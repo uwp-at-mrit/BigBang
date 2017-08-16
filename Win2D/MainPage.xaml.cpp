@@ -21,7 +21,6 @@ using namespace Windows::UI::Xaml::Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-MainPage::MainPage()
-{
+MainPage::MainPage() {
 	InitializeComponent();
 }

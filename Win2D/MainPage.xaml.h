@@ -7,13 +7,11 @@
 
 #include "MainPage.g.h"
 
-namespace Win2D
-{
+namespace Win2D {
 	/// <summary>
 	/// An empty page that can be used on its own or navigated to within a Frame.
 	/// </summary>
-	public ref class MainPage sealed
-	{
+	public ref class MainPage sealed {
 	public:
 		MainPage();
 

@@ -7,13 +7,11 @@
 
 #include "App.g.h"
 
-namespace Win2D
-{
+namespace Win2D {
 	/// <summary>
 	/// Provides application-specific behavior to supplement the default Application class.
 	/// </summary>
-	ref class App sealed
-	{
+	ref class App sealed {
 	protected:
 		virtual void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e) override;
 
