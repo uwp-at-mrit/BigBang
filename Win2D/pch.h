@@ -8,4 +8,4 @@
 #include <collection.h>
 #include <ppltasks.h>
 
-#include "App.xaml.h"
+using namespace Windows::UI::Xaml;

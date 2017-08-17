@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win2D", "Win2D\Win2D.vcxproj", "{48E918C7-C555-4610-9E89-B75085192A77}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TxD2DDemo", "..\TxD2DDemo\TxD2DDemo\TxD2DDemo.vcxproj", "{64C72EB2-4F90-440F-9824-551D1F0DAAFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -33,6 +35,24 @@ Global
 		{48E918C7-C555-4610-9E89-B75085192A77}.Release|x86.ActiveCfg = Release|Win32
 		{48E918C7-C555-4610-9E89-B75085192A77}.Release|x86.Build.0 = Release|Win32
 		{48E918C7-C555-4610-9E89-B75085192A77}.Release|x86.Deploy.0 = Release|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|ARM.ActiveCfg = Debug|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|ARM.Build.0 = Debug|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|ARM.Deploy.0 = Debug|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x64.ActiveCfg = Debug|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x64.Build.0 = Debug|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x64.Deploy.0 = Debug|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x86.ActiveCfg = Debug|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x86.Build.0 = Debug|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Debug|x86.Deploy.0 = Debug|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|ARM.ActiveCfg = Release|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|ARM.Build.0 = Release|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|ARM.Deploy.0 = Release|ARM
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x64.ActiveCfg = Release|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x64.Build.0 = Release|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x64.Deploy.0 = Release|x64
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x86.ActiveCfg = Release|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x86.Build.0 = Release|Win32
+		{64C72EB2-4F90-440F-9824-551D1F0DAAFC}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
