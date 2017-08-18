@@ -1,17 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Common">
-      <UniqueIdentifier>48e918c7-c555-4610-9e89-b75085192a77</UniqueIdentifier>
-    </Filter>
     <Filter Include="Assets">
-      <UniqueIdentifier>49a2c5fc-8e4a-44fa-a1a1-e34a2b96c553</UniqueIdentifier>
+      <UniqueIdentifier>86378d0e-98f8-4b88-9e75-f7b2e8fe8aa0</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="MainPage.xaml.cpp" />
+    <ClCompile Include="win2d.cpp" />
+    <ClCompile Include="workspace.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="MainPage.xaml.h" />
     <ClInclude Include="workspace.h" />
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -40,10 +46,6 @@
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Win2D_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="win2d.cpp" />
-    <ClCompile Include="workspace.cpp" />
+    <None Include="StartsWithPanel_TemporaryKey.pfx" />
   </ItemGroup>
 </Project>

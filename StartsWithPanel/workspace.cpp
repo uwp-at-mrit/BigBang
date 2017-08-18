@@ -1,12 +1,15 @@
 #include "pch.h"
 #include "workspace.h"
 
-Win2D::WorkSpace::WorkSpace() {
+Win2D::WorkSpace::WorkSpace() : StackPanel() {
     Orientation = Windows::UI::Xaml::Controls::Orientation::Vertical; // Vertical is also the default orientation
 };
 
 void Win2D::WorkSpace::InitializeComponent() {
+    auto buttonPanel = ref new StackPanel();
+    buttonPanel->Orientation = Windows::UI::Xaml::Controls::Orientation::Horizontal;
 
+    this->Children->InsertAt(0, buttonPanel);
 };
 
 void Win2D::WorkSpace::Suspend(Object^ sender, SuspendingEventArgs^ e) {
