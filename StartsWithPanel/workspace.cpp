@@ -1,18 +1,29 @@
 #include "pch.h"
+#include "ui.h"
 #include "workspace.h"
 
-Win2D::WorkSpace::WorkSpace() : StackPanel() {
+using namespace Win2D::XAML;
+using namespace Win2D::StartsWithPanel;
+
+using namespace Windows::Foundation;
+using namespace Windows::UI::ViewManagement;
+using namespace Windows::ApplicationModel::Resources;
+
+WorkSpace::WorkSpace() : StackPanel() {
     Orientation = Windows::UI::Xaml::Controls::Orientation::Vertical; // Vertical is also the default orientation
+    ApplicationView::GetForCurrentView()->Title = "Monitor";
 };
 
-void Win2D::WorkSpace::InitializeComponent() {
-    auto buttonPanel = ref new StackPanel();
-    buttonPanel->Orientation = Windows::UI::Xaml::Controls::Orientation::Horizontal;
-
-    this->Children->InsertAt(0, buttonPanel);
+void WorkSpace::InitializeComponent() {
+    auto switchBar = UI::MakeStackPanel(this,"switchbar" , Windows::UI::Xaml::Controls::Orientation::Horizontal);
+    
+    monitor = UI::MakeCanvas(this, "monitor");
+    numeric = UI::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
+    alert = UI::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
+    flash = UI::MakeToggleSwitch(switchBar, "flash", nullptr, nullptr);
 };
 
-void Win2D::WorkSpace::Suspend(Object^ sender, SuspendingEventArgs^ e) {
+void WorkSpace::Suspend(Object^ sender, SuspendingEventArgs^ e) {
     (void)sender;
     (void)e;
 

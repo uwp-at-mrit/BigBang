@@ -7,3 +7,5 @@
 
 #include <collection.h>
 #include <ppltasks.h>
+
+using namespace Platform;
