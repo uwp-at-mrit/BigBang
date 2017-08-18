@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="workspace.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -42,6 +43,7 @@
     <None Include="Win2D_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="uwp.cpp" />
+    <ClCompile Include="win2d.cpp" />
+    <ClCompile Include="workspace.cpp" />
   </ItemGroup>
 </Project>

@@ -7,5 +7,3 @@
 
 #include <collection.h>
 #include <ppltasks.h>
-
-using namespace Windows::UI::Xaml;
