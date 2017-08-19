@@ -14,7 +14,7 @@ using namespace Windows::System::Diagnostics;
 WorkSpace::WorkSpace() : StackPanel() {
     Orientation = Windows::UI::Xaml::Controls::Orientation::Vertical; // Vertical is also the default orientation
     ApplicationView::GetForCurrentView()->Title = "Monitor";
-};
+}
 
 void WorkSpace::InitializeComponent() {
     auto switchBar = UI::MakeStackPanel(this, Windows::UI::Xaml::Controls::Orientation::Horizontal);
@@ -28,9 +28,9 @@ void WorkSpace::InitializeComponent() {
     clockPanel->HorizontalAlignment = Windows::UI::Xaml::HorizontalAlignment::Right;
     clockPanel->VerticalAlignment = Windows::UI::Xaml::VerticalAlignment::Center;
     UI::MakeTextClock(clockPanel);
-};
+}
 
 void WorkSpace::Suspend(Object^ sender, SuspendingEventArgs^ e) {
     // TODO: Save application state and stop any background activity.
     // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-};
+}

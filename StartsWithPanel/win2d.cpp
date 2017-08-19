@@ -14,7 +14,7 @@ namespace Win2D {
             Win2D() {
                 // InitializeComponent(); // [Debug] To catch unhandled exceptions that thrown by XAML parser.
                 Suspending += ref new SuspendingEventHandler(this, &Win2D::OnSuspending);
-            };
+            }
 
         protected:
             /// <summary> Invoked whenever the application is launched. </summary>
@@ -42,7 +42,7 @@ namespace Win2D {
                         Window::Current->Activate();
                     }
                 }
-            };
+            }
 
         private:
             /// <summary> Invoked when application execution is being suspended. </summary>
@@ -52,7 +52,7 @@ namespace Win2D {
                 // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
                 auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
                 if (workspace != nullptr) workspace->Suspend(sender, e);
-            };
+            }
         };
     }
 }

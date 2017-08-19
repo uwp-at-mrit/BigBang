@@ -12,7 +12,7 @@ static T PlaceUIElement(Panel^ parent, T child, String^ id) {
     children->InsertAt(children->Size, child);
 
     return child;
-};
+}
 
 static void MakeTextBoxAsLabel(TextBox^ label) {
     label->IsReadOnly = true;
@@ -28,7 +28,7 @@ StackPanel^ UI::MakeStackPanel(Panel^ parent, Orientation direction) {
     child->Orientation = direction;
 
     return PlaceUIElement<StackPanel^>(parent, child, nullptr);
-};
+}
 
 ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption) {
     auto child = ref new ToggleSwitch();
@@ -37,19 +37,19 @@ ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption,
     child->OffContent = (offCaption == nullptr) ? child->OnContent : offCaption;
     
     return PlaceUIElement<ToggleSwitch^>(parent, child, id);
-};
+}
 
 TextClock^ UI::MakeTextClock(Panel^ parent) {
     auto child = ref new TextClock();
     
     return PlaceUIElement<TextClock^>(parent, child, nullptr);
-};
+}
 
 Canvas^ UI::MakeCanvas(Panel^ parent, String^ id) {
     auto child = ref new Canvas();
 
     return PlaceUIElement<Canvas^>(parent, child, id);
-};
+}
 
 /*************************************************************************************************/
 TextClock::TextClock() {
@@ -90,4 +90,4 @@ DispatcherTimer^ UI::MakeTimer(long long ms, EventHandler<Object^>^ OnTick) {
     timer->Tick += OnTick;
 
     return timer;
-};
+}
