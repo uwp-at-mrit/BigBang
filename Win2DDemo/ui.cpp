@@ -22,10 +22,12 @@ static void MakeTextBoxAsLabel(TextBox^ label) {
     label->BorderBrush = nullptr;
 }
 
-StackPanel^ UI::MakeStackPanel(Panel^ parent, Orientation direction) {
+StackPanel^ UI::MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding) {
     auto child = ref new StackPanel();
 
     child->Orientation = direction;
+    child->Margin = margin;
+    child->Padding = padding;
 
     return PlaceUIElement<StackPanel^>(parent, child, nullptr);
 }
@@ -40,9 +42,7 @@ ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption,
 }
 
 TextClock^ UI::MakeTextClock(Panel^ parent) {
-    auto child = ref new TextClock();
-    
-    return PlaceUIElement<TextClock^>(parent, child, nullptr);
+    return PlaceUIElement<TextClock^>(parent, ref new TextClock(), nullptr);
 }
 
 Canvas^ UI::MakeCanvas(Panel^ parent, String^ id) {
@@ -53,32 +53,44 @@ Canvas^ UI::MakeCanvas(Panel^ parent, String^ id) {
 
 /*************************************************************************************************/
 TextClock::TextClock() {
+    Name = "SystemClock";
+    VerticalAlignment = ::VerticalAlignment::Center;
+    Loaded += ref new RoutedEventHandler(this, &TextClock::OnLoadTrim);
+    formatter = ref new DateTimeFormatter("longdate longtime");
     now = ref new Calendar();
     MakeTextBoxAsLabel(this);
-    now->SetToNow();
-    if (now->Nanosecond == 0) {
-        timer = UI::MakeTimer(1000, ref new EventHandler<Object^>(this, &TextClock::UpdateTime));
+    long long ms = UpdateTime();
+    if (ms == 0) {
+        timer = UI::MakeTimer(1000, ref new EventHandler<Object^>(this, &TextClock::OnTickUpdate));
     } else {
-        long long ms = now->Nanosecond / 10000;
-        timer = UI::MakeTimer(1000 - ms, ref new EventHandler<Object^>(this, &TextClock::AdjustTime));
+        timer = UI::MakeTimer(1000 - ms, ref new EventHandler<Object^>(this, &TextClock::OnTickAdjust));
     }
 }
 
-void TextClock::AdjustTime(Object^ sender, Object^ e) {
-    timer->Interval = TimeSpan({ 1000 * 1000 * 10 });
-    timer->Tick += ref new EventHandler<Object^>(this, &TextClock::UpdateTime);
-
-    this->UpdateTime(sender, e);
+long long TextClock::UpdateTime() {
+    now->SetToNow();
+    long long ms = now->Nanosecond / 1000 / 1000;
+    this->Text = formatter->Format(now->GetDateTime())
+        + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
+        + ms.ToString();
+    return ms;
 }
 
-void TextClock::UpdateTime(Object^ sender, Object^ e) {
-    now->SetToNow();
-    this->Text = now->YearAsPaddedString(4)
-        + "-" + now->MonthAsPaddedNumericString(2)
-        + "-" + now->DayAsPaddedString(2)
-        + " " + now->HourAsPaddedString(2)
-        + ":" + now->MinuteAsPaddedString(2)
-        + ":" + now->SecondAsPaddedString(2);
+void TextClock::OnTickAdjust(Object^ sender, Object^ e) {
+    timer->Interval = TimeSpan({ 1000 * 1000 * 10 });
+    timer->Tick += ref new EventHandler<Object^>(this, &TextClock::OnTickUpdate);
+
+    (void)UpdateTime();
+}
+
+void TextClock::OnTickUpdate(Object^ sender, Object^ e) {
+    (void)UpdateTime();
+}
+
+void TextClock::OnLoadTrim(Object^ sender, RoutedEventArgs^ e) {
+    if (Padding.Left >= 0.0) {
+        Padding = ThicknessHelper::FromLengths(0.0, Padding.Top, 0.0, Padding.Bottom);
+    }
 }
 
 DispatcherTimer^ UI::MakeTimer(long long ms, EventHandler<Object^>^ OnTick) {

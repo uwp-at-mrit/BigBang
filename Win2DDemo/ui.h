@@ -4,6 +4,7 @@
 
 using namespace Windows::Foundation;
 using namespace Windows::Globalization;
+using namespace Windows::Globalization::DateTimeFormatting;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
@@ -17,17 +18,20 @@ namespace Win2D {
             TextClock();
 
         private:
-            void AdjustTime(Object^ sender, Object^ e);
-            void UpdateTime(Object^ sender, Object^ e);
+            long long UpdateTime();
+            void OnTickAdjust(Object^ sender, Object^ e);
+            void OnTickUpdate(Object^ sender, Object^ e);
+            void OnLoadTrim(Object^ sender, RoutedEventArgs^ e);
 
         private:
             Calendar^ now = nullptr;
             DispatcherTimer^ timer = nullptr;
+            DateTimeFormatter^ formatter = nullptr;
         };
 
         public ref class UI sealed {
         public:
-            static StackPanel^ MakeStackPanel(Panel^ parent, Orientation direction);
+            static StackPanel^ MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding);
             static ToggleSwitch^ MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption);
             static TextClock^ MakeTextClock(Panel^ parent);
             static Canvas^ MakeCanvas(Panel^ parent, String^ id);

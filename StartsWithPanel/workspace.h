@@ -1,5 +1,10 @@
 #pragma once
 
+#include "ui.h"
+
+using namespace Win2D::XAML;
+
+using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::ApplicationModel;
 
@@ -16,6 +21,12 @@ namespace Win2D {
             void Suspend(Object^ sender, SuspendingEventArgs^ e);
 
         private:
+            void Reflow(Object^ sender, SizeChangedEventArgs^ e);
+
+        private:
+            StackPanel^ switchBar;
+            TextClock^ systemClock;
+            
             ToggleSwitch^ numeric;
             ToggleSwitch^ alert;
             ToggleSwitch^ flash;
