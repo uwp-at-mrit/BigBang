@@ -5,9 +5,12 @@
 using namespace Windows::Foundation;
 using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
+using namespace Windows::System::Threading;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+
+using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 typedef void(*TimerEventHandler)(Object^, Object^);
 
@@ -18,8 +21,6 @@ namespace Win2D {
             TextClock();
 
         private:
-            long long UpdateTime();
-            void OnTickAdjust(Object^ sender, Object^ e);
             void OnTickUpdate(Object^ sender, Object^ e);
             void OnLoadTrim(Object^ sender, RoutedEventArgs^ e);
 
@@ -36,7 +37,8 @@ namespace Win2D {
             static TextClock^ MakeTextClock(Panel^ parent);
             static Canvas^ MakeCanvas(Panel^ parent, String^ id);
 
-            static DispatcherTimer^ MakeTimer(long long ms, EventHandler<Object^>^ handler);
+            static DispatcherTimer^ MakeGUITimer(long long ms, EventHandler<Object^>^ handler);
+            static DispatcherTimer^ MakeThreadTimer(long long ms, EventHandler<Object^>^ handler);
         };
     }
 }
