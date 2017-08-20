@@ -25,7 +25,7 @@ namespace Win2D {
 
         private:
             StackPanel^ switchBar;
-            TextClock^ systemClock;
+            DigitalClock^ systemClock;
             
             ToggleSwitch^ numeric;
             ToggleSwitch^ alert;

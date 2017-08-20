@@ -41,8 +41,8 @@ ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption,
     return PlaceUIElement<ToggleSwitch^>(parent, child, id);
 }
 
-TextClock^ UI::MakeTextClock(Panel^ parent) {
-    return PlaceUIElement<TextClock^>(parent, ref new TextClock(), nullptr);
+DigitalClock^ UI::MakeDigitalClock(Panel^ parent) {
+    return PlaceUIElement<DigitalClock^>(parent, ref new DigitalClock(), nullptr);
 }
 
 Canvas^ UI::MakeCanvas(Panel^ parent, String^ id) {
@@ -62,39 +62,28 @@ DispatcherTimer^ UI::MakeGUITimer(long long ms, EventHandler<Object^>^ OnTick) {
     return timer;
 }
 
-DispatcherTimer^ UI::MakeThreadTimer(long long ms, EventHandler<Object^>^ OnTick) {
-    auto timer = ref new DispatcherTimer();
-    long long duration = ms * 1000 * 10;
-
-    timer->Interval = TimeSpan({ duration });
-    timer->Start();
-    timer->Tick += OnTick;
-
-    return timer;
-}
-
 /*************************************************************************************************/
-TextClock::TextClock() {
+DigitalClock::DigitalClock() {
     Name = "SystemClock";
     VerticalAlignment = ::VerticalAlignment::Center;
-    Loaded += ref new RoutedEventHandler(this, &TextClock::OnLoadTrim);
+    Loaded += ref new RoutedEventHandler(this, &DigitalClock::OnLoadTrim);
     formatter = ref new DateTimeFormatter("longdate longtime");
     now = ref new Calendar();
     MakeTextBoxAsLabel(this);
-    timer = UI::MakeGUITimer(1000, ref new EventHandler<Object^>(this, &TextClock::OnTickUpdate));
-    OnTickUpdate(nullptr, nullptr);
+    timer = UI::MakeGUITimer(0, ref new EventHandler<Object^>(this, &DigitalClock::OnTickUpdate));
+    OnTickUpdate(nullptr, nullptr); // timer is used in inside the event handler
 }
 
-void TextClock::OnTickUpdate(Object^ sender, Object^ e) {
+void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     now->SetToNow();
-    long long ms = now->Nanosecond / 1000 / 1000;
-    timer->Interval = TimeSpan({ (1000 - ms) * 1000 * 10 }); 
+    long long ms = now->Nanosecond / 1000000;
+    timer->Interval = TimeSpan({ (1000 - ms) * 10000 });
     this->Text = formatter->Format(now->GetDateTime())
         + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
         + ms.ToString();
 }
 
-void TextClock::OnLoadTrim(Object^ sender, RoutedEventArgs^ e) {
+void DigitalClock::OnLoadTrim(Object^ sender, RoutedEventArgs^ e) {
     if (Padding.Left >= 0.0) {
         Padding = ThicknessHelper::FromLengths(0.0, Padding.Top, 0.0, Padding.Bottom);
     }

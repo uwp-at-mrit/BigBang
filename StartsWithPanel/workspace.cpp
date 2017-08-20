@@ -20,7 +20,7 @@ void WorkSpace::InitializeComponent() {
     monitor = UI::MakeCanvas(this, "monitor");
 
     switchBar = UI::MakeStackPanel(titleBar, ::Orientation::Horizontal, zero, zero);
-    systemClock = UI::MakeTextClock(titleBar);
+    systemClock = UI::MakeDigitalClock(titleBar);
 
     numeric = UI::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
     alert = UI::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
