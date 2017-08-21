@@ -76,8 +76,9 @@ DigitalClock::DigitalClock() {
 
 void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     now->SetToNow();
-    long long ms = now->Nanosecond / 1000000;
-    timer->Interval = TimeSpan({ (1000 - ms) * 10000 });
+    long long l00ns = now->Nanosecond / 100;
+    long long ms = l00ns / 10000;
+    timer->Interval = TimeSpan({ 10000000 - l00ns });
     this->Text = formatter->Format(now->GetDateTime())
         + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
         + ms.ToString();
