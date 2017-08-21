@@ -17,27 +17,19 @@ WorkSpace::WorkSpace() : StackPanel() {
 void WorkSpace::InitializeComponent() {
     Thickness zero = ThicknessHelper::FromUniformLength(0);
     auto titleBar = UI::MakeStackPanel(this, ::Orientation::Horizontal, zero, zero);
-    monitor = UI::MakeCanvas(this, "monitor");
-
     switchBar = UI::MakeStackPanel(titleBar, ::Orientation::Horizontal, zero, zero);
-    systemClock = UI::MakeDigitalClock(titleBar);
 
     numeric = UI::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
     alert = UI::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
     flash = UI::MakeToggleSwitch(switchBar, "flash", nullptr, nullptr);
+
+    systemClock = ref new DigitalClock(titleBar);
+    monitor = UI::MakeCanvas(this, "monitor");
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
     if (e->PreviousSize.Width != e->NewSize.Width) {
-        double left = switchBar->Padding.Left;
-        double top = switchBar->Padding.Top;
-        double bottom = switchBar->Padding.Bottom;
-        double right = switchBar->Padding.Right;
-        double switchOff = (switchBar->ActualWidth - right) + switchBar->Margin.Left + switchBar->Margin.Right;
-        double clockOff = systemClock->ActualWidth - systemClock->Padding.Left;
-        double padding = e->NewSize.Width - switchOff - clockOff;
-
-        switchBar->Padding = ThicknessHelper::FromLengths(left, top, padding, bottom);
+        systemClock->ChangeSize(e->NewSize.Width - switchBar->ActualWidth, switchBar->ActualHeight);
     }
 }
 
