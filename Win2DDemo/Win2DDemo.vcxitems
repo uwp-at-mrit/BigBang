@@ -21,10 +21,4 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)tongue.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.h" />
   </ItemGroup>
-  <ItemGroup>
-    <PRIResource Include="$(MSBuildThisFileDirectory)Strings\en-US\Resource.resw" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Strings\zh-CN\Resource.resx" />
-  </ItemGroup>
 </Project>
