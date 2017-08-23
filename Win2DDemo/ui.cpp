@@ -2,7 +2,6 @@
 #include "ui.h"
 
 using namespace Win2D::XAML;
-
 using namespace Windows::UI;
 
 template <class T>
