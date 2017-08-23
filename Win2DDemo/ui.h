@@ -9,6 +9,7 @@ using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 
+using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
@@ -30,13 +31,16 @@ namespace Win2D {
             void DrawClock(CanvasControl^ sender, CanvasDrawEventArgs^ args);
 
         private:
-            String^ Timestamp = nullptr;
+            String^ timestamp = nullptr;
+            String^ datestamp = nullptr;
             CanvasControl^ entity = nullptr;
+            CanvasTextFormat^ fontInfo = nullptr;
 
         private:
             Calendar^ datetime = nullptr;
             DispatcherTimer^ timer = nullptr;
-            DateTimeFormatter^ formatter = nullptr;
+            DateTimeFormatter^ longdate = nullptr;
+            DateTimeFormatter^ longtime = nullptr;
         };
 
         public ref class UI sealed {

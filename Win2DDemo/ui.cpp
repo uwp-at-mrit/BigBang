@@ -65,7 +65,8 @@ DigitalClock::DigitalClock(Panel^ parent) {
     auto onLoad = ref new CanvasRCHandler(this, &DigitalClock::LoadTimestamp);
     auto onDraw = ref new CanvasDrawHandler(this, &DigitalClock::DrawClock);
 
-    formatter = ref new DateTimeFormatter("longdate longtime");
+    longdate = ref new DateTimeFormatter("longdate");
+    longtime = ref new DateTimeFormatter("longtime");
     datetime = ref new Calendar();
     entity = UI::MakeGPUCanvas(parent, "SystemClock", onLoad, onDraw);
     timer = UI::MakeGUITimer(0, onTick);
@@ -76,7 +77,8 @@ void DigitalClock::UpdateTimeStamp() {
     long long l00ns = datetime->Nanosecond / 100;
     long long ms = l00ns / 10000;
     timer->Interval = TimeSpan({ 10000000 - l00ns });
-    Timestamp = formatter->Format(datetime->GetDateTime())
+    datestamp = longdate->Format(datetime->GetDateTime());
+    timestamp = longtime->Format(datetime->GetDateTime())
         + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
         + ms.ToString();
 }
@@ -89,13 +91,33 @@ void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
 }
 
 void DigitalClock::LoadTimestamp(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
-    if (Timestamp == nullptr) {
+    if (timestamp == nullptr) {
         UpdateTimeStamp();
+    }
+
+    if (fontInfo == nullptr) {
+        fontInfo = ref new CanvasTextFormat();
+        fontInfo->WordWrapping = CanvasWordWrapping::NoWrap;
+        fontInfo->FontSize = 12;
     }
 }
 
 void DigitalClock::DrawClock(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
-    e->DrawingSession->DrawText(Timestamp, 0, 0, Colors::Black);
+    CanvasTextLayout^ lytTime = ref new CanvasTextLayout(e->DrawingSession, timestamp, fontInfo, 0.0f, 0.0f);
+    CanvasTextLayout^ lytDate = ref new CanvasTextLayout(e->DrawingSession, datestamp, fontInfo, 0.0f, 0.0f);
+    float width = (float)entity->Width;
+    float height = (float)entity->Height;
+
+    bool isTimestampLonger = (lytTime->LayoutBounds.Width > lytDate->LayoutBounds.Width);
+    float deltaWidth = abs(lytDate->LayoutBounds.Width - lytTime->LayoutBounds.Width) / 2.0f;
+    
+    float tx = width - lytTime->LayoutBounds.Width - (isTimestampLonger ? 0.0f : deltaWidth);
+    float ty = (height - lytTime->LayoutBounds.Height - lytDate->LayoutBounds.Height) / 2.0f;
+    e->DrawingSession->DrawTextLayout(lytTime, tx, ty, Colors::Black);
+    
+    float dx = width - lytDate->LayoutBounds.Width - (isTimestampLonger ? deltaWidth : 0);
+    float dy = ty + lytDate->LayoutBounds.Height;
+    e->DrawingSession->DrawTextLayout(lytDate, dx, dy, Colors::Black);
 }
 
 void DigitalClock::ChangeSize(double width, double height) {
