@@ -17,8 +17,8 @@
     (inherit get-admin get-dc get-snip-location move-to move find-snip)
     (inherit editor-location-to-dc-location local-to-global global-to-local)
 
-    (define/augment (can-interactive-move? mouse) (inner #false can-interactive-move? mouse))
-    (define/augment (can-interactive-resize? mouse) (inner #false can-interactive-resize? mouse))
+    ;(define/augment (can-interactive-move? mouse) (inner #false can-interactive-move? mouse))
+    ;(define/augment (can-interactive-resize? mouse) (inner #false can-interactive-resize? mouse))
     (define/augment (can-load-file? filename format) (inner #false can-load-file? filename format))
     (define/augment (can-save-file? filename format) (inner #false can-save-file? filename format))
 
