@@ -14,11 +14,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)tongue.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)tongue.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.h" />
   </ItemGroup>
 </Project>
