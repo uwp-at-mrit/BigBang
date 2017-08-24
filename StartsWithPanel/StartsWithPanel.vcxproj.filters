@@ -8,11 +8,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win2d.cpp" />
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="workspace.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
     <ClInclude Include="workspace.h" />
   </ItemGroup>
   <ItemGroup>

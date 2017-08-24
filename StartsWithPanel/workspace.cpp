@@ -1,13 +1,13 @@
-#include "pch.h"
 #include "workspace.h"
 
 using namespace Win2D::StartsWithPanel;
+using namespace Win2D::Xaml;
 
-using namespace Windows::Foundation;
-using namespace Windows::UI::ViewManagement;
+using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
 
 WorkSpace::WorkSpace() : StackPanel() {
-    ApplicationView::GetForCurrentView()->Title = "Monitor";
+    Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->Title = "Monitor";
     Orientation = ::Orientation::Vertical;
     VerticalAlignment = ::VerticalAlignment::Top;
     Margin = ThicknessHelper::FromUniformLength(8.0);
@@ -33,7 +33,7 @@ void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
     }
 }
 
-void WorkSpace::Suspend(Object^ sender, SuspendingEventArgs^ e) {
+void WorkSpace::Suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e) {
     // TODO: Save application state and stop any background activity.
     // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }

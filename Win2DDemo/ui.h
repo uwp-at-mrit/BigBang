@@ -1,76 +1,97 @@
 #pragma once
 
-#include "pch.h"
+namespace WUX = Windows::UI::Xaml;
+namespace WUC = WUX::Controls;
+namespace MSUI = Microsoft::Graphics::Canvas::UI;
+namespace MSX = MSUI::Xaml;
 
-using namespace Windows::Foundation;
-using namespace Windows::Globalization;
-using namespace Windows::Globalization::DateTimeFormatting;
+typedef Windows::Foundation::EventHandler<Platform::Object^> ObjectHandler;
+typedef Windows::Foundation::TypedEventHandler<MSX::CanvasControl^, MSX::CanvasDrawEventArgs^> CanvasDrawHandler;
+typedef Windows::Foundation::TypedEventHandler<MSX::CanvasControl^, MSUI::CanvasCreateResourcesEventArgs^> CanvasLoadHandler;
 
-using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
+namespace Win2D::Xaml {
+    public ref class XAML sealed {
+    public:
+       static WUC::StackPanel^ MakeStackPanel(
+           WUC::Panel^ parent,
+           WUC::Orientation direction,
+           WUX::Thickness margin,
+           WUX::Thickness padding);
 
-using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
-using namespace Microsoft::Graphics::Canvas::UI;
-using namespace Microsoft::Graphics::Canvas::UI::Xaml;
+       static WUC::ToggleSwitch^ MakeToggleSwitch(
+           WUC::Panel^ parent,
+           Platform::String^ id,
+           Platform::String^ onCaption,
+           Platform::String^ offCaption);
 
-typedef EventHandler<Object^> ObjectHandler;
-typedef TypedEventHandler<CanvasControl^, CanvasDrawEventArgs^> CanvasDrawHandler;
-typedef TypedEventHandler<CanvasControl^, CanvasCreateResourcesEventArgs^> CanvasRCHandler;
+       static MSX::CanvasControl^ MakeGPUCanvas(
+           WUC::Panel^ parent,
+           Platform::String^ id,
+           CanvasLoadHandler^ Load,
+           CanvasDrawHandler^ Draw);
 
-namespace Win2D {
-    namespace Xaml {
-        public ref class Pasteboard : public DependencyObject {
-        public:
-            void ChangeSize(double width, double height);
-            CanvasControl^ GetCanvas();
+       static WUC::Canvas^ MakeCanvas(
+           WUC::Panel^ parent,
+           Platform::String^ id);
 
-        internal:
-            Pasteboard(Panel^ parent, String^ id);
+       static WUX::DispatcherTimer^ MakeGUITimer(
+           long long ms,
+           ObjectHandler^ handler);
+    };
 
-            virtual void OnDisplaySize(double width, double height) {};
-            virtual void LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) {};
-            virtual void Draw(CanvasControl^ sender, CanvasDrawingSession^ args) {};
+    public ref class Win2DPanel : public WUX::DependencyObject {
+    public:
+        void ChangeSize(double width, double height);
+        void SmartRedraw();
 
-        private:
-            CanvasControl^ entity;
+    public:
+        property MSX::CanvasControl^ Canvas { MSX::CanvasControl^ get() { return entity; } }
+        property double Width { double get() { return entity->Width; } }
+        property double Height { double get() { return entity->Height; } }
 
-            void OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args);
-            void OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ args);
-        };
+    internal:
+        Win2DPanel(WUC::Panel^ parent, Platform::String^ id);
 
-        public ref class DigitalClock sealed : public Pasteboard {
-        public:
-            DigitalClock(Panel^ parent);
+        virtual void OnDisplaySize(double width, double height) {};
+        virtual void LoadResources(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args) {};
+        virtual void Draw(MSX::CanvasControl^ sender, Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 
-        internal:
-            void LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) override;
-            void Draw(CanvasControl^ sender, CanvasDrawingSession^ args) override;
+    private:
+        MSX::CanvasControl^ entity;
 
-        private:
-            void UpdateTimeStamp();
-            void OnTickUpdate(Object^ sender, Object^ e);
+        void OnLoad(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args);
+        void OnPaint(MSX::CanvasControl^ sender, MSX::CanvasDrawEventArgs^ args);
+    };
 
-        private:
-            String^ timestamp;
-            String^ datestamp;
-            CanvasTextFormat^ fontInfo;
+    public ref class DigitalClock sealed : public Win2DPanel {
+    public:
+        DigitalClock(WUC::Panel^ parent);
 
-        private:
-            Calendar^ datetime;
-            DispatcherTimer^ timer;
-            DateTimeFormatter^ longdate;
-            DateTimeFormatter^ longtime;
-        };
+    internal:
+        void LoadResources(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args) override;
+        void Draw(MSX::CanvasControl^ sender, Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) override;
 
-        public ref class XAML sealed {
-        public:
-            static StackPanel^ MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding);
-            static ToggleSwitch^ MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption);
-            static CanvasControl^ MakeGPUCanvas(Panel^ parent, String^ id, CanvasRCHandler^ Load, CanvasDrawHandler^ Draw);
-            static Canvas^ MakeCanvas(Panel^ parent, String^ id);
+    private:
+        void UpdateTimeStamp();
+        void OnTickUpdate(Object^ sender, Object^ e);
 
-            static DispatcherTimer^ MakeGUITimer(long long ms, ObjectHandler^ handler);
-        };
-    }
+    private:
+        Platform::String^ timestamp;
+        Platform::String^ datestamp;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo;
+
+    private:
+        WUX::DispatcherTimer^ timer;
+        Windows::Globalization::Calendar^ datetime;
+        Windows::Globalization::DateTimeFormatting::DateTimeFormatter^ longdate;
+        Windows::Globalization::DateTimeFormatting::DateTimeFormatter^ longtime;
+    };
+
+    public ref class Pasteboard sealed : public Win2DPanel {
+    public:
+        Pasteboard(WUC::Panel^ parent, Platform::String^ id);
+
+    private:
+
+    };
 }

@@ -2,35 +2,27 @@
 
 #include "ui.h"
 
-using namespace Win2D::Xaml;
+namespace Win2D::StartsWithPanel {
+    /// <summary> An empty page that can be used on its own or navigated to within a Frame. </summary>
+    [::Windows::Foundation::Metadata::WebHostHidden]
+    ref class WorkSpace sealed : public Windows::UI::Xaml::Controls::StackPanel {
+    public:
+        WorkSpace();
 
-using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::ApplicationModel;
+    public:
+        void InitializeComponent();
+        void Suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
 
-namespace Win2D {
-    namespace StartsWithPanel {
-        /// <summary> An empty page that can be used on its own or navigated to within a Frame. </summary>
-        [::Windows::Foundation::Metadata::WebHostHidden]
-        ref class WorkSpace sealed : public StackPanel {
-        public:
-            WorkSpace();
+    private:
+        void Reflow(Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 
-        public:
-            void InitializeComponent();
-            void Suspend(Object^ sender, SuspendingEventArgs^ e);
+    private:
+        Windows::UI::Xaml::Controls::StackPanel^ switchBar;
+        Win2D::Xaml::DigitalClock^ systemClock;
 
-        private:
-            void Reflow(Object^ sender, SizeChangedEventArgs^ e);
-
-        private:
-            StackPanel^ switchBar;
-            DigitalClock^ systemClock;
-            
-            ToggleSwitch^ numeric;
-            ToggleSwitch^ alert;
-            ToggleSwitch^ flash;
-            Canvas^ monitor;
-        };
-    }
+        Windows::UI::Xaml::Controls::ToggleSwitch^ numeric;
+        Windows::UI::Xaml::Controls::ToggleSwitch^ alert;
+        Windows::UI::Xaml::Controls::ToggleSwitch^ flash;
+        Windows::UI::Xaml::Controls::Canvas^ monitor;
+    };
 }

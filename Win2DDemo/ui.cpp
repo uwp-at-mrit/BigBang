@@ -1,8 +1,22 @@
-#include "pch.h"
+#include <cmath>
+
 #include "ui.h"
 
 using namespace Win2D::Xaml;
+using namespace Platform;
+
+using namespace Windows::Foundation;
+using namespace Windows::Globalization;
+using namespace Windows::Globalization::DateTimeFormatting;
+
 using namespace Windows::UI;
+using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
+
+using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Text;
+using namespace Microsoft::Graphics::Canvas::UI;
+using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 template <class T>
 static T PlaceUIElement(Panel^ parent, T child, String^ id) {
@@ -31,7 +45,7 @@ ToggleSwitch^ XAML::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaptio
     return PlaceUIElement<ToggleSwitch^>(parent, child, id);
 }
 
-CanvasControl^ XAML::MakeGPUCanvas(Panel^ parent, String^ id, CanvasRCHandler^ OnLoad, CanvasDrawHandler^ OnDraw) {
+CanvasControl^ XAML::MakeGPUCanvas(Panel^ parent, String^ id, CanvasLoadHandler^ OnLoad, CanvasDrawHandler^ OnDraw) {
     auto child = ref new CanvasControl();
 
     child->CreateResources += OnLoad;
@@ -59,32 +73,37 @@ DispatcherTimer^ XAML::MakeGUITimer(long long ms, ObjectHandler^ OnTick) {
 }
 
 /*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, String^ id) {
-    auto onLoad = ref new CanvasRCHandler(this, &Pasteboard::OnLoad);
-    auto onPaint = ref new CanvasDrawHandler(this, &Pasteboard::OnPaint);
+Win2DPanel::Win2DPanel(Panel^ parent, String^ id) {
+    auto onLoad = ref new CanvasLoadHandler(this, &Win2DPanel::OnLoad);
+    auto onPaint = ref new CanvasDrawHandler(this, &Win2DPanel::OnPaint);
     entity = XAML::MakeGPUCanvas(parent, id, onLoad, onPaint);
 }
 
-void Pasteboard::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
+void Win2DPanel::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
     this->LoadResources(sender, e);
 }
 
-void Pasteboard::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
+void Win2DPanel::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
     this->Draw(sender, e->DrawingSession);
 }
 
-void Pasteboard::ChangeSize(double width, double height) {
+void Win2DPanel::ChangeSize(double width, double height) {
     entity->Width = width;
     entity->Height = height;
     this->OnDisplaySize(width, height);
 }
 
-CanvasControl^ Pasteboard::GetCanvas() {
-    return entity;
+void Win2DPanel::SmartRedraw() {
+    entity->Invalidate();
 }
 
 /*************************************************************************************************/
-DigitalClock::DigitalClock(Panel^ parent) : Pasteboard(parent, "SystemClock") {
+Pasteboard::Pasteboard(Panel^ parent, String^ id) : Win2DPanel(parent, id) {
+
+}
+
+/*************************************************************************************************/
+DigitalClock::DigitalClock(Panel^ parent) : Win2DPanel(parent, "SystemClock") {
     auto onTick = ref new ObjectHandler(this, &DigitalClock::OnTickUpdate);
 
     longdate = ref new DateTimeFormatter("longdate");
@@ -106,7 +125,7 @@ void DigitalClock::UpdateTimeStamp() {
 
 void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     UpdateTimeStamp();
-    this->GetCanvas()->Invalidate();
+    this->SmartRedraw();
 }
 
 void DigitalClock::LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
@@ -124,8 +143,8 @@ void DigitalClock::LoadResources(CanvasControl^ sender, CanvasCreateResourcesEve
 void DigitalClock::Draw(CanvasControl^ sender, CanvasDrawingSession^ ds) {
     CanvasTextLayout^ lytTime = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
     CanvasTextLayout^ lytDate = ref new CanvasTextLayout(ds, datestamp, fontInfo, 0.0f, 0.0f);
-    float width = (float)GetCanvas()->Width;
-    float height = (float)GetCanvas()->Height;
+    float width = (float)Width;
+    float height = (float)Height;
 
     bool isTimestampLonger = (lytTime->LayoutBounds.Width > lytDate->LayoutBounds.Width);
     float deltaWidth = abs(lytDate->LayoutBounds.Width - lytTime->LayoutBounds.Width) / 2.0f;
