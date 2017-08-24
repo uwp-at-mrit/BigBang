@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ui.h"
 
-using namespace Win2D::XAML;
+using namespace Win2D::Xaml;
 using namespace Windows::UI;
 
 template <class T>
@@ -12,7 +12,7 @@ static T PlaceUIElement(Panel^ parent, T child, String^ id) {
     return child;
 }
 
-StackPanel^ UI::MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding) {
+StackPanel^ XAML::MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding) {
     auto child = ref new StackPanel();
 
     child->Orientation = direction;
@@ -22,7 +22,7 @@ StackPanel^ UI::MakeStackPanel(Panel^ parent, Orientation direction, Thickness m
     return PlaceUIElement<StackPanel^>(parent, child, nullptr);
 }
 
-ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption) {
+ToggleSwitch^ XAML::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption) {
     auto child = ref new ToggleSwitch();
 
     child->OnContent = (onCaption == nullptr) ? ((id == nullptr) ? "" : id) : onCaption;
@@ -31,7 +31,7 @@ ToggleSwitch^ UI::MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption,
     return PlaceUIElement<ToggleSwitch^>(parent, child, id);
 }
 
-CanvasControl^ UI::MakeGPUCanvas(Panel^ parent, String^ id, CanvasRCHandler^ OnLoad, CanvasDrawHandler^ OnDraw) {
+CanvasControl^ XAML::MakeGPUCanvas(Panel^ parent, String^ id, CanvasRCHandler^ OnLoad, CanvasDrawHandler^ OnDraw) {
     auto child = ref new CanvasControl();
 
     child->CreateResources += OnLoad;
@@ -41,13 +41,13 @@ CanvasControl^ UI::MakeGPUCanvas(Panel^ parent, String^ id, CanvasRCHandler^ OnL
 }
 
 
-Canvas^ UI::MakeCanvas(Panel^ parent, String^ id) {
+Canvas^ XAML::MakeCanvas(Panel^ parent, String^ id) {
     auto child = ref new Canvas();
 
     return PlaceUIElement<Canvas^>(parent, child, id);
 }
 
-DispatcherTimer^ UI::MakeGUITimer(long long ms, ObjectHandler^ OnTick) {
+DispatcherTimer^ XAML::MakeGUITimer(long long ms, ObjectHandler^ OnTick) {
     auto timer = ref new DispatcherTimer();
     long long duration = ms * 1000 * 10;
 
@@ -59,16 +59,38 @@ DispatcherTimer^ UI::MakeGUITimer(long long ms, ObjectHandler^ OnTick) {
 }
 
 /*************************************************************************************************/
-DigitalClock::DigitalClock(Panel^ parent) {
+Pasteboard::Pasteboard(Panel^ parent, String^ id) {
+    auto onLoad = ref new CanvasRCHandler(this, &Pasteboard::OnLoad);
+    auto onPaint = ref new CanvasDrawHandler(this, &Pasteboard::OnPaint);
+    entity = XAML::MakeGPUCanvas(parent, id, onLoad, onPaint);
+}
+
+void Pasteboard::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
+    this->LoadResources(sender, e);
+}
+
+void Pasteboard::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
+    this->Draw(sender, e->DrawingSession);
+}
+
+void Pasteboard::ChangeSize(double width, double height) {
+    entity->Width = width;
+    entity->Height = height;
+    this->OnDisplaySize(width, height);
+}
+
+CanvasControl^ Pasteboard::GetCanvas() {
+    return entity;
+}
+
+/*************************************************************************************************/
+DigitalClock::DigitalClock(Panel^ parent) : Pasteboard(parent, "SystemClock") {
     auto onTick = ref new ObjectHandler(this, &DigitalClock::OnTickUpdate);
-    auto onLoad = ref new CanvasRCHandler(this, &DigitalClock::LoadTimestamp);
-    auto onDraw = ref new CanvasDrawHandler(this, &DigitalClock::DrawClock);
 
     longdate = ref new DateTimeFormatter("longdate");
     longtime = ref new DateTimeFormatter("longtime");
     datetime = ref new Calendar();
-    entity = UI::MakeGPUCanvas(parent, "SystemClock", onLoad, onDraw);
-    timer = UI::MakeGUITimer(0, onTick);
+    timer = XAML::MakeGUITimer(0, onTick);
 }
 
 void DigitalClock::UpdateTimeStamp() {
@@ -84,12 +106,10 @@ void DigitalClock::UpdateTimeStamp() {
 
 void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     UpdateTimeStamp();
-    if (entity != nullptr) {
-        entity->Invalidate();
-    }
+    this->GetCanvas()->Invalidate();
 }
 
-void DigitalClock::LoadTimestamp(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
+void DigitalClock::LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
     if (timestamp == nullptr) {
         UpdateTimeStamp();
     }
@@ -101,25 +121,20 @@ void DigitalClock::LoadTimestamp(CanvasControl^ sender, CanvasCreateResourcesEve
     }
 }
 
-void DigitalClock::DrawClock(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
-    CanvasTextLayout^ lytTime = ref new CanvasTextLayout(e->DrawingSession, timestamp, fontInfo, 0.0f, 0.0f);
-    CanvasTextLayout^ lytDate = ref new CanvasTextLayout(e->DrawingSession, datestamp, fontInfo, 0.0f, 0.0f);
-    float width = (float)entity->Width;
-    float height = (float)entity->Height;
+void DigitalClock::Draw(CanvasControl^ sender, CanvasDrawingSession^ ds) {
+    CanvasTextLayout^ lytTime = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
+    CanvasTextLayout^ lytDate = ref new CanvasTextLayout(ds, datestamp, fontInfo, 0.0f, 0.0f);
+    float width = (float)GetCanvas()->Width;
+    float height = (float)GetCanvas()->Height;
 
     bool isTimestampLonger = (lytTime->LayoutBounds.Width > lytDate->LayoutBounds.Width);
     float deltaWidth = abs(lytDate->LayoutBounds.Width - lytTime->LayoutBounds.Width) / 2.0f;
     
     float tx = width - lytTime->LayoutBounds.Width - (isTimestampLonger ? 0.0f : deltaWidth);
     float ty = (height - lytTime->LayoutBounds.Height - lytDate->LayoutBounds.Height) / 2.0f;
-    e->DrawingSession->DrawTextLayout(lytTime, tx, ty, Colors::Black);
+    ds->DrawTextLayout(lytTime, tx, ty, Colors::Black);
     
     float dx = width - lytDate->LayoutBounds.Width - (isTimestampLonger ? deltaWidth : 0);
     float dy = ty + lytDate->LayoutBounds.Height;
-    e->DrawingSession->DrawTextLayout(lytDate, dx, dy, Colors::Black);
-}
-
-void DigitalClock::ChangeSize(double width, double height) {
-    entity->Width = width;
-    entity->Height = height;
+    ds->DrawTextLayout(lytDate, dx, dy, Colors::Black);
 }

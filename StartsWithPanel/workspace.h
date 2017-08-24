@@ -2,7 +2,7 @@
 
 #include "ui.h"
 
-using namespace Win2D::XAML;
+using namespace Win2D::Xaml;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;

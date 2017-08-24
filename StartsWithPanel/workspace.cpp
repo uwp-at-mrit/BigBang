@@ -16,15 +16,15 @@ WorkSpace::WorkSpace() : StackPanel() {
 
 void WorkSpace::InitializeComponent() {
     Thickness zero = ThicknessHelper::FromUniformLength(0);
-    auto titleBar = UI::MakeStackPanel(this, ::Orientation::Horizontal, zero, zero);
-    switchBar = UI::MakeStackPanel(titleBar, ::Orientation::Horizontal, zero, zero);
+    auto titleBar = XAML::MakeStackPanel(this, ::Orientation::Horizontal, zero, zero);
+    switchBar = XAML::MakeStackPanel(titleBar, ::Orientation::Horizontal, zero, zero);
 
-    numeric = UI::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
-    alert = UI::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
-    flash = UI::MakeToggleSwitch(switchBar, "flash", nullptr, nullptr);
+    numeric = XAML::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
+    alert = XAML::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
+    flash = XAML::MakeToggleSwitch(switchBar, "flash", nullptr, nullptr);
 
     systemClock = ref new DigitalClock(titleBar);
-    monitor = UI::MakeCanvas(this, "monitor");
+    monitor = XAML::MakeCanvas(this, "monitor");
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {

@@ -9,6 +9,7 @@ using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 
+using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
@@ -18,32 +19,51 @@ typedef TypedEventHandler<CanvasControl^, CanvasDrawEventArgs^> CanvasDrawHandle
 typedef TypedEventHandler<CanvasControl^, CanvasCreateResourcesEventArgs^> CanvasRCHandler;
 
 namespace Win2D {
-    namespace XAML {
-        public ref class DigitalClock sealed {
+    namespace Xaml {
+        public ref class Pasteboard : public DependencyObject {
+        public:
+            void ChangeSize(double width, double height);
+            CanvasControl^ GetCanvas();
+
+        internal:
+            Pasteboard(Panel^ parent, String^ id);
+
+            virtual void OnDisplaySize(double width, double height) {};
+            virtual void LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) {};
+            virtual void Draw(CanvasControl^ sender, CanvasDrawingSession^ args) {};
+
+        private:
+            CanvasControl^ entity;
+
+            void OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args);
+            void OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ args);
+        };
+
+        public ref class DigitalClock sealed : public Pasteboard {
         public:
             DigitalClock(Panel^ parent);
-            void ChangeSize(double width, double height);
+
+        internal:
+            void LoadResources(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) override;
+            void Draw(CanvasControl^ sender, CanvasDrawingSession^ args) override;
 
         private:
             void UpdateTimeStamp();
             void OnTickUpdate(Object^ sender, Object^ e);
-            void LoadTimestamp(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args);
-            void DrawClock(CanvasControl^ sender, CanvasDrawEventArgs^ args);
 
         private:
-            String^ timestamp = nullptr;
-            String^ datestamp = nullptr;
-            CanvasControl^ entity = nullptr;
-            CanvasTextFormat^ fontInfo = nullptr;
+            String^ timestamp;
+            String^ datestamp;
+            CanvasTextFormat^ fontInfo;
 
         private:
-            Calendar^ datetime = nullptr;
-            DispatcherTimer^ timer = nullptr;
-            DateTimeFormatter^ longdate = nullptr;
-            DateTimeFormatter^ longtime = nullptr;
+            Calendar^ datetime;
+            DispatcherTimer^ timer;
+            DateTimeFormatter^ longdate;
+            DateTimeFormatter^ longtime;
         };
 
-        public ref class UI sealed {
+        public ref class XAML sealed {
         public:
             static StackPanel^ MakeStackPanel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding);
             static ToggleSwitch^ MakeToggleSwitch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption);
