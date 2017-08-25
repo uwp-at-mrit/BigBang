@@ -14,9 +14,17 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.h" />
   </ItemGroup>
 </Project>

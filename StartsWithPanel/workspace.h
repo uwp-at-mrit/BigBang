@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui.h"
+#include "digitalclock.h"
 
 namespace Win2D::StartsWithPanel {
     /// <summary> An empty page that can be used on its own or navigated to within a Frame. </summary>
@@ -18,11 +19,11 @@ namespace Win2D::StartsWithPanel {
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchBar;
-        Win2D::Xaml::DigitalClock^ systemClock;
+        Win2D::UIElement::DigitalClock^ systemClock;
 
         Windows::UI::Xaml::Controls::ToggleSwitch^ numeric;
         Windows::UI::Xaml::Controls::ToggleSwitch^ alert;
         Windows::UI::Xaml::Controls::ToggleSwitch^ flash;
-        Windows::UI::Xaml::Controls::Canvas^ monitor;
+        Win2D::UIElement::Pasteboard^ monitor;
     };
 }

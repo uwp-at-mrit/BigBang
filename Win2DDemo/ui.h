@@ -1,97 +1,35 @@
 #pragma once
 
-namespace WUX = Windows::UI::Xaml;
-namespace WUC = WUX::Controls;
-namespace MSUI = Microsoft::Graphics::Canvas::UI;
-namespace MSX = MSUI::Xaml;
-
 typedef Windows::Foundation::EventHandler<Platform::Object^> ObjectHandler;
-typedef Windows::Foundation::TypedEventHandler<MSX::CanvasControl^, MSX::CanvasDrawEventArgs^> CanvasDrawHandler;
-typedef Windows::Foundation::TypedEventHandler<MSX::CanvasControl^, MSUI::CanvasCreateResourcesEventArgs^> CanvasLoadHandler;
 
-namespace Win2D::Xaml {
-    public ref class XAML sealed {
-    public:
-       static WUC::StackPanel^ MakeStackPanel(
-           WUC::Panel^ parent,
-           WUC::Orientation direction,
-           WUX::Thickness margin,
-           WUX::Thickness padding);
+typedef Windows::Foundation::TypedEventHandler<
+    Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^,
+    Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^>
+    CanvasDrawHandler;
 
-       static WUC::ToggleSwitch^ MakeToggleSwitch(
-           WUC::Panel^ parent,
-           Platform::String^ id,
-           Platform::String^ onCaption,
-           Platform::String^ offCaption);
+typedef Windows::Foundation::TypedEventHandler<
+    Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^,
+    Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^>
+    CanvasLoadHandler;
 
-       static MSX::CanvasControl^ MakeGPUCanvas(
-           WUC::Panel^ parent,
-           Platform::String^ id,
-           CanvasLoadHandler^ Load,
-           CanvasDrawHandler^ Draw);
+Windows::UI::Xaml::Controls::StackPanel^ stack_panel(
+    Windows::UI::Xaml::Controls::Panel^ parent,
+    Windows::UI::Xaml::Controls::Orientation direction,
+    Windows::UI::Xaml::Thickness margin,
+    Windows::UI::Xaml::Thickness padding);
 
-       static WUC::Canvas^ MakeCanvas(
-           WUC::Panel^ parent,
-           Platform::String^ id);
+Windows::UI::Xaml::Controls::ToggleSwitch^ toggle_switch(
+    Windows::UI::Xaml::Controls::Panel^ parent,
+    Platform::String^ id,
+    Platform::String^ onCaption,
+    Platform::String^ offCaption);
 
-       static WUX::DispatcherTimer^ MakeGUITimer(
-           long long ms,
-           ObjectHandler^ handler);
-    };
+Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ gpu_canvas(
+    Windows::UI::Xaml::Controls::Panel^ parent,
+    Platform::String^ id,
+    CanvasLoadHandler^ Load,
+    CanvasDrawHandler^ Draw);
 
-    public ref class Win2DPanel : public WUX::DependencyObject {
-    public:
-        void ChangeSize(double width, double height);
-        void SmartRedraw();
-
-    public:
-        property MSX::CanvasControl^ Canvas { MSX::CanvasControl^ get() { return entity; } }
-        property double Width { double get() { return entity->Width; } }
-        property double Height { double get() { return entity->Height; } }
-
-    internal:
-        Win2DPanel(WUC::Panel^ parent, Platform::String^ id);
-
-        virtual void OnDisplaySize(double width, double height) {};
-        virtual void LoadResources(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args) {};
-        virtual void Draw(MSX::CanvasControl^ sender, Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
-
-    private:
-        MSX::CanvasControl^ entity;
-
-        void OnLoad(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args);
-        void OnPaint(MSX::CanvasControl^ sender, MSX::CanvasDrawEventArgs^ args);
-    };
-
-    public ref class DigitalClock sealed : public Win2DPanel {
-    public:
-        DigitalClock(WUC::Panel^ parent);
-
-    internal:
-        void LoadResources(MSX::CanvasControl^ sender, MSUI::CanvasCreateResourcesEventArgs^ args) override;
-        void Draw(MSX::CanvasControl^ sender, Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) override;
-
-    private:
-        void UpdateTimeStamp();
-        void OnTickUpdate(Object^ sender, Object^ e);
-
-    private:
-        Platform::String^ timestamp;
-        Platform::String^ datestamp;
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo;
-
-    private:
-        WUX::DispatcherTimer^ timer;
-        Windows::Globalization::Calendar^ datetime;
-        Windows::Globalization::DateTimeFormatting::DateTimeFormatter^ longdate;
-        Windows::Globalization::DateTimeFormatting::DateTimeFormatter^ longtime;
-    };
-
-    public ref class Pasteboard sealed : public Win2DPanel {
-    public:
-        Pasteboard(WUC::Panel^ parent, Platform::String^ id);
-
-    private:
-
-    };
-}
+Windows::UI::Xaml::DispatcherTimer^ gui_timer(
+    long long ms,
+    ObjectHandler^ handler);

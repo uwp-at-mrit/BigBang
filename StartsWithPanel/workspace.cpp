@@ -1,7 +1,7 @@
 #include "workspace.h"
 
 using namespace Win2D::StartsWithPanel;
-using namespace Win2D::Xaml;
+using namespace Win2D::UIElement;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
@@ -16,15 +16,15 @@ WorkSpace::WorkSpace() : StackPanel() {
 
 void WorkSpace::InitializeComponent() {
     Thickness zero = ThicknessHelper::FromUniformLength(0);
-    auto titleBar = XAML::MakeStackPanel(this, ::Orientation::Horizontal, zero, zero);
-    switchBar = XAML::MakeStackPanel(titleBar, ::Orientation::Horizontal, zero, zero);
+    auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
+    switchBar = stack_panel(titleBar, ::Orientation::Horizontal, zero, zero);
 
-    numeric = XAML::MakeToggleSwitch(switchBar, "numeric", nullptr, nullptr);
-    alert = XAML::MakeToggleSwitch(switchBar, "alert", nullptr, nullptr);
-    flash = XAML::MakeToggleSwitch(switchBar, "flash", nullptr, nullptr);
+    numeric = toggle_switch(switchBar, "numeric", nullptr, nullptr);
+    alert = toggle_switch(switchBar, "alert", nullptr, nullptr);
+    flash = toggle_switch(switchBar, "flash", nullptr, nullptr);
 
     systemClock = ref new DigitalClock(titleBar);
-    monitor = XAML::MakeCanvas(this, "monitor");
+    monitor = ref new Pasteboard(this, "monitor");
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
