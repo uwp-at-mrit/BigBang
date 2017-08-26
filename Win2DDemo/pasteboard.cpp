@@ -36,7 +36,7 @@ TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInf
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto onLoad = ref new CanvasLoadHandler(this, &Win2DCanvas::OnLoad);
     auto onPaint = ref new CanvasDrawHandler(this, &Win2DCanvas::OnPaint);
-    entity = gpu_canvas(parent, id, onLoad, onPaint);
+    control = gpu_canvas(parent, id, onLoad, onPaint);
 }
 
 void Win2DCanvas::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
@@ -48,13 +48,13 @@ void Win2DCanvas::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
 }
 
 void Win2DCanvas::ChangeSize(double width, double height) {
-    entity->Width = width;
-    entity->Height = height;
+    control->Width = width;
+    control->Height = height;
     this->OnDisplaySize(width, height);
 }
 
 void Win2DCanvas::SmartRedraw() {
-    entity->Invalidate();
+    control->Invalidate();
 }
 
 /*************************************************************************************************/

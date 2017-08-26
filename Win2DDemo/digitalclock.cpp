@@ -57,7 +57,7 @@ void DigitalClock::Draw(CanvasDrawingSession^ ds) {
     auto layout = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
     layout->HorizontalAlignment = CanvasHorizontalAlignment::Center;
 
-    float x = ((float)Width) - layout->LayoutBounds.Width - layout->LayoutBounds.X;
-    float y = ((float)Height - layout->LayoutBounds.Height) / 2.0f;
+    float x = ((float)Control->Width) - layout->LayoutBounds.Width - layout->LayoutBounds.X;
+    float y = ((float)Control->Height - layout->LayoutBounds.Height) / 2.0f;
     ds->DrawTextLayout(layout, x, y, Colors::Black);
 }

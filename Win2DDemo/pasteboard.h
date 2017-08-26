@@ -21,15 +21,7 @@ namespace Win2D::UIElement {
 
     public:
         property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ Control {
-            Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return entity; }
-        }
-
-        property double Width {
-            double get() { return entity->Width; }
-        }
-
-        property double Height {
-            double get() { return entity->Height; }
+            Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return control; }
         }
 
     internal:
@@ -41,7 +33,7 @@ namespace Win2D::UIElement {
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 
     private:
-        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ entity;
+        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         
         void OnLoad(
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
