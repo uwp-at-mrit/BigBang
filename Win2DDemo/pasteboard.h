@@ -4,13 +4,23 @@
 #include "snip.h"
 
 namespace Win2D::UIElement {
-    public ref class Win2DPanel : public Windows::UI::Xaml::DependencyObject {
+    public value struct TextExtent {
+        float Width;
+        float Height;
+        float Distance;
+        float Spacing;
+    };
+
+    public ref class Win2DCanvas : public Windows::UI::Xaml::DependencyObject {
+    public:
+        static TextExtent GetTextExtent(Platform::String^ message, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
+
     public:
         void ChangeSize(double width, double height);
         void SmartRedraw();
 
     public:
-        property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ Canvas {
+        property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ Can {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return entity; }
         }
 
@@ -23,7 +33,7 @@ namespace Win2D::UIElement {
         }
 
     internal:
-        Win2DPanel(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
+        Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
 
     internal:
         virtual void OnDisplaySize(double width, double height) {};
@@ -32,7 +42,7 @@ namespace Win2D::UIElement {
 
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ entity;
-
+        
         void OnLoad(
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args);
@@ -42,7 +52,7 @@ namespace Win2D::UIElement {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
     };
 
-    public ref class Pasteboard sealed : public Win2DPanel {
+    public ref class Pasteboard sealed : public Win2DCanvas {
     public:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
 

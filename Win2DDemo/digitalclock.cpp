@@ -21,7 +21,8 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
-DigitalClock::DigitalClock(Panel^ parent) : Win2DPanel(parent, "SystemClock") {
+#include "debug.h"
+DigitalClock::DigitalClock(Panel^ parent) : Win2DCanvas(parent, "SystemClock") {
     auto onTick = ref new ObjectHandler(this, &DigitalClock::OnTickUpdate);
 
     longdate = ref new DateTimeFormatter("longdate");
@@ -32,7 +33,8 @@ DigitalClock::DigitalClock(Panel^ parent) : Win2DPanel(parent, "SystemClock") {
     fontInfo->WordWrapping = CanvasWordWrapping::NoWrap;
     fontInfo->FontSize = 12;
 
-    timer = gui_timer(0, onTick);
+    timer = gui_timer(1000, onTick);
+    UpdateTimeStamp();
 }
 
 void DigitalClock::UpdateTimeStamp() {
@@ -40,10 +42,11 @@ void DigitalClock::UpdateTimeStamp() {
     long long l00ns = datetime->Nanosecond / 100;
     long long ms = l00ns / 10000;
     timer->Interval = TimeSpan({ 10000000 - l00ns });
-    datestamp = longdate->Format(datetime->GetDateTime());
     timestamp = longtime->Format(datetime->GetDateTime())
         + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
-        + ms.ToString();
+        + ms.ToString()
+        + "\n"
+        + longdate->Format(datetime->GetDateTime());
 }
 
 void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
@@ -51,26 +54,11 @@ void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     this->SmartRedraw();
 }
 
-void DigitalClock::LoadResources(CanvasCreateResourcesEventArgs^ e) {
-    if (timestamp == nullptr) {
-        UpdateTimeStamp();
-    }
-}
-
 void DigitalClock::Draw(CanvasDrawingSession^ ds) {
-    auto timeLayout = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
-    auto dateLayout = ref new CanvasTextLayout(ds, datestamp, fontInfo, 0.0f, 0.0f);
-    float width = (float)Width;
-    float height = (float)Height;
+    auto layout = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
+    layout->HorizontalAlignment = CanvasHorizontalAlignment::Center;
 
-    bool isTimestampLonger = (timeLayout->LayoutBounds.Width > dateLayout->LayoutBounds.Width);
-    float deltaWidth = abs(dateLayout->LayoutBounds.Width - timeLayout->LayoutBounds.Width) / 2.0f;
-
-    float tx = width - timeLayout->LayoutBounds.Width - (isTimestampLonger ? 0.0f : deltaWidth);
-    float ty = (height - timeLayout->LayoutBounds.Height - dateLayout->LayoutBounds.Height) / 2.0f;
-    ds->DrawTextLayout(timeLayout, tx, ty, Colors::Black);
-
-    float dx = width - dateLayout->LayoutBounds.Width - (isTimestampLonger ? deltaWidth : 0);
-    float dy = ty + dateLayout->LayoutBounds.Height;
-    ds->DrawTextLayout(dateLayout, dx, dy, Colors::Black);
+    float x = ((float)Width) - layout->LayoutBounds.Width - layout->LayoutBounds.X;
+    float y = ((float)Height - layout->LayoutBounds.Height) / 2.0f;
+    ds->DrawTextLayout(layout, x, y, Colors::Black);
 }

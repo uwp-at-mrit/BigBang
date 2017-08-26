@@ -3,12 +3,11 @@
 #include "pasteboard.h"
 
 namespace Win2D::UIElement {
-    public ref class DigitalClock sealed : public Win2D::UIElement::Win2DPanel {
+    public ref class DigitalClock sealed : public Win2D::UIElement::Win2DCanvas {
     public:
         DigitalClock(Windows::UI::Xaml::Controls::Panel^ parent);
 
     internal:
-        void LoadResources(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) override;
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) override;
 
     private:
@@ -17,7 +16,6 @@ namespace Win2D::UIElement {
 
     private:
         Platform::String^ timestamp;
-        Platform::String^ datestamp;
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo;
 
     private:
