@@ -21,7 +21,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
-#include "debug.h"
 DigitalClock::DigitalClock(Panel^ parent) : Win2DCanvas(parent, "SystemClock") {
     auto onTick = ref new ObjectHandler(this, &DigitalClock::OnTickUpdate);
 

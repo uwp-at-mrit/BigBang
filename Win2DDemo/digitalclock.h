@@ -9,7 +9,7 @@ namespace Win2D::UIElement {
 
     internal:
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) override;
-
+        
     private:
         void UpdateTimeStamp();
         void OnTickUpdate(Platform::Object^ sender, Platform::Object^ e);

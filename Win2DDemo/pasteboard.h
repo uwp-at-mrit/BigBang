@@ -20,7 +20,7 @@ namespace Win2D::UIElement {
         void SmartRedraw();
 
     public:
-        property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ Can {
+        property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ Control {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return entity; }
         }
 
