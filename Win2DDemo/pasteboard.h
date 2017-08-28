@@ -49,14 +49,13 @@ namespace Win2D::UIElement {
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
 
     internal:
-        virtual void LoadResources(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) override;
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
     
     internal:
-        void Insert(Win2D::UIElement::Snip* snip);
+        void Insert(Win2D::Pasteboard::Snip* snip);
 
     private:
-        Win2D::UIElement::Snip* headSnip;
+        Win2D::Pasteboard::Snip* headSnip;
         ~Pasteboard();
     };
 }

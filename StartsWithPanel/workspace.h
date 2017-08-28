@@ -24,6 +24,8 @@ namespace Win2D::StartsWithPanel {
         Windows::UI::Xaml::Controls::ToggleSwitch^ numeric;
         Windows::UI::Xaml::Controls::ToggleSwitch^ alert;
         Windows::UI::Xaml::Controls::ToggleSwitch^ flash;
-        Win2D::UIElement::Pasteboard^ monitor;
+
+        Win2D::UIElement::Pasteboard^ toolbar;
+        Win2D::UIElement::Pasteboard^ stage;
     };
 }

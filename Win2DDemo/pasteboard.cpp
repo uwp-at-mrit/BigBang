@@ -6,6 +6,7 @@ using namespace std;
 using namespace Platform;
 
 using namespace Win2D::UIElement;
+using namespace Win2D::Pasteboard;
 
 using namespace Windows::Foundation;
 using namespace Windows::UI;
@@ -30,7 +31,7 @@ TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInf
     Rect ink = textLayout->DrawBounds;
     float space = ink.X - logical.X;
     float distance = logical.Height - ink.Height - space;
-    return TextExtent({logical.Width, logical.Height, distance, space});
+    return {logical.Width, logical.Height, distance, space};
 }
 
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
@@ -71,9 +72,6 @@ void Pasteboard::Insert(Snip* snip) {
     }
 
     this->SmartRedraw();
-}
-
-void Pasteboard::LoadResources(CanvasCreateResourcesEventArgs^ e) {
 }
 
 void Pasteboard::Draw(CanvasDrawingSession^ ds) {
