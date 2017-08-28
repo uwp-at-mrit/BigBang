@@ -13,18 +13,11 @@ namespace Win2D::StartsWithPanel {
     public:
         void InitializeComponent();
         void Suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
-
-    private:
         void Reflow(Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchBar;
         Win2D::UIElement::DigitalClock^ systemClock;
-
-        Windows::UI::Xaml::Controls::ToggleSwitch^ numeric;
-        Windows::UI::Xaml::Controls::ToggleSwitch^ alert;
-        Windows::UI::Xaml::Controls::ToggleSwitch^ flash;
-
         Win2D::UIElement::Pasteboard^ toolbar;
         Win2D::UIElement::Pasteboard^ stage;
     };

@@ -8,7 +8,7 @@ namespace Win2D::UIElement {
         DigitalClock(Windows::UI::Xaml::Controls::Panel^ parent);
 
     internal:
-        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) override;
+        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
         
     private:
         void UpdateTimeStamp();

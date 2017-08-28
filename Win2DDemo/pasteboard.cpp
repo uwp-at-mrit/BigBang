@@ -1,12 +1,10 @@
 #include "ui.h"
 #include "pasteboard.h"
-#include "snip.h"
 
 using namespace std;
 using namespace Platform;
 
 using namespace Win2D::UIElement;
-using namespace Win2D::Sniplet;
 
 using namespace Windows::Foundation;
 using namespace Windows::UI;
@@ -26,12 +24,16 @@ TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInf
         sharedDrawingSession = target->CreateDrawingSession();
     }
 
-    auto textLayout = ref new CanvasTextLayout(sharedDrawingSession, message, fontInfo, 0.0f, 0.0f);
+    return Win2DCanvas::GetTextExtent(sharedDrawingSession, message, fontInfo);
+}
+
+TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ fontInfo) {
+    auto textLayout = ref new CanvasTextLayout(ds, message, fontInfo, 0.0f, 0.0f);
     Rect logical = textLayout->LayoutBounds;
     Rect ink = textLayout->DrawBounds;
     float space = ink.X - logical.X;
     float distance = logical.Height - ink.Height - space;
-    return {logical.Width, logical.Height, distance, space};
+    return { logical.Width, logical.Height, distance, space };
 }
 
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
@@ -59,23 +61,34 @@ void Win2DCanvas::SmartRedraw() {
 }
 
 /*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, String^ id) : Win2DCanvas(parent, id) {    
+Pasteboard::Pasteboard(Panel^ parent, String^ id) : Win2DCanvas(parent, id) {
 }
 
 Pasteboard::~Pasteboard() {
-    delete headSnip;
+    while (headSnip != nullptr) {
+        Snip* snip = headSnip;
+        headSnip = snip->next;
+
+        delete snip;
+    }
 }
 
 void Pasteboard::Insert(Snip* snip) {
-    if (headSnip == nullptr) {
-        headSnip = snip;
+    snip->next = headSnip;
+
+    if (headSnip != nullptr) {
+        headSnip->prev = snip;
     }
 
+    headSnip = snip;
     this->SmartRedraw();
 }
 
+#include "debug.h"
 void Pasteboard::Draw(CanvasDrawingSession^ ds) {
     if (headSnip != nullptr) {
-        headSnip->Draw(ds);
+        headSnip->Draw(ds, 0.0, 0.0);
     }
+
+    ds->DrawRectangle(0.0f, 0.0f, this->Control->ActualWidth, this->Control->ActualHeight, Colors::SkyBlue);
 }
