@@ -3,7 +3,7 @@
 
 using namespace Win2D::StartsWithPanel;
 using namespace Win2D::UIElement;
-using namespace Win2D::Pasteboard;
+using namespace Win2D::Sniplet;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;

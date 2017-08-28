@@ -52,10 +52,10 @@ namespace Win2D::UIElement {
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
     
     internal:
-        void Insert(Win2D::Pasteboard::Snip* snip);
+        void Insert(Win2D::Sniplet::Snip* snip);
 
     private:
-        Win2D::Pasteboard::Snip* headSnip;
+        Win2D::Sniplet::Snip* headSnip;
         ~Pasteboard();
     };
 }

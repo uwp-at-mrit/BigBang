@@ -1,6 +1,6 @@
 #include "snip.h"
 
-using namespace Win2D::Pasteboard;
+using namespace Win2D::Sniplet;
 
 using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;

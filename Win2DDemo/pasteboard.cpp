@@ -6,7 +6,7 @@ using namespace std;
 using namespace Platform;
 
 using namespace Win2D::UIElement;
-using namespace Win2D::Pasteboard;
+using namespace Win2D::Sniplet;
 
 using namespace Windows::Foundation;
 using namespace Windows::UI;
