@@ -1,6 +1,7 @@
 #pragma once
 
 #include "canvas.h"
+#include "layout.h"
 
 namespace Win2D::UIElement {
     private enum SnipTypes {
@@ -27,7 +28,7 @@ namespace Win2D::UIElement {
     /*********************************************************************************************/
     public ref class Pasteboard sealed : public Win2DCanvas {
     internal:
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Win2D::UIElement::Layout* layout = nullptr);
 
     internal:
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
@@ -42,6 +43,7 @@ namespace Win2D::UIElement {
 
     private:
         Snip* headSnip;
+        Win2D::UIElement::Layout* layout;
 
     private:
         ~Pasteboard();

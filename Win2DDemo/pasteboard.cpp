@@ -1,4 +1,5 @@
 #include "pasteboard.h"
+#include "layout.h"
 
 using namespace std;
 using namespace Platform;
@@ -10,7 +11,8 @@ using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 
-Pasteboard::Pasteboard(Panel^ parent, String^ id) : Win2DCanvas(parent, id) {
+Pasteboard::Pasteboard(Panel^ parent, String^ id, Layout* layout) : Win2DCanvas(parent, id) {
+    this->layout = (layout == nullptr) ? new Layout() : layout;
 }
 
 Pasteboard::~Pasteboard() {
@@ -20,6 +22,8 @@ Pasteboard::~Pasteboard() {
 
         delete snip;
     }
+
+    delete layout;
 }
 
 void Pasteboard::Insert(Snip* snip, double x, double y) {
