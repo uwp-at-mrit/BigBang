@@ -11,7 +11,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 Textlet::~Textlet() {}
 
-Textlet::Textlet(String^ content = "") {
+Textlet::Textlet(String^ content) {
     _content = content;
     _font = ref new CanvasTextFormat();
     _font->WordWrapping = CanvasWordWrapping::NoWrap;

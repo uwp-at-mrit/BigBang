@@ -6,7 +6,7 @@ namespace Win2D::Sniplet {
     class Textlet : public Win2D::UIElement::Snip {
     public:
         ~Textlet() noexcept;
-        Textlet(Platform::String^ content);
+        Textlet(Platform::String^ content = "");
 
     public:
         Win2D::UIElement::SnipTypes GetType() override;

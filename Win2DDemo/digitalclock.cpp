@@ -50,7 +50,7 @@ void DigitalClock::UpdateTimeStamp() {
 
 void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
     UpdateTimeStamp();
-    this->SmartRedraw();
+    this->Refresh();
 }
 
 void DigitalClock::Draw(CanvasDrawingSession^ ds) {
