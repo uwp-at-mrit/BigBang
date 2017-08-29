@@ -57,7 +57,7 @@ namespace Win2D::UIElement {
 
     private class Snip {
     public:
-        virtual ~Snip() {};
+        virtual ~Snip() noexcept {};
 
     public:
         virtual SnipTypes GetType() = 0;

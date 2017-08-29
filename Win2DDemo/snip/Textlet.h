@@ -5,8 +5,7 @@
 namespace Win2D::Sniplet {
     class Textlet : public Win2D::UIElement::Snip {
     public:
-        ~Textlet();
-        Textlet();
+        ~Textlet() noexcept;
         Textlet(Platform::String^ content);
 
     public:
