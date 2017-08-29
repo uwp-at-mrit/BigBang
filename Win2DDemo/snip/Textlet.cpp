@@ -16,6 +16,7 @@ Textlet::Textlet() : Textlet("") {}
 Textlet::Textlet(String^ content) {
     _content = content;
     _font = ref new CanvasTextFormat();
+    _font->WordWrapping = CanvasWordWrapping::NoWrap;
 }
 
 SnipTypes Textlet::GetType() {
@@ -27,6 +28,5 @@ TextExtent Textlet::GetExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^
 };
 
 void Textlet::Draw(CanvasDrawingSession^ ds, double x, double y) {
-    auto layout = ref new CanvasTextLayout(ds, _content, _font, 0.0f, 0.0f);
-    ds->DrawTextLayout(layout, (float)x, (float)y, Colors::Black);
+    ds->DrawText(_content, (float)x, (float)y, Colors::Black, _font);
 }

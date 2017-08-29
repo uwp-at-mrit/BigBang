@@ -74,6 +74,10 @@ Pasteboard::~Pasteboard() {
 }
 
 void Pasteboard::Insert(Snip* snip) {
+    this->Insert(snip, 0.0, 0.0);
+}
+
+void Pasteboard::Insert(Snip* snip, double x, double y) {
     snip->next = headSnip;
 
     if (headSnip != nullptr) {
@@ -84,7 +88,6 @@ void Pasteboard::Insert(Snip* snip) {
     this->SmartRedraw();
 }
 
-#include "debug.h"
 void Pasteboard::Draw(CanvasDrawingSession^ ds) {
     if (headSnip != nullptr) {
         headSnip->Draw(ds, 0.0, 0.0);

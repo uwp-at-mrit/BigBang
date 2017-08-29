@@ -79,6 +79,7 @@ namespace Win2D::UIElement {
     
     internal:
         void Insert(Snip* snip);
+        void Insert(Snip* snip, double x, double y);
 
     private:
         Snip* headSnip;
