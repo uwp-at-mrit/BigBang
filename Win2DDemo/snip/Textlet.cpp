@@ -20,27 +20,35 @@ using namespace Microsoft::Graphics::Canvas::Text;
 static wchar_t wpool[DEFAULT_POOL_SIZE];
 
 static void TextletSetLargeString(Textlet* self, size_t size, const wchar_t* fmt, va_list argl) {
-    wchar_t* largePool = new wchar_t[size + 1];
+    wchar_t* largePool = (wchar_t*)calloc(size + 1, sizeof(wchar_t));
+
     vswprintf(largePool, size + 1, fmt, argl);
     va_end(argl);
-    self->SetText(ref new String(largePool));
-    delete[] largePool;
+    self->SetText("(" + size.ToString() + ")");
+    free(largePool);
 }
 
 Textlet::~Textlet() {}
 
 Textlet::Textlet(const wchar_t *fmt, ...) {
+    int bigSize = DEFAULT_POOL_SIZE - 1;
+    wchar_t *pool;
     va_list argl;
 
-    va_start(argl, fmt);
-    size_t size = vswprintf(wpool, DEFAULT_POOL_SIZE, fmt, argl);
-    va_end(argl);
-    if (size < DEFAULT_POOL_SIZE) {
-        this->SetText(ref new String(wpool));
-    } else {
+    do {
+        pool = (bigSize < DEFAULT_POOL_SIZE) ? wpool : (new wchar_t[bigSize + 1]);
         va_start(argl, fmt);
-        TextletSetLargeString(this, size, fmt, argl);
-    }
+        int status = vswprintf(pool, bigSize + 1, fmt, argl);
+        va_end(argl);
+        if (status == -1) {
+            bigSize = bigSize * 2 + 1;
+            if (pool != wpool) delete[] pool;
+            pool = nullptr;
+        }
+    } while (pool == nullptr);
+
+    this->SetText(ref new String(pool));
+    if (pool != wpool) delete[] pool;
 }
 
 Textlet::Textlet(String^ content) {
