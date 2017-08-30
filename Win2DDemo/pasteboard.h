@@ -1,7 +1,6 @@
 #pragma once
 
 #include "canvas.h"
-#include "layout.h"
 
 namespace Win2D::UIElement {
     private enum SnipTypes {
@@ -10,12 +9,17 @@ namespace Win2D::UIElement {
 
     private class Snip {
     public:
+        virtual SnipTypes GetType() = 0;
         virtual ~Snip() noexcept {};
 
     public:
-        virtual SnipTypes GetType() = 0;
-        virtual TextExtent GetExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, double x, double y) = 0;
-        virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, double x, double y) = 0;
+        virtual void FillExtent(
+            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+            float x, float y, float* width =nullptr, float* height = nullptr,
+            float* descent = nullptr, float* space = nullptr, float* lspace = nullptr, float* rspace = nullptr)
+            = 0;
+
+        virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) = 0;
 
     public:
         void* assocData;
@@ -26,26 +30,44 @@ namespace Win2D::UIElement {
     };
 
     /*********************************************************************************************/
-    public ref class Pasteboard sealed : public Win2DCanvas {
+    public ref class IPasteboard : public Win2DCanvas {
+    public:
+        virtual ~IPasteboard();
+
     internal:
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Win2D::UIElement::Layout* layout = nullptr);
+        IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
 
     internal:
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
     
     internal:
-        void Insert(Snip* snip, double x = 0.0, double y = 0.0);
-        void MoveTo(Snip* snip, double x, double y);
+        void Insert(Snip* snip, float x = 0.0, float y = 0.0);
+        void MoveTo(Snip* snip, float x, float y);
 
     private protected:
-        virtual void BeforeInsert(Snip* snip, double x, double y) {};
-        virtual void AfterInsert(Snip* snip, double x, double y) {};
+        virtual void BeforeInsert(Snip* snip, float x, float y) {};
+        virtual void AfterInsert(Snip* snip, float x, float y) {};
 
-    private:
+    private protected:
         Snip* headSnip;
-        Win2D::UIElement::Layout* layout;
+        Snip* tailSnip;
+    };
+
+    public ref class Pasteboard sealed : public IPasteboard {
+    public:
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
+    };
+
+    public ref class VerticalPasteboard sealed : public IPasteboard {
+    public:
+        VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, int gapsize);
+
+    private protected:
+        void BeforeInsert(Snip* snip, float x, float y) override;
+        void AfterInsert(Snip* snip, float x, float y) override;
 
     private:
-        ~Pasteboard();
+        int gapsize;
+        double lastPosition;
     };
 }

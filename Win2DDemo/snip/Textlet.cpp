@@ -21,10 +21,18 @@ SnipTypes Textlet::GetType() {
     return SnipTypes::Text;
 }
 
-TextExtent Textlet::GetExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, double x, double y) {
-    return Win2DCanvas::GetTextExtent(ds, _content, _font);
+void Textlet::FillExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y,
+    float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+    TextExtent ts = Win2DCanvas::GetTextExtent(ds, _content, _font);
+
+    if (width != nullptr) (*width) = ts.Width;
+    if (height != nullptr) (*height) = ts.Height;
+    if (descent != nullptr) (*descent) = ts.Descent;
+    if (space != nullptr) (*space) = ts.Space;
+    if (lspace != nullptr) (*lspace) = ts.LSpace;
+    if (rspace != nullptr) (*rspace) = ts.RSpace;
 };
 
-void Textlet::Draw(CanvasDrawingSession^ ds, double x, double y) {
+void Textlet::Draw(CanvasDrawingSession^ ds, float x, float y) {
     ds->DrawText(_content, (float)x, (float)y, Colors::Black, _font);
 }

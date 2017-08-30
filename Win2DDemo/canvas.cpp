@@ -31,9 +31,12 @@ TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message,
     auto textLayout = ref new CanvasTextLayout(ds, message, fontInfo, 0.0f, 0.0f);
     Rect logical = textLayout->LayoutBounds;
     Rect ink = textLayout->DrawBounds;
-    float space = ink.X - logical.X;
-    float distance = logical.Height - ink.Height - space;
-    return { logical.Width, logical.Height, distance, space };
+    float space = ink.Y - logical.Y;
+    float descent = logical.Height - ink.Height - space;
+    float left = ink.X - logical.X;
+    float right = logical.Width - ink.Width - left;
+
+    return { logical.Width, logical.Height, descent, space, left, right };
 }
 
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
@@ -67,12 +70,8 @@ void Win2DCanvas::EndEditSequence() {
 
     if (editSequence <= 0) {
         if (isRefreshPending) Refresh();
-        editSequence = 0;
+        if (editSequence < 0) editSequence = 0;
     }
-}
-
-bool Win2DCanvas::IsRefreshDelayed() {
-    return editSequence > 0;
 }
 
 void Win2DCanvas::Refresh() {

@@ -7,11 +7,16 @@ namespace Win2D::Sniplet {
     public:
         ~Textlet() noexcept;
         Textlet(Platform::String^ content = "");
+        Win2D::UIElement::SnipTypes GetType() override;
 
     public:
-        Win2D::UIElement::SnipTypes GetType() override;
-        Win2D::UIElement::TextExtent GetExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, double x, double y) override;
-        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, double x, double y) override;
+        void FillExtent(
+            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+            float x, float y, float* w = nullptr, float* h = nullptr,
+            float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
+            override;
+
+        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
 
     private:
         Platform::String^ _content;

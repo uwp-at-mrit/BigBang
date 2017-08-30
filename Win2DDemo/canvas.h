@@ -4,8 +4,10 @@ namespace Win2D::UIElement {
     public value struct TextExtent {
         float Width;
         float Height;
-        float Distance;
-        float Spacing;
+        float Descent;
+        float Space;
+        float LSpace;
+        float RSpace;
     };
 
     public ref class Win2DCanvas : public Windows::UI::Xaml::DependencyObject {
@@ -25,7 +27,6 @@ namespace Win2D::UIElement {
     public:
         void BeginEditSequence();
         void EndEditSequence();
-        bool IsRefreshDelayed();
         void Refresh();
 
     public:
