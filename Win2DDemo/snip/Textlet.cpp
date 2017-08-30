@@ -1,3 +1,9 @@
+#include <string>
+#include <cstdio>
+#include <cwchar>
+#include <cstdarg>
+#include <cstdlib>
+
 #include "Textlet.h"
 #include "canvas.h"
 
@@ -10,16 +16,47 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
+#define DEFAULT_POOL_SIZE 1024
+static wchar_t wpool[DEFAULT_POOL_SIZE];
+
+static void TextletSetLargeString(Textlet* self, size_t size, const wchar_t* fmt, va_list argl) {
+    wchar_t* largePool = new wchar_t[size + 1];
+    vswprintf(largePool, size + 1, fmt, argl);
+    va_end(argl);
+    self->SetText(ref new String(largePool));
+    delete[] largePool;
+}
+
 Textlet::~Textlet() {}
 
+Textlet::Textlet(const wchar_t *fmt, ...) {
+    va_list argl;
+
+    va_start(argl, fmt);
+    size_t size = vswprintf(wpool, DEFAULT_POOL_SIZE, fmt, argl);
+    va_end(argl);
+    if (size < DEFAULT_POOL_SIZE) {
+        this->SetText(ref new String(wpool));
+    } else {
+        va_start(argl, fmt);
+        TextletSetLargeString(this, size, fmt, argl);
+    }
+}
+
 Textlet::Textlet(String^ content) {
-    this->content = content;
-    this->font = ref new CanvasTextFormat();
-    this->font->WordWrapping = CanvasWordWrapping::NoWrap;
+    this->SetText(content);
 }
 
 SnipTypes Textlet::GetType() {
     return SnipTypes::Text;
+}
+
+void Textlet::SetText(String^ content) {
+    this->content = content;
+    if (this->font == nullptr) {
+        this->font = ref new CanvasTextFormat();
+        this->font->WordWrapping = CanvasWordWrapping::NoWrap;
+    }
 }
 
 void Textlet::FillExtent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {

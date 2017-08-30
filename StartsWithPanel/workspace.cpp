@@ -1,4 +1,4 @@
-#include <cstdlib>
+﻿#include <cstdlib>
 
 #include "workspace.h"
 #include "pasteboard.h"
@@ -8,6 +8,7 @@ using namespace Win2D::StartsWithPanel;
 using namespace Win2D::UIElement;
 using namespace Win2D::Sniplet;
 
+using namespace Platform;
 using namespace Windows::UI;
 using namespace Windows::UI::ViewManagement;
 
@@ -49,7 +50,7 @@ void WorkSpace::InitializeComponent() {
         square->Width = 32;
         square->Height = 32;
 
-        stage->Insert(new Textlet("Hello, Snip" + i.ToString()));
+        stage->Insert(new Textlet(L"Hello, Snip%u, 你的颜色应该是 (%u, %u, %u)", i, r, g, b));
     }
 }
 
