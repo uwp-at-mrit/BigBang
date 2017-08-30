@@ -12,6 +12,8 @@ namespace Win2D::UIElement {
 
     public ref class Win2DCanvas : public Windows::UI::Xaml::DependencyObject {
     public:
+        static Microsoft::Graphics::Canvas::CanvasDrawingSession^ GetSharedDrawingSession();
+
         static TextExtent GetTextExtent(
             Platform::String^ message,
             Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);

@@ -13,10 +13,10 @@ namespace Win2D::UIElement {
         virtual ~Snip() noexcept {};
 
     public:
-        virtual void FillExtent(
-            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float x, float y, float* width =nullptr, float* height = nullptr,
-            float* descent = nullptr, float* space = nullptr, float* lspace = nullptr, float* rspace = nullptr)
+        virtual void FillExtent(float x, float y,
+            float* width =nullptr, float* height = nullptr,
+            float* descent = nullptr, float* space = nullptr,
+            float* lspace = nullptr, float* rspace = nullptr)
             = 0;
 
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) = 0;
@@ -60,14 +60,14 @@ namespace Win2D::UIElement {
 
     public ref class VerticalPasteboard sealed : public IPasteboard {
     public:
-        VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, int gapsize);
+        VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);
 
     private protected:
         void BeforeInsert(Snip* snip, float x, float y) override;
         void AfterInsert(Snip* snip, float x, float y) override;
 
     private:
-        int gapsize;
-        double lastPosition;
+        float gapsize;
+        float lastPosition;
     };
 }

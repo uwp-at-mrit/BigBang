@@ -53,7 +53,7 @@ void IPasteboard::Draw(CanvasDrawingSession^ ds) {
 Pasteboard::Pasteboard(Panel^ parent, String^ id) : IPasteboard(parent, id) {
 }
 
-VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id, int gapsize) : IPasteboard(parent, id) {
+VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id, float gapsize) : IPasteboard(parent, id) {
     this->gapsize = gapsize;
     this->lastPosition = -gapsize;
 }
@@ -62,7 +62,10 @@ void VerticalPasteboard::BeforeInsert(Snip* snip, float x, float y) {
     this->BeginEditSequence();
 }
 
-void VerticalPasteboard::AfterInsert(Snip* snip, float x, float y) {
-    
+void VerticalPasteboard::AfterInsert(Snip* snip, float, float) {
+    float x = 0.0f;
+    float y = lastPosition + gapsize;
+    float height = 0.0;
+    //snip->FillExtent();
     this->EndEditSequence();
 }

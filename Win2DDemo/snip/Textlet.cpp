@@ -1,4 +1,5 @@
 #include "Textlet.h"
+#include "canvas.h"
 
 using namespace Win2D::Sniplet;
 using namespace Win2D::UIElement;
@@ -12,18 +13,17 @@ using namespace Microsoft::Graphics::Canvas::Text;
 Textlet::~Textlet() {}
 
 Textlet::Textlet(String^ content) {
-    _content = content;
-    _font = ref new CanvasTextFormat();
-    _font->WordWrapping = CanvasWordWrapping::NoWrap;
+    this->content = content;
+    this->font = ref new CanvasTextFormat();
+    this->font->WordWrapping = CanvasWordWrapping::NoWrap;
 }
 
 SnipTypes Textlet::GetType() {
     return SnipTypes::Text;
 }
 
-void Textlet::FillExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y,
-    float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
-    TextExtent ts = Win2DCanvas::GetTextExtent(ds, _content, _font);
+void Textlet::FillExtent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+    TextExtent ts = Win2DCanvas::GetTextExtent(content, font);
 
     if (width != nullptr) (*width) = ts.Width;
     if (height != nullptr) (*height) = ts.Height;
@@ -34,5 +34,5 @@ void Textlet::FillExtent(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, 
 };
 
 void Textlet::Draw(CanvasDrawingSession^ ds, float x, float y) {
-    ds->DrawText(_content, (float)x, (float)y, Colors::Black, _font);
+    ds->DrawText(content, (float)x, (float)y, Colors::Black, font);
 }

@@ -17,14 +17,18 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 static CanvasDrawingSession^ sharedDrawingSession;
-TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInfo) {
+CanvasDrawingSession^ Win2DCanvas::GetSharedDrawingSession() {
     if (sharedDrawingSession == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
         auto target = ref new CanvasRenderTarget(sharedDevice, 1.0f, 1.0f, 96);
         sharedDrawingSession = target->CreateDrawingSession();
     }
 
-    return Win2DCanvas::GetTextExtent(sharedDrawingSession, message, fontInfo);
+    return sharedDrawingSession;
+}
+
+TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInfo) {
+    return Win2DCanvas::GetTextExtent(Win2DCanvas::GetSharedDrawingSession(), message, fontInfo);
 }
 
 TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ fontInfo) {

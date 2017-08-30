@@ -10,16 +10,16 @@ namespace Win2D::Sniplet {
         Win2D::UIElement::SnipTypes GetType() override;
 
     public:
-        void FillExtent(
-            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float x, float y, float* w = nullptr, float* h = nullptr,
-            float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
+        void FillExtent(float x, float y,
+            float* w = nullptr, float* h = nullptr,
+            float* d = nullptr, float* s = nullptr,
+            float* l = nullptr, float* r = nullptr)
             override;
 
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
 
     private:
-        Platform::String^ _content;
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ _font;
+        Platform::String^ content;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
     };
 }
