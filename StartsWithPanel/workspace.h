@@ -19,7 +19,7 @@ namespace Win2D::StartsWithPanel {
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchBar;
         Win2D::UIElement::DigitalClock^ systemClock;
-        Win2D::UIElement::Pasteboard^ toolbar;
-        Win2D::UIElement::Pasteboard^ stage;
+        Win2D::UIElement::IPasteboard^ toolbar;
+        Win2D::UIElement::IPasteboard^ stage;
     };
 }

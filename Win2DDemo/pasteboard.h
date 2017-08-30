@@ -22,7 +22,7 @@ namespace Win2D::UIElement {
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) = 0;
 
     public:
-        void* assocData;
+        void* info;
 
     public:
         Snip* next;
@@ -60,6 +60,7 @@ namespace Win2D::UIElement {
 
     public ref class VerticalPasteboard sealed : public IPasteboard {
     public:
+        VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);
 
     private protected:

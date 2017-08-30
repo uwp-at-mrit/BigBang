@@ -36,7 +36,7 @@ void WorkSpace::InitializeComponent() {
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     toolbar = ref new ::Pasteboard(workarea, "toolbar");
-    stage = ref new ::Pasteboard(workarea, "stage");
+    stage = ref new VerticalPasteboard(workarea, "stage", 8);
 
     for (int i = 0; i < 8; i++) {
         unsigned char r = (unsigned char)(rand() % 255);
