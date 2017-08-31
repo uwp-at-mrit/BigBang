@@ -18,13 +18,14 @@ using namespace Windows::UI::Xaml::Shapes;
 using namespace Windows::UI::Xaml::Media;
 
 WorkSpace::WorkSpace() : StackPanel() {
-    Orientation = ::Orientation::Vertical;
-    Margin = ThicknessHelper::FromUniformLength(8.0);
+    this->Orientation = ::Orientation::Vertical;
+    this->Margin = ThicknessHelper::FromUniformLength(8.0);
+    this->SizeChanged += ref new SizeChangedEventHandler(this, &WorkSpace::Reflow);
 
     ApplicationView::GetForCurrentView()->Title = "WorkSpace";
-    SizeChanged += ref new SizeChangedEventHandler(this, &WorkSpace::Reflow);
 }
 
+#include "debug.h"
 void WorkSpace::InitializeComponent() {
     Thickness zero = ThicknessHelper::FromUniformLength(0);
     auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
@@ -36,8 +37,6 @@ void WorkSpace::InitializeComponent() {
     auto flash = toggle_switch(switchBar, "flash", nullptr, nullptr);
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    workarea->VerticalAlignment = ::VerticalAlignment::Stretch;
-    workarea->HorizontalAlignment = ::HorizontalAlignment::Left;
     toolbar = ref new VerticalPasteboard(workarea, "toolbar", 8);
     stage = ref new Pasteboard(workarea, "stage");
 
@@ -59,7 +58,8 @@ void WorkSpace::InitializeComponent() {
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
-    // TODO: This Event is not fired when height become less.
+    // TODO: Why I have to handle this? Are there any problems with CanvasControl whoes ActualWidth happen to be 0?
+    // TODO: This Event is not fired when height is shrunken.
     bool widthChanged = (e->PreviousSize.Width != e->NewSize.Width);
     bool heightChanged = (e->PreviousSize.Height != e->NewSize.Height);
 

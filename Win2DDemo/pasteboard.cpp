@@ -59,7 +59,10 @@ void IPasteboard::Draw(CanvasDrawingSession^ ds) {
         child = child->prev;
     }
 
-    ds->DrawRectangle(0.0f, 0.0f, (float)this->Control->ActualWidth, (float)this->Control->ActualHeight, Colors::SkyBlue);
+    float width = (float)this->Control->ActualWidth;
+    float height = (float)this->Control->ActualHeight;
+    
+    ds->DrawRectangle(0.0f, 0.0f, width, height, Colors::SkyBlue);
 }
 
 /*************************************************************************************************/
