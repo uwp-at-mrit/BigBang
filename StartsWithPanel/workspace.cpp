@@ -48,7 +48,7 @@ void WorkSpace::InitializeComponent() {
         toolbar->Insert(Textlet::CreateSnipIcon(32.0f, r, g, b));
     }
 
-    stage->Insert(new Textlet("Hello, I am the Stage! But there might be some wrong with the CanvasControl!"));
+    stage->Insert(new Textlet("Hi, there! I have builtin drawing region support, so this word is truncated!"));
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
