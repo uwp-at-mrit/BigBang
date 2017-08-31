@@ -1,5 +1,3 @@
-#include <string>
-#include <cstdio>
 #include <cwchar>
 #include <cstdarg>
 #include <cstdlib>
