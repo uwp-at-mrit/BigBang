@@ -17,7 +17,8 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 static CanvasDrawingSession^ sharedDrawingSession;
-CanvasDrawingSession^ Win2DCanvas::GetSharedDrawingSession() {
+
+CanvasDrawingSession^ Win2D::UIElement::make_shared_drawing_session() {
     if (sharedDrawingSession == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
         auto target = ref new CanvasRenderTarget(sharedDevice, 1.0f, 1.0f, 96);
@@ -27,11 +28,11 @@ CanvasDrawingSession^ Win2DCanvas::GetSharedDrawingSession() {
     return sharedDrawingSession;
 }
 
-TextExtent Win2DCanvas::GetTextExtent(String^ message, CanvasTextFormat^ fontInfo) {
-    return Win2DCanvas::GetTextExtent(Win2DCanvas::GetSharedDrawingSession(), message, fontInfo);
+TextExtent Win2D::UIElement::get_text_extent(String^ message, CanvasTextFormat^ fontInfo) {
+    return get_text_extent(make_shared_drawing_session(), message, fontInfo);
 }
 
-TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ fontInfo) {
+TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ fontInfo) {
     auto textLayout = ref new CanvasTextLayout(ds, message, fontInfo, 0.0f, 0.0f);
     Rect logical = textLayout->LayoutBounds;
     Rect ink = textLayout->DrawBounds;
@@ -43,6 +44,7 @@ TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message,
     return { logical.Width, logical.Height, descent, space, left, right };
 }
 
+/*************************************************************************************************/
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto onLoad = ref new CanvasLoadHandler(this, &Win2DCanvas::OnLoad);
     auto onPaint = ref new CanvasDrawHandler(this, &Win2DCanvas::OnPaint);

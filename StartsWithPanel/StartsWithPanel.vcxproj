@@ -154,7 +154,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="workspace.h" />
+    <ClInclude Include="monitor.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -209,7 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win2d.cpp" />
-    <ClCompile Include="workspace.cpp" />
+    <ClCompile Include="monitor.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

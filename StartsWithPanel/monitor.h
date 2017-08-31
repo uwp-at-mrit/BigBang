@@ -7,9 +7,9 @@
 namespace Win2D::StartsWithPanel {
     /// <summary> An empty page that can be used on its own or navigated to within a Frame. </summary>
     [::Windows::Foundation::Metadata::WebHostHidden]
-    ref class WorkSpace sealed : public Windows::UI::Xaml::Controls::StackPanel {
+    ref class Monitor sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
-        WorkSpace();
+        Monitor();
 
     public:
         void InitializeComponent();

@@ -1,4 +1,4 @@
-﻿#include "workspace.h"
+﻿#include "monitor.h"
 
 namespace Win2D::StartsWithPanel {
     /// <summary> Provides application-specific behavior to supplement the default Application class. </summary>
@@ -14,7 +14,7 @@ namespace Win2D::StartsWithPanel {
         /// <summary> Invoked whenever the application is launched. </summary>
         /// <param name="e">Details about the launch request and process.</param>
         virtual void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e) override {
-            auto workspace = dynamic_cast<WorkSpace^>(Windows::UI::Xaml::Window::Current->Content);
+            auto workspace = dynamic_cast<Monitor^>(Windows::UI::Xaml::Window::Current->Content);
 
             if (workspace != nullptr) {
                 if (e->PrelaunchActivated == false) {
@@ -23,7 +23,7 @@ namespace Win2D::StartsWithPanel {
                 }
             } else {
                 // Create a Frame to act as the navigation context and associate it with a SuspensionManager key
-                workspace = ref new WorkSpace();
+                workspace = ref new Monitor();
 
                 if (e->PreviousExecutionState == Windows::ApplicationModel::Activation::ApplicationExecutionState::Terminated) {
                     // TODO: Restore the saved session state only when appropriate, scheduling the
@@ -44,7 +44,7 @@ namespace Win2D::StartsWithPanel {
         /// <param name="e">Details about the suspend request.</param>
         void OnSuspending(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-            auto workspace = dynamic_cast<WorkSpace^>(Windows::UI::Xaml::Window::Current->Content);
+            auto workspace = dynamic_cast<Monitor^>(Windows::UI::Xaml::Window::Current->Content);
             if (workspace != nullptr) workspace->Suspend(sender, e);
         }
     };

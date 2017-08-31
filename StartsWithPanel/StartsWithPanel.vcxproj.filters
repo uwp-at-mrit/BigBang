@@ -8,10 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win2d.cpp" />
-    <ClCompile Include="workspace.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="workspace.h" />
+    <ClCompile Include="monitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -147,5 +144,8 @@
   <ItemGroup>
     <None Include="StartsWithPanel_TemporaryKey.pfx" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="monitor.h" />
   </ItemGroup>
 </Project>

@@ -10,19 +10,19 @@ namespace Win2D::UIElement {
         float RSpace;
     };
 
+
+    Microsoft::Graphics::Canvas::CanvasDrawingSession^ make_shared_drawing_session();
+
+    TextExtent get_text_extent(
+        Platform::String^ message,
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
+
+    TextExtent get_text_extent(
+        Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+        Platform::String^ message,
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
+
     public ref class Win2DCanvas : public Windows::UI::Xaml::DependencyObject {
-    public:
-        static Microsoft::Graphics::Canvas::CanvasDrawingSession^ GetSharedDrawingSession();
-
-        static TextExtent GetTextExtent(
-            Platform::String^ message,
-            Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
-
-        static TextExtent GetTextExtent(
-            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            Platform::String^ message,
-            Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
-
     public:
         void BeginEditSequence();
         void EndEditSequence();

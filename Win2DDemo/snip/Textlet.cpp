@@ -67,7 +67,7 @@ void Textlet::SetText(String^ content) {
 }
 
 void Textlet::FillExtent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
-    TextExtent ts = Win2DCanvas::GetTextExtent(content, font);
+    TextExtent ts = get_text_extent(content, font);
 
     if (width != nullptr) (*width) = ts.Width;
     if (height != nullptr) (*height) = ts.Height;
