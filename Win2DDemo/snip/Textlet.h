@@ -5,6 +5,9 @@
 namespace Win2D::Snip {
     private class Textlet : public Win2D::UIElement::Snip {
     public:
+        static Win2D::UIElement::SnipIcon* CreateSnipIcon(float size, unsigned char r, unsigned char g, unsigned char b);
+
+    public:
         ~Textlet() noexcept;
         Textlet(const wchar_t* fmt, ...);
         Textlet(Platform::String^ content = "");
@@ -25,5 +28,16 @@ namespace Win2D::Snip {
     private:
         Platform::String^ content;
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
+    };
+
+    private class TextIcon : public Win2D::UIElement::SnipIcon {
+    public:
+        TextIcon(float size, unsigned char r, unsigned char g, unsigned char b);
+
+    public:
+        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
+
+    private:
+        Windows::UI::Color foreground;
     };
 }

@@ -26,4 +26,21 @@ namespace Win2D::UIElement {
         Snip* next;
         Snip* prev;
     };
+
+    private class SnipIcon : public Snip {
+    public:
+        ~SnipIcon() noexcept;
+        SnipIcon(float size);
+        Win2D::UIElement::SnipTypes GetType() override;
+
+    public:
+        void FillExtent(float x, float y,
+            float* w = nullptr, float* h = nullptr,
+            float* d = nullptr, float* s = nullptr,
+            float* l = nullptr, float* r = nullptr)
+            override;
+
+    protected:
+        float size;
+    };
 }

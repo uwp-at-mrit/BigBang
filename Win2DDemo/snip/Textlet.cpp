@@ -11,6 +11,7 @@ using namespace Win2D::UIElement;
 using namespace std;
 using namespace Platform;
 using namespace Windows::UI;
+using namespace Windows::UI::Xaml::Media;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
@@ -78,4 +79,17 @@ void Textlet::FillExtent(float x, float y, float* width, float* height, float* d
 
 void Textlet::Draw(CanvasDrawingSession^ ds, float x, float y) {
     ds->DrawText(content, (float)x, (float)y, Colors::Black, font);
+}
+
+/*************************************************************************************************/
+SnipIcon* Textlet::CreateSnipIcon(float size, unsigned char r, unsigned char g, unsigned char b) {
+    return new TextIcon(size, r, g, b);
+}
+
+TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b) : SnipIcon(size) {
+    this->foreground = { 255, r, g, b };
+}
+
+void TextIcon::Draw(CanvasDrawingSession^ ds, float x, float y) {
+    ds->FillRectangle(x, y, size, size, this->foreground);
 }

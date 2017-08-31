@@ -41,17 +41,11 @@ void WorkSpace::InitializeComponent() {
     stage = ref new Pasteboard(workarea, "stage");
 
     for (int i = 0; i < 8; i++) {
-        unsigned char r = (unsigned char)(rand() % 255);
-        unsigned char g = (unsigned char)(rand() % 255);
-        unsigned char b = (unsigned char)(rand() % 255);
-        auto brush = ref new SolidColorBrush(Color({255, r, g, b}));
-        auto square = ref new Rectangle();
-        
-        square->Fill = brush;
-        square->Width = 32;
-        square->Height = 32;
+        auto r = (unsigned char)(rand() % 255);
+        auto g = (unsigned char)(rand() % 255);
+        auto b = (unsigned char)(rand() % 255);
 
-        toolbar->Insert(new Textlet(L"#%02X%02X%02X", i, r, g, b));
+        toolbar->Insert(Textlet::CreateSnipIcon(32.0f, r, g, b));
     }
 
     stage->Insert(new Textlet("Hello, I am the Stage!"));
