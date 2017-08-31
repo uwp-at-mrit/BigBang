@@ -146,6 +146,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="monitor.h" />
+    <ClInclude Include="monitor.hpp" />
   </ItemGroup>
 </Project>

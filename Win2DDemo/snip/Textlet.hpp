@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snip/snip.h"
+#include "snip/snip.hpp"
 
 namespace Win2D::Snip {
     private class Textlet : public Win2D::UIElement::Snip {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "canvas.h"
+#include "canvas.hpp"
 
 namespace Win2D::UIElement {
     public ref class DigitalClock sealed : public Win2D::UIElement::Win2DCanvas {

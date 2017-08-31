@@ -1,8 +1,8 @@
 ﻿#include <cstdlib>
 
-#include "monitor.h"
-#include "pasteboard.h"
-#include "snip/Textlet.h"
+#include "monitor.hpp"
+#include "pasteboard.hpp"
+#include "snip/Textlet.hpp"
 
 using namespace Win2D::StartsWithPanel;
 using namespace Win2D::UIElement;
@@ -37,7 +37,7 @@ void Monitor::InitializeComponent() {
     auto flash = toggle_switch(switchBar, "flash", nullptr, nullptr);
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    this->toolbar = ref new VPasteboard(workarea, "toolbar", four.Top + four.Bottom, four);
+    this->toolbar = ref new VPasteboard(workarea, "toolbar", float(four.Top + four.Bottom), four);
     this->stage = ref new Pasteboard(workarea, "stage", four);
 
     for (int i = 0; i < 8; i++) {

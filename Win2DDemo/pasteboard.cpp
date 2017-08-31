@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <WindowsNumerics.h>
 
-#include "pasteboard.h"
+#include "pasteboard.hpp"
 
 using namespace std;
 using namespace Platform;

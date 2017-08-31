@@ -1,5 +1,5 @@
-#include "ui.h"
-#include "pasteboard.h"
+#include "ui.hpp"
+#include "pasteboard.hpp"
 
 using namespace std;
 using namespace Platform;

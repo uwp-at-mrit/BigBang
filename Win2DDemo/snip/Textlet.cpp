@@ -2,8 +2,8 @@
 #include <cstdarg>
 #include <cstdlib>
 
-#include "Textlet.h"
-#include "canvas.h"
+#include "Textlet.hpp"
+#include "canvas.hpp"
 
 using namespace Win2D::Snip;
 using namespace Win2D::UIElement;

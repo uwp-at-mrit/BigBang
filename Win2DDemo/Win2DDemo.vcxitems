@@ -23,12 +23,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)canvas.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)debug.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\Textlet.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\Textlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hpp" />
   </ItemGroup>
 </Project>

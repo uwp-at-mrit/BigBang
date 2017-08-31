@@ -1,7 +1,7 @@
 #pragma once
 
-#include "canvas.h"
-#include "snip/snip.h"
+#include "canvas.hpp"
+#include "snip/snip.hpp"
 
 namespace Win2D::UIElement {
     public ref class IPasteboard : public Win2DCanvas {

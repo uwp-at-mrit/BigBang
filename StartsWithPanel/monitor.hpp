@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ui.h"
-#include "digitalclock.h"
-#include "pasteboard.h"
+#include "ui.hpp"
+#include "digitalclock.hpp"
+#include "pasteboard.hpp"
 
 namespace Win2D::StartsWithPanel {
     /// <summary> An empty page that can be used on its own or navigated to within a Frame. </summary>

@@ -10,7 +10,6 @@ namespace Win2D::UIElement {
         float RSpace;
     };
 
-
     Microsoft::Graphics::Canvas::CanvasDrawingSession^ make_shared_drawing_session();
 
     TextExtent get_text_extent(

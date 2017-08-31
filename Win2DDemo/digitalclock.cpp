@@ -1,7 +1,7 @@
 #include <cmath>
 
-#include "ui.h"
-#include "digitalclock.h"
+#include "ui.hpp"
+#include "digitalclock.hpp"
 
 using namespace std;
 using namespace Platform;
@@ -40,7 +40,7 @@ void DigitalClock::UpdateTimeStamp() {
     datetime->SetToNow();
     long long l00ns = datetime->Nanosecond / 100;
     long long ms = l00ns / 10000;
-    this->timer->Interval = TimeSpan({ 10000000 - l00ns });
+    this->timer->Interval = TimeSpan{ 10000000 - l00ns };
     this->timestamp = this->longtime->Format(datetime->GetDateTime())
         + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : "."))
         + ms.ToString()

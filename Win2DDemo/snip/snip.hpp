@@ -1,6 +1,6 @@
 #pragma once
 
-#include "canvas.h"
+#include "canvas.hpp"
 
 namespace Win2D::UIElement {
     private enum SnipTypes { Text, Icon };
