@@ -5,7 +5,7 @@
 #include "Textlet.h"
 #include "canvas.h"
 
-using namespace Win2D::Sniplet;
+using namespace Win2D::Snip;
 using namespace Win2D::UIElement;
 
 using namespace std;

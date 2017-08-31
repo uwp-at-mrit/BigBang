@@ -3,15 +3,11 @@
 #include "snip/snip.h"
 
 namespace Win2D::Snip {
-    private class Textlet : public Win2D::UIElement::Snip {
+    private class Iconlet : public Win2D::UIElement::Snip {
     public:
-        ~Textlet() noexcept;
-        Textlet(const wchar_t* fmt, ...);
-        Textlet(Platform::String^ content = "");
+        ~Iconlet() noexcept;
+        Iconlet(float size);
         Win2D::UIElement::SnipTypes GetType() override;
-
-    public:
-        void SetText(Platform::String^ content);
 
     public:
         void FillExtent(float x, float y,
@@ -23,7 +19,6 @@ namespace Win2D::Snip {
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
 
     private:
-        Platform::String^ content;
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
+        float size;
     };
 }

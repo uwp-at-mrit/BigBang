@@ -6,7 +6,7 @@
 
 using namespace Win2D::StartsWithPanel;
 using namespace Win2D::UIElement;
-using namespace Win2D::Sniplet;
+using namespace Win2D::Snip;
 
 using namespace Platform;
 using namespace Windows::UI;
@@ -51,10 +51,10 @@ void WorkSpace::InitializeComponent() {
         square->Width = 32;
         square->Height = 32;
 
-        toolbar->Insert(new Textlet(L"(%u, %u, %u)", i, r, g, b));
+        toolbar->Insert(new Textlet(L"#%02X%02X%02X", i, r, g, b));
     }
 
-    stage->Insert(new Textlet("I am here!"));
+    stage->Insert(new Textlet("Hello, I am the Stage!"));
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {

@@ -17,6 +17,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\Iconlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\Textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cpp" />
@@ -25,6 +27,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)debug.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\Iconlet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\Textlet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.h" />
