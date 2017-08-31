@@ -46,9 +46,10 @@ TextExtent Win2DCanvas::GetTextExtent(CanvasDrawingSession^ ds, String^ message,
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto onLoad = ref new CanvasLoadHandler(this, &Win2DCanvas::OnLoad);
     auto onPaint = ref new CanvasDrawHandler(this, &Win2DCanvas::OnPaint);
-    control = gpu_canvas(parent, id, onLoad, onPaint);
-    editSequence = 0;
-    isRefreshPending = false;
+    
+    this->control = gpu_canvas(parent, id, onLoad, onPaint);
+    this->editSequence = 0;
+    this->isRefreshPending = false;
 }
 
 void Win2DCanvas::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
@@ -60,23 +61,23 @@ void Win2DCanvas::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
 }
 
 void Win2DCanvas::BeginEditSequence() {
-    editSequence += 1;
+    this->editSequence += 1;
 }
 
 void Win2DCanvas::EndEditSequence() {
-    editSequence -= 1;
+    this->editSequence -= 1;
 
-    if (editSequence <= 0) {
-        if (isRefreshPending) Refresh();
-        if (editSequence < 0) editSequence = 0;
+    if (this->editSequence <= 0) {
+        if (this->isRefreshPending) this->Refresh();
+        if (this->editSequence < 0) this->editSequence = 0;
     }
 }
 
 void Win2DCanvas::Refresh() {
-    if (editSequence > 0) {
-        isRefreshPending = true;
+    if (this->editSequence > 0) {
+        this->isRefreshPending = true;
     } else {
-        control->Invalidate();
-        isRefreshPending = false;
+        this->control->Invalidate();
+        this->isRefreshPending = false;
     }
 }

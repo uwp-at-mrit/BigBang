@@ -43,6 +43,7 @@ namespace Win2D::UIElement {
 
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
+
         int editSequence;
         bool isRefreshPending;
         
