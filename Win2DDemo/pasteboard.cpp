@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "pasteboard.h"
 
 using namespace std;
@@ -64,6 +66,11 @@ void IPasteboard::Draw(CanvasDrawingSession^ ds) {
 Pasteboard::Pasteboard(Panel^ parent, String^ id) : IPasteboard(parent, id) {
 }
 
+void Pasteboard::ChangeSize(double width, double height) {
+    this->Control->Width = width;
+    this->Control->Height = height;
+}
+
 VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id) : VerticalPasteboard(parent, id, 0.0f) {}
 VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id, float gapsize) : IPasteboard(parent, id) {
     this->gapsize = gapsize;
@@ -77,10 +84,18 @@ void VerticalPasteboard::BeforeInsert(Snip* snip, float x, float y) {
 void VerticalPasteboard::AfterInsert(Snip* snip, float, float) {
     float x = 0.0f;
     float y = lastPosition + gapsize;
+    float width = 0.0;
     float height = 0.0;
+    double Width = this->Control->MinWidth;
     
-    snip->FillExtent(x, y, nullptr, &height);
+    snip->FillExtent(x, y, &width, &height);
     this->MoveTo(snip, x, y);
     this->lastPosition += (gapsize + height);
+    this->Control->MinWidth = max(Width, (double)width);
+    this->Control->MinHeight = this->lastPosition;
     this->EndEditSequence();
+}
+
+void VerticalPasteboard::ChangeSize(double width, double height) {
+    this->Control->Height = height;
 }

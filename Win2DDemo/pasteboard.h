@@ -56,12 +56,18 @@ namespace Win2D::UIElement {
     public ref class Pasteboard sealed : public IPasteboard {
     public:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
+
+    internal:
+        void ChangeSize(double width, double height) override;
     };
 
     public ref class VerticalPasteboard sealed : public IPasteboard {
     public:
         VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         VerticalPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);
+
+    internal:
+        void ChangeSize(double width, double height) override;
 
     private protected:
         void BeforeInsert(Snip* snip, float x, float y) override;

@@ -8,6 +8,7 @@ namespace Win2D::UIElement {
         DigitalClock(Windows::UI::Xaml::Controls::Panel^ parent);
 
     internal:
+        void ChangeSize(double width, double height) override;
         void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
         
     private:

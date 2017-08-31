@@ -59,12 +59,6 @@ void Win2DCanvas::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
     this->Draw(e->DrawingSession);
 }
 
-void Win2DCanvas::ChangeSize(double width, double height) {
-    control->Width = width;
-    control->Height = height;
-    this->OnDisplaySize(width, height);
-}
-
 void Win2DCanvas::BeginEditSequence() {
     editSequence += 1;
 }

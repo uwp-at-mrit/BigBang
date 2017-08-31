@@ -24,9 +24,6 @@ namespace Win2D::UIElement {
             Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ fontInfo);
 
     public:
-        void ChangeSize(double width, double height);
-
-    public:
         void BeginEditSequence();
         void EndEditSequence();
         void Refresh();
@@ -40,7 +37,7 @@ namespace Win2D::UIElement {
         Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
 
     internal:
-        virtual void OnDisplaySize(double width, double height) {};
+        virtual void ChangeSize(double width, double height) {};
         virtual void LoadResources(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
         virtual void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 

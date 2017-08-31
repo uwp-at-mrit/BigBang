@@ -36,8 +36,10 @@ void WorkSpace::InitializeComponent() {
     auto flash = toggle_switch(switchBar, "flash", nullptr, nullptr);
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    toolbar = ref new ::Pasteboard(workarea, "toolbar");
-    stage = ref new VerticalPasteboard(workarea, "stage", 8);
+    workarea->VerticalAlignment = ::VerticalAlignment::Stretch;
+    workarea->HorizontalAlignment = ::HorizontalAlignment::Left;
+    toolbar = ref new VerticalPasteboard(workarea, "toolbar", 8);
+    stage = ref new Pasteboard(workarea, "stage");
 
     for (int i = 0; i < 8; i++) {
         unsigned char r = (unsigned char)(rand() % 255);
@@ -50,8 +52,10 @@ void WorkSpace::InitializeComponent() {
         square->Width = 32;
         square->Height = 32;
 
-        stage->Insert(new Textlet(L"Hello, Snip%u, 你的颜色应该是 (%u, %u, %u)", i, r, g, b));
+        toolbar->Insert(new Textlet(L"(%u, %u, %u)", i, r, g, b));
     }
+
+    stage->Insert(new Textlet("I am here!"));
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
@@ -60,7 +64,10 @@ void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {
     bool heightChanged = (e->PreviousSize.Height != e->NewSize.Height);
 
     if (widthChanged || heightChanged) {
-        stage->ChangeSize(e->NewSize.Width, e->NewSize.Height - switchBar->ActualHeight);
+        double widthOff = toolbar->Control->MinWidth;
+
+        toolbar->ChangeSize(e->NewSize.Width, e->NewSize.Height - switchBar->ActualHeight);
+        stage->ChangeSize(e->NewSize.Width - widthOff, e->NewSize.Height - switchBar->ActualHeight);
 
         if (widthChanged) {
             systemClock->ChangeSize(e->NewSize.Width - switchBar->ActualWidth, switchBar->ActualHeight);
