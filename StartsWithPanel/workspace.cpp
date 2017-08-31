@@ -25,9 +25,9 @@ WorkSpace::WorkSpace() : StackPanel() {
     ApplicationView::GetForCurrentView()->Title = "WorkSpace";
 }
 
-#include "debug.h"
 void WorkSpace::InitializeComponent() {
     Thickness zero = ThicknessHelper::FromUniformLength(0);
+    Thickness four = ThicknessHelper::FromUniformLength(4.0);
     auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     switchBar = stack_panel(titleBar, ::Orientation::Horizontal, zero, zero);
     systemClock = ref new DigitalClock(titleBar);
@@ -37,8 +37,8 @@ void WorkSpace::InitializeComponent() {
     auto flash = toggle_switch(switchBar, "flash", nullptr, nullptr);
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    toolbar = ref new VerticalPasteboard(workarea, "toolbar", 8);
-    stage = ref new Pasteboard(workarea, "stage");
+    toolbar = ref new VPasteboard(workarea, "toolbar", four.Top + four.Bottom, four);
+    stage = ref new Pasteboard(workarea, "stage", four);
 
     for (int i = 0; i < 8; i++) {
         auto r = (unsigned char)(rand() % 255);
@@ -48,7 +48,7 @@ void WorkSpace::InitializeComponent() {
         toolbar->Insert(Textlet::CreateSnipIcon(32.0f, r, g, b));
     }
 
-    stage->Insert(new Textlet("Hello, I am the Stage!"));
+    stage->Insert(new Textlet("Hello, I am the Stage! But there might be some wrong with the CanvasControl!"));
 }
 
 void WorkSpace::Reflow(Object^ sender, SizeChangedEventArgs^ e) {

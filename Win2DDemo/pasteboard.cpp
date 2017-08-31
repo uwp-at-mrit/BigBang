@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <WindowsNumerics.h>
 
 #include "pasteboard.h"
 
@@ -8,7 +9,10 @@ using namespace Platform;
 using namespace Win2D::UIElement;
 
 using namespace Windows::UI;
+using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 
@@ -17,7 +21,12 @@ struct SnipInfo {
     float y;
 };
 
-IPasteboard::IPasteboard(Panel^ parent, String^ id) : Win2DCanvas(parent, id) {
+static Thickness zero(0.0, 0.0, 0.0, 0.0);
+
+IPasteboard::IPasteboard(Panel^ parent, String^ id) : IPasteboard(parent, id, zero) {}
+
+IPasteboard::IPasteboard(Panel^ parent, String^ id, Thickness padding) : Win2DCanvas(parent, id) {
+    this->Inset = padding;
 }
 
 IPasteboard::~IPasteboard() {
@@ -52,53 +61,65 @@ void IPasteboard::MoveTo(Snip* snip, float x, float y) {
 }
 
 void IPasteboard::Draw(CanvasDrawingSession^ ds) {
-    Snip* child = this->tailSnip;
-    while (child != nullptr) {
-        SnipInfo* info = (SnipInfo*)child->info;
-        child->Draw(ds, info->x, info->y);
-        child = child->prev;
-    }
+    float Width = this->activeWidth;
+    float Height = this->activeHeight;
+    float tx = (float)this->Inset.Left;
+    float ty = (float)this->Inset.Top;
+    float width, height;
 
-    float width = (float)this->Control->ActualWidth;
-    float height = (float)this->Control->ActualHeight;
+    // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
+    ds->Transform = make_float3x2_translation(tx, ty);
+    auto activeRegion = ds->CreateLayer(1.0f, Rect(0.0f, 0.0f, Width, Height));
+    for (Snip* child = this->tailSnip; child != nullptr; child = child->prev) {
+        SnipInfo* info = (SnipInfo*)child->info;
+        child->FillExtent(info->x, info->y, &width, &height);
+        width = max(Width - info->x, width);
+        height = max(Height - info->y, height);
+        auto layer = ds->CreateLayer(1.0f, Rect(info->x, info->y, width, height));
+        child->Draw(ds, info->x, info->y);
+        delete layer /* Must Close the Layer Explicitly */;
+    }
+    delete activeRegion;
     
-    ds->DrawRectangle(0.0f, 0.0f, width, height, Colors::SkyBlue);
+    ds->DrawRectangle(0.0f, 0.0f, Width, Height, Colors::SkyBlue);
+    ds->DrawRectangle(-tx, -ty, (float)Control->ActualWidth, (float)Control->ActualHeight, Colors::RoyalBlue);
 }
 
 /*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, String^ id) : IPasteboard(parent, id) {
-}
+Pasteboard::Pasteboard(Panel^ parent, String^ id) : Pasteboard(parent, id, zero) {}
+Pasteboard::Pasteboard(Panel^ parent, String^ id, Thickness inset) : IPasteboard(parent, id, inset) {}
 
 void Pasteboard::ChangeSize(double width, double height) {
     this->Control->Width = width;
     this->Control->Height = height;
 }
 
-VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id) : VerticalPasteboard(parent, id, 0.0f) {}
-VerticalPasteboard::VerticalPasteboard(Panel^ parent, String^ id, float gapsize) : IPasteboard(parent, id) {
+VPasteboard::VPasteboard(Panel^ parent, String^ id) : VPasteboard(parent, id, 0.0f) {}
+VPasteboard::VPasteboard(Panel^ parent, String^ id, float gapsize) : VPasteboard(parent, id, gapsize, zero) {}
+VPasteboard::VPasteboard(Panel^ parent, String^ id, float gapsize, Thickness inset) : IPasteboard(parent, id, inset) {
     this->gapsize = gapsize;
     this->lastPosition = -gapsize;
 }
 
-void VerticalPasteboard::BeforeInsert(Snip* snip, float x, float y) {
+void VPasteboard::BeforeInsert(Snip* snip, float x, float y) {
     this->BeginEditSequence();
 }
 
-void VerticalPasteboard::AfterInsert(Snip* snip, float, float) {
+void VPasteboard::AfterInsert(Snip* snip, float, float) {
+    float Width = this->activeWidth;
     float x = 0.0f;
     float y = lastPosition + gapsize;
     float width = 0.0;
     float height = 0.0;
-    double Width = this->Control->MinWidth;
     
     snip->FillExtent(x, y, &width, &height);
     this->MoveTo(snip, x, y);
     this->lastPosition += (gapsize + height);
-    this->Control->MinWidth = max(Width, (double)width);
-    this->Control->MinHeight = this->lastPosition;
+    this->minWidth = max(Width, width);
+    this->minHeight = this->lastPosition;
     this->EndEditSequence();
 }
 
-void VerticalPasteboard::ChangeSize(double width, double height) {
+void VPasteboard::ChangeSize(double width, double height) {
     this->Control->Height = height;
 }
