@@ -2,7 +2,7 @@
 
 namespace Win2D::StartsWithPanel {
     /// <summary> Provides application-specific behavior to supplement the default Application class. </summary>
-    ref class Win2D sealed : public Windows::UI::Xaml::Application {
+    private ref class Win2D sealed : public Windows::UI::Xaml::Application {
     internal:
         /// <summary> Initializes the singleton application object, logical equal to main() or WinMain(). </summary>
         Win2D() {

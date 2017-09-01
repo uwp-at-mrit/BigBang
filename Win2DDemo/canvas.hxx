@@ -1,9 +1,6 @@
 #pragma once
 
-typedef bool (*CanvasInputHandler)(
-    float x, float y,
-    Windows::UI::Input::PointerPointProperties ppps,
-    Windows::System::VirtualKeyModifiers vkms);
+#include "input.hxx"
 
 namespace Win2D::UIElement {
     public value struct TextExtent {
@@ -26,7 +23,7 @@ namespace Win2D::UIElement {
         Platform::String^ message,
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config);
 
-    public ref class Win2DCanvas : public Windows::UI::Xaml::DependencyObject {
+    private ref class Win2DCanvas {
     public:
         void begin_edit_sequence();
         void end_edit_sequence();
@@ -38,29 +35,17 @@ namespace Win2D::UIElement {
         }
 
     internal:
-        Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-        
+        Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IInteractive^ user = nullptr);
+    
     internal:
         virtual void resize(double width, double height) {};
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 
-    internal:
-        virtual bool action(
-            float x, float y,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms,
-            Windows::Devices::Input::PointerDeviceType type);
-
-        virtual bool notice(
-            float x, float y,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms,
-            Windows::Devices::Input::PointerDeviceType type);
-
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         Windows::UI::Input::PointerPointProperties^ ppps;
+        IInteractive^ pseudo_user;
 
         int edit_sequence;
         bool is_refresh_pending;
@@ -84,12 +69,5 @@ namespace Win2D::UIElement {
         void delay_pressed(
             Platform::Object^ sender,
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-
-
-        bool dispatch_event(
-            Windows::Foundation::Point position,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms,
-            Windows::Devices::Input::PointerDeviceType type);
     };
 }

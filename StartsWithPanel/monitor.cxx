@@ -26,7 +26,7 @@ Monitor::Monitor() : StackPanel() {
 }
 
 void Monitor::initialize_component() {
-    Thickness zero = ThicknessHelper::FromUniformLength(0);
+    Thickness zero = ThicknessHelper::FromUniformLength(0.0);
     Thickness four = ThicknessHelper::FromUniformLength(4.0);
     auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     this->switchbar = stack_panel(titleBar, ::Orientation::Horizontal, zero, zero);
@@ -48,7 +48,7 @@ void Monitor::initialize_component() {
         toolbar->insert(make_textlet_icon(32.0f, r, g, b));
     }
 
-    this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so this word is truncated!"));
+    this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so these words are truncated!"));
 }
 
 void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {

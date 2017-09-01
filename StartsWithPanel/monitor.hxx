@@ -1,12 +1,13 @@
 #pragma once
 
 #include "ui.hxx"
+#include "input.hxx"
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
 
 namespace Win2D::StartsWithPanel {
     [::Windows::Foundation::Metadata::WebHostHidden]
-    ref class Monitor sealed : public Windows::UI::Xaml::Controls::StackPanel {
+    public ref class Monitor sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
         Monitor();
 

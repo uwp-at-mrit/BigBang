@@ -4,9 +4,12 @@
 #include "snip/snip.hpp"
 
 namespace Win2D::UIElement {
-    public ref class IPasteboard : public Win2DCanvas {
+    private ref class IPasteboard : public Win2DCanvas {
     public:
         virtual ~IPasteboard();
+
+    public:
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
 
     public:
         property float active_width {
@@ -35,16 +38,6 @@ namespace Win2D::UIElement {
         IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
 
     internal:
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
-
-        /*
-        bool action(float x, float y,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms,
-            Windows::Devices::Input::PointerDeviceType type) override;
-        */
-
-    internal:
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
         void move(Snip* snip, float x, float y);
 
@@ -59,22 +52,22 @@ namespace Win2D::UIElement {
         Snip* tail_snip;
     };
 
-    public ref class Pasteboard sealed : public IPasteboard {
+    private ref class Pasteboard sealed : public IPasteboard {
     public:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
 
-    internal:
+    public:
         void resize(double width, double height) override;
     };
 
-    public ref class VPasteboard sealed : public IPasteboard {
+    private ref class VPasteboard sealed : public IPasteboard {
     public:
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize, Windows::UI::Xaml::Thickness inset);
 
-    internal:
+    public:
         void resize(double width, double height) override;
 
     private protected:
