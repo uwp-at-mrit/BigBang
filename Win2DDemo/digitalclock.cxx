@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "ui.hpp"
+#include "ui.hxx"
 #include "digitalclock.hxx"
 
 using namespace std;

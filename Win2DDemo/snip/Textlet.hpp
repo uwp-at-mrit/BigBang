@@ -16,13 +16,11 @@ namespace Win2D::Snip {
         void change_text(Platform::String^ content);
 
     public:
-        void fill_extent(float x, float y,
-            float* w = nullptr, float* h = nullptr,
-            float* d = nullptr, float* s = nullptr,
-            float* l = nullptr, float* r = nullptr)
+        void fill_extent(float* w = nullptr, float* h = nullptr,
+            float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
 
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
     private:
         Platform::String^ content;
@@ -34,7 +32,7 @@ namespace Win2D::Snip {
         TextIcon(float size, unsigned char r, unsigned char g, unsigned char b);
 
     public:
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y) override;
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
     private:
         Windows::UI::Color foreground;

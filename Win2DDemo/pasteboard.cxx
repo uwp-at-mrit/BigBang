@@ -13,7 +13,8 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
-
+using namespace Windows::System;
+using namespace Windows::UI::Input;
 using namespace Microsoft::Graphics::Canvas;
 
 struct SnipInfo {
@@ -72,17 +73,25 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
     auto activeRegion = ds->CreateLayer(1.0f, Rect(0.0f, 0.0f, Width, Height));
     for (Snip* child = this->tail_snip; child != nullptr; child = child->prev) {
         SnipInfo* info = (SnipInfo*)child->info;
-        child->fill_extent(info->x, info->y, &width, &height);
+        child->fill_extent(&width, &height);
         width = max(Width - info->x, width);
         height = max(Height - info->y, height);
         auto layer = ds->CreateLayer(1.0f, Rect(info->x, info->y, width, height));
-        child->draw(ds, info->x, info->y);
+        child->draw(ds, info->x, info->y, Width, Height);
         delete layer /* Must Close the Layer Explicitly */;
     }
     delete activeRegion;
     
     ds->DrawRectangle(0.0f, 0.0f, Width, Height, Colors::SkyBlue);
     ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
+}
+
+#include "debug.hpp"
+bool IPasteboard::point(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms) {
+    if (ppps->IsLeftButtonPressed) {
+        trace(L"clicked (%f, %f)", x, y);
+    }
+    return ppps->IsLeftButtonPressed;
 }
 
 /*************************************************************************************************/
@@ -107,13 +116,11 @@ void VPasteboard::before_insert(Snip* snip, float x, float y) {
 
 void VPasteboard::after_insert(Snip* snip, float, float) {
     float Width = this->active_width;
-    float x = 0.0f;
-    float y = anchor + gapsize;
     float width = 0.0;
     float height = 0.0;
     
-    snip->fill_extent(x, y, &width, &height);
-    this->move(snip, x, y);
+    snip->fill_extent(&width, &height);
+    this->move(snip, 0.0f, anchor + gapsize);
     this->anchor += (gapsize + height);
     this->min_width = max(Width, width);
     this->min_height = this->anchor;

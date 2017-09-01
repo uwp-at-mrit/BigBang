@@ -36,6 +36,7 @@ namespace Win2D::UIElement {
 
     internal:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
+        bool point(float x, float y, Windows::UI::Input::PointerPointProperties^ ppps, Windows::System::VirtualKeyModifiers vkms) override;
     
     internal:
         void insert(Snip* snip, float x = 0.0, float y = 0.0);

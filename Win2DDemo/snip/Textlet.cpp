@@ -66,7 +66,7 @@ void Textlet::change_text(String^ content) {
     }
 }
 
-void Textlet::fill_extent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+void Textlet::fill_extent(float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
     TextExtent ts = get_text_extent(content, layout_config);
 
     if (width != nullptr) (*width) = ts.width;
@@ -77,7 +77,7 @@ void Textlet::fill_extent(float x, float y, float* width, float* height, float* 
     if (rspace != nullptr) (*rspace) = ts.rspace;
 };
 
-void Textlet::draw(CanvasDrawingSession^ ds, float x, float y) {
+void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->DrawText(content, (float)x, (float)y, Colors::Black, layout_config);
 }
 
@@ -90,6 +90,6 @@ TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b
     this->foreground = { 255, r, g, b };
 }
 
-void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y) {
+void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->FillRectangle(x, y, size, size, this->foreground);
 }

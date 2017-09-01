@@ -1,5 +1,10 @@
 #pragma once
 
+typedef bool (*CanvasInputHandler)(
+    float x, float y,
+    Windows::UI::Input::PointerPointProperties ppps,
+    Windows::System::VirtualKeyModifiers vkms);
+
 namespace Win2D::UIElement {
     public value struct TextExtent {
         float width;
@@ -34,11 +39,26 @@ namespace Win2D::UIElement {
 
     internal:
         Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-
+        
     internal:
         virtual void resize(double width, double height) {};
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
+
+    internal:
+        virtual bool point(
+            float x, float y,
+            Windows::UI::Input::PointerPointProperties^ ppps,
+            Windows::System::VirtualKeyModifiers vkms);
+
+        virtual bool touch(
+            float x, float y,
+            Windows::UI::Input::PointerPointProperties^ ppps,
+            Windows::System::VirtualKeyModifiers vkms);
+
+        virtual bool paint(float x, float y,
+            Windows::UI::Input::PointerPointProperties^ ppps,
+            Windows::System::VirtualKeyModifiers vkms);
 
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
@@ -50,8 +70,12 @@ namespace Win2D::UIElement {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args);
         
-        void do_paint(
+        void do_display(
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
+
+        void do_input(
+            Platform::Object^ sender,
+            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
     };
 }
