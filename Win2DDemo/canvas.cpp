@@ -16,26 +16,26 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
-static CanvasDrawingSession^ sharedDrawingSession;
+static CanvasDrawingSession^ shared_ds;
 
 CanvasDrawingSession^ Win2D::UIElement::make_shared_drawing_session() {
-    if (sharedDrawingSession == nullptr) {
+    if (shared_ds == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
         auto target = ref new CanvasRenderTarget(sharedDevice, 1.0f, 1.0f, 96);
-        sharedDrawingSession = target->CreateDrawingSession();
+        shared_ds = target->CreateDrawingSession();
     }
 
-    return sharedDrawingSession;
+    return shared_ds;
 }
 
-TextExtent Win2D::UIElement::get_text_extent(String^ message, CanvasTextFormat^ fontInfo) {
-    return get_text_extent(make_shared_drawing_session(), message, fontInfo);
+TextExtent Win2D::UIElement::get_text_extent(String^ message, CanvasTextFormat^ layout_config) {
+    return get_text_extent(make_shared_drawing_session(), message, layout_config);
 }
 
-TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ fontInfo) {
-    auto textLayout = ref new CanvasTextLayout(ds, message, fontInfo, 0.0f, 0.0f);
-    Rect logical = textLayout->LayoutBounds;
-    Rect ink = textLayout->DrawBounds;
+TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ layout_config) {
+    auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0f, 0.0f);
+    Rect logical = layout->LayoutBounds;
+    Rect ink = layout->DrawBounds;
     float space = ink.Y - logical.Y;
     float descent = logical.Height - ink.Height - space;
     float left = ink.X - logical.X;
@@ -46,40 +46,40 @@ TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ m
 
 /*************************************************************************************************/
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
-    auto onLoad = ref new CanvasLoadHandler(this, &Win2DCanvas::OnLoad);
-    auto onPaint = ref new CanvasDrawHandler(this, &Win2DCanvas::OnPaint);
+    auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
+    auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);
     
-    this->control = gpu_canvas(parent, id, onLoad, onPaint);
-    this->editSequence = 0;
-    this->isRefreshPending = false;
+    this->control = gpu_canvas(parent, id, do_load, do_paint);
+    this->edit_sequence = 0;
+    this->is_refresh_pending = false;
 }
 
-void Win2DCanvas::OnLoad(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
-    this->LoadResources(e);
+void Win2DCanvas::do_load(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
+    this->load(e);
 }
 
-void Win2DCanvas::OnPaint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
-    this->Draw(e->DrawingSession);
+void Win2DCanvas::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
+    this->draw(e->DrawingSession);
 }
 
-void Win2DCanvas::BeginEditSequence() {
-    this->editSequence += 1;
+void Win2DCanvas::begin_edit_sequence() {
+    this->edit_sequence += 1;
 }
 
-void Win2DCanvas::EndEditSequence() {
-    this->editSequence -= 1;
+void Win2DCanvas::end_edit_sequence() {
+    this->edit_sequence -= 1;
 
-    if (this->editSequence <= 0) {
-        if (this->isRefreshPending) this->Refresh();
-        if (this->editSequence < 0) this->editSequence = 0;
+    if (this->edit_sequence <= 0) {
+        if (this->is_refresh_pending) this->refresh();
+        if (this->edit_sequence < 0) this->edit_sequence = 0;
     }
 }
 
-void Win2DCanvas::Refresh() {
-    if (this->editSequence > 0) {
-        this->isRefreshPending = true;
+void Win2DCanvas::refresh() {
+    if (this->edit_sequence > 0) {
+        this->is_refresh_pending = true;
     } else {
         this->control->Invalidate();
-        this->isRefreshPending = false;
+        this->is_refresh_pending = false;
     }
 }

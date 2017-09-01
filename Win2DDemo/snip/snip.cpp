@@ -13,11 +13,11 @@ SnipIcon::SnipIcon(float size) {
     this->size = size;
 }
 
-SnipTypes SnipIcon::GetType() {
+SnipTypes SnipIcon::get_type() {
     return SnipTypes::Icon;
 }
 
-void SnipIcon::FillExtent(float x, float y, float* width, float* height, float* d, float* s, float* l, float* r) {
+void SnipIcon::fill_extent(float x, float y, float* width, float* height, float* d, float* s, float* l, float* r) {
     if (width != nullptr) (*width) = this->size;
     if (height != nullptr) (*height) = this->size;
 };

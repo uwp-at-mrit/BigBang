@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui.hpp"
 
 using namespace Platform;
 using namespace Windows::Foundation;
@@ -9,7 +9,7 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 template <class T>
-static T PlaceUIElement(Panel^ parent, T child, String^ id) {
+static T append_child(Panel^ parent, T child, String^ id) {
     if (id != nullptr)  child->Name = id;
     parent->Children->Append(child);
 
@@ -23,7 +23,7 @@ StackPanel^ stack_panel(Panel^ parent, Orientation direction, Thickness margin, 
     child->Margin = margin;
     child->Padding = padding;
 
-    return PlaceUIElement<StackPanel^>(parent, child, nullptr);
+    return append_child<StackPanel^>(parent, child, nullptr);
 }
 
 ToggleSwitch^ toggle_switch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption) {
@@ -32,16 +32,16 @@ ToggleSwitch^ toggle_switch(Panel^ parent, String^ id, String^ onCaption, String
     child->OnContent = (onCaption == nullptr) ? ((id == nullptr) ? "" : id) : onCaption;
     child->OffContent = (offCaption == nullptr) ? child->OnContent : offCaption;
     
-    return PlaceUIElement<ToggleSwitch^>(parent, child, id);
+    return append_child<ToggleSwitch^>(parent, child, id);
 }
 
-CanvasControl^ gpu_canvas(Panel^ parent, String^ id, CanvasLoadHandler^ OnLoad, CanvasDrawHandler^ OnDraw) {
+CanvasControl^ gpu_canvas(Panel^ parent, String^ id, CanvasLoadHandler^ do_load, CanvasDrawHandler^ OnDraw) {
     auto child = ref new CanvasControl();
 
-    child->CreateResources += OnLoad;
+    child->CreateResources += do_load;
     child->Draw += OnDraw;
 
-    return PlaceUIElement<CanvasControl^>(parent, child, id);
+    return append_child<CanvasControl^>(parent, child, id);
 }
 
 DispatcherTimer^ gui_timer(long long ms, ObjectHandler^ OnTick) {

@@ -6,7 +6,6 @@ namespace Win2D::StartsWithPanel {
     internal:
         /// <summary> Initializes the singleton application object, logical equal to main() or WinMain(). </summary>
         Win2D() {
-            // InitializeComponent(); // [Debug] To catch unhandled exceptions that thrown by XAML parser.
             Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &Win2D::OnSuspending);
         }
 
@@ -18,7 +17,7 @@ namespace Win2D::StartsWithPanel {
 
             if (workspace != nullptr) {
                 if (e->PrelaunchActivated == false) {
-                    workspace->InitializeComponent();
+                    workspace->initialize_component();
                     Windows::UI::Xaml::Window::Current->Activate();
                 }
             } else {
@@ -31,7 +30,7 @@ namespace Win2D::StartsWithPanel {
                 }
 
                 if (e->PrelaunchActivated == false) {
-                    workspace->InitializeComponent();
+                    workspace->initialize_component();
                     Windows::UI::Xaml::Window::Current->Content = workspace;
                     Windows::UI::Xaml::Window::Current->Activate();
                 }
@@ -45,7 +44,7 @@ namespace Win2D::StartsWithPanel {
         void OnSuspending(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
             auto workspace = dynamic_cast<Monitor^>(Windows::UI::Xaml::Window::Current->Content);
-            if (workspace != nullptr) workspace->Suspend(sender, e);
+            if (workspace != nullptr) workspace->suspend(sender, e);
         }
     };
 }

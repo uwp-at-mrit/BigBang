@@ -18,12 +18,12 @@ using namespace Microsoft::Graphics::Canvas::Text;
 #define DEFAULT_POOL_SIZE 1024
 static wchar_t wpool[DEFAULT_POOL_SIZE];
 
-static void TextletSetLargeString(Textlet* self, size_t size, const wchar_t* fmt, va_list argl) {
+static void textlet_set_large_string(Textlet* self, size_t size, const wchar_t* fmt, va_list argl) {
     wchar_t* largePool = (wchar_t*)calloc(size + 1, sizeof(wchar_t));
 
     vswprintf(largePool, size + 1, fmt, argl);
     va_end(argl);
-    self->SetText("(" + size.ToString() + ")");
+    self->change_text("(" + size.ToString() + ")");
     free(largePool);
 }
 
@@ -46,43 +46,43 @@ Textlet::Textlet(const wchar_t *fmt, ...) {
         }
     } while (pool == nullptr);
 
-    this->SetText(ref new String(pool));
+    this->change_text(ref new String(pool));
     if (pool != wpool) delete[] pool;
 }
 
 Textlet::Textlet(String^ content) {
-    this->SetText(content);
+    this->change_text(content);
 }
 
-SnipTypes Textlet::GetType() {
+SnipTypes Textlet::get_type() {
     return SnipTypes::Text;
 }
 
-void Textlet::SetText(String^ content) {
+void Textlet::change_text(String^ content) {
     this->content = content;
-    if (this->font == nullptr) {
-        this->font = ref new CanvasTextFormat();
-        this->font->WordWrapping = CanvasWordWrapping::NoWrap;
+    if (this->layout_config == nullptr) {
+        this->layout_config = ref new CanvasTextFormat();
+        this->layout_config->WordWrapping = CanvasWordWrapping::NoWrap;
     }
 }
 
-void Textlet::FillExtent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
-    TextExtent ts = get_text_extent(content, font);
+void Textlet::fill_extent(float x, float y, float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+    TextExtent ts = get_text_extent(content, layout_config);
 
-    if (width != nullptr) (*width) = ts.Width;
-    if (height != nullptr) (*height) = ts.Height;
-    if (descent != nullptr) (*descent) = ts.Descent;
-    if (space != nullptr) (*space) = ts.Space;
-    if (lspace != nullptr) (*lspace) = ts.LSpace;
-    if (rspace != nullptr) (*rspace) = ts.RSpace;
+    if (width != nullptr) (*width) = ts.width;
+    if (height != nullptr) (*height) = ts.height;
+    if (descent != nullptr) (*descent) = ts.descent;
+    if (space != nullptr) (*space) = ts.space;
+    if (lspace != nullptr) (*lspace) = ts.lspace;
+    if (rspace != nullptr) (*rspace) = ts.rspace;
 };
 
-void Textlet::Draw(CanvasDrawingSession^ ds, float x, float y) {
-    ds->DrawText(content, (float)x, (float)y, Colors::Black, font);
+void Textlet::draw(CanvasDrawingSession^ ds, float x, float y) {
+    ds->DrawText(content, (float)x, (float)y, Colors::Black, layout_config);
 }
 
 /*************************************************************************************************/
-SnipIcon* Textlet::CreateSnipIcon(float size, unsigned char r, unsigned char g, unsigned char b) {
+SnipIcon* Win2D::Snip::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
     return new TextIcon(size, r, g, b);
 }
 
@@ -90,6 +90,6 @@ TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b
     this->foreground = { 255, r, g, b };
 }
 
-void TextIcon::Draw(CanvasDrawingSession^ ds, float x, float y) {
+void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y) {
     ds->FillRectangle(x, y, size, size, this->foreground);
 }

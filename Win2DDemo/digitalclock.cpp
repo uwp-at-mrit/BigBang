@@ -22,21 +22,21 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 DigitalClock::DigitalClock(Panel^ parent) : Win2DCanvas(parent, "SystemClock") {
-    auto onTick = ref new ObjectHandler(this, &DigitalClock::OnTickUpdate);
+    auto do_update = ref new ObjectHandler(this, &DigitalClock::do_update_on_tick);
 
     this->longdate = ref new DateTimeFormatter("longdate");
     this->longtime = ref new DateTimeFormatter("longtime");
     this->datetime = ref new Calendar();
-    this->fontInfo = ref new CanvasTextFormat();
+    this->layout_config = ref new CanvasTextFormat();
 
-    this->fontInfo->WordWrapping = CanvasWordWrapping::NoWrap;
-    this->fontInfo->FontSize = 12;
+    this->layout_config->WordWrapping = CanvasWordWrapping::NoWrap;
+    this->layout_config->FontSize = 12;
 
-    this->timer = gui_timer(1000, onTick);
-    this->UpdateTimeStamp();
+    this->timer = gui_timer(1000, do_update);
+    this->update_timestamp();
 }
 
-void DigitalClock::UpdateTimeStamp() {
+void DigitalClock::update_timestamp() {
     datetime->SetToNow();
     long long l00ns = datetime->Nanosecond / 100;
     long long ms = l00ns / 10000;
@@ -48,21 +48,21 @@ void DigitalClock::UpdateTimeStamp() {
         + this->longdate->Format(datetime->GetDateTime());
 }
 
-void DigitalClock::OnTickUpdate(Object^ sender, Object^ e) {
-    this->UpdateTimeStamp();
-    this->Refresh();
+void DigitalClock::do_update_on_tick(Object^ sender, Object^ e) {
+    this->update_timestamp();
+    this->refresh();
 }
 
-void DigitalClock::Draw(CanvasDrawingSession^ ds) {
-    auto layout = ref new CanvasTextLayout(ds, timestamp, fontInfo, 0.0f, 0.0f);
+void DigitalClock::draw(CanvasDrawingSession^ ds) {
+    auto layout = ref new CanvasTextLayout(ds, timestamp, layout_config, 0.0f, 0.0f);
     layout->HorizontalAlignment = CanvasHorizontalAlignment::Center;
 
-    float x = ((float)Control->Width) - layout->LayoutBounds.Width - layout->LayoutBounds.X;
-    float y = ((float)Control->Height - layout->LayoutBounds.Height) / 2.0f;
+    float x = ((float)canvas->Width) - layout->LayoutBounds.Width - layout->LayoutBounds.X;
+    float y = ((float)canvas->Height - layout->LayoutBounds.Height) / 2.0f;
     ds->DrawTextLayout(layout, x, y, Colors::Black);
 }
 
-void DigitalClock::ChangeSize(double width, double height) {
-    this->Control->Width = width;
-    this->Control->Height = height;
+void DigitalClock::resize(double width, double height) {
+    this->canvas->Width = width;
+    this->canvas->Height = height;
 }

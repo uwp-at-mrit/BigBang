@@ -28,7 +28,7 @@ Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ gpu_canvas(
     Windows::UI::Xaml::Controls::Panel^ parent,
     Platform::String^ id,
     CanvasLoadHandler^ Load,
-    CanvasDrawHandler^ Draw);
+    CanvasDrawHandler^ draw);
 
 Windows::UI::Xaml::DispatcherTimer^ gui_timer(
     long long ms,

@@ -9,23 +9,23 @@ namespace Win2D::UIElement {
         virtual ~IPasteboard();
 
     public:
-        property float activeWidth {
-            float get() { return float(Control->ActualWidth - Inset.Left - Inset.Right); };
+        property float active_width {
+            float get() { return float(canvas->ActualWidth - inset.Left - inset.Right); };
         }
 
-        property float activeHeight {
-            float get() { return float(Control->ActualHeight - Inset.Top - Inset.Bottom); };
+        property float active_height {
+            float get() { return float(canvas->ActualHeight - inset.Top - inset.Bottom); };
         }
 
-        property float minWidth {
-            void set(float v) { Control->MinWidth = double(v) + Inset.Left + Inset.Right; };
+        property float min_width {
+            void set(float v) { canvas->MinWidth = double(v) + inset.Left + inset.Right; };
         }
 
-        property float minHeight {
-            void set(float v) { Control->MinHeight = double(v) + Inset.Top + Inset.Bottom; };
+        property float min_height {
+            void set(float v) { canvas->MinHeight = double(v) + inset.Top + inset.Bottom; };
         }
 
-        property Windows::UI::Xaml::Thickness Inset {
+        property Windows::UI::Xaml::Thickness inset {
             void set(Windows::UI::Xaml::Thickness v) { padding = v; }
             Windows::UI::Xaml::Thickness get() { return padding; }
         }
@@ -35,21 +35,21 @@ namespace Win2D::UIElement {
         IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
 
     internal:
-        void Draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
     
     internal:
-        void Insert(Snip* snip, float x = 0.0, float y = 0.0);
-        void MoveTo(Snip* snip, float x, float y);
+        void insert(Snip* snip, float x = 0.0, float y = 0.0);
+        void move(Snip* snip, float x, float y);
 
     private protected:
-        virtual void BeforeInsert(Snip* snip, float x, float y) {};
-        virtual void AfterInsert(Snip* snip, float x, float y) {};
+        virtual void before_insert(Snip* snip, float x, float y) {};
+        virtual void after_insert(Snip* snip, float x, float y) {};
 
     private protected:
         Windows::UI::Xaml::Thickness padding;
 
-        Snip* headSnip;
-        Snip* tailSnip;
+        Snip* head_snip;
+        Snip* tail_snip;
     };
 
     public ref class Pasteboard sealed : public IPasteboard {
@@ -58,7 +58,7 @@ namespace Win2D::UIElement {
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
 
     internal:
-        void ChangeSize(double width, double height) override;
+        void resize(double width, double height) override;
     };
 
     public ref class VPasteboard sealed : public IPasteboard {
@@ -68,14 +68,14 @@ namespace Win2D::UIElement {
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize, Windows::UI::Xaml::Thickness inset);
 
     internal:
-        void ChangeSize(double width, double height) override;
+        void resize(double width, double height) override;
 
     private protected:
-        void BeforeInsert(Snip* snip, float x, float y) override;
-        void AfterInsert(Snip* snip, float x, float y) override;
+        void before_insert(Snip* snip, float x, float y) override;
+        void after_insert(Snip* snip, float x, float y) override;
 
     private:
         float gapsize;
-        float lastPosition;
+        float anchor;
     };
 }
