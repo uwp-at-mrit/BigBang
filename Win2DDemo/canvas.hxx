@@ -46,22 +46,21 @@ namespace Win2D::UIElement {
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 
     internal:
-        virtual bool point(
+        virtual bool action(
             float x, float y,
             Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms);
+            Windows::System::VirtualKeyModifiers vkms,
+            Windows::Devices::Input::PointerDeviceType type);
 
-        virtual bool touch(
+        virtual bool notice(
             float x, float y,
             Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms);
-
-        virtual bool paint(float x, float y,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms);
+            Windows::System::VirtualKeyModifiers vkms,
+            Windows::Devices::Input::PointerDeviceType type);
 
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
+        Windows::UI::Input::PointerPointProperties^ ppps;
 
         int edit_sequence;
         bool is_refresh_pending;
@@ -70,12 +69,27 @@ namespace Win2D::UIElement {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args);
         
-        void do_display(
+        void do_paint(
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
-        void do_input(
+        void do_click(
             Platform::Object^ sender,
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+
+        void do_notice(
+            Platform::Object^ sender,
+            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+
+        void delay_pressed(
+            Platform::Object^ sender,
+            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+
+
+        bool dispatch_event(
+            Windows::Foundation::Point position,
+            Windows::UI::Input::PointerPointProperties^ ppps,
+            Windows::System::VirtualKeyModifiers vkms,
+            Windows::Devices::Input::PointerDeviceType type);
     };
 }

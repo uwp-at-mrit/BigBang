@@ -48,7 +48,7 @@ void Monitor::initialize_component() {
         toolbar->insert(make_textlet_icon(32.0f, r, g, b));
     }
 
-    this->stage->insert(new Textlet("Hi, there! I have builtin drawing region support, so this word is truncated!"));
+    this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so this word is truncated!"));
 }
 
 void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {

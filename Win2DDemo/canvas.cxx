@@ -54,50 +54,48 @@ TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ m
 /*************************************************************************************************/
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
-    auto do_display = ref new CanvasDrawHandler(this, &Win2DCanvas::do_display);
+    auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);
     
-    this->control = gpu_canvas(parent, id, do_load, do_display);
+    this->control = gpu_canvas(parent, id, do_load, do_paint);
     this->edit_sequence = 0;
     this->is_refresh_pending = false;
 
-    this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_input);
-    this->control->PointerPressed += ref new PointerEventHandler(this, &Win2DCanvas::do_input);
+    this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_click);
+    this->control->PointerMoved += ref new PointerEventHandler(this, &Win2DCanvas::do_notice);
+    this->control->PointerPressed += ref new PointerEventHandler(this, &Win2DCanvas::delay_pressed);
 }
 
 void Win2DCanvas::do_load(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
     this->load(e);
 }
 
-void Win2DCanvas::do_display(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
+void Win2DCanvas::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
     this->draw(e->DrawingSession);
 }
 
-void Win2DCanvas::do_input(Object^ sender, PointerRoutedEventArgs^ e) {
-    auto target = dynamic_cast<::UIElement^>(e->OriginalSource);
-
-    if (target != nullptr) {
-        auto kms = e->KeyModifiers;
-        auto ppt = e->GetCurrentPoint(target);
-        auto pt = ppt->Position;
-        auto ppps = ppt->Properties;
-
-        switch (e->Pointer->PointerDeviceType) {
-        case PointerDeviceType::Mouse: e->Handled = this->point(pt.X, pt.Y, ppps, kms); break;
-        case PointerDeviceType::Touch: e->Handled = this->touch(pt.X, pt.Y, ppps, kms); break;
-        case PointerDeviceType::Pen:   e->Handled = this->paint(pt.X, pt.Y, ppps, kms); break;
-        }
-    }
+void Win2DCanvas::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
+    auto ppt = e->GetCurrentPoint(this->canvas);
+    e->Handled = this->dispatch_event(ppt->Position, ppt->Properties, e->KeyModifiers, e->Pointer->PointerDeviceType);
 }
 
-bool Win2DCanvas::point(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms) {
+void Win2DCanvas::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
+    auto ppt = e->GetCurrentPoint(this->canvas);
+    e->Handled = this->dispatch_event(ppt->Position, this->ppps, e->KeyModifiers, e->Pointer->PointerDeviceType);
+}
+
+void Win2DCanvas::delay_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
+    this->ppps = e->GetCurrentPoint(this->canvas)->Properties;
+}
+
+bool Win2DCanvas::dispatch_event(Point pt, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
+    return this->action(pt.X, pt.Y, ppps, vkms, type);
+}
+
+bool Win2DCanvas::action(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
     return false;
 }
 
-bool Win2DCanvas::touch(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms) {
-    return this->point(x, y, ppps, vkms);
-}
-
-bool Win2DCanvas::paint(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms) {
+bool Win2DCanvas::notice(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
     return false;
 }
 

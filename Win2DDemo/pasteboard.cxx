@@ -15,6 +15,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 using namespace Windows::System;
 using namespace Windows::UI::Input;
+using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
 
 struct SnipInfo {
@@ -84,14 +85,6 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
     
     ds->DrawRectangle(0.0f, 0.0f, Width, Height, Colors::SkyBlue);
     ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
-}
-
-#include "debug.hpp"
-bool IPasteboard::point(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms) {
-    if (ppps->IsLeftButtonPressed) {
-        trace(L"clicked (%f, %f)", x, y);
-    }
-    return ppps->IsLeftButtonPressed;
 }
 
 /*************************************************************************************************/
