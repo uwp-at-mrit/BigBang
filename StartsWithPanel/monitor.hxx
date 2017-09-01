@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ui.hpp"
-#include "digitalclock.hpp"
-#include "pasteboard.hpp"
+#include "ui.hxx"
+#include "digitalclock.hxx"
+#include "pasteboard.hxx"
 
 namespace Win2D::StartsWithPanel {
     [::Windows::Foundation::Metadata::WebHostHidden]

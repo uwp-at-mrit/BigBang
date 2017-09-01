@@ -1,4 +1,4 @@
-#include "ui.hpp"
+#include "ui.hxx"
 
 using namespace Platform;
 using namespace Windows::Foundation;

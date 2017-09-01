@@ -1,4 +1,4 @@
-﻿#include "monitor.hpp"
+﻿#include "monitor.hxx"
 
 namespace Win2D::StartsWithPanel {
     /// <summary> Provides application-specific behavior to supplement the default Application class. </summary>

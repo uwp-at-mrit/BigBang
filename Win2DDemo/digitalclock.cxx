@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "ui.hpp"
-#include "digitalclock.hpp"
+#include "digitalclock.hxx"
 
 using namespace std;
 using namespace Platform;

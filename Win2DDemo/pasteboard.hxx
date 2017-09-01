@@ -1,6 +1,6 @@
 #pragma once
 
-#include "canvas.hpp"
+#include "canvas.hxx"
 #include "snip/snip.hpp"
 
 namespace Win2D::UIElement {

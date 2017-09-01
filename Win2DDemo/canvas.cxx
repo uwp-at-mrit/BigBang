@@ -1,5 +1,5 @@
 #include "ui.hpp"
-#include "pasteboard.hpp"
+#include "pasteboard.hxx"
 
 using namespace std;
 using namespace Platform;

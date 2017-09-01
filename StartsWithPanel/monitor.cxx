@@ -1,7 +1,7 @@
 ﻿#include <cstdlib>
 
-#include "monitor.hpp"
-#include "pasteboard.hpp"
+#include "monitor.hxx"
+#include "pasteboard.hxx"
 #include "snip/textlet.hpp"
 
 using namespace Win2D::StartsWithPanel;

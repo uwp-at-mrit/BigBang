@@ -14,21 +14,21 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)debug.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />
   </ItemGroup>
 </Project>
