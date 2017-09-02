@@ -31,6 +31,8 @@ namespace Win2D::UIElement {
 
     public:
         void change_event_lisener(IInteractive^ listener);
+        virtual bool canvas_position_to_drawing_position(float* x, float* y) { return true; };
+        virtual bool drawing_position_to_canvas_position(float* x, float* y) { return true; };
 
     public:
         property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ canvas {

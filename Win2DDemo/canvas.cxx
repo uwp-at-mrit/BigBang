@@ -23,6 +23,16 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
+#define DISPATCH_EVENT(do_event, e, ppps) { \
+    auto ppt = e->GetCurrentPoint(this->canvas); \
+    auto ps = (ppps == nullptr) ? ppt->Properties : ppps; \
+    float x = ppt->Position.X; \
+    float y = ppt->Position.Y; \
+    if (this->canvas_position_to_drawing_position(&x, &y)) { \
+        e->Handled = do_event(x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
+    } /* TODO: fire unfocus event */ \
+}
+
 static CanvasDrawingSession^ shared_ds;
 
 CanvasDrawingSession^ Win2D::UIElement::make_shared_drawing_session() {
@@ -52,18 +62,6 @@ TextExtent Win2D::UIElement::get_text_extent(CanvasDrawingSession^ ds, String^ m
 }
 
 /*************************************************************************************************/
-static bool dispatch_event(IInteractive^ self, Interaction event,
-    Windows::Foundation::Point position, Windows::UI::Input::PointerPointProperties^ ppps,
-    Windows::System::VirtualKeyModifiers vkms, Windows::Devices::Input::PointerDeviceType type) {
-    
-    switch (event) {
-    case Interaction::ACTION: return self->action(position.X, position.Y, ppps, vkms, type);
-    case Interaction::NOTICE: return self->notice(position.X, position.Y, ppps, vkms, type);
-    default: return false;
-    }
-}
-
-/*************************************************************************************************/
 Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
     auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);
@@ -83,13 +81,11 @@ void Win2DCanvas::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
 }
 
 void Win2DCanvas::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
-    auto ppt = e->GetCurrentPoint(this->canvas);
-    e->Handled = dispatch_event(this->listener, Interaction::NOTICE, ppt->Position, ppt->Properties, e->KeyModifiers, e->Pointer->PointerDeviceType);
+    DISPATCH_EVENT(this->listener->notice, e, nullptr);
 }
 
 void Win2DCanvas::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
-    auto ppt = e->GetCurrentPoint(this->canvas);
-    e->Handled = dispatch_event(this->listener, Interaction::ACTION, ppt->Position, this->ppps, e->KeyModifiers, e->Pointer->PointerDeviceType);
+    DISPATCH_EVENT(this->listener->action, e, this->ppps);
 }
 
 void Win2DCanvas::delay_pressed(Object^ sender, PointerRoutedEventArgs^ e) {

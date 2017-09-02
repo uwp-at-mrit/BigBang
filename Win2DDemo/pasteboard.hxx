@@ -12,6 +12,10 @@ namespace Win2D::UIElement {
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
 
     public:
+        bool canvas_position_to_drawing_position(float* x, float* y) override;
+        bool drawing_position_to_canvas_position(float* x, float* y) override;
+
+    public:
         property float active_width {
             float get() { return float(canvas->ActualWidth - inset.Left - inset.Right); };
         }

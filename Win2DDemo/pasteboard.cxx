@@ -87,6 +87,41 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
     ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
 }
 
+
+bool IPasteboard::canvas_position_to_drawing_position(float* x, float* y) {
+    bool xOK = true;
+    bool yOK = true;
+
+    if (x != nullptr) {
+        (*x) -= float(this->padding.Left);
+        xOK = ((*x) >= 0) && ((*x) <= this->active_width);
+    }
+
+    if (y != nullptr) {
+        (*y) -= float(this->padding.Top);
+        yOK = ((*y) >= 0) && ((*y) <= this->active_height);
+    }
+
+    return (xOK && yOK);
+};
+
+bool IPasteboard::drawing_position_to_canvas_position(float* x, float* y) {
+    bool xOK = true;
+    bool yOK = true;
+    
+    if (x != nullptr) {
+        xOK = ((*x) >= 0) && ((*x) <= this->active_width);
+        (*x) += float(this->padding.Left);
+    }
+
+    if (y != nullptr) {
+        yOK = ((*y) >= 0) && ((*y) <= this->active_height);
+        (*y) += float(this->padding.Top);
+    }
+
+    return (xOK && yOK);
+};
+
 /*************************************************************************************************/
 Pasteboard::Pasteboard(Panel^ parent, String^ id) : Pasteboard(parent, id, zero) {}
 Pasteboard::Pasteboard(Panel^ parent, String^ id, Thickness inset) : IPasteboard(parent, id, inset) {}
