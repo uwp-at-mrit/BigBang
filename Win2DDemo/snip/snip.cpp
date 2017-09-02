@@ -2,7 +2,7 @@
 
 using namespace std;
 using namespace Platform;
-using namespace Win2DDemo;
+using namespace WarGrey::Win2DDemo;
 
 using namespace Microsoft::Graphics::Canvas;
 

@@ -1,6 +1,6 @@
 ﻿#include "monitor.hxx"
 
-namespace Win2DDemo {
+namespace WarGrey::Win2DDemo {
     /// <summary> Provides application-specific behavior to supplement the default Application class. </summary>
     private ref class Application sealed : public Windows::UI::Xaml::Application {
     internal:
@@ -53,5 +53,5 @@ int main(Platform::Array<Platform::String^>^ args) {
     Windows::UI::Xaml::Application::Start(
         ref new Windows::UI::Xaml::ApplicationInitializationCallback(
             [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
-        ref new ::Win2DDemo::Application(); }));
+        ref new WarGrey::Win2DDemo::Application(); }));
 }

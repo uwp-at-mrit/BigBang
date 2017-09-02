@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace Platform;
-using namespace Win2DDemo;
+using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
@@ -34,7 +34,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 static CanvasDrawingSession^ shared_ds;
 
-CanvasDrawingSession^ Win2DDemo::make_shared_drawing_session() {
+CanvasDrawingSession^ WarGrey::Win2DDemo::make_shared_drawing_session() {
     if (shared_ds == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
         auto target = ref new CanvasRenderTarget(sharedDevice, 1.0f, 1.0f, 96);
@@ -44,11 +44,11 @@ CanvasDrawingSession^ Win2DDemo::make_shared_drawing_session() {
     return shared_ds;
 }
 
-TextExtent Win2DDemo::get_text_extent(String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::Win2DDemo::get_text_extent(String^ message, CanvasTextFormat^ layout_config) {
     return get_text_extent(make_shared_drawing_session(), message, layout_config);
 }
 
-TextExtent Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ layout_config) {
     auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0f, 0.0f);
     Rect logical = layout->LayoutBounds;
     Rect ink = layout->DrawBounds;

@@ -2,7 +2,7 @@
 
 #include "listener/pointer.hxx"
 
-namespace Win2DDemo {
+namespace WarGrey::Win2DDemo {
     public value struct TextExtent {
         float width;
         float height;
@@ -30,7 +30,7 @@ namespace Win2DDemo {
         void refresh();
 
     public:
-        void set_pointer_lisener(IPointerListener^ listener);
+        void set_pointer_lisener(WarGrey::Win2DDemo::IPointerListener^ listener);
         virtual bool canvas_position_to_drawing_position(float* x, float* y) { return true; };
         virtual bool drawing_position_to_canvas_position(float* x, float* y) { return true; };
 
@@ -50,7 +50,7 @@ namespace Win2DDemo {
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         Windows::UI::Input::PointerPointProperties^ ppps;
-        IPointerListener^ listener;
+        WarGrey::Win2DDemo::IPointerListener^ listener;
 
         int edit_sequence;
         bool is_refresh_pending;

@@ -3,8 +3,8 @@
 #include "canvas.hxx"
 #include "snip/snip.hpp"
 
-namespace Win2DDemo {
-    private ref class IPasteboard : public Win2DCanvas {
+namespace WarGrey::Win2DDemo {
+    private ref class IPasteboard : public WarGrey::Win2DDemo::Win2DCanvas {
     public:
         virtual ~IPasteboard();
 
@@ -56,7 +56,7 @@ namespace Win2DDemo {
         Snip* tail_snip;
     };
 
-    private ref class Pasteboard sealed : public IPasteboard {
+    private ref class Pasteboard sealed : public WarGrey::Win2DDemo::IPasteboard {
     public:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
@@ -65,7 +65,7 @@ namespace Win2DDemo {
         void resize(double width, double height) override;
     };
 
-    private ref class VPasteboard sealed : public IPasteboard {
+    private ref class VPasteboard sealed : public WarGrey::Win2DDemo::IPasteboard {
     public:
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
         VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);

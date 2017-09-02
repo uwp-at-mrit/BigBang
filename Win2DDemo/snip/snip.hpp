@@ -2,7 +2,7 @@
 
 #include "canvas.hxx"
 
-namespace Win2DDemo {
+namespace WarGrey::Win2DDemo {
     private enum SnipTypes { Text, Icon };
 
     private class Snip {

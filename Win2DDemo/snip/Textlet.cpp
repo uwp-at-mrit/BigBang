@@ -7,7 +7,7 @@
 
 using namespace std;
 using namespace Platform;
-using namespace Win2DDemo;
+using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Media;
@@ -81,7 +81,7 @@ void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-SnipIcon* Win2DDemo::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
+SnipIcon* WarGrey::Win2DDemo::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
     return new TextIcon(size, r, g, b);
 }
 

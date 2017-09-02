@@ -1,7 +1,7 @@
 #include "toolbar.hxx"
 #include "debug.hpp"
 
-using namespace Win2DDemo;
+using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::System;
 using namespace Windows::UI::Input;
