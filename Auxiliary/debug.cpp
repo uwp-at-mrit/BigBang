@@ -1,6 +1,6 @@
 ﻿#include <ppltasks.h>
 
-#include "debug.h"
+#include "debug.hpp"
 
 #define DEFAULT_POOL_SIZE 2048
 static wchar_t pool[DEFAULT_POOL_SIZE];

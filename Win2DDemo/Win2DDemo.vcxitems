@@ -15,23 +15,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)listener\listener.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)workspace\toolbar.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)debug.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)listener\pointer.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)workspace\toolbar.hxx" />
   </ItemGroup>
