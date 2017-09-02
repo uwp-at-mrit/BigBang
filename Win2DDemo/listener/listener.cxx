@@ -1,6 +1,6 @@
 #include "pointer.hxx"
 
-using namespace Win2DDemo;
+using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::System;
 using namespace Windows::UI::Input;

@@ -2,8 +2,8 @@
 
 #include "canvas.hxx"
 
-namespace Win2DDemo {
-    private ref class DigitalClock sealed : public Win2DDemo::Win2DCanvas {
+namespace WarGrey::Win2DDemo {
+    private ref class DigitalClock sealed : public WarGrey::Win2DDemo::Win2DCanvas {
     public:
         DigitalClock(Windows::UI::Xaml::Controls::Panel^ parent);
 
