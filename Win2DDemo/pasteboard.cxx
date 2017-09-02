@@ -5,8 +5,7 @@
 
 using namespace std;
 using namespace Platform;
-
-using namespace Win2D::UIElement;
+using namespace Win2DDemo;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;

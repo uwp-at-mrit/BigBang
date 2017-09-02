@@ -2,15 +2,15 @@
 
 #include "snip/snip.hpp"
 
-namespace Win2D::Snip {
-    Win2D::UIElement::SnipIcon* make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b);
+namespace Win2DDemo {
+    Win2DDemo::SnipIcon* make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b);
 
-    private class Textlet : public Win2D::UIElement::Snip {
+    private class Textlet : public Win2DDemo::Snip {
     public:
         ~Textlet() noexcept;
         Textlet(const wchar_t* fmt, ...);
         Textlet(Platform::String^ content = "");
-        Win2D::UIElement::SnipTypes get_type() override;
+        Win2DDemo::SnipTypes get_type() override;
 
     public:
         void change_text(Platform::String^ content);
@@ -27,7 +27,7 @@ namespace Win2D::Snip {
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config;
     };
 
-    private class TextIcon : public Win2D::UIElement::SnipIcon {
+    private class TextIcon : public Win2DDemo::SnipIcon {
     public:
         TextIcon(float size, unsigned char r, unsigned char g, unsigned char b);
 

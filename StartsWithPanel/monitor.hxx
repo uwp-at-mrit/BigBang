@@ -5,7 +5,7 @@
 #include "pasteboard.hxx"
 #include "listener/pointer.hxx"
 
-namespace Win2D::StartsWithPanel {
+namespace Win2DDemo {
     [::Windows::Foundation::Metadata::WebHostHidden]
     public ref class Monitor sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
@@ -18,8 +18,8 @@ namespace Win2D::StartsWithPanel {
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchbar;
-        Win2D::UIElement::DigitalClock^ system_clock;
-        Win2D::UIElement::IPasteboard^ toolbar;
-        Win2D::UIElement::IPasteboard^ stage;
+        Win2DDemo::DigitalClock^ system_clock;
+        Win2DDemo::IPasteboard^ toolbar;
+        Win2DDemo::IPasteboard^ stage;
     };
 }

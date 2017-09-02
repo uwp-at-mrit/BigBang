@@ -3,7 +3,7 @@
 #include "canvas.hxx"
 #include "snip/snip.hpp"
 
-namespace Win2D::UIElement {
+namespace Win2DDemo {
     private ref class IPasteboard : public Win2DCanvas {
     public:
         virtual ~IPasteboard();

@@ -5,18 +5,14 @@
 #include "snip/textlet.hpp"
 #include "workspace/toolbar.hxx"
 
-using namespace Win2D::StartsWithPanel;
-using namespace Win2D::Workspace;
-using namespace Win2D::UIElement;
-using namespace Win2D::Snip;
-
 using namespace Platform;
+using namespace Win2DDemo;
+
 using namespace Windows::UI;
 using namespace Windows::UI::ViewManagement;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::Xaml::Shapes;
 using namespace Windows::UI::Xaml::Media;
 
 Monitor::Monitor() : StackPanel() {

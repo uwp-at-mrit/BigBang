@@ -2,7 +2,7 @@
 
 #include "listener/pointer.hxx"
 
-namespace Win2D::UIElement {
+namespace Win2DDemo {
     public value struct TextExtent {
         float width;
         float height;

@@ -2,7 +2,7 @@
 
 #include "canvas.hxx"
 
-namespace Win2D::UIElement {
+namespace Win2DDemo {
     private enum SnipTypes { Text, Icon };
 
     private class Snip {
@@ -32,7 +32,7 @@ namespace Win2D::UIElement {
     public:
         ~SnipIcon() noexcept;
         SnipIcon(float size);
-        Win2D::UIElement::SnipTypes get_type() override;
+        Win2DDemo::SnipTypes get_type() override;
 
     public:
         void fill_extent(float* w = nullptr, float* h = nullptr,

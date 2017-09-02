@@ -1,12 +1,12 @@
 ﻿#include "monitor.hxx"
 
-namespace Win2D::StartsWithPanel {
+namespace Win2DDemo {
     /// <summary> Provides application-specific behavior to supplement the default Application class. </summary>
-    private ref class Win2D sealed : public Windows::UI::Xaml::Application {
+    private ref class Application sealed : public Windows::UI::Xaml::Application {
     internal:
         /// <summary> Initializes the singleton application object, logical equal to main() or WinMain(). </summary>
-        Win2D() {
-            Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &Win2D::OnSuspending);
+        Application() {
+            Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &Application::OnSuspending);
         }
 
     protected:
@@ -53,5 +53,5 @@ int main(Platform::Array<Platform::String^>^ args) {
     Windows::UI::Xaml::Application::Start(
         ref new Windows::UI::Xaml::ApplicationInitializationCallback(
             [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
-        ref new ::Win2D::StartsWithPanel::Win2D(); }));
+        ref new ::Win2DDemo::Application(); }));
 }

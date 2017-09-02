@@ -3,10 +3,10 @@
 #include "pasteboard.hxx"
 #include "listener/pointer.hxx"
 
-namespace Win2D::Workspace {
-    private ref class ToolbarListener sealed : public Win2D::UIElement::IPointerListener {
+namespace Win2DDemo {
+    private ref class ToolbarListener sealed : public Win2DDemo::IPointerListener {
     public:
-        ToolbarListener(Win2D::UIElement::IPasteboard^ stage);
+        ToolbarListener(Win2DDemo::IPasteboard^ stage);
 
     public:
         bool action(
@@ -16,6 +16,6 @@ namespace Win2D::Workspace {
             Windows::Devices::Input::PointerDeviceType type) override;
 
     private:
-        Win2D::UIElement::IPasteboard^ stage;
+        Win2DDemo::IPasteboard^ stage;
     };
 }

@@ -5,11 +5,10 @@
 #include "textlet.hpp"
 #include "canvas.hxx"
 
-using namespace Win2D::Snip;
-using namespace Win2D::UIElement;
-
 using namespace std;
 using namespace Platform;
+using namespace Win2DDemo;
+
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Media;
 using namespace Microsoft::Graphics::Canvas;
@@ -82,7 +81,7 @@ void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-SnipIcon* Win2D::Snip::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
+SnipIcon* Win2DDemo::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
     return new TextIcon(size, r, g, b);
 }
 

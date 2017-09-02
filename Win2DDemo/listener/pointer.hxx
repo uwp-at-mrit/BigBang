@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Win2D::UIElement {
+namespace Win2DDemo {
     private ref class IPointerListener abstract {
     public:
         virtual bool action(
