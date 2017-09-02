@@ -30,12 +30,15 @@ namespace Win2D::UIElement {
         void refresh();
 
     public:
+        void change_event_lisener(IInteractive^ listener);
+
+    public:
         property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ canvas {
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return control; }
         }
 
     internal:
-        Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IInteractive^ user = nullptr);
+        Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
     
     internal:
         virtual void resize(double width, double height) {};
@@ -45,7 +48,7 @@ namespace Win2D::UIElement {
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         Windows::UI::Input::PointerPointProperties^ ppps;
-        IInteractive^ pseudo_user;
+        IInteractive^ listener;
 
         int edit_sequence;
         bool is_refresh_pending;

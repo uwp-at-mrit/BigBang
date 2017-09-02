@@ -64,20 +64,14 @@ static bool dispatch_event(IInteractive^ self, Interaction event,
 }
 
 /*************************************************************************************************/
-Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id, IInteractive^ user) {
+Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
     auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);
     
     this->control = gpu_canvas(parent, id, do_load, do_paint);
     this->edit_sequence = 0;
     this->is_refresh_pending = false;
-    this->pseudo_user = user;
-
-    if (this->pseudo_user != nullptr) {
-        this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_click);
-        this->control->PointerMoved += ref new PointerEventHandler(this, &Win2DCanvas::do_notice);
-        this->control->PointerPressed += ref new PointerEventHandler(this, &Win2DCanvas::delay_pressed);
-    }
+    this->listener = nullptr;
 }
 
 void Win2DCanvas::do_load(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
@@ -90,16 +84,26 @@ void Win2DCanvas::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
 
 void Win2DCanvas::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
     auto ppt = e->GetCurrentPoint(this->canvas);
-    e->Handled = dispatch_event(this->pseudo_user, Interaction::ACTION, ppt->Position, ppt->Properties, e->KeyModifiers, e->Pointer->PointerDeviceType);
+    e->Handled = dispatch_event(this->listener, Interaction::NOTICE, ppt->Position, ppt->Properties, e->KeyModifiers, e->Pointer->PointerDeviceType);
 }
 
 void Win2DCanvas::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
     auto ppt = e->GetCurrentPoint(this->canvas);
-    e->Handled = dispatch_event(this->pseudo_user, Interaction::ACTION, ppt->Position, this->ppps, e->KeyModifiers, e->Pointer->PointerDeviceType);
+    e->Handled = dispatch_event(this->listener, Interaction::ACTION, ppt->Position, this->ppps, e->KeyModifiers, e->Pointer->PointerDeviceType);
 }
 
 void Win2DCanvas::delay_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
     this->ppps = e->GetCurrentPoint(this->canvas)->Properties;
+}
+
+void Win2DCanvas::change_event_lisener(IInteractive^ listener) {
+    if (this->listener == nullptr) {
+        this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_click);
+        this->control->PointerMoved += ref new PointerEventHandler(this, &Win2DCanvas::do_notice);
+        this->control->PointerPressed += ref new PointerEventHandler(this, &Win2DCanvas::delay_pressed);
+    }
+
+    this->listener = listener;
 }
 
 /*************************************************************************************************/

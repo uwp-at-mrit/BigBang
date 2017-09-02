@@ -3,8 +3,10 @@
 #include "monitor.hxx"
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
+#include "workspace/toolbar.hxx"
 
 using namespace Win2D::StartsWithPanel;
+using namespace Win2D::Workspace;
 using namespace Win2D::UIElement;
 using namespace Win2D::Snip;
 
@@ -39,6 +41,8 @@ void Monitor::initialize_component() {
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     this->toolbar = ref new VPasteboard(workarea, "toolbar", float(four.Top + four.Bottom), four);
     this->stage = ref new Pasteboard(workarea, "stage", four);
+
+    this->toolbar->change_event_lisener(ref new ToolbarListener(this->stage));
 
     for (int i = 0; i < 8; i++) {
         auto r = (unsigned char)(rand() % 255);
