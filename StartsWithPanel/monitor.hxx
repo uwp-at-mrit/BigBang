@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ui.hxx"
-#include "input.hxx"
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
+#include "listener/pointer.hxx"
 
 namespace Win2D::StartsWithPanel {
     [::Windows::Foundation::Metadata::WebHostHidden]

@@ -42,7 +42,7 @@ void Monitor::initialize_component() {
     this->toolbar = ref new VPasteboard(workarea, "toolbar", float(four.Top + four.Bottom), four);
     this->stage = ref new Pasteboard(workarea, "stage", four);
 
-    this->toolbar->change_event_lisener(ref new ToolbarListener(this->stage));
+    this->toolbar->set_pointer_lisener(ref new ToolbarListener(this->stage));
 
     for (int i = 0; i < 8; i++) {
         auto r = (unsigned char)(rand() % 255);

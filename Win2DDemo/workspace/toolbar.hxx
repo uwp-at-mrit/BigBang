@@ -1,10 +1,10 @@
 #pragma once
 
-#include "input.hxx"
 #include "pasteboard.hxx"
+#include "listener/pointer.hxx"
 
 namespace Win2D::Workspace {
-    private ref class ToolbarListener sealed : public Win2D::UIElement::IInteractive {
+    private ref class ToolbarListener sealed : public Win2D::UIElement::IPointerListener {
     public:
         ToolbarListener(Win2D::UIElement::IPasteboard^ stage);
 

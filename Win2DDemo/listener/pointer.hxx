@@ -1,9 +1,7 @@
 #pragma once
 
 namespace Win2D::UIElement {
-    private enum Interaction { ACTION, NOTICE };
-
-    private ref class IInteractive abstract {
+    private ref class IPointerListener abstract {
     public:
         virtual bool action(
             float x, float y,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.hxx"
+#include "listener/pointer.hxx"
 
 namespace Win2D::UIElement {
     public value struct TextExtent {
@@ -30,7 +30,7 @@ namespace Win2D::UIElement {
         void refresh();
 
     public:
-        void change_event_lisener(IInteractive^ listener);
+        void set_pointer_lisener(IPointerListener^ listener);
         virtual bool canvas_position_to_drawing_position(float* x, float* y) { return true; };
         virtual bool drawing_position_to_canvas_position(float* x, float* y) { return true; };
 
@@ -50,7 +50,7 @@ namespace Win2D::UIElement {
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         Windows::UI::Input::PointerPointProperties^ ppps;
-        IInteractive^ listener;
+        IPointerListener^ listener;
 
         int edit_sequence;
         bool is_refresh_pending;

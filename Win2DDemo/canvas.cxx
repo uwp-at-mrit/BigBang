@@ -92,7 +92,7 @@ void Win2DCanvas::delay_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
     this->ppps = e->GetCurrentPoint(this->canvas)->Properties;
 }
 
-void Win2DCanvas::change_event_lisener(IInteractive^ listener) {
+void Win2DCanvas::set_pointer_lisener(IPointerListener^ listener) {
     if (this->listener == nullptr) {
         this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_click);
         this->control->PointerMoved += ref new PointerEventHandler(this, &Win2DCanvas::do_notice);
