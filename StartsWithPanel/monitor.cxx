@@ -55,17 +55,17 @@ void Monitor::initialize_component() {
 }
 
 void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {
-    // TODO: This Event is not fired for shrinking height.
+    // TODO: This MinSize of children does not affect the panel?
     // TODO: Why I have to deal with this mannually?
     bool width_changed = (e->PreviousSize.Width != e->NewSize.Width);
     bool height_changed = (e->PreviousSize.Height != e->NewSize.Height);
 
     if (width_changed || height_changed) {
-        float toolbar_width;
+        float toolbar_width, toolbar_height;
 
-        this->toolbar->fill_snips_extent(nullptr, nullptr, &toolbar_width, nullptr);
+        this->toolbar->fill_snips_extent(nullptr, nullptr, &toolbar_width, &toolbar_height);
         this->toolbar->layer_width = toolbar_width;
-        this->toolbar->min_canvas_height = 400.0F;  //TODO: why e->NewSize.Height crashes the application
+        this->toolbar->canvas_height = 400.0F; // why e->NewSize.Height crashes the application.
         this->stage->canvas_width = e->NewSize.Width - this->toolbar->min_canvas_width;
 
         this->stage->insert(new Textlet(L"Stage Size: (%f, %f)", e->NewSize.Width, e->NewSize.Height));
