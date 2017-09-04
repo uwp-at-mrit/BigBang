@@ -4,9 +4,19 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::Win2DDemo {
-    private ref class IPasteboard : public WarGrey::Win2DDemo::Win2DCanvas {
+    ref class Pasteboard;
+
+    private ref class IPasteboardLayout abstract {
+    internal:
+        virtual void before_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
+        virtual void after_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
+    };
+
+    private ref class Pasteboard sealed: public WarGrey::Win2DDemo::Win2DCanvas {
     public:
-        virtual ~IPasteboard();
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout^ layout);
+        virtual ~Pasteboard();
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
@@ -27,19 +37,11 @@ namespace WarGrey::Win2DDemo {
         read_write_property(float, min_layer_height);
 
     internal:
-        IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-        IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
-
-    internal:
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
         void move(Snip* snip, float x, float y);
 
     private protected:
-        virtual void before_insert(Snip* snip, float x, float y) {};
-        virtual void after_insert(Snip* snip, float x, float y) {};
-        virtual void recalculate_snips_extent_when_invalid();
-
-    private protected:
+        void recalculate_snips_extent_when_invalid();
         void on_end_edit_sequence() override;
 
     private protected:
@@ -50,28 +52,8 @@ namespace WarGrey::Win2DDemo {
         float snips_height;
 
     private protected:
+        IPasteboardLayout^ layout;
         Snip* head_snip;
         Snip* tail_snip;
-    };
-
-    private ref class Pasteboard sealed : public WarGrey::Win2DDemo::IPasteboard {
-    public:
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, Windows::UI::Xaml::Thickness inset);
-    };
-
-    private ref class VPasteboard sealed : public WarGrey::Win2DDemo::IPasteboard {
-    public:
-        VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-        VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize);
-        VPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, float gapsize, Windows::UI::Xaml::Thickness inset);
-
-    private protected:
-        void before_insert(Snip* snip, float x, float y) override;
-        void after_insert(Snip* snip, float x, float y) override;
-
-    private:
-        float gapsize;
-        float anchor;
     };
 }

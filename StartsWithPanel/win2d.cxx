@@ -23,7 +23,7 @@ namespace WarGrey::Win2DDemo {
             } else {
                 // Create a Frame to act as the navigation context and associate it with a SuspensionManager key
                 workspace = ref new Monitor();
-
+                
                 if (e->PreviousExecutionState == Windows::ApplicationModel::Activation::ApplicationExecutionState::Terminated) {
                     // TODO: Restore the saved session state only when appropriate, scheduling the
                         // final launch steps after the restore is complete

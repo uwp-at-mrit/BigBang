@@ -16,6 +16,8 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)layout\orientation.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)listener\listener.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
@@ -25,6 +27,8 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)layout\orientation.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)listener\pointer.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />

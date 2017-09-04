@@ -6,7 +6,7 @@
 namespace WarGrey::Win2DDemo {
     private ref class ToolbarListener sealed : public WarGrey::Win2DDemo::IPointerListener {
     public:
-        ToolbarListener(WarGrey::Win2DDemo::IPasteboard^ stage);
+        ToolbarListener(WarGrey::Win2DDemo::Pasteboard^ stage);
 
     public:
         bool action(
@@ -16,6 +16,6 @@ namespace WarGrey::Win2DDemo {
             Windows::Devices::Input::PointerDeviceType type) override;
 
     private:
-        WarGrey::Win2DDemo::IPasteboard^ stage;
+        WarGrey::Win2DDemo::Pasteboard^ stage;
     };
 }

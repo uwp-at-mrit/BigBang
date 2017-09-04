@@ -2,6 +2,7 @@
 #include <WindowsNumerics.h>
 
 #include "pasteboard.hxx"
+#include "layout/absolute.hxx"
 
 using namespace std;
 using namespace Platform;
@@ -22,15 +23,17 @@ struct SnipInfo {
     float y;
 };
 
-static Thickness zero(0.0, 0.0, 0.0, 0.0);
+static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
+static IPasteboardLayout^ default_layout = ref new AbsoluteLayout();
 
-IPasteboard::IPasteboard(Panel^ parent, String^ id) : IPasteboard(parent, id, zero) {}
+Pasteboard::Pasteboard(Panel^ parent, String^ id) : Pasteboard(parent, id, default_layout) {}
 
-IPasteboard::IPasteboard(Panel^ parent, String^ id, Thickness padding) : Win2DCanvas(parent, id) {
-    this->inset = padding;
+Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout^ layout) : Win2DCanvas(parent, id) {
+    this->padding = default_padding;
+    this->layout = layout;
 }
 
-IPasteboard::~IPasteboard() {
+Pasteboard::~Pasteboard() {
     while (this->head_snip != nullptr) {
         Snip* snip = this->head_snip;
         this->head_snip = snip->next;
@@ -39,8 +42,8 @@ IPasteboard::~IPasteboard() {
     }
 }
 
-void IPasteboard::insert(Snip* snip, float x, float y) {
-    this->before_insert(snip, x, y);
+void Pasteboard::insert(Snip* snip, float x, float y) {
+    this->layout->before_insert(this, snip, x, y);
     
     if (this->tail_snip == nullptr) this->tail_snip = snip;
     snip->next = this->head_snip;
@@ -48,10 +51,10 @@ void IPasteboard::insert(Snip* snip, float x, float y) {
     this->head_snip = snip;
 
     this->move(snip, x, y);
-    this->after_insert(snip, x, y);
+    this->layout->after_insert(this, snip, x, y);
 }
 
-void IPasteboard::move(Snip* snip, float x, float y) {
+void Pasteboard::move(Snip* snip, float x, float y) {
     SnipInfo* info = (SnipInfo*)snip->info;
     bool is_invalid = (info == nullptr);
 
@@ -72,7 +75,7 @@ void IPasteboard::move(Snip* snip, float x, float y) {
     }
 }
 
-void IPasteboard::draw(CanvasDrawingSession^ ds) {
+void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float Width = this->layer_width;
     float Height = this->layer_height;
     float tx = (float)this->inset.Left;
@@ -100,7 +103,7 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
     ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
 }
 
-bool IPasteboard::canvas_position_to_drawing_position(float* x, float* y) {
+bool Pasteboard::canvas_position_to_drawing_position(float* x, float* y) {
     bool xOK = true;
     bool yOK = true;
 
@@ -117,7 +120,7 @@ bool IPasteboard::canvas_position_to_drawing_position(float* x, float* y) {
     return (xOK && yOK);
 }
 
-bool IPasteboard::drawing_position_to_canvas_position(float* x, float* y) {
+bool Pasteboard::drawing_position_to_canvas_position(float* x, float* y) {
     bool xOK = true;
     bool yOK = true;
     
@@ -134,7 +137,7 @@ bool IPasteboard::drawing_position_to_canvas_position(float* x, float* y) {
     return (xOK && yOK);
 }
 
-void IPasteboard::fill_snips_extent(float* x, float* y, float* width, float* height) {
+void Pasteboard::fill_snips_extent(float* x, float* y, float* width, float* height) {
     this->recalculate_snips_extent_when_invalid();
     if (x != nullptr) (*x) = this->snips_x;
     if (y != nullptr) (*y) = this->snips_y;
@@ -142,11 +145,11 @@ void IPasteboard::fill_snips_extent(float* x, float* y, float* width, float* hei
     if (height != nullptr) (*height) = this->snips_height;
 }
 
-void IPasteboard::size_cache_invalid() {
+void Pasteboard::size_cache_invalid() {
     this->snips_width = -1.0F;
 }
 
-void IPasteboard::recalculate_snips_extent_when_invalid() {
+void Pasteboard::recalculate_snips_extent_when_invalid() {
     if (this->snips_width < 0.0F) {
         float width, height;
 
@@ -169,47 +172,22 @@ void IPasteboard::recalculate_snips_extent_when_invalid() {
     }
 }
 
-void IPasteboard::on_end_edit_sequence() {
+void Pasteboard::on_end_edit_sequence() {
     this->recalculate_snips_extent_when_invalid();
 }
 
 /*************************************************************************************************/
-void IPasteboard::inset::set(Thickness v) { this->padding = v; }
-Thickness IPasteboard::inset::get() { return this->padding; }
+void Pasteboard::inset::set(Thickness v) { this->padding = v; }
+Thickness Pasteboard::inset::get() { return this->padding; }
 
-void IPasteboard::min_layer_width::set(float v) { this->canvas->MinWidth = double(v) + this->inset.Left + this->inset.Right; }
-float IPasteboard::min_layer_width::get() { return float(this->canvas->MinWidth - this->inset.Left - this->inset.Right); }
+void Pasteboard::min_layer_width::set(float v) { this->canvas->MinWidth = double(v) + this->inset.Left + this->inset.Right; }
+float Pasteboard::min_layer_width::get() { return float(this->canvas->MinWidth - this->inset.Left - this->inset.Right); }
 
-void IPasteboard::min_layer_height::set(float v) { this->canvas->MinHeight = double(v) + this->inset.Top + this->inset.Bottom; }
-float IPasteboard::min_layer_height::get() { return float(this->canvas->MinHeight - this->inset.Top - this->inset.Bottom); }
+void Pasteboard::min_layer_height::set(float v) { this->canvas->MinHeight = double(v) + this->inset.Top + this->inset.Bottom; }
+float Pasteboard::min_layer_height::get() { return float(this->canvas->MinHeight - this->inset.Top - this->inset.Bottom); }
 
-void IPasteboard::layer_width::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
-float IPasteboard::layer_width::get() { return float(this->canvas->ActualWidth - this->inset.Left - this->inset.Right); }
+void Pasteboard::layer_width::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
+float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - this->inset.Left - this->inset.Right); }
 
-void IPasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
-float IPasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
-
-/*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, String^ id) : Pasteboard(parent, id, zero) {}
-Pasteboard::Pasteboard(Panel^ parent, String^ id, Thickness inset) : IPasteboard(parent, id, inset) {}
-
-VPasteboard::VPasteboard(Panel^ parent, String^ id) : VPasteboard(parent, id, 0.0F) {}
-VPasteboard::VPasteboard(Panel^ parent, String^ id, float gapsize) : VPasteboard(parent, id, gapsize, zero) {}
-VPasteboard::VPasteboard(Panel^ parent, String^ id, float gapsize, Thickness inset) : IPasteboard(parent, id, inset) {
-    this->gapsize = gapsize;
-    this->anchor = -gapsize;
-}
-
-void VPasteboard::before_insert(Snip* snip, float x, float y) {
-    this->begin_edit_sequence();
-}
-
-void VPasteboard::after_insert(Snip* snip, float, float) {
-    float width = 0.0F;
-    float height = 0.0F;
-    
-    snip->fill_extent(&width, &height);
-    this->move(snip, 0.0F, anchor + gapsize);
-    this->anchor += (gapsize + height);
-    this->end_edit_sequence();
-}
+void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
+float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }

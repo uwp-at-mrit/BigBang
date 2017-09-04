@@ -7,7 +7,7 @@ using namespace Windows::System;
 using namespace Windows::UI::Input;
 using namespace Windows::Devices::Input;
 
-ToolbarListener::ToolbarListener(IPasteboard^ stage) {
+ToolbarListener::ToolbarListener(Pasteboard^ stage) {
     this->stage = stage;
 }
 
