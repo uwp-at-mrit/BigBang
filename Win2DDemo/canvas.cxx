@@ -128,3 +128,18 @@ void Win2DCanvas::refresh() {
         this->is_refresh_pending = false;
     }
 }
+
+/*************************************************************************************************/
+CanvasControl^ Win2DCanvas::canvas::get() { return control; }
+
+void Win2DCanvas::min_canvas_width::set(float v) { this->canvas->MinWidth = double(v); }
+float Win2DCanvas::min_canvas_width::get() { return float(this->canvas->MinWidth); };
+
+void Win2DCanvas::min_canvas_height::set(float v) { this->canvas->MinHeight = double(v); }
+float Win2DCanvas::min_canvas_height::get() { return float(this->canvas->MinHeight); };
+
+void Win2DCanvas::canvas_width::set(float v) { this->canvas->Width = double(v); }
+float Win2DCanvas::canvas_width::get() { return float(this->canvas->Width); };
+
+void Win2DCanvas::canvas_height::set(float v) { this->canvas->Height = double(v); }
+float Win2DCanvas::canvas_height::get() { return float(this->canvas->Height); };

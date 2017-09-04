@@ -1,6 +1,7 @@
 #pragma once
 
 #include "listener/pointer.hxx"
+#include "sugar.hpp"
 
 namespace WarGrey::Win2DDemo {
     public value struct TextExtent {
@@ -35,9 +36,12 @@ namespace WarGrey::Win2DDemo {
         virtual bool drawing_position_to_canvas_position(float* x, float* y) { return true; };
 
     public:
-        property Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ canvas {
-            Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ get() { return control; }
-        }
+        read_only_property(Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^, canvas);
+
+        read_write_property(float, canvas_width);
+        read_write_property(float, canvas_height);
+        read_write_property(float, min_canvas_width);
+        read_write_property(float, min_canvas_height);
 
     internal:
         Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);

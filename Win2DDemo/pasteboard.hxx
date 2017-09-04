@@ -18,50 +18,13 @@ namespace WarGrey::Win2DDemo {
         void size_cache_invalid();
 
     public:
-        property Windows::UI::Xaml::Thickness inset {
-            void set(Windows::UI::Xaml::Thickness v) { padding = v; }
-            Windows::UI::Xaml::Thickness get() { return padding; }
-        }
+        read_write_property(Windows::UI::Xaml::Thickness, inset);
 
-        property float min_canvas_width {
-            void set(float v) { canvas->MinWidth = double(v); }
-            float get() { return float(canvas->MinWidth); };
-        }
-        
-        property float min_canvas_height {
-            void set(float v) { canvas->MinHeight = double(v); }
-            float get() { return float(canvas->MinHeight); };
-        }
+        read_write_property(float, layer_width);
+        read_write_property(float, layer_height);
 
-        property float canvas_width {
-            void set(float v) { canvas->Width = double(v); }
-            float get() { return float(canvas->ActualWidth); };
-        }
-
-        property float canvas_height {
-            void set(float v) { canvas->Height = double(v); }
-            float get() { return float(canvas->ActualHeight); };
-        }
-
-        property float min_layer_width {
-            void set(float v) { canvas->MinWidth = double(v) + inset.Left + inset.Right; };
-            float get() { return float(canvas->MinWidth - inset.Left - inset.Right); };
-        }
-
-        property float min_layer_height {
-            void set(float v) { canvas->MinHeight = double(v) + inset.Top + inset.Bottom; };
-            float get() { return float(canvas->MinHeight - inset.Top - inset.Bottom); };
-        }
-
-        property float layer_width {
-            void set(float v) { canvas->Height = double(v) + inset.Top + inset.Bottom; };
-            float get() { return float(canvas->ActualWidth - inset.Left - inset.Right); };
-        }
-
-        property float layer_height {
-            void set(float v) { canvas->Height = double(v) + inset.Top + inset.Bottom; };
-            float get() { return float(canvas->ActualHeight - inset.Top - inset.Bottom); };
-        }
+        read_write_property(float, min_layer_width);
+        read_write_property(float, min_layer_height);
 
     internal:
         IPasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
