@@ -21,7 +21,7 @@ using namespace Windows::UI::Xaml::Media;
 Monitor::Monitor() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(8.0);
-    this->SizeChanged += ref new SizeChangedEventHandler(this, &Monitor::reflow);
+    this->SizeChanged += ref new SizeChangedEventHandler(this, &Monitor::stretch_workarea);
 
     ApplicationView::GetForCurrentView()->Title = "WorkSpace";
 }
@@ -37,7 +37,7 @@ void Monitor::initialize_component() {
     auto alert = toggle_switch(switchbar, "alert", nullptr, nullptr);
     auto flash = toggle_switch(switchbar, "flash", nullptr, nullptr);
 
-    workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
+    auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     this->toolbar = ref new VPasteboard(workarea, "toolbar", float(four.Top + four.Bottom), four);
     this->stage = ref new VPasteboard(workarea, "stage", 0.0F, four);
 
@@ -55,7 +55,7 @@ void Monitor::initialize_component() {
     this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so these words are truncated!"));
  }
 
-void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {
+void Monitor::stretch_workarea(Object^ sender, SizeChangedEventArgs^ e) {
     bool width_changed = (e->PreviousSize.Width != e->NewSize.Width);
     bool height_changed = (e->PreviousSize.Height != e->NewSize.Height);
 

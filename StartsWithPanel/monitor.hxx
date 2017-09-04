@@ -14,11 +14,10 @@ namespace WarGrey::Win2DDemo {
     public:
         void initialize_component();
         void suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
-        void reflow(Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+        void stretch_workarea(Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchbar;
-        Windows::UI::Xaml::Controls::StackPanel^ workarea;
         WarGrey::Win2DDemo::DigitalClock^ system_clock;
         WarGrey::Win2DDemo::IPasteboard^ toolbar;
         WarGrey::Win2DDemo::IPasteboard^ stage;
