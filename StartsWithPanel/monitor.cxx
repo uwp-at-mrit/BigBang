@@ -38,7 +38,7 @@ void Monitor::initialize_component() {
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     this->toolbar = ref new VPasteboard(workarea, "toolbar", float(four.Top + four.Bottom), four);
-    this->stage = ref new Pasteboard(workarea, "stage", four);
+    this->stage = ref new VPasteboard(workarea, "stage", 0.0F, four);
 
     this->toolbar->set_pointer_lisener(ref new ToolbarListener(this->stage));
 
@@ -51,9 +51,9 @@ void Monitor::initialize_component() {
     }
 
     this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so these words are truncated!"));
+    this->stage->insert(new Textlet("Universay Windows Platform seems to have bugs!!"));
 }
 
-#include "debug.hpp"
 void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {
     // TODO: This Event is not fired for shrinking height.
     // TODO: Why I have to deal with this mannually?
@@ -67,6 +67,8 @@ void Monitor::reflow(Object^ sender, SizeChangedEventArgs^ e) {
         this->toolbar->layer_width = toolbar_width;
         this->toolbar->min_canvas_height = 400.0F;  //TODO: why e->NewSize.Height crashes the application
         this->stage->canvas_width = e->NewSize.Width - this->toolbar->min_canvas_width;
+
+        this->stage->insert(new Textlet(L"Stage Size: (%f, %f)", e->NewSize.Width, e->NewSize.Height));
 
         if (width_changed) {
             this->system_clock->resize(e->NewSize.Width - switchbar->ActualWidth, switchbar->ActualHeight);

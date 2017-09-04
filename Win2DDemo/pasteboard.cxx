@@ -79,9 +79,12 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
         child->fill_extent(&width, &height);
         width = max(Width - info->x, width);
         height = max(Height - info->y, height);
-        auto layer = ds->CreateLayer(1.0f, Rect(info->x, info->y, width, height));
-        child->draw(ds, info->x, info->y, Width, Height);
-        delete layer /* Must Close the Layer Explicitly */;
+        
+        if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
+            auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+            child->draw(ds, info->x, info->y, Width, Height);
+            delete layer /* Must Close the Layer Explicitly */;
+        }
     }
     delete activeRegion;
     
