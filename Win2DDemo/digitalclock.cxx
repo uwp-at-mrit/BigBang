@@ -60,8 +60,3 @@ void DigitalClock::draw(CanvasDrawingSession^ ds) {
     float y = ((float)canvas->Height - layout->LayoutBounds.Height) / 2.0f;
     ds->DrawTextLayout(layout, x, y, Colors::Black);
 }
-
-void DigitalClock::resize(double width, double height) {
-    this->canvas->Width = width;
-    this->canvas->Height = height;
-}

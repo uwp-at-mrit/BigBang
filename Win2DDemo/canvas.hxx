@@ -43,7 +43,7 @@ namespace WarGrey::Win2DDemo {
         Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
     
     internal:
-        virtual void resize(double width, double height) {};
+        virtual void resize(double width, double height);
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 

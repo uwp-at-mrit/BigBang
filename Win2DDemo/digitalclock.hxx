@@ -8,7 +8,6 @@ namespace WarGrey::Win2DDemo {
         DigitalClock(Windows::UI::Xaml::Controls::Panel^ parent);
 
     internal:
-        void resize(double width, double height) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
         
     private:

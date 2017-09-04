@@ -37,7 +37,7 @@ static CanvasDrawingSession^ shared_ds;
 CanvasDrawingSession^ WarGrey::Win2DDemo::make_shared_drawing_session() {
     if (shared_ds == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
-        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0f, 1.0f, 96);
+        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0f, 96);
         shared_ds = target->CreateDrawingSession();
     }
 
@@ -49,7 +49,7 @@ TextExtent WarGrey::Win2DDemo::get_text_extent(String^ message, CanvasTextFormat
 }
 
 TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ layout_config) {
-    auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0f, 0.0f);
+    auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0F, 0.0F);
     Rect logical = layout->LayoutBounds;
     Rect ink = layout->DrawBounds;
     float space = ink.Y - logical.Y;
@@ -102,6 +102,11 @@ void Win2DCanvas::set_pointer_lisener(IPointerListener^ listener) {
 }
 
 /*************************************************************************************************/
+void Win2DCanvas::resize(double width, double height) {
+    this->canvas->Width = width;
+    this->canvas->Height = height;
+}
+
 void Win2DCanvas::begin_edit_sequence() {
     this->edit_sequence += 1;
 }

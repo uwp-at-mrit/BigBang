@@ -17,15 +17,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 #define DEFAULT_POOL_SIZE 1024
 static wchar_t wpool[DEFAULT_POOL_SIZE];
 
-static void textlet_set_large_string(Textlet* self, size_t size, const wchar_t* fmt, va_list argl) {
-    wchar_t* largePool = (wchar_t*)calloc(size + 1, sizeof(wchar_t));
-
-    vswprintf(largePool, size + 1, fmt, argl);
-    va_end(argl);
-    self->change_text("(" + size.ToString() + ")");
-    free(largePool);
-}
-
 Textlet::~Textlet() {}
 
 Textlet::Textlet(const wchar_t *fmt, ...) {
