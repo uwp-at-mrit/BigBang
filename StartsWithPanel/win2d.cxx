@@ -6,7 +6,7 @@ namespace WarGrey::Win2DDemo {
     internal:
         /// <summary> Initializes the singleton application object, logical equal to main() or WinMain(). </summary>
         Application() {
-            Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &Application::OnSuspending);
+            this->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &Application::OnSuspending);
         }
 
     protected:

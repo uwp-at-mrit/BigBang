@@ -37,6 +37,8 @@ namespace WarGrey::Win2DDemo {
 
     public:
         read_only_property(Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^, canvas);
+        read_only_property(float, actual_width);
+        read_only_property(float, actual_height);
 
         read_write_property(float, canvas_width);
         read_write_property(float, canvas_height);
@@ -50,6 +52,9 @@ namespace WarGrey::Win2DDemo {
         virtual void resize(double width, double height);
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
+
+    private protected:
+        virtual void on_end_edit_sequence() {};
 
     private:
         Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;

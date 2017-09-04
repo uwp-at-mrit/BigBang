@@ -117,6 +117,7 @@ void Win2DCanvas::end_edit_sequence() {
     if (this->edit_sequence <= 0) {
         if (this->is_refresh_pending) this->refresh();
         if (this->edit_sequence < 0) this->edit_sequence = 0;
+        this->on_end_edit_sequence();
     }
 }
 
@@ -131,6 +132,8 @@ void Win2DCanvas::refresh() {
 
 /*************************************************************************************************/
 CanvasControl^ Win2DCanvas::canvas::get() { return control; }
+float Win2DCanvas::actual_width::get() { return float(this->canvas->ActualWidth); };
+float Win2DCanvas::actual_height::get() { return float(this->canvas->ActualHeight); };
 
 void Win2DCanvas::min_canvas_width::set(float v) { this->canvas->MinWidth = double(v); }
 float Win2DCanvas::min_canvas_width::get() { return float(this->canvas->MinWidth); };

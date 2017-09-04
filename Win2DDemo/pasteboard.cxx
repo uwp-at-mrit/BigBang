@@ -47,18 +47,26 @@ void IPasteboard::insert(Snip* snip, float x, float y) {
     if (this->head_snip != nullptr) this->head_snip->prev = snip;
     this->head_snip = snip;
 
-    snip->info = (void *)new SnipInfo();
     this->move(snip, x, y);
-
     this->after_insert(snip, x, y);
 }
 
 void IPasteboard::move(Snip* snip, float x, float y) {
     SnipInfo* info = (SnipInfo*)snip->info;
+    bool is_invalid = (info == nullptr);
+
+    if (is_invalid) {
+        info = new SnipInfo();
+        snip->info = (void *)info;
+    }
 
     if ((info->x != x) || (info->y != y)) {
         info->x = x;
         info->y = y;
+        is_invalid = true;
+    }
+
+    if (is_invalid) {
         this->size_cache_invalid();
         this->refresh();
     }
@@ -73,7 +81,7 @@ void IPasteboard::draw(CanvasDrawingSession^ ds) {
 
     // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
     ds->Transform = make_float3x2_translation(tx, ty);
-    auto activeRegion = ds->CreateLayer(1.0f, Rect(0.0F, 0.0F, Width, Height));
+    auto activeRegion = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
     for (Snip* child = this->tail_snip; child != nullptr; child = child->prev) {
         SnipInfo* info = (SnipInfo*)child->info;
         child->fill_extent(&width, &height);
@@ -126,12 +134,20 @@ bool IPasteboard::drawing_position_to_canvas_position(float* x, float* y) {
     return (xOK && yOK);
 }
 
+void IPasteboard::fill_snips_extent(float* x, float* y, float* width, float* height) {
+    this->recalculate_snips_extent_when_invalid();
+    if (x != nullptr) (*x) = this->snips_x;
+    if (y != nullptr) (*y) = this->snips_y;
+    if (width != nullptr) (*width) = this->snips_width;
+    if (height != nullptr) (*height) = this->snips_height;
+}
+
 void IPasteboard::size_cache_invalid() {
     this->snips_width = -1.0F;
 }
 
 void IPasteboard::recalculate_snips_extent_when_invalid() {
-    if ((this->snips_width < 0.0F) && (this->head_snip != nullptr)) {
+    if (this->snips_width < 0.0F) {
         float width, height;
 
         this->snips_x = FLT_MAX;
@@ -153,12 +169,8 @@ void IPasteboard::recalculate_snips_extent_when_invalid() {
     }
 }
 
-void IPasteboard::fill_snips_extent(float* x, float* y, float* width, float* height) {
+void IPasteboard::on_end_edit_sequence() {
     this->recalculate_snips_extent_when_invalid();
-    if (x != nullptr) (*x) = this->snips_x;
-    if (y != nullptr) (*y) = this->snips_y;
-    if (width != nullptr) (*width) = this->snips_width;
-    if (height != nullptr) (*height) = this->snips_height;
 }
 
 /*************************************************************************************************/

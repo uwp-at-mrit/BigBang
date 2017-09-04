@@ -40,6 +40,9 @@ namespace WarGrey::Win2DDemo {
         virtual void recalculate_snips_extent_when_invalid();
 
     private protected:
+        void on_end_edit_sequence() override;
+
+    private protected:
         Windows::UI::Xaml::Thickness padding;
         float snips_x;
         float snips_y;

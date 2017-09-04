@@ -18,6 +18,7 @@ namespace WarGrey::Win2DDemo {
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchbar;
+        Windows::UI::Xaml::Controls::StackPanel^ workarea;
         WarGrey::Win2DDemo::DigitalClock^ system_clock;
         WarGrey::Win2DDemo::IPasteboard^ toolbar;
         WarGrey::Win2DDemo::IPasteboard^ stage;
