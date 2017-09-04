@@ -37,7 +37,7 @@ static CanvasDrawingSession^ shared_ds;
 CanvasDrawingSession^ WarGrey::Win2DDemo::make_shared_drawing_session() {
     if (shared_ds == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
-        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0f, 96);
+        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0F, 96.0F);
         shared_ds = target->CreateDrawingSession();
     }
 
