@@ -24,13 +24,11 @@ struct SnipInfo {
 };
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
-static IPasteboardLayout^ default_layout = ref new AbsoluteLayout();
 
-Pasteboard::Pasteboard(Panel^ parent, String^ id) : Pasteboard(parent, id, default_layout) {}
-
-Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout^ layout) : Win2DCanvas(parent, id) {
+Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
     this->padding = default_padding;
-    this->layout = layout;
+    this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
+    this->layout->refcount += 1;
 }
 
 Pasteboard::~Pasteboard() {
@@ -39,6 +37,11 @@ Pasteboard::~Pasteboard() {
         this->head_snip = snip->next;
 
         delete snip;
+    }
+
+    this->layout->refcount -= 1;
+    if (this->layout->refcount == 0) {
+        delete this->layout;
     }
 }
 

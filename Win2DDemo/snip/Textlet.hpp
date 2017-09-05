@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "snip.hpp"
 
 namespace WarGrey::Win2DDemo {
     WarGrey::Win2DDemo::SnipIcon* make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b);
@@ -30,6 +30,7 @@ namespace WarGrey::Win2DDemo {
     private class TextIcon : public WarGrey::Win2DDemo::SnipIcon {
     public:
         TextIcon(float size, unsigned char r, unsigned char g, unsigned char b);
+        ~TextIcon() noexcept;
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

@@ -39,8 +39,8 @@ void Monitor::initialize_component() {
     auto flash = toggle_switch(switchbar, "flash", nullptr, nullptr);
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    this->toolbar = ref new Pasteboard(workarea, "toolbar", ref new VerticalLayout(float(four.Top + four.Bottom)));
-    this->stage = ref new Pasteboard(workarea, "stage", ref new VerticalLayout(0.0F));
+    this->toolbar = ref new Pasteboard(workarea, "toolbar", new VerticalLayout(float(four.Top + four.Bottom)));
+    this->stage = ref new Pasteboard(workarea, "stage", new VerticalLayout(0.0F));
 
     this->toolbar->set_pointer_lisener(ref new ToolbarListener(this->stage));
     this->toolbar->begin_edit_sequence();

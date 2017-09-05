@@ -11,7 +11,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 template <class T>
 static T append_child(Panel^ parent, T child, String^ id) {
     if (id != nullptr)  child->Name = id;
-    parent->Children->Append(child);
+    if (parent != nullptr) parent->Children->Append(child);
 
     return child;
 }

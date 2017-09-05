@@ -14,7 +14,7 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-#define DEFAULT_POOL_SIZE 1024
+const int DEFAULT_POOL_SIZE = 1024;
 static wchar_t wpool[DEFAULT_POOL_SIZE];
 
 Textlet::~Textlet() {}
@@ -79,6 +79,8 @@ SnipIcon* WarGrey::Win2DDemo::make_textlet_icon(float size, unsigned char r, uns
 TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b) : SnipIcon(size) {
     this->foreground = { 255, r, g, b };
 }
+
+TextIcon::~TextIcon() {}
 
 void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->FillRectangle(x, y, size, size, this->foreground);

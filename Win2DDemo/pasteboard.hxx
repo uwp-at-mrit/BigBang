@@ -6,16 +6,18 @@
 namespace WarGrey::Win2DDemo {
     ref class Pasteboard;
 
-    private ref class IPasteboardLayout abstract {
-    internal:
+    private class IPasteboardLayout {
+    public:
         virtual void before_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
         virtual void after_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
+        virtual ~IPasteboardLayout() noexcept {};
+
+    public:
+        int refcount = 0;
     };
 
     private ref class Pasteboard sealed: public WarGrey::Win2DDemo::Win2DCanvas {
     public:
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout^ layout);
         virtual ~Pasteboard();
 
     public:
@@ -37,6 +39,10 @@ namespace WarGrey::Win2DDemo {
         read_write_property(float, min_layer_height);
 
     internal:
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
+        void* layout_info;
+
+    internal:
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
         void move(Snip* snip, float x, float y);
 
@@ -52,7 +58,7 @@ namespace WarGrey::Win2DDemo {
         float snips_height;
 
     private protected:
-        IPasteboardLayout^ layout;
+        IPasteboardLayout* layout;
         Snip* head_snip;
         Snip* tail_snip;
     };

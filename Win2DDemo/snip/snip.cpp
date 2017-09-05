@@ -1,4 +1,4 @@
-#include "snip/snip.hpp"
+#include "snip.hpp"
 
 using namespace std;
 using namespace Platform;
