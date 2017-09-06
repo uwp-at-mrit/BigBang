@@ -10,6 +10,11 @@ void trace(Platform::String^ message) {
     OutputDebugString(L"\n");
 }
 
+void trace(const wchar_t *fmt) {
+    OutputDebugString(fmt);
+    OutputDebugString(L"\n");
+}
+
 void trace(const wchar_t *fmt, ...) {
     va_list argl;
     va_start(argl, fmt);

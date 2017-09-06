@@ -7,8 +7,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="monitor.cxx" />
-    <ClCompile Include="win2d.cxx" />
+    <ClCompile Include="workspace.cxx" />
+    <ClCompile Include="Win2DApp.cxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -146,6 +146,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="monitor.hxx" />
+    <ClInclude Include="workspace.hxx" />
   </ItemGroup>
 </Project>

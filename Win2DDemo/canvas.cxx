@@ -28,7 +28,9 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
     float x = ppt->Position.X; \
     float y = ppt->Position.Y; \
     if (this->canvas_position_to_drawing_position(&x, &y)) { \
-        e->Handled = do_event(x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
+        if (!e->Handled) { \
+           e->Handled = do_event(x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
+        } \
     } /* TODO: fire unfocus event */ \
 }
 
@@ -83,6 +85,7 @@ void Win2DCanvas::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
     DISPATCH_EVENT(this->listener->notice, e, nullptr);
 }
 
+#include "debug.hpp"
 void Win2DCanvas::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
     DISPATCH_EVENT(this->listener->action, e, this->ppps);
 }
@@ -134,6 +137,12 @@ void Win2DCanvas::refresh() {
 CanvasControl^ Win2DCanvas::canvas::get() { return control; }
 float Win2DCanvas::actual_width::get() { return float(this->canvas->ActualWidth); };
 float Win2DCanvas::actual_height::get() { return float(this->canvas->ActualHeight); };
+
+void Win2DCanvas::max_canvas_width::set(float v) { this->canvas->MaxWidth = double(v); }
+float Win2DCanvas::max_canvas_width::get() { return float(this->canvas->MaxWidth); };
+
+void Win2DCanvas::max_canvas_height::set(float v) { this->canvas->MaxHeight = double(v); }
+float Win2DCanvas::max_canvas_height::get() { return float(this->canvas->MaxHeight); };
 
 void Win2DCanvas::min_canvas_width::set(float v) { this->canvas->MinWidth = double(v); }
 float Win2DCanvas::min_canvas_width::get() { return float(this->canvas->MinWidth); };

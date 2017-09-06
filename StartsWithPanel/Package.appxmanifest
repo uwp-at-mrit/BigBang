@@ -3,7 +3,7 @@
   <Identity Name="c66f2f20-f815-46e2-b58f-0afe3c0fcd34" Publisher="CN=juzhe" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="c66f2f20-f815-46e2-b58f-0afe3c0fcd34" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>Win2DHungryHenry</DisplayName>
+    <DisplayName>Win2DDemo</DisplayName>
     <PublisherDisplayName>wargrey</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>

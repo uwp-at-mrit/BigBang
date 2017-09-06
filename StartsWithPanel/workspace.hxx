@@ -7,14 +7,14 @@
 
 namespace WarGrey::Win2DDemo {
     [::Windows::Foundation::Metadata::WebHostHidden]
-    public ref class Monitor sealed : public Windows::UI::Xaml::Controls::StackPanel {
+    public ref class WorkSpace sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
-        Monitor();
+        WorkSpace();
+        void initialize_component(Windows::Foundation::Size region);
 
     public:
-        void initialize_component();
-        void suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
-        void stretch_workarea(Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+        void reflow(float width, float height);
+        void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
     private:
         Windows::UI::Xaml::Controls::StackPanel^ switchbar;

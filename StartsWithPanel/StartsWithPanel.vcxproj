@@ -155,7 +155,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="monitor.hxx" />
+    <ClInclude Include="workspace.hxx" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -209,8 +209,8 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="win2d.cxx" />
-    <ClCompile Include="monitor.cxx" />
+    <ClCompile Include="Win2DApp.cxx" />
+    <ClCompile Include="workspace.cxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

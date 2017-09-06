@@ -1,33 +1,31 @@
 ﻿#include <cstdlib>
 #include <algorithm>
 
-#include "monitor.hxx"
+#include "workspace.hxx"
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
 #include "workspace/toolbar.hxx"
 #include "layout/orientation.hxx"
+#include "layout/absolute.hxx"
 
 using namespace std;
 using namespace Platform;
 using namespace WarGrey::Win2DDemo;
+using namespace Windows::Foundation;
+using namespace Windows::ApplicationModel;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
-using namespace Windows::UI::ViewManagement;
-
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
 
-Monitor::Monitor() : StackPanel() {
+WorkSpace::WorkSpace() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(8.0);
-    this->SizeChanged += ref new SizeChangedEventHandler(this, &Monitor::stretch_workarea);
-
-    ApplicationView::GetForCurrentView()->Title = "WorkSpace";
 }
 
-void Monitor::initialize_component() {
+void WorkSpace::initialize_component(Size region) {
     Thickness zero = ThicknessHelper::FromUniformLength(0.0);
     Thickness four = ThicknessHelper::FromUniformLength(4.0);
     auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
@@ -40,7 +38,7 @@ void Monitor::initialize_component() {
 
     auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
     this->toolbar = ref new Pasteboard(workarea, "toolbar", new VerticalLayout(float(four.Top + four.Bottom)));
-    this->stage = ref new Pasteboard(workarea, "stage", new VerticalLayout(0.0F));
+    this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
 
     this->toolbar->set_pointer_lisener(ref new ToolbarListener(this->stage));
     this->toolbar->begin_edit_sequence();
@@ -54,23 +52,18 @@ void Monitor::initialize_component() {
     this->toolbar->end_edit_sequence();
 
     this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so these words are truncated!"));
- }
-
-void Monitor::stretch_workarea(Object^ sender, SizeChangedEventArgs^ e) {
-    bool width_changed = (e->PreviousSize.Width != e->NewSize.Width);
-    bool height_changed = (e->PreviousSize.Height != e->NewSize.Height);
-
-    if (width_changed || height_changed) {
-        this->toolbar->canvas_height = e->NewSize.Height - float(switchbar->ActualHeight);
-        this->stage->canvas_width = e->NewSize.Width - this->toolbar->actual_width;
-
-        if (width_changed) {
-            this->system_clock->resize(e->NewSize.Width - switchbar->ActualWidth, switchbar->ActualHeight);
-        }
-    }
+    this->stage->insert(new Textlet(L"Initial Size: (%f, %f)", region.Width, region.Height), 0.0F, 32.0F);
+    this->reflow(region.Width, region.Height);
 }
 
-void Monitor::suspend(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e) {
+void WorkSpace::reflow(float width, float height) {
+    this->toolbar->canvas_height = height - float(switchbar->ActualHeight);
+    this->stage->canvas_width = width - this->toolbar->actual_width;
+
+    this->system_clock->resize(width - switchbar->ActualWidth, switchbar->ActualHeight);
+}
+
+void WorkSpace::suspend(SuspendingOperation^ op) {
     // TODO: Save application state and stop any background activity.
     // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }

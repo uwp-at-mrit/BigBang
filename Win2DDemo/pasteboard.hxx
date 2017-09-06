@@ -8,9 +8,12 @@ namespace WarGrey::Win2DDemo {
 
     private class IPasteboardLayout {
     public:
+        virtual void on_attach_to(Pasteboard^ self) {};
+        virtual ~IPasteboardLayout() noexcept {};
+
+    public:
         virtual void before_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
         virtual void after_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
-        virtual ~IPasteboardLayout() noexcept {};
 
     public:
         int refcount = 0;
@@ -26,7 +29,8 @@ namespace WarGrey::Win2DDemo {
     public:
         bool canvas_position_to_drawing_position(float* x, float* y) override;
         bool drawing_position_to_canvas_position(float* x, float* y) override;
-        void fill_snips_extent(float* x, float* y, float* width, float* height);
+        void set_preferred_min_size(float width, float height);
+        void fill_snips_extent(float* width, float* height, float* x = nullptr, float* y = nullptr);
         void size_cache_invalid();
 
     public:
@@ -37,6 +41,12 @@ namespace WarGrey::Win2DDemo {
 
         read_write_property(float, min_layer_width);
         read_write_property(float, min_layer_height);
+
+        read_write_property(float, max_layer_width);
+        read_write_property(float, max_layer_height);
+
+        read_only_property(float, actual_layer_width);
+        read_only_property(float, actual_layer_height);
 
     internal:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
@@ -56,6 +66,8 @@ namespace WarGrey::Win2DDemo {
         float snips_y;
         float snips_width;
         float snips_height;
+        float preferred_min_width;
+        float preferred_min_height;
 
     private protected:
         IPasteboardLayout* layout;

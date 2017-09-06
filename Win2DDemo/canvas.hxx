@@ -44,6 +44,8 @@ namespace WarGrey::Win2DDemo {
         read_write_property(float, canvas_height);
         read_write_property(float, min_canvas_width);
         read_write_property(float, min_canvas_height);
+        read_write_property(float, max_canvas_width);
+        read_write_property(float, max_canvas_height);
 
     internal:
         Win2DCanvas(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id);
