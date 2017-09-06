@@ -80,7 +80,10 @@ TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b
     this->foreground = { 255, r, g, b };
 }
 
-TextIcon::~TextIcon() {}
+#include "debug.hpp"
+TextIcon::~TextIcon() {
+    trace(L"delete Icon: #%02x%02x%02x", this->foreground.R, this->foreground.G, this->foreground.B);
+}
 
 void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->FillRectangle(x, y, size, size, this->foreground);

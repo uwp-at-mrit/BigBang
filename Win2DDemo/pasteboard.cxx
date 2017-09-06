@@ -35,11 +35,14 @@ Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : W
 }
 
 Pasteboard::~Pasteboard() {
-    while (this->head_snip != nullptr) {
-        Snip* snip = this->head_snip;
-        this->head_snip = snip->next;
-
-        delete snip;
+    if (this->first_snip != nullptr) {
+        Snip* child = nullptr;
+        this->first_snip->prev->next = nullptr;
+        do {
+            child = this->first_snip;
+            this->first_snip = this->first_snip->next;
+            delete child;
+        } while (this->first_snip != nullptr);
     }
 
     this->layout->refcount -= 1;
@@ -52,10 +55,15 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
     if (snip->info == nullptr) { // TODO: should it be copied if one snip can only belongs to one pasteboard
         this->layout->before_insert(this, snip, x, y);
 
-        if (this->tail_snip == nullptr) this->tail_snip = snip;
-        snip->next = this->head_snip;
-        if (this->head_snip != nullptr) this->head_snip->prev = snip;
-        this->head_snip = snip;
+        if (this->first_snip == nullptr) {
+            this->first_snip = snip;
+            snip->prev = this->first_snip;
+        } else {
+            snip->prev = this->first_snip->prev;
+            this->first_snip->prev->next = snip;
+            this->first_snip->prev = snip;
+        }
+        snip->next = this->first_snip;
 
         this->move(snip, x, y);
         this->layout->after_insert(this, snip, x, y);
@@ -83,6 +91,30 @@ void Pasteboard::move(Snip* snip, float x, float y) {
     }
 }
 
+Snip* Pasteboard::find_snip(float x, float y) {
+    float width, height;
+    Snip* found = nullptr;
+
+    if (this->first_snip != nullptr) {
+        Snip* child = this->first_snip->prev;
+
+        do {
+            SnipInfo* info = (SnipInfo*)child->info;
+            child->fill_extent(&width, &height);
+
+            if ((info->x < x) && (x < (info->x + width)) && (info->y < y) && (y < (info->y + height))) {
+                found = child;
+                break;
+            }
+
+            child = child->prev;
+        } while (child != this->first_snip->prev);
+    }
+    
+    return found;
+}
+
+
 void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float Width = this->actual_layer_width;
     float Height = this->actual_layer_height;
@@ -92,20 +124,26 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
 
     // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
     ds->Transform = make_float3x2_translation(tx, ty);
-    auto activeRegion = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
-    for (Snip* child = this->tail_snip; child != nullptr; child = child->prev) {
-        SnipInfo* info = (SnipInfo*)child->info;
-        child->fill_extent(&width, &height);
-        width = max(Width - info->x, width);
-        height = max(Height - info->y, height);
-        
-        if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
-            auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
-            child->draw(ds, info->x, info->y, Width, Height);
-            delete layer /* Must Close the Layer Explicitly */;
-        }
+    if (this->first_snip != nullptr) {
+        auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
+        Snip* child = this->first_snip->prev;
+
+        do {
+            SnipInfo* info = (SnipInfo*)child->info;
+            child->fill_extent(&width, &height);
+            width = max(Width - info->x, width);
+            height = max(Height - info->y, height);
+
+            if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
+                auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+                child->draw(ds, info->x, info->y, Width, Height);
+                delete layer; /* Must Close the Layer Explicitly */
+            }
+
+            child = child->prev;
+        } while (child != this->first_snip->prev);
+        delete region; /* Must Close the Layer Explicitly */
     }
-    delete activeRegion;
     
     ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colors::DeepSkyBlue);
     ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
@@ -169,18 +207,28 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
     if (this->snips_width < 0.0F) {
         float width, height;
 
-        this->snips_x = FLT_MAX;
-        this->snips_y = FLT_MAX;
         this->snips_width = 0.0F;
         this->snips_height = 0.0F;
 
-        for (Snip* child = this->head_snip; child != nullptr; child = child->next) {
-            SnipInfo* info = (SnipInfo*)child->info;
-            child->fill_extent(&width, &height);
-            this->snips_x = min(this->snips_x, info->x);
-            this->snips_y = min(this->snips_y, info->y);
-            this->snips_width = max(this->snips_width, info->x + width);
-            this->snips_height = max(this->snips_height, info->y + height);
+        if (this->first_snip == nullptr) {
+            this->snips_x = 0.0F;
+            this->snips_y = 0.0F;
+        } else {
+            Snip* child = this->first_snip;
+
+            this->snips_x = FLT_MAX;
+            this->snips_y = FLT_MAX;
+            
+            do {
+                SnipInfo* info = (SnipInfo*)child->info;
+                child->fill_extent(&width, &height);
+                this->snips_x = min(this->snips_x, info->x);
+                this->snips_y = min(this->snips_y, info->y);
+                this->snips_width = max(this->snips_width, info->x + width);
+                this->snips_height = max(this->snips_height, info->y + height);
+
+                child = child->next;
+            } while (child != this->first_snip);
         }
 
         this->min_layer_width = max(this->snips_width, this->preferred_min_width);

@@ -1,4 +1,5 @@
 ﻿#include "workspace.hxx"
+#include "debug.hpp"
 
 using namespace std;
 using namespace Platform;
@@ -19,9 +20,9 @@ namespace WarGrey::Win2DDemo {
             this->Suspending += ref new SuspendingEventHandler(this, &Win2DApp::OnSuspending);
             self->VisibleBoundsChanged += ref new TypedEventHandler<ApplicationView^, Object^>(this, &Win2DApp::DoResize);
             
-            ApplicationView::PreferredLaunchViewSize = get_screen_size();
             ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
-            
+            ApplicationView::PreferredLaunchViewSize = get_screen_size();
+
             // WARNING: Force Using the default TitleBar if a custom one was set once.
             CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
             self->Title = workspace->ToString();
@@ -60,7 +61,7 @@ namespace WarGrey::Win2DDemo {
             if (workspace != nullptr) workspace->suspend(e->SuspendingOperation);
         }
 
-        void DoResize(ApplicationView^ view, Object^ _) {
+        void DoResize(ApplicationView^ view, Object^ obj) {
             auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
             if (workspace != nullptr) {
                 auto region = adjusted_workspace_size(view->VisibleBounds, workspace);

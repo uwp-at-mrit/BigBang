@@ -53,6 +53,7 @@ namespace WarGrey::Win2DDemo {
         void* layout_info;
 
     internal:
+        Snip* find_snip(float x, float y);
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
         void move(Snip* snip, float x, float y);
 
@@ -60,7 +61,7 @@ namespace WarGrey::Win2DDemo {
         void recalculate_snips_extent_when_invalid();
         void on_end_edit_sequence() override;
 
-    private protected:
+    private:
         Windows::UI::Xaml::Thickness padding;
         float snips_x;
         float snips_y;
@@ -69,9 +70,8 @@ namespace WarGrey::Win2DDemo {
         float preferred_min_width;
         float preferred_min_height;
 
-    private protected:
+    private:
         IPasteboardLayout* layout;
-        Snip* head_snip;
-        Snip* tail_snip;
+        Snip* first_snip;
     };
 }
