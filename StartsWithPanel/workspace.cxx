@@ -5,8 +5,8 @@
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
 #include "workspace/toolbar.hxx"
-#include "layout/orientation.hxx"
-#include "layout/absolute.hxx"
+#include "layout/orientation.hpp"
+#include "layout/absolute.hpp"
 
 using namespace std;
 using namespace Platform;
@@ -51,8 +51,6 @@ void WorkSpace::initialize_component(Size region) {
     }
     this->toolbar->end_edit_sequence();
 
-    this->stage->insert(new Textlet("Hi, there! I have builtin drawing region supportted, so these words are truncated!"));
-    this->stage->insert(new Textlet(L"Initial Size: (%f, %f)", region.Width, region.Height), 0.0F, 32.0F);
     this->reflow(region.Width, region.Height);
 }
 

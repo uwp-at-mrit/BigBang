@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "absolute.hxx"
+#include "absolute.hpp"
 
 using namespace std;
 using namespace WarGrey::Win2DDemo;

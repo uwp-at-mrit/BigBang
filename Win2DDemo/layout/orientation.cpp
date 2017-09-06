@@ -1,4 +1,4 @@
-#include "orientation.hxx"
+#include "orientation.hpp"
 
 using namespace WarGrey::Win2DDemo;
 

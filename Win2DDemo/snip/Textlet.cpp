@@ -68,7 +68,7 @@ void Textlet::fill_extent(float* width, float* height, float* descent, float* sp
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText(content, (float)x, (float)y, Colors::Black, layout_config);
+    ds->DrawText(content, x, y, Colors::Black, layout_config);
 }
 
 /*************************************************************************************************/

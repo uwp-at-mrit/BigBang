@@ -31,11 +31,6 @@ namespace WarGrey::Win2DDemo {
         void refresh();
 
     public:
-        void set_pointer_lisener(WarGrey::Win2DDemo::IPointerListener^ listener);
-        virtual bool canvas_position_to_drawing_position(float* x, float* y) { return true; };
-        virtual bool drawing_position_to_canvas_position(float* x, float* y) { return true; };
-
-    public:
         read_only_property(Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^, canvas);
         read_only_property(float, actual_width);
         read_only_property(float, actual_height);
@@ -56,13 +51,10 @@ namespace WarGrey::Win2DDemo {
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args) {};
 
     private protected:
+        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
         virtual void on_end_edit_sequence() {};
 
     private:
-        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ control;
-        Windows::UI::Input::PointerPointProperties^ ppps;
-        WarGrey::Win2DDemo::IPointerListener^ listener;
-
         int edit_sequence;
         bool is_refresh_pending;
         
@@ -73,17 +65,5 @@ namespace WarGrey::Win2DDemo {
         void do_paint(
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
             Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
-
-        void do_click(
-            Platform::Object^ sender,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-
-        void do_notice(
-            Platform::Object^ sender,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-
-        void delay_click(
-            Platform::Object^ sender,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
     };
 }

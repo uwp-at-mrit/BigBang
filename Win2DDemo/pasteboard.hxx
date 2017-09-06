@@ -27,11 +27,14 @@ namespace WarGrey::Win2DDemo {
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
 
     public:
-        bool canvas_position_to_drawing_position(float* x, float* y) override;
-        bool drawing_position_to_canvas_position(float* x, float* y) override;
+        bool canvas_position_to_drawing_position(float* x, float* y);
+        bool drawing_position_to_canvas_position(float* x, float* y);
         void set_preferred_min_size(float width, float height);
-        void fill_snips_extent(float* width, float* height, float* x = nullptr, float* y = nullptr);
+        void fill_snips_bounds(float* x, float* y, float* width, float* height);
         void size_cache_invalid();
+
+    public:
+        void set_pointer_lisener(WarGrey::Win2DDemo::IPointerListener^ listener);
 
     public:
         read_write_property(Windows::UI::Xaml::Thickness, inset);
@@ -62,11 +65,17 @@ namespace WarGrey::Win2DDemo {
         void on_end_edit_sequence() override;
 
     private:
+        WarGrey::Win2DDemo::IPointerListener^ listener;
+
+        void do_click(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+        void do_notice(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+
+    private:
         Windows::UI::Xaml::Thickness padding;
-        float snips_x;
-        float snips_y;
-        float snips_width;
-        float snips_height;
+        float snips_left;
+        float snips_top;
+        float snips_right;
+        float snips_bottom;
         float preferred_min_width;
         float preferred_min_height;
 

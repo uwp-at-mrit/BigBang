@@ -4,35 +4,17 @@
 using namespace std;
 using namespace Platform;
 using namespace WarGrey::Win2DDemo;
-
 using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 
 using namespace Windows::System;
-using namespace Windows::UI::Input;
-using namespace Windows::UI::Xaml::Input;
-using namespace Windows::Devices::Input;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
-
-#define DISPATCH_EVENT(do_event, e, ppps) { \
-    auto ppt = e->GetCurrentPoint(this->canvas); \
-    auto ps = (ppps == nullptr) ? ppt->Properties : ppps; \
-    float x = ppt->Position.X; \
-    float y = ppt->Position.Y; \
-    if (this->canvas_position_to_drawing_position(&x, &y)) { \
-        if (!e->Handled) { \
-           e->Handled = do_event(this, x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
-        } \
-    } /* TODO: fire unfocus event */ \
-}
 
 static CanvasDrawingSession^ shared_ds;
 
@@ -70,7 +52,6 @@ Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
     this->control = gpu_canvas(parent, id, do_load, do_paint);
     this->edit_sequence = 0;
     this->is_refresh_pending = false;
-    this->listener = nullptr;
 }
 
 void Win2DCanvas::do_load(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ e) {
@@ -79,28 +60,6 @@ void Win2DCanvas::do_load(CanvasControl^ sender, CanvasCreateResourcesEventArgs^
 
 void Win2DCanvas::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ e) {
     this->draw(e->DrawingSession);
-}
-
-void Win2DCanvas::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
-    DISPATCH_EVENT(this->listener->notice, e, nullptr);
-}
-
-void Win2DCanvas::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
-    DISPATCH_EVENT(this->listener->action, e, this->ppps);
-}
-
-void Win2DCanvas::delay_click(Object^ sender, PointerRoutedEventArgs^ e) {
-    this->ppps = e->GetCurrentPoint(this->canvas)->Properties;
-}
-
-void Win2DCanvas::set_pointer_lisener(IPointerListener^ listener) {
-    if (this->listener == nullptr) {
-        this->control->PointerReleased += ref new PointerEventHandler(this, &Win2DCanvas::do_click);
-        this->control->PointerMoved += ref new PointerEventHandler(this, &Win2DCanvas::do_notice);
-        this->control->PointerPressed += ref new PointerEventHandler(this, &Win2DCanvas::delay_click);
-    }
-
-    this->listener = listener;
 }
 
 /*************************************************************************************************/

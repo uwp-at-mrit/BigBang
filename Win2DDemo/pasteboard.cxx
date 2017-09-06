@@ -2,7 +2,7 @@
 #include <WindowsNumerics.h>
 
 #include "pasteboard.hxx"
-#include "layout/absolute.hxx"
+#include "layout/absolute.hpp"
 
 using namespace std;
 using namespace Platform;
@@ -11,18 +11,21 @@ using namespace WarGrey::Win2DDemo;
 using namespace Windows::System;
 using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 struct SnipInfo {
-    float x;
-    float y;
+    float x = 0;
+    float y = 0;
+    bool selected = false;
 };
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
@@ -124,6 +127,20 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
 
     // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
     ds->Transform = make_float3x2_translation(tx, ty);
+
+    { // draw border and bounds
+        float x, y;
+        auto stroke = ref new CanvasStrokeStyle();
+        stroke->DashStyle = CanvasDashStyle::Dash;
+
+        this->fill_snips_bounds(&x, &y, &width, &height);
+        ds->FillRectangle(x, y, width, height, Colors::Snow);
+        ds->DrawRectangle(x, y, width, height, Colors::MistyRose, 1.0F, stroke);
+
+        ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colors::DeepSkyBlue);
+        ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, Colors::RoyalBlue);
+    }
+
     if (this->first_snip != nullptr) {
         auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
         Snip* child = this->first_snip->prev;
@@ -144,12 +161,6 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
         } while (child != this->first_snip->prev);
         delete region; /* Must Close the Layer Explicitly */
     }
-    
-    ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colors::DeepSkyBlue);
-    ds->DrawRectangle(-tx, -ty, (float)canvas->ActualWidth, (float)canvas->ActualHeight, Colors::RoyalBlue);
-
-    this->fill_snips_extent(&width, &height, &tx, &ty);
-    ds->DrawRectangle(tx, ty, width, height, Colors::SpringGreen);
 }
 
 bool Pasteboard::canvas_position_to_drawing_position(float* x, float* y) {
@@ -191,48 +202,49 @@ void Pasteboard::set_preferred_min_size(float min_width, float min_height) {
     this->preferred_min_height = max(min_height, 0.0F);
 }
 
-void Pasteboard::fill_snips_extent(float* width, float* height, float* x, float* y) {
+void Pasteboard::fill_snips_bounds(float* x, float* y, float* width, float* height) {
     this->recalculate_snips_extent_when_invalid();
-    if (x != nullptr) (*x) = this->snips_x;
-    if (y != nullptr) (*y) = this->snips_y;
-    if (width != nullptr) (*width) = this->snips_width;
-    if (height != nullptr) (*height) = this->snips_height;
+    if (x != nullptr) (*x) = this->snips_left;
+    if (y != nullptr) (*y) = this->snips_top; 
+    if (width != nullptr) (*width) = this->snips_right - this->snips_left;
+    if (height != nullptr) (*height) = this->snips_bottom - this->snips_top;
 }
 
 void Pasteboard::size_cache_invalid() {
-    this->snips_width = -1.0F;
+    this->snips_right = this->snips_left - 1.0F;
 }
 
 void Pasteboard::recalculate_snips_extent_when_invalid() {
-    if (this->snips_width < 0.0F) {
+    if (this->snips_right < this->snips_left) {
         float width, height;
 
-        this->snips_width = 0.0F;
-        this->snips_height = 0.0F;
-
         if (this->first_snip == nullptr) {
-            this->snips_x = 0.0F;
-            this->snips_y = 0.0F;
+            this->snips_left = 0.0F;
+            this->snips_top = 0.0F;
+            this->snips_right = 0.0F;
+            this->snips_bottom = 0.0F;
         } else {
             Snip* child = this->first_snip;
 
-            this->snips_x = FLT_MAX;
-            this->snips_y = FLT_MAX;
+            this->snips_left = FLT_MAX;
+            this->snips_top = FLT_MAX;
+            this->snips_right = -FLT_MAX;
+            this->snips_bottom = -FLT_MAX;
             
             do {
                 SnipInfo* info = (SnipInfo*)child->info;
                 child->fill_extent(&width, &height);
-                this->snips_x = min(this->snips_x, info->x);
-                this->snips_y = min(this->snips_y, info->y);
-                this->snips_width = max(this->snips_width, info->x + width);
-                this->snips_height = max(this->snips_height, info->y + height);
+                this->snips_left = min(this->snips_left, info->x);
+                this->snips_top = min(this->snips_top, info->y);
+                this->snips_right = max(this->snips_right, info->x + width);
+                this->snips_bottom = max(this->snips_bottom, info->y + height);
 
                 child = child->next;
             } while (child != this->first_snip);
         }
 
-        this->min_layer_width = max(this->snips_width, this->preferred_min_width);
-        this->min_layer_height = max(this->snips_height, this->preferred_min_height);
+        this->min_layer_width = max(this->snips_right, this->preferred_min_width);
+        this->min_layer_height = max(this->snips_bottom, this->preferred_min_height);
     }
 }
 
@@ -264,3 +276,41 @@ float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - 
 
 void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
+
+/************************************************************************************************/
+#define DISPATCH_EVENT(do_event, e, ppps) { \
+    auto ppt = e->GetCurrentPoint(this->canvas); \
+    auto ps = (ppps == nullptr) ? ppt->Properties : ppps; \
+    float x = ppt->Position.X; \
+    float y = ppt->Position.Y; \
+    if (this->canvas_position_to_drawing_position(&x, &y)) { \
+        if (!e->Handled) { \
+           e->Handled = do_event(this, x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
+        } \
+    } /* TODO: fire unfocus event */ \
+}
+
+void Pasteboard::set_pointer_lisener(IPointerListener^ listener) {
+    if (this->listener == nullptr) {
+        this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::do_click);
+        this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::do_notice);
+        this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::do_click);
+    }
+
+    this->listener = listener;
+}
+
+void Pasteboard::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
+    DISPATCH_EVENT(this->listener->notice, e, nullptr);
+}
+
+void Pasteboard::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
+    static PointerPointProperties^ ppps = nullptr;
+
+    if (ppps == nullptr) {
+        ppps = e->GetCurrentPoint(this->canvas)->Properties;
+    } else {
+        DISPATCH_EVENT(this->listener->action, e, ppps);
+        ppps = nullptr;
+    }
+}
