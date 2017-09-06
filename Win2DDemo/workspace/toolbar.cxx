@@ -1,5 +1,4 @@
 #include "toolbar.hxx"
-#include "debug.hpp"
 
 using namespace WarGrey::Win2DDemo;
 
@@ -11,7 +10,16 @@ ToolbarListener::ToolbarListener(Pasteboard^ stage) {
     this->stage = stage;
 }
 
-bool ToolbarListener::action(float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
-    trace(L"[%f, %f]", x, y);
-    return true;
+bool ToolbarListener::action(Object^ src, float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
+    Pasteboard^ self = dynamic_cast<Pasteboard^>(src);
+    bool handling = (self != nullptr);
+    
+    if (handling) {
+        SnipIcon* snip = (SnipIcon*)self->find_snip(x, y);
+        if (snip != nullptr) {
+            stage->insert(snip->create_snip(), x, y);
+        }
+    }
+
+    return handling;
 }

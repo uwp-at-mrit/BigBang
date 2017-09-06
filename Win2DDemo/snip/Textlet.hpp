@@ -35,6 +35,9 @@ namespace WarGrey::Win2DDemo {
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+    public:
+        Snip* create_snip() override;
+
     private:
         Windows::UI::Color foreground;
     };

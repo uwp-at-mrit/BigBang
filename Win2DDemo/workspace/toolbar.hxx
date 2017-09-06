@@ -10,6 +10,7 @@ namespace WarGrey::Win2DDemo {
 
     public:
         bool action(
+            Platform::Object^ self,
             float x, float y,
             Windows::UI::Input::PointerPointProperties^ ppps,
             Windows::System::VirtualKeyModifiers vkms,

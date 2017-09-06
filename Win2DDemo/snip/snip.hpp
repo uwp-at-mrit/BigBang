@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 
 #include "canvas.hxx"
 
@@ -38,6 +38,9 @@ namespace WarGrey::Win2DDemo {
         void fill_extent(float* w = nullptr, float* h = nullptr,
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
+
+    public:
+        virtual Snip* create_snip() = 0;
 
     protected:
         float size;

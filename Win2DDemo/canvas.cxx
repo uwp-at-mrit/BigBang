@@ -29,7 +29,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
     float y = ppt->Position.Y; \
     if (this->canvas_position_to_drawing_position(&x, &y)) { \
         if (!e->Handled) { \
-           e->Handled = do_event(x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
+           e->Handled = do_event(this, x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
         } \
     } /* TODO: fire unfocus event */ \
 }
