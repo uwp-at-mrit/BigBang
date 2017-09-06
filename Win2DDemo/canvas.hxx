@@ -82,7 +82,7 @@ namespace WarGrey::Win2DDemo {
             Platform::Object^ sender,
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 
-        void delay_pressed(
+        void delay_click(
             Platform::Object^ sender,
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
     };
