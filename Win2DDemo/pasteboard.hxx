@@ -21,6 +21,7 @@ namespace WarGrey::Win2DDemo {
 
     private ref class Pasteboard sealed: public WarGrey::Win2DDemo::Win2DCanvas {
     public:
+        void set_pointer_listener(WarGrey::Win2DDemo::IPointerListener^ listener);
         virtual ~Pasteboard();
 
     public:
@@ -32,9 +33,6 @@ namespace WarGrey::Win2DDemo {
         void set_preferred_min_size(float width, float height);
         void fill_snips_bounds(float* x, float* y, float* width, float* height);
         void size_cache_invalid();
-
-    public:
-        void set_pointer_lisener(WarGrey::Win2DDemo::IPointerListener^ listener);
 
     public:
         read_write_property(Windows::UI::Xaml::Thickness, inset);
@@ -58,7 +56,11 @@ namespace WarGrey::Win2DDemo {
     internal:
         Snip* find_snip(float x, float y);
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
-        void move(Snip* snip, float x, float y);
+        void move(Snip* snip, float x, float y, bool relative = false);
+
+    internal:
+        void set_selected(Snip* snip);
+        void no_selected();
 
     private protected:
         void recalculate_snips_extent_when_invalid();
@@ -67,8 +69,10 @@ namespace WarGrey::Win2DDemo {
     private:
         WarGrey::Win2DDemo::IPointerListener^ listener;
 
-        void do_click(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-        void do_notice(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+        void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+        void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+        void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+        void cleanup_selection(Snip* snip, bool select);
 
     private:
         Windows::UI::Xaml::Thickness padding;
@@ -80,7 +84,8 @@ namespace WarGrey::Win2DDemo {
         float preferred_min_height;
 
     private:
-        IPasteboardLayout* layout;
-        Snip* first_snip;
+        WarGrey::Win2DDemo::IPasteboardLayout* layout;
+        WarGrey::Win2DDemo::Snip* first_snip;
+        WarGrey::Win2DDemo::Snip* captured_snip;
     };
 }

@@ -40,7 +40,7 @@ void WorkSpace::initialize_component(Size region) {
     this->toolbar = ref new Pasteboard(workarea, "toolbar", new VerticalLayout(float(four.Top + four.Bottom)));
     this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
     
-    this->toolbar->set_pointer_lisener(ref new ToolbarListener(this->stage));
+    this->toolbar->set_pointer_listener(ref new ToolbarListener(this->stage));
     this->toolbar->begin_edit_sequence();
     for (int i = 0; i < 4; i++) {
         auto r = (unsigned char)(rand() % 255);

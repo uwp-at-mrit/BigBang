@@ -23,9 +23,11 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 struct SnipInfo {
-    float x = 0;
-    float y = 0;
+    float x = 0.0F;
+    float y = 0.0F;
     bool selected = false;
+    float move_x = 0.0F;
+    float move_y = 0.0F;
 };
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
@@ -35,6 +37,10 @@ Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : W
     this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
     this->layout->refcount += 1;
     this->layout->on_attach_to(this);
+
+    this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::on_pointer_moved);
+    this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::on_pointer_pressed);
+    this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::on_pointer_released);
 }
 
 Pasteboard::~Pasteboard() {
@@ -73,13 +79,18 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
     }
 }
 
-void Pasteboard::move(Snip* snip, float x, float y) {
+void Pasteboard::move(Snip* snip, float x, float y, bool relative) {
     SnipInfo* info = (SnipInfo*)snip->info;
     bool is_invalid = (info == nullptr);
 
     if (is_invalid) {
         info = new SnipInfo();
         snip->info = (void *)info;
+    }
+
+    if (relative) {
+        x += info->x;
+        y += info->y;
     }
 
     if ((info->x != x) || (info->y != y)) {
@@ -116,7 +127,6 @@ Snip* Pasteboard::find_snip(float x, float y) {
     
     return found;
 }
-
 
 void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float Width = this->actual_layer_width;
@@ -252,6 +262,16 @@ void Pasteboard::on_end_edit_sequence() {
     this->recalculate_snips_extent_when_invalid();
 }
 
+void Pasteboard::set_selected(Snip* snip) {
+    if (snip != nullptr) {
+        this->cleanup_selection(snip, true);
+    }
+}
+
+void Pasteboard::no_selected() {
+    this->cleanup_selection(nullptr, false);
+}
+
 /*************************************************************************************************/
 void Pasteboard::inset::set(Thickness v) { this->padding = v; }
 Thickness Pasteboard::inset::get() { return this->padding; }
@@ -278,39 +298,94 @@ void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) +
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
 
 /************************************************************************************************/
-#define DISPATCH_EVENT(do_event, e, ppps) { \
-    auto ppt = e->GetCurrentPoint(this->canvas); \
-    auto ps = (ppps == nullptr) ? ppt->Properties : ppps; \
-    float x = ppt->Position.X; \
-    float y = ppt->Position.Y; \
-    if (this->canvas_position_to_drawing_position(&x, &y)) { \
-        if (!e->Handled) { \
-           e->Handled = do_event(this, x, y, ps, e->KeyModifiers, e->Pointer->PointerDeviceType); \
-        } \
-    } /* TODO: fire unfocus event */ \
-}
-
-void Pasteboard::set_pointer_lisener(IPointerListener^ listener) {
-    if (this->listener == nullptr) {
-        this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::do_click);
-        this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::do_notice);
-        this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::do_click);
-    }
-
+void Pasteboard::set_pointer_listener(IPointerListener^ listener) {
     this->listener = listener;
 }
 
-void Pasteboard::do_notice(Object^ sender, PointerRoutedEventArgs^ e) {
-    DISPATCH_EVENT(this->listener->notice, e, nullptr);
+void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
+    if (!e->Handled) {
+        auto ppt = e->GetCurrentPoint(this->control);
+        float x = ppt->Position.X;
+        float y = ppt->Position.Y;
+
+        if (ppt->Properties->IsLeftButtonPressed) {
+            this->canvas_position_to_drawing_position(&x, &y);
+            
+            if (this->captured_snip != nullptr) {
+                SnipInfo* info = (SnipInfo*)this->captured_snip->info;
+                this->move(this->captured_snip, x - info->move_x, y - info->move_y, true);
+                info->move_x = x;
+                info->move_y = y;
+                this->refresh();
+            }
+        }
+
+        e->Handled = true;
+    }
 }
 
-void Pasteboard::do_click(Object^ sender, PointerRoutedEventArgs^ e) {
-    static PointerPointProperties^ ppps = nullptr;
+void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
+    if ((!e->Handled) && (this->control->CapturePointer(e->Pointer))) {
+        auto ppt = e->GetCurrentPoint(this->control);
+        float x = ppt->Position.X;
+        float y = ppt->Position.Y;
+        
+        if (ppt->Properties->IsLeftButtonPressed && this->canvas_position_to_drawing_position(&x, &y)) {
+            this->captured_snip = this->find_snip(x, y);
 
-    if (ppps == nullptr) {
-        ppps = e->GetCurrentPoint(this->canvas)->Properties;
-    } else {
-        DISPATCH_EVENT(this->listener->action, e, ppps);
-        ppps = nullptr;
+            if (this->captured_snip != nullptr) {
+                SnipInfo* info = (SnipInfo*)this->captured_snip->info;
+                info->move_x = x;
+                info->move_y = y;
+            }
+        }
+
+        e->Handled = true;
+    }
+}
+
+void Pasteboard::on_pointer_released(Object^ sender, PointerRoutedEventArgs^ e) {
+    if (!e->Handled) {
+        if (this->captured_snip != nullptr) {
+            this->captured_snip = nullptr;
+        } else {
+            auto ppt = e->GetCurrentPoint(this->control);
+            float x = ppt->Position.X;
+            float y = ppt->Position.Y;
+
+            if (this->canvas_position_to_drawing_position(&x, &y)) {
+                Snip* snip = this->find_snip(x, y);
+
+                //if (snip != nullptr) {
+                //  this->set_selected(snip);
+                //} else {
+                //  this->no_selected();
+                //}
+            }
+        }
+
+        e->Handled = true;
+    }
+}
+
+void Pasteboard::cleanup_selection(Snip* snip, bool selection) {
+    if (this->first_snip != nullptr) {
+        Snip* child = this->first_snip;
+
+        this->begin_edit_sequence();
+        do {
+            if ((snip == nullptr) || (snip == child)) {
+                SnipInfo* info = (SnipInfo*)child->info;
+                if (!info->selected ^ !selection) { /* xor */
+                    info->selected = selection;
+                    this->refresh();
+                }
+
+                if (snip != nullptr) break;
+            }
+
+            child = child->next;
+        } while (child != this->first_snip);
+        this->end_edit_sequence();
     }
 }
