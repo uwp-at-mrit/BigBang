@@ -1,20 +1,11 @@
 #pragma once
 
 #include "pasteboard.hxx"
-#include "listener/pointer.hxx"
 
 namespace WarGrey::Win2DDemo {
-    private ref class ToolbarListener sealed : public WarGrey::Win2DDemo::IPointerListener {
+    private class ToolbarListener : public WarGrey::Win2DDemo::IPasteboardListener {
     public:
         ToolbarListener(WarGrey::Win2DDemo::Pasteboard^ stage);
-
-    public:
-        bool action(
-            Platform::Object^ self,
-            float x, float y,
-            Windows::UI::Input::PointerPointProperties^ ppps,
-            Windows::System::VirtualKeyModifiers vkms,
-            Windows::Devices::Input::PointerDeviceType type) override;
 
     private:
         WarGrey::Win2DDemo::Pasteboard^ stage;

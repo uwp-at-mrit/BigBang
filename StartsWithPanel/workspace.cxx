@@ -40,13 +40,12 @@ void WorkSpace::initialize_component(Size region) {
     this->toolbar = ref new Pasteboard(workarea, "toolbar", new VerticalLayout(float(four.Top + four.Bottom)));
     this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
     
-    this->toolbar->set_pointer_listener(ref new ToolbarListener(this->stage));
+    this->toolbar->set_pointer_listener(new ToolbarListener(this->stage));
     auto sysUI = ref new Windows::UI::ViewManagement::UISettings();
     this->toolbar->begin_edit_sequence();
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::Hotlight)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::ButtonFace)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::ActiveCaption)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::Window)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight2)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::Accent)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark2)));
     this->toolbar->end_edit_sequence();
 
     this->reflow(region.Width, region.Height);

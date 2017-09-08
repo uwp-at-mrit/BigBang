@@ -1,6 +1,7 @@
 #pragma once
 
 #include "canvas.hxx"
+#include "object.hpp"
 
 namespace WarGrey::Win2DDemo {
     private enum SnipTypes { Text, Icon };
@@ -8,7 +9,7 @@ namespace WarGrey::Win2DDemo {
     private class Snip {
     public:
         virtual SnipTypes get_type() = 0;
-        virtual ~Snip() noexcept {};
+        virtual ~Snip() noexcept { if (info != nullptr) delete info; };
 
     public:
         virtual void fill_extent(float* width = nullptr, float* height = nullptr,
@@ -21,7 +22,7 @@ namespace WarGrey::Win2DDemo {
             = 0;
 
     public:
-        void* info;
+        AbstractObject* info;
 
     public:
         Snip* next;

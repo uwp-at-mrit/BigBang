@@ -18,7 +18,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)digitalclock.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\orientation.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)listener\listener.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />
@@ -29,7 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\orientation.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)listener\pointer.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />

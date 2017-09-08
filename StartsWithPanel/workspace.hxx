@@ -3,7 +3,6 @@
 #include "ui.hxx"
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
-#include "listener/pointer.hxx"
 
 namespace WarGrey::Win2DDemo {
     [::Windows::Foundation::Metadata::WebHostHidden]

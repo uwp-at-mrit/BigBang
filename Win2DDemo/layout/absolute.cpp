@@ -5,6 +5,8 @@
 using namespace std;
 using namespace WarGrey::Win2DDemo;
 
+using namespace Windows::UI::Xaml::Input;
+
 AbsoluteLayout::AbsoluteLayout(float width, float height) : preferred_min_width(width), preferred_min_height(height) {}
 
 void AbsoluteLayout::on_attach_to(Pasteboard^ self) {

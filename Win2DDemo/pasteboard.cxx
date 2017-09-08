@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <WindowsNumerics.h>
 
+#include "object.hpp"
 #include "pasteboard.hxx"
 #include "layout/absolute.hpp"
 
@@ -30,7 +31,7 @@ static ICanvasBrush^ border_color = nullptr;
 static ICanvasBrush^ rubberband_color = nullptr;
 
 /*************************************************************************************************/
-struct SnipInfo {
+struct SnipInfo : public AbstractObject {
     Pasteboard^ master;
     float x = 0.0F;
     float y = 0.0F;
@@ -42,7 +43,7 @@ struct SnipInfo {
 static void bind_snip_owership(Pasteboard^ master, Snip* snip) {
     SnipInfo* info = new SnipInfo();
     info->master = master;
-    snip->info = (void *)info;
+    snip->info = info;
 }
 
 static void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
@@ -91,14 +92,24 @@ Pasteboard::~Pasteboard() {
         do {
             child = this->head_snip;
             this->head_snip = this->head_snip->next;
-            delete SNIP_INFO(child);
-            delete child;
+            delete child; // snip's destructor will delete the associated info object
         } while (this->head_snip != nullptr);
+    }
+
+    if (this->layout_info != nullptr) {
+        delete this->layout_info; // the layout object does not have to take care of the associated info object
     }
 
     this->layout->refcount -= 1;
     if (this->layout->refcount == 0) {
         delete this->layout;
+    }
+
+    if (this->listener != nullptr) {
+        this->listener->refcount -= 1;
+        if (this->listener->refcount == 0) {
+            delete this->layout;
+        }
     }
 }
 
@@ -304,8 +315,9 @@ void Pasteboard::no_selected() {
 }
 
 /************************************************************************************************/
-void Pasteboard::set_pointer_listener(IPointerListener^ listener) {
+void Pasteboard::set_pointer_listener(IPasteboardListener* listener) {
     this->listener = listener;
+    this->listener->refcount += 1;
 }
 
 void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
@@ -317,9 +329,11 @@ void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
         if (ppt->Properties->IsLeftButtonPressed) {
             this->canvas_position_to_drawing_position(&x, &y);
             if (this->rubberband_y == nullptr) {
-                this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
-                this->last_pointer_x = x;
-                this->last_pointer_y = y;
+                if (layout->can_interactive_move(this, e)) {
+                    this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
+                    this->last_pointer_x = x;
+                    this->last_pointer_y = y;
+                }
             } else {
                 (*this->rubberband_x) = x;
                 (*this->rubberband_y) = y;
@@ -461,15 +475,16 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     }
 
     if (this->rubberband_y != nullptr) {
-        if (rubberband_color == nullptr) {
-            auto systemUI = ref new UISettings();
-            rubberband_color = ref new CanvasSolidColorBrush(ds, systemUI->UIElementColor(UIElementType::Highlight));
-        }
         float left = min(this->last_pointer_x, (*this->rubberband_x));
         float top = min(this->last_pointer_y, (*this->rubberband_y));
         float width = abs((*this->rubberband_x) - this->last_pointer_x);
         float height = abs((*this->rubberband_y) - this->last_pointer_y);
         
+        if (rubberband_color == nullptr) {
+            auto systemUI = ref new UISettings();
+            rubberband_color = ref new CanvasSolidColorBrush(ds, systemUI->UIElementColor(UIElementType::Highlight));
+        }
+
         rubberband_color->Opacity = 0.32F;
         ds->FillRectangle(left, top, width, height, rubberband_color);
         rubberband_color->Opacity = 1.00F;

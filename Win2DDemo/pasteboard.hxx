@@ -1,19 +1,32 @@
 #pragma once
 
 #include "canvas.hxx"
+#include "object.hpp"
 #include "snip/snip.hpp"
 
 namespace WarGrey::Win2DDemo {
     ref class Pasteboard;
 
-    private class IPasteboardLayout {
+    private class IPasteboardLayout abstract {
     public:
         virtual void on_attach_to(Pasteboard^ self) {};
         virtual ~IPasteboardLayout() noexcept {};
 
     public:
-        virtual void before_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
-        virtual void after_insert(Pasteboard^ self, Snip* snip, float x, float y) = 0;
+        virtual bool can_interactive_move(Pasteboard^ self, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e) { return true; };
+        virtual bool can_select(Pasteboard^ self, Snip* snip) { return true; };
+
+    public:
+        virtual void before_insert(Pasteboard^ self, Snip* snip, float x, float y) {};
+        virtual void after_insert(Pasteboard^ self, Snip* snip, float x, float y) {};
+
+    public:
+        int refcount = 0;
+    };
+
+    private class IPasteboardListener abstract {
+    public:
+        virtual ~IPasteboardListener() noexcept {};
 
     public:
         int refcount = 0;
@@ -21,7 +34,6 @@ namespace WarGrey::Win2DDemo {
 
     private ref class Pasteboard sealed: public WarGrey::Win2DDemo::Win2DCanvas {
     public:
-        void set_pointer_listener(WarGrey::Win2DDemo::IPointerListener^ listener);
         virtual ~Pasteboard();
 
     public:
@@ -51,7 +63,8 @@ namespace WarGrey::Win2DDemo {
 
     internal:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
-        void* layout_info;
+        void set_pointer_listener(WarGrey::Win2DDemo::IPasteboardListener* listener);
+        AbstractObject* layout_info;
 
     internal:
         Snip* find_snip(float x, float y);
@@ -69,7 +82,7 @@ namespace WarGrey::Win2DDemo {
         void on_end_edit_sequence() override;
 
     private:
-        WarGrey::Win2DDemo::IPointerListener^ listener;
+        WarGrey::Win2DDemo::IPasteboardListener* listener;
         float last_pointer_x;
         float last_pointer_y;
         float rubberband_x[2];

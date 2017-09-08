@@ -1,6 +1,5 @@
 #pragma once
 
-#include "listener/pointer.hxx"
 #include "sugar.hpp"
 
 namespace WarGrey::Win2DDemo {

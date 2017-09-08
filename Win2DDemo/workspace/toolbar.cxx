@@ -10,6 +10,7 @@ ToolbarListener::ToolbarListener(Pasteboard^ stage) {
     this->stage = stage;
 }
 
+/*
 bool ToolbarListener::action(Object^ src, float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
     Pasteboard^ self = dynamic_cast<Pasteboard^>(src);
     bool handling = (self != nullptr);
@@ -23,3 +24,4 @@ bool ToolbarListener::action(Object^ src, float x, float y, PointerPointProperti
 
     return handling;
 }
+*/
