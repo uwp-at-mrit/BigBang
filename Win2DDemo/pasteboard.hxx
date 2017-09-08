@@ -56,9 +56,11 @@ namespace WarGrey::Win2DDemo {
     internal:
         Snip* find_snip(float x, float y);
         void insert(Snip* snip, float x = 0.0, float y = 0.0);
-        void move(Snip* snip, float x, float y, bool relative = false);
+        void move(Snip* snip, float x, float y);
+        void move_to(Snip* snip, float x, float y);
 
     internal:
+        void add_selected(Snip* snip);
         void set_selected(Snip* snip);
         void no_selected();
 
@@ -68,12 +70,13 @@ namespace WarGrey::Win2DDemo {
 
     private:
         WarGrey::Win2DDemo::IPointerListener^ listener;
+        float last_pointer_x;
+        float last_pointer_y;
 
         void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
         void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
         void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-        void cleanup_selection(Snip* snip, bool select);
-
+        
     private:
         Windows::UI::Xaml::Thickness padding;
         float snips_left;
@@ -85,7 +88,6 @@ namespace WarGrey::Win2DDemo {
 
     private:
         WarGrey::Win2DDemo::IPasteboardLayout* layout;
-        WarGrey::Win2DDemo::Snip* first_snip;
-        WarGrey::Win2DDemo::Snip* captured_snip;
+        WarGrey::Win2DDemo::Snip* head_snip;
     };
 }

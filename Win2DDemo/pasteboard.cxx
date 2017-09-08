@@ -22,16 +22,51 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
+#define SNIP_INFO(snip) ((SnipInfo*)snip->info)
+
 struct SnipInfo {
+    Pasteboard^ master;
     float x = 0.0F;
     float y = 0.0F;
     bool selected = false;
-    float move_x = 0.0F;
-    float move_y = 0.0F;
 };
+
+static void bind_snip_owership(Pasteboard^ master, Snip* snip) {
+    SnipInfo* info = new SnipInfo();
+    info->master = master;
+    snip->info = (void *)info;
+}
+
+static void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
+    if (!absolute) {
+        x += info->x;
+        y += info->y;
+    }
+
+    if ((info->x != x) || (info->y != y)) {
+        info->x = x;
+        info->y = y;
+
+        info->master->size_cache_invalid();
+        info->master->refresh();
+    }
+}
+
+static void unsafe_add_selected(SnipInfo* info) {
+    info->selected = true;
+    info->master->refresh();
+}
+
+static void unsafe_set_selected(SnipInfo* info) {
+    info->master->begin_edit_sequence();
+    info->master->no_selected();
+    unsafe_add_selected(info);
+    info->master->end_edit_sequence();
+}
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 
+/*************************************************************************************************/
 Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
     this->padding = default_padding;
     this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
@@ -44,14 +79,15 @@ Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : W
 }
 
 Pasteboard::~Pasteboard() {
-    if (this->first_snip != nullptr) {
+    if (this->head_snip != nullptr) {
         Snip* child = nullptr;
-        this->first_snip->prev->next = nullptr;
+        this->head_snip->prev->next = nullptr;
         do {
-            child = this->first_snip;
-            this->first_snip = this->first_snip->next;
+            child = this->head_snip;
+            this->head_snip = this->head_snip->next;
+            delete SNIP_INFO(child);
             delete child;
-        } while (this->first_snip != nullptr);
+        } while (this->head_snip != nullptr);
     }
 
     this->layout->refcount -= 1;
@@ -64,44 +100,53 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
     if (snip->info == nullptr) { // TODO: should it be copied if one snip can only belongs to one pasteboard
         this->layout->before_insert(this, snip, x, y);
 
-        if (this->first_snip == nullptr) {
-            this->first_snip = snip;
-            snip->prev = this->first_snip;
+        if (this->head_snip == nullptr) {
+            this->head_snip = snip;
+            snip->prev = this->head_snip;
         } else {
-            snip->prev = this->first_snip->prev;
-            this->first_snip->prev->next = snip;
-            this->first_snip->prev = snip;
+            snip->prev = this->head_snip->prev;
+            this->head_snip->prev->next = snip;
+            this->head_snip->prev = snip;
         }
-        snip->next = this->first_snip;
+        snip->next = this->head_snip;
 
-        this->move(snip, x, y);
+        this->begin_edit_sequence();
+        bind_snip_owership(this, snip);
+        unsafe_move_snip_info(SNIP_INFO(snip), x, y, true);
+        this->size_cache_invalid();
+        this->refresh();
+        this->end_edit_sequence();
         this->layout->after_insert(this, snip, x, y);
     }
 }
 
-void Pasteboard::move(Snip* snip, float x, float y, bool relative) {
-    SnipInfo* info = (SnipInfo*)snip->info;
-    bool is_invalid = (info == nullptr);
-
-    if (is_invalid) {
-        info = new SnipInfo();
-        snip->info = (void *)info;
+void Pasteboard::move_to(Snip* snip, float x, float y) {
+    if ((snip != nullptr) && (snip->info != nullptr)) {
+        SnipInfo* info = SNIP_INFO(snip);
+        if (info->master == this) {
+            unsafe_move_snip_info(info, x, y, true);
+        }
     }
+}
 
-    if (relative) {
-        x += info->x;
-        y += info->y;
-    }
+void Pasteboard::move(Snip* snip, float x, float y) {
+    if (snip != nullptr) {
+        SnipInfo* info = SNIP_INFO(snip);
+        if ((info != nullptr) && (info->master == this)) {
+            unsafe_move_snip_info(info, x, y, false);
+        }
+    } else {
+        Snip* child = this->head_snip;
 
-    if ((info->x != x) || (info->y != y)) {
-        info->x = x;
-        info->y = y;
-        is_invalid = true;
-    }
-
-    if (is_invalid) {
-        this->size_cache_invalid();
-        this->refresh();
+        this->begin_edit_sequence();
+        do {
+            SnipInfo* info = SNIP_INFO(child);
+            if (info->selected) {
+                unsafe_move_snip_info(info, x, y, false);
+            }
+            child = child->next;
+        } while (child != this->head_snip);
+        this->end_edit_sequence();
     }
 }
 
@@ -109,11 +154,11 @@ Snip* Pasteboard::find_snip(float x, float y) {
     float width, height;
     Snip* found = nullptr;
 
-    if (this->first_snip != nullptr) {
-        Snip* child = this->first_snip->prev;
+    if (this->head_snip != nullptr) {
+        Snip* child = this->head_snip->prev;
 
         do {
-            SnipInfo* info = (SnipInfo*)child->info;
+            SnipInfo* info = SNIP_INFO(child);
             child->fill_extent(&width, &height);
 
             if ((info->x < x) && (x < (info->x + width)) && (info->y < y) && (y < (info->y + height))) {
@@ -122,7 +167,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
             }
 
             child = child->prev;
-        } while (child != this->first_snip->prev);
+        } while (child != this->head_snip->prev);
     }
     
     return found;
@@ -151,24 +196,27 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
         ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, Colors::RoyalBlue);
     }
 
-    if (this->first_snip != nullptr) {
+    if (this->head_snip != nullptr) {
         auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
-        Snip* child = this->first_snip->prev;
+        Snip* child = this->head_snip->prev;
 
         do {
-            SnipInfo* info = (SnipInfo*)child->info;
+            SnipInfo* info = SNIP_INFO(child);
             child->fill_extent(&width, &height);
-            width = max(Width - info->x, width);
-            height = max(Height - info->y, height);
+            width = min(Width - info->x, width);
+            height = min(Height - info->y, height);
 
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
                 auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
-                child->draw(ds, info->x, info->y, Width, Height);
+                child->draw(ds, info->x, info->y, width, height);
+                if (info->selected) {
+                    ds->FillCircle(info->x + width / 2.0F, info->y + height / 2.0F, 4.0F, Colors::White);
+                }
                 delete layer; /* Must Close the Layer Explicitly */
             }
 
             child = child->prev;
-        } while (child != this->first_snip->prev);
+        } while (child != this->head_snip->prev);
         delete region; /* Must Close the Layer Explicitly */
     }
 }
@@ -228,13 +276,13 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
     if (this->snips_right < this->snips_left) {
         float width, height;
 
-        if (this->first_snip == nullptr) {
+        if (this->head_snip == nullptr) {
             this->snips_left = 0.0F;
             this->snips_top = 0.0F;
             this->snips_right = 0.0F;
             this->snips_bottom = 0.0F;
         } else {
-            Snip* child = this->first_snip;
+            Snip* child = this->head_snip;
 
             this->snips_left = FLT_MAX;
             this->snips_top = FLT_MAX;
@@ -242,7 +290,7 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
             this->snips_bottom = -FLT_MAX;
             
             do {
-                SnipInfo* info = (SnipInfo*)child->info;
+                SnipInfo* info = SNIP_INFO(child);
                 child->fill_extent(&width, &height);
                 this->snips_left = min(this->snips_left, info->x);
                 this->snips_top = min(this->snips_top, info->y);
@@ -250,7 +298,7 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
                 this->snips_bottom = max(this->snips_bottom, info->y + height);
 
                 child = child->next;
-            } while (child != this->first_snip);
+            } while (child != this->head_snip);
         }
 
         this->min_layer_width = max(this->snips_right, this->preferred_min_width);
@@ -262,14 +310,117 @@ void Pasteboard::on_end_edit_sequence() {
     this->recalculate_snips_extent_when_invalid();
 }
 
+void Pasteboard::add_selected(Snip* snip) {
+    if (snip != nullptr) {
+        SnipInfo* info = SNIP_INFO(snip);
+        if ((info != nullptr) && (info->master == this)) {
+            unsafe_add_selected(info);
+        }
+    }
+}
+
 void Pasteboard::set_selected(Snip* snip) {
     if (snip != nullptr) {
-        this->cleanup_selection(snip, true);
+        SnipInfo* info = SNIP_INFO(snip);
+        if ((info != nullptr) && (info->master == this)) {
+            unsafe_set_selected(info);
+        }
     }
 }
 
 void Pasteboard::no_selected() {
-    this->cleanup_selection(nullptr, false);
+    if (this->head_snip != nullptr) {
+        Snip* child = this->head_snip;
+
+        this->begin_edit_sequence();
+        do {
+            SnipInfo* info = SNIP_INFO(child);
+            if (info->selected) {
+                info->selected = false;
+                this->refresh();
+            }
+
+            child = child->next;
+        } while (child != this->head_snip);
+        this->end_edit_sequence();
+    }
+}
+
+/************************************************************************************************/
+void Pasteboard::set_pointer_listener(IPointerListener^ listener) {
+    this->listener = listener;
+}
+
+void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
+    if (!e->Handled) {
+        auto ppt = e->GetCurrentPoint(this->control);
+        float x = ppt->Position.X;
+        float y = ppt->Position.Y;
+
+        if (ppt->Properties->IsLeftButtonPressed) {
+            this->canvas_position_to_drawing_position(&x, &y);
+            this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
+            this->last_pointer_x = x;
+            this->last_pointer_y = y;
+            this->refresh();
+        }
+
+        e->Handled = true;
+    }
+}
+
+void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
+    if ((!e->Handled) && (this->control->CapturePointer(e->Pointer))) {
+        auto ppt = e->GetCurrentPoint(this->control);
+        float x = ppt->Position.X;
+        float y = ppt->Position.Y;
+        
+        if (ppt->Properties->IsLeftButtonPressed) {
+            if (this->canvas_position_to_drawing_position(&x, &y)) {
+                Snip* snip = this->find_snip(x, y);
+
+                if (snip == nullptr) {
+                    this->no_selected();
+                } else {
+                    this->last_pointer_x = x;
+                    this->last_pointer_y = y;
+
+                    if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
+                        unsafe_add_selected(SNIP_INFO(snip));
+                    } else {
+                        SnipInfo* info = SNIP_INFO(snip);
+                        if (!info->selected) {
+                            unsafe_set_selected(SNIP_INFO(snip));
+                        }
+                    }
+                }
+            } else {
+                this->no_selected();
+            }
+        }
+
+        e->Handled = true;
+    }
+}
+
+void Pasteboard::on_pointer_released(Object^ sender, PointerRoutedEventArgs^ e) {
+    if (!e->Handled) {
+        auto ppt = e->GetCurrentPoint(this->control);
+        float x = ppt->Position.X;
+        float y = ppt->Position.Y;
+
+        if (this->canvas_position_to_drawing_position(&x, &y)) {
+            Snip* snip = this->find_snip(x, y);
+
+            //if (snip != nullptr) {
+              //  this->set_selected(snip);
+            //} else {
+              //  this->no_selected();
+            //}
+        }
+
+        e->Handled = true;
+    }
 }
 
 /*************************************************************************************************/
@@ -296,96 +447,3 @@ float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - 
 
 void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
-
-/************************************************************************************************/
-void Pasteboard::set_pointer_listener(IPointerListener^ listener) {
-    this->listener = listener;
-}
-
-void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
-    if (!e->Handled) {
-        auto ppt = e->GetCurrentPoint(this->control);
-        float x = ppt->Position.X;
-        float y = ppt->Position.Y;
-
-        if (ppt->Properties->IsLeftButtonPressed) {
-            this->canvas_position_to_drawing_position(&x, &y);
-            
-            if (this->captured_snip != nullptr) {
-                SnipInfo* info = (SnipInfo*)this->captured_snip->info;
-                this->move(this->captured_snip, x - info->move_x, y - info->move_y, true);
-                info->move_x = x;
-                info->move_y = y;
-                this->refresh();
-            }
-        }
-
-        e->Handled = true;
-    }
-}
-
-void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
-    if ((!e->Handled) && (this->control->CapturePointer(e->Pointer))) {
-        auto ppt = e->GetCurrentPoint(this->control);
-        float x = ppt->Position.X;
-        float y = ppt->Position.Y;
-        
-        if (ppt->Properties->IsLeftButtonPressed && this->canvas_position_to_drawing_position(&x, &y)) {
-            this->captured_snip = this->find_snip(x, y);
-
-            if (this->captured_snip != nullptr) {
-                SnipInfo* info = (SnipInfo*)this->captured_snip->info;
-                info->move_x = x;
-                info->move_y = y;
-            }
-        }
-
-        e->Handled = true;
-    }
-}
-
-void Pasteboard::on_pointer_released(Object^ sender, PointerRoutedEventArgs^ e) {
-    if (!e->Handled) {
-        if (this->captured_snip != nullptr) {
-            this->captured_snip = nullptr;
-        } else {
-            auto ppt = e->GetCurrentPoint(this->control);
-            float x = ppt->Position.X;
-            float y = ppt->Position.Y;
-
-            if (this->canvas_position_to_drawing_position(&x, &y)) {
-                Snip* snip = this->find_snip(x, y);
-
-                //if (snip != nullptr) {
-                //  this->set_selected(snip);
-                //} else {
-                //  this->no_selected();
-                //}
-            }
-        }
-
-        e->Handled = true;
-    }
-}
-
-void Pasteboard::cleanup_selection(Snip* snip, bool selection) {
-    if (this->first_snip != nullptr) {
-        Snip* child = this->first_snip;
-
-        this->begin_edit_sequence();
-        do {
-            if ((snip == nullptr) || (snip == child)) {
-                SnipInfo* info = (SnipInfo*)child->info;
-                if (!info->selected ^ !selection) { /* xor */
-                    info->selected = selection;
-                    this->refresh();
-                }
-
-                if (snip != nullptr) break;
-            }
-
-            child = child->next;
-        } while (child != this->first_snip);
-        this->end_edit_sequence();
-    }
-}

@@ -18,7 +18,7 @@ void VerticalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float y
     float* anchor = (float*)self->layout_info;
 
     snip->fill_extent(&width, &height);
-    self->move(snip, 0.0F, (*anchor) + this->gapsize);
+    self->move_to(snip, 0.0F, (*anchor) + this->gapsize);
     (*anchor) += (gapsize + height);
     self->end_edit_sequence();
 };
