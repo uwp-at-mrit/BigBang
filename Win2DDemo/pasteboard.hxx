@@ -64,7 +64,7 @@ namespace WarGrey::Win2DDemo {
     internal:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
         void set_pointer_listener(WarGrey::Win2DDemo::IPasteboardListener* listener);
-        AbstractObject* layout_info;
+        AbstractObject* layout_info = nullptr;
 
     internal:
         Snip* find_snip(float x, float y);
@@ -102,7 +102,7 @@ namespace WarGrey::Win2DDemo {
         float preferred_min_height;
 
     private:
-        WarGrey::Win2DDemo::IPasteboardLayout* layout;
-        WarGrey::Win2DDemo::Snip* head_snip;
+        WarGrey::Win2DDemo::IPasteboardLayout* layout = nullptr;
+        WarGrey::Win2DDemo::Snip* head_snip = nullptr;
     };
 }

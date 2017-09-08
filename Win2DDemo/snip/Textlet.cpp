@@ -5,8 +5,6 @@
 #include "textlet.hpp"
 #include "canvas.hxx"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::UI;
@@ -36,11 +34,11 @@ Textlet::Textlet(const wchar_t *fmt, ...) {
         }
     } while (pool == nullptr);
 
-    this->change_text(ref new String(pool));
+    this->change_text(ref new Platform::String(pool));
     if (pool != wpool) delete[] pool;
 }
 
-Textlet::Textlet(String^ content) {
+Textlet::Textlet(Platform::String^ content) {
     this->change_text(content);
 }
 
@@ -48,7 +46,7 @@ SnipTypes Textlet::get_type() {
     return SnipTypes::Text;
 }
 
-void Textlet::change_text(String^ content) {
+void Textlet::change_text(Platform::String^ content) {
     this->content = content;
     if (this->layout_config == nullptr) {
         this->layout_config = ref new CanvasTextFormat();

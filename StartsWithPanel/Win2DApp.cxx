@@ -1,9 +1,4 @@
 ﻿#include "workspace.hxx"
-#include "debug.hpp"
-
-using namespace std;
-using namespace Platform;
-using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;
@@ -72,6 +67,6 @@ namespace WarGrey::Win2DDemo {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
-    auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new Win2DApp(); };
+    auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::Win2DDemo::Win2DApp(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

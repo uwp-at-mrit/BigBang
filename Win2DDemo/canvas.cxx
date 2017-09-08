@@ -1,8 +1,6 @@
 #include "ui.hxx"
 #include "pasteboard.hxx"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
 using namespace Windows::Foundation;
 
@@ -28,11 +26,11 @@ CanvasDrawingSession^ WarGrey::Win2DDemo::make_shared_drawing_session() {
     return shared_ds;
 }
 
-TextExtent WarGrey::Win2DDemo::get_text_extent(String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::Win2DDemo::get_text_extent(Platform::String^ message, CanvasTextFormat^ layout_config) {
     return get_text_extent(make_shared_drawing_session(), message, layout_config);
 }
 
-TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, Platform::String^ message, CanvasTextFormat^ layout_config) {
     auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0F, 0.0F);
     Rect logical = layout->LayoutBounds;
     Rect ink = layout->DrawBounds;
@@ -45,7 +43,7 @@ TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, String^
 }
 
 /*************************************************************************************************/
-Win2DCanvas::Win2DCanvas(Panel^ parent, String^ id) {
+Win2DCanvas::Win2DCanvas(Panel^ parent, Platform::String^ id) {
     auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
     auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);
     

@@ -1,10 +1,6 @@
 #include "snip.hpp"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
-
-using namespace Microsoft::Graphics::Canvas;
 
 SnipIcon::~SnipIcon() {}
 

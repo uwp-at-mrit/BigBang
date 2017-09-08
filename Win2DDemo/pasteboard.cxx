@@ -5,8 +5,6 @@
 #include "pasteboard.hxx"
 #include "layout/absolute.hpp"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::System;
@@ -74,7 +72,7 @@ static void unsafe_set_selected(SnipInfo* info) {
 }
 
 /*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
+Pasteboard::Pasteboard(Panel^ parent, Platform::String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
     this->padding = default_padding;
     this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
     this->layout->refcount += 1;
@@ -224,8 +222,8 @@ bool Pasteboard::drawing_position_to_canvas_position(float* x, float* y) {
 }
 
 void Pasteboard::set_preferred_min_size(float min_width, float min_height) {
-    this->preferred_min_width = max(min_width, 0.0F);
-    this->preferred_min_height = max(min_height, 0.0F);
+    this->preferred_min_width = std::max(min_width, 0.0F);
+    this->preferred_min_height = std::max(min_height, 0.0F);
 }
 
 void Pasteboard::fill_snips_bounds(float* x, float* y, float* width, float* height) {
@@ -260,17 +258,17 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
             do {
                 SnipInfo* info = SNIP_INFO(child);
                 child->fill_extent(&width, &height);
-                this->snips_left = min(this->snips_left, info->x);
-                this->snips_top = min(this->snips_top, info->y);
-                this->snips_right = max(this->snips_right, info->x + width);
-                this->snips_bottom = max(this->snips_bottom, info->y + height);
+                this->snips_left = std::min(this->snips_left, info->x);
+                this->snips_top = std::min(this->snips_top, info->y);
+                this->snips_right = std::max(this->snips_right, info->x + width);
+                this->snips_bottom = std::max(this->snips_bottom, info->y + height);
 
                 child = child->next;
             } while (child != this->head_snip);
         }
 
-        this->min_layer_width = max(this->snips_right, this->preferred_min_width);
-        this->min_layer_height = max(this->snips_bottom, this->preferred_min_height);
+        this->min_layer_width = std::max(this->snips_right, this->preferred_min_width);
+        this->min_layer_height = std::max(this->snips_bottom, this->preferred_min_height);
     }
 }
 
@@ -458,8 +456,8 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
         do {
             SnipInfo* info = SNIP_INFO(child);
             child->fill_extent(&width, &height);
-            width = min(Width - info->x, width);
-            height = min(Height - info->y, height);
+            width = std::min(Width - info->x, width);
+            height = std::min(Height - info->y, height);
 
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
                 auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
@@ -475,16 +473,16 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     }
 
     if (this->rubberband_y != nullptr) {
-        float left = min(this->last_pointer_x, (*this->rubberband_x));
-        float top = min(this->last_pointer_y, (*this->rubberband_y));
-        float width = abs((*this->rubberband_x) - this->last_pointer_x);
-        float height = abs((*this->rubberband_y) - this->last_pointer_y);
+        float left = std::min(this->last_pointer_x, (*this->rubberband_x));
+        float top = std::min(this->last_pointer_y, (*this->rubberband_y));
+        float width = std::abs((*this->rubberband_x) - this->last_pointer_x);
+        float height = std::abs((*this->rubberband_y) - this->last_pointer_y);
         
         if (rubberband_color == nullptr) {
             auto systemUI = ref new UISettings();
             rubberband_color = ref new CanvasSolidColorBrush(ds, systemUI->UIElementColor(UIElementType::Highlight));
         }
-
+        
         rubberband_color->Opacity = 0.32F;
         ds->FillRectangle(left, top, width, height, rubberband_color);
         rubberband_color->Opacity = 1.00F;

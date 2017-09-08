@@ -1,6 +1,5 @@
 #include "ui.hxx"
 
-using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 
@@ -11,7 +10,7 @@ using namespace Windows::UI::ViewManagement;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 template <class T>
-static inline T append_child(Panel^ parent, T child, String^ id) {
+static inline T append_child(Panel^ parent, T child, Platform::String^ id) {
     if (id != nullptr)  child->Name = id;
     if (parent != nullptr) parent->Children->Append(child);
 
@@ -47,7 +46,7 @@ StackPanel^ stack_panel(Panel^ parent, Orientation direction, Thickness margin, 
     return append_child<StackPanel^>(parent, child, nullptr);
 }
 
-ToggleSwitch^ toggle_switch(Panel^ parent, String^ id, String^ onCaption, String^ offCaption) {
+ToggleSwitch^ toggle_switch(Panel^ parent, Platform::String^ id, Platform::String^ onCaption, Platform::String^ offCaption) {
     auto child = ref new ToggleSwitch();
 
     child->OnContent = (onCaption == nullptr) ? ((id == nullptr) ? "" : id) : onCaption;
@@ -56,7 +55,7 @@ ToggleSwitch^ toggle_switch(Panel^ parent, String^ id, String^ onCaption, String
     return append_child<ToggleSwitch^>(parent, child, id);
 }
 
-CanvasControl^ gpu_canvas(Panel^ parent, String^ id, CanvasLoadHandler^ do_load, CanvasDrawHandler^ OnDraw) {
+CanvasControl^ gpu_canvas(Panel^ parent, Platform::String^ id, CanvasLoadHandler^ do_load, CanvasDrawHandler^ OnDraw) {
     auto child = ref new CanvasControl();
 
     child->CreateResources += do_load;

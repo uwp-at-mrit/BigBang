@@ -3,8 +3,6 @@
 #include "ui.hxx"
 #include "digitalclock.hxx"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::Foundation;
