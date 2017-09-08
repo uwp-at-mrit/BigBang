@@ -3,7 +3,7 @@
 #include "snip.hpp"
 
 namespace WarGrey::Win2DDemo {
-    WarGrey::Win2DDemo::SnipIcon* make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b);
+    WarGrey::Win2DDemo::SnipIcon* make_textlet_icon(float size, Windows::UI::Color color);
 
     private class Textlet : public WarGrey::Win2DDemo::Snip {
     public:
@@ -29,7 +29,7 @@ namespace WarGrey::Win2DDemo {
 
     private class TextIcon : public WarGrey::Win2DDemo::SnipIcon {
     public:
-        TextIcon(float size, unsigned char r, unsigned char g, unsigned char b);
+        TextIcon(float size, Windows::UI::Color color);
         ~TextIcon() noexcept;
 
     public:

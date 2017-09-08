@@ -72,12 +72,12 @@ void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-SnipIcon* WarGrey::Win2DDemo::make_textlet_icon(float size, unsigned char r, unsigned char g, unsigned char b) {
-    return new TextIcon(size, r, g, b);
+SnipIcon* WarGrey::Win2DDemo::make_textlet_icon(float size, Windows::UI::Color color) {
+    return new TextIcon(size, color);
 }
 
-TextIcon::TextIcon(float size, unsigned char r, unsigned char g, unsigned char b) : SnipIcon(size) {
-    this->foreground = { 255, r, g, b };
+TextIcon::TextIcon(float size, Windows::UI::Color color) : SnipIcon(size) {
+    this->foreground = color;
 }
 
 TextIcon::~TextIcon() {}

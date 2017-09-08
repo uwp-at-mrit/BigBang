@@ -72,6 +72,8 @@ namespace WarGrey::Win2DDemo {
         WarGrey::Win2DDemo::IPointerListener^ listener;
         float last_pointer_x;
         float last_pointer_y;
+        float rubberband_x[2];
+        float* rubberband_y;
 
         void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
         void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);

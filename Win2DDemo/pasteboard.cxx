@@ -11,6 +11,7 @@ using namespace WarGrey::Win2DDemo;
 using namespace Windows::System;
 using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::UI;
@@ -18,18 +19,25 @@ using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::ViewManagement;
 
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-#define SNIP_INFO(snip) ((SnipInfo*)snip->info)
+static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
+static CanvasStrokeStyle^ dash_stroke = nullptr;
+static ICanvasBrush^ border_color = nullptr;
+static ICanvasBrush^ rubberband_color = nullptr;
 
+/*************************************************************************************************/
 struct SnipInfo {
     Pasteboard^ master;
     float x = 0.0F;
     float y = 0.0F;
     bool selected = false;
 };
+
+#define SNIP_INFO(snip) ((SnipInfo*)snip->info)
 
 static void bind_snip_owership(Pasteboard^ master, Snip* snip) {
     SnipInfo* info = new SnipInfo();
@@ -63,8 +71,6 @@ static void unsafe_set_selected(SnipInfo* info) {
     unsafe_add_selected(info);
     info->master->end_edit_sequence();
 }
-
-static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 
 /*************************************************************************************************/
 Pasteboard::Pasteboard(Panel^ parent, String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
@@ -114,7 +120,6 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
         bind_snip_owership(this, snip);
         unsafe_move_snip_info(SNIP_INFO(snip), x, y, true);
         this->size_cache_invalid();
-        this->refresh();
         this->end_edit_sequence();
         this->layout->after_insert(this, snip, x, y);
     }
@@ -135,7 +140,7 @@ void Pasteboard::move(Snip* snip, float x, float y) {
         if ((info != nullptr) && (info->master == this)) {
             unsafe_move_snip_info(info, x, y, false);
         }
-    } else {
+    } else if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
         this->begin_edit_sequence();
@@ -171,54 +176,6 @@ Snip* Pasteboard::find_snip(float x, float y) {
     }
     
     return found;
-}
-
-void Pasteboard::draw(CanvasDrawingSession^ ds) {
-    float Width = this->actual_layer_width;
-    float Height = this->actual_layer_height;
-    float tx = (float)this->inset.Left;
-    float ty = (float)this->inset.Top;
-    float width, height;
-
-    // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
-    ds->Transform = make_float3x2_translation(tx, ty);
-
-    { // draw border and bounds
-        float x, y;
-        auto stroke = ref new CanvasStrokeStyle();
-        stroke->DashStyle = CanvasDashStyle::Dash;
-
-        this->fill_snips_bounds(&x, &y, &width, &height);
-        ds->FillRectangle(x, y, width, height, Colors::Snow);
-        ds->DrawRectangle(x, y, width, height, Colors::MistyRose, 1.0F, stroke);
-
-        ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colors::DeepSkyBlue);
-        ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, Colors::RoyalBlue);
-    }
-
-    if (this->head_snip != nullptr) {
-        auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
-        Snip* child = this->head_snip->prev;
-
-        do {
-            SnipInfo* info = SNIP_INFO(child);
-            child->fill_extent(&width, &height);
-            width = min(Width - info->x, width);
-            height = min(Height - info->y, height);
-
-            if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
-                auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
-                child->draw(ds, info->x, info->y, width, height);
-                if (info->selected) {
-                    ds->FillCircle(info->x + width / 2.0F, info->y + height / 2.0F, 4.0F, Colors::White);
-                }
-                delete layer; /* Must Close the Layer Explicitly */
-            }
-
-            child = child->prev;
-        } while (child != this->head_snip->prev);
-        delete region; /* Must Close the Layer Explicitly */
-    }
 }
 
 bool Pasteboard::canvas_position_to_drawing_position(float* x, float* y) {
@@ -359,10 +316,15 @@ void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
 
         if (ppt->Properties->IsLeftButtonPressed) {
             this->canvas_position_to_drawing_position(&x, &y);
-            this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
-            this->last_pointer_x = x;
-            this->last_pointer_y = y;
-            this->refresh();
+            if (this->rubberband_y == nullptr) {
+                this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
+                this->last_pointer_x = x;
+                this->last_pointer_y = y;
+            } else {
+                (*this->rubberband_x) = x;
+                (*this->rubberband_y) = y;
+                this->refresh();
+            }
         }
 
         e->Handled = true;
@@ -379,12 +341,13 @@ void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
             if (this->canvas_position_to_drawing_position(&x, &y)) {
                 Snip* snip = this->find_snip(x, y);
 
+                this->last_pointer_x = x;
+                this->last_pointer_y = y;
                 if (snip == nullptr) {
+                    this->rubberband_y = this->rubberband_x + 1;
                     this->no_selected();
                 } else {
-                    this->last_pointer_x = x;
-                    this->last_pointer_y = y;
-
+                    this->rubberband_y = nullptr;
                     if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
                         unsafe_add_selected(SNIP_INFO(snip));
                     } else {
@@ -405,18 +368,9 @@ void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
 
 void Pasteboard::on_pointer_released(Object^ sender, PointerRoutedEventArgs^ e) {
     if (!e->Handled) {
-        auto ppt = e->GetCurrentPoint(this->control);
-        float x = ppt->Position.X;
-        float y = ppt->Position.Y;
-
-        if (this->canvas_position_to_drawing_position(&x, &y)) {
-            Snip* snip = this->find_snip(x, y);
-
-            //if (snip != nullptr) {
-              //  this->set_selected(snip);
-            //} else {
-              //  this->no_selected();
-            //}
+        if (this->rubberband_y != nullptr) {
+            this->rubberband_y = nullptr;
+            this->refresh();
         }
 
         e->Handled = true;
@@ -447,3 +401,81 @@ float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - 
 
 void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
+
+/*************************************************************************************************/
+void Pasteboard::draw(CanvasDrawingSession^ ds) {
+    float Width = this->actual_layer_width;
+    float Height = this->actual_layer_height;
+    float tx = (float)this->inset.Left;
+    float ty = (float)this->inset.Top;
+    float width, height;
+
+    // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
+    ds->Transform = make_float3x2_translation(tx, ty);
+    
+    { // draw border
+        if (dash_stroke == nullptr) {
+            auto systemUI = ref new UISettings();
+
+            dash_stroke = ref new CanvasStrokeStyle();
+            dash_stroke->DashStyle = CanvasDashStyle::Dash;
+            border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
+        }
+
+        border_color->Opacity = 0.64F;
+        ds->DrawRectangle(0.0F, 0.0F, Width, Height, border_color, 1.0F, dash_stroke);
+        border_color->Opacity = 1.00F;
+        ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
+    }
+
+    auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
+
+    { // draw minimum enclosing box
+        float x, y;
+
+        this->fill_snips_bounds(&x, &y, &width, &height);
+        ds->FillRectangle(x, y, width, height, Colors::Snow);
+        ds->DrawRectangle(x, y, width, height, Colors::MistyRose, 1.0F, dash_stroke);
+    }
+
+    if (this->head_snip != nullptr) {
+        Snip* child = this->head_snip->prev;
+
+        do {
+            SnipInfo* info = SNIP_INFO(child);
+            child->fill_extent(&width, &height);
+            width = min(Width - info->x, width);
+            height = min(Height - info->y, height);
+
+            if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
+                auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+                child->draw(ds, info->x, info->y, width, height);
+                if (info->selected) {
+                    ds->FillCircle(info->x + width / 2.0F, info->y + height / 2.0F, 4.0F, Colors::White);
+                }
+                delete layer; /* Must Close the Layer Explicitly */
+            }
+
+            child = child->prev;
+        } while (child != this->head_snip->prev);
+    }
+
+    if (this->rubberband_y != nullptr) {
+        if (rubberband_color == nullptr) {
+            auto systemUI = ref new UISettings();
+            rubberband_color = ref new CanvasSolidColorBrush(ds, systemUI->UIElementColor(UIElementType::Highlight));
+        }
+        float left = min(this->last_pointer_x, (*this->rubberband_x));
+        float top = min(this->last_pointer_y, (*this->rubberband_y));
+        float width = abs((*this->rubberband_x) - this->last_pointer_x);
+        float height = abs((*this->rubberband_y) - this->last_pointer_y);
+        
+        rubberband_color->Opacity = 0.32F;
+        ds->FillRectangle(left, top, width, height, rubberband_color);
+        rubberband_color->Opacity = 1.00F;
+        ds->DrawRectangle(left, top, width, height, rubberband_color);
+    }
+
+    delete region; /* Must Close the Layer Explicitly */
+}
+

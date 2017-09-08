@@ -41,14 +41,12 @@ void WorkSpace::initialize_component(Size region) {
     this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
     
     this->toolbar->set_pointer_listener(ref new ToolbarListener(this->stage));
+    auto sysUI = ref new Windows::UI::ViewManagement::UISettings();
     this->toolbar->begin_edit_sequence();
-    for (int i = 0; i < 4; i++) {
-        auto r = (unsigned char)(rand() % 255);
-        auto g = (unsigned char)(rand() % 255);
-        auto b = (unsigned char)(rand() % 255);
-
-        toolbar->insert(make_textlet_icon(64.0F, r, g, b));
-    }
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::Hotlight)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::ButtonFace)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::ActiveCaption)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->UIElementColor(Windows::UI::ViewManagement::UIElementType::Window)));
     this->toolbar->end_edit_sequence();
 
     this->reflow(region.Width, region.Height);
