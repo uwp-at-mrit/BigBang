@@ -7,6 +7,12 @@ namespace WarGrey::Win2DDemo {
     public:
         ToolbarListener(WarGrey::Win2DDemo::Pasteboard^ stage);
 
+    public:
+        bool can_select_multiple(Pasteboard^ master) override;
+
+    public:
+        void after_select(Pasteboard^ master, Snip* snip) override;
+
     private:
         WarGrey::Win2DDemo::Pasteboard^ stage;
     };

@@ -10,7 +10,7 @@ struct LayoutInfo : public AbstractObject {
 
 VerticalLayout::VerticalLayout(float gap_size) : gapsize(gap_size) {};
 
-bool VerticalLayout::can_interactive_move(Pasteboard^ self, PointerRoutedEventArgs^ e) {
+bool VerticalLayout::can_move(Pasteboard^ self, PointerRoutedEventArgs^ e) {
     return false;
 }
 

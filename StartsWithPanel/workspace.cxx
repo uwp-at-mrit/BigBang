@@ -8,9 +8,8 @@
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 
-using namespace std;
-using namespace Platform;
 using namespace WarGrey::Win2DDemo;
+
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;
 
@@ -43,9 +42,13 @@ void WorkSpace::initialize_component(Size region) {
     this->toolbar->set_pointer_listener(new ToolbarListener(this->stage));
     auto sysUI = ref new Windows::UI::ViewManagement::UISettings();
     this->toolbar->begin_edit_sequence();
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight3)));
     toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight2)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight1)));
     toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::Accent)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark1)));
     toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark2)));
+    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark3)));
     this->toolbar->end_edit_sequence();
 
     this->reflow(region.Width, region.Height);

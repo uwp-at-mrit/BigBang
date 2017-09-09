@@ -1,27 +1,15 @@
 #include "toolbar.hxx"
+#include "debug.hpp"
 
 using namespace WarGrey::Win2DDemo;
 
-using namespace Windows::System;
-using namespace Windows::UI::Input;
-using namespace Windows::Devices::Input;
+ToolbarListener::ToolbarListener(Pasteboard^ stage) : stage(stage) {}
 
-ToolbarListener::ToolbarListener(Pasteboard^ stage) {
-    this->stage = stage;
+bool ToolbarListener::can_select_multiple(Pasteboard^ stage) {
+    return false;
 }
 
-/*
-bool ToolbarListener::action(Object^ src, float x, float y, PointerPointProperties^ ppps, VirtualKeyModifiers vkms, PointerDeviceType type) {
-    Pasteboard^ self = dynamic_cast<Pasteboard^>(src);
-    bool handling = (self != nullptr);
-    
-    if (handling) {
-        SnipIcon* snip = (SnipIcon*)self->find_snip(x, y);
-        if (snip != nullptr) {
-            stage->insert(snip->create_snip(), x, y);
-        }
-    }
-
-    return handling;
+void ToolbarListener::after_select(Pasteboard^ master, Snip* snip) {
+    SnipIcon* icon = (SnipIcon*)snip;
+    stage->insert(icon->create_snip(), 0, 0);
 }
-*/

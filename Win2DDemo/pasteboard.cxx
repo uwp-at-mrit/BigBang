@@ -23,10 +23,15 @@ using namespace Windows::UI::ViewManagement;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
+class PlaceHolderListener : public IPasteboardListener {};
+
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 static CanvasStrokeStyle^ dash_stroke = nullptr;
 static ICanvasBrush^ border_color = nullptr;
+static ICanvasBrush^ inset_border_color = nullptr;
 static ICanvasBrush^ rubberband_color = nullptr;
+
+#define REMOVE(ptr, refcount) if (ptr->refcount <= 1) { delete ptr; } else { ptr->refcount -= 1; }
 
 /*************************************************************************************************/
 struct SnipInfo : public AbstractObject {
@@ -38,13 +43,13 @@ struct SnipInfo : public AbstractObject {
 
 #define SNIP_INFO(snip) ((SnipInfo*)snip->info)
 
-static void bind_snip_owership(Pasteboard^ master, Snip* snip) {
+static inline void bind_snip_owership(Pasteboard^ master, Snip* snip) {
     SnipInfo* info = new SnipInfo();
     info->master = master;
     snip->info = info;
 }
 
-static void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
+static inline void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -59,15 +64,17 @@ static void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolut
     }
 }
 
-static void unsafe_add_selected(SnipInfo* info) {
+static inline void unsafe_add_selected(IPasteboardListener* listener, Snip* snip, SnipInfo* info) {
+    listener->before_select(info->master, snip);
     info->selected = true;
     info->master->refresh();
+    listener->after_select(info->master, snip);
 }
 
-static void unsafe_set_selected(SnipInfo* info) {
+static inline void unsafe_set_selected(IPasteboardListener* listener, Snip* snip, SnipInfo* info) {
     info->master->begin_edit_sequence();
     info->master->no_selected();
-    unsafe_add_selected(info);
+    unsafe_add_selected(listener, snip, info);
     info->master->end_edit_sequence();
 }
 
@@ -81,6 +88,9 @@ Pasteboard::Pasteboard(Panel^ parent, Platform::String^ id, IPasteboardLayout* l
     this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::on_pointer_moved);
     this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::on_pointer_pressed);
     this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::on_pointer_released);
+
+    this->listener = nullptr;
+    this->set_pointer_listener(new PlaceHolderListener());
 }
 
 Pasteboard::~Pasteboard() {
@@ -98,17 +108,8 @@ Pasteboard::~Pasteboard() {
         delete this->layout_info; // the layout object does not have to take care of the associated info object
     }
 
-    this->layout->refcount -= 1;
-    if (this->layout->refcount == 0) {
-        delete this->layout;
-    }
-
-    if (this->listener != nullptr) {
-        this->listener->refcount -= 1;
-        if (this->listener->refcount == 0) {
-            delete this->layout;
-        }
-    }
+    REMOVE(this->layout, refcount);
+    REMOVE(this->listener, refcount);
 }
 
 void Pasteboard::insert(Snip* snip, float x, float y) {
@@ -129,6 +130,7 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
         bind_snip_owership(this, snip);
         unsafe_move_snip_info(SNIP_INFO(snip), x, y, true);
         this->size_cache_invalid();
+        this->refresh();
         this->end_edit_sequence();
         this->layout->after_insert(this, snip, x, y);
     }
@@ -279,8 +281,10 @@ void Pasteboard::on_end_edit_sequence() {
 void Pasteboard::add_selected(Snip* snip) {
     if (snip != nullptr) {
         SnipInfo* info = SNIP_INFO(snip);
-        if ((info != nullptr) && (info->master == this)) {
-            unsafe_add_selected(info);
+        if ((info != nullptr) && (info->master == this) && (!info->selected)) {
+            if (this->rubberband_allowed && this->listener->can_select(this, snip)) {
+                unsafe_add_selected(this->listener, snip, info);
+            }
         }
     }
 }
@@ -288,8 +292,10 @@ void Pasteboard::add_selected(Snip* snip) {
 void Pasteboard::set_selected(Snip* snip) {
     if (snip != nullptr) {
         SnipInfo* info = SNIP_INFO(snip);
-        if ((info != nullptr) && (info->master == this)) {
-            unsafe_set_selected(info);
+        if ((info != nullptr) && (info->master == this) && (!info->selected)) {
+            if (this->listener->can_select(this, snip)) {
+                unsafe_set_selected(this->listener, snip, info);
+            }
         }
     }
 }
@@ -302,8 +308,10 @@ void Pasteboard::no_selected() {
         do {
             SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
+                this->listener->before_deselect(this, child);
                 info->selected = false;
                 this->refresh();
+                this->listener->after_deselect(this, child);
             }
 
             child = child->next;
@@ -314,8 +322,13 @@ void Pasteboard::no_selected() {
 
 /************************************************************************************************/
 void Pasteboard::set_pointer_listener(IPasteboardListener* listener) {
+    if (this->listener != nullptr) {
+        REMOVE(this->listener, refcount);
+    }
+
     this->listener = listener;
     this->listener->refcount += 1;
+    this->rubberband_allowed = this->listener->can_select_multiple(this);
 }
 
 void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
@@ -327,7 +340,7 @@ void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
         if (ppt->Properties->IsLeftButtonPressed) {
             this->canvas_position_to_drawing_position(&x, &y);
             if (this->rubberband_y == nullptr) {
-                if (layout->can_interactive_move(this, e)) {
+                if (layout->can_move(this, e)) {
                     this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
                     this->last_pointer_x = x;
                     this->last_pointer_y = y;
@@ -355,17 +368,20 @@ void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
 
                 this->last_pointer_x = x;
                 this->last_pointer_y = y;
+
                 if (snip == nullptr) {
-                    this->rubberband_y = this->rubberband_x + 1;
+                    this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
                     this->no_selected();
                 } else {
                     this->rubberband_y = nullptr;
-                    if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
-                        unsafe_add_selected(SNIP_INFO(snip));
-                    } else {
-                        SnipInfo* info = SNIP_INFO(snip);
-                        if (!info->selected) {
-                            unsafe_set_selected(SNIP_INFO(snip));
+                    SnipInfo* info = SNIP_INFO(snip);
+                    if ((!info->selected) && this->listener->can_select(this, snip)) {
+                        if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
+                            if (this->rubberband_allowed) {
+                                unsafe_add_selected(this->listener, snip, info);
+                            }
+                        } else {
+                            unsafe_set_selected(this->listener, snip, info);
                         }
                     }
                 }
@@ -425,18 +441,17 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
     ds->Transform = make_float3x2_translation(tx, ty);
     
-    { // draw border
+    { // draw borders
         if (dash_stroke == nullptr) {
             auto systemUI = ref new UISettings();
 
             dash_stroke = ref new CanvasStrokeStyle();
             dash_stroke->DashStyle = CanvasDashStyle::Dash;
-            border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
+            inset_border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
+            border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::AccentDark1));
         }
 
-        border_color->Opacity = 0.64F;
-        ds->DrawRectangle(0.0F, 0.0F, Width, Height, border_color, 1.0F, dash_stroke);
-        border_color->Opacity = 1.00F;
+        ds->DrawRectangle(0.0F, 0.0F, Width, Height, inset_border_color, 1.0F, dash_stroke);
         ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
     }
 
