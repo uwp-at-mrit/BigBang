@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pasteboard.hxx"
+#include "layout.hpp"
 
 namespace WarGrey::Win2DDemo {
     private class AbsoluteLayout : public WarGrey::Win2DDemo::IPasteboardLayout {

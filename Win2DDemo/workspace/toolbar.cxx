@@ -1,5 +1,6 @@
 #include "toolbar.hxx"
-#include "debug.hpp"
+#include "pasteboard.hxx"
+#include "snip/snip.hpp"
 
 using namespace WarGrey::Win2DDemo;
 

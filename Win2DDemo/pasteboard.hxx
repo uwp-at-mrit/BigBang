@@ -1,46 +1,12 @@
 #pragma once
 
+#include "sugar.hpp"
 #include "canvas.hxx"
-#include "object.hpp"
+#include "forward.hxx"
 #include "snip/snip.hpp"
+#include "workspace/listener.hpp"
 
 namespace WarGrey::Win2DDemo {
-    ref class Pasteboard;
-
-    private class IPasteboardLayout abstract {
-    public:
-        virtual void on_attach_to(Pasteboard^ master) {};
-        virtual ~IPasteboardLayout() noexcept {};
-
-    public:
-        virtual bool can_move(Pasteboard^ master, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e) { return true; };
-
-    public:
-        virtual void before_insert(Pasteboard^ master, Snip* snip, float x, float y) {};
-        virtual void after_insert(Pasteboard^ master, Snip* snip, float x, float y) {};
-
-    public:
-        int refcount = 0;
-    };
-
-    private class IPasteboardListener abstract {
-    public:
-        virtual ~IPasteboardListener() noexcept {};
-
-    public:
-        virtual bool can_select_multiple(Pasteboard^ master) { return true; };
-        virtual bool can_select(Pasteboard^ master, Snip* snip) { return true; };
-
-    public:
-        virtual void before_select(Pasteboard^ master, Snip* snip) {};
-        virtual void after_select(Pasteboard^ master, Snip* snip) {};
-        virtual void before_deselect(Pasteboard^ master, Snip* snip) {};
-        virtual void after_deselect(Pasteboard^ master, Snip* snip) {};
-
-    public:
-        int refcount = 0;
-    };
-
     private ref class Pasteboard sealed: public WarGrey::Win2DDemo::Win2DCanvas {
     public:
         virtual ~Pasteboard();

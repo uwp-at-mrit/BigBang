@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "absolute.hpp"
+#include "pasteboard.hxx"
 
 using namespace WarGrey::Win2DDemo;
 

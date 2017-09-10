@@ -26,12 +26,15 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)digitalclock.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)forward.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)layout\layout.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\orientation.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)workspace\listener.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)workspace\toolbar.hxx" />
   </ItemGroup>
 </Project>

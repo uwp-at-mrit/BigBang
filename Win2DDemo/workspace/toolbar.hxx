@@ -1,6 +1,7 @@
 #pragma once
 
-#include "pasteboard.hxx"
+#include "forward.hxx"
+#include "workspace/listener.hpp"
 
 namespace WarGrey::Win2DDemo {
     private class ToolbarListener : public WarGrey::Win2DDemo::IPasteboardListener {

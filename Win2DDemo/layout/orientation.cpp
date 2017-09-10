@@ -1,3 +1,5 @@
+#include "object.hpp"
+#include "pasteboard.hxx"
 #include "orientation.hpp"
 
 using namespace WarGrey::Win2DDemo;
