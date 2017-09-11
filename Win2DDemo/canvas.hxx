@@ -1,15 +1,16 @@
 #pragma once
 
 #include "sugar.hpp"
+#include "canvas.hxx"
 
 namespace WarGrey::Win2DDemo {
     public value struct TextExtent {
         float width;
         float height;
-        float descent;
-        float space;
-        float lspace;
+        float tspace;
         float rspace;
+        float bspace;
+        float lspace;
     };
 
     Microsoft::Graphics::Canvas::CanvasDrawingSession^ make_shared_drawing_session();

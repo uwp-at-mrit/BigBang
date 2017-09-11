@@ -2,11 +2,11 @@
 
 using namespace WarGrey::Win2DDemo;
 
+using namespace Windows::UI;
+
 SnipIcon::~SnipIcon() {}
 
-SnipIcon::SnipIcon(float size) {
-    this->size = size;
-}
+SnipIcon::SnipIcon(float size, Color color) : size(size), color(color) {}
 
 SnipTypes SnipIcon::get_type() {
     return SnipTypes::Icon;

@@ -34,12 +34,12 @@ TextExtent WarGrey::Win2DDemo::get_text_extent(CanvasDrawingSession^ ds, Platfor
     auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0F, 0.0F);
     Rect logical = layout->LayoutBounds;
     Rect ink = layout->DrawBounds;
-    float space = ink.Y - logical.Y;
-    float descent = logical.Height - ink.Height - space;
+    float top = ink.Y - logical.Y;
+    float bottom = logical.Height - ink.Height - top;
     float left = ink.X - logical.X;
     float right = logical.Width - ink.Width - left;
 
-    return { logical.Width, logical.Height, descent, space, left, right };
+    return { logical.Width, logical.Height, top, right, bottom, left };
 }
 
 /*************************************************************************************************/

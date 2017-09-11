@@ -1,6 +1,7 @@
 #pragma once
 
 #include "snip.hpp"
+#include "canvas.hxx"
 
 namespace WarGrey::Win2DDemo {
     WarGrey::Win2DDemo::SnipIcon* make_textlet_icon(float size, Windows::UI::Color color);
@@ -39,6 +40,8 @@ namespace WarGrey::Win2DDemo {
         Snip* create_snip() override;
 
     private:
-        Windows::UI::Color foreground;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+        float xoffset;
+        float yoffset;
     };
 }

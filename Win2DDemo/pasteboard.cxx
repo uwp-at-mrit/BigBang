@@ -171,7 +171,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
     Snip* found = nullptr;
 
     if (this->head_snip != nullptr) {
-        Snip* child = this->head_snip->prev;
+        Snip* child = this->head_snip;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
@@ -182,8 +182,8 @@ Snip* Pasteboard::find_snip(float x, float y) {
                 break;
             }
 
-            child = child->prev;
-        } while (child != this->head_snip->prev);
+            child = child->next;
+        } while (child != this->head_snip);
     }
     
     return found;
@@ -466,7 +466,7 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     }
 
     if (this->head_snip != nullptr) {
-        Snip* child = this->head_snip->prev;
+        Snip* child = this->head_snip;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
@@ -483,8 +483,8 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
                 delete layer; /* Must Close the Layer Explicitly */
             }
 
-            child = child->prev;
-        } while (child != this->head_snip->prev);
+            child = child->next;
+        } while (child != this->head_snip);
     }
 
     if (this->rubberband_y != nullptr) {

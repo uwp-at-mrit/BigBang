@@ -32,7 +32,7 @@ namespace WarGrey::Win2DDemo {
     private class SnipIcon : public Snip {
     public:
         ~SnipIcon() noexcept;
-        SnipIcon(float size);
+        SnipIcon(float size, Windows::UI::Color color);
         Win2DDemo::SnipTypes get_type() override;
 
     public:
@@ -45,5 +45,6 @@ namespace WarGrey::Win2DDemo {
 
     protected:
         float size;
+        Windows::UI::Color color;
     };
 }

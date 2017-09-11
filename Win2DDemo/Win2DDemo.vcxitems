@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)workspace\toolbar.cxx" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +35,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)workspace\listener.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)workspace\toolbar.hxx" />
   </ItemGroup>

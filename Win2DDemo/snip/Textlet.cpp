@@ -3,11 +3,11 @@
 #include <cstdlib>
 
 #include "textlet.hpp"
-#include "canvas.hxx"
 
 using namespace WarGrey::Win2DDemo;
 
 using namespace Windows::UI;
+using namespace Windows::UI::Text;
 using namespace Windows::UI::Xaml::Media;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -59,8 +59,8 @@ void Textlet::fill_extent(float* width, float* height, float* descent, float* sp
 
     if (width != nullptr) (*width) = ts.width;
     if (height != nullptr) (*height) = ts.height;
-    if (descent != nullptr) (*descent) = ts.descent;
-    if (space != nullptr) (*space) = ts.space;
+    if (descent != nullptr) (*descent) = ts.bspace;
+    if (space != nullptr) (*space) = ts.tspace;
     if (lspace != nullptr) (*lspace) = ts.lspace;
     if (rspace != nullptr) (*rspace) = ts.rspace;
 };
@@ -74,14 +74,24 @@ SnipIcon* WarGrey::Win2DDemo::make_textlet_icon(float size, Windows::UI::Color c
     return new TextIcon(size, color);
 }
 
-TextIcon::TextIcon(float size, Windows::UI::Color color) : SnipIcon(size) {
-    this->foreground = color;
+TextIcon::TextIcon(float size, Windows::UI::Color color) : SnipIcon(size, color) {
+    this->label_font = ref new CanvasTextFormat();
+    this->label_font->WordWrapping = CanvasWordWrapping::NoWrap;
+    this->label_font->FontFamily = "Symbol";
+    this->label_font->FontStretch = FontStretch::ExtraExpanded;
+    this->label_font->FontSize = size;
+    
+    TextExtent te = get_text_extent("A", this->label_font);
+    this->xoffset = (size - te.width) / 2;
+    this->yoffset = - te.tspace / 2;
+    // TODO: find a function to compute the right font metrics.
 }
 
 TextIcon::~TextIcon() {}
 
 void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->FillRectangle(x, y, size, size, this->foreground);
+    ds->DrawText("A", x + this->xoffset, y + this->yoffset, SnipIcon::color, this->label_font);
+    ds->DrawRectangle(x, y, size, size, SnipIcon::color);
 }
 
 Snip* TextIcon::create_snip() {
