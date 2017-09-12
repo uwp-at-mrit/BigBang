@@ -4,6 +4,7 @@
 #include "workspace.hxx"
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
+#include "snip/alarmlet.hpp"
 #include "workspace/toolbar.hxx"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
@@ -18,6 +19,7 @@ using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
+using namespace Windows::UI::ViewManagement;
 
 WorkSpace::WorkSpace() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
@@ -40,15 +42,12 @@ void WorkSpace::initialize_component(Size region) {
     this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
     
     this->toolbar->set_pointer_listener(new ToolbarListener(this->stage));
-    auto sysUI = ref new Windows::UI::ViewManagement::UISettings();
+    auto sysUI = ref new UISettings();
+    float icon_size = 64.0F;
+    Color icon_color = sysUI->UIElementColor(UIElementType::ActiveCaption);
     this->toolbar->begin_edit_sequence();
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight3)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight2)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentLight1)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::Accent)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark1)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark2)));
-    toolbar->insert(make_textlet_icon(64.0F, sysUI->GetColorValue(Windows::UI::ViewManagement::UIColorType::AccentDark3)));
+    toolbar->insert(make_alarmlet_icon(icon_size, icon_color));
+    toolbar->insert(make_textlet_icon(icon_size, icon_color));
     this->toolbar->end_edit_sequence();
 
     this->reflow(region.Width, region.Height);
