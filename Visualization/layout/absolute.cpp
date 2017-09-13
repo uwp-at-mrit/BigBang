@@ -3,7 +3,7 @@
 #include "absolute.hpp"
 #include "pasteboard.hxx"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Input;
 

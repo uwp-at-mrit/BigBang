@@ -1,7 +1,7 @@
 #include "ui.hxx"
 #include "pasteboard.hxx"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 
 using namespace Windows::UI;
@@ -16,7 +16,7 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
 static CanvasDrawingSession^ shared_ds;
 
-CanvasDrawingSession^ WarGrey::WinACS::make_shared_drawing_session() {
+CanvasDrawingSession^ WarGrey::SCADA::make_shared_drawing_session() {
     if (shared_ds == nullptr) {
         auto sharedDevice = CanvasDevice::GetSharedDevice();
         auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0F, 96.0F);
@@ -26,11 +26,11 @@ CanvasDrawingSession^ WarGrey::WinACS::make_shared_drawing_session() {
     return shared_ds;
 }
 
-TextExtent WarGrey::WinACS::get_text_extent(Platform::String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::SCADA::get_text_extent(Platform::String^ message, CanvasTextFormat^ layout_config) {
     return get_text_extent(make_shared_drawing_session(), message, layout_config);
 }
 
-TextExtent WarGrey::WinACS::get_text_extent(CanvasDrawingSession^ ds, Platform::String^ message, CanvasTextFormat^ layout_config) {
+TextExtent WarGrey::SCADA::get_text_extent(CanvasDrawingSession^ ds, Platform::String^ message, CanvasTextFormat^ layout_config) {
     auto layout = ref new CanvasTextLayout(ds, message, layout_config, 0.0F, 0.0F);
     Rect logical = layout->LayoutBounds;
     Rect ink = layout->DrawBounds;

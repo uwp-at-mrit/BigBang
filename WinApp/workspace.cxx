@@ -9,7 +9,7 @@
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;

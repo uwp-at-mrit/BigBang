@@ -4,7 +4,7 @@
 
 #include "textlet.hpp"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Text;
@@ -70,7 +70,7 @@ void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-SnipIcon* WarGrey::WinACS::make_textlet_icon(float size, Windows::UI::Color color) {
+SnipIcon* WarGrey::SCADA::make_textlet_icon(float size, Windows::UI::Color color) {
     return new TextIcon(size, color);
 }
 

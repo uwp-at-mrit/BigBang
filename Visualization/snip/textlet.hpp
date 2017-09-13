@@ -3,15 +3,15 @@
 #include "snip.hpp"
 #include "canvas.hxx"
 
-namespace WarGrey::WinACS {
-    WarGrey::WinACS::SnipIcon* make_textlet_icon(float size, Windows::UI::Color color);
+namespace WarGrey::SCADA {
+    WarGrey::SCADA::SnipIcon* make_textlet_icon(float size, Windows::UI::Color color);
 
-    private class Textlet : public WarGrey::WinACS::Snip {
+    private class Textlet : public WarGrey::SCADA::Snip {
     public:
         ~Textlet() noexcept;
         Textlet(const wchar_t* fmt, ...);
         Textlet(Platform::String^ content = "");
-        WarGrey::WinACS::SnipTypes get_type() override;
+        WarGrey::SCADA::SnipTypes get_type() override;
 
     public:
         void change_text(Platform::String^ content);
@@ -28,7 +28,7 @@ namespace WarGrey::WinACS {
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config;
     };
 
-    private class TextIcon : public WarGrey::WinACS::SnipIcon {
+    private class TextIcon : public WarGrey::SCADA::SnipIcon {
     public:
         TextIcon(float size, Windows::UI::Color color);
         ~TextIcon() noexcept;

@@ -1,6 +1,6 @@
 #include "snip.hpp"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 

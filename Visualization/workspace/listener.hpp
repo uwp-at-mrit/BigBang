@@ -2,7 +2,7 @@
 
 #include "forward.hxx"
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     private class IPasteboardListener abstract {
     public:
         virtual ~IPasteboardListener() noexcept {};

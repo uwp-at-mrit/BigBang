@@ -2,8 +2,8 @@
 
 #include "layout.hpp"
 
-namespace WarGrey::WinACS {
-    private class VerticalLayout : public WarGrey::WinACS::IPasteboardLayout {
+namespace WarGrey::SCADA {
+    private class VerticalLayout : public WarGrey::SCADA::IPasteboardLayout {
     public:
         VerticalLayout(float gap_size);
 
@@ -18,7 +18,7 @@ namespace WarGrey::WinACS {
         float gapsize;
     };
 
-    private class HorizontalLayout : public WarGrey::WinACS::IPasteboardLayout {
+    private class HorizontalLayout : public WarGrey::SCADA::IPasteboardLayout {
     public:
         HorizontalLayout(float gap_size);
 

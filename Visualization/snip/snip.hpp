@@ -3,7 +3,7 @@
 #include "canvas.hxx"
 #include "object.hpp"
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     private enum SnipTypes { Text, Icon };
 
     private class Snip {
@@ -33,7 +33,7 @@ namespace WarGrey::WinACS {
     public:
         ~SnipIcon() noexcept;
         SnipIcon(float size, Windows::UI::Color color);
-        WinACS::SnipTypes get_type() override;
+        SCADA::SnipTypes get_type() override;
 
     public:
         void fill_extent(float* w = nullptr, float* h = nullptr,

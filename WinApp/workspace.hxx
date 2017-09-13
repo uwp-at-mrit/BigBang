@@ -4,7 +4,7 @@
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
     public ref class WorkSpace sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
@@ -16,8 +16,8 @@ namespace WarGrey::WinACS {
         void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
     private:
-        WarGrey::WinACS::DigitalClock^ system_clock;
-        WarGrey::WinACS::Pasteboard^ toolbar;
-        WarGrey::WinACS::Pasteboard^ stage;
+        WarGrey::SCADA::DigitalClock^ system_clock;
+        WarGrey::SCADA::Pasteboard^ toolbar;
+        WarGrey::SCADA::Pasteboard^ stage;
     };
 }

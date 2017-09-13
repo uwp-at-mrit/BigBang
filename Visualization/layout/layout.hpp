@@ -2,7 +2,7 @@
 
 #include "forward.hxx"
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     private class IPasteboardLayout abstract {
     public:
         virtual void on_attach_to(Pasteboard^ master) {};

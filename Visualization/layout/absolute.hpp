@@ -2,8 +2,8 @@
 
 #include "layout.hpp"
 
-namespace WarGrey::WinACS {
-    private class AbsoluteLayout : public WarGrey::WinACS::IPasteboardLayout {
+namespace WarGrey::SCADA {
+    private class AbsoluteLayout : public WarGrey::SCADA::IPasteboardLayout {
     public:
         AbsoluteLayout(float min_width = 0.0F, float min_height = 0.0F);
         void on_attach_to(Pasteboard^ master) override;

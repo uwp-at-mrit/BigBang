@@ -2,14 +2,14 @@
 
 #include "snip.hpp"
 
-namespace WarGrey::WinACS {
-    WarGrey::WinACS::SnipIcon* make_alarmlet_icon(float size, Windows::UI::Color color);
+namespace WarGrey::SCADA {
+    WarGrey::SCADA::SnipIcon* make_alarmlet_icon(float size, Windows::UI::Color color);
 
-    private class Alarmlet : public WarGrey::WinACS::Snip {
+    private class Alarmlet : public WarGrey::SCADA::Snip {
     public:
         ~Alarmlet() noexcept;
         Alarmlet(float size);
-        WarGrey::WinACS::SnipTypes get_type() override;
+        WarGrey::SCADA::SnipTypes get_type() override;
 
     public:
         void change_text(Platform::String^ content);
@@ -25,7 +25,7 @@ namespace WarGrey::WinACS {
         float size;
     };
 
-    private class AlarmIcon : public WarGrey::WinACS::SnipIcon {
+    private class AlarmIcon : public WarGrey::SCADA::SnipIcon {
     public:
         AlarmIcon(float size, Windows::UI::Color color);
         ~AlarmIcon() noexcept;

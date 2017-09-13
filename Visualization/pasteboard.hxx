@@ -6,8 +6,8 @@
 #include "snip/snip.hpp"
 #include "workspace/listener.hpp"
 
-namespace WarGrey::WinACS {
-    private ref class Pasteboard sealed: public WarGrey::WinACS::Win2DCanvas {
+namespace WarGrey::SCADA {
+    private ref class Pasteboard sealed: public WarGrey::SCADA::Win2DCanvas {
     public:
         virtual ~Pasteboard();
 
@@ -38,7 +38,7 @@ namespace WarGrey::WinACS {
 
     internal:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
-        void set_pointer_listener(WarGrey::WinACS::IPasteboardListener* listener);
+        void set_pointer_listener(WarGrey::SCADA::IPasteboardListener* listener);
         AbstractObject* layout_info = nullptr;
 
     internal:
@@ -57,7 +57,7 @@ namespace WarGrey::WinACS {
         void on_end_edit_sequence() override;
 
     private:
-        WarGrey::WinACS::IPasteboardListener* listener;
+        WarGrey::SCADA::IPasteboardListener* listener;
         float last_pointer_x;
         float last_pointer_y;
         float rubberband_x[2];
@@ -78,7 +78,7 @@ namespace WarGrey::WinACS {
         float preferred_min_height;
 
     private:
-        WarGrey::WinACS::IPasteboardLayout* layout = nullptr;
-        WarGrey::WinACS::Snip* head_snip = nullptr;
+        WarGrey::SCADA::IPasteboardLayout* layout = nullptr;
+        WarGrey::SCADA::Snip* head_snip = nullptr;
     };
 }

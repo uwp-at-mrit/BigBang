@@ -8,7 +8,7 @@ using namespace Windows::ApplicationModel::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::ViewManagement;
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     private ref class Win2DApp sealed : public Application {
     protected:
         void Win2DAppMain(ApplicationView^ self, WorkSpace^ workspace) {
@@ -67,6 +67,6 @@ namespace WarGrey::WinACS {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
-    auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::WinACS::Win2DApp(); };
+    auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Win2DApp(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

@@ -5,7 +5,7 @@
 #include "alarmlet.hpp"
 #include "canvas.hxx"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml::Media;
@@ -49,7 +49,7 @@ void Alarmlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-SnipIcon* WarGrey::WinACS::make_alarmlet_icon(float size, Windows::UI::Color color) {
+SnipIcon* WarGrey::SCADA::make_alarmlet_icon(float size, Windows::UI::Color color) {
     return new AlarmIcon(size, color);
 }
 

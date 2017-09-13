@@ -3,7 +3,7 @@
 #include "sugar.hpp"
 #include "canvas.hxx"
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     public value struct TextExtent {
         float width;
         float height;

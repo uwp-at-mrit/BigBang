@@ -3,7 +3,7 @@
 #include "ui.hxx"
 #include "digitalclock.hxx"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 using namespace Windows::Globalization;

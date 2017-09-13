@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     ref class Pasteboard;
     class IPasteboardLayout;
     class IPasteboardListener;

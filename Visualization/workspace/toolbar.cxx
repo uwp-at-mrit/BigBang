@@ -2,7 +2,7 @@
 #include "pasteboard.hxx"
 #include "snip/snip.hpp"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 ToolbarListener::ToolbarListener(Pasteboard^ stage) : stage(stage) {}
 

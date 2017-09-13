@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WarGrey::WinACS {
+namespace WarGrey::SCADA {
     private class AbstractObject abstract {
     public:
         virtual ~AbstractObject() noexcept {};

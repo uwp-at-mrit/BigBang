@@ -2,7 +2,7 @@
 #include "pasteboard.hxx"
 #include "orientation.hpp"
 
-using namespace WarGrey::WinACS;
+using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Input;
 
