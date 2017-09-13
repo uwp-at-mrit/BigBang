@@ -3,7 +3,7 @@
   <Identity Name="c66f2f20-f815-46e2-b58f-0afe3c0fcd34" Publisher="CN=juzhe" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="c66f2f20-f815-46e2-b58f-0afe3c0fcd34" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>WinACS</DisplayName>
+    <DisplayName>WinSCADA</DisplayName>
     <PublisherDisplayName>wargrey</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -14,8 +14,8 @@
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="WinACS.App">
-      <uap:VisualElements DisplayName="WinACS" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Universary Windows Automatic Control System" BackgroundColor="transparent">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="WinSCADA.App">
+      <uap:VisualElements DisplayName="WinSCADA" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Supervisory Control and Data Acquisition System on Universal Windows Platform" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
