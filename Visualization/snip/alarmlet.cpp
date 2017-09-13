@@ -58,7 +58,7 @@ AlarmIcon::AlarmIcon(float size, Windows::UI::Color color) : SnipIcon(size, colo
 AlarmIcon::~AlarmIcon() {}
 
 void AlarmIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float inset = 8.0F;
+    float inset = SnipIcon::size / 6.18F;
 
     float base_size = SnipIcon::size - inset * 2.0F;
     float base_height = base_size / 8.0F;

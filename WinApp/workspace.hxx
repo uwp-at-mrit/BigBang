@@ -16,7 +16,6 @@ namespace WarGrey::WinACS {
         void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
     private:
-        Windows::UI::Xaml::Controls::StackPanel^ switchbar;
         WarGrey::WinACS::DigitalClock^ system_clock;
         WarGrey::WinACS::Pasteboard^ toolbar;
         WarGrey::WinACS::Pasteboard^ stage;

@@ -28,22 +28,15 @@ WorkSpace::WorkSpace() : StackPanel() {
 
 void WorkSpace::initialize_component(Size region) {
     Thickness zero = ThicknessHelper::FromUniformLength(0.0);
-    Thickness four = ThicknessHelper::FromUniformLength(4.0);
     auto titleBar = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    this->switchbar = stack_panel(titleBar, ::Orientation::Horizontal, zero, zero);
+    this->toolbar = ref new Pasteboard(titleBar, "toolbar", new HorizontalLayout(4.0F));
     this->system_clock = ref new DigitalClock(titleBar);
 
-    auto numeric = toggle_switch(switchbar, "numeric", nullptr, nullptr);
-    auto alert = toggle_switch(switchbar, "alert", nullptr, nullptr);
-    auto flash = toggle_switch(switchbar, "flash", nullptr, nullptr);
-
-    auto workarea = stack_panel(this, ::Orientation::Horizontal, zero, zero);
-    this->toolbar = ref new Pasteboard(workarea, "toolbar", new VerticalLayout(float(four.Top + four.Bottom)));
-    this->stage = ref new Pasteboard(workarea, "stage", new AbsoluteLayout(400.0F, 300.0F));
+    this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout(400.0F, 300.0F));
     
     this->toolbar->set_pointer_listener(new ToolbarListener(this->stage));
     auto sysUI = ref new UISettings();
-    float icon_size = 64.0F;
+    float icon_size = 32.0F;
     Color icon_color = sysUI->UIElementColor(UIElementType::ActiveCaption);
     this->toolbar->begin_edit_sequence();
     toolbar->insert(make_alarmlet_icon(icon_size, icon_color));
@@ -54,10 +47,9 @@ void WorkSpace::initialize_component(Size region) {
 }
 
 void WorkSpace::reflow(float width, float height) {
-    this->toolbar->canvas_height = height - float(switchbar->ActualHeight);
-    this->stage->canvas_width = width - this->toolbar->actual_width;
-
-    this->system_clock->resize(width - switchbar->ActualWidth, switchbar->ActualHeight);
+    this->stage->canvas_width = width;
+    this->stage->canvas_height = height - float(toolbar->actual_height);
+    this->system_clock->resize(width - this->toolbar->actual_width, this->toolbar->actual_height);
 }
 
 void WorkSpace::suspend(SuspendingOperation^ op) {

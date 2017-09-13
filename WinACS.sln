@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Auxiliary", "Auxiliary\Auxiliary.vcxitems", "{9D38AD51-FEE8-4303-8B0D-833BBCC93B58}"
 EndProject
@@ -9,10 +9,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinApp", "WinApp\WinApp.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Visualization", "Visualization\Visualization.vcxitems", "{6A826F3B-23F9-432C-86BD-F9D318096966}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataStream", "DataStream\DataStream.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Visualization\Visualization.vcxitems*{6a826f3b-23f9-432c-86bd-f9d318096966}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
+		DataStream\DataStream.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{f13a79bc-0a9f-4e69-90b9-3ed82ea49304}*SharedItemsImports = 4
 		Visualization\Visualization.vcxitems*{f13a79bc-0a9f-4e69-90b9-3ed82ea49304}*SharedItemsImports = 4
 	EndGlobalSection
