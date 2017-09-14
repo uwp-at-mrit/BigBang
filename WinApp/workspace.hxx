@@ -3,6 +3,7 @@
 #include "ui.hxx"
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
+#include "network.hxx"
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
@@ -19,5 +20,7 @@ namespace WarGrey::SCADA {
         WarGrey::SCADA::DigitalClock^ system_clock;
         WarGrey::SCADA::Pasteboard^ toolbar;
         WarGrey::SCADA::Pasteboard^ stage;
+
+        WarGrey::SCADA::TCPListener^ listener;
     };
 }

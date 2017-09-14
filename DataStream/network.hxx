@@ -8,17 +8,18 @@ namespace WarGrey::SCADA {
 
     private ref class TCPListener sealed {
     public:
-        TCPListener();
+        TCPListener(unsigned short port);
         
     private:
         ~TCPListener();
 
     private:
         void welcome(
-            Windows::Networking::Sockets::StreamSocketListener^ sender,
+            Windows::Networking::Sockets::StreamSocketListener^ listener,
             Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs ^e);
 
     private:
         Windows::Networking::Sockets::StreamSocketListener^ listener;
+        Windows::Networking::Sockets::StreamSocket^ client;
     };
 }
