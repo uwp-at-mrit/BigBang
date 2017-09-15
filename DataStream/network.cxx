@@ -38,4 +38,5 @@ void TCPListener::welcome(StreamSocketListener^ listener, StreamSocketListenerCo
     trace(greetings);
     tcpout->WriteString(greetings);
     tcpout->WriteString("\n");
+    tcpout->FlushAsync();
 }
