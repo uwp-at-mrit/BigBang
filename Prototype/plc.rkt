@@ -2,7 +2,7 @@
 
 (require racket/tcp)
 
-(define-values (/dev/tcpin /dev/tcpout) (tcp-connect/enable-break "192.168.1.147" 18030))
+(define-values (/dev/tcpin /dev/tcpout) (tcp-connect/enable-break "172.16.8.195" 18030))
 
 (write "Hello, Visual C++/CX, I am Racket!" /dev/tcpout)
 (newline /dev/tcpout)
