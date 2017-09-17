@@ -15,7 +15,7 @@
                   (file-stream-buffer-mode /dev/tcpout 'line)
                   
                   (let ([now (seconds->date (* (current-inexact-milliseconds) 0.001))])
-                    (define ms (~a (exact-round (/ (date*-nanosecond now) 1000000)) #:min-width 3 #:left-pad-string "0"))
+                    (define ms (~a (exact-round (/ (date*-nanosecond now) 1000000)) #:min-width 3 #:align 'right #:pad-string "0"))
                     (fprintf /dev/tcpout "[~a.~a]Hello, I am Racket!~n" (date->string now #true) ms)
                     
                     (if (sync/timeout/enable-break 1.618 /dev/tcpin)
