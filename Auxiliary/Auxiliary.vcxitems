@@ -14,11 +14,11 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)rsyslog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)debug.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)rsyslog.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.hxx" />

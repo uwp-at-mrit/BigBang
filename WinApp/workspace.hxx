@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ui.hxx"
+#include "network.hxx"
 #include "digitalclock.hxx"
 #include "pasteboard.hxx"
-#include "network.hxx"
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
@@ -17,10 +17,9 @@ namespace WarGrey::SCADA {
         void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
     private:
+        WarGrey::SCADA::TCPListener^ listener;
         WarGrey::SCADA::DigitalClock^ system_clock;
         WarGrey::SCADA::Pasteboard^ toolbar;
         WarGrey::SCADA::Pasteboard^ stage;
-
-        WarGrey::SCADA::TCPListener^ listener;
     };
 }

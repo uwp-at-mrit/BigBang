@@ -13,6 +13,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::AppService;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
@@ -24,7 +25,8 @@ using namespace Windows::UI::ViewManagement;
 WorkSpace::WorkSpace() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(8.0);
-    this->listener = ref new TCPListener((unsigned short)18030U);
+
+    this->listener = ref new TCPListener((unsigned short)18030);
 }
 
 void WorkSpace::initialize_component(Size region) {

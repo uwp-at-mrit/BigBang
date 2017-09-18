@@ -8,6 +8,8 @@
       (dynamic-wind
        (thunk (void))
        (thunk (let ([listener (tcp-listen 18030 256 #true)])
+                (define-values (hostname port _r _p) (tcp-addresses listener #true))
+                (printf "> ~a:~a~n" hostname port)
                 (define-values (/dev/tcpin /dev/tcpout) (tcp-accept/enable-break listener))
                 (file-stream-buffer-mode /dev/tcpout 'line)
                 
@@ -15,6 +17,7 @@
                 (displayln (read-line /dev/tcpin))
                 (fprintf /dev/tcpout "Greetings, ~a:~a, I am Racket Too.~n" remote rport)))
        (thunk (custodian-shutdown-all (current-custodian))))))
+  (sleep 1)
   (server))
 
 (with-handlers ([exn? void])
