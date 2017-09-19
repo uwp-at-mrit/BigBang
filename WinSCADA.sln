@@ -5,11 +5,11 @@ VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Auxiliary", "Auxiliary\Auxiliary.vcxitems", "{9D38AD51-FEE8-4303-8B0D-833BBCC93B58}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinApp", "WinApp\WinApp.vcxproj", "{F13A79BC-0A9F-4E69-90B9-3ED82EA49304}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Visualization", "Visualization\Visualization.vcxitems", "{6A826F3B-23F9-432C-86BD-F9D318096966}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataStream", "DataStream\DataStream.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RubberBack", "RubberBack\RubberBack.vcxproj", "{F13A79BC-0A9F-4E69-90B9-3ED82EA49304}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
