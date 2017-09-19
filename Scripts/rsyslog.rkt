@@ -7,6 +7,8 @@
 (define (server)
   (define listener (udp-open-socket))
   (udp-bind! listener #false 18030 #true)
+  (define-values (lhost lport _r _p) (udp-addresses listener #true))
+  (printf "> ~a:~a~n" lhost lport)
   (let wait-recv-print-loop ()
     (define-values (size remote rport) (udp-receive!/enable-break listener datagram))
     (define /dev/stdout (current-output-port))
@@ -15,4 +17,5 @@
     (newline /dev/stdout)
     (wait-recv-print-loop)))
 
-(server)
+(with-handlers ([exn:break? void])
+  (server))
