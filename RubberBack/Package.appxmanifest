@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="RubberBack.App">
-      <uap:VisualElements DisplayName="Rubber Back" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Supervisory Control and Data Acquisition System on Universal Windows Platform for Rubber Back" BackgroundColor="transparent">
+      <uap:VisualElements DisplayName="Rubber Back" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Supervisory Control and Data Acquisition System for Rubber Back on Universal Windows Platform" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
