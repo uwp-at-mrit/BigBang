@@ -1,4 +1,5 @@
 ﻿#include "workspace.hxx"
+#include "rsyslog.hpp"
 
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;
@@ -9,9 +10,12 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::ViewManagement;
 
 namespace WarGrey::SCADA {
+    typedef EventHandler<UnhandledErrorDetectedEventArgs^> UncaughtExceptionHandler;
+
     private ref class Win2DApp sealed : public Application {
     protected:
         void Win2DAppMain(ApplicationView^ self, WorkSpace^ workspace) {
+            CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Win2DApp::OnUncaughtException);
             this->Suspending += ref new SuspendingEventHandler(this, &Win2DApp::OnSuspending);
             self->VisibleBoundsChanged += ref new TypedEventHandler<ApplicationView^, Object^>(this, &Win2DApp::DoResize);
             
@@ -50,13 +54,26 @@ namespace WarGrey::SCADA {
         }
 
     private:
-        void OnSuspending(Object^ sender, SuspendingEventArgs^ e) {
+        void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
             auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
             if (workspace != nullptr) workspace->suspend(e->SuspendingOperation);
         }
 
-        void DoResize(ApplicationView^ view, Object^ obj) {
+        void OnUncaughtException(Platform::Object^ sender, UnhandledErrorDetectedEventArgs^ e) {
+            auto error = e->UnhandledError;
+
+            if (!error->Handled) {
+                try {
+                    // if an error is returned from a delegate, it will not be marked as Handled.
+                    error->Propagate();
+                } catch (Platform::AccessDeniedException^ ade) {
+                    rsyslog(ade->Message);
+                }
+            }
+        }
+
+        void DoResize(ApplicationView^ view, Platform::Object^ obj) {
             auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
             if (workspace != nullptr) {
                 auto region = adjusted_workspace_size(view->VisibleBounds, workspace);

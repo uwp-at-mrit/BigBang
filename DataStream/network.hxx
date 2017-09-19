@@ -6,21 +6,6 @@ namespace WarGrey::SCADA {
         Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs^>
         TCPAcceptHandler;
 
-    private ref class PLC sealed {
-    public:
-        PLC(Windows::Networking::Sockets::StreamSocket^ plc);
-
-        void greetings();
-
-    private:
-        ~PLC();
-
-    private:
-        Windows::Networking::Sockets::StreamSocket^ plc;
-        Windows::Storage::Streams::IDataReader^ tcpin;
-        Windows::Storage::Streams::IDataWriter^ tcpout;
-    };
-
     private ref class TCPListener sealed {
     public:
         TCPListener(unsigned short port);
@@ -33,8 +18,12 @@ namespace WarGrey::SCADA {
             Windows::Networking::Sockets::StreamSocketListener^ listener,
             Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs ^e);
 
+        void read_stream_loop(
+            Windows::Storage::Streams::IDataReader^ tcpin,
+            Windows::Storage::Streams::IDataWriter^ tcpout,
+            Windows::Networking::Sockets::StreamSocket^ plc);
+
     private:
         Windows::Networking::Sockets::StreamSocketListener^ listener;
-        WarGrey::SCADA::PLC^ client;
     };
 }
