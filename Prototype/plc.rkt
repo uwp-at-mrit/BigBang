@@ -16,7 +16,10 @@
                   
                   (let ([now (seconds->date (* (current-inexact-milliseconds) 0.001))])
                     (define ms (~a (exact-round (/ (date*-nanosecond now) 1000000)) #:min-width 3 #:align 'right #:pad-string "0"))
-                    (fprintf /dev/tcpout "[~a.~a]Hello, I am Racket!~n" (date->string now #true) ms)
+                    (define greetings (format "[~a.~a]Hello, I am Racket!" (date->string now #true) ms))
+                    (write-bytes (integer->integer-bytes (string-utf-8-length greetings) 4 #false #true) /dev/tcpout)
+                    (write-string greetings /dev/tcpout)
+                    (flush-output /dev/tcpout)
                     
                     (if (sync/timeout/enable-break 1.618 /dev/tcpin)
                         (displayln (read-line /dev/tcpin))
