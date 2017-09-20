@@ -67,4 +67,3 @@ void HorizontalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float
     info->anchor += (gapsize + height);
     self->end_edit_sequence();
 };
-

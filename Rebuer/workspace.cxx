@@ -21,23 +21,52 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
+static Thickness zero(0.0, 0.0, 0.0, 0.0);
+
 WorkSpace::WorkSpace() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
-    this->Margin = ThicknessHelper::FromUniformLength(0.0);
+    this->Margin = zero;
 
     //this->listener = ref new TCPListener((unsigned short)18030);
 }
 
 void WorkSpace::initialize_component(Size region) {
-    this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout(400.0F, 300.0F));
-    this->stage->inset = ThicknessHelper::FromUniformLength(0.0);
+    this->statusbar = ref new Pasteboard(this, "statusbar", new HorizontalLayout(0.0F));
+    this->statusbar->show_border(false);
+    this->statusbar->insert(new Textlet(L"再生胶%s", L"B1"), 0.0F, 0.0F);
+    
+    this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout());
+    this->stage->show_selection_dots(false);
+    //this->stage->show_border(false);
+    this->stage->inset = zero;
+
+    this->taskbar = ref new Pasteboard(this, "taskbar", new HorizontalLayout(0.0F));
+    this->taskbar->show_border(false);
+    this->taskbar->show_inset_box(true);
+    this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")), 0.0F, 0.0F);
 
     this->reflow(region.Width, region.Height);
 }
 
 void WorkSpace::reflow(float width, float height) {
+    float sbar_height = this->statusbar->actual_height;
+    float tbar_height = this->taskbar->actual_height;
+
+    this->statusbar->canvas_width = width;
+    this->taskbar->canvas_width = width;
     this->stage->canvas_width = width;
-    this->stage->canvas_height = height;
+
+    if (sbar_height == 0.0F) {
+        this->statusbar->fill_snips_bounds(nullptr, nullptr, nullptr, &sbar_height);
+        sbar_height += float(this->statusbar->inset.Top + this->statusbar->inset.Bottom);
+    }
+
+    if (tbar_height == 0.0F) {
+        this->taskbar->fill_snips_bounds(nullptr, nullptr, nullptr, &tbar_height);
+        tbar_height += float(this->taskbar->inset.Top + this->taskbar->inset.Bottom);
+    }
+
+    this->stage->canvas_height = height - sbar_height - tbar_height;
 }
 
 void WorkSpace::suspend(SuspendingOperation^ op) {

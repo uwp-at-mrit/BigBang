@@ -8,7 +8,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Text;
-using namespace Windows::UI::Xaml::Media;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
@@ -47,6 +46,7 @@ void Textlet::change_text(Platform::String^ content) {
     if (this->layout_config == nullptr) {
         this->layout_config = ref new CanvasTextFormat();
         this->layout_config->WordWrapping = CanvasWordWrapping::NoWrap;
+        this->layout_config->FontSize = 12.0F;
     }
 }
 
@@ -62,5 +62,5 @@ void Textlet::fill_extent(float* width, float* height, float* descent, float* sp
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText(content, x, y, Colors::Black, layout_config);
+    ds->DrawText(content, x, y, Colors::Snow, layout_config);
 }

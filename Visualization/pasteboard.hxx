@@ -22,6 +22,12 @@ namespace WarGrey::SCADA {
         void size_cache_invalid();
 
     public:
+        void show_border(bool show);
+        void show_inset_box(bool show);
+        void show_enclosing_box(bool show);
+        void show_selection_dots(bool show);
+
+    public:
         read_write_property(Windows::UI::Xaml::Thickness, inset);
 
         read_write_property(float, layer_width);
@@ -70,6 +76,10 @@ namespace WarGrey::SCADA {
         
     private:
         Windows::UI::Xaml::Thickness padding;
+        bool draw_outer_border;
+        bool draw_inner_border;
+        bool draw_enclosing_box;
+        bool draw_selection_dots;
         float snips_left;
         float snips_top;
         float snips_right;

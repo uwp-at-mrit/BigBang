@@ -10,6 +10,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
@@ -84,6 +85,11 @@ Pasteboard::Pasteboard(Panel^ parent, Platform::String^ id, IPasteboardLayout* l
     this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
     this->layout->refcount += 1;
     this->layout->on_attach_to(this);
+
+    this->draw_outer_border = true;
+    this->draw_inner_border = false;
+    this->draw_enclosing_box = false;
+    this->draw_selection_dots = true;
 
     this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::on_pointer_moved);
     this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::on_pointer_pressed);
@@ -430,6 +436,34 @@ float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - 
 void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
 
+void Pasteboard::show_border(bool show) {
+    if (this->draw_outer_border != show) {
+        this->draw_outer_border = show;
+        this->refresh();
+    }
+}
+
+void Pasteboard::show_inset_box(bool show) {
+    if (this->draw_inner_border != show) {
+        this->draw_inner_border = show;
+        this->refresh();
+    }
+}
+
+void Pasteboard::show_enclosing_box(bool show) {
+    if (this->draw_enclosing_box != show) {
+        this->draw_enclosing_box = show;
+        this->refresh();
+    }
+}
+
+void Pasteboard::show_selection_dots(bool show) {
+    if (this->draw_selection_dots != show) {
+        this->draw_selection_dots = show;
+        this->refresh();
+    }
+}
+
 /*************************************************************************************************/
 void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float Width = this->actual_layer_width;
@@ -443,21 +477,28 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     
     { // draw borders
         if (dash_stroke == nullptr) {
-            auto systemUI = ref new UISettings();
+            if (this->draw_outer_border || this->draw_inner_border) {
+                auto systemUI = ref new UISettings();
 
-            dash_stroke = ref new CanvasStrokeStyle();
-            dash_stroke->DashStyle = CanvasDashStyle::Dash;
-            inset_border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
-            border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::AccentDark1));
+                dash_stroke = ref new CanvasStrokeStyle();
+                dash_stroke->DashStyle = CanvasDashStyle::Dash;
+                inset_border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
+                border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::AccentDark1));
+            }
         }
 
-        ds->DrawRectangle(0.0F, 0.0F, Width, Height, inset_border_color, 1.0F, dash_stroke);
-        ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
+        if (this->draw_inner_border) {
+            ds->DrawRectangle(0.0F, 0.0F, Width, Height, inset_border_color, 1.0F, dash_stroke);
+        }
+
+        if (this->draw_outer_border) {
+            ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
+        }
     }
 
     auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
 
-    { // draw minimum enclosing box
+    if (this->draw_enclosing_box) {
         float x, y;
 
         this->fill_snips_bounds(&x, &y, &width, &height);
@@ -477,7 +518,7 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
                 auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 child->draw(ds, info->x, info->y, width, height);
-                if (info->selected) {
+                if ((info->selected) && (this->draw_selection_dots)) {
                     ds->FillCircle(info->x + width / 2.0F, info->y + height / 2.0F, 4.0F, Colors::White);
                 }
                 delete layer; /* Must Close the Layer Explicitly */

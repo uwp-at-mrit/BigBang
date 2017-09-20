@@ -18,6 +18,8 @@ namespace WarGrey::SCADA {
 
     private:
         WarGrey::SCADA::TCPListener^ listener;
+        WarGrey::SCADA::Pasteboard^ statusbar;
         WarGrey::SCADA::Pasteboard^ stage;
+        WarGrey::SCADA::Pasteboard^ taskbar;
     };
 }
