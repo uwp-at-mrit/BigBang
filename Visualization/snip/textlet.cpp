@@ -15,8 +15,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 const int DEFAULT_POOL_SIZE = 1024;
 static wchar_t wpool[DEFAULT_POOL_SIZE];
 
-Textlet::~Textlet() {}
-
 Textlet::Textlet(const wchar_t *fmt, ...) {
     int bigSize = DEFAULT_POOL_SIZE - 1;
     wchar_t *pool;
@@ -42,9 +40,7 @@ Textlet::Textlet(Platform::String^ content) {
     this->change_text(content);
 }
 
-SnipTypes Textlet::get_type() {
-    return SnipTypes::Text;
-}
+Textlet::~Textlet() {}
 
 void Textlet::change_text(Platform::String^ content) {
     this->content = content;
@@ -67,33 +63,4 @@ void Textlet::fill_extent(float* width, float* height, float* descent, float* sp
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->DrawText(content, x, y, Colors::Black, layout_config);
-}
-
-/*************************************************************************************************/
-SnipIcon* WarGrey::SCADA::make_textlet_icon(float size, Windows::UI::Color color) {
-    return new TextIcon(size, color);
-}
-
-TextIcon::TextIcon(float size, Windows::UI::Color color) : SnipIcon(size, color) {
-    this->label_font = ref new CanvasTextFormat();
-    this->label_font->WordWrapping = CanvasWordWrapping::NoWrap;
-    this->label_font->FontFamily = "Symbol";
-    this->label_font->FontStretch = FontStretch::ExtraExpanded;
-    this->label_font->FontSize = size;
-    
-    TextExtent te = get_text_extent("A", this->label_font);
-    this->xoffset = (size - te.width) / 2;
-    this->yoffset = - te.tspace / 2;
-    // TODO: find a function to compute the right font metrics.
-}
-
-TextIcon::~TextIcon() {}
-
-void TextIcon::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText("A", x + this->xoffset, y + this->yoffset, SnipIcon::color, this->label_font);
-    ds->DrawRectangle(x, y, size, size, SnipIcon::color);
-}
-
-Snip* TextIcon::create_snip() {
-    return new Textlet("text snip");
 }

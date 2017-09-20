@@ -5,7 +5,6 @@
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
 #include "snip/alarmlet.hpp"
-#include "workspace/toolbar.hxx"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 
@@ -30,8 +29,8 @@ WorkSpace::WorkSpace() : StackPanel() {
 }
 
 void WorkSpace::initialize_component(Size region) {
-    Thickness zero = ThicknessHelper::FromUniformLength(0.0);
     this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout(400.0F, 300.0F));
+    this->stage->inset = ThicknessHelper::FromUniformLength(0.0);
 
     this->reflow(region.Width, region.Height);
 }

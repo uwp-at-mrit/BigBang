@@ -4,12 +4,9 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-    private enum SnipTypes { Text, Icon };
-
     private class Snip {
     public:
-        virtual SnipTypes get_type() = 0;
-        virtual ~Snip() noexcept { if (info != nullptr) delete info; };
+        virtual ~Snip() noexcept;
 
     public:
         virtual void fill_extent(float* width = nullptr, float* height = nullptr,
@@ -27,24 +24,5 @@ namespace WarGrey::SCADA {
     public:
         Snip* next;
         Snip* prev;
-    };
-
-    private class SnipIcon : public Snip {
-    public:
-        ~SnipIcon() noexcept;
-        SnipIcon(float size, Windows::UI::Color color);
-        SCADA::SnipTypes get_type() override;
-
-    public:
-        void fill_extent(float* w = nullptr, float* h = nullptr,
-            float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
-            override;
-
-    public:
-        virtual Snip* create_snip() = 0;
-
-    protected:
-        float size;
-        Windows::UI::Color color;
     };
 }
