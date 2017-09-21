@@ -33,7 +33,7 @@ WorkSpace::WorkSpace() : StackPanel() {
 void WorkSpace::initialize_component(Size region) {
     this->statusbar = ref new Pasteboard(this, "statusbar", new HorizontalLayout(0.0F));
     this->statusbar->show_border(false);
-    this->statusbar->show_enclosing_box(true);
+    this->statusbar->show_selection_dots(false);
     this->statusbar->insert(new Statuslet(L"再生胶B1"), 0.0F, 0.0F);
     
     this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout());

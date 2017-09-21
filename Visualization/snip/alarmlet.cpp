@@ -16,13 +16,10 @@ Alarmlet::Alarmlet(float size) : size(size) {}
 
 Alarmlet::~Alarmlet() {}
 
-void Alarmlet::fill_extent(float* width, float* height, float* bspace, float* tspace, float* lspace, float* rspace) {
-    if (width != nullptr) (*width) = this->size;
-    if (height != nullptr) (*height) = this->size;
-    if (bspace != nullptr) (*bspace) = 0.0F;
-    if (tspace != nullptr) (*tspace) = 0.0F;
-    if (lspace != nullptr) (*lspace) = 0.0F;
-    if (rspace != nullptr) (*rspace) = 0.0F;
+void Alarmlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+    SET_BOXES(w, h, this->size);
+    SET_BOXES(b, t, 0.0F);
+    SET_BOXES(l, r, 0.0F);
 };
 
 void Alarmlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

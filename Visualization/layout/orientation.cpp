@@ -33,9 +33,10 @@ void VerticalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float y
     }
 
     LayoutInfo* info = (LayoutInfo*)self->layout_info;
-
-    snip->fill_extent(&width, &height);
-    self->move_to(snip, 0.0F, info->anchor + this->gapsize);
+    
+    y = info->anchor + this->gapsize;
+    snip->fill_extent(0.0F, y, &width, &height);
+    self->move_to(snip, 0.0F, y);
     info->anchor += (gapsize + height);
     self->end_edit_sequence();
 };
@@ -63,8 +64,9 @@ void HorizontalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float
 
     LayoutInfo* info = (LayoutInfo*)self->layout_info;
 
-    snip->fill_extent(&width, &height);
-    self->move_to(snip, info->anchor + this->gapsize, 0.0F);
+    x = info->anchor + this->gapsize;
+    snip->fill_extent(x, 0.0F, &width, &height);
+    self->move_to(snip, x, 0.0F);
     info->anchor += (gapsize + height);
     self->end_edit_sequence();
 };

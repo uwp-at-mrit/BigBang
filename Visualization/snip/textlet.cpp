@@ -50,15 +50,12 @@ void Textlet::change_text(Platform::String^ content) {
     }
 }
 
-void Textlet::fill_extent(float* width, float* height, float* bspace, float* tspace, float* lspace, float* rspace) {
+void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
     TextExtent ts = get_text_extent(content, layout_config);
 
-    if (width != nullptr) (*width) = ts.width;
-    if (height != nullptr) (*height) = ts.height;
-    if (bspace != nullptr) (*bspace) = ts.bspace;
-    if (tspace != nullptr) (*tspace) = ts.tspace;
-    if (lspace != nullptr) (*lspace) = ts.lspace;
-    if (rspace != nullptr) (*rspace) = ts.rspace;
+    SET_VALUES(w, ts.width, h, ts.height);
+    SET_VALUES(b, ts.bspace, t, ts.tspace);
+    SET_VALUES(l, ts.lspace, r, ts.rspace);
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

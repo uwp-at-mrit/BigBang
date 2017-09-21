@@ -45,6 +45,7 @@ static inline void bind_snip_owership(Pasteboard^ master, Snip* snip) {
     SnipInfo* info = new SnipInfo();
     info->master = master;
     snip->info = info;
+    snip->on_attach_to(master);
 }
 
 static inline void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
@@ -178,7 +179,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
-            child->fill_extent(&width, &height);
+            child->fill_extent(info->x, info->y, &width, &height);
 
             if ((info->x < x) && (x < (info->x + width)) && (info->y < y) && (y < (info->y + height))) {
                 found = child;
@@ -262,7 +263,7 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
             
             do {
                 SnipInfo* info = SNIP_INFO(child);
-                child->fill_extent(&width, &height);
+                child->fill_extent(info->x, info->y, &width, &height);
                 this->snips_left = std::min(this->snips_left, info->x);
                 this->snips_top = std::min(this->snips_top, info->y);
                 this->snips_right = std::max(this->snips_right, info->x + width);
@@ -503,7 +504,7 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
-            child->fill_extent(&width, &height);
+            child->fill_extent(info->x, info->y, &width, &height);
             width = std::min(Width - info->x, width);
             height = std::min(Height - info->y, height);
 
