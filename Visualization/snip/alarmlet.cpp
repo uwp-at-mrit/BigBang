@@ -16,11 +16,11 @@ Alarmlet::Alarmlet(float size) : size(size) {}
 
 Alarmlet::~Alarmlet() {}
 
-void Alarmlet::fill_extent(float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+void Alarmlet::fill_extent(float* width, float* height, float* bspace, float* tspace, float* lspace, float* rspace) {
     if (width != nullptr) (*width) = this->size;
     if (height != nullptr) (*height) = this->size;
-    if (descent != nullptr) (*descent) = 0.0F;
-    if (space != nullptr) (*space) = 0.0F;
+    if (bspace != nullptr) (*bspace) = 0.0F;
+    if (tspace != nullptr) (*tspace) = 0.0F;
     if (lspace != nullptr) (*lspace) = 0.0F;
     if (rspace != nullptr) (*rspace) = 0.0F;
 };

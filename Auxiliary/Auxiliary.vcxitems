@@ -15,12 +15,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)rsyslog.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)rsyslog.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)time.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hpp" />
   </ItemGroup>
 </Project>

@@ -1,20 +1,13 @@
 ﻿#include <ppltasks.h>
 
 #include "rsyslog.hpp"
+#include "time.hpp"
 
 using namespace Concurrency;
-
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-using namespace Windows::Globalization;
-using namespace Windows::Globalization::DateTimeFormatting;
-
-#define DEFAULT_POOL_SIZE 2048
-static wchar_t pool[DEFAULT_POOL_SIZE];
-
-static Calendar^ datetime = nullptr;
 static DatagramSocket^ client = nullptr;
 static IDataWriter^ udpout = nullptr;
 
@@ -22,7 +15,6 @@ static void syslog(Platform::String^ message) {
     if (client == nullptr) {
         auto loghost = ref new HostName("172.16.8.1");
         
-        datetime = ref new Calendar();
         client = ref new DatagramSocket();
 
         create_task(client->ConnectAsync(loghost, "18030")).then([message](task<void> conn) {
@@ -31,21 +23,18 @@ static void syslog(Platform::String^ message) {
             syslog(message);
         });
     } else if (udpout != nullptr) {
-        datetime->SetToNow();
-        long long ms = datetime->Nanosecond / 1000000;
-        auto record = L"[" + datetime->YearAsPaddedString(4)
-            + L"-" + datetime->MonthAsPaddedNumericString(2)
-            + L"-" + datetime->DayAsPaddedString(2)
-            + L" " + datetime->HourAsPaddedString(2)
-            + L":" + datetime->MinuteAsPaddedString(2)
-            + L":" + datetime->SecondAsPaddedString(2)
-            + ((ms < 10) ? ".00" : ((ms < 100) ? ".0" : ".")) + ms.ToString()
-            + L"] " + message;
+        Platform::String^ timestamp = update_nowstamp();
 
-        udpout->WriteString(record);
+        udpout->WriteByte('[');
+        udpout->WriteString(timestamp);
+        udpout->WriteString(L"] ");
+        udpout->WriteString(message);
         udpout->StoreAsync();
         
-        OutputDebugString(record->Data());
+        OutputDebugString(L"[");
+        OutputDebugString(timestamp->Data());
+        OutputDebugString(L"] ");
+        OutputDebugString(message->Data());
         OutputDebugString(L"\n");
     }
 }
@@ -55,6 +44,9 @@ void rsyslog(Platform::String^ message) {
 }
 
 void rsyslog(const wchar_t *fmt, ...) {
+    static const int DEFAULT_POOL_SIZE = 2048;
+    static wchar_t pool[DEFAULT_POOL_SIZE];
+
     va_list argl;
     va_start(argl, fmt);
     vswprintf(pool, DEFAULT_POOL_SIZE, fmt, argl);

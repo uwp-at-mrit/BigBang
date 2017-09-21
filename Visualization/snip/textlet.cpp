@@ -11,10 +11,10 @@ using namespace Windows::UI::Text;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-const int DEFAULT_POOL_SIZE = 1024;
-static wchar_t wpool[DEFAULT_POOL_SIZE];
-
 Textlet::Textlet(const wchar_t *fmt, ...) {
+    static const int DEFAULT_POOL_SIZE = 1024;
+    static wchar_t wpool[DEFAULT_POOL_SIZE];
+
     int bigSize = DEFAULT_POOL_SIZE - 1;
     wchar_t *pool;
     va_list argl;
@@ -50,13 +50,13 @@ void Textlet::change_text(Platform::String^ content) {
     }
 }
 
-void Textlet::fill_extent(float* width, float* height, float* descent, float* space, float* lspace, float* rspace) {
+void Textlet::fill_extent(float* width, float* height, float* bspace, float* tspace, float* lspace, float* rspace) {
     TextExtent ts = get_text_extent(content, layout_config);
 
     if (width != nullptr) (*width) = ts.width;
     if (height != nullptr) (*height) = ts.height;
-    if (descent != nullptr) (*descent) = ts.bspace;
-    if (space != nullptr) (*space) = ts.tspace;
+    if (bspace != nullptr) (*bspace) = ts.bspace;
+    if (tspace != nullptr) (*tspace) = ts.tspace;
     if (lspace != nullptr) (*lspace) = ts.lspace;
     if (rspace != nullptr) (*rspace) = ts.rspace;
 };

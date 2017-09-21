@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 
     public:
         virtual void fill_extent(float* width = nullptr, float* height = nullptr,
-            float* descent = nullptr, float* space = nullptr, float* lspace = nullptr, float* rspace = nullptr)
+            float* bspace = nullptr, float* tspace = nullptr, float* lspace = nullptr, float* rspace = nullptr)
             = 0;
 
         virtual void draw(

@@ -9,14 +9,10 @@ namespace WarGrey::SCADA {
         ~Alarmlet() noexcept;
 
     public:
-        void change_text(Platform::String^ content);
-
-    public:
-        void fill_extent(float* w = nullptr, float* h = nullptr,
-            float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
-            override;
-
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+        void fill_extent(float* w = nullptr, float* h = nullptr,
+            float* b = nullptr, float* t = nullptr, float* l = nullptr, float* r = nullptr)
+            override;
 
     private:
         float size;

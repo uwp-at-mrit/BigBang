@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <WindowsNumerics.h>
 
+#include "ui.hpp"
 #include "object.hpp"
 #include "pasteboard.hxx"
 #include "layout/absolute.hpp"
@@ -10,7 +11,6 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
@@ -27,10 +27,6 @@ using namespace Windows::Foundation::Numerics;
 class PlaceHolderListener : public IPasteboardListener {};
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
-static CanvasStrokeStyle^ dash_stroke = nullptr;
-static ICanvasBrush^ border_color = nullptr;
-static ICanvasBrush^ inset_border_color = nullptr;
-static ICanvasBrush^ rubberband_color = nullptr;
 
 #define REMOVE(ptr, refcount) if (ptr->refcount <= 1) { delete ptr; } else { ptr->refcount -= 1; }
 
@@ -476,22 +472,17 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     ds->Transform = make_float3x2_translation(tx, ty);
     
     { // draw borders
-        if (dash_stroke == nullptr) {
-            if (this->draw_outer_border || this->draw_inner_border) {
-                auto systemUI = ref new UISettings();
-
-                dash_stroke = ref new CanvasStrokeStyle();
-                dash_stroke->DashStyle = CanvasDashStyle::Dash;
-                inset_border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::Accent));
-                border_color = ref new CanvasSolidColorBrush(ds, systemUI->GetColorValue(UIColorType::AccentDark1));
-            }
-        }
-
         if (this->draw_inner_border) {
-            ds->DrawRectangle(0.0F, 0.0F, Width, Height, inset_border_color, 1.0F, dash_stroke);
+            static auto border_color = ref new CanvasSolidColorBrush(ds, system_color(UIColorType::Accent));
+            static auto dash_stroke = ref new CanvasStrokeStyle();
+
+            dash_stroke->DashStyle = CanvasDashStyle::Dash;
+            ds->DrawRectangle(0.0F, 0.0F, Width, Height, border_color, 1.0F, dash_stroke);
         }
 
         if (this->draw_outer_border) {
+            static auto border_color = ref new CanvasSolidColorBrush(ds, system_color(UIColorType::AccentDark1));
+
             ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
         }
     }
@@ -499,11 +490,11 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
 
     if (this->draw_enclosing_box) {
+        static auto box_color = ref new CanvasSolidColorBrush(ds, system_color(UIElementType::GrayText));
         float x, y;
 
         this->fill_snips_bounds(&x, &y, &width, &height);
-        ds->FillRectangle(x, y, width, height, Colors::Snow);
-        ds->DrawRectangle(x, y, width, height, Colors::MistyRose, 1.0F, dash_stroke);
+        ds->DrawRectangle(x, y, width, height, box_color, 1.0F);
     }
 
     if (this->head_snip != nullptr) {
@@ -529,15 +520,12 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     }
 
     if (this->rubberband_y != nullptr) {
+        static auto rubberband_color = ref new CanvasSolidColorBrush(ds, system_color(UIElementType::Highlight));
+
         float left = std::min(this->last_pointer_x, (*this->rubberband_x));
         float top = std::min(this->last_pointer_y, (*this->rubberband_y));
         float width = std::abs((*this->rubberband_x) - this->last_pointer_x);
         float height = std::abs((*this->rubberband_y) - this->last_pointer_y);
-        
-        if (rubberband_color == nullptr) {
-            auto systemUI = ref new UISettings();
-            rubberband_color = ref new CanvasSolidColorBrush(ds, systemUI->UIElementColor(UIElementType::Highlight));
-        }
         
         rubberband_color->Opacity = 0.32F;
         ds->FillRectangle(left, top, width, height, rubberband_color);
@@ -547,4 +535,3 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
 
     delete region; /* Must Close the Layer Explicitly */
 }
-

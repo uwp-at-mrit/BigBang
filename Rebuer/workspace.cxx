@@ -4,7 +4,7 @@
 #include "workspace.hxx"
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
-#include "snip/alarmlet.hpp"
+#include "snip/statuslet.hpp"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 
@@ -33,7 +33,8 @@ WorkSpace::WorkSpace() : StackPanel() {
 void WorkSpace::initialize_component(Size region) {
     this->statusbar = ref new Pasteboard(this, "statusbar", new HorizontalLayout(0.0F));
     this->statusbar->show_border(false);
-    this->statusbar->insert(new Textlet(L"再生胶%s", L"B1"), 0.0F, 0.0F);
+    this->statusbar->show_enclosing_box(true);
+    this->statusbar->insert(new Statuslet(L"再生胶B1"), 0.0F, 0.0F);
     
     this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout());
     this->stage->show_selection_dots(false);

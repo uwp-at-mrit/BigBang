@@ -1,4 +1,4 @@
-#include "ui.hxx"
+#include "ui.hpp"
 #include "pasteboard.hxx"
 
 using namespace WarGrey::SCADA;

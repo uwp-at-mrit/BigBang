@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ui.hxx"
+#include "ui.hpp"
 #include "network.hxx"
-#include "digitalclock.hxx"
 #include "pasteboard.hxx"
 
 namespace WarGrey::SCADA {
