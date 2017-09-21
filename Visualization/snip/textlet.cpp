@@ -43,15 +43,15 @@ Textlet::~Textlet() {}
 
 void Textlet::change_text(Platform::String^ content) {
     this->content = content;
-    if (this->layout_config == nullptr) {
-        this->layout_config = ref new CanvasTextFormat();
-        this->layout_config->WordWrapping = CanvasWordWrapping::NoWrap;
-        this->layout_config->FontSize = 12.0F;
+    if (this->font == nullptr) {
+        this->font = ref new CanvasTextFormat();
+        this->font->WordWrapping = CanvasWordWrapping::NoWrap;
+        this->font->FontSize = 12.0F;
     }
 }
 
 void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
-    TextExtent ts = get_text_extent(content, layout_config);
+    TextExtent ts = get_text_extent(content, font);
 
     SET_VALUES(w, ts.width, h, ts.height);
     SET_VALUES(b, ts.bspace, t, ts.tspace);
@@ -59,5 +59,5 @@ void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float*
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText(content, x, y, Colors::Snow, layout_config);
+    ds->DrawText(content, x, y, Colors::Snow, font);
 }

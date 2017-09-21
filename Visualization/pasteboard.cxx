@@ -78,7 +78,7 @@ static inline void unsafe_set_selected(IPasteboardListener* listener, Snip* snip
 }
 
 /*************************************************************************************************/
-Pasteboard::Pasteboard(Panel^ parent, Platform::String^ id, IPasteboardLayout* layout) : Win2DCanvas(parent, id) {
+Pasteboard::Pasteboard(Panel^ parent, IPasteboardLayout* layout) : Win2DCanvas(parent, nullptr) {
     this->padding = default_padding;
     this->layout = ((layout == nullptr) ? new AbsoluteLayout() : layout);
     this->layout->refcount += 1;

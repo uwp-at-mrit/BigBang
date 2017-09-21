@@ -18,12 +18,6 @@ Windows::UI::Xaml::Controls::StackPanel^ stack_panel(
     Windows::UI::Xaml::Thickness margin,
     Windows::UI::Xaml::Thickness padding);
 
-Windows::UI::Xaml::Controls::ToggleSwitch^ toggle_switch(
-    Windows::UI::Xaml::Controls::Panel^ parent,
-    Platform::String^ id,
-    Platform::String^ onCaption,
-    Platform::String^ offCaption);
-
 Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ gpu_canvas(
     Windows::UI::Xaml::Controls::Panel^ parent,
     Platform::String^ id,

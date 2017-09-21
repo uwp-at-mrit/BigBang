@@ -3,8 +3,6 @@
 #include "snip.hpp"
 
 namespace WarGrey::SCADA {
-    ref class StatusTimer;
-
     private class Statuslet : public WarGrey::SCADA::Snip {
     public:
         Statuslet(Platform::String^ caption);
@@ -17,16 +15,8 @@ namespace WarGrey::SCADA {
             override;
 
     private:
-        Windows::Foundation::TimeSpan update_timestamp();
-        friend Windows::Foundation::TimeSpan update_surpass_ref_class(Statuslet* self);
-
-    private:
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
         Platform::String^ caption;
-        Platform::String^ timestamp;
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config;
-
-    private:
-        WarGrey::SCADA::StatusTimer^ timer;
-        WarGrey::SCADA::Pasteboard^ master;
+        bool plc_connected;
     };
 }

@@ -25,15 +25,6 @@ StackPanel^ stack_panel(Panel^ parent, Orientation direction, Thickness margin, 
     return append_child<StackPanel^>(parent, child, nullptr);
 }
 
-ToggleSwitch^ toggle_switch(Panel^ parent, Platform::String^ id, Platform::String^ onCaption, Platform::String^ offCaption) {
-    auto child = ref new ToggleSwitch();
-
-    child->OnContent = (onCaption == nullptr) ? ((id == nullptr) ? "" : id) : onCaption;
-    child->OffContent = (offCaption == nullptr) ? child->OnContent : offCaption;
-    
-    return append_child<ToggleSwitch^>(parent, child, id);
-}
-
 CanvasControl^ gpu_canvas(Panel^ parent, Platform::String^ id, CanvasLoadHandler^ do_load, CanvasDrawHandler^ OnDraw) {
     auto child = ref new CanvasControl();
 

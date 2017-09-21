@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
         read_only_property(float, actual_layer_height);
 
     internal:
-        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ id, IPasteboardLayout* layout = nullptr);
+        Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, IPasteboardLayout* layout = nullptr);
         void set_pointer_listener(WarGrey::SCADA::IPasteboardListener* listener);
         AbstractObject* layout_info = nullptr;
 

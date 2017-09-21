@@ -31,19 +31,20 @@ WorkSpace::WorkSpace() : StackPanel() {
 }
 
 void WorkSpace::initialize_component(Size region) {
-    this->statusbar = ref new Pasteboard(this, "statusbar", new HorizontalLayout(0.0F));
+    this->statusbar = ref new Pasteboard(this, new HorizontalLayout(0.0F));
     this->statusbar->show_border(false);
     this->statusbar->show_selection_dots(false);
     this->statusbar->insert(new Statuslet(L"再生胶B1"), 0.0F, 0.0F);
     
-    this->stage = ref new Pasteboard(this, "stage", new AbsoluteLayout());
+    this->stage = ref new Pasteboard(this, new AbsoluteLayout());
     this->stage->show_selection_dots(false);
     //this->stage->show_border(false);
-    this->stage->inset = zero;
+    //this->stage->inset = zero;
 
-    this->taskbar = ref new Pasteboard(this, "taskbar", new HorizontalLayout(0.0F));
+    this->taskbar = ref new Pasteboard(this, new HorizontalLayout(0.0F));
     this->taskbar->show_border(false);
     this->taskbar->show_inset_box(true);
+    this->taskbar->show_selection_dots(false);
     this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")), 0.0F, 0.0F);
 
     this->reflow(region.Width, region.Height);

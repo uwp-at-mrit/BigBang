@@ -17,12 +17,12 @@ namespace WarGrey::SCADA {
 
     TextExtent get_text_extent(
         Platform::String^ message,
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config);
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
 
     TextExtent get_text_extent(
         Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
         Platform::String^ message,
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ layout_config);
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
 
     private ref class Win2DCanvas {
     public:
