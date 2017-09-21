@@ -1,15 +1,11 @@
 #include "ui.hpp"
 
 using namespace Windows::Foundation;
-using namespace Windows::Graphics::Display;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::ViewManagement;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
-
-static UISettings^ sysUI = nullptr;
 
 template <class T>
 static inline T append_child(Panel^ parent, T child, Platform::String^ id) {
@@ -17,41 +13,6 @@ static inline T append_child(Panel^ parent, T child, Platform::String^ id) {
     if (parent != nullptr) parent->Children->Append(child);
 
     return child;
-}
-
-static inline Size adjust_size(float Width, float Height, Panel^ workspace) {
-    auto margin = workspace->Margin;
-
-    float width = Width - float(margin.Left + margin.Right);
-    float height = Height - float(margin.Top + margin.Bottom);
-    return Size(width, height);
-}
-
-Size get_screen_size() {
-    auto display = DisplayInformation::GetForCurrentView();
-    auto scaling = float(display->RawPixelsPerViewPixel);
-
-    return { float(display->ScreenWidthInRawPixels) / scaling, float(display->ScreenHeightInRawPixels) / scaling };
-}
-
-Size adjusted_workspace_size(Rect region, Panel^ workspace) {
-    return adjust_size(region.Width, region.Height, workspace);
-}
-
-Color system_color(UIColorType type) {
-    if (sysUI == nullptr) {
-        sysUI = ref new UISettings();
-    }
-
-    return sysUI->GetColorValue(type);
-}
-
-Color system_color(UIElementType type) {
-    if (sysUI == nullptr) {
-        sysUI = ref new UISettings();
-    }
-
-    return sysUI->UIElementColor(type);
 }
 
 StackPanel^ stack_panel(Panel^ parent, Orientation direction, Thickness margin, Thickness padding) {

@@ -1,9 +1,10 @@
 #include <algorithm>
 #include <WindowsNumerics.h>
 
-#include "ui.hpp"
 #include "object.hpp"
+#include "system.hpp"
 #include "pasteboard.hxx"
+#include "snip/snip.hpp"
 #include "layout/absolute.hpp"
 
 using namespace WarGrey::SCADA;

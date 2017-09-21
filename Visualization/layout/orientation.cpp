@@ -1,6 +1,7 @@
 #include "object.hpp"
 #include "pasteboard.hxx"
 #include "orientation.hpp"
+#include "snip/snip.hpp"
 
 using namespace WarGrey::SCADA;
 

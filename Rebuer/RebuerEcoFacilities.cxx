@@ -1,5 +1,6 @@
 ﻿#include "workspace.hxx"
 #include "rsyslog.hpp"
+#include "system.hpp"
 
 using namespace Windows::Foundation;
 using namespace Windows::ApplicationModel;
@@ -20,7 +21,7 @@ namespace WarGrey::SCADA {
             CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Rebuer::OnUncaughtException);
 
             ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
-            ApplicationView::PreferredLaunchViewSize = get_screen_size();
+            ApplicationView::PreferredLaunchViewSize = system_screen_size();
             this->RequestedTheme = ApplicationTheme::Dark;
 
             // WARNING: Force Using the default TitleBar if a custom one was set once.

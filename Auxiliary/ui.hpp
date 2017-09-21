@@ -12,11 +12,6 @@ typedef Windows::Foundation::TypedEventHandler<
     Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^>
     CanvasLoadHandler;
 
-Windows::Foundation::Size get_screen_size();
-Windows::Foundation::Size adjusted_workspace_size(Windows::Foundation::Rect region, Windows::UI::Xaml::Controls::Panel^ ws);
-Windows::UI::Color system_color(Windows::UI::ViewManagement::UIColorType type);
-Windows::UI::Color system_color(Windows::UI::ViewManagement::UIElementType type);
-
 Windows::UI::Xaml::Controls::StackPanel^ stack_panel(
     Windows::UI::Xaml::Controls::Panel^ parent,
     Windows::UI::Xaml::Controls::Orientation direction,

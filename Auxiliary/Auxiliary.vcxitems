@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)rsyslog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)system.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
   </ItemGroup>
@@ -22,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)rsyslog.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)system.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)time.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ui.hpp" />
   </ItemGroup>

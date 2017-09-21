@@ -3,7 +3,7 @@
 #include "sugar.hpp"
 #include "canvas.hxx"
 #include "forward.hxx"
-#include "snip/snip.hpp"
+#include "object.hpp"
 #include "workspace/listener.hpp"
 
 namespace WarGrey::SCADA {

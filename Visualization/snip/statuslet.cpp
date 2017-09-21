@@ -2,6 +2,7 @@
 
 #include "ui.hpp"
 #include "time.hpp"
+#include "pasteboard.hxx"
 #include "snip/statuslet.hpp"
 
 using namespace WarGrey::SCADA;
