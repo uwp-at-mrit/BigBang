@@ -3,6 +3,7 @@
 #include "system.hpp"
 
 using namespace Windows::Foundation;
+
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
@@ -86,6 +87,7 @@ namespace WarGrey::SCADA {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
+    // Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-cn";
     auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Rebuer(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

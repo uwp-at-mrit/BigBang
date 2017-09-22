@@ -58,15 +58,7 @@ public:
     }
 
     void update_wifiinfo(WiFiAdapter^ info) {
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
-    }
-
-    void update_nicinfo() {
         auto nics = NetworkInformation::GetConnectionProfiles();
-        auto names = NetworkInformation::GetHostNames();
-        Platform::String^ ipv4 = speak("noipv4");
         Platform::String^ signal = speak("nowifi");
 
         for (unsigned int i = 0; i < nics->Size; ++i) {
@@ -78,6 +70,25 @@ public:
             }
         }
 
+        this->wifi_strength = speak("wifilabel") + signal;
+
+        if (this->master != nullptr) {
+            this->master->refresh();
+        }
+    }
+
+    void update_sdinfo() {
+        this->storage = speak("sdlabel") + L"0MB";
+
+        if (this->master != nullptr) {
+            this->master->refresh();
+        }
+    }
+
+    void update_ipinfo() {
+        auto names = NetworkInformation::GetHostNames();
+        Platform::String^ ipv4 = speak("noipv4");
+
         for (unsigned int i = 0; i < names->Size; ++i) {
             auto host = names->GetAt(i);
             if (host->Type == HostNameType::Ipv4) {
@@ -85,13 +96,12 @@ public:
                 break;
             }
         }
-        
-        this->wifi_strength = speak("wifilabel") + signal;
-        this->localhost = speak("ipv4label") + ipv4;
-    }
 
-    void update_sdinfo() {
-        this->storage = speak("sdlabel") + L"0MB";
+        this->ipv4 = speak("ipv4label") + ipv4;
+
+        if (this->master != nullptr) {
+            this->master->refresh();
+        }
     }
 
 internal:
@@ -102,8 +112,9 @@ internal:
 
         this->update_timestamp();
         this->update_powerinfo();
+        this->update_wifiinfo(nullptr);
         this->update_sdinfo();
-        this->update_nicinfo();
+        this->update_ipinfo();
     }
 
 private:
@@ -125,7 +136,7 @@ private:
     Platform::String^ powercapacity;
     Platform::String^ wifi_strength;
     Platform::String^ storage;
-    Platform::String^ localhost;
+    Platform::String^ ipv4;
     
 private:
     Pasteboard^ master;
@@ -174,7 +185,7 @@ void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, floa
 }
 
 void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto localhost = ref new CanvasTextLayout(ds, statusbar->localhost, font, 0.0f, 0.0f);
+    auto ipv4 = ref new CanvasTextLayout(ds, statusbar->ipv4, font, 0.0f, 0.0f);
     auto width = Width / 7.0F;
 
     ds->DrawText(this->caption,            x + width * 0.0F, y, Colors::Yellow, font);
@@ -182,7 +193,7 @@ void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
     ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green, font);
     ds->DrawText(statusbar->wifi_strength, x + width * 3.0F, y, Colors::Yellow, font);
     ds->DrawText(statusbar->storage,       x + width * 5.0F, y, Colors::Yellow, font);
-    ds->DrawTextLayout(localhost, Width - localhost->LayoutBounds.Width, y, Colors::White);
+    ds->DrawTextLayout(ipv4, Width - ipv4->LayoutBounds.Width, y, Colors::White);
 
     { // highlight PLC Status
         auto plc_x = x + width * 4.0F;
