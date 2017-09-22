@@ -4,26 +4,6 @@
 #include "canvas.hxx"
 
 namespace WarGrey::SCADA {
-    public value struct TextExtent {
-        float width;
-        float height;
-        float tspace;
-        float rspace;
-        float bspace;
-        float lspace;
-    };
-
-    Microsoft::Graphics::Canvas::CanvasDrawingSession^ make_shared_drawing_session();
-
-    TextExtent get_text_extent(
-        Platform::String^ message,
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
-
-    TextExtent get_text_extent(
-        Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-        Platform::String^ message,
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
-
     private ref class Win2DCanvas {
     public:
         void begin_edit_sequence();

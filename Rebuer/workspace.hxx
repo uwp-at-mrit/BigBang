@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
         WarGrey::SCADA::TCPListener^ listener;
         WarGrey::SCADA::Pasteboard^ statusbar;
         WarGrey::SCADA::Pasteboard^ stage;
+        WarGrey::SCADA::Pasteboard^ gauge;
         WarGrey::SCADA::Pasteboard^ taskbar;
     };
 }

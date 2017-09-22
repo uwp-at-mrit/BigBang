@@ -22,6 +22,6 @@ namespace WarGrey::SCADA {
 
     private:
         Platform::String^ content;
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
     };
 }

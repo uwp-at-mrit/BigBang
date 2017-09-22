@@ -2,6 +2,7 @@
 #include <ppltasks.h>
 
 #include "ui.hpp"
+#include "text.hpp"
 #include "time.hpp"
 #include "tongue.hpp"
 #include "rsyslog.hpp"
@@ -152,10 +153,7 @@ static float status_height = 0.0F;
 Statuslet::Statuslet(Platform::String^ caption) {
     this->caption = caption;
     this->plc_connected = false;
-    this->font = ref new CanvasTextFormat();
-
-    this->font->WordWrapping = CanvasWordWrapping::NoWrap;
-    this->font->FontSize = 12;
+    this->label_font = make_text_format();
 
     if (statusbar == nullptr) {
         statusbar = ref new Status();
@@ -169,11 +167,11 @@ void Statuslet::on_attach_to(Pasteboard^ master) {
 void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
     if (statusbar->master != nullptr) {
         if (status_height == 0.0F) {
-            TextExtent ts = get_text_extent(speak("plclabel"), font);
+            TextExtent ts = get_text_extent(speak("plclabel"), label_font);
             status_height = ts.height;
 
             // TODO: Win2D eats suffix spaces.
-            TextExtent sp = get_text_extent("o", font);
+            TextExtent sp = get_text_extent("o", label_font);
             status_prefix_width = ts.width + sp.width;
         }
 
@@ -185,23 +183,23 @@ void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, floa
 }
 
 void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto ipv4 = ref new CanvasTextLayout(ds, statusbar->ipv4, font, 0.0f, 0.0f);
+    auto ipv4 = ref new CanvasTextLayout(ds, statusbar->ipv4, this->label_font, 0.0f, 0.0f);
     auto width = Width / 7.0F;
 
-    ds->DrawText(this->caption,            x + width * 0.0F, y, Colors::Yellow, font);
-    ds->DrawText(statusbar->timestamp,     x + width * 1.0F, y, Colors::Yellow, font);
-    ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green, font);
-    ds->DrawText(statusbar->wifi_strength, x + width * 3.0F, y, Colors::Yellow, font);
-    ds->DrawText(statusbar->storage,       x + width * 5.0F, y, Colors::Yellow, font);
+    ds->DrawText(this->caption,            x + width * 0.0F, y, Colors::Yellow, this->label_font);
+    ds->DrawText(statusbar->timestamp,     x + width * 1.0F, y, Colors::Yellow, this->label_font);
+    ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green, this->label_font);
+    ds->DrawText(statusbar->wifi_strength, x + width * 3.0F, y, Colors::Yellow, this->label_font);
+    ds->DrawText(statusbar->storage,       x + width * 5.0F, y, Colors::Yellow, this->label_font);
     ds->DrawTextLayout(ipv4, Width - ipv4->LayoutBounds.Width, y, Colors::White);
 
     { // highlight PLC Status
         auto plc_x = x + width * 4.0F;
-        ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, font);
+        ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, this->label_font);
         if (this->plc_connected) {
-            ds->DrawText(speak("connected"), plc_x + status_prefix_width, y, Colors::Green, font);
+            ds->DrawText(speak("connected"), plc_x + status_prefix_width, y, Colors::Green, this->label_font);
         } else {
-            ds->DrawText(speak("disconnected"), plc_x + status_prefix_width, y, Colors::Red, font);
+            ds->DrawText(speak("disconnected"), plc_x + status_prefix_width, y, Colors::Red, this->label_font);
         }
     }
 }

@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="workspace.hxx" />
+    <ClInclude Include="workspace\listener.hpp" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Localization\en\tongue.resw" />

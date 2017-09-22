@@ -150,4 +150,16 @@
   <data name="RRB2" xml:space="preserve">
     <value>Recycled Rubber B2</value>
   </data>
+  <data name="cleanmotor" xml:space="preserve">
+    <value>Clean Motor</value>
+  </data>
+  <data name="feedingmotor" xml:space="preserve">
+    <value>Feeding Motor</value>
+  </data>
+  <data name="mastermotor" xml:space="preserve">
+    <value>Master Screw Motor</value>
+  </data>
+  <data name="slavermotor" xml:space="preserve">
+    <value>Slave Screw Motor</value>
+  </data>
 </root>

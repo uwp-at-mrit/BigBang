@@ -1,12 +1,11 @@
 #pragma once
 
-#include "snip.hpp"
+#include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Statuslet : public WarGrey::SCADA::Snip {
+    private class Gaugelet : public WarGrey::SCADA::Snip {
     public:
-        Statuslet(Platform::String^ caption);
-        void on_attach_to(Pasteboard^ master) override;
+        Gaugelet(Platform::String^ caption, float ampere , int rpm);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
@@ -16,7 +15,9 @@ namespace WarGrey::SCADA {
 
     private:
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font;
         Platform::String^ caption;
-        bool plc_connected;
+        float ampere;
+        int rpm;
     };
 }

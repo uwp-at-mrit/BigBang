@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include <cstdlib>
 
+#include "text.hpp"
 #include "textlet.hpp"
 
 using namespace WarGrey::SCADA;
@@ -43,15 +44,13 @@ Textlet::~Textlet() {}
 
 void Textlet::change_text(Platform::String^ content) {
     this->content = content;
-    if (this->font == nullptr) {
-        this->font = ref new CanvasTextFormat();
-        this->font->WordWrapping = CanvasWordWrapping::NoWrap;
-        this->font->FontSize = 12.0F;
+    if (this->label_font == nullptr) {
+        this->label_font = make_text_format();
     }
 }
 
 void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
-    TextExtent ts = get_text_extent(content, font);
+    TextExtent ts = get_text_extent(content, label_font);
 
     SET_VALUES(w, ts.width, h, ts.height);
     SET_VALUES(b, ts.bspace, t, ts.tspace);
@@ -59,5 +58,5 @@ void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float*
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText(content, x, y, Colors::Snow, font);
+    ds->DrawText(content, x, y, Colors::Snow, label_font);
 }

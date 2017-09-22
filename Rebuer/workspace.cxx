@@ -6,6 +6,7 @@
 #include "pasteboard.hxx"
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
+#include "snip/gaugelet.hpp"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 
@@ -24,6 +25,30 @@ using namespace Windows::UI::ViewManagement;
 
 static Thickness zero(0.0, 0.0, 0.0, 0.0);
 
+static Pasteboard^ make_region(Panel^ parent, IPasteboardLayout* layout, Thickness* inset = nullptr) {
+    auto region = ref new Pasteboard(parent, layout);
+
+    region->show_selection_dots(false);
+    region->show_border(false);
+
+    if (inset != nullptr) {
+        region->inset = (*inset);
+    }
+
+    return region;
+}
+
+static float region_height(Pasteboard^ pb) {
+    float height = pb->actual_height;
+
+    if (height == 0.0F) {
+        pb->fill_snips_bounds(nullptr, nullptr, nullptr, &height);
+        height += float(pb->inset.Top + pb->inset.Bottom);
+    }
+
+    return height;
+}
+
 WorkSpace::WorkSpace() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = zero;
@@ -32,44 +57,33 @@ WorkSpace::WorkSpace() : StackPanel() {
 }
 
 void WorkSpace::initialize_component(Size region) {
-    this->statusbar = ref new Pasteboard(this, new HorizontalLayout(0.0F));
-    this->statusbar->show_border(false);
-    this->statusbar->show_selection_dots(false);
-    this->statusbar->insert(new Statuslet(speak("RRB1")), 0.0F, 0.0F);
+    this->statusbar = make_region(this, new HorizontalLayout(0.0F));
+    this->stage = make_region(this, new AbsoluteLayout());
+    this->gauge = make_region(this, new HorizontalLayout(64.0F));
+    this->taskbar = make_region(this, new HorizontalLayout(0.0F));
     
-    this->stage = ref new Pasteboard(this, new AbsoluteLayout());
-    this->stage->show_selection_dots(false);
-    //this->stage->show_border(false);
-    //this->stage->inset = zero;
-
-    this->taskbar = ref new Pasteboard(this, new HorizontalLayout(0.0F));
-    this->taskbar->show_border(false);
-    this->taskbar->show_inset_box(true);
     this->taskbar->show_selection_dots(false);
-    this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")), 0.0F, 0.0F);
+
+    this->statusbar->insert(new Statuslet(speak("RRB1")));
+    this->gauge->insert(new Gaugelet(speak("mastermotor"), 200.0F, 7200));
+    this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200.0F, 7200));
+    this->gauge->insert(new Gaugelet(speak("cleanmotor"), 200.0F, 7200));
+    this->gauge->insert(new Gaugelet(speak("slavermotor"), 200.0F, 7200));
+    this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")));
 
     this->reflow(region.Width, region.Height);
 }
 
 void WorkSpace::reflow(float width, float height) {
-    float sbar_height = this->statusbar->actual_height;
-    float tbar_height = this->taskbar->actual_height;
-
     this->statusbar->canvas_width = width;
     this->taskbar->canvas_width = width;
     this->stage->canvas_width = width;
+    this->gauge->canvas_width = width;
 
-    if (sbar_height == 0.0F) {
-        this->statusbar->fill_snips_bounds(nullptr, nullptr, nullptr, &sbar_height);
-        sbar_height += float(this->statusbar->inset.Top + this->statusbar->inset.Bottom);
-    }
-
-    if (tbar_height == 0.0F) {
-        this->taskbar->fill_snips_bounds(nullptr, nullptr, nullptr, &tbar_height);
-        tbar_height += float(this->taskbar->inset.Top + this->taskbar->inset.Bottom);
-    }
-
-    this->stage->canvas_height = height - sbar_height - tbar_height;
+    this->stage->canvas_height = height
+        - region_height(this->statusbar)
+        - region_height(this->taskbar)
+        - region_height(this->gauge);
 }
 
 void WorkSpace::suspend(SuspendingOperation^ op) {

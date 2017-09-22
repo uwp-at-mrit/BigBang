@@ -150,4 +150,16 @@
   <data name="RRB2" xml:space="preserve">
     <value>再生胶B2</value>
   </data>
+  <data name="cleanmotor" xml:space="preserve">
+    <value>清胶器螺杆电机</value>
+  </data>
+  <data name="feedingmotor" xml:space="preserve">
+    <value>进料电机</value>
+  </data>
+  <data name="mastermotor" xml:space="preserve">
+    <value>主螺杆电机</value>
+  </data>
+  <data name="slavermotor" xml:space="preserve">
+    <value>副螺杆电机</value>
+  </data>
 </root>

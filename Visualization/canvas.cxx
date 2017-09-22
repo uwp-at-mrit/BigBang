@@ -10,40 +10,9 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
 
 using namespace Windows::System;
-using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 
-static CanvasDrawingSession^ shared_ds;
-
-CanvasDrawingSession^ WarGrey::SCADA::make_shared_drawing_session() {
-    if (shared_ds == nullptr) {
-        auto sharedDevice = CanvasDevice::GetSharedDevice();
-        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0F, 96.0F);
-        shared_ds = target->CreateDrawingSession();
-    }
-
-    return shared_ds;
-}
-
-TextExtent WarGrey::SCADA::get_text_extent(Platform::String^ message, CanvasTextFormat^ font) {
-    return get_text_extent(make_shared_drawing_session(), message, font);
-}
-
-TextExtent WarGrey::SCADA::get_text_extent(CanvasDrawingSession^ ds, Platform::String^ message, CanvasTextFormat^ font) {
-    auto layout = ref new CanvasTextLayout(ds, message, font, 0.0F, 0.0F);
-    Rect logical = layout->LayoutBounds;
-    Rect ink = layout->DrawBounds;
-    float top = ink.Y - logical.Y;
-    float bottom = logical.Height - ink.Height - top;
-    float left = ink.X - logical.X;
-    float right = logical.Width - ink.Width - left;
-
-    return { logical.Width, logical.Height, top, right, bottom, left };
-}
-
-/*************************************************************************************************/
 Win2DCanvas::Win2DCanvas(Panel^ parent, Platform::String^ id) {
     auto do_load = ref new CanvasLoadHandler(this, &Win2DCanvas::do_load);
     auto do_paint = ref new CanvasDrawHandler(this, &Win2DCanvas::do_paint);

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\orientation.cpp" />
@@ -23,9 +24,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hpp" />
@@ -35,6 +38,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pasteboard.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)workspace\listener.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
   </ItemGroup>
 </Project>
