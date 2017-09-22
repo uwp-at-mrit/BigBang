@@ -104,12 +104,10 @@ internal:
         // WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
         this->timer = gui_timer(1000, ref new ObjectHandler(this, &Status::refresh_timeinfo));
         
-        rsyslog("BEGIN");
         this->update_timestamp();
         this->update_powerinfo();
         this->update_sdinfo();
         this->update_nicinfo();
-        rsyslog("END");
     }
 
 private:
