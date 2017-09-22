@@ -11,6 +11,15 @@ using namespace Windows::Storage::Streams;
 static DatagramSocket^ client = nullptr;
 static IDataWriter^ udpout = nullptr;
 
+static void trace(const wchar_t* message) {
+    OutputDebugString(message);
+    OutputDebugString(L"\n");
+}
+
+static void trace(Platform::String^ message) {
+    trace(message->Data());
+}
+
 static void syslog(Platform::String^ message) {
     if (client == nullptr) {
         auto loghost = ref new HostName("172.16.8.1");
@@ -29,13 +38,13 @@ static void syslog(Platform::String^ message) {
         udpout->WriteString(timestamp);
         udpout->WriteString(L"] ");
         udpout->WriteString(message);
-        udpout->StoreAsync();
-        
-        OutputDebugString(L"[");
-        OutputDebugString(timestamp->Data());
-        OutputDebugString(L"] ");
-        OutputDebugString(message->Data());
-        OutputDebugString(L"\n");
+        create_task(udpout->StoreAsync()).then([timestamp, message](unsigned int size) {
+            OutputDebugString(L"[");
+            OutputDebugString(timestamp->Data());
+            OutputDebugString(L"] ");
+            OutputDebugString(message->Data());
+            OutputDebugString(L"\n");
+        });
     }
 }
 
