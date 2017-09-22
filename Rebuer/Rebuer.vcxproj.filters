@@ -178,4 +178,8 @@
   <ItemGroup>
     <ClInclude Include="workspace.hxx" />
   </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Localization\en\tongue.resw" />
+    <PRIResource Include="Localization\zh-cn\tongue.resw" />
+  </ItemGroup>
 </Project>

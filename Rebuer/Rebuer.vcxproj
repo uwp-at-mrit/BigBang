@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{f13a79bc-0a9f-4e69-90b9-3ed82ea49304}</ProjectGuid>
     <RootNamespace>Rebuer</RootNamespace>
-    <DefaultLanguage>en-US</DefaultLanguage>
+    <DefaultLanguage>zh-cn</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
@@ -231,6 +231,12 @@
   <ItemGroup>
     <ClCompile Include="RebuerEcoFacilities.cxx" />
     <ClCompile Include="workspace.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Localization\en\tongue.resw" />
+    <PRIResource Include="Localization\zh-cn\tongue.resw">
+      <SubType>Designer</SubType>
+    </PRIResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
