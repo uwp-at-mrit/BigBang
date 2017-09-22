@@ -5,7 +5,6 @@
 #include "text.hpp"
 #include "time.hpp"
 #include "tongue.hpp"
-#include "rsyslog.hpp"
 #include "pasteboard.hxx"
 #include "snip/statuslet.hpp"
 

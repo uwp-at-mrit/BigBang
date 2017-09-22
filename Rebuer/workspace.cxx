@@ -65,10 +65,10 @@ void WorkSpace::initialize_component(Size region) {
     this->taskbar->show_selection_dots(false);
 
     this->statusbar->insert(new Statuslet(speak("RRB1")));
-    this->gauge->insert(new Gaugelet(speak("mastermotor"), 200.0F, 7200));
-    this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200.0F, 7200));
-    this->gauge->insert(new Gaugelet(speak("cleanmotor"), 200.0F, 7200));
-    this->gauge->insert(new Gaugelet(speak("slavermotor"), 200.0F, 7200));
+    this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
+    this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
+    this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
+    this->gauge->insert(new Gaugelet(speak("slavermotor"),  200, 100));
     this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")));
 
     this->reflow(region.Width, region.Height);

@@ -162,4 +162,10 @@
   <data name="slavermotor" xml:space="preserve">
     <value>Slave Screw Motor</value>
   </data>
+  <data name="ampere" xml:space="preserve">
+    <value>Ampere</value>
+  </data>
+  <data name="rpm" xml:space="preserve">
+    <value>RPM</value>
+  </data>
 </root>

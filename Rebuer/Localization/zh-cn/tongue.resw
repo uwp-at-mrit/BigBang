@@ -162,4 +162,10 @@
   <data name="slavermotor" xml:space="preserve">
     <value>副螺杆电机</value>
   </data>
+  <data name="ampere" xml:space="preserve">
+    <value>电流</value>
+  </data>
+  <data name="rpm" xml:space="preserve">
+    <value>转速</value>
+  </data>
 </root>
