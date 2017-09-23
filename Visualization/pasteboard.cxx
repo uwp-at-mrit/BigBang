@@ -35,9 +35,7 @@ static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 /*************************************************************************************************/
 private ref class SnipInfo sealed : public WarGrey::SCADA::ISnipInfo {
 public:
-    SnipInfo(Pasteboard^ master) {
-        this->_master = master;
-    }
+    SnipInfo(Pasteboard^ master) : _master(master) {};
 
     property Pasteboard^ master { virtual Pasteboard^ get() { return this->_master; }; }
     property CanvasDevice^ Device { virtual CanvasDevice^ get() { return this->_master->canvas->Device; }; }
@@ -50,6 +48,11 @@ internal:
 private:
     Pasteboard^ _master;
 };
+
+/** WARNING
+ *   C-Style casting tries all C++ style casting except dynamic_cast;
+ *   reinterpret_cast may cause "Access violation reading location 0xFFFFFFFFFFFFFFFF" even for subtype casting. 
+ */
 
 #define SNIP_INFO(snip) (static_cast<SnipInfo^>(snip->info))
 
