@@ -41,14 +41,14 @@ void Gaugelet::fill_extent(float x, float y, float* w, float* h, float* b, float
         this->caption_width = ts.width;
         this->scale_height = l00.height;
         this->label_height = ts.height;
-        this->gauge_gapsize = l00.width * 1.618F;
-        this->gauge_y = ts.height * 1.618F;
+        this->meter_gapsize = l00.width * 1.618F;
+        this->meter_y = ts.height * 1.618F;
         this->mark_width = l00.width / 3.0F;
         this->mark_interval = l00.height * 0.7F;
-        this->gauge_width = this->mark_width * 9.0F;
+        this->meter_width = this->mark_width * 9.0F;
 
-        this->width = std::fmax(this->caption_width, this->gauge_width * 2.0F + this->gauge_gapsize);
-        this->height = this->gauge_y + this->mark_interval * this->step + this->label_height * 2.0F + this->scale_height;
+        this->width = std::fmax(this->caption_width, this->meter_width * 2.0F + this->meter_gapsize);
+        this->height = this->meter_y + this->mark_interval * this->step + this->label_height * 2.0F + this->scale_height;
     }
 
     SET_VALUES(w, this->width, h, this->height);
@@ -57,20 +57,20 @@ void Gaugelet::fill_extent(float x, float y, float* w, float* h, float* b, float
 }
 
 void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto gauges_width = this->gauge_width * 2.0F + this->gauge_gapsize;
-    auto xA = x + (this->width - gauges_width) / 2.0F;
-    auto xR = xA + this->gauge_width + this->gauge_gapsize;
+    auto meters_width = this->meter_width * 2.0F + this->meter_gapsize;
+    auto xA = x + (this->width - meters_width) / 2.0F;
+    auto xR = xA + this->meter_width + this->meter_gapsize;
     
     ds->DrawText(this->caption, x + (this->width - this->caption_width) / 2.0F, y, Colors::Khaki, this->label_font);
-    this->draw_gauge(ds, xA, this->gauge_y, this->Ampere, this->ampere, speak("ampere"), Colors::RoyalBlue);
-    this->draw_gauge(ds, xR, this->gauge_y, this->RPM, float(this->rpm), speak("rpm"), Colors::Green);
+    this->draw_meter(ds, xA, this->meter_y, this->Ampere, this->ampere, speak("ampere"), Colors::RoyalBlue);
+    this->draw_meter(ds, xR, this->meter_y, this->RPM, float(this->rpm), speak("rpm"), Colors::Green);
 }
 
-void Gaugelet::draw_gauge(CanvasDrawingSession^ ds, float x, float y, int mscale, float scale, Platform::String^ label, Color& color) {
+void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, int mscale, float scale, Platform::String^ label, Color& color) {
     auto body_yoff = this->scale_height * 0.5F;
-    auto body_width = (this->gauge_width - this->mark_width) / 2.0F;
+    auto body_width = (this->meter_width - this->mark_width) / 2.0F;
     auto body_height = this->mark_interval * this->step;
-    auto body_x = x + this->gauge_width - body_width;
+    auto body_x = x + this->meter_width - body_width;
     auto body_y = y + body_yoff;
     auto body_bottom = body_y + body_height;
     auto delta = mscale / this->step;

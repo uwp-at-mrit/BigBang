@@ -4,7 +4,7 @@
 #include "canvas.hxx"
 #include "forward.hxx"
 #include "object.hpp"
-#include "workspace/listener.hpp"
+#include "listener/listener.hpp"
 
 namespace WarGrey::SCADA {
     private ref class Pasteboard sealed: public WarGrey::SCADA::Win2DCanvas {

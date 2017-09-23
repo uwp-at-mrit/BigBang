@@ -168,4 +168,7 @@
   <data name="rpm" xml:space="preserve">
     <value>转速</value>
   </data>
+  <data name="tank" xml:space="preserve">
+    <value>储料罐</value>
+  </data>
 </root>

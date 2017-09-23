@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
             override;
     
     private:
-        void draw_gauge(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+        void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, int mscale, float scale, Platform::String^ label,
             Windows::UI::Color& color);
 
@@ -32,11 +32,11 @@ namespace WarGrey::SCADA {
         float caption_width;
         float label_height;
         float scale_height;
-        float gauge_width;
-        float gauge_gapsize;
+        float meter_width;
+        float meter_gapsize;
         float mark_width;
         float mark_interval;
-        float gauge_y;
+        float meter_y;
 
     private:
         float ampere;

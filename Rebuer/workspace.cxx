@@ -59,7 +59,7 @@ WorkSpace::WorkSpace() : StackPanel() {
 void WorkSpace::initialize_component(Size region) {
     this->statusbar = make_region(this, new HorizontalLayout(0.0F));
     this->stage = make_region(this, new AbsoluteLayout());
-    this->gauge = make_region(this, new HorizontalLayout(64.0F));
+    this->gauge = make_region(this, new HorizontalLayout(16.0F));
     this->taskbar = make_region(this, new HorizontalLayout(0.0F));
     
     this->taskbar->show_selection_dots(false);
