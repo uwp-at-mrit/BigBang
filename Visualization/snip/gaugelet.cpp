@@ -8,14 +8,6 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-using namespace Windows::UI::Xaml;
-using namespace Windows::ApplicationModel::Resources;
-
-using namespace Windows::Devices::Power;
-using namespace Windows::Devices::WiFi;
-
-using namespace Windows::Networking;
-using namespace Windows::Networking::Connectivity;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;

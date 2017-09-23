@@ -14,10 +14,7 @@ using namespace Concurrency;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;
-using namespace Windows::ApplicationModel::Resources;
-
 using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 
 using namespace Windows::Devices::Power;
 using namespace Windows::Devices::WiFi;

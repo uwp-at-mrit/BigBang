@@ -168,7 +168,7 @@
   <data name="rpm" xml:space="preserve">
     <value>RPM</value>
   </data>
-  <data name="tank" xml:space="preserve">
+  <data name="storagetank" xml:space="preserve">
     <value>Storage Tank</value>
   </data>
 </root>
