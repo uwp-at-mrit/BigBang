@@ -20,7 +20,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\orientation.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)pasteboard.cxx" />

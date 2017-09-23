@@ -32,7 +32,7 @@ void VerticalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float y
         self->layout_info = info;
     }
 
-    LayoutInfo* info = (LayoutInfo*)self->layout_info;
+    LayoutInfo* info = static_cast<LayoutInfo*>(self->layout_info);
     
     y = info->anchor + this->gapsize;
     snip->fill_extent(0.0F, y, &width, &height);
@@ -62,7 +62,7 @@ void HorizontalLayout::after_insert(Pasteboard^ self, Snip* snip, float x, float
         self->layout_info = info;
     }
 
-    LayoutInfo* info = (LayoutInfo*)self->layout_info;
+    LayoutInfo* info = static_cast<LayoutInfo*>(self->layout_info);
 
     x = info->anchor + this->gapsize;
     snip->fill_extent(x, 0.0F, &width, &height);

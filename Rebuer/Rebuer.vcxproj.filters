@@ -7,8 +7,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="workspace.cxx" />
     <ClCompile Include="RebuerEcoFacilities.cxx" />
+    <ClCompile Include="workspace.cxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -176,10 +176,10 @@
     <None Include="Rebuer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="workspace.hxx" />
-  </ItemGroup>
-  <ItemGroup>
     <PRIResource Include="Localization\en\tongue.resw" />
     <PRIResource Include="Localization\zh-cn\tongue.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="workspace.hxx" />
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
@@ -32,23 +33,34 @@ static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 #define REMOVE(ptr, refcount) if (ptr->refcount <= 1) { delete ptr; } else { ptr->refcount -= 1; }
 
 /*************************************************************************************************/
-struct SnipInfo : public AbstractObject {
-    Pasteboard^ master;
-    float x = 0.0F;
-    float y = 0.0F;
-    bool selected = false;
+private ref class SnipInfo sealed : public WarGrey::SCADA::ISnipInfo {
+public:
+    SnipInfo(Pasteboard^ master) {
+        this->_master = master;
+    }
+
+    property Pasteboard^ master { virtual Pasteboard^ get() { return this->_master; }; }
+    property CanvasDevice^ Device { virtual CanvasDevice^ get() { return this->_master->canvas->Device; }; }
+
+internal:
+    float x;
+    float y;
+    bool selected;
+
+private:
+    Pasteboard^ _master;
 };
 
-#define SNIP_INFO(snip) ((SnipInfo*)snip->info)
+#define SNIP_INFO(snip) (static_cast<SnipInfo^>(snip->info))
 
-static inline void bind_snip_owership(Pasteboard^ master, Snip* snip) {
-    SnipInfo* info = new SnipInfo();
-    info->master = master;
+static inline SnipInfo^ bind_snip_owership(Pasteboard^ master, Snip* snip) {
+    auto info = ref new SnipInfo(master);
     snip->info = info;
-    snip->on_attach_to(master);
+
+    return info;
 }
 
-static inline void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool absolute) {
+static inline void unsafe_move_snip_via_info(SnipInfo^ info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -63,14 +75,14 @@ static inline void unsafe_move_snip_info(SnipInfo* info, float x, float y, bool 
     }
 }
 
-static inline void unsafe_add_selected(IPasteboardListener* listener, Snip* snip, SnipInfo* info) {
+static inline void unsafe_add_selected(IPasteboardListener* listener, Snip* snip, SnipInfo^ info) {
     listener->before_select(info->master, snip);
     info->selected = true;
     info->master->refresh();
     listener->after_select(info->master, snip);
 }
 
-static inline void unsafe_set_selected(IPasteboardListener* listener, Snip* snip, SnipInfo* info) {
+static inline void unsafe_set_selected(IPasteboardListener* listener, Snip* snip, SnipInfo^ info) {
     info->master->begin_edit_sequence();
     info->master->no_selected();
     unsafe_add_selected(listener, snip, info);
@@ -130,9 +142,9 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
         }
         snip->next = this->head_snip;
 
+        auto info = bind_snip_owership(this, snip);
         this->begin_edit_sequence();
-        bind_snip_owership(this, snip);
-        unsafe_move_snip_info(SNIP_INFO(snip), x, y, true);
+        unsafe_move_snip_via_info(info, x, y, true);
         this->size_cache_invalid();
         this->refresh();
         this->end_edit_sequence();
@@ -142,27 +154,27 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
 
 void Pasteboard::move_to(Snip* snip, float x, float y) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
-        SnipInfo* info = SNIP_INFO(snip);
-        if (info->master == this) {
-            unsafe_move_snip_info(info, x, y, true);
+        if (snip->info->master == this) {
+            SnipInfo^ info = SNIP_INFO(snip);
+            unsafe_move_snip_via_info(info, x, y, true);
         }
     }
 }
 
 void Pasteboard::move(Snip* snip, float x, float y) {
-    if (snip != nullptr) {
-        SnipInfo* info = SNIP_INFO(snip);
-        if ((info != nullptr) && (info->master == this)) {
-            unsafe_move_snip_info(info, x, y, false);
+    if ((snip != nullptr) && (snip->info != nullptr)) {
+        if (snip->info->master == this) {
+            SnipInfo^ info = SNIP_INFO(snip);
+            unsafe_move_snip_via_info(info, x, y, false);
         }
     } else if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
         this->begin_edit_sequence();
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            SnipInfo^ info = SNIP_INFO(child);
             if (info->selected) {
-                unsafe_move_snip_info(info, x, y, false);
+                unsafe_move_snip_via_info(info, x, y, false);
             }
             child = child->next;
         } while (child != this->head_snip);
@@ -178,7 +190,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
         Snip* child = this->head_snip;
 
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            SnipInfo^ info = SNIP_INFO(child);
             child->fill_extent(info->x, info->y, &width, &height);
 
             if ((info->x < x) && (x < (info->x + width)) && (info->y < y) && (y < (info->y + height))) {
@@ -262,7 +274,7 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
             this->snips_bottom = -FLT_MAX;
             
             do {
-                SnipInfo* info = SNIP_INFO(child);
+                SnipInfo^ info = SNIP_INFO(child);
                 child->fill_extent(info->x, info->y, &width, &height);
                 this->snips_left = std::min(this->snips_left, info->x);
                 this->snips_top = std::min(this->snips_top, info->y);
@@ -284,9 +296,9 @@ void Pasteboard::on_end_edit_sequence() {
 
 void Pasteboard::add_selected(Snip* snip) {
     if (snip != nullptr) {
-        SnipInfo* info = SNIP_INFO(snip);
-        if ((info != nullptr) && (info->master == this) && (!info->selected)) {
-            if (this->rubberband_allowed && this->listener->can_select(this, snip)) {
+        if ((snip->info != nullptr) && (snip->info->master == this)) {
+            SnipInfo^ info = SNIP_INFO(snip);
+            if ((!info->selected) && (this->rubberband_allowed && this->listener->can_select(this, snip))) {
                 unsafe_add_selected(this->listener, snip, info);
             }
         }
@@ -295,9 +307,9 @@ void Pasteboard::add_selected(Snip* snip) {
 
 void Pasteboard::set_selected(Snip* snip) {
     if (snip != nullptr) {
-        SnipInfo* info = SNIP_INFO(snip);
-        if ((info != nullptr) && (info->master == this) && (!info->selected)) {
-            if (this->listener->can_select(this, snip)) {
+        if ((snip->info != nullptr) && (snip->info->master == this)) {
+            SnipInfo^ info = SNIP_INFO(snip);
+            if ((!info->selected) && (this->listener->can_select(this, snip))) {
                 unsafe_set_selected(this->listener, snip, info);
             }
         }
@@ -310,7 +322,7 @@ void Pasteboard::no_selected() {
 
         this->begin_edit_sequence();
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            SnipInfo^ info = SNIP_INFO(child);
             if (info->selected) {
                 this->listener->before_deselect(this, child);
                 info->selected = false;
@@ -378,7 +390,7 @@ void Pasteboard::on_pointer_pressed(Object^ sender, PointerRoutedEventArgs^ e) {
                     this->no_selected();
                 } else {
                     this->rubberband_y = nullptr;
-                    SnipInfo* info = SNIP_INFO(snip);
+                    SnipInfo^ info = SNIP_INFO(snip);
                     if ((!info->selected) && this->listener->can_select(this, snip)) {
                         if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
                             if (this->rubberband_allowed) {
@@ -503,7 +515,7 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
         Snip* child = this->head_snip;
 
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            SnipInfo^ info = SNIP_INFO(child);
             child->fill_extent(info->x, info->y, &width, &height);
             width = std::min(Width - info->x, width);
             height = std::min(Height - info->y, height);

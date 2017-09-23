@@ -28,6 +28,8 @@ using namespace Microsoft::Graphics::Canvas::Text;
 typedef TypedEventHandler<Battery^, Platform::Object^> BatteryUpdateHandler;
 typedef TypedEventHandler<WiFiAdapter^, Platform::Object^> WiFiUpdateHandler;
 
+#define REFRESH(self) if (self->master->info != nullptr) { self->master->info->master->refresh(); }
+
 // delegate only accepts C++/CX
 ref class Status sealed {
 public:
@@ -35,9 +37,7 @@ public:
         int l00ns;
 
         this->timestamp = update_nowstamp(false, &l00ns);
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
+        REFRESH(this);
 
         return TimeSpan{ 10000000 - l00ns };
     }
@@ -48,10 +48,7 @@ public:
         auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
         this->powercapacity = speak("powerlabel") + std::round((remaining / full) * 100.0F).ToString() + "%";
-        
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
+        REFRESH(this);
     }
 
     void update_wifiinfo(WiFiAdapter^ info) {
@@ -68,18 +65,12 @@ public:
         }
 
         this->wifi_strength = speak("wifilabel") + signal;
-
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
+        REFRESH(this);
     }
 
     void update_sdinfo() {
         this->storage = speak("sdlabel") + L"0MB";
-
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
+        REFRESH(this);
     }
 
     void update_ipinfo() {
@@ -95,14 +86,13 @@ public:
         }
 
         this->ipv4 = speak("ipv4label") + ipv4;
-
-        if (this->master != nullptr) {
-            this->master->refresh();
-        }
+        REFRESH(this);
     }
 
 internal:
-    Status() {
+    Status(Statuslet* master) {
+        this->master = master;
+
         Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
         // WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
         this->timer = gui_timer(1000, ref new ObjectHandler(this, &Status::refresh_timeinfo));
@@ -136,7 +126,7 @@ private:
     Platform::String^ ipv4;
     
 private:
-    Pasteboard^ master;
+    Statuslet* master; // this will be destructed by master Pasteboard;
 
     friend class WarGrey::SCADA::Statuslet;
 };
@@ -151,13 +141,8 @@ Statuslet::Statuslet(Platform::String^ caption) {
     this->plc_connected = false;
     this->label_font = make_text_format();
 
-    if (statusbar == nullptr) {
-        statusbar = ref new Status();
-    }
-}
-
-void Statuslet::on_attach_to(Pasteboard^ master) {
-    statusbar->master = master;
+    // TODO: is it safe?
+    statusbar = ref new Status(this);
 }
 
 void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
@@ -171,7 +156,7 @@ void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, floa
             status_prefix_width = ts.width + sp.width;
         }
 
-        SET_BOX(w, statusbar->master->actual_layer_width - x);
+        SET_BOX(w, info->master->actual_layer_width - x);
         SET_BOX(h, status_height);
         SET_BOXES(b, t, 0.0F);
         SET_BOXES(l, r, 0.0F);

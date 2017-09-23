@@ -6,7 +6,6 @@ namespace WarGrey::SCADA {
     private class Statuslet : public WarGrey::SCADA::Snip {
     public:
         Statuslet(Platform::String^ caption);
-        void on_attach_to(Pasteboard^ master) override;
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

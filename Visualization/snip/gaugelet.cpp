@@ -1,7 +1,6 @@
 ﻿#include <cmath>
 
 #include "text.hpp"
-#include "rsyslog.hpp"
 #include "tongue.hpp"
 #include "snip/gaugelet.hpp"
 

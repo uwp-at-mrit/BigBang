@@ -1,17 +1,19 @@
 ﻿#include <cmath>
 
 #include "text.hpp"
-#include "rsyslog.hpp"
 #include "tongue.hpp"
 #include "snip/storagelet.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-using namespace Windows::UI::Xaml;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
+using namespace Microsoft::Graphics::Canvas::Brushes;
+
+CanvasGradientStop topface_stops[3];
+CanvasGradientStop body_stops[3];
+CanvasGradientStop used_stops[3];
 
 StorageTanklet::StorageTanklet(float width, float height) {
     this->width = width;
@@ -27,5 +29,6 @@ void StorageTanklet::fill_extent(float x, float y, float* w, float* h, float* b,
 }
 
 void StorageTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->FillRectangle(x, y, this->width, this->height, Colors::Gray);
+    auto brush = ref new CanvasSolidColorBrush(this->info, Colors::Snow);
+    ds->FillRectangle(x, y, this->width, this->height, brush);
 }
