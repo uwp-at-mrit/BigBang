@@ -10,6 +10,7 @@
 #include "snip/gaugelet.hpp"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
+#include "decorator/border.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -30,7 +31,7 @@ static Pasteboard^ make_region(Panel^ parent, IPasteboardLayout* layout, Thickne
     auto region = ref new Pasteboard(parent, layout);
 
     region->show_selection_dots(false);
-    region->show_border(false);
+    region->set_decorator(new BorderDecorator(false, false, true));
 
     if (inset != nullptr) {
         region->inset = (*inset);
@@ -63,7 +64,6 @@ void WorkSpace::initialize_component(Size region) {
     this->gauge = make_region(this, new HorizontalLayout(16.0F));
     this->taskbar = make_region(this, new HorizontalLayout(0.0F));
     
-    this->gauge->show_enclosing_box(true);
     this->taskbar->show_selection_dots(false);
 
     this->statusbar->insert(new Statuslet(speak("RRB1")));

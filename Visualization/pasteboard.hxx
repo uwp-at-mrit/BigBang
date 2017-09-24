@@ -2,9 +2,10 @@
 
 #include "sugar.hpp"
 #include "canvas.hxx"
-#include "forward.hxx"
+#include "forward.hpp"
 #include "object.hpp"
 #include "listener/listener.hpp"
+#include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
     private ref class Pasteboard sealed: public WarGrey::SCADA::Win2DCanvas {
@@ -13,6 +14,7 @@ namespace WarGrey::SCADA {
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds) override;
+        void show_selection_dots(bool show);
 
     public:
         bool canvas_position_to_drawing_position(float* x, float* y);
@@ -20,12 +22,6 @@ namespace WarGrey::SCADA {
         void set_preferred_min_size(float width, float height);
         void fill_snips_bounds(float* x, float* y, float* width, float* height);
         void size_cache_invalid();
-
-    public:
-        void show_border(bool show);
-        void show_inset_box(bool show);
-        void show_enclosing_box(bool show);
-        void show_selection_dots(bool show);
 
     public:
         read_write_property(Windows::UI::Xaml::Thickness, inset);
@@ -45,6 +41,7 @@ namespace WarGrey::SCADA {
     internal:
         Pasteboard(Windows::UI::Xaml::Controls::Panel^ parent, IPasteboardLayout* layout = nullptr);
         void set_pointer_listener(WarGrey::SCADA::IPasteboardListener* listener);
+        void set_decorator(WarGrey::SCADA::IPasteboardDecorator* decorator);
         AbstractObject* layout_info = nullptr;
 
     internal:
@@ -76,10 +73,6 @@ namespace WarGrey::SCADA {
         
     private:
         Windows::UI::Xaml::Thickness padding;
-        bool draw_outer_border;
-        bool draw_inner_border;
-        bool draw_enclosing_box;
-        bool draw_selection_dots;
         float snips_left;
         float snips_top;
         float snips_right;
@@ -89,6 +82,8 @@ namespace WarGrey::SCADA {
 
     private:
         WarGrey::SCADA::IPasteboardLayout* layout = nullptr;
+        WarGrey::SCADA::IPasteboardDecorator* decorator = nullptr;
         WarGrey::SCADA::Snip* head_snip = nullptr;
+        bool draw_selection_dots = true;
     };
 }

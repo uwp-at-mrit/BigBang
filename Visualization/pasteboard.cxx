@@ -6,6 +6,7 @@
 #include "pasteboard.hxx"
 #include "snip/snip.hpp"
 #include "layout/absolute.hpp"
+#include "decorator/decorator.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -14,7 +15,6 @@ using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
@@ -27,6 +27,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 class PlaceHolderListener : public IPasteboardListener {};
+class PlaceHolderDecorator : public IPasteboardDecorator {};
 
 static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
 
@@ -99,11 +100,6 @@ Pasteboard::Pasteboard(Panel^ parent, IPasteboardLayout* layout) : Win2DCanvas(p
     this->layout->refcount += 1;
     this->layout->on_attach_to(this);
 
-    this->draw_outer_border = true;
-    this->draw_inner_border = false;
-    this->draw_enclosing_box = false;
-    this->draw_selection_dots = true;
-
     this->control->PointerMoved += ref new PointerEventHandler(this, &Pasteboard::on_pointer_moved);
     this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::on_pointer_pressed);
     this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::on_pointer_released);
@@ -129,6 +125,7 @@ Pasteboard::~Pasteboard() {
 
     REMOVE(this->layout, refcount);
     REMOVE(this->listener, refcount);
+    REMOVE(this->decorator, refcount);
 }
 
 void Pasteboard::insert(Snip* snip, float x, float y) {
@@ -340,16 +337,6 @@ void Pasteboard::no_selected() {
 }
 
 /************************************************************************************************/
-void Pasteboard::set_pointer_listener(IPasteboardListener* listener) {
-    if (this->listener != nullptr) {
-        REMOVE(this->listener, refcount);
-    }
-
-    this->listener = listener;
-    this->listener->refcount += 1;
-    this->rubberband_allowed = this->listener->can_select_multiple(this);
-}
-
 void Pasteboard::on_pointer_moved(Object^ sender, PointerRoutedEventArgs^ e) {
     if (!e->Handled) {
         auto ppt = e->GetCurrentPoint(this->control);
@@ -449,25 +436,24 @@ float Pasteboard::layer_width::get() { return float(this->canvas->ActualWidth - 
 void Pasteboard::layer_height::set(float v) { this->canvas->Height = double(v) + this->inset.Top + this->inset.Bottom; }
 float Pasteboard::layer_height::get() { return float(this->canvas->ActualHeight - this->inset.Top - this->inset.Bottom); }
 
-void Pasteboard::show_border(bool show) {
-    if (this->draw_outer_border != show) {
-        this->draw_outer_border = show;
-        this->refresh();
+void Pasteboard::set_pointer_listener(IPasteboardListener* listener) {
+    if (this->listener != nullptr) {
+        REMOVE(this->listener, refcount);
     }
+
+    this->listener = (listener == nullptr) ? new PlaceHolderListener() : listener;
+    this->listener->refcount += 1;
+    this->rubberband_allowed = this->listener->can_select_multiple(this);
 }
 
-void Pasteboard::show_inset_box(bool show) {
-    if (this->draw_inner_border != show) {
-        this->draw_inner_border = show;
-        this->refresh();
+void Pasteboard::set_decorator(IPasteboardDecorator* decorator) {
+    if (this->decorator != nullptr) {
+        REMOVE(this->decorator, refcount);
     }
-}
 
-void Pasteboard::show_enclosing_box(bool show) {
-    if (this->draw_enclosing_box != show) {
-        this->draw_enclosing_box = show;
-        this->refresh();
-    }
+    this->decorator = (decorator == nullptr) ? new PlaceHolderDecorator() : decorator;
+    this->decorator->refcount += 1;
+    this->refresh();
 }
 
 void Pasteboard::show_selection_dots(bool show) {
@@ -484,35 +470,13 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float tx = (float)this->inset.Left;
     float ty = (float)this->inset.Top;
     float width, height;
+    Rect border(-tx, -ty, this->canvas_width, this->actual_height);
 
     // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
     ds->Transform = make_float3x2_translation(tx, ty);
-    
-    { // draw borders
-        if (this->draw_inner_border) {
-            static auto border_color = ref new CanvasSolidColorBrush(ds, system_color(UIColorType::Accent));
-            static auto dash_stroke = ref new CanvasStrokeStyle();
-
-            dash_stroke->DashStyle = CanvasDashStyle::Dash;
-            ds->DrawRectangle(0.0F, 0.0F, Width, Height, border_color, 1.0F, dash_stroke);
-        }
-
-        if (this->draw_outer_border) {
-            static auto border_color = ref new CanvasSolidColorBrush(ds, system_color(UIColorType::AccentDark1));
-
-            ds->DrawRectangle(-tx, -ty, (float)this->actual_width, (float)this->actual_height, border_color);
-        }
-    }
+    this->decorator->draw_before(this, ds, Width, Height, border);
 
     auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
-
-    if (this->draw_enclosing_box) {
-        static auto box_color = ref new CanvasSolidColorBrush(ds, system_color(UIElementType::GrayText));
-        float x, y;
-
-        this->fill_snips_bounds(&x, &y, &width, &height);
-        ds->DrawRectangle(x, y, width, height, box_color, 1.0F);
-    }
 
     if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
@@ -551,4 +515,6 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     }
 
     delete region; /* Must Close the Layer Explicitly */
+
+    this->decorator->draw_after(this, ds, Width, Height, border);
 }

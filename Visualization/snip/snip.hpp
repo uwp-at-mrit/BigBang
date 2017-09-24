@@ -1,7 +1,7 @@
 #pragma once
 
 #include "canvas.hxx"
-#include "forward.hxx"
+#include "forward.hpp"
 
 #define SET_BOX(var, value) if (var != nullptr) (*var) = (value)
 #define SET_BOXES(var1, var2, value) { auto v = value; SET_BOX(var1, v); SET_BOX(var2, v); }

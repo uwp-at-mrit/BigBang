@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cpp" />
@@ -28,10 +29,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)canvas.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)listener\listener.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)forward.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\layout.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\orientation.hpp" />

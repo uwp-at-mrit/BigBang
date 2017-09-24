@@ -1,6 +1,6 @@
 #pragma once
 
-#include "forward.hxx"
+#include "forward.hpp"
 
 namespace WarGrey::SCADA {
     private class IPasteboardLayout abstract {
