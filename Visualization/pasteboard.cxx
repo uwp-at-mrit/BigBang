@@ -104,8 +104,8 @@ Pasteboard::Pasteboard(Panel^ parent, IPasteboardLayout* layout) : Win2DCanvas(p
     this->control->PointerPressed += ref new PointerEventHandler(this, &Pasteboard::on_pointer_pressed);
     this->control->PointerReleased += ref new PointerEventHandler(this, &Pasteboard::on_pointer_released);
 
-    this->listener = nullptr;
-    this->set_pointer_listener(new PlaceHolderListener());
+    this->set_pointer_listener(nullptr);
+    this->set_decorator(nullptr);
 }
 
 Pasteboard::~Pasteboard() {
