@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
             override;
 
     private:
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr;
 
     private:
         float width;

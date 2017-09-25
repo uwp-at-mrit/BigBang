@@ -66,7 +66,7 @@ void WorkSpace::initialize_component(Size region) {
     this->taskbar->show_selection_dots(false);
 
     this->statusbar->insert(new Statuslet(speak("RRB1")));
-    this->stage->insert(new StorageTanklet(100.0F, 168.0F));
+    this->stage->insert(new StorageTanklet(80.0F, 128.0F));
     this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
     this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
     this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
