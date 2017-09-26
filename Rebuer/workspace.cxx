@@ -7,6 +7,7 @@
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
+#include "snip/funnellet.hpp"
 #include "snip/gaugelet.hpp"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
@@ -67,6 +68,7 @@ void WorkSpace::initialize_component(Size region) {
 
     this->statusbar->insert(new Statuslet(speak("RRB1")));
     this->stage->insert(new StorageTanklet(80.0F, 128.0F));
+    this->stage->insert(new Funnellet(80.0F, 128.0F), 128.0F, 0.0F);
     this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
     this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
     this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
