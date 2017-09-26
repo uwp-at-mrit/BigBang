@@ -160,7 +160,7 @@
     <value>Master Screw Motor</value>
   </data>
   <data name="slavermotor" xml:space="preserve">
-    <value>Slave Screw Motor</value>
+    <value>Slaver Screw Motor</value>
   </data>
   <data name="ampere" xml:space="preserve">
     <value>Ampere</value>

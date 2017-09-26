@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)path.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\absolute.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)layout\orientation.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)gradient.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)layout\absolute.hpp" />

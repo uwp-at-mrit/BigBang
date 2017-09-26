@@ -3,9 +3,10 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Funnellet : public WarGrey::SCADA::Snip {
+    private class Motorlet : public WarGrey::SCADA::Snip {
     public:
-        Funnellet(float width, float height);
+        Motorlet(float width);
+        Motorlet(float width, float height);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

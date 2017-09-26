@@ -1,6 +1,4 @@
-﻿#include "text.hpp"
-#include "path.hpp"
-#include "tongue.hpp"
+﻿#include "path.hpp"
 #include "gradient.hpp"
 #include "snip/funnellet.hpp"
 
@@ -8,7 +6,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static Color topface_colors[] = { Colors::DarkGoldenrod, Colors::DarkGoldenrod, Colors::LightGray, Colors::DarkGoldenrod };

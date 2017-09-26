@@ -187,7 +187,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
     Snip* found = nullptr;
 
     if (this->head_snip != nullptr) {
-        Snip* child = this->head_snip;
+        Snip* child = this->head_snip->prev;
 
         do {
             SnipInfo^ info = SNIP_INFO(child);
@@ -198,7 +198,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
                 break;
             }
 
-            child = child->next;
+            child = child->prev;
         } while (child != this->head_snip);
     }
     
