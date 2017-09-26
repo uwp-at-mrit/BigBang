@@ -40,7 +40,7 @@ static Color body_colors[] = {
 };
 
 static Color used_indicator_colors[] = {
-    Colors::DimGray, Colors::DimGray, ColorHelper::FromArgb(255, 192, 192, 192), Colors::DimGray,
+    Colors::DimGray, Colors::DimGray, Colors::Silver, Colors::DimGray,
     Colors::DimGray, Colors::DimGray, Colors::DimGray, Colors::DimGray
 };
 
