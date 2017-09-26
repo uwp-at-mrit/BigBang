@@ -10,6 +10,7 @@ using namespace Windows::Foundation::Numerics;
 CanvasLinearGradientBrush^ make_linear_gradient_brush(ICanvasResourceCreator^ master
     , float sx, float sy, float ex, float ey, CanvasGradientStop* stops, int total
     , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
+    
     /** NOTE
      * Uses `auto` here to define 'stopa' may cause warning: using uninitialized memory.
      */
