@@ -63,7 +63,7 @@ void StorageTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
     auto adjust_height = std::fmin(body_height - used_height + 1.0F, body_height);
 
     auto body_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, body_stops);
-    auto body_path = make_cylinder_surface(ds, x, y, this->width, adjust_height, radiusY);
+    auto body_path = make_cylinder_surface(ds, x, y, radiusX, radiusY, adjust_height);
     ds->FillGeometry(body_path, body_brush);
 
     // drawing top face after drawing body makes the edge more smoothing.
@@ -72,7 +72,7 @@ void StorageTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
     auto used_y = y + (body_height - used_height);
     auto used_indicator_brush = make_linear_gradient_brush(this->info, x, used_y, x + this->width, used_y, used_stops);
-    auto used_path = make_cylinder_surface(ds, x, used_y, this->width, used_height, radiusY);
+    auto used_path = make_cylinder_surface(ds, x, used_y, radiusX, radiusY, used_height);
     ds->FillGeometry(used_path, used_indicator_brush);
 
     // TextLayout has already moved the text half-width ahead since its width is zero.

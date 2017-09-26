@@ -8,15 +8,31 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::Foundation::Numerics;
 
-CanvasGeometry^ make_cylinder_surface(CanvasDrawingSession^ ds, float x, float y, float w, float h, float ry) {
+CanvasGeometry^ make_cylinder_surface(CanvasDrawingSession^ ds, float x, float y, float rx, float ry, float height) {
     auto surface = ref new CanvasPathBuilder(ds);
-    auto rx = w / 2.0F;
+    float cx = x + rx;
+    float cy = y + ry;
     
     surface->BeginFigure(x, y);
-    surface->AddArc(float2(x + rx, y + ry), rx, ry, float(M_PI), -float(M_PI));
-    surface->AddLine(x + w, y + h);
-    surface->AddArc(float2(x + rx, y + ry + h), rx, ry, 0.0F, float(M_PI));
+    surface->AddArc(float2(cx, cy), rx, ry, float(M_PI), -float(M_PI));
+    surface->AddLine(cx + rx, y + height);
+    surface->AddArc(float2(cx, cy + height), rx, ry, 0.0F, float(M_PI));
     surface->EndFigure(CanvasFigureLoop::Closed);
 
     return CanvasGeometry::CreatePath(surface);
 }
+
+CanvasGeometry^ make_pyramid_surface(CanvasDrawingSession^ ds, float x, float y, float rt, float rb, float ry, float height) {
+    auto surface = ref new CanvasPathBuilder(ds);
+    auto cx = x + rt;
+    auto cy = y + ry;
+
+    surface->BeginFigure(x, y);
+    surface->AddArc(float2(cx, cy), rt, ry, float(M_PI), -float(M_PI));
+    surface->AddLine(cx + rb, y + height);
+    surface->AddArc(float2(cx, cy + height), rb, ry * rb / rt, 0.0F, float(M_PI));
+    surface->EndFigure(CanvasFigureLoop::Closed);
+
+    return CanvasGeometry::CreatePath(surface);
+}
+

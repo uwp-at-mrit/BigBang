@@ -1,4 +1,5 @@
 ﻿#include "text.hpp"
+#include "path.hpp"
 #include "tongue.hpp"
 #include "gradient.hpp"
 #include "snip/funnellet.hpp"
@@ -10,35 +11,21 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Color topface_colors[] = {
-    Colors::Gold, Colors::Gold, Colors::Gold, Colors::Gold,
-    Colors::Gold, Colors::LightGray, Colors::Gold, Colors::Gold
-};
+static Color topface_colors[] = { Colors::DarkGoldenrod, Colors::DarkGoldenrod, Colors::LightGray, Colors::DarkGoldenrod };
+static Color body_colors[] = { Colors::DarkGoldenrod, Colors::LightGray, Colors::DarkGoldenrod };
 
-static Color body_colors[] = {
-    Colors::Black, Colors::Black, Colors::Silver, Colors::Black,
-    Colors::Black, Colors::Black, Colors::Black, Colors::Black
-};
-
-static Color used_colors[] = {
-    Colors::DimGray, Colors::DimGray, Colors::Silver, Colors::DimGray,
-    Colors::DimGray, Colors::DimGray, Colors::DimGray, Colors::DimGray
-};
-
-static Platform::Array<CanvasGradientStop>^ make_color_stops(Color& edge_color, Color& highlight_color, float position) {
-    CanvasGradientStop stops[] = {
-        CanvasGradientStop{ 0.0F, edge_color },
-        CanvasGradientStop{ position, highlight_color },
-        CanvasGradientStop{ 1.0F, edge_color }
-    };
-
-    return ref new Platform::Array<CanvasGradientStop>(stops, sizeof(stops) / sizeof(CanvasGradientStop));
-}
+static Platform::Array<CanvasGradientStop>^ topface_stops = nullptr;
+static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;
 
 /*************************************************************************************************/
 Funnellet::Funnellet(float width, float height) {
     this->width = width;
     this->height = height;
+
+    if (body_stops == nullptr) {
+        topface_stops = MAKE_GRADIENT_STOPS(topface_colors);
+        body_stops = MAKE_GRADIENT_STOPS(body_colors);
+    }
 }
 
 void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
@@ -48,16 +35,16 @@ void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, floa
 }
 
 void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto radiusX = this->width / 2.0F;
-    auto radiusB = radiusX / 4.0F;
+    auto radiusT = this->width / 2.0F;
+    auto radiusB = this->width / 8.0F;
     auto radiusY = this->width / 64.0F;
-    auto body_height = this->height - radiusY * 2.0F;
+    auto body_height = this->height - radiusY * 3.0F;
 
-    //AUTO_FUNNEL_PATHBUILDER(body_tank, ds, x, y, radiusX, radiusY, this->width, this->height);
-    //auto body_brush = make_linear_gradient_brush(this->info, -100.0, y, 100.0, y, body_colors, 8);
-    //ds->FillGeometry(CanvasGeometry::CreatePath(body_tank), body_brush);
+    auto body_path = make_pyramid_surface(ds, x, y, radiusT, radiusB, radiusY, body_height);
+    auto body_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, body_stops);
+    ds->FillGeometry(body_path, body_brush);
 
     // drawing top face after drawing body makes the edge more smoothing.
-    // AUTO_LINEAR_GRADIENT_BRUSH(topface_brush, this->info, x, y, x + this->width, y, topface_stops);
-    // ds->FillEllipse(x + radiusX, y + radiusY, radiusX, radiusY, topface_brush);
+    auto topface_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, topface_stops);
+    ds->FillEllipse(x + radiusT, y + radiusY, radiusT, radiusY, topface_brush);
 }
