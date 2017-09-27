@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 
     internal:
         Snip* find_snip(float x, float y);
-        void insert(Snip* snip, float x = 0.0, float y = 0.0);
+        void insert(Snip* snip, float x = 0.0F, float y = 0.0F, double degrees = 0.0);
         void move(Snip* snip, float x, float y);
         void move_to(Snip* snip, float x, float y);
 

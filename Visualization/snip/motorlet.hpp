@@ -17,5 +17,6 @@ namespace WarGrey::SCADA {
     private:
         float width;
         float height;
+        float rotation;
     };
 }

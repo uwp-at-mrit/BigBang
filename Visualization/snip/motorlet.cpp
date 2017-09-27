@@ -1,4 +1,4 @@
-﻿#include <cmath>
+﻿#include <algorithm>
 
 #include "path.hpp"
 #include "gradient.hpp"
@@ -51,7 +51,7 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float body_height = this->height * 0.97F;
     float body_yoff = this->height - body_height;
     float body_y = y + body_yoff;
-
+    
     { // draw screw
         float thickness = this->height / 7.5F;
         float thread = std::fmax(this->width * 0.01F, 1.0F);

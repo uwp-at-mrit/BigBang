@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <algorithm>
 #include <WindowsNumerics.h>
 
@@ -15,6 +16,7 @@ using namespace Windows::Devices::Input;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
@@ -44,11 +46,32 @@ public:
 internal:
     float x;
     float y;
+    float rotation;
     bool selected;
 
 private:
     Pasteboard^ _master;
 };
+
+static inline void fill_snip_extent(Snip* snip, SnipInfo^ info, float* x, float* y, float* width, float* height) {
+    snip->fill_extent(info->x, info->y, width, height);
+
+    (*x) = info->x;
+    (*y) = info->y;
+    
+    if (info->rotation != 0.0F) {
+        // TODO: the resulting rectangle is inaccurate especially for small snips.
+        auto cx = (*x) + (*width) / 2.0F;
+        auto cy = (*y) + (*height) / 2.0F;
+        auto clip = CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), Rect((*x), (*y), (*width), (*height)));
+        auto enclosing = clip->ComputeBounds(make_float3x2_rotation(info->rotation, float2(cx, cy)));
+        
+        (*x) = enclosing.X;
+        (*y) = enclosing.Y;
+        (*width) = enclosing.Width;
+        (*height) = enclosing.Height;
+    }
+}
 
 /** WARNING
  *   C-Style casting tries all C++ style casting except dynamic_cast;
@@ -57,9 +80,13 @@ private:
 
 #define SNIP_INFO(snip) (static_cast<SnipInfo^>(snip->info))
 
-static inline SnipInfo^ bind_snip_owership(Pasteboard^ master, Snip* snip) {
+static inline SnipInfo^ bind_snip_owership(Pasteboard^ master, Snip* snip, double degrees) {
     auto info = ref new SnipInfo(master);
     snip->info = info;
+
+    while (degrees <  0.000) degrees += 360.0;
+    while (degrees >= 360.0) degrees -= 360.0;
+    info->rotation = -float(degrees * M_PI / 180.0);
 
     return info;
 }
@@ -128,7 +155,7 @@ Pasteboard::~Pasteboard() {
     REMOVE(this->decorator, refcount);
 }
 
-void Pasteboard::insert(Snip* snip, float x, float y) {
+void Pasteboard::insert(Snip* snip, float x, float y, double degrees) {
     if (snip->info == nullptr) { // TODO: should it be copied if one snip can only belongs to one pasteboard
         this->layout->before_insert(this, snip, x, y);
 
@@ -142,7 +169,7 @@ void Pasteboard::insert(Snip* snip, float x, float y) {
         }
         snip->next = this->head_snip;
 
-        auto info = bind_snip_owership(this, snip);
+        auto info = bind_snip_owership(this, snip, degrees);
         this->begin_edit_sequence();
         unsafe_move_snip_via_info(info, x, y, true);
         this->size_cache_invalid();
@@ -183,7 +210,7 @@ void Pasteboard::move(Snip* snip, float x, float y) {
 }
 
 Snip* Pasteboard::find_snip(float x, float y) {
-    float width, height;
+    float sx, sy, sw, sh;
     Snip* found = nullptr;
 
     if (this->head_snip != nullptr) {
@@ -191,9 +218,9 @@ Snip* Pasteboard::find_snip(float x, float y) {
 
         do {
             SnipInfo^ info = SNIP_INFO(child);
-            child->fill_extent(info->x, info->y, &width, &height);
+            fill_snip_extent(child, info, &sx, &sy, &sw, &sh);
 
-            if ((info->x < x) && (x < (info->x + width)) && (info->y < y) && (y < (info->y + height))) {
+            if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
                 found = child;
                 break;
             }
@@ -258,7 +285,7 @@ void Pasteboard::size_cache_invalid() {
 
 void Pasteboard::recalculate_snips_extent_when_invalid() {
     if (this->snips_right < this->snips_left) {
-        float width, height;
+        float rx, ry, width, height;
 
         if (this->head_snip == nullptr) {
             this->snips_left = 0.0F;
@@ -275,11 +302,11 @@ void Pasteboard::recalculate_snips_extent_when_invalid() {
             
             do {
                 SnipInfo^ info = SNIP_INFO(child);
-                child->fill_extent(info->x, info->y, &width, &height);
-                this->snips_left = std::min(this->snips_left, info->x);
-                this->snips_top = std::min(this->snips_top, info->y);
-                this->snips_right = std::max(this->snips_right, info->x + width);
-                this->snips_bottom = std::max(this->snips_bottom, info->y + height);
+                fill_snip_extent(child, info, &rx, &ry, &width, &height);
+                this->snips_left = std::min(this->snips_left, rx);
+                this->snips_top = std::min(this->snips_top, ry);
+                this->snips_right = std::max(this->snips_right, rx + width);
+                this->snips_bottom = std::max(this->snips_bottom, ry + height);
 
                 child = child->next;
             } while (child != this->head_snip);
@@ -471,9 +498,9 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
     float ty = (float)this->inset.Top;
     float width, height;
     Rect border(-tx, -ty, this->canvas_width, this->actual_height);
+    float3x2 transform = make_float3x2_translation(tx, ty);
 
-    // https://blogs.msdn.microsoft.com/win2d/2014/09/15/why-does-win2d-include-three-different-sets-of-vector-and-matrix-types/
-    ds->Transform = make_float3x2_translation(tx, ty);
+    ds->Transform = transform;
     this->decorator->draw_before(this, ds, Width, Height, border);
 
     auto region = ds->CreateLayer(1.0F, Rect(0.0F, 0.0F, Width, Height));
@@ -484,16 +511,27 @@ void Pasteboard::draw(CanvasDrawingSession^ ds) {
         do {
             SnipInfo^ info = SNIP_INFO(child);
             child->fill_extent(info->x, info->y, &width, &height);
-            width = std::min(Width - info->x, width);
-            height = std::min(Height - info->y, height);
-
+            
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
-                auto layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+                CanvasActiveLayer ^layer = nullptr;
+
+                if (info->rotation == 0.0F) {
+                    layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+                } else {
+                    auto cx = tx + info->x + width / 2.0F;
+                    auto cy = ty + info->y + height / 2.0F;
+
+                    ds->Transform = make_float3x2_rotation(info->rotation, float2(cx, cy));
+                    layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+                }
+                
                 child->draw(ds, info->x, info->y, width, height);
                 if ((info->selected) && (this->draw_selection_dots)) {
                     ds->FillCircle(info->x + width / 2.0F, info->y + height / 2.0F, 4.0F, Colors::White);
                 }
+                
                 delete layer; /* Must Close the Layer Explicitly */
+                ds->Transform = transform;
             }
 
             child = child->next;
