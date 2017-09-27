@@ -86,7 +86,7 @@ static inline SnipInfo^ bind_snip_owership(Pasteboard^ master, Snip* snip, doubl
 
     while (degrees <  0.000) degrees += 360.0;
     while (degrees >= 360.0) degrees -= 360.0;
-    info->rotation = -float(degrees * M_PI / 180.0);
+    info->rotation = float(degrees * M_PI / 180.0);
 
     return info;
 }

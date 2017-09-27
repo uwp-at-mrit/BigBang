@@ -10,6 +10,7 @@
 #include "snip/funnellet.hpp"
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
+#include "snip/vibratorlet.hpp"
 #include "layout/orientation.hpp"
 #include "layout/absolute.hpp"
 #include "decorator/border.hpp"
@@ -70,10 +71,11 @@ void WorkSpace::initialize_component(Size region) {
     this->statusbar->insert(new Statuslet(speak("RRB1")));
     this->stage->insert(new StorageTanklet(80.0F, 128.0F));
     this->stage->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
-    this->stage->insert(new Motorlet(16.0F), 400.0F, 300.0F, 270.0); 
-    this->stage->insert(new Motorlet(32.0F), 148.0F, 96.0F, 45.0);
-    this->stage->insert(new Motorlet(64.0F), 256.0F, 48.0F, 90.0);
-    this->stage->insert(new Motorlet(128.0F), 256.0F, 128.0F, 120.0);
+    this->stage->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0); 
+    this->stage->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
+    this->stage->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
+    this->stage->insert(new Motorlet(128.0F), 256.0F, 128.0F, 180.0);
+    this->stage->insert(new Vibratorlet(128.0F), 512.0F, 128.0F);
     this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
     this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
     this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
