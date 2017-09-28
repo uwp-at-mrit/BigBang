@@ -43,6 +43,22 @@ CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2) {
     return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Xor);
 }
 
+CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
+    return g1->CombineWith(g2, t, CanvasGeometryCombine::Exclude);
+}
+
+CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
+    return g1->CombineWith(g2, t, CanvasGeometryCombine::Intersect);
+}
+
+CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
+    return g1->CombineWith(g2, t, CanvasGeometryCombine::Union);
+}
+
+CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
+    return g1->CombineWith(g2, t, CanvasGeometryCombine::Xor);
+}
+
 /*************************************************************************************************/
 CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));

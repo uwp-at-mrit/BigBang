@@ -63,25 +63,19 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
     { // draw the rest
         float head_height = body_height * 0.8F;
-        float head_radiusX = this->width * 0.02F;
-        float head_radiusY = this->height * 0.03F;
-        float tail_radiusX = head_radiusX * 3.0F;
-        float tail_radiusY = head_radiusY * 3.0F;
-
         float body_xoff = this->width * 0.16F;
         float body_width = this->width * 0.54F;
-
         float body_x = x + body_xoff;
-        float head_x = body_x + body_width - head_radiusX;
+        float head_x = body_x + body_width / 8.0F;
         float head_y = body_y + (body_height - head_height) / 2.0F;
         float head_width = screw_x - head_x;
 
         auto head_brush = make_linear_gradient_brush(head_x, head_y, head_x, head_y + head_height, body_stops);
         auto body_brush = make_linear_gradient_brush(x, body_y, x, body_y + body_height, body_stops);
 
-        auto head_part = rounded_rectangle(head_x, head_y, head_width, head_height, -0.02F, -0.03F);
+        auto head_part = rounded_rectangle(head_x, head_y, head_width, head_height, -0.04F, -0.06F);
         auto body_part = rectangle(body_x, body_y, body_width, body_height);
-        auto tail_part = rounded_rectangle(x, body_y, body_xoff + tail_radiusX, body_height, -0.06F, -0.09F);
+        auto tail_part = rounded_rectangle(x, body_y, body_xoff * 2.0F, body_height, -0.25F, -0.10F);
 
         auto lines = blank(); {
             int defcount = 8;

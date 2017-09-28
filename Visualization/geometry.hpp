@@ -25,6 +25,26 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_substract(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
+    Windows::Foundation::Numerics::float3x2 transform);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_intersect(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
+    Windows::Foundation::Numerics::float3x2 transform);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
+    Windows::Foundation::Numerics::float3x2 transform);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
+    Windows::Foundation::Numerics::float3x2 transform);
+
 /*************************************************************************************************/
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(float x, float y, float length, float thickness);
