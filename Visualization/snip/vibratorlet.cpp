@@ -7,8 +7,11 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+using namespace Windows::Foundation;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static Color body_color = ColorHelper::FromArgb(255, 50, 50, 50);
 static Color hat_color = Colors::DodgerBlue;
@@ -28,7 +31,7 @@ static void setup_gradient_stops() {
 }
 
 /*************************************************************************************************/
-Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 2.4F) { }
+Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 1.95F) {}
 
 Vibratorlet::Vibratorlet(float width, float height) {
     this->width = width;
@@ -46,7 +49,7 @@ void Vibratorlet::fill_extent(float x, float y, float* w, float* h, float* b, fl
 void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float hat_yoff = this->height * 0.12F;
     float hat_height = this->height * 0.20F;
-    float hat_width = this->width * 0.38F;
+    float hat_width = this->width / 3.6F;
     float body_width = hat_width * 2.0F;
     float body_height = this->height - hat_height - hat_yoff;
     float body_x = x + (this->width - body_width) / 2.0F;
@@ -57,13 +60,29 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 
     { // draw hat and body
         float hat_x = cx - hat_width / 2.0F;
+        float hat_y = y + hat_yoff;
         float hat_bthickness = this->height * 0.005F;
-        float hat_bradiusX = hat_width * 0.75F;
-        auto hat_brush = make_linear_gradient_brush(this->info, hat_x, y, hat_x + hat_width, y, hat_stops);
+        float hat_bradiusX = hat_width * 0.8F;
         
-        ds->FillEllipse(cx, body_y + 1.0F, hat_bradiusX, hat_bthickness, hat_color);
+        float endpart_width = hat_width * 0.6F;
+        float midpart_width = hat_width * 0.5F;
+        float endpart_height = hat_height / 3.4F;
+        float midpart_height = endpart_height * 1.2F;
+        float bewidth = std::fmax(endpart_width, midpart_width);
+        float beheight = endpart_height + midpart_height + endpart_height;
+        float dx = cx - bewidth / 2.0F;
+        float dy = hat_y - hat_height / 17.0F;
+        float dcy = hat_y + hat_height * 0.43F;
+
+        auto hat_path = CanvasGeometry::CreateRectangle(ds, Rect(hat_x, hat_y, hat_width, hat_height));
+        auto be_path = geometry_rotate(CanvasGeometry::CreateRectangle(ds, Rect(dx, hat_y, bewidth, beheight)), 30.0);
+        auto hat_brush = make_linear_gradient_brush(hat_x, y, hat_x + hat_width, y, hat_stops);
+        auto fe = rotate_rectangle(dx, hat_y, bewidth, beheight, 30.0, cx, dcy);
+
+        ds->FillGeometry(geometry_combine(be_path, hat_path, CanvasGeometryCombine::Union), hat_decorator_color);
+        ds->FillEllipse(cx, body_y, hat_bradiusX, hat_bthickness, hat_color);
         ds->DrawRectangle(hat_x, body_y - 1.0F, hat_width, 1.0F, body_color);
-        ds->FillRectangle(hat_x, y + hat_yoff, hat_width, hat_height, hat_brush);
+        ds->FillRectangle(hat_x, hat_y, hat_width, hat_height, hat_brush);
     }
 
     { // draw rings
@@ -75,7 +94,7 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         float step = ry * float(stepunit);
         float yoff = body_y + step / 2.0F;
         float box_height = ry * 2.0F;
-        auto ring_brush = make_linear_gradient_brush(ds, x, body_y, x + this->width, body_y, ring_stops);
+        auto ring_brush = make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops);
 
         for (int i = 0; i < count; i++) {
             float cy = yoff + i * step;

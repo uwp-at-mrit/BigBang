@@ -6,10 +6,30 @@
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-CanvasGeometry^ make_cylinder_surface(CanvasDrawingSession^ ds, float x, float y, float rx, float ry, float height) {
-    auto surface = ref new CanvasPathBuilder(ds);
+static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
+
+CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d) {
+    Rect region = g->ComputeBounds();
+
+    return geometry_rotate(g, d,
+        region.X + region.Width / 2.0F,
+        region.Y + region.Height / 2.0F);
+}
+
+CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy) {
+    return g->Transform(make_float3x2_rotation(float(d * M_PI / 180.0), float2(cx, cy)));
+}
+
+CanvasGeometry^ geometry_combine(CanvasGeometry^ g1, CanvasGeometry^ g2, CanvasGeometryCombine c) {
+    return g1->CombineWith(g2, float3x2::identity(), c);
+}
+
+/*************************************************************************************************/
+CanvasGeometry^ cylinder_surface(float x, float y, float rx, float ry, float height) {
+    auto surface = ref new CanvasPathBuilder(shared_ds);
     float cx = x + rx;
     float cy = y + ry;
     
@@ -22,8 +42,8 @@ CanvasGeometry^ make_cylinder_surface(CanvasDrawingSession^ ds, float x, float y
     return CanvasGeometry::CreatePath(surface);
 }
 
-CanvasGeometry^ make_pyramid_surface(CanvasDrawingSession^ ds, float x, float y, float rt, float rb, float ry, float height) {
-    auto surface = ref new CanvasPathBuilder(ds);
+CanvasGeometry^ pyramid_surface(float x, float y, float rt, float rb, float ry, float height) {
+    auto surface = ref new CanvasPathBuilder(shared_ds);
     float cx = x + rt;
     float cy = y + ry;
 
@@ -36,3 +56,10 @@ CanvasGeometry^ make_pyramid_surface(CanvasDrawingSession^ ds, float x, float y,
     return CanvasGeometry::CreatePath(surface);
 }
 
+CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {
+    return rotate_rectangle(x, y, w, h, d, x + w / 2.0F, y + h / 2.0F);
+}
+
+CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
+    return geometry_rotate(CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h)), d, cx, cy);
+}

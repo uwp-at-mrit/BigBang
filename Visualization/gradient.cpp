@@ -7,6 +7,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 using namespace Windows::Foundation::Numerics;
 
+static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
+
 Platform::Array<CanvasGradientStop>^ make_gradient_stops(Color colors[], int total) {
     Platform::Array<CanvasGradientStop>^ stopa = nullptr;
     CanvasGradientStop* stops = new CanvasGradientStop[total];
@@ -22,10 +24,10 @@ Platform::Array<CanvasGradientStop>^ make_gradient_stops(Color colors[], int tot
     return stopa;
 }
 
-CanvasLinearGradientBrush^ make_linear_gradient_brush(ICanvasResourceCreator^ master
-    , float sx, float sy, float ex, float ey, Platform::Array<CanvasGradientStop>^ stops
+CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey
+    , Platform::Array<CanvasGradientStop>^ stops
     , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
-    auto brush = ref new CanvasLinearGradientBrush(master, stops, edge, alpha);
+    auto brush = ref new CanvasLinearGradientBrush(shared_ds, stops, edge, alpha);
 
     brush->StartPoint = float2(sx, sy);
     brush->EndPoint = float2(ex, ey);

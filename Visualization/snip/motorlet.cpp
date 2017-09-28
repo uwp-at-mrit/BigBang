@@ -1,6 +1,6 @@
 ﻿#include <algorithm>
 
-#include "path.hpp"
+#include "geometry.hpp"
 #include "gradient.hpp"
 #include "snip/motorlet.hpp"
 
@@ -57,7 +57,7 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         float thread = std::fmax(this->width * 0.01F, 1.0F);
         float screw_y = body_y + body_height / 2.0F;
 
-        auto screw_brush = make_linear_gradient_brush(this->info, screw_x, screw_y, screw_x + thread, screw_y - thread, screw_stops);
+        auto screw_brush = make_linear_gradient_brush(screw_x, screw_y, screw_x + thread, screw_y - thread, screw_stops);
         ds->DrawLine(screw_x, screw_y, x + width, screw_y, screw_brush, thickness);
     }
 
@@ -76,10 +76,10 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         float head_y = body_y + (body_height - head_height) / 2.0F;
         float head_width = screw_x - head_x;
 
-        auto head_brush = make_linear_gradient_brush(this->info, head_x, head_y, head_x, head_y + head_height, body_stops);
+        auto head_brush = make_linear_gradient_brush(head_x, head_y, head_x, head_y + head_height, body_stops);
         ds->FillRoundedRectangle(head_x, head_y, head_width, head_height, head_radiusX, head_radiusY, head_brush);
 
-        auto body_brush = make_linear_gradient_brush(this->info, x, body_y, x, body_y + body_height, body_stops);
+        auto body_brush = make_linear_gradient_brush(x, body_y, x, body_y + body_height, body_stops);
         ds->FillRoundedRectangle(x, body_y, body_xoff + tail_radiusX, body_height, tail_radiusX, tail_radiusY, body_brush);
         ds->FillRectangle(body_x, body_y, body_width, body_height, body_brush);
         ds->DrawLine(body_x, body_y, body_x, body_y + body_height, Colors::DimGray);

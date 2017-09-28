@@ -62,17 +62,17 @@ void StorageTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
     auto used_height = body_height * 0.618F;
     auto adjust_height = std::fmin(body_height - used_height + 1.0F, body_height);
 
-    auto body_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, body_stops);
-    auto body_path = make_cylinder_surface(ds, x, y, radiusX, radiusY, adjust_height);
+    auto body_brush = make_linear_gradient_brush(x, y, x + this->width, y, body_stops);
+    auto body_path = cylinder_surface(x, y, radiusX, radiusY, adjust_height);
     ds->FillGeometry(body_path, body_brush);
 
     // drawing top face after drawing body makes the edge more smoothing.
-    auto topface_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, topface_stops);
+    auto topface_brush = make_linear_gradient_brush(x, y, x + this->width, y, topface_stops);
     ds->FillEllipse(x + radiusX, y + radiusY, radiusX, radiusY, topface_brush);
 
     auto used_y = y + (body_height - used_height);
-    auto used_indicator_brush = make_linear_gradient_brush(this->info, x, used_y, x + this->width, used_y, used_stops);
-    auto used_path = make_cylinder_surface(ds, x, used_y, radiusX, radiusY, used_height);
+    auto used_indicator_brush = make_linear_gradient_brush(x, used_y, x + this->width, used_y, used_stops);
+    auto used_path = cylinder_surface(x, used_y, radiusX, radiusY, used_height);
     ds->FillGeometry(used_path, used_indicator_brush);
 
     // TextLayout has already moved the text half-width ahead since its width is zero.

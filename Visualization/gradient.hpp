@@ -7,7 +7,6 @@ Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop>^ make_
 );
 
 Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ make_linear_gradient_brush(
-    Microsoft::Graphics::Canvas::ICanvasResourceCreator^ master,
     float start_x, float start_y, float end_x, float end_y,
     Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop>^ stops,
     Microsoft::Graphics::Canvas::CanvasEdgeBehavior shade = Microsoft::Graphics::Canvas::CanvasEdgeBehavior::Mirror,

@@ -37,11 +37,11 @@ void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
     auto radiusY = this->width / 64.0F;
     auto body_height = this->height - radiusY * 3.0F;
 
-    auto body_path = make_pyramid_surface(ds, x, y, radiusT, radiusB, radiusY, body_height);
-    auto body_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, body_stops);
+    auto body_path = pyramid_surface(x, y, radiusT, radiusB, radiusY, body_height);
+    auto body_brush = make_linear_gradient_brush(x, y, x + this->width, y, body_stops);
     ds->FillGeometry(body_path, body_brush);
 
     // drawing top face after drawing body makes the edge more smoothing.
-    auto topface_brush = make_linear_gradient_brush(this->info, x, y, x + this->width, y, topface_stops);
+    auto topface_brush = make_linear_gradient_brush(x, y, x + this->width, y, topface_stops);
     ds->FillEllipse(x + radiusT, y + radiusY, radiusT, radiusY, topface_brush);
 }
