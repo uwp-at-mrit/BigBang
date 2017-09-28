@@ -18,7 +18,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)canvas.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)gradient.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)path.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
@@ -37,7 +37,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)listener\listener.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)path.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)gradient.hpp" />

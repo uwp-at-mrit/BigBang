@@ -1,6 +1,6 @@
 ﻿#include <algorithm>
 
-#include "path.hpp"
+#include "geometry.hpp"
 #include "gradient.hpp"
 #include "snip/vibratorlet.hpp"
 
@@ -10,28 +10,25 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Color dark_color = Colors::Gray;
-static Color light_color = Colors::Silver;
+static Color body_color = ColorHelper::FromArgb(255, 50, 50, 50);
+static Color hat_color = Colors::DodgerBlue;
+static Color hat_decorator_color = Colors::DarkOrange;
 
-static Color body_colors[] = {
-    dark_color, light_color, light_color, light_color,
-    light_color, light_color, light_color, dark_color
-};
+static Color hat_colors[] = { hat_color, hat_color, Colors::Silver, hat_color, hat_color, hat_color };
+static Color ring_colors[] = { Colors::Gray, Colors::Silver, Colors::Gray, Colors::Gray };
 
-static Color screw_colors[] = { Colors::White, Colors::Black };
-
-static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;
-static Platform::Array<CanvasGradientStop>^ screw_stops = nullptr;
+static Platform::Array<CanvasGradientStop>^ hat_stops = nullptr;
+static Platform::Array<CanvasGradientStop>^ ring_stops = nullptr;
 
 static void setup_gradient_stops() {
-    if (body_stops == nullptr) {
-        body_stops = MAKE_GRADIENT_STOPS(body_colors);
-        screw_stops = MAKE_GRADIENT_STOPS(screw_colors);
+    if (hat_stops == nullptr) {
+        hat_stops = MAKE_GRADIENT_STOPS(hat_colors);
+        ring_stops = MAKE_GRADIENT_STOPS(ring_colors);
     }
 }
 
 /*************************************************************************************************/
-Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 0.6F) { }
+Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 2.4F) { }
 
 Vibratorlet::Vibratorlet(float width, float height) {
     this->width = width;
@@ -47,86 +44,45 @@ void Vibratorlet::fill_extent(float x, float y, float* w, float* h, float* b, fl
 }
 
 void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float screw_x = x + this->width * 0.8F;
-    float body_height = this->height * 0.97F;
-    float body_yoff = this->height - body_height;
-    float body_y = y + body_yoff;
-    
-    { // draw screw
-        float thickness = this->height / 7.5F;
-        float thread = std::fmax(this->width * 0.01F, 1.0F);
-        float screw_y = body_y + body_height / 2.0F;
+    float hat_yoff = this->height * 0.12F;
+    float hat_height = this->height * 0.20F;
+    float hat_width = this->width * 0.38F;
+    float body_width = hat_width * 2.0F;
+    float body_height = this->height - hat_height - hat_yoff;
+    float body_x = x + (this->width - body_width) / 2.0F;
+    float body_y = y + this->height - body_height;
+    float cx = x + this->width / 2.0F;
 
-        auto screw_brush = make_linear_gradient_brush(this->info, screw_x, screw_y, screw_x + thread, screw_y - thread, screw_stops);
-        ds->DrawLine(screw_x, screw_y, x + width, screw_y, screw_brush, thickness);
+    ds->FillRectangle(body_x, body_y, body_width, body_height, body_color);
+
+    { // draw hat and body
+        float hat_x = cx - hat_width / 2.0F;
+        float hat_bthickness = this->height * 0.005F;
+        float hat_bradiusX = hat_width * 0.75F;
+        auto hat_brush = make_linear_gradient_brush(this->info, hat_x, y, hat_x + hat_width, y, hat_stops);
+        
+        ds->FillEllipse(cx, body_y + 1.0F, hat_bradiusX, hat_bthickness, hat_color);
+        ds->DrawRectangle(hat_x, body_y - 1.0F, hat_width, 1.0F, body_color);
+        ds->FillRectangle(hat_x, y + hat_yoff, hat_width, hat_height, hat_brush);
     }
 
-    { // draw body
-        float head_height = body_height * 0.8F;
-        float head_radiusX = this->width * 0.02F;
-        float head_radiusY = this->height * 0.03F;
-        float tail_radiusX = head_radiusX * 3.0F;
-        float tail_radiusY = head_radiusY * 3.0F;
+    { // draw rings
+        int defcount = 10;
+        int stepunit = 5;
+        int count = (body_height > float(stepunit * defcount)) ? defcount : int(std::floor(body_height / float(stepunit)));
+        float rx = cx - x;
+        float ry = body_height / float(count * stepunit);
+        float step = ry * float(stepunit);
+        float yoff = body_y + step / 2.0F;
+        float box_height = ry * 2.0F;
+        auto ring_brush = make_linear_gradient_brush(ds, x, body_y, x + this->width, body_y, ring_stops);
 
-        float body_xoff = this->width * 0.16F;
-        float body_width = this->width * 0.54F;
-
-        float body_x = x + body_xoff;
-        float head_x = body_x + body_width - head_radiusX;
-        float head_y = body_y + (body_height - head_height) / 2.0F;
-        float head_width = screw_x - head_x;
-
-        auto head_brush = make_linear_gradient_brush(this->info, head_x, head_y, head_x, head_y + head_height, body_stops);
-        ds->FillRoundedRectangle(head_x, head_y, head_width, head_height, head_radiusX, head_radiusY, head_brush);
-
-        auto body_brush = make_linear_gradient_brush(this->info, x, body_y, x, body_y + body_height, body_stops);
-        ds->FillRoundedRectangle(x, body_y, body_xoff + tail_radiusX, body_height, tail_radiusX, tail_radiusY, body_brush);
-        ds->FillRectangle(body_x, body_y, body_width, body_height, body_brush);
-        ds->DrawLine(body_x, body_y, body_x, body_y + body_height, Colors::DimGray);
-        ds->DrawLine(body_x + body_width, body_y, body_x + body_width, body_y + body_height, Colors::DimGray);
-
-        { // draw lines
-            int count = (head_height > 16.0) ? 8 : int(std::floor(head_height / 2.0F));
-            float thickness = head_height / float(count * 2);
-            float end_x = body_x + body_width;
-            float yoff = head_y + thickness;
-            float step = thickness * 2.0F;
-
-            for (int i = 0; i < count; i++) {
-                float end_y = yoff + i * step;
-                ds->DrawLine(body_x, end_y, end_x, end_y, dark_color, thickness);
-            }
-        }
-
-        { // draw body parts
-            float small_box_size = body_yoff * 4.0F;
-            float small_box_x = body_x + body_yoff;
-            float bar_x = small_box_x + small_box_size + body_yoff;
-            float bar_width = body_width - small_box_size - body_yoff * 4.0F;
-            float bar_height = body_yoff * 3.0F;
-            float radius = small_box_size * (1.0F - 0.618F);
-            float centeroff = small_box_size / 2.0F;
-
-            ds->FillRectangle(bar_x, y, bar_width, bar_height, light_color);
-            ds->DrawRectangle(bar_x, y, bar_width, bar_height, Colors::DimGray);
-
-            ds->FillRectangle(small_box_x, body_y, small_box_size, small_box_size, light_color);
-            ds->DrawRectangle(small_box_x, body_y, small_box_size, small_box_size, dark_color);
-            ds->FillCircle(small_box_x + centeroff, body_y + centeroff, radius, dark_color);
-
-            { // draw status
-                float box_size = bar_width * 0.618F;
-                float box_x = bar_x + (bar_width - box_size) / 2.0F;
-                float box_y = y + this->height - box_size;
-                float status_size = (body_yoff <= 1.0F) ? box_size : (box_size - body_yoff * 4.0F);
-                float status_x = bar_x + (bar_width - status_size) / 2.0F;
-                float status_y = box_y + (box_size - status_size) / 2.0F;
-
-                ds->FillRectangle(box_x, box_y, box_size, box_size, light_color);
-                ds->DrawRectangle(box_x, box_y, box_size, box_size, dark_color);
-                ds->FillRectangle(status_x, status_y, status_size, status_size, Colors::Green);
-                ds->DrawRectangle(status_x, status_y, status_size, status_size, dark_color);
-            }
+        for (int i = 0; i < count; i++) {
+            float cy = yoff + i * step;
+            ds->FillEllipse(cx, cy, rx, ry, ring_brush);
+            ds->FillRectangle(body_x, cy - box_height, body_width, box_height, body_color);
         }
     }
+
+    ds->DrawRectangle(x, y, this->width, this->height, Colors::Firebrick);
 }

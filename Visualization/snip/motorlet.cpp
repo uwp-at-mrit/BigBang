@@ -86,11 +86,13 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         ds->DrawLine(body_x + body_width, body_y, body_x + body_width, body_y + body_height, Colors::DimGray);
 
         { // draw lines
-            int count = (head_height > 16.0) ? 8 : int(std::floor(head_height / 2.0F));
-            float thickness = head_height / float(count * 2);
+            int defcount = 8;
+            int stepunit = 2;
+            int count = (head_height > float(stepunit * defcount)) ? defcount : int(std::floor(head_height / float(stepunit)));
+            float thickness = head_height / float(count * stepunit);
             float end_x = body_x + body_width;
-            float yoff = head_y + thickness;
-            float step = thickness * 2.0F;
+            float step = thickness * float(stepunit);
+            float yoff = head_y + step / 2.0F;
 
             for (int i = 0; i < count; i++) {
                 float end_y = yoff + i * step;

@@ -1,7 +1,7 @@
 #define _USE_MATH_DEFINES
-#include <cmath>
+#include <WindowsNumerics.h>
 
-#include "path.hpp"
+#include "geometry.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
@@ -24,8 +24,8 @@ CanvasGeometry^ make_cylinder_surface(CanvasDrawingSession^ ds, float x, float y
 
 CanvasGeometry^ make_pyramid_surface(CanvasDrawingSession^ ds, float x, float y, float rt, float rb, float ry, float height) {
     auto surface = ref new CanvasPathBuilder(ds);
-    auto cx = x + rt;
-    auto cy = y + ry;
+    float cx = x + rt;
+    float cy = y + ry;
 
     surface->BeginFigure(x, y);
     surface->AddArc(float2(cx, cy), rt, ry, float(M_PI), -float(M_PI));

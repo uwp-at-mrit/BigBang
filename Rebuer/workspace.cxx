@@ -75,7 +75,7 @@ void WorkSpace::initialize_component(Size region) {
     this->stage->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
     this->stage->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
     this->stage->insert(new Motorlet(128.0F), 256.0F, 128.0F, 180.0);
-    this->stage->insert(new Vibratorlet(128.0F), 512.0F, 128.0F);
+    this->stage->insert(new Vibratorlet(150.0F), 512.0F, 64.0F);
     this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
     this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
     this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));

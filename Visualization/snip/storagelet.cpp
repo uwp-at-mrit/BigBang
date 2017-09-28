@@ -1,9 +1,9 @@
 ﻿#include <cmath>
 
 #include "text.hpp"
-#include "path.hpp"
 #include "tongue.hpp"
 #include "gradient.hpp"
+#include "geometry.hpp"
 #include "snip/storagelet.hpp"
 
 using namespace WarGrey::SCADA;
