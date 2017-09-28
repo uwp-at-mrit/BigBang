@@ -11,7 +11,6 @@ using namespace Windows::Foundation;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static Color body_color = ColorHelper::FromArgb(255, 50, 50, 50);
 static Color hat_color = Colors::DodgerBlue;
@@ -62,7 +61,8 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         float hat_x = cx - hat_width / 2.0F;
         float hat_y = y + hat_yoff;
         float hat_bthickness = this->height * 0.005F;
-        float hat_bradiusX = hat_width * 0.8F;
+        float hat_bradiusX = hat_width * 0.8F - hat_bthickness / 2.0F;
+        float hat_bradiusY = hat_bthickness - 1.5F;
         
         float endpart_width = hat_width * 0.6F;
         float midpart_width = hat_width * 0.5F;
@@ -74,14 +74,14 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         float dy = hat_y - hat_height / 17.0F;
         float dcy = hat_y + hat_height * 0.43F;
 
-        auto hat_path = CanvasGeometry::CreateRectangle(ds, Rect(hat_x, hat_y, hat_width, hat_height));
-        auto be_path = geometry_rotate(CanvasGeometry::CreateRectangle(ds, Rect(dx, hat_y, bewidth, beheight)), 30.0);
+        auto hat_path = rectangle(hat_x, hat_y, hat_width, hat_height);
+        auto be_path = geometry_rotate(rectangle(dx, hat_y, bewidth, beheight), 30.0);
         auto hat_brush = make_linear_gradient_brush(hat_x, y, hat_x + hat_width, y, hat_stops);
         auto fe = rotate_rectangle(dx, hat_y, bewidth, beheight, 30.0, cx, dcy);
 
-        ds->FillGeometry(geometry_combine(be_path, hat_path, CanvasGeometryCombine::Union), hat_decorator_color);
-        ds->FillEllipse(cx, body_y, hat_bradiusX, hat_bthickness, hat_color);
-        ds->DrawRectangle(hat_x, body_y - 1.0F, hat_width, 1.0F, body_color);
+        ds->FillGeometry(geometry_substract(be_path, hat_path), hat_decorator_color);
+        ds->DrawEllipse(cx, body_y, hat_bradiusX, hat_bradiusY, hat_color, hat_bthickness);
+        //ds->DrawRectangle(hat_x, body_y - 1.0F, hat_width, 1.0F, body_color);
         ds->FillRectangle(hat_x, hat_y, hat_width, hat_height, hat_brush);
     }
 
@@ -89,16 +89,17 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         int defcount = 10;
         int stepunit = 5;
         int count = (body_height > float(stepunit * defcount)) ? defcount : int(std::floor(body_height / float(stepunit)));
-        float rx = cx - x;
-        float ry = body_height / float(count * stepunit);
-        float step = ry * float(stepunit);
+        float thickness = body_height / float(count * stepunit);
+        float rx = cx - x - thickness;
+        float ry = thickness - 1.5F;
+        float step = thickness * float(stepunit);
         float yoff = body_y + step / 2.0F;
-        float box_height = ry * 2.0F;
+        float box_height = thickness * 2.0F;
         auto ring_brush = make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops);
 
         for (int i = 0; i < count; i++) {
             float cy = yoff + i * step;
-            ds->FillEllipse(cx, cy, rx, ry, ring_brush);
+            ds->DrawEllipse(cx, cy, rx, ry, ring_brush, thickness);
             ds->FillRectangle(body_x, cy - box_height, body_width, box_height, body_color);
         }
     }

@@ -61,7 +61,7 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         ds->DrawLine(screw_x, screw_y, x + width, screw_y, screw_brush, thickness);
     }
 
-    { // draw body
+    { // draw the rest
         float head_height = body_height * 0.8F;
         float head_radiusX = this->width * 0.02F;
         float head_radiusY = this->height * 0.03F;
@@ -77,15 +77,13 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         float head_width = screw_x - head_x;
 
         auto head_brush = make_linear_gradient_brush(head_x, head_y, head_x, head_y + head_height, body_stops);
-        ds->FillRoundedRectangle(head_x, head_y, head_width, head_height, head_radiusX, head_radiusY, head_brush);
-
         auto body_brush = make_linear_gradient_brush(x, body_y, x, body_y + body_height, body_stops);
-        ds->FillRoundedRectangle(x, body_y, body_xoff + tail_radiusX, body_height, tail_radiusX, tail_radiusY, body_brush);
-        ds->FillRectangle(body_x, body_y, body_width, body_height, body_brush);
-        ds->DrawLine(body_x, body_y, body_x, body_y + body_height, Colors::DimGray);
-        ds->DrawLine(body_x + body_width, body_y, body_x + body_width, body_y + body_height, Colors::DimGray);
 
-        { // draw lines
+        auto head_part = rounded_rectangle(head_x, head_y, head_width, head_height, -0.02F, -0.03F);
+        auto body_part = rectangle(body_x, body_y, body_width, body_height);
+        auto tail_part = rounded_rectangle(x, body_y, body_xoff + tail_radiusX, body_height, -0.06F, -0.09F);
+
+        auto lines = blank(); {
             int defcount = 8;
             int stepunit = 2;
             int count = (head_height > float(stepunit * defcount)) ? defcount : int(std::floor(head_height / float(stepunit)));
@@ -96,11 +94,11 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
             for (int i = 0; i < count; i++) {
                 float end_y = yoff + i * step;
-                ds->DrawLine(body_x, end_y, end_x, end_y, dark_color, thickness);
+                lines = geometry_union(lines, hline(body_x, end_y, body_width, thickness));
             }
         }
 
-        { // draw body parts
+        { // prepare for body components
             float small_box_size = body_yoff * 4.0F;
             float small_box_x = body_x + body_yoff;
             float bar_x = small_box_x + small_box_size + body_yoff;
@@ -108,15 +106,13 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
             float bar_height = body_yoff * 3.0F;
             float radius = small_box_size * (1.0F - 0.618F);
             float centeroff = small_box_size / 2.0F;
+            
+            auto bar = rectangle(bar_x, y, bar_width, bar_height);
+            auto small_box = rectangle(small_box_x, body_y, small_box_size, small_box_size);
+            auto small_status = circle(small_box_x + centeroff, body_y + centeroff, radius);
+            auto small_background = geometry_substract(small_box, small_status);
 
-            ds->FillRectangle(bar_x, y, bar_width, bar_height, light_color);
-            ds->DrawRectangle(bar_x, y, bar_width, bar_height, Colors::DimGray);
-
-            ds->FillRectangle(small_box_x, body_y, small_box_size, small_box_size, light_color);
-            ds->DrawRectangle(small_box_x, body_y, small_box_size, small_box_size, dark_color);
-            ds->FillCircle(small_box_x + centeroff, body_y + centeroff, radius, dark_color);
-
-            { // draw status
+            { // prepare for motor status
                 float box_size = bar_width * 0.618F;
                 float box_x = bar_x + (bar_width - box_size) / 2.0F;
                 float box_y = y + this->height - box_size;
@@ -124,10 +120,32 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
                 float status_x = bar_x + (bar_width - status_size) / 2.0F;
                 float status_y = box_y + (box_size - status_size) / 2.0F;
 
-                ds->FillRectangle(box_x, box_y, box_size, box_size, light_color);
-                ds->DrawRectangle(box_x, box_y, box_size, box_size, dark_color);
-                ds->FillRectangle(status_x, status_y, status_size, status_size, Colors::Green);
-                ds->DrawRectangle(status_x, status_y, status_size, status_size, dark_color);
+                auto box = rectangle(box_x, box_y, box_size, box_size);
+                auto status = rectangle(status_x, status_y, status_size, status_size);
+                auto background = geometry_union(geometry_substract(box, status), small_background);
+
+                { // draw body
+                    auto hollow_lines = geometry_substract(lines, box);
+                    auto body_masks = geometry_union(geometry_union(small_box, box), geometry_union(bar, lines));
+                    auto hollow_body = geometry_substract(body_part, body_masks);
+
+                    ds->FillGeometry(geometry_substract(head_part, body_part), head_brush);
+                    ds->FillGeometry(geometry_substract(tail_part, body_part), body_brush);
+                    ds->FillGeometry(hollow_body, body_brush);
+                    ds->FillGeometry(hollow_lines, dark_color);
+                    ds->DrawLine(body_x, body_y, body_x, body_y + body_height, Colors::DimGray);
+                    ds->DrawLine(body_x + body_width, body_y, body_x + body_width, body_y + body_height, Colors::DimGray);
+                }
+
+                { // draw body components
+                    auto background_outline = geometry_union(bar, background);
+
+                    ds->FillGeometry(background_outline, light_color);
+                    ds->DrawGeometry(background_outline, dark_color);
+
+                    ds->FillGeometry(small_status, dark_color);
+                    ds->FillGeometry(status, Colors::Green);
+                }
             }
         }
     }

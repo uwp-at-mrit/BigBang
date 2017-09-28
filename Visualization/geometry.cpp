@@ -23,8 +23,76 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy)
     return g->Transform(make_float3x2_rotation(float(d * M_PI / 180.0), float2(cx, cy)));
 }
 
-CanvasGeometry^ geometry_combine(CanvasGeometry^ g1, CanvasGeometry^ g2, CanvasGeometryCombine c) {
-    return g1->CombineWith(g2, float3x2::identity(), c);
+CanvasGeometry^ geometry_linewidth(CanvasGeometry^ g, float thickness) {
+    return g->Stroke(thickness);
+}
+
+CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2) {
+    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Exclude);
+}
+
+CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2) {
+    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Intersect);
+}
+
+CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2) {
+    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Union);
+}
+
+CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2) {
+    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Xor);
+}
+
+/*************************************************************************************************/
+CanvasGeometry^ blank() {
+    return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
+}
+
+CanvasGeometry^ hline(float x, float y, float l, float t) {
+    auto line = ref new CanvasPathBuilder(shared_ds);
+
+    line->BeginFigure(x, y);
+    line->AddLine(x + l, y);
+    line->EndFigure(CanvasFigureLoop::Open);
+
+    return geometry_linewidth(CanvasGeometry::CreatePath(line), t);
+}
+
+CanvasGeometry^ vline(float x, float y, float l, float t) {
+    auto line = ref new CanvasPathBuilder(shared_ds);
+
+    line->BeginFigure(x, y);
+    line->AddLine(x, y + l);
+    line->EndFigure(CanvasFigureLoop::Open);
+
+    return geometry_linewidth(CanvasGeometry::CreatePath(line), t);
+}
+
+CanvasGeometry^ circle(float cx, float cy, float r) {
+    return CanvasGeometry::CreateCircle(shared_ds, cx, cy, r);
+}
+
+CanvasGeometry^ rectangle(float x, float y, float w, float h) {
+    return CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h));
+}
+
+CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
+    if ((rx == 0.0F) && (ry == 0.0F)) {
+        return rectangle(x, y, w, h);
+    } else {
+        float radius_x = (rx < 0.0F) ? (w * std::abs(rx)) : rx;
+        float radius_y = (ry == 0.0F) ? radius_x : ((ry < 0.0F) ? (h * std::abs(ry)) : ry);
+
+        return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
+    }
+}
+
+CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {
+    return rotate_rectangle(x, y, w, h, d, x + w / 2.0F, y + h / 2.0F);
+}
+
+CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
+    return geometry_rotate(rectangle(x, y, w, h), d, cx, cy);
 }
 
 /*************************************************************************************************/
@@ -54,12 +122,4 @@ CanvasGeometry^ pyramid_surface(float x, float y, float rt, float rb, float ry, 
     surface->EndFigure(CanvasFigureLoop::Closed);
 
     return CanvasGeometry::CreatePath(surface);
-}
-
-CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {
-    return rotate_rectangle(x, y, w, h, d, x + w / 2.0F, y + h / 2.0F);
-}
-
-CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
-    return geometry_rotate(CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h)), d, cx, cy);
 }
