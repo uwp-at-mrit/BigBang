@@ -11,9 +11,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rebuer", "Rebuer\Rebuer.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PLCStream", "PLCStream\PLCStream.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RebuerEcoFacilities", "RebuerEcoFacilities\RebuerEcoFacilities.vcxproj", "{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Visualization\Visualization.vcxitems*{6a826f3b-23f9-432c-86bd-f9d318096966}*SharedItemsImports = 9
+		Auxiliary\Auxiliary.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
+		PLCStream\PLCStream.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
+		Visualization\Visualization.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
 		PLCStream\PLCStream.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{f13a79bc-0a9f-4e69-90b9-3ed82ea49304}*SharedItemsImports = 4
@@ -47,6 +52,24 @@ Global
 		{F13A79BC-0A9F-4E69-90B9-3ED82EA49304}.Release|x86.ActiveCfg = Release|Win32
 		{F13A79BC-0A9F-4E69-90B9-3ED82EA49304}.Release|x86.Build.0 = Release|Win32
 		{F13A79BC-0A9F-4E69-90B9-3ED82EA49304}.Release|x86.Deploy.0 = Release|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|ARM.ActiveCfg = Debug|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|ARM.Build.0 = Debug|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|ARM.Deploy.0 = Debug|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x64.ActiveCfg = Debug|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x64.Build.0 = Debug|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x64.Deploy.0 = Debug|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x86.ActiveCfg = Debug|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x86.Build.0 = Debug|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Debug|x86.Deploy.0 = Debug|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|ARM.ActiveCfg = Release|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|ARM.Build.0 = Release|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|ARM.Deploy.0 = Release|ARM
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x64.ActiveCfg = Release|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x64.Build.0 = Release|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x64.Deploy.0 = Release|x64
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x86.ActiveCfg = Release|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x86.Build.0 = Release|Win32
+		{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
