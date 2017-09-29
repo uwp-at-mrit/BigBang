@@ -139,7 +139,7 @@
     <value>Recycled Rubber B1</value>
   </data>
   <data name="sdlabel" xml:space="preserve">
-    <value>Storage:  </value>
+    <value>Card Storage:  </value>
   </data>
   <data name="noipv4" xml:space="preserve">
     <value>0.0.0.0</value>

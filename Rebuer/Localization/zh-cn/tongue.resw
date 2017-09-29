@@ -139,7 +139,7 @@
     <value>再生胶B1</value>
   </data>
   <data name="sdlabel" xml:space="preserve">
-    <value>SD 容量: </value>
+    <value>SD 卡容量: </value>
   </data>
   <data name="noipv4" xml:space="preserve">
     <value>0.0.0.0</value>

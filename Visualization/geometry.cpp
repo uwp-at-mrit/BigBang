@@ -2,6 +2,7 @@
 #include <WindowsNumerics.h>
 
 #include "geometry.hpp"
+#include "rsyslog.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
@@ -23,7 +24,7 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy)
     return g->Transform(make_float3x2_rotation(float(d * M_PI / 180.0), float2(cx, cy)));
 }
 
-CanvasGeometry^ geometry_linewidth(CanvasGeometry^ g, float thickness) {
+CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness) {
     return g->Stroke(thickness);
 }
 
@@ -64,28 +65,42 @@ CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
 }
 
-CanvasGeometry^ hline(float x, float y, float l, float t) {
+CanvasGeometry^ hline(float x, float y, float l, float th) {
     auto line = ref new CanvasPathBuilder(shared_ds);
 
     line->BeginFigure(x, y);
     line->AddLine(x + l, y);
     line->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_linewidth(CanvasGeometry::CreatePath(line), t);
+    return geometry_stroke(CanvasGeometry::CreatePath(line), th);
 }
 
-CanvasGeometry^ vline(float x, float y, float l, float t) {
+CanvasGeometry^ vline(float x, float y, float l, float th) {
     auto line = ref new CanvasPathBuilder(shared_ds);
 
     line->BeginFigure(x, y);
     line->AddLine(x, y + l);
     line->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_linewidth(CanvasGeometry::CreatePath(line), t);
+    return geometry_stroke(CanvasGeometry::CreatePath(line), th);
+}
+
+CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
+    auto arc = ref new CanvasPathBuilder(shared_ds);
+    
+    arc->BeginFigure(sx, sy);
+    arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Large);
+    arc->EndFigure(CanvasFigureLoop::Open);
+
+    return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
 }
 
 CanvasGeometry^ circle(float cx, float cy, float r) {
     return CanvasGeometry::CreateCircle(shared_ds, cx, cy, r);
+}
+
+CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
+    return CanvasGeometry::CreateEllipse(shared_ds, cx, cy, rx, ry);
 }
 
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {
@@ -93,14 +108,10 @@ CanvasGeometry^ rectangle(float x, float y, float w, float h) {
 }
 
 CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
-    if ((rx == 0.0F) && (ry == 0.0F)) {
-        return rectangle(x, y, w, h);
-    } else {
-        float radius_x = (rx < 0.0F) ? (w * std::abs(rx)) : rx;
-        float radius_y = (ry == 0.0F) ? radius_x : ((ry < 0.0F) ? (h * std::abs(ry)) : ry);
+    float radius_x = (rx < 0.0F) ? (w * std::abs(rx)) : rx;
+    float radius_y = (ry < 0.0F) ? (h * std::abs(ry)) : ry;
 
-        return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
-    }
+    return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
 }
 
 CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {

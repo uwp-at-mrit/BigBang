@@ -226,7 +226,7 @@ Snip* Pasteboard::find_snip(float x, float y) {
             }
 
             child = child->prev;
-        } while (child != this->head_snip);
+        } while (child != this->head_snip->prev);
     }
     
     return found;
