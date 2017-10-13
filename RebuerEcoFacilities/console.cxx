@@ -1,9 +1,10 @@
 ﻿#include <cstdlib>
 #include <algorithm>
 
+#include "rsyslog.hpp"
 #include "tongue.hpp"
-#include "workspace.hxx"
-#include "pasteboard.hxx"
+#include "console.hxx"
+#include "universe.hpp"
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
@@ -28,12 +29,8 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
-static Thickness zero(0.0, 0.0, 0.0, 0.0);
-
-static Pasteboard^ make_region(Panel^ parent, IPasteboardLayout* layout, IPasteboardDecorator* border = nullptr) {
-    auto region = ref new Pasteboard(parent, layout);
-
-    region->show_selection_dots(false);
+static Universe* make_universe(Panel^ parent, IUniverseLayout* layout, IUniverseDecorator* border = nullptr) {
+    auto region = new Universe(parent, 1);
 
     if (border != nullptr) {
         region->set_decorator(border);
@@ -42,29 +39,24 @@ static Pasteboard^ make_region(Panel^ parent, IPasteboardLayout* layout, IPasteb
     return region;
 }
 
-static float region_height(Pasteboard^ pb) {
-    float height = pb->actual_height;
-
-    if (height == 0.0F) {
-        pb->fill_snips_bounds(nullptr, nullptr, nullptr, &height);
-        height += float(pb->inset.Top + pb->inset.Bottom);
-    }
-
-    return height;
-}
-
-WorkSpace::WorkSpace() : StackPanel() {
+Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
-    this->Margin = zero;
+    this->Margin = ThicknessHelper::FromUniformLength(4.0);
 
     //this->listener = ref new TCPListener((unsigned short)18030);
 }
 
-void WorkSpace::initialize_component(Size region) {
-    this->statusbar = make_region(this, new HorizontalLayout(0.0F), new HBorderDecorator(false, true));
-    this->stage = make_region(this, new AbsoluteLayout());
-    this->gauge = make_region(this, new HorizontalLayout(16.0F));
-    this->taskbar = make_region(this, new HorizontalLayout(0.0F), new HBorderDecorator(true, false));
+void Console::initialize_component(Size region) {
+    this->universe = make_universe(this, nullptr, new BorderDecorator(true, true));
+    this->reflow(region.Width, region.Height);
+}
+
+/*
+void Console::initialize_component(Size region) {
+    this->statusbar = make_universe(this, new HorizontalLayout(0.0F), new HBorderDecorator(false, true));
+    this->stage = make_universe(this, new AbsoluteLayout());
+    this->gauge = make_universe(this, new HorizontalLayout(16.0F));
+    this->taskbar = make_universe(this, new HorizontalLayout(0.0F), new HBorderDecorator(true, false));
     
     this->taskbar->show_selection_dots(false);
 
@@ -84,8 +76,11 @@ void WorkSpace::initialize_component(Size region) {
 
     this->reflow(region.Width, region.Height);
 }
+*/
 
-void WorkSpace::reflow(float width, float height) {
+void Console::reflow(float width, float height) {
+    this->universe->resize(width, height);
+/*
     this->statusbar->canvas_width = width;
     this->taskbar->canvas_width = width;
     this->stage->canvas_width = width;
@@ -95,9 +90,10 @@ void WorkSpace::reflow(float width, float height) {
         - region_height(this->statusbar)
         - region_height(this->taskbar)
         - region_height(this->gauge);
+*/
 }
 
-void WorkSpace::suspend(SuspendingOperation^ op) {
+void Console::suspend(SuspendingOperation^ op) {
     // TODO: Save application state and stop any background activity.
     // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }

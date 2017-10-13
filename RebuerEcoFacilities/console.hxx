@@ -1,13 +1,13 @@
 #pragma once
 
 #include "network.hxx"
-#include "pasteboard.hxx"
+#include "universe.hpp"
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
-    public ref class WorkSpace sealed : public Windows::UI::Xaml::Controls::StackPanel {
+    public ref class Console sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
-        WorkSpace();
+        Console();
         void initialize_component(Windows::Foundation::Size region);
 
     public:
@@ -16,9 +16,7 @@ namespace WarGrey::SCADA {
 
     private:
         WarGrey::SCADA::TCPListener^ listener;
-        WarGrey::SCADA::Pasteboard^ statusbar;
-        WarGrey::SCADA::Pasteboard^ stage;
-        WarGrey::SCADA::Pasteboard^ gauge;
-        WarGrey::SCADA::Pasteboard^ taskbar;
+        
+        WarGrey::SCADA::Universe* universe;
     };
 }

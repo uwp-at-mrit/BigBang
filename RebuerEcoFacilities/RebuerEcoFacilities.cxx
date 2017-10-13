@@ -1,4 +1,4 @@
-﻿#include "workspace.hxx"
+﻿#include "console.hxx"
 #include "rsyslog.hpp"
 #include "system.hpp"
 
@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 
     private ref class Rebuer sealed : public Application {
     protected:
-        void RebuerMain(ApplicationView^ self, WorkSpace^ workspace) {
+        void RebuerMain(ApplicationView^ self, Console^ workspace) {
             this->Suspending += ref new SuspendingEventHandler(this, &Rebuer::OnSuspending);
             self->VisibleBoundsChanged += ref new TypedEventHandler<ApplicationView^, Object^>(this, &Rebuer::DoResize);
             CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Rebuer::OnUncaughtException);
@@ -32,7 +32,7 @@ namespace WarGrey::SCADA {
 
         virtual void OnLaunched(LaunchActivatedEventArgs^ e) override {
             auto self = ApplicationView::GetForCurrentView();
-            auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
+            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
 
             if (workspace != nullptr) {
                 if (e->PrelaunchActivated == false) {
@@ -40,7 +40,7 @@ namespace WarGrey::SCADA {
                     Window::Current->Activate();
                 }
             } else {
-                workspace = ref new WorkSpace();
+                workspace = ref new Console();
                 this->RebuerMain(self, workspace);
             
                 if (e->PreviousExecutionState == ApplicationExecutionState::Terminated) {
@@ -59,7 +59,7 @@ namespace WarGrey::SCADA {
     private:
         void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-            auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
+            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
             if (workspace != nullptr) workspace->suspend(e->SuspendingOperation);
         }
 
@@ -77,7 +77,7 @@ namespace WarGrey::SCADA {
         }
 
         void DoResize(ApplicationView^ view, Platform::Object^ obj) {
-            auto workspace = dynamic_cast<WorkSpace^>(Window::Current->Content);
+            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
             if (workspace != nullptr) {
                 auto region = adjusted_workspace_size(view->VisibleBounds, workspace);
                 workspace->reflow(region.Width, region.Height);
