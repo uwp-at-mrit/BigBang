@@ -1,7 +1,7 @@
 #pragma once
 
 #include "network.hxx"
-#include "pasteboard.hxx"
+#include "universe.hxx"
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]

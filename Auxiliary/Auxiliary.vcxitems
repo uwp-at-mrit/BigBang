@@ -18,7 +18,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)system.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)tongue.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)rsyslog.hpp" />
@@ -27,6 +26,5 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)system.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)time.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)tongue.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ui.hpp" />
   </ItemGroup>
 </Project>
