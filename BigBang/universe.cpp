@@ -84,6 +84,8 @@ static inline SnipInfo* bind_snip_owership(Win2DControl^ master, Snip* snip, dou
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
 
+    snip->load();
+
     return info;
 }
 
