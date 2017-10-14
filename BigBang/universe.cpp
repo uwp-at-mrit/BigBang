@@ -5,6 +5,7 @@
 #include "control.hxx"
 #include "universe.hpp"
 
+#include "rsyslog.hpp"
 #include "system.hpp"
 #include "geometry.hpp"
 #include "snip/snip.hpp"
@@ -36,7 +37,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
  *   reinterpret_cast may cause "Access violation reading location 0xFFFFFFFFFFFFFFFF" even for subtype casting.
  */
 
-#define SNIP_INFO(snip) (static_cast<SnipInfo^>(snip->info))
+#define SNIP_INFO(snip) (static_cast<SnipInfo*>(snip->info))
 #define REMOVE(ptr, refcount) if (ptr->refcount <= 1) { delete ptr; } else { ptr->refcount -= 1; }
 
 ref class Win2DUniverse;
@@ -44,26 +45,18 @@ ref class Win2DUniverse;
 //class PlaceHolderListener : public IUniverseListener {};
 class PlaceHolderDecorator : public IUniverseDecorator {};
 
-static Thickness default_padding(4.0, 4.0, 4.0, 4.0);
-
-private ref class SnipInfo sealed : public WarGrey::SCADA::ISnipInfo {
+class SnipInfo : public WarGrey::SCADA::ISnipInfo {
 public:
-    SnipInfo(Win2DControl^ master) : _master(master) {};
+    SnipInfo(Win2DControl^ master) : ISnipInfo(master) {};
 
-    property Win2DControl^ master { virtual Win2DControl^ get() { return this->_master; }; }
-    property CanvasDevice^ Device { virtual CanvasDevice^ get() { return this->_master->device; }; }
-
-internal:
+public:
     float x;
     float y;
     float rotation;
     bool selected;
-
-private:
-    Win2DControl^ _master;
 };
 
-static inline void fill_snip_extent(Snip* snip, SnipInfo^ info, float* x, float* y, float* width, float* height) {
+static inline void fill_snip_extent(Snip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
     snip->fill_extent(info->x, info->y, width, height);
 
     (*x) = info->x;
@@ -83,8 +76,8 @@ static inline void fill_snip_extent(Snip* snip, SnipInfo^ info, float* x, float*
     }
 }
 
-static inline SnipInfo^ bind_snip_owership(Win2DControl^ master, Snip* snip, double degrees) {
-    auto info = ref new SnipInfo(master);
+static inline SnipInfo* bind_snip_owership(Win2DControl^ master, Snip* snip, double degrees) {
+    auto info = new SnipInfo(master);
     snip->info = info;
 
     while (degrees <  0.000) degrees += 360.0;
@@ -94,7 +87,7 @@ static inline SnipInfo^ bind_snip_owership(Win2DControl^ master, Snip* snip, dou
     return info;
 }
 
-static inline void unsafe_move_snip_via_info(SnipInfo^ info, float x, float y, bool absolute) {
+static inline void unsafe_move_snip_via_info(SnipInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -109,20 +102,19 @@ static inline void unsafe_move_snip_via_info(SnipInfo^ info, float x, float y, b
     }
 }
 
-static inline void unsafe_add_selected(IUniverseListener* listener, Snip* snip, SnipInfo^ info) {
+static inline void unsafe_add_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
     //listener->before_select(info->master, snip);
     info->selected = true;
     //info->master->refresh();
     //listener->after_select(info->master, snip);
 }
 
-static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, SnipInfo^ info) {
+static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
     unsafe_add_selected(listener, snip, info);
 }
 
 /*************************************************************************************************/
 Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate) {
-    this->padding = default_padding;
     //this->set_pointer_listener(nullptr);
     this->set_decorator(nullptr);
 }
@@ -163,7 +155,7 @@ void Universe::insert(Snip* snip, float x, float y, double degrees) {
 void Universe::move_to(Snip* snip, float x, float y) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this->master) {
-            SnipInfo^ info = SNIP_INFO(snip);
+            SnipInfo* info = SNIP_INFO(snip);
             unsafe_move_snip_via_info(info, x, y, true);
         }
     }
@@ -172,7 +164,7 @@ void Universe::move_to(Snip* snip, float x, float y) {
 void Universe::move(Snip* snip, float x, float y) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this->master) {
-            SnipInfo^ info = SNIP_INFO(snip);
+            SnipInfo* info = SNIP_INFO(snip);
             unsafe_move_snip_via_info(info, x, y, false);
         }
     } else if (this->head_snip != nullptr) {
@@ -180,7 +172,7 @@ void Universe::move(Snip* snip, float x, float y) {
 
         //this->begin_edit_sequence();
         do {
-            SnipInfo^ info = SNIP_INFO(child);
+            SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
                 unsafe_move_snip_via_info(info, x, y, false);
             }
@@ -198,7 +190,7 @@ Snip* Universe::find_snip(float x, float y) {
         Snip* child = this->head_snip->prev;
 
         do {
-            SnipInfo^ info = SNIP_INFO(child);
+            SnipInfo* info = SNIP_INFO(child);
             fill_snip_extent(child, info, &sx, &sy, &sw, &sh);
 
             if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
@@ -243,7 +235,7 @@ void Universe::recalculate_snips_extent_when_invalid() {
             this->snips_bottom = -FLT_MAX;
 
             do {
-                SnipInfo^ info = SNIP_INFO(child);
+                SnipInfo* info = SNIP_INFO(child);
                 fill_snip_extent(child, info, &rx, &ry, &width, &height);
                 this->snips_left = std::min(this->snips_left, rx);
                 this->snips_top = std::min(this->snips_top, ry);
@@ -262,7 +254,7 @@ void Universe::recalculate_snips_extent_when_invalid() {
 void Universe::add_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this->master)) {
-            SnipInfo^ info = SNIP_INFO(snip);
+            SnipInfo* info = SNIP_INFO(snip);
             if ((!info->selected) && (this->rubberband_allowed /*&& this->listener->can_select(this, snip)*/)) {
                 unsafe_add_selected(this->listener, snip, info);
             }
@@ -273,7 +265,7 @@ void Universe::add_selected(Snip* snip) {
 void Universe::set_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this->master)) {
-            SnipInfo^ info = SNIP_INFO(snip);
+            SnipInfo* info = SNIP_INFO(snip);
             if ((!info->selected) /*&& (this->listener->can_select(this, snip))*/) {
                 unsafe_set_selected(this->listener, snip, info);
             }
@@ -287,7 +279,7 @@ void Universe::no_selected() {
 
         //this->begin_edit_sequence();
         do {
-            SnipInfo^ info = SNIP_INFO(child);
+            SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
                 //this->listener->before_deselect(this, child);
                 info->selected = false;
@@ -343,7 +335,7 @@ void Universe::on_pointer_pressed(UIElement^ control, PointerRoutedEventArgs^ e)
                 this->no_selected();
             } else {
                 this->rubberband_y = nullptr;
-                SnipInfo^ info = SNIP_INFO(snip);
+                SnipInfo* info = SNIP_INFO(snip);
                 if ((!info->selected) /*&& this->listener->can_select(this, snip)*/) {
                     if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
                         if (this->rubberband_allowed) {
@@ -394,22 +386,32 @@ void Universe::set_decorator(IUniverseDecorator* decorator) {
 }
 
 /*************************************************************************************************/
-void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
-    float width, height;
-    float3x2 transform = ds->Transform;
+void Universe::update(long long count, long long interval, long long uptime, bool is_slow) {
+    if (this->head_snip != nullptr) {
+        Snip* child = this->head_snip;
 
+        do {
+            child->update(count, interval, uptime, is_slow);
+            child = child->next;
+        } while (child != this->head_snip);
+    }
+}
+
+void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
+    CanvasActiveLayer ^layer = nullptr;
+    float3x2 transform = ds->Transform;
+    float width, height;
+    
     this->decorator->draw_before(this, ds, Width, Height);
 
     if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
         do {
-            SnipInfo^ info = SNIP_INFO(child);
+            SnipInfo* info = SNIP_INFO(child);
             child->fill_extent(info->x, info->y, &width, &height);
 
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
-                CanvasActiveLayer ^layer = nullptr;
-
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 } else {
@@ -422,7 +424,7 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
                 child->draw(ds, info->x, info->y, width, height);
 
-                delete layer; /* Must Close the Layer Explicitly */
+                delete layer; // Must Close the Layer Explicitly
                 ds->Transform = transform;
             }
 
@@ -448,8 +450,6 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 }
 
 /*************************************************************************************************/
-#include "rsyslog.hpp"
-
 private ref class Win2DUniverse sealed : public WarGrey::SCADA::Win2DControl {
 internal:
     Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = nullptr) {
@@ -463,6 +463,7 @@ internal:
             this->planet->TargetElapsedTime = TimeSpan({ -10000000LL * frame_rate });
         }
 
+        this->planet->UseSharedDevice = true; // this is required
         this->planet->SizeChanged += ref new SizeChangedEventHandler(this, &Win2DUniverse::do_resize);
         this->planet->CreateResources += ref new UniverseLoadHandler(this, &Win2DUniverse::do_load);
         this->planet->GameLoopStarting += ref new UniverseHandler(this, &Win2DUniverse::do_start);
@@ -482,7 +483,6 @@ internal:
 
 private:
     void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args) {
-        rsyslog(L"[%d]reflow(%f, %f)", this->planet->HasGameLoopThreadAccess, width, height);
         float width = args->NewSize.Width;
         float height = args->NewSize.Height;
 
@@ -491,34 +491,35 @@ private:
         }
     }
 
-    void do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-        rsyslog(L"[%d]load", this->planet->HasGameLoopThreadAccess);
-        this->world->load(args);
-    }
-
     void do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-        rsyslog(L"[%d]start", this->planet->HasGameLoopThreadAccess);
         this->world->start();
     }
 
-    void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
-        long long count = args->Timing.UpdateCount - 1; 
-        long long elapsed = args->Timing.ElapsedTime.Duration;
+    void do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
+        this->world->load(args);
+    }
 
-        if (args->Timing.IsRunningSlowly) {
-            this->world->fast_update(count, elapsed);
-        } else {
-            this->world->update(count, elapsed);
-        }
+    void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
+        long long count = args->Timing.UpdateCount - 1;
+        long long elapsed = args->Timing.ElapsedTime.Duration;
+        long long uptime = args->Timing.TotalTime.Duration;
+        bool is_slow = args->Timing.IsRunningSlowly;
+
+        this->world->update(count, elapsed, uptime, is_slow);
     }
 
     void do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
         Size region = this->planet->Size;
-        this->world->draw(args->DrawingSession, region.Width, region.Height);
+
+        try {
+            this->world->draw(args->DrawingSession, region.Width, region.Height);
+        } catch (Platform::Exception^ wte) {
+            /// TODO: Why it complains about the WrongThreadException at first running.
+            rsyslog(wte->Message);
+        }
     }
 
     void do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-        rsyslog(L"[%d]stop", this->planet->HasGameLoopThreadAccess);
         this->world->stop();
     }
 

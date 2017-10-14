@@ -15,6 +15,9 @@ namespace WarGrey::SCADA {
         void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
     private:
+        ~Console();
+
+    private:
         WarGrey::SCADA::TCPListener^ listener;
         
         WarGrey::SCADA::Universe* universe;

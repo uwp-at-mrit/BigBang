@@ -8,7 +8,6 @@ namespace WarGrey::SCADA {
     public:
         IUniverse(Windows::UI::Xaml::Controls::Panel^ parent, int frame_rate = 0);
         virtual ~IUniverse() noexcept;
-        void resize(float width, float height);
 
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
@@ -16,8 +15,7 @@ namespace WarGrey::SCADA {
 
     public:
         virtual void start() {};
-        virtual void update(long long count, long long interval) {};
-        virtual void fast_update(long long count, long long interval) { this->update(count, interval); };
+        virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
         virtual void stop() {};
 
     public:
@@ -36,6 +34,9 @@ namespace WarGrey::SCADA {
             Windows::UI::Xaml::UIElement^ obj,
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
 
+    public:
+        void resize(float width, float height);
+
     protected:
         WarGrey::SCADA::Win2DControl^ master;
     };
@@ -46,6 +47,7 @@ namespace WarGrey::SCADA {
         virtual ~Universe() noexcept;
 
     public:
+        void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
     public:
@@ -95,7 +97,6 @@ namespace WarGrey::SCADA {
         bool rubberband_allowed;
 
     private:
-        Windows::UI::Xaml::Thickness padding;
         float snips_left;
         float snips_top;
         float snips_right;

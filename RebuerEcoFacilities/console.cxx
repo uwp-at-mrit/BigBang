@@ -29,68 +29,58 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
-static Universe* make_universe(Panel^ parent, IUniverseLayout* layout, IUniverseDecorator* border = nullptr) {
-    auto region = new Universe(parent, 1);
+using namespace Microsoft::Graphics::Canvas::UI;
 
-    if (border != nullptr) {
-        region->set_decorator(border);
+class BigBang : public WarGrey::SCADA::Universe {
+public:
+    BigBang(Panel^ parent) : Universe(parent, 4) {
+        this->set_decorator(new BorderDecorator(true, true));
     }
 
-    return region;
-}
+public:
+    void load(CanvasCreateResourcesEventArgs^ args) {
+        //this->insert(new Statuslet(speak("RRB1")));
+        this->insert(new StorageTanklet(80.0F, 128.0F));
+        this->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
+        this->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0);
+        this->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
+        this->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
+        this->insert(new Motorlet(128.0F), 256.0F, 128.0F);
+        this->insert(new Vibratorlet(32.0F), 700.0F, 300.0F);
+    };
+};
 
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-
     //this->listener = ref new TCPListener((unsigned short)18030);
 }
 
+Console::~Console() {
+    if (this->universe != nullptr) {
+        delete this->universe;
+    }
+}
+
 void Console::initialize_component(Size region) {
-    this->universe = make_universe(this, nullptr, new BorderDecorator(true, true));
+    if (this->universe == nullptr) {
+        this->universe = new BigBang(this);
+    }
     this->reflow(region.Width, region.Height);
 }
 
 /*
 void Console::initialize_component(Size region) {
-    this->statusbar = make_universe(this, new HorizontalLayout(0.0F), new HBorderDecorator(false, true));
-    this->stage = make_universe(this, new AbsoluteLayout());
-    this->gauge = make_universe(this, new HorizontalLayout(16.0F));
-    this->taskbar = make_universe(this, new HorizontalLayout(0.0F), new HBorderDecorator(true, false));
-    
-    this->taskbar->show_selection_dots(false);
-
-    this->statusbar->insert(new Statuslet(speak("RRB1")));
-    this->stage->insert(new StorageTanklet(80.0F, 128.0F));
-    this->stage->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
-    this->stage->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0); 
-    this->stage->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
-    this->stage->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
-    this->stage->insert(new Motorlet(128.0F), 256.0F, 128.0F);
-    this->stage->insert(new Vibratorlet(32.0F), 700.0F, 300.0F);
     this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
     this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
     this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
     this->gauge->insert(new Gaugelet(speak("slavermotor"),  200, 100));
     this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")));
-
-    this->reflow(region.Width, region.Height);
 }
 */
 
 void Console::reflow(float width, float height) {
     this->universe->resize(width, height);
-/*
-    this->statusbar->canvas_width = width;
-    this->taskbar->canvas_width = width;
-    this->stage->canvas_width = width;
-    this->gauge->canvas_width = width;
-
-    this->stage->canvas_height = height
-        - region_height(this->statusbar)
-        - region_height(this->taskbar)
-        - region_height(this->gauge);
-*/
 }
 
 void Console::suspend(SuspendingOperation^ op) {

@@ -8,22 +8,26 @@
 #define SET_VALUES(var1, val1, var2, val2) SET_BOX(var1, val1); SET_BOX(var2, val2)
 
 namespace WarGrey::SCADA {
-    private interface class ISnipInfo : public Microsoft::Graphics::Canvas::ICanvasResourceCreator {
+    private class ISnipInfo abstract {
     public:
-        property WarGrey::SCADA::Win2DControl^ master { WarGrey::SCADA::Win2DControl^ get(); };
+        ISnipInfo(Win2DControl^ master) : master(master) {};
+
+    public:
+        Win2DControl^ master;
     };
 
     private class Snip abstract {
     public:
-        virtual ~Snip() {};
+        virtual ~Snip() { if (this->info != nullptr) delete this->info; };
 
     public:
+        virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
         virtual void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr,
             float* bspace = nullptr, float* tspace = nullptr, float* lspace = nullptr, float* rspace = nullptr) = 0;
         
     public:
-        ISnipInfo^ info;
+        ISnipInfo* info;
 
     public:
         Snip* next;
