@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <WindowsNumerics.h>
 
 #include "geometry.hpp"
 #include "gradient.hpp"
@@ -7,6 +8,8 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+using namespace Windows::Foundation::Numerics;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
@@ -36,14 +39,24 @@ Motorlet::Motorlet(float width) : Motorlet(width, width * 0.6F) { }
 Motorlet::Motorlet(float width, float height) {
     this->width = width;
     this->height = height;
+}
 
+void Motorlet::load() {
+    float thread = std::fmax(this->width * 0.01F, 1.0F);
+    
     setup_gradient_stops();
+    this->screw_brush = make_linear_gradient_brush(0.0F, 0.0F, thread, -thread, screw_stops);
+    
 }
 
 void Motorlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
     SET_VALUES(w, this->width, h, this->height);
     SET_BOXES(b, t, 0.0F);
     SET_BOXES(l, r, 0.0F);
+}
+
+void Motorlet::update(long long count, long long interval, long long uptime, bool is_slow) {
+    this->screw_brush->Transform = make_float3x2_translation(float2(float(count), 0.0F));
 }
 
 void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -54,11 +67,9 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     
     { // draw screw
         float thickness = this->height / 7.5F;
-        float thread = std::fmax(this->width * 0.01F, 1.0F);
         float screw_y = body_y + body_height / 2.0F;
 
-        auto screw_brush = make_linear_gradient_brush(screw_x, screw_y, screw_x + thread, screw_y - thread, screw_stops);
-        ds->DrawLine(screw_x, screw_y, x + width, screw_y, screw_brush, thickness);
+        ds->DrawLine(screw_x, screw_y, x + width, screw_y, this->screw_brush, thickness);
     }
 
     { // draw the rest

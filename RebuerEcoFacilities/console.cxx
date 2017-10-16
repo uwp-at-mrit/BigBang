@@ -33,7 +33,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 
 class BigBang : public WarGrey::SCADA::Universe {
 public:
-    BigBang(Panel^ parent) : Universe(parent, 4) {
+    BigBang(Panel^ parent) : Universe(parent, 8) {
         this->set_decorator(new BorderDecorator(true, true));
     }
 

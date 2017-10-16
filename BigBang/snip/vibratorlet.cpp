@@ -38,7 +38,9 @@ Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 2.0F) {}
 Vibratorlet::Vibratorlet(float width, float height) {
     this->width = width;
     this->height = height;
+}
 
+void Vibratorlet::load() {
     setup_gradient_stops();
 }
 
@@ -46,6 +48,10 @@ void Vibratorlet::fill_extent(float x, float y, float* w, float* h, float* b, fl
     SET_VALUES(w, this->width, h, this->height);
     SET_BOXES(b, t, 0.0F);
     SET_BOXES(l, r, 0.0F);
+}
+
+void Vibratorlet::update(long long count, long long interval, long long uptime, bool is_slow) {
+    this->vibrated = (count % 2 == 0);
 }
 
 void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -67,9 +73,10 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         float rx = cx - x - thickness;
         float ry = thickness / 2.0F;
         float step = thickness * float(stepunit);
-        float yoff = body_y + step / 2.0F;
+        float yoff = body_y + step / (this->vibrated ? 2.0F : 1.0F);
 
         auto body = rectangle(body_x, body_y, body_width, body_height);
+        auto ring_brush = make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops);
         auto rings = blank();
         for (int i = 0; i < count; i++) {
             float cy = yoff + i * step;
@@ -77,7 +84,7 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         }
 
         ds->FillGeometry(geometry_substract(body, rings), body_color);
-        ds->FillGeometry(rings, make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops));
+        ds->FillGeometry(rings, ring_brush);
     }
 
     { // draw hat and decorators
