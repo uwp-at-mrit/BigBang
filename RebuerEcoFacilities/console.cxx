@@ -39,8 +39,8 @@ public:
 
 public:
     void load(CanvasCreateResourcesEventArgs^ args) {
-        //this->insert(new Statuslet(speak("RRB1")));
-        this->insert(new StorageTanklet(80.0F, 128.0F));
+        this->insert(new Statuslet(speak("RRB1")), 0.0F, 0.0F);
+        this->insert(new StorageTanklet(80.0F, 128.0F), 0.0F, 32.0F);
         this->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
         this->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0);
         this->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);

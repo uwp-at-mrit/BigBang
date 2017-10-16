@@ -27,8 +27,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 typedef TypedEventHandler<Battery^, Platform::Object^> BatteryUpdateHandler;
 typedef TypedEventHandler<WiFiAdapter^, Platform::Object^> WiFiUpdateHandler;
 
-#define REFRESH(self) if (self->master->info != nullptr) { self->master->info->master->refresh(); }
-
 // delegate only accepts C++/CX
 ref class Status sealed {
 public:
@@ -36,7 +34,6 @@ public:
         int l00ns;
 
         this->timestamp = update_nowstamp(false, &l00ns);
-        //REFRESH(this);
 
         return TimeSpan{ 10000000 - l00ns };
     }
@@ -47,7 +44,6 @@ public:
         auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
         this->powercapacity = speak("powerlabel") + std::round((remaining / full) * 100.0F).ToString() + "%";
-        //REFRESH(this);
     }
 
     void update_wifiinfo(WiFiAdapter^ info) {
@@ -64,12 +60,10 @@ public:
         }
 
         this->wifi_strength = speak("wifilabel") + signal;
-        //REFRESH(this);
     }
 
     void update_sdinfo() {
         this->storage = speak("sdlabel") + L"0MB";
-        //REFRESH(this);
     }
 
     void update_ipinfo() {
@@ -85,7 +79,6 @@ public:
         }
 
         this->ipv4 = speak("ipv4label") + ipv4;
-        //REFRESH(this);
     }
 
 internal:
@@ -94,7 +87,6 @@ internal:
 
         Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
         // WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
-        //this->timer = gui_timer(1000, ref new ObjectHandler(this, &Status::refresh_timeinfo));
 
         this->update_timestamp();
         this->update_powerinfo();
@@ -104,10 +96,6 @@ internal:
     }
 
 private:
-    void refresh_timeinfo(Platform::Object^ sender, Platform::Object^ e) {
-        this->timer->Interval = this->update_timestamp();
-    }
-
     void refresh_powerinfo(Battery^ sender, Platform::Object^ e) {
         this->update_powerinfo();
     }
@@ -117,7 +105,6 @@ private:
     }
 
 private:
-    DispatcherTimer^ timer;
     Platform::String^ timestamp;
     Platform::String^ powercapacity;
     Platform::String^ wifi_strength;
@@ -125,7 +112,7 @@ private:
     Platform::String^ ipv4;
     
 private:
-    Statuslet* master; // this will be destructed by master Pasteboard;
+    Statuslet* master; // this will be destructed by master Control;
 
     friend class WarGrey::SCADA::Statuslet;
 };
@@ -139,27 +126,35 @@ Statuslet::Statuslet(Platform::String^ caption) {
     this->caption = caption;
     this->plc_connected = false;
     this->label_font = make_text_format();
+}
 
-    // TODO: is it safe?
-    statusbar = ref new Status(this);
+void Statuslet::load() {
+    if (statusbar == nullptr) {
+        TextExtent ts = get_text_extent(speak("plclabel"), label_font);
+        status_height = ts.height;
+
+        // TODO: Win2D eats suffix spaces.
+        TextExtent sp = get_text_extent("o", label_font);
+        status_prefix_width = ts.width + sp.width;
+
+        statusbar = ref new Status(this);
+    }
 }
 
 void Statuslet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
     if (statusbar->master != nullptr) {
-        if (status_height == 0.0F) {
-            TextExtent ts = get_text_extent(speak("plclabel"), label_font);
-            status_height = ts.height;
+        float actual_width; 
 
-            // TODO: Win2D eats suffix spaces.
-            TextExtent sp = get_text_extent("o", label_font);
-            status_prefix_width = ts.width + sp.width;
-        }
-
-        SET_BOX(w, info->master->actual_width - x);
+        statusbar->master->info->master->fill_actual_extent(&actual_width, nullptr);
+        SET_BOX(w, actual_width - x);
         SET_BOX(h, status_height);
         SET_BOXES(b, t, 0.0F);
         SET_BOXES(l, r, 0.0F);
     }
+}
+
+void Statuslet::update(long long count, long long interval, long long uptime, bool is_slow) {
+    statusbar->update_timestamp();
 }
 
 void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

@@ -39,6 +39,9 @@ namespace WarGrey::SCADA {
         read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
         read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 
+    public:
+        virtual void fill_actual_extent(float* width, float* height);
+
     protected private:
         Microsoft::Graphics::Canvas::ICanvasResourceCreator^ universe;
         Windows::UI::Xaml::Controls::UserControl^ control;

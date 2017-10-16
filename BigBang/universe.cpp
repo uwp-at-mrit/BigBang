@@ -453,6 +453,14 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
 /*************************************************************************************************/
 private ref class Win2DUniverse sealed : public WarGrey::SCADA::Win2DControl {
+public:
+    void fill_actual_extent(float* width, float* height) override {
+        Size region = this->planet->Size;
+
+        if (width != nullptr)  (*width)  = region.Width;
+        if (height != nullptr) (*height) = region.Height;
+    };
+
 internal:
     Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = nullptr) {
         this->world = world; 
