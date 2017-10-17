@@ -115,6 +115,30 @@ static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, 
     unsafe_add_selected(listener, snip, info);
 }
 
+static inline void snip_center_point_offset(Snip* snip, SnipInfo* info, SnipCenterPoint cp, float& xoff, float& yoff) {
+    xoff = 0.0F;
+    yoff = 0.0F;
+
+    if (cp != SnipCenterPoint::LT) {
+        float width, height, halfw, halfh;
+
+        snip->fill_extent(info->x, info->y, &width, &height);
+        halfw = width / 2.0F;
+        halfh = height / 2.0F;
+
+        switch (cp) {
+        case SnipCenterPoint::LC:               yoff = halfh;  break;
+        case SnipCenterPoint::LB:               yoff = height; break;
+        case SnipCenterPoint::CT: xoff = halfw;                break;
+        case SnipCenterPoint::CC: xoff = halfw; yoff = halfh;  break;
+        case SnipCenterPoint::CB: xoff = halfw; yoff = height; break;
+        case SnipCenterPoint::RT: xoff = width;                break;
+        case SnipCenterPoint::RC: xoff = width; yoff = halfh;  break;
+        case SnipCenterPoint::RB: xoff = width; yoff = height; break;
+        }
+    }
+}
+
 /*************************************************************************************************/
 Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate) {
     //this->set_pointer_listener(nullptr);
@@ -154,11 +178,14 @@ void Universe::insert(Snip* snip, double degrees, float x, float y) {
     }
 }
 
-void Universe::move_to(Snip* snip, float x, float y) {
+void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this->master) {
             SnipInfo* info = SNIP_INFO(snip);
-            unsafe_move_snip_via_info(info, x, y, true);
+            float xoff, yoff;
+
+            snip_center_point_offset(snip, info, cp, xoff, yoff);
+            unsafe_move_snip_via_info(info, x - xoff, y - yoff, true);
         }
     }
 }
@@ -205,6 +232,19 @@ Snip* Universe::find_snip(float x, float y) {
     }
 
     return found;
+}
+
+void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoint cp) {
+    if ((snip != nullptr) && (snip->info != nullptr)) {
+        if (snip->info->master == this->master) {
+            SnipInfo* info = SNIP_INFO(snip);
+            float xoff, yoff;
+
+            snip_center_point_offset(snip, info, cp, xoff, yoff);
+            if (x != nullptr) (*x) = info->x + xoff;
+            if (y != nullptr) (*y) = info->y + yoff;
+        }
+    }
 }
 
 void Universe::fill_snips_bounds(float* x, float* y, float* width, float* height) {

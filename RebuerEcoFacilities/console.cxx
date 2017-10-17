@@ -39,7 +39,7 @@ public:
         this->icons[0] = new StorageTanklet(80.0F, 128.0F);
         this->icons[1] = new Funnellet(64.0F, 64.0F);
         this->icons[2] = new Motorlet(64.0F);
-        this->feeding_motor = new Motorlet(32.0F);
+        this->funnel_motor = new Motorlet(32.0F);
         this->vibrator = new Vibratorlet(32.0F);
 
         this->insert(this->statusbar);
@@ -54,11 +54,7 @@ public:
             this->insert(this->icons[i]);
         }
 
-        this->insert(this->feeding_motor, -45.0);
-
-        this->insert(new Motorlet(16.0F), 90.0, 400.0F, 300.0F);
-        this->insert(new Motorlet(64.0F), -90.0, 256.0F, 48.0F);
-        this->insert(new Motorlet(128.0F), 0.0, 256.0F, 128.0F);
+        this->insert(this->funnel_motor, -45.0);
 
         for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
             this->insert(this->gauges[i]);
@@ -70,13 +66,15 @@ public:
         float console_y;
 
         this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
-        this->move_to(this->vibrator, width / 2.0F, height / 2.0F);
+        this->vibrator->fill_extent(0.0F, 0.0F, &snip_wdith, &snip_height);
+        this->move_to(this->vibrator, (width - snip_wdith) / 2.0F, (height - snip_height) / 2.0F);
 
         { // flow icons
             float icon_gapsize = 64.0F;
             float icon_hmax = 0.0F;
             float icon_x = 0.0F;
             float icon_y = console_y * 1.5F;
+            float snip_x, snip_y;
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
@@ -87,6 +85,11 @@ public:
                 this->icons[i]->fill_extent(icon_x, icon_y, &snip_wdith, &snip_height);
                 this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) / 2.0F);
                 icon_x += (snip_wdith + icon_gapsize);
+            }
+
+            { // flow associated motors
+                this->fill_snip_location(this->icons[1], &snip_x, &snip_y, SnipCenterPoint::CB);
+                this->move_to(this->funnel_motor, snip_x, snip_y, SnipCenterPoint::CC);
             }
         }
 
@@ -108,7 +111,7 @@ public:
 private: // never deletes these snips mannually
     Statuslet* statusbar;
     Vibratorlet* vibrator;
-    Motorlet* feeding_motor;
+    Motorlet* funnel_motor;
     Snip* icons[3];
     Gaugelet* gauges[4];
 };

@@ -76,9 +76,10 @@ namespace WarGrey::SCADA {
 
     public:
         Snip* find_snip(float x, float y);
+        void fill_snip_location(Snip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT);
         void insert(Snip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F);
         void move(Snip* snip, float x, float y);
-        void move_to(Snip* snip, float x, float y);
+        void move_to(Snip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT);
 
     public:
         void add_selected(Snip* snip);
