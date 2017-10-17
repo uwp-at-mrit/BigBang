@@ -38,7 +38,7 @@ public:
     }
 
 public:
-    void load(CanvasCreateResourcesEventArgs^ args) {
+    void load(CanvasCreateResourcesEventArgs^ args, float width, float height) override {
         this->insert(new Statuslet(speak("RRB1")), 0.0F, 0.0F);
         this->insert(new StorageTanklet(80.0F, 128.0F), 0.0F, 32.0F);
         this->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
@@ -47,7 +47,23 @@ public:
         this->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
         this->insert(new Motorlet(128.0F), 256.0F, 128.0F);
         this->insert(new Vibratorlet(32.0F), 700.0F, 300.0F);
+
+        float gauge_y = height * 0.618F;
+        this->insert(new Gaugelet(speak("mastermotor"), 100, 100), 8.0F, gauge_y);
+        this->insert(new Gaugelet(speak("feedingmotor"), 200, 100), 128.0F, gauge_y);
+        this->insert(new Gaugelet(speak("cleanmotor"), 10, 20), 256.0F, gauge_y);
+        this->insert(new Gaugelet(speak("slavermotor"), 200, 100), 348.0F, gauge_y);
+
+        rsyslog("load");
     };
+
+    void reflow(float width, float height) override {
+        rsyslog("reflow");
+    }
+
+private: // never deletes these snips mannually
+    Snip* mastermotor;
+    Snip* feedingmotor;
 };
 
 Console::Console() : StackPanel() {
@@ -66,18 +82,9 @@ void Console::initialize_component(Size region) {
     if (this->universe == nullptr) {
         this->universe = new BigBang(this);
     }
+
     this->reflow(region.Width, region.Height);
 }
-
-/*
-void Console::initialize_component(Size region) {
-    this->gauge->insert(new Gaugelet(speak("mastermotor"),  100, 100));
-    this->gauge->insert(new Gaugelet(speak("feedingmotor"), 200, 100));
-    this->gauge->insert(new Gaugelet(speak("cleanmotor"),   10,  20));
-    this->gauge->insert(new Gaugelet(speak("slavermotor"),  200, 100));
-    this->taskbar->insert(new Textlet(ref new Platform::String(L"TaskBar")));
-}
-*/
 
 void Console::reflow(float width, float height) {
     this->universe->resize(width, height);

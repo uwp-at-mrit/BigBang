@@ -8,6 +8,18 @@
       <UniqueIdentifier>c1c0e393-d88f-4b49-abd3-ba89f516d9b6</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
+    <Filter Include="Localization">
+      <UniqueIdentifier>{2a472d9c-6889-47d7-89fa-5e8912362cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Localization\tongue">
+      <UniqueIdentifier>{c1ce3c77-4a1a-4815-85f7-cd10a5b80a10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Localization\tongue\en-US">
+      <UniqueIdentifier>{3a4ffce6-eefd-490a-9d92-1c4fddd4beb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Localization\tongue\zh-CN">
+      <UniqueIdentifier>{df4eeec5-4394-4e6b-a96d-958bd58e9b6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RebuerEcoFacilities.cxx" />
@@ -176,8 +188,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Localization\en-US\tongue.resw" />
-    <PRIResource Include="Localization\zh-CN\tongue.resw" />
+    <PRIResource Include="Localization\en-US\tongue.resw">
+      <Filter>Localization\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="Localization\zh-CN\tongue.resw">
+      <Filter>Localization\tongue\zh-CN</Filter>
+    </PRIResource>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
         virtual ~IUniverse() noexcept;
 
     public:
-        virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args) {};
+        virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 
     public:

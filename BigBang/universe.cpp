@@ -137,7 +137,7 @@ Universe::~Universe() {
 }
 
 void Universe::insert(Snip* snip, float x, float y, double degrees) {
-    if (snip->info == nullptr) { // TODO: should it be copied if one snip can only belongs to one pasteboard
+    if (snip->info == nullptr) {
         if (this->head_snip == nullptr) {
             this->head_snip = snip;
             snip->prev = this->head_snip;
@@ -497,7 +497,11 @@ private:
         float height = args->NewSize.Height;
 
         if ((width > 0.0F) && (height > 0.0F)) {
-            this->world->reflow(width, height);
+            if (this->loaded) {
+                this->world->reflow(width, height);
+            } else {
+                this->pending_resize = true;
+            }
         }
     }
 
@@ -506,7 +510,15 @@ private:
     }
 
     void do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-        this->world->load(args);
+        Size region = this->planet->Size;
+
+        this->world->load(args, region.Width, region.Height);
+        this->loaded = true;
+
+        if (this->pending_resize) {
+            this->pending_resize = false;
+            this->world->reflow(region.Width, region.Height);
+        }
     }
 
     void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
@@ -531,6 +543,7 @@ private:
 
     void do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
         this->world->stop();
+        this->pending_resize = false;
     }
 
 private:
@@ -549,6 +562,10 @@ private:
 private:
     CanvasAnimatedControl^ planet;
     IUniverse* world;
+
+private:
+    bool loaded = false;
+    bool pending_resize = false;
 };
 
 IUniverse::IUniverse(Panel^ parent, int frame_rate) {

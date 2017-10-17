@@ -73,7 +73,7 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
         float rx = cx - x - thickness;
         float ry = thickness / 2.0F;
         float step = thickness * float(stepunit);
-        float yoff = body_y + step / (this->vibrated ? 2.0F : 1.0F);
+        float yoff = body_y + step / (this->vibrated ? 4.0F : 2.0F);
 
         auto body = rectangle(body_x, body_y, body_width, body_height);
         auto ring_brush = make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops);
