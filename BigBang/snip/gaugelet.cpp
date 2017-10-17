@@ -53,8 +53,8 @@ void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     auto xR = xA + this->meter_width + this->meter_gapsize;
     
     ds->DrawText(this->caption, x + (this->width - this->caption_width) / 2.0F, y, Colors::Khaki, this->label_font);
-    this->draw_meter(ds, xA, this->meter_y, this->Ampere, this->ampere, speak("ampere"), Colors::RoyalBlue);
-    this->draw_meter(ds, xR, this->meter_y, this->RPM, float(this->rpm), speak("rpm"), Colors::Green);
+    this->draw_meter(ds, xA, y + this->meter_y, this->Ampere, this->ampere, speak("ampere"), Colors::RoyalBlue);
+    this->draw_meter(ds, xR, y + this->meter_y, this->RPM, float(this->rpm), speak("rpm"), Colors::Green);
 }
 
 void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, int mscale, float scale, Platform::String^ label, Color& color) {
@@ -71,8 +71,8 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, int mscale
 
     ds->FillRectangle(body_x, body_y, body_width, body_height - current_height, Colors::Gray);
     ds->FillRectangle(body_x, body_bottom - current_height, body_width, current_height, color);
-    ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::DarkGray);
-    ds->DrawLine(body_x, body_y, body_x, body_bottom, Colors::GhostWhite);
+    ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::GhostWhite);
+    ds->DrawLine(body_x, body_y, body_x, body_bottom, Colors::DarkGray);
 
     for (char i = 0; i <= this->step; i ++) {
         auto ythis = body_y + this->mark_interval * i;

@@ -159,7 +159,7 @@
   <data name="mastermotor" xml:space="preserve">
     <value>主螺杆电机</value>
   </data>
-  <data name="slavermotor" xml:space="preserve">
+  <data name="slavemotor" xml:space="preserve">
     <value>副螺杆电机</value>
   </data>
   <data name="ampere" xml:space="preserve">

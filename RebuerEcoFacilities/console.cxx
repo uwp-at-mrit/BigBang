@@ -33,37 +33,83 @@ using namespace Microsoft::Graphics::Canvas::UI;
 
 class BigBang : public WarGrey::SCADA::Universe {
 public:
-    BigBang(Panel^ parent) : Universe(parent, 8) {
-        this->set_decorator(new BorderDecorator(true, true));
-    }
+    BigBang(Panel^ parent) : Universe(parent, 8) {}
 
 public:
     void load(CanvasCreateResourcesEventArgs^ args, float width, float height) override {
-        this->insert(new Statuslet(speak("RRB1")), 0.0F, 0.0F);
-        this->insert(new StorageTanklet(80.0F, 128.0F), 0.0F, 32.0F);
-        this->insert(new Funnellet(64.0F, 64.0F), 128.0F, 48.0F);
+        this->statusbar = new Statuslet(speak("RRB1"));
+        this->icons[0] = new StorageTanklet(80.0F, 128.0F);
+        this->icons[1] = new Funnellet(64.0F, 64.0F);
+        this->icons[2] = new Motorlet(64.0F);
+        this->vibrator = new Vibratorlet(32.0F);
+
+        this->insert(this->statusbar);
+        this->insert(this->vibrator);
+
         this->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0);
         this->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
         this->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
         this->insert(new Motorlet(128.0F), 256.0F, 128.0F);
-        this->insert(new Vibratorlet(32.0F), 700.0F, 300.0F);
 
-        float gauge_y = height * 0.618F;
-        this->insert(new Gaugelet(speak("mastermotor"), 100, 100), 8.0F, gauge_y);
-        this->insert(new Gaugelet(speak("feedingmotor"), 200, 100), 128.0F, gauge_y);
-        this->insert(new Gaugelet(speak("cleanmotor"), 10, 20), 256.0F, gauge_y);
-        this->insert(new Gaugelet(speak("slavermotor"), 200, 100), 348.0F, gauge_y);
+        this->gauges[0] = new Gaugelet(speak("mastermotor"), 100, 100);
+        this->gauges[1] = new Gaugelet(speak("feedingmotor"), 200, 100);
+        this->gauges[2] = new Gaugelet(speak("cleanmotor"), 10, 20);
+        this->gauges[3] = new Gaugelet(speak("slavemotor"), 200, 100);
 
-        rsyslog("load");
+        for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+            this->insert(this->icons[i]);
+        }
+
+        for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
+            this->insert(this->gauges[i]);
+        }
     };
 
     void reflow(float width, float height) override {
-        rsyslog("reflow");
+        float snip_wdith, snip_height;
+        float console_y;
+
+        this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
+        this->move_to(this->vibrator, width / 2.0F, height / 2.0F);
+
+        { // flow icons
+            float icon_gapsize = 64.0F;
+            float icon_hmax = 0.0F;
+            float icon_x = 0.0F;
+            float icon_y = console_y * 1.5F;
+
+            for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+                this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
+                icon_hmax = std::max(snip_height, icon_hmax);
+            }
+
+            for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+                this->icons[i]->fill_extent(icon_x, icon_y, &snip_wdith, &snip_height);
+                this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) / 2.0F);
+                icon_x += (snip_wdith + icon_gapsize);
+            }
+        }
+
+        { // flow gauges
+            float gauge_gapsize = 32.0F;
+            float gauge_x = 0.0F;
+            float gauge_y = console_y;
+
+            this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
+            gauge_y = height - snip_height;
+            for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
+                this->move_to(this->gauges[i], gauge_x, gauge_y);
+                this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_wdith);
+                gauge_x += (snip_wdith + gauge_gapsize);
+            }
+        }
     }
 
 private: // never deletes these snips mannually
-    Snip* mastermotor;
-    Snip* feedingmotor;
+    Statuslet* statusbar;
+    Vibratorlet* vibrator;
+    Snip* icons[3];
+    Gaugelet* gauges[4];
 };
 
 Console::Console() : StackPanel() {
