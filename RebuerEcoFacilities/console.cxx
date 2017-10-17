@@ -38,7 +38,6 @@ public:
         this->statusbar = new Statuslet(speak("RRB1"));
         this->icons[0] = new StorageTanklet(80.0F, 128.0F);
         this->icons[1] = new Funnellet(64.0F, 64.0F);
-        this->icons[2] = new Motorlet(64.0F);
         this->funnel_motor = new Motorlet(32.0F);
         this->vibrator = new Vibratorlet(32.0F);
 
@@ -112,7 +111,7 @@ private: // never deletes these snips mannually
     Statuslet* statusbar;
     Vibratorlet* vibrator;
     Motorlet* funnel_motor;
-    Snip* icons[3];
+    Snip* icons[2];
     Gaugelet* gauges[4];
 };
 
