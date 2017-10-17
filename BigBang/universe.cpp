@@ -136,7 +136,7 @@ Universe::~Universe() {
     REMOVE(this->decorator, refcount);
 }
 
-void Universe::insert(Snip* snip, float x, float y, double degrees) {
+void Universe::insert(Snip* snip, double degrees, float x, float y) {
     if (snip->info == nullptr) {
         if (this->head_snip == nullptr) {
             this->head_snip = snip;

@@ -12,8 +12,6 @@
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
-#include "layout/orientation.hpp"
-#include "layout/absolute.hpp"
 #include "decorator/border.hpp"
 
 using namespace WarGrey::SCADA;
@@ -41,15 +39,11 @@ public:
         this->icons[0] = new StorageTanklet(80.0F, 128.0F);
         this->icons[1] = new Funnellet(64.0F, 64.0F);
         this->icons[2] = new Motorlet(64.0F);
+        this->feeding_motor = new Motorlet(32.0F);
         this->vibrator = new Vibratorlet(32.0F);
 
         this->insert(this->statusbar);
         this->insert(this->vibrator);
-
-        this->insert(new Motorlet(16.0F), 400.0F, 300.0F, 90.0);
-        this->insert(new Motorlet(32.0F), 148.0F, 96.0F, -45.0);
-        this->insert(new Motorlet(64.0F), 256.0F, 48.0F, -90.0);
-        this->insert(new Motorlet(128.0F), 256.0F, 128.0F);
 
         this->gauges[0] = new Gaugelet(speak("mastermotor"), 100, 100);
         this->gauges[1] = new Gaugelet(speak("feedingmotor"), 200, 100);
@@ -59,6 +53,12 @@ public:
         for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
             this->insert(this->icons[i]);
         }
+
+        this->insert(this->feeding_motor, -45.0);
+
+        this->insert(new Motorlet(16.0F), 90.0, 400.0F, 300.0F);
+        this->insert(new Motorlet(64.0F), -90.0, 256.0F, 48.0F);
+        this->insert(new Motorlet(128.0F), 0.0, 256.0F, 128.0F);
 
         for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
             this->insert(this->gauges[i]);
@@ -108,6 +108,7 @@ public:
 private: // never deletes these snips mannually
     Statuslet* statusbar;
     Vibratorlet* vibrator;
+    Motorlet* feeding_motor;
     Snip* icons[3];
     Gaugelet* gauges[4];
 };
