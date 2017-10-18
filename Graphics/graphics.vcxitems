@@ -4,6 +4,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{73bfe193-7352-40ab-99c0-717f6ebee2d8}</ItemsProjectGuid>
+    <ItemsProjectName>Graphics</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,11 +15,13 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)colorspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)gradient.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)gradient.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />

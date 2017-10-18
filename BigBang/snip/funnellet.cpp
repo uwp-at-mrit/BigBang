@@ -8,8 +8,9 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Color topface_colors[] = { Colors::DarkGoldenrod, Colors::DarkGoldenrod, Colors::LightGray, Colors::DarkGoldenrod };
-static Color body_colors[] = { Colors::DarkGoldenrod, Colors::LightGray, Colors::DarkGoldenrod };
+static Color color = Colors::Green;
+static Color topface_colors[] = { color, color, Colors::LightGray, color };
+static Color body_colors[] = { color, Colors::LightGray, color };
 
 static Platform::Array<CanvasGradientStop>^ topface_stops = nullptr;
 static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;

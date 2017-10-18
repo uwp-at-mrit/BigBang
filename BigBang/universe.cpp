@@ -569,7 +569,7 @@ private:
 
         this->world->update(count, elapsed, uptime, is_slow);
 
-        if (is_slow) rsyslog(L"cannot draw so many snips in %fms.", float(elapsed) / 10000.0F);
+        if (is_slow) rsyslog(L"cannot draw so many snips within %fms.", float(elapsed) / 10000.0F);
     }
 
     void do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
