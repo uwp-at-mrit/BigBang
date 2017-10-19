@@ -7,11 +7,7 @@ using namespace Windows::UI;
 
 #define UCHAR(v) ((unsigned char)std::round(v * 255.0))
 
-static Color inline rgb(double r, double g, double b) {
-    return ColorHelper::FromArgb(255, UCHAR(r), UCHAR(g), UCHAR(b));
-}
-
-static Color hue_to_rgb(double hue, double chroma, double m) {
+static Color hue_to_rgba(double hue, double chroma, double m, double a) {
     double r = m;
     double g = m;
     double b = m;
@@ -32,10 +28,10 @@ static Color hue_to_rgb(double hue, double chroma, double m) {
         }
     }
 
-    return rgb(r, g, b);
+    return rgba(r, g, b, a);
 }
 
-static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, char color_component) {
+static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, char color_component, double alpha) {
     double cosH_60H = 2.0; // if hue == 0.0 or hue == 120.0;
 
     if ((hue != 0.0) && (hue != 120.0)) {
@@ -49,36 +45,48 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
         double minor = (intensity * 3.0) - (major + midor);
 
         switch (color_component) {
-        case 'r': return rgb(major, minor, midor); break;
-        case 'g': return rgb(midor, major, minor); break;
-        default:  return rgb(minor, midor, major); break;
+        case 'r': return rgba(major, minor, midor, alpha); break;
+        case 'g': return rgba(midor, major, minor, alpha); break;
+        default:  return rgba(minor, midor, major, alpha); break;
         }
     }
 }
 
-Windows::UI::Color hsv(double hue, double saturation, double value) {
+Color rgba(int hex, double a) {
+    auto r = (unsigned char)((hex >> 16) & 0xFF);
+    auto g = (unsigned char)((hex >> 8) & 0xFF);
+    auto b = (unsigned char)(hex & 0xFF);
+
+    return ColorHelper::FromArgb(UCHAR(a), r, g, b);
+}
+
+Color rgba(double r, double g, double b, double a) {
+    return ColorHelper::FromArgb(UCHAR(a), UCHAR(r), UCHAR(g), UCHAR(b));
+}
+
+Color hsva(double hue, double saturation, double value, double alpha) {
     double chroma = saturation * value;
     double m = value - chroma;
     
-    return hue_to_rgb(hue, chroma, m);
+    return hue_to_rgba(hue, chroma, m, alpha);
 }
 
-Windows::UI::Color hsl(double hue, double saturation, double lightness) {
+Color hsla(double hue, double saturation, double lightness, double alpha) {
     double chroma = saturation * (1.0 - std::abs(lightness * 2.0 - 1.0));
     double m = lightness - chroma * 0.5;
     
-    return hue_to_rgb(hue, chroma, m);
+    return hue_to_rgba(hue, chroma, m, alpha);
 }
 
-Windows::UI::Color hsi(double hue, double saturation, double intensity) {
+Color hsia(double hue, double saturation, double intensity, double alpha) {
     if ((saturation == 0.0) || std::isnan(saturation)) {
-        return rgb(intensity, intensity, intensity);
+        return rgba(intensity, intensity, intensity, alpha);
     } else if (hue < 120.0) {
-        return hsi_sector_to_rgb(hue, saturation, intensity, 'r');
+        return hsi_sector_to_rgb(hue, saturation, intensity, 'r', alpha);
     } else if (hue < 240.0) {
-        return hsi_sector_to_rgb(hue - 120.0, saturation, intensity, 'g');
+        return hsi_sector_to_rgb(hue - 120.0, saturation, intensity, 'g', alpha);
     } else {
-        return hsi_sector_to_rgb(hue - 240.0, saturation, intensity, 'b');
+        return hsi_sector_to_rgb(hue - 240.0, saturation, intensity, 'b', alpha);
     }
 }
 
@@ -110,21 +118,16 @@ void test_colorspace() {
     };
 
     for (int i = 0; i < sizeof(samples) / sizeof(double[14]); i++) {
-        Color rgb_c = rgb(samples[i][0], samples[i][1],  samples[i][2]);
-        Color hsv_c = hsv(samples[i][3], samples[i][11], samples[i][7]);
-        Color hsl_c = hsl(samples[i][3], samples[i][12], samples[i][8]);
-        Color hsi_c = hsi(samples[i][3], samples[i][13], samples[i][9]);
-        
-        int rgb_hex = rgb_to_hex(rgb_c);
-        int hsv_hex = rgb_to_hex(hsv_c);
-        int hsl_hex = rgb_to_hex(hsl_c);
-        int hsi_hex = rgb_to_hex(hsi_c);
+        int rgb = rgb_to_hex(rgba(samples[i][0], samples[i][1],  samples[i][2]));
+        int hsv = rgb_to_hex(hsva(samples[i][3], samples[i][11], samples[i][7]));
+        int hsl = rgb_to_hex(hsla(samples[i][3], samples[i][12], samples[i][8]));
+        int hsi = rgb_to_hex(hsia(samples[i][3], samples[i][13], samples[i][9]));
         
         Platform::String^ frmt = "[%02d]RGB:%06X"
-            + " HSV:%06" + ((rgb_hex == hsv_hex) ? "X" : "x")
-            + " HSL:%06" + ((rgb_hex == hsl_hex) ? "X" : "x")
-            + " HSI:%06" + ((rgb_hex == hsi_hex) ? "X" : "x");
+            + " HSV:%06" + ((rgb == hsv) ? "X" : "x")
+            + " HSL:%06" + ((rgb == hsl) ? "X" : "x")
+            + " HSI:%06" + ((rgb == hsi) ? "X" : "x");
 
-        rsyslog(frmt->Data(), i + 1, rgb_hex, hsv_hex, hsl_hex, hsi_hex);
+        rsyslog(frmt->Data(), i + 1, rgb, hsv, hsl, hsi);
     }
 }

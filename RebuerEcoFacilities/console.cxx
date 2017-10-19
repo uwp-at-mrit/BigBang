@@ -2,7 +2,6 @@
 #include <algorithm>
 
 #include "rsyslog.hpp"
-#include "colorspace.hpp"
 #include "tongue.hpp"
 #include "console.hxx"
 #include "universe.hpp"
@@ -134,7 +133,6 @@ void Console::initialize_component(Size region) {
     }
 
     this->reflow(region.Width, region.Height);
-    test_colorspace();
 }
 
 void Console::reflow(float width, float height) {

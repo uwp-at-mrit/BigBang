@@ -1,5 +1,6 @@
 ﻿#include "geometry.hpp"
 #include "gradient.hpp"
+#include "colorspace.hpp"
 #include "snip/funnellet.hpp"
 
 using namespace WarGrey::SCADA;
@@ -8,9 +9,10 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Color color = Colors::Green;
-static Color topface_colors[] = { color, color, Colors::LightGray, color };
-static Color body_colors[] = { color, Colors::LightGray, color };
+static Color main_color = hsla(120.0, 0.7, 0.3);
+static Color highlight_color = hsla(120.0, 0.7, 0.84);
+static Color topface_colors[] = { main_color, main_color, highlight_color, main_color };
+static Color body_colors[] = { main_color, highlight_color, main_color };
 
 static Platform::Array<CanvasGradientStop>^ topface_stops = nullptr;
 static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;
