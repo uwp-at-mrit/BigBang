@@ -5,9 +5,10 @@
 namespace WarGrey::SCADA {
     private class Funnellet : public WarGrey::SCADA::Snip {
     public:
-        Funnellet(float width, float height);
+        Funnellet(float width, float height, double color = 120.0, double saturation = 1.0);
 
     public:
+        void load() override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr,
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
@@ -16,5 +17,15 @@ namespace WarGrey::SCADA {
     private:
         float width;
         float height;
+
+    private:
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ topface;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+
+        Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ topface_brush;
+        Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_brush;
+
+        double color;
+        double saturation;
     };
 }

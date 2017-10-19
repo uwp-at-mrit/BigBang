@@ -46,6 +46,10 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
     Windows::Foundation::Numerics::float3x2 transform);
 
 /*************************************************************************************************/
+Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ geometry_freeze(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry);
+
+/*************************************************************************************************/
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(float x, float y, float length, float thickness = 1.0F);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(float x, float y, float length, float thickness = 1.0F);

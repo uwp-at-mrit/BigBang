@@ -1,3 +1,5 @@
+#include <WindowsNumerics.h>
+
 #include "gradient.hpp"
 
 using namespace Windows::UI;
@@ -9,8 +11,8 @@ using namespace Windows::Foundation::Numerics;
 
 static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
 
-Platform::Array<CanvasGradientStop>^ make_gradient_stops(Color colors[], int total) {
-    Platform::Array<CanvasGradientStop>^ stopa = nullptr;
+GradientStops^ make_gradient_stops(Color colors[], int total) {
+    GradientStops^ stopa = nullptr;
     CanvasGradientStop* stops = new CanvasGradientStop[total];
     auto flstep = 1.0F / float(total - 1);
 
@@ -24,13 +26,21 @@ Platform::Array<CanvasGradientStop>^ make_gradient_stops(Color colors[], int tot
     return stopa;
 }
 
+void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, float x, float y) {
+    brush->Transform = make_float3x2_translation(float2(x, y));
+}
+
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey
-    , Platform::Array<CanvasGradientStop>^ stops
-    , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
+    , GradientStops^ stops, CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
     auto brush = ref new CanvasLinearGradientBrush(shared_ds, stops, edge, alpha);
 
     brush->StartPoint = float2(sx, sy);
     brush->EndPoint = float2(ex, ey);
 
     return brush;
+}
+
+CanvasLinearGradientBrush^ make_linear_gradient_brush(float hextent, float vextent, GradientStops^ stops
+    , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
+    return make_linear_gradient_brush(0.0F, 0.0F, hextent, vextent, stops, edge, alpha);
 }

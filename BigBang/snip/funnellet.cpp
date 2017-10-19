@@ -9,23 +9,31 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Color main_color = hsla(120.0, 0.7, 0.3);
-static Color highlight_color = hsla(120.0, 0.7, 0.84);
-static Color topface_colors[] = { main_color, main_color, highlight_color, main_color };
-static Color body_colors[] = { main_color, highlight_color, main_color };
-
-static Platform::Array<CanvasGradientStop>^ topface_stops = nullptr;
-static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;
-
-/*************************************************************************************************/
-Funnellet::Funnellet(float width, float height) {
+Funnellet::Funnellet(float width, float height, double color, double saturation) {
     this->width = width;
     this->height = height;
 
-    if (body_stops == nullptr) {
-        topface_stops = MAKE_GRADIENT_STOPS(topface_colors);
-        body_stops = MAKE_GRADIENT_STOPS(body_colors);
-    }
+    this->color = color;
+    this->saturation = saturation;
+}
+
+void Funnellet::load() {
+    Color color = hsla(this->color, this->saturation, 0.30);
+    Color highlight_color = hsla(this->color, this->saturation, 0.84);
+
+    Color topface_colors[] = { color, color, highlight_color, color };
+    Color body_colors[] = { color, highlight_color, color };
+
+    auto radiusT = this->width / 2.0F;
+    auto radiusB = this->width / 8.0F;
+    auto radiusY = this->width / 64.0F;
+    auto body_height = this->height - radiusY * 3.0F;
+
+    this->body = geometry_freeze(pyramid_surface(0.0F, 0.0F, radiusT, radiusB, radiusY, body_height));
+    this->body_brush = make_linear_gradient_brush(this->width, 0.0F, MAKE_GRADIENT_STOPS(body_colors));
+    
+    this->topface = geometry_freeze(ellipse(radiusT, radiusY, radiusT, radiusY));
+    this->topface_brush = make_linear_gradient_brush(this->width, 0.0F, MAKE_GRADIENT_STOPS(topface_colors));
 }
 
 void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
@@ -35,16 +43,10 @@ void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, floa
 }
 
 void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto radiusT = this->width / 2.0F;
-    auto radiusB = this->width / 8.0F;
-    auto radiusY = this->width / 64.0F;
-    auto body_height = this->height - radiusY * 3.0F;
-
-    auto body_path = pyramid_surface(x, y, radiusT, radiusB, radiusY, body_height);
-    auto body_brush = make_linear_gradient_brush(x, y, x + this->width, y, body_stops);
-    ds->FillGeometry(body_path, body_brush);
+    brush_translate(this->topface_brush, x, y);
+    brush_translate(this->body_brush, x, y);
 
     // drawing top face after drawing body makes the edge more smoothing.
-    auto topface_brush = make_linear_gradient_brush(x, y, x + this->width, y, topface_stops);
-    ds->FillEllipse(x + radiusT, y + radiusY, radiusT, radiusY, topface_brush);
+    ds->DrawCachedGeometry(this->body, x, y, this->body_brush);
+    ds->DrawCachedGeometry(this->topface, x, y, this->topface_brush);
 }

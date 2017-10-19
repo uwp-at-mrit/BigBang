@@ -61,6 +61,11 @@ CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t)
 }
 
 /*************************************************************************************************/
+CanvasCachedGeometry^ geometry_freeze(CanvasGeometry^ geometry) {
+    return CanvasCachedGeometry::CreateFill(geometry);
+}
+
+/*************************************************************************************************/
 CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
 }

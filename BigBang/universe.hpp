@@ -47,6 +47,7 @@ namespace WarGrey::SCADA {
         virtual ~Universe() noexcept;
 
     public:
+        void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height);
         void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 

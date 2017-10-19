@@ -428,6 +428,17 @@ void Universe::set_decorator(IUniverseDecorator* decorator) {
 }
 
 /*************************************************************************************************/
+void Universe::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {
+    if (this->head_snip != nullptr) {
+        Snip* child = this->head_snip;
+
+        do {
+            child->load();
+            child = child->next;
+        } while (child != this->head_snip);
+    }
+}
+
 void Universe::update(long long count, long long interval, long long uptime, bool is_slow) {
     if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
