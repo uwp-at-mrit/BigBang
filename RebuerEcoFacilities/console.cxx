@@ -2,7 +2,6 @@
 #include <algorithm>
 
 #include "rsyslog.hpp"
-#include "tongue.hpp"
 #include "console.hxx"
 #include "universe.hpp"
 #include "snip/textlet.hpp"
@@ -31,24 +30,26 @@ using namespace Microsoft::Graphics::Canvas::UI;
 
 class BigBang : public WarGrey::SCADA::Universe {
 public:
-    BigBang(Panel^ parent) : Universe(parent, 8) {}
+    BigBang(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
+        this->caption = caption;
+    }
 
 public:
     void load(CanvasCreateResourcesEventArgs^ args, float width, float height) override {
-        this->statusbar = new Statuslet(speak("RRB1"));
+        this->statusbar = new Statuslet(this->caption);
         this->icons[0] = new StorageTanklet(80.0F, 128.0F);
         this->icons[1] = new Funnellet(64.0F, 64.0F, 32.0, 1.0, 0.4, 0.8);
         this->icons[2] = new Funnellet(32.0F, 32.0F, 120.0, 0.7, 0.3, 0.84);
         this->funnel_motor = new Motorlet(32.0F);
-        this->vibrator = new Vibratorlet(32.0F);
+        this->vibrator = new Vibratorlet(96.0F);
 
         this->insert(this->statusbar);
         this->insert(this->vibrator);
 
-        this->gauges[0] = new Gaugelet(speak("mastermotor"), 100, 100);
-        this->gauges[1] = new Gaugelet(speak("feedingmotor"), 200, 100);
-        this->gauges[2] = new Gaugelet(speak("cleanmotor"), 10, 20);
-        this->gauges[3] = new Gaugelet(speak("slavemotor"), 200, 100);
+        this->gauges[0] = new Gaugelet("mastermotor", 100, 100);
+        this->gauges[1] = new Gaugelet("feedingmotor", 200, 100);
+        this->gauges[2] = new Gaugelet("cleanmotor", 10, 20);
+        this->gauges[3] = new Gaugelet("slavemotor", 200, 100);
 
         for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
             this->insert(this->icons[i]);
@@ -114,6 +115,9 @@ private: // never deletes these snips mannually
     Motorlet* funnel_motor;
     Snip* icons[3];
     Gaugelet* gauges[4];
+
+private:
+    Platform::String^ caption;
 };
 
 Console::Console() : StackPanel() {
@@ -130,7 +134,7 @@ Console::~Console() {
 
 void Console::initialize_component(Size region) {
     if (this->universe == nullptr) {
-        this->universe = new BigBang(this);
+        this->universe = new BigBang(this, "RRB1");
     }
 
     this->reflow(region.Width, region.Height);

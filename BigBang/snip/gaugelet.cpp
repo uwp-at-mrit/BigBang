@@ -43,11 +43,13 @@ static CanvasCachedGeometry^ meter_mark(CanvasTextFormat^ font, int mscale, int 
 }
 
 
-Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step) {
-    this->caption = caption;
+Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step, Color acolor, Color rcolor) {
+    this->caption = speak(caption);
     this->Ampere = maxA;
     this->RPM = maxn;
     this->step = step;
+    this->Acolor = acolor;
+    this->Rcolor = rcolor;
 
     this->label_font = make_text_format(12.0F);
 }
@@ -108,14 +110,14 @@ void Gaugelet::fill_extent(float x, float y, float* w, float* h, float* b, float
 }
 
 void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto meters_width = this->meter_width * 2.0F + this->meter_gapsize;
-    auto xA = x + (this->width - meters_width) * 0.5F;
-    auto xR = xA + this->meter_width + this->meter_gapsize;
-    auto meter_y = y + this->label_height;
+    float meters_width = this->meter_width * 2.0F + this->meter_gapsize;
+    float xA = x + (this->width - meters_width) * 0.5F;
+    float xR = xA + this->meter_width + this->meter_gapsize;
+    float meter_y = y + this->label_height;
     
     ds->DrawText(this->caption, x + (this->width - this->caption_width) * 0.5F, y, Colors::Khaki, this->label_font);
-    this->draw_meter(ds, xA, meter_y, this->ampere_scales, this->Ampere, this->ampere, "ampere", Colors::RoyalBlue);
-    this->draw_meter(ds, xR, meter_y, this->rpm_scales, this->RPM, float(this->rpm), "rpm", Colors::Green);
+    this->draw_meter(ds, xA, meter_y, this->ampere_scales, this->Ampere, this->ampere, "ampere", this->Acolor);
+    this->draw_meter(ds, xR, meter_y, this->rpm_scales, this->RPM, float(this->rpm), "rpm", this->Rcolor);
 }
 
 void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y
@@ -146,9 +148,9 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y
         auto scale_layout = make_text_layout(scale.ToString(), this->label_font);
         auto label_layout = make_text_layout(speak(label), this->label_font);
 
-        auto scale_x = body_x - scale_layout->LayoutBounds.Width / 2.0F;
-        auto scale_y = y + this->height - (this->label_height * 3.0F);
-        auto label_x = body_x - label_layout->LayoutBounds.Width / 2.0F;
+        float label_x = body_x - label_layout->LayoutBounds.Width * 0.5F;
+        float scale_x = body_x - scale_layout->LayoutBounds.Width * 0.5F;
+        float scale_y = y + this->height - (this->label_height * 3.0F);
 
         ds->DrawTextLayout(scale_layout, scale_x, scale_y, Colors::Yellow);
         ds->DrawTextLayout(label_layout, label_x, scale_y + this->label_height, Colors::DarkKhaki);

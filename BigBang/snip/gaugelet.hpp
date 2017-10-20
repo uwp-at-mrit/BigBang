@@ -5,7 +5,9 @@
 namespace WarGrey::SCADA {
     private class Gaugelet : public WarGrey::SCADA::Snip {
     public:
-        Gaugelet(Platform::String^ caption, int ampere , int rpm, unsigned char step = 10);
+        Gaugelet(Platform::String^ caption, int ampere , int rpm, unsigned char step = 10,
+            Windows::UI::Color ampere_color = Windows::UI::Colors::RoyalBlue,
+            Windows::UI::Color rpm_color = Windows::UI::Colors::Green);
 
     public:
         void load() override;
@@ -28,6 +30,8 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ rpm_scales;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ scale_marks;
         Platform::String^ caption;
+        Windows::UI::Color Acolor;
+        Windows::UI::Color Rcolor;
         unsigned int Ampere;
         unsigned int RPM;
         unsigned char step;

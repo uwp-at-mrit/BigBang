@@ -158,9 +158,9 @@ void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
     auto ipv4 = ref new CanvasTextLayout(ds, statusbar->ipv4, this->label_font, 0.0f, 0.0f);
     auto width = Width / 7.0F;
 
-    ds->DrawText(this->caption,            x + width * 0.0F, y, Colors::Yellow, this->label_font);
+    ds->DrawText(speak(this->caption),     x + width * 0.0F, y, Colors::Yellow, this->label_font);
     ds->DrawText(statusbar->timestamp,     x + width * 1.0F, y, Colors::Yellow, this->label_font);
-    ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green, this->label_font);
+    ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green,  this->label_font);
     ds->DrawText(statusbar->wifi_strength, x + width * 3.0F, y, Colors::Yellow, this->label_font);
     ds->DrawText(statusbar->storage,       x + width * 5.0F, y, Colors::Yellow, this->label_font);
     ds->DrawTextLayout(ipv4, Width - ipv4->LayoutBounds.Width, y, Colors::White);
