@@ -19,10 +19,7 @@ static Color light_color = Colors::Silver;
 /*************************************************************************************************/
 Motorlet::Motorlet(float width) : Motorlet(width, width * 0.6F) { }
 
-Motorlet::Motorlet(float width, float height) {
-    this->width = width;
-    this->height = height;
-}
+Motorlet::Motorlet(float width, float height) : width(width), height(height) {}
 
 void Motorlet::load() {
     Color screw_colors[] = { Colors::White, Colors::Black };
@@ -31,21 +28,23 @@ void Motorlet::load() {
         light_color, light_color, light_color, dark_color
     };
 
+    auto screw_stops = MAKE_GRADIENT_STOPS(screw_colors);
     auto body_stops = MAKE_GRADIENT_STOPS(body_colors);
+
     float thread = std::fmax(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;
     float body_y = this->height - body_height;
+    float screw_x = this->width * 0.8F;
 
-    this->screw_x = this->width * 0.8F;
-    this->screw_brush = make_linear_gradient_brush(0.0F, 0.0F, thread, -thread, MAKE_GRADIENT_STOPS(screw_colors));
+    this->screw_brush = make_linear_gradient_brush(screw_x, screw_x, screw_x + thread, screw_x - thread, screw_stops);
 
-    { // body and components
+    { // body and parts
         float head_height = body_height * 0.8F;
         float head_width = this->width * 0.10F;
         float body_width = this->width * 0.54F;
         float tail_width = this->width * 0.16F;
-        float head_bar_x = this->screw_x - head_width;
-        float head_x = this->screw_x - head_width * 1.25F;
+        float head_bar_x = screw_x - head_width;
+        float head_x = screw_x - head_width * 1.25F;
         float head_y = body_y + (body_height - head_height) * 0.5F;
         float body_x = tail_width;
 
@@ -68,7 +67,7 @@ void Motorlet::load() {
             }
         }
 
-        { // body components
+        { // body parts
             float small_box_size = body_y * 4.0F;
             float small_box_x = body_x + body_y;
             float bar_x = small_box_x + small_box_size + body_y;
@@ -104,11 +103,11 @@ void Motorlet::load() {
                     this->lines = geometry_freeze(geometry_union(small_status, hollow_lines));
                 }
 
-                { // body components
+                { // body parts
                     auto outline = geometry_union(bar, background);
 
-                    this->components_outline = geometry_draft(outline);
-                    this->components = geometry_freeze(outline);
+                    this->outline = geometry_draft(outline);
+                    this->parts = geometry_freeze(outline);
                     this->status = geometry_freeze(status);
                 }
             }
@@ -135,10 +134,11 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     
     { // draw screw
         float head_height = this->head_brush->EndPoint.y - this->head_brush->StartPoint.y;
+        float screw_x = x + this->screw_brush->StartPoint.x;
         float screw_y = body_y + body_height * 0.5F;
         float thickness = this->height / 7.5F;
 
-        ds->DrawLine(x + this->screw_x, screw_y, x + this->width, screw_y, this->screw_brush, thickness);
+        ds->DrawLine(screw_x, screw_y, x + this->width, screw_y, this->screw_brush, thickness);
     }
 
     { // draw body
@@ -154,9 +154,9 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         ds->DrawLine(head_x, body_y, head_x, body_y + body_height, Colors::DimGray);
     }
 
-    { // draw body components
-        ds->DrawCachedGeometry(this->components, x, y, light_color);
-        ds->DrawCachedGeometry(this->components_outline, x, y, dark_color);
+    { // draw body parts
+        ds->DrawCachedGeometry(this->parts, x, y, light_color);
+        ds->DrawCachedGeometry(this->outline, x, y, dark_color);
         ds->DrawCachedGeometry(this->status, x, y, Colors::Green);
     }
 }
