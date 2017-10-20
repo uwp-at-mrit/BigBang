@@ -17,8 +17,21 @@ namespace WarGrey::SCADA {
             override;
 
     private:
+        void initialize_hat();
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hat_decorator_sides;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hat_frontend_midbg;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hat_frontend_midfg;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hat_bottom;
+        Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hat;
+        Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hat_brush;
+        float hat_adjust_yoff;
+
+    private:
+        void initialize_rings();
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ rings;
+        Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
         Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_brush;
+        float ring_interval;
 
     private:
         float width;

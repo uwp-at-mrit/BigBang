@@ -92,6 +92,10 @@ CanvasGeometry^ hline(float x, float y, float l, float th) {
     return geometry_stroke(CanvasGeometry::CreatePath(line), th);
 }
 
+CanvasGeometry^ hline(float l, float th) {
+    return hline(0.0F, 0.0F, l, th);
+}
+
 CanvasGeometry^ vline(float x, float y, float l, float th) {
     auto line = ref new CanvasPathBuilder(shared_ds);
 
@@ -100,6 +104,10 @@ CanvasGeometry^ vline(float x, float y, float l, float th) {
     line->EndFigure(CanvasFigureLoop::Open);
 
     return geometry_stroke(CanvasGeometry::CreatePath(line), th);
+}
+
+CanvasGeometry^ vline(float l, float th) {
+    return vline(0.0F, 0.0F, l, th);
 }
 
 CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
@@ -124,6 +132,10 @@ CanvasGeometry^ rectangle(float x, float y, float w, float h) {
     return CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h));
 }
 
+CanvasGeometry^ rectangle(float w, float h) {
+    return rectangle(0.0F, 0.0F, w, h);
+}
+
 CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
     float radius_x = (rx < 0.0F) ? (w * std::abs(rx)) : rx;
     float radius_y = (ry < 0.0F) ? (h * std::abs(ry)) : ry;
@@ -131,12 +143,24 @@ CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, 
     return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
 }
 
+CanvasGeometry^ rounded_rectangle(float w, float h, float rx, float ry) {
+    return rounded_rectangle(0.0F, 0.0F, w, h, rx, ry);
+}
+
 CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {
-    return rotate_rectangle(x, y, w, h, d, x + w / 2.0F, y + h / 2.0F);
+    return rotate_rectangle(x, y, w, h, d, x + w * 0.5F, y + h * 0.5F);
+}
+
+CanvasGeometry^ rotate_rectangle(float w, float h, double d) {
+    return rotate_rectangle(0.0F, 0.0F, w, h, d, w * 0.5F, h * 0.5F);
 }
 
 CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
     return geometry_rotate(rectangle(x, y, w, h), d, cx, cy);
+}
+
+CanvasGeometry^ rotate_rectangle(float w, float h, double d, float cx, float cy) {
+    return rotate_rectangle(0.0F, 0.0F, w, h, d, cx, cy);
 }
 
 /*************************************************************************************************/
