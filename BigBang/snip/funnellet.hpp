@@ -5,7 +5,9 @@
 namespace WarGrey::SCADA {
     private class Funnellet : public WarGrey::SCADA::Snip {
     public:
-        Funnellet(float width, float height, double color = 120.0, double saturation = 1.0);
+        Funnellet(float width, float height,
+            double color = 120.0, double saturation = 1.0,
+            double dark_lightness = 4.0, double light_lightness = 0.8);
 
     public:
         void load() override;
@@ -25,7 +27,7 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ topface_brush;
         Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_brush;
 
-        double color;
-        double saturation;
+        Windows::UI::Color color;
+        Windows::UI::Color highlight_color;
     };
 }

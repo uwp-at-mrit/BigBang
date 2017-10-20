@@ -2,9 +2,9 @@
 #include <WindowsNumerics.h>
 
 #include "geometry.hpp"
-#include "rsyslog.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::Foundation;
@@ -28,20 +28,20 @@ CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness) {
     return g->Stroke(thickness);
 }
 
-CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2) {
-    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Exclude);
+CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Exclude);
 }
 
-CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2) {
-    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Intersect);
+CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Intersect);
 }
 
-CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2) {
-    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Union);
+CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Union);
 }
 
-CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2) {
-    return g1->CombineWith(g2, float3x2::identity(), CanvasGeometryCombine::Xor);
+CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Xor);
 }
 
 CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
@@ -68,6 +68,18 @@ CanvasCachedGeometry^ geometry_freeze(CanvasGeometry^ geometry) {
 /*************************************************************************************************/
 CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
+}
+
+CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
+    float x = tl->LayoutBounds.X;
+    float y = tl->LayoutBounds.Y;
+    auto layout = CanvasGeometry::CreateText(tl);
+    
+    if ((x >= 0.0F) && (y >= 0.0F)) {
+        return layout;
+    } else {
+        return geometry_union(blank(), layout, make_float3x2_translation(float2(-x, -y)));
+    }
 }
 
 CanvasGeometry^ hline(float x, float y, float l, float th) {
@@ -154,4 +166,12 @@ CanvasGeometry^ pyramid_surface(float x, float y, float rt, float rb, float ry, 
     surface->EndFigure(CanvasFigureLoop::Closed);
 
     return CanvasGeometry::CreatePath(surface);
+}
+
+CanvasGeometry^ cylinder_surface(float rx, float ry, float height) {
+    return cylinder_surface(0.0F, 0.0F, rx, ry, height);
+}
+
+CanvasGeometry^ pyramid_surface(float rt, float rb, float ry, float height) {
+    return pyramid_surface(0.0F, 0.0F, rt, rb, ry, height);
 }

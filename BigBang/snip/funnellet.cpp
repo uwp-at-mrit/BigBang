@@ -9,27 +9,24 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-Funnellet::Funnellet(float width, float height, double color, double saturation) {
+Funnellet::Funnellet(float width, float height, double color, double saturation, double dark, double light) {
     this->width = width;
     this->height = height;
 
-    this->color = color;
-    this->saturation = saturation;
+    this->color = hsla(color, saturation, dark);
+    this->highlight_color = hsla(color, saturation, light);
 }
 
 void Funnellet::load() {
-    Color color = hsla(this->color, this->saturation, 0.30);
-    Color highlight_color = hsla(this->color, this->saturation, 0.84);
-
-    Color topface_colors[] = { color, color, highlight_color, color };
-    Color body_colors[] = { color, highlight_color, color };
+    Color topface_colors[] = { this->color, this->color, this->highlight_color, this->color };
+    Color body_colors[] = { this->color, this->highlight_color, this->color };
 
     auto radiusT = this->width / 2.0F;
     auto radiusB = this->width / 8.0F;
     auto radiusY = this->width / 64.0F;
     auto body_height = this->height - radiusY * 3.0F;
 
-    this->body = geometry_freeze(pyramid_surface(0.0F, 0.0F, radiusT, radiusB, radiusY, body_height));
+    this->body = geometry_freeze(pyramid_surface(radiusT, radiusB, radiusY, body_height));
     this->body_brush = make_linear_gradient_brush(this->width, 0.0F, MAKE_GRADIENT_STOPS(body_colors));
     
     this->topface = geometry_freeze(ellipse(radiusT, radiusY, radiusT, radiusY));

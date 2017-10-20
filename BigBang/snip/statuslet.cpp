@@ -132,10 +132,7 @@ void Statuslet::load() {
     if (statusbar == nullptr) {
         TextExtent ts = get_text_extent(speak("plclabel"), label_font);
         status_height = ts.height;
-
-        // TODO: Win2D eats suffix spaces.
-        TextExtent sp = get_text_extent("o", label_font);
-        status_prefix_width = ts.width + sp.width;
+        status_prefix_width = ts.width;
 
         statusbar = ref new Status(this);
     }

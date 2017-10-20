@@ -5,16 +5,26 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-static CanvasDrawingSession^ shared_ds;
+static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
 
-CanvasDrawingSession^ make_shared_drawing_session() {
-    if (shared_ds == nullptr) {
-        auto sharedDevice = CanvasDevice::GetSharedDevice();
-        auto target = ref new CanvasRenderTarget(sharedDevice, 1.0F, 1.0F, 96.0F);
-        shared_ds = target->CreateDrawingSession();
+CanvasTextLayout^ make_text_layout(Platform::String^ para, CanvasTextFormat^ font) {
+    return ref new CanvasTextLayout(shared_ds, para, font, 0.0F, 0.0F);
+}
+
+CanvasTextLayout^ make_vertical_layout(Platform::String^ para, CanvasTextFormat^ font, float spacing, CanvasHorizontalAlignment align) {
+    auto layout = make_text_layout(para, font);
+
+    layout->WordWrapping = CanvasWordWrapping::WholeWord;
+    layout->HorizontalAlignment = align;
+
+    if (spacing > 0.0F) {
+        layout->LineSpacing = spacing;
+    } else if (spacing < 0.0F) {
+        layout->LineSpacing = -spacing;
+        layout->LineSpacingMode = CanvasLineSpacingMode::Proportional;
     }
 
-    return shared_ds;
+    return layout;
 }
 
 CanvasTextFormat^ make_text_format(float size) {
@@ -26,13 +36,13 @@ CanvasTextFormat^ make_text_format(float size) {
     return font_config;
 }
 
-TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ label_font) {
-    return get_text_extent(make_shared_drawing_session(), message, label_font);
+TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ font, bool trim) {
+    return get_text_extent(shared_ds, message, font, trim);
 }
 
-TextExtent get_text_extent(CanvasDrawingSession^ ds, Platform::String^ message, CanvasTextFormat^ label_font) {
-    auto layout = ref new CanvasTextLayout(ds, message, label_font, 0.0F, 0.0F);
-    Rect logical = layout->LayoutBounds;
+TextExtent get_text_extent(ICanvasResourceCreator^ ds, Platform::String^ message, CanvasTextFormat^ font, bool trim) {
+    auto layout = ref new CanvasTextLayout(ds, message, font, 0.0F, 0.0F);
+    Rect logical = trim ? layout->LayoutBounds : layout->LayoutBoundsIncludingTrailingWhitespace;
     Rect ink = layout->DrawBounds;
     float top = ink.Y - logical.Y;
     float bottom = logical.Height - ink.Height - top;
