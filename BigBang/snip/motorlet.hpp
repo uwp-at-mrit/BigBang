@@ -22,5 +22,14 @@ namespace WarGrey::SCADA {
 
     private:
         Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ screw_brush;
+        Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ head_brush;
+        Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ body_brush;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ lines;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ components_outline;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ components;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ status;
+        float screw_x;
     };
 }

@@ -53,6 +53,10 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
 Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ geometry_freeze(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ geometry_draft(
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry,
+    float linewidth = 1.0F);
+
 /*************************************************************************************************/
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl);
@@ -72,8 +76,6 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
     float sx, float sy, float ex, float ey, float radiusX, float radiusY,
     float thickness = 1.0F);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rounded_rectangle(
-    float width, float height, float radiusX = -0.25F, float radiusY = -0.25F);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rounded_rectangle(
     float x, float y, float width, float height, float radiusX = -0.25F, float radiusY = -0.25F);
 

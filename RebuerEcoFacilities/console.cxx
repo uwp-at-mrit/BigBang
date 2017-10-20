@@ -41,10 +41,12 @@ public:
         this->icons[1] = new Funnellet(64.0F, 64.0F, 32.0, 1.0, 0.4, 0.8);
         this->icons[2] = new Funnellet(32.0F, 32.0F, 120.0, 0.7, 0.3, 0.84);
         this->funnel_motor = new Motorlet(32.0F);
+        this->motor = new Motorlet(169.0F);
         this->vibrator = new Vibratorlet(96.0F);
 
         this->insert(this->statusbar);
         this->insert(this->vibrator);
+        this->insert(this->motor);
 
         this->gauges[0] = new Gaugelet("mastermotor", 100, 100);
         this->gauges[1] = new Gaugelet("feedingmotor", 200, 100);
@@ -63,12 +65,14 @@ public:
     };
 
     void reflow(float width, float height) override {
-        float snip_wdith, snip_height;
+        float snip_width, snip_height;
         float console_y;
 
         this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
-        this->vibrator->fill_extent(0.0F, 0.0F, &snip_wdith, &snip_height);
-        this->move_to(this->vibrator, (width - snip_wdith) * 0.5F, (height - snip_height) * 0.5F);
+        this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
+        this->move_to(this->vibrator, (width - snip_width) * 0.5F, (height - snip_height) * 0.5F);
+        this->motor->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
+        this->move_to(this->motor, width * 0.2F, (height - snip_height) * 0.5F);
 
         { // flow icons
             float icon_gapsize = 64.0F;
@@ -83,9 +87,9 @@ public:
             }
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
-                this->icons[i]->fill_extent(icon_x, icon_y, &snip_wdith, &snip_height);
+                this->icons[i]->fill_extent(icon_x, icon_y, &snip_width, &snip_height);
                 this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
-                icon_x += (snip_wdith + icon_gapsize);
+                icon_x += (snip_width + icon_gapsize);
             }
 
             { // flow associated motors
@@ -103,8 +107,8 @@ public:
             gauge_y = height - snip_height;
             for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
                 this->move_to(this->gauges[i], gauge_x, gauge_y);
-                this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_wdith);
-                gauge_x += (snip_wdith + gauge_gapsize);
+                this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
+                gauge_x += (snip_width + gauge_gapsize);
             }
         }
     }
@@ -113,6 +117,7 @@ private: // never deletes these snips mannually
     Statuslet* statusbar;
     Vibratorlet* vibrator;
     Motorlet* funnel_motor;
+    Motorlet* motor;
     Snip* icons[3];
     Gaugelet* gauges[4];
 

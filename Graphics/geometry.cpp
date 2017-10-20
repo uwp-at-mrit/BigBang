@@ -65,6 +65,10 @@ CanvasCachedGeometry^ geometry_freeze(CanvasGeometry^ geometry) {
     return CanvasCachedGeometry::CreateFill(geometry);
 }
 
+CanvasCachedGeometry^ geometry_draft(CanvasGeometry^ geometry, float linewidth) {
+    return CanvasCachedGeometry::CreateStroke(geometry, linewidth);
+}
+
 /*************************************************************************************************/
 CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
