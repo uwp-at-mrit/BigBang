@@ -131,7 +131,7 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         float head_height = this->head_brush->EndPoint.y - this->head_brush->StartPoint.y;
         float screw_x = x + this->screw_brush->StartPoint.x;
         float screw_y = body_y + body_height * 0.5F;
-        float thickness = this->height / 7.5F;
+        float thickness = this->height * 0.12F;
 
         ds->DrawLine(screw_x, screw_y, x + this->width, screw_y, this->screw_brush, thickness);
     }
