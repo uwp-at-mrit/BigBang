@@ -34,14 +34,34 @@ static void setup_gradient_stops() {
 
 /*************************************************************************************************/
 Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 2.0F) {}
-
-Vibratorlet::Vibratorlet(float width, float height) {
-    this->width = width;
-    this->height = height;
-}
+Vibratorlet::Vibratorlet(float width, float height) : width(width), height(height) {}
 
 void Vibratorlet::load() {
     setup_gradient_stops();
+
+    /*
+    { // draw body and rings
+        int defcount = 10;
+        int stepunit = 5;
+        int count = (body_height > float(stepunit * defcount)) ? defcount : int(std::floor(body_height / float(stepunit)));
+        float thickness = body_height / float(count * stepunit);
+        float rx = cx - x - thickness;
+        float ry = thickness / 2.0F;
+        float step = thickness * float(stepunit);
+        float yoff = body_y + step / (this->vibrated ? 4.0F : 2.0F);
+
+        auto body = rectangle(body_x, body_y, body_width, body_height);
+        auto ring_brush = make_linear_gradient_brush(x, body_y, x + this->width, body_y, ring_stops);
+        auto rings = blank();
+        for (int i = 0; i < count; i++) {
+            float cy = yoff + i * step;
+            rings = geometry_union(rings, long_arc(body_x + body_width, cy, body_x, cy, rx, ry, thickness));
+        }
+
+        ds->FillGeometry(body, body_color);
+        ds->FillGeometry(rings, ring_brush);
+    }
+    */
 }
 
 void Vibratorlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
@@ -83,7 +103,7 @@ void Vibratorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
             rings = geometry_union(rings, long_arc(body_x + body_width, cy, body_x, cy, rx, ry, thickness));
         }
 
-        ds->FillGeometry(geometry_substract(body, rings), body_color);
+        ds->FillGeometry(body, body_color);
         ds->FillGeometry(rings, ring_brush);
     }
 

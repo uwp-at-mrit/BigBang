@@ -68,7 +68,7 @@ public:
 
         this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
         this->vibrator->fill_extent(0.0F, 0.0F, &snip_wdith, &snip_height);
-        this->move_to(this->vibrator, (width - snip_wdith) / 2.0F, (height - snip_height) / 2.0F);
+        this->move_to(this->vibrator, (width - snip_wdith) * 0.5F, (height - snip_height) * 0.5F);
 
         { // flow icons
             float icon_gapsize = 64.0F;
@@ -84,7 +84,7 @@ public:
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, &snip_wdith, &snip_height);
-                this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) / 2.0F);
+                this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
                 icon_x += (snip_wdith + icon_gapsize);
             }
 

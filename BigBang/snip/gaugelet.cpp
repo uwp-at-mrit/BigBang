@@ -13,36 +13,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasCachedGeometry^ meter_mark(CanvasTextFormat^ font, int mscale, int step) {
-    TextExtent l00 = get_text_extent("100", font);
-    float mark_width = l00.width / 3.0F;
-    float mark_interval = l00.height * 0.7F;
-    float body_x = l00.width + mark_width * 2.0F;
-    float body_y = l00.height * 0.5F;
-    float long_x = body_x - mark_width;
-    float short_x = body_x - mark_width * 0.618F;
-    int delta = mscale / step;
-
-    Platform::String^ scale_texts = "";
-    auto marks = blank();
-    for (char i = 0; i <= step; i++) {
-        auto ythis = body_y + mark_interval * i;
-
-        if (i % 2 == 0) {
-            marks = geometry_union(marks, hline(long_x, ythis, body_x - long_x));
-            scale_texts = scale_texts + " " + (mscale - delta * i).ToString();
-        } else {
-            marks = geometry_union(marks, hline(short_x, ythis, body_x - short_x));
-        }
-    }
-
-    auto layout = make_vertical_layout(scale_texts, font, mark_interval * 2.0F, CanvasHorizontalAlignment::Right);
-    auto scale_mark = geometry_union(marks, paragraph(layout), l00.width - layout->LayoutBounds.Width, -mark_interval);
-
-    return geometry_freeze(scale_mark);
-}
-
-
 Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step, Color acolor, Color rcolor) {
     this->caption = speak(caption);
     this->Ampere = maxA;

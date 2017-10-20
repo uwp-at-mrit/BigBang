@@ -17,6 +17,10 @@ namespace WarGrey::SCADA {
             override;
 
     private:
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ rings;
+        Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_brush;
+
+    private:
         float width;
         float height;
 
