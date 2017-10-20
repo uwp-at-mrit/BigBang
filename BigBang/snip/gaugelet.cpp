@@ -8,10 +8,8 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
-using namespace Microsoft::Graphics::Canvas::Geometry;
 
 Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step, Color acolor, Color rcolor) {
     this->caption = speak(caption);

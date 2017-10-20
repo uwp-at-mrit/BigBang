@@ -1,6 +1,5 @@
 ﻿#include <algorithm>
 
-#include "rsyslog.hpp"
 #include "geometry.hpp"
 #include "gradient.hpp"
 #include "colorspace.hpp"
@@ -10,9 +9,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Windows::Foundation;
-
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static Color body_color = rgba(0x323232);
 static Color hat_color = Colors::DodgerBlue;

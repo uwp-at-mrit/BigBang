@@ -1,5 +1,4 @@
 ﻿#include <algorithm>
-#include <WindowsNumerics.h>
 
 #include "geometry.hpp"
 #include "gradient.hpp"
@@ -8,17 +7,13 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-using namespace Windows::Foundation::Numerics;
-
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static Color dark_color = Colors::Gray;
 static Color light_color = Colors::Silver;
 
 /*************************************************************************************************/
-Motorlet::Motorlet(float width) : Motorlet(width, width * 0.6F) { }
-
+Motorlet::Motorlet(float width) : Motorlet(width, width * 0.6F) {}
 Motorlet::Motorlet(float width, float height) : width(width), height(height) {}
 
 void Motorlet::load() {

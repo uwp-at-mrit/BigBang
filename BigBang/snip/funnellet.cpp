@@ -7,7 +7,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Brushes;
 
 Funnellet::Funnellet(float width, float height, double color, double saturation, double dark, double light) {
     this->width = width;
