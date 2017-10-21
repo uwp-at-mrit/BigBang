@@ -24,8 +24,8 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy)
     return g->Transform(make_float3x2_rotation(float(d * M_PI / 180.0), float2(cx, cy)));
 }
 
-CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness) {
-    return g->Stroke(thickness);
+CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStrokeStyle^ style) {
+    return (style == nullptr) ? g->Stroke(thickness) : g->Stroke(thickness, style);
 }
 
 CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
@@ -86,32 +86,32 @@ CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
     }
 }
 
-CanvasGeometry^ hline(float x, float y, float l, float th) {
+CanvasGeometry^ hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
     auto line = ref new CanvasPathBuilder(shared_ds);
 
     line->BeginFigure(x, y);
     line->AddLine(x + l, y);
     line->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_stroke(CanvasGeometry::CreatePath(line), th);
+    return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
 }
 
-CanvasGeometry^ hline(float l, float th) {
-    return hline(0.0F, 0.0F, l, th);
+CanvasGeometry^ hline(float l, float th, CanvasStrokeStyle^ style) {
+    return hline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ vline(float x, float y, float l, float th) {
+CanvasGeometry^ vline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
     auto line = ref new CanvasPathBuilder(shared_ds);
 
     line->BeginFigure(x, y);
     line->AddLine(x, y + l);
     line->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_stroke(CanvasGeometry::CreatePath(line), th);
+    return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
 }
 
-CanvasGeometry^ vline(float l, float th) {
-    return vline(0.0F, 0.0F, l, th);
+CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
+    return vline(0.0F, 0.0F, l, th, style);
 }
 
 CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {

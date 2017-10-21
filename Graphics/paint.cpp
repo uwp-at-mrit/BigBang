@@ -1,11 +1,12 @@
 #include <WindowsNumerics.h>
 
-#include "gradient.hpp"
+#include "paint.hpp"
 
 using namespace Windows::UI;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::Foundation::Numerics;
 
@@ -43,4 +44,21 @@ CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float 
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float hextent, float vextent, GradientStops^ stops
     , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
     return make_linear_gradient_brush(0.0F, 0.0F, hextent, vextent, stops, edge, alpha);
+}
+
+CanvasStrokeStyle^ make_dash_stroke(Platform::Array<float>^ dashes, float offset) {
+    auto dash = ref new CanvasStrokeStyle();
+
+    dash->DashOffset = offset;
+    dash->CustomDashStyle = dashes;
+
+    return dash;
+}
+
+CanvasStrokeStyle^ make_dash_stroke(CanvasDashStyle style, float offset) {
+    auto dash = ref new CanvasStrokeStyle();
+    dash->DashOffset = offset;
+    dash->DashStyle = style;
+
+    return dash;
 }

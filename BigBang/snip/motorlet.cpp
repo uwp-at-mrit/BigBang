@@ -1,7 +1,7 @@
 ﻿#include <algorithm>
 
 #include "geometry.hpp"
-#include "gradient.hpp"
+#include "paint.hpp"
 #include "snip/motorlet.hpp"
 
 using namespace WarGrey::SCADA;

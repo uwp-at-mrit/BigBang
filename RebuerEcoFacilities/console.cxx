@@ -85,7 +85,7 @@ public:
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
-                icon_hmax = std::max(snip_height, icon_hmax);
+                icon_hmax = max(snip_height, icon_hmax);
             }
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {

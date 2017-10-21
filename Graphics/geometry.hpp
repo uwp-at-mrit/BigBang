@@ -7,7 +7,8 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_rotate(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, double degrees, float cx, float cy);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_stroke(
-    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, float thickness);
+    Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, float thickness,
+    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_substract(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
@@ -61,10 +62,21 @@ Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ geometry_draft(
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(float length, float thickness = 1.0F);
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(float x, float y, float length, float thickness = 1.0F);
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(float length, float thickness = 1.0F);
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(float x, float y, float length, float thickness = 1.0F);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(
+    float length, float thickness = 1.0F,
+    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(
+    float x, float y, float length, float thickness = 1.0F,
+    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
+    float length, float thickness = 1.0F,
+    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
+    float x, float y, float length, float thickness = 1.0F,
+    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);

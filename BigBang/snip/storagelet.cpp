@@ -2,7 +2,7 @@
 
 #include "text.hpp"
 #include "tongue.hpp"
-#include "gradient.hpp"
+#include "paint.hpp"
 #include "geometry.hpp"
 #include "snip/storagelet.hpp"
 
