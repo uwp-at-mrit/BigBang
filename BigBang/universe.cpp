@@ -89,7 +89,7 @@ static inline SnipInfo* bind_snip_owership(Win2DControl^ master, Snip* snip, dou
     return info;
 }
 
-static inline void unsafe_move_snip_via_info(SnipInfo* info, float x, float y, bool absolute) {
+static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -99,8 +99,7 @@ static inline void unsafe_move_snip_via_info(SnipInfo* info, float x, float y, b
         info->x = x;
         info->y = y;
 
-        //info->master->size_cache_invalid();
-        //info->master->refresh();
+        master->size_cache_invalid();
     }
 }
 
@@ -173,7 +172,7 @@ void Universe::insert(Snip* snip, double degrees, float x, float y) {
         snip->next = this->head_snip;
 
         auto info = bind_snip_owership(this->master, snip, degrees);
-        unsafe_move_snip_via_info(info, x, y, true);
+        unsafe_move_snip_via_info(this, info, x, y, true);
         this->size_cache_invalid();
     }
 }
@@ -185,7 +184,7 @@ void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
             float xoff, yoff;
 
             snip_center_point_offset(snip, info, cp, xoff, yoff);
-            unsafe_move_snip_via_info(info, x - xoff, y - yoff, true);
+            unsafe_move_snip_via_info(this, info, x - xoff, y - yoff, true);
         }
     }
 }
@@ -194,7 +193,7 @@ void Universe::move(Snip* snip, float x, float y) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this->master) {
             SnipInfo* info = SNIP_INFO(snip);
-            unsafe_move_snip_via_info(info, x, y, false);
+            unsafe_move_snip_via_info(this, info, x, y, false);
         }
     } else if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
@@ -203,7 +202,7 @@ void Universe::move(Snip* snip, float x, float y) {
         do {
             SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
-                unsafe_move_snip_via_info(info, x, y, false);
+                unsafe_move_snip_via_info(this, info, x, y, false);
             }
             child = child->next;
         } while (child != this->head_snip);
@@ -475,7 +474,9 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 }
 
+                this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
                 child->draw(ds, info->x, info->y, width, height);
+                this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
 
                 delete layer; // Must Close the Layer Explicitly
                 ds->Transform = transform;

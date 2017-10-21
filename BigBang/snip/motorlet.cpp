@@ -9,12 +9,18 @@ using namespace WarGrey::SCADA;
 using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 
+static const float default_ratio = 0.6F;
 static Color dark_color = Colors::Gray;
 static Color light_color = Colors::Silver;
 
 /*************************************************************************************************/
-Motorlet::Motorlet(float width) : Motorlet(width, width * 0.6F) {}
-Motorlet::Motorlet(float width, float height) : width(width), height(height) {}
+Motorlet::Motorlet(float width, float height) : width(width), height(height) {
+    if (height == 0.0F) {
+        this->height = width * default_ratio;
+    } else if (height < 0.0F) {
+        this->height = -(width * height);
+    }
+}
 
 void Motorlet::load() {
     Color screw_colors[] = { Colors::White, Colors::Black };

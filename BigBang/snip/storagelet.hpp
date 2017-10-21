@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class StorageTanklet : public WarGrey::SCADA::Snip {
     public:
-        StorageTanklet(float width , float height);
+        StorageTanklet(float width , float height = 0.0F);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

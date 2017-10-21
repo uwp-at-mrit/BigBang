@@ -32,14 +32,16 @@ class BigBang : public WarGrey::SCADA::Universe {
 public:
     BigBang(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
         this->caption = caption;
+
+        this->set_decorator(new BorderDecorator(true, false, true));
     }
 
 public:
     void load(CanvasCreateResourcesEventArgs^ args, float width, float height) override {
         this->statusbar = new Statuslet(this->caption);
-        this->icons[0] = new StorageTanklet(80.0F, 128.0F);
-        this->icons[1] = new Funnellet(64.0F, 64.0F, 32.0, 1.0, 0.4, 0.8);
-        this->icons[2] = new Funnellet(32.0F, 32.0F, 120.0, 0.7, 0.3, 0.84);
+        this->icons[0] = new StorageTanklet(80.0F);
+        this->icons[1] = new Funnellet(64.0F, 0.0F, 32.0, 1.0, 0.4, 0.8);
+        this->icons[2] = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
         this->funnel_motor = new Motorlet(32.0F);
         this->motor = new Motorlet(169.0F);
         this->vibrator = new Vibratorlet(96.0F);

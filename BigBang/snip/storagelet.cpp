@@ -13,6 +13,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static const float default_ratio = 1.618F;
+
 static Color topface_colors[] = {
     Colors::Gold, Colors::Gold, Colors::Gold, Colors::Gold,
     Colors::Gold, Colors::LightGray, Colors::Gold, Colors::Gold
@@ -33,13 +35,14 @@ static Platform::Array<CanvasGradientStop>^ body_stops = nullptr;
 static Platform::Array<CanvasGradientStop>^ used_stops = nullptr;
 
 /*************************************************************************************************/
-StorageTanklet::StorageTanklet(float width, float height) {
-    this->width = width;
-    this->height = height;
+StorageTanklet::StorageTanklet(float width, float height) : width(width), height(height) {
+    if (height == 0.0F) {
+        this->height = width * default_ratio;
+    } else if (height < 0.0F) {
+        this->height = -(width * height);
+    }
 
-    this->label_font = make_text_format(12.0F);
-    this->label_font->WordWrapping = CanvasWordWrapping::WholeWord;
-    this->label_font->HorizontalAlignment = CanvasHorizontalAlignment::Center;
+    this->label_font = make_text_format(12.0F, CanvasWordWrapping::WholeWord, CanvasHorizontalAlignment::Center);
 
     if (body_stops == nullptr) {
         topface_stops = MAKE_GRADIENT_STOPS(topface_colors);

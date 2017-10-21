@@ -27,10 +27,11 @@ CanvasTextLayout^ make_vertical_layout(Platform::String^ para, CanvasTextFormat^
     return layout;
 }
 
-CanvasTextFormat^ make_text_format(float size) {
+CanvasTextFormat^ make_text_format(float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
     auto font_config = ref new CanvasTextFormat();
 
-    font_config->WordWrapping = CanvasWordWrapping::NoWrap;
+    font_config->WordWrapping = wrapping;
+    font_config->HorizontalAlignment = align;
     font_config->FontSize = size;
 
     return font_config;

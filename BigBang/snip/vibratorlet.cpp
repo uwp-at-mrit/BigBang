@@ -11,6 +11,8 @@ using namespace Windows::UI;
 using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 
+static const float default_ratio = 2.0F;
+
 static Color body_color = rgba(0x323232);
 static Color hat_color = Colors::DodgerBlue;
 static Color hat_decorator_color = Colors::DarkOrange;
@@ -18,8 +20,13 @@ static Color hat_decorator_mid_color = Colors::Orange;
 static Color hat_decorator_midbg_color = rgba(0xFFBE00);
 
 /*************************************************************************************************/
-Vibratorlet::Vibratorlet(float width) : Vibratorlet(width, width * 2.0F) {}
-Vibratorlet::Vibratorlet(float width, float height) : width(width), height(height) {}
+Vibratorlet::Vibratorlet(float width, float height) : width(width), height(height) {
+    if (height == 0.0F) {
+        this->height = width * default_ratio;
+    } else if (height < 0.0F) {
+        this->height = -(width * height);
+    }
+}
 
 void Vibratorlet::load() {
     this->initialize_hat();

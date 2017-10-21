@@ -19,7 +19,10 @@ Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ make_vertical_layout(
     float spacing,
     Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align);
 
-Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_text_format(float size = 12.0F);
+Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_text_format(
+    float size = 12.0F,
+    Microsoft::Graphics::Canvas::Text::CanvasWordWrapping wrapping = Microsoft::Graphics::Canvas::Text::CanvasWordWrapping::NoWrap,
+    Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align = Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment::Left);
 
 TextExtent get_text_extent(
     Platform::String^ message,

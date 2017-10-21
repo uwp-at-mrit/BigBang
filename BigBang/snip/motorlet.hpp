@@ -5,8 +5,7 @@
 namespace WarGrey::SCADA {
     private class Motorlet : public WarGrey::SCADA::Snip {
     public:
-        Motorlet(float width);
-        Motorlet(float width, float height);
+        Motorlet(float width, float height = 0.0F);
 
     public:
         void load() override;

@@ -5,8 +5,7 @@
 namespace WarGrey::SCADA {
     private class Vibratorlet : public WarGrey::SCADA::Snip {
     public:
-        Vibratorlet(float width);
-        Vibratorlet(float width, float height);
+        Vibratorlet(float width, float height = 0.0F);
 
     public:
         void load() override;
