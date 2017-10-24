@@ -1,9 +1,12 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <WindowsNumerics.h>
 #include <collection.h>
 #include <algorithm>
 
 #include "snip/snip.hpp"
+#include "snip/motorlet.hpp"
 
 namespace WarGrey::SCADA {
     private class Funnellet : public WarGrey::SCADA::Snip {

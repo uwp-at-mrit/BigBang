@@ -64,8 +64,8 @@ static inline void fill_snip_extent(Snip* snip, SnipInfo* info, float* x, float*
 
     if (info->rotation != 0.0F) {
         // TODO: the resulting rectangle is inaccurate especially for small snips.
-        auto cx = (*x) + (*width) / 2.0F;
-        auto cy = (*y) + (*height) / 2.0F;
+        auto cx = (*x) + (*width) * 0.5F;
+        auto cy = (*y) + (*height) * 0.5F;
         auto clip = rectangle((*x), (*y), (*width), (*height));
         auto enclosing = clip->ComputeBounds(make_float3x2_rotation(info->rotation, float2(cx, cy)));
 

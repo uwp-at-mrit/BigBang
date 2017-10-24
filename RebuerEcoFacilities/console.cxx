@@ -4,7 +4,7 @@
 #include "rsyslog.hpp"
 #include "console.hxx"
 #include "universe.hpp"
-#include "snip/textlet.hpp"
+#include "snip/pipelet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
 #include "snip/funnellet.hpp"
@@ -42,7 +42,7 @@ public:
         this->icons[0] = new StorageTanklet(80.0F);
         this->icons[1] = new Funnellet(64.0F, 0.0F, 32.0, 1.0, 0.4, 0.8);
         this->icons[2] = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
-        this->funnel_motor = new Motorlet(32.0F);
+        this->icons[3] = new HPipelet(108.0F, 32.0F, 120.0);
         this->motor = new Motorlet(169.0F);
         this->vibrator = new Vibratorlet(96.0F);
 
@@ -58,8 +58,6 @@ public:
         for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
             this->insert(this->icons[i]);
         }
-
-        this->insert(this->funnel_motor, -45.0);
 
         for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
             this->insert(this->gauges[i]);
@@ -81,7 +79,6 @@ public:
             float icon_hmax = 0.0F;
             float icon_x = 0.0F;
             float icon_y = console_y * 1.5F;
-            float snip_x, snip_y;
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
@@ -92,11 +89,6 @@ public:
                 this->icons[i]->fill_extent(icon_x, icon_y, &snip_width, &snip_height);
                 this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
                 icon_x += (snip_width + icon_gapsize);
-            }
-
-            { // flow associated motors
-                this->fill_snip_location(this->icons[1], &snip_x, &snip_y, SnipCenterPoint::CB);
-                this->move_to(this->funnel_motor, snip_x, snip_y, SnipCenterPoint::CC);
             }
         }
 
@@ -118,9 +110,8 @@ public:
 private: // never deletes these snips mannually
     Statuslet* statusbar;
     Vibratorlet* vibrator;
-    Motorlet* funnel_motor;
     Motorlet* motor;
-    Snip* icons[3];
+    Snip* icons[4];
     Gaugelet* gauges[4];
 
 private:

@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />

@@ -1,5 +1,8 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <WindowsNumerics.h>
+
 #include "control.hxx"
 #include "forward.hpp"
 
@@ -8,6 +11,8 @@
 #define SET_VALUES(var1, val1, var2, val2) SET_BOX(var1, val1); SET_BOX(var2, val2)
 
 namespace WarGrey::SCADA {
+    Windows::Foundation::Rect snip_enclosing_box(Snip* snip, float x, float y, Windows::Foundation::Numerics::float3x2 tf);
+
     private class ISnipInfo abstract {
     public:
         ISnipInfo(Win2DControl^ master) : master(master) {};

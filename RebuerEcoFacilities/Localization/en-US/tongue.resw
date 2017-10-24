@@ -151,7 +151,7 @@
     <value>Recycled Rubber B2</value>
   </data>
   <data name="cleanmotor" xml:space="preserve">
-    <value>Clean Motor</value>
+    <value>Glue Cleaning Motor</value>
   </data>
   <data name="feedingmotor" xml:space="preserve">
     <value>Feeding Motor</value>

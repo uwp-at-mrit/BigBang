@@ -16,8 +16,8 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d) {
     Rect region = g->ComputeBounds();
 
     return geometry_rotate(g, d,
-        region.X + region.Width / 2.0F,
-        region.Y + region.Height / 2.0F);
+        region.X + region.Width * 0.5F,
+        region.Y + region.Height * 0.5F);
 }
 
 CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy) {

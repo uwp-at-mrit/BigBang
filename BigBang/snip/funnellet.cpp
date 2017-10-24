@@ -1,4 +1,6 @@
-﻿#include <collection.h>
+﻿#define _USE_MATH_DEFINES
+#include <WindowsNumerics.h>
+#include <collection.h>
 
 #include "paint.hpp"
 #include "geometry.hpp"
@@ -9,6 +11,9 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Platform::Collections;
+
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
@@ -37,8 +42,8 @@ void Funnellet::load() {
     float radiusT = this->width * 0.500F;
     float radiusB = this->width * 0.125F;
     float radiusY = this->width * 0.020F;
-    float body_y = this->height * 0.500F;
-    float body_height = this->height - body_y - radiusY * 3.0F;
+    float body_y = this->height * 0.500F + radiusY;
+    float body_height = this->height - body_y - radiusY * 2.0F;
 
     this->body = geometry_freeze(pyramid_surface(radiusT, radiusB, radiusY, body_height));
     this->body_brush = make_linear_gradient_brush(0.0F, body_y, this->width, body_y, MAKE_GRADIENT_STOPS(body_colors));
