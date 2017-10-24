@@ -1,6 +1,4 @@
-﻿#define _USE_MATH_DEFINES
-#include <WindowsNumerics.h>
-#include <collection.h>
+﻿#include <collection.h>
 
 #include "paint.hpp"
 #include "geometry.hpp"
@@ -11,9 +9,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Platform::Collections;
-
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
