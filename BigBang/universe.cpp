@@ -7,7 +7,7 @@
 
 #include "rsyslog.hpp"
 #include "system.hpp"
-#include "geometry.hpp"
+#include "shape.hpp"
 #include "snip/snip.hpp"
 #include "decorator/decorator.hpp"
 

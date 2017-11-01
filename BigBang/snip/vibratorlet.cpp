@@ -1,7 +1,7 @@
 ﻿#include <algorithm>
 
 #include "paint.hpp"
-#include "geometry.hpp"
+#include "shape.hpp"
 #include "colorspace.hpp"
 #include "snip/vibratorlet.hpp"
 

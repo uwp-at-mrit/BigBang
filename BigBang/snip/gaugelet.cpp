@@ -2,7 +2,7 @@
 
 #include "text.hpp"
 #include "tongue.hpp"
-#include "geometry.hpp"
+#include "shape.hpp"
 #include "snip/gaugelet.hpp"
 
 using namespace WarGrey::SCADA;

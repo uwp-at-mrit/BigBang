@@ -18,12 +18,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)colorspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)paint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)shape.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)paint.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shape.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
   </ItemGroup>
 </Project>

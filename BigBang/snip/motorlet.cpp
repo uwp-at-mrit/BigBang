@@ -1,6 +1,6 @@
 ﻿#include <algorithm>
 
-#include "geometry.hpp"
+#include "shape.hpp"
 #include "paint.hpp"
 #include "snip/motorlet.hpp"
 

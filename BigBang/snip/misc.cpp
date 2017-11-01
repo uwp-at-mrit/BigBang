@@ -1,5 +1,5 @@
 #include "snip.hpp"
-#include "geometry.hpp"
+#include "shape.hpp"
 
 using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;

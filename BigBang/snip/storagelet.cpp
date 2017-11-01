@@ -3,7 +3,7 @@
 #include "text.hpp"
 #include "tongue.hpp"
 #include "paint.hpp"
-#include "geometry.hpp"
+#include "shape.hpp"
 #include "snip/storagelet.hpp"
 
 using namespace WarGrey::SCADA;
