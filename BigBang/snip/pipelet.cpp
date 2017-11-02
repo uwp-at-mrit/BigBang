@@ -53,32 +53,29 @@ void Screwlet::update(long long count, long long interval, long long uptime, boo
 
 void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float connector_height = this->connector_brush->EndPoint.y - this->connector_brush->StartPoint.y;
-    
-    { // draw body
-        float base_width = this->pipe_thickness * 1.618F;
-        float base_height = (base_width - this->pipe_thickness) * 0.5F;
-        float body_x = x + base_height;
-        float body_y = y + base_height;
-        float body_height = this->height - body_y + y;
-        float body_corner = base_height * 0.5F;
-        float base_x = body_x - base_height;
-        float base_y = y + this->height - base_height; 
+    float base_width = this->pipe_thickness * 1.618F;
+    float base_height = (base_width - this->pipe_thickness) * 0.5F;
+    float body_x = x + base_height;
+    float body_y = y + base_height;
+    float body_height = this->height - body_y + y;
+    float body_corner = base_height * 0.5F;
+    float base_x = body_x - base_height;
+    float base_y = y + this->height - base_height;
 
-        ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
-        ds->FillRectangle(base_x, base_y, base_width, base_height, this->color);
-        ds->DrawRectangle(base_x, base_y, base_width, base_height, Colors::Black);
+    ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
+    ds->FillRectangle(base_x, base_y, base_width, base_height, this->color);
+    ds->DrawRectangle(base_x, base_y, base_width, base_height, Colors::Black);
 
-        { // draw pipe
-            float pipe_x = body_x + this->pipe_thickness;
-            float pipe_y = y + connector_height * 0.5F;
-            float pipe_xoff = this->connector_width - this->connector_rx * 0.5F;
+    { // draw pipe
+        float pipe_x = body_x + this->pipe_thickness;
+        float pipe_y = y + connector_height * 0.5F;
+        float pipe_xoff = this->connector_width - this->connector_rx * 0.5F;
 
-            brush_translate(this->connector_brush, x, y);
-            brush_translate(this->pipe_brush, 0.0F, pipe_y - this->pipe_thickness * 0.5F);
-            ds->FillEllipse(pipe_x + pipe_xoff, pipe_y, this->connector_rx, pipe_y - y, this->color);
-            ds->DrawLine(pipe_x, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
-            ds->DrawCachedGeometry(this->connector, pipe_x - this->connector_rx, y, this->connector_brush);
-        }
+        brush_translate(this->connector_brush, x, y);
+        brush_translate(this->pipe_brush, 0.0F, pipe_y - this->pipe_thickness * 0.5F);
+        ds->FillEllipse(pipe_x + pipe_xoff, pipe_y, this->connector_rx, pipe_y - y, this->color);
+        ds->DrawLine(pipe_x, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
+        ds->DrawCachedGeometry(this->connector, pipe_x - this->connector_rx, y, this->connector_brush);
     }
 }
 
