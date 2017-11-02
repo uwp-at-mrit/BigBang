@@ -27,6 +27,10 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float c
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
+    float sx, float sy, float ex, float ey, float radiusX, float radiusY,
+    float thickness = 1.0F);
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
     float sx, float sy, float ex, float ey, float radiusX, float radiusY,
     float thickness = 1.0F);
@@ -44,11 +48,17 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rotate_rectangle(
     float x, float y, float width, float height, double degrees, float centerX, float centerY);
 
 /*************************************************************************************************/
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_surface(
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_tb_surface(
     float x, float y, float radiusX, float radiusY, float height);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_surface(
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_tb_surface(
     float radiusX, float radiusY, float height);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_rl_surface(
+    float x, float y, float radiusX, float radiusY, float width);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cylinder_rl_surface(
+    float radiusX, float radiusY, float width);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pyramid_surface(
     float x, float y, float radiusT, float radiusB, float radiusY, float height);

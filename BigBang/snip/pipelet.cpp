@@ -1,5 +1,4 @@
-﻿#include <cmath>
-
+﻿#include "rsyslog.hpp"
 #include "text.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
@@ -15,19 +14,31 @@ using namespace Windows::Foundation::Numerics;
 static const float default_ratio = 0.2F;
 
 /*************************************************************************************************/
-Screwlet::Screwlet(float width, float height, float thickness) : width(width), height(height), thickness(thickness) {
+Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double body, double light)
+    : width(width), height(height), pipe_thickness(thickness) {
     if (thickness == 0.0F) {
-        this->thickness = this->width * default_ratio;
+        this->pipe_thickness = this->width * default_ratio;
     } else if (thickness < 0.0F) {
-        this->thickness = -this->width * thickness;
+        this->pipe_thickness = -this->width * thickness;
     }
+
+    this->pipe_ascent = this->pipe_thickness * 0.5F;
+    this->connector_width = this->width * 0.0618F;
+    this->connector_rx = this->pipe_ascent * 0.1618F;
+
+    this->connector_color = hsla(color, saturation, body * 0.5);
+    this->color = hsla(color, saturation, body);
+    this->highlight_color = hsla(color, saturation, light); 
 }
 
 void Screwlet::load() {
-    //{
-    //    this->engine->info = this->info; // TODO: is it safe?
-    //    this->engine->load();
-    //}
+    Color connector_colors[] = { this->connector_color, this->highlight_color, this->connector_color, this->connector_color };
+    Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
+    float connector_height = this->pipe_thickness + this->pipe_ascent * 2.0F;
+    
+    this->connector_brush = make_linear_gradient_brush(0.0F, connector_height, MAKE_GRADIENT_STOPS(connector_colors));
+    this->pipe_brush = make_linear_gradient_brush(0.0F, this->pipe_thickness, MAKE_GRADIENT_STOPS(pipe_colors));
+    this->connector = geometry_freeze(cylinder_rl_surface(this->connector_rx, connector_height * 0.5F, this->connector_width));
 }
 
 void Screwlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
@@ -41,36 +52,33 @@ void Screwlet::update(long long count, long long interval, long long uptime, boo
 }
 
 void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    //float engine_width, engine_height;
-    //this->engine->fill_extent(x, y, &engine_width, &engine_height);
-
+    float connector_height = this->connector_brush->EndPoint.y - this->connector_brush->StartPoint.y;
+    
     { // draw body
-        float base_height = 8.0F;
+        float base_width = this->pipe_thickness * 1.618F;
+        float base_height = (base_width - this->pipe_thickness) * 0.5F;
         float body_x = x + base_height;
+        float body_y = y + base_height;
+        float body_height = this->height - body_y + y;
+        float body_corner = base_height * 0.5F;
         float base_x = body_x - base_height;
-        float base_y = y + this->height - base_height;
-        float base_width = this->thickness + base_height * 2.0F;
+        float base_y = y + this->height - base_height; 
 
-        ds->FillRoundedRectangle(body_x, y, this->thickness, this->height, 4.0F, 4.0F, Colors::ForestGreen);
-        ds->FillRectangle(base_x, base_y, base_width, base_height, Colors::ForestGreen);
+        ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
+        ds->FillRectangle(base_x, base_y, base_width, base_height, this->color);
         ds->DrawRectangle(base_x, base_y, base_width, base_height, Colors::Black);
 
         { // draw pipe
-            float pipe_x = body_x + this->thickness;
-            float pipe_y = y + base_height;
-            float pipe_width = x + this->width - pipe_x;
-            float pipe_height = this->thickness;
-            float endpoint_height = pipe_height / 0.618F;
+            float pipe_x = body_x + this->pipe_thickness;
+            float pipe_y = y + connector_height * 0.5F;
+            float pipe_xoff = this->connector_width - this->connector_rx * 0.5F;
 
-            ds->FillRectangle(pipe_x, pipe_y, pipe_width, pipe_height, Colors::ForestGreen);
-            ds->FillEllipse(pipe_x, pipe_y + pipe_height * 0.5F, 3.0F, endpoint_height * 0.5F, Colors::ForestGreen);
+            brush_translate(this->connector_brush, x, y);
+            brush_translate(this->pipe_brush, 0.0F, pipe_y - this->pipe_thickness * 0.5F);
+            ds->FillEllipse(pipe_x + pipe_xoff, pipe_y, this->connector_rx, pipe_y - y, this->color);
+            ds->DrawLine(pipe_x, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
+            ds->DrawCachedGeometry(this->connector, pipe_x - this->connector_rx, y, this->connector_brush);
         }
-    }
-
-    { // draw engine
-      //ds->Transform = make_float3x2_scale(float2(-1.0F, 1.0F));
-      //this->engine->draw(ds, -(x + engine_width), y + (this->height - engine_height), Width, Height);
-      //this->engine->draw(ds, x, y + (this->height - engine_height), Width, Height);
     }
 }
 

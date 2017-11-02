@@ -58,9 +58,19 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
+CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
     auto arc = ref new CanvasPathBuilder(shared_ds);
     
+    arc->BeginFigure(sx, sy);
+    arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
+    arc->EndFigure(CanvasFigureLoop::Open);
+
+    return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
+}
+
+CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
+    auto arc = ref new CanvasPathBuilder(shared_ds);
+
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Large);
     arc->EndFigure(CanvasFigureLoop::Open);
@@ -112,7 +122,7 @@ CanvasGeometry^ rotate_rectangle(float w, float h, double d, float cx, float cy)
 }
 
 /*************************************************************************************************/
-CanvasGeometry^ cylinder_surface(float x, float y, float rx, float ry, float height) {
+CanvasGeometry^ cylinder_tb_surface(float x, float y, float rx, float ry, float height) {
     auto surface = ref new CanvasPathBuilder(shared_ds);
     float cx = x + rx;
     float cy = y + ry;
@@ -121,6 +131,20 @@ CanvasGeometry^ cylinder_surface(float x, float y, float rx, float ry, float hei
     surface->AddArc(float2(cx, cy), rx, ry, float(M_PI), -float(M_PI));
     surface->AddLine(cx + rx, y + height);
     surface->AddArc(float2(cx, cy + height), rx, ry, 0.0F, float(M_PI));
+    surface->EndFigure(CanvasFigureLoop::Closed);
+
+    return CanvasGeometry::CreatePath(surface);
+}
+
+CanvasGeometry^ cylinder_rl_surface(float x, float y, float rx, float ry, float width) {
+    auto surface = ref new CanvasPathBuilder(shared_ds);
+    float cx = x + rx;
+    float cy = y + ry;
+
+    surface->BeginFigure(cx, y);
+    surface->AddArc(float2(cx, cy), rx, ry, -float(M_PI_2), -float(M_PI));
+    surface->AddLine(cx + width, cy + ry);
+    surface->AddArc(float2(cx + width, cy), rx, ry, float(M_PI_2), float(M_PI));
     surface->EndFigure(CanvasFigureLoop::Closed);
 
     return CanvasGeometry::CreatePath(surface);
@@ -140,8 +164,12 @@ CanvasGeometry^ pyramid_surface(float x, float y, float rt, float rb, float ry, 
     return CanvasGeometry::CreatePath(surface);
 }
 
-CanvasGeometry^ cylinder_surface(float rx, float ry, float height) {
-    return cylinder_surface(0.0F, 0.0F, rx, ry, height);
+CanvasGeometry^ cylinder_tb_surface(float rx, float ry, float height) {
+    return cylinder_tb_surface(0.0F, 0.0F, rx, ry, height);
+}
+
+CanvasGeometry^ cylinder_rl_surface(float rx, float ry, float width) {
+    return cylinder_rl_surface(0.0F, 0.0F, rx, ry, width);
 }
 
 CanvasGeometry^ pyramid_surface(float rt, float rb, float ry, float height) {
