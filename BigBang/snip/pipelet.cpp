@@ -15,6 +15,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const float default_pipe_thickness_ratio = 0.2F;
+static const Color hat_color = hsla(194.73684210526315, 0.532710280373832, 0.7901960784313726);
+static const Color hat_hlcolor = hsla(57.39130434782608, 1.0, 0.7745098039215687);
 
 /*************************************************************************************************/
 Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double body, double highlight)
@@ -57,7 +59,7 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float body_y = y + base_height;
     float body_height = this->height - body_y + y;
     float body_corner = base_height * 0.5F;
-    float base_x = body_x - base_height;
+    float base_x = body_x - (base_width - this->pipe_thickness) * 0.5F;
     float base_y = y + this->height - base_height;
 
     ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
@@ -114,8 +116,6 @@ void Pipelet::load() {
 
     auto pipe = rectangle(pipe_width, this->thickness);
     this->body_mask = rectangle(hollow_offset, hollow_offset, hollow_width, hollow_height);
-    //auto cartoon_top = hline(hollow_offset, hollow_offset + 1.0F, hollow_width);
-    //auto cartoon_bottom = hline(hollow_offset, this->thickness - hollow_offset - 1.0F, hollow_width);
     this->hollow_body = geometry_freeze(geometry_substract(pipe, this->body_mask));
     this->cartoon_style = make_dash_stroke(CanvasDashStyle::Dash);
 }
@@ -157,5 +157,93 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
         ds->FillEllipse(pipe_x, cy, this->connector_rx, cy - y, this->color);
         ds->DrawCachedGeometry(this->hollow_body, pipe_x, pipe_y, this->brush);
         ds->DrawCachedGeometry(this->connector, x, y, this->connector_brush);
+    }
+}
+
+/*************************************************************************************************/
+GlueCleanlet::GlueCleanlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+    : width(width), height(height), pipe_thickness(thickness) {
+    if (thickness == 0.0F) {
+        this->pipe_thickness = this->width * default_pipe_thickness_ratio;
+    } else if (thickness < 0.0F) {
+        this->pipe_thickness = -this->width * thickness;
+    }
+
+    this->pipe_ascent = this->pipe_thickness * 0.5F;
+
+    this->color = hsla(color, saturation, light);
+    this->highlight_color = hsla(color, saturation, highlight);
+    this->body_color = hsla(color, saturation, light * 0.8);
+    this->endpoint_color = hsla(color, saturation, light * 0.6);
+}
+
+void GlueCleanlet::load() {
+    Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
+    Color hat_colors[] = { hat_color, hat_hlcolor, hat_color };
+    auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
+    auto hat_stops = MAKE_GRADIENT_STOPS(hat_colors);
+
+    float bottom_width = this->pipe_thickness * 1.618F;
+    float base_height = (bottom_width - this->pipe_thickness) * 0.5F;
+    float bottom_x = this->width - bottom_width;
+    float bottom_y = this->height - base_height;
+    float hat_width = this->pipe_thickness * 0.618F;
+    float hat_height = base_height * 0.618F;
+    float hat_x = bottom_x + (bottom_width - hat_width) * 0.5F;
+    float hatbody_width = hat_width * 0.618F;
+    float hatbody_height = base_height * 1.618F;
+    float hatbody_x = bottom_x + (bottom_width - hatbody_width) * 0.5F;
+    float top_width = bottom_width - base_height;
+    float top_x = bottom_x + (bottom_width - top_width) * 0.5F;
+    float top_y = hat_height + hatbody_height;
+    float vpipe_x = bottom_x + (bottom_width - this->pipe_thickness) * 0.5F;
+    float pipe_rx = base_height;
+
+    auto full_pipe = rounded_rectangle(-pipe_rx, 0.0F, vpipe_x + pipe_rx * 2.0F, this->pipe_thickness, pipe_rx, -0.5F);
+    auto pipe_head = rectangle(-pipe_rx, 0.0F, pipe_rx, this->pipe_thickness);
+    auto top = rectangle(top_x, top_y, top_width, base_height);
+    auto bottom = rectangle(bottom_x, bottom_y, bottom_width, base_height);
+    this->pipe = geometry_freeze(geometry_substract(full_pipe, pipe_head));
+    this->endpoint = geometry_freeze(geometry_union(top, bottom));
+    this->pipe_brush = make_linear_gradient_brush(vpipe_x, top_y, vpipe_x, top_y + this->pipe_thickness, pipe_stops);
+    this->hat_brush = make_linear_gradient_brush(hat_x, 0.0F, hat_x + hat_width, 0.0F, hat_stops);
+    this->hatbody_brush = make_linear_gradient_brush(hatbody_x, hat_height, hatbody_x + hatbody_width, hatbody_height, hat_stops);
+}
+
+void GlueCleanlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+    SET_VALUES(w, this->width, h, this->height);
+    SET_BOXES(b, t, 0.0F);
+    SET_BOXES(l, r, 0.0F);
+}
+
+void GlueCleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+    float2 body = this->pipe_brush->StartPoint;
+    float body_y = y + body.y;
+
+    { // draw output pipe
+        float vpipe_x = x + body.x;
+        float vpipe_height = y + this->height - body_y;
+
+        ds->FillRectangle(vpipe_x, body_y, this->pipe_thickness, vpipe_height, this->body_color);
+        ds->DrawCachedGeometry(this->endpoint, x, y, this->endpoint_color);
+    }
+
+    { // draw input pipe
+        brush_translate(this->pipe_brush, 0.0F, y + this->pipe_ascent);
+        ds->DrawCachedGeometry(this->pipe, x, body_y + this->pipe_ascent, this->pipe_brush);
+    }
+
+    { // draw hat
+        float2 hat = this->hat_brush->StartPoint;
+        float2 hatbody = this->hatbody_brush->StartPoint;
+        float hat_x = x + hat.x;
+        float hatbody_x = x + hatbody.x;
+        float hat_width = this->hat_brush->EndPoint.x - hat.x;
+        float hatbody_width = this->hatbody_brush->EndPoint.x - hatbody.x;
+
+        brush_translate(this->hat_brush, hat_x, 0.0F);
+        brush_translate(this->hatbody_brush, hatbody_x, 0.0F);
+        ds->FillRectangle(hat_x, y, hat_width, hatbody.y - hat.y, this->hat_brush);
+        ds->FillRectangle(hatbody_x, y + hatbody.y, hatbody_width, body.y - hatbody.y, this->hatbody_brush);
     }
 }
