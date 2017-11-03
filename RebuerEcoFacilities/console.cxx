@@ -42,8 +42,8 @@ public:
         this->icons[0] = new StorageTanklet(80.0F);
         this->icons[1] = new Funnellet(64.0F, 0.0F, 32.0, 1.0, 0.4, 0.8);
         this->icons[2] = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
-        this->icons[3] = new Screwlet(128.0F, 100.0F);
-        this->icons[4] = new Screwlet(100.0F, 64.0F, -0.2F, 32.0, 1.0, 0.4, 0.8);
+        this->icons[3] = new Screwlet(200.0F, 128.0F);
+        this->icons[4] = new Pipelet(200.0F);
         this->motor = new Motorlet(169.0F);
         this->vibrator = new Vibratorlet(96.0F);
 
