@@ -146,8 +146,8 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
         float cartoon_ytop = cartoon_y + 1.0F;
         float cartoon_ybottom = cartoon_ytop + region.Height - 2.0F;
 
-        this->brush->Opacity = 0.72F;
-        ds->FillRectangle(cartoon_x, pipe_y + region.Top, region.Width, region.Height, this->brush);
+        this->brush->Opacity = 0.85F;
+        ds->FillRectangle(cartoon_x, cartoon_y, region.Width, region.Height, this->brush);
         ds->DrawLine(cartoon_x, cartoon_ytop, cartoon_xend, cartoon_ytop, this->highlight_color, 2.0F, this->cartoon_style);
         ds->DrawLine(x, cartoon_ybottom, cartoon_xend, cartoon_ybottom, this->highlight_color, 2.0F, this->cartoon_style);
     }
