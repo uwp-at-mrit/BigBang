@@ -15,8 +15,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const float default_pipe_thickness_ratio = 0.2F;
-static const Color hat_color = hsla(194.73684210526315, 0.532710280373832, 0.7901960784313726);
-static const Color hat_hlcolor = hsla(57.39130434782608, 1.0, 0.7745098039215687);
+static const Color hat_color = hsla(194.74, 0.53, 0.79);
+static const Color hat_hlcolor = hsla(40.0, 1.0, 0.97);
 
 /*************************************************************************************************/
 Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double body, double highlight)
@@ -161,7 +161,7 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-GlueCleanlet::GlueCleanlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
     if (thickness == 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
@@ -177,7 +177,7 @@ GlueCleanlet::GlueCleanlet(float width, float height, float thickness, double co
     this->endpoint_color = hsla(color, saturation, light * 0.6);
 }
 
-void GlueCleanlet::load() {
+void GlueCleanerlet::load() {
     Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
     Color hat_colors[] = { hat_color, hat_hlcolor, hat_color };
     auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
@@ -187,11 +187,11 @@ void GlueCleanlet::load() {
     float base_height = (bottom_width - this->pipe_thickness) * 0.5F;
     float bottom_x = this->width - bottom_width;
     float bottom_y = this->height - base_height;
-    float hat_width = this->pipe_thickness * 0.618F;
-    float hat_height = base_height * 0.618F;
+    float hat_width = this->pipe_thickness * 0.8F;
+    float hat_height = base_height * 0.382F; // 0.618F x 0.618F
     float hat_x = bottom_x + (bottom_width - hat_width) * 0.5F;
     float hatbody_width = hat_width * 0.618F;
-    float hatbody_height = base_height * 1.618F;
+    float hatbody_height = base_height * 0.618F;
     float hatbody_x = bottom_x + (bottom_width - hatbody_width) * 0.5F;
     float top_width = bottom_width - base_height;
     float top_x = bottom_x + (bottom_width - top_width) * 0.5F;
@@ -210,13 +210,13 @@ void GlueCleanlet::load() {
     this->hatbody_brush = make_linear_gradient_brush(hatbody_x, hat_height, hatbody_x + hatbody_width, hatbody_height, hat_stops);
 }
 
-void GlueCleanlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
     SET_VALUES(w, this->width, h, this->height);
     SET_BOXES(b, t, 0.0F);
     SET_BOXES(l, r, 0.0F);
 }
 
-void GlueCleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float2 body = this->pipe_brush->StartPoint;
     float body_y = y + body.y;
 
@@ -236,14 +236,12 @@ void GlueCleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
     { // draw hat
         float2 hat = this->hat_brush->StartPoint;
         float2 hatbody = this->hatbody_brush->StartPoint;
-        float hat_x = x + hat.x;
-        float hatbody_x = x + hatbody.x;
         float hat_width = this->hat_brush->EndPoint.x - hat.x;
         float hatbody_width = this->hatbody_brush->EndPoint.x - hatbody.x;
 
-        brush_translate(this->hat_brush, hat_x, 0.0F);
-        brush_translate(this->hatbody_brush, hatbody_x, 0.0F);
-        ds->FillRectangle(hat_x, y, hat_width, hatbody.y - hat.y, this->hat_brush);
-        ds->FillRectangle(hatbody_x, y + hatbody.y, hatbody_width, body.y - hatbody.y, this->hatbody_brush);
+        brush_translate(this->hat_brush, x, y);
+        brush_translate(this->hatbody_brush, x, y);
+        ds->FillRectangle(x + hat.x, y, hat_width, hatbody.y - hat.y, this->hat_brush);
+        ds->FillRectangle(x + hatbody.x, y + hatbody.y, hatbody_width, body.y - hatbody.y, this->hatbody_brush);
     }
 }

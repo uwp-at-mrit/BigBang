@@ -68,9 +68,9 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ brush;
     };
 
-    private class GlueCleanlet : public WarGrey::SCADA::Snip {
+    private class GlueCleanerlet : public WarGrey::SCADA::Snip {
     public:
-        GlueCleanlet(float width, float height, float thickness = 0.0F,
+        GlueCleanerlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
 

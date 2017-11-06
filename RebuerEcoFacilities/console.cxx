@@ -44,7 +44,7 @@ public:
         this->icons[2] = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
         this->icons[3] = new Screwlet(200.0F, 128.0F);
         this->icons[4] = new Pipelet(200.0F);
-        this->icons[5] = new GlueCleanlet(200.0F, 128.0F);
+        this->icons[5] = new GlueCleanerlet(200.0F, 128.0F);
         this->motor = new Motorlet(169.0F);
         this->vibrator = new Vibratorlet(96.0F);
 
