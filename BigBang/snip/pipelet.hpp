@@ -47,8 +47,8 @@ namespace WarGrey::SCADA {
     private class Pipelet : public WarGrey::SCADA::IPipelet {
     public:
         Pipelet(float width, float height = 0.0F, float thickness = 0.0F,
-            double color = nan("DimGray"), double saturation = 0.0,
-            double light = 0.412, double highlight = 0.753);
+            double color = nan("Silver"), double saturation = 0.0,
+            double light = 0.512, double highlight = 0.753);
 
     public:
         void load() override;

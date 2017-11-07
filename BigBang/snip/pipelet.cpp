@@ -14,7 +14,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static const float default_pipe_thickness_ratio = 0.2F;
+static const float default_pipe_thickness_ratio = 0.25F;
 static const Color hat_color = hsla(194.74, 0.53, 0.79);
 static const Color hat_hlcolor = hsla(40.0, 1.0, 0.97);
 
@@ -31,8 +31,8 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->connector_color = hsla(color, saturation, light * 0.5);
-    this->body_color = hsla(color, saturation, light * 0.8);
+    this->connector_color = hsla(color, saturation, light * 0.8);
+    this->body_color = hsla(color, saturation, light * 0.75);
     this->base_color = hsla(color, saturation, light * 0.6);
 }
 
@@ -68,7 +68,7 @@ void Screwlet::fill_inport_extent(float* x, float* y, float* width, float* heigh
     SET_BOX(x, pipe_x + (pipe_length - input_width) * 0.5F);
     SET_BOX(y, this->pipe_brush->StartPoint.y);
     SET_BOX(width, input_width);
-    SET_BOX(height, this->pipe_thickness * default_pipe_thickness_ratio);
+    SET_BOX(height, 2.0F);
 }
 
 void Screwlet::fill_outport_extent(float* x, float* y, float* width, float* height) {
@@ -106,7 +106,7 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-Pipelet::Pipelet(float width, float height, float thickness, double color, double saturation, double body, double highlight)
+Pipelet::Pipelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), thickness(thickness) {
     if (thickness == 0.0F) {
         this->thickness = this->width * default_pipe_thickness_ratio;
@@ -120,9 +120,9 @@ Pipelet::Pipelet(float width, float height, float thickness, double color, doubl
 
     this->connector_width = this->width * 0.0618F;
 
-    this->color = hsla(color, saturation, body);
+    this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->connector_color = hsla(color, saturation, body * 0.5);
+    this->connector_color = hsla(color, saturation, light * 0.8);
 }
 
 void Pipelet::load() {
@@ -190,7 +190,7 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
         float cartoon_ytop = cartoon_y + 1.0F;
         float cartoon_ybottom = cartoon_ytop + region.Height - 2.0F;
 
-        this->brush->Opacity = 0.85F;
+        this->brush->Opacity = 0.72F;
         ds->FillRectangle(cartoon_x, cartoon_y, region.Width, region.Height, this->brush);
         ds->DrawLine(cartoon_x, cartoon_ytop, cartoon_xend, cartoon_ytop, this->highlight_color, 2.0F, this->cartoon_style);
         ds->DrawLine(x, cartoon_ybottom, cartoon_xend, cartoon_ybottom, this->highlight_color, 2.0F, this->cartoon_style);
@@ -215,7 +215,7 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->body_color = hsla(color, saturation, light * 0.8);
+    this->body_color = hsla(color, saturation, light * 0.75);
     this->endpoint_color = hsla(color, saturation, light * 0.6);
 }
 
