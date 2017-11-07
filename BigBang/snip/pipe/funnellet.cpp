@@ -8,6 +8,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+using namespace Windows::Foundation;
 using namespace Platform::Collections;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -41,10 +42,10 @@ void Funnellet::load() {
     float body_height = this->height - body_y - radiusY * 2.0F;
 
     this->body = geometry_freeze(pyramid_surface(radiusT, radiusB, radiusY, body_height));
-    this->body_brush = make_linear_gradient_brush(0.0F, body_y, this->width, body_y, MAKE_GRADIENT_STOPS(body_colors));
+    this->body_brush = make_linear_gradient_brush(0.0F, radiusB, this->width, radiusB, MAKE_GRADIENT_STOPS(body_colors));
     
     this->topface = geometry_freeze(ellipse(radiusT, radiusY, radiusT, radiusY));
-    this->topface_brush = make_linear_gradient_brush(this->width, 0.0F, MAKE_GRADIENT_STOPS(topface_colors));
+    this->topface_brush = make_linear_gradient_brush(0.0F, body_y, this->width, body_y, MAKE_GRADIENT_STOPS(topface_colors));
     
     { // particles
         auto nothing = geometry_freeze(blank());
@@ -57,6 +58,17 @@ void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, floa
     SET_VALUES(w, this->width, h, this->height);
     SET_BOXES(b, t, 0.0F);
     SET_BOXES(l, r, 0.0F);
+}
+
+Rect Funnellet::get_input_port() {
+    return Rect{ 0.0F, this->body_brush->StartPoint.y, this->width, 0.0F };
+}
+
+Rect Funnellet::get_output_port() {
+    float radius = this->body_brush->EndPoint.y;
+    float cx = this->width * 0.5F;
+
+    return Rect{ cx - radius, this->height - radius, radius * 2.0F, radius };
 }
 
 void Funnellet::update(long long count, long long interval, long long uptime, bool is_slow) {
@@ -73,7 +85,7 @@ void Funnellet::update(long long count, long long interval, long long uptime, bo
 }
 
 void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float body_y = y + this->body_brush->StartPoint.y;
+    float body_y = y + this->topface_brush->EndPoint.y;
 
     { // drawing top face after drawing body makes the edge more smoothing.
         brush_translate(this->topface_brush, x, body_y);

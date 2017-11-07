@@ -3,11 +3,10 @@
 #include <collection.h>
 #include <algorithm>
 
-#include "snip/snip.hpp"
-#include "snip/motorlet.hpp"
+#include "snip/pipe/pipesnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Funnellet : public WarGrey::SCADA::Snip {
+    private class Funnellet : public WarGrey::SCADA::IPipeSnip {
     public:
         Funnellet(float width, float height = 0.0F,
             double color = 120.0, double saturation = 1.0,
@@ -20,6 +19,10 @@ namespace WarGrey::SCADA {
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr,
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
+
+    public:
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     private:
         float width;

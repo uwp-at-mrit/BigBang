@@ -6,11 +6,13 @@
 #include "universe.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
-#include "snip/pipe/pipelet.hpp"
-#include "snip/pipe/funnellet.hpp"
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
+#include "snip/pipe/funnellet.hpp"
+#include "snip/pipe/pipelet.hpp"
+#include "snip/pipe/screwlet.hpp"
+#include "snip/pipe/gluecleanerlet.hpp"
 #include "decorator/border.hpp"
 
 using namespace WarGrey::SCADA;
@@ -28,7 +30,7 @@ using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::UI;
 
-inline void connect_pipe(Universe* universe, IPipelet* prev, IPipelet* pipe, float* x, float* y) {
+inline void connect_pipe(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y) {
     pipe_connecting_position(prev, pipe, x, y);
     universe->move_to(pipe, (*x), (*y));
 }
@@ -128,23 +130,15 @@ public:
         }
 
         { // flow B Segment
-            float current_x, current_y;
-
-            this->master->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-
-            float master_x = width * 0.2F;
-            float master_y = (height - snip_height) / 3.0F;
-            this->move_to(this->master, master_x, master_y);
-
+            size_t max_idx = sizeof(this->pipes) / sizeof(Snip*) - 1;
+            
             this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-            Rect master_in = this->master->get_input_port();
-            current_x = master_x + master_in.X + (master_in.Width - snip_width) * 0.5F;
-            current_y = master_y + master_in.Y + master_in.Height - snip_height;
+
+            float current_x = width * 0.2F;
+            float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
-            size_t max_idx = sizeof(this->pipes) / sizeof(Snip*) - 1;
-            current_x = master_x;
-            current_y = master_y;
+            connect_pipe(this, this->funnel, this->master, &current_x, &current_y);
             connect_pipe(this, this->master, pipes[0], &current_x, &current_y);
             for (size_t i = 1; i <= max_idx; i++) {
                 connect_pipe(this, pipes[i - 1], pipes[i], &current_x, &current_y);
