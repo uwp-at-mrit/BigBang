@@ -6,9 +6,16 @@
 namespace WarGrey::SCADA {
     private class IPipelet : public WarGrey::SCADA::Snip {
     public:
-        virtual void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
-        virtual void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
+        virtual Windows::Foundation::Rect get_input_port() = 0;
+        virtual Windows::Foundation::Rect get_output_port() = 0;
     };
+
+    void pipe_connecting_position(WarGrey::SCADA::IPipelet* prev, WarGrey::SCADA::IPipelet* pipe, float* x, float* y);
+    Windows::Foundation::Numerics::float2 pipe_connecting_position(
+        WarGrey::SCADA::IPipelet* prev,
+        WarGrey::SCADA::IPipelet* pipe,
+        float x = 0.0F,
+        float y = 0.0F);
 
     private class Screwlet : public WarGrey::SCADA::IPipelet {
     public:
@@ -24,8 +31,8 @@ namespace WarGrey::SCADA {
             override;
 
     public:
-        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
-        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     private:
         float width;
@@ -59,8 +66,8 @@ namespace WarGrey::SCADA {
             override;
 
     public:
-        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
-        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     private:
         float width;
@@ -94,8 +101,8 @@ namespace WarGrey::SCADA {
             override;
 
     public:
-        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
-        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     private:
         float width;

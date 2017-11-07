@@ -1,9 +1,7 @@
-﻿#include "rsyslog.hpp"
-#include "text.hpp"
-#include "paint.hpp"
+﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipelet.hpp"
+#include "snip/pipe/pipelet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -15,6 +13,10 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static const float default_pipe_thickness_ratio = 0.25F;
+static const float default_connector_light_rate = 0.8F;
+static const float default_body_light_rate = 0.72F;
+static const float default_endpoint_light_rate = 0.6F;
+
 static const Color hat_color = hsla(194.74, 0.53, 0.79);
 static const Color hat_hlcolor = hsla(40.0, 1.0, 0.97);
 
@@ -31,9 +33,9 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->connector_color = hsla(color, saturation, light * 0.8);
-    this->body_color = hsla(color, saturation, light * 0.75);
-    this->base_color = hsla(color, saturation, light * 0.6);
+    this->connector_color = hsla(color, saturation, light * default_connector_light_rate);
+    this->body_color = hsla(color, saturation, light * default_body_light_rate);
+    this->base_color = hsla(color, saturation, light * default_endpoint_light_rate);
 }
 
 void Screwlet::load() {
@@ -60,22 +62,17 @@ void Screwlet::fill_extent(float x, float y, float* w, float* h, float* b, float
     SET_BOXES(l, r, 0.0F);
 }
 
-void Screwlet::fill_inport_extent(float* x, float* y, float* width, float* height) {
+Rect Screwlet::get_input_port() {
     float pipe_x = this->pipe_brush->StartPoint.x;
     float pipe_length = this->width - pipe_x;
     float input_width = pipe_length * 0.618F;
+    float x = pipe_x + (pipe_length - input_width) * 0.5F;
 
-    SET_BOX(x, pipe_x + (pipe_length - input_width) * 0.5F);
-    SET_BOX(y, this->pipe_brush->StartPoint.y);
-    SET_BOX(width, input_width);
-    SET_BOX(height, 2.0F);
+    return Rect{ x, this->pipe_brush->StartPoint.y, input_width, 2.0F };
 }
 
-void Screwlet::fill_outport_extent(float* x, float* y, float* width, float* height) {
-    SET_BOX(x, this->width);
-    SET_BOX(y, this->pipe_brush->StartPoint.y);
-    SET_BOX(width, 0.0F);
-    SET_BOX(height, this->pipe_thickness);
+Rect Screwlet::get_output_port() {
+    return Rect{ this->width, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
 }
 
 void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -122,7 +119,7 @@ Pipelet::Pipelet(float width, float height, float thickness, double color, doubl
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->connector_color = hsla(color, saturation, light * 0.8);
+    this->connector_color = hsla(color, saturation, light * default_connector_light_rate);
 }
 
 void Pipelet::load() {
@@ -156,18 +153,12 @@ void Pipelet::fill_extent(float x, float y, float* w, float* h, float* b, float*
     SET_BOXES(l, r, 0.0F);
 }
 
-void Pipelet::fill_inport_extent(float* x, float* y, float* width, float* height) {
-    SET_BOX(x, this->connector_brush->StartPoint.x);
-    SET_BOX(y, this->brush->StartPoint.y);
-    SET_BOX(width, 0.0F);
-    SET_BOX(height, this->thickness);
+Rect Pipelet::get_input_port() {
+    return Rect{ this->connector_brush->StartPoint.x, this->brush->StartPoint.y, 0.0F, this->thickness };
 }
 
-void Pipelet::fill_outport_extent(float* x, float* y, float* width, float* height) {
-    SET_BOX(x, this->width);
-    SET_BOX(y, this->brush->StartPoint.y);
-    SET_BOX(width, 0.0F);
-    SET_BOX(height, this->thickness);
+Rect Pipelet::get_output_port() {
+    return Rect{ this->width, this->brush->StartPoint.y, 0.0F, this->thickness };
 }
 
 void Pipelet::update(long long count, long long interval, long long uptime, bool is_slow) {
@@ -215,8 +206,8 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->body_color = hsla(color, saturation, light * 0.75);
-    this->endpoint_color = hsla(color, saturation, light * 0.6);
+    this->body_color = hsla(color, saturation, light * default_body_light_rate);
+    this->endpoint_color = hsla(color, saturation, light * default_endpoint_light_rate);
 }
 
 void GlueCleanerlet::load() {
@@ -259,18 +250,12 @@ void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h, float* b,
     SET_BOXES(l, r, 0.0F);
 }
 
-void GlueCleanerlet::fill_inport_extent(float* x, float* y, float* width, float* height) {
-    SET_BOX(x, 0.0F);
-    SET_BOX(y, this->pipe_brush->StartPoint.y);
-    SET_BOX(width, 0.0F);
-    SET_BOX(height, this->pipe_thickness);
+Rect GlueCleanerlet::get_input_port() {
+    return Rect{ 0.0F, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
 }
 
-void GlueCleanerlet::fill_outport_extent(float* x, float* y, float* width, float* height) {
-    SET_BOX(x, this->pipe_brush->StartPoint.x);
-    SET_BOX(y, this->height);
-    SET_BOX(width, this->pipe_thickness);
-    SET_BOX(height, 0.0F);
+Rect GlueCleanerlet::get_output_port() {
+    return Rect{ this->pipe_brush->StartPoint.x, this->height, this->pipe_thickness, 0.0F };
 }
 
 void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -301,4 +286,25 @@ void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
         ds->FillRectangle(x + hat_bottom.x, y, hat_width, hat_bottom.y, this->hat_brush);
         ds->FillRectangle(x + hatbody_bottom.x, hatbody_y, hatbody_width, body_y - hatbody_y, this->hatbody_brush);
     }
+}
+
+/*************************************************************************************************/
+void WarGrey::SCADA::pipe_connecting_position(IPipelet* prev, IPipelet* pipe, float* x, float* y) {
+    Rect out = prev->get_output_port();
+    Rect in = pipe->get_input_port();
+
+    float delta_x = (out.X - in.X) - (out.Width - in.Width) * 0.5F;
+    float delta_y = (out.Y - in.Y) - (out.Height - in.Height) * 0.5F;
+
+    if (x != nullptr) { (*x) = (*x) + delta_x; }
+    if (y != nullptr) { (*y) = (*y) + delta_y; }
+}
+
+float2 WarGrey::SCADA::pipe_connecting_position(IPipelet* prev, IPipelet* pipe, float x0, float y0) {
+    float x = x0;
+    float y = y0;
+    
+    pipe_connecting_position(prev, pipe, &x, &y);
+
+    return float2{ x, y};
 }

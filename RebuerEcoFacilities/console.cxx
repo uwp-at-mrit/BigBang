@@ -4,10 +4,10 @@
 #include "rsyslog.hpp"
 #include "console.hxx"
 #include "universe.hpp"
-#include "snip/pipelet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
-#include "snip/funnellet.hpp"
+#include "snip/pipe/pipelet.hpp"
+#include "snip/pipe/funnellet.hpp"
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
@@ -27,6 +27,11 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::UI;
+
+inline void connect_pipe(Universe* universe, IPipelet* prev, IPipelet* pipe, float* x, float* y) {
+    pipe_connecting_position(prev, pipe, x, y);
+    universe->move_to(pipe, (*x), (*y));
+}
 
 class BSegment : public WarGrey::SCADA::Universe {
 public:
@@ -68,8 +73,9 @@ public:
             float pipe_thickness = 32.0F;
 
             this->master = new Screwlet(128.0F, 128.0F, pipe_thickness);
+            this->slave = new Screwlet(128.0F, 80.0F, pipe_thickness);
             this->cleaner = new GlueCleanerlet(80.0F, 100.0F, pipe_thickness);
-            this->funnel = new Funnellet(48.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
+            this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
 
             this->insert(this->master);
 
@@ -80,6 +86,7 @@ public:
 
             this->insert(this->funnel);
             this->insert(this->cleaner);
+            this->insert(this->slave);
         }
     };
 
@@ -121,10 +128,8 @@ public:
         }
 
         { // flow B Segment
-            float in_x, in_y, in_width, in_height;
-            float out_x, out_y, out_width, out_height;
             float current_x, current_y;
-            
+
             this->master->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
             float master_x = width * 0.2F;
@@ -132,30 +137,21 @@ public:
             this->move_to(this->master, master_x, master_y);
 
             this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-            this->master->fill_inport_extent(&in_x, &in_y, &in_width, &in_height);
-            current_x = master_x + in_x + (in_width - snip_width) * 0.5F;
-            current_y = master_y + in_y + in_height - snip_height;
+            Rect master_in = this->master->get_input_port();
+            current_x = master_x + master_in.X + (master_in.Width - snip_width) * 0.5F;
+            current_y = master_y + master_in.Y + master_in.Height - snip_height;
             this->move_to(this->funnel, current_x, current_y);
 
+            size_t max_idx = sizeof(this->pipes) / sizeof(Snip*) - 1;
             current_x = master_x;
             current_y = master_y;
-            this->master->fill_outport_extent(&out_x, &out_y, &out_width, &out_height);
-            for (unsigned int i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
-                Pipelet* pipe = pipes[i];
-
-                pipe->fill_inport_extent(&in_x, &in_y, &in_width, &in_height);
-
-                current_x += ((out_x - in_x) - (out_width - in_width));
-                current_y += ((out_y - in_y) + (out_height - in_height) * 0.5F);
-                this->move_to(pipe, current_x, current_y);
-                
-                pipe->fill_outport_extent(&out_x, &out_y, &out_width, &out_height);
+            connect_pipe(this, this->master, pipes[0], &current_x, &current_y);
+            for (size_t i = 1; i <= max_idx; i++) {
+                connect_pipe(this, pipes[i - 1], pipes[i], &current_x, &current_y);
             }
 
-            this->cleaner->fill_inport_extent(&in_x, &in_y, &in_width, &in_height);
-            float cleaner_x = current_x + (out_x - in_x) - (out_width - in_width);
-            float cleaner_y = current_y + (out_y - in_y) + (out_height - in_height) * 0.5F;
-            this->move_to(this->cleaner, cleaner_x, cleaner_y);
+            connect_pipe(this, pipes[max_idx], this->cleaner, &current_x, &current_y);
+            connect_pipe(this, this->cleaner, this->slave, &current_x, &current_y);
         }
     }
     
