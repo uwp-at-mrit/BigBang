@@ -8,16 +8,6 @@ namespace WarGrey::SCADA {
     public:
         virtual void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
         virtual void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
-
-    public:
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
-            float ipx, ipy, ipw, iph;
-
-            this->fill_inport_extent(&ipx, &ipy, &ipw, &iph);
-            ds->DrawRectangle(x + ipx, y + ipy, ipw, iph, Windows::UI::Colors::Firebrick);
-            this->fill_outport_extent(&ipx, &ipy, &ipw, &iph);
-            ds->DrawRectangle(x + ipx, y + ipy, ipw, iph, Windows::UI::Colors::Firebrick);
-        };
     };
 
     private class Screwlet : public WarGrey::SCADA::IPipelet {
@@ -45,6 +35,7 @@ namespace WarGrey::SCADA {
 
     private:
         Windows::UI::Color color;
+        Windows::UI::Color base_color;
         Windows::UI::Color connector_color;
         Windows::UI::Color highlight_color;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ connector;

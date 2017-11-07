@@ -32,6 +32,7 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
     this->color = hsla(color, saturation, body);
     this->highlight_color = hsla(color, saturation, highlight);
     this->connector_color = hsla(color, saturation, body * 0.5);
+    this->base_color = hsla(color, saturation, body * 0.6);
 }
 
 void Screwlet::load() {
@@ -87,8 +88,7 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float base_y = y + this->height - base_height;
 
     ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
-    ds->FillRectangle(base_x, base_y, base_width, base_height, this->color);
-    ds->DrawLine(body_x, base_y, body_x + this->pipe_thickness, base_y, Colors::Black);
+    ds->FillRectangle(base_x, base_y, base_width, base_height, this->base_color);
 
     { // draw pipe
         float connector_rx = this->connector_brush->StartPoint.x;
@@ -102,8 +102,6 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         ds->DrawLine(pipe_x + pipe_xoff, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
         ds->DrawCachedGeometry(this->connector, pipe_x - connector_rx, y, this->connector_brush);
     }
-
-    IPipelet::draw(ds, x, y, Width, Height);
 }
 
 /*************************************************************************************************/
@@ -203,8 +201,6 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
         ds->DrawCachedGeometry(this->hollow_body, pipe_x, pipe_y, this->brush);
         ds->DrawCachedGeometry(this->connector, x, y, this->connector_brush);
     }
-
-    IPipelet::draw(ds, x, y, Width, Height);
 }
 
 /*************************************************************************************************/
@@ -304,6 +300,4 @@ void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
         ds->FillRectangle(x + hat_bottom.x, y, hat_width, hat_bottom.y, this->hat_brush);
         ds->FillRectangle(x + hatbody_bottom.x, hatbody_y, hatbody_width, body_y - hatbody_y, this->hatbody_brush);
     }
-
-    IPipelet::draw(ds, x, y, Width, Height);
 }
