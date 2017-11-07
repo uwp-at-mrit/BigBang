@@ -19,7 +19,7 @@ static const Color hat_color = hsla(194.74, 0.53, 0.79);
 static const Color hat_hlcolor = hsla(40.0, 1.0, 0.97);
 
 /*************************************************************************************************/
-Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double body, double highlight)
+Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
     if (thickness == 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
@@ -29,10 +29,11 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
 
     this->connector_width = this->width * 0.0618F;
 
-    this->color = hsla(color, saturation, body);
+    this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->connector_color = hsla(color, saturation, body * 0.5);
-    this->base_color = hsla(color, saturation, body * 0.6);
+    this->connector_color = hsla(color, saturation, light * 0.5);
+    this->body_color = hsla(color, saturation, light * 0.8);
+    this->base_color = hsla(color, saturation, light * 0.6);
 }
 
 void Screwlet::load() {
@@ -87,7 +88,7 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float base_x = body_x - (base_width - this->pipe_thickness) * 0.5F;
     float base_y = y + this->height - base_height;
 
-    ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->color);
+    ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->body_color);
     ds->FillRectangle(base_x, base_y, base_width, base_height, this->base_color);
 
     { // draw pipe

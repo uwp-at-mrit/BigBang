@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
     public:
         Screwlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
-            double bodylight = 0.339, double highlight = 0.839);
+            double light = 0.339, double highlight = 0.839);
 
     public:
         void load() override;
@@ -35,9 +35,10 @@ namespace WarGrey::SCADA {
 
     private:
         Windows::UI::Color color;
-        Windows::UI::Color base_color;
         Windows::UI::Color connector_color;
         Windows::UI::Color highlight_color;
+        Windows::UI::Color body_color;
+        Windows::UI::Color base_color;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ connector;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ connector_brush;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ pipe_brush;
@@ -47,7 +48,7 @@ namespace WarGrey::SCADA {
     public:
         Pipelet(float width, float height = 0.0F, float thickness = 0.0F,
             double color = nan("DimGray"), double saturation = 0.0,
-            double bodylight = 0.412, double highlight = 0.753);
+            double light = 0.412, double highlight = 0.753);
 
     public:
         void load() override;
