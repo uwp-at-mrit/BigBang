@@ -4,7 +4,23 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Screwlet : public WarGrey::SCADA::Snip {
+    private class IPipelet : public WarGrey::SCADA::Snip {
+    public:
+        virtual void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
+        virtual void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) = 0;
+
+    public:
+        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
+            float ipx, ipy, ipw, iph;
+
+            this->fill_inport_extent(&ipx, &ipy, &ipw, &iph);
+            ds->DrawRectangle(x + ipx, y + ipy, ipw, iph, Windows::UI::Colors::Firebrick);
+            this->fill_outport_extent(&ipx, &ipy, &ipw, &iph);
+            ds->DrawRectangle(x + ipx, y + ipy, ipw, iph, Windows::UI::Colors::Firebrick);
+        };
+    };
+
+    private class Screwlet : public WarGrey::SCADA::IPipelet {
     public:
         Screwlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
@@ -17,13 +33,15 @@ namespace WarGrey::SCADA {
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
 
+    public:
+        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+
     private:
         float width;
         float height;
         float pipe_thickness;
-        float pipe_ascent;
         float connector_width;
-        float connector_rx;
 
     private:
         Windows::UI::Color color;
@@ -34,7 +52,7 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ pipe_brush;
     };
 
-    private class Pipelet : public WarGrey::SCADA::Snip {
+    private class Pipelet : public WarGrey::SCADA::IPipelet {
     public:
         Pipelet(float width, float height = 0.0F, float thickness = 0.0F,
             double color = nan("DimGray"), double saturation = 0.0,
@@ -48,13 +66,15 @@ namespace WarGrey::SCADA {
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
 
+    public:
+        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+
     private:
         float width;
         float height;
         float thickness;
-        float ascent;
         float connector_width;
-        float connector_rx;
 
     private:
         Windows::UI::Color color;
@@ -68,7 +88,7 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ brush;
     };
 
-    private class GlueCleanerlet : public WarGrey::SCADA::Snip {
+    private class GlueCleanerlet : public WarGrey::SCADA::IPipelet {
     public:
         GlueCleanerlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
@@ -81,11 +101,14 @@ namespace WarGrey::SCADA {
             float* d = nullptr, float* s = nullptr, float* l = nullptr, float* r = nullptr)
             override;
 
+    public:
+        void fill_inport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+        void fill_outport_extent(float* x, float* y, float* width = nullptr, float* height = nullptr) override;
+
     private:
         float width;
         float height;
         float pipe_thickness;
-        float pipe_ascent;
 
     private:
         Windows::UI::Color color;
