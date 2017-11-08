@@ -7,6 +7,7 @@
 
 #include "rsyslog.hpp"
 #include "system.hpp"
+#include "paint.hpp"
 #include "shape.hpp"
 #include "snip/snip.hpp"
 #include "decorator/decorator.hpp"
@@ -487,7 +488,7 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     }
 
     if (this->rubberband_y != nullptr) {
-        static auto rubberband_color = ref new CanvasSolidColorBrush(ds, system_color(UIElementType::Highlight));
+        static auto rubberband_color = make_solid_brush(system_color(UIElementType::Highlight));
 
         float left = std::min(this->last_pointer_x, (*this->rubberband_x));
         float top = std::min(this->last_pointer_y, (*this->rubberband_y));

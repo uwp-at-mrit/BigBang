@@ -2,6 +2,7 @@
 
 #include "decorator/pipeline.hpp"
 #include "snip/pipe/pipesnip.hpp"
+#include "paint.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -24,13 +25,13 @@ void PipelineDecorator::draw_after_snip(Snip* self, CanvasDrawingSession^ ds, fl
 
        if (pipe != nullptr) {
            if (this->draw_inport) {
-               static auto color = ref new CanvasSolidColorBrush(ds, Colors::Orange);
+               static auto color = make_solid_brush(Colors::Orange);
                Rect region = pipe->get_input_port();
                ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
            }
 
            if (this->draw_outport) {
-               static auto color = ref new CanvasSolidColorBrush(ds, Colors::Firebrick);
+               static auto color = make_solid_brush(Colors::Firebrick);
                Rect region = pipe->get_output_port();
                ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
            }

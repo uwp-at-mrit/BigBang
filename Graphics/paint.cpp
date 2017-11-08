@@ -31,6 +31,10 @@ void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, 
     brush->Transform = make_float3x2_translation(float2(x, y));
 }
 
+CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& color) {
+    return ref new CanvasSolidColorBrush(shared_ds, color);
+}
+
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey
     , GradientStops^ stops, CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
     auto brush = ref new CanvasLinearGradientBrush(shared_ds, stops, edge, alpha);

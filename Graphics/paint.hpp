@@ -7,6 +7,8 @@ typedef Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop
 GradientStops^ make_gradient_stops(Windows::UI::Color colors[], int total);
 void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, float x, float y);
 
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& color);
+
 Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ make_linear_gradient_brush(
     float hextent, float vextent, GradientStops^ stops,
     Microsoft::Graphics::Canvas::CanvasEdgeBehavior shade = Microsoft::Graphics::Canvas::CanvasEdgeBehavior::Mirror,
