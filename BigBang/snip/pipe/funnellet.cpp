@@ -105,4 +105,7 @@ void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
             particles_y -= particles_interval;
         }
     }
+
+    ds->DrawRectangle(this->get_input_port(), Colors::Firebrick);
+    ds->DrawRectangle(this->get_output_port(), Colors::Firebrick);
 }

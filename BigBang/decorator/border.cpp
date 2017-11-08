@@ -13,7 +13,6 @@ using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-using namespace Microsoft::Graphics::Canvas::Geometry;
 
 BorderDecorator::BorderDecorator(bool draw_border, bool draw_enclosing, bool draw_snip_enclosing) {
     this->draw_border = draw_border;

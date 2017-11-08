@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)control.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipe\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipe\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp" />
