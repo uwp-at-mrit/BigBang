@@ -61,14 +61,14 @@ void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, floa
 }
 
 Rect Funnellet::get_input_port() {
-    return Rect{ 0.0F, this->body_brush->StartPoint.y, this->width, 0.0F };
+    return Rect{ 0.0F, this->topface_brush->EndPoint.y , this->width, 0.0F };
 }
 
 Rect Funnellet::get_output_port() {
     float radius = this->body_brush->EndPoint.y;
-    float cx = this->width * 0.5F;
+    float height = radius;
 
-    return Rect{ cx - radius, this->height - radius, radius * 2.0F, radius };
+    return Rect{ this->width * 0.5F - radius, this->height - height, radius * 2.0F, height };
 }
 
 void Funnellet::update(long long count, long long interval, long long uptime, bool is_slow) {
