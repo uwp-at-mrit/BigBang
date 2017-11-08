@@ -71,10 +71,8 @@ void Gaugelet::load() {
     this->height = this->label_height * 2.618F + this->ampere_scales->LayoutBounds.Height;
 }
 
-void Gaugelet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void Gaugelet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

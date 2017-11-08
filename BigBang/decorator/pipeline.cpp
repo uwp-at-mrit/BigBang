@@ -1,7 +1,7 @@
 #pragma once
 
 #include "decorator/pipeline.hpp"
-#include "snip/pipe/pipesnip.hpp"
+#include "snip/pipeline/pipesnip.hpp"
 #include "paint.hpp"
 
 using namespace WarGrey::SCADA;

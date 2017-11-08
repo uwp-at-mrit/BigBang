@@ -3,7 +3,7 @@
 #include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipe/funnellet.hpp"
+#include "snip/pipeline/funnellet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -54,10 +54,8 @@ void Funnellet::load() {
     }
 }
 
-void Funnellet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void Funnellet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 Rect Funnellet::get_input_port() {

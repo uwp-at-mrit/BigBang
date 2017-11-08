@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipe/screwlet.hpp"
-#include "snip/pipe/static.hpp"
+#include "snip/pipeline/screwlet.hpp"
+#include "snip/pipeline/static.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -21,7 +21,7 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
         this->pipe_thickness = -this->width * thickness;
     }
 
-    this->connector_width = this->width * 0.0618F;
+    this->connector_width = this->pipe_thickness * 0.25F;
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
@@ -48,10 +48,8 @@ void Screwlet::load() {
     this->connector = geometry_freeze(cylinder_rl_surface(connector_rx, connector_ry, this->connector_width));
 }
 
-void Screwlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void Screwlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 Rect Screwlet::get_input_port() {

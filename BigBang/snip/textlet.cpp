@@ -49,12 +49,10 @@ void Textlet::change_text(Platform::String^ content) {
     }
 }
 
-void Textlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void Textlet::fill_extent(float x, float y, float* w, float* h) {
     TextExtent ts = get_text_extent(content, label_font);
 
     SET_VALUES(w, ts.width, h, ts.height);
-    SET_VALUES(b, ts.bspace, t, ts.tspace);
-    SET_VALUES(l, ts.lspace, r, ts.rspace);
 };
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

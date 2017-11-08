@@ -51,10 +51,8 @@ StorageTanklet::StorageTanklet(float width, float height) : width(width), height
     }
 }
 
-void StorageTanklet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void StorageTanklet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 void StorageTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

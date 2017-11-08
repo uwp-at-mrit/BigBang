@@ -9,10 +9,10 @@
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
-#include "snip/pipe/funnellet.hpp"
-#include "snip/pipe/pipelet.hpp"
-#include "snip/pipe/screwlet.hpp"
-#include "snip/pipe/gluecleanerlet.hpp"
+#include "snip/pipeline/funnellet.hpp"
+#include "snip/pipeline/pipelet.hpp"
+#include "snip/pipeline/screwlet.hpp"
+#include "snip/pipeline/gluecleanerlet.hpp"
 
 //#include "decorator/border.hpp"
 //#include "decorator/pipeline.hpp"
@@ -32,8 +32,8 @@ using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::UI;
 
-inline void connect_pipe(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y) {
-    pipe_connecting_position(prev, pipe, x, y);
+inline void connect_pipe(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+    pipe_connecting_position(prev, pipe, x, y, fx, fy);
     universe->move_to(pipe, (*x), (*y));
 }
 
@@ -77,7 +77,7 @@ public:
             float pipe_thickness = 32.0F;
 
             this->master = new Screwlet(128.0F, 128.0F, pipe_thickness);
-            this->slave = new Screwlet(128.0F, 80.0F, pipe_thickness);
+            this->slave = new Screwlet(200.0F, 80.0F, pipe_thickness);
             this->cleaner = new GlueCleanerlet(80.0F, 100.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
 
@@ -147,7 +147,7 @@ public:
             }
 
             connect_pipe(this, pipes[max_idx], this->cleaner, &current_x, &current_y);
-            connect_pipe(this, this->cleaner, this->slave, &current_x, &current_y);
+            connect_pipe(this, this->cleaner, this->slave, &current_x, &current_y, 0.0);
         }
     }
     

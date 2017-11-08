@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipe/gluecleanerlet.hpp"
-#include "snip/pipe/static.hpp"
+#include "snip/pipeline/gluecleanerlet.hpp"
+#include "snip/pipeline/static.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -64,10 +64,8 @@ void GlueCleanerlet::load() {
     this->hatbody_brush = make_linear_gradient_brush(hatbody_x, top_y, hatbody_x + hatbody_width, top_y, hat_stops);
 }
 
-void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 Rect GlueCleanerlet::get_input_port() {

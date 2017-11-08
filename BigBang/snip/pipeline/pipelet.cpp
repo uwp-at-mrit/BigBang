@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipe/pipelet.hpp"
-#include "snip/pipe/static.hpp"
+#include "snip/pipeline/pipelet.hpp"
+#include "snip/pipeline/static.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,7 +25,7 @@ Pipelet::Pipelet(float width, float height, float thickness, double color, doubl
         this->height = this->thickness * 1.618F;
     }
 
-    this->connector_width = this->width * 0.0618F;
+    this->connector_width = this->thickness * 0.25F;
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
@@ -57,10 +57,8 @@ void Pipelet::load() {
     this->cartoon_style = make_dash_stroke(CanvasDashStyle::Dash);
 }
 
-void Pipelet::fill_extent(float x, float y, float* w, float* h, float* b, float* t, float* l, float* r) {
+void Pipelet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
-    SET_BOXES(b, t, 0.0F);
-    SET_BOXES(l, r, 0.0F);
 }
 
 Rect Pipelet::get_input_port() {
