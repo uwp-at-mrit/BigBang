@@ -450,6 +450,8 @@ void Universe::update(long long count, long long interval, long long uptime, boo
     }
 }
 
+#include "snip/misc.hpp"
+
 void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     CanvasActiveLayer ^layer = nullptr;
     float3x2 transform = ds->Transform;

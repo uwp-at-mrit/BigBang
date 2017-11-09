@@ -18,13 +18,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)control.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp" />
@@ -38,9 +38,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp" />

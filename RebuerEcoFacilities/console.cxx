@@ -32,7 +32,7 @@ using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::UI;
 
-inline void connect_pipe(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+inline void connect_pipes(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
     universe->move_to(pipe, (*x), (*y));
 }
@@ -140,14 +140,15 @@ public:
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
-            connect_pipe(this, this->funnel, this->master, &current_x, &current_y);
-            connect_pipe(this, this->master, pipes[0], &current_x, &current_y);
+            connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25);
+            connect_pipes(this, this->master, pipes[0], &current_x, &current_y);
+
             for (size_t i = 1; i <= max_idx; i++) {
-                connect_pipe(this, pipes[i - 1], pipes[i], &current_x, &current_y);
+                connect_pipes(this, pipes[i - 1], pipes[i], &current_x, &current_y);
             }
 
-            connect_pipe(this, pipes[max_idx], this->cleaner, &current_x, &current_y);
-            connect_pipe(this, this->cleaner, this->slave, &current_x, &current_y, 0.0);
+            connect_pipes(this, pipes[max_idx], this->cleaner, &current_x, &current_y);
+            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 0.0);
         }
     }
     
