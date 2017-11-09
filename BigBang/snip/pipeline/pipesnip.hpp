@@ -2,12 +2,13 @@
 
 #include <cmath>
 #include "snip/snip.hpp"
+#include "snip/misc.hpp"
 
 namespace WarGrey::SCADA {
     private class IPipeSnip : public WarGrey::SCADA::Snip {
     public:
-        virtual Windows::Foundation::Rect get_input_port() = 0;
-        virtual Windows::Foundation::Rect get_output_port() = 0;
+        virtual Windows::Foundation::Rect get_inlet() = 0;
+        virtual Windows::Foundation::Rect get_outlet() = 0;
     };
 
     void pipe_connecting_position(

@@ -52,7 +52,7 @@ void Screwlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-Rect Screwlet::get_input_port() {
+Rect Screwlet::get_inlet() {
     float pipe_x = this->pipe_brush->StartPoint.x;
     float pipe_length = this->width - pipe_x;
     float port_width = pipe_length * 0.618F;
@@ -61,7 +61,7 @@ Rect Screwlet::get_input_port() {
     return Rect{ x, this->pipe_brush->StartPoint.y, port_width, 0.0F };
 }
 
-Rect Screwlet::get_output_port() {
+Rect Screwlet::get_outlet() {
     return Rect{ this->width, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
 }
 

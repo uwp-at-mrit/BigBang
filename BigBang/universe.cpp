@@ -450,8 +450,6 @@ void Universe::update(long long count, long long interval, long long uptime, boo
     }
 }
 
-#include "snip/misc.hpp"
-
 void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     CanvasActiveLayer ^layer = nullptr;
     float3x2 transform = ds->Transform;
@@ -470,8 +468,8 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 } else {
-                    auto cx = info->x + width / 2.0F;
-                    auto cy = info->y + height / 2.0F;
+                    auto cx = info->x + width * 0.5F;
+                    auto cy = info->y + height * 0.5F;
 
                     ds->Transform = make_float3x2_rotation(info->rotation, float2(cx, cy));
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));

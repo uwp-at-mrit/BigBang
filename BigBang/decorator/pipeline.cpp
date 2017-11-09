@@ -26,13 +26,13 @@ void PipelineDecorator::draw_after_snip(Snip* self, CanvasDrawingSession^ ds, fl
        if (pipe != nullptr) {
            if (this->draw_inport) {
                static auto color = make_solid_brush(Colors::Orange);
-               Rect region = pipe->get_input_port();
+               Rect region = pipe->get_inlet();
                ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
            }
 
            if (this->draw_outport) {
                static auto color = make_solid_brush(Colors::Firebrick);
-               Rect region = pipe->get_output_port();
+               Rect region = pipe->get_outlet();
                ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
            }
        }

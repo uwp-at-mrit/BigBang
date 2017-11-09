@@ -11,6 +11,7 @@
 #include "snip/vibratorlet.hpp"
 #include "snip/pipeline/funnellet.hpp"
 #include "snip/pipeline/pipelet.hpp"
+#include "snip/pipeline/fittinglet.hpp"
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
@@ -83,8 +84,13 @@ public:
 
             this->insert(this->master);
 
-            for (unsigned int i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
-                this->pipes[i] = new Pipelet(128.0F, 0.0F, pipe_thickness);
+            for (size_t i = 0; i < sizeof(this->fittings) / sizeof(Snip*); i++) {
+                this->fittings[i] = new Fittinglet(pipe_thickness * 0.32F, pipe_thickness * 1.618F);
+                this->insert(this->fittings[i]);
+            }
+
+            for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
+                this->pipes[i] = new Pipelet(128.0F, pipe_thickness);
                 this->insert(this->pipes[i]);
             }
 
@@ -141,13 +147,16 @@ public:
             this->move_to(this->funnel, current_x, current_y);
 
             connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25);
-            connect_pipes(this, this->master, pipes[0], &current_x, &current_y);
+            connect_pipes(this, this->master, this->fittings[0], &current_x, &current_y);
+            connect_pipes(this, this->fittings[0], this->pipes[0], &current_x, &current_y);
 
             for (size_t i = 1; i <= max_idx; i++) {
-                connect_pipes(this, pipes[i - 1], pipes[i], &current_x, &current_y);
+                connect_pipes(this, this->pipes[i - 1], this->fittings[i], &current_x, &current_y);
+                connect_pipes(this, this->fittings[i], this->pipes[i], &current_x, &current_y);
             }
 
-            connect_pipes(this, pipes[max_idx], this->cleaner, &current_x, &current_y);
+            connect_pipes(this, this->pipes[max_idx], this->fittings[max_idx + 1], &current_x, &current_y);
+            connect_pipes(this, this->fittings[max_idx + 1], this->cleaner, &current_x, &current_y);
             connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 0.0);
         }
     }
@@ -161,6 +170,7 @@ private:
 private:
     Screwlet* master;
     Screwlet* slave;
+    Fittinglet* fittings[5];
     Pipelet* pipes[4];
     GlueCleanerlet* cleaner;
     Funnellet* funnel;

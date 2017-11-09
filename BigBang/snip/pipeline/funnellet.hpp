@@ -19,8 +19,8 @@ namespace WarGrey::SCADA {
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
     public:
-        Windows::Foundation::Rect get_input_port() override;
-        Windows::Foundation::Rect get_output_port() override;
+        Windows::Foundation::Rect get_inlet() override;
+        Windows::Foundation::Rect get_outlet() override;
 
     private:
         float width;
