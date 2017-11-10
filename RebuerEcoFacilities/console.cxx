@@ -56,7 +56,6 @@ public:
         { // load icons
             this->icons[0] = new StorageTanklet(80.0F);
             this->icons[1] = new Motorlet(200.0F);
-            this->icons[2] = new Vibratorlet(80.0F);
 
             for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->insert(this->icons[i]);
@@ -85,9 +84,10 @@ public:
             size_t hfpimax = pcount + hfpcount + 1;
 
             this->master = new Screwlet(pipe_length, 128.0F, pipe_thickness);
-            this->slave = new HFlippedPipeSnip<Screwlet>(new Screwlet(200.0F, 80.0F, pipe_thickness));
-            this->cleaner = new GlueCleanerlet(80.0F, 100.0F, pipe_thickness);
+            this->slave = new HFlippedPipeSnip<Screwlet>(new Screwlet(164.0F, 80.0F, pipe_thickness));
+            this->cleaner = new GlueCleanerlet(80.0F, 128.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
+            this->vibrator = new Vibratorlet(fitting_height);
 
             this->insert(this->master);
 
@@ -116,6 +116,7 @@ public:
             this->insert(this->funnel);
             this->insert(this->cleaner);
             this->insert(this->slave);
+            this->insert(this->vibrator);
 
             this->insert(this->fittings[pcount]);
             this->insert(this->fittings[hfpimax]);
@@ -123,7 +124,7 @@ public:
     };
 
     void reflow(float width, float height) override {
-        float snip_width, snip_height, console_y;
+        float snip_width, snip_height, console_y, fitting_height;
 
         this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
         
@@ -186,13 +187,17 @@ public:
                 connect_pipes(this, this->fittings[hfidx], this->hfpipes[i], &current_x, &current_y);
                 connect_pipes(this, this->hfpipes[i], this->fittings[hfidx + 1], &current_x, &current_y);
             }
+
+            this->fittings[0]->fill_extent(0.0F, 0.0F, nullptr, &fitting_height);
+            this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
+            this->move_to(this->vibrator, current_x - snip_width * 2.0F, current_y + (fitting_height - snip_height) * 0.5F);
         }
     }
     
 // never deletes these snips mannually
 private:
     Statuslet* statusbar;
-    Snip* icons[3];
+    Snip* icons[2];
     Gaugelet* gauges[4];
 
 private:
