@@ -78,7 +78,7 @@ public:
             float pipe_thickness = 32.0F;
 
             this->master = new Screwlet(128.0F, 128.0F, pipe_thickness);
-            this->slave = new Screwlet(200.0F, 80.0F, pipe_thickness);
+            this->slave = new HFlippedPipeSnip<Screwlet>(new Screwlet(200.0F, 80.0F, pipe_thickness));
             this->cleaner = new GlueCleanerlet(80.0F, 100.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
 
@@ -157,7 +157,7 @@ public:
 
             connect_pipes(this, this->pipes[max_idx], this->fittings[max_idx + 1], &current_x, &current_y);
             connect_pipes(this, this->fittings[max_idx + 1], this->cleaner, &current_x, &current_y);
-            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 0.0);
+            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 1.0);
         }
     }
     
@@ -169,7 +169,7 @@ private:
 
 private:
     Screwlet* master;
-    Screwlet* slave;
+    HFlippedPipeSnip<Screwlet>* slave;
     Fittinglet* fittings[5];
     Pipelet* pipes[4];
     GlueCleanerlet* cleaner;
