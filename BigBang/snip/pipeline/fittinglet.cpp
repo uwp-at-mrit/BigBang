@@ -13,13 +13,11 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Fittinglet::Fittinglet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : width(width), height(height), pipe_thickness(thickness) {
-    if (thickness <= 0.0F) {
-        this->pipe_thickness = this->height * 0.618F;
+Fittinglet::Fittinglet(float width, float height, float hsocket, double color, double saturation, double light, double highlight)
+    : width(width), height(height), socket_height(hsocket) {
+    if (hsocket <= 0.0F) {
+        this->socket_height = this->height * 0.618F;
     }
-
-    this->pipe_ascent = (this->height - this->pipe_thickness) * 0.5F;
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
@@ -29,8 +27,8 @@ Fittinglet::Fittinglet(float width, float height, float thickness, double color,
 void Fittinglet::load() {
     Color colors[] = { this->body_color, this->highlight_color, this->body_color, this->body_color };
 
-    float body_rx = this->pipe_ascent * 0.18F;
     float body_ry = this->height * 0.5F;
+    float body_rx = body_ry * 0.0618F;
     float body_width = this->width - body_rx * 2.0F;
 
     this->brush = make_linear_gradient_brush(body_rx, 0.0F, body_rx, this->height, MAKE_GRADIENT_STOPS(colors));
@@ -43,14 +41,16 @@ void Fittinglet::fill_extent(float x, float y, float* w, float* h) {
 
 Rect Fittinglet::get_inlet() {
     float socket_width = this->brush->StartPoint.x;
+    float ascent = (this->height - this->socket_height) * 0.5F;
 
-    return Rect{ 0.0F, this->pipe_ascent, socket_width, this->pipe_thickness };
+    return Rect{ 0.0F, ascent, socket_width, this->socket_height };
 }
 
 Rect Fittinglet::get_outlet() {
     float socket_width = this->brush->StartPoint.x * 2.0F;
+    float ascent = (this->height - this->socket_height) * 0.5F;
 
-    return Rect{ this->width - socket_width, this->pipe_ascent, socket_width, this->pipe_thickness };
+    return Rect{ this->width - socket_width, ascent, socket_width, this->socket_height };
 }
 
 void Fittinglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

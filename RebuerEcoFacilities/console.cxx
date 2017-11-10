@@ -146,7 +146,7 @@ public:
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
-            connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25);
+            connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25, 0.50);
             connect_pipes(this, this->master, this->fittings[0], &current_x, &current_y);
             connect_pipes(this, this->fittings[0], this->pipes[0], &current_x, &current_y);
 

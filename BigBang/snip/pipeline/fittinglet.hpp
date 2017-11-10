@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class Fittinglet : public WarGrey::SCADA::IPipeSnip {
     public:
-        Fittinglet(float width, float height = 0.0F, float thickness = 0.0F,
+        Fittinglet(float width, float height = 0.0F, float socket_height = 0.0F,
             double color = nan("Silver"), double saturation = 0.0,
             double light = 0.512, double highlight = 0.753);
 
@@ -21,8 +21,7 @@ namespace WarGrey::SCADA {
     private:
         float width;
         float height;
-        float pipe_ascent;
-        float pipe_thickness;
+        float socket_height;
 
     private:
         Windows::UI::Color color;
