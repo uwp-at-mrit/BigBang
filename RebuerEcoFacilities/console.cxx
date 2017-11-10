@@ -75,28 +75,50 @@ public:
         }
 
         { // load B Segment
+            float pipe_length = 128.0F;
             float pipe_thickness = 32.0F;
+            float fitting_width = pipe_thickness * 0.36F;
+            float fitting_height = pipe_thickness * 1.618F;
 
-            this->master = new Screwlet(128.0F, 128.0F, pipe_thickness);
+            size_t pcount = sizeof(this->pipes) / sizeof(Snip*);
+            size_t hfpcount = sizeof(this->hfpipes) / sizeof(Snip*);
+            size_t hfpimax = pcount + hfpcount + 1;
+
+            this->master = new Screwlet(pipe_length, 128.0F, pipe_thickness);
             this->slave = new HFlippedPipeSnip<Screwlet>(new Screwlet(200.0F, 80.0F, pipe_thickness));
             this->cleaner = new GlueCleanerlet(80.0F, 100.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
 
             this->insert(this->master);
 
-            for (size_t i = 0; i < sizeof(this->fittings) / sizeof(Snip*); i++) {
-                this->fittings[i] = new Fittinglet(pipe_thickness * 0.36F, pipe_thickness * 1.618F);
+            this->fittings[pcount] = new RFittinglet(fitting_width, fitting_height, 0.0F, nan("Silver"), 0.0, 0.512, 0.753);
+            this->fittings[hfpimax] = new HFlippedPipeSnip<RFittinglet>(new RFittinglet(fitting_width, fitting_height));
+            
+            for (size_t i = 0; i < pcount; i++) {
+                this->fittings[i] = new LFittinglet(fitting_width, fitting_height);
                 this->insert(this->fittings[i]);
+
+                this->pipes[i] = new Pipelet(pipe_length, pipe_thickness);
+                this->insert(this->pipes[i]);
             }
 
-            for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
-                this->pipes[i] = new Pipelet(128.0F, pipe_thickness);
-                this->insert(this->pipes[i]);
+            for (size_t i = 0; i < hfpcount; i++) {
+                size_t hfidx = pcount + i + 1;
+                LFittinglet* fitting = new LFittinglet(fitting_width, fitting_height, 0.0F, 120.0, 0.607, 0.339, 0.839);
+                this->fittings[hfidx] = new HFlippedPipeSnip<LFittinglet>(fitting);
+                this->insert(this->fittings[hfidx]);
+
+                Pipelet* pipe = new Pipelet(pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+                this->hfpipes[i] = new HFlippedPipeSnip<Pipelet>(pipe);
+                this->insert(this->hfpipes[i]);
             }
 
             this->insert(this->funnel);
             this->insert(this->cleaner);
             this->insert(this->slave);
+
+            this->insert(this->fittings[pcount]);
+            this->insert(this->fittings[hfpimax]);
         }
     };
 
@@ -138,26 +160,32 @@ public:
         }
 
         { // flow B Segment
-            size_t max_idx = sizeof(this->pipes) / sizeof(Snip*) - 1;
+            size_t pcount = sizeof(this->pipes) / sizeof(Snip*);
+            size_t hfpcount = sizeof(this->hfpipes) / sizeof(Snip*);
             
             this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
-            float current_x = width * 0.2F;
+            float current_x = width * 0.25F;
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
             connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25, 0.50);
             connect_pipes(this, this->master, this->fittings[0], &current_x, &current_y);
-            connect_pipes(this, this->fittings[0], this->pipes[0], &current_x, &current_y);
 
-            for (size_t i = 1; i <= max_idx; i++) {
-                connect_pipes(this, this->pipes[i - 1], this->fittings[i], &current_x, &current_y);
+            for (size_t i = 0; i < pcount; i++) {
                 connect_pipes(this, this->fittings[i], this->pipes[i], &current_x, &current_y);
+                connect_pipes(this, this->pipes[i], this->fittings[i + 1], &current_x, &current_y);
             }
 
-            connect_pipes(this, this->pipes[max_idx], this->fittings[max_idx + 1], &current_x, &current_y);
-            connect_pipes(this, this->fittings[max_idx + 1], this->cleaner, &current_x, &current_y);
+            connect_pipes(this, this->fittings[pcount], this->cleaner, &current_x, &current_y);
             connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 1.0);
+            connect_pipes(this, this->slave, this->fittings[pcount + 1], &current_x, &current_y);
+
+            for (size_t i = 0; i < hfpcount; i++) {
+                size_t hfidx = pcount + i + 1;
+                connect_pipes(this, this->fittings[hfidx], this->hfpipes[i], &current_x, &current_y);
+                connect_pipes(this, this->hfpipes[i], this->fittings[hfidx + 1], &current_x, &current_y);
+            }
         }
     }
     
@@ -170,11 +198,12 @@ private:
 private:
     Screwlet* master;
     HFlippedPipeSnip<Screwlet>* slave;
-    Fittinglet* fittings[5];
-    Pipelet* pipes[4];
     GlueCleanerlet* cleaner;
     Funnellet* funnel;
     Vibratorlet* vibrator;
+    Pipelet* pipes[4];
+    HFlippedPipeSnip<Pipelet>* hfpipes[2];
+    IPipeSnip* fittings[4 + 2 + 2];
 
 private:
     Platform::String^ caption;

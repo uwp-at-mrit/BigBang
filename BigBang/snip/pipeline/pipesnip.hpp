@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
         virtual Windows::Foundation::Rect get_outlet() = 0;
     };
 
-    template <class PS>
+    template <class PS> // TODO: workout a better design pattern
     private class HFlippedPipeSnip : public WarGrey::SCADA::IPipeSnip {
     public:
         HFlippedPipeSnip(PS* self) : master(self) {}
