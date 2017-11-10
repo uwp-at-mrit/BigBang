@@ -42,22 +42,24 @@ void Fittinglet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 Rect Fittinglet::get_inlet() {
-    float sockect_width = this->brush->StartPoint.x;
+    float socket_width = this->brush->StartPoint.x;
 
-    return Rect{ 0.0F, this->pipe_ascent, sockect_width, this->pipe_thickness };
+    return Rect{ 0.0F, this->pipe_ascent, socket_width, this->pipe_thickness };
 }
 
 Rect Fittinglet::get_outlet() {
-    float sockect_width = this->brush->StartPoint.x * 2.0F;
+    float socket_width = this->brush->StartPoint.x * 2.0F;
 
-    return Rect{ this->width - sockect_width, this->pipe_ascent, sockect_width, this->pipe_thickness };
+    return Rect{ this->width - socket_width, this->pipe_ascent, socket_width, this->pipe_thickness };
 }
 
 void Fittinglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float cx = this->brush->StartPoint.x;
-    float cy = this->height * 0.5F;
+    float rx = this->brush->StartPoint.x;
+    float ry = this->height * 0.5F;
+    float cx = x + this->width - rx * 1.1618F;
+    float cy = y + ry;
     
     brush_translate(this->brush, x, y);
-    ds->FillEllipse(x + this->width - cx, y + cy, cx, cy, this->color);
+    ds->FillEllipse(cx, cy, rx, ry, this->color);
     ds->DrawCachedGeometry(this->body, x, y, this->brush);
 }

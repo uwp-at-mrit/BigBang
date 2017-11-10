@@ -85,7 +85,7 @@ public:
             this->insert(this->master);
 
             for (size_t i = 0; i < sizeof(this->fittings) / sizeof(Snip*); i++) {
-                this->fittings[i] = new Fittinglet(pipe_thickness * 0.32F, pipe_thickness * 1.618F);
+                this->fittings[i] = new Fittinglet(pipe_thickness * 0.36F, pipe_thickness * 1.618F);
                 this->insert(this->fittings[i]);
             }
 

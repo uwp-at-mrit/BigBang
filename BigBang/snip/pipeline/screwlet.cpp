@@ -82,12 +82,13 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         float connector_rx = this->connector_brush->StartPoint.x;
         float pipe_x = body_x + this->pipe_thickness;
         float pipe_y = y + this->pipe_brush->StartPoint.y + this->pipe_thickness * 0.5F;
-        float pipe_xoff = this->connector_width - connector_rx * 0.5F;
+        float pipe_xoff = this->connector_width - connector_rx * 0.1618F;
+        float cx = pipe_x + pipe_xoff;
 
         brush_translate(this->connector_brush, x, y);
         brush_translate(this->pipe_brush, x, y);
-        ds->FillEllipse(pipe_x + pipe_xoff, pipe_y, connector_rx, pipe_y - y, this->color);
-        ds->DrawLine(pipe_x + pipe_xoff, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
+        ds->FillEllipse(cx, pipe_y, connector_rx, pipe_y - y, this->color);
+        ds->DrawLine(cx, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
         ds->DrawCachedGeometry(this->connector, pipe_x - connector_rx, y, this->connector_brush);
     }
 }
