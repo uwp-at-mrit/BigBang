@@ -55,9 +55,8 @@ public:
 
         { // load icons
             this->icons[0] = new StorageTanklet(80.0F);
-            this->icons[1] = new Motorlet(200.0F);
-
-            for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+            
+            for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->insert(this->icons[i]);
             }
         }
@@ -68,7 +67,7 @@ public:
             this->gauges[2] = new Gaugelet("cleanmotor", 10, 20);
             this->gauges[3] = new Gaugelet("slavemotor", 200, 100);
 
-            for (unsigned int i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
+            for (size_t i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
                 this->insert(this->gauges[i]);
             }
         }
@@ -90,6 +89,10 @@ public:
             this->vibrator = new Vibratorlet(fitting_height);
 
             this->insert(this->master);
+            this->insert(this->funnel);
+            this->insert(this->cleaner);
+            this->insert(this->slave);
+            this->insert(this->vibrator);
 
             this->fittings[pcount] = new RFittinglet(fitting_width, fitting_height, 0.0F, nan("Silver"), 0.0, 0.512, 0.753);
             this->fittings[hfpimax] = new HFlippedPipeSnip<RFittinglet>(new RFittinglet(fitting_width, fitting_height));
@@ -113,13 +116,19 @@ public:
                 this->insert(this->hfpipes[i]);
             }
 
-            this->insert(this->funnel);
-            this->insert(this->cleaner);
-            this->insert(this->slave);
-            this->insert(this->vibrator);
-
             this->insert(this->fittings[pcount]);
             this->insert(this->fittings[hfpimax]);
+        }
+
+        { // load motors
+            this->motors[0] = new Motorlet(100);
+            this->motors[1] = new Motorlet(100);
+            this->motors[2] = new Motorlet(100);
+            this->motors[3] = new Motorlet(100);
+
+            for (size_t i = 0; i < sizeof(this->motors) / sizeof(Motorlet*); i++) {
+                this->insert(this->motors[i]);
+            }
         }
     };
 
@@ -197,7 +206,7 @@ public:
 // never deletes these snips mannually
 private:
     Statuslet* statusbar;
-    Snip* icons[2];
+    Snip* icons[1];
     Gaugelet* gauges[4];
 
 private:
@@ -207,6 +216,7 @@ private:
     Funnellet* funnel;
     Vibratorlet* vibrator;
     Pipelet* pipes[4];
+    Motorlet* motors[4];
     HFlippedPipeSnip<Pipelet>* hfpipes[2];
     IPipeSnip* fittings[4 + 2 + 2];
 
