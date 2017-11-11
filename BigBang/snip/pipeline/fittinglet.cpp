@@ -32,7 +32,7 @@ void Fittinglet::load() {
     float body_width = this->width - body_rx * 2.0F;
 
     this->brush = make_linear_gradient_brush(body_rx, 0.0F, body_rx, this->height, MAKE_GRADIENT_STOPS(colors));
-    this->body = this->make_body(body_rx, body_ry, body_width);
+    this->body = geometry_freeze(this->make_body(body_rx, body_ry, body_width));
 }
 
 void Fittinglet::fill_extent(float x, float y, float* w, float* h) {
@@ -43,18 +43,18 @@ void Fittinglet::fill_extent(float x, float y, float* w, float* h) {
 LFittinglet::LFittinglet(float width, float height, float hsocket, double color, double saturation, double light, double highlight)
     : Fittinglet(width, height, socket_height, color, saturation, light, highlight) {}
 
-CanvasCachedGeometry^ LFittinglet::make_body(float rx, float ry, float width) {
-    return geometry_freeze(cylinder_rl_surface(rx, ry, width));
+CanvasGeometry^ LFittinglet::make_body(float rx, float ry, float width) {
+    return cylinder_rl_surface(rx, ry, width);
 }
 
-Rect LFittinglet::get_inlet() {
+Rect LFittinglet::get_input_port() {
     float socket_width = this->brush->StartPoint.x * 2.0F;
     float ascent = (this->height - this->socket_height) * 0.5F;
 
     return Rect{ 0.0F, ascent, socket_width, this->socket_height };
 }
 
-Rect LFittinglet::get_outlet() {
+Rect LFittinglet::get_output_port() {
     float socket_width = this->brush->StartPoint.x;
     float ascent = (this->height - this->socket_height) * 0.5F;
 
@@ -76,18 +76,18 @@ void LFittinglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 RFittinglet::RFittinglet(float width, float height, float hsocket, double color, double saturation, double light, double highlight)
     : Fittinglet(width, height, socket_height, color, saturation, light, highlight) {}
 
-CanvasCachedGeometry^ RFittinglet::make_body(float rx, float ry, float width) {
-    return geometry_freeze(cylinder_lr_surface(rx, ry, width));
+CanvasGeometry^ RFittinglet::make_body(float rx, float ry, float width) {
+    return cylinder_lr_surface(rx, ry, width);
 }
 
-Rect RFittinglet::get_inlet() {
+Rect RFittinglet::get_input_port() {
     float socket_width = this->brush->StartPoint.x * 2.0F;
     float ascent = (this->height - this->socket_height) * 0.5F;
 
     return Rect{ 0.0F, ascent, socket_width, this->socket_height };
 }
 
-Rect RFittinglet::get_outlet() {
+Rect RFittinglet::get_output_port() {
     float socket_width = this->brush->StartPoint.x;
     float ascent = (this->height - this->socket_height) * 0.5F;
 

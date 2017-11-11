@@ -68,11 +68,11 @@ void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-Rect GlueCleanerlet::get_inlet() {
+Rect GlueCleanerlet::get_input_port() {
     return Rect{ 0.0F, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
 }
 
-Rect GlueCleanerlet::get_outlet() {
+Rect GlueCleanerlet::get_output_port() {
     return Rect{ this->pipe_brush->StartPoint.x, this->height, this->pipe_thickness, 0.0F };
 }
 

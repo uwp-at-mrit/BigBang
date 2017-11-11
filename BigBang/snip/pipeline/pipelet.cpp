@@ -44,11 +44,11 @@ void Pipelet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->thickness);
 }
 
-Rect Pipelet::get_inlet() {
+Rect Pipelet::get_input_port() {
     return Rect{ 0.0F, 0.0F, 0.0F, this->thickness };
 }
 
-Rect Pipelet::get_outlet() {
+Rect Pipelet::get_output_port() {
     return Rect{ this->width, 0.0F, 0.0F, this->thickness };
 }
 

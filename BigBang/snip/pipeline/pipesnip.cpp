@@ -6,8 +6,8 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 void WarGrey::SCADA::pipe_connecting_position(IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx, double fy) {
-    Rect in = pipe->get_inlet();
-    Rect out = prev->get_outlet();
+    Rect in = pipe->get_input_port();
+    Rect out = prev->get_output_port();
 
     float delta_x = (out.X - in.X) + (out.Width - in.Width) * float(fx);
     float delta_y = (out.Y - in.Y) + (out.Height - in.Height) * float(fy);

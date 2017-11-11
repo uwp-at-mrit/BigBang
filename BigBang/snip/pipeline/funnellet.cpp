@@ -58,11 +58,11 @@ void Funnellet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-Rect Funnellet::get_inlet() {
+Rect Funnellet::get_input_port() {
     return Rect{ 0.0F, this->topface_brush->EndPoint.y , this->width, 0.0F };
 }
 
-Rect Funnellet::get_outlet() {
+Rect Funnellet::get_output_port() {
     float radius = this->body_brush->EndPoint.y;
     float height = radius;
 
@@ -104,6 +104,6 @@ void Funnellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
         }
     }
 
-    ds->DrawRectangle(this->get_inlet(), Colors::Firebrick);
-    ds->DrawRectangle(this->get_outlet(), Colors::Firebrick);
+    ds->DrawRectangle(this->get_input_port(), Colors::Firebrick);
+    ds->DrawRectangle(this->get_output_port(), Colors::Firebrick);
 }

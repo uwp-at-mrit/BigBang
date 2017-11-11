@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
     protected:
-        virtual Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ make_body(float rx, float ry, float width) = 0;
+        virtual Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_body(float rx, float ry, float width) = 0;
 
     protected:
         float width;
@@ -37,11 +37,11 @@ namespace WarGrey::SCADA {
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
         
     public:
-        Windows::Foundation::Rect get_inlet() override;
-        Windows::Foundation::Rect get_outlet() override;
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     protected:
-        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ make_body(float rx, float ry, float width) override;
+        Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_body(float rx, float ry, float width) override;
     };
 
     private class RFittinglet : public WarGrey::SCADA::Fittinglet {
@@ -54,10 +54,10 @@ namespace WarGrey::SCADA {
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
     public:
-        Windows::Foundation::Rect get_inlet() override;
-        Windows::Foundation::Rect get_outlet() override;
+        Windows::Foundation::Rect get_input_port() override;
+        Windows::Foundation::Rect get_output_port() override;
 
     protected:
-        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ make_body(float rx, float ry, float width) override;
+        Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_body(float rx, float ry, float width) override;
     };
 }

@@ -7,8 +7,8 @@
 namespace WarGrey::SCADA {
     private class IPipeSnip : public WarGrey::SCADA::Snip {
     public:
-        virtual Windows::Foundation::Rect get_inlet() = 0;
-        virtual Windows::Foundation::Rect get_outlet() = 0;
+        virtual Windows::Foundation::Rect get_input_port() = 0;
+        virtual Windows::Foundation::Rect get_output_port() = 0;
     };
 
     template <class PS> // TODO: workout a better design pattern
@@ -36,12 +36,12 @@ namespace WarGrey::SCADA {
         }
 
     public:
-        Windows::Foundation::Rect get_inlet() override {
-            return snip_socket_hflip(this->master, 0.0F, 0.0F, this->master->get_inlet());
+        Windows::Foundation::Rect get_input_port() override {
+            return snip_socket_hflip(this->master, 0.0F, 0.0F, this->master->get_input_port());
         }
 
-        Windows::Foundation::Rect get_outlet() override {
-            return snip_socket_hflip(this->master, 0.0F, 0.0F, this->master->get_outlet());
+        Windows::Foundation::Rect get_output_port() override {
+            return snip_socket_hflip(this->master, 0.0F, 0.0F, this->master->get_output_port());
         }
     
     private:

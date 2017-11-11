@@ -15,8 +15,8 @@
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
-//#include "decorator/border.hpp"
-//#include "decorator/pipeline.hpp"
+// #include "decorator/border.hpp"
+// #include "decorator/pipeline.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -43,7 +43,8 @@ public:
     BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
         this->caption = caption;
 
-        //this->set_decorator(new PipelineDecorator(true, true));
+        // this->set_decorator(new BorderDecorator(true, true, true));
+        // this->set_decorator(new PipelineDecorator(true, true));
     }
 
 public:
@@ -82,8 +83,8 @@ public:
             size_t hfpcount = sizeof(this->hfpipes) / sizeof(Snip*);
             size_t hfpimax = pcount + hfpcount + 1;
 
-            this->master = new Screwlet(pipe_length, 128.0F, pipe_thickness);
-            this->slave = new HFlippedPipeSnip<Screwlet>(new Screwlet(164.0F, 80.0F, pipe_thickness));
+            this->master = new LScrewlet(pipe_length, 128.0F, pipe_thickness);
+            this->slave = new RScrewlet(164.0F, 80.0F, pipe_thickness);
             this->cleaner = new GlueCleanerlet(80.0F, 128.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
             this->vibrator = new Vibratorlet(fitting_height);
@@ -211,7 +212,7 @@ private:
 
 private:
     Screwlet* master;
-    HFlippedPipeSnip<Screwlet>* slave;
+    Screwlet* slave;
     GlueCleanerlet* cleaner;
     Funnellet* funnel;
     Vibratorlet* vibrator;
