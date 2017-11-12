@@ -21,7 +21,7 @@ Fittinglet::Fittinglet(float width, float height, float hsocket, double color, d
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->body_color = hsla(color, saturation, light * default_connector_light_rate);
+    this->body_color = hsla(color, saturation, light * default_fitting_lightness_rate);
 }
 
 void Fittinglet::load() {

@@ -25,9 +25,9 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->fitting_color = hsla(color, saturation, light * default_connector_light_rate);
-    this->body_color = hsla(color, saturation, light * default_body_light_rate);
-    this->base_color = hsla(color, saturation, light * default_endpoint_light_rate);
+    this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
+    this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
+    this->base_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
 void Screwlet::load() {
@@ -37,15 +37,19 @@ void Screwlet::load() {
     auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
 
     float ascent = this->pipe_thickness * 0.5F;
-    float fitting_ry = this->pipe_thickness * 0.5F + ascent;
-    float fitting_rx = fitting_ry * 0.0618F;
+    float basefit_ry = this->pipe_thickness * 0.5F + ascent;
+    float basefit_rx = basefit_ry * 0.0618F;
+    float outfit_ry = this->pipe_thickness * 0.5F * default_fitting_pipe_ratio;
+    float outfit_rx = outfit_ry * 0.0618F;
+    float outfit_y = basefit_ry - outfit_ry;
     float base_width = this->pipe_thickness * 1.618F;
     float base_height = (base_width - this->pipe_thickness) * 0.5F;
     float pipe_x = base_height + this->pipe_thickness;
     
-    this->fitting_brush = make_linear_gradient_brush(fitting_rx, 0.0F, fitting_rx, fitting_ry * 2.0F, fitting_stops);
+    this->basefit_brush = make_linear_gradient_brush(basefit_rx, 0.0F, basefit_rx, basefit_ry * 2.0F, fitting_stops);
+    this->outfit_brush = make_linear_gradient_brush(outfit_rx, outfit_y, outfit_rx, outfit_ry * 2.0F, fitting_stops);
     this->pipe_brush = make_linear_gradient_brush(pipe_x, ascent, pipe_x, this->pipe_thickness + ascent, pipe_stops);
-    this->fitting = geometry_freeze(this->make_fitting(fitting_rx, fitting_ry));
+    this->base_fitting = geometry_freeze(this->make_fitting(basefit_rx, basefit_ry));
 }
 
 void Screwlet::fill_extent(float x, float y, float* w, float* h) {
@@ -67,18 +71,18 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     ds->FillRectangle(base_x, base_y, base_width, base_height, this->base_color);
 
     { // draw pipe
-        float fitting_rx = this->fitting_brush->StartPoint.x;
+        float fitting_rx = this->basefit_brush->StartPoint.x;
         float fitting_off = fitting_rx * 0.1618F;
         float pipe_y = y + this->pipe_brush->StartPoint.y + this->pipe_thickness * 0.5F;
         float pipe_width = this->width - (body_off + this->pipe_thickness + this->fitting_width);
         float pipe_x, fitting_x, cx;
 
-        brush_translate(this->fitting_brush, x, y);
+        brush_translate(this->basefit_brush, x, y);
         brush_translate(this->pipe_brush, x, y);
         cx = this->locate_pipe(x, body_x, fitting_rx, fitting_off, &pipe_x, &fitting_x);
         ds->FillEllipse(cx, pipe_y, fitting_rx, pipe_y - y, this->color);
         ds->DrawLine(pipe_x, pipe_y, pipe_x + pipe_width, pipe_y, this->pipe_brush, this->pipe_thickness);
-        ds->DrawCachedGeometry(this->fitting, fitting_x, y, this->fitting_brush);
+        ds->DrawCachedGeometry(this->base_fitting, fitting_x, y, this->basefit_brush);
     }
 }
 
@@ -100,7 +104,11 @@ Rect LScrewlet::get_input_port() {
 }
 
 Rect LScrewlet::get_output_port() {
-    return Rect{ this->width, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
+    float socket_y = this->outfit_brush->StartPoint.y;
+    float socket_width = this->outfit_brush->StartPoint.x;
+    float socket_height = this->pipe_thickness + (this->pipe_brush->StartPoint.y - socket_y) * 2.0F;
+
+    return Rect{ this->width - socket_width, socket_y, socket_width, socket_height };
 }
 
 void LScrewlet::locate_body(float x, float base_width, float body_off, float *base_x, float* body_x) {
@@ -133,7 +141,11 @@ Rect RScrewlet::get_input_port() {
 }
 
 Rect RScrewlet::get_output_port() {
-    return Rect{ 0.0F, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
+    float socket_y = this->outfit_brush->StartPoint.y;
+    float socket_width = this->outfit_brush->StartPoint.x;
+    float socket_height = this->pipe_thickness + (this->pipe_brush->StartPoint.y - socket_y) * 2.0F;
+
+    return Rect{ 0.0F, socket_y, socket_width, socket_height };
 }
 
 void RScrewlet::locate_body(float x, float base_width, float body_off, float *base_x, float* body_x) {
@@ -149,21 +161,3 @@ float RScrewlet::locate_pipe(float x, float body_x, float fitting_rx, float fitt
 
     return cx_before_adjust + fitting_off;
 }
-
-/*
-void RScrewlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    { // draw pipe
-        float fitting_rx = this->fitting_brush->StartPoint.x;
-        float pipe_x = body_x + this->pipe_thickness;
-        float pipe_y = y + this->pipe_brush->StartPoint.y + this->pipe_thickness * 0.5F;
-        float fitting_off = this->fitting_width - fitting_rx * 0.1618F;
-        float cx = pipe_x + fitting_off;
-
-        brush_translate(this->fitting_brush, x, y);
-        brush_translate(this->pipe_brush, x, y);
-        ds->FillEllipse(cx, pipe_y, fitting_rx, pipe_y - y, this->color);
-        ds->DrawLine(cx, pipe_y, x + this->width, pipe_y, this->pipe_brush, this->pipe_thickness);
-        ds->DrawCachedGeometry(this->fitting, pipe_x - fitting_rx, y, this->fitting_brush);
-    }
-}
-*/

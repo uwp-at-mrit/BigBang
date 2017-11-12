@@ -26,8 +26,8 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
-    this->body_color = hsla(color, saturation, light * default_body_light_rate);
-    this->endpoint_color = hsla(color, saturation, light * default_endpoint_light_rate);
+    this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
+    this->endpoint_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
 void GlueCleanerlet::load() {
