@@ -16,8 +16,8 @@
 #include "snip/pipeline/gluecleanerlet.hpp"
 
 // #include "decorator/border.hpp"
-// #include "decorator/pipeline.hpp"
 #include "decorator/grid.hpp"
+// #include "decorator/pipeline.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -58,6 +58,8 @@ public:
 
         { // load icons
             this->icons[0] = new StorageTanklet(80.0F);
+            this->icons[1] = new LScrewlet(128.0F, 128.0F, 32.0F);
+            this->icons[2] = new RScrewlet(128.0F, 128.0F, 32.0F);
             
             for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->insert(this->icons[i]);
@@ -209,7 +211,7 @@ public:
 // never deletes these snips mannually
 private:
     Statuslet* statusbar;
-    Snip* icons[1];
+    Snip* icons[3];
     Gaugelet* gauges[4];
 
 private:

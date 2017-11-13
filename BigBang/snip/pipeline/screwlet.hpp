@@ -14,8 +14,9 @@ namespace WarGrey::SCADA {
 
     protected:
         virtual Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_fitting(float rx, float ry) = 0;
-        virtual void locate_body(float x, float base_width, float body_off, float *base_x, float* body_x) = 0;
-        virtual float locate_pipe(float x, float body_x, float fitting_rx, float fitting_off, float *pipe_x, float* fitting_x) = 0;
+        virtual void locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) = 0;
+        virtual void locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx,
+            float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) = 0;
 
     protected:
         float width;
@@ -48,8 +49,9 @@ namespace WarGrey::SCADA {
 
     protected:
         Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_fitting(float rx, float ry) override;
-        void locate_body(float x, float base_width, float body_off, float *base_x, float* body_x) override;
-        float locate_pipe(float x, float body_x, float fitting_rx, float fitting_off, float *pipe_x, float* fitting_x) override;
+        void locate_body(float x, float base_width, float body_off, float *body_x, float *base_x) override;
+        void locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx,
+            float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) override;
     };
 
     private class RScrewlet : public WarGrey::SCADA::Screwlet {
@@ -64,7 +66,8 @@ namespace WarGrey::SCADA {
 
     protected:
         Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_fitting(float rx, float ry) override;
-        void locate_body(float x, float base_width, float body_off, float *base_x, float* body_x) override;
-        float locate_pipe(float x, float body_x, float fitting_rx, float fitting_off, float *pipe_x, float* fitting_x) override;
+        void locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) override;
+        void locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx,
+            float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) override;
     };
 }
