@@ -17,6 +17,7 @@
 
 // #include "decorator/border.hpp"
 // #include "decorator/pipeline.hpp"
+#include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -45,6 +46,7 @@ public:
 
         // this->set_decorator(new BorderDecorator(true, true, true));
         // this->set_decorator(new PipelineDecorator(true, true));
+        this->set_decorator(new GridDecorator());
     }
 
 public:
