@@ -20,7 +20,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\fittinglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
@@ -42,7 +41,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\fittinglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />

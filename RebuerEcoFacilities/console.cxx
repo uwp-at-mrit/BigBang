@@ -11,7 +11,6 @@
 #include "snip/vibratorlet.hpp"
 #include "snip/pipeline/funnellet.hpp"
 #include "snip/pipeline/pipelet.hpp"
-#include "snip/pipeline/fittinglet.hpp"
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
@@ -80,18 +79,12 @@ public:
         { // load B Segment
             float pipe_length = 128.0F;
             float pipe_thickness = 32.0F;
-            float fitting_width = pipe_thickness * 0.36F;
-            float fitting_height = pipe_thickness * 1.618F;
-
-            size_t pcount = sizeof(this->pipes) / sizeof(Snip*);
-            size_t hfpcount = sizeof(this->hfpipes) / sizeof(Snip*);
-            size_t hfpimax = pcount + hfpcount + 1;
 
             this->master = new LScrewlet(pipe_length, 128.0F, pipe_thickness);
             this->slave = new RScrewlet(164.0F, 80.0F, pipe_thickness);
             this->cleaner = new GlueCleanerlet(80.0F, 128.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
-            this->vibrator = new Vibratorlet(fitting_height);
+            this->vibrator = new Vibratorlet(pipe_thickness * 1.618F);
 
             this->insert(this->master);
             this->insert(this->funnel);
@@ -99,30 +92,16 @@ public:
             this->insert(this->slave);
             this->insert(this->vibrator);
 
-            this->fittings[pcount] = new RFittinglet(fitting_width, fitting_height, 0.0F, nan("Silver"), 0.0, 0.512, 0.753);
-            this->fittings[hfpimax] = new HFlippedPipeSnip<RFittinglet>(new RFittinglet(fitting_width, fitting_height));
-            
-            for (size_t i = 0; i < pcount; i++) {
-                this->fittings[i] = new LFittinglet(fitting_width, fitting_height);
-                this->insert(this->fittings[i]);
-
+            for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
                 this->pipes[i] = new Pipelet(pipe_length, pipe_thickness);
                 this->insert(this->pipes[i]);
             }
 
-            for (size_t i = 0; i < hfpcount; i++) {
-                size_t hfidx = pcount + i + 1;
-                LFittinglet* fitting = new LFittinglet(fitting_width, fitting_height, 0.0F, 120.0, 0.607, 0.339, 0.839);
-                this->fittings[hfidx] = new HFlippedPipeSnip<LFittinglet>(fitting);
-                this->insert(this->fittings[hfidx]);
-
+            for (size_t i = 0; i < sizeof(this->hfpipes) / sizeof(Snip*); i++) {
                 Pipelet* pipe = new Pipelet(pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
                 this->hfpipes[i] = new HFlippedPipeSnip<Pipelet>(pipe);
                 this->insert(this->hfpipes[i]);
             }
-
-            this->insert(this->fittings[pcount]);
-            this->insert(this->fittings[hfpimax]);
         }
 
         { // load motors
@@ -148,12 +127,12 @@ public:
             float icon_x = 0.0F;
             float icon_y = console_y * 1.5F;
 
-            for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+            for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
                 icon_hmax = max(snip_height, icon_hmax);
             }
 
-            for (unsigned int i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+            for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->icons[i]->fill_extent(icon_x, icon_y, &snip_width, &snip_height);
                 this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
                 icon_x += (snip_width + icon_gapsize);
@@ -185,24 +164,21 @@ public:
             this->move_to(this->funnel, current_x, current_y);
 
             connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25, 0.50);
-            connect_pipes(this, this->master, this->fittings[0], &current_x, &current_y);
+            connect_pipes(this, this->master, this->pipes[0], &current_x, &current_y);
 
-            for (size_t i = 0; i < pcount; i++) {
-                connect_pipes(this, this->fittings[i], this->pipes[i], &current_x, &current_y);
-                connect_pipes(this, this->pipes[i], this->fittings[i + 1], &current_x, &current_y);
+            for (size_t i = 1; i < pcount; i++) {
+                connect_pipes(this, this->pipes[i - 1], this->pipes[i], &current_x, &current_y);
             }
 
-            connect_pipes(this, this->fittings[pcount], this->cleaner, &current_x, &current_y);
+            connect_pipes(this, this->pipes[pcount], this->cleaner, &current_x, &current_y);
             connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 1.0);
-            connect_pipes(this, this->slave, this->fittings[pcount + 1], &current_x, &current_y);
+            connect_pipes(this, this->slave, this->hfpipes[0], &current_x, &current_y);
 
-            for (size_t i = 0; i < hfpcount; i++) {
-                size_t hfidx = pcount + i + 1;
-                connect_pipes(this, this->fittings[hfidx], this->hfpipes[i], &current_x, &current_y);
-                connect_pipes(this, this->hfpipes[i], this->fittings[hfidx + 1], &current_x, &current_y);
+            for (size_t i = 1; i < hfpcount; i++) {
+                connect_pipes(this, this->hfpipes[i - 1], this->hfpipes[i], &current_x, &current_y);
             }
 
-            this->fittings[0]->fill_extent(0.0F, 0.0F, nullptr, &fitting_height);
+            this->pipes[0]->fill_extent(0.0F, 0.0F, nullptr, &fitting_height);
             this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
             this->move_to(this->vibrator, current_x - snip_width * 2.0F, current_y + (fitting_height - snip_height) * 0.5F);
         }
@@ -223,7 +199,6 @@ private:
     Pipelet* pipes[4];
     Motorlet* motors[4];
     HFlippedPipeSnip<Pipelet>* hfpipes[2];
-    IPipeSnip* fittings[4 + 2 + 2];
 
 private:
     Platform::String^ caption;
