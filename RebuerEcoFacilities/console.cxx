@@ -14,9 +14,9 @@
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
-// #include "decorator/border.hpp"
+#include "decorator/border.hpp"
 #include "decorator/grid.hpp"
-// #include "decorator/pipeline.hpp"
+#include "decorator/pipeline.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -57,8 +57,6 @@ public:
 
         { // load icons
             this->icons[0] = new StorageTanklet(80.0F);
-            this->icons[1] = new LScrewlet(128.0F, 128.0F, 32.0F);
-            this->icons[2] = new RScrewlet(128.0F, 128.0F, 32.0F);
             
             for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
                 this->insert(this->icons[i]);
@@ -93,13 +91,12 @@ public:
             this->insert(this->vibrator);
 
             for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
-                this->pipes[i] = new Pipelet(pipe_length, pipe_thickness);
+                this->pipes[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness);
                 this->insert(this->pipes[i]);
             }
 
             for (size_t i = 0; i < sizeof(this->hfpipes) / sizeof(Snip*); i++) {
-                Pipelet* pipe = new Pipelet(pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-                this->hfpipes[i] = new HFlippedPipeSnip<Pipelet>(pipe);
+                this->hfpipes[i] = new RPipelet(pipe_length, 0.0F, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
                 this->insert(this->hfpipes[i]);
             }
         }
@@ -187,7 +184,7 @@ public:
 // never deletes these snips mannually
 private:
     Statuslet* statusbar;
-    Snip* icons[3];
+    Snip* icons[1];
     Gaugelet* gauges[4];
 
 private:
@@ -198,7 +195,7 @@ private:
     Vibratorlet* vibrator;
     Pipelet* pipes[4];
     Motorlet* motors[4];
-    HFlippedPipeSnip<Pipelet>* hfpipes[2];
+    Pipelet* hfpipes[2];
 
 private:
     Platform::String^ caption;

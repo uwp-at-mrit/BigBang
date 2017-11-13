@@ -15,13 +15,13 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
-    if (thickness == 0.0F) {
+    if (thickness <= 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
     } else if (thickness < 0.0F) {
         this->pipe_thickness = -this->width * thickness;
     }
 
-    this->fitting_width = this->pipe_thickness * 0.25F;
+    this->fitting_width = this->pipe_thickness * default_fitting_width_pipe_ratio;
 
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
@@ -39,7 +39,7 @@ void Screwlet::load() {
     float ascent = this->pipe_thickness * 0.5F;
     float basefit_ry = this->pipe_thickness * 0.5F + ascent;
     float basefit_rx = basefit_ry * default_fitting_angle_ratio;
-    float outfit_ry = this->pipe_thickness * default_fitting_pipe_ratio * 0.5F;
+    float outfit_ry = this->pipe_thickness * default_fitting_height_pipe_ratio * 0.5F;
     float outfit_rx = outfit_ry * default_fitting_angle_ratio;
     float outfit_y = basefit_ry - outfit_ry;
     float base_width = this->pipe_thickness * 1.618F;
@@ -109,11 +109,9 @@ Rect LScrewlet::get_input_port() {
 }
 
 Rect LScrewlet::get_output_port() {
-    float socket_y = this->outfit_brush->StartPoint.y;
     float socket_width = this->outfit_brush->StartPoint.x;
-    float socket_height = this->outfit_brush->EndPoint.y - socket_y;
 
-    return Rect{ this->width - socket_width, socket_y, socket_width, socket_height };
+    return Rect{ this->width - socket_width, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
 }
 
 void LScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
@@ -148,11 +146,9 @@ Rect RScrewlet::get_input_port() {
 }
 
 Rect RScrewlet::get_output_port() {
-    float socket_y = this->outfit_brush->StartPoint.y;
     float socket_width = this->outfit_brush->StartPoint.x;
-    float socket_height = this->pipe_thickness + (this->pipe_brush->StartPoint.y - socket_y) * 2.0F;
 
-    return Rect{ 0.0F, socket_y, socket_width, socket_height };
+    return Rect{ 0.0F, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
 }
 
 void RScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
