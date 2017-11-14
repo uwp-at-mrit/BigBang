@@ -38,9 +38,9 @@ void Screwlet::load() {
 
     float ascent = this->pipe_thickness * 0.5F;
     float basefit_ry = this->pipe_thickness * 0.5F + ascent;
-    float basefit_rx = basefit_ry * default_fitting_angle_ratio;
+    float basefit_rx = basefit_ry * default_fitting_view_angle;
     float outfit_ry = this->pipe_thickness * default_fitting_height_pipe_ratio * 0.5F;
-    float outfit_rx = outfit_ry * default_fitting_angle_ratio;
+    float outfit_rx = outfit_ry * default_fitting_view_angle;
     float outfit_y = basefit_ry - outfit_ry;
     float base_width = this->pipe_thickness * 1.618F;
     float base_height = (base_width - this->pipe_thickness) * 0.5F;

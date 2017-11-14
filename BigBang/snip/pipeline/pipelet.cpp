@@ -39,7 +39,7 @@ void Pipelet::load() {
     
     float ascent = (this->height - this->thickness) * 0.5F;
     float fitting_ry = this->height * 0.5F;
-    float fitting_rx = fitting_ry * default_fitting_angle_ratio;
+    float fitting_rx = fitting_ry * default_fitting_view_angle;
     float pipe_length = this->width - (this->fitting_width + fitting_rx) * 2.0F;
     float pipe_x = (this->width - pipe_length) * 0.5F;
     float hollow_height = this->thickness * 0.618F;

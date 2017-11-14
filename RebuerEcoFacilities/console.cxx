@@ -86,19 +86,21 @@ public:
 
             this->insert(this->master);
             this->insert(this->funnel);
-            this->insert(this->cleaner);
-            this->insert(this->slave);
-            this->insert(this->vibrator);
 
             for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
                 this->pipes[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness);
                 this->insert(this->pipes[i]);
             }
 
+            this->insert(this->cleaner);
+            this->insert(this->slave);
+
             for (size_t i = 0; i < sizeof(this->hfpipes) / sizeof(Snip*); i++) {
                 this->hfpipes[i] = new RPipelet(pipe_length, 0.0F, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
                 this->insert(this->hfpipes[i]);
             }
+
+            this->insert(this->vibrator);
         }
 
         { // load motors

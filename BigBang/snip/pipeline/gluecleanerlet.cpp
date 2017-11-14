@@ -24,15 +24,20 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
         this->pipe_thickness = -this->width * thickness;
     }
 
+    this->fitting_width = this->pipe_thickness * default_fitting_width_pipe_ratio;
+
     this->color = hsla(color, saturation, light);
     this->highlight_color = hsla(color, saturation, highlight);
+    this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
     this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
     this->endpoint_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
 void GlueCleanerlet::load() {
+    Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
     Color hat_colors[] = { hat_color, hat_hlcolor, hat_color };
+    auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors); 
     auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
     auto hat_stops = MAKE_GRADIENT_STOPS(hat_colors);
 
@@ -51,17 +56,23 @@ void GlueCleanerlet::load() {
     float top_y = hatbody_y + hatbody_height;
     float vpipe_x = bottom_x + (bottom_width - this->pipe_thickness) * 0.5F;
     float hpipe_y = top_y + this->pipe_thickness * 0.5F;
+    float fitting_height = this->pipe_thickness * default_fitting_height_pipe_ratio;
+    float fitting_ry = fitting_height * 0.5F;
+    float fitting_rx = fitting_ry * default_fitting_view_angle;
+    float fitting_y = hpipe_y - (fitting_height - this->pipe_thickness) * 0.5F;
     float pipe_rx = base_height;
 
-    auto full_pipe = rounded_rectangle(-pipe_rx, 0.0F, vpipe_x + pipe_rx * 2.0F, this->pipe_thickness, pipe_rx, -0.5F);
-    auto pipe_head = rectangle(-pipe_rx, 0.0F, pipe_rx, this->pipe_thickness);
     auto top = rectangle(top_x, top_y, top_width, base_height);
     auto bottom = rectangle(bottom_x, bottom_y, bottom_width, base_height);
+    auto full_pipe = rounded_rectangle(0.0F, 0.0F, vpipe_x + pipe_rx, this->pipe_thickness, pipe_rx, -0.5F);
+    auto pipe_head = rectangle(0.0F, 0.0F, this->fitting_width + fitting_rx, this->pipe_thickness);
     this->pipe = geometry_freeze(geometry_substract(full_pipe, pipe_head));
+    this->fitting = geometry_freeze(cylinder_rl_surface(fitting_rx, fitting_ry, this->fitting_width));
     this->endpoint = geometry_freeze(geometry_union(top, bottom));
     this->pipe_brush = make_linear_gradient_brush(vpipe_x, hpipe_y, vpipe_x, hpipe_y + this->pipe_thickness, pipe_stops);
     this->hat_brush = make_linear_gradient_brush(hat_x, hatbody_y, hat_x + hat_width, hatbody_y, hat_stops);
     this->hatbody_brush = make_linear_gradient_brush(hatbody_x, top_y, hatbody_x + hatbody_width, top_y, hat_stops);
+    this->fitting_brush = make_linear_gradient_brush(fitting_rx, fitting_y, fitting_rx, fitting_y + fitting_height, fitting_stops);
 }
 
 void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h) {
@@ -69,7 +80,7 @@ void GlueCleanerlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 Rect GlueCleanerlet::get_input_port() {
-    return Rect{ 0.0F, this->pipe_brush->StartPoint.y, 0.0F, this->pipe_thickness };
+    return Rect{ 0.0F, this->pipe_brush->StartPoint.y, this->fitting_brush->StartPoint.x, this->pipe_thickness };
 }
 
 Rect GlueCleanerlet::get_output_port() {
@@ -88,11 +99,20 @@ void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
     }
 
     { // draw input pipe
-        brush_translate(this->pipe_brush, 0.0F, y);
-        ds->DrawCachedGeometry(this->pipe, x, y + this->pipe_brush->StartPoint.y, this->pipe_brush);
+        float hpipe_y = y + this->pipe_brush->StartPoint.y;
+        float fitting_y = y + this->fitting_brush->StartPoint.y;
+        float fitting_rx = this->fitting_brush->StartPoint.x;
+        float fitting_cx = x + this->fitting_width + fitting_rx * (1.0F - default_fitting_view_angle);
+        float fitting_cy = hpipe_y + this->pipe_thickness * 0.5F;
+
+        brush_translate(this->fitting_brush, x, y);
+        brush_translate(this->pipe_brush, x, y);
+        ds->FillEllipse(fitting_cx, fitting_cy, fitting_rx, fitting_cy - fitting_y, this->color);
+        ds->DrawCachedGeometry(this->pipe, x, hpipe_y, this->pipe_brush);
+        ds->DrawCachedGeometry(this->fitting, x, fitting_y, this->fitting_brush);
     }
 
-    { // draw hat_bottom
+    { // draw hat
         float2 hat_bottom = this->hat_brush->StartPoint;
         float2 hatbody_bottom = this->hatbody_brush->StartPoint;
         float hat_width = this->hat_brush->EndPoint.x - hat_bottom.x;

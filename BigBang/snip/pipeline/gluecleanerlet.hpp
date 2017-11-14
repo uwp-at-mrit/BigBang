@@ -22,16 +22,21 @@ namespace WarGrey::SCADA {
         float width;
         float height;
         float pipe_thickness;
+        float fitting_width;
 
     private:
         Windows::UI::Color color;
+        Windows::UI::Color fitting_color;
         Windows::UI::Color highlight_color;
         Windows::UI::Color body_color;
         Windows::UI::Color endpoint_color;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ hat_brush;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ hatbody_brush;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ pipe_brush;
+        Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ fitting_brush;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ pipe;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoint;
+        Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ fitting;
+
     };
 }
