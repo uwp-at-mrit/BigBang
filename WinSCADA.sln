@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Auxiliary", "Auxiliary\Auxiliary.vcxitems", "{9D38AD51-FEE8-4303-8B0D-833BBCC93B58}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PLCStream", "PLCStream\PLCStream.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RebuerEcoFacilities", "RebuerEcoFacilities\RebuerEcoFacilities.vcxproj", "{6EA9DACD-2014-41C2-9D5A-FA5CC391A5DF}"
 EndProject
@@ -13,16 +11,18 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BigBang", "BigBang\BigBang.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\graphics.vcxitems", "{73BFE193-7352-40AB-99C0-717F6EBEE2D8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Modbus", "Modbus\Modbus.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BigBang\BigBang.vcxitems*{6a826f3b-23f9-432c-86bd-f9d318096966}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
 		BigBang\BigBang.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
-		PLCStream\PLCStream.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
+		Modbus\Modbus.vcxitems*{6ea9dacd-2014-41c2-9d5a-fa5cc391a5df}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{73bfe193-7352-40ab-99c0-717f6ebee2d8}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
-		PLCStream\PLCStream.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
+		Modbus\Modbus.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
