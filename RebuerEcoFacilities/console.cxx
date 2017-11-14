@@ -79,25 +79,25 @@ public:
             float pipe_thickness = 32.0F;
 
             this->master = new LScrewlet(pipe_length, 128.0F, pipe_thickness);
-            this->slave = new RScrewlet(164.0F, 80.0F, pipe_thickness);
-            this->cleaner = new GlueCleanerlet(80.0F, 128.0F, pipe_thickness);
+            this->slave = new LScrewlet(pipe_length, 80.0F, pipe_thickness);
+            this->cleaner = new GlueCleanerlet(pipe_length, 128.0F, pipe_thickness);
             this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
             this->vibrator = new Vibratorlet(pipe_thickness * 1.618F);
 
             this->insert(this->master);
             this->insert(this->funnel);
 
-            for (size_t i = 0; i < sizeof(this->pipes) / sizeof(Snip*); i++) {
-                this->pipes[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness);
-                this->insert(this->pipes[i]);
+            for (size_t i = 0; i < sizeof(this->pipes_1st) / sizeof(Snip*); i++) {
+                this->pipes_1st[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness);
+                this->insert(this->pipes_1st[i]);
             }
 
             this->insert(this->cleaner);
             this->insert(this->slave);
 
-            for (size_t i = 0; i < sizeof(this->hfpipes) / sizeof(Snip*); i++) {
-                this->hfpipes[i] = new RPipelet(pipe_length, 0.0F, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-                this->insert(this->hfpipes[i]);
+            for (size_t i = 0; i < sizeof(this->pipes_2nd) / sizeof(Snip*); i++) {
+                this->pipes_2nd[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+                this->insert(this->pipes_2nd[i]);
             }
 
             this->insert(this->vibrator);
@@ -116,7 +116,7 @@ public:
     };
 
     void reflow(float width, float height) override {
-        float snip_width, snip_height, console_y, fitting_height;
+        float console_y, pipe_width, pipe_height, snip_width, snip_height;
 
         this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &console_y);
         
@@ -153,33 +153,35 @@ public:
         }
 
         { // flow B Segment
-            size_t pcount = sizeof(this->pipes) / sizeof(Snip*);
-            size_t hfpcount = sizeof(this->hfpipes) / sizeof(Snip*);
+            size_t pcount_1st = sizeof(this->pipes_1st) / sizeof(Snip*);
+            size_t pcount_2nd = sizeof(this->pipes_2nd) / sizeof(Snip*);
             
+            this->pipes_1st[0]->fill_extent(0.0F, 0.0F, &pipe_width, &pipe_height);
             this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
-            float current_x = width * 0.25F;
+            float current_x = pipe_width * 1.618F;
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
             connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25, 0.50);
-            connect_pipes(this, this->master, this->pipes[0], &current_x, &current_y);
+            connect_pipes(this, this->master, this->pipes_1st[0], &current_x, &current_y);
 
-            for (size_t i = 1; i < pcount; i++) {
-                connect_pipes(this, this->pipes[i - 1], this->pipes[i], &current_x, &current_y);
+            for (size_t i = 1; i < pcount_1st; i++) {
+                connect_pipes(this, this->pipes_1st[i - 1], this->pipes_1st[i], &current_x, &current_y);
             }
 
-            connect_pipes(this, this->pipes[pcount], this->cleaner, &current_x, &current_y);
-            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 1.0);
-            connect_pipes(this, this->slave, this->hfpipes[0], &current_x, &current_y);
+            connect_pipes(this, this->pipes_1st[pcount_1st], this->cleaner, &current_x, &current_y);
+            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 0.25);
+            connect_pipes(this, this->slave, this->pipes_2nd[0], &current_x, &current_y);
 
-            for (size_t i = 1; i < hfpcount; i++) {
-                connect_pipes(this, this->hfpipes[i - 1], this->hfpipes[i], &current_x, &current_y);
+            for (size_t i = 1; i < pcount_2nd; i++) {
+                connect_pipes(this, this->pipes_2nd[i - 1], this->pipes_2nd[i], &current_x, &current_y);
             }
 
-            this->pipes[0]->fill_extent(0.0F, 0.0F, nullptr, &fitting_height);
             this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-            this->move_to(this->vibrator, current_x - snip_width * 2.0F, current_y + (fitting_height - snip_height) * 0.5F);
+            current_x += pipe_width + snip_width * 0.5F;
+            current_y += pipe_height - snip_height;
+            this->move_to(this->vibrator, current_x, current_y);
         }
     }
     
@@ -195,9 +197,9 @@ private:
     GlueCleanerlet* cleaner;
     Funnellet* funnel;
     Vibratorlet* vibrator;
-    Pipelet* pipes[4];
+    Pipelet* pipes_1st[4];
+    Pipelet* pipes_2nd[2];
     Motorlet* motors[4];
-    Pipelet* hfpipes[2];
 
 private:
     Platform::String^ caption;
