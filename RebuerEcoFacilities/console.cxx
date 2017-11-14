@@ -81,7 +81,7 @@ public:
             this->master = new LScrewlet(pipe_length, 128.0F, pipe_thickness);
             this->slave = new LScrewlet(pipe_length, 80.0F, pipe_thickness);
             this->cleaner = new GlueCleanerlet(pipe_length, 128.0F, pipe_thickness);
-            this->funnel = new Funnellet(32.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
+            this->funnel = new Funnellet(42.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
             this->vibrator = new Vibratorlet(pipe_thickness * 1.618F);
 
             this->insert(this->master);
@@ -163,7 +163,7 @@ public:
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
 
-            connect_pipes(this, this->funnel, this->master, &current_x, &current_y, 0.25, 0.50);
+            connect_pipes(this, this->funnel, this->master, &current_x, &current_y);
             connect_pipes(this, this->master, this->pipes_1st[0], &current_x, &current_y);
 
             for (size_t i = 1; i < pcount_1st; i++) {
@@ -171,7 +171,7 @@ public:
             }
 
             connect_pipes(this, this->pipes_1st[pcount_1st], this->cleaner, &current_x, &current_y);
-            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y, 0.25);
+            connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y);
             connect_pipes(this, this->slave, this->pipes_2nd[0], &current_x, &current_y);
 
             for (size_t i = 1; i < pcount_2nd; i++) {
