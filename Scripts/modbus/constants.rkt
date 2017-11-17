@@ -18,7 +18,7 @@
 (define MODBUS_FC_MASK_WRITE_REGISTER       #x16)
 (define MODBUS_FC_WRITE_AND_READ_REGISTERS  #x17)
 
-(define MODBUS_BROADCAST_ADDRESS    0)
+(define MODBUS_BROADCAST_ADDRESS 0)
 
 ;; Modbus_Application_Protocol_V1_1b.pdf (chapter 6 section 1 page 12)
 ;; Quantity of Coils to read (2 bytes): 1 to 2000 (#x7D0)

@@ -1,6 +1,7 @@
 #lang racket
 
 (provide (all-defined-out))
+(require "constants.rkt")
 
 (define UT_BITS_ADDRESS            #x130)
 (define UT_BITS_NB                 #x25)
@@ -19,6 +20,9 @@
 (define UT_INPUT_REGISTERS_NB      #x1)
 (define UT_INPUT_REGISTERS_TAB     #(#x000A))
 
+;; Use a different port that greater than 1024 for unit testing.
+(define UT_TCP_DEFAULT_PORT        (+ 1024 MODBUS_TCP_DEFAULT_PORT))
+
 ;; Raise a manual exception when this address is used for the first byte
 (define UT_REGISTERS_ADDRESS_SPECIAL              #x170)
 ;; The response of the server will contains an invalid TID or slave
@@ -31,3 +35,6 @@
 ;; If the following value is used, a bad response is sent.
 ;   It's better to test with a lower value than UT_REGISTERS_NB_POINTS to try to raise a segfault.
 (define UT_REGISTERS_NB_SPECIAL #x2)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (~hex n) (~r n #:base 16))
