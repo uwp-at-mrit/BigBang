@@ -9,7 +9,8 @@
   (require "format.rkt")
 
   (define host "127.0.0.1")
-  (define ctx #false)              
+  (define ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT))
+  (define rc #false)
   
   (define (check-bits tab_bits TAB_BITS i nb-points)
     (when (> nb-points 0)
@@ -20,7 +21,7 @@
       (check-bits tab_bits TAB_BITS (add1 i) (- nb-points nb-bits))))
   
   (define-tamer-suite modbus-client "Modbus Client Unit Tests"
-    #:before (λ [] (set! ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT)) (modbus_set_debug ctx 1))
+    #:before (λ [] (modbus_set_debug ctx 1))
     #:after (λ [] (modbus_close ctx) (modbus_free ctx))
     (let-values ([(&sec:old &usec:old) (values (box 0) (box 0))]
                  [(&sec:new &usec:new) (values (box 0) (box 0))])
@@ -34,25 +35,27 @@
     
     ;; Allocate and initialize the memory to store the bits and registers
     (let ([tab_rp_bits (malloc/uint8 (max UT_BITS_NB UT_INPUT_BITS_NB) 'fill-zero)]
-          [tab_rp_registers (malloc/uint8 (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB) 'fill-zero)])
+          [tab_rp_registers (malloc/uint8 (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB) 'fill-zero)]
+          [tab_value (malloc/uint8 UT_BITS_NB)])
       (test-suite "Read/Write Coil Bit"
                   (test-suite "Single Bit"
-                              (let ([rc (modbus_write_bit ctx UT_BITS_ADDRESS 1)])
-                                (test-eq? "modbus_write_bit" rc 1))
-                              (let ([rc (modbus_read_bits ctx UT_BITS_ADDRESS 1 tab_rp_bits)]
-                                    [bit (uint8-ref tab_rp_bits 0)])
-                                (test-case "modbus_read_bits"
+                              (test-spec "modbus_write_bit"
+                                         #:before (λ [] (set! rc (modbus_write_bit ctx UT_BITS_ADDRESS 1)))
+                                         (check-eq? rc 1))
+                              (test-spec "modbus_read_bits"
+                                         #:before (λ [] (set! rc (modbus_read_bits ctx UT_BITS_ADDRESS 1 tab_rp_bits)))
+                                         (let ([bit (uint8-ref tab_rp_bits 0)])
                                            (check-eq? rc 1 (format "FAILED (nb points ~a)" rc))
                                            (check-eq? bit 1 (format "FAILED (#x~a != #x1)" (~hex bit))))))
                   (test-suite "Multiple Bits"
-                              (let ([tab_value (malloc/uint8 UT_BITS_NB)])
-                                (modbus_set_bits_from_bytes tab_value 0 UT_BITS_NB UT_BITS_TAB)
-                                (let ([rc (modbus_write_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_value)])
-                                  (test-eq? "modbus_write_bits" rc UT_BITS_NB))
-                                (let ([rc (modbus_read_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_rp_bits)])
-                                  (test-case "modbus_read_bits"
-                                             (check-eq? rc UT_BITS_NB (format "FAILED (nb points ~a)" rc))
-                                             (check-bits tab_rp_bits UT_BITS_TAB 0 UT_BITS_NB)))))))
+                              #:before (λ [] (modbus_set_bits_from_bytes tab_value 0 UT_BITS_NB UT_BITS_TAB))
+                              (test-spec "modbus_write_bit"
+                                         #:before (λ [] (set! rc (modbus_write_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_value)))
+                                         (check-eq? rc UT_BITS_NB))
+                              (test-spec "modbus_read_bits"
+                                         #:before (λ [] (set! rc (modbus_read_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_rp_bits)))
+                                         (check-eq? rc UT_BITS_NB (format "FAILED (nb points ~a)" rc))
+                                         (check-bits tab_rp_bits UT_BITS_TAB 0 UT_BITS_NB)))))
   
     #;(printf "> DISCRETE INPUTS~n")))
 
