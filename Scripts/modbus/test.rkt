@@ -35,6 +35,3 @@
 ;; If the following value is used, a bad response is sent.
 ;   It's better to test with a lower value than UT_REGISTERS_NB_POINTS to try to raise a segfault.
 (define UT_REGISTERS_NB_SPECIAL #x2)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (~hex n) (~r n #:base 16))
