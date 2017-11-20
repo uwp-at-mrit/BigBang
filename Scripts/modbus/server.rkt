@@ -3,7 +3,7 @@
 (require "unsafe.rkt")
 (require "test.rkt")
 
-(define query (malloc/uint8 MODBUS_TCP_MAX_ADU_LENGTH))
+(define query (uint8-malloc MODBUS_TCP_MAX_ADU_LENGTH))
 (define ctx (modbus_new_tcp #false UT_TCP_DEFAULT_PORT))
 (define header_length (modbus_get_header_length ctx))
 (modbus_set_debug ctx 1)

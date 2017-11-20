@@ -86,20 +86,29 @@
             (λ [mb idx v] (ptr-set* (modbus_mapping-tab_registers mb) _uint16 idx v))
             (λ [mb idx v] (ptr-set* (modbus_mapping-tab_input_registers mb) _uint16 idx v)))))
 
+(define vector->uint8
+  (lambda [src]
+    (define dest (uint8-calloc (vector-length src)))
+    (for ([v (in-vector src)] [i (in-naturals)]) (ptr-set! dest _uint8 i v))
+    dest))
+
+(define vector->uint16
+  (lambda [src]
+    (define dest (uint16-calloc (vector-length src)))
+    (for ([v (in-vector src)] [i (in-naturals)]) (ptr-set! dest _uint16 i v))
+    dest))
+
 (define uint8-ref (λ [a idx] (ptr-ref a _uint8 idx)))
 (define uint16-ref (λ [a idx] (ptr-ref a _uint16 idx)))
 
-(define malloc/uint8
-  (lambda [n [zero? #false]]
-    (define ptr (cast (malloc _uint8 n) _pointer _uint8*))
-    (when zero? (memset ptr 0 n _uint8))
-    ptr))
+(define uint8-memset (λ [ptr c len] (memset ptr c len _uint8)))
+(define uint16-memset (λ [ptr c len] (memset ptr c len _uint16)))
 
-(define malloc/uint16
-  (lambda [n [zero? #false]]
-    (define ptr (cast (malloc _uint16 n) _pointer _uint16*))
-    (when zero? (memset ptr 0 n _uint16))
-    ptr))
+(define uint8-malloc (λ [n] (cast (malloc _uint8 n) _pointer _uint8*)))
+(define uint16-malloc (λ [n] (cast (malloc _uint16 n) _pointer _uint16*)))
+
+(define uint8-calloc (λ [n] (let ([ptr (uint8-malloc n)]) (uint8-memset ptr 0 n) ptr)))
+(define uint16-calloc (λ [n] (let ([ptr (uint16-malloc n)]) (uint16-memset ptr 0 n) ptr)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-modbus modbus_free (_fun _modbus_t* -> _void) #:wrap (deallocator))
@@ -180,7 +189,7 @@
 (define-modbus* modbus_write_bit (_fun [addr : _int] [status : _int] #:?> _int))
 (define-modbus* modbus_write_bits (_fun [addr : _int] [nb : _int] [src : _uint8*] #:?> _int))
 (define-modbus* modbus_write_register (_fun [addr : _int] [value : _int] #:?> _int))
-(define-modbus* modbus_write_registers (_fun [addr : _int] [src : (_vector i _uint16)] #:?> _int))
+(define-modbus* modbus_write_registers (_fun [addr : _int] [nb : _int] [src : _uint16*] #:?> _int))
 (define-modbus* modbus_read_bits (_fun [addr : _int] [nb : _int] [dest : _uint8*] #:?> _int))
 (define-modbus* modbus_read_input_bits (_fun [addr : _int] [nb : _int] [dest : _uint8*] #:?> _int))
 (define-modbus* modbus_read_registers (_fun [addr : _int] [nb : _int] [dest : _uint16*] #:?> _int))

@@ -2,6 +2,8 @@
 
 (require "tamer.rkt")
 
+(tamer-taming-start)
+
 (module story racket
   (require "unsafe.rkt")
   (require "test.rkt")
@@ -10,15 +12,27 @@
 
   (define host "127.0.0.1")
   (define ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT))
-  (define rc #false)
-  
-  (define (check-bits tab_bits TAB_BITS i nb-points)
+
+  ;; Allocate and initialize the memory to store the bits and registers
+  (define tab_rp_bits (uint8-calloc (max UT_BITS_NB UT_INPUT_BITS_NB)))
+  (define tab_rp_registers (uint16-calloc (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB)))
+
+  (define rc (make-parameter #false))
+
+  (define (check-bits tab_bits TAB_BITS nb-points [i 0])
     (when (> nb-points 0)
       (define nb-bits (min nb-points 8))
-      (define value (modbus_get_byte_from_bits tab_bits (* i 8) nb-bits))
+      (define given (modbus_get_byte_from_bits tab_bits (* i 8) nb-bits))
       (define expected (vector-ref TAB_BITS i))
-      (check-eq? value expected (format "FAILED (#x~a != #x~a)" (~hex value) (~hex expected)))
-      (check-bits tab_bits TAB_BITS (add1 i) (- nb-points nb-bits))))
+      (check-eq? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
+      (check-bits tab_bits TAB_BITS (- nb-points nb-bits) (add1 i))))
+
+  (define (check-registers tab_registers TAB_REGISTERS nb-points [i 0])
+    (when (> nb-points i)
+      (define given (uint16-ref tab_registers i))
+      (define expected (vector-ref TAB_REGISTERS i))
+      (check-eq? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
+      (check-registers tab_registers TAB_REGISTERS nb-points (add1 i))))
   
   (define-tamer-suite modbus-client "Modbus Client Unit Tests"
     #:before (λ [] (modbus_set_debug ctx 1))
@@ -33,30 +47,65 @@
                              (check-equal? &sec:old &sec:new "Second has been modified on connect")
                              (check-equal? &usec:old &usec:new "Macrosecond has been modified on connect"))))
     
-    ;; Allocate and initialize the memory to store the bits and registers
-    (let ([tab_rp_bits (malloc/uint8 (max UT_BITS_NB UT_INPUT_BITS_NB) 'fill-zero)]
-          [tab_rp_registers (malloc/uint8 (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB) 'fill-zero)]
-          [tab_value (malloc/uint8 UT_BITS_NB)])
-      (test-suite "Read/Write Coil Bit"
-                  (test-suite "Single Bit"
-                              (test-spec "modbus_write_bit"
-                                         #:before (λ [] (set! rc (modbus_write_bit ctx UT_BITS_ADDRESS 1)))
-                                         (check-eq? rc 1))
-                              (test-spec "modbus_read_bits"
-                                         #:before (λ [] (set! rc (modbus_read_bits ctx UT_BITS_ADDRESS 1 tab_rp_bits)))
-                                         (let ([bit (uint8-ref tab_rp_bits 0)])
-                                           (check-eq? rc 1 (format "FAILED (nb points ~a)" rc))
-                                           (check-eq? bit 1 (format "FAILED (#x~a != #x1)" (~hex bit))))))
+    (test-suite "Coil Bits"
+                (test-suite "Single Bit"
+                            (test-spec "modbus_write_bit"
+                                       #:before (λ [] (rc (modbus_write_bit ctx UT_BITS_ADDRESS 1)))
+                                       (check-eq? (rc) 1))
+                            (test-spec "modbus_read_bits"
+                                       #:before (λ [] (rc (modbus_read_bits ctx UT_BITS_ADDRESS 1 tab_rp_bits)))
+                                       (check-eq? (rc) 1 (format "FAILED (nb points ~a)" (rc)))
+                                       (let ([bit (uint8-ref tab_rp_bits 0)])
+                                         (check-eq? bit 1 (format "FAILED (#x~a != #x1)" (~hex bit))))))
+                (let ([tab_value (uint8-malloc UT_BITS_NB)])
                   (test-suite "Multiple Bits"
                               #:before (λ [] (modbus_set_bits_from_bytes tab_value 0 UT_BITS_NB UT_BITS_TAB))
                               (test-spec "modbus_write_bit"
-                                         #:before (λ [] (set! rc (modbus_write_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_value)))
-                                         (check-eq? rc UT_BITS_NB))
+                                         #:before (λ [] (rc (modbus_write_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_value)))
+                                         (check-eq? (rc) UT_BITS_NB))
                               (test-spec "modbus_read_bits"
-                                         #:before (λ [] (set! rc (modbus_read_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_rp_bits)))
-                                         (check-eq? rc UT_BITS_NB (format "FAILED (nb points ~a)" rc))
-                                         (check-bits tab_rp_bits UT_BITS_TAB 0 UT_BITS_NB)))))
-  
-    #;(printf "> DISCRETE INPUTS~n")))
+                                         #:before (λ [] (rc (modbus_read_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_rp_bits)))
+                                         (check-eq? (rc) UT_BITS_NB (format "FAILED (nb points ~a)" (rc)))
+                                         (check-bits tab_rp_bits UT_BITS_TAB UT_BITS_NB)))))
+    
+    (test-suite "Discrete Inputs"
+                (test-spec "modbus_read_input_bits"
+                           #:before (λ [] (rc (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS UT_INPUT_BITS_NB tab_rp_bits)))
+                           (check-eq? (rc) UT_INPUT_BITS_NB (format "FAILED (nb points ~a)" (rc)))
+                           (check-bits tab_rp_bits UT_INPUT_BITS_TAB UT_INPUT_BITS_NB)))
 
-(tamer-taming-start)
+    (test-suite "Holding Registers"
+                (test-suite "Single Register"
+                            (test-spec "modbus_write_register"
+                                       #:before (λ [] (rc (modbus_write_register ctx UT_REGISTERS_ADDRESS #x1234)))
+                                       (check-eq? (rc) 1))
+                            (test-spec "modbus_read_registers"
+                                       #:before (λ [] (rc (modbus_read_registers ctx UT_REGISTERS_ADDRESS 1 tab_rp_registers)))
+                                       (check-eq? (rc) 1 (format "FAILED (nb points ~a)" (rc)))
+                                       (let ([register (uint16-ref tab_rp_registers 0)])
+                                         (check-eq? register #x1234 (format "FAILED (#x~a != #x1234)" (~hex register))))))
+                (test-suite "Many Registers"
+                            (test-spec "modbus_write_registers"
+                                       #:before (λ [] (rc (modbus_write_registers ctx UT_REGISTERS_ADDRESS UT_REGISTERS_NB (vector->uint16 UT_REGISTERS_TAB))))
+                                       (check-eq? (rc) UT_REGISTERS_NB))
+                            (test-spec "modbus_read_registers"
+                                       #:before (λ [] (rc (modbus_read_registers ctx UT_REGISTERS_ADDRESS UT_REGISTERS_NB tab_rp_registers)))
+                                       (check-eq? (rc) UT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
+                                       (check-registers tab_rp_registers UT_REGISTERS_TAB UT_REGISTERS_NB))
+                            (test-spec "modbus_read_registers (0)"
+                                       (check-exn exn:fail? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS 0 tab_rp_registers)) "FAILED"))
+                            (test-spec "modbus_write_and_read_registers"
+                                       #:before (λ [] (void (uint16-memset tab_rp_registers 0 (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB))
+                                                            ; Write registers to zero from tab_rp_registers and store read registers into tab_rp_registers.
+                                                            ; So the read registers must set to 0, except the first one because there is an offset of 1 register on write.
+                                                            (rc (modbus_write_and_read_registers ctx (+ UT_REGISTERS_ADDRESS 1) (- UT_REGISTERS_NB 1) tab_rp_registers
+                                                                                                 UT_REGISTERS_ADDRESS UT_REGISTERS_NB tab_rp_registers))))
+                                       (check-eq? (rc) UT_REGISTERS_NB (format "FAILED (nb points ~a != ~a)" (rc) UT_REGISTERS_NB))
+                                       (let ([ADJUSTED_TAB (make-vector UT_REGISTERS_NB 0)])
+                                         (vector-set! ADJUSTED_TAB 0 (vector UT_REGISTERS_TAB 0))
+                                         (check-registers tab_rp_registers ADJUSTED_TAB UT_REGISTERS_NB))))
+                (test-suite "Input Registers"
+                            (test-spec "modbus_read_input_registers"
+                                       #:before (λ [] (rc (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS UT_INPUT_REGISTERS_NB tab_rp_registers)))
+                                       (check-eq? (rc) UT_INPUT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
+                                       (check-registers tab_rp_registers UT_INPUT_REGISTERS_TAB UT_INPUT_REGISTERS_TAB))))))
