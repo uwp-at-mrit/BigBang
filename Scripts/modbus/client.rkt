@@ -97,7 +97,7 @@
                                        (check-eq? (rc) UT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
                                        (check-registers tab_rp_registers UT_REGISTERS_TAB UT_REGISTERS_NB))
                             (test-spec "modbus_read_registers (0)"
-                                       (check-exn exn:fail? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS 0 tab_rp_registers)) "FAILED"))
+                                       (check-exn exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS 0 tab_rp_registers)) "FAILED"))
                             (test-spec "modbus_write_and_read_registers"
                                        #:before (λ [] (void (uint16-memset tab_rp_registers 0 (max UT_REGISTERS_NB UT_INPUT_REGISTERS_NB))
                                                             ; Write registers to zero from tab_rp_registers and store read registers into tab_rp_registers.

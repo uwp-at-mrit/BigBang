@@ -35,10 +35,14 @@
          (_fun #:save-errno 'posix _modbus_t* argl ...)
          rest ...)]))
 
+(struct exn:modbus exn:fail (errno) #:extra-constructor-name make-exn:modbus #:transparent)
+
 (define on-error-break
   (lambda [func retcode errcode]
     (when (eq? retcode errcode)
-      (error func "~a" (modbus_strerror (saved-errno))))
+      (raise (make-exn:modbus (format "~a: ~a" func (modbus_strerror (saved-errno)))
+                              (current-continuation-marks)
+                              (saved-errno))))
     retcode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
