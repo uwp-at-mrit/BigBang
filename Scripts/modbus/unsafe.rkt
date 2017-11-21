@@ -36,13 +36,34 @@
          rest ...)]))
 
 (struct exn:modbus exn:fail (errno) #:extra-constructor-name make-exn:modbus #:transparent)
+(struct exn:modbus:xilfun  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xilfun)
+(struct exn:modbus:xiladd  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xiladd)
+(struct exn:modbus:xilval  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xilval)
+(struct exn:modbus:xsfail  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xsfail)
+(struct exn:modbus:xsbusy  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xsbusy)
+(struct exn:modbus:xack    exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xack)
+(struct exn:modbus:xnack   exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xnack)
+(struct exn:modbus:xmempar exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xmempar)
+(struct exn:modbus:xgpath  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xgpath)
+(struct exn:modbus:xgtar   exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xgtar)
 
 (define on-error-break
   (lambda [func retcode errcode]
     (when (eq? retcode errcode)
-      (raise (make-exn:modbus (format "~a: ~a" func (modbus_strerror (saved-errno)))
-                              (current-continuation-marks)
-                              (saved-errno))))
+      (define errno (saved-errno))
+      (define errmsg (format "~a: ~a" func (modbus_strerror errno)))
+      (define errccm (current-continuation-marks))
+      (raise (cond [(= errno EMBXILFUN)  (make-exn:modbus:xilfun  errmsg errccm errno)]
+                   [(= errno EMBXILADD)  (make-exn:modbus:xiladd  errmsg errccm errno)]
+                   [(= errno EMBXILVAL)  (make-exn:modbus:xilval  errmsg errccm errno)]
+                   [(= errno EMBXSFAIL)  (make-exn:modbus:xsfail  errmsg errccm errno)]
+                   [(= errno EMBXSBUSY)  (make-exn:modbus:xsbusy  errmsg errccm errno)]
+                   [(= errno EMBXACK)    (make-exn:modbus:xack    errmsg errccm errno)]
+                   [(= errno EMBXNACK)   (make-exn:modbus:xnack   errmsg errccm errno)]
+                   [(= errno EMBXMEMPAR) (make-exn:modbus:xmempar errmsg errccm errno)]
+                   [(= errno EMBXGPATH)  (make-exn:modbus:xgpath  errmsg errccm errno)]
+                   [(= errno EMBXGTAR)   (make-exn:modbus:xgtar   errmsg errccm errno)]
+                   [else (make-exn:modbus errmsg errccm errno)])))
     retcode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
