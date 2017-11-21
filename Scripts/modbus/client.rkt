@@ -33,6 +33,10 @@
       (define expected (vector-ref TAB_REGISTERS i))
       (check-eq? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
       (check-registers tab_registers TAB_REGISTERS nb-points (add1 i))))
+
+  (define (equal_dword tab_reg value)
+    (and (eq? (uint16-ref tab_reg 0) (arithmetic-shift value -16))
+         (eq? (uint16-ref tab_reg 1) (bitwise-and value #xFFFF))))
   
   (define-tamer-suite modbus-client "Modbus Client Unit Tests"
     #:before (λ [] (modbus_set_debug ctx 1))
@@ -108,4 +112,41 @@
                             (test-spec "modbus_read_input_registers"
                                        #:before (λ [] (rc (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS UT_INPUT_REGISTERS_NB tab_rp_registers)))
                                        (check-eq? (rc) UT_INPUT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
-                                       (check-registers tab_rp_registers UT_INPUT_REGISTERS_TAB UT_INPUT_REGISTERS_TAB))))))
+                                       (check-registers tab_rp_registers UT_INPUT_REGISTERS_TAB UT_INPUT_REGISTERS_NB)))
+                (test-suite "Masks (bonus)"
+                            (test-spec "modbus_mask_write_register"
+                                       #:before (λ [] (modbus_write_register ctx UT_REGISTERS_ADDRESS #x12))
+                                       (check-not-exn (thunk (rc (modbus_mask_write_register ctx UT_REGISTERS_ADDRESS #xF2 #x25))) "FAILED"))
+                            (test-spec "modbus_read_registers"
+                                       #:before (λ [] (rc (modbus_read_registers ctx UT_REGISTERS_ADDRESS 1 tab_rp_registers)))
+                                       (let ([register (uint16-ref tab_rp_registers 0)])
+                                         (check-eq? register #x17 (format "FAILED (#x~a != #x17)" (~hex register)))))))
+    (test-suite "Floats"
+                (test-suite "ABCD"
+                            (test-spec "modbus_set_float_abcd"
+                                       #:before (λ [] (modbus_set_float_abcd UT_REAL tab_rp_registers))
+                                       (check-true (equal_dword tab_rp_registers UT_IREAL_ABCD) "FAILED Set float ABCD"))
+                            (test-spec "modbus_get_float_abcd"
+                                       #:before (λ [] (rc (modbus_get_float_abcd tab_rp_registers)))
+                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+                (test-suite "DCBA"
+                            (test-spec "modbus_set_float_dcba"
+                                       #:before (λ [] (modbus_set_float_dcba UT_REAL tab_rp_registers))
+                                       (check-true (equal_dword tab_rp_registers UT_IREAL_DCBA) "FAILED Set float DCBA"))
+                            (test-spec "modbus_get_float_dcba"
+                                       #:before (λ [] (rc (modbus_get_float_dcba tab_rp_registers)))
+                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+                (test-suite "BADC"
+                            (test-spec "modbus_set_float_badc"
+                                       #:before (λ [] (modbus_set_float_badc UT_REAL tab_rp_registers))
+                                       (check-true (equal_dword tab_rp_registers UT_IREAL_BADC) "FAILED Set float BADC"))
+                            (test-spec "modbus_get_float_badc"
+                                       #:before (λ [] (rc (modbus_get_float_badc tab_rp_registers)))
+                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+                (test-suite "CDAB"
+                            (test-spec "modbus_set_float_cdab"
+                                       #:before (λ [] (modbus_set_float_cdab UT_REAL tab_rp_registers))
+                                       (check-true (equal_dword tab_rp_registers UT_IREAL_CDAB) "FAILED Set float CDAB"))
+                            (test-spec "modbus_get_float_cdab"
+                                       #:before (λ [] (rc (modbus_get_float_cdab tab_rp_registers)))
+                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL)))))))

@@ -35,3 +35,10 @@
 ;; If the following value is used, a bad response is sent.
 ;   It's better to test with a lower value than UT_REGISTERS_NB_POINTS to try to raise a segfault.
 (define UT_REGISTERS_NB_SPECIAL #x2)
+
+
+(define UT_REAL 123456.00)
+(define UT_IREAL_ABCD #x0020F147)
+(define UT_IREAL_DCBA #x47F12000)
+(define UT_IREAL_BADC #x200047F1)
+(define UT_IREAL_CDAB #xF1470020)
