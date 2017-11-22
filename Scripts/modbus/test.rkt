@@ -21,7 +21,7 @@
 (define UT_INPUT_REGISTERS_TAB     #(#x000A))
 
 ;; Use a different port that greater than 1024 for unit testing.
-(define UT_TCP_DEFAULT_PORT        (+ 1024 MODBUS_TCP_DEFAULT_PORT))
+(define UT_TCP_DEFAULT_PORT        MODBUS_TCP_DEFAULT_PORT)
 
 ;; Raise a manual exception when this address is used for the first byte
 (define UT_REGISTERS_ADDRESS_SPECIAL              #x170)
