@@ -47,23 +47,24 @@
 (struct exn:modbus:xgpath  exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xgpath)
 (struct exn:modbus:xgtar   exn:modbus () #:transparent #:extra-constructor-name make-exn:modbus:xgtar)
 
+(define modbus-exceptions
+  (make-hash (list (cons EMBXILFUN   make-exn:modbus:xilfun)
+                   (cons EMBXILADD   make-exn:modbus:xiladd)
+                   (cons EMBXILVAL   make-exn:modbus:xilval)
+                   (cons EMBXSFAIL   make-exn:modbus:xsfail)
+                   (cons EMBXSBUSY   make-exn:modbus:xsbusy)
+                   (cons EMBXACK     make-exn:modbus:xack)
+                   (cons EMBXNACK    make-exn:modbus:xnack)
+                   (cons EMBXMEMPAR  make-exn:modbus:xmempar)
+                   (cons EMBXGPATH   make-exn:modbus:xgpath)
+                   (cons EMBXGTAR    make-exn:modbus:xgtar))))
+
 (define on-error-break
   (lambda [func retcode errcode]
     (when (eq? retcode errcode)
       (define errno (saved-errno))
-      (define errmsg (format "~a: ~a" func (modbus_strerror errno)))
-      (define errccm (current-continuation-marks))
-      (raise (cond [(= errno EMBXILFUN)  (make-exn:modbus:xilfun  errmsg errccm errno)]
-                   [(= errno EMBXILADD)  (make-exn:modbus:xiladd  errmsg errccm errno)]
-                   [(= errno EMBXILVAL)  (make-exn:modbus:xilval  errmsg errccm errno)]
-                   [(= errno EMBXSFAIL)  (make-exn:modbus:xsfail  errmsg errccm errno)]
-                   [(= errno EMBXSBUSY)  (make-exn:modbus:xsbusy  errmsg errccm errno)]
-                   [(= errno EMBXACK)    (make-exn:modbus:xack    errmsg errccm errno)]
-                   [(= errno EMBXNACK)   (make-exn:modbus:xnack   errmsg errccm errno)]
-                   [(= errno EMBXMEMPAR) (make-exn:modbus:xmempar errmsg errccm errno)]
-                   [(= errno EMBXGPATH)  (make-exn:modbus:xgpath  errmsg errccm errno)]
-                   [(= errno EMBXGTAR)   (make-exn:modbus:xgtar   errmsg errccm errno)]
-                   [else (make-exn:modbus errmsg errccm errno)])))
+      (define mkexn (hash-ref modbus-exceptions errno (λ [] make-exn:modbus)))
+      (raise (mkexn (format "~a: ~a" func (modbus_strerror errno)) (current-continuation-marks) errno)))
     retcode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

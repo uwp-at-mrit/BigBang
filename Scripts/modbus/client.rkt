@@ -107,91 +107,91 @@
                                        (check-eq? (rc) UT_REGISTERS_NB (format "FAILED (nb points ~a != ~a)" (rc) UT_REGISTERS_NB))
                                        (let ([ADJUSTED_TAB (make-vector UT_REGISTERS_NB 0)])
                                          (vector-set! ADJUSTED_TAB 0 (vector UT_REGISTERS_TAB 0))
-                                         (check-registers tab_rp_registers ADJUSTED_TAB UT_REGISTERS_NB))))
-                (test-suite "Input Registers"
-                            (test-spec "modbus_read_input_registers"
-                                       #:before (λ [] (rc (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS UT_INPUT_REGISTERS_NB tab_rp_registers)))
-                                       (check-eq? (rc) UT_INPUT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
-                                       (check-registers tab_rp_registers UT_INPUT_REGISTERS_TAB UT_INPUT_REGISTERS_NB)))
-                (test-suite "Masks (bonus)"
-                            (test-spec "modbus_mask_write_register"
-                                       #:before (λ [] (modbus_write_register ctx UT_REGISTERS_ADDRESS #x12))
-                                       (check-not-exn (thunk (rc (modbus_mask_write_register ctx UT_REGISTERS_ADDRESS #xF2 #x25))) "FAILED"))
-                            (test-spec "modbus_read_registers"
-                                       #:before (λ [] (rc (modbus_read_registers ctx UT_REGISTERS_ADDRESS 1 tab_rp_registers)))
-                                       (let ([register (uint16-ref tab_rp_registers 0)])
-                                         (check-eq? register #x17 (format "FAILED (#x~a != #x17)" (~hex register)))))))
+                                         (check-registers tab_rp_registers ADJUSTED_TAB UT_REGISTERS_NB)))))
 
-    (test-suite "Floats"
-                (test-suite "ABCD"
-                            (test-spec "modbus_set_float_abcd"
-                                       #:before (λ [] (modbus_set_float_abcd UT_REAL tab_rp_registers))
-                                       (check-true (equal_dword tab_rp_registers UT_IREAL_ABCD) "FAILED Set float ABCD"))
-                            (test-spec "modbus_get_float_abcd"
-                                       #:before (λ [] (rc (modbus_get_float_abcd tab_rp_registers)))
-                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
-                (test-suite "DCBA"
-                            (test-spec "modbus_set_float_dcba"
-                                       #:before (λ [] (modbus_set_float_dcba UT_REAL tab_rp_registers))
-                                       (check-true (equal_dword tab_rp_registers UT_IREAL_DCBA) "FAILED Set float DCBA"))
-                            (test-spec "modbus_get_float_dcba"
-                                       #:before (λ [] (rc (modbus_get_float_dcba tab_rp_registers)))
-                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
-                (test-suite "BADC"
-                            (test-spec "modbus_set_float_badc"
-                                       #:before (λ [] (modbus_set_float_badc UT_REAL tab_rp_registers))
-                                       (check-true (equal_dword tab_rp_registers UT_IREAL_BADC) "FAILED Set float BADC"))
-                            (test-spec "modbus_get_float_badc"
-                                       #:before (λ [] (rc (modbus_get_float_badc tab_rp_registers)))
-                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
-                (test-suite "CDAB"
-                            (test-spec "modbus_set_float_cdab"
-                                       #:before (λ [] (modbus_set_float_cdab UT_REAL tab_rp_registers))
-                                       (check-true (equal_dword tab_rp_registers UT_IREAL_CDAB) "FAILED Set float CDAB"))
-                            (test-spec "modbus_get_float_cdab"
-                                       #:before (λ [] (rc (modbus_get_float_cdab tab_rp_registers)))
-                                       (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL)))))
+    (test-suite "Input Registers"
+                (test-spec "modbus_read_input_registers"
+                           #:before (λ [] (rc (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS UT_INPUT_REGISTERS_NB tab_rp_registers)))
+                           (check-eq? (rc) UT_INPUT_REGISTERS_NB (format "FAILED (nb points ~a)" (rc)))
+                           (check-registers tab_rp_registers UT_INPUT_REGISTERS_TAB UT_INPUT_REGISTERS_NB)))
 
-    (let ([regxiladd (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
+    (test-suite "Masks"
+                (test-spec "modbus_mask_write_register"
+                           #:before (λ [] (modbus_write_register ctx UT_REGISTERS_ADDRESS #x12))
+                           (check-not-exn (thunk (rc (modbus_mask_write_register ctx UT_REGISTERS_ADDRESS #xF2 #x25))) "FAILED"))
+                (test-spec "modbus_read_registers"
+                           #:before (λ [] (rc (modbus_read_registers ctx UT_REGISTERS_ADDRESS 1 tab_rp_registers)))
+                           (let ([register (uint16-ref tab_rp_registers 0)])
+                             (check-eq? register #x17 (format "FAILED (#x~a != #x17)" (~hex register))))))
+
+    (let ([REGXILADD (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
+      ; The mapping begins at the defined addresses and ends at (address + nb_points) so these addresses are not valid
       (test-suite "Illegal Data Address"
-                  ; The mapping begins at the defined addresses and ends at (address + nb_points) so these addresses are not valid
-                  #:before (λ [] (saved-errno 0))
-                  (test-suite "modbus_read_bits"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_read_bits ctx 0 1 tab_rp_bits)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (add1 UT_BITS_NB) tab_rp_bits))))
-                  (test-suite "modbus_read_input_bits"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_read_input_bits ctx 0 1 tab_rp_bits)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (add1 UT_INPUT_BITS_NB) tab_rp_bits))))
-                  (test-suite "modbus_read_registers"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_read_registers ctx 0 1 tab_rp_registers)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (add1 UT_REGISTERS_NB_MAX) tab_rp_registers))))
-                  (test-suite "modbus_read_input_registers"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_read_input_registers ctx 0 1 tab_rp_registers)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (add1 UT_INPUT_REGISTERS_NB) tab_rp_registers))))
-                  (test-suite "modbus_write_bit"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_write_bit ctx 0 1)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_write_bit ctx (+ UT_BITS_ADDRESS UT_BITS_NB) 1))))
-                  (test-suite "modbus_write_bits"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_write_bits ctx 0 1 tab_rp_bits)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_write_bits ctx (+ UT_BITS_ADDRESS UT_BITS_NB) UT_BITS_NB tab_rp_bits))))
-                  (test-suite "modbus_write_register"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_write_register ctx 0 (uint16-ref tab_rp_registers 0))))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_write_register ctx (+ UT_BITS_ADDRESS UT_BITS_NB) (uint16-ref tab_rp_registers 0)))))
-                  (test-suite "modbus_write_registers"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_write_registers ctx 0 1 tab_rp_registers)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_write_registers ctx regxiladd UT_REGISTERS_NB tab_rp_registers))))
-                  (test-suite "modbus_mask_write_register"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_mask_write_register ctx 0 #xF2 #x25)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_mask_write_register ctx regxiladd #xF2 #x25))))
-                  (test-suite "modbus_write_and_read_registers"
-                              (test-exn "0" exn:modbus? (λ [] (modbus_write_and_read_registers ctx 0 1 tab_rp_registers 0 1 tab_rp_registers)))
-                              (test-exn "max" exn:modbus? (λ [] (modbus_write_and_read_registers ctx regxiladd UT_REGISTERS_NB tab_rp_registers regxiladd UT_REGISTERS_NB tab_rp_registers))))))
+                  (test-spec "modbus_read_bits"
+                             (check-exn exn:modbus? (λ [] (modbus_read_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 UT_BITS_NB) tab_rp_bits)) "max"))
+                  (test-spec "modbus_read_input_bits"
+                             (check-exn exn:modbus? (λ [] (modbus_read_input_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 UT_INPUT_BITS_NB) tab_rp_bits)) "max"))
+                  (test-spec "modbus_read_registers"
+                             (check-exn exn:modbus? (λ [] (modbus_read_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 UT_REGISTERS_NB_MAX) tab_rp_registers)) "max"))
+                  (test-spec "modbus_read_input_registers"
+                             (check-exn exn:modbus? (λ [] (modbus_read_input_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (+ 1 UT_INPUT_REGISTERS_NB) tab_rp_registers)) "max"))
+                  (test-spec "modbus_write_bit"
+                             (check-exn exn:modbus? (λ [] (modbus_write_bit ctx 0 1)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_write_bit ctx (+ UT_BITS_ADDRESS UT_BITS_NB) 1)) "max"))
+                  (test-spec "modbus_write_bits"
+                             (check-exn exn:modbus? (λ [] (modbus_write_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_write_bits ctx (+ UT_BITS_ADDRESS UT_BITS_NB) UT_BITS_NB tab_rp_bits)) "max"))
+                  (test-spec "modbus_write_register"
+                             (check-exn exn:modbus? (λ [] (modbus_write_register ctx 0 (uint16-ref tab_rp_registers 0))) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_write_register ctx (+ UT_BITS_ADDRESS UT_BITS_NB) (uint16-ref tab_rp_registers 0))) "max"))
+                  (test-spec "modbus_write_registers"
+                             (check-exn exn:modbus? (λ [] (modbus_write_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_write_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))
+                  (test-spec "modbus_mask_write_register"
+                             (check-exn exn:modbus? (λ [] (modbus_mask_write_register ctx 0 #xF2 #x25)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_mask_write_register ctx REGXILADD #xF2 #x25)) "max"))
+                  (test-spec "modbus_write_and_read_registers"
+                             (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx 0 1 tab_rp_registers 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))))
 
     (test-suite "Too Many Data Error"
-                (test-exn "modbus_read_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (add1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
-                (test-exn "modbus_read_input_bits" exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (add1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
-                (test-exn "modbus_read_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (add1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
-                (test-exn "modbus_read_input_registers" exn:modbus? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (add1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
-                (test-exn "modbus_write_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (add1 MODBUS_MAX_WRITE_BITS) tab_rp_bits)))
-                (test-exn "modbus_write_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (add1 MODBUS_MAX_WRITE_REGISTERS) tab_rp_registers))))))
-  
+                (test-exn "modbus_read_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
+                (test-exn "modbus_read_input_bits" exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
+                (test-exn "modbus_read_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
+                (test-exn "modbus_read_input_registers" exn:modbus? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
+                (test-exn "modbus_write_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 MODBUS_MAX_WRITE_BITS) tab_rp_bits)))
+                (test-exn "modbus_write_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_WRITE_REGISTERS) tab_rp_registers)))))
+
+  (define-tamer-suite modbus-float "Modbus Float Operations"
+    (test-suite "ABCD"
+                (test-spec "modbus_set_float_abcd"
+                           #:before (λ [] (modbus_set_float_abcd UT_REAL tab_rp_registers))
+                           (check-true (equal_dword tab_rp_registers UT_IREAL_ABCD) "FAILED Set float ABCD"))
+                (test-spec "modbus_get_float_abcd"
+                           #:before (λ [] (rc (modbus_get_float_abcd tab_rp_registers)))
+                           (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+    (test-suite "DCBA"
+                (test-spec "modbus_set_float_dcba"
+                           #:before (λ [] (modbus_set_float_dcba UT_REAL tab_rp_registers))
+                           (check-true (equal_dword tab_rp_registers UT_IREAL_DCBA) "FAILED Set float DCBA"))
+                (test-spec "modbus_get_float_dcba"
+                           #:before (λ [] (rc (modbus_get_float_dcba tab_rp_registers)))
+                           (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+    (test-suite "BADC"
+                (test-spec "modbus_set_float_badc"
+                           #:before (λ [] (modbus_set_float_badc UT_REAL tab_rp_registers))
+                           (check-true (equal_dword tab_rp_registers UT_IREAL_BADC) "FAILED Set float BADC"))
+                (test-spec "modbus_get_float_badc"
+                           #:before (λ [] (rc (modbus_get_float_badc tab_rp_registers)))
+                           (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))
+    (test-suite "CDAB"
+                (test-spec "modbus_set_float_cdab"
+                           #:before (λ [] (modbus_set_float_cdab UT_REAL tab_rp_registers))
+                           (check-true (equal_dword tab_rp_registers UT_IREAL_CDAB) "FAILED Set float CDAB"))
+                (test-spec "modbus_get_float_cdab"
+                           #:before (λ [] (rc (modbus_get_float_cdab tab_rp_registers)))
+                           (check-eqv? (rc) UT_REAL (format "FAILED (~a != ~a)" (rc) UT_REAL))))))
