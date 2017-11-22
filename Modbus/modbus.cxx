@@ -1,4 +1,4 @@
-#include "network.hxx"
+#include "modbus.hxx"
 #include "rsyslog.hpp"
 
 #include <ppltasks.h>
@@ -11,14 +11,14 @@ using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
 /*************************************************************************************************/
-TCPListener::TCPListener (unsigned short port) {
+ModbusListener::ModbusListener (unsigned short port) {
     this->listener = ref new StreamSocketListener();
     this->listener->Control->QualityOfService = SocketQualityOfService::LowLatency;
     this->listener->Control->KeepAlive = false;
     create_task(this->listener->BindEndpointAsync(nullptr, port.ToString())).then([this, port](task<void> binding) {
         try {
             binding.get();
-            this->listener->ConnectionReceived += ref new TCPAcceptHandler(this, &TCPListener::welcome);
+            this->listener->ConnectionReceived += ref new TCPAcceptHandler(this, &ModbusListener::welcome);
 
             rsyslog(L"> 0.0.0.0:%u", port);
         } catch (Platform::Exception^ e) {
@@ -27,9 +27,9 @@ TCPListener::TCPListener (unsigned short port) {
     });
 }
 
-TCPListener::~TCPListener() {}
+ModbusListener::~ModbusListener() {}
 
-void TCPListener::welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
+void ModbusListener::welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
     auto tcpin = ref new DataReader(e->Socket->InputStream);
     auto tcpout = ref new DataWriter(e->Socket->OutputStream);
 
@@ -41,7 +41,7 @@ void TCPListener::welcome(StreamSocketListener^ listener, StreamSocketListenerCo
     this->read_stream_loop(tcpin, tcpout, e->Socket);
 }
 
-void TCPListener::read_stream_loop(IDataReader^ tcpin, IDataWriter^ tcpout, StreamSocket^ plc) {
+void ModbusListener::read_stream_loop(IDataReader^ tcpin, IDataWriter^ tcpout, StreamSocket^ plc) {
     unsigned int ssize = sizeof(unsigned int);
     create_task(tcpin->LoadAsync(ssize)).then([tcpin, ssize](unsigned int size) {
         if (size < ssize) {

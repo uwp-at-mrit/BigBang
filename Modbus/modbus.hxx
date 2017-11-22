@@ -6,12 +6,12 @@ namespace WarGrey::SCADA {
         Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs^>
         TCPAcceptHandler;
 
-    private ref class TCPListener sealed {
+    private ref class ModbusListener sealed {
     public:
-        TCPListener(unsigned short port);
+        ModbusListener(unsigned short port);
         
     private:
-        ~TCPListener();
+        ~ModbusListener();
 
     private:
         void welcome(
