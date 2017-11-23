@@ -208,7 +208,7 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-    //this->listener = ref new ModbusListener((unsigned short)18030);
+    this->listener = ref new ModbusListener((unsigned short)MODBUE_DEFAULT_TCP_PORT);
 }
 
 Console::~Console() {
