@@ -84,19 +84,30 @@ static void read_handle_reply_loop(ModbusServer* server, IDataReader^ mbin, IDat
 
 // delegate only accepts C++/CX class
 private ref class WarGrey::SCADA::ModbusListener sealed {
-public:
-    ModbusListener(unsigned short port) {
+internal:
+    ModbusListener(ModbusServer* server, unsigned short port) : server(server), port(port) {
         this->listener = ref new StreamSocketListener();
         this->listener->Control->QualityOfService = SocketQualityOfService::LowLatency;
         this->listener->Control->KeepAlive = false;
-        this->port = port;
-    }
-
-    virtual ~ModbusListener() {
-        delete this->listener;
     }
 
 public:
+    void run() {
+        create_task(this->listener->BindEndpointAsync(nullptr, this->port.ToString())).then([this](task<void> binding) {
+            try {
+                binding.get();
+                this->listener->ConnectionReceived
+                    += ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
+                        this,
+                        &ModbusListener::welcome);
+
+                rsyslog(L"## 0.0.0.0:%u", this->port);
+            } catch (Platform::Exception^ e) {
+                rsyslog(e->Message);
+            }
+        });
+    }
+
     void welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
         auto client = e->Socket;
         auto id = socket_identity(client);
@@ -112,39 +123,18 @@ public:
     }
 
 private:
-    void run(ModbusServer* server) {
-        this->server = server;
-        create_task(this->listener->BindEndpointAsync(nullptr, this->port.ToString())).then([this](task<void> binding) {
-            try {
-                binding.get();
-                this->listener->ConnectionReceived += ref new TCPAcceptHandler(this, &ModbusListener::welcome);
-
-                rsyslog(L"## 0.0.0.0:%u", this->port);
-            } catch (Platform::Exception^ e) {
-                rsyslog(e->Message);
-            }
-        });
-    }
-
-private:
     unsigned short port;
     StreamSocketListener^ listener;
     ModbusServer* server;
-
-    friend class WarGrey::SCADA::ModbusServer;
 };
 
 /*************************************************************************************************/
 ModbusServer::ModbusServer(unsigned short port) {
-    this->listener = ref new ModbusListener(port);
-};
-
-ModbusServer::~ModbusServer() {
-    delete this->listener;
+    this->listener = ref new ModbusListener(this, port);
 };
 
 ModbusServer* ModbusServer::listen() {
-    this->listener->run(this);
+    this->listener->run();
 
     return this;
 }

@@ -4,16 +4,13 @@
 
 namespace WarGrey::SCADA {
     ref class ModbusListener;
-    
-    typedef Windows::Foundation::TypedEventHandler<
-        Windows::Networking::Sockets::StreamSocketListener^,
-        Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs^>
-        TCPAcceptHandler;
 
     private class ModbusServer {
     public:
         ModbusServer(unsigned short port = MODBUS_TCP_DEFAULT_PORT);
-        virtual ~ModbusServer() noexcept;
+        virtual ~ModbusServer() noexcept {};
+
+    public:
         ModbusServer* listen();
 
     private:
