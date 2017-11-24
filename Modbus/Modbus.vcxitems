@@ -15,6 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\listener.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
   </ItemGroup>

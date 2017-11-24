@@ -2,7 +2,7 @@
 #include "shape.hpp"
 #include "colorspace.hpp"
 #include "snip/pipeline/screwlet.hpp"
-#include "snip/pipeline/static.hpp"
+#include "snip/pipeline/constants.hpp"
 
 using namespace WarGrey::SCADA;
 

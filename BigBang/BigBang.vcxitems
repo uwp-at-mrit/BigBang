@@ -48,7 +48,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\static.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\constants.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
