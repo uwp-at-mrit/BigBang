@@ -27,7 +27,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 typedef TypedEventHandler<Battery^, Platform::Object^> BatteryUpdateHandler;
 typedef TypedEventHandler<WiFiAdapter^, Platform::Object^> WiFiUpdateHandler;
 
-// delegate only accepts C++/CX
+// delegate only accepts C++/CX class
 ref class Status sealed {
 public:
     TimeSpan update_timestamp() {

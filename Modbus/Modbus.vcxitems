@@ -16,11 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\listener.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\listener.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp" />
   </ItemGroup>
 </Project>
