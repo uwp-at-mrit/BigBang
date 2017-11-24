@@ -4,6 +4,7 @@
 #include "rsyslog.hpp"
 #include "console.hxx"
 #include "universe.hpp"
+#include "modbus/constants.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
 #include "snip/motorlet.hpp"
@@ -208,7 +209,7 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-    this->listener = ref new ModbusListener((unsigned short)MODBUE_DEFAULT_TCP_PORT);
+    this->listener = ref new ModbusListener(MODBUS_TCP_DEFAULT_PORT);
 }
 
 Console::~Console() {

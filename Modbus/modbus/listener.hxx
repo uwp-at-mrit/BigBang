@@ -6,8 +6,6 @@ namespace WarGrey::SCADA {
         Windows::Networking::Sockets::StreamSocketListenerConnectionReceivedEventArgs^>
         TCPAcceptHandler;
 
-#define MODBUE_DEFAULT_TCP_PORT 502
-
     private ref class ModbusListener sealed {
     public:
         ModbusListener(unsigned short port);

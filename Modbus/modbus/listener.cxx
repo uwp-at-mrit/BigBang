@@ -26,7 +26,7 @@ static void read_handle_reply_loop(IDataReader^ mbin, IDataWriter^ mbout, Stream
 
             cancel_current_task();
         }
-            
+
         unsigned short transaction = mbin->ReadUInt16();
         unsigned short protocol = mbin->ReadUInt16();
         unsigned short length = mbin->ReadUInt16();
@@ -42,7 +42,7 @@ static void read_handle_reply_loop(IDataReader^ mbin, IDataWriter^ mbout, Stream
             unsigned char function_code = mbin->ReadByte();
             unsigned short data_length = (unsigned short)(mbin->UnconsumedBufferLength);
 
-            for (size_t i = 0; i < data_length; i ++) mbin->ReadByte();
+            for (size_t i = 0; i < data_length; i++) mbin->ReadByte();
 
             rsyslog(L"[received ADU indication(%hu, %hu, 1 + 1 + %hu, %hhu, %hhu) from %s]",
                 transaction, protocol, data_length, unit, function_code, id->Data());
