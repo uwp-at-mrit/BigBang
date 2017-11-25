@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
-        WarGrey::SCADA::ModbusServer* server;
+        WarGrey::SCADA::IModbusServer* server;
         WarGrey::SCADA::Universe* universe;
     };
 }
