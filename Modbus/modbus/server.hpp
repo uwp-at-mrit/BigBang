@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
         virtual ~IModbusServer() noexcept {};
 
     public:
-        IModbusServer* listen();
+        void listen();
         int process(uint8 function_code, Windows::Storage::Streams::IDataReader^ mbin, uint8 *response);
 
     public: // data access
