@@ -56,22 +56,23 @@
 (for ([i (in-range UT_INPUT_REGISTERS_NB)])
   (modbus-mapping-tab-input-registers-set! mb_mapping i (vector-ref UT_INPUT_REGISTERS_TAB i)))
 
-(define serverfd (modbus_tcp_listen ctx 1))
-(printf "## localhost:~a~n" UT_TCP_DEFAULT_PORT)
+(define serverfd (modbus_tcp_listen ctx 8))
+(printf "## 0.0.0.0:~a~n" UT_TCP_DEFAULT_PORT)
 
-(define clientfd (modbus_tcp_accept ctx serverfd))
-(printf ">> PLC:~a~n" clientfd)
+(with-handlers ([exn:break? (λ [e] (newline))])
+  (define clientfd (modbus_tcp_accept ctx serverfd))
+  (printf ">> PLC:~a~n" clientfd)
 
-(with-handlers ([exn? (λ [e] (fprintf (current-error-port) "~a~n" (exn-message e)))])
-  (let wait-receive-reply-loop ()
-    (define query-count
-      (let filter-out-zero-queries ()
-        (define count (modbus_receive ctx query))
-        (cond [(positive? count) count]
-              [else (filter-out-zero-queries)])))
-    (modbus-special-reply ctx query)
-    (modbus_reply ctx query query-count mb_mapping)
-    (wait-receive-reply-loop)))
+  (with-handlers ([exn? (λ [e] (fprintf (current-error-port) "~a~n" (exn-message e)))])
+    (let wait-receive-reply-loop ()
+      (define query-count
+        (let filter-out-zero-queries ()
+          (define count (modbus_receive ctx query))
+          (cond [(positive? count) count]
+                [else (filter-out-zero-queries)])))
+      (modbus-special-reply ctx query)
+      (modbus_reply ctx query query-count mb_mapping)
+      (wait-receive-reply-loop))))
 
 (close serverfd)
 (modbus_mapping_free mb_mapping)
