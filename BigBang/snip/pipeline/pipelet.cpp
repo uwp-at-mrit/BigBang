@@ -1,5 +1,5 @@
 ﻿#include "snip/pipeline/pipelet.hpp"
-#include "snip/pipeline/static.hpp"
+#include "snip/pipeline/constants.hpp"
 #include "colorspace.hpp"
 #include "paint.hpp"
 #include "shape.hpp"

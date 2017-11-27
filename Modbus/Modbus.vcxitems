@@ -15,9 +15,10 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)network.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)network.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "network.hxx"
+#include "modbus/server.hpp"
 #include "universe.hpp"
 
 namespace WarGrey::SCADA {
@@ -18,8 +18,7 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
-        WarGrey::SCADA::TCPListener^ listener;
-        
+        WarGrey::SCADA::IModbusServer* server;
         WarGrey::SCADA::Universe* universe;
     };
 }

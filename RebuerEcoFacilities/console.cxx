@@ -179,7 +179,7 @@ public:
             }
 
             this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-            current_x += pipe_width + snip_width * 0.5F;
+            current_x += pipe_width + snip_width;
             current_y += pipe_height - snip_height;
             this->move_to(this->vibrator, current_x, current_y);
         }
@@ -208,12 +208,16 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-    //this->listener = ref new TCPListener((unsigned short)18030);
+    this->server = (new ModbusServer())->listen();
 }
 
 Console::~Console() {
     if (this->universe != nullptr) {
         delete this->universe;
+    }
+
+    if (this->server != nullptr) {
+        delete this->server;
     }
 }
 
