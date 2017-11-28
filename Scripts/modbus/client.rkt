@@ -124,7 +124,7 @@
                            (let ([register (uint16-ref tab_rp_registers 0)])
                              (check-eq? register #x17 (format "FAILED (#x~a != #x17)" (~hex register))))))
 
-    (let ([REGXILADD (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
+    #;(let ([REGXILADD (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
       ; The mapping begins at the defined addresses and ends at (address + nb_points) so these addresses are not valid
       (test-suite "Illegal Data Address"
                   (test-spec "modbus_read_bits"
@@ -158,7 +158,7 @@
                              (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx 0 1 tab_rp_registers 0 1 tab_rp_registers)) "0")
                              (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))))
 
-    (test-suite "Too Many Data Error"
+    #;(test-suite "Too Many Data Error"
                 (test-exn "modbus_read_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
                 (test-exn "modbus_read_input_bits" exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
                 (test-exn "modbus_read_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
