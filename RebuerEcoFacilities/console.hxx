@@ -1,7 +1,7 @@
 #pragma once
 
-#include "modbus/client.hpp"
 #include "universe.hpp"
+#include "modbus.hpp"
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
+        WarGrey::SCADA::ModbusVirtualDevice* device;
         WarGrey::SCADA::IModbusClient* client;
         WarGrey::SCADA::Universe* universe;
     };

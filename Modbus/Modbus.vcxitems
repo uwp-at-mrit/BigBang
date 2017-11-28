@@ -17,10 +17,15 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\protocol.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\protocol.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp" />
   </ItemGroup>
 </Project>

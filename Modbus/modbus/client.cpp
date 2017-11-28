@@ -36,7 +36,7 @@ void IModbusClient::connect() {
             mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
             mbout->ByteOrder = ByteOrder::BigEndian;
 
-            rsyslog(L"## %s:%s", this->target->RawName->Data(), this->service->Data());
+            rsyslog(L">> %s:%s", this->target->RawName->Data(), this->service->Data());
         } catch (Platform::Exception^ e) {
             rsyslog(e->Message);
         }

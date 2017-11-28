@@ -208,12 +208,19 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-    this->client = new ModbusClient("192.168.1.1");
+    this->device = new ModbusVirtualDevice();
+    this->device->listen();
+    
+    this->client = new ModbusClient("127.0.0.1");
 }
 
 Console::~Console() {
     if (this->universe != nullptr) {
         delete this->universe;
+    }
+
+    if (this->device != nullptr) {
+        delete this->device;
     }
 
     if (this->client != nullptr) {

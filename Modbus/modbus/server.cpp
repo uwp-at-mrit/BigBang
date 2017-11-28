@@ -1,4 +1,6 @@
+#include "modbus/constants.hpp"
 #include "modbus/server.hpp"
+#include "modbus/protocol.hpp"
 #include "rsyslog.hpp"
 
 #include <ppltasks.h>
@@ -10,12 +12,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-static void read_bytes(IDataReader^ mbin, uint8* dest, size_t count) {
-    for (size_t i = 0; i < count; i++) {
-        dest[i] = mbin->ReadByte();
-    }
-}
-
 static inline Platform::String^ socket_identity(StreamSocket^ socket) {
     return socket->Information->RemoteHostName->RawName + ":" + socket->Information->RemotePort;
 }
@@ -24,6 +20,9 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
     , StreamSocket^ client, Platform::String^ id) {
     uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
     create_task(mbin->LoadAsync(header_length)).then([=](unsigned int size) {
+        uint16 transaction, protocol, length;
+        uint8 unit;
+
         if (size < header_length) {
             if (size == 0) {
                 rsyslog(L"%s has disconnected", id->Data());
@@ -34,11 +33,7 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
             cancel_current_task();
         }
 
-        uint16 transaction = mbin->ReadUInt16();
-        uint16 protocol = mbin->ReadUInt16();
-        uint16 length = mbin->ReadUInt16();
-        uint8 unit = mbin->ReadByte();
-        uint16 pdu_length = length - 1;
+        uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
         return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
             if (size < pdu_length) {
@@ -51,22 +46,11 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
 
             rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
                 transaction, protocol, length, unit, function_code, id->Data());
-
-            mbout->WriteUInt16(transaction);
-            mbout->WriteUInt16(protocol);
             
             if (retcode < 0) {
-                mbout->WriteUInt16(3);
-                mbout->WriteByte(unit);
-                mbout->WriteByte(function_code + (uint8)0x80);
-                mbout->WriteByte((uint8)(-retcode));
+                modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
             } else {
-                mbout->WriteUInt16((uint16)(retcode + 2));
-                mbout->WriteByte(unit);
-                mbout->WriteByte(function_code);
-                for (size_t i = 0; i < retcode; i++) {
-                    mbout->WriteByte(response[i]);
-                }
+                modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);
             }
         });
     }).then([=](task<void> doHandlingRequest) {
@@ -192,7 +176,7 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
         uint16 address = mbin->ReadUInt16();
         uint16 quantity = mbin->ReadUInt16();
         uint8 count = mbin->ReadByte();
-        read_bytes(mbin, response, count);
+        MODBUS_READ_BYTES(mbin, response, count);
 
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
             return -MODBUS_EXN_ILLEGAL_DATA_VALUE;
@@ -208,7 +192,7 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
         uint8 request[MODBUS_MAX_PDU_LENGTH];
         int data_length = mbin->UnconsumedBufferLength;
 
-        read_bytes(mbin, request, data_length);
+        MODBUS_READ_BYTES(mbin, request, data_length);
 
         return this->do_private_function(funcode, request, data_length, response);
     };
@@ -218,17 +202,3 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
 int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint16 data_length, uint8* response) { // MAP: Page 10
     return -MODBUS_EXN_ILLEGAL_FUNCTION;
 }
-
-/*************************************************************************************************/
-int ModbusServer::read_coils(uint16 address, uint16 quantity, uint8* dest) { // MAP: Page 10
-    return -MODBUS_EXN_DEVICE_BUSY;
-}
-
-int ModbusServer::write_coil(uint16 address, bool value) { // MAP: Page 10
-    return 0;
-}
-
-int ModbusServer::write_coils(uint16 address, uint16 quantity, uint8* dest) { // MAP: Page 10
-    return -MODBUS_EXN_MEMORY_PARITY_ERROR;
-}
-
