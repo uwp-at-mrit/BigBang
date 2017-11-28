@@ -10,7 +10,7 @@
   (require "tamer.rkt")
   (require "format.rkt")
 
-  (define host "192.168.1.100")
+  (define host "172.16.8.222")
   (define ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT))
 
   ;; Allocate and initialize the memory to store the bits and registers
