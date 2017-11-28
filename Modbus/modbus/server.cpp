@@ -149,10 +149,8 @@ IModbusServer::IModbusServer(uint16 port) {
     this->listener = ref new ModbusListener(this, port);
 };
 
-IModbusServer* IModbusServer::listen() {
+void IModbusServer::listen() {
     this->listener->run();
-
-    return this;
 }
 
 int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { // MAP: Page 10

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "modbus/server.hpp"
+#include "modbus/client.hpp"
 #include "universe.hpp"
 
 namespace WarGrey::SCADA {
@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
-        WarGrey::SCADA::IModbusServer* server;
+        WarGrey::SCADA::IModbusClient* client;
         WarGrey::SCADA::Universe* universe;
     };
 }
