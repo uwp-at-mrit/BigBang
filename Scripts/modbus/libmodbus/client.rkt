@@ -1,14 +1,14 @@
 #lang racket
 
-(require "tamer.rkt")
+(require "../tamer.rkt")
 
 (tamer-taming-start)
 
 (module story racket
   (require "unsafe.rkt")
   (require "test.rkt")
-  (require "tamer.rkt")
-  (require "format.rkt")
+  (require "../tamer.rkt")
+  (require "../format.rkt")
 
   (define host "172.16.8.222")
   (define ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT))
