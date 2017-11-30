@@ -46,7 +46,8 @@
       (test-suite "Connection"
                   #:before (λ [] (void (modbus_get_response_timeout ctx &sec:old &usec:old)
                                        (modbus_connect ctx)
-                                       (modbus_get_response_timeout ctx &sec:new &usec:new)))
+                                       (modbus_get_response_timeout ctx &sec:new &usec:new)
+                                       (printf "Response timeout ~a.~as~n" (unbox &sec:new) (unbox &usec:new))))
                   (test-case "No response timeout modification on connect"
                              (check-equal? &sec:old &sec:new "Second has been modified on connect")
                              (check-equal? &usec:old &usec:new "Macrosecond has been modified on connect"))))
@@ -64,7 +65,7 @@
                 (let ([tab_value (uint8-malloc UT_BITS_NB)])
                   (test-suite "Multiple Bits"
                               #:before (λ [] (modbus_set_bits_from_bytes tab_value 0 UT_BITS_NB UT_BITS_TAB))
-                              (test-spec "modbus_write_bit"
+                              (test-spec "modbus_write_bits"
                                          #:before (λ [] (rc (modbus_write_bits ctx UT_BITS_ADDRESS UT_BITS_NB tab_value)))
                                          (check-eq? (rc) UT_BITS_NB))
                               (test-spec "modbus_read_bits"
