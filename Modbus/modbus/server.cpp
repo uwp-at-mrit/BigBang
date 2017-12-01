@@ -203,8 +203,8 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
             retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
-        } else if (count != MODBUS_NStar(quantity)) {
-			retcode = -modbus_illegal_data_value(count, MODBUS_NStar(quantity), this->debug);
+        } else if (count != MODBUS_COIL_NStar(quantity)) {
+			retcode = -modbus_illegal_data_value(count, MODBUS_COIL_NStar(quantity), this->debug);
 		} else {
 			retcode = this->write_coils(address, quantity, response);
 		}
