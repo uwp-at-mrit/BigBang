@@ -17,7 +17,7 @@ static inline Platform::String^ socket_identity(StreamSocket^ socket) {
     return socket->Information->RemoteHostName->RawName + ":" + socket->Information->RemotePort;
 }
 
-static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataWriter^ mbout, uint8* response
+static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWriter^ mbout, uint8* response
     , StreamSocket^ client, Platform::String^ id) {
     uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
     create_task(mbin->LoadAsync(header_length)).then([=](unsigned int size) {
@@ -43,17 +43,18 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
             }
 
             uint8 function_code = mbin->ReadByte();
-            int retcode = server->process(function_code, mbin, response);
 
-            if (server->debug_enabled()) {
-                rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
-                    transaction, protocol, length, unit, function_code, id->Data());
-            }
+			if (server->debug_enabled()) {
+				rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
+					transaction, protocol, length, unit, function_code, id->Data());
+			}
+
+            int retcode = server->process(function_code, mbin, response);
             
-            if (retcode < 0) {
-                modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
+            if (retcode >= 0) {
+				modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);                
             } else {
-                modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);
+				modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
             }
         });
     }).then([=](task<void> doHandlingRequest) {
@@ -85,6 +86,12 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
             delete client;
         }
     });
+}
+
+static inline int modbus_echo(uint8* response, uint16 address, uint16 value) {
+	MODBUS_SET_INT16_TO_INT8(response, 0, address);
+	MODBUS_SET_INT16_TO_INT8(response, 2, value);
+	return 4;
 }
 
 // delegate only accepts C++/CX class
@@ -152,24 +159,31 @@ bool IModbusServer::debug_enabled() {
     return this->debug;
 }
 
-int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { // MAP: Page 10
+int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { // MAP: Page 10
+	int retcode = -MODBUS_EXN_DEVICE_FAILURE;
+
     switch (funcode) {
-    case MODBUS_READ_COILS: { // MAP: Page 12
+	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: { // MAP: Page 12, 13
         uint16 address = mbin->ReadUInt16();
-        uint16 quantity = mbin->ReadUInt16();
+		uint16 quantity = mbin->ReadUInt16();
 
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_BITS)) {
-            return -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_BITS, this->debug);
-        } else {
-            response[0] = MODBUS_NStar(quantity);
-            return this->read_coils(address, quantity, response + 1);
-        }
-    };
+            retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_BITS, this->debug);
+		} else if (funcode == MODBUS_READ_COILS) {
+			retcode = this->read_coils(address, quantity, response + 1);
+		} else {
+			retcode = this->read_discrete_inputs(address, quantity, response + 1);
+		}
+			
+		if (retcode >= 0) {
+			response[0] = (uint8)retcode;
+			retcode += 1;
+		}
+	}; break;
     case MODBUS_WRITE_SINGLE_COIL: { // MAP: Page 17
         uint16 address = mbin->ReadUInt16();
         uint16 value = mbin->ReadUInt16();
-        int retcode;
-
+        
         switch (value) {
 		case 0x0000: retcode = this->write_coil(address, false); break;
 		case 0xFF00: retcode = this->write_coil(address, true); break;
@@ -177,44 +191,39 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
         }
 
         if (retcode >= 0) {
-            MODBUS_SET_INT16_TO_INT8(response, 0, address);
-            MODBUS_SET_INT16_TO_INT8(response, 2, value);
-            retcode = 4;
+            retcode = modbus_echo(response, address, value);
         }
-
-        return retcode;
-    };
+	}; break;
     case MODBUS_WRITE_MULTIPLE_COILS: { // MAP: Page 29
-        uint16 address = mbin->ReadUInt16();
+		uint16 address = mbin->ReadUInt16();
         uint16 quantity = mbin->ReadUInt16();
         uint8 count = mbin->ReadByte();
-        MODBUS_READ_BYTES(mbin, response, count);
-
+        
+		MODBUS_READ_BYTES(mbin, response, count);
+		
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
-            return -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
+            retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
         } else if (count != MODBUS_NStar(quantity)) {
-			return -modbus_illegal_data_value(count, MODBUS_NStar(quantity), this->debug);
-        } else {
-            int retcode = this->write_coils(address, quantity, response, count);
+			retcode = -modbus_illegal_data_value(count, MODBUS_NStar(quantity), this->debug);
+		} else {
+			retcode = this->write_coils(address, quantity, response);
+		}
 
-            if (retcode >= 0) {
-                MODBUS_SET_INT16_TO_INT8(response, 0, address);
-                MODBUS_SET_INT16_TO_INT8(response, 2, quantity);
-                retcode = 4;
-            }
-
-            return retcode;
-        }
-    };
+		if (retcode >= 0) {
+			retcode = modbus_echo(response, address, quantity);
+		}
+	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
         int data_length = mbin->UnconsumedBufferLength;
 
         MODBUS_READ_BYTES(mbin, request, data_length);
 
-        return this->do_private_function(funcode, request, data_length, response);
+        retcode = this->do_private_function(funcode, request, data_length, response);
     };
     }
+
+	return retcode;
 }
 
 int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint16 data_length, uint8* response) { // MAP: Page 10

@@ -67,6 +67,16 @@ int ModbusVirtualDevice::read_coils(uint16 address, uint16 quantity, uint8* coil
     }
 }
 
+int ModbusVirtualDevice::read_discrete_inputs(uint16 address, uint16 quantity, uint8* input_status) { // MAP: Page 10
+	uint16 idx = address - this->inbit0;
+
+	if ((idx < 0) || (idx > this->ninbits - quantity)) {
+		return -modbus_illegal_address(address, this->inbit0, this->ninbits, this->debug);
+	} else {
+		return modbus_read_coils(this->discrete_inputs, idx, quantity, input_status, 0);
+	}
+}
+
 int ModbusVirtualDevice::write_coil(uint16 address, bool value) { // MAP: Page 10
     uint16 idx = address - this->bit0;
 
@@ -78,13 +88,13 @@ int ModbusVirtualDevice::write_coil(uint16 address, bool value) { // MAP: Page 1
     }
 }
 
-int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src, uint16 count) { // MAP: Page 10
+int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 10
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx > this->nbits - quantity)) {
         return -modbus_illegal_address(address, this->bit0, this->nbits, this->debug);
     } else {
-        modbus_set_bits_from_bytes(this->coils, idx, count, src);
+        modbus_set_bits_from_bytes(this->coils, idx, quantity, src);
         return 0;
     }
 }

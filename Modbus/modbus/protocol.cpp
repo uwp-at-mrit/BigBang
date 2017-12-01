@@ -40,18 +40,17 @@ int modbus_read_coils(uint8 *src, uint16 address, uint16 quantity, uint8 *dest, 
         if (shift < 7) {
             shift += 1;
         } else {
-            dest[d_idx++] = byte;
+			dest[d_idx++] = byte;
             byte = shift = 0;
         }
     }
 
     if (shift != 0) {
-        dest[d_idx++] = byte;
+		dest[d_idx++] = byte;
     }
 
     return d_idx;
 }
-
 
 void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src) {
     for (size_t i = 0; i < 8; i++) {
@@ -61,7 +60,7 @@ void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src) {
 
 
 void modbus_set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uint8 *src) {
-    int shift = 0;
+    uint8 shift = 0;
 
     for (size_t i = idx; i < idx + count; i++) {
         dest[i] = src[(i - idx) / 8] & (1 << shift) ? 1 : 0;
@@ -72,9 +71,10 @@ void modbus_set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uin
 uint8 modbus_get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
     uint8 value = 0;
 
-    if (count > 8) {
-        count = 8;
-    }
+	if (count > 8) {
+		// In fact, the count as an input argument should not be greater than 8
+		count = 8;
+	}
 
     for (size_t i = 0; i < count; i++) {
         value |= (src[idx + i] << i);
