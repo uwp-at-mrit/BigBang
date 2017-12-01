@@ -163,7 +163,7 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 	int retcode = -MODBUS_EXN_DEVICE_FAILURE;
 
     switch (funcode) {
-	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: { // MAP: Page 12, 13
+	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: { // MAP: Page 11, 12
         uint16 address = mbin->ReadUInt16();
 		uint16 quantity = mbin->ReadUInt16();
 
@@ -180,36 +180,68 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			retcode += 1;
 		}
 	}; break;
-    case MODBUS_WRITE_SINGLE_COIL: { // MAP: Page 17
+	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS: { // MAP: Page 15, 16
+		uint16 address = mbin->ReadUInt16();
+		uint16 quantity = mbin->ReadUInt16();
+
+		if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_REGISTERS)) {
+			retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_REGISTERS, this->debug);
+		} else if (funcode == MODBUS_READ_HOLDING_REGISTERS) {
+			retcode = this->read_holding_registers(address, quantity, response + 1);
+		} else {
+			retcode = this->read_input_registers(address, quantity, response + 1);
+		}
+
+		if (retcode >= 0) {
+			response[0] = (uint8)retcode;
+			retcode += 1;
+		}
+	}; break;
+	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER: { // MAP: Page 17, 19
         uint16 address = mbin->ReadUInt16();
         uint16 value = mbin->ReadUInt16();
         
-        switch (value) {
-		case 0x0000: retcode = this->write_coil(address, false); break;
-		case 0xFF00: retcode = this->write_coil(address, true); break;
-		default: retcode = -modbus_illegal_bool_value(value, 0xFF00, 0x0000, this->debug); break;
-        }
+		if (funcode == MODBUS_WRITE_SINGLE_COIL) {
+			switch (value) {
+			case 0x0000: retcode = this->write_coil(address, false); break;
+			case 0xFF00: retcode = this->write_coil(address, true); break;
+			default: retcode = -modbus_illegal_bool_value(value, 0xFF00, 0x0000, this->debug); break;
+			}
+		} else {
+			retcode = this->write_register(address, value);
+		}
 
         if (retcode >= 0) {
             retcode = modbus_echo(response, address, value);
         }
 	}; break;
-    case MODBUS_WRITE_MULTIPLE_COILS: { // MAP: Page 29
+	case MODBUS_WRITE_MULTIPLE_COILS: case MODBUS_WRITE_MULTIPLE_REGISTERS: { // MAP: Page 29, 30
 		uint16 address = mbin->ReadUInt16();
         uint16 quantity = mbin->ReadUInt16();
         uint8 count = mbin->ReadByte();
         
 		MODBUS_READ_BYTES(mbin, response, count);
 		
-        if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
-            retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
-        } else if (count != MODBUS_COIL_NStar(quantity)) {
-			retcode = -modbus_illegal_data_value(count, MODBUS_COIL_NStar(quantity), this->debug);
+		if (funcode == MODBUS_WRITE_MULTIPLE_COILS) {
+			if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
+				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
+			} else if (count != MODBUS_COIL_NStar(quantity)) {
+				retcode = -modbus_illegal_data_value(count, MODBUS_COIL_NStar(quantity), this->debug);
+			} else {
+				retcode = this->write_coils(address, quantity, response);
+			}
 		} else {
-			retcode = this->write_coils(address, quantity, response);
+			if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_REGISTERS)) {
+				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_REGISTERS, this->debug);
+			} else if (count != MODBUS_REGISTER_NStar(quantity)) {
+				retcode = -modbus_illegal_data_value(count, MODBUS_REGISTER_NStar(quantity), this->debug);
+			} else {
+				retcode = this->write_registers(address, quantity, response);
+			}
 		}
 
 		if (retcode >= 0) {
+			// TODO: is echoing right here?
 			retcode = modbus_echo(response, address, quantity);
 		}
 	}; break;

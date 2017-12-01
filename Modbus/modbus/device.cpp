@@ -57,23 +57,23 @@ void ModbusVirtualDevice::initialize_input_registers(uint16 idx, uint16 size, co
 }
 
 /*************************************************************************************************/
-int ModbusVirtualDevice::read_coils(uint16 address, uint16 quantity, uint8* coil_status) { // MAP: Page 10
+int ModbusVirtualDevice::read_coils(uint16 address, uint16 quantity, uint8* coil_status) { // MAP: Page 11
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx > this->nbits - quantity)) {
         return -modbus_illegal_address(address, this->bit0, this->nbits, this->debug);
     } else {
-        return modbus_read_coils(this->coils, idx, quantity, coil_status, 0);
+        return modbus_read_coils(this->coils, idx, quantity, coil_status);
     }
 }
 
-int ModbusVirtualDevice::read_discrete_inputs(uint16 address, uint16 quantity, uint8* input_status) { // MAP: Page 10
+int ModbusVirtualDevice::read_discrete_inputs(uint16 address, uint16 quantity, uint8* input_status) { // MAP: Page 12
 	uint16 idx = address - this->inbit0;
 
 	if ((idx < 0) || (idx > this->ninbits - quantity)) {
 		return -modbus_illegal_address(address, this->inbit0, this->ninbits, this->debug);
 	} else {
-		return modbus_read_coils(this->discrete_inputs, idx, quantity, input_status, 0);
+		return modbus_read_coils(this->discrete_inputs, idx, quantity, input_status);
 	}
 }
 
@@ -97,4 +97,46 @@ int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src
         modbus_set_bits_from_bytes(this->coils, idx, quantity, src);
         return 0;
     }
+}
+
+int ModbusVirtualDevice::read_holding_registers(uint16 address, uint16 quantity, uint8* register_values) { // MAP: Page 15
+	uint16 idx = address - this->register0;
+
+	if ((idx < 0) || (idx > this->nregisters - quantity)) {
+		return -modbus_illegal_address(address, this->register0, this->nregisters, this->debug);
+	} else {
+		return modbus_read_registers(this->holding_registers, idx, quantity, register_values);
+	}
+}
+
+int ModbusVirtualDevice::read_input_registers(uint16 address, uint16 quantity, uint8* input_registers) { // MAP: Page 16
+	uint16 idx = address - this->inregister0;
+
+	if ((idx < 0) || (idx > this->ninregisters - quantity)) {
+		return -modbus_illegal_address(address, this->inregister0, this->ninregisters, this->debug);
+	} else {
+		return modbus_read_registers(this->input_registers, idx, quantity, input_registers);
+	}
+}
+
+int ModbusVirtualDevice::write_register(uint16 address, uint16 value) { // MAP: Page 19
+	uint16 idx = address - this->register0;
+
+	if ((idx < 0) || (idx >= this->nregisters)) {
+		return -modbus_illegal_address(address, this->register0, this->nregisters, this->debug);
+	} else {
+		this->holding_registers[idx] = value;
+		return 0;
+	}
+}
+
+int ModbusVirtualDevice::write_registers(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 10
+	uint16 idx = address - this->register0;
+
+	if ((idx < 0) || (idx > this->nregisters - quantity)) {
+		return -modbus_illegal_address(address, this->register0, this->nregisters, this->debug);
+	} else {
+		modbus_write_registers(this->holding_registers, idx, quantity, src);
+		return 0;
+	}
 }

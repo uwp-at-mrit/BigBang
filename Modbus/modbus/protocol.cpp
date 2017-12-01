@@ -31,9 +31,10 @@ void modbus_write_exn_adu(IDataWriter^ mbout, uint16 transaction, uint16 protoco
     mbout->WriteByte(reason);
 }
 
-int modbus_read_coils(uint8 *src, uint16 address, uint16 quantity, uint8 *dest, uint8 d_idx) {
+int modbus_read_coils(uint8 *src, uint16 address, uint16 quantity, uint8 *dest) {
     uint8 shift = 0;
     uint8 byte = 0;
+	uint8 d_idx = 0;
 
     for (uint16 i = address; i < address + quantity; i++) {
         byte |= src[i] << shift;
@@ -50,6 +51,26 @@ int modbus_read_coils(uint8 *src, uint16 address, uint16 quantity, uint8 *dest, 
     }
 
     return d_idx;
+}
+
+int modbus_read_registers(uint16 *src, uint16 address, uint16 quantity, uint8 *dest) {
+	uint8 d_idx = 0;
+
+	for (uint16 i = address; i < address + quantity; i++) {
+		dest[d_idx++] = src[i] >> 8;
+		dest[d_idx++] = src[i] & 0xFF;
+	}
+
+	return d_idx;
+}
+
+void modbus_write_registers(uint16 *dest, uint16 address, uint16 quantity, uint8 *src) {
+	uint8 d_idx = 0;
+
+	for (size_t i = 0; i < quantity; i++) {
+		dest[address + i] = MODBUS_GET_INT16_FROM_INT8(src, d_idx);
+		d_idx += 2;
+	}
 }
 
 void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src) {

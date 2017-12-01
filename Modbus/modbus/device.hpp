@@ -28,6 +28,11 @@ namespace WarGrey::SCADA {
 		int write_coil(uint16 address, bool value) override;
         int write_coils(uint16 address, uint16 quantity, uint8* src) override;
 
+		int read_holding_registers(uint16 address, uint16 quantity, uint8* register_values) override;
+		int read_input_registers(uint16 address, uint16 quantity, uint8* input_registers) override;
+		int write_register(uint16 address, uint16 value) override;
+		int write_registers(uint16 address, uint16 quantity, uint8* src) override;
+
     public: // Diagnostics
 
     public: // Other
