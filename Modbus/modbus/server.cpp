@@ -1,6 +1,7 @@
 #include "modbus/constants.hpp"
 #include "modbus/server.hpp"
 #include "modbus/protocol.hpp"
+#include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
 #include <ppltasks.h>
@@ -44,8 +45,10 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
             uint8 function_code = mbin->ReadByte();
             int retcode = server->process(function_code, mbin, response);
 
-            rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
-                transaction, protocol, length, unit, function_code, id->Data());
+            if (server->debug_enabled()) {
+                rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
+                    transaction, protocol, length, unit, function_code, id->Data());
+            }
             
             if (retcode < 0) {
                 modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
@@ -68,7 +71,10 @@ static void modbus_process_loop(IModbusServer* server, IDataReader^ mbin, IDataW
     }).then([=](task<unsigned int> doReplying) {
         try {
             unsigned int sent = doReplying.get();
-            rsyslog(L"[sent %u bytes to %s]", sent, id->Data());
+
+            if (server->debug_enabled()) {
+                rsyslog(L"[sent %u bytes to %s]", sent, id->Data());
+            }
 
             modbus_process_loop(server, mbin, mbout, response, client, id);
         } catch (Platform::Exception^ e) {
@@ -112,7 +118,7 @@ public:
         auto id = socket_identity(client);
         auto mbin = ref new DataReader(client->InputStream);
         auto mbout = ref new DataWriter(client->OutputStream);
-        uint8 response_pdu[MODBUS_MAX_PDU_LENGTH];
+        uint8 response_pdu[MODBUS_TCP_MAX_ADU_LENGTH];
 
         mbin->UnicodeEncoding = UnicodeEncoding::Utf8;
         mbin->ByteOrder = ByteOrder::BigEndian;
@@ -131,23 +137,43 @@ private:
 /*************************************************************************************************/
 IModbusServer::IModbusServer(uint16 port) {
     this->listener = ref new ModbusListener(this, port);
+    this->debug = false;
 };
 
 void IModbusServer::listen() {
     this->listener->run();
 }
 
+void IModbusServer::enable_debug(bool on_or_off) {
+    this->debug = on_or_off;
+}
+
+bool IModbusServer::debug_enabled() {
+    return this->debug;
+}
+
 int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { // MAP: Page 10
     switch (funcode) {
+    case MODBUS_READ_COILS: { // MAP: Page 12
+        uint16 address = mbin->ReadUInt16();
+        uint16 quantity = mbin->ReadUInt16();
+
+        if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_BITS)) {
+            return -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_BITS, this->debug);
+        } else {
+            response[0] = MODBUS_NStar(quantity);
+            return this->read_coils(address, quantity, response + 1);
+        }
+    };
     case MODBUS_WRITE_SINGLE_COIL: { // MAP: Page 17
         uint16 address = mbin->ReadUInt16();
         uint16 value = mbin->ReadUInt16();
-        int retcode = -MODBUS_EXN_ILLEGAL_DATA_VALUE;
+        int retcode;
 
-        if (value == 0x0000) {
-            retcode = this->write_coil(address, false);
-        } else if (value == 0xFF00) {
-            retcode = this->write_coil(address, true);
+        switch (value) {
+		case 0x0000: retcode = this->write_coil(address, false); break;
+		case 0xFF00: retcode = this->write_coil(address, true); break;
+		default: retcode = -modbus_illegal_bool_value(value, 0xFF00, 0x0000, this->debug); break;
         }
 
         if (retcode >= 0) {
@@ -158,38 +184,30 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
 
         return retcode;
     };
-    case MODBUS_READ_COILS: { // MAP: Page 12
-        uint16 address = mbin->ReadUInt16();
-        uint16 quantity = mbin->ReadUInt16();
-
-        if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_BITS)) {
-            return -MODBUS_EXN_ILLEGAL_DATA_VALUE;
-        }
-
-        if (int(address) + int(quantity) > 0xFFFF) {
-            return -MODBUS_EXN_ILLEGAL_DATA_ADDRESS;
-        }
-
-        return this->read_coils(address, quantity, response);
-    };
-    case MODBUS_WRITE_MULTIPLE_COILS: {
+    case MODBUS_WRITE_MULTIPLE_COILS: { // MAP: Page 29
         uint16 address = mbin->ReadUInt16();
         uint16 quantity = mbin->ReadUInt16();
         uint8 count = mbin->ReadByte();
         MODBUS_READ_BYTES(mbin, response, count);
 
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
-            return -MODBUS_EXN_ILLEGAL_DATA_VALUE;
-        }
+            return -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
+        } else if (count != MODBUS_NStar(quantity)) {
+			return -modbus_illegal_data_value(count, MODBUS_NStar(quantity), this->debug);
+        } else {
+            int retcode = this->write_coils(address, quantity, response, count);
 
-        if (int(address) + int(quantity) > 0xFFFF) {
-            return -MODBUS_EXN_ILLEGAL_DATA_ADDRESS;
-        }
+            if (retcode >= 0) {
+                MODBUS_SET_INT16_TO_INT8(response, 0, address);
+                MODBUS_SET_INT16_TO_INT8(response, 2, quantity);
+                retcode = 4;
+            }
 
-        return this->write_coils(address, quantity, response);
+            return retcode;
+        }
     };
     default: {
-        uint8 request[MODBUS_MAX_PDU_LENGTH];
+        uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
         int data_length = mbin->UnconsumedBufferLength;
 
         MODBUS_READ_BYTES(mbin, request, data_length);
@@ -200,5 +218,5 @@ int IModbusServer::process(uint8 funcode, IDataReader^ mbin, uint8 *response) { 
 }
 
 int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint16 data_length, uint8* response) { // MAP: Page 10
-    return -MODBUS_EXN_ILLEGAL_FUNCTION;
+    return -modbus_illegal_function(function_code, this->debug);
 }
