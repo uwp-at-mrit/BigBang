@@ -40,10 +40,16 @@ public:
 
     void update_powerinfo() {
         auto info = Battery::AggregateBattery->GetReport();
-        auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
-        auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
+		auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
 
-        this->powercapacity = speak("powerlabel") + std::round((remaining / full) * 100.0F).ToString() + "%";
+		if (maybe_remaining == nullptr) {
+			this->powercapacity = speak("powerlabel") + "100%";
+		} else {
+			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
+			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
+
+			this->powercapacity = speak("powerlabel") + std::round((remaining / full) * 100.0F).ToString() + "%";
+		}
     }
 
     void update_wifiinfo(WiFiAdapter^ info) {
