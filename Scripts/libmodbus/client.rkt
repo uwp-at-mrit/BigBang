@@ -10,7 +10,7 @@
   (require "../tamer/tamer.rkt")
   (require "../tamer/format.rkt")
 
-  (define host "172.16.8.222")
+  (define host (vector-ref (current-command-line-arguments) 0))
   (define ctx (modbus_new_tcp host UT_TCP_DEFAULT_PORT))
 
   ;; Allocate and initialize the memory to store the bits and registers
@@ -24,20 +24,20 @@
       (define nb-bits (min nb-points 8))
       (define given (modbus_get_byte_from_bits tab_bits (* i 8) nb-bits))
       (define expected (vector-ref TAB_BITS i))
-      (check-eq? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
+      (check-eqv? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
       (check-bits tab_bits TAB_BITS (- nb-points nb-bits) (add1 i))))
 
   (define (check-registers tab_registers TAB_REGISTERS nb-points [i 0])
     (when (> nb-points i)
       (define given (uint16-ref tab_registers i))
       (define expected (vector-ref TAB_REGISTERS i))
-      (check-eq? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
+      (check-eqv? given expected (format "FAILED (#x~a != #x~a)" (~hex given) (~hex expected)))
       (check-registers tab_registers TAB_REGISTERS nb-points (add1 i))))
 
   (define (equal_dword tab_reg value)
     (and (eq? (uint16-ref tab_reg 0) (arithmetic-shift value -16))
          (eq? (uint16-ref tab_reg 1) (bitwise-and value #xFFFF))))
-  
+
   (define-tamer-suite modbus-client "Modbus Client Unit Tests"
     #:before (λ [] (modbus_set_debug ctx 1))
     #:after (λ [] (modbus_close ctx) (modbus_free ctx))
