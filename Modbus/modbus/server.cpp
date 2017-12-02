@@ -252,6 +252,9 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			retcode = modbus_echo(response, address, quantity);
 		}
 	}; break;
+	case MODBUS_READ_FILE_RECORD: case MODBUS_WRITE_FILE_RECORD: { // MAP: Page 32, 34
+		retcode = -MODBUS_EXN_DEVICE_FAILURE;
+	}; break;
 	case MODBUS_MASK_WRITE_REGISTER: { // MAP: Page 36
 		uint16 address = mbin->ReadUInt16();
 		uint16 mand = mbin->ReadUInt16();
@@ -290,7 +293,7 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 	}; break;
 	case MODBUS_READ_FIFO_QUEUES: { // MAP: Page 40
 		uint16 address = mbin->ReadUInt16();
-		retcode = this->read_queues(address, response + 4);
+		retcode = this->read_fifo_queues(address, response + 4);
 
 		if (retcode >= 0) {
 			if (retcode = 31) {
@@ -300,6 +303,17 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 				retcode = NStar + modbus_echo(response, NStar + 2, retcode);
 			}
 		}
+	}; break;
+		/* Following functions (before next `break`) are Serial Line Only */
+	case MODBUS_READ_EXCEPTION_STATUS: case MODBUS_DIAGNOSTIC: { // MAP: Page 20, 21
+	}
+	case MODBUS_GET_COM_EVENT_COUNTER: case MODBUS_GET_COM_EVENT_LOG: { // MAP: Page 25, 26
+	};
+	case MODBUS_REPORT_SLAVE_ID: { // MAP: Page 31
+		retcode = -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
+	}; break;
+	case MODBUS_READ_DEVICE_IDENTIFICATION: { // MAP: Page 41-
+		retcode = -MODBUS_EXN_DEVICE_BUSY;
 	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];

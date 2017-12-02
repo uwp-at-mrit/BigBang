@@ -6,20 +6,25 @@ static const uint16 MODBUS_TCP_DEFAULT_PORT = 502;
 static const uint16 MODBUS_TCP_SLAVE        = 0xFF;
 
 /* Modbus function codes */
-static const uint8 MODBUS_READ_COILS               = 0x01;
-static const uint8 MODBUS_READ_DISCRETE_INPUTS     = 0x02;
-static const uint8 MODBUS_READ_HOLDING_REGISTERS   = 0x03;
-static const uint8 MODBUS_READ_INPUT_REGISTERS     = 0x04;
-static const uint8 MODBUS_WRITE_SINGLE_COIL        = 0x05;
-static const uint8 MODBUS_WRITE_SINGLE_REGISTER    = 0x06;
-static const uint8 MODBUS_READ_EXCEPTION_STATUS    = 0x07;
-static const uint8 MODBUS_WRITE_MULTIPLE_COILS     = 0x0F;
-static const uint8 MODBUS_WRITE_MULTIPLE_REGISTERS = 0x10;
-static const uint8 MODBUS_REPORT_SLAVE_ID          = 0x11;
-static const uint8 MODBUS_MASK_WRITE_REGISTER      = 0x16;
-static const uint8 MODBUS_WRITE_AND_READ_REGISTERS = 0x17;
-
-static const uint8 MODBUS_READ_FIFO_QUEUES         = 0x18;
+static const uint8 MODBUS_READ_COILS                 = 0x01;
+static const uint8 MODBUS_READ_DISCRETE_INPUTS       = 0x02;
+static const uint8 MODBUS_READ_HOLDING_REGISTERS     = 0x03;
+static const uint8 MODBUS_READ_INPUT_REGISTERS       = 0x04;
+static const uint8 MODBUS_WRITE_SINGLE_COIL          = 0x05;
+static const uint8 MODBUS_WRITE_SINGLE_REGISTER      = 0x06;
+static const uint8 MODBUS_READ_EXCEPTION_STATUS      = 0x07;
+static const uint8 MODBUS_DIAGNOSTIC                 = 0x08;
+static const uint8 MODBUS_GET_COM_EVENT_COUNTER      = 0x0B;
+static const uint8 MODBUS_GET_COM_EVENT_LOG          = 0x0C;
+static const uint8 MODBUS_WRITE_MULTIPLE_COILS       = 0x0F;
+static const uint8 MODBUS_WRITE_MULTIPLE_REGISTERS   = 0x10;
+static const uint8 MODBUS_REPORT_SLAVE_ID            = 0x11;
+static const uint8 MODBUS_READ_FILE_RECORD           = 0x14;
+static const uint8 MODBUS_WRITE_FILE_RECORD          = 0x15;
+static const uint8 MODBUS_MASK_WRITE_REGISTER        = 0x16;
+static const uint8 MODBUS_WRITE_AND_READ_REGISTERS   = 0x17;
+static const uint8 MODBUS_READ_FIFO_QUEUES           = 0x18;
+static const uint8 MODBUS_READ_DEVICE_IDENTIFICATION = 0x2B;
 
 /* Modbus limits */
 static const uint16 MODBUS_MAX_READ_BITS          = 0x7D0; // MAP: Page 12

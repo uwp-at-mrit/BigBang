@@ -168,6 +168,6 @@ int ModbusVirtualDevice::write_read_registers(uint16 waddr, uint16 wcount, uint1
 	}
 }
 
-int ModbusVirtualDevice::read_queues(uint16 address, uint8* value_registers) { // MAP: Page 40
+int ModbusVirtualDevice::read_fifo_queues(uint16 address, uint8* value_registers) { // MAP: Page 40
 	return 0;
 }
