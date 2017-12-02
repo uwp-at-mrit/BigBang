@@ -141,6 +141,19 @@ int ModbusVirtualDevice::write_registers(uint16 address, uint16 quantity, uint8*
 	}
 }
 
+int ModbusVirtualDevice::mask_write_register(uint16 address, uint16 and, uint16 or ) { // MAP: Page 36
+	uint16 idx = address - this->register0;
+	
+	if ((idx < 0) || (idx >= this->nregisters)) {
+		return -modbus_illegal_address(idx, this->register0, this->nregisters, this->debug);
+	} else {
+		uint16 data = this->holding_registers[idx];
+
+		this->holding_registers[idx] = (data & and) | (or & (~and));
+		return 0;
+	}
+}
+
 int ModbusVirtualDevice::write_read_registers(uint16 waddr, uint16 wcount, uint16 raddr, uint16 rcount, uint8* rwpool) { // MAP: Page 38
 	uint16 widx = waddr - this->register0;
 	uint16 ridx = raddr - this->register0;

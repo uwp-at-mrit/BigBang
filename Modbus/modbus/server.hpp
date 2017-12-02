@@ -27,6 +27,7 @@ namespace WarGrey::SCADA {
 		virtual int write_register(uint16 address, uint16 value) = 0;
 		virtual int write_registers(uint16 address, uint16 quantity, uint8* src) = 0;
 
+		virtual int mask_write_register(uint16 address, uint16 and, uint16 or) = 0;
 		virtual int write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint8* rwpool) = 0;
 
     public: // Diagnostics

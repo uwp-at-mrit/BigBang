@@ -94,6 +94,13 @@ static inline int modbus_echo(uint8* response, uint16 address, uint16 value) {
 	return 4;
 }
 
+static inline int modbus_echo(uint8* response, uint16 address, uint16 value1, uint16 value2) {
+	MODBUS_SET_INT16_TO_INT8(response, 0, address);
+	MODBUS_SET_INT16_TO_INT8(response, 2, value1);
+	MODBUS_SET_INT16_TO_INT8(response, 4, value2);
+	return 6;
+}
+
 // delegate only accepts C++/CX class
 private ref class WarGrey::SCADA::ModbusListener sealed {
 internal:
@@ -243,6 +250,17 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		if (retcode >= 0) {
 			// TODO: is echoing right here?
 			retcode = modbus_echo(response, address, quantity);
+		}
+	}; break;
+	case MODBUS_MASK_WRITE_REGISTER: { // MAP: Page 36
+		uint16 address = mbin->ReadUInt16();
+		uint16 mand = mbin->ReadUInt16();
+		uint16 mor = mbin->ReadUInt16();
+
+		retcode = this->mask_write_register(address, mand, mor);
+
+		if (retcode >= 0) {
+			retcode = modbus_echo(response, address, mand, mor);
 		}
 	}; break;
 	case MODBUS_WRITE_AND_READ_REGISTERS: { // MAP: Page 38

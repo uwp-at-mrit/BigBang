@@ -5,7 +5,7 @@ using namespace WarGrey::SCADA;
 static const uint16 ninbit      = 0x16;
 static const uint16 ninregister = 0x01;
 
-static uint8 inbits_src[]       = { 0xAC, 0xDB, 0x35 };
+static uint8  inbits_src[]      = { 0xAC, 0xDB, 0x35 };
 static uint16 inregisters_src[] = { 0x0A };
 
 IModbusServer* make_modbus_test_server() {
