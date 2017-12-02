@@ -107,7 +107,7 @@
                                                                                                  UT_REGISTERS_ADDRESS UT_REGISTERS_NB tab_rp_registers))))
                                        (check-eq? (rc) UT_REGISTERS_NB (format "FAILED (nb points ~a != ~a)" (rc) UT_REGISTERS_NB))
                                        (let ([ADJUSTED_TAB (make-vector UT_REGISTERS_NB 0)])
-                                         (vector-set! ADJUSTED_TAB 0 (vector UT_REGISTERS_TAB 0))
+                                         (vector-set! ADJUSTED_TAB 0 (vector-ref UT_REGISTERS_TAB 0))
                                          (check-registers tab_rp_registers ADJUSTED_TAB UT_REGISTERS_NB)))))
 
     (test-suite "Input Registers"
@@ -125,41 +125,41 @@
                            (let ([register (uint16-ref tab_rp_registers 0)])
                              (check-eq? register #x17 (format "FAILED (#x~a != #x17)" (~hex register))))))
 
-    #;(let ([REGXILADD (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
+    (let ([REGXILADD (+ UT_REGISTERS_ADDRESS UT_REGISTERS_NB_MAX)])
       ; The mapping begins at the defined addresses and ends at (address + nb_points) so these addresses are not valid
       (test-suite "Illegal Data Address"
                   (test-spec "modbus_read_bits"
-                             (check-exn exn:modbus? (λ [] (modbus_read_bits ctx 0 1 tab_rp_bits)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 UT_BITS_NB) tab_rp_bits)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 UT_BITS_NB) tab_rp_bits)) "max"))
                   (test-spec "modbus_read_input_bits"
-                             (check-exn exn:modbus? (λ [] (modbus_read_input_bits ctx 0 1 tab_rp_bits)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 UT_INPUT_BITS_NB) tab_rp_bits)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_input_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 UT_INPUT_BITS_NB) tab_rp_bits)) "max"))
                   (test-spec "modbus_read_registers"
-                             (check-exn exn:modbus? (λ [] (modbus_read_registers ctx 0 1 tab_rp_registers)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 UT_REGISTERS_NB_MAX) tab_rp_registers)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 UT_REGISTERS_NB_MAX) tab_rp_registers)) "max"))
                   (test-spec "modbus_read_input_registers"
-                             (check-exn exn:modbus? (λ [] (modbus_read_input_registers ctx 0 1 tab_rp_registers)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (+ 1 UT_INPUT_REGISTERS_NB) tab_rp_registers)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_input_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_read_input_registers ctx UT_INPUT_REGISTERS_ADDRESS (+ 1 UT_INPUT_REGISTERS_NB) tab_rp_registers)) "max"))
                   (test-spec "modbus_write_bit"
-                             (check-exn exn:modbus? (λ [] (modbus_write_bit ctx 0 1)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_write_bit ctx (+ UT_BITS_ADDRESS UT_BITS_NB) 1)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_bit ctx 0 1)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_bit ctx (+ UT_BITS_ADDRESS UT_BITS_NB) 1)) "max"))
                   (test-spec "modbus_write_bits"
-                             (check-exn exn:modbus? (λ [] (modbus_write_bits ctx 0 1 tab_rp_bits)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_write_bits ctx (+ UT_BITS_ADDRESS UT_BITS_NB) UT_BITS_NB tab_rp_bits)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_bits ctx 0 1 tab_rp_bits)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_bits ctx (+ UT_BITS_ADDRESS UT_BITS_NB) UT_BITS_NB tab_rp_bits)) "max"))
                   (test-spec "modbus_write_register"
-                             (check-exn exn:modbus? (λ [] (modbus_write_register ctx 0 (uint16-ref tab_rp_registers 0))) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_write_register ctx (+ UT_BITS_ADDRESS UT_BITS_NB) (uint16-ref tab_rp_registers 0))) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_register ctx 0 (uint16-ref tab_rp_registers 0))) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_register ctx (+ UT_BITS_ADDRESS UT_BITS_NB) (uint16-ref tab_rp_registers 0))) "max"))
                   (test-spec "modbus_write_registers"
-                             (check-exn exn:modbus? (λ [] (modbus_write_registers ctx 0 1 tab_rp_registers)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_write_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_registers ctx 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))
                   (test-spec "modbus_mask_write_register"
-                             (check-exn exn:modbus? (λ [] (modbus_mask_write_register ctx 0 #xF2 #x25)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_mask_write_register ctx REGXILADD #xF2 #x25)) "max"))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_mask_write_register ctx 0 #xF2 #x25)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_mask_write_register ctx REGXILADD #xF2 #x25)) "max"))
                   (test-spec "modbus_write_and_read_registers"
-                             (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx 0 1 tab_rp_registers 0 1 tab_rp_registers)) "0")
-                             (check-exn exn:modbus? (λ [] (modbus_write_and_read_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))))
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_and_read_registers ctx 0 1 tab_rp_registers 0 1 tab_rp_registers)) "0")
+                             (check-exn exn:modbus:xiladd? (λ [] (modbus_write_and_read_registers ctx REGXILADD UT_REGISTERS_NB tab_rp_registers REGXILADD UT_REGISTERS_NB tab_rp_registers)) "max"))))
 
-    #;(test-suite "Too Many Data Error"
+    (test-suite "Too Many Data Error"
                 (test-exn "modbus_read_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
                 (test-exn "modbus_read_input_bits" exn:modbus? (λ [] (modbus_read_input_bits ctx UT_INPUT_BITS_ADDRESS (+ 1 MODBUS_MAX_READ_BITS) tab_rp_bits)))
                 (test-exn "modbus_read_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_READ_REGISTERS) tab_rp_registers)))
@@ -167,7 +167,7 @@
                 (test-exn "modbus_write_bits" exn:modbus? (λ [] (modbus_read_bits ctx UT_BITS_ADDRESS (+ 1 MODBUS_MAX_WRITE_BITS) tab_rp_bits)))
                 (test-exn "modbus_write_registers" exn:modbus? (λ [] (modbus_read_registers ctx UT_REGISTERS_ADDRESS (+ 1 MODBUS_MAX_WRITE_REGISTERS) tab_rp_registers)))))
 
-  (define-tamer-suite modbus-float "Modbus Float Operations"
+  #;(define-tamer-suite modbus-float "Modbus Float Operations"
     (test-suite "ABCD"
                 (test-spec "modbus_set_float_abcd"
                            #:before (λ [] (modbus_set_float_abcd UT_REAL tab_rp_registers))
