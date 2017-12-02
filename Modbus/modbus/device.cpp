@@ -61,7 +61,7 @@ int ModbusVirtualDevice::read_coils(uint16 address, uint16 quantity, uint8* coil
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx > this->nbits - quantity)) {
-        return -modbus_illegal_address(address, this->bit0, this->nbits, this->debug);
+        return -modbus_illegal_address(address, quantity, this->bit0, this->nbits, this->debug);
     } else {
         return modbus_read_coils(this->coils, idx, quantity, coil_status);
     }
@@ -71,7 +71,7 @@ int ModbusVirtualDevice::read_discrete_inputs(uint16 address, uint16 quantity, u
 	uint16 idx = address - this->inbit0;
 
 	if ((idx < 0) || (idx > this->ninbits - quantity)) {
-		return -modbus_illegal_address(address, this->inbit0, this->ninbits, this->debug);
+		return -modbus_illegal_address(address, quantity, this->inbit0, this->ninbits, this->debug);
 	} else {
 		return modbus_read_coils(this->discrete_inputs, idx, quantity, input_status);
 	}
@@ -92,7 +92,7 @@ int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx > this->nbits - quantity)) {
-        return -modbus_illegal_address(address, this->bit0, this->nbits, this->debug);
+        return -modbus_illegal_address(address, quantity, this->bit0, this->nbits, this->debug);
     } else {
         modbus_set_bits_from_bytes(this->coils, idx, quantity, src);
         return 0;
@@ -103,7 +103,7 @@ int ModbusVirtualDevice::read_holding_registers(uint16 address, uint16 quantity,
 	uint16 idx = address - this->register0;
 
 	if ((idx < 0) || (idx > this->nregisters - quantity)) {
-		return -modbus_illegal_address(address, this->register0, this->nregisters, this->debug);
+		return -modbus_illegal_address(address, quantity, this->register0, this->nregisters, this->debug);
 	} else {
 		return modbus_read_registers(this->holding_registers, idx, quantity, register_values);
 	}
@@ -113,7 +113,7 @@ int ModbusVirtualDevice::read_input_registers(uint16 address, uint16 quantity, u
 	uint16 idx = address - this->inregister0;
 
 	if ((idx < 0) || (idx > this->ninregisters - quantity)) {
-		return -modbus_illegal_address(address, this->inregister0, this->ninregisters, this->debug);
+		return -modbus_illegal_address(address, quantity, this->inregister0, this->ninregisters, this->debug);
 	} else {
 		return modbus_read_registers(this->input_registers, idx, quantity, input_registers);
 	}
@@ -134,7 +134,7 @@ int ModbusVirtualDevice::write_registers(uint16 address, uint16 quantity, uint8*
 	uint16 idx = address - this->register0;
 
 	if ((idx < 0) || (idx > this->nregisters - quantity)) {
-		return -modbus_illegal_address(address, this->register0, this->nregisters, this->debug);
+		return -modbus_illegal_address(address, quantity, this->register0, this->nregisters, this->debug);
 	} else {
 		modbus_write_registers(this->holding_registers, idx, quantity, src);
 		return 0;
@@ -159,9 +159,9 @@ int ModbusVirtualDevice::write_read_registers(uint16 waddr, uint16 wcount, uint1
 	uint16 ridx = raddr - this->register0;
 
 	if ((widx < 0) || (widx > this->nregisters - wcount)) {
-		return -modbus_illegal_address(waddr, this->register0, this->nregisters, this->debug);
+		return -modbus_illegal_address(waddr, wcount, this->register0, this->nregisters, this->debug);
 	} else if ((ridx < 0) || (ridx > this->nregisters - rcount)) {
-		return -modbus_illegal_address(raddr, this->register0, this->nregisters, this->debug);
+		return -modbus_illegal_address(raddr, rcount, this->register0, this->nregisters, this->debug);
 	} else {
 		modbus_write_registers(this->holding_registers, widx, wcount, rwpool);
 		return modbus_read_registers(this->holding_registers, ridx, rcount, rwpool);
