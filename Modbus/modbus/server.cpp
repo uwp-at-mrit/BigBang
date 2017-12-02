@@ -288,6 +288,19 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			retcode += 1;
 		}
 	}; break;
+	case MODBUS_READ_FIFO_QUEUES: { // MAP: Page 40
+		uint16 address = mbin->ReadUInt16();
+		retcode = this->read_queues(address, response + 4);
+
+		if (retcode >= 0) {
+			if (retcode = 31) {
+				retcode = -modbus_illegal_data_value(retcode, 0, 32, this->debug);
+			} else {
+				uint8 NStar = MODBUS_QUEUE_NStar(retcode);
+				retcode = NStar + modbus_echo(response, NStar + 2, retcode);
+			}
+		}
+	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
         int data_length = mbin->UnconsumedBufferLength;

@@ -6,6 +6,7 @@
 #define MODBUS_WRITE_BYTES(mbout, src, count) do { for (size_t i = 0; i < count; i++) { mbout->WriteByte(src[i]); } } while(0)
 #define MODBUS_COIL_NStar(quantity) ((uint8)((quantity / 8) + ((quantity % 8) ? 1 : 0)))
 #define MODBUS_REGISTER_NStar(quantity) ((uint8)(quantity * 2))
+#define MODBUS_QUEUE_NStar(quantity) ((uint8)(quantity * 2))
 
 uint16 modbus_read_mbap(Windows::Storage::Streams::IDataReader^ mbin,
     uint16* transaction, uint16* protocol, uint16* length, uint8* unit);

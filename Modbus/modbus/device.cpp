@@ -167,3 +167,7 @@ int ModbusVirtualDevice::write_read_registers(uint16 waddr, uint16 wcount, uint1
 		return modbus_read_registers(this->holding_registers, ridx, rcount, rwpool);
 	}
 }
+
+int ModbusVirtualDevice::read_queues(uint16 address, uint8* value_registers) { // MAP: Page 40
+	return 0;
+}

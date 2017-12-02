@@ -19,8 +19,9 @@ static const uint8 MODBUS_REPORT_SLAVE_ID          = 0x11;
 static const uint8 MODBUS_MASK_WRITE_REGISTER      = 0x16;
 static const uint8 MODBUS_WRITE_AND_READ_REGISTERS = 0x17;
 
-#define MODBUS_BROADCAST_ADDRESS    0
+static const uint8 MODBUS_READ_FIFO_QUEUES         = 0x18;
 
+/* Modbus limits */
 static const uint16 MODBUS_MAX_READ_BITS          = 0x7D0; // MAP: Page 12
 static const uint16 MODBUS_MAX_WRITE_BITS         = 0x7B0; // MAP: Page 29
 static const uint16 MODBUS_MAX_READ_REGISTERS     = 0x07D; // MAP: Page 15
