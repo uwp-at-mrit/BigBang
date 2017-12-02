@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
-        WarGrey::SCADA::ModbusVirtualDevice* device;
+        WarGrey::SCADA::IModbusServer* device;
         WarGrey::SCADA::IModbusClient* client;
         WarGrey::SCADA::Universe* universe;
     };

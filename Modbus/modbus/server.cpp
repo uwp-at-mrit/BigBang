@@ -245,6 +245,31 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			retcode = modbus_echo(response, address, quantity);
 		}
 	}; break;
+	case MODBUS_WRITE_AND_READ_REGISTERS: { // MAP: Page 38
+		uint16 raddress = mbin->ReadUInt16();
+		uint16 rquantity = mbin->ReadUInt16();
+		uint16 waddress = mbin->ReadUInt16();
+		uint16 wquantity = mbin->ReadUInt16();
+		uint8 wcount = mbin->ReadByte();
+		uint8* rwpool = response + 1;
+
+		MODBUS_READ_BYTES(mbin, rwpool, wcount);
+
+		if ((rquantity < 0x01) || (rquantity > MODBUS_MAX_WR_READ_REGISTERS)) {
+			retcode = -modbus_illegal_data_value(rquantity, 0x01, MODBUS_MAX_WR_READ_REGISTERS, this->debug);
+		} else if ((wquantity < 0x01) || (wquantity > MODBUS_MAX_WR_WRITE_REGISTERS)) {
+			retcode = -modbus_illegal_data_value(wquantity, 0x01, MODBUS_MAX_WR_WRITE_REGISTERS, this->debug);
+		} else if (wcount != MODBUS_REGISTER_NStar(wquantity)) {
+			retcode = -modbus_illegal_data_value(wcount, MODBUS_REGISTER_NStar(wquantity), this->debug);
+		} else {
+			retcode = this->write_read_registers(waddress, wquantity, raddress, rquantity, rwpool);
+		}
+
+		if (retcode >= 0) {
+			response[0] = (uint8)retcode;
+			retcode += 1;
+		}
+	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
         int data_length = mbin->UnconsumedBufferLength;

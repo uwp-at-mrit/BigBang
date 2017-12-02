@@ -206,14 +206,10 @@ private:
 };
 
 Console::Console() : StackPanel() {
-    uint8 inbits_src[3] = { 0xAC, 0xDB, 0x35 };
-
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-    this->device = new ModbusVirtualDevice(0x130, 0x25, 0x1C4, 0x16, 0x160, 0x20, 0x108, 0x01);
-    this->device->initialize_discrete_inputs(0, 0x16, inbits_src);
-    this->device->enable_debug(true);
-    this->device->listen();
+	this->device = make_modbus_test_server();
+	this->device->listen();
     
     this->client = new ModbusClient("127.0.0.1");
 }

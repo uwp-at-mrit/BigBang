@@ -33,6 +33,8 @@ namespace WarGrey::SCADA {
 		int write_register(uint16 address, uint16 value) override;
 		int write_registers(uint16 address, uint16 quantity, uint8* src) override;
 
+		int write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint8* rwpool) override;
+
     public: // Diagnostics
 
     public: // Other
