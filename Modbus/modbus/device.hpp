@@ -38,6 +38,7 @@ namespace WarGrey::SCADA {
 		int read_fifo_queues(uint16 address, uint8* value_registers) override;
 
     public: // Diagnostics
+		const char* access_private_device_identification(uint8 object) override;
 
     public: // Other
 

@@ -13,7 +13,8 @@ ModbusVirtualDevice::ModbusVirtualDevice(uint16 nbits, uint16 ninbits, uint16 nr
     : ModbusVirtualDevice(0, nbits, 0, ninbits, 0, nregisters, 0, ninregisters) {}
 
 ModbusVirtualDevice::ModbusVirtualDevice(uint16 bit0, uint16 nbits, uint16 inbit0, uint16 ninbits
-    , uint16 register0, uint16 nregisters, uint16 inregister0, uint16 ninregisters, uint16 port) : IModbusServer(port) {
+    , uint16 register0, uint16 nregisters, uint16 inregister0, uint16 ninregisters, uint16 port)
+	: IModbusServer(port, "WarGrey", "ModbusVirtualDevice", "1.0", "https://github.com/wargrey/WinSCADA", "WinSCADA") {
     uint16 omit = std::min(std::min(bit0, inbit0), std::min(register0, inregister0));
     size_t bits = std::max(bit0 + nbits, inbit0 + ninbits) * sizeof(uint8);
     size_t registers = std::max(register0 + nregisters * sizeof(uint16), inregister0 + ninregisters * sizeof(uint16));
@@ -170,4 +171,8 @@ int ModbusVirtualDevice::write_read_registers(uint16 waddr, uint16 wcount, uint1
 
 int ModbusVirtualDevice::read_fifo_queues(uint16 address, uint8* value_registers) { // MAP: Page 40
 	return 0;
+}
+
+const char* ModbusVirtualDevice::access_private_device_identification(uint8 object) { // MAP: Page 43
+	return nullptr;
 }

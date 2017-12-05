@@ -5,6 +5,7 @@
 #include "rsyslog.hpp"
 
 #include <ppltasks.h>
+#include <cstring>
 
 using namespace WarGrey::SCADA;
 
@@ -12,6 +13,8 @@ using namespace Concurrency;
 using namespace Windows::Foundation;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
+
+#define MODBUS_CONFORMITY_LEVEL(id) ((id >= 0x80) ? 0x03 : ((id >= 0x03) ? 0x02 : 0x01))
 
 static inline Platform::String^ socket_identity(StreamSocket^ socket) {
     return socket->Information->RemoteHostName->RawName + ":" + socket->Information->RemotePort;
@@ -56,6 +59,21 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
             } else {
 				modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
             }
+
+			{ // clear dirty bytes
+				int dirty = mbin->UnconsumedBufferLength;
+
+				if (dirty > 0) {
+					MODBUS_READ_BYTES(mbin, response, dirty);
+					if (server->debug_enabled()) {
+						if (dirty == 1) {
+							rsyslog(L"[Hmmm... 1 dirty byte comes from %s has been cleared]", id->Data());
+						} else {
+							rsyslog(L"[Hmmm... %d dirty bytes come from %s have been cleared]", dirty, id->Data());
+						}
+					}
+				}
+			}
         });
     }).then([=](task<void> doHandlingRequest) {
         try {
@@ -149,9 +167,18 @@ private:
 };
 
 /*************************************************************************************************/
-IModbusServer::IModbusServer(uint16 port) {
+IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, const char* revision
+	, const char* url, const char* name, const char* model, const char* appname) {
     this->listener = ref new ModbusListener(this, port);
     this->debug = false;
+
+	this->standard_identifications[0x00] = vendor;
+	this->standard_identifications[0x01] = code;
+	this->standard_identifications[0x02] = revision;
+	this->standard_identifications[0x03] = url;
+	this->standard_identifications[0x04] = name;
+	this->standard_identifications[0x05] = model;
+	this->standard_identifications[0x06] = appname;
 };
 
 void IModbusServer::listen() {
@@ -212,7 +239,7 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			switch (value) {
 			case 0x0000: retcode = this->write_coil(address, false); break;
 			case 0xFF00: retcode = this->write_coil(address, true); break;
-			default: retcode = -modbus_illegal_bool_value(value, 0xFF00, 0x0000, this->debug); break;
+			default: retcode = -modbus_illegal_enum_value(value, 0xFF00, 0x0000, this->debug); break;
 			}
 		} else {
 			retcode = this->write_register(address, value);
@@ -313,7 +340,74 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		retcode = -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
 	}; break;
 	case MODBUS_READ_DEVICE_IDENTIFICATION: { // MAP: Page 41-
-		retcode = -MODBUS_EXN_DEVICE_BUSY;
+		uint8 MEI_type = mbin->ReadByte();
+
+		switch (MEI_type) {
+		case 0x0D: { // MAP: Page 42
+			retcode = -MODBUS_EXN_DEVICE_BUSY;
+		}; break;
+		case 0x0E: { // MAP: Page 43
+			uint8 read_device_id_code = mbin->ReadByte();
+			uint8 object_id = mbin->ReadByte();
+			uint8 conformity_level = read_device_id_code;
+			uint8 more_follows = 0x00;
+			uint8 object_count = 0x00;
+			uint8 object_list_idx = 6;
+			uint8 capacity = MODBUS_MAX_PDU_LENGTH - object_list_idx;
+			uint8* object_list = response + object_list_idx;
+			uint8 object_stdmax = sizeof(standard_identifications) / sizeof(char*);
+			uint8 object_max = 0xFF;
+
+			if ((read_device_id_code < 0x01) || (read_device_id_code > 0x04)) {
+				retcode = -modbus_illegal_data_value(read_device_id_code, 0x01, 0x04, this->debug);
+			} else {
+				int object_used = this->process_device_identification(object_list, object_id, capacity, true);
+				bool stream_access = (read_device_id_code != 0x04);
+				
+				if ((object_used < 0) && stream_access) {
+					object_id = 0x00;
+					object_used = this->process_device_identification(object_list, object_id, capacity, true);
+				}
+
+				conformity_level = MODBUS_CONFORMITY_LEVEL(object_id);
+				switch (conformity_level) {
+				case 0x01: object_max = 0x02; break;
+				case 0x02: object_max = object_stdmax - 1; break;
+				default: object_max = 0xFF; break;
+				}
+
+				retcode = 0;
+				while (object_used > 0) {
+					object_list = object_list + object_used;
+					object_count++;
+					capacity -= object_used;
+					retcode += object_used;
+
+					object_used
+						= (stream_access && (object_id + object_count <= object_max))
+						? this->process_device_identification(object_list, object_id + object_count, capacity, false)
+						: -1;
+				}
+
+				more_follows = ((object_used < 0) ? 0x00 : 0xFF);
+			}
+
+			if (retcode == 0) {
+				retcode = -modbus_identification_not_found(object_id, 0x00, object_stdmax - 1, 0x80, this->debug);
+			} else if (retcode > 0) { // implies object_count > 0;
+				response[0] = MEI_type;
+				response[1] = read_device_id_code;
+				response[2] = conformity_level;
+				response[3] = more_follows;
+				response[4] = (more_follows == 0x00) ?  0x00 : (object_id + object_count);
+				response[5] = object_count;
+				retcode += object_list_idx;
+			}
+		}; break;
+		default: {
+			retcode = -modbus_illegal_enum_value(MEI_type, 0x0D, 0x0E, this->debug);
+		}
+		}
 	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
@@ -326,6 +420,43 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
     }
 
 	return retcode;
+}
+
+int IModbusServer::process_device_identification(uint8* object_list, uint8 object, uint8 capacity, bool cut) {
+	int used = -1; 
+	const char* strval = (object < 0x07)
+		? this->standard_identifications[object]
+		: this->access_private_device_identification(object);
+
+	if (strval != nullptr) {
+		uint8 size = (uint8)strlen(strval);
+
+		used = size + 2;
+		if (used > capacity) {
+			if (cut && (capacity > 2)) {
+				size = capacity - 2;
+				used = capacity;
+			} else {
+				used = 0;
+			}
+		}
+
+		if (used > 0) {
+			object_list[0] = object;
+			object_list[1] = size;
+			memcpy(object_list + 2, strval, size);
+			
+			if (this->debug) {
+				rsyslog(L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
+			}
+		} else {
+			if (this->debug) {
+				rsyslog(L"[device identification object 0x%02X will be sent in the next transcation]", object);
+			}
+		}
+	}
+
+	return used;
 }
 
 int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint16 data_length, uint8* response) { // MAP: Page 10
