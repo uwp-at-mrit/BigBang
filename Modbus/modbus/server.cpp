@@ -4,14 +4,13 @@
 #include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
-#include <collection.h>
 #include <ppltasks.h>
 #include <cstring>
+#include <map>
 
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
-using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
@@ -147,7 +146,7 @@ private:
 };
 
 /*************************************************************************************************/
-static Map<int, ModbusListener^>^ modbus_smart_listeners = nullptr;
+static std::map<int, ModbusListener^>* modbus_smart_listeners = nullptr;
 
 IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, const char* revision
 	, const char* url, const char* name, const char* model, const char* appname)
@@ -167,9 +166,10 @@ IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, 
 
 IModbusServer::~IModbusServer() {
 	if (modbus_smart_listeners != nullptr) {
-		modbus_smart_listeners->Remove(this->listener->GetHashCode());
+		modbus_smart_listeners->erase(this->listener->GetHashCode());
 		
-		if (modbus_smart_listeners->Size == 0) {
+		if (modbus_smart_listeners->empty()) {
+			delete modbus_smart_listeners;
 			modbus_smart_listeners = nullptr;
 		}
 	}
@@ -179,10 +179,10 @@ void IModbusServer::listen() {
 	auto waitor = ref new ModbusListener(this);
 
 	if (modbus_smart_listeners == nullptr) {
-		modbus_smart_listeners = ref new Map<int, ModbusListener^>();
+		modbus_smart_listeners = new std::map<int, ModbusListener^>();
 	}
 
-	modbus_smart_listeners->Insert(this->listener->GetHashCode(), waitor);
+	modbus_smart_listeners->insert(std::pair<int, ModbusListener^>(this->listener->GetHashCode(), waitor));
 
 	this->listener->ConnectionReceived
 		+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
