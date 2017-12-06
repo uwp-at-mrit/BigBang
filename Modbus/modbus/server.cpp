@@ -4,12 +4,14 @@
 #include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
+#include <collection.h>
 #include <ppltasks.h>
 #include <cstring>
 
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
+using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
@@ -120,31 +122,14 @@ static inline int modbus_echo(uint8* response, uint16 address, uint16 value1, ui
 }
 
 // delegate only accepts C++/CX class
-private ref class WarGrey::SCADA::ModbusListener sealed {
+private ref class ModbusListener sealed {
 internal:
-    ModbusListener(IModbusServer* server, uint16 port) : server(server), port(port) {
-        this->listener = ref new StreamSocketListener();
-        this->listener->Control->QualityOfService = SocketQualityOfService::LowLatency;
-        this->listener->Control->KeepAlive = false;
-    }
+    ModbusListener(IModbusServer* server) : server(server) {}
+	
+private:
+	~ModbusListener() { rsyslog("Here"); }
 
 public:
-    void run() {
-        create_task(this->listener->BindEndpointAsync(nullptr, this->port.ToString())).then([this](task<void> binding) {
-            try {
-                binding.get();
-                this->listener->ConnectionReceived
-                    += ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
-                        this,
-                        &ModbusListener::welcome);
-
-                rsyslog(L"## 0.0.0.0:%u", this->port);
-            } catch (Platform::Exception^ e) {
-                rsyslog(e->Message);
-            }
-        });
-    }
-
     void welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
         auto client = e->Socket;
         auto id = socket_identity(client);
@@ -161,16 +146,18 @@ public:
     }
 
 private:
-    uint16 port;
-    StreamSocketListener^ listener;
     IModbusServer* server;
 };
 
 /*************************************************************************************************/
+static Map<int, ModbusListener^>^ modbus_smart_listeners = nullptr;
+
 IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, const char* revision
-	, const char* url, const char* name, const char* model, const char* appname) {
-    this->listener = ref new ModbusListener(this, port);
-    this->debug = false;
+	, const char* url, const char* name, const char* model, const char* appname)
+	: debug(false), service(port.ToString()) {
+	this->listener = ref new StreamSocketListener();
+	this->listener->Control->QualityOfService = SocketQualityOfService::LowLatency;
+	this->listener->Control->KeepAlive = false;
 
 	this->standard_identifications[0x00] = vendor;
 	this->standard_identifications[0x01] = code;
@@ -181,8 +168,38 @@ IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, 
 	this->standard_identifications[0x06] = appname;
 };
 
+IModbusServer::~IModbusServer() {
+	if (modbus_smart_listeners != nullptr) {
+		modbus_smart_listeners->Remove(this->listener->GetHashCode());
+		
+		if (modbus_smart_listeners->Size == 0) {
+			modbus_smart_listeners = nullptr;
+		}
+	}
+}
+
 void IModbusServer::listen() {
-    this->listener->run();
+	auto waitor = ref new ModbusListener(this);
+
+	if (modbus_smart_listeners == nullptr) {
+		modbus_smart_listeners = ref new Map<int, ModbusListener^>();
+	}
+
+	modbus_smart_listeners->Insert(this->listener->GetHashCode(), waitor);
+
+	create_task(this->listener->BindEndpointAsync(nullptr, this->service)).then([=](task<void> binding) {
+		try {
+			binding.get();
+			this->listener->ConnectionReceived
+				+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
+					waitor,
+					&ModbusListener::welcome);
+
+			rsyslog(L"## 0.0.0.0:%s", this->service->Data());
+		} catch (Platform::Exception^ e) {
+			rsyslog(e->Message);
+		}
+	});
 }
 
 void IModbusServer::enable_debug(bool on_or_off) {
@@ -389,6 +406,7 @@ int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 						: -1;
 				}
 
+				// TODO: nullptr may be left before non-null identifications.
 				more_follows = ((object_used < 0) ? 0x00 : 0xFF);
 			}
 

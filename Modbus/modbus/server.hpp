@@ -3,11 +3,9 @@
 #include <cinttypes>
 
 namespace WarGrey::SCADA {
-    ref class ModbusListener;
-
     private class IModbusServer {
     public:
-        virtual ~IModbusServer() noexcept {};
+        virtual ~IModbusServer() noexcept;
 		IModbusServer(uint16 port, const char* vendor_code, const char* product_code, const char* revision,
 			const char* vendor_url, const char* product_name = nullptr, const char* model_name = nullptr,
 			const char* application_name = nullptr);
@@ -45,9 +43,10 @@ namespace WarGrey::SCADA {
 
     protected:
 		const char* standard_identifications[7];
-        bool debug;
+        bool debug = false;
 
     private:
-        WarGrey::SCADA::ModbusListener^ listener;
+        Windows::Networking::Sockets::StreamSocketListener^ listener;
+		Platform::String^ service;
     };
 }
