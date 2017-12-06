@@ -1,6 +1,6 @@
 #include "modbus/constants.hpp"
 #include "modbus/server.hpp"
-#include "modbus/protocol.hpp"
+#include "modbus/indication.hpp"
 #include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
@@ -125,9 +125,6 @@ static inline int modbus_echo(uint8* response, uint16 address, uint16 value1, ui
 private ref class ModbusListener sealed {
 internal:
     ModbusListener(IModbusServer* server) : server(server) {}
-	
-private:
-	~ModbusListener() { rsyslog("Here"); }
 
 public:
     void welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
@@ -187,13 +184,14 @@ void IModbusServer::listen() {
 
 	modbus_smart_listeners->Insert(this->listener->GetHashCode(), waitor);
 
+	this->listener->ConnectionReceived
+		+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
+			waitor,
+			&ModbusListener::welcome);
+
 	create_task(this->listener->BindEndpointAsync(nullptr, this->service)).then([=](task<void> binding) {
 		try {
 			binding.get();
-			this->listener->ConnectionReceived
-				+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
-					waitor,
-					&ModbusListener::welcome);
 
 			rsyslog(L"## 0.0.0.0:%s", this->service->Data());
 		} catch (Platform::Exception^ e) {

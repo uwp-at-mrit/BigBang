@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cinttypes>
+
 #include "modbus/constants.hpp"
 
 namespace WarGrey::SCADA {
@@ -15,6 +17,8 @@ namespace WarGrey::SCADA {
 
     protected:
         void connect();
+		void enable_debug(bool on_or_off);
+		bool debug_enabled();
 
     protected:
         Windows::Storage::Streams::IDataReader^ mbin;
@@ -24,6 +28,7 @@ namespace WarGrey::SCADA {
         Windows::Networking::Sockets::StreamSocket^ socket;
         Windows::Networking::HostName^ target;
         Platform::String^ service;
+		bool debug;
     };
 
     private class ModbusClient : public WarGrey::SCADA::IModbusClient {
@@ -34,5 +39,8 @@ namespace WarGrey::SCADA {
         int read_coils(uint16 address, uint16 quantity, uint8* dest) override;
         int write_coil(uint16 address, bool value) override;
         int write_coils(uint16 address, uint16 quantity, uint8* dest) override;
+
+	protected:
+		uint8 request[MODBUS_MAX_PDU_LENGTH];
     };
 }

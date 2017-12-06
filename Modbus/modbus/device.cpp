@@ -1,7 +1,7 @@
 #include <algorithm>
 
 #include "modbus/device.hpp"
-#include "modbus/protocol.hpp"
+#include "modbus/indication.hpp"
 #include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
