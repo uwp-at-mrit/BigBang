@@ -46,16 +46,16 @@ public:
 		DataReader^ mbin = ref new DataReader(client->InputStream);
         DataWriter^ mbout = ref new DataWriter(client->OutputStream);
 	
-		uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
-		uint16 transaction, protocol, length;
-		uint8 response_pdu[MODBUS_TCP_MAX_ADU_LENGTH], unit;
-
 		mbin->UnicodeEncoding = UnicodeEncoding::Utf8;
 		mbin->ByteOrder = ByteOrder::BigEndian;
 		mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
 		mbout->ByteOrder = ByteOrder::BigEndian;
 
 		try {
+			uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
+			uint16 transaction, protocol, length;
+			uint8 response_pdu[MODBUS_TCP_MAX_ADU_LENGTH], unit;
+
 			while (true) {
 				unsigned int size = create_task(mbin->LoadAsync(header_length)).get();
 
