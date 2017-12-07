@@ -1,4 +1,4 @@
-#include "modbus/indication.hpp"
+#include "modbus/protocol.hpp"
 
 using namespace Windows::Storage::Streams;
 

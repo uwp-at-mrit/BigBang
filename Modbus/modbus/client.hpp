@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cinttypes>
-
 #include "modbus/constants.hpp"
 
 namespace WarGrey::SCADA {

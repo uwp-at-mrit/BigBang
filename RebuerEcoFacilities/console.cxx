@@ -211,7 +211,7 @@ Console::Console() : StackPanel() {
 	this->device = make_modbus_test_server();
 	this->device->listen();
     
-    this->client = new ModbusClient("127.0.0.1");
+    //this->client = new ModbusClient("127.0.0.1");
 }
 
 Console::~Console() {

@@ -1,5 +1,5 @@
 #include "modbus/client.hpp"
-#include "modbus/indication.hpp"
+#include "modbus/protocol.hpp"
 #include "rsyslog.hpp"
 
 #include <ppltasks.h>
@@ -24,7 +24,7 @@ IModbusClient::IModbusClient(Platform::String^ server, uint16 port) {
 };
 
 void IModbusClient::connect() {
-    // TODO: It seems that this API is bullshit since exceptions may escaped from async task.
+    // TODO: It seems that this API is bullshit since exceptions may escape from async task.
     create_task(this->socket->ConnectAsync(this->target, this->service)).then([this](task<void> handshaking) {
         try {
             handshaking.get();
@@ -43,7 +43,6 @@ void IModbusClient::connect() {
         }
     });
 }
-
 
 void IModbusClient::enable_debug(bool on_or_off) {
 	this->debug = on_or_off;
