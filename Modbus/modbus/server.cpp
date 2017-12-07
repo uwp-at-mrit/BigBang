@@ -17,99 +17,8 @@ using namespace Windows::Storage::Streams;
 
 #define MODBUS_CONFORMITY_LEVEL(id) ((id >= 0x80) ? 0x03 : ((id >= 0x03) ? 0x02 : 0x01))
 
-static std::map<int, cancellation_token_source>* modbus_actions = nullptr;
-
 static inline Platform::String^ socket_identity(StreamSocket^ socket) {
     return socket->Information->RemoteHostName->RawName + ":" + socket->Information->RemotePort;
-}
-
-static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWriter^ mbout, uint8* response
-    , StreamSocket^ client, Platform::String^ id, cancellation_token token) {
-    uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
-    create_task(mbin->LoadAsync(header_length), token).then([=](unsigned int size) {
-        uint16 transaction, protocol, length;
-        uint8 unit;
-
-        if (size < header_length) {
-            if (size == 0) {
-                rsyslog(L"%s has disconnected", id->Data());
-            } else {
-                rsyslog(L"MBAP header from %s is too short(%u < %hu)", id->Data(), size, header_length);
-            }
-
-            cancel_current_task();
-        }
-
-        uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
-
-        return create_task(mbin->LoadAsync(pdu_length), token).then([=](unsigned int size) {
-            if (size < pdu_length) {
-                rsyslog(L"PDU data from %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
-                cancel_current_task();
-            }
-
-            uint8 function_code = mbin->ReadByte();
-
-			if (server->debug_enabled()) {
-				rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
-					transaction, protocol, length, unit, function_code, id->Data());
-			}
-
-			int retcode
-				= ((protocol == 0x00) && (unit == 0xFF))
-				? server->process(function_code, mbin, response)
-				: -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
-
-			if (retcode >= 0) {
-				modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);
-			} else {
-				modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
-			}
-
-			{ // clear dirty bytes
-				int dirty = mbin->UnconsumedBufferLength;
-
-				if (dirty > 0) {
-					MODBUS_READ_BYTES(mbin, response, dirty);
-					if (server->debug_enabled()) {
-						if (dirty == 1) {
-							rsyslog(L"[Hmmm... 1 byte comes from %s has been discarded]", id->Data());
-						} else {
-							rsyslog(L"[Hmmm... %d bytes come from %s have been discarded]", dirty, id->Data());
-						}
-					}
-				}
-			}
-        }, token);
-    }, token).then([=](task<void> doHandlingRequest) {
-        try {
-            doHandlingRequest.get();
-
-            return create_task(mbout->StoreAsync(), token);
-        } catch (Platform::Exception^ e) {
-            rsyslog(e->Message);
-            cancel_current_task();
-        } catch (task_canceled&) {
-            rsyslog(L"Cancel dealing with request from %s", id->Data());
-            cancel_current_task();
-        }
-    }, token).then([=](task<unsigned int> doReplying) {
-        try {
-            unsigned int sent = doReplying.get();
-
-            if (server->debug_enabled()) {
-                rsyslog(L"[sent %u bytes to %s]", sent, id->Data());
-            }
-
-            modbus_process_loop(server, mbin, mbout, response, client, id, token);
-        } catch (Platform::Exception^ e) {
-            rsyslog(e->Message);
-            delete client;
-        } catch (task_canceled&) {
-            rsyslog(L"Cancel replying to %s", id->Data());
-            delete client;
-        }
-    }, token);
 }
 
 static inline int modbus_echo(uint8* response, uint16 address, uint16 value) {
@@ -131,22 +40,91 @@ internal:
     ModbusListener(IModbusServer* server) : server(server) {}
 
 public:
-    void welcome(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
-        auto client = e->Socket;
-        auto id = socket_identity(client);
-        auto mbin = ref new DataReader(client->InputStream);
-        auto mbout = ref new DataWriter(client->OutputStream);
-        uint8 response_pdu[MODBUS_TCP_MAX_ADU_LENGTH];
-		auto action = modbus_actions->find(listener->GetHashCode());
+    void process(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
+        StreamSocket^ client = e->Socket;
+		Platform::String^ id = socket_identity(client); 
+		DataReader^ mbin = ref new DataReader(client->InputStream);
+        DataWriter^ mbout = ref new DataWriter(client->OutputStream);
+	
+		uint16 header_length = (uint16)(2 + 2 + 2 + 1); // MMIG page 5
+		uint16 transaction, protocol, length;
+		uint8 response_pdu[MODBUS_TCP_MAX_ADU_LENGTH], unit;
 
-		if (action != modbus_actions->end()) {
-			mbin->UnicodeEncoding = UnicodeEncoding::Utf8;
-			mbin->ByteOrder = ByteOrder::BigEndian;
-			mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
-			mbout->ByteOrder = ByteOrder::BigEndian;
+		mbin->UnicodeEncoding = UnicodeEncoding::Utf8;
+		mbin->ByteOrder = ByteOrder::BigEndian;
+		mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
+		mbout->ByteOrder = ByteOrder::BigEndian;
 
-			modbus_process_loop(this->server, mbin, mbout, response_pdu, client, id, action->second.get_token());
+		try {
+			while (true) {
+				unsigned int size = create_task(mbin->LoadAsync(header_length)).get();
+
+				if (size < header_length) {
+					if (size == 0) {
+						rsyslog(L"%s has disconnected", id->Data());
+					} else {
+						rsyslog(L"MBAP header from %s is too short(%u < %hu)", id->Data(), size, header_length);
+					}
+
+					break;
+				}
+
+				uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
+				size = create_task(mbin->LoadAsync(pdu_length)).get();
+
+				if (size < pdu_length) {
+					rsyslog(L"PDU data from	%s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
+					break;
+				}
+
+				{ // handling request
+					uint8 function_code = mbin->ReadByte();
+
+					if (server->debug_enabled()) {
+						rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
+							transaction, protocol, length, unit, function_code, id->Data());
+					}
+
+					int retcode
+						= ((protocol == 0x00) && (unit == 0xFF))
+						? server->process(function_code, mbin, response_pdu)
+						: -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
+
+					if (retcode >= 0) {
+						modbus_write_adu(mbout, transaction, protocol, unit, function_code, response_pdu, retcode);
+					} else {
+						modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
+					}
+				}
+
+				{ // clear dirty bytes
+					int dirty = mbin->UnconsumedBufferLength;
+
+					if (dirty > 0) {
+						MODBUS_READ_BYTES(mbin, response_pdu, dirty);
+						if (server->debug_enabled()) {
+							if (dirty == 1) {
+								rsyslog(L"[Hmmm... 1 byte comes from %s has been discarded]", id->Data());
+							} else {
+								rsyslog(L"[Hmmm... %d bytes come from %s have been discarded]", dirty, id->Data());
+							}
+						}
+					}
+				}
+
+				{ // reply
+					unsigned int sent = create_task(mbout->StoreAsync()).get();
+
+					if (server->debug_enabled()) {
+						rsyslog(L"[sent %u bytes to %s]", sent, id->Data());
+					}
+				}
+			}
+		} catch (Platform::Exception^ e) {
+			rsyslog(e->Message);
 		}
+
+		delete client;
     }
 
 private:
@@ -177,52 +155,37 @@ IModbusServer::~IModbusServer() {
 	auto uuid = this->listener->GetHashCode();
 
 	if (modbus_smart_listeners != nullptr) {
-		auto action = modbus_actions->find(uuid);
-	
-		if (action != modbus_actions->end()) {
-			action->second.cancel();
-			modbus_actions->erase(action);
-			modbus_smart_listeners->erase(uuid);
+		modbus_smart_listeners->erase(uuid);
 
-			if (modbus_actions->empty()) {
-				delete modbus_smart_listeners;
-				delete modbus_actions;
-
-				modbus_smart_listeners = nullptr;
-				modbus_actions = nullptr;
-			}
+		if (modbus_smart_listeners->empty()) {
+			delete modbus_smart_listeners;
+			modbus_smart_listeners = nullptr;
 		}
 	}
 }
 
 void IModbusServer::listen() {
-	cancellation_token_source action;
 	auto waitor = ref new ModbusListener(this);
 	auto uuid = this->listener->GetHashCode();
 
 	if (modbus_smart_listeners == nullptr) {
 		modbus_smart_listeners = new std::map<int, ModbusListener^>();
-		modbus_actions = new std::map<int, cancellation_token_source>();
 	}
 
 	modbus_smart_listeners->insert(std::pair<int, ModbusListener^>(uuid, waitor));
-	modbus_actions->insert(std::pair<int, cancellation_token_source>(uuid, action));
 	
-	auto token = modbus_actions->find(uuid)->second.get_token();
-	create_task(this->listener->BindEndpointAsync(nullptr, this->service), token).then([this, waitor](task<void> binding) {
-		try {
-			binding.get();
+	try {
+		create_task(this->listener->BindEndpointAsync(nullptr, this->service)).wait();
+		
+		this->listener->ConnectionReceived
+			+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
+				waitor,
+				&ModbusListener::process);
 
-			this->listener->ConnectionReceived
-				+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
-					waitor,
-					&ModbusListener::welcome);
-
-			rsyslog(L"## 0.0.0.0:%s", this->service->Data());
-		} catch (Platform::Exception^ e) {
-			rsyslog(e->Message);
-		}
-	}, token);
+		rsyslog(L"## 0.0.0.0:%s", this->service->Data());
+	} catch (Platform::Exception^ e) {
+		rsyslog(e->Message);
+	}
 }
 
 void IModbusServer::enable_debug(bool on_or_off) {
