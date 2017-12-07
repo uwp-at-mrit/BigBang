@@ -48,44 +48,35 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 
             uint8 function_code = mbin->ReadByte();
 
-			if ((protocol == 0x00) && (unit != 0xFF)) {
-				if (server->debug_enabled()) {
-					rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s]",
-						transaction, protocol, length, unit, function_code, id->Data());
-				}
+			if (server->debug_enabled()) {
+				rsyslog(L"[received ADU indication(%hu, %hu, %hu, %hhu) for function code %hhu from %s]",
+					transaction, protocol, length, unit, function_code, id->Data());
+			}
 
-				int retcode = server->process(function_code, mbin, response);
+			int retcode
+				= ((protocol == 0x00) && (unit == 0xFF))
+				? server->process(function_code, mbin, response)
+				: -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
 
-				if (retcode >= 0) {
-					modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);
-				} else {
-					modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
-				}
+			if (retcode >= 0) {
+				modbus_write_adu(mbout, transaction, protocol, unit, function_code, response, retcode);
+			} else {
+				modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
+			}
 
-				{ // clear dirty bytes
-					int dirty = mbin->UnconsumedBufferLength;
+			{ // clear dirty bytes
+				int dirty = mbin->UnconsumedBufferLength;
 
-					if (dirty > 0) {
-						MODBUS_READ_BYTES(mbin, response, dirty);
-						if (server->debug_enabled()) {
-							if (dirty == 1) {
-								rsyslog(L"[Hmmm... 1 dirty byte comes from %s has been cleared]", id->Data());
-							} else {
-								rsyslog(L"[Hmmm... %d dirty bytes come from %s have been cleared]", dirty, id->Data());
-							}
+				if (dirty > 0) {
+					MODBUS_READ_BYTES(mbin, response, dirty);
+					if (server->debug_enabled()) {
+						if (dirty == 1) {
+							rsyslog(L"[Hmmm... 1 byte comes from %s has been discarded]", id->Data());
+						} else {
+							rsyslog(L"[Hmmm... %d bytes come from %s have been discarded]", dirty, id->Data());
 						}
 					}
 				}
-			} else {
-				int dirty = mbin->UnconsumedBufferLength;
-				MODBUS_READ_BYTES(mbin, response, dirty);
-
-				if (server->debug_enabled()) {
-					rsyslog(L"discarded non-modbus/tcp ADU indication(%hu, %hu, %hu, %hhu, %hhu) from %s",
-						transaction, protocol, length, unit, function_code, id->Data());
-				}
-
-				modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, MODBUS_EXN_NEGATIVE_ACKNOWLEDGE);
 			}
         });
     }).then([=](task<void> doHandlingRequest) {
