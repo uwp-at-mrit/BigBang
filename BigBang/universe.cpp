@@ -39,7 +39,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
  */
 
 #define SNIP_INFO(snip) (static_cast<SnipInfo*>(snip->info))
-#define REMOVE(ptr, refcount) if (ptr->refcount <= 1) { delete ptr; } else { ptr->refcount -= 1; }
 
 ref class Win2DUniverse;
 
@@ -157,7 +156,7 @@ Universe::~Universe() {
     }
 
     //REMOVE(this->listener, refcount);
-    REMOVE(this->decorator, refcount);
+    this->decorator->destroy();
 }
 
 void Universe::insert(Snip* snip, double degrees, float x, float y) {
@@ -419,11 +418,11 @@ void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e
 
 void Universe::set_decorator(IUniverseDecorator* decorator) {
     if (this->decorator != nullptr) {
-        REMOVE(this->decorator, refcount);
+        this->decorator->destroy();
     }
 
     this->decorator = (decorator == nullptr) ? new PlaceHolderDecorator() : decorator;
-    this->decorator->refcount += 1;
+    this->decorator->reference();
     //this->refresh();
 }
 

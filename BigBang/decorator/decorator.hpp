@@ -1,12 +1,10 @@
 #pragma once
 
 #include "forward.hpp"
+#include "object.hpp"
 
 namespace WarGrey::SCADA {
-    private class IUniverseDecorator abstract {
-    public:
-        virtual ~IUniverseDecorator() noexcept {};
-
+	private class IUniverseDecorator abstract : public WarGrey::SCADA::SharedObject {
     public:
         virtual void draw_before(
             WarGrey::SCADA::Universe* master,
@@ -27,8 +25,5 @@ namespace WarGrey::SCADA {
             WarGrey::SCADA::Snip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float hidth, float height) {};
-
-    public:
-        int refcount = 0;
     };
 }

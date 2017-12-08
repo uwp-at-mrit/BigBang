@@ -3,7 +3,7 @@
 #include <cinttypes>
 
 namespace WarGrey::SCADA {
-    private class IModbusServer {
+    private class IModbusServer abstract {
     public:
         virtual ~IModbusServer() noexcept;
 		IModbusServer(uint16 port, const char* vendor_code, const char* product_code, const char* revision,

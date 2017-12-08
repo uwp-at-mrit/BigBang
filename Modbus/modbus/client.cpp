@@ -13,15 +13,22 @@ using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
 /*************************************************************************************************/
-IModbusClient::IModbusClient(Platform::String^ server, uint16 port) {
+IModbusClient::IModbusClient(Platform::String^ server, uint16 port, IModbusTransactionGenerator* generator) {
     this->target = ref new HostName(server);
     this->service = port.ToString();
 
     this->socket = ref new StreamSocket();
     this->socket->Control->KeepAlive = false;
 
+	this->generator = generator;
+	this->generator->reference();
+
     this->connect();
 };
+
+IModbusClient::~IModbusClient() {
+	this->generator->destroy();
+}
 
 void IModbusClient::connect() {
     // TODO: It seems that this API is bullshit since exceptions may escape from async task.
@@ -57,10 +64,32 @@ int ModbusClient::read_coils(uint16 address, uint16 quantity, uint8* dest) { // 
     return -MODBUS_EXN_DEVICE_BUSY;
 }
 
-int ModbusClient::write_coil(uint16 address, bool value) { // MAP: Page 10
+int ModbusClient::write_coil(uint16 address, bool value, IModbusExceptionListener* callback) { // MAP: Page 10
     return 0;
 }
 
-int ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* dest) { // MAP: Page 10
+int ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusExceptionListener* callback) { // MAP: Page 10
     return -MODBUS_EXN_MEMORY_PARITY_ERROR;
+}
+
+/*************************************************************************************************/
+ModbusSequenceGenerator::ModbusSequenceGenerator(uint16 start) {
+	this->start = ((start == 0) ? 1 : start);
+	this->sequence = this->start;
+}
+
+void ModbusSequenceGenerator::reset() {
+	this->sequence = this->start;
+}
+
+uint16 ModbusSequenceGenerator::yield() {
+	uint16 seq = this->sequence;
+
+	if (this->sequence == 0xFFFF) {
+		this->reset();
+	} else {
+		this->sequence++;
+	}
+
+	return seq;
 }
