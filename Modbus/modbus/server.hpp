@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 
     public:
         void listen();
-        int process(uint8 function_code, Windows::Storage::Streams::DataReader^ mbin, uint8 *response);
+		int process(uint8 function_code, Windows::Storage::Streams::DataReader^ mbin, uint8 *response);
 		int process_device_identification(uint8* object_list, uint8 object, uint8 capacity, bool cut);
         void enable_debug(bool on_or_off);
         bool debug_enabled();
@@ -41,7 +41,7 @@ namespace WarGrey::SCADA {
     public: // Other
         virtual int do_private_function(uint8 function_code, uint8* request, uint16 request_data_length, uint8* response);
 
-    protected:
+	protected:
 		const char* standard_identifications[7];
         bool debug = false;
 

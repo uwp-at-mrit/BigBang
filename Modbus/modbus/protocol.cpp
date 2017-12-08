@@ -10,12 +10,12 @@ static void inline modbus_write_mbap(IDataWriter^ mbout, uint16 transaction, uin
 }
 
 uint16 modbus_read_mbap(IDataReader^ mbin, uint16* transaction, uint16* protocol, uint16* length, uint8* unit) {
-    (*transaction) = mbin->ReadUInt16();
-    (*protocol) = mbin->ReadUInt16();
-    (*length) = mbin->ReadUInt16();
-    (*unit) = mbin->ReadByte();
+	(*transaction) = mbin->ReadUInt16();
+	(*protocol) = mbin->ReadUInt16();
+	(*length) = mbin->ReadUInt16();
+	(*unit) = mbin->ReadByte();
 
-    return (*length) - 1;
+	return (*length) - 1;
 }
 
 void modbus_write_adu(IDataWriter^ mbout, uint16 transaction, uint16 protocol, uint8 unit
