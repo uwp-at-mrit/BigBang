@@ -29,9 +29,9 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 
 		if (size < MODBUS_MBAP_LENGTH) {
 			if (size == 0) {
-				rsyslog(L"%s has disconnected", id->Data());
+				rsyslog(L"Client %s has disconnected", id->Data());
 			} else {
-				rsyslog(L"MBAP header from %s is too short(%u < %hu)", id->Data(), size, MODBUS_MBAP_LENGTH);
+				rsyslog(L"MBAP header from client %s is too short(%u < %hu)", id->Data(), size, MODBUS_MBAP_LENGTH);
 			}
 			
 			cancel_current_task();
@@ -41,7 +41,7 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 		
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 			if (size < pdu_length) {
-				rsyslog(L"PDU data from %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
+				rsyslog(L"PDU data from client %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
 				cancel_current_task();
 			}
 			
@@ -53,8 +53,8 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 			}
 			
 			int retcode
-				= ((protocol == 0x00) && (unit == 0xFF))
-				? server->process(function_code, mbin, pdu_data)
+				= ((protocol == MODBUS_PROTOCOL) && (unit == MODBUS_TCP_SLAVE))
+				? server->request(function_code, mbin, pdu_data)
 				: -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
 			
 			if (retcode >= 0) {
@@ -67,13 +67,9 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 				int dirty = mbin->UnconsumedBufferLength;
 				
 				if (dirty > 0) {
-					MODBUS_READ_BYTES(mbin, pdu_data, dirty);
+					MODBUS_DISCARD_BYTES(mbin, dirty);
 					if (server->debug_enabled()) {
-						if (dirty == 1) {
-							rsyslog(L"[Hmmm... 1 byte comes from %s has been discarded]", id->Data());
-						} else {
-							rsyslog(L"[Hmmm... %d bytes come from %s have been discarded]", dirty, id->Data());
-						}
+						rsyslog(L"[discarded last %d bytes of the indication from %s]", dirty, id->Data());
 					}
 				}
 			}
@@ -86,7 +82,7 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 			rsyslog(e->Message);
 			cancel_current_task();
 		} catch (task_canceled&) {
-			rsyslog(L"Cancel dealing with request from %s", id->Data());
+			rsyslog(L"Cancel dealing with the indication from %s", id->Data());
 			cancel_current_task();
 		}
 	}).then([=](task<unsigned int> doReplying) {
@@ -94,7 +90,7 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 			unsigned int sent = doReplying.get();
 			
 			if (server->debug_enabled()) {
-				rsyslog(L"[sent %u bytes to %s]", sent, id->Data());
+				rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
 			}
 			
 			modbus_process_loop(server, mbin, mbout, pdu_data, client, id);
@@ -102,7 +98,7 @@ static void modbus_process_loop(IModbusServer* server, DataReader^ mbin, DataWri
 			rsyslog(e->Message);
 			delete client;
 		} catch (task_canceled&) {
-			rsyslog(L"Cancel replying to %s", id->Data());
+			rsyslog(L"Cancel responding to %s", id->Data());
 			delete client;
 		}
 	});
@@ -127,7 +123,7 @@ internal:
     ModbusListener(IModbusServer* server) : server(server) {}
 
 public:
-    void process(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
+    void respond(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
         StreamSocket^ client = e->Socket;
 		Platform::String^ id = socket_identity(client); 
 		DataReader^ mbin = ref new DataReader(client->InputStream);
@@ -195,7 +191,7 @@ void IModbusServer::listen() {
 		this->listener->ConnectionReceived
 			+= ref new TypedEventHandler<StreamSocketListener^, StreamSocketListenerConnectionReceivedEventArgs^>(
 				waitor,
-				&ModbusListener::process);
+				&ModbusListener::respond);
 
 		rsyslog(L"## 0.0.0.0:%s", this->service->Data());
 	} catch (Platform::Exception^ e) {
@@ -211,7 +207,7 @@ bool IModbusServer::debug_enabled() {
     return this->debug;
 }
 
-int IModbusServer::process(uint8 funcode, DataReader^ mbin, uint8 *response) { // MAP: Page 10
+int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { // MAP: Page 10
 	int retcode = -MODBUS_EXN_DEVICE_FAILURE;
 
     switch (funcode) {

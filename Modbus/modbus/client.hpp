@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 		virtual uint16 yield() = 0;
 	};
 
-	private class IModbusExceptionListener abstract {
+	private class IModbusConfirmation abstract {
 	public:
 		virtual int on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
 	};
@@ -20,15 +20,17 @@ namespace WarGrey::SCADA {
         IModbusClient(Platform::String^ server, uint16 service, IModbusTransactionGenerator* generator);
         virtual ~IModbusClient() noexcept;
 
-    public: // data access
-        virtual int read_coils(uint16 address, uint16 quantity, uint8* dest) = 0;
-        virtual int write_coil(uint16 address, bool value, IModbusExceptionListener* callback) = 0;
-        virtual int write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusExceptionListener* callback) = 0;
-
-    protected:
-        void connect();
+	public:
+		void connect();
+		uint8* calloc_pdu();
+		void request(uint8 function_code, uint8* pdu_data, uint16 size, IModbusConfirmation* confirmation);
 		void enable_debug(bool on_or_off);
 		bool debug_enabled();
+
+    public: // data access
+        virtual int read_coils(uint16 address, uint16 quantity, uint8* dest) = 0;
+        virtual int write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) = 0;
+        virtual int write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) = 0;
 
     protected:
         Windows::Storage::Streams::IDataReader^ mbin;
@@ -64,8 +66,8 @@ namespace WarGrey::SCADA {
 
     public: // data access
         int read_coils(uint16 address, uint16 quantity, uint8* dest) override;
-		int write_coil(uint16 address, bool value, IModbusExceptionListener* callback) override;
-        int write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusExceptionListener* callback) override;
+		int write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) override;
+        int write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];

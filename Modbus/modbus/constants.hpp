@@ -2,6 +2,9 @@
 
 #include <cinttypes>
 
+static const uint16 MODBUS_PROTOCOL         = 0x00;
+static const uint16 MODBUS_MBAP_LENGTH      = (uint16)(2 + 2 + 2 + 1);
+
 static const uint16 MODBUS_TCP_DEFAULT_PORT = 502;
 static const uint16 MODBUS_TCP_SLAVE        = 0xFF;
 
