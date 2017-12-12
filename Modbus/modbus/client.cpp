@@ -31,6 +31,10 @@ IModbusClient::~IModbusClient() {
 }
 
 void IModbusClient::connect() {
+	if (this->mbout != nullptr) {
+		this->mbout = nullptr;
+	}
+
     // TODO: It seems that this API is bullshit since exceptions may escape from async task.
     create_task(this->socket->ConnectAsync(this->target, this->service)).then([this](task<void> handshaking) {
         try {
@@ -49,6 +53,10 @@ void IModbusClient::connect() {
             rsyslog(e->Message);
         }
     });
+}
+
+bool IModbusClient::is_connected() {
+	return (this->mbout != nullptr);
 }
 
 uint8* IModbusClient::calloc_pdu() {
@@ -119,6 +127,7 @@ void IModbusClient::request(uint8 function_code, uint8* request, uint16 size, IM
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
 			rsyslog(e->Message);
+			this->connect();
 		}});
 }
 
@@ -136,15 +145,18 @@ int ModbusClient::read_coils(uint16 address, uint16 quantity, uint8* dest) { // 
 }
 
 int ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) { // MAP: Page 10
-	uint8* pdu_data = this->calloc_pdu();
-	uint16 bvalue = (value ? 0xFF00 : 0x0000);
+	if (this->is_connected()) {
+		uint8* pdu_data = this->calloc_pdu();
+		uint16 bvalue = (value ? 0xFF00 : 0x0000);
 
-	MODBUS_SET_INT16_TO_INT8(request, 0, address);
-	MODBUS_SET_INT16_TO_INT8(request, 2, bvalue);
+		MODBUS_SET_INT16_TO_INT8(request, 0, address);
+		MODBUS_SET_INT16_TO_INT8(request, 2, bvalue);
 
-	IModbusClient::request(MODBUS_WRITE_SINGLE_COIL, pdu_data, 4, confirmation);
+		IModbusClient::request(MODBUS_WRITE_SINGLE_COIL, pdu_data, 4, confirmation);
 
-    return 0;
+	}
+	
+	return 0;
 }
 
 int ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) { // MAP: Page 10

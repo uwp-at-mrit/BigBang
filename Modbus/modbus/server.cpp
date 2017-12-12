@@ -49,20 +49,20 @@ public:
 		mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
 		mbout->ByteOrder = ByteOrder::BigEndian;
 
-		process(mbin, mbout, pdu_data, client, id->Data());
+		process(mbin, mbout, pdu_data, client, id);
     }
 
 private:
-	void process(DataReader^ mbin, DataWriter^ mbout, uint8* pdu_data, StreamSocket^ client, const wchar_t* id) {
+	void process(DataReader^ mbin, DataWriter^ mbout, uint8* pdu_data, StreamSocket^ client, Platform::String^ id) {
 		create_task(mbin->LoadAsync(MODBUS_MBAP_LENGTH)).then([=](unsigned int size) {
 			uint16 transaction, protocol, length;
 			uint8 unit;
 
 			if (size < MODBUS_MBAP_LENGTH) {
 				if (size == 0) {
-					rsyslog(L"Client %s has disconnected", id);
+					rsyslog(L"Client %s has disconnected", id->Data());
 				} else {
-					rsyslog(L"MBAP header from client %s is too short(%u < %hu)", id, size, MODBUS_MBAP_LENGTH);
+					rsyslog(L"MBAP header from client %s is too short(%u < %hu)", id->Data(), size, MODBUS_MBAP_LENGTH);
 				}
 
 				cancel_current_task();
@@ -72,7 +72,7 @@ private:
 
 			return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 				if (size < pdu_length) {
-					rsyslog(L"PDU data from client %s has been truncated(%u < %hu)", id, size, pdu_length);
+					rsyslog(L"PDU data from client %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
 					cancel_current_task();
 				}
 
@@ -80,7 +80,7 @@ private:
 
 				if (this->server->debug_enabled()) {
 					rsyslog(L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
-						transaction, protocol, length, unit, function_code, id);
+						transaction, protocol, length, unit, function_code, id->Data());
 				}
 
 				int retcode
@@ -100,7 +100,7 @@ private:
 					if (dirty > 0) {
 						MODBUS_DISCARD_BYTES(mbin, dirty);
 						if (this->server->debug_enabled()) {
-							rsyslog(L"[discarded last %d bytes of the indication from %s]", dirty, id);
+							rsyslog(L"[discarded last %d bytes of the indication from %s]", dirty, id->Data());
 						}
 					}
 				}
@@ -113,7 +113,7 @@ private:
 				rsyslog(e->Message);
 				cancel_current_task();
 			} catch (task_canceled&) {
-				rsyslog(L"Cancel dealing with the indication from %s", id);
+				rsyslog(L"Cancel dealing with the indication from %s", id->Data());
 				cancel_current_task();
 			}
 		}).then([=](task<unsigned int> doReplying) {
@@ -121,7 +121,7 @@ private:
 				unsigned int sent = doReplying.get();
 
 				if (this->server->debug_enabled()) {
-					rsyslog(L"[sent %u-byte-response to %s]", sent, id);
+					rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
 				}
 
 				this->process(mbin, mbout, pdu_data, client, id);
@@ -129,7 +129,7 @@ private:
 				rsyslog(e->Message);
 				delete client;
 			} catch (task_canceled&) {
-				rsyslog(L"Cancel responding to %s", id);
+				rsyslog(L"Cancel responding to %s", id->Data());
 				delete client;
 			}
 		});

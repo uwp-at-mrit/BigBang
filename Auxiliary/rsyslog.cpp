@@ -1,12 +1,10 @@
 ﻿#include <ppltasks.h>
-#include <collection.h>
+#include <queue>
 
 #include "rsyslog.hpp"
 #include "time.hpp"
 
 using namespace Concurrency;
-using namespace Platform::Collections;
-
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
@@ -29,8 +27,8 @@ static void send_to(IDataWriter^ udpout, Platform::String^ ts, Platform::String^
 }
 
 static void syslog(Platform::String^ message) {
-    static Vector<Platform::String^>^ timestamps = ref new Vector<Platform::String^>();
-    static Vector<Platform::String^>^ messages = ref new Vector<Platform::String^>();
+    static std::queue<Platform::String^> timestamps;
+    static std::queue<Platform::String^> messages;
 
     static DatagramSocket^ client = nullptr;
     static IDataWriter^ udpout = nullptr;
@@ -41,24 +39,24 @@ static void syslog(Platform::String^ message) {
         auto loghost = ref new HostName("172.16.8.1");
         
         client = ref new DatagramSocket();
-        timestamps->Append(timestamp);
-        messages->Append(message);
+        timestamps.push(timestamp);
+        messages.push(message);
 
         create_task(client->ConnectAsync(loghost, "18030")).then([message](task<void> conn) {
             conn.get();
             udpout = ref new DataWriter(client->OutputStream);
             
             do {
-                auto ts = timestamps->GetAt(0);
-                auto msg = messages->GetAt(0);
+                auto ts = timestamps.front();
+                auto msg = messages.front();
                 send_to(udpout, ts, msg);
-                timestamps->RemoveAt(0);
-                messages->RemoveAt(0);
-            } while (timestamps->Size > 0);
+                timestamps.pop();
+                messages.pop();
+            } while (!timestamps.empty());
         });
     } else if (udpout == nullptr) {
-        timestamps->Append(timestamp);
-        messages->Append(message);
+        timestamps.push(timestamp);
+        messages.push(message);
     } else {
         send_to(udpout, timestamp, message);
     }

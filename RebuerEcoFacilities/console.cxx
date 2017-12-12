@@ -212,6 +212,12 @@ Console::Console() : StackPanel() {
 	this->device->listen();
     
     this->client = new ModbusClient("127.0.0.1");
+	//while (!this->client->is_connected()) {
+	//	rsyslog("here");
+	//	Sleep(64);
+	//}
+
+	this->client->write_coil(0x0130, true, nullptr);
 }
 
 Console::~Console() {

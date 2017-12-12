@@ -12,7 +12,8 @@ namespace WarGrey::SCADA {
 
 	private class IModbusConfirmation abstract {
 	public:
-		virtual int on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
+		virtual void on_connection() = 0;
+		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
 	};
 
     private class IModbusClient abstract {
@@ -21,7 +22,9 @@ namespace WarGrey::SCADA {
         virtual ~IModbusClient() noexcept;
 
 	public:
-		void connect();
+		bool is_connected();
+
+	public:
 		uint8* calloc_pdu();
 		void request(uint8 function_code, uint8* pdu_data, uint16 size, IModbusConfirmation* confirmation);
 		void enable_debug(bool on_or_off);
@@ -40,6 +43,9 @@ namespace WarGrey::SCADA {
         Windows::Networking::Sockets::StreamSocket^ socket;
         Windows::Networking::HostName^ target;
         Platform::String^ service;
+
+	private:
+		void connect();
 
 	private:
 		WarGrey::SCADA::IModbusTransactionGenerator* generator;
