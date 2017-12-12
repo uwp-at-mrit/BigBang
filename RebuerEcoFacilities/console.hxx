@@ -5,7 +5,7 @@
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
-    public ref class Console sealed : public Windows::UI::Xaml::Controls::StackPanel {
+	public ref class Console sealed : public Windows::UI::Xaml::Controls::StackPanel {
     public:
         Console();
         void initialize_component(Windows::Foundation::Size region);
@@ -20,6 +20,7 @@ namespace WarGrey::SCADA {
     private:
         WarGrey::SCADA::IModbusServer* device;
         WarGrey::SCADA::IModbusClient* client;
+		WarGrey::SCADA::IModbusConfirmation* confirmation;
         WarGrey::SCADA::Universe* universe;
     };
 }

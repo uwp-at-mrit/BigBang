@@ -38,6 +38,13 @@ inline void connect_pipes(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, 
     universe->move_to(pipe, (*x), (*y));
 }
 
+class BConfirmation : public WarGrey::SCADA::IModbusConfirmation {
+public:
+	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {
+		rsyslog(L"Done(%hu, 0x%02X, 0x%04X, 0x%04X)", transaction, function_code, address, value);
+	};
+};
+
 class BSegment : public WarGrey::SCADA::Universe {
 public:
     BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
@@ -208,16 +215,12 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
+	this->confirmation = new BConfirmation();
 	this->device = make_modbus_test_server();
 	this->device->listen();
     
-    this->client = new ModbusClient("127.0.0.1");
-	//while (!this->client->is_connected()) {
-	//	rsyslog("here");
-	//	Sleep(64);
-	//}
-
-	this->client->write_coil(0x0130, true, nullptr);
+    this->client = make_modbus_test_client("127.0.0.1");
+	this->client->write_coil(0x0130, true, this->confirmation);
 }
 
 Console::~Console() {

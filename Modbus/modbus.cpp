@@ -17,3 +17,11 @@ IModbusServer* make_modbus_test_server() {
 
 	return device;
 }
+
+IModbusClient* make_modbus_test_client(Platform::String^ device) {
+	auto client = new ModbusClient(device);
+
+	client->enable_debug(true);
+
+	return client;
+}

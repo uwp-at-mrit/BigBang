@@ -1,12 +1,12 @@
+#include <ppltasks.h>
+#include <cstring>
+#include <map>
+
 #include "modbus/constants.hpp"
 #include "modbus/server.hpp"
 #include "modbus/protocol.hpp"
 #include "modbus/exception.hpp"
 #include "rsyslog.hpp"
-
-#include <ppltasks.h>
-#include <cstring>
-#include <map>
 
 using namespace WarGrey::SCADA;
 
@@ -62,7 +62,8 @@ private:
 				if (size == 0) {
 					rsyslog(L"Client %s has disconnected", id->Data());
 				} else {
-					rsyslog(L"MBAP header from client %s is too short(%u < %hu)", id->Data(), size, MODBUS_MBAP_LENGTH);
+					rsyslog(L"MBAP header from client %s is too short(%u < %hu)",
+						id->Data(), size, MODBUS_MBAP_LENGTH);
 				}
 
 				cancel_current_task();
@@ -95,12 +96,12 @@ private:
 				}
 
 				{ // clear dirty bytes
-					int dirty = mbin->UnconsumedBufferLength;
+					unsigned int dirty = mbin->UnconsumedBufferLength;
 
 					if (dirty > 0) {
 						MODBUS_DISCARD_BYTES(mbin, dirty);
 						if (this->server->debug_enabled()) {
-							rsyslog(L"[discarded last %d bytes of the indication from %s]", dirty, id->Data());
+							rsyslog(L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
 						}
 					}
 				}
