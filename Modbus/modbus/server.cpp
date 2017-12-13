@@ -49,11 +49,11 @@ public:
 		mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
 		mbout->ByteOrder = ByteOrder::BigEndian;
 
-		process(mbin, mbout, pdu_data, client, id);
+		wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
     }
 
 private:
-	void process(DataReader^ mbin, DataWriter^ mbout, uint8* pdu_data, StreamSocket^ client, Platform::String^ id) {
+	void wait_process_reply_loop(DataReader^ mbin, DataWriter^ mbout, uint8* pdu_data, StreamSocket^ client, Platform::String^ id) {
 		create_task(mbin->LoadAsync(MODBUS_MBAP_LENGTH)).then([=](unsigned int size) {
 			uint16 transaction, protocol, length;
 			uint8 unit;
@@ -125,7 +125,7 @@ private:
 					rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
 				}
 
-				this->process(mbin, mbout, pdu_data, client, id);
+				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (Platform::Exception^ e) {
 				rsyslog(e->Message);
 				delete client;

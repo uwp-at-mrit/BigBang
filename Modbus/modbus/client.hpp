@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <queue>
 
 #include "modbus/constants.hpp"
 #include "object.hpp"
@@ -43,6 +44,7 @@ namespace WarGrey::SCADA {
 	private:
 		void connect();
 		void apply_request(std::pair<uint16, ModbusTransaction>& transaction);
+		void wait_process_callback_loop();
 
     private:
         Windows::Networking::Sockets::StreamSocket^ socket;
@@ -53,6 +55,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
 		std::map<uint16, ModbusTransaction>* blocking_requests;
 		std::map<uint16, ModbusTransaction>* pending_requests;
+		std::queue<uint8*>* pdu_pool;
 		bool debug;
     };
 

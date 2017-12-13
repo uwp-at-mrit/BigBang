@@ -221,6 +221,7 @@ Console::Console() : StackPanel() {
     
     this->client = make_modbus_test_client("127.0.0.1");
 	this->client->write_coil(0x0130, true, this->confirmation);
+	this->client->write_coil(0x0131, false, this->confirmation);
 }
 
 Console::~Console() {
@@ -235,6 +236,10 @@ Console::~Console() {
     if (this->client != nullptr) {
         delete this->client;
     }
+
+	if (this->confirmation != nullptr) {
+		delete this->confirmation;
+	}
 }
 
 void Console::initialize_component(Size region) {
