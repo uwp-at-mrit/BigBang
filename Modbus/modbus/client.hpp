@@ -17,6 +17,9 @@ namespace WarGrey::SCADA {
 
 	private class IModbusConfirmation abstract {
 	public:
+		virtual void on_coils(uint16 transaction, uint8* coil_status, uint8 count) {};
+		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) {};
+
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) {};
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) {};
 		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) {};
@@ -34,7 +37,8 @@ namespace WarGrey::SCADA {
 		bool debug_enabled();
 
     public: // data access
-        virtual uint16 read_coils(uint16 address, uint16 quantity, uint8* dest) = 0;
+		virtual uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
         virtual uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) = 0;
         virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation) = 0;
 		
@@ -43,8 +47,8 @@ namespace WarGrey::SCADA {
 		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) = 0;
 
     protected:
-        Windows::Storage::Streams::IDataReader^ mbin;
-        Windows::Storage::Streams::IDataWriter^ mbout;
+        Windows::Storage::Streams::DataReader^ mbin;
+        Windows::Storage::Streams::DataWriter^ mbout;
 
 	private:
 		void connect();
@@ -83,7 +87,8 @@ namespace WarGrey::SCADA {
 			: IModbusClient(server, port, new WarGrey::SCADA::ModbusSequenceGenerator()) {};
 
     public: // data access
-        uint16 read_coils(uint16 address, uint16 quantity, uint8* dest) override;
+		uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
+		uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
 		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) override;
         uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) override;
 

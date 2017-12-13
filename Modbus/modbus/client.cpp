@@ -23,6 +23,45 @@ private struct WarGrey::SCADA::ModbusTransaction {
 	IModbusConfirmation* confirmation;
 };
 
+static uint16 modbus_simple_request(IModbusClient* self, uint8 fcode, uint16 addr, uint16 val, IModbusConfirmation* cb) {
+	uint8* pdu_data = self->calloc_pdu();
+
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, addr);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, val);
+
+	return self->request(fcode, pdu_data, 4, cb);
+}
+
+void modbus_apply_positive_confirmation(IModbusConfirmation* cb, uint16 transaction, uint8 function_code, DataReader^ mbin) {
+	switch (function_code) {
+	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
+		uint8 status[MODBUS_MAX_PDU_LENGTH];
+		uint8 count = mbin->ReadByte();
+		MODBUS_READ_BYTES(mbin, status, count);
+
+		if (function_code == MODBUS_READ_COILS) {
+			cb->on_coils(transaction, status, count);
+		} else {
+			cb->on_discrete_inputs(transaction, status, count);
+		}
+	} break;
+	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
+	case MODBUS_WRITE_MULTIPLE_COILS: case MODBUS_WRITE_MULTIPLE_REGISTERS: { // MAP: Page 29, 30
+		uint16 address = mbin->ReadUInt16();
+		uint16 value = mbin->ReadUInt16();
+
+		cb->on_echo_response(transaction, function_code, address, value);
+	} break;
+	case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
+		uint16 address = mbin->ReadUInt16();
+		uint16 and_mask = mbin->ReadUInt16();
+		uint16 or_mask = mbin->ReadUInt16();
+
+		cb->on_echo_response(transaction, function_code, address, and_mask, or_mask);
+	} break;
+	}
+}
+
 /*************************************************************************************************/
 IModbusClient::IModbusClient(Platform::String^ server, uint16 port, IModbusTransactionIdGenerator* generator) {
     this->device = ref new HostName(server);
@@ -212,26 +251,9 @@ void IModbusClient::wait_process_callback_loop() {
 
 			if (cb != nullptr) {
 				if (function_code != raw_code) {
-					uint8 reason = this->mbin->ReadByte();
-
-					cb->on_exception(transaction, function_code, reason);
+					cb->on_exception(transaction, function_code, this->mbin->ReadByte());
 				} else {
-					switch (function_code) {
-					case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
-					case MODBUS_WRITE_MULTIPLE_COILS: case MODBUS_WRITE_MULTIPLE_REGISTERS: { // MAP: Page 29, 30
-						uint16 address = this->mbin->ReadUInt16();
-						uint16 value = this->mbin->ReadUInt16();
-
-						cb->on_echo_response(transaction, function_code, address, value);
-					} break;
-					case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
-						uint16 address = this->mbin->ReadUInt16();
-						uint16 and_mask = this->mbin->ReadUInt16();
-						uint16 or_mask = this->mbin->ReadUInt16();
-
-						cb->on_echo_response(transaction, function_code, address, and_mask, or_mask);
-					} break;
-					}
+					modbus_apply_positive_confirmation(cb, transaction, function_code, this->mbin);
 				}
 			}
 		});
@@ -274,18 +296,16 @@ bool IModbusClient::debug_enabled() {
 }
 
 /*************************************************************************************************/
-uint16 ModbusClient::read_coils(uint16 address, uint16 quantity, uint8* dest) { // MAP: Page 10
-    return -MODBUS_EXN_DEVICE_BUSY;
+uint16 ModbusClient::read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) { // MAP: Page 11
+	return modbus_simple_request(this, MODBUS_READ_COILS, address, quantity, confirmation);
+}
+
+uint16 ModbusClient::read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) { // MAP: Page 12
+	return modbus_simple_request(this, MODBUS_READ_DISCRETE_INPUTS, address, quantity, confirmation);
 }
 
 uint16 ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) { // MAP: Page 17
-	uint8* pdu_data = this->calloc_pdu();
-	uint16 bvalue = (value ? 0xFF00 : 0x0000);
-
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, bvalue);
-
-	return IModbusClient::request(MODBUS_WRITE_SINGLE_COIL, pdu_data, 4, confirmation);
+	return modbus_simple_request(this, MODBUS_WRITE_SINGLE_COIL, address, (value ? 0xFF00 : 0x0000), confirmation);
 }
 
 uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation) { // MAP: Page 29
@@ -301,12 +321,7 @@ uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src, IM
 }
 
 uint16 ModbusClient::write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) { // MAP: Page 19
-	uint8* pdu_data = this->calloc_pdu();
-
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, value);
-
-	return IModbusClient::request(MODBUS_WRITE_SINGLE_REGISTER, pdu_data, 4, confirmation);
+	return modbus_simple_request(this, MODBUS_WRITE_SINGLE_REGISTER, address, value, confirmation);
 }
 
 uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) { // MAP: Page 30
