@@ -23,7 +23,7 @@ uint8 modbus_illegal_address(uint16 address, uint16 count, uint16 start, uint16 
 		if ((address < start) || (address > start + amount)) {
 			modbus_illegal_address(address, start, amount, true);
 		} else {
-			rsyslog(L"[Too many data requested (%u > %u)]", address - start + count, amount);
+			rsyslog(L"[Too many data required (%u > %u)]", address - start + count, amount);
 		}
 	}
 

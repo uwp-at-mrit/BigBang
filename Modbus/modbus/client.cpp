@@ -4,6 +4,8 @@
 #include "modbus/protocol.hpp"
 #include "rsyslog.hpp"
 
+// MMIG: Page 20
+
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
@@ -143,7 +145,7 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 
 void IModbusClient::wait_process_callback_loop() {
 	create_task(this->mbin->LoadAsync(MODBUS_MBAP_LENGTH)).then([=](unsigned int size) {
-		uint16 identification, protocol, length;
+		uint16 transaction, protocol, length;
 		uint8 unit;
 
 		if (size < MODBUS_MBAP_LENGTH) {
@@ -158,7 +160,7 @@ void IModbusClient::wait_process_callback_loop() {
 			cancel_current_task();
 		}
 
-		uint16 pdu_length = modbus_read_mbap(mbin, &identification, &protocol, &length, &unit);
+		uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 			if (size < pdu_length) {
@@ -169,11 +171,11 @@ void IModbusClient::wait_process_callback_loop() {
 				cancel_current_task();
 			}
 
-			auto maybe_transaction = this->pending_requests->find(identification);
+			auto maybe_transaction = this->pending_requests->find(transaction);
 			if (maybe_transaction == this->pending_requests->end()) {
 				if (this->debug) {
 					rsyslog(L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
-						identification, this->device->RawName->Data(), this->service->Data());
+						transaction, this->device->RawName->Data(), this->service->Data());
 				}
 
 				cancel_current_task();
@@ -185,7 +187,7 @@ void IModbusClient::wait_process_callback_loop() {
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
 				if (this->debug) {
 					rsyslog(L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s:%s>",
-						identification, protocol, length, unit,
+						transaction, protocol, length, unit,
 						this->device->RawName->Data(), this->service->Data());
 				}
 
@@ -204,7 +206,7 @@ void IModbusClient::wait_process_callback_loop() {
 				}
 			} else if (this->debug) {
 				rsyslog(L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
-					identification, protocol, length, unit, function_code,
+					transaction, protocol, length, unit, function_code,
 					this->device->RawName->Data(), this->service->Data());
 			}
 
@@ -212,7 +214,7 @@ void IModbusClient::wait_process_callback_loop() {
 				if (function_code != raw_code) {
 					uint8 reason = this->mbin->ReadByte();
 
-					cb->on_exception(identification, function_code, reason);
+					cb->on_exception(transaction, function_code, reason);
 				} else {
 					switch (function_code) {
 					case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
@@ -220,7 +222,14 @@ void IModbusClient::wait_process_callback_loop() {
 						uint16 address = this->mbin->ReadUInt16();
 						uint16 value = this->mbin->ReadUInt16();
 
-						cb->on_echo_response(identification, function_code, address, value);
+						cb->on_echo_response(transaction, function_code, address, value);
+					} break;
+					case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
+						uint16 address = this->mbin->ReadUInt16();
+						uint16 and_mask = this->mbin->ReadUInt16();
+						uint16 or_mask = this->mbin->ReadUInt16();
+
+						cb->on_echo_response(transaction, function_code, address, and_mask, or_mask);
 					} break;
 					}
 				}
@@ -269,7 +278,7 @@ uint16 ModbusClient::read_coils(uint16 address, uint16 quantity, uint8* dest) { 
     return -MODBUS_EXN_DEVICE_BUSY;
 }
 
-uint16 ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) { // MAP: Page 10
+uint16 ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) { // MAP: Page 17
 	uint8* pdu_data = this->calloc_pdu();
 	uint16 bvalue = (value ? 0xFF00 : 0x0000);
 
@@ -279,13 +288,47 @@ uint16 ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation*
 	return IModbusClient::request(MODBUS_WRITE_SINGLE_COIL, pdu_data, 4, confirmation);
 }
 
-uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) { // MAP: Page 10
+uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation) { // MAP: Page 29
+	uint8* pdu_data = this->calloc_pdu();
+	uint8 NStar = MODBUS_COIL_NStar(quantity);
+
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, quantity);
+	pdu_data[4] = NStar;
+	memcpy(pdu_data + 5, src, NStar);
+	
+	return IModbusClient::request(MODBUS_WRITE_MULTIPLE_COILS, pdu_data, 5 + NStar, confirmation);
+}
+
+uint16 ModbusClient::write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) { // MAP: Page 19
 	uint8* pdu_data = this->calloc_pdu();
 
 	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
-	//MODBUS_SET_INT16_TO_INT8(pdu_data, 2, bvalue); 
-	
-	return IModbusClient::request(MODBUS_WRITE_MULTIPLE_COILS, pdu_data, 4, confirmation);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, value);
+
+	return IModbusClient::request(MODBUS_WRITE_SINGLE_REGISTER, pdu_data, 4, confirmation);
+}
+
+uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) { // MAP: Page 30
+	uint8* pdu_data = this->calloc_pdu();
+	uint8 NStar = MODBUS_REGISTER_NStar(quantity);
+
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, quantity);
+	pdu_data[4] = NStar;
+	modbus_read_registers(src, 0, NStar, pdu_data + 5);
+
+	return IModbusClient::request(MODBUS_WRITE_MULTIPLE_REGISTERS, pdu_data, 5 + NStar, confirmation);
+}
+
+uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) { // MAP: Page 36
+	uint8* pdu_data = this->calloc_pdu();
+
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, and);
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 4, or);
+
+	return IModbusClient::request(MODBUS_MASK_WRITE_REGISTER, pdu_data, 6, confirmation);
 }
 
 /*************************************************************************************************/

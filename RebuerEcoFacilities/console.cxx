@@ -43,6 +43,10 @@ public:
 	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {
 		rsyslog(L"Done(%hu, 0x%02X, 0x%04X, 0x%04X)", transaction, function_code, address, value);
 	};
+
+	void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {
+		rsyslog(L"Function(0x%02X) invoking failed due to reason %d", function_code, reason);
+	};
 };
 
 class BSegment : public WarGrey::SCADA::Universe {
@@ -219,9 +223,10 @@ Console::Console() : StackPanel() {
 	this->device = make_modbus_test_server();
 	this->device->listen();
     
+	uint8 coils[] = { 0xCD, 0x6B, 0xB2, 0x0E, 0x1B };
     this->client = make_modbus_test_client("127.0.0.1");
 	this->client->write_coil(0x0130, true, this->confirmation);
-	this->client->write_coil(0x0131, false, this->confirmation);
+	this->client->write_coils(0x0130, 0x25, coils, this->confirmation);
 }
 
 Console::~Console() {

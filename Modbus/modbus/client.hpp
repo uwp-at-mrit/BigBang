@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
 	private class IModbusConfirmation abstract {
 	public:
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) {};
+		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) {};
 		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) {};
 	};
 
@@ -35,7 +36,11 @@ namespace WarGrey::SCADA {
     public: // data access
         virtual uint16 read_coils(uint16 address, uint16 quantity, uint8* dest) = 0;
         virtual uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) = 0;
-        virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) = 0;
+        virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation) = 0;
+		
+		virtual uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) = 0;
 
     protected:
         Windows::Storage::Streams::IDataReader^ mbin;
@@ -81,6 +86,10 @@ namespace WarGrey::SCADA {
         uint16 read_coils(uint16 address, uint16 quantity, uint8* dest) override;
 		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) override;
         uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) override;
+
+		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) override;
+		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) override;
+		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
