@@ -4,6 +4,7 @@
 
 #define MODBUS_DISCARD_BYTES(mbin, count) do { for (size_t i = 0; i < count; i++) { mbin->ReadByte(); } } while(0)
 #define MODBUS_READ_BYTES(mbin, dest, count) do { for (size_t i = 0; i < count; i++) { dest[i] = mbin->ReadByte(); } } while(0)
+#define MODBUS_READ_DOUBLES(mbin, dest, count) do { for (size_t i = 0; i < count; i++) { dest[i] = mbin->ReadUInt16(); } } while(0)
 #define MODBUS_WRITE_BYTES(mbout, src, count) do { for (size_t i = 0; i < count; i++) { mbout->WriteByte(src[i]); } } while(0)
 #define MODBUS_COIL_NStar(quantity) ((uint8)((quantity / 8) + ((quantity % 8) ? 1 : 0)))
 #define MODBUS_REGISTER_NStar(quantity) ((uint8)(quantity * 2))

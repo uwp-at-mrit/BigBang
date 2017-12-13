@@ -45,6 +45,18 @@ void modbus_apply_positive_confirmation(IModbusConfirmation* cb, uint16 transact
 			cb->on_discrete_inputs(transaction, status, count);
 		}
 	} break;
+	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS:     // MAP: Page 15, 16
+	case MODBUS_WRITE_AND_READ_REGISTERS: {                                   // MAP: Page 38
+		uint16 values[MODBUS_MAX_PDU_LENGTH / 2];
+		uint8 count = mbin->ReadByte() / 2;
+		MODBUS_READ_DOUBLES(mbin, values, count);
+
+		if (function_code == MODBUS_READ_COILS) {
+			cb->on_holding_registers(transaction, values, count);
+		} else {
+			cb->on_input_registers(transaction, values, count);
+		}
+	} break;
 	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
 	case MODBUS_WRITE_MULTIPLE_COILS: case MODBUS_WRITE_MULTIPLE_REGISTERS: { // MAP: Page 29, 30
 		uint16 address = mbin->ReadUInt16();
@@ -318,6 +330,14 @@ uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src, IM
 	memcpy(pdu_data + 5, src, NStar);
 	
 	return IModbusClient::request(MODBUS_WRITE_MULTIPLE_COILS, pdu_data, 5 + NStar, confirmation);
+}
+
+uint16 ModbusClient::read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) {
+	return modbus_simple_request(this, MODBUS_READ_HOLDING_REGISTERS, address, quantity, confirmation);
+}
+
+uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) {
+	return modbus_simple_request(this, MODBUS_READ_INPUT_REGISTERS, address, quantity, confirmation);
 }
 
 uint16 ModbusClient::write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) { // MAP: Page 19

@@ -19,6 +19,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void on_coils(uint16 transaction, uint8* coil_status, uint8 count) {};
 		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) {};
+		virtual void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) {};
+		virtual void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) {};
 
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) {};
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) {};
@@ -42,6 +44,8 @@ namespace WarGrey::SCADA {
         virtual uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) = 0;
         virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation) = 0;
 		
+		virtual uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) = 0;
@@ -92,6 +96,9 @@ namespace WarGrey::SCADA {
 		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) override;
         uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) override;
 
+
+		uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
+		uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
 		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) override;
 		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) override;
 		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) override;

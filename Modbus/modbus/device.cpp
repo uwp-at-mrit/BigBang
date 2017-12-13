@@ -78,7 +78,7 @@ int ModbusVirtualDevice::read_discrete_inputs(uint16 address, uint16 quantity, u
 	}
 }
 
-int ModbusVirtualDevice::write_coil(uint16 address, bool value) { // MAP: Page 10
+int ModbusVirtualDevice::write_coil(uint16 address, bool value) { // MAP: Page 17
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx >= this->nbits)) {
@@ -89,7 +89,7 @@ int ModbusVirtualDevice::write_coil(uint16 address, bool value) { // MAP: Page 1
     }
 }
 
-int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 10
+int ModbusVirtualDevice::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 29
     uint16 idx = address - this->bit0;
 
     if ((idx < 0) || (idx > this->nbits - quantity)) {
@@ -131,7 +131,7 @@ int ModbusVirtualDevice::write_register(uint16 address, uint16 value) { // MAP: 
 	}
 }
 
-int ModbusVirtualDevice::write_registers(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 10
+int ModbusVirtualDevice::write_registers(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 30
 	uint16 idx = address - this->register0;
 
 	if ((idx < 0) || (idx > this->nregisters - quantity)) {
