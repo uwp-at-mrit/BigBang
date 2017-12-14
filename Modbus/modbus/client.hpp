@@ -17,14 +17,14 @@ namespace WarGrey::SCADA {
 
 	private class IModbusConfirmation abstract {
 	public:
-		virtual void on_coils(uint16 transaction, uint8* coil_status, uint8 count) {};
-		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) {};
-		virtual void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) {};
-		virtual void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) {};
+		virtual void on_coils(uint16 transaction, uint8* coil_status, uint8 count) = 0;
+		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) = 0;
+		virtual void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) = 0;
+		virtual void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) = 0;
 
-		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) {};
-		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) {};
-		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) {};
+		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) = 0;
+		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) = 0;
+		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
 	};
 
     private class IModbusClient abstract {
@@ -49,6 +49,11 @@ namespace WarGrey::SCADA {
 		virtual uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) = 0;
+		
+		virtual uint16 write_read_registers(
+			uint16 waddr, uint16 wquantity,
+			uint16 raddr, uint16 rquantity, uint16* src,
+			IModbusConfirmation* confirmation) = 0;
 
     protected:
         Windows::Storage::Streams::DataReader^ mbin;
@@ -102,8 +107,25 @@ namespace WarGrey::SCADA {
 		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) override;
 		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) override;
 		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) override;
+		
+		uint16 write_read_registers(
+			uint16 waddr, uint16 wquantity,
+			uint16 raddr, uint16 rquantity, uint16* src,
+			IModbusConfirmation* confirmation) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
     };
+
+	private class ModbusConfirmation : public WarGrey::SCADA::IModbusConfirmation {
+	public:
+		void on_coils(uint16 transaction, uint8* coil_status, uint8 count) override {};
+		void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) override {};
+		void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) override {};
+		void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) override {};
+
+		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {};
+		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) override {};
+		void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {};
+	};
 }
