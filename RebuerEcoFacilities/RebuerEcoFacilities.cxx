@@ -70,9 +70,9 @@ namespace WarGrey::SCADA {
                 try {
                     // if an error is returned from a delegate, it will not be marked as Handled.
                     error->Propagate();
-                } catch (Platform::AccessDeniedException^ ade) {
-                    rsyslog(ade->Message);
-                }
+                } catch (Platform::Exception^ e) {
+                    rsyslog("Unhandled Error: " + e->Message);
+				}
             }
         }
 

@@ -17,14 +17,18 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\adu.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\protocol.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\sockexn.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus_test.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\adu.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />

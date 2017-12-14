@@ -2,6 +2,8 @@
 
 #include <cinttypes>
 
+#include "sockexn.hpp"
+
 uint8 modbus_illegal_function(uint8 function_code, bool debug = true);
 uint8 modbus_illegal_address(uint16 address, uint16 start, uint16 amount, bool debug = true);
 uint8 modbus_illegal_address(uint16 address, uint16 count, uint16 start, uint16 amount, bool debug = true);

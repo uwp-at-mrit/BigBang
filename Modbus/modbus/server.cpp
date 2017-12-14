@@ -60,21 +60,18 @@ private:
 
 			if (size < MODBUS_MBAP_LENGTH) {
 				if (size == 0) {
-					rsyslog(L"Client %s has disconnected", id->Data());
+					modbus_protocol_fatal(L"Client %s has disconnected", id->Data());
 				} else {
-					rsyslog(L"MBAP header from client %s is too short(%u < %hu)",
+					modbus_protocol_fatal(L"MBAP header from client %s is too short(%u < %hu)",
 						id->Data(), size, MODBUS_MBAP_LENGTH);
 				}
-
-				cancel_current_task();
 			}
 
 			uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
 			return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 				if (size < pdu_length) {
-					rsyslog(L"PDU data from client %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
-					cancel_current_task();
+					modbus_protocol_fatal(L"PDU data from client %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
 				}
 
 				uint8 function_code = mbin->ReadByte();
@@ -95,6 +92,16 @@ private:
 					modbus_write_exn_adu(mbout, transaction, protocol, unit, function_code, (uint8)(-retcode));
 				}
 
+				return create_task(mbout->StoreAsync());
+			});
+		}).then([=](task<unsigned int> doReplying) {
+			try {
+				unsigned int sent = doReplying.get();
+
+				if (this->server->debug_enabled()) {
+					rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
+				}
+
 				{ // clear dirty bytes
 					unsigned int dirty = mbin->UnconsumedBufferLength;
 
@@ -104,25 +111,6 @@ private:
 							rsyslog(L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
 						}
 					}
-				}
-			});
-		}).then([=](task<void> doHandlingRequest) {
-			try {
-				doHandlingRequest.get();
-				return create_task(mbout->StoreAsync());
-			} catch (Platform::Exception^ e) {
-				rsyslog(e->Message);
-				cancel_current_task();
-			} catch (task_canceled&) {
-				rsyslog(L"Cancel dealing with the indication from %s", id->Data());
-				cancel_current_task();
-			}
-		}).then([=](task<unsigned int> doReplying) {
-			try {
-				unsigned int sent = doReplying.get();
-
-				if (this->server->debug_enabled()) {
-					rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
 				}
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);

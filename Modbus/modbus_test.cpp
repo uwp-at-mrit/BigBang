@@ -22,7 +22,7 @@ public:
 	}
 
 	void on_input_registers(uint16 transaction, uint16* register_values, uint8 count) override {
-		rsyslog(L"Job(%hu) done, read %hhu input register(0x%04X)", transaction, count, register_values[0]);
+		modbus_discard_current_adu(L"<Discarded job(%hu) with %hhu input register(0x%04X)>", transaction, count, register_values[0]);
 	}
 
 public:
@@ -59,17 +59,25 @@ IModbusClient* make_modbus_test_client(Platform::String^ device) {
 	return client;
 }
 
-void modbus_test_client(Platform::String^ device) {
+void modbus_test_client(Platform::String^ device, bool debug) {
 	uint8 coils[] = { 0xCD, 0x6B, 0xB2, 0x0E, 0x1B };
 	uint16 registers[] = { 0x00, 0x00, 0x00 };
 	auto confirmation = new BConfirmation();
 	auto client = make_modbus_test_client(device);
 	uint8 regsize = sizeof(registers_src) / sizeof(uint16);
 	
+	client->enable_debug(debug);
 	client->write_coil(0x0130, true, confirmation);
 	client->write_coils(0x0130, 0x25, coils, confirmation);
 	client->read_discrete_inputs(0x1C4, 0x16, confirmation);
 	client->read_input_registers(0x108, 0x01, confirmation);
 	client->write_registers(0x160, 0x03, registers_src, confirmation);
 	client->write_read_registers(0x160 + 1, regsize - 1, 0x160, regsize, registers, confirmation);
+}
+
+void modbus_test_server() {
+	auto server = make_modbus_test_server();
+	server->listen();
+	
+	modbus_test_client("localhost", false);
 }

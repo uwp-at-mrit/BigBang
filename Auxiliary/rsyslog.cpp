@@ -73,13 +73,7 @@ void rsyslog(Platform::String^ message) {
 }
 
 void rsyslog(const wchar_t *fmt, ...) {
-    static const int DEFAULT_POOL_SIZE = 2048;
-    static wchar_t pool[DEFAULT_POOL_SIZE];
-
-    va_list argl;
-    va_start(argl, fmt);
-    vswprintf(pool, DEFAULT_POOL_SIZE, fmt, argl);
-    va_end(argl);
+	VSWPRINT(pool, 2048, fmt);
 
     rsyslog(ref new Platform::String(pool));
 }

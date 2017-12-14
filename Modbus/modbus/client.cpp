@@ -2,6 +2,8 @@
 
 #include "modbus/client.hpp"
 #include "modbus/protocol.hpp"
+#include "modbus/sockexn.hpp"
+#include "modbus/adu.hpp"
 #include "rsyslog.hpp"
 
 // MMIG: Page 20
@@ -45,7 +47,7 @@ static inline uint16 modbus_write_register_request(IModbusClient* self, uint8* p
 	return self->request(fcode, pdu_data, offset + 5 + NStar, cb);
 }
 
-void modbus_apply_positive_confirmation(IModbusConfirmation* cb, uint16 transaction, uint8 function_code, DataReader^ mbin) {
+static void modbus_apply_positive_confirmation(IModbusConfirmation* cb, uint16 transaction, uint8 function_code, DataReader^ mbin) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
 		static uint8 status[MODBUS_MAX_PDU_LENGTH];
@@ -106,9 +108,6 @@ IModbusClient::IModbusClient(Platform::String^ server, uint16 port, IModbusTrans
     this->device = ref new HostName(server);
     this->service = port.ToString();
 
-    this->socket = ref new StreamSocket();
-    this->socket->Control->KeepAlive = false;
-
 	this->blocking_requests = new std::map<uint16, ModbusTransaction>();
 	this->pending_requests = new std::map<uint16, ModbusTransaction>();
 	this->pdu_pool = new std::queue<uint8*>();
@@ -141,9 +140,17 @@ IModbusClient::~IModbusClient() {
 }
 
 void IModbusClient::connect() {
-	this->mbout = nullptr;
+	if (this->mbout != nullptr) {
+		delete this->socket;
+		delete this->mbin;
+		delete this->mbout;
 
-    // TODO: It seems that this API is bullshit since exceptions may escape from async task.
+		this->mbout = nullptr;
+	}
+
+	this->socket = ref new StreamSocket();
+	this->socket->Control->KeepAlive = false;
+
     create_task(this->socket->ConnectAsync(this->device, this->service)).then([this](task<void> handshaking) {
         try {
             handshaking.get();
@@ -167,7 +174,7 @@ void IModbusClient::connect() {
 				this->blocking_requests->erase(current);
 			};
         } catch (Platform::Exception^ e) {
-            rsyslog(e->Message);
+			this->connect();
         }
     });
 }
@@ -227,48 +234,37 @@ void IModbusClient::wait_process_callback_loop() {
 
 		if (size < MODBUS_MBAP_LENGTH) {
 			if (size == 0) {
-				rsyslog(L"Server %s:%s has lost", this->device->RawName->Data(), this->service->Data());
+				modbus_protocol_fatal(L"Server %s:%s has lost", this->device->RawName->Data(), this->service->Data());
 			} else {
-				rsyslog(L"MBAP header comes from server %s:%s is too short(%u < %hu)",
+				modbus_protocol_fatal(L"MBAP header comes from server %s:%s is too short(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, MODBUS_MBAP_LENGTH);
 			}
-
-			cancel_current_task();
 		}
 
 		uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 			if (size < pdu_length) {
-				rsyslog(L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
+				modbus_protocol_fatal(L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, pdu_length);
-
-				cancel_current_task();
 			}
 
 			auto maybe_transaction = this->pending_requests->find(transaction);
 			if (maybe_transaction == this->pending_requests->end()) {
-				if (this->debug) {
-					rsyslog(L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
-						transaction, this->device->RawName->Data(), this->service->Data());
-				}
-
-				cancel_current_task();
+				modbus_discard_current_adu(this->debug,
+					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
+					transaction, this->device->RawName->Data(), this->service->Data());
 			} else {
 				this->pdu_pool->push(maybe_transaction->second.pdu_data);
 				this->pending_requests->erase(maybe_transaction);
 			}
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
-				if (this->debug) {
-					rsyslog(L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s:%s>",
-						transaction, protocol, length, unit,
-						this->device->RawName->Data(), this->service->Data());
-				}
-
-				cancel_current_task();
+				modbus_discard_current_adu(this->debug,
+					L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s:%s>",
+					transaction, protocol, length, unit, this->device->RawName->Data(), this->service->Data());
 			}
 
 			IModbusConfirmation* cb = maybe_transaction->second.confirmation;
@@ -277,10 +273,9 @@ void IModbusClient::wait_process_callback_loop() {
 			uint8 function_code = (raw_code > 0x80) ? (raw_code - 0x80) : raw_code;
 
 			if (function_code != origin_code) {
-				if (this->debug) {
-					rsyslog(L"<discarded negative confirmation due to non-expected function(0x%02X) comes from %s:%s>",
-						function_code, this->device->RawName->Data(), this->service->Data());
-				}
+				modbus_discard_current_adu(this->debug,
+					L"<discarded negative confirmation due to non-expected function(0x%02X) comes from %s:%s>",
+					function_code, this->device->RawName->Data(), this->service->Data());
 			} else if (this->debug) {
 				rsyslog(L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
 					transaction, protocol, length, unit, function_code,
@@ -310,14 +305,16 @@ void IModbusClient::wait_process_callback_loop() {
 			}
 
 			this->wait_process_callback_loop();
-		} catch (task_canceled&) {
+		} catch (modbus_adu_discarded&) {
 			unsigned int rest = mbin->UnconsumedBufferLength;
-
+			
 			if (rest > 0) {
 				MODBUS_DISCARD_BYTES(mbin, rest);
-			} else {
-				this->connect();
 			}
+			
+			this->wait_process_callback_loop();
+		} catch (task_canceled&) {
+			this->connect();
 		} catch (Platform::Exception^ e) {
 			rsyslog(e->Message);
 			this->connect();
