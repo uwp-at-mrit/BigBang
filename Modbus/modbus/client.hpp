@@ -21,10 +21,15 @@ namespace WarGrey::SCADA {
 		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) = 0;
 		virtual void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) = 0;
 		virtual void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) = 0;
+		virtual void on_queue_registers(uint16 transaction, uint16* queue_registers, uint16 count) = 0;
 
+	public:
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) = 0;
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) = 0;
 		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
+
+	public:
+		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) = 0;
 	};
 
     private class IModbusClient abstract {
@@ -46,6 +51,7 @@ namespace WarGrey::SCADA {
 		
 		virtual uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 read_queues(uint16 address, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) = 0;
 		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) = 0;
@@ -54,6 +60,9 @@ namespace WarGrey::SCADA {
 			uint16 waddr, uint16 wquantity,
 			uint16 raddr, uint16 rquantity, uint16* src,
 			IModbusConfirmation* confirmation) = 0;
+
+	public: // Other
+		virtual uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length, IModbusConfirmation* confirmation) = 0;
 
     protected:
         Windows::Storage::Streams::DataReader^ mbin;
@@ -101,9 +110,9 @@ namespace WarGrey::SCADA {
 		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation) override;
         uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation) override;
 
-
 		uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
 		uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation) override;
+		uint16 read_queues(uint16 address, IModbusConfirmation* confirmation) override;
 		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) override;
 		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation) override;
 		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation) override;
@@ -112,6 +121,9 @@ namespace WarGrey::SCADA {
 			uint16 waddr, uint16 wquantity,
 			uint16 raddr, uint16 rquantity, uint16* src,
 			IModbusConfirmation* confirmation) override;
+
+	public: // Others
+		uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length, IModbusConfirmation* confirmation) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
@@ -123,9 +135,14 @@ namespace WarGrey::SCADA {
 		void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) override {};
 		void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) override {};
 		void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) override {};
+		void on_queue_registers(uint16 transaction, uint16* queue_registers, uint16 count) override {};
 
+	public:
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {};
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) override {};
 		void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {};
+
+	public:
+		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) override {};
 	};
 }

@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 
 		int mask_write_register(uint16 address, uint16 and, uint16 or) override;
 		int write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint8* rwpool) override;
-		int read_fifo_queues(uint16 address, uint8* value_registers) override;
+		int read_queues(uint16 address, uint8* value_registers) override;
 
     public: // Diagnostics
 		const char* access_private_device_identification(uint8 object) override;

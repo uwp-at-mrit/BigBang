@@ -332,7 +332,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 	}; break;
 	case MODBUS_READ_FIFO_QUEUES: { // MAP: Page 40
 		uint16 address = mbin->ReadUInt16();
-		retcode = this->read_fifo_queues(address, response + 4);
+		retcode = this->read_queues(address, response + 4);
 
 		if (retcode >= 0) {
 			if (retcode = 31) {

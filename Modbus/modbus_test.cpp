@@ -25,6 +25,7 @@ public:
 		rsyslog(L"Job(%hu) done, read %hhu input register(0x%04X)", transaction, count, register_values[0]);
 	}
 
+public:
 	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {
 		rsyslog(L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
 	};
@@ -32,6 +33,11 @@ public:
 	void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {
 		rsyslog(L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
+
+public:
+	void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) override {
+		rsyslog(L"Job(%hu, 0x%02X) done, surprisingly", transaction, function_code);
+	}
 };
 
 IModbusServer* make_modbus_test_server() {

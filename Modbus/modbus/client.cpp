@@ -84,6 +84,20 @@ void modbus_apply_positive_confirmation(IModbusConfirmation* cb, uint16 transact
 
 		cb->on_echo_response(transaction, function_code, address, and_mask, or_mask);
 	} break;
+	case MODBUS_READ_FIFO_QUEUES: {                                           // MAP: Page 40
+		static uint16 queues[MODBUS_MAX_PDU_LENGTH];
+		uint16 useless = mbin->ReadUInt16();
+		uint16 count = mbin->ReadUInt16();
+
+		cb->on_queue_registers(transaction, queues, count);
+	} break;
+	default: {
+		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
+		static uint8 count = (uint8)mbin->UnconsumedBufferLength;
+
+		MODBUS_READ_BYTES(mbin, raw_data, count);
+		cb->on_private_response(transaction, function_code, raw_data, count);
+	}
 	}
 }
 
@@ -352,6 +366,15 @@ uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity, IModb
 	return modbus_simple_request(this, MODBUS_READ_INPUT_REGISTERS, address, quantity, confirmation);
 }
 
+uint16 ModbusClient::read_queues(uint16 address, IModbusConfirmation* confirmation) {
+	uint8* pdu_data = this->calloc_pdu();
+
+	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
+
+	return IModbusClient::request(MODBUS_READ_FIFO_QUEUES, pdu_data, 2, confirmation);
+}
+
+
 uint16 ModbusClient::write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation) { // MAP: Page 19
 	return modbus_simple_request(this, MODBUS_WRITE_SINGLE_REGISTER, address, value, confirmation);
 }
@@ -380,6 +403,10 @@ uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16
 
 	return modbus_write_register_request(this, pdu_data, 4,
 		MODBUS_WRITE_AND_READ_REGISTERS, waddr, wquantity, src, confirmation);
+}
+
+uint16 ModbusClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length, IModbusConfirmation* confirmation) {
+	return IModbusClient::request(fcode, request, data_length, confirmation);
 }
 
 /*************************************************************************************************/
