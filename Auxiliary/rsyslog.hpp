@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cwchar>
+#include <cstdarg>
 
 #define VSWPRINT(pool, size, fmt) \
 static wchar_t pool[size]; \

@@ -76,15 +76,18 @@ private:
 
 				uint8 function_code = mbin->ReadByte();
 
+				if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
+					modbus_discard_current_adu(this->server->debug_enabled(),
+						L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s>",
+						transaction, protocol, length, unit, id->Data());
+				}
+
 				if (this->server->debug_enabled()) {
 					rsyslog(L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
 						transaction, protocol, length, unit, function_code, id->Data());
 				}
 
-				int retcode
-					= ((protocol == MODBUS_PROTOCOL) && (unit == MODBUS_TCP_SLAVE))
-					? this->server->request(function_code, mbin, pdu_data)
-					: -MODBUS_EXN_NEGATIVE_ACKNOWLEDGE;
+				int retcode = this->server->request(function_code, mbin, pdu_data);
 
 				if (retcode >= 0) {
 					modbus_write_adu(mbout, transaction, protocol, unit, function_code, pdu_data, retcode);
@@ -114,11 +117,19 @@ private:
 				}
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
+			} catch (modbus_discarded&) {
+				unsigned int dirty = mbin->UnconsumedBufferLength;
+
+				if (dirty > 0) {
+					MODBUS_DISCARD_BYTES(mbin, dirty);
+				}
+
+				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
+			} catch (modbus_error&) {
+				rsyslog(L"Cancel responding to %s", id->Data());
+				delete client;
 			} catch (Platform::Exception^ e) {
 				rsyslog(e->Message);
-				delete client;
-			} catch (task_canceled&) {
-				rsyslog(L"Cancel responding to %s", id->Data());
 				delete client;
 			}
 		});
@@ -208,7 +219,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		} else {
 			retcode = this->read_discrete_inputs(address, quantity, response + 1);
 		}
-			
+
 		if (retcode >= 0) {
 			response[0] = (uint8)retcode;
 			retcode += 1;

@@ -106,18 +106,3 @@ uint8 modbus_get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
 
     return value;
 }
-
-/*************************************************************************************************/
-void modbus_protocol_fatal() {
-	Concurrency::cancel_current_task();
-}
-
-void modbus_protocol_fatal(Platform::String^ message) {
-	rsyslog(message);
-	modbus_protocol_fatal();
-}
-
-void modbus_protocol_fatal(const wchar_t *fmt, ...) {
-	VSWPRINT(pool, 2048, fmt);
-	modbus_protocol_fatal(ref new Platform::String(pool));
-}

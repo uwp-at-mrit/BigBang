@@ -9,6 +9,9 @@ static uint8  inbits_src[]      = { 0xAC,  0xDB,  0x35 };
 static uint16 registers_src[]   = { 0x22B, 0x001, 0x064 };
 static uint16 inregisters_src[] = { 0x0A };
 
+static IModbusServer* server = nullptr;
+static IModbusClient* client = nullptr;
+
 class BConfirmation : public ModbusConfirmation {
 public:
 	void on_discrete_inputs(uint16 transaction, uint8* status, uint8 count) override {
@@ -60,10 +63,14 @@ IModbusClient* make_modbus_test_client(Platform::String^ device, IModbusConfirma
 }
 
 void modbus_test_client(Platform::String^ device, bool debug) {
+	if (client == nullptr) {
+		auto confirmation = new BConfirmation();
+		
+		client = make_modbus_test_client(device, confirmation);
+	}
+
 	uint8 coils[] = { 0xCD, 0x6B, 0xB2, 0x0E, 0x1B };
 	uint16 registers[] = { 0x00, 0x00, 0x00 };
-	auto confirmation = new BConfirmation();
-	auto client = make_modbus_test_client(device, confirmation);
 	uint8 regsize = sizeof(registers_src) / sizeof(uint16);
 	
 	client->enable_debug(debug);
@@ -76,8 +83,10 @@ void modbus_test_client(Platform::String^ device, bool debug) {
 }
 
 void modbus_test_server() {
-	auto server = make_modbus_test_server();
-	server->listen();
+	if (server == nullptr) {
+		server = make_modbus_test_server();
+		server->listen();
+	}
 	
 	modbus_test_client("localhost", false);
 }

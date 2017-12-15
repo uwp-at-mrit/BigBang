@@ -3,7 +3,7 @@
 #include "modbus/client.hpp"
 #include "modbus/protocol.hpp"
 #include "modbus/sockexn.hpp"
-#include "modbus/adu.hpp"
+#include "modbus/exception.hpp"
 #include "rsyslog.hpp"
 
 // MMIG: Page 20
@@ -170,7 +170,8 @@ uint8* IModbusClient::calloc_pdu() {
 }
 
 uint16 IModbusClient::request(uint8 function_code, uint8* data, uint16 size, IModbusConfirmation* confirmation) {
-	ModbusTransaction mt = { function_code, data, size, ((confirmation == nullptr) ? this->fallback_confirmation : confirmation) };
+	IModbusConfirmation* cf = ((confirmation == nullptr) ? this->fallback_confirmation : confirmation);
+	ModbusTransaction mt = { function_code, data, size, cf };
 	uint16 id = this->generator->yield();
 	auto transaction = std::pair<uint16, ModbusTransaction>(id, mt);
 
@@ -284,7 +285,7 @@ void IModbusClient::wait_process_callback_loop() {
 			}
 
 			this->wait_process_callback_loop();
-		} catch (modbus_adu_discarded&) {
+		} catch (modbus_discarded&) {
 			unsigned int rest = mbin->UnconsumedBufferLength;
 			
 			if (rest > 0) {

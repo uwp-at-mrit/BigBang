@@ -60,7 +60,3 @@ void modbus_write_registers(uint16 *dest, uint16 address, uint16 quantity, uint8
 void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src);
 void modbus_set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uint8 *src);
 uint8 modbus_get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count);
-
-void modbus_protocol_fatal();
-void modbus_protocol_fatal(Platform::String^ message);
-void modbus_protocol_fatal(const wchar_t *fmt, ...);
