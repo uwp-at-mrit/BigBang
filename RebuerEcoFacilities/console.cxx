@@ -14,8 +14,6 @@
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
-#include "modbus_test.hpp"
-
 #include "decorator/border.hpp"
 #include "decorator/grid.hpp"
 #include "decorator/pipeline.hpp"
@@ -210,9 +208,6 @@ private:
 Console::Console() : StackPanel() {
     this->Orientation = ::Orientation::Vertical;
     this->Margin = ThicknessHelper::FromUniformLength(4.0);
-
-	//modbus_test_client("172.16.8.1");
-	modbus_test_server();
 }
 
 Console::~Console() {
