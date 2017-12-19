@@ -21,7 +21,7 @@ BorderDecorator::BorderDecorator(bool draw_border, bool draw_enclosing, bool dra
     this->draw_snip_enclosing_box = draw_snip_enclosing;
 }
 
-void BorderDecorator::draw_before(Universe* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void BorderDecorator::draw_before(IUniverse* master, CanvasDrawingSession^ ds, float Width, float Height) {
     if (this->draw_enclosing_box) {
         static auto box_color = make_solid_brush(system_color(UIElementType::GrayText));
         float x, y, width, height;

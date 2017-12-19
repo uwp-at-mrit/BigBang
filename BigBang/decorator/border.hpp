@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 
     public:
         void draw_before(
-            WarGrey::SCADA::Universe* master,
+            WarGrey::SCADA::IUniverse* master,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float Width, float Height) override;
 

@@ -10,10 +10,10 @@
 namespace WarGrey::SCADA {
     private class ISnipInfo abstract {
     public:
-        ISnipInfo(Win2DControl^ master) : master(master) {};
+        ISnipInfo(IUniverse* master) : master(master) {};
 
     public:
-        Win2DControl^ master;
+		IUniverse* master;
     };
 
     private class Snip abstract {

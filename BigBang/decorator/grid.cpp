@@ -20,7 +20,7 @@ GridDecorator::GridDecorator(float w, float h) : width(w), height(h) {
     }
 }
 
-void GridDecorator::draw_before(Universe* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void GridDecorator::draw_before(IUniverse* master, CanvasDrawingSession^ ds, float Width, float Height) {
     static auto grid_color = make_solid_brush(system_color(UIElementType::GrayText));
 
     grid_color->Opacity = 0.64F;

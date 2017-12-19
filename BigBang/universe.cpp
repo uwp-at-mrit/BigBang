@@ -47,7 +47,7 @@ class PlaceHolderDecorator : public IUniverseDecorator {};
 
 class SnipInfo : public WarGrey::SCADA::ISnipInfo {
 public:
-    SnipInfo(Win2DControl^ master) : ISnipInfo(master) {};
+    SnipInfo(IUniverse* master) : ISnipInfo(master) {};
 
 public:
     float x;
@@ -76,7 +76,7 @@ static inline void fill_snip_extent(Snip* snip, SnipInfo* info, float* x, float*
     }
 }
 
-static inline SnipInfo* bind_snip_owership(Win2DControl^ master, Snip* snip, double degrees) {
+static inline SnipInfo* bind_snip_owership(IUniverse* master, Snip* snip, double degrees) {
     auto info = new SnipInfo(master);
     snip->info = info;
 
@@ -104,10 +104,7 @@ static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, f
 }
 
 static inline void unsafe_add_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
-    //listener->before_select(info->master, snip);
     info->selected = true;
-    //info->master->refresh();
-    //listener->after_select(info->master, snip);
 }
 
 static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
@@ -140,7 +137,6 @@ static inline void snip_center_point_offset(Snip* snip, SnipInfo* info, SnipCent
 
 /*************************************************************************************************/
 Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate) {
-    //this->set_pointer_listener(nullptr);
     this->set_decorator(nullptr);
 }
 
@@ -155,7 +151,6 @@ Universe::~Universe() {
         } while (this->head_snip != nullptr);
     }
 
-    //REMOVE(this->listener, refcount);
     this->decorator->destroy();
 }
 
@@ -171,7 +166,7 @@ void Universe::insert(Snip* snip, double degrees, float x, float y) {
         }
         snip->next = this->head_snip;
 
-        auto info = bind_snip_owership(this->master, snip, degrees);
+        auto info = bind_snip_owership(this, snip, degrees);
         unsafe_move_snip_via_info(this, info, x, y, true);
         this->size_cache_invalid();
     }
@@ -179,7 +174,7 @@ void Universe::insert(Snip* snip, double degrees, float x, float y) {
 
 void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this->master) {
+        if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
             float xoff, yoff;
 
@@ -191,7 +186,7 @@ void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
 
 void Universe::move(Snip* snip, float x, float y) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this->master) {
+        if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
             unsafe_move_snip_via_info(this, info, x, y, false);
         }
@@ -235,7 +230,7 @@ Snip* Universe::find_snip(float x, float y) {
 
 void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this->master) {
+        if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
             float xoff, yoff;
 
@@ -287,14 +282,14 @@ void Universe::recalculate_snips_extent_when_invalid() {
             } while (child != this->head_snip);
         }
 
-        this->master->min_width = std::max(this->snips_right, this->preferred_min_width);
-        this->master->min_height = std::max(this->snips_bottom, this->preferred_min_height);
+        this->control->min_width = std::max(this->snips_right, this->preferred_min_width);
+        this->control->min_height = std::max(this->snips_bottom, this->preferred_min_height);
     }
 }
 
 void Universe::add_selected(Snip* snip) {
     if (snip != nullptr) {
-        if ((snip->info != nullptr) && (snip->info->master == this->master)) {
+        if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
             if ((!info->selected) && (this->rubberband_allowed /*&& this->listener->can_select(this, snip)*/)) {
                 unsafe_add_selected(this->listener, snip, info);
@@ -305,7 +300,7 @@ void Universe::add_selected(Snip* snip) {
 
 void Universe::set_selected(Snip* snip) {
     if (snip != nullptr) {
-        if ((snip->info != nullptr) && (snip->info->master == this->master)) {
+        if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
             if ((!info->selected) /*&& (this->listener->can_select(this, snip))*/) {
                 unsafe_set_selected(this->listener, snip, info);
@@ -623,16 +618,16 @@ private:
 };
 
 IUniverse::IUniverse(Panel^ parent, int frame_rate) {
-    this->master = ref new Win2DUniverse(this, frame_rate, parent, nullptr);
+    this->control = ref new Win2DUniverse(this, frame_rate, parent, nullptr);
 }
 
 IUniverse::~IUniverse() {
-    this->master = nullptr;
+    this->control = nullptr;
 }
 
 void IUniverse::resize(float width, float height) {
-    if ((width != this->master->actual_width) || (height != this->master->actual_height)) {
-        this->master->width = width;
-        this->master->height = height;
+    if ((width != this->control->actual_width) || (height != this->control->actual_height)) {
+        this->control->width = width;
+		this->control->height = height;
     }
 }

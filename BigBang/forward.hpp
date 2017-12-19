@@ -1,7 +1,7 @@
 #pragma once
 
 namespace WarGrey::SCADA {
-    class Universe;
+    class IUniverse;
 
     class IUniverseListener;
     class IUniverseDecorator;
