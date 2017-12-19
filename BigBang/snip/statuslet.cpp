@@ -148,7 +148,7 @@ void Statuslet::fill_extent(float x, float y, float* w, float* h) {
     if (statusbar->master != nullptr) {
         float actual_width; 
 
-        statusbar->master->info->master->control->fill_actual_extent(&actual_width, nullptr);
+        statusbar->master->info->master->fill_actual_extent(&actual_width, nullptr);
         SET_BOX(w, actual_width - x);
         SET_BOX(h, status_height);
     }

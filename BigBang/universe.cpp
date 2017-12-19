@@ -631,3 +631,7 @@ void IUniverse::resize(float width, float height) {
 		this->control->height = height;
     }
 }
+
+void IUniverse::fill_actual_extent(float* width, float* height) {
+	this->control->fill_actual_extent(width, height);
+}

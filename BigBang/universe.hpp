@@ -43,8 +43,9 @@ namespace WarGrey::SCADA {
 
     public:
         void resize(float width, float height);
+		void fill_actual_extent(float* width, float* height);
 
-    public:
+    protected:
         WarGrey::SCADA::Win2DControl^ control;
     };
 
