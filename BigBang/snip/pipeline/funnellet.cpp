@@ -69,6 +69,10 @@ Rect Funnellet::get_output_port() {
     return Rect{ this->width * 0.5F - radius, this->height - height, radius * 2.0F, height };
 }
 
+Rect Funnellet::get_motor_port() {
+	return Rect{ 0.0F, 0.0F, this->width, 0.0F };
+}
+
 void Funnellet::update(long long count, long long interval, long long uptime, bool is_slow) {
     auto particles = blank();
     

@@ -114,6 +114,13 @@ Rect LScrewlet::get_output_port() {
     return Rect{ this->width - socket_width, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
 }
 
+Rect LScrewlet::get_motor_port() {
+	float base_y = this->pipe_brush->StartPoint.y;
+	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+
+	return Rect{ base_height, base_y, 0.0F, this->height - base_y };
+}
+
 void LScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
     (*base_x) = x;
     (*body_x) = x + body_off;
@@ -149,6 +156,13 @@ Rect RScrewlet::get_output_port() {
     float socket_width = this->outfit_brush->StartPoint.x;
 
     return Rect{ 0.0F, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
+}
+
+Rect RScrewlet::get_motor_port() {
+	float base_y = this->pipe_brush->StartPoint.y;
+	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+
+	return Rect{ this->width - base_height, base_y, 0.0F, this->height - base_y };
 }
 
 void RScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {

@@ -6,7 +6,7 @@
 #include "snip/pipeline/pipesnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Funnellet : public WarGrey::SCADA::IPipeSnip {
+    private class Funnellet : public WarGrey::SCADA::IMotorSnip {
     public:
         Funnellet(float width, float height = 0.0F,
             double color = 120.0, double saturation = 1.0,
@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
     public:
         Windows::Foundation::Rect get_input_port() override;
         Windows::Foundation::Rect get_output_port() override;
+		Windows::Foundation::Rect get_motor_port() override;
 
     private:
         float width;

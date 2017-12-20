@@ -1,9 +1,10 @@
 ﻿#include <cstdlib>
 #include <algorithm>
 
-#include "rsyslog.hpp"
 #include "console.hxx"
 #include "universe.hpp"
+#include "rsyslog.hpp"
+
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
 #include "snip/motorlet.hpp"
@@ -33,9 +34,38 @@ using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::UI;
 
-inline void connect_pipes(Universe* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+enum BMotor { Funnel = 0, Master, Cleaner, Slave, Count };
+
+static inline Motorlet* construct_motorlet(IUniverse* universe, float width, double degree = 0.0) {
+	Motorlet* motor = new Motorlet(width);
+	universe->insert(motor, degree);
+
+	return motor;
+}
+
+static inline Gaugelet* construct_gaugelet(IUniverse* universe, Platform::String^ caption, int A, int RPM) {
+	Gaugelet* gauge = new Gaugelet(caption, A, RPM);
+	universe->insert(gauge);
+
+	return gauge;
+}
+
+static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
     universe->move_to(pipe, (*x), (*y));
+}
+
+static inline void connect_motor(IUniverse* universe, IMotorSnip* pipe, Motorlet* motor, float x, float y, double fx = 1.0, double fy = 1.0) {
+	// TODO: there must be a more elegant way to deal with rotated motors
+	float motor_width, motor_height, yoff;
+	Rect mport = pipe->get_motor_port();
+
+	motor->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
+	universe->fill_snip_bound(motor, nullptr, &yoff, nullptr, nullptr);
+
+	x = x + mport.X + (mport.Width - motor_width) * float(fx);
+	y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
+	universe->move_to(motor, x, y);
 }
 
 class BSegment : public WarGrey::SCADA::Universe {
@@ -44,7 +74,7 @@ public:
         this->caption = caption;
 
         // this->set_decorator(new BorderDecorator(true, true, true));
-        // this->set_decorator(new PipelineDecorator(true, true));
+        // this->set_decorator(new PipelineDecorator(true, true, true));
         this->set_decorator(new GridDecorator());
     }
 
@@ -64,24 +94,23 @@ public:
         }
 
         { // load gauges
-            this->gauges[0] = new Gaugelet("mastermotor", 100, 100);
-            this->gauges[1] = new Gaugelet("feedingmotor", 200, 100);
-            this->gauges[2] = new Gaugelet("cleanmotor", 10, 20);
-            this->gauges[3] = new Gaugelet("slavemotor", 200, 100);
-
-            for (size_t i = 0; i < sizeof(this->gauges) / sizeof(Gaugelet*); i++) {
-                this->insert(this->gauges[i]);
-            }
+            this->gauges[BMotor::Master]  = construct_gaugelet(this, "mastermotor",  100, 100);
+            this->gauges[BMotor::Funnel]  = construct_gaugelet(this, "feedingmotor", 200, 100);
+            this->gauges[BMotor::Cleaner] = construct_gaugelet(this, "cleanmotor",   10,  20);
+            this->gauges[BMotor::Slave]   = construct_gaugelet(this, "slavemotor",   200, 100);
         }
 
         { // load B Segment
             float pipe_length = 128.0F;
             float pipe_thickness = 32.0F;
+			float master_height = 128.0F;
+			float funnel_width = 42.0F;
+			float slave_height = 80.0F;
 
-            this->master = new LScrewlet(pipe_length, 128.0F, pipe_thickness);
-            this->slave = new LScrewlet(pipe_length, 80.0F, pipe_thickness);
-            this->cleaner = new GlueCleanerlet(pipe_length, 128.0F, pipe_thickness);
-            this->funnel = new Funnellet(42.0F, 0.0F, 120.0, 0.7, 0.3, 0.84);
+            this->master   = new LScrewlet(pipe_length, master_height, pipe_thickness);
+            this->slave    = new LScrewlet(pipe_length, slave_height, pipe_thickness);
+            this->cleaner  = new GlueCleanerlet(pipe_length, master_height, pipe_thickness);
+            this->funnel   = new Funnellet(funnel_width, 0.0F, 120.0, 0.7, 0.3, 0.84);
             this->vibrator = new Vibratorlet(pipe_thickness * 1.618F);
 
             this->insert(this->master);
@@ -101,17 +130,13 @@ public:
             }
 
             this->insert(this->vibrator);
-        }
 
-        { // load motors
-            this->motors[0] = new Motorlet(100);
-            this->motors[1] = new Motorlet(100);
-            this->motors[2] = new Motorlet(100);
-            this->motors[3] = new Motorlet(100);
-
-            for (size_t i = 0; i < sizeof(this->motors) / sizeof(Motorlet*); i++) {
-                this->insert(this->motors[i]);
-            }
+			{ // load motors
+				this->motors[BMotor::Funnel] = construct_motorlet(this, funnel_width, 90.0);
+				this->motors[BMotor::Master] = construct_motorlet(this, master_height * 0.85F);
+				this->motors[BMotor::Slave] = construct_motorlet(this, slave_height * 0.85F);
+				this->motors[BMotor::Cleaner] = construct_motorlet(this, pipe_thickness, 90.0);
+			}
         }
     };
 
@@ -162,8 +187,10 @@ public:
             float current_x = pipe_width * 1.618F;
             float current_y = (height - snip_height) * 0.25F;
             this->move_to(this->funnel, current_x, current_y);
+			connect_motor(this, this->funnel, this->motors[BMotor::Funnel], current_x, current_y, 0.5, 1.0);
 
             connect_pipes(this, this->funnel, this->master, &current_x, &current_y);
+			connect_motor(this, this->master, this->motors[BMotor::Master], current_x, current_y);
             connect_pipes(this, this->master, this->pipes_1st[0], &current_x, &current_y);
 
             for (size_t i = 1; i < pcount_1st; i++) {
@@ -171,7 +198,9 @@ public:
             }
 
             connect_pipes(this, this->pipes_1st[pcount_1st], this->cleaner, &current_x, &current_y);
+			connect_motor(this, this->cleaner, this->motors[BMotor::Cleaner], current_x, current_y, 0.5, 1.0);
             connect_pipes(this, this->cleaner, this->slave, &current_x, &current_y);
+			connect_motor(this, this->slave, this->motors[BMotor::Slave], current_x, current_y);
             connect_pipes(this, this->slave, this->pipes_2nd[0], &current_x, &current_y);
 
             for (size_t i = 1; i < pcount_2nd; i++) {
@@ -189,7 +218,7 @@ public:
 private:
     Statuslet* statusbar;
     Snip* icons[1];
-    Gaugelet* gauges[4];
+    Gaugelet* gauges[BMotor::Count];
 
 private:
     Screwlet* master;
@@ -199,7 +228,7 @@ private:
     Vibratorlet* vibrator;
     Pipelet* pipes_1st[4];
     Pipelet* pipes_2nd[2];
-    Motorlet* motors[4];
+	Motorlet* motors[BMotor::Count];
 
 private:
     Platform::String^ caption;

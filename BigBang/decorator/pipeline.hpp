@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class PipelineDecorator sealed : public WarGrey::SCADA::IUniverseDecorator {
     public:
-        PipelineDecorator(bool draw_inport = true, bool draw_outport = true);
+        PipelineDecorator(bool draw_inport = true, bool draw_outport = true, bool draw_motorport = true);
 
     public:
         void draw_after_snip(
@@ -16,5 +16,6 @@ namespace WarGrey::SCADA {
     private:
         bool draw_inport;
         bool draw_outport;
+		bool draw_motorport;
     };
 }

@@ -56,26 +56,6 @@ public:
     bool selected;
 };
 
-static inline void fill_snip_extent(Snip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
-    snip->fill_extent(info->x, info->y, width, height);
-
-    (*x) = info->x;
-    (*y) = info->y;
-
-    if (info->rotation != 0.0F) {
-        // TODO: the resulting rectangle is inaccurate especially for small snips.
-        auto cx = (*x) + (*width) * 0.5F;
-        auto cy = (*y) + (*height) * 0.5F;
-        auto clip = rectangle((*x), (*y), (*width), (*height));
-        auto enclosing = clip->ComputeBounds(make_float3x2_rotation(info->rotation, float2(cx, cy)));
-
-        (*x) = enclosing.X;
-        (*y) = enclosing.Y;
-        (*width) = enclosing.Width;
-        (*height) = enclosing.Height;
-    }
-}
-
 static inline SnipInfo* bind_snip_owership(IUniverse* master, Snip* snip, double degrees) {
     auto info = new SnipInfo(master);
     snip->info = info;
@@ -87,6 +67,26 @@ static inline SnipInfo* bind_snip_owership(IUniverse* master, Snip* snip, double
     snip->load();
 
     return info;
+}
+
+static inline void unsafe_fill_snip_bound(Snip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
+	snip->fill_extent(info->x, info->y, width, height);
+
+	(*x) = info->x;
+	(*y) = info->y;
+
+	if (info->rotation != 0.0F) {
+		// TODO: the resulting rectangle is inaccurate especially for small snips.
+		auto cx = (*x) + (*width) * 0.5F;
+		auto cy = (*y) + (*height) * 0.5F;
+		auto clip = rectangle((*x), (*y), (*width), (*height));
+		auto enclosing = clip->ComputeBounds(make_float3x2_rotation(info->rotation, float2(cx, cy)));
+
+		(*x) = enclosing.X;
+		(*y) = enclosing.Y;
+		(*width) = enclosing.Width;
+		(*height) = enclosing.Height;
+	}
 }
 
 static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, float x, float y, bool absolute) {
@@ -111,16 +111,13 @@ static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, 
     unsafe_add_selected(listener, snip, info);
 }
 
-static inline void snip_center_point_offset(Snip* snip, SnipInfo* info, SnipCenterPoint cp, float& xoff, float& yoff) {
+static inline void snip_center_point_offset(Snip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
     xoff = 0.0F;
     yoff = 0.0F;
 
     if (cp != SnipCenterPoint::LT) {
-        float width, height, halfw, halfh;
-
-        snip->fill_extent(info->x, info->y, &width, &height);
-        halfw = width / 2.0F;
-        halfh = height / 2.0F;
+		float halfw = width  * 0.5F;
+		float halfh = height * 0.5F;
 
         switch (cp) {
         case SnipCenterPoint::LC:               yoff = halfh;  break;
@@ -176,9 +173,10 @@ void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
-            float xoff, yoff;
+            float sx, sy, sw, sh, xoff, yoff;
 
-            snip_center_point_offset(snip, info, cp, xoff, yoff);
+			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+            snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
             unsafe_move_snip_via_info(this, info, x - xoff, y - yoff, true);
         }
     }
@@ -193,7 +191,6 @@ void Universe::move(Snip* snip, float x, float y) {
     } else if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
-        //this->begin_edit_sequence();
         do {
             SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
@@ -201,7 +198,6 @@ void Universe::move(Snip* snip, float x, float y) {
             }
             child = child->next;
         } while (child != this->head_snip);
-        //this->end_edit_sequence();
     }
 }
 
@@ -214,7 +210,7 @@ Snip* Universe::find_snip(float x, float y) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
-            fill_snip_extent(child, info, &sx, &sy, &sw, &sh);
+            unsafe_fill_snip_bound(child, info, &sx, &sy, &sw, &sh);
 
             if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
                 found = child;
@@ -232,13 +228,29 @@ void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoin
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
-            float xoff, yoff;
+            float sx, sy, sw, sh, xoff, yoff;
 
-            snip_center_point_offset(snip, info, cp, xoff, yoff);
-            if (x != nullptr) (*x) = info->x + xoff;
-            if (y != nullptr) (*y) = info->y + yoff;
+			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+            snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
+            if (x != nullptr) (*x) = sx + xoff;
+            if (y != nullptr) (*y) = sy + yoff;
         }
     }
+}
+
+void Universe::fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) {
+	if ((snip != nullptr) && (snip->info != nullptr)) {
+		if (snip->info->master == this) {
+			SnipInfo* info = SNIP_INFO(snip);
+			float sx, sy, sw, sh;
+			
+			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+			if (x != nullptr) (*x) = sx;
+			if (y != nullptr) (*y) = sy;
+			if (width != nullptr) (*width) = sw;
+			if (height != nullptr) (*height) = sh;
+		}
+	}
 }
 
 void Universe::fill_snips_bounds(float* x, float* y, float* width, float* height) {
@@ -272,7 +284,7 @@ void Universe::recalculate_snips_extent_when_invalid() {
 
             do {
                 SnipInfo* info = SNIP_INFO(child);
-                fill_snip_extent(child, info, &rx, &ry, &width, &height);
+                unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
                 this->snips_left = std::min(this->snips_left, rx);
                 this->snips_top = std::min(this->snips_top, ry);
                 this->snips_right = std::max(this->snips_right, rx + width);

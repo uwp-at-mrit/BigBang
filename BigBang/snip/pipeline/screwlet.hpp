@@ -3,7 +3,7 @@
 #include "snip/pipeline/pipesnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Screwlet : public WarGrey::SCADA::IPipeSnip {
+    private class Screwlet : public WarGrey::SCADA::IMotorSnip {
     public:
         Screwlet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
 
@@ -46,6 +46,7 @@ namespace WarGrey::SCADA {
     public:
         Windows::Foundation::Rect get_input_port() override;
         Windows::Foundation::Rect get_output_port() override;
+		Windows::Foundation::Rect get_motor_port() override;
 
     protected:
         Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_fitting(float rx, float ry) override;
@@ -63,6 +64,7 @@ namespace WarGrey::SCADA {
     public:
         Windows::Foundation::Rect get_input_port() override;
         Windows::Foundation::Rect get_output_port() override;
+		Windows::Foundation::Rect get_motor_port() override;
 
     protected:
         Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_fitting(float rx, float ry) override;

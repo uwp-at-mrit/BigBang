@@ -87,6 +87,13 @@ Rect GlueCleanerlet::get_output_port() {
     return Rect{ this->pipe_brush->StartPoint.x, this->height, this->pipe_thickness, 0.0F };
 }
 
+Rect GlueCleanerlet::get_motor_port() {
+	float hat_x = this->hat_brush->StartPoint.x;
+	float hat_width = this->hat_brush->EndPoint.x - hat_x;
+	
+	return Rect{ hat_x, 0.0, hat_width, 0.0F };
+}
+
 void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float body_y = y + this->hatbody_brush->StartPoint.y;
 

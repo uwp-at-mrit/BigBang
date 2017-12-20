@@ -3,7 +3,7 @@
 #include "snip/pipeline/pipesnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class GlueCleanerlet : public WarGrey::SCADA::IPipeSnip {
+    private class GlueCleanerlet : public WarGrey::SCADA::IMotorSnip {
     public:
         GlueCleanerlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
@@ -17,6 +17,7 @@ namespace WarGrey::SCADA {
     public:
         Windows::Foundation::Rect get_input_port() override;
         Windows::Foundation::Rect get_output_port() override;
+		Windows::Foundation::Rect get_motor_port() override;
 
     private:
         float width;
