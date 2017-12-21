@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
     public:
         Funnellet(float width, float height = 0.0F,
             double color = 120.0, double saturation = 1.0,
-            double dark_lightness = 4.0, double light_lightness = 0.8);
+            double dark_lightness = 0.4, double light_lightness = 0.8);
 
     public:
         void load() override;

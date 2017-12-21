@@ -10,6 +10,7 @@
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
+#include "snip/arrowlet.hpp"
 #include "snip/pipeline/funnellet.hpp"
 #include "snip/pipeline/pipelet.hpp"
 #include "snip/pipeline/screwlet.hpp"
@@ -50,6 +51,20 @@ static inline Gaugelet* construct_gaugelet(IUniverse* universe, Platform::String
 	return gauge;
 }
 
+static inline DoubleArrowlet* construct_water_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+	DoubleArrowlet* waterpipe = new DoubleArrowlet(length, ArrowPosition::End, 209.60, 1.000, 0.559);
+	universe->insert(waterpipe, degrees);
+
+	return waterpipe;
+}
+
+static inline DoubleArrowlet* construct_oil_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+	DoubleArrowlet* oilpipe = new DoubleArrowlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
+	universe->insert(oilpipe, degrees);
+
+	return oilpipe;
+}
+
 static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
     universe->move_to(pipe, (*x), (*y));
@@ -86,12 +101,14 @@ public:
         }
 
         { // load icons
-            this->icons[0] = new StorageTanklet(80.0F);
+			this->icons[0] = new StorageTanklet(80.0F);
             
-            for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
-                this->insert(this->icons[i]);
-            }
-        }
+			for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
+				if (this->icons[i] != nullptr) {
+					this->insert(this->icons[i]);
+				}
+			}
+		}
 
         { // load gauges
             this->gauges[BMotor::Master]  = construct_gaugelet(this, "mastermotor",  100, 100);
@@ -106,6 +123,13 @@ public:
 			float master_height = 128.0F;
 			float funnel_width = 42.0F;
 			float slave_height = 80.0F;
+
+			{ // load water and oil pipes
+				this->motors[BMotor::Funnel] = construct_motorlet(this, funnel_width, 90.0);
+				this->motors[BMotor::Master] = construct_motorlet(this, master_height * 0.85F);
+				this->motors[BMotor::Slave] = construct_motorlet(this, slave_height * 0.85F);
+				this->motors[BMotor::Cleaner] = construct_motorlet(this, pipe_thickness, 90.0);
+			}
 
             this->master   = new LScrewlet(pipe_length, master_height, pipe_thickness);
             this->slave    = new LScrewlet(pipe_length, slave_height, pipe_thickness);
@@ -152,14 +176,18 @@ public:
             float icon_y = console_y * 1.5F;
 
             for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
-                this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
-                icon_hmax = max(snip_height, icon_hmax);
+				if (this->icons[i] != nullptr) {
+					this->icons[i]->fill_extent(icon_x, icon_y, nullptr, &snip_height);
+					icon_hmax = max(snip_height, icon_hmax);
+				}
             }
 
             for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
-                this->icons[i]->fill_extent(icon_x, icon_y, &snip_width, &snip_height);
-                this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
-                icon_x += (snip_width + icon_gapsize);
+				if (this->icons[i] != nullptr) {
+					this->icons[i]->fill_extent(icon_x, icon_y, &snip_width, &snip_height);
+					this->move_to(this->icons[i], icon_x, icon_y + (icon_hmax - snip_height) * 0.5F);
+					icon_x += (snip_width + icon_gapsize);
+				}
             }
         }
 
@@ -229,6 +257,8 @@ private:
     Pipelet* pipes_1st[4];
     Pipelet* pipes_2nd[2];
 	Motorlet* motors[BMotor::Count];
+	DoubleArrowlet* oil_pipes[5];
+	DoubleArrowlet* water_pipes[5];
 
 private:
     Platform::String^ caption;

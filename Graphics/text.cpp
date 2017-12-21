@@ -1,5 +1,7 @@
 #include "text.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::Foundation;
 
 using namespace Microsoft::Graphics::Canvas;
