@@ -36,7 +36,7 @@ static void syslog(Platform::String^ message) {
     Platform::String^ timestamp = update_nowstamp();
 
     if (client == nullptr) {
-        auto loghost = ref new HostName("172.16.8.1");
+        auto loghost = ref new HostName("172.16.1.1");
         
         client = ref new DatagramSocket();
         timestamps.push(timestamp);

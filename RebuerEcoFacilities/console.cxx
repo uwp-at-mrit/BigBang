@@ -70,13 +70,13 @@ static inline void connect_motor(IUniverse* universe, IMotorSnip* pipe, Motorlet
 
 class BSegment : public WarGrey::SCADA::Universe {
 public:
-    BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
-        this->caption = caption;
+	BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
+		this->caption = caption;
 
         // this->set_decorator(new BorderDecorator(true, true, true));
         // this->set_decorator(new PipelineDecorator(true, true, true));
-        this->set_decorator(new GridDecorator());
-    }
+		this->set_decorator(new GridDecorator());
+	}
 
 public:
     void load(CanvasCreateResourcesEventArgs^ args, float width, float height) override {
