@@ -19,7 +19,7 @@ namespace WarGrey::SCADA {
     private:
 		WarGrey::SCADA::ArrowPosition position;
 		float length;
-		float height;
+		float thickness;
 		float arrow_size;
 		float arrowhead_size;
 		float scale_width;

@@ -127,7 +127,7 @@ CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size
 	float alignoff = thickness * 1.0F;
 	float wingsize = arrowheadsize * 0.5F;
 	float out_y = y + wingsize;
-	float in_y = out_y + wingsize;
+	float in_y = out_y + wingsize + 1.0F;
 	float end_x = x + arrow_size;
 
 	arrow->BeginFigure(x + arrowheadsize, y);

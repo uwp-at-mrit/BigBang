@@ -322,23 +322,23 @@ void Universe::set_selected(Snip* snip) {
 }
 
 void Universe::no_selected() {
-    if (this->head_snip != nullptr) {
-        Snip* child = this->head_snip;
+	if (this->head_snip != nullptr) {
+		Snip* child = this->head_snip;
 
         //this->begin_edit_sequence();
-        do {
-            SnipInfo* info = SNIP_INFO(child);
+		do {
+			SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
-                //this->listener->before_deselect(this, child);
-                info->selected = false;
-                //this->refresh();
-                //this->listener->after_deselect(this, child);
-            }
+				//this->listener->before_deselect(this, child);
+				info->selected = false;
+				//this->refresh();
+				//this->listener->after_deselect(this, child);
+			}
 
-            child = child->next;
-        } while (child != this->head_snip);
+			child = child->next;
+		} while (child != this->head_snip);
         //this->end_edit_sequence();
-    }
+	}
 }
 
 /************************************************************************************************/
@@ -367,38 +367,38 @@ void Universe::on_pointer_moved(UIElement^ control, PointerRoutedEventArgs^ e) {
 }
 
 void Universe::on_pointer_pressed(UIElement^ control, PointerRoutedEventArgs^ e) {
-    if ((!e->Handled) && (control->CapturePointer(e->Pointer))) {
-        auto ppt = e->GetCurrentPoint(control);
-        float x = ppt->Position.X;
-        float y = ppt->Position.Y;
+	if ((!e->Handled) && (control->CapturePointer(e->Pointer))) {
+		auto ppt = e->GetCurrentPoint(control);
+		float x = ppt->Position.X;
+		float y = ppt->Position.Y;
 
-        if (ppt->Properties->IsLeftButtonPressed) {
-            Snip* snip = this->find_snip(x, y);
+		if (ppt->Properties->IsLeftButtonPressed) {
+			Snip* snip = this->find_snip(x, y);
 
-            this->last_pointer_x = x;
-            this->last_pointer_y = y;
+			this->last_pointer_x = x;
+			this->last_pointer_y = y;
 
-            if (snip == nullptr) {
-                this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-                this->no_selected();
-            } else {
-                this->rubberband_y = nullptr;
-                SnipInfo* info = SNIP_INFO(snip);
-                if ((!info->selected) /*&& this->listener->can_select(this, snip)*/) {
-                    if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
-                        if (this->rubberband_allowed) {
-                            unsafe_add_selected(this->listener, snip, info);
-                        }
-                    } else {
-                        unsafe_set_selected(this->listener, snip, info);
-                    }
-                }
-            }
-        } else {
-            this->no_selected();
-        }
+			if (snip == nullptr) {
+				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
+				this->no_selected();
+			} else {
+				this->rubberband_y = nullptr;
+				SnipInfo* info = SNIP_INFO(snip);
+				if ((!info->selected) /*&& this->listener->can_select(this, snip)*/) {
+					if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
+						if (this->rubberband_allowed) {
+							unsafe_add_selected(this->listener, snip, info);
+						}
+					} else {
+						unsafe_set_selected(this->listener, snip, info);
+					}
+				}
+			}
+		} else {
+			this->no_selected();
+		}
 
-        e->Handled = true;
+		e->Handled = true;
     }
 }
 
@@ -474,8 +474,8 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 } else {
-                    auto cx = info->x + width * 0.5F;
-                    auto cy = info->y + height * 0.5F;
+                    float cx = info->x + width * 0.5F;
+                    float cy = info->y + height * 0.5F;
 
                     ds->Transform = make_float3x2_rotation(info->rotation, float2(cx, cy));
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
