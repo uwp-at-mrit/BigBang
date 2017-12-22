@@ -10,7 +10,7 @@
 #include "snip/motorlet.hpp"
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
-#include "snip/arrowlet.hpp"
+#include "snip/liquidlet.hpp"
 #include "snip/pipeline/funnellet.hpp"
 #include "snip/pipeline/pipelet.hpp"
 #include "snip/pipeline/screwlet.hpp"
@@ -51,15 +51,15 @@ static inline Gaugelet* construct_gaugelet(IUniverse* universe, Platform::String
 	return gauge;
 }
 
-static inline DoubleArrowlet* construct_water_pipe(IUniverse* universe, float length, double degrees = 0.0) {
-	DoubleArrowlet* waterpipe = new DoubleArrowlet(length, ArrowPosition::End, 209.60, 1.000, 0.559);
+static inline Liquidlet* construct_water_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+	Liquidlet* waterpipe = new Liquidlet(length, ArrowPosition::End, 209.60, 1.000, 0.559);
 	universe->insert(waterpipe, degrees);
 
 	return waterpipe;
 }
 
-static inline DoubleArrowlet* construct_oil_pipe(IUniverse* universe, float length, double degrees = 0.0) {
-	DoubleArrowlet* oilpipe = new DoubleArrowlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
+static inline Liquidlet* construct_oil_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+	Liquidlet* oilpipe = new Liquidlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
 	universe->insert(oilpipe, degrees);
 
 	return oilpipe;
@@ -88,9 +88,9 @@ public:
 	BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
 		this->caption = caption;
 
-        // this->set_decorator(new BorderDecorator(true, true, true));
+        this->set_decorator(new BorderDecorator(true, true, true));
         // this->set_decorator(new PipelineDecorator(true, true, true));
-		this->set_decorator(new GridDecorator());
+		// this->set_decorator(new GridDecorator());
 	}
 
 public:
@@ -101,8 +101,10 @@ public:
         }
 
         { // load icons
-			this->icons[0] = new StorageTanklet(80.0F);
-            
+			// this->icons[0] = new StorageTanklet(80.0F);
+
+			this->icons[0] = new Liquidlet(128.0F);
+
 			for (size_t i = 0; i < sizeof(this->icons) / sizeof(Snip*); i++) {
 				if (this->icons[i] != nullptr) {
 					this->insert(this->icons[i]);
@@ -125,10 +127,10 @@ public:
 			float slave_height = 80.0F;
 
 			{ // load water and oil pipes
-				this->motors[BMotor::Funnel] = construct_motorlet(this, funnel_width, 90.0);
-				this->motors[BMotor::Master] = construct_motorlet(this, master_height * 0.85F);
-				this->motors[BMotor::Slave] = construct_motorlet(this, slave_height * 0.85F);
-				this->motors[BMotor::Cleaner] = construct_motorlet(this, pipe_thickness, 90.0);
+				//this->motors[BMotor::Funnel] = construct_motorlet(this, funnel_width, 90.0);
+				//this->motors[BMotor::Master] = construct_motorlet(this, master_height * 0.85F);
+				//this->motors[BMotor::Slave] = construct_motorlet(this, slave_height * 0.85F);
+				//this->motors[BMotor::Cleaner] = construct_motorlet(this, pipe_thickness, 90.0);
 			}
 
             this->master   = new LScrewlet(pipe_length, master_height, pipe_thickness);
@@ -257,8 +259,8 @@ private:
     Pipelet* pipes_1st[4];
     Pipelet* pipes_2nd[2];
 	Motorlet* motors[BMotor::Count];
-	DoubleArrowlet* oil_pipes[5];
-	DoubleArrowlet* water_pipes[5];
+	Liquidlet* oil_pipes[5];
+	Liquidlet* water_pipes[5];
 
 private:
     Platform::String^ caption;

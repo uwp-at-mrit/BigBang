@@ -121,6 +121,32 @@ CanvasGeometry^ rotate_rectangle(float w, float h, double d, float cx, float cy)
     return rotate_rectangle(0.0F, 0.0F, w, h, d, cx, cy);
 }
 
+CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size, float thickness, CanvasStrokeStyle^ style) {
+	auto arrow = ref new CanvasPathBuilder(shared_ds);
+	float arrowheadsize = head_size * thickness;
+	float alignoff = thickness * 1.0F;
+	float wingsize = arrowheadsize * 0.5F;
+	float out_y = y + wingsize;
+	float in_y = out_y + wingsize;
+	float end_x = x + arrow_size;
+
+	arrow->BeginFigure(x + arrowheadsize, y);
+	arrow->AddLine(x + alignoff, out_y);
+	arrow->AddLine(end_x, out_y);
+	arrow->EndFigure(CanvasFigureLoop::Open);
+
+	arrow->BeginFigure(x, in_y);
+	arrow->AddLine(end_x - alignoff, in_y);
+	arrow->AddLine(end_x - arrowheadsize, in_y + wingsize);
+	arrow->EndFigure(CanvasFigureLoop::Open);
+
+	return geometry_stroke(CanvasGeometry::CreatePath(arrow), thickness);
+}
+
+CanvasGeometry^ double_arrow(float length, float arrowhead_size, float thickness, CanvasStrokeStyle^ style) {
+	return double_arrow(0.0F, 0.0F, length, arrowhead_size, thickness, style);
+}
+
 /*************************************************************************************************/
 CanvasGeometry^ cylinder_tb_surface(float x, float y, float rx, float ry, float height) {
     auto surface = ref new CanvasPathBuilder(shared_ds);
