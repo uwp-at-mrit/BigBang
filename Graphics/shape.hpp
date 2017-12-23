@@ -48,11 +48,11 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rotate_rectangle(
     float x, float y, float width, float height, double degrees, float centerX, float centerY);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ double_arrow(
-	float x, float y, float length, float arrowhead_size, float thickness = 1.0F,
+	float x, float y, float length, float arrowhead_size, float spacing = -2.0F, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ double_arrow(
-	float length, float arrowhead_size = 4.0F, float thickness = 1.0F,
+	float length, float arrowhead_size = 4.0F, float spacing = -1.0F, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 /*************************************************************************************************/

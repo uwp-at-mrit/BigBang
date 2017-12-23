@@ -11,6 +11,8 @@ using namespace Windows::UI::Text;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
+static const float arrow_xoff = 2.0F;
+
 Liquidlet::Liquidlet(float length, ArrowPosition position, double color, double saturation, double lightness) {
 	this->length = length;
 	this->position = position;
@@ -38,15 +40,17 @@ void Liquidlet::fill_extent(float x, float y, float* w, float* h) {
 void Liquidlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	CanvasTextLayout^ in_scale = make_text_layout(this->in_temperature.ToString(), this->font);
 	CanvasTextLayout^ out_scale = make_text_layout(this->out_temperature.ToString(), this->font);
-	float pipe_height = this->thickness - this->scale_height * 2.0F;
+	float pipe_region_height = this->thickness - this->scale_height * 2.0F;
+	float pipe_thickness = pipe_region_height * 0.25F + 1.0F;
 	float in_scale_xoff = this->arrowhead_size + (this->scale_width - in_scale->LayoutBounds.Width) * 0.5F;
 	float out_scale_xoff = this->arrowhead_size + (this->scale_width - out_scale->LayoutBounds.Width) * 0.5F;
-	float arrow_xoff = 2.0F;
 	float arrow_x = x + ((this->position == ArrowPosition::Start) ? arrow_xoff : (this->length - this->arrow_size - arrow_xoff));
-	float arrow_y = y + this->scale_height;
+	float out_pipe_y = y + this->scale_height;
+	float in_pipe_y = out_pipe_y + pipe_region_height - pipe_thickness - 1.0F;
 
-	ds->DrawTextLayout(out_scale, arrow_x + out_scale_xoff, arrow_y + pipe_height, Colors::Yellow);
-	ds->FillRectangle(x, arrow_y, this->length, pipe_height, this->pipe_brush);
-	ds->DrawCachedGeometry(this->arrow, arrow_x, arrow_y, this->arrow_brush);
+	ds->DrawTextLayout(out_scale, arrow_x + out_scale_xoff, out_pipe_y + pipe_region_height, Colors::Yellow);
+	ds->FillRectangle(x, out_pipe_y, this->length, pipe_thickness, this->pipe_brush);
+	ds->FillRectangle(x, in_pipe_y, this->length, pipe_thickness, this->pipe_brush);
+	ds->DrawCachedGeometry(this->arrow, arrow_x, out_pipe_y, this->arrow_brush);
 	ds->DrawTextLayout(in_scale, arrow_x + in_scale_xoff, y, Colors::Yellow);
 }

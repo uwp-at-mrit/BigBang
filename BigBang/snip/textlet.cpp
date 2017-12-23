@@ -12,7 +12,7 @@ using namespace Windows::UI::Text;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-Textlet::Textlet(const wchar_t *fmt, ...) {
+Labellet::Labellet(const wchar_t *fmt, ...) {
     static const int DEFAULT_POOL_SIZE = 1024;
     static wchar_t wpool[DEFAULT_POOL_SIZE];
 
@@ -36,25 +36,25 @@ Textlet::Textlet(const wchar_t *fmt, ...) {
     if (pool != wpool) delete[] pool;
 }
 
-Textlet::Textlet(Platform::String^ content) {
+Labellet::Labellet(Platform::String^ content) {
     this->change_text(content);
 }
 
-Textlet::~Textlet() {}
+Labellet::~Labellet() {}
 
-void Textlet::change_text(Platform::String^ content) {
+void Labellet::change_text(Platform::String^ content) {
     this->content = content;
     if (this->label_font == nullptr) {
         this->label_font = make_text_format();
     }
 }
 
-void Textlet::fill_extent(float x, float y, float* w, float* h) {
+void Labellet::fill_extent(float x, float y, float* w, float* h) {
     TextExtent ts = get_text_extent(content, label_font);
 
     SET_VALUES(w, ts.width, h, ts.height);
 };
 
-void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->DrawText(content, x, y, Colors::Snow, label_font);
 }

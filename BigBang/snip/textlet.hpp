@@ -3,12 +3,14 @@
 #include "snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Textlet : public WarGrey::SCADA::Snip {
-    public:
-        Textlet(const wchar_t* fmt, ...);
-        Textlet(Platform::String^ content = "");
+	private class Textlet : public WarGrey::SCADA::Snip {};
 
-        ~Textlet() noexcept;
+    private class Labellet : public WarGrey::SCADA::Textlet {
+    public:
+        Labellet(const wchar_t* fmt, ...);
+        Labellet(Platform::String^ content = "");
+
+        ~Labellet() noexcept;
 
     public:
         void change_text(Platform::String^ content);

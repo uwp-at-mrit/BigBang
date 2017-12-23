@@ -91,8 +91,8 @@ public:
 		this->caption = caption;
 
         // this->set_decorator(new BorderDecorator(true, true, true));
-        this->set_decorator(new PipelineDecorator(true, true, true));
-		// this->set_decorator(new GridDecorator());
+        // this->set_decorator(new PipelineDecorator(true, true, true));
+		this->set_decorator(new GridDecorator());
 	}
 
 public:
