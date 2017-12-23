@@ -159,18 +159,19 @@ void Statuslet::update(long long count, long long interval, long long uptime, bo
 }
 
 void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto ipv4 = ref new CanvasTextLayout(ds, statusbar->ipv4, this->label_font, 0.0f, 0.0f);
+    auto timestamp = ref new CanvasTextLayout(ds, statusbar->timestamp, this->label_font, 0.0f, 0.0f);
     float width = Width / 7.0F;
+	float timestamp_xoff = (Width - timestamp->LayoutBounds.Width);
 
-    ds->DrawText(speak(this->caption),     x + width * 0.0F, y, Colors::Yellow, this->label_font);
-    ds->DrawText(statusbar->timestamp,     x + width * 1.0F, y, Colors::Yellow, this->label_font);
-    ds->DrawText(statusbar->powercapacity, x + width * 2.0F, y, Colors::Green,  this->label_font);
-    ds->DrawText(statusbar->wifi_strength, x + width * 3.0F, y, Colors::Yellow, this->label_font);
-    ds->DrawText(statusbar->storage,       x + width * 5.0F, y, Colors::Yellow, this->label_font);
-    ds->DrawTextLayout(ipv4, x + (Width - ipv4->LayoutBounds.Width), y, Colors::White);
+    ds->DrawText(speak(this->caption),     x + width * 0.0F,   y, Colors::Yellow, this->label_font);
+    ds->DrawText(statusbar->ipv4,          x + width * 1.0F,   y, Colors::White,  this->label_font);
+    ds->DrawText(statusbar->powercapacity, x + width * 3.0F,   y, Colors::Green,  this->label_font);
+    ds->DrawText(statusbar->wifi_strength, x + width * 4.0F,   y, Colors::Yellow, this->label_font);
+    ds->DrawText(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow, this->label_font);
+    ds->DrawTextLayout(timestamp,          x + timestamp_xoff, y, Colors::Yellow);
 
     { // highlight PLC Status
-        auto plc_x = x + width * 4.0F;
+        auto plc_x = x + width * 2.0F;
         ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, this->label_font);
         if (this->plc_connected) {
             ds->DrawText(speak("connected"), plc_x + status_prefix_width, y, Colors::Green, this->label_font);
