@@ -24,6 +24,6 @@ namespace WarGrey::SCADA {
         virtual void draw_after_snip(
             WarGrey::SCADA::Snip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float x, float y, float hidth, float height) {};
+            float x, float y, float width, float height) {};
     };
 }

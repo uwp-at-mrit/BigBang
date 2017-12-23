@@ -208,10 +208,12 @@
     <PRIResource Include="Localization\zh-CN\tongue.resw" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="B.cpp" />
     <ClCompile Include="RebuerEcoFacilities.cxx" />
     <ClCompile Include="console.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="B.hpp" />
     <ClInclude Include="console.hxx" />
   </ItemGroup>
   <ItemGroup>

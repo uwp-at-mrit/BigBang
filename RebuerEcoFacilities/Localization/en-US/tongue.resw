@@ -171,4 +171,7 @@
   <data name="storagetank" xml:space="preserve">
     <value>Storage Tank</value>
   </data>
+  <data name="B1" xml:space="preserve">
+    <value>B1</value>
+  </data>
 </root>

@@ -3,7 +3,7 @@
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
-    private class GridDecorator sealed : public WarGrey::SCADA::IUniverseDecorator {
+    private class GridDecorator : public WarGrey::SCADA::IUniverseDecorator {
     public:
         GridDecorator(float grid_width = 16.0F, float grid_height = 0.0F);
 

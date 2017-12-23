@@ -17,6 +17,6 @@ namespace WarGrey::SCADA {
         ~Console();
 
     private:
-        WarGrey::SCADA::Universe* universe;
+        WarGrey::SCADA::IUniverse* universe;
     };
 }

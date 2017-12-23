@@ -36,9 +36,9 @@ void BorderDecorator::draw_before(IUniverse* master, CanvasDrawingSession^ ds, f
     }
 }
 
-void BorderDecorator::draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float w, float h) {
+void BorderDecorator::draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
     if (this->draw_snip_enclosing_box) {
         static auto box_color = make_solid_brush(system_color(UIElementType::Highlight));
-        ds->DrawRectangle(x, y, w, h, box_color, 1.0F);
+        ds->DrawRectangle(x, y, width, height, box_color, 1.0F);
     }
 }

@@ -20,7 +20,7 @@ PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out, bool draw_moto
 	this->draw_motorport = draw_motor;
 }
 
-void PipelineDecorator::draw_after_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float w, float h) {
+void PipelineDecorator::draw_after_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
     if (this->draw_inport || this->draw_outport) {
        IPipeSnip* pipe = dynamic_cast<IPipeSnip*>(self);
 

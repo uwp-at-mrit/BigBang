@@ -171,4 +171,7 @@
   <data name="storagetank" xml:space="preserve">
     <value>储料罐</value>
   </data>
+  <data name="B1" xml:space="preserve">
+    <value>B1</value>
+  </data>
 </root>

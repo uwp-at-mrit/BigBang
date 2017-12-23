@@ -3,7 +3,7 @@
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
-    private class BorderDecorator sealed : public WarGrey::SCADA::IUniverseDecorator {
+    private class BorderDecorator : public WarGrey::SCADA::IUniverseDecorator {
     public:
         BorderDecorator(bool draw_border = true, bool draw_enclosing = false, bool draw_snip_enclosing = false);
 
