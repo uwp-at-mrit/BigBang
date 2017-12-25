@@ -75,8 +75,10 @@ static inline void place_motor(IUniverse* universe, IMotorSnip* pipe, Motorlet* 
 class BConsole : public IUniverseDecorator {
 public:
 	BConsole(Platform::String^ caption, Color& caption_color, float fontsize) {
+		auto font = make_text_format("Consolas", fontsize);
+
 		this->color = make_solid_brush(caption_color);
-		this->caption = make_text_layout(speak(caption), make_text_format(fontsize));
+		this->caption = make_text_layout(speak(caption), font);
 	};
 
 public:

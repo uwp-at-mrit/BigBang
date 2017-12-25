@@ -30,13 +30,22 @@ CanvasTextLayout^ make_vertical_layout(Platform::String^ para, CanvasTextFormat^
 }
 
 CanvasTextFormat^ make_text_format(float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
-    auto font_config = ref new CanvasTextFormat();
+    return make_text_format(nullptr, size, wrapping, align);
+}
 
-    font_config->WordWrapping = wrapping;
-    font_config->HorizontalAlignment = align;
-    font_config->FontSize = size;
+CanvasTextFormat^ make_text_format(Platform::String^ face, float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
+	auto font_config = ref new CanvasTextFormat();
 
-    return font_config;
+	if (face != nullptr) {
+		font_config->FontFamily = face;
+	}
+
+	font_config->WordWrapping = wrapping;
+	font_config->HorizontalAlignment = align;
+	font_config->FontSize = size;
+
+
+	return font_config;
 }
 
 TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ font, bool trim) {

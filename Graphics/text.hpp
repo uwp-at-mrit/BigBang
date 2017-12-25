@@ -26,6 +26,11 @@ Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_text_format(
     Microsoft::Graphics::Canvas::Text::CanvasWordWrapping wrapping = Microsoft::Graphics::Canvas::Text::CanvasWordWrapping::NoWrap,
     Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align = Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment::Left);
 
+Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_text_format(
+	Platform::String^ face, float size = 12.0F,
+	Microsoft::Graphics::Canvas::Text::CanvasWordWrapping wrapping = Microsoft::Graphics::Canvas::Text::CanvasWordWrapping::NoWrap,
+	Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align = Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment::Left);
+
 WarGrey::SCADA::TextExtent get_text_extent(
     Platform::String^ message,
     Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
