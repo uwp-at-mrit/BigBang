@@ -130,7 +130,7 @@ public:
 		float slave_height = 80.0F;
 
 		{ // load water and oil pipes
-			this->water_pipes[0] = load_water_pipe(this->bench, pipe_length, 0);
+			this->water_pipes[0] = load_water_pipe(this->bench, pipe_length, 0.0);
 			for (unsigned char i = 1; i < SNIPS_ARITY(this->water_pipes); i++) {
 				this->water_pipes[i] = load_water_pipe(this->bench, pipe_length, 90.0);
 			}
