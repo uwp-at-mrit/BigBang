@@ -51,6 +51,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
@@ -110,6 +113,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
       <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
+      <Filter>interaction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

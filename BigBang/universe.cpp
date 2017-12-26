@@ -9,8 +9,10 @@
 #include "system.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
+
 #include "snip/snip.hpp"
 #include "decorator/decorator.hpp"
+#include "interaction/listener.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -42,7 +44,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 ref class Win2DUniverse;
 
-//class PlaceHolderListener : public IUniverseListener {};
+class PlaceHolderListener : public IUniverseListener {};
 class PlaceHolderDecorator : public IUniverseDecorator {};
 
 class SnipInfo : public WarGrey::SCADA::ISnipInfo {
@@ -103,12 +105,15 @@ static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, f
     }
 }
 
-static inline void unsafe_add_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
-    info->selected = true;
+static inline void unsafe_add_selected(IUniverse* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
+	listener->before_select(master, snip, true);
+	info->selected = true;
+	listener->after_select(master, snip, true);
 }
 
-static inline void unsafe_set_selected(IUniverseListener* listener, Snip* snip, SnipInfo* info) {
-    unsafe_add_selected(listener, snip, info);
+static inline void unsafe_set_selected(IUniverse* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
+	master->no_selected();
+	unsafe_add_selected(master, listener, snip, info);
 }
 
 static inline void snip_center_point_offset(Snip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
@@ -304,8 +309,8 @@ void Universe::add_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
-            if ((!info->selected) && (this->rubberband_allowed /*&& this->listener->can_select(this, snip)*/)) {
-                unsafe_add_selected(this->listener, snip, info);
+            if ((!info->selected) && (this->rubberband_allowed && this->listener->can_select(this, snip))) {
+                unsafe_add_selected(this, this->listener, snip, info);
             }
         }
     }
@@ -315,8 +320,8 @@ void Universe::set_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
-            if ((!info->selected) /*&& (this->listener->can_select(this, snip))*/) {
-                unsafe_set_selected(this->listener, snip, info);
+            if ((!info->selected) && (this->listener->can_select(this, snip))) {
+				unsafe_set_selected(this, this->listener, snip, info);
             }
         }
     }
@@ -329,9 +334,9 @@ void Universe::no_selected() {
 		do {
 			SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
-				//this->listener->before_deselect(this, child);
+				this->listener->before_select(this, child, false);
 				info->selected = false;
-				//this->listener->after_deselect(this, child);
+				this->listener->after_select(this, child, false);
 			}
 
 			child = child->next;
@@ -348,11 +353,10 @@ void Universe::on_pointer_moved(UIElement^ control, PointerRoutedEventArgs^ e) {
 
         if (ppt->Properties->IsLeftButtonPressed) {
             if (this->rubberband_y == nullptr) {
-                //if (layout->can_move(this, e)) {
-                //    this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
-                //    this->last_pointer_x = x;
-                //    this->last_pointer_y = y;
-                //}
+				// TODO: implement interactive moving
+                this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
+				this->last_pointer_x = x;
+				this->last_pointer_y = y;
             } else {
                 (*this->rubberband_x) = x;
                 (*this->rubberband_y) = y;
@@ -376,18 +380,20 @@ void Universe::on_pointer_pressed(UIElement^ control, PointerRoutedEventArgs^ e)
 			this->last_pointer_y = y;
 
 			if (snip == nullptr) {
+				this->rubberband_x[0] = x;
+				this->rubberband_x[1] = y;
 				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
 				this->no_selected();
 			} else {
 				this->rubberband_y = nullptr;
 				SnipInfo* info = SNIP_INFO(snip);
-				if ((!info->selected) /*&& this->listener->can_select(this, snip)*/) {
+				if ((!info->selected) && this->listener->can_select(this, snip)) {
 					if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
 						if (this->rubberband_allowed) {
-							unsafe_add_selected(this->listener, snip, info);
+							unsafe_add_selected(this, this->listener, snip, info);
 						}
 					} else {
-						unsafe_set_selected(this->listener, snip, info);
+						unsafe_set_selected(this, this->listener, snip, info);
 					}
 				}
 			}
@@ -403,6 +409,7 @@ void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e
     if (!e->Handled) {
         if (this->rubberband_y != nullptr) {
             this->rubberband_y = nullptr;
+			// TODO: select all touched snips
         }
 
         e->Handled = true;
@@ -412,11 +419,11 @@ void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e
 /*************************************************************************************************/
 void Universe::set_pointer_listener(IUniverseListener* listener) {
     if (this->listener != nullptr) {
-        
+		this->listener->destroy();
     }
 
     this->listener = (listener == nullptr) ? new PlaceHolderListener() : listener;
-    this->listener->refcount += 1;
+    this->listener->reference();
     this->rubberband_allowed = this->listener->can_select_multiple(this);
 }
 
@@ -480,6 +487,10 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                 this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
                 child->draw(ds, info->x, info->y, width, height);
                 this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
+
+				if (info->selected) {
+					ds->DrawRectangle(info->x, info->y, width, height, system_color(UIElementType::HighlightText));
+				}
 
                 delete layer; // Must Close the Layer Explicitly
                 ds->Transform = transform;

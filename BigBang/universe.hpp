@@ -43,6 +43,11 @@ namespace WarGrey::SCADA {
 		virtual void move(Snip* snip, float x, float y) = 0;
 		virtual void move_to(Snip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 
+	public:
+		virtual void add_selected(Snip* snip) = 0;
+		virtual void set_selected(Snip* snip) = 0;
+		virtual void no_selected() = 0;
+
     public:
         void resize(float width, float height);
 		void fill_actual_extent(float* width, float* height);
@@ -94,9 +99,9 @@ namespace WarGrey::SCADA {
         void move_to(Snip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
 
     public:
-        void add_selected(Snip* snip);
-        void set_selected(Snip* snip);
-        void no_selected();
+        void add_selected(Snip* snip) override;
+        void set_selected(Snip* snip) override;
+        void no_selected() override;
 
     private:
         void recalculate_snips_extent_when_invalid();
