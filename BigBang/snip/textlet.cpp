@@ -61,12 +61,12 @@ void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
 /*************************************************************************************************/
 Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Color& lcolor, Color& scolor) {
-	this->scale_font = make_text_format("Cambria Math");
+	this->scale_font = make_text_format("Courier New");
 	this->unit = make_text_layout(speak(unit), this->scale_font);
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
-		Platform::String^ suffix = " = ";
+		Platform::String^ suffix = " =";
 
 		if (subscript == nullptr) {
 			this->label = make_text_layout(symbol + suffix, this->scale_font);

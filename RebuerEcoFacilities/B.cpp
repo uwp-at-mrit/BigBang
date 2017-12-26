@@ -26,64 +26,76 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 #define SNIPS_ARITY(a) sizeof(a) / sizeof(Snip*)
 
-static inline Motorlet* construct_motorlet(IUniverse* universe, float width, double degree = 0.0) {
+static inline Motorlet* load_motorlet(IUniverse* master, float width, double degree = 0.0) {
 	Motorlet* motor = new Motorlet(width);
-	universe->insert(motor, degree);
+	master->insert(motor, degree);
 
 	return motor;
 }
 
-static inline Gaugelet* construct_gaugelet(IUniverse* universe, Platform::String^ caption, int A, int RPM) {
+static inline Gaugelet* load_gaugelet(IUniverse* master, Platform::String^ caption, int A, int RPM) {
 	Gaugelet* gauge = new Gaugelet(caption, A, RPM);
-	universe->insert(gauge);
+	master->insert(gauge);
 
 	return gauge;
 }
 
-static inline Liquidlet* construct_water_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+static inline Scalelet* load_scalelet(IUniverse* master, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript) {
+	Scalelet* scale = new Scalelet(unit, label, subscript);
+	master->insert(scale);
+
+	return scale;
+}
+
+static inline LPipelet* load_pipelet(IUniverse* master, float length, float thickness, double hue, double saturation, double light, double highlight) {
+	LPipelet* pipe = new LPipelet(length, 0.0F, thickness, hue, saturation, light, highlight);
+	master->insert(pipe);
+
+	return pipe;
+}
+
+static inline Liquidlet* load_water_pipe(IUniverse* master, float length, double degrees = 0.0) {
 	Liquidlet* waterpipe = new Liquidlet(length, ArrowPosition::End, 209.60, 1.000, 0.559);
-	universe->insert(waterpipe, degrees);
+	master->insert(waterpipe, degrees);
 
 	return waterpipe;
 }
 
-static inline Liquidlet* construct_oil_pipe(IUniverse* universe, float length, double degrees = 0.0) {
+static inline Liquidlet* load_oil_pipe(IUniverse* master, float length, double degrees = 0.0) {
 	Liquidlet* oilpipe = new Liquidlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
-	universe->insert(oilpipe, degrees);
+	master->insert(oilpipe, degrees);
 
 	return oilpipe;
 }
 
-static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip* pipe
-	, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+static inline void connect_pipes(IUniverse* master, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
-    universe->move_to(pipe, (*x), (*y));
+    master->move_to(pipe, (*x), (*y));
 }
 
-void connect_motor(Universe* universe, IMotorSnip* pipe, Motorlet* motor, Scalelet* scale
-	, float x, float y, double fx = 1.0, double fy = 1.0) {
+void connect_motor(IUniverse* master, IMotorSnip* pipe, Motorlet* motor, Scalelet* scale, float x, float y, double fx = 1.0, double fy = 1.0) {
 	// TODO: there must be a more elegant way to deal with rotated motors
 	float motor_width, motor_height, scale_width, scale_height, yoff;
 	Rect mport = pipe->get_motor_port();
 
 	motor->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
 	scale->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
-	universe->fill_snip_bound(motor, nullptr, &yoff, nullptr, nullptr);
+	master->fill_snip_bound(motor, nullptr, &yoff, nullptr, nullptr);
 
 	x = x + mport.X + (mport.Width - motor_width) * float(fx);
 	y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
-	universe->move_to(motor, x, y);
+	master->move_to(motor, x, y);
 
 	if (yoff == 0.0F) {
 		x = x + (motor_width - scale_width) * 0.3F;
-		universe->move_to(scale, x, y + motor_height);
+		master->move_to(scale, x, y + motor_height);
 	} else {
 		x = x + (motor_width - scale_width) * 0.5F;
-		universe->move_to(scale, x, y - scale_height + yoff);
+		master->move_to(scale, x, y - scale_height + yoff);
 	}
 }
 
-private enum BMotor { Funnel = 0, Master, Cleaner, Slave, Count };
+private enum B { Master = 0, Cleaner, Slave, Funnel, Count }; // WARNING: order matters
 
 private class BConsole : public ModbusConfirmation {
 public:
@@ -96,7 +108,6 @@ public:
 	}
 
 	void load_icons(float width, float height) {
-		// load icons
 		this->icons[0] = new StorageTanklet(80.0F);
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->icons) && this->icons[i] != nullptr; i++) {
@@ -105,11 +116,10 @@ public:
 	}
 
 	void load_gauges(float width, float height) {
-		// load gauges
-		this->gauges[BMotor::Master] = construct_gaugelet(bench, "mastermotor", 100, 100);
-		this->gauges[BMotor::Funnel] = construct_gaugelet(bench, "feedingmotor", 200, 100);
-		this->gauges[BMotor::Cleaner] = construct_gaugelet(bench, "cleanmotor", 10, 20);
-		this->gauges[BMotor::Slave] = construct_gaugelet(bench, "slavemotor", 200, 100);
+		this->gauges[B::Master] = load_gaugelet(this->bench, "mastermotor", 100, 100);
+		this->gauges[B::Funnel] = load_gaugelet(this->bench, "feedingmotor", 200, 100);
+		this->gauges[B::Cleaner] = load_gaugelet(this->bench, "cleanmotor", 10, 20);
+		this->gauges[B::Slave] = load_gaugelet(this->bench, "slavemotor", 200, 100);
 	}
 
 	void load_workline(float width, float height) {
@@ -120,14 +130,14 @@ public:
 		float slave_height = 80.0F;
 
 		{ // load water and oil pipes
-			this->water_pipes[0] = construct_water_pipe(bench, pipe_length, 0);
+			this->water_pipes[0] = load_water_pipe(this->bench, pipe_length, 0);
 			for (unsigned char i = 1; i < SNIPS_ARITY(this->water_pipes); i++) {
-				this->water_pipes[i] = construct_water_pipe(bench, pipe_length, 90.0);
+				this->water_pipes[i] = load_water_pipe(this->bench, pipe_length, 90.0);
 			}
 
-			this->oil_pipes[0] = construct_oil_pipe(bench, pipe_length);
+			this->oil_pipes[0] = load_oil_pipe(this->bench, pipe_length);
 			for (unsigned char i = 1; i < SNIPS_ARITY(this->oil_pipes); i++) {
-				this->oil_pipes[i] = construct_oil_pipe(bench, pipe_length, 90.0);
+				this->oil_pipes[i] = load_oil_pipe(this->bench, pipe_length, 90.0);
 			}
 		}
 
@@ -141,29 +151,34 @@ public:
 		this->bench->insert(this->funnel);
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->pipes_1st); i++) {
-			this->pipes_1st[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness);
-			this->bench->insert(this->pipes_1st[i]);
+			this->pipes_1st[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
+			this->Pps[i] = load_scalelet(this->bench, "bar", "pressure", nullptr);
+			this->Tpis[i] = load_scalelet(this->bench, "celsius", "temperature", "inside");
+			this->Tpos[i] = load_scalelet(this->bench, "celsius", "temperature", "outside");
 		}
 
 		this->bench->insert(this->cleaner);
 		this->bench->insert(this->slave);
 
+		for (size_t i = 0; i < SNIPS_ARITY(this->Pss); i++) {
+			this->Pss[i] = load_scalelet(this->bench, "bar", "pressure", nullptr);
+			this->Tss[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
+		}
+
 		for (size_t i = 0; i < SNIPS_ARITY(this->pipes_2nd); i++) {
-			this->pipes_2nd[i] = new LPipelet(pipe_length, 0.0F, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-			this->bench->insert(this->pipes_2nd[i]);
+			this->pipes_2nd[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
 		}
 
 		this->bench->insert(this->vibrator);
 
 		{ // load motors
-			this->motors[BMotor::Funnel] = construct_motorlet(bench, funnel_width, 90.0);
-			this->motors[BMotor::Master] = construct_motorlet(bench, master_height * 0.85F);
-			this->motors[BMotor::Slave] = construct_motorlet(bench, slave_height * 0.85F);
-			this->motors[BMotor::Cleaner] = construct_motorlet(bench, pipe_thickness, 90.0);
+			this->motors[B::Funnel] = load_motorlet(this->bench, funnel_width, 90.0);
+			this->motors[B::Master] = load_motorlet(this->bench, master_height * 0.85F);
+			this->motors[B::Slave] = load_motorlet(this->bench, slave_height * 0.85F);
+			this->motors[B::Cleaner] = load_motorlet(this->bench, pipe_thickness, 90.0);
 
-			for (unsigned int i = 0; i < BMotor::Count; i++) {
-				this->Tms[i] = new Scalelet("celsius");
-				this->bench->insert(this->Tms[i]);
+			for (unsigned int i = 0; i < B::Count; i++) {
+				this->Tms[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
 			}
 		}
 	}
@@ -218,24 +233,24 @@ public:
 		float current_x = pipe_length * 1.618F;
 		float current_y = (height - snip_height) * 0.25F;
 		this->bench->move_to(this->funnel, current_x, current_y);
-		this->move_motor(BMotor::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
+		this->move_motor(B::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
 
-		connect_pipes(bench, this->funnel, this->master, &current_x, &current_y, 0.2, 0.5);
-		this->move_motor(BMotor::Master, this->master, current_x, current_y);
-		connect_pipes(bench, this->master, this->pipes_1st[0], &current_x, &current_y);
+		connect_pipes(this->bench, this->funnel, this->master, &current_x, &current_y, 0.2, 0.5);
+		this->move_motor(B::Master, this->master, current_x, current_y);
+		connect_pipes(this->bench, this->master, this->pipes_1st[0], &current_x, &current_y);
 
 		for (size_t i = 1; i < pcount_1st; i++) {
-			connect_pipes(bench, this->pipes_1st[i - 1], this->pipes_1st[i], &current_x, &current_y);
+			connect_pipes(this->bench, this->pipes_1st[i - 1], this->pipes_1st[i], &current_x, &current_y);
 		}
 
-		connect_pipes(bench, this->pipes_1st[pcount_1st], this->cleaner, &current_x, &current_y);
-		this->move_motor(BMotor::Cleaner, this->cleaner, current_x, current_y, 0.5, 1.0);
-		connect_pipes(bench, this->cleaner, this->slave, &current_x, &current_y);
-		this->move_motor(BMotor::Slave, this->slave, current_x, current_y);
-		connect_pipes(bench, this->slave, this->pipes_2nd[0], &current_x, &current_y);
+		connect_pipes(this->bench, this->pipes_1st[pcount_1st - 1], this->cleaner, &current_x, &current_y);
+		this->move_motor(B::Cleaner, this->cleaner, current_x, current_y, 0.5, 1.0);
+		connect_pipes(this->bench, this->cleaner, this->slave, &current_x, &current_y);
+		this->move_motor(B::Slave, this->slave, current_x, current_y);
+		connect_pipes(this->bench, this->slave, this->pipes_2nd[0], &current_x, &current_y);
 
 		for (size_t i = 1; i < pcount_2nd; i++) {
-			connect_pipes(bench, this->pipes_2nd[i - 1], this->pipes_2nd[i], &current_x, &current_y);
+			connect_pipes(this->bench, this->pipes_2nd[i - 1], this->pipes_2nd[i], &current_x, &current_y);
 		}
 
 		this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
@@ -243,29 +258,52 @@ public:
 		current_y += pipe_thickness - snip_height;
 		this->bench->move_to(this->vibrator, current_x, current_y);
 
-		{ // flow water and oil pipes
+		{ // flow water and oil pipes and scales
 			Rect mport = this->master->get_input_port();
 			Rect cport = this->cleaner->get_output_port();
-			float pipe_ascent = this->pipes_1st[0]->get_input_port().Y;
+			Rect pport = this->pipes_1st[0]->get_input_port();
+			float pipe_ascent = pport.Y;
 			float pipe_x, pipe_y, liquid_xoff, liquid_yoff;
+			float scale_x, scale_y, scale_width, scale_height;
 
 			this->bench->fill_snip_bound(this->pipes_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
 			this->bench->fill_snip_bound(this->oil_pipes[1], nullptr, &liquid_yoff, nullptr, nullptr);
+			this->Pps[0]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
 			this->water_pipes[0]->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
+			current_y = pipe_y + pipe_ascent;
+			scale_x = pipe_x + (pipe_length - scale_width) * 0.5F;
+			scale_y = current_y + pport.Height;
 			liquid_xoff = (pipe_length - snip_width) * 0.5F;
 			liquid_yoff = pipe_ascent + liquid_yoff - snip_height;
 			for (unsigned char i = 1; i < SNIPS_ARITY(this->oil_pipes); i++) {
+				float sx = scale_x + pipe_length * (i - 1);
+
 				this->bench->move_to(this->oil_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - 1), pipe_y + liquid_yoff);
+				this->bench->move_to(this->Pps[i - 1],  sx, current_y - scale_height);
+				this->bench->move_to(this->Tpis[i - 1], sx, scale_y + scale_height * 0.0F);
+				this->bench->move_to(this->Tpos[i - 1], sx, scale_y + scale_height * 1.0F);
 			}
 
 			liquid_yoff = liquid_yoff + pipe_thickness + snip_width - pipe_ascent * 2.0F;
 			this->bench->fill_snip_bound(this->master, &pipe_x, nullptr, nullptr, nullptr);
+			scale_x = pipe_x + mport.X + (mport.Width - scale_width) * 0.5F;
 			current_x = pipe_x + mport.X + (mport.Width - snip_width) * 0.5F;
 			current_y = pipe_y + (pipe_thickness - snip_height) * 0.5F;
 			this->bench->move_to(this->oil_pipes[0], pipe_x + this->master->get_motor_port().X - snip_width, current_y);
-			this->bench->fill_snip_bound(this->cleaner, &pipe_x, nullptr, nullptr, nullptr);
+			this->bench->move_to(this->Pss[B::Master], scale_x, scale_y);
+			this->bench->move_to(this->Tss[B::Master], scale_x, scale_y + scale_height);
+			
+			this->bench->fill_snip_bound(this->cleaner, &pipe_x, &pipe_y, nullptr, nullptr);
+			scale_x = pipe_x + (cport.X - scale_width) * 0.5F;
 			this->bench->move_to(this->water_pipes[0], pipe_x + cport.X + cport.Width, current_y);
+			this->bench->move_to(this->Pss[B::Cleaner], scale_x, scale_y);
+			this->bench->move_to(this->Tss[B::Cleaner], scale_x, scale_y + scale_height);
+
+			scale_x = pipe_x + cport.X + (cport.Width - scale_width) * 0.5F;
+			scale_y = pipe_y + cport.Y + pport.Height;
+			this->bench->move_to(this->Pss[B::Slave], scale_x, scale_y);
+			this->bench->move_to(this->Tss[B::Slave], scale_x, scale_y + scale_height);
 
 			this->bench->move_to(this->water_pipes[1], current_x, pipe_y + liquid_yoff);
 			current_x = pipe_x + cport.X + (cport.Width - snip_width) * 0.5F;
@@ -278,8 +316,7 @@ public:
 	}
 
 private:
-	void move_motor(BMotor id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
-		// TODO: there must be a more elegant way to deal with rotated motors
+	void move_motor(B id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
 		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
 	}
 
@@ -287,18 +324,23 @@ private:
 private:
 	Statuslet * statusbar;
 	Snip* icons[1];
-	Gaugelet* gauges[BMotor::Count];
+	Gaugelet* gauges[B::Count];
 
 private:
 	Screwlet * master;
 	Screwlet* slave;
 	GlueCleanerlet* cleaner;
+	Scalelet* Pss[3];
+	Scalelet* Tss[3];
 	Funnellet* funnel;
 	Vibratorlet* vibrator;
 	Pipelet* pipes_1st[4];
+	Scalelet* Pps[4];
+	Scalelet* Tpis[4];
+	Scalelet* Tpos[4];
 	Pipelet* pipes_2nd[2];
-	Motorlet* motors[BMotor::Count];
-	Scalelet* Tms[BMotor::Count];
+	Motorlet* motors[B::Count];
+	Scalelet* Tms[B::Count];
 	Liquidlet* oil_pipes[5];
 	Liquidlet* water_pipes[5];
 
