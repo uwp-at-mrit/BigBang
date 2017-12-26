@@ -2,6 +2,7 @@
 
 #include "universe.hpp"
 
+#include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
 #include "snip/motorlet.hpp"
@@ -27,7 +28,7 @@ namespace WarGrey::SCADA {
 	// never deletes these snips mannually
 	private:
 		Statuslet * statusbar;
-		Snip* icons[1];
+		Snip* icons[4];
 		Gaugelet* gauges[BMotor::Count];
 
 	private:

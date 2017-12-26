@@ -113,6 +113,9 @@ void BSegment::load(CanvasCreateResourcesEventArgs^ args, float width, float hei
 
 	{ // load icons
 		this->icons[0] = new StorageTanklet(80.0F);
+		this->icons[1] = new Scalelet("pressure", "bar");
+		this->icons[2] = new Scalelet("temperature", "celsius", "inside");
+		this->icons[3] = new Scalelet("temperature", "celsius", "outside");
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->icons) && this->icons[i] != nullptr; i++) {
 			this->insert(this->icons[i]);

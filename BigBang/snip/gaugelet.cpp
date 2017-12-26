@@ -11,15 +11,10 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step, Color acolor, Color rcolor) {
-    this->caption = speak(caption);
-    this->Ampere = maxA;
-    this->RPM = maxn;
-    this->step = step;
-    this->Acolor = acolor;
-    this->Rcolor = rcolor;
-
-    this->label_font = make_text_format(12.0F);
+Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char step, Color acolor, Color rcolor)
+	: Ampere(maxA), RPM(maxn), step(step), Acolor(acolor), Rcolor(rcolor) {
+	this->caption = speak(caption);
+	this->label_font = make_text_format(12.0F);
 }
 
 void Gaugelet::initialize_meters() {

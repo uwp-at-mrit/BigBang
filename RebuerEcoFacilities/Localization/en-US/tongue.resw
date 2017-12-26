@@ -174,4 +174,22 @@
   <data name="B1" xml:space="preserve">
     <value>B1</value>
   </data>
+  <data name="bar" xml:space="preserve">
+    <value>bar</value>
+  </data>
+  <data name="pressure" xml:space="preserve">
+    <value>P</value>
+  </data>
+  <data name="celsius" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="inside" xml:space="preserve">
+    <value>i</value>
+  </data>
+  <data name="outside" xml:space="preserve">
+    <value>o</value>
+  </data>
+  <data name="temperature" xml:space="preserve">
+    <value>T</value>
+  </data>
 </root>
