@@ -1,7 +1,4 @@
-﻿#include <cstdlib>
-#include <algorithm>
-
-#include "B.hpp"
+﻿#include "B.hpp"
 #include "tongue.hpp"
 #include "system.hpp"
 
