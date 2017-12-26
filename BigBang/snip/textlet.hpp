@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 
 	private class Scalelet : public WarGrey::SCADA::Textlet {
 	public:
-		Scalelet(Platform::String^ label, Platform::String^ unit, Platform::String^ subscript = nullptr,
+		Scalelet(Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr,
 			Windows::UI::Color& label_color = Windows::UI::ColorHelper::FromArgb(255, 35, 235, 185),
 			Windows::UI::Color& scale_color = Windows::UI::Colors::Yellow);
 

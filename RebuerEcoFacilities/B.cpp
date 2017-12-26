@@ -54,9 +54,33 @@ static inline Liquidlet* construct_oil_pipe(IUniverse* universe, float length, d
 	return oilpipe;
 }
 
-static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip* pipe
+	, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
     universe->move_to(pipe, (*x), (*y));
+}
+
+void connect_motor(Universe* universe, IMotorSnip* pipe, Motorlet* motor, Scalelet* scale
+	, float x, float y, double fx = 1.0, double fy = 1.0) {
+	// TODO: there must be a more elegant way to deal with rotated motors
+	float motor_width, motor_height, scale_width, scale_height, yoff;
+	Rect mport = pipe->get_motor_port();
+
+	motor->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
+	scale->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
+	universe->fill_snip_bound(motor, nullptr, &yoff, nullptr, nullptr);
+
+	x = x + mport.X + (mport.Width - motor_width) * float(fx);
+	y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
+	universe->move_to(motor, x, y);
+
+	if (yoff == 0.0F) {
+		x = x + (motor_width - scale_width) * 0.3F;
+		universe->move_to(scale, x, y + motor_height);
+	} else {
+		x = x + (motor_width - scale_width) * 0.5F;
+		universe->move_to(scale, x, y - scale_height + yoff);
+	}
 }
 
 private enum BMotor { Funnel = 0, Master, Cleaner, Slave, Count };
@@ -138,7 +162,7 @@ public:
 			this->motors[BMotor::Cleaner] = construct_motorlet(bench, pipe_thickness, 90.0);
 
 			for (unsigned int i = 0; i < BMotor::Count; i++) {
-				this->Tms[i] = new Scalelet("temperature", "celsius");
+				this->Tms[i] = new Scalelet("celsius");
 				this->bench->insert(this->Tms[i]);
 			}
 		}
@@ -256,24 +280,7 @@ public:
 private:
 	void move_motor(BMotor id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
 		// TODO: there must be a more elegant way to deal with rotated motors
-		float motor_width, motor_height, scale_width, scale_height, yoff;
-		Rect mport = pipe->get_motor_port();
-
-		this->motors[id]->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
-		this->Tms[id]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
-		this->bench->fill_snip_bound(this->motors[id], nullptr, &yoff, nullptr, nullptr);
-
-		x = x + mport.X + (mport.Width - motor_width) * float(fx);
-		y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
-		this->bench->move_to(this->motors[id], x, y);
-
-		if (yoff == 0.0F) {
-			x = x + (motor_width - scale_width) * 0.3F;
-			this->bench->move_to(this->Tms[id], x, y + motor_height);
-		} else {
-			x = x + (motor_width - scale_width) * 0.5F;
-			this->bench->move_to(this->Tms[id], x, y - scale_height + yoff);
-		}
+		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
 	}
 
 // never deletes these snips mannually

@@ -60,24 +60,26 @@ void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-Scalelet::Scalelet(Platform::String^ label, Platform::String^ unit, Platform::String^ subscript, Color& lcolor, Color& scolor) {
-	Platform::String^ symbol = speak(label);
-	Platform::String^ suffix = " = ";
-
+Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Color& lcolor, Color& scolor) {
 	this->scale_font = make_text_format("Cambria Math");
 	this->unit = make_text_layout(speak(unit), this->scale_font);
 
-	if (subscript == nullptr) {
-		this->label = make_text_layout(symbol + suffix, this->scale_font);
-	} else {
-		Platform::String^ subsymbol = speak(subscript);
-		float subsize = this->scale_font->FontSize * 0.618F;
-		unsigned int symcount = symbol->Length();
-		unsigned int subcount = subsymbol->Length();
+	if (label != nullptr) {
+		Platform::String^ symbol = speak(label);
+		Platform::String^ suffix = " = ";
 
-		this->label = make_text_layout(symbol + subsymbol + suffix, this->scale_font);
-		this->label->SetFontSize(symcount, subcount, subsize);
-		this->label->SetFontStyle(symcount, subcount, FontStyle::Italic);
+		if (subscript == nullptr) {
+			this->label = make_text_layout(symbol + suffix, this->scale_font);
+		} else {
+			Platform::String^ subsymbol = speak(subscript);
+			float subsize = this->scale_font->FontSize * 0.618F;
+			unsigned int symcount = symbol->Length();
+			unsigned int subcount = subsymbol->Length();
+
+			this->label = make_text_layout(symbol + subsymbol + suffix, this->scale_font);
+			this->label->SetFontSize(symcount, subcount, subsize);
+			this->label->SetFontStyle(symcount, subcount, FontStyle::Italic);
+		}
 	}
 
 	this->label_color = make_solid_brush(lcolor);
@@ -90,17 +92,25 @@ void Scalelet::change_scale(float value) {
 }
 
 void Scalelet::fill_extent(float x, float y, float* w, float* h) {
-	float width = this->label->LayoutBounds.Width + this->scale->LayoutBounds.Width + this->unit->LayoutBounds.Width;
-	float height = this->label->LayoutBounds.Height;
+	float width = this->scale->LayoutBounds.Width + this->unit->LayoutBounds.Width;
+	float height = this->unit->LayoutBounds.Height;
+
+	if (this->label != nullptr) {
+		width += this->label->LayoutBounds.Width;
+	}
 
 	SET_VALUES(w, width, h, height);
 };
 
 void Scalelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float xoff = x + this->label->LayoutBounds.Width;
+	float start_x = x;
 	float swidth = this->scale->LayoutBounds.Width;
 
-	ds->DrawTextLayout(this->label, x, y, this->label_color);
-	ds->DrawTextLayout(this->scale, xoff, y, this->scale_color);
-	ds->DrawTextLayout(this->unit, xoff + swidth, y, this->label_color);
+	if (this->label != nullptr) {
+		ds->DrawTextLayout(this->label, x, y, this->label_color);
+		start_x += this->label->LayoutBounds.Width;
+	}
+
+	ds->DrawTextLayout(this->scale, start_x, y, this->scale_color);
+	ds->DrawTextLayout(this->unit, start_x + swidth, y, this->label_color);
 }
