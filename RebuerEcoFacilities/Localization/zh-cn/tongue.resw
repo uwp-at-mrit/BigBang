@@ -181,7 +181,7 @@
     <value>P</value>
   </data>
   <data name="celsius" xml:space="preserve">
-    <value>°C</value>
+    <value>℃</value>
   </data>
   <data name="inside" xml:space="preserve">
     <value>i</value>

@@ -59,19 +59,6 @@ static inline void connect_pipes(IUniverse* universe, IPipeSnip* prev, IPipeSnip
     universe->move_to(pipe, (*x), (*y));
 }
 
-static inline void place_motor(IUniverse* universe, IMotorSnip* pipe, Motorlet* motor, float x, float y, double fx = 1.0, double fy = 1.0) {
-	// TODO: there must be a more elegant way to deal with rotated motors
-	float motor_width, motor_height, yoff;
-	Rect mport = pipe->get_motor_port();
-
-	motor->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
-	universe->fill_snip_bound(motor, nullptr, &yoff, nullptr, nullptr);
-
-	x = x + mport.X + (mport.Width - motor_width) * float(fx);
-	y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
-	universe->move_to(motor, x, y);
-}
-
 private enum BMotor { Funnel = 0, Master, Cleaner, Slave, Count };
 
 private class BConsole : public ModbusConfirmation {
@@ -87,9 +74,6 @@ public:
 	void load_icons(float width, float height) {
 		// load icons
 		this->icons[0] = new StorageTanklet(80.0F);
-		this->icons[1] = new Scalelet("pressure", "bar");
-		this->icons[2] = new Scalelet("temperature", "celsius", "inside");
-		this->icons[3] = new Scalelet("temperature", "celsius", "outside");
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->icons) && this->icons[i] != nullptr; i++) {
 			this->bench->insert(this->icons[i]);
@@ -105,7 +89,6 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		// load B Segment
 		float pipe_length = 128.0F;
 		float pipe_thickness = 32.0F;
 		float master_height = 128.0F;
@@ -153,6 +136,11 @@ public:
 			this->motors[BMotor::Master] = construct_motorlet(bench, master_height * 0.85F);
 			this->motors[BMotor::Slave] = construct_motorlet(bench, slave_height * 0.85F);
 			this->motors[BMotor::Cleaner] = construct_motorlet(bench, pipe_thickness, 90.0);
+
+			for (unsigned int i = 0; i < BMotor::Count; i++) {
+				this->Tms[i] = new Scalelet("temperature", "celsius");
+				this->bench->insert(this->Tms[i]);
+			}
 		}
 	}
 
@@ -206,10 +194,10 @@ public:
 		float current_x = pipe_length * 1.618F;
 		float current_y = (height - snip_height) * 0.25F;
 		this->bench->move_to(this->funnel, current_x, current_y);
-		place_motor(bench, this->funnel, this->motors[BMotor::Funnel], current_x, current_y, 0.5, 1.0);
+		this->move_motor(BMotor::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
 
 		connect_pipes(bench, this->funnel, this->master, &current_x, &current_y, 0.2, 0.5);
-		place_motor(bench, this->master, this->motors[BMotor::Master], current_x, current_y);
+		this->move_motor(BMotor::Master, this->master, current_x, current_y);
 		connect_pipes(bench, this->master, this->pipes_1st[0], &current_x, &current_y);
 
 		for (size_t i = 1; i < pcount_1st; i++) {
@@ -217,9 +205,9 @@ public:
 		}
 
 		connect_pipes(bench, this->pipes_1st[pcount_1st], this->cleaner, &current_x, &current_y);
-		place_motor(bench, this->cleaner, this->motors[BMotor::Cleaner], current_x, current_y, 0.5, 1.0);
+		this->move_motor(BMotor::Cleaner, this->cleaner, current_x, current_y, 0.5, 1.0);
 		connect_pipes(bench, this->cleaner, this->slave, &current_x, &current_y);
-		place_motor(bench, this->slave, this->motors[BMotor::Slave], current_x, current_y);
+		this->move_motor(BMotor::Slave, this->slave, current_x, current_y);
 		connect_pipes(bench, this->slave, this->pipes_2nd[0], &current_x, &current_y);
 
 		for (size_t i = 1; i < pcount_2nd; i++) {
@@ -265,10 +253,33 @@ public:
 		}
 	}
 
+private:
+	void move_motor(BMotor id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
+		// TODO: there must be a more elegant way to deal with rotated motors
+		float motor_width, motor_height, scale_width, scale_height, yoff;
+		Rect mport = pipe->get_motor_port();
+
+		this->motors[id]->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
+		this->Tms[id]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
+		this->bench->fill_snip_bound(this->motors[id], nullptr, &yoff, nullptr, nullptr);
+
+		x = x + mport.X + (mport.Width - motor_width) * float(fx);
+		y = y + mport.Y + (mport.Height - motor_height + yoff) * float(fy);
+		this->bench->move_to(this->motors[id], x, y);
+
+		if (yoff == 0.0F) {
+			x = x + (motor_width - scale_width) * 0.3F;
+			this->bench->move_to(this->Tms[id], x, y + motor_height);
+		} else {
+			x = x + (motor_width - scale_width) * 0.5F;
+			this->bench->move_to(this->Tms[id], x, y - scale_height + yoff);
+		}
+	}
+
 // never deletes these snips mannually
 private:
 	Statuslet * statusbar;
-	Snip* icons[4];
+	Snip* icons[1];
 	Gaugelet* gauges[BMotor::Count];
 
 private:
@@ -280,6 +291,7 @@ private:
 	Pipelet* pipes_1st[4];
 	Pipelet* pipes_2nd[2];
 	Motorlet* motors[BMotor::Count];
+	Scalelet* Tms[BMotor::Count];
 	Liquidlet* oil_pipes[5];
 	Liquidlet* water_pipes[5];
 
