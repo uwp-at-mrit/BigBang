@@ -135,6 +135,7 @@ static inline void snip_center_point_offset(Snip* snip, float width, float heigh
 /*************************************************************************************************/
 Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate) {
     this->set_decorator(nullptr);
+	this->set_pointer_listener(nullptr);
 }
 
 Universe::~Universe() {
@@ -325,19 +326,16 @@ void Universe::no_selected() {
 	if (this->head_snip != nullptr) {
 		Snip* child = this->head_snip;
 
-        //this->begin_edit_sequence();
 		do {
 			SnipInfo* info = SNIP_INFO(child);
             if (info->selected) {
 				//this->listener->before_deselect(this, child);
 				info->selected = false;
-				//this->refresh();
 				//this->listener->after_deselect(this, child);
 			}
 
 			child = child->next;
 		} while (child != this->head_snip);
-        //this->end_edit_sequence();
 	}
 }
 
@@ -358,7 +356,6 @@ void Universe::on_pointer_moved(UIElement^ control, PointerRoutedEventArgs^ e) {
             } else {
                 (*this->rubberband_x) = x;
                 (*this->rubberband_y) = y;
-                //this->refresh();
             }
         }
 
@@ -413,15 +410,15 @@ void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e
 }
 
 /*************************************************************************************************/
-//void Universe::set_pointer_listener(IUniverseListener* listener) {
-//    if (this->listener != nullptr) {
-        //REMOVE(this->listener, refcount);
-//    }
+void Universe::set_pointer_listener(IUniverseListener* listener) {
+    if (this->listener != nullptr) {
+        
+    }
 
-    //this->listener = (listener == nullptr) ? new PlaceHolderListener() : listener;
-    //this->listener->refcount += 1;
-    //this->rubberband_allowed = this->listener->can_select_multiple(this);
-//}
+    this->listener = (listener == nullptr) ? new PlaceHolderListener() : listener;
+    this->listener->refcount += 1;
+    this->rubberband_allowed = this->listener->can_select_multiple(this);
+}
 
 void Universe::set_decorator(IUniverseDecorator* decorator) {
     if (this->decorator != nullptr) {
@@ -430,7 +427,6 @@ void Universe::set_decorator(IUniverseDecorator* decorator) {
 
     this->decorator = (decorator == nullptr) ? new PlaceHolderDecorator() : decorator;
     this->decorator->reference();
-    //this->refresh();
 }
 
 /*************************************************************************************************/

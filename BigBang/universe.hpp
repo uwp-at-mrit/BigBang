@@ -82,7 +82,7 @@ namespace WarGrey::SCADA {
         void size_cache_invalid();
 
     public:
-        //void set_pointer_listener(WarGrey::SCADA::IUniverseListener* listener);
+        void set_pointer_listener(WarGrey::SCADA::IUniverseListener* listener);
         void set_decorator(WarGrey::SCADA::IUniverseDecorator* decorator);
 
     public:

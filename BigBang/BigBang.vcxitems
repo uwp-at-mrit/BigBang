@@ -24,7 +24,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.cpp" />
@@ -46,7 +45,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.hpp" />

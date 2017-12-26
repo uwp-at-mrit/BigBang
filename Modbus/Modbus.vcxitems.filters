@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\exception.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\protocol.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus_test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\protocol.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\sockexn.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus_test.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="modbus">
+      <UniqueIdentifier>{fec378cd-478c-4226-926b-a964d983b88d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

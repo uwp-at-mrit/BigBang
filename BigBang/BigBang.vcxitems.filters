@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)control.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)universe.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\liquidlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)universe.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\liquidlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\storagelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="decorator">
+      <UniqueIdentifier>{61fcef44-48ce-4d1a-856e-d8db43e4531e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="snip">
+      <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="snip\pipeline">
+      <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interaction">
+      <UniqueIdentifier>{26bba27d-d03f-45eb-8b5c-6dd3b5d34440}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
