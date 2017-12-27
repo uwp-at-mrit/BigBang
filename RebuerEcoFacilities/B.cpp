@@ -121,10 +121,10 @@ public:
 
 	void load_workline(float width, float height) {
 		float pipe_length = 128.0F;
-		float pipe_thickness = 32.0F;
-		float master_height = 128.0F;
-		float funnel_width = 42.0F;
-		float slave_height = 80.0F;
+		float pipe_thickness = pipe_length * 0.25F;
+		float master_height = pipe_length;
+		float funnel_width = pipe_length * 0.382F;
+		float slave_height = pipe_length * 0.618F;
 
 		{ // load water and oil pipes
 			this->water_pipes[0] = load_water_pipe(this->bench, pipe_length, 0.0);
@@ -142,7 +142,7 @@ public:
 		this->slave = new LScrewlet(pipe_length, slave_height, pipe_thickness);
 		this->cleaner = new GlueCleanerlet(pipe_length, master_height, pipe_thickness);
 		this->funnel = new Funnellet(funnel_width, 0.0F, 120.0, 0.7, 0.3, 0.84);
-		this->vibrator = new Vibratorlet(pipe_thickness * 1.618F);
+		this->vibrator = new Vibratorlet(pipe_thickness * 2.718F);
 
 		this->bench->insert(this->master);
 		this->bench->insert(this->funnel);
@@ -189,7 +189,7 @@ public:
 		float icon_gapsize = 64.0F;
 		float icon_hmax = 0.0F;
 		float icon_x = 0.0F;
-		float icon_y = this->console_y * 1.5F;
+		float icon_y = this->console_y * 1.618F;
 		float icon_width, icon_height;
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->icons) && this->icons[i] != nullptr; i++) {
@@ -228,7 +228,7 @@ public:
 		this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
 		float current_x = pipe_length * 1.618F;
-		float current_y = (height - snip_height) * 0.25F;
+		float current_y = (height - pipe_length * 3.14F) * 0.5F;
 		this->bench->move_to(this->funnel, current_x, current_y);
 		this->move_motor(B::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
 
@@ -251,8 +251,8 @@ public:
 		}
 
 		this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-		current_x += pipe_length + snip_width;
-		current_y += pipe_thickness - snip_height;
+		current_x += (pipe_length + snip_width * 0.5F);
+		current_y += (pipe_thickness - snip_height);
 		this->bench->move_to(this->vibrator, current_x, current_y);
 
 		{ // flow water and oil pipes and scales
