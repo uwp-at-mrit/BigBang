@@ -144,13 +144,16 @@ void Statuslet::load() {
     }
 }
 
-void Statuslet::fill_extent(float x, float y, float* w, float* h) {
+void Statuslet::fill_extent(float x, float y, float* width, float* height) {
     if (statusbar->master != nullptr) {
-        float actual_width; 
+        if (width != nullptr) {
+			float actual_width;
 
-        statusbar->master->info->master->fill_actual_extent(&actual_width, nullptr);
-        SET_BOX(w, actual_width - x);
-        SET_BOX(h, status_height);
+			statusbar->master->info->master->fill_actual_extent(&actual_width, nullptr);
+			(*width) = actual_width - x;
+		}
+
+        SET_BOX(height, status_height);
     }
 }
 

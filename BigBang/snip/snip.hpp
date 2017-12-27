@@ -11,6 +11,7 @@ namespace WarGrey::SCADA {
     private class ISnipInfo abstract {
     public:
         ISnipInfo(IUniverse* master) : master(master) {};
+		virtual ~ISnipInfo() noexcept {};
 
     public:
 		IUniverse* master;
@@ -18,7 +19,7 @@ namespace WarGrey::SCADA {
 
     private class Snip abstract {
     public:
-        virtual ~Snip() { if (this->info != nullptr) delete this->info; };
+        virtual ~Snip() noexcept { if (this->info != nullptr) { delete this->info; } };
 
     public:
         virtual void load() {};

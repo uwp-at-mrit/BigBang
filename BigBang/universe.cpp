@@ -144,16 +144,8 @@ Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate
 }
 
 Universe::~Universe() {
-    if (this->head_snip != nullptr) {
-        Snip* child = nullptr;
-        this->head_snip->prev->next = nullptr;
-        do {
-            child = this->head_snip;
-            this->head_snip = this->head_snip->next;
-            delete child; // snip's destructor will delete the associated info object
-        } while (this->head_snip != nullptr);
-    }
-
+	this->clear();
+	this->listener->destroy();
     this->decorator->destroy();
 }
 
@@ -189,8 +181,8 @@ void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
 }
 
 void Universe::move(Snip* snip, float x, float y) {
-    if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this) {
+    if (snip != nullptr) {
+		if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
             unsafe_move_snip_via_info(this, info, x, y, false);
         }
@@ -532,6 +524,20 @@ void Universe::save(Platform::String^ path, float width, float height, float dpi
 			rsyslog("failed to save universe as bitmap:" + e->Message);
 		}
 	});
+}
+
+void Universe::clear() {
+	if (this->head_snip != nullptr) {
+		Snip* temp_head = this->head_snip;
+		this->head_snip = nullptr;
+		Snip* child = nullptr;
+		temp_head->prev->next = nullptr;
+		do {
+			child = temp_head;
+			temp_head = temp_head->next;
+			delete child; // snip's destructor will delete the associated info object
+		} while (temp_head != nullptr);
+	}
 }
 
 /*************************************************************************************************/
