@@ -8,6 +8,9 @@
 #include "decorator/grid.hpp"
 #include "decorator/pipeline.hpp"
 
+#include <ppltasks.h>
+using namespace Windows::Storage;
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -310,6 +313,18 @@ public:
 				this->bench->move_to(this->water_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - 3), pipe_y + liquid_yoff);
 			}
 		}
+
+		StorageFolder^ dir = ApplicationData::Current->LocalFolder;
+		Concurrency::create_task(dir->CreateFileAsync("test.png")).then([this](Concurrency::task<StorageFile^> touch) {
+			try {
+				StorageFile^ test = touch.get();
+
+				rsyslog(test->Path);
+				snip_save(this->motors[B::Master], test->Path);
+			} catch (Platform::Exception^ e) {
+				rsyslog(e->Message);
+			}
+		});
 	}
 
 private:

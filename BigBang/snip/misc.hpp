@@ -8,3 +8,5 @@
 Windows::Foundation::Rect snip_enclosing_box(
     WarGrey::SCADA::Snip* snip, float x, float y,
     Windows::Foundation::Numerics::float3x2 tf);
+
+void snip_save(WarGrey::SCADA::Snip* snip, Platform::String^ path, float dpi = 96.0F);

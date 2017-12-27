@@ -12,6 +12,7 @@ namespace WarGrey::SCADA {
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
+		virtual void save(Platform::String^ path, float width, float height, float dpi = 96.0) = 0;
 
     public:
         virtual void start() {};
@@ -62,9 +63,10 @@ namespace WarGrey::SCADA {
         virtual ~Universe() noexcept;
 
     public:
-        void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height);
+        void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) override;
         void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
+		void save(Platform::String^ path, float width, float height, float dpi = 96.0) override;
 
     public:
         virtual void on_pointer_moved(

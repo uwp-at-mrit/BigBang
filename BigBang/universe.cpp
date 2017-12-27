@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
-#include <algorithm>
 #include <WindowsNumerics.h>
+#include <ppltasks.h>
 
 #include "control.hxx"
 #include "universe.hpp"
@@ -291,17 +291,17 @@ void Universe::recalculate_snips_extent_when_invalid() {
             do {
                 SnipInfo* info = SNIP_INFO(child);
                 unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
-                this->snips_left = std::min(this->snips_left, rx);
-                this->snips_top = std::min(this->snips_top, ry);
-                this->snips_right = std::max(this->snips_right, rx + width);
-                this->snips_bottom = std::max(this->snips_bottom, ry + height);
+                this->snips_left = min(this->snips_left, rx);
+                this->snips_top = min(this->snips_top, ry);
+                this->snips_right = max(this->snips_right, rx + width);
+                this->snips_bottom = max(this->snips_bottom, ry + height);
 
                 child = child->next;
             } while (child != this->head_snip);
         }
 
-        this->control->min_width = std::max(this->snips_right, this->preferred_min_width);
-        this->control->min_height = std::max(this->snips_bottom, this->preferred_min_height);
+        this->control->min_width = max(this->snips_right, this->preferred_min_width);
+        this->control->min_height = max(this->snips_bottom, this->preferred_min_height);
     }
 }
 
@@ -503,8 +503,8 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     if (this->rubberband_y != nullptr) {
         static auto rubberband_color = make_solid_brush(system_color(UIElementType::Highlight));
 
-        float left = std::min(this->last_pointer_x, (*this->rubberband_x));
-        float top = std::min(this->last_pointer_y, (*this->rubberband_y));
+        float left = min(this->last_pointer_x, (*this->rubberband_x));
+        float top = min(this->last_pointer_y, (*this->rubberband_y));
         float width = std::abs((*this->rubberband_x) - this->last_pointer_x);
         float height = std::abs((*this->rubberband_y) - this->last_pointer_y);
 
@@ -515,6 +515,23 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     }
 
     this->decorator->draw_after(this, ds, Width, Height);
+}
+
+void Universe::save(Platform::String^ path, float width, float height, float dpi) {
+	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
+	CanvasRenderTarget^ offscreen = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
+	CanvasDrawingSession^ ds = offscreen->CreateDrawingSession();
+
+	ds->Clear(ColorHelper::FromArgb(0, 0, 0, 0));
+	this->draw(ds, width, height);
+	Concurrency::create_task(offscreen->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
+		.then([=](Concurrency::task<void> saving) {
+		try {
+			saving.get();
+		} catch (Platform::Exception^ e) {
+			rsyslog("failed to save universe as bitmap:" + e->Message);
+		}
+	});
 }
 
 /*************************************************************************************************/
@@ -604,7 +621,7 @@ private:
         try {
             this->world->draw(args->DrawingSession, region.Width, region.Height);
         } catch (Platform::Exception^ wte) {
-            /// TODO: Why it complains about the WrongThreadException at first running.
+            /// TODO: Why it complains about the WrongThreadException at first running?
             rsyslog(wte->Message);
         }
     }
