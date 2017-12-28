@@ -1,11 +1,12 @@
 #pragma once
 
 #include "snip.hpp"
+#include "modbus.hpp"
 
 namespace WarGrey::SCADA {
     private class Statuslet : public WarGrey::SCADA::Snip {
     public:
-        Statuslet(Platform::String^ caption);
+        Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* callback);
 
     public:
         void load() override;
@@ -14,8 +15,10 @@ namespace WarGrey::SCADA {
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
     private:
-        Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
-        Platform::String^ caption;
-        bool plc_connected;
+        WarGrey::SCADA::IModbusClient* client;
+		Platform::String^ caption;
+
+	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
     };
 }

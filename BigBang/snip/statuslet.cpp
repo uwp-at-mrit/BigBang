@@ -128,10 +128,12 @@ static Status^ statusbar = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
 
-Statuslet::Statuslet(Platform::String^ caption) {
+Statuslet::Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console) {
     this->caption = caption;
-    this->plc_connected = false;
     this->label_font = make_text_format();
+
+	this->client = new ModbusClient(plc, console);
+	this->client->enable_debug(true);
 }
 
 void Statuslet::load() {
@@ -176,10 +178,14 @@ void Statuslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
     { // highlight PLC Status
         auto plc_x = x + width * 2.0F;
         ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, this->label_font);
-        if (this->plc_connected) {
-            ds->DrawText(speak("connected"), plc_x + status_prefix_width, y, Colors::Green, this->label_font);
+        if (this->client->connected()) {
+            ds->DrawText(this->client->device_hostname(), plc_x + status_prefix_width, y, Colors::Green, this->label_font);
         } else {
-            ds->DrawText(speak("disconnected"), plc_x + status_prefix_width, y, Colors::Red, this->label_font);
+			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
+			static unsigned int retry_count = 0;
+			int idx = (retry_count ++) % (sizeof(dots) / sizeof(Platform::String^));
+
+			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, this->label_font);
         }
     }
 }

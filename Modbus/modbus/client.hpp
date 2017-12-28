@@ -17,16 +17,16 @@ namespace WarGrey::SCADA {
 
 	private class IModbusConfirmation abstract {
 	public:
-		virtual void on_coils(uint16 transaction, uint8* coil_status, uint8 count) = 0;
-		virtual void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) = 0;
-		virtual void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) = 0;
-		virtual void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) = 0;
-		virtual void on_queue_registers(uint16 transaction, uint16* queue_registers, uint16 count) = 0;
+		virtual void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count) = 0;
+		virtual void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count) = 0;
+		virtual void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) = 0;
+		virtual void on_input_registers(uint16 transaction, uint16 address, uint16* input_registers, uint8 count) = 0;
+		virtual void on_queue_registers(uint16 transaction, uint16 address, uint16* queue_registers, uint16 count) = 0;
 
 	public:
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) = 0;
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) = 0;
-		virtual void on_exception(uint16 transaction, uint8 function_code, uint8 reason) = 0;
+		virtual void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) = 0;
 
 	public:
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) = 0;
@@ -40,10 +40,13 @@ namespace WarGrey::SCADA {
 			IModbusConfirmation* fallback_callback,
 			IModbusTransactionIdGenerator* generator);
 
+		Platform::String^ device_hostname();
+
 	public:
 		uint8* calloc_pdu();
 		void enable_debug(bool on_or_off);
 		bool debug_enabled();
+		bool connected();
 
     public: // data access
 		virtual uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
@@ -146,16 +149,16 @@ namespace WarGrey::SCADA {
 
 	private class ModbusConfirmation : public WarGrey::SCADA::IModbusConfirmation {
 	public:
-		void on_coils(uint16 transaction, uint8* coil_status, uint8 count) override {};
-		void on_discrete_inputs(uint16 transaction, uint8* input_status, uint8 count) override {};
-		void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) override {};
-		void on_input_registers(uint16 transaction, uint16* input_registers, uint8 count) override {};
-		void on_queue_registers(uint16 transaction, uint16* queue_registers, uint16 count) override {};
+		void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count) override {};
+		void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count) override {};
+		void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {};
+		void on_input_registers(uint16 transaction, uint16 address, uint16* input_registers, uint8 count) override {};
+		void on_queue_registers(uint16 transaction, uint16 address, uint16* queue_registers, uint16 count) override {};
 
 	public:
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {};
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or) override {};
-		void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {};
+		void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {};
 
 	public:
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) override {};

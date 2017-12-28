@@ -14,17 +14,17 @@ static IModbusClient* client = nullptr;
 
 class BConfirmation : public ModbusConfirmation {
 public:
-	void on_discrete_inputs(uint16 transaction, uint8* status, uint8 count) override {
+	void on_discrete_inputs(uint16 transaction, uint16 address, uint8* status, uint8 count) override {
 		rsyslog(L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
 			transaction, count, status[0], status[1], status[2]);
 	};
 
-	void on_holding_registers(uint16 transaction, uint16* register_values, uint8 count) override {
+	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
 		rsyslog(L"Job(%hu) done, read %hhu registers(0x%04X, 0x%04X, 0x%04X)",
 			transaction, count, register_values[0], register_values[1], register_values[2]);
 	}
 
-	void on_input_registers(uint16 transaction, uint16* register_values, uint8 count) override {
+	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
 		modbus_discard_current_adu(L"<Discarded job(%hu) with %hhu input register(0x%04X)>", transaction, count, register_values[0]);
 	}
 
@@ -33,7 +33,7 @@ public:
 		rsyslog(L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
 	};
 
-	void on_exception(uint16 transaction, uint8 function_code, uint8 reason) override {
+	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {
 		rsyslog(L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 

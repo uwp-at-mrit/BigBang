@@ -8,6 +8,8 @@
 #include "decorator/grid.hpp"
 #include "decorator/pipeline.hpp"
 
+#include "modbus_test.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -96,11 +98,12 @@ private enum B { Master = 0, Cleaner, Slave, Funnel, Count }; // WARNING: order 
 
 private class BConsole : public ModbusConfirmation {
 public:
-	BConsole(BSegment* master, Platform::String^ caption) : bench(master), caption(caption) {};
+	BConsole(BSegment* master, Platform::String^ caption, Platform::String^ plc)
+		: bench(master), caption(caption), device(plc) {};
 
 public:
 	void load_window_frame(float width, float height) {
-		this->statusbar = new Statuslet(this->caption);
+		this->statusbar = new Statuslet(this->caption, this->device, this);
 		this->bench->insert(this->statusbar);
 	}
 
@@ -124,7 +127,7 @@ public:
 		size_t pc_2nd_1st = SNIPS_ARITY(this->pipes_2nd_1st);
 		size_t pc_2nd_2nd = SNIPS_ARITY(this->pipes_2nd_2nd);
 
-		float pipe_length = width / float(pc_1st + pc_2nd_1st + pc_2nd_2nd + 6);
+		float pipe_length = width / float(pc_1st + pc_2nd_1st + /* pc_2nd_2nd + */ 6);
 		float pipe_thickness = pipe_length * 0.25F;
 		float master_height = pipe_length;
 		float funnel_width = pipe_length * 0.382F;
@@ -172,9 +175,9 @@ public:
 
 		this->bench->insert(this->vibrator);
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->pipes_2nd_2nd); i++) {
-			this->pipes_2nd_2nd[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-		}
+		//for (size_t i = 0; i < SNIPS_ARITY(this->pipes_2nd_2nd); i++) {
+		//	this->pipes_2nd_2nd[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		//}
 
 		{ // load motors
 			this->motors[B::Funnel] = load_motorlet(this->bench, funnel_width, 90.0);
@@ -261,11 +264,11 @@ public:
 		this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 		this->bench->move_to(this->vibrator, current_x + pipe_length, current_y + pipe_thickness - snip_height);
 		
-		current_x += (pipe_length + snip_width);
-		this->bench->move_to(this->pipes_2nd_2nd[0], current_x, current_y);
-		for (size_t i = 1; i < pcount_2nd_2nd; i++) {
-			connect_pipes(this->bench, this->pipes_2nd_2nd[i - 1], this->pipes_2nd_2nd[i], &current_x, &current_y);
-		}
+		//current_x += (pipe_length + snip_width);
+		//this->bench->move_to(this->pipes_2nd_2nd[0], current_x, current_y);
+		//for (size_t i = 1; i < pcount_2nd_2nd; i++) {
+		//	connect_pipes(this->bench, this->pipes_2nd_2nd[i - 1], this->pipes_2nd_2nd[i], &current_x, &current_y);
+		//}
 
 		{ // flow water and oil pipes and scales
 			Rect mport = this->master->get_input_port();
@@ -324,9 +327,33 @@ public:
 		}
 	}
 
+public:
+	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
+		rsyslog(L"Job(%hu) done, read %hhu registers", transaction, count);
+		this->trace_registers(L"AI", address, register_values, count);
+	}
+
+	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
+		rsyslog(L"Job(%hu) done, read %hhu registers", transaction, count);
+		this->trace_registers(L"AO", address, register_values, count);
+	}
+
+	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {
+		rsyslog(L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+	};
+
 private:
 	void move_motor(B id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
 		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
+	}
+
+private:
+	void trace_registers(const wchar_t* type, uint16 address, uint16* values, uint8 count) {
+		for (unsigned char i = 0; i < count; i++) {
+			if (values[i] > 0) {
+				rsyslog(L"    %s[%03d] = 0x%04X", type, address + i, values[i]);
+			}
+		}
 	}
 
 // never deletes these snips mannually
@@ -356,6 +383,7 @@ private:
 
 private:
 	Platform::String^ caption;
+	Platform::String^ device;
 	BSegment* bench;
 
 private:
@@ -391,7 +419,7 @@ private:
 };
 
 BSegment::BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
-	this->console = new BConsole(this, caption);
+	this->console = new BConsole(this, caption, "192.168.0.188");
 	this->set_decorator(new BConsoleDecorator("B1", system_color(UIElementType::GrayText), 64.0F));
 }
 

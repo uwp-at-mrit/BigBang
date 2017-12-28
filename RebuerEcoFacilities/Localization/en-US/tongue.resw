@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="connected" xml:space="preserve">
-    <value>Connected</value>
+  <data name="connecting" xml:space="preserve">
+    <value>Connecting</value>
   </data>
   <data name="disconnected" xml:space="preserve">
     <value>Disconnected</value>
@@ -130,7 +130,7 @@
     <value>Not Found</value>
   </data>
   <data name="plclabel" xml:space="preserve">
-    <value>PLC Status:  </value>
+    <value>PLC:  </value>
   </data>
   <data name="powerlabel" xml:space="preserve">
     <value>Power:  </value>

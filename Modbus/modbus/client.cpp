@@ -25,7 +25,7 @@ private struct WarGrey::SCADA::ModbusTransaction {
 	IModbusConfirmation* confirmation;
 };
 
-static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 transaction, uint8 function_code, DataReader^ mbin) {
+static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 transaction, uint8 function_code, uint16 address, DataReader^ mbin) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
 		static uint8 status[MODBUS_MAX_PDU_LENGTH];
@@ -33,9 +33,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		MODBUS_READ_BYTES(mbin, status, count);
 
 		if (function_code == MODBUS_READ_COILS) {
-			cf->on_coils(transaction, status, count);
+			cf->on_coils(transaction, address, status, count);
 		} else {
-			cf->on_discrete_inputs(transaction, status, count);
+			cf->on_discrete_inputs(transaction, address, status, count);
 		}
 	} break;
 	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS:     // MAP: Page 15, 16
@@ -45,9 +45,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		MODBUS_READ_DOUBLES(mbin, registers, count);
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
-			cf->on_input_registers(transaction, registers, count);
+			cf->on_input_registers(transaction, address, registers, count);
 		} else {
-			cf->on_holding_registers(transaction, registers, count);
+			cf->on_holding_registers(transaction, address, registers, count);
 		}
 	} break;
 	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
@@ -69,7 +69,7 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		uint16 useless = mbin->ReadUInt16();
 		uint16 count = mbin->ReadUInt16();
 
-		cf->on_queue_registers(transaction, queues, count);
+		cf->on_queue_registers(transaction, address, queues, count);
 	} break;
 	default: {
 		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
@@ -96,6 +96,10 @@ IModbusClient::IModbusClient(Platform::String^ server, uint16 port, IModbusConfi
 
     this->connect();
 };
+
+Platform::String^ IModbusClient::device_hostname() {
+	return this->device->RawName;
+}
 
 IModbusClient::~IModbusClient() {
 	this->generator->destroy();
@@ -153,6 +157,10 @@ void IModbusClient::connect() {
 				this->blocking_requests->erase(current);
 			};
         } catch (Platform::Exception^ e) {
+			if (this->debug_enabled()) {
+				rsyslog(modbus_socket_strerror(e));
+			}
+
 			this->connect();
         }
     });
@@ -251,6 +259,7 @@ void IModbusClient::wait_process_callback_loop() {
 			uint8 origin_code = maybe_transaction->second.function_code;
 			uint8 raw_code = mbin->ReadByte();
 			uint8 function_code = (raw_code > 0x80) ? (raw_code - 0x80) : raw_code;
+			uint16 maybe_address = MODBUS_GET_INT16_FROM_INT8(maybe_transaction->second.pdu_data, 0);
 
 			if (function_code != origin_code) {
 				modbus_discard_current_adu(this->debug,
@@ -264,9 +273,9 @@ void IModbusClient::wait_process_callback_loop() {
 
 			if (cf != nullptr) {
 				if (function_code != raw_code) {
-					cf->on_exception(transaction, function_code, this->mbin->ReadByte());
+					cf->on_exception(transaction, function_code, maybe_address, this->mbin->ReadByte());
 				} else {
-					modbus_apply_positive_confirmation(cf, transaction, function_code, this->mbin);
+					modbus_apply_positive_confirmation(cf, transaction, function_code, maybe_address, this->mbin);
 				}
 			}
 		});
@@ -308,6 +317,10 @@ void IModbusClient::enable_debug(bool on_or_off) {
 
 bool IModbusClient::debug_enabled() {
 	return this->debug;
+}
+
+bool IModbusClient::connected() {
+	return (this->mbout != nullptr);
 }
 
 uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val, IModbusConfirmation* cf) {
