@@ -26,7 +26,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp" />
@@ -49,7 +49,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\constants.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />

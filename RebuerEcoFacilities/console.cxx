@@ -22,7 +22,7 @@ Console::~Console() {
 
 void Console::initialize_component(Size region) {
     if (this->universe == nullptr) {
-        this->universe = new BSegment(this, "RRB1");
+        this->universe = new BSegment(this, "B1", "192.168.0.188");
     }
 
     this->reflow(region.Width, region.Height);

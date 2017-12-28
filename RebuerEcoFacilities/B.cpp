@@ -8,8 +8,6 @@
 #include "decorator/grid.hpp"
 #include "decorator/pipeline.hpp"
 
-#include "modbus_test.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -46,8 +44,8 @@ static inline Scalelet* load_scalelet(IUniverse* master, Platform::String^ unit,
 	return scale;
 }
 
-static inline LPipelet* load_pipelet(IUniverse* master, float length, float thickness, double hue, double saturation, double light, double highlight) {
-	LPipelet* pipe = new LPipelet(length, 0.0F, thickness, hue, saturation, light, highlight);
+static inline LSleevelet* load_sleevelet(IUniverse* master, float length, float thickness, double hue, double saturation, double light, double highlight) {
+	LSleevelet* pipe = new LSleevelet(length, 0.0F, thickness, hue, saturation, light, highlight);
 	master->insert(pipe);
 
 	return pipe;
@@ -155,7 +153,7 @@ public:
 		this->bench->insert(this->funnel);
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->pipes_1st); i++) {
-			this->pipes_1st[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
+			this->pipes_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
 			this->Pps[i] = load_scalelet(this->bench, "bar", "pressure", nullptr);
 			this->Tpis[i] = load_scalelet(this->bench, "celsius", "temperature", "inside");
 			this->Tpos[i] = load_scalelet(this->bench, "celsius", "temperature", "outside");
@@ -170,13 +168,13 @@ public:
 		}
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->pipes_2nd_1st); i++) {
-			this->pipes_2nd_1st[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+			this->pipes_2nd_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
 		}
 
 		this->bench->insert(this->vibrator);
 
 		//for (size_t i = 0; i < SNIPS_ARITY(this->pipes_2nd_2nd); i++) {
-		//	this->pipes_2nd_2nd[i] = load_pipelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		//	this->pipes_2nd_2nd[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
 		//}
 
 		{ // load motors
@@ -370,12 +368,12 @@ private:
 	Scalelet* Tss[3];
 	Funnellet* funnel;
 	Vibratorlet* vibrator;
-	Pipelet* pipes_1st[4];
+	Sleevelet* pipes_1st[4];
 	Scalelet* Pps[4];
 	Scalelet* Tpis[4];
 	Scalelet* Tpos[4];
-	Pipelet* pipes_2nd_1st[2];
-	Pipelet* pipes_2nd_2nd[2];
+	Sleevelet* pipes_2nd_1st[2];
+	Sleevelet* pipes_2nd_2nd[2];
 	Motorlet* motors[B::Count];
 	Scalelet* Tms[B::Count];
 	Liquidlet* oil_pipes[5];
@@ -418,9 +416,9 @@ private:
 	CanvasTextLayout^ caption;
 };
 
-BSegment::BSegment(Panel^ parent, Platform::String^ caption) : Universe(parent, 8) {
-	this->console = new BConsole(this, caption, "192.168.0.188");
-	this->set_decorator(new BConsoleDecorator("B1", system_color(UIElementType::GrayText), 64.0F));
+BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 8) {
+	this->console = new BConsole(this, "RR" + label, plc);
+	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 
 BSegment::~BSegment() {

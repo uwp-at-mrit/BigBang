@@ -1,4 +1,4 @@
-﻿#include "snip/pipeline/pipelet.hpp"
+﻿#include "snip/pipeline/sleevelet.hpp"
 #include "snip/pipeline/constants.hpp"
 #include "colorspace.hpp"
 #include "paint.hpp"
@@ -13,7 +13,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Pipelet::Pipelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+Sleevelet::Sleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), thickness(thickness) {
     if (thickness <= 0.0F) {
         this->thickness = this->width * default_pipe_thickness_ratio;
@@ -32,7 +32,7 @@ Pipelet::Pipelet(float width, float height, float thickness, double color, doubl
     this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
 }
 
-void Pipelet::load() {
+void Sleevelet::load() {
     Color colors[] = { this->color, this->highlight_color, this->color, this->color };
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);
@@ -57,11 +57,11 @@ void Pipelet::load() {
     this->hollow_body = geometry_freeze(geometry_substract(pipe, this->body_mask));
 }
 
-void Pipelet::fill_extent(float x, float y, float* w, float* h) {
+void Sleevelet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Sleevelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     brush_translate(this->brush, x, y);
     brush_translate(this->fitting_brush, x, y);
 
@@ -97,30 +97,30 @@ void Pipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 }
 
 /*************************************************************************************************/
-LPipelet::LPipelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Pipelet(width, height, thickness, color, saturation, light, highlight) {}
+LSleevelet::LSleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+    : Sleevelet(width, height, thickness, color, saturation, light, highlight) {}
 
-void LPipelet::update(long long count, long long interval, long long uptime, bool is_slow) {
+void LSleevelet::update(long long count, long long interval, long long uptime, bool is_slow) {
     this->cartoon_style->DashOffset = -float(count);
 }
 
-Rect LPipelet::get_input_port() {
+Rect LSleevelet::get_input_port() {
     float socket_width = this->fitting_brush->StartPoint.x;
 
     return Rect{ 0.0F, this->brush->StartPoint.y, socket_width, this->thickness };
 }
 
-Rect LPipelet::get_output_port() {
+Rect LSleevelet::get_output_port() {
     float socket_width = this->fitting_brush->StartPoint.x;
 
     return Rect{ this->width - socket_width, this->brush->StartPoint.y, socket_width, this->thickness };
 }
 
-CanvasGeometry^ LPipelet::make_fitting(float rx, float ry) {
+CanvasGeometry^ LSleevelet::make_fitting(float rx, float ry) {
     return cylinder_rl_surface(rx, ry, this->fitting_width);
 }
 
-void LPipelet::locate_pipe(float x, float rx, float off, float* infit_x, float *infit_cx, float* outfit_x, float* outfit_cx) {
+void LSleevelet::locate_pipe(float x, float rx, float off, float* infit_x, float *infit_cx, float* outfit_x, float* outfit_cx) {
     (*infit_cx) = x + this->fitting_width + rx - off;
     (*infit_x) = x;
     (*outfit_cx) = x + this->width - rx;
@@ -128,30 +128,30 @@ void LPipelet::locate_pipe(float x, float rx, float off, float* infit_x, float *
 }
 
 /*************************************************************************************************/
-RPipelet::RPipelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Pipelet(width, height, thickness, color, saturation, light, highlight) {}
+RSleevelet::RSleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+    : Sleevelet(width, height, thickness, color, saturation, light, highlight) {}
 
-void RPipelet::update(long long count, long long interval, long long uptime, bool is_slow) {
+void RSleevelet::update(long long count, long long interval, long long uptime, bool is_slow) {
     this->cartoon_style->DashOffset = float(count);
 }
 
-Rect RPipelet::get_input_port() {
+Rect RSleevelet::get_input_port() {
     float socket_width = this->fitting_brush->StartPoint.x;
 
     return Rect{ this->width - socket_width, this->brush->StartPoint.y, socket_width, this->thickness };
 }
 
-Rect RPipelet::get_output_port() {
+Rect RSleevelet::get_output_port() {
     float socket_width = this->fitting_brush->StartPoint.x;
 
     return Rect{ 0.0F, this->brush->StartPoint.y, socket_width, this->thickness };
 }
 
-CanvasGeometry^ RPipelet::make_fitting(float rx, float ry) {
+CanvasGeometry^ RSleevelet::make_fitting(float rx, float ry) {
     return cylinder_lr_surface(rx, ry, this->fitting_width);
 }
 
-void RPipelet::locate_pipe(float x, float rx, float off, float* infit_x, float *infit_cx, float* outfit_x, float* outfit_cx) {
+void RSleevelet::locate_pipe(float x, float rx, float off, float* infit_x, float *infit_cx, float* outfit_x, float* outfit_cx) {
     (*infit_x) = x + this->width - this->fitting_width - rx * 2.0F;
     (*infit_cx) = (*infit_x) + rx + off; 
     (*outfit_x) = x - off;

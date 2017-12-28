@@ -11,14 +11,14 @@
 #include "snip/vibratorlet.hpp"
 #include "snip/liquidlet.hpp"
 #include "snip/pipeline/funnellet.hpp"
-#include "snip/pipeline/pipelet.hpp"
+#include "snip/pipeline/sleevelet.hpp"
 #include "snip/pipeline/screwlet.hpp"
 #include "snip/pipeline/gluecleanerlet.hpp"
 
 namespace WarGrey::SCADA {
 	private class BSegment : public WarGrey::SCADA::Universe {
 	public:
-		BSegment(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ caption);
+		BSegment(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ label, Platform::String^ plc);
 		~BSegment() noexcept;
 
 	public:

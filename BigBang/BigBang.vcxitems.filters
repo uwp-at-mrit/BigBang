@@ -36,9 +36,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
@@ -52,6 +49,9 @@
       <Filter>snip\pipeline</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\pipeline\sleevelet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,9 +99,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipelet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
       <Filter>snip\pipeline</Filter>
     </ClInclude>
@@ -120,6 +117,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
       <Filter>interaction</Filter>
     </ClInclude>
+    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\pipeline\sleevelet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -128,11 +128,11 @@
     <Filter Include="snip">
       <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="snip\pipeline">
-      <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>
-    </Filter>
     <Filter Include="interaction">
       <UniqueIdentifier>{26bba27d-d03f-45eb-8b5c-6dd3b5d34440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="snip\pipeline">
+      <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

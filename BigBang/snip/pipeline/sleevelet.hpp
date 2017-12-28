@@ -3,9 +3,9 @@
 #include "snip/pipeline/pipesnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Pipelet : public WarGrey::SCADA::IPipeSnip {
+    private class Sleevelet : public WarGrey::SCADA::IPipeSnip {
     public:
-        Pipelet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
+        Sleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
 
     public:
         void load() override;
@@ -34,9 +34,9 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ cartoon_style;
     };
 
-    private class LPipelet : public WarGrey::SCADA::Pipelet {
+    private class LSleevelet : public WarGrey::SCADA::Sleevelet {
     public:
-        LPipelet(float width, float height = 0.0F, float thickness = 0.0F,
+        LSleevelet(float width, float height = 0.0F, float thickness = 0.0F,
             double color = nan("Silver"), double saturation = 0.0,
             double light = 0.512, double highlight = 0.753);
 
@@ -52,9 +52,9 @@ namespace WarGrey::SCADA {
         void locate_pipe(float x, float rx, float off, float* infit_x, float *infit_cx, float* outfit_x, float* outfit_cx) override;
     };
 
-    private class RPipelet : public WarGrey::SCADA::Pipelet {
+    private class RSleevelet : public WarGrey::SCADA::Sleevelet {
     public:
-        RPipelet(float width, float height = 0.0F, float thickness = 0.0F,
+        RSleevelet(float width, float height = 0.0F, float thickness = 0.0F,
             double color = nan("Silver"), double saturation = 0.0,
             double light = 0.512, double highlight = 0.753);
 
