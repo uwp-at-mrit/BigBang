@@ -7,6 +7,7 @@ namespace WarGrey::SCADA {
     private class Statuslet : public WarGrey::SCADA::Snip {
     public:
         Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* callback);
+		~Statuslet() noexcept;
 
     public:
         void load() override;

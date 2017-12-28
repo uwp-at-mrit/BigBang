@@ -136,6 +136,10 @@ Statuslet::Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusCo
 	this->client->enable_debug(true);
 }
 
+Statuslet::~Statuslet() {
+	delete this->client;
+}
+
 void Statuslet::load() {
     if (statusbar == nullptr) {
         TextExtent ts = get_text_extent(speak("plclabel"), label_font);
