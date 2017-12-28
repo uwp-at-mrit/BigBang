@@ -115,7 +115,7 @@ public:
 
 	void load_gauges(float width, float height) {
 		this->gauges[B::Master] = load_gaugelet(this->bench, "mastermotor", 100, 100);
-		this->gauges[B::Funnel] = load_gaugelet(this->bench, "feedingmotor", 200, 100);
+		this->gauges[B::Funnel] = load_gaugelet(this->bench, "feedmotor", 200, 100);
 		this->gauges[B::Cleaner] = load_gaugelet(this->bench, "cleanmotor", 10, 20);
 		this->gauges[B::Slave] = load_gaugelet(this->bench, "slavemotor", 200, 100);
 	}

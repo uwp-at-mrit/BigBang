@@ -153,7 +153,7 @@
   <data name="cleanmotor" xml:space="preserve">
     <value>清胶器螺杆电机</value>
   </data>
-  <data name="feedingmotor" xml:space="preserve">
+  <data name="feedmotor" xml:space="preserve">
     <value>进料电机</value>
   </data>
   <data name="mastermotor" xml:space="preserve">

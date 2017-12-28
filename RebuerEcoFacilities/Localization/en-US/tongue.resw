@@ -153,14 +153,14 @@
   <data name="cleanmotor" xml:space="preserve">
     <value>Glue Cleaning Motor</value>
   </data>
-  <data name="feedingmotor" xml:space="preserve">
-    <value>Feeding Motor</value>
+  <data name="feedmotor" xml:space="preserve">
+    <value>Feedstock Motor</value>
   </data>
   <data name="mastermotor" xml:space="preserve">
-    <value>Master Screw Motor</value>
+    <value>Main Screw Motor</value>
   </data>
   <data name="slavemotor" xml:space="preserve">
-    <value>Slave Screw Motor</value>
+    <value>Auxilliary Screw Motor</value>
   </data>
   <data name="ampere" xml:space="preserve">
     <value>Ampere</value>
