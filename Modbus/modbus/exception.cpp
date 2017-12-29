@@ -94,7 +94,7 @@ void WarGrey::SCADA::modbus_protocol_fatal(Platform::String^ message) {
 }
 
 void WarGrey::SCADA::modbus_protocol_fatal(const wchar_t *fmt, ...) {
-	VSWPRINT(pool, 2048, fmt);
+	VSNWPRINT(pool, 2048, fmt);
 	modbus_protocol_fatal(ref new Platform::String(pool));
 }
 
@@ -112,11 +112,11 @@ void WarGrey::SCADA::modbus_discard_current_adu(Platform::String^ message, bool 
 }
 
 void WarGrey::SCADA::modbus_discard_current_adu(const wchar_t *fmt, ...) {
-	VSWPRINT(pool, 2048, fmt);
+	VSNWPRINT(pool, 2048, fmt);
 	modbus_discard_current_adu(ref new Platform::String(pool), true);
 }
 
 void WarGrey::SCADA::modbus_discard_current_adu(bool debug, const wchar_t *fmt, ...) {
-	VSWPRINT(pool, 2048, fmt);
+	VSNWPRINT(pool, 2048, fmt);
 	modbus_discard_current_adu(ref new Platform::String(pool), debug);
 }

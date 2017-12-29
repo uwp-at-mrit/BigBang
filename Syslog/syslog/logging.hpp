@@ -1,41 +1,56 @@
 #pragma once
 
+#include <list>
+
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	private enum SyslogLevel { Debug, Info, Notice, Warning, Error, Critical, Alert, Panic, None };
+	private enum class Log { Debug, Info, Notice, Warning, Error, Critical, Alert, Panic, None };
 
 	private class ISyslogData abstract : public WarGrey::SCADA::SharedObject {};
 
 	private class ISyslogReceiver abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		virtual ~ISyslogReceiver() noexcept {};
-		ISyslogReceiver(WarGrey::SCADA::SyslogLevel level, Platform::String^ topic = "") : level(level), topic(topic) {};
+		ISyslogReceiver(WarGrey::SCADA::Log level, Platform::String^ topic = "")
+			: level(level), topic(topic) {};
 
 	public:
-		void log_message(WarGrey::SCADA::SyslogLevel level, Platform::String^ message,
+		void log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::ISyslogData* data, Platform::String^ topic);
 
 	protected:
 		virtual void on_log_message(
-			WarGrey::SCADA::SyslogLevel level,
+			WarGrey::SCADA::Log level,
 			Platform::String^ message,
 			WarGrey::SCADA::ISyslogData* data,
 			Platform::String^ topic) = 0;
 
 	private:
-		WarGrey::SCADA::SyslogLevel level;
+		WarGrey::SCADA::Log level;
 		Platform::String^ topic;
 	};
 
-	private class ISyslog abstract : public WarGrey::SCADA::SharedObject {
+	private class Syslog : public WarGrey::SCADA::SharedObject {
 	public:
-		virtual ~ISyslog() noexcept;
-		ISyslog(WarGrey::SCADA::SyslogLevel level, Platform::String^ topic = "", WarGrey::SCADA::ISyslog* parent = nullptr);
+		virtual ~Syslog() noexcept;
+		Syslog(WarGrey::SCADA::Log level, Platform::String^ topic = "", WarGrey::SCADA::Syslog* parent = nullptr);
+
+	public:
+		void append_log_receiver(ISyslogReceiver* receiver);
+		void log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ alt_topic = "", bool prefix = true);
+		void log_message(WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);
+		void log_message(WarGrey::SCADA::Log level, Platform::String^ alt_topic, const wchar_t* msgfmt, ...);
 
 	private:
-		WarGrey::SCADA::SyslogLevel level;
+		void do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ topic, bool prefix);
+
+	private:
+		WarGrey::SCADA::Log level;
 		Platform::String^ topic;
-		ISyslog* parent;
+		Syslog* parent;
+
+	private:
+		std::list<WarGrey::SCADA::ISyslogReceiver*>* receivers;
 	};
 }
