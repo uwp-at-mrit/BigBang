@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)string.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)system.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)time.hpp" />

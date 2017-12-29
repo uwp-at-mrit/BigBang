@@ -2,7 +2,6 @@
 
 #include "snip/snip.hpp"
 #include "snip/misc.hpp"
-#include "rsyslog.hpp"
 
 namespace WarGrey::SCADA {
     private class IPipeSnip : public WarGrey::SCADA::Snip {

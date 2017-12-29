@@ -6,7 +6,8 @@
 #include "modbus/server.hpp"
 #include "modbus/protocol.hpp"
 #include "modbus/exception.hpp"
-#include "rsyslog.hpp"
+
+#include "syslog.hpp"
 
 using namespace WarGrey::SCADA;
 

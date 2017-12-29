@@ -1,7 +1,7 @@
 #include <ppltasks.h>
 
 #include "modbus/protocol.hpp"
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 
 using namespace Windows::Storage::Streams;
 

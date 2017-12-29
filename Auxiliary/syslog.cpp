@@ -1,7 +1,8 @@
 ﻿#include <ppltasks.h>
 #include <queue>
 
-#include "rsyslog.hpp"
+#include "syslog.hpp"
+#include "string.hpp"
 #include "time.hpp"
 
 using namespace Concurrency;

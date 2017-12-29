@@ -1,5 +1,5 @@
 #include "modbus_test.hpp"
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 
 using namespace WarGrey::SCADA;
 

@@ -5,7 +5,7 @@
 #include "control.hxx"
 #include "universe.hpp"
 
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 #include "system.hpp"
 #include "paint.hpp"
 #include "shape.hpp"

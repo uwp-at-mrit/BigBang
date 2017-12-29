@@ -1,6 +1,7 @@
 ﻿#include "B.hpp"
 #include "tongue.hpp"
 #include "system.hpp"
+#include "syslog.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"

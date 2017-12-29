@@ -1,5 +1,5 @@
 ﻿#include "console.hxx"
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 #include "system.hpp"
 
 using namespace Windows::Foundation;

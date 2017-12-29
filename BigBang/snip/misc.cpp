@@ -3,7 +3,7 @@
 #include "snip/misc.hpp"
 #include "snip.hpp"
 #include "shape.hpp"
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 
 using namespace WarGrey::SCADA;
 

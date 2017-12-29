@@ -95,7 +95,7 @@ Color hsia(double hue, double saturation, double intensity, double alpha) {
 }
 
 /*************************************************************************************************/
-#include "rsyslog.hpp"
+#include "syslog.hpp"
 
 static inline int rgb_to_hex(Color rgb) {
     return (rgb.R << 16) | (rgb.G << 8) | rgb.B;

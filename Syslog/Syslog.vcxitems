@@ -14,9 +14,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Auxiliary\rsyslog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Auxiliary\syslog.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Auxiliary\rsyslog.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Auxiliary\syslog.hpp" />
   </ItemGroup>
 </Project>
