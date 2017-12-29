@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{9d38ad51-fee8-4303-8b0d-833bbcc93b58}</ItemsProjectGuid>
+    <ItemsProjectGuid>{01974307-edb2-486f-a3f2-2f4e8eb07d20}</ItemsProjectGuid>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,15 +14,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)system.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)tongue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Auxiliary\rsyslog.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)system.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)time.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)tongue.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Auxiliary\rsyslog.hpp" />
   </ItemGroup>
 </Project>

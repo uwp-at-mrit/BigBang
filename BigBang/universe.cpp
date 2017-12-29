@@ -144,7 +144,7 @@ Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate
 }
 
 Universe::~Universe() {
-	this->clear();
+	this->clear(false);
 	this->listener->destroy();
     this->decorator->destroy();
 }
@@ -526,8 +526,16 @@ void Universe::save(Platform::String^ path, float width, float height, float dpi
 	});
 }
 
-void Universe::clear() {
-	if (this->head_snip != nullptr) {
+void Universe::clear(bool run_on_game_loop) {
+	if (run_on_game_loop) {
+		//auto master = dynamic_cast<Win2DUniverse^>(this->control);
+
+		//if (master != nullptr) {
+		//	master->run_on_game_loop([this]() {
+				this->clear(false);
+		//	});
+		//}
+	} else if (this->head_snip != nullptr) {
 		Snip* temp_head = this->head_snip;
 		this->head_snip = nullptr;
 		Snip* child = nullptr;
@@ -551,8 +559,7 @@ public:
     };
 
 internal:
-    Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = nullptr) {
-        this->world = world; 
+    Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = nullptr) : world(world) {
         this->planet = ref new CanvasAnimatedControl();
         if (id != nullptr) this->planet->Name = id;
 
@@ -579,6 +586,12 @@ internal:
 
         parent->Children->Append(this->planet);
     }
+
+internal:
+	template<typename _Lambda>
+	void run_on_game_loop(_Lambda lambda) {
+		this->planet->RunOnGameLoopThreadAsync(lambda);
+	}
 
 private:
     void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args) {

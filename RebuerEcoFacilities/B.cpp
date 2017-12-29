@@ -447,4 +447,6 @@ void BSegment::reflow(float width, float height) {
 		console->reflow_gauges(width, height);
 		console->reflow_workline(width, height);
 	}
+
+	//this->clear();
 }
