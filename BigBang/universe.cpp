@@ -562,7 +562,7 @@ public:
 internal:
     Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = "") : world(world) {
         this->planet = ref new CanvasAnimatedControl();
-        if (!id->IsEmpty()) this->planet->Name = id;
+        if (id != nullptr) this->planet->Name = id;
 
         if (frame_rate > 0) {
             this->planet->TargetElapsedTime = TimeSpan({ 10000000LL / frame_rate });

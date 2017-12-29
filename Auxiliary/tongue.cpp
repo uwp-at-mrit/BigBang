@@ -6,5 +6,5 @@ Platform::String^ speak(Platform::String^ word) {
     static ResourceLoader^ tongue = ResourceLoader::GetForViewIndependentUse("tongue");
     Platform::String^ dialect = tongue->GetString(word);
 
-    return (dialect->IsEmpty()) ? word : dialect;
+    return (dialect == nullptr) ? word : dialect;
 }
