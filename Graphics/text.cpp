@@ -36,7 +36,7 @@ CanvasTextFormat^ make_text_format(float size, CanvasWordWrapping wrapping, Canv
 CanvasTextFormat^ make_text_format(Platform::String^ face, float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
 	auto font_config = ref new CanvasTextFormat();
 
-	if (face != nullptr) {
+	if (!face->IsEmpty()) {
 		font_config->FontFamily = face;
 	}
 

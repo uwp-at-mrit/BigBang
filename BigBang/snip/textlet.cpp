@@ -64,11 +64,11 @@ Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::St
 	this->scale_font = make_text_format("Courier New");
 	this->unit = make_text_layout(speak(unit), this->scale_font);
 
-	if (label != nullptr) {
+	if (!label->IsEmpty()) {
 		Platform::String^ symbol = speak(label);
 		Platform::String^ suffix = " =";
 
-		if (subscript == nullptr) {
+		if (subscript->IsEmpty()) {
 			this->label = make_text_layout(symbol + suffix, this->scale_font);
 		} else {
 			Platform::String^ subsymbol = speak(subscript);

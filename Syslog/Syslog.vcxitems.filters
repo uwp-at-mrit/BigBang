@@ -5,4 +5,10 @@
       <UniqueIdentifier>{99fc8653-d037-4284-8310-118f89dd3cb4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\logging.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\logging.cpp" />
+  </ItemGroup>
 </Project>

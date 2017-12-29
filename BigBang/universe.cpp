@@ -540,6 +540,7 @@ void Universe::clear(bool run_on_game_loop) {
 		this->head_snip = nullptr;
 		Snip* child = nullptr;
 		temp_head->prev->next = nullptr;
+		
 		do {
 			child = temp_head;
 			temp_head = temp_head->next;
@@ -559,9 +560,9 @@ public:
     };
 
 internal:
-    Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = nullptr) : world(world) {
+    Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = "") : world(world) {
         this->planet = ref new CanvasAnimatedControl();
-        if (id != nullptr) this->planet->Name = id;
+        if (!id->IsEmpty()) this->planet->Name = id;
 
         if (frame_rate > 0) {
             this->planet->TargetElapsedTime = TimeSpan({ 10000000LL / frame_rate });

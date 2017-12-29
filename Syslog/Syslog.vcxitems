@@ -15,8 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Auxiliary\syslog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\logging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Auxiliary\syslog.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\logging.hpp" />
   </ItemGroup>
 </Project>
