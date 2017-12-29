@@ -15,12 +15,12 @@ static IModbusClient* client = nullptr;
 class BConfirmation : public ModbusConfirmation {
 public:
 	void on_discrete_inputs(uint16 transaction, uint16 address, uint8* status, uint8 count) override {
-		rsyslog(L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
+		syslog(L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
 			transaction, count, status[0], status[1], status[2]);
 	};
 
 	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
-		rsyslog(L"Job(%hu) done, read %hhu registers(0x%04X, 0x%04X, 0x%04X)",
+		syslog(L"Job(%hu) done, read %hhu registers(0x%04X, 0x%04X, 0x%04X)",
 			transaction, count, register_values[0], register_values[1], register_values[2]);
 	}
 
@@ -30,16 +30,16 @@ public:
 
 public:
 	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {
-		rsyslog(L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
+		syslog(L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
 	};
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {
-		rsyslog(L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+		syslog(L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 
 public:
 	void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) override {
-		rsyslog(L"Job(%hu, 0x%02X) done, surprisingly", transaction, function_code);
+		syslog(L"Job(%hu, 0x%02X) done, surprisingly", transaction, function_code);
 	}
 };
 

@@ -84,7 +84,7 @@ private:
 				}
 
 				if (this->server->debug_enabled()) {
-					rsyslog(L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
+					syslog(L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
 						transaction, protocol, length, unit, function_code, id->Data());
 				}
 
@@ -103,7 +103,7 @@ private:
 				unsigned int sent = doReplying.get();
 
 				if (this->server->debug_enabled()) {
-					rsyslog(L"[sent %u-byte-response to %s]", sent, id->Data());
+					syslog(L"[sent %u-byte-response to %s]", sent, id->Data());
 				}
 
 				{ // clear dirty bytes
@@ -112,7 +112,7 @@ private:
 					if (dirty > 0) {
 						MODBUS_DISCARD_BYTES(mbin, dirty);
 						if (this->server->debug_enabled()) {
-							rsyslog(L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
+							syslog(L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
 						}
 					}
 				}
@@ -127,10 +127,10 @@ private:
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (modbus_error&) {
-				rsyslog(L"Cancel responding to %s", id->Data());
+				syslog(L"Cancel responding to %s", id->Data());
 				delete client;
 			} catch (Platform::Exception^ e) {
-				rsyslog(e->Message);
+				syslog(e->Message);
 				delete client;
 			}
 		});
@@ -191,9 +191,9 @@ void IModbusServer::listen() {
 				waitor,
 				&ModbusListener::respond);
 
-		rsyslog(L"## 0.0.0.0:%s", this->service->Data());
+		syslog(L"## 0.0.0.0:%s", this->service->Data());
 	} catch (Platform::Exception^ e) {
-		rsyslog(e->Message);
+		syslog(e->Message);
 	}
 }
 
@@ -460,11 +460,11 @@ int IModbusServer::process_device_identification(uint8* object_list, uint8 objec
 			memcpy(object_list + 2, strval, size);
 			
 			if (this->debug) {
-				rsyslog(L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
+				syslog(L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
 			}
 		} else {
 			if (this->debug) {
-				rsyslog(L"[device identification object 0x%02X will be sent in the next transcation]", object);
+				syslog(L"[device identification object 0x%02X will be sent in the next transcation]", object);
 			}
 		}
 	}

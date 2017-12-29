@@ -4,5 +4,5 @@
 #include "syslog/receiver/rsyslog.hpp"
 #include "syslog/receiver/stdout.hpp"
 
-void rsyslog(Platform::String^ message);
-void rsyslog(const wchar_t *fmt, ...);
+void syslog(Platform::String^ message);
+void syslog(const wchar_t *fmt, ...);

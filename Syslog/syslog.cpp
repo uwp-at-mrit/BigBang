@@ -5,7 +5,7 @@ using namespace WarGrey::SCADA;
 
 static Syslog* winlog;
 
-void rsyslog(Platform::String^ message) {
+void syslog(Platform::String^ message) {
 	if (winlog == nullptr) {
 		winlog = new Syslog(Log::Debug, "WinSCADA", nullptr);
 		winlog->append_log_receiver(new StdoutReceiver());
@@ -15,8 +15,8 @@ void rsyslog(Platform::String^ message) {
 	winlog->log_message(Log::Debug, message, "");
 }
 
-void rsyslog(const wchar_t *fmt, ...) {
+void syslog(const wchar_t *fmt, ...) {
 	VSWPRINT(message, fmt);
 
-    rsyslog(message);
+    syslog(message);
 }

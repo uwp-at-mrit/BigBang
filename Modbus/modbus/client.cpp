@@ -146,7 +146,7 @@ void IModbusClient::connect() {
             mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
             mbout->ByteOrder = ByteOrder::BigEndian;
 
-            rsyslog(L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
+            syslog(L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
 
 			this->wait_process_callback_loop();
 
@@ -158,7 +158,7 @@ void IModbusClient::connect() {
 			};
         } catch (Platform::Exception^ e) {
 			if (this->debug_enabled()) {
-				rsyslog(modbus_socket_strerror(e));
+				syslog(modbus_socket_strerror(e));
 			}
 
 			this->connect();
@@ -204,12 +204,12 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 			unsigned int sent = sending.get();
 
 			if (this->debug) {
-				rsyslog(L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
+				syslog(L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
 					sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
 			}
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
-			rsyslog(e->Message);
+			syslog(e->Message);
 			this->blocking_requests->insert(transaction);
 			this->connect();
 		}});
@@ -266,7 +266,7 @@ void IModbusClient::wait_process_callback_loop() {
 					L"<discarded negative confirmation due to non-expected function(0x%02X) comes from %s:%s>",
 					function_code, this->device->RawName->Data(), this->service->Data());
 			} else if (this->debug) {
-				rsyslog(L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
+				syslog(L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
 					transaction, protocol, length, unit, function_code,
 					this->device->RawName->Data(), this->service->Data());
 			}
@@ -288,7 +288,7 @@ void IModbusClient::wait_process_callback_loop() {
 			if (dirty > 0) {
 				MODBUS_DISCARD_BYTES(mbin, dirty);
 				if (this->debug) {
-					rsyslog(L"<discarded last %u bytes of the confirmation comes from %s:%s>",
+					syslog(L"<discarded last %u bytes of the confirmation comes from %s:%s>",
 						dirty, this->device->RawName->Data(), this->service->Data());
 				}
 			}
@@ -305,7 +305,7 @@ void IModbusClient::wait_process_callback_loop() {
 		} catch (task_canceled&) {
 			this->connect();
 		} catch (Platform::Exception^ e) {
-			rsyslog(e->Message);
+			syslog(e->Message);
 			this->connect();
 		}
 	});

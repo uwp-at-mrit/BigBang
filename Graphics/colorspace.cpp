@@ -132,6 +132,6 @@ void test_colorspace() {
             + " HSL:%06" + ((rgb == hsl) ? "X" : "x")
             + " HSI:%06" + ((rgb == hsi) ? "X" : "x");
 
-        rsyslog(frmt->Data(), i + 1, rgb, hsv, hsl, hsi);
+        syslog(frmt->Data(), i + 1, rgb, hsv, hsl, hsi);
     }
 }

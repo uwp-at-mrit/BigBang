@@ -39,7 +39,7 @@ void snip_save(Snip* snip, Platform::String^ path, float dpi) {
 		try {
 			saving.get();
 		} catch (Platform::Exception^ e) {
-			rsyslog("failed to save snip as bitmap:" + e->Message);
+			syslog("failed to save snip as bitmap:" + e->Message);
 		}
 	});
 }
