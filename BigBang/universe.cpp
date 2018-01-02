@@ -521,7 +521,7 @@ void Universe::save(Platform::String^ path, float width, float height, float dpi
 		try {
 			saving.get();
 		} catch (Platform::Exception^ e) {
-			syslog("failed to save universe as bitmap:" + e->Message);
+			syslog(Log::Alert, "failed to save universe as bitmap:" + e->Message);
 		}
 	});
 }
@@ -632,7 +632,7 @@ private:
 
         this->world->update(count, elapsed, uptime, is_slow);
 
-        if (is_slow) syslog(L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+        if (is_slow) syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
     }
 
     void do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
@@ -642,7 +642,7 @@ private:
             this->world->draw(args->DrawingSession, region.Width, region.Height);
         } catch (Platform::Exception^ wte) {
             /// TODO: Why it complains about the WrongThreadException at first running?
-            syslog(wte->Message);
+            syslog(Log::Warning, wte->Message);
         }
     }
 

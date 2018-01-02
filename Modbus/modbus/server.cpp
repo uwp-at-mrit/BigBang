@@ -84,7 +84,7 @@ private:
 				}
 
 				if (this->server->debug_enabled()) {
-					syslog(L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
+					syslog(Log::Debug, L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
 						transaction, protocol, length, unit, function_code, id->Data());
 				}
 
@@ -103,7 +103,7 @@ private:
 				unsigned int sent = doReplying.get();
 
 				if (this->server->debug_enabled()) {
-					syslog(L"[sent %u-byte-response to %s]", sent, id->Data());
+					syslog(Log::Debug, L"[sent %u-byte-response to %s]", sent, id->Data());
 				}
 
 				{ // clear dirty bytes
@@ -112,7 +112,7 @@ private:
 					if (dirty > 0) {
 						MODBUS_DISCARD_BYTES(mbin, dirty);
 						if (this->server->debug_enabled()) {
-							syslog(L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
+							syslog(Log::Debug, L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
 						}
 					}
 				}
@@ -127,10 +127,10 @@ private:
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (modbus_error&) {
-				syslog(L"Cancel responding to %s", id->Data());
+				syslog(Log::Debug, L"Cancel responding to %s", id->Data());
 				delete client;
 			} catch (Platform::Exception^ e) {
-				syslog(e->Message);
+				syslog(Log::Warning, e->Message);
 				delete client;
 			}
 		});
@@ -191,9 +191,9 @@ void IModbusServer::listen() {
 				waitor,
 				&ModbusListener::respond);
 
-		syslog(L"## 0.0.0.0:%s", this->service->Data());
+		syslog(Log::Info, L"## 0.0.0.0:%s", this->service->Data());
 	} catch (Platform::Exception^ e) {
-		syslog(e->Message);
+		syslog(Log::Warning, e->Message);
 	}
 }
 
@@ -460,11 +460,11 @@ int IModbusServer::process_device_identification(uint8* object_list, uint8 objec
 			memcpy(object_list + 2, strval, size);
 			
 			if (this->debug) {
-				syslog(L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
+				syslog(Log::Debug, L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
 			}
 		} else {
 			if (this->debug) {
-				syslog(L"[device identification object 0x%02X will be sent in the next transcation]", object);
+				syslog(Log::Debug, L"[device identification object 0x%02X will be sent in the next transcation]", object);
 			}
 		}
 	}
