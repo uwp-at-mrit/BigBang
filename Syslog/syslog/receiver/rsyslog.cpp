@@ -1,10 +1,6 @@
-﻿#include "syslog/receiver/rsyslog.hpp"
+﻿#include <ppltasks.h>
 
-#include <ppltasks.h>
-
-#include "syslog.hpp"
-#include "string.hpp"
-#include "time.hpp"
+#include "syslog/receiver/rsyslog.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -14,9 +10,9 @@ using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
 static void send_to(IDataWriter^ udpout, Platform::String^ ts, Platform::String^ level, Platform::String^ msg) {
-	udpout->WriteByte('[');
+	udpout->WriteByte('<');
 	udpout->WriteString(ts);
-	udpout->WriteString(L"] [");
+	udpout->WriteString(L"> [");
 	udpout->WriteString(level);
 	udpout->WriteString(L"] ");
 	udpout->WriteString(msg);
@@ -44,13 +40,13 @@ RSyslogReceiver::RSyslogReceiver(Platform::String^ server, unsigned short servic
 	});
 }
 
-void RSyslogReceiver::on_log_message(Log level, Platform::String^ message, ISyslogData* data, Platform::String^ topic) {
-	Platform::String^ timestamp = update_nowstamp();
+void RSyslogReceiver::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
+	Platform::String^ timestamp = data.timestamp;
 
 	if (udpout == nullptr) {
-		this->timestamps.push(timestamp);
 		this->levels.push(level.ToString());
 		this->messages.push(message);
+		this->timestamps.push(timestamp);
 	} else {
 		send_to(udpout, timestamp, level.ToString(), message);
 	}

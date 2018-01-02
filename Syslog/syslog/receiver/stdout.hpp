@@ -10,6 +10,6 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
-			WarGrey::SCADA::ISyslogData* data, Platform::String^ topic) override;
+			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 	};
 }

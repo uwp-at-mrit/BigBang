@@ -1,9 +1,10 @@
 #include "logging.hpp"
 #include "string.hpp"
+#include "time.hpp"
 
 using namespace WarGrey::SCADA;
 
-void ISyslogReceiver::log_message(Log level, Platform::String^ message, ISyslogData* data, Platform::String^ topic) {
+void ISyslogReceiver::log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
 	if (level >= this->level) {
 		if ((this->topic == nullptr) || (this->topic->Equals(topic))) {
 			this->on_log_message(level, message, data, topic);
@@ -62,16 +63,19 @@ void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ alt_topic,
 }
 
 void Syslog::do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ topic, bool prefix) {
+	SyslogMetainfo attachment;
 	auto actual_topic = ((topic == nullptr) ? this->topic : topic);
 	auto actual_message = (((!prefix) || (actual_topic == nullptr)) ? message : (actual_topic + ": " + message));
 	auto logger = this;
+
+	attachment.timestamp = update_nowstamp();
 
 	while (logger != nullptr) {
 		auto readers = logger->receivers;
 		auto no_more = readers->end();
 
 		for (auto it = readers->begin(); it != no_more; it++) {
-			(*it)->log_message(level, actual_message, nullptr, actual_topic);
+			(*it)->log_message(level, actual_message, attachment, actual_topic);
 		}
 
 		// TODO: do we need propagated level?

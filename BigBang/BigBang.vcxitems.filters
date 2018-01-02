@@ -51,9 +51,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\pipeline\sleevelet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
@@ -117,9 +115,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
       <Filter>interaction</Filter>
     </ClInclude>
-    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\pipeline\sleevelet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

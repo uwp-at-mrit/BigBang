@@ -7,7 +7,9 @@
 namespace WarGrey::SCADA {
 	private enum class Log { Debug, Info, Notice, Warning, Error, Critical, Alert, Panic, None };
 
-	private class ISyslogData abstract : public WarGrey::SCADA::SharedObject {};
+	private struct SyslogMetainfo {
+		Platform::String^ timestamp;
+	};
 
 	private class ISyslogReceiver abstract : public WarGrey::SCADA::SharedObject {
 	public:
@@ -17,13 +19,13 @@ namespace WarGrey::SCADA {
 
 	public:
 		void log_message(WarGrey::SCADA::Log level, Platform::String^ message,
-			WarGrey::SCADA::ISyslogData* data, Platform::String^ topic);
+			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic);
 
 	protected:
 		virtual void on_log_message(
 			WarGrey::SCADA::Log level,
 			Platform::String^ message,
-			WarGrey::SCADA::ISyslogData* data,
+			WarGrey::SCADA::SyslogMetainfo& data,
 			Platform::String^ topic) = 0;
 
 	private:
