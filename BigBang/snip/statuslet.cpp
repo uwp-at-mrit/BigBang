@@ -128,16 +128,14 @@ static Status^ statusbar = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
 
-#include "modbus_test.hpp"
-
 Statuslet::Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console) {
-	auto logger = default_logger();
+	auto logger = new Syslog(Log::Debug, "Test", nullptr);
+	logger->append_log_receiver(default_rsyslog_receiver());
 
     this->caption = caption;
     this->label_font = make_text_format();
 
 	this->client = new ModbusClient(logger, plc, console);
-	modbus_test_server(logger);
 }
 
 Statuslet::~Statuslet() {

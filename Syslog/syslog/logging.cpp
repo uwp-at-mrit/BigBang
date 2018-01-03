@@ -18,8 +18,6 @@ Syslog::Syslog(Log level, Platform::String^ topic, Syslog* parent) : level(level
 		this->parent = parent;
 		this->parent->reference();
 	}
-
-	this->receivers = new std::list<ISyslogReceiver*>();
 }
 
 Syslog::~Syslog() {
@@ -27,18 +25,16 @@ Syslog::~Syslog() {
 		this->parent->destroy();
 	}
 
-	while (!this->receivers->empty()) {
-		this->receivers->front()->destroy();
-		this->receivers->pop_front();
+	while (!this->receivers.empty()) {
+		this->receivers.front()->destroy();
+		this->receivers.pop_front();
 	}
-
-	delete this->receivers;
 }
 
 void Syslog::append_log_receiver(ISyslogReceiver* receiver) {
 	if (receiver != nullptr) {
 		receiver->reference();
-		this->receivers->push_back(receiver);
+		this->receivers.push_back(receiver);
 	}
 }
 
@@ -72,9 +68,9 @@ void Syslog::log_message(Platform::String^ topic, WarGrey::SCADA::Log level, Pla
 
 	while (logger != nullptr) {
 		auto readers = logger->receivers;
-		auto no_more = readers->end();
+		auto no_more = readers.end();
 
-		for (auto it = readers->begin(); it != no_more; it++) {
+		for (auto it = readers.begin(); it != no_more; it++) {
 			(*it)->log_message(level, actual_message, attachment, actual_topic);
 		}
 

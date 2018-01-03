@@ -88,6 +88,6 @@ namespace WarGrey::SCADA {
 
 int main(Platform::Array<Platform::String^>^ args) {
     // Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-cn";
-    auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Rebuer(); };
+	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Rebuer(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

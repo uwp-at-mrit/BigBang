@@ -3,13 +3,24 @@
 
 using namespace WarGrey::SCADA;
 
-static Syslog* winlog;
+ISyslogReceiver* default_rsyslog_receiver() {
+	static ISyslogReceiver* rsyslog;
+
+	if (rsyslog == nullptr) {
+		rsyslog = new RSyslogReceiver("172.16.1.1", 18030);
+		rsyslog->reference();
+	}
+
+	return rsyslog;
+}
 
 Syslog* default_logger() {
+	static Syslog* winlog;
+
 	if (winlog == nullptr) {
 		winlog = new Syslog(Log::Debug, "WinSCADA", nullptr);
+		winlog->append_log_receiver(default_rsyslog_receiver());
 		winlog->append_log_receiver(new StdoutReceiver());
-		winlog->append_log_receiver(new RSyslogReceiver("172.16.1.1", 18030));
 		winlog->reference();
 	}
 

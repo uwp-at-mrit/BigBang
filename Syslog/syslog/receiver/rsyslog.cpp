@@ -28,7 +28,7 @@ RSyslogReceiver::RSyslogReceiver(Platform::String^ server, unsigned short servic
 		conn.get();
 		udpout = ref new DataWriter(client->OutputStream);
 
-		do {
+		while (!this->timestamps.empty()) {
 			auto ts = this->timestamps.front();
 			auto lvl = this->levels.front();
 			auto msg = this->messages.front();
@@ -36,7 +36,7 @@ RSyslogReceiver::RSyslogReceiver(Platform::String^ server, unsigned short servic
 			this->timestamps.pop();
 			this->levels.pop();
 			this->messages.pop();
-		} while (!this->timestamps.empty());
+		};
 	});
 }
 

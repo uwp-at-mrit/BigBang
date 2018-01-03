@@ -53,6 +53,6 @@ namespace WarGrey::SCADA {
 		Syslog* parent;
 
 	private:
-		std::list<WarGrey::SCADA::ISyslogReceiver*>* receivers;
+		std::list<WarGrey::SCADA::ISyslogReceiver*> receivers;
 	};
 }
