@@ -32,7 +32,7 @@ void Motorlet::load() {
     auto screw_stops = MAKE_GRADIENT_STOPS(screw_colors);
     auto body_stops = MAKE_GRADIENT_STOPS(body_colors);
 
-    float thread = std::fmax(this->width * 0.01F, 1.0F);
+    float thread = fmax(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;
     float body_y = this->height - body_height;
     float screw_x = this->width * 0.8F;
@@ -56,7 +56,7 @@ void Motorlet::load() {
         auto lines = blank(); {
             int defcount = 8;
             int stepunit = 2;
-            int count = (head_height > float(stepunit * defcount)) ? defcount : int(std::floor(head_height / float(stepunit)));
+            int count = (head_height > float(stepunit * defcount)) ? defcount : int(floor(head_height / float(stepunit)));
             float thickness = head_height / float(count * stepunit);
             float end_x = body_x + body_width;
             float step = thickness * float(stepunit);

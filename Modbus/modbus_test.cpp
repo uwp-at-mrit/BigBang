@@ -14,66 +14,62 @@ static IModbusClient* client = nullptr;
 
 class BConfirmation : public ModbusConfirmation {
 public:
-	void on_discrete_inputs(uint16 transaction, uint16 address, uint8* status, uint8 count) override {
-		syslog(Log::Info, L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
+	void on_discrete_inputs(uint16 transaction, uint16 address, uint8* status, uint8 count, Syslog* logger) override {
+		logger->log_message(Log::Info, L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
 			transaction, count, status[0], status[1], status[2]);
 	};
 
-	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
-		syslog(Log::Info, L"Job(%hu) done, read %hhu registers(0x%04X, 0x%04X, 0x%04X)",
+	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
+		logger->log_message(Log::Info, L"Job(%hu) done, read %hhu registers(0x%04X, 0x%04X, 0x%04X)",
 			transaction, count, register_values[0], register_values[1], register_values[2]);
 	}
 
-	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
-		modbus_discard_current_adu(L"<Discarded job(%hu) with %hhu input register(0x%04X)>", transaction, count, register_values[0]);
+	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
+		modbus_discard_current_adu(logger,
+			L"<Discarded job(%hu) with %hhu input register(0x%04X)>",
+			transaction, count, register_values[0]);
 	}
 
 public:
-	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value) override {
-		syslog(Log::Info, L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
+	void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value, Syslog* logger) override {
+		logger->log_message(Log::Info, L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
 	};
 
-	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {
-		syslog(Log::Info, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
+		logger->log_message(Log::Info, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 
 public:
-	void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count) override {
-		syslog(Log::Info, L"Job(%hu, 0x%02X) done, surprisingly", transaction, function_code);
+	void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {
+		logger->log_message(Log::Info, L"Job(%hu, 0x%02X) done, surprisingly", transaction, function_code);
 	}
 };
 
-IModbusServer* make_modbus_test_server() {
+IModbusServer* make_modbus_test_server(Syslog* logger) {
 	uint8 ninregister = sizeof(inregisters_src) / sizeof(uint16);
-	auto device = new ModbusVirtualDevice(0x130, 0x25, 0x1C4, ninbit, 0x160, 0x20, 0x108, ninregister);
+	auto device = new ModbusVirtualDevice(logger, 0x130, 0x25, 0x1C4, ninbit, 0x160, 0x20, 0x108, ninregister);
 	
 	device->initialize_discrete_inputs(0, ninbit, inbits_src);
 	device->initialize_input_registers(0, ninregister, inregisters_src);
-	device->enable_debug(true);
 
 	return device;
 }
 
-IModbusClient* make_modbus_test_client(Platform::String^ device, IModbusConfirmation* confirmation) {
-	auto client = new ModbusClient(device, confirmation);
-
-	client->enable_debug(true);
-
-	return client;
+IModbusClient* make_modbus_test_client(Syslog* logger, Platform::String^ device, IModbusConfirmation* confirmation) {
+	return new ModbusClient(logger, device, confirmation);
 }
 
-void modbus_test_client(Platform::String^ device, bool debug) {
+void modbus_test_client(Platform::String^ device, Syslog* logger) {
 	if (client == nullptr) {
 		auto confirmation = new BConfirmation();
 		
-		client = make_modbus_test_client(device, confirmation);
+		client = make_modbus_test_client(logger, device, confirmation);
 	}
 
 	uint8 coils[] = { 0xCD, 0x6B, 0xB2, 0x0E, 0x1B };
 	uint16 registers[] = { 0x00, 0x00, 0x00 };
 	uint8 regsize = sizeof(registers_src) / sizeof(uint16);
 	
-	client->enable_debug(debug);
 	client->write_coil(0x0130, true);
 	client->write_coils(0x0130, 0x25, coils);
 	client->read_discrete_inputs(0x1C4, 0x16);
@@ -82,11 +78,11 @@ void modbus_test_client(Platform::String^ device, bool debug) {
 	client->write_read_registers(0x160 + 1, regsize - 1, 0x160, regsize, registers);
 }
 
-void modbus_test_server() {
+void modbus_test_server(Syslog* logger) {
 	if (server == nullptr) {
-		server = make_modbus_test_server();
+		server = make_modbus_test_server(logger);
 		server->listen();
 	}
 	
-	modbus_test_client("localhost", false);
+	modbus_test_client("localhost", logger);
 }

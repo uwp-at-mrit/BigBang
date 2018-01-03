@@ -16,7 +16,7 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-#define POP_REQUEST(self) auto it = self->begin(); free(it->second.pdu_data); self->erase(it);
+#define POP_REQUEST(self) auto it = self.begin(); free(it->second.pdu_data); self.erase(it);
 
 private struct WarGrey::SCADA::ModbusTransaction {
 	uint8 function_code;
@@ -25,7 +25,8 @@ private struct WarGrey::SCADA::ModbusTransaction {
 	IModbusConfirmation* confirmation;
 };
 
-static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 transaction, uint8 function_code, uint16 address, DataReader^ mbin) {
+static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
+	, uint16 transaction, uint8 function_code, uint16 address) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
 		static uint8 status[MODBUS_MAX_PDU_LENGTH];
@@ -33,9 +34,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		MODBUS_READ_BYTES(mbin, status, count);
 
 		if (function_code == MODBUS_READ_COILS) {
-			cf->on_coils(transaction, address, status, count);
+			cf->on_coils(transaction, address, status, count, logger);
 		} else {
-			cf->on_discrete_inputs(transaction, address, status, count);
+			cf->on_discrete_inputs(transaction, address, status, count, logger);
 		}
 	} break;
 	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS:     // MAP: Page 15, 16
@@ -45,9 +46,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		MODBUS_READ_DOUBLES(mbin, registers, count);
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
-			cf->on_input_registers(transaction, address, registers, count);
+			cf->on_input_registers(transaction, address, registers, count, logger);
 		} else {
-			cf->on_holding_registers(transaction, address, registers, count);
+			cf->on_holding_registers(transaction, address, registers, count, logger);
 		}
 	} break;
 	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
@@ -55,40 +56,39 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, uint16 t
 		uint16 address = mbin->ReadUInt16();
 		uint16 value = mbin->ReadUInt16();
 
-		cf->on_echo_response(transaction, function_code, address, value);
+		cf->on_echo_response(transaction, function_code, address, value, logger);
 	} break;
 	case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
 		uint16 address = mbin->ReadUInt16();
 		uint16 and_mask = mbin->ReadUInt16();
 		uint16 or_mask = mbin->ReadUInt16();
 
-		cf->on_echo_response(transaction, function_code, address, and_mask, or_mask);
+		cf->on_echo_response(transaction, function_code, address, and_mask, or_mask, logger);
 	} break;
 	case MODBUS_READ_FIFO_QUEUES: {                                           // MAP: Page 40
 		static uint16 queues[MODBUS_MAX_PDU_LENGTH];
 		uint16 useless = mbin->ReadUInt16();
 		uint16 count = mbin->ReadUInt16();
 
-		cf->on_queue_registers(transaction, address, queues, count);
+		cf->on_queue_registers(transaction, address, queues, count, logger);
 	} break;
 	default: {
 		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
 		static uint8 count = (uint8)mbin->UnconsumedBufferLength;
 
 		MODBUS_READ_BYTES(mbin, raw_data, count);
-		cf->on_private_response(transaction, function_code, raw_data, count);
+		cf->on_private_response(transaction, function_code, raw_data, count, logger);
 	}
 	}
 }
 
 /*************************************************************************************************/
-IModbusClient::IModbusClient(Platform::String^ server, uint16 port, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
-    this->device = ref new HostName(server);
-    this->service = port.ToString();
-
-	this->blocking_requests = new std::map<uint16, ModbusTransaction>();
-	this->pending_requests = new std::map<uint16, ModbusTransaction>();
-	this->pdu_pool = new std::queue<uint8*>();
+IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
+	this->logger = ((sl == nullptr) ? new Syslog(Log::None, "Modbus Silent Client", nullptr) : sl);
+	this->logger->reference();
+	
+	this->device = ref new HostName(h);
+    this->service = p.ToString();
 
 	this->fallback_confirmation = cf;
 	this->generator = ((g == nullptr) ? new WarGrey::SCADA::ModbusSequenceGenerator() : g);
@@ -102,24 +102,21 @@ Platform::String^ IModbusClient::device_hostname() {
 }
 
 IModbusClient::~IModbusClient() {
+	this->logger->destroy();
 	this->generator->destroy();
 
-	while (!this->blocking_requests->empty()) {
+	while (!this->blocking_requests.empty()) {
 		POP_REQUEST(this->blocking_requests);
 	}
 
-	while (!this->pending_requests->empty()) {
+	while (!this->pending_requests.empty()) {
 		POP_REQUEST(this->pending_requests);
 	}
 
-	while (!this->pdu_pool->empty()) {
-		free(this->pdu_pool->front());
-		this->pdu_pool->pop();
+	while (!this->pdu_pool.empty()) {
+		free(this->pdu_pool.front());
+		this->pdu_pool.pop();
 	}
-
-	delete this->blocking_requests;
-	delete this->pending_requests;
-	delete this->pdu_pool;
 }
 
 void IModbusClient::connect() {
@@ -146,33 +143,30 @@ void IModbusClient::connect() {
             mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
             mbout->ByteOrder = ByteOrder::BigEndian;
 
-            syslog(Log::Info, L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
+            this->logger->log_message(Log::Info, L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
 
 			this->wait_process_callback_loop();
 
-			while (!this->blocking_requests->empty()) {
-				auto current = this->blocking_requests->begin();
+			while (!this->blocking_requests.empty()) {
+				auto current = this->blocking_requests.begin();
 
 				this->apply_request(std::pair<uint16, ModbusTransaction>(current->first, current->second));
-				this->blocking_requests->erase(current);
+				this->blocking_requests.erase(current);
 			};
         } catch (Platform::Exception^ e) {
-			if (this->debug_enabled()) {
-				syslog(Log::Warning, modbus_socket_strerror(e));
-			}
-
+			this->logger->log_message(Log::Warning, modbus_socket_strerror(e));
 			this->connect();
         }
     });
 }
 
 uint8* IModbusClient::calloc_pdu() {
-	if (this->pdu_pool->empty()) {
-		this->pdu_pool->push((uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8)));
+	if (this->pdu_pool.empty()) {
+		this->pdu_pool.push((uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8)));
 	}
 
-	auto head = this->pdu_pool->front();
-	this->pdu_pool->pop();
+	auto head = this->pdu_pool.front();
+	this->pdu_pool.pop();
 
 	return head;
 }
@@ -184,7 +178,7 @@ uint16 IModbusClient::request(uint8 function_code, uint8* data, uint16 size, IMo
 	auto transaction = std::pair<uint16, ModbusTransaction>(id, mt);
 
 	if (this->mbout == nullptr) {
-		this->blocking_requests->insert(transaction);
+		this->blocking_requests.insert(transaction);
 	} else {
 		this->apply_request(transaction);
 	}
@@ -198,19 +192,17 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 
 	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second.pdu_data, transaction.second.size);
 
-	this->pending_requests->insert(transaction);
+	this->pending_requests.insert(transaction);
 	create_task(this->mbout->StoreAsync()).then([=](task<unsigned int> sending) {
 		try {
 			unsigned int sent = sending.get();
 
-			if (this->debug) {
-				syslog(Log::Debug, L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
-					sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
-			}
+			this->logger->log_message(Log::Debug, L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
+				sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Warning, e->Message);
-			this->blocking_requests->insert(transaction);
+			this->logger->log_message(Log::Warning, e->Message);
+			this->blocking_requests.insert(transaction);
 			this->connect();
 		}});
 }
@@ -222,9 +214,12 @@ void IModbusClient::wait_process_callback_loop() {
 
 		if (size < MODBUS_MBAP_LENGTH) {
 			if (size == 0) {
-				modbus_protocol_fatal(L"Server %s:%s has lost", this->device->RawName->Data(), this->service->Data());
+				modbus_protocol_fatal(this->logger,
+					L"Server %s:%s has lost",
+					this->device->RawName->Data(), this->service->Data());
 			} else {
-				modbus_protocol_fatal(L"MBAP header comes from server %s:%s is too short(%u < %hu)",
+				modbus_protocol_fatal(this->logger,
+					L"MBAP header comes from server %s:%s is too short(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, MODBUS_MBAP_LENGTH);
 			}
@@ -234,23 +229,24 @@ void IModbusClient::wait_process_callback_loop() {
 
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 			if (size < pdu_length) {
-				modbus_protocol_fatal(L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
+				modbus_protocol_fatal(this->logger,
+					L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, pdu_length);
 			}
 
-			auto maybe_transaction = this->pending_requests->find(transaction);
-			if (maybe_transaction == this->pending_requests->end()) {
-				modbus_discard_current_adu(this->debug,
+			auto maybe_transaction = this->pending_requests.find(transaction);
+			if (maybe_transaction == this->pending_requests.end()) {
+				modbus_discard_current_adu(this->logger,
 					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
 					transaction, this->device->RawName->Data(), this->service->Data());
 			} else {
-				this->pdu_pool->push(maybe_transaction->second.pdu_data);
-				this->pending_requests->erase(maybe_transaction);
+				this->pdu_pool.push(maybe_transaction->second.pdu_data);
+				this->pending_requests.erase(maybe_transaction);
 			}
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
-				modbus_discard_current_adu(this->debug,
+				modbus_discard_current_adu(this->logger,
 					L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s:%s>",
 					transaction, protocol, length, unit, this->device->RawName->Data(), this->service->Data());
 			}
@@ -262,20 +258,21 @@ void IModbusClient::wait_process_callback_loop() {
 			uint16 maybe_address = MODBUS_GET_INT16_FROM_INT8(maybe_transaction->second.pdu_data, 0);
 
 			if (function_code != origin_code) {
-				modbus_discard_current_adu(this->debug,
+				modbus_discard_current_adu(this->logger,
 					L"<discarded negative confirmation due to non-expected function(0x%02X) comes from %s:%s>",
 					function_code, this->device->RawName->Data(), this->service->Data());
-			} else if (this->debug) {
-				syslog(Log::Debug, L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
+			} else {
+				this->logger->log_message(Log::Debug,
+					L"<received confirmation(%hu, %hu, %hu, %hhu) for function 0x%02X comes from %s:%s>",
 					transaction, protocol, length, unit, function_code,
 					this->device->RawName->Data(), this->service->Data());
 			}
 
 			if (cf != nullptr) {
 				if (function_code != raw_code) {
-					cf->on_exception(transaction, function_code, maybe_address, this->mbin->ReadByte());
+					cf->on_exception(transaction, function_code, maybe_address, this->mbin->ReadByte(), this->logger);
 				} else {
-					modbus_apply_positive_confirmation(cf, transaction, function_code, maybe_address, this->mbin);
+					modbus_apply_positive_confirmation(cf, this->logger, this->mbin, transaction, function_code, maybe_address);
 				}
 			}
 		});
@@ -287,10 +284,9 @@ void IModbusClient::wait_process_callback_loop() {
 
 			if (dirty > 0) {
 				MODBUS_DISCARD_BYTES(mbin, dirty);
-				if (this->debug) {
-					syslog(Log::Debug, L"<discarded last %u bytes of the confirmation comes from %s:%s>",
-						dirty, this->device->RawName->Data(), this->service->Data());
-				}
+				this->logger->log_message(Log::Debug,
+					L"<discarded last %u bytes of the confirmation comes from %s:%s>",
+					dirty, this->device->RawName->Data(), this->service->Data());
 			}
 
 			this->wait_process_callback_loop();
@@ -305,18 +301,10 @@ void IModbusClient::wait_process_callback_loop() {
 		} catch (task_canceled&) {
 			this->connect();
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Warning, e->Message);
+			this->logger->log_message(Log::Warning, e->Message);
 			this->connect();
 		}
 	});
-}
-
-void IModbusClient::enable_debug(bool on_or_off) {
-	this->debug = on_or_off;
-}
-
-bool IModbusClient::debug_enabled() {
-	return this->debug;
 }
 
 bool IModbusClient::connected() {

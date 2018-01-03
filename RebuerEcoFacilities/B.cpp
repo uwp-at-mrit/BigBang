@@ -327,18 +327,18 @@ public:
 	}
 
 public:
-	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
-		syslog(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
-		this->trace_registers(L"AI", address, register_values, count);
+	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
+		logger->log_message(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
+		this->trace_registers(logger, L"AI", address, register_values, count);
 	}
 
-	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count) override {
-		syslog(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
-		this->trace_registers(L"AO", address, register_values, count);
+	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
+		logger->log_message(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
+		this->trace_registers(logger, L"AO", address, register_values, count);
 	}
 
-	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason) override {
-		syslog(Log::Debug, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
+		logger->log_message(Log::Debug, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 
 private:
@@ -347,10 +347,10 @@ private:
 	}
 
 private:
-	void trace_registers(const wchar_t* type, uint16 address, uint16* values, uint8 count) {
+	void trace_registers(Syslog* logger, const wchar_t* type, uint16 address, uint16* values, uint8 count) {
 		for (unsigned char i = 0; i < count; i++) {
 			if (values[i] > 0) {
-				syslog(Log::Debug, L"    %s[%03d] = 0x%04X", type, address + i, values[i]);
+				logger->log_message(Log::Debug, L"    %s[%03d] = 0x%04X", type, address + i, values[i]);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-﻿#include <cmath>
+﻿#include <algorithm>
 #include <ppltasks.h>
 
 #include "text.hpp"
@@ -48,7 +48,7 @@ public:
 			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
 			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
-			this->powercapacity = speak("powerlabel") + std::round((remaining / full) * 100.0F).ToString() + "%";
+			this->powercapacity = speak("powerlabel") + round((remaining / full) * 100.0F).ToString() + "%";
 		}
     }
 
@@ -60,7 +60,7 @@ public:
             auto nic = nics->GetAt(i);
             if (nic->IsWlanConnectionProfile) {
                 auto signal_bar = nic->GetSignalBars()->Value;
-                signal = std::round(signal_bar / 5 * 100).ToString() + L"%";
+                signal = round(signal_bar / 5 * 100).ToString() + L"%";
                 break;
             }
         }
@@ -128,16 +128,22 @@ static Status^ statusbar = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
 
+#include "modbus_test.hpp"
+
 Statuslet::Statuslet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console) {
+	auto logger = default_logger();
+
     this->caption = caption;
     this->label_font = make_text_format();
 
-	this->client = new ModbusClient(plc, console);
-	this->client->enable_debug(true);
+	this->client = new ModbusClient(logger, plc, console);
+	modbus_test_server(logger);
 }
 
 Statuslet::~Statuslet() {
-	delete this->client;
+	if (this->client != nullptr) {
+		delete this->client;
+	}
 }
 
 void Statuslet::load() {

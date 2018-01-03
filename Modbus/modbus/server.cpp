@@ -34,7 +34,7 @@ static inline int modbus_echo(uint8* response, uint16 address, uint16 value1, ui
 // delegate only accepts C++/CX class
 private ref class ModbusListener sealed {
 internal:
-    ModbusListener(IModbusServer* server) : server(server) {}
+    ModbusListener(IModbusServer* server, Syslog* logger) : server(server), logger(logger) {}
 
 public:
     void respond(StreamSocketListener^ listener, StreamSocketListenerConnectionReceivedEventArgs^ e) {
@@ -61,9 +61,10 @@ private:
 
 			if (size < MODBUS_MBAP_LENGTH) {
 				if (size == 0) {
-					modbus_protocol_fatal(L"Client %s has disconnected", id->Data());
+					modbus_protocol_fatal(this->logger, L"Client %s has disconnected", id->Data());
 				} else {
-					modbus_protocol_fatal(L"MBAP header from client %s is too short(%u < %hu)",
+					modbus_protocol_fatal(this->logger,
+						L"MBAP header from client %s is too short(%u < %hu)",
 						id->Data(), size, MODBUS_MBAP_LENGTH);
 				}
 			}
@@ -72,21 +73,22 @@ private:
 
 			return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 				if (size < pdu_length) {
-					modbus_protocol_fatal(L"PDU data from client %s has been truncated(%u < %hu)", id->Data(), size, pdu_length);
+					modbus_protocol_fatal(this->logger,
+						L"PDU data from client %s has been truncated(%u < %hu)",
+						id->Data(), size, pdu_length);
 				}
 
 				uint8 function_code = mbin->ReadByte();
 
 				if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
-					modbus_discard_current_adu(this->server->debug_enabled(),
+					modbus_discard_current_adu(this->logger,
 						L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s>",
 						transaction, protocol, length, unit, id->Data());
 				}
 
-				if (this->server->debug_enabled()) {
-					syslog(Log::Debug, L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
-						transaction, protocol, length, unit, function_code, id->Data());
-				}
+				this->logger->log_message(Log::Debug,
+					L"[received indication(%hu, %hu, %hu, %hhu) for function 0x%02X from %s]",
+					transaction, protocol, length, unit, function_code, id->Data());
 
 				int retcode = this->server->request(function_code, mbin, pdu_data);
 
@@ -102,18 +104,16 @@ private:
 			try {
 				unsigned int sent = doReplying.get();
 
-				if (this->server->debug_enabled()) {
-					syslog(Log::Debug, L"[sent %u-byte-response to %s]", sent, id->Data());
-				}
+				this->logger->log_message(Log::Debug, L"[sent %u-byte-response to %s]", sent, id->Data());
 
 				{ // clear dirty bytes
 					unsigned int dirty = mbin->UnconsumedBufferLength;
 
 					if (dirty > 0) {
 						MODBUS_DISCARD_BYTES(mbin, dirty);
-						if (this->server->debug_enabled()) {
-							syslog(Log::Debug, L"[discarded last %u bytes of the indication from %s]", dirty, id->Data());
-						}
+						this->logger->log_message(Log::Debug,
+							L"[discarded last %u bytes of the indication from %s]",
+							dirty, id->Data());
 					}
 				}
 
@@ -127,10 +127,10 @@ private:
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (modbus_error&) {
-				syslog(Log::Debug, L"Cancel responding to %s", id->Data());
+				this->logger->log_message(Log::Debug, L"Cancel responding to %s", id->Data());
 				delete client;
 			} catch (Platform::Exception^ e) {
-				syslog(Log::Warning, e->Message);
+				this->logger->log_message(Log::Warning, e->Message);
 				delete client;
 			}
 		});
@@ -138,14 +138,19 @@ private:
 
 private:
     IModbusServer* server;
+	Syslog* logger;
 };
 
 /*************************************************************************************************/
-static std::map<int, ModbusListener^>* modbus_smart_listeners = nullptr;
+static std::map<int, ModbusListener^> modbus_smart_listeners;
 
-IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, const char* revision
+IModbusServer::IModbusServer(Syslog* logger, uint16 port
+	, const char* vendor, const char* code, const char* revision
 	, const char* url, const char* name, const char* model, const char* appname)
-	: debug(false), service(port.ToString()) {
+	: service(port.ToString()) {
+	this->logger = ((logger == nullptr) ? new Syslog(Log::None, "Modbus Silent Server", nullptr) : logger);
+	this->logger->reference();
+
 	this->listener = ref new StreamSocketListener();
 	this->listener->Control->QualityOfService = SocketQualityOfService::LowLatency;
 	this->listener->Control->KeepAlive = false;
@@ -161,27 +166,20 @@ IModbusServer::IModbusServer(uint16 port, const char* vendor, const char* code, 
 };
 
 IModbusServer::~IModbusServer() {
+	this->logger->destroy();
 	auto uuid = this->listener->GetHashCode();
+	auto self = modbus_smart_listeners.find(uuid);
 
-	if (modbus_smart_listeners != nullptr) {
-		modbus_smart_listeners->erase(uuid);
-
-		if (modbus_smart_listeners->empty()) {
-			delete modbus_smart_listeners;
-			modbus_smart_listeners = nullptr;
-		}
+	if (self != modbus_smart_listeners.end()) {
+		modbus_smart_listeners.erase(self);
 	}
 }
 
 void IModbusServer::listen() {
-	auto waitor = ref new ModbusListener(this);
+	auto waitor = ref new ModbusListener(this, this->logger);
 	auto uuid = this->listener->GetHashCode();
 
-	if (modbus_smart_listeners == nullptr) {
-		modbus_smart_listeners = new std::map<int, ModbusListener^>();
-	}
-
-	modbus_smart_listeners->insert(std::pair<int, ModbusListener^>(uuid, waitor));
+	modbus_smart_listeners.insert(std::pair<int, ModbusListener^>(uuid, waitor));
 	
 	try {
 		create_task(this->listener->BindEndpointAsync(nullptr, this->service)).wait();
@@ -191,18 +189,10 @@ void IModbusServer::listen() {
 				waitor,
 				&ModbusListener::respond);
 
-		syslog(Log::Info, L"## 0.0.0.0:%s", this->service->Data());
+		this->logger->log_message(Log::Info, L"## listening on %s:%s", L"0.0.0.0", this->service->Data());
 	} catch (Platform::Exception^ e) {
-		syslog(Log::Warning, e->Message);
+		this->logger->log_message(Log::Warning, e->Message);
 	}
-}
-
-void IModbusServer::enable_debug(bool on_or_off) {
-    this->debug = on_or_off;
-}
-
-bool IModbusServer::debug_enabled() {
-    return this->debug;
 }
 
 int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { // MAP: Page 10
@@ -214,7 +204,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		uint16 quantity = mbin->ReadUInt16();
 
         if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_BITS)) {
-            retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_BITS, this->debug);
+            retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_BITS, this->logger);
 		} else if (funcode == MODBUS_READ_COILS) {
 			retcode = this->read_coils(address, quantity, response + 1);
 		} else {
@@ -231,7 +221,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		uint16 quantity = mbin->ReadUInt16();
 
 		if ((quantity < 0x01) || (quantity > MODBUS_MAX_READ_REGISTERS)) {
-			retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_REGISTERS, this->debug);
+			retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_READ_REGISTERS, this->logger);
 		} else if (funcode == MODBUS_READ_HOLDING_REGISTERS) {
 			retcode = this->read_holding_registers(address, quantity, response + 1);
 		} else {
@@ -251,7 +241,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			switch (value) {
 			case 0x0000: retcode = this->write_coil(address, false); break;
 			case 0xFF00: retcode = this->write_coil(address, true); break;
-			default: retcode = -modbus_illegal_enum_value(value, 0xFF00, 0x0000, this->debug); break;
+			default: retcode = -modbus_illegal_enum_value(value, 0xFF00, 0x0000, this->logger); break;
 			}
 		} else {
 			retcode = this->write_register(address, value);
@@ -270,17 +260,17 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		
 		if (funcode == MODBUS_WRITE_MULTIPLE_COILS) {
 			if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
-				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->debug);
+				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_BITS, this->logger);
 			} else if (count != MODBUS_COIL_NStar(quantity)) {
-				retcode = -modbus_illegal_data_value(count, MODBUS_COIL_NStar(quantity), this->debug);
+				retcode = -modbus_illegal_data_value(count, MODBUS_COIL_NStar(quantity), this->logger);
 			} else {
 				retcode = this->write_coils(address, quantity, response);
 			}
 		} else {
 			if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_REGISTERS)) {
-				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_REGISTERS, this->debug);
+				retcode = -modbus_illegal_data_value(quantity, 0x01, MODBUS_MAX_WRITE_REGISTERS, this->logger);
 			} else if (count != MODBUS_REGISTER_NStar(quantity)) {
-				retcode = -modbus_illegal_data_value(count, MODBUS_REGISTER_NStar(quantity), this->debug);
+				retcode = -modbus_illegal_data_value(count, MODBUS_REGISTER_NStar(quantity), this->logger);
 			} else {
 				retcode = this->write_registers(address, quantity, response);
 			}
@@ -316,11 +306,11 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		MODBUS_READ_BYTES(mbin, rwpool, wcount);
 
 		if ((rquantity < 0x01) || (rquantity > MODBUS_MAX_WR_READ_REGISTERS)) {
-			retcode = -modbus_illegal_data_value(rquantity, 0x01, MODBUS_MAX_WR_READ_REGISTERS, this->debug);
+			retcode = -modbus_illegal_data_value(rquantity, 0x01, MODBUS_MAX_WR_READ_REGISTERS, this->logger);
 		} else if ((wquantity < 0x01) || (wquantity > MODBUS_MAX_WR_WRITE_REGISTERS)) {
-			retcode = -modbus_illegal_data_value(wquantity, 0x01, MODBUS_MAX_WR_WRITE_REGISTERS, this->debug);
+			retcode = -modbus_illegal_data_value(wquantity, 0x01, MODBUS_MAX_WR_WRITE_REGISTERS, this->logger);
 		} else if (wcount != MODBUS_REGISTER_NStar(wquantity)) {
-			retcode = -modbus_illegal_data_value(wcount, MODBUS_REGISTER_NStar(wquantity), this->debug);
+			retcode = -modbus_illegal_data_value(wcount, MODBUS_REGISTER_NStar(wquantity), this->logger);
 		} else {
 			retcode = this->write_read_registers(waddress, wquantity, raddress, rquantity, rwpool);
 		}
@@ -336,7 +326,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 
 		if (retcode >= 0) {
 			if (retcode = 31) {
-				retcode = -modbus_illegal_data_value(retcode, 0, 32, this->debug);
+				retcode = -modbus_illegal_data_value(retcode, 0, 32, this->logger);
 			} else {
 				uint8 NStar = MODBUS_QUEUE_NStar(retcode);
 				retcode = NStar + modbus_echo(response, NStar + 2, retcode);
@@ -371,7 +361,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			uint8 object_max = 0xFF;
 
 			if ((read_device_id_code < 0x01) || (read_device_id_code > 0x04)) {
-				retcode = -modbus_illegal_data_value(read_device_id_code, 0x01, 0x04, this->debug);
+				retcode = -modbus_illegal_data_value(read_device_id_code, 0x01, 0x04, this->logger);
 			} else {
 				int object_used = this->process_device_identification(object_list, object_id, capacity, true);
 				bool stream_access = (read_device_id_code != 0x04);
@@ -406,7 +396,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			}
 
 			if (retcode == 0) {
-				retcode = -modbus_identification_not_found(object_id, 0x00, object_stdmax - 1, 0x80, this->debug);
+				retcode = -modbus_identification_not_found(object_id, 0x00, object_stdmax - 1, 0x80, this->logger);
 			} else if (retcode > 0) { // implies object_count > 0;
 				response[0] = MEI_type;
 				response[1] = read_device_id_code;
@@ -418,7 +408,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 			}
 		}; break;
 		default: {
-			retcode = -modbus_illegal_enum_value(MEI_type, 0x0D, 0x0E, this->debug);
+			retcode = -modbus_illegal_enum_value(MEI_type, 0x0D, 0x0E, this->logger);
 		}
 		}
 	}; break;
@@ -459,13 +449,13 @@ int IModbusServer::process_device_identification(uint8* object_list, uint8 objec
 			object_list[1] = size;
 			memcpy(object_list + 2, strval, size);
 			
-			if (this->debug) {
-				syslog(Log::Debug, L"[device identification object 0x%02X(%u:%u bytes) is ready]", object, size, capacity);
-			}
+			this->logger->log_message(Log::Debug,
+				L"[device identification object 0x%02X(%u:%u bytes) is ready]",
+				object, size, capacity);
 		} else {
-			if (this->debug) {
-				syslog(Log::Debug, L"[device identification object 0x%02X will be sent in the next transcation]", object);
-			}
+			this->logger->log_message(Log::Debug,
+				L"[device identification object 0x%02X will be sent in the next transcation]",
+				object);
 		}
 	}
 
@@ -473,5 +463,5 @@ int IModbusServer::process_device_identification(uint8* object_list, uint8 objec
 }
 
 int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint16 data_length, uint8* response) { // MAP: Page 10
-    return -modbus_illegal_function(function_code, this->debug);
+    return -modbus_illegal_function(function_code, this->logger);
 }

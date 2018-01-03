@@ -4,5 +4,7 @@
 #include "syslog/receiver/rsyslog.hpp"
 #include "syslog/receiver/stdout.hpp"
 
+WarGrey::SCADA::Syslog* default_logger();
+
 void syslog(WarGrey::SCADA::Log level, Platform::String^ message);
 void syslog(WarGrey::SCADA::Log level, const wchar_t *fmt, ...);

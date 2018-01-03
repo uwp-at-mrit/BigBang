@@ -42,27 +42,27 @@ void Syslog::append_log_receiver(ISyslogReceiver* receiver) {
 	}
 }
 
-void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ alt_topic, bool prefix) {
+void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
 	if (level >= this->level) {
-		this->do_log_message(level, message, alt_topic, prefix);
+		this->log_message(this->topic, level, message, prefix);
 	}
 }
 
 void Syslog::log_message(WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...) {
 	if (level >= this->level) {
 		VSWPRINT(message, msgfmt);
-		this->do_log_message(level, message, this->topic, true);
+		this->log_message(this->topic, level, message, true);
 	}
 }
 
-void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ alt_topic, const wchar_t* msgfmt, ...) {
+void Syslog::log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...) {
 	if (level >= this->level) {
 		VSWPRINT(message, msgfmt);
-		this->do_log_message(level, message, alt_topic, true);
+		this->log_message(alt_topic, level, message, true);
 	}
 }
 
-void Syslog::do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ topic, bool prefix) {
+void Syslog::log_message(Platform::String^ topic, WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
 	SyslogMetainfo attachment;
 	auto actual_topic = ((topic == nullptr) ? this->topic : topic);
 	auto actual_message = (((!prefix) || (actual_topic == nullptr)) ? message : (actual_topic + ": " + message));
