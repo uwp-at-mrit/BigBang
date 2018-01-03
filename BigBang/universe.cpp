@@ -642,7 +642,7 @@ private:
             this->world->draw(args->DrawingSession, region.Width, region.Height);
         } catch (Platform::Exception^ wte) {
             /// TODO: Why it complains about the WrongThreadException at first running?
-            syslog(Log::Warning, wte->Message);
+            syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
         }
     }
 

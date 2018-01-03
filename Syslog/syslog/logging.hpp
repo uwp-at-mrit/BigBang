@@ -48,6 +48,9 @@ namespace WarGrey::SCADA {
 		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);
 
 	private:
+		void do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ alt_topic, bool prefix);
+
+	private:
 		WarGrey::SCADA::Log level;
 		Platform::String^ topic;
 		Syslog* parent;

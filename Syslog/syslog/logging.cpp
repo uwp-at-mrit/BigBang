@@ -40,29 +40,35 @@ void Syslog::append_log_receiver(ISyslogReceiver* receiver) {
 
 void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
 	if (level >= this->level) {
-		this->log_message(this->topic, level, message, prefix);
+		this->do_log_message(level, message, this->topic, prefix);
+	}
+}
+
+void Syslog::log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
+	if (level >= this->level) {
+		this->do_log_message(level, message, alt_topic, prefix);
 	}
 }
 
 void Syslog::log_message(WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...) {
 	if (level >= this->level) {
 		VSWPRINT(message, msgfmt);
-		this->log_message(this->topic, level, message, true);
+		this->do_log_message(level, message, this->topic, true);
 	}
 }
 
 void Syslog::log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...) {
 	if (level >= this->level) {
 		VSWPRINT(message, msgfmt);
-		this->log_message(alt_topic, level, message, true);
+		this->do_log_message(level, message, alt_topic, true);
 	}
 }
 
-void Syslog::log_message(Platform::String^ topic, WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
+void Syslog::do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ topic, bool prefix) {
 	SyslogMetainfo attachment;
 	auto actual_topic = ((topic == nullptr) ? this->topic : topic);
 	auto actual_message = (((!prefix) || (actual_topic == nullptr)) ? message : (actual_topic + ": " + message));
-	auto logger = this;
+	Syslog* logger = this;
 
 	attachment.timestamp = update_nowstamp();
 
@@ -75,6 +81,6 @@ void Syslog::log_message(Platform::String^ topic, WarGrey::SCADA::Log level, Pla
 		}
 
 		// TODO: do we need propagated level?
-		logger = this->parent;
+		logger = logger->parent;
 	}
 }

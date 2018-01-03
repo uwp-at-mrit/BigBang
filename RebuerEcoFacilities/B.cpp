@@ -102,8 +102,11 @@ public:
 
 public:
 	void load_window_frame(float width, float height) {
-		this->statusbar = new Statuslet(this->caption, this->device, this);
+		this->statusline = new Statuslinelet(Log::Debug);
+		this->statusbar = new Statusbarlet(this->caption, this->device, this, this->statusline);
+
 		this->bench->insert(this->statusbar);
+		this->bench->insert(this->statusline);
 	}
 
 	void load_icons(float width, float height) {
@@ -193,6 +196,7 @@ public:
 public:
 	void reflow_window_frame(float width, float height) {
 		this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &this->console_y);
+		this->bench->move_to(this->statusline, 0.0F, height - console_y);
 	}
 
 	void reflow_icons(float width, float height) {
@@ -221,7 +225,7 @@ public:
 		float snip_width, snip_height;
 
 		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
-		gauge_y = height - snip_height;
+		gauge_y = height - snip_height - console_y;
 		for (unsigned int i = 0; i < SNIPS_ARITY(this->gauges); i++) {
 			this->bench->move_to(this->gauges[i], gauge_x, gauge_y);
 			this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
@@ -357,7 +361,8 @@ private:
 
 // never deletes these snips mannually
 private:
-	Statuslet * statusbar;
+	Statusbarlet* statusbar;
+	Statuslinelet* statusline;
 	Snip* icons[1];
 	Gaugelet* gauges[B::Count];
 
@@ -407,8 +412,12 @@ public:
 	}
 
 	void draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
-		if ((x == 0.0) && (y == 0.0)) { // underline statusbar
-			ds->DrawLine(0, height, width, height, this->color, 2.0F);
+		if (x == 0.0) {
+			if (y == 0.0) { // statusbar's bottomline 
+				ds->DrawLine(0, height, width, height, this->color, 2.0F);
+			} else if (dynamic_cast<Statuslinelet*>(self) != nullptr) { // statusline's topline
+				ds->DrawLine(0, y, width, y, this->color, 2.0F);
+			}
 		}
 	}
 
@@ -432,10 +441,10 @@ void BSegment::load(CanvasCreateResourcesEventArgs^ args, float width, float hei
 	auto console = dynamic_cast<BConsole*>(this->console);
 
 	if (console != nullptr) {
-		console->load_window_frame(width, height);
 		console->load_icons(width, height);
 		console->load_gauges(width, height);
 		console->load_workline(width, height);
+		console->load_window_frame(width, height);
 	}
 }
 
