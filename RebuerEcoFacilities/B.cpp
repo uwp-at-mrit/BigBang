@@ -103,7 +103,7 @@ public:
 public:
 	void load_window_frame(float width, float height) {
 		this->statusline = new Statuslinelet(Log::Debug);
-		this->statusbar = new Statusbarlet(this->caption, this->device, this, this->statusline);
+		this->statusbar = new Statusbarlet(this->caption, this->device, this, 126, 120, 429, this->statusline);
 
 		this->bench->insert(this->statusbar);
 		this->bench->insert(this->statusline);
@@ -332,17 +332,12 @@ public:
 
 public:
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
-		logger->log_message(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
-		this->trace_registers(logger, L"AI", address, register_values, count);
-	}
-
-	void on_holding_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
-		logger->log_message(Log::Debug, L"Job(%hu) done, read %hhu registers", transaction, count);
-		this->trace_registers(logger, L"AO", address, register_values, count);
+		logger->log_message(Log::Debug, L"Job(%hu) done, read %hu registers(%d, %d, %d, %d, %d)", transaction, count,
+			register_values[0], register_values[1], register_values[2], register_values[3], register_values[4]);
 	}
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
-		logger->log_message(Log::Debug, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+		logger->log_message(Log::Error, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 
 private:
@@ -426,7 +421,7 @@ private:
 	CanvasTextLayout^ caption;
 };
 
-BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 8) {
+BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 4) {
 	this->console = new BConsole(this, "RR" + label, plc);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }

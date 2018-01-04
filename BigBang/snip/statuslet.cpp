@@ -29,13 +29,17 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 typedef TypedEventHandler<Battery^, Platform::Object^> BatteryUpdateHandler;
 typedef TypedEventHandler<WiFiAdapter^, Platform::Object^> WiFiUpdateHandler;
 
+static CanvasTextFormat^ status_font = nullptr;
+static float status_prefix_width = 0.0F;
+static float status_height = 0.0F;
+
 // delegate only accepts C++/CX class
 ref class Status sealed {
 public:
     TimeSpan update_timestamp() {
         int l00ns;
 
-        this->timestamp = update_nowstamp(false, &l00ns);
+        this->timestamp = make_text_layout(update_nowstamp(false, &l00ns), status_font);
 
         return TimeSpan{ 10000000 - l00ns };
     }
@@ -43,15 +47,18 @@ public:
     void update_powerinfo() {
         auto info = Battery::AggregateBattery->GetReport();
 		auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
+		Platform::String^ power = nullptr;
 
 		if (maybe_remaining == nullptr) {
-			this->powercapacity = speak("powerlabel") + "100%";
+			power = speak("powerlabel") + "100%";
 		} else {
 			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
 			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
-			this->powercapacity = speak("powerlabel") + round((remaining / full) * 100.0F).ToString() + "%";
+			power = speak("powerlabel") + round((remaining / full) * 100.0F).ToString() + "%";
 		}
+
+		this->powercapacity = make_text_layout(power, status_font);
     }
 
     void update_wifiinfo(WiFiAdapter^ info) {
@@ -67,11 +74,11 @@ public:
             }
         }
 
-        this->wifi_strength = speak("wifilabel") + signal;
+        this->wifi_strength = make_text_layout(speak("wifilabel") + signal, status_font);
     }
 
     void update_sdinfo() {
-        this->storage = speak("sdlabel") + L"0MB";
+        this->storage = make_text_layout(speak("sdlabel") + L"0MB", status_font);
     }
 
     void update_ipinfo() {
@@ -86,7 +93,7 @@ public:
             }
         }
 
-        this->ipv4 = speak("ipv4label") + ipv4;
+        this->ipv4 = make_text_layout(speak("ipv4label") + ipv4, status_font);
     }
 
 internal:
@@ -113,11 +120,11 @@ private:
     }
 
 private:
-    Platform::String^ timestamp;
-    Platform::String^ powercapacity;
-    Platform::String^ wifi_strength;
-    Platform::String^ storage;
-    Platform::String^ ipv4;
+    CanvasTextLayout^ timestamp;
+	CanvasTextLayout^ powercapacity;
+	CanvasTextLayout^ wifi_strength;
+	CanvasTextLayout^ storage;
+	CanvasTextLayout^ ipv4;
     
 private:
     Statusbarlet* master; // this will be destructed by master Control;
@@ -127,9 +134,6 @@ private:
 
 /*************************************************************************************************/
 static Status^ statusbar = nullptr;
-static CanvasTextFormat^ status_font = nullptr;
-static float status_prefix_width = 0.0F;
-static float status_height = 0.0F;
 
 static void initialize_status_font() {
 	if (status_font == nullptr) {
@@ -141,14 +145,17 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console, ISyslogReceiver* uirecv) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console
+	, uint16 saddr, uint16 q, uint16 eaddr, ISyslogReceiver* uirecv)
+	: start_address(saddr), end_address(eaddr), quantity(q) {
 	auto logger = new Syslog(Log::Debug, caption, default_logger());
 	
 	if (uirecv != nullptr) {
 		logger->append_log_receiver(uirecv);
 	}
 
-	this->caption = caption;
+	initialize_status_font();
+	this->caption = make_text_layout(speak(caption), status_font);
 	this->client = new ModbusClient(logger, plc, console);
 }
 
@@ -159,8 +166,6 @@ Statusbarlet::~Statusbarlet() {
 }
 
 void Statusbarlet::load() {
-	initialize_status_font();
-
     if (statusbar == nullptr) {
         statusbar = ref new Status(this);
     }
@@ -178,20 +183,27 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-    statusbar->update_timestamp();
+	uint16 address = this->start_address;
+
+	statusbar->update_timestamp();
+
+	while (address < this->end_address) {
+		uint16 q = min(this->quantity, this->end_address - address);
+		this->client->read_input_registers(address, q);
+		address += q;
+	}
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto timestamp = ref new CanvasTextLayout(ds, statusbar->timestamp, status_font, 0.0f, 0.0f);
     float width = Width / 7.0F;
-	float timestamp_xoff = (Width - timestamp->LayoutBounds.Width);
+	float timestamp_xoff = (Width - statusbar->timestamp->LayoutBounds.Width);
 
-    ds->DrawText(speak(this->caption),     x + width * 0.0F,   y, Colors::Yellow, status_font);
-    ds->DrawText(statusbar->ipv4,          x + width * 1.0F,   y, Colors::White,  status_font);
-    ds->DrawText(statusbar->powercapacity, x + width * 3.0F,   y, Colors::Green,  status_font);
-    ds->DrawText(statusbar->wifi_strength, x + width * 4.0F,   y, Colors::Yellow, status_font);
-    ds->DrawText(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow, status_font);
-    ds->DrawTextLayout(timestamp,          x + timestamp_xoff, y, Colors::Yellow);
+    ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->ipv4,          x + width * 1.0F,   y, Colors::White);
+    ds->DrawTextLayout(statusbar->powercapacity, x + width * 3.0F,   y, Colors::Green);
+    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 4.0F,   y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->timestamp,     x + timestamp_xoff, y, Colors::Yellow);
 
     { // highlight PLC Status
         auto plc_x = x + width * 2.0F;
@@ -209,12 +221,14 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 }
 
 /*************************************************************************************************/
-static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
+static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None)];
+static ICanvasBrush^ status_nolog_color = nullptr;
 
 void Statuslinelet::load() {
 	initialize_status_font();
 
-	if (status_colors[0] == nullptr) {
+	if (status_nolog_color == nullptr) {
+		status_nolog_color = make_solid_brush(Colors::GhostWhite);
 		status_colors[static_cast<unsigned int>(Log::Debug)] = make_solid_brush(Colors::Gray);
 		status_colors[static_cast<unsigned int>(Log::Info)] = make_solid_brush(Colors::Green);
 		status_colors[static_cast<unsigned int>(Log::Notice)] = make_solid_brush(Colors::GreenYellow);
@@ -223,10 +237,10 @@ void Statuslinelet::load() {
 		status_colors[static_cast<unsigned int>(Log::Critical)] = make_solid_brush(Colors::Crimson);
 		status_colors[static_cast<unsigned int>(Log::Alert)] = make_solid_brush(Colors::Firebrick);
 		status_colors[static_cast<unsigned int>(Log::Panic)] = make_solid_brush(Colors::Firebrick);
-		status_colors[static_cast<unsigned int>(Log::None)] = make_solid_brush(Colors::GhostWhite);
 	}
 
 	this->status = make_text_layout("", status_font);
+	this->color = status_nolog_color;
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
@@ -241,15 +255,15 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->DrawTextLayout(this->status, x, y, status_colors[static_cast<unsigned int>(Log::None)]);
+	ds->DrawTextLayout(this->status, x, y, this->color);
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
 	Platform::String^ status_message = "[" + level.ToString() + "] " + message;
-	ICanvasBrush^ color = status_colors[static_cast<unsigned int>(level)];
-
+	
 	this->status = make_text_layout(status_message, status_font);
-	if (color != nullptr) {
-		this->status->SetBrush(0, status_message->Length(), color);
+	this->color = status_colors[static_cast<unsigned int>(level)];
+	if (this->color == nullptr) {
+		this->color = status_nolog_color;
 	}
 }

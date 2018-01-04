@@ -7,8 +7,9 @@ namespace WarGrey::SCADA {
     private class Statusbarlet : public WarGrey::SCADA::Snip {
     public:
 		~Statusbarlet() noexcept;
-        Statusbarlet(Platform::String^ caption, Platform::String^ plc,
+		Statusbarlet(Platform::String^ caption, Platform::String^ plc,
 			WarGrey::SCADA::IModbusConfirmation* callback,
+			uint16 start_address, uint16 quantity, uint16 end_address,
 			WarGrey::SCADA::ISyslogReceiver* ui_receiver = nullptr);
 
     public:
@@ -18,8 +19,13 @@ namespace WarGrey::SCADA {
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
     private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
         WarGrey::SCADA::IModbusClient* client;
-		Platform::String^ caption;
+
+	private:
+		uint16 start_address;
+		uint16 end_address;
+		uint16 quantity;
     };
 
 	private class Statuslinelet : public WarGrey::SCADA::Snip, public WarGrey::SCADA::ISyslogReceiver {
@@ -38,5 +44,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	};
 }
