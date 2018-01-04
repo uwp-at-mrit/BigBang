@@ -98,12 +98,12 @@ private enum B { Master = 0, Cleaner, Slave, Funnel, Count }; // WARNING: order 
 private class BConsole : public ModbusConfirmation {
 public:
 	BConsole(BSegment* master, Platform::String^ caption, Platform::String^ plc)
-		: bench(master), caption(caption), device(plc) {};
+		: bench(master), caption(caption), device(plc), start_address(126), end_address(429) {};
 
 public:
 	void load_window_frame(float width, float height) {
 		this->statusline = new Statuslinelet(Log::Debug);
-		this->statusbar = new Statusbarlet(this->caption, this->device, this, 126, 120, 429, this->statusline);
+		this->statusbar = new Statusbarlet(this->caption, this->device, this, this->statusline);
 
 		this->bench->insert(this->statusbar);
 		this->bench->insert(this->statusline);
@@ -331,6 +331,11 @@ public:
 	}
 
 public:
+	void fill_application_input_register_interval(uint16* addr0, uint16* addrn, uint16* addrq) override {
+		SET_VALUES(addr0, this->start_address, addrn, this->end_address);
+		SET_BOX(addrq, MODBUS_MAX_READ_REGISTERS);
+	}
+
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		logger->log_message(Log::Debug, L"Job(%hu) done, read %hu registers(%d, %d, %d, %d, %d)", transaction, count,
 			register_values[0], register_values[1], register_values[2], register_values[3], register_values[4]);
@@ -343,15 +348,6 @@ public:
 private:
 	void move_motor(B id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
 		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
-	}
-
-private:
-	void trace_registers(Syslog* logger, const wchar_t* type, uint16 address, uint16* values, uint8 count) {
-		for (unsigned char i = 0; i < count; i++) {
-			if (values[i] > 0) {
-				logger->log_message(Log::Debug, L"    %s[%03d] = 0x%04X", type, address + i, values[i]);
-			}
-		}
 	}
 
 // never deletes these snips mannually
@@ -387,6 +383,11 @@ private:
 
 private:
 	float console_y;
+
+private:
+	uint16 start_address;
+	uint16 end_address;
+	uint16 quantity;
 };
 
 private class BConsoleDecorator : public IUniverseDecorator {
@@ -452,6 +453,4 @@ void BSegment::reflow(float width, float height) {
 		console->reflow_gauges(width, height);
 		console->reflow_workline(width, height);
 	}
-
-	//this->clear();
 }

@@ -1,4 +1,5 @@
 #include "control.hxx"
+#include "box.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -31,6 +32,5 @@ void Win2DControl::height::set(float v) { this->control->Height = double(v); }
 float Win2DControl::height::get() { return float(this->control->Height); };
 
 void Win2DControl::fill_actual_extent(float* width, float* height) {
-    if (width != nullptr)  (*width)  = this->actual_width;
-    if (height != nullptr) (*height) = this->actual_height;
+    SET_VALUES(width, this->actual_width, height, this->actual_height);
 }

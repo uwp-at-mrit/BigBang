@@ -19,6 +19,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)tongue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)box.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />

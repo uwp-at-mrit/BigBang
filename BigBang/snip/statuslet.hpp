@@ -9,7 +9,6 @@ namespace WarGrey::SCADA {
 		~Statusbarlet() noexcept;
 		Statusbarlet(Platform::String^ caption, Platform::String^ plc,
 			WarGrey::SCADA::IModbusConfirmation* callback,
-			uint16 start_address, uint16 quantity, uint16 end_address,
 			WarGrey::SCADA::ISyslogReceiver* ui_receiver = nullptr);
 
     public:

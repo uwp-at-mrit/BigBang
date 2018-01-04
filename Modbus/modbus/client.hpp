@@ -31,6 +31,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
+
+	public:
+		virtual void fill_application_input_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) = 0;
+		virtual void fill_application_holding_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) = 0;
 	};
 
     private class IModbusClient abstract {
@@ -165,5 +169,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {};
+
+	public:
+		void fill_application_input_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) override;
+		void fill_application_holding_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) override;
 	};
 }

@@ -5,6 +5,7 @@
 #include "modbus/sockexn.hpp"
 #include "modbus/exception.hpp"
 #include "syslog.hpp"
+#include "box.hpp"
 
 // MMIG: Page 20
 
@@ -80,6 +81,20 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		cf->on_private_response(transaction, function_code, raw_data, count, logger);
 	}
 	}
+}
+
+static inline void modbus_fill_register_interval(uint16* addr0, uint16* addrn, uint16* addrq) {
+	SET_VALUES(addr0, 0x0000, addrn, 0xFFFF);
+	SET_BOX(addrq, MODBUS_MAX_READ_REGISTERS);
+}
+
+/*************************************************************************************************/
+void ModbusConfirmation::fill_application_input_register_interval(uint16* addr0, uint16* addrn, uint16* addrq) {
+	modbus_fill_register_interval(addr0, addrn, addrq);
+}
+
+void ModbusConfirmation::fill_application_holding_register_interval(uint16* addr0, uint16* addrn, uint16* addrq) {
+	modbus_fill_register_interval(addr0, addrn, addrq);
 }
 
 /*************************************************************************************************/

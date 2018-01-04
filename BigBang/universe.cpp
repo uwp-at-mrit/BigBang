@@ -230,8 +230,8 @@ void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoin
 
 			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
             snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
-            if (x != nullptr) (*x) = sx + xoff;
-            if (y != nullptr) (*y) = sy + yoff;
+            SET_BOX(x, sx + xoff);
+            SET_BOX(y, sy + yoff);
         }
     }
 }
@@ -243,20 +243,17 @@ void Universe::fill_snip_bound(Snip* snip, float* x, float* y, float* width, flo
 			float sx, sy, sw, sh;
 			
 			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-			if (x != nullptr) (*x) = sx;
-			if (y != nullptr) (*y) = sy;
-			if (width != nullptr) (*width) = sw;
-			if (height != nullptr) (*height) = sh;
+			SET_VALUES(x, sx, y, sy);
+			SET_VALUES(width, sw, height, sh);
 		}
 	}
 }
 
 void Universe::fill_snips_bounds(float* x, float* y, float* width, float* height) {
     this->recalculate_snips_extent_when_invalid();
-    if (x != nullptr) (*x) = this->snips_left;
-    if (y != nullptr) (*y) = this->snips_top;
-    if (width != nullptr) (*width) = this->snips_right - this->snips_left;
-    if (height != nullptr) (*height) = this->snips_bottom - this->snips_top;
+    SET_VALUES(x, this->snips_left, y, this->snips_top);
+    SET_BOX(width, this->snips_right - this->snips_left);
+    SET_BOX(height, this->snips_bottom - this->snips_top);
 }
 
 void Universe::size_cache_invalid() {
@@ -555,8 +552,7 @@ public:
     void fill_actual_extent(float* width, float* height) override {
         Size region = this->planet->Size;
 
-        if (width != nullptr)  (*width)  = region.Width;
-        if (height != nullptr) (*height) = region.Height;
+        SET_VALUES(width, region.Width, height, region.Height);
     };
 
 internal:

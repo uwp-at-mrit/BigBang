@@ -145,9 +145,7 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console
-	, uint16 saddr, uint16 q, uint16 eaddr, ISyslogReceiver* uirecv)
-	: start_address(saddr), end_address(eaddr), quantity(q) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console, ISyslogReceiver* uirecv) {
 	auto logger = new Syslog(Log::Debug, caption, default_logger());
 	
 	if (uirecv != nullptr) {
@@ -157,6 +155,7 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IMo
 	initialize_status_font();
 	this->caption = make_text_layout(speak(caption), status_font);
 	this->client = new ModbusClient(logger, plc, console);
+	console->fill_application_input_register_interval(&this->start_address, &this->end_address, &this->quantity);
 }
 
 Statusbarlet::~Statusbarlet() {
