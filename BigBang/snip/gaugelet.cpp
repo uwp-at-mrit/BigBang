@@ -28,7 +28,7 @@ Gaugelet::Gaugelet(Platform::String^ caption, int maxA, int maxn, unsigned char 
 }
 
 void Gaugelet::initialize_meters() {
-    auto font = make_text_format(8.00F);
+    auto font = make_text_format(this->label_font->FontSize * 2.0F / 3.0F);
     TextExtent l00 = get_text_extent("100", font);
 
     this->mark_width = l00.width / 3.0F;
@@ -66,7 +66,7 @@ void Gaugelet::load() {
 	this->initialize_meters();
 
     this->meter_gapsize = this->Rscales->LayoutBounds.Height - this->Rscales->DrawBounds.Height;
-    this->meter_width = this->mark_width * 9.0F /* must greater than 5.0F */;
+    this->meter_width = this->mark_width * 9.0F /* must greater than 5.0F which is the width of meter body */;
 
     this->width = std::fmax(this->caption->LayoutBounds.Width, this->meter_width * 2.0F + this->meter_gapsize);
     this->height = this->caption->LayoutBounds.Height * 2.618F + this->Ascales->LayoutBounds.Height;
@@ -120,7 +120,7 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scal
         float scale_width = scales_layout->LayoutBounds.Width;
         float scale_spacing = scales_layout->DrawBounds.Y;
 
-        // WARNING: the box mode of the text layout is not intuitive
+        // WARNING: the box mode of the Direct2D text layout is not intuitive
         ds->DrawTextLayout(scales_layout, body_x + scale_xoff - scale_width, y, Colors::WhiteSmoke);
         ds->DrawCachedGeometry(this->scale_marks, body_x - this->mark_width, body_y, Colors::WhiteSmoke);
     }
