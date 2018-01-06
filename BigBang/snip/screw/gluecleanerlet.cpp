@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipeline/gluecleanerlet.hpp"
-#include "snip/pipeline/constants.hpp"
+#include "snip/screw/gluecleanerlet.hpp"
+#include "snip/screw/constants.hpp"
 
 using namespace WarGrey::SCADA;
 

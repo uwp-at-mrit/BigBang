@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snip/pipeline/pipesnip.hpp"
+#include "snip/screw/screwsnip.hpp"
 
 namespace WarGrey::SCADA {
     private class GlueCleanerlet : public WarGrey::SCADA::IMotorSnip {

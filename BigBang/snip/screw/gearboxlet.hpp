@@ -1,11 +1,11 @@
 #pragma once
 
-#include "snip/pipeline/pipesnip.hpp"
+#include "snip/screw/screwsnip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Screwlet : public WarGrey::SCADA::IMotorSnip {
+    private class Gearboxlet : public WarGrey::SCADA::IMotorSnip {
     public:
-        Screwlet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
+        Gearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
 
     public:
         void load() override;
@@ -37,9 +37,9 @@ namespace WarGrey::SCADA {
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ pipe_brush;
     };
 
-    private class LScrewlet : public WarGrey::SCADA::Screwlet {
+    private class LGearboxlet : public WarGrey::SCADA::Gearboxlet {
     public:
-        LScrewlet(float width, float height, float thickness = 0.0F,
+        LGearboxlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
     
@@ -55,9 +55,9 @@ namespace WarGrey::SCADA {
             float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) override;
     };
 
-    private class RScrewlet : public WarGrey::SCADA::Screwlet {
+    private class RGearboxlet : public WarGrey::SCADA::Gearboxlet {
     public:
-        RScrewlet(float width, float height, float thickness = 0.0F,
+        RGearboxlet(float width, float height, float thickness = 0.0F,
             double color = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
 

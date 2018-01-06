@@ -4,13 +4,7 @@
 #include "snip/misc.hpp"
 
 namespace WarGrey::SCADA {
-    private class IPipeSnip : public WarGrey::SCADA::Snip {
-    public:
-        virtual Windows::Foundation::Rect get_input_port() = 0;
-        virtual Windows::Foundation::Rect get_output_port() = 0;
-    };
-
-	private class IMotorSnip : public WarGrey::SCADA::IPipeSnip {
+    private class IMotorSnip : public WarGrey::SCADA::IPipeSnip {
 	public:
 		virtual Windows::Foundation::Rect get_motor_port() = 0;
 	};

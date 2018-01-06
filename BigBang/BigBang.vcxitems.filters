@@ -9,9 +9,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
@@ -39,23 +36,25 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.cpp">
+    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\funnellet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.cpp" />
+    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gearboxlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gluecleanerlet.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.cpp" />
+    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\screwsnip.cpp">
+      <Filter>snip\pipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\constants.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp">
@@ -66,9 +65,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp">
       <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\funnellet.hpp">
-      <Filter>snip\pipeline</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
       <Filter>snip</Filter>
@@ -100,22 +96,26 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
       <Filter>snip\pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\pipesnip.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\screwlet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\gluecleanerlet.hpp">
       <Filter>snip\pipeline</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
       <Filter>interaction</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipeline\sleevelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\constants.hpp" />
+    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\funnellet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gearboxlet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gluecleanerlet.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.hpp" />
+    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\screwsnip.hpp">
+      <Filter>snip\pipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

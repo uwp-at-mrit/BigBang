@@ -1,5 +1,5 @@
-﻿#include "snip/pipeline/sleevelet.hpp"
-#include "snip/pipeline/constants.hpp"
+﻿#include "snip/screw/sleevelet.hpp"
+#include "snip/screw/constants.hpp"
 #include "colorspace.hpp"
 #include "paint.hpp"
 #include "shape.hpp"

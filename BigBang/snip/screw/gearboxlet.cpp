@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/pipeline/screwlet.hpp"
-#include "snip/pipeline/constants.hpp"
+#include "snip/screw/gearboxlet.hpp"
+#include "snip/screw/constants.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -13,7 +13,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Screwlet::Screwlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+Gearboxlet::Gearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
     if (thickness <= 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
@@ -30,7 +30,7 @@ Screwlet::Screwlet(float width, float height, float thickness, double color, dou
     this->base_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
-void Screwlet::load() {
+void Gearboxlet::load() {
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);
@@ -53,11 +53,11 @@ void Screwlet::load() {
     this->outlet_fitting = geometry_freeze(this->make_fitting(outfit_rx, outfit_ry));
 }
 
-void Screwlet::fill_extent(float x, float y, float* w, float* h) {
+void Gearboxlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Gearboxlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float body_x, pipe_x, base_x, basefit_x, basefit_cx, outfit_x, outfit_cx;
     
     float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
@@ -92,14 +92,14 @@ void Screwlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-LScrewlet::LScrewlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Screwlet(width, height, thickness, color, saturation, light, highlight) {}
+LGearboxlet::LGearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+    : Gearboxlet(width, height, thickness, color, saturation, light, highlight) {}
     
-CanvasGeometry^ LScrewlet::make_fitting(float rx, float ry) {
+CanvasGeometry^ LGearboxlet::make_fitting(float rx, float ry) {
     return cylinder_rl_surface(rx, ry, this->fitting_width);
 }
 
-Rect LScrewlet::get_input_port() {
+Rect LGearboxlet::get_input_port() {
     float pipe_part_x = this->pipe_brush->StartPoint.x;
     float pipe_part_length = this->width - pipe_part_x;
     float socket_width = pipe_part_length * 0.618F;
@@ -108,25 +108,25 @@ Rect LScrewlet::get_input_port() {
     return Rect{ x, this->pipe_brush->StartPoint.y, socket_width, 0.0F };
 }
 
-Rect LScrewlet::get_output_port() {
+Rect LGearboxlet::get_output_port() {
     float socket_width = this->outfit_brush->StartPoint.x;
 
     return Rect{ this->width - socket_width, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
 }
 
-Rect LScrewlet::get_motor_port() {
+Rect LGearboxlet::get_motor_port() {
 	float base_y = this->pipe_brush->StartPoint.y;
 	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
 
 	return Rect{ base_height, base_y, 0.0F, this->height - base_y };
 }
 
-void LScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
+void LGearboxlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
     (*base_x) = x;
     (*body_x) = x + body_off;
 }
 
-void LScrewlet::locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx
+void LGearboxlet::locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx
     ,float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) {
     (*basefit_x) = body_x + this->pipe_thickness - basefit_rx;
     (*basefit_cx) = body_x + this->pipe_thickness + this->fitting_width - basefit_rx * offrate;
@@ -136,41 +136,41 @@ void LScrewlet::locate_pipe(float x, float body_x, float offrate, float basefit_
 }
 
 /*************************************************************************************************/
-RScrewlet::RScrewlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Screwlet(width, height, thickness, color, saturation, light, highlight) {}
+RGearboxlet::RGearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+    : Gearboxlet(width, height, thickness, color, saturation, light, highlight) {}
 
-CanvasGeometry^ RScrewlet::make_fitting(float rx, float ry) {
+CanvasGeometry^ RGearboxlet::make_fitting(float rx, float ry) {
     return cylinder_lr_surface(rx, ry, this->fitting_width);
 }
 
-Rect RScrewlet::get_input_port() {
+Rect RGearboxlet::get_input_port() {
     float pipe_part_x = this->pipe_brush->StartPoint.x;
     float pipe_part_length = this->width - pipe_part_x;
     float socket_width = pipe_part_length * 0.618F;
-    float x = (this->width - socket_width - pipe_part_x) * 0.5F; // simplified hflipping based on LScrewlet
+    float x = (this->width - socket_width - pipe_part_x) * 0.5F; // simplified hflipping based on LGearboxlet
 
     return Rect{ x, this->pipe_brush->StartPoint.y, socket_width, 0.0F };
 }
 
-Rect RScrewlet::get_output_port() {
+Rect RGearboxlet::get_output_port() {
     float socket_width = this->outfit_brush->StartPoint.x;
 
     return Rect{ 0.0F, this->pipe_brush->StartPoint.y, socket_width, this->pipe_thickness };
 }
 
-Rect RScrewlet::get_motor_port() {
+Rect RGearboxlet::get_motor_port() {
 	float base_y = this->pipe_brush->StartPoint.y;
 	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
 
 	return Rect{ this->width - base_height, base_y, 0.0F, this->height - base_y };
 }
 
-void RScrewlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
+void RGearboxlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
     (*base_x) = x + this->width - base_width;
     (*body_x) = x + this->width - this->pipe_thickness - body_off;
 }
 
-void RScrewlet::locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx
+void RGearboxlet::locate_pipe(float x, float body_x, float offrate, float basefit_rx, float outfit_rx
     , float* pipe_x, float* basefit_x, float *basefit_cx, float* outfit_x, float* outfit_cx) {
     float basecx_before_adjust = body_x - this->fitting_width;
     

@@ -36,4 +36,10 @@ namespace WarGrey::SCADA {
         Snip* next;
         Snip* prev;
     };
+
+	private class IPipeSnip : public WarGrey::SCADA::Snip {
+	public:
+		virtual Windows::Foundation::Rect get_input_port() = 0;
+		virtual Windows::Foundation::Rect get_output_port() = 0;
+	};
 }
