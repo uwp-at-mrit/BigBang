@@ -38,11 +38,12 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
+		void set_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::None);
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
 	};
 }

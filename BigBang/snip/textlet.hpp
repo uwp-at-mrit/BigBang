@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
         Labellet(Platform::String^ content = "");
 
     public:
-        void change_text(Platform::String^ content);
+        void set_text(Platform::String^ content);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 			Windows::UI::Color& scale_color = Windows::UI::Colors::Yellow);
 
 	public:
-		void change_scale(float value);
+		void set_scale(float value);
 
 	public:
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

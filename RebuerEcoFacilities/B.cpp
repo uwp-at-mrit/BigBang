@@ -52,14 +52,14 @@ static inline LSleevelet* load_sleevelet(IUniverse* master, float length, float 
 	return pipe;
 }
 
-static inline Liquidlet* load_water_pipe(IUniverse* master, float length, double degrees = 0.0) {
-	Liquidlet* waterpipe = new Liquidlet(length, ArrowPosition::End, 209.60, 1.000, 0.559);
+static inline Liquidlet* load_water_pipe(IUniverse* master, float length, double degrees, ArrowPosition ap = ArrowPosition::End) {
+	Liquidlet* waterpipe = new Liquidlet(length, ap, 209.60, 1.000, 0.559);
 	master->insert(waterpipe, degrees);
 
 	return waterpipe;
 }
 
-static inline Liquidlet* load_oil_pipe(IUniverse* master, float length, double degrees = 0.0) {
+static inline Liquidlet* load_oil_pipe(IUniverse* master, float length, double degrees) {
 	Liquidlet* oilpipe = new Liquidlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
 	master->insert(oilpipe, degrees);
 
@@ -93,12 +93,14 @@ void connect_motor(IUniverse* master, IMotorSnip* pipe, Motorlet* motor, Scalele
 	}
 }
 
-private enum B { Master = 0, Cleaner, Slave, Funnel, Count }; // WARNING: order matters
+// WARNING: order matters, Master, Cleaner and Slave are also the anchors for water pipes 
+private enum B { Master = 0, Funnel, Cleaner, Slave, Count };
 
 private class BConsole : public ModbusConfirmation {
 public:
 	BConsole(BSegment* master, Platform::String^ caption, Platform::String^ plc)
-		: bench(master), caption(caption), device(plc), start_address(126), end_address(429) {};
+		: bench(master), caption(caption), device(plc)
+		, inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
 
 public:
 	void load_window_frame(float width, float height) {
@@ -125,23 +127,27 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		size_t pc_1st = SNIPS_ARITY(this->sleeves_1st);
-		size_t pc_2nd_1st = SNIPS_ARITY(this->sleeves_2nd_1st);
-		size_t pc_2nd_2nd = SNIPS_ARITY(this->sleeves_2nd_2nd);
+		size_t dc = SNIPS_ARITY(this->desulphurizers);
+		size_t vc1 = SNIPS_ARITY(this->viscosities_1st);
+		size_t vc2 = SNIPS_ARITY(this->viscosities_2nd);
 
-		float pipe_length = width / float(pc_1st + pc_2nd_1st + /* pc_2nd_2nd + */ 6);
+		float pipe_length = width / float(dc + vc1 + vc2 + 6);
 		float pipe_thickness = pipe_length * 0.25F;
-		float master_height = pipe_length;
+		float master_height = pipe_length * 1.25F;
+		float cleaner_height = pipe_length;
 		float funnel_width = pipe_length * 0.382F;
 		float slave_height = pipe_length * 0.618F;
 
 		{ // load water and oil pipes
-			this->water_pipes[0] = load_water_pipe(this->bench, pipe_length, 0.0);
-			for (unsigned char i = 1; i < SNIPS_ARITY(this->water_pipes); i++) {
-				this->water_pipes[i] = load_water_pipe(this->bench, pipe_length, 90.0);
+			this->water_pipes[B::Master] = load_water_pipe(this->bench, pipe_length, 0.0, ArrowPosition::Start);
+			this->water_pipes[B::Cleaner] = load_water_pipe(this->bench, pipe_length, 0.0);
+			for (unsigned char i = 0; i < SNIPS_ARITY(this->water_pipes); i++) {
+				if (this->water_pipes[i] == nullptr) {
+					this->water_pipes[i] = load_water_pipe(this->bench, pipe_length, 90.0);
+				}
 			}
 
-			this->oil_pipes[0] = load_oil_pipe(this->bench, pipe_length);
+			this->oil_pipes[B::Master] = load_oil_pipe(this->bench, pipe_length, 0.0);
 			for (unsigned char i = 1; i < SNIPS_ARITY(this->oil_pipes); i++) {
 				this->oil_pipes[i] = load_oil_pipe(this->bench, pipe_length, 90.0);
 			}
@@ -149,18 +155,18 @@ public:
 
 		this->master = new LScrewlet(pipe_length, master_height, pipe_thickness);
 		this->slave = new LScrewlet(pipe_length, slave_height, pipe_thickness);
-		this->cleaner = new GlueCleanerlet(pipe_length, master_height, pipe_thickness);
+		this->cleaner = new GlueCleanerlet(pipe_length, cleaner_height, pipe_thickness);
 		this->funnel = new Funnellet(funnel_width, 0.0F, 120.0, 0.7, 0.3, 0.84);
 		this->vibrator = new Vibratorlet(pipe_thickness * 2.718F);
 
 		this->bench->insert(this->master);
 		this->bench->insert(this->funnel);
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->sleeves_1st); i++) {
-			this->sleeves_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
-			this->Pps[i] = load_scalelet(this->bench, "bar", "pressure", nullptr);
-			this->Tpis[i] = load_scalelet(this->bench, "celsius", "temperature", "inside");
-			this->Tpos[i] = load_scalelet(this->bench, "celsius", "temperature", "outside");
+		for (size_t i = 0; i < SNIPS_ARITY(this->desulphurizers); i++) {
+			this->desulphurizers[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
+			this->Pds[i] = load_scalelet(this->bench, "bar", "pressure", nullptr);
+			this->Tdis[i] = load_scalelet(this->bench, "celsius", "temperature", "inside");
+			this->Tdos[i] = load_scalelet(this->bench, "celsius", "temperature", "outside");
 		}
 
 		this->bench->insert(this->cleaner);
@@ -171,19 +177,19 @@ public:
 			this->Tss[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
 		}
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->sleeves_2nd_1st); i++) {
-			this->sleeves_2nd_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_1st); i++) {
+			this->viscosities_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
 		}
 
 		this->bench->insert(this->vibrator);
 
-		//for (size_t i = 0; i < SNIPS_ARITY(this->sleeves_2nd_2nd); i++) {
-		//	this->sleeves_2nd_2nd[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-		//}
+		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_2nd); i++) {
+			this->viscosities_2nd[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		}
 
 		{ // load motors
 			this->motors[B::Funnel] = load_motorlet(this->bench, funnel_width, 90.0);
-			this->motors[B::Master] = load_motorlet(this->bench, master_height * 0.85F);
+			this->motors[B::Master] = load_motorlet(this->bench, master_height * 0.618F);
 			this->motors[B::Slave] = load_motorlet(this->bench, slave_height * 0.85F);
 			this->motors[B::Cleaner] = load_motorlet(this->bench, pipe_thickness, 90.0);
 
@@ -235,11 +241,11 @@ public:
 
 	void reflow_workline(float width, float height) {
 		float pipe_length, pipe_thickness, snip_width, snip_height;
-		size_t pcount_1st = SNIPS_ARITY(this->sleeves_1st);
-		size_t pcount_2nd_1st = SNIPS_ARITY(this->sleeves_2nd_1st);
-		size_t pcount_2nd_2nd = SNIPS_ARITY(this->sleeves_2nd_2nd);
+		size_t dc = SNIPS_ARITY(this->desulphurizers);
+		size_t vc1 = SNIPS_ARITY(this->viscosities_1st);
+		size_t vc2 = SNIPS_ARITY(this->viscosities_2nd);
 
-		this->sleeves_1st[0]->fill_extent(0.0F, 0.0F, &pipe_length, &pipe_thickness);
+		this->desulphurizers[0]->fill_extent(0.0F, 0.0F, &pipe_length, &pipe_thickness);
 		this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
 		float current_x = pipe_length * 2.4F;
@@ -249,96 +255,119 @@ public:
 		connect_pipes(this->bench, this->funnel, this->master, &current_x, &current_y, 0.2, 0.5);
 		this->move_motor(B::Master, this->master, current_x, current_y);
 		
-		connect_pipes(this->bench, this->master, this->sleeves_1st[0], &current_x, &current_y);
-		for (size_t i = 1; i < pcount_1st; i++) {
-			connect_pipes(this->bench, this->sleeves_1st[i - 1], this->sleeves_1st[i], &current_x, &current_y);
+		connect_pipes(this->bench, this->master, this->desulphurizers[0], &current_x, &current_y);
+		for (size_t i = 1; i < dc; i++) {
+			connect_pipes(this->bench, this->desulphurizers[i - 1], this->desulphurizers[i], &current_x, &current_y);
 		}
 
-		connect_pipes(this->bench, this->sleeves_1st[pcount_1st - 1], this->cleaner, &current_x, &current_y);
+		connect_pipes(this->bench, this->desulphurizers[dc - 1], this->cleaner, &current_x, &current_y);
 		this->move_motor(B::Cleaner, this->cleaner, current_x, current_y, 0.5, 1.0);
 		connect_pipes(this->bench, this->cleaner, this->slave, &current_x, &current_y);
 		this->move_motor(B::Slave, this->slave, current_x, current_y);
 		
-		connect_pipes(this->bench, this->slave, this->sleeves_2nd_1st[0], &current_x, &current_y);
-		for (size_t i = 1; i < pcount_2nd_1st; i++) {
-			connect_pipes(this->bench, this->sleeves_2nd_1st[i - 1], this->sleeves_2nd_1st[i], &current_x, &current_y);
+		connect_pipes(this->bench, this->slave, this->viscosities_1st[0], &current_x, &current_y);
+		for (size_t i = 1; i < vc1; i++) {
+			connect_pipes(this->bench, this->viscosities_1st[i - 1], this->viscosities_1st[i], &current_x, &current_y);
 		}
 
 		this->vibrator->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 		this->bench->move_to(this->vibrator, current_x + pipe_length, current_y + pipe_thickness - snip_height);
 		
-		//current_x += (pipe_length + snip_width);
-		//this->bench->move_to(this->sleeves_2nd_2nd[0], current_x, current_y);
-		//for (size_t i = 1; i < pcount_2nd_2nd; i++) {
-		//	connect_pipes(this->bench, this->sleeves_2nd_2nd[i - 1], this->sleeves_2nd_2nd[i], &current_x, &current_y);
-		//}
+		current_x += (pipe_length + snip_width);
+		this->bench->move_to(this->viscosities_2nd[0], current_x, current_y);
+		for (size_t i = 1; i < vc2; i++) {
+			connect_pipes(this->bench, this->viscosities_2nd[i - 1], this->viscosities_2nd[i], &current_x, &current_y);
+		}
 
 		{ // flow water and oil pipes and scales
 			Rect mport = this->master->get_input_port();
 			Rect cport = this->cleaner->get_output_port();
-			Rect pport = this->sleeves_1st[0]->get_input_port();
+			Rect pport = this->desulphurizers[0]->get_input_port();
 			float pipe_ascent = pport.Y;
-			float pipe_x, pipe_y, liquid_xoff, liquid_yoff;
+			float pipe_x, pipe_y, liquid_xoff, liquid_yoff, liquid_width, liquid_height;
 			float scale_x, scale_y, scale_width, scale_height;
 
-			this->bench->fill_snip_bound(this->sleeves_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
+			this->bench->fill_snip_bound(this->desulphurizers[0], &pipe_x, &pipe_y, nullptr, nullptr);
 			this->bench->fill_snip_bound(this->oil_pipes[1], nullptr, &liquid_yoff, nullptr, nullptr);
-			this->Pps[0]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
-			this->water_pipes[0]->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
+			this->Pds[0]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
+			this->water_pipes[0]->fill_extent(0.0F, 0.0F, &liquid_width, &liquid_height);
 
 			current_y = pipe_y + pipe_ascent;
 			scale_x = pipe_x + (pipe_length - scale_width) * 0.5F;
 			scale_y = current_y + pport.Height;
-			liquid_xoff = (pipe_length - snip_width) * 0.5F;
-			liquid_yoff = pipe_ascent + liquid_yoff - snip_height;
-			for (unsigned char i = 1; i < SNIPS_ARITY(this->oil_pipes); i++) {
-				float sx = scale_x + pipe_length * (i - 1);
-
-				this->bench->move_to(this->oil_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - 1), pipe_y + liquid_yoff);
-				this->bench->move_to(this->Pps[i - 1],  sx, current_y - scale_height);
-				this->bench->move_to(this->Tpis[i - 1], sx, scale_y + scale_height * 0.0F);
-				this->bench->move_to(this->Tpos[i - 1], sx, scale_y + scale_height * 1.0F);
+			liquid_xoff = (pipe_length - liquid_width) * 0.5F;
+			liquid_yoff = pipe_ascent + liquid_yoff - liquid_height;
+			for (unsigned char i = 0; i < SNIPS_ARITY(this->oil_pipes) - 1; i++) {
+				this->bench->move_to(this->oil_pipes[i + 1], pipe_x + liquid_xoff + pipe_length * i, pipe_y + liquid_yoff);
+				this->move_scale_ptt(i, scale_height, scale_x + pipe_length * i, scale_y, pport.Height);
 			}
 
-			liquid_yoff = liquid_yoff + pipe_thickness + snip_width - pipe_ascent * 2.0F;
+			liquid_yoff = liquid_yoff + pipe_thickness + liquid_width - pipe_ascent * 2.0F;
 			this->bench->fill_snip_bound(this->master, &pipe_x, nullptr, nullptr, nullptr);
-			scale_x = pipe_x + mport.X + (mport.Width - scale_width) * 0.5F;
-			current_x = pipe_x + mport.X + (mport.Width - snip_width) * 0.5F;
-			current_y = pipe_y + (pipe_thickness - snip_height) * 0.5F;
-			this->bench->move_to(this->oil_pipes[0], pipe_x + this->master->get_motor_port().X - snip_width, current_y);
-			this->bench->move_to(this->Pss[B::Master], scale_x, scale_y);
-			this->bench->move_to(this->Tss[B::Master], scale_x, scale_y + scale_height);
+			current_x = pipe_x + this->master->get_motor_port().X - liquid_width;
+			this->bench->move_to(this->oil_pipes[B::Master], current_x, current_y);
+			this->bench->move_to(this->water_pipes[B::Master], current_x, current_y + liquid_height);
+			current_x = pipe_x + mport.X + (mport.Width - liquid_width) * 0.5F;
+			current_y = pipe_y + (pipe_thickness - liquid_height) * 0.5F;
+			this->move_scale_pt(0, scale_height, pipe_x + mport.X + (mport.Width - scale_width) * 0.5F, scale_y);
 			
 			this->bench->fill_snip_bound(this->cleaner, &pipe_x, &pipe_y, nullptr, nullptr);
-			scale_x = pipe_x + (cport.X - scale_width) * 0.5F;
-			this->bench->move_to(this->water_pipes[0], pipe_x + cport.X + cport.Width, current_y);
-			this->bench->move_to(this->Pss[B::Cleaner], scale_x, scale_y);
-			this->bench->move_to(this->Tss[B::Cleaner], scale_x, scale_y + scale_height);
-
-			scale_x = pipe_x + cport.X + (cport.Width - scale_width) * 0.5F;
-			scale_y = pipe_y + cport.Y + pport.Height;
-			this->bench->move_to(this->Pss[B::Slave], scale_x, scale_y);
-			this->bench->move_to(this->Tss[B::Slave], scale_x, scale_y + scale_height);
+			this->bench->move_to(this->water_pipes[B::Cleaner], pipe_x + cport.X + cport.Width, current_y + liquid_height);
+			this->move_scale_pt(1, scale_height, pipe_x + (cport.X - scale_width) * 0.5F, scale_y);
+			this->move_scale_pt(2, scale_height,
+				pipe_x + cport.X + (cport.Width - scale_width) * 0.5F,
+				pipe_y + cport.Y + pport.Height);
 
 			this->bench->move_to(this->water_pipes[1], current_x, pipe_y + liquid_yoff);
-			current_x = pipe_x + cport.X + (cport.Width - snip_width) * 0.5F;
-			this->bench->fill_snip_bound(this->sleeves_2nd_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
-			this->bench->move_to(this->water_pipes[2], current_x, pipe_y + liquid_yoff);
-			for (unsigned char i = 3; i < SNIPS_ARITY(this->water_pipes); i++) {
-				this->bench->move_to(this->water_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - 3), pipe_y + liquid_yoff);
+			current_x = pipe_x + cport.X + (cport.Width - liquid_width) * 0.5F;
+			this->bench->fill_snip_bound(this->viscosities_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
+			current_y = pipe_y + liquid_yoff;
+			this->bench->move_to(this->water_pipes[B::Slave], current_x, current_y);
+			for (unsigned char i = B::Slave + 1; i < SNIPS_ARITY(this->water_pipes); i++) {
+				this->bench->move_to(this->water_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - B::Slave - 1), current_y);
 			}
 		}
 	}
 
 public:
 	void fill_application_input_register_interval(uint16* addr0, uint16* addrn, uint16* addrq) override {
-		SET_VALUES(addr0, this->start_address, addrn, this->end_address);
-		SET_BOX(addrq, MODBUS_MAX_READ_REGISTERS);
+		SET_VALUES(addr0, this->inaddr0, addrn, this->inaddrn);
+		SET_BOX(addrq, this->inaddrq);
 	}
 
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
-		logger->log_message(Log::Debug, L"Job(%hu) done, read %hu registers(%d, %d, %d, %d, %d)", transaction, count,
-			register_values[0], register_values[1], register_values[2], register_values[3], register_values[4]);
+		uint16* modbus = register_values - address;
+
+		if ((count != this->inaddrq) && (address + count != this->inaddrn)) {
+			logger->log_message(Log::Warning,
+				L"Job(%hu) done, but read less input registers, expected quantity: %d, given %d",
+				transaction, min(this->inaddrn - address, this->inaddrq), count);
+		}
+
+		if (address == this->inaddr0) { // [126, 251)
+			float ratio = 0.1F;
+
+			this->gauges[B::Master]->set_rpm(modbus[126]);
+			this->gauges[B::Slave]->set_rpm(modbus[127]);
+
+			for (unsigned int di = 0; di < SNIPS_ARITY(this->desulphurizers); di++) {
+				unsigned int idx = 152 + di * 3;
+
+				this->Pds[di]->set_scale(float(modbus[idx + 0] * ratio));
+				this->Tdis[di]->set_scale(float(modbus[idx + 1] * ratio));
+				this->Tdos[di]->set_scale(float(modbus[idx + 2] * ratio));
+			}
+
+			for (unsigned int wpi = 0; wpi < SNIPS_ARITY(this->water_pipes); wpi++) {
+				unsigned int idx = 182 + wpi * 8;
+				float Ti = float(modbus[idx + 0] * ratio);
+				float To = float(modbus[idx + 1] * ratio);
+
+				this->water_pipes[wpi]->set_temperatures(Ti, To);
+			}
+		} else { // [251, 325]; // 325 < 251 + 125(MODBUS_MAX_READ_REGISTERS)
+
+		}
 	}
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
@@ -348,6 +377,17 @@ public:
 private:
 	void move_motor(B id, IMotorSnip* pipe, float x, float y, double fx = 1.0, double fy = 1.0) {
 		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
+	}
+
+	void move_scale_pt(int idx, float scale_height, float x, float y) {
+		this->bench->move_to(this->Pss[idx], x, y);
+		this->bench->move_to(this->Tss[idx], x, y + scale_height);
+	}
+
+	void move_scale_ptt(int idx, float scale_height, float x, float y, float port_height) {
+		this->bench->move_to(this->Pds[idx],  x, y - port_height - scale_height);
+		this->bench->move_to(this->Tdis[idx], x, y + scale_height * 0.0F);
+		this->bench->move_to(this->Tdos[idx], x, y + scale_height * 1.0F);
 	}
 
 // never deletes these snips mannually
@@ -365,16 +405,16 @@ private:
 	Scalelet* Tss[3];
 	Funnellet* funnel;
 	Vibratorlet* vibrator;
-	Sleevelet* sleeves_1st[4];
-	Scalelet* Pps[4];
-	Scalelet* Tpis[4];
-	Scalelet* Tpos[4];
-	Sleevelet* sleeves_2nd_1st[2];
-	Sleevelet* sleeves_2nd_2nd[2];
+	Sleevelet* desulphurizers[4];
+	Scalelet* Pds[4];
+	Scalelet* Tdis[4];
+	Scalelet* Tdos[4];
+	Sleevelet* viscosities_1st[2];
+	Sleevelet* viscosities_2nd[2];
 	Motorlet* motors[B::Count];
 	Scalelet* Tms[B::Count];
 	Liquidlet* oil_pipes[5];
-	Liquidlet* water_pipes[5];
+	Liquidlet* water_pipes[6];
 
 private:
 	Platform::String^ caption;
@@ -385,9 +425,9 @@ private:
 	float console_y;
 
 private:
-	uint16 start_address;
-	uint16 end_address;
-	uint16 quantity;
+	uint16 inaddr0;
+	uint16 inaddrn;
+	uint16 inaddrq;
 };
 
 private class BConsoleDecorator : public IUniverseDecorator {

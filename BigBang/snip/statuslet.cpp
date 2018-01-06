@@ -220,7 +220,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 }
 
 /*************************************************************************************************/
-static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None)];
+static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
 static ICanvasBrush^ status_nolog_color = nullptr;
 
 void Statuslinelet::load() {
@@ -238,8 +238,15 @@ void Statuslinelet::load() {
 		status_colors[static_cast<unsigned int>(Log::Panic)] = make_solid_brush(Colors::Firebrick);
 	}
 
-	this->status = make_text_layout("", status_font);
-	this->color = status_nolog_color;
+	this->set_message("");
+}
+
+void Statuslinelet::set_message(Platform::String^ message, Log level) {
+	this->status = make_text_layout(message, status_font);
+	this->color = status_colors[static_cast<unsigned int>(level)];
+	if (this->color == nullptr) {
+		this->color = status_nolog_color;
+	}
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
@@ -258,11 +265,5 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
-	Platform::String^ status_message = "[" + level.ToString() + "] " + message;
-	
-	this->status = make_text_layout(status_message, status_font);
-	this->color = status_colors[static_cast<unsigned int>(level)];
-	if (this->color == nullptr) {
-		this->color = status_nolog_color;
-	}
+	this->set_message("[" + level.ToString() + "] " + message, level);
 }

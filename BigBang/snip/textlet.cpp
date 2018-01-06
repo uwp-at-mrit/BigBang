@@ -17,14 +17,14 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 Labellet::Labellet(const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
-    this->change_text(label);
+    this->set_text(label);
 }
 
 Labellet::Labellet(Platform::String^ content) {
-    this->change_text(content);
+    this->set_text(content);
 }
 
-void Labellet::change_text(Platform::String^ content) {
+void Labellet::set_text(Platform::String^ content) {
     this->content = content;
     if (this->label_font == nullptr) {
         this->label_font = make_text_format();
@@ -66,10 +66,10 @@ Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::St
 
 	this->label_color = make_solid_brush(lcolor);
 	this->scale_color = make_solid_brush(scolor);
-	this->change_scale(0.0F);
+	this->set_scale(0.0F);
 }
 
-void Scalelet::change_scale(float value) {
+void Scalelet::set_scale(float value) {
 	this->scale = make_text_layout(" " + value.ToString(), this->scale_font);
 }
 

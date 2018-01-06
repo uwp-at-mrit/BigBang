@@ -16,7 +16,12 @@ namespace WarGrey::SCADA {
 
     private class Snip abstract {
     public:
-        virtual ~Snip() noexcept { if (this->info != nullptr) { delete this->info; } };
+		virtual ~Snip() noexcept {
+			if (this->info != nullptr) {
+				delete this->info;
+				this->info = nullptr;
+			}
+		}
 
     public:
         virtual void load() {};

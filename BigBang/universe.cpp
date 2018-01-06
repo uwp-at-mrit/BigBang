@@ -144,7 +144,7 @@ Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate
 }
 
 Universe::~Universe() {
-	this->clear(false);
+	this->clear();
 	this->listener->destroy();
     this->decorator->destroy();
 }
@@ -473,15 +473,15 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 }
 
-                this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
-                child->draw(ds, info->x, info->y, width, height);
-                this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
+				this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
+				child->draw(ds, info->x, info->y, width, height);
+				this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
 
 				if (info->selected) {
 					ds->DrawRectangle(info->x, info->y, width, height, system_color(UIElementType::HighlightText));
 				}
 
-                delete layer; // Must Close the Layer Explicitly
+                delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
                 ds->Transform = transform;
             }
 
@@ -523,16 +523,8 @@ void Universe::save(Platform::String^ path, float width, float height, float dpi
 	});
 }
 
-void Universe::clear(bool run_on_game_loop) {
-	if (run_on_game_loop) {
-		//auto master = dynamic_cast<Win2DUniverse^>(this->control);
-
-		//if (master != nullptr) {
-		//	master->run_on_game_loop([this]() {
-				this->clear(false);
-		//	});
-		//}
-	} else if (this->head_snip != nullptr) {
+void Universe::clear() {
+	if (this->head_snip != nullptr) {
 		Snip* temp_head = this->head_snip;
 		this->head_snip = nullptr;
 		Snip* child = nullptr;
@@ -584,12 +576,6 @@ internal:
         parent->Children->Append(this->planet);
     }
 
-internal:
-	template<typename _Lambda>
-	void run_on_game_loop(_Lambda lambda) {
-		this->planet->RunOnGameLoopThreadAsync(lambda);
-	}
-
 private:
     void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args) {
         float width = args->NewSize.Width;
@@ -620,7 +606,7 @@ private:
         }
     }
 
-    void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
+	void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
         long long count = args->Timing.UpdateCount - 1;
         long long elapsed = args->Timing.ElapsedTime.Duration;
         long long uptime = args->Timing.TotalTime.Duration;
@@ -628,19 +614,20 @@ private:
 
         this->world->update(count, elapsed, uptime, is_slow);
 
-        if (is_slow) syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
-    }
+		if (is_slow) {
+			syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+		}
+	}
 
     void do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
         Size region = this->planet->Size;
 
-        try {
+		try {
             this->world->draw(args->DrawingSession, region.Width, region.Height);
-        } catch (Platform::Exception^ wte) {
-            /// TODO: Why it complains about the WrongThreadException at first running?
+		} catch (Platform::Exception^ wte) {
             syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
-        }
-    }
+		}
+	}
 
     void do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
         this->world->stop();

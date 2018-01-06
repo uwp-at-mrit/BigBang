@@ -13,13 +13,19 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 static const float arrow_xoff = 2.0F;
 
-Liquidlet::Liquidlet(float length, ArrowPosition position, double color, double saturation, double lightness) {
+Liquidlet::Liquidlet(float length, ArrowPosition position, double color, double saturation, double lightness, Color& scolor) {
 	this->length = length;
 	this->position = position;
 	this->arrowhead_size = 4.0F;
 	this->arrow_brush = make_solid_brush(hsla(color, saturation, lightness, 1.00));
 	this->pipe_brush = make_solid_brush(hsla(color, saturation, lightness, 0.40));
+	this->scale_brush = make_solid_brush(scolor);
 	this->font = make_text_format(8.0F);
+}
+
+void Liquidlet::set_temperatures(float in, float out) {
+	this->in_temperature = in;
+	this->out_temperature = out;
 }
 
 void Liquidlet::load() {
@@ -48,9 +54,9 @@ void Liquidlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float out_pipe_y = y + this->scale_height;
 	float in_pipe_y = out_pipe_y + pipe_region_height - pipe_thickness - 1.0F;
 
-	ds->DrawTextLayout(out_scale, arrow_x + out_scale_xoff, out_pipe_y + pipe_region_height, Colors::Yellow);
+	ds->DrawTextLayout(out_scale, arrow_x + out_scale_xoff, out_pipe_y + pipe_region_height, this->scale_brush);
 	ds->FillRectangle(x, out_pipe_y, this->length, pipe_thickness, this->pipe_brush);
 	ds->FillRectangle(x, in_pipe_y, this->length, pipe_thickness, this->pipe_brush);
 	ds->DrawCachedGeometry(this->arrow, arrow_x, out_pipe_y, this->arrow_brush);
-	ds->DrawTextLayout(in_scale, arrow_x + in_scale_xoff, y, Colors::Yellow);
+	ds->DrawTextLayout(in_scale, arrow_x + in_scale_xoff, y, this->scale_brush);
 }
