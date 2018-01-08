@@ -43,8 +43,8 @@ void Gearboxlet::load() {
     float outfit_rx = outfit_ry * default_fitting_view_angle;
     float outfit_y = basefit_ry - outfit_ry;
     float base_width = this->pipe_thickness * 1.618F;
-    float motor_x = (base_width - this->pipe_thickness) * 0.5F;
-	float base_height = motor_x * 1.618F;
+	float base_height = this->height - basefit_ry * 2.0F - ascent;
+	float motor_x = (this->width - this->pipe_thickness) * 0.382F;
     float pipe_part_x = motor_x + this->pipe_thickness;
     
     this->basefit_brush = make_linear_gradient_brush(basefit_rx, base_height, basefit_rx, base_height + basefit_ry * 2.0F, fitting_stops);
@@ -62,16 +62,20 @@ void Gearboxlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
     float body_x, pipe_x, base_x, basefit_x, basefit_cx, outfit_x, outfit_cx;
     
     float motor_x = this->pipe_brush->StartPoint.x - this->pipe_thickness;
-    float base_width = motor_x * 2.0F + this->pipe_thickness;
+    float tray_width = motor_x + this->pipe_thickness + this->fitting_width * 2.0F;
+	float tray_height = this->fitting_width;
 	float base_height = this->basefit_brush->StartPoint.y;
-    float body_y = y + motor_x;
-    float body_height = this->height - body_y + y;
-    float body_corner = motor_x * 0.5F;
+	float base_width = tray_width - this->fitting_width * 2.0F;
+	float base_xoff = (tray_width - base_width) * 0.5F;
+	float body_y = y + this->fitting_width;
+    float body_height = this->height - base_height - body_y + y + this->fitting_width;
+    float body_corner = this->pipe_thickness * 0.125F;
     float base_y = y + this->height - base_height;
     
     this->locate_body(x, base_width, motor_x, &body_x, &base_x);
     ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->body_color);
-    ds->FillRectangle(base_x, base_y, base_width, base_height, this->gbox_color);
+    ds->FillRectangle(base_x, base_y, tray_width, tray_height, this->gbox_color);
+	ds->FillRectangle(base_x + base_xoff, base_y + tray_height, base_width, base_height, this->body_color);
 
     { // draw pipe
         float basefit_rx = this->basefit_brush->StartPoint.x;
