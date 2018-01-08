@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
         Windows::UI::Color fitting_color;
         Windows::UI::Color highlight_color;
         Windows::UI::Color body_color;
-        Windows::UI::Color base_color;
+        Windows::UI::Color gbox_color;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ base_fitting;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ outlet_fitting;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ basefit_brush;

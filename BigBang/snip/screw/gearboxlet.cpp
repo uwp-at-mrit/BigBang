@@ -27,7 +27,7 @@ Gearboxlet::Gearboxlet(float width, float height, float thickness, double color,
     this->highlight_color = hsla(color, saturation, highlight);
     this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
     this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
-    this->base_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
+    this->gbox_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
 void Gearboxlet::load() {
@@ -43,10 +43,11 @@ void Gearboxlet::load() {
     float outfit_rx = outfit_ry * default_fitting_view_angle;
     float outfit_y = basefit_ry - outfit_ry;
     float base_width = this->pipe_thickness * 1.618F;
-    float base_height = (base_width - this->pipe_thickness) * 0.5F;
-    float pipe_part_x = base_height + this->pipe_thickness;
+    float motor_x = (base_width - this->pipe_thickness) * 0.5F;
+	float base_height = motor_x * 1.618F;
+    float pipe_part_x = motor_x + this->pipe_thickness;
     
-    this->basefit_brush = make_linear_gradient_brush(basefit_rx, 0.0F, basefit_rx, basefit_ry * 2.0F, fitting_stops);
+    this->basefit_brush = make_linear_gradient_brush(basefit_rx, base_height, basefit_rx, base_height + basefit_ry * 2.0F, fitting_stops);
     this->outfit_brush = make_linear_gradient_brush(outfit_rx, outfit_y, outfit_rx, outfit_y + outfit_ry * 2.0F, fitting_stops);
     this->pipe_brush = make_linear_gradient_brush(pipe_part_x, ascent, pipe_part_x, this->pipe_thickness + ascent, pipe_stops);
     this->base_fitting = geometry_freeze(this->make_fitting(basefit_rx, basefit_ry));
@@ -60,27 +61,27 @@ void Gearboxlet::fill_extent(float x, float y, float* w, float* h) {
 void Gearboxlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float body_x, pipe_x, base_x, basefit_x, basefit_cx, outfit_x, outfit_cx;
     
-    float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
-    float base_width = base_height * 2.0F + this->pipe_thickness;
-    float body_y = y + base_height;
+    float motor_x = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+    float base_width = motor_x * 2.0F + this->pipe_thickness;
+	float base_height = this->basefit_brush->StartPoint.y;
+    float body_y = y + motor_x;
     float body_height = this->height - body_y + y;
-    float body_corner = base_height * 0.5F;
+    float body_corner = motor_x * 0.5F;
     float base_y = y + this->height - base_height;
-    float body_off = (base_width - this->pipe_thickness) * 0.5F;
     
-    this->locate_body(x, base_width, body_off, &body_x, &base_x);
+    this->locate_body(x, base_width, motor_x, &body_x, &base_x);
     ds->FillRoundedRectangle(body_x, body_y, this->pipe_thickness, body_height, body_corner, body_corner, this->body_color);
-    ds->FillRectangle(base_x, base_y, base_width, base_height, this->base_color);
+    ds->FillRectangle(base_x, base_y, base_width, base_height, this->gbox_color);
 
     { // draw pipe
         float basefit_rx = this->basefit_brush->StartPoint.x;
         float outfit_rx = this->outfit_brush->StartPoint.x;
         float outfit_ry = (this->outfit_brush->EndPoint.y - this->outfit_brush->StartPoint.y) * 0.5F;
-        float pipe_length = this->width - (body_off + this->pipe_thickness + this->fitting_width * 2.0F + outfit_rx);
+        float pipe_length = this->width - (motor_x + this->pipe_thickness + this->fitting_width * 2.0F + outfit_rx);
         float cy = y + this->pipe_brush->StartPoint.y + this->pipe_thickness * 0.5F;
         
         brush_translate(this->pipe_brush, x, y);
-        brush_translate(this->basefit_brush, x, y);
+        brush_translate(this->basefit_brush, x, y - base_height);
         brush_translate(this->outfit_brush, x, y);
         this->locate_pipe(x, body_x, 0.1618F, basefit_rx, outfit_rx, &pipe_x, &basefit_x, &basefit_cx, &outfit_x, &outfit_cx);
         ds->FillEllipse(basefit_cx, cy, basefit_rx, cy - y, this->color);
@@ -116,9 +117,10 @@ Rect LGearboxlet::get_output_port() {
 
 Rect LGearboxlet::get_motor_port() {
 	float base_y = this->pipe_brush->StartPoint.y;
-	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+	float motor_x = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+	float base_height = this->basefit_brush->StartPoint.y;
 
-	return Rect{ base_height, base_y, 0.0F, this->height - base_y };
+	return Rect{ motor_x, base_y, 0.0F, this->height - base_y - base_height };
 }
 
 void LGearboxlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {
@@ -160,9 +162,10 @@ Rect RGearboxlet::get_output_port() {
 
 Rect RGearboxlet::get_motor_port() {
 	float base_y = this->pipe_brush->StartPoint.y;
-	float base_height = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+	float motor_x = this->pipe_brush->StartPoint.x - this->pipe_thickness;
+	float base_height = this->basefit_brush->StartPoint.y;
 
-	return Rect{ this->width - base_height, base_y, 0.0F, this->height - base_y };
+	return Rect{ this->width - motor_x, base_y, 0.0F, this->height - base_y - base_height };
 }
 
 void RGearboxlet::locate_body(float x, float base_width, float body_off, float* body_x, float *base_x) {

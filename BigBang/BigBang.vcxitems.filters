@@ -39,19 +39,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\funnellet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gearboxlet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gluecleanerlet.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.cpp" />
-    <ClCompile Include="D:\MRIT\WinSCADA\BigBang\snip\screw\screwsnip.cpp">
-      <Filter>snip\pipeline</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\funnellet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
@@ -103,19 +95,11 @@
       <Filter>interaction</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\constants.hpp" />
-    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\funnellet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gearboxlet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\gluecleanerlet.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.hpp" />
-    <ClInclude Include="D:\MRIT\WinSCADA\BigBang\snip\screw\screwsnip.hpp">
-      <Filter>snip\pipeline</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\funnellet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

@@ -127,17 +127,54 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		size_t gc = SNIPS_ARITY(this->gbscales) / 2;
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
 		size_t vc1 = SNIPS_ARITY(this->viscosities_1st);
 		size_t vc2 = SNIPS_ARITY(this->viscosities_2nd);
 
 		float pipe_length = width / float(dc + vc1 + vc2 + 6);
 		float pipe_thickness = pipe_length * 0.25F;
-		float master_height = pipe_length * 1.25F;
-		float cleaner_height = pipe_length;
 		float funnel_width = pipe_length * 0.382F;
-		float slave_height = pipe_length * 0.618F;
+		float gearbox_length = pipe_length * 1.25F;
+		float dgbox_height = pipe_length * 1.25F;
+		float mgbox_height = pipe_length * 0.750F;
+		float cleaner_height = pipe_length;
+
+		this->dgearbox = new LGearboxlet(gearbox_length, dgbox_height, pipe_thickness);
+		this->mgearbox = new LGearboxlet(gearbox_length, mgbox_height, pipe_thickness);
+		this->cleaner = new GlueCleanerlet(pipe_length, cleaner_height, pipe_thickness);
+		this->funnel = new Funnellet(funnel_width, 0.0F, 120.0, 0.7, 0.3, 0.84);
+		this->vibrator = new Vibratorlet(pipe_thickness * 2.718F);
+
+		this->bench->insert(this->dgearbox);
+		this->bench->insert(this->funnel);
+
+		for (size_t i = 0; i < dc; i++) {
+			this->desulphurizers[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
+		}
+
+		this->bench->insert(this->cleaner);
+		this->bench->insert(this->mgearbox);
+
+		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_1st); i++) {
+			this->viscosities_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		}
+
+		this->bench->insert(this->vibrator);
+
+		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_2nd); i++) {
+			this->viscosities_2nd[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
+		}
+
+		{ // load motors
+			this->motors[B::Funnel] = load_motorlet(this->bench, funnel_width, 90.0);
+			this->motors[B::Desulphurizer] = load_motorlet(this->bench, dgbox_height * 0.618F);
+			this->motors[B::Mooney] = load_motorlet(this->bench, mgbox_height);
+			this->motors[B::Cleaner] = load_motorlet(this->bench, pipe_thickness, 90.0);
+
+			for (unsigned int i = 0; i < B::Count; i++) {
+				this->Tms[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
+			}
+		}
 
 		{ // load water and oil pipes
 			this->water_pipes[B::Desulphurizer] = load_water_pipe(this->bench, pipe_length, 0.0, ArrowPosition::Start);
@@ -154,49 +191,10 @@ public:
 			}
 		}
 
-		this->dgearbox = new LGearboxlet(pipe_length, master_height, pipe_thickness);
-		this->mgearbox = new LGearboxlet(pipe_length, slave_height, pipe_thickness);
-		this->cleaner = new GlueCleanerlet(pipe_length, cleaner_height, pipe_thickness);
-		this->funnel = new Funnellet(funnel_width, 0.0F, 120.0, 0.7, 0.3, 0.84);
-		this->vibrator = new Vibratorlet(pipe_thickness * 2.718F);
-
-		this->bench->insert(this->dgearbox);
-		this->bench->insert(this->funnel);
-
-		for (size_t i = 0; i < dc; i++) {
-			this->desulphurizers[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, nan("Silver"), 0.000, 0.512, 0.753);
-			this->dscales[i + dc * 0] = load_scalelet(this->bench, "bar", "pressure", nullptr);
-			this->dscales[i + dc * 1] = load_scalelet(this->bench, "celsius", "temperature", "inside");
-			this->dscales[i + dc * 2] = load_scalelet(this->bench, "celsius", "temperature", "outside");
-		}
-
-		this->bench->insert(this->cleaner);
-		this->bench->insert(this->mgearbox);
-
-		for (size_t i = 0; i < gc; i++) {
-			this->gbscales[i + gc * 0] = load_scalelet(this->bench, "bar", "pressure", nullptr);
-			this->gbscales[i + gc * 1] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
-		}
-
-		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_1st); i++) {
-			this->viscosities_1st[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-		}
-
-		this->bench->insert(this->vibrator);
-
-		for (size_t i = 0; i < SNIPS_ARITY(this->viscosities_2nd); i++) {
-			this->viscosities_2nd[i] = load_sleevelet(this->bench, pipe_length, pipe_thickness, 120.0, 0.607, 0.339, 0.839);
-		}
-
-		{ // load motors
-			this->motors[B::Funnel] = load_motorlet(this->bench, funnel_width, 90.0);
-			this->motors[B::Desulphurizer] = load_motorlet(this->bench, master_height * 0.618F);
-			this->motors[B::Mooney] = load_motorlet(this->bench, slave_height * 0.85F);
-			this->motors[B::Cleaner] = load_motorlet(this->bench, pipe_thickness, 90.0);
-
-			for (unsigned int i = 0; i < B::Count; i++) {
-				this->Tms[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
-			}
+		{ // load labels
+			this->load_scales_pt(this->gbscales, SNIPS_ARITY(this->gbscales) / 2);
+			this->load_scales_ptt(this->dscales, dc);
+			this->load_scales_ptt(this->vscales_1st, vc1);
 		}
 	}
 
@@ -240,7 +238,7 @@ public:
 		}
 	}
 
-	void reflow_workline(float width, float height) {
+	void reflow_screwline(float width, float height) {
 		float pipe_length, pipe_thickness, snip_width, snip_height;
 		size_t gc = SNIPS_ARITY(this->gbscales) / 2;
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
@@ -250,7 +248,7 @@ public:
 		this->desulphurizers[0]->fill_extent(0.0F, 0.0F, &pipe_length, &pipe_thickness);
 		this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
-		float current_x = pipe_length * 2.4F;
+		float current_x = pipe_length * 2.0F;
 		float current_y = (height - pipe_length * 3.14F) * 0.5F;
 		this->bench->move_to(this->funnel, current_x, current_y);
 		this->move_motor(B::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
@@ -264,7 +262,7 @@ public:
 
 		connect_pipes(this->bench, this->desulphurizers[dc - 1], this->cleaner, &current_x, &current_y);
 		this->move_motor(B::Cleaner, this->cleaner, current_x, current_y, 0.5, 1.0);
-		connect_pipes(this->bench, this->cleaner, this->mgearbox, &current_x, &current_y);
+		connect_pipes(this->bench, this->cleaner, this->mgearbox, &current_x, &current_y, 0.2, 0.5);
 		this->move_motor(B::Mooney, this->mgearbox, current_x, current_y);
 		
 		connect_pipes(this->bench, this->mgearbox, this->viscosities_1st[0], &current_x, &current_y);
@@ -281,45 +279,42 @@ public:
 			connect_pipes(this->bench, this->viscosities_2nd[i - 1], this->viscosities_2nd[i], &current_x, &current_y);
 		}
 
-		{ // flow water and oil pipes and scales
-			Rect mport = this->dgearbox->get_input_port();
+		{ // flow liguid pipes and labels, TODO: if there is a more elegant way to deal with this
+			Rect dport = this->dgearbox->get_input_port();
+			Rect mport = this->dgearbox->get_motor_port();
 			Rect cport = this->cleaner->get_output_port();
 			Rect pport = this->desulphurizers[0]->get_input_port();
-			float pipe_ascent = pport.Y;
-			float pipe_x, pipe_y, liquid_xoff, liquid_yoff, liquid_width, liquid_height;
-			float scale_x, scale_y, scale_width, scale_height;
+
+			float pipe_x, pipe_y, scale_width, scale_height, scale_xoff;
+			float liquid_xoff, liquid_yoff, liquid_width, liquid_height;
 
 			this->bench->fill_snip_bound(this->desulphurizers[0], &pipe_x, &pipe_y, nullptr, nullptr);
 			this->bench->fill_snip_bound(this->oil_pipes[1], nullptr, &liquid_yoff, nullptr, nullptr);
 			this->dscales[0]->fill_extent(0.0F, 0.0F, &scale_width, &scale_height);
 			this->water_pipes[0]->fill_extent(0.0F, 0.0F, &liquid_width, &liquid_height);
 
-			current_y = pipe_y + pipe_ascent;
-			scale_x = pipe_x + (pipe_length - scale_width) * 0.5F;
-			scale_y = current_y + pport.Height;
+			current_y = pipe_y + pport.Y;
+			scale_xoff = (pipe_length - scale_width) * 0.25F;
 			liquid_xoff = (pipe_length - liquid_width) * 0.5F;
-			liquid_yoff = pipe_ascent + liquid_yoff - liquid_height;
+			liquid_yoff = pport.Y + liquid_yoff - liquid_height;
+			this->move_scales_ptt(this->dscales, dc, pipe_x + scale_xoff, current_y, scale_height, pipe_length, pport.Height);
 			for (size_t i = 0; i < SNIPS_ARITY(this->oil_pipes) - 1; i++) {
 				this->bench->move_to(this->oil_pipes[i + 1], pipe_x + liquid_xoff + pipe_length * i, pipe_y + liquid_yoff);
-				this->move_scale_ptt(this->dscales, dc, i, scale_height, scale_x + pipe_length * i, scale_y, pport.Height);
 			}
 
-			liquid_yoff = liquid_yoff + pipe_thickness + liquid_width - pipe_ascent * 2.0F;
+			liquid_yoff = liquid_yoff + pipe_thickness + liquid_width - pport.Y * 2.0F;
 			this->bench->fill_snip_bound(this->dgearbox, &pipe_x, nullptr, nullptr, nullptr);
-			current_x = pipe_x + this->dgearbox->get_motor_port().X - liquid_width;
+			current_x = pipe_x + mport.X - liquid_width;
 			this->bench->move_to(this->oil_pipes[B::Desulphurizer], current_x, current_y);
 			this->bench->move_to(this->water_pipes[B::Desulphurizer], current_x, current_y + liquid_height);
-			current_x = pipe_x + mport.X + (mport.Width - liquid_width) * 0.5F;
+			this->move_scales_pt(this->gbscales, gc, 0, pipe_x + dport.X, current_y + pport.Height, scale_height);
+			current_x = pipe_x + dport.X + (dport.Width - liquid_width) * 0.5F;
 			current_y = pipe_y + (pipe_thickness - liquid_height) * 0.5F;
-			this->move_scale_pt(this->gbscales, gc, 0, scale_height, pipe_x + mport.X + (mport.Width - scale_width) * 0.5F, scale_y);
 			
 			this->bench->fill_snip_bound(this->cleaner, &pipe_x, &pipe_y, nullptr, nullptr);
 			this->bench->move_to(this->water_pipes[B::Cleaner], pipe_x + cport.X + cport.Width, current_y + liquid_height);
-			this->move_scale_pt(this->gbscales, gc, 1, scale_height,
-				pipe_x + cport.X + (cport.Width - scale_width) * 0.5F,
-				pipe_y + cport.Y + pport.Height);
-
-			this->bench->move_to(this->water_pipes[1], current_x, pipe_y + liquid_yoff);
+			this->bench->move_to(this->water_pipes[1], current_x, pipe_y + dport.Y + liquid_yoff);
+			this->move_scales_pt(this->gbscales, gc, 1, pipe_x + cport.X, pipe_y + cport.Y + pport.Height, scale_height);
 			current_x = pipe_x + cport.X + (cport.Width - liquid_width) * 0.5F;
 			this->bench->fill_snip_bound(this->viscosities_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
 			current_y = pipe_y + liquid_yoff;
@@ -327,6 +322,9 @@ public:
 			for (size_t i = B::Mooney + 1; i < SNIPS_ARITY(this->water_pipes); i++) {
 				this->bench->move_to(this->water_pipes[i], pipe_x + liquid_xoff + pipe_length * (i - B::Mooney - 1), current_y);
 			}
+
+			this->bench->fill_snip_bound(this->viscosities_1st[0], &pipe_x, &pipe_y, nullptr, nullptr);
+			this->move_scales_ptt(this->vscales_1st, vc1, pipe_x + scale_xoff, pipe_y + pport.Y, scale_height, pipe_length, pport.Height);
 		}
 	}
 
@@ -338,6 +336,7 @@ public:
 
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
+		size_t vc1 = SNIPS_ARITY(this->viscosities_1st);
 		uint16* modbus = register_values - address;
 
 		if ((count != this->inaddrq) && (address + count != this->inaddrn)) {
@@ -353,18 +352,10 @@ public:
 			this->gauges[B::Desulphurizer]->set_rpm(modbus[126]);
 			this->gauges[B::Mooney]->set_rpm(modbus[127]);
 
-			this->gbscales[0]->set_scale(float(modbus[150]) * ratio);
-			this->gbscales[1]->set_scale(float(modbus[151]) * ratio);
-			for (unsigned int di = 0; di < dc; di++) {
-				unsigned int idx = 152 + di * 3;
-
-				this->dscales[di + dc * 0]->set_scale(float(modbus[idx + 0] * ratio));
-				this->dscales[di + dc * 1]->set_scale(float(modbus[idx + 1] * ratio));
-				this->dscales[di + dc * 2]->set_scale(float(modbus[idx + 2] * ratio));
-			}
-
-			this->gbscales[2]->set_scale(float(modbus[166]) * ratio);
-			this->gbscales[3]->set_scale(float(modbus[167]) * ratio);
+			this->update_scales_pt(this->gbscales,     0,   modbus, 150, ratio);
+			this->update_scales_ptt(this->dscales,     dc,  modbus, 152, ratio);
+			this->update_scales_pt(this->gbscales,     2,   modbus, 166, ratio);
+			this->update_scales_ptt(this->vscales_1st, vc1, modbus, 168, ratio);
 
 			for (size_t wpi = 0; wpi < SNIPS_ARITY(this->water_pipes); wpi++) {
 				size_t idx = 182 + wpi * 8;
@@ -390,15 +381,57 @@ private:
 		connect_motor(this->bench, pipe, this->motors[id], this->Tms[id], x, y, fx, fy);
 	}
 
-	void move_scale_pt(Scalelet* scales[], size_t arity, size_t idx, float scale_height, float x, float y) {
+	void load_scales_t(Scalelet* scales[], size_t arity) {
+		for (size_t i = 0; i < arity; i++) {
+			scales[i] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
+		}
+	}
+
+	void load_scales_pt(Scalelet* scales[], size_t arity) {
+		for (size_t i = 0; i < arity; i++) {
+			scales[i + arity * 0] = load_scalelet(this->bench, "bar", "pressure", nullptr);
+			scales[i + arity * 1] = load_scalelet(this->bench, "celsius", "temperature", nullptr);
+		}
+	}
+
+	void load_scales_ptt(Scalelet* scales[], size_t arity) {
+		for (size_t i = 0; i < arity; i++) {
+			scales[i + arity * 0] = load_scalelet(this->bench, "bar", "pressure", nullptr);
+			scales[i + arity * 1] = load_scalelet(this->bench, "celsius", "temperature", "inside");
+			scales[i + arity * 2] = load_scalelet(this->bench, "celsius", "temperature", "outside");
+		}
+	}
+
+	void move_scales_pt(Scalelet* scales[], size_t arity, size_t idx, float x, float y, float scale_height) {
 		this->bench->move_to(scales[idx + arity * 0], x, y);
 		this->bench->move_to(scales[idx + arity * 1], x, y + scale_height);
 	}
 
-	void move_scale_ptt(Scalelet* scales[], size_t arity, size_t idx, float scale_height, float x, float y, float port_height) {
-		this->bench->move_to(scales[idx + arity * 0], x, y - port_height - scale_height);
-		this->bench->move_to(scales[idx + arity * 1], x, y + scale_height * 0.0F);
-		this->bench->move_to(scales[idx + arity * 2], x, y + scale_height * 1.0F);
+	void move_scales_ptt(Scalelet* scales[], size_t arity, float x0, float y_ascent, float scale_height, float hgap, float vgap) {
+		float y_descent = y_ascent + vgap;
+
+		for (size_t idx = 0; idx < arity; idx++) {
+			float x = x0 + hgap * float(idx);
+
+			this->bench->move_to(scales[idx + arity * 0], x, y_ascent - scale_height);
+			this->bench->move_to(scales[idx + arity * 1], x, y_descent + scale_height * 0.0F);
+			this->bench->move_to(scales[idx + arity * 2], x, y_descent + scale_height * 1.0F);
+		}
+	}
+
+	void update_scales_pt(Scalelet* scales[], size_t i, uint16* modbus, size_t idx, float ratio) {
+		scales[i + 0]->set_scale(float(modbus[idx + 0]) * ratio);
+		scales[i + 1]->set_scale(float(modbus[idx + 1]) * ratio);
+	}
+
+	void update_scales_ptt(Scalelet* scales[], size_t arity, uint16* modbus, size_t addr, float ratio) {
+		for (size_t i = 0; i < arity; i++) {
+			size_t idx = addr + i * 3;
+		
+			scales[i + arity * 0]->set_scale(float(modbus[idx + 0] * ratio));
+			scales[i + arity * 1]->set_scale(float(modbus[idx + 1] * ratio));
+			scales[i + arity * 2]->set_scale(float(modbus[idx + 2] * ratio));
+		}
 	}
 
 // never deletes these snips mannually
@@ -418,6 +451,7 @@ private:
 	Sleevelet* desulphurizers[4];
 	Scalelet* dscales[4 * 3];
 	Sleevelet* viscosities_1st[2];
+	Scalelet* vscales_1st[2 * 3];
 	Sleevelet* viscosities_2nd[2];
 	Motorlet* motors[B::Count];
 	Scalelet* Tms[B::Count];
@@ -499,6 +533,6 @@ void BSegment::reflow(float width, float height) {
 		console->reflow_window_frame(width, height);
 		console->reflow_icons(width, height);
 		console->reflow_gauges(width, height);
-		console->reflow_workline(width, height);
+		console->reflow_screwline(width, height);
 	}
 }
