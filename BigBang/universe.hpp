@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "control.hxx"
 #include "decorator/decorator.hpp"
 
@@ -51,11 +53,16 @@ namespace WarGrey::SCADA {
 		virtual void no_selected() = 0;
 
     public:
+		void enter_critical_section();
+		void leave_critical_section();
         void resize(float width, float height);
 		void fill_actual_extent(float* width, float* height);
 
     protected:
         WarGrey::SCADA::Win2DControl^ control;
+
+	private:
+		std::mutex section;
     };
 
     private class Universe : public WarGrey::SCADA::IUniverse {

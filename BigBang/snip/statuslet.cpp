@@ -242,10 +242,15 @@ void Statuslinelet::load() {
 }
 
 void Statuslinelet::set_message(Platform::String^ message, Log level) {
-	this->status = make_text_layout(message, status_font);
-	this->color = status_colors[static_cast<unsigned int>(level)];
-	if (this->color == nullptr) {
-		this->color = status_nolog_color;
+	auto color = status_colors[static_cast<unsigned int>(level)]; 
+	this->color = ((color == nullptr) ? status_nolog_color : color);
+
+	if (this->info == nullptr) {
+		this->status = make_text_layout(message, status_font);
+	} else {
+		this->info->master->enter_critical_section();
+		this->status = make_text_layout(message, status_font);
+		this->info->master->leave_critical_section();
 	}
 }
 

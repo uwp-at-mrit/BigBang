@@ -623,8 +623,11 @@ private:
         Size region = this->planet->Size;
 
 		try {
+			this->world->enter_critical_section();
             this->world->draw(args->DrawingSession, region.Width, region.Height);
+			this->world->leave_critical_section();
 		} catch (Platform::Exception^ wte) {
+			this->world->leave_critical_section();
             syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
 		}
 	}
@@ -662,6 +665,14 @@ IUniverse::IUniverse(Panel^ parent, int frame_rate) {
 
 IUniverse::~IUniverse() {
     this->control = nullptr;
+}
+
+void IUniverse::enter_critical_section() {
+	this->section.lock();
+}
+
+void IUniverse::leave_critical_section() {
+	this->section.unlock();
 }
 
 void IUniverse::resize(float width, float height) {

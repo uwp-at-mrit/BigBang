@@ -131,13 +131,13 @@ public:
 		size_t mc = SNIPS_ARITY(this->mooneys);
 
 		float pipe_length = width / float(dc + mc + 6);
-		float pipe_thickness = pipe_length * 0.25F;
+		float pipe_thickness = pipe_length * 0.250F;
 		float funnel_width = pipe_length * 0.382F;
 		float gearbox_length = pipe_length * 1.618F;
-		float dgbox_height = pipe_length * 1.25F;
-		float mgbox_height = pipe_length * 0.750F;
+		float dgbox_height = pipe_length * 1.250F;
+		float mgbox_height = pipe_length * 1.000F;
 		float cleaner_width = pipe_length * 0.618F;
-		float cleaner_height = pipe_length;
+		float cleaner_height = pipe_length * 1.000F;
 
 		this->dgearbox = new LGearboxlet(gearbox_length, dgbox_height, pipe_thickness);
 		this->mgearbox = new LGearboxlet(gearbox_length, mgbox_height, pipe_thickness);
@@ -332,6 +332,7 @@ public:
 				transaction, min(this->inaddrn - address, this->inaddrq), count);
 		}
 
+		this->bench->enter_critical_section();
 		switch ((address - this->inaddr0) / this->inaddrq) {
 		case 0: { // [126, 251)
 			float ratio = 0.1F;
@@ -357,6 +358,7 @@ public:
 
 		}
 		}
+		this->bench->leave_critical_section();
 	}
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
@@ -465,10 +467,13 @@ public:
 
 		this->color = make_solid_brush(caption_color);
 		this->caption = make_text_layout(speak(caption), font);
+		this->grid = new GridDecorator();
 	};
 
 public:
 	void draw_before(IUniverse* self, CanvasDrawingSession^ ds, float Width, float Height) {
+		this->grid->draw_before(self, ds, Width, Height);
+
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
@@ -476,6 +481,8 @@ public:
 	}
 
 	void draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+		this->grid->draw_before_snip(self, ds, x, y, width, height);
+
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
 				ds->DrawLine(0, height, width, height, this->color, 2.0F);
@@ -488,6 +495,7 @@ public:
 private:
 	ICanvasBrush^ color;
 	CanvasTextLayout^ caption;
+	IUniverseDecorator* grid;
 };
 
 BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 4) {
