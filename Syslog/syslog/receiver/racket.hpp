@@ -5,9 +5,9 @@
 #include "syslog/logging.hpp"
 
 namespace WarGrey::SCADA {
-	private class RSyslogReceiver : public WarGrey::SCADA::ISyslogReceiver {
+	private class RacketReceiver : public WarGrey::SCADA::ISyslogReceiver {
 	public:
-		RSyslogReceiver(Platform::String^ server, unsigned short service,
+		RacketReceiver(Platform::String^ server, unsigned short service,
 			WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug,
 			Platform::String^ topic = "");
 

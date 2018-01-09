@@ -81,7 +81,7 @@ namespace WarGrey::SCADA {
 	private:
 		void connect();
 		void apply_request(std::pair<uint16, ModbusTransaction>& transaction);
-		void wait_process_callback_loop();
+		void wait_process_confirm_loop();
 
     private:
         Windows::Networking::Sockets::StreamSocket^ socket;

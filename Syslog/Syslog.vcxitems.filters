@@ -12,20 +12,20 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog\logging.hpp">
       <Filter>syslog</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\rsyslog.hpp">
-      <Filter>syslog\receiver</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.hpp" />
+    <ClInclude Include="D:\MRIT\WinSCADA\Syslog\syslog\receiver\racket.hpp">
+      <Filter>syslog\receiver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog\logging.cpp">
       <Filter>syslog</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\rsyslog.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.cpp" />
+    <ClCompile Include="D:\MRIT\WinSCADA\Syslog\syslog\receiver\racket.cpp">
       <Filter>syslog\receiver</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.cpp" />
   </ItemGroup>
 </Project>

@@ -23,6 +23,7 @@ private struct WarGrey::SCADA::ModbusTransaction {
 	uint8 function_code;
 	uint8* pdu_data;
 	uint16 size;
+	uint16 maybe_address;
 	IModbusConfirmation* confirmation;
 };
 
@@ -120,6 +121,7 @@ IModbusClient::~IModbusClient() {
 	this->logger->destroy();
 	this->generator->destroy();
 
+	delete this->socket; // stop the confirmation loop before release PDU pool.
 	while (!this->blocking_requests.empty()) {
 		POP_REQUEST(this->blocking_requests);
 	}
@@ -160,7 +162,7 @@ void IModbusClient::connect() {
 
             this->logger->log_message(Log::Info, L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
 
-			this->wait_process_callback_loop();
+			this->wait_process_confirm_loop();
 
 			while (!this->blocking_requests.empty()) {
 				auto current = this->blocking_requests.begin();
@@ -176,19 +178,22 @@ void IModbusClient::connect() {
 }
 
 uint8* IModbusClient::calloc_pdu() {
+	uint8* pdu = nullptr;
+
 	if (this->pdu_pool.empty()) {
-		this->pdu_pool.push((uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8)));
+		pdu = (uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8));
+	} else {
+		pdu = this->pdu_pool.front();
+		this->pdu_pool.pop();
 	}
 
-	auto head = this->pdu_pool.front();
-	this->pdu_pool.pop();
-
-	return head;
+	return pdu;
 }
 
 uint16 IModbusClient::request(uint8 function_code, uint8* data, uint16 size, IModbusConfirmation* confirmation) {
 	IModbusConfirmation* cf = ((confirmation == nullptr) ? this->fallback_confirmation : confirmation);
-	ModbusTransaction mt = { function_code, data, size, cf };
+	uint16 maybe_address = MODBUS_GET_INT16_FROM_INT8(data, 0);
+	ModbusTransaction mt = { function_code, data, size, maybe_address, cf };
 	uint16 id = this->generator->yield();
 	auto transaction = std::pair<uint16, ModbusTransaction>(id, mt);
 
@@ -212,7 +217,8 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 		try {
 			unsigned int sent = sending.get();
 
-			this->logger->log_message(Log::Debug, L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
+			this->logger->log_message(Log::Debug,
+				L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
 				sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
@@ -222,7 +228,7 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 		}});
 }
 
-void IModbusClient::wait_process_callback_loop() {
+void IModbusClient::wait_process_confirm_loop() {
 	create_task(this->mbin->LoadAsync(MODBUS_MBAP_LENGTH)).then([=](unsigned int size) {
 		uint16 transaction, protocol, length;
 		uint8 unit;
@@ -267,10 +273,10 @@ void IModbusClient::wait_process_callback_loop() {
 			}
 
 			IModbusConfirmation* cf = maybe_transaction->second.confirmation;
+			uint16 maybe_address = maybe_transaction->second.maybe_address;
 			uint8 origin_code = maybe_transaction->second.function_code;
 			uint8 raw_code = mbin->ReadByte();
-			uint8 function_code = (raw_code > 0x80) ? (raw_code - 0x80) : raw_code;
-			uint16 maybe_address = MODBUS_GET_INT16_FROM_INT8(maybe_transaction->second.pdu_data, 0);
+			uint8 function_code = ((raw_code > 0x80) ? (raw_code - 0x80) : raw_code);
 
 			if (function_code != origin_code) {
 				modbus_discard_current_adu(this->logger,
@@ -304,7 +310,7 @@ void IModbusClient::wait_process_callback_loop() {
 					dirty, this->device->RawName->Data(), this->service->Data());
 			}
 
-			this->wait_process_callback_loop();
+			this->wait_process_confirm_loop();
 		} catch (modbus_discarded&) {
 			unsigned int rest = mbin->UnconsumedBufferLength;
 			
@@ -312,7 +318,7 @@ void IModbusClient::wait_process_callback_loop() {
 				MODBUS_DISCARD_BYTES(mbin, rest);
 			}
 			
-			this->wait_process_callback_loop();
+			this->wait_process_confirm_loop();
 		} catch (task_canceled&) {
 			this->connect();
 		} catch (Platform::Exception^ e) {
@@ -420,7 +426,7 @@ uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16
 }
 
 uint16 ModbusClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length, IModbusConfirmation* confirmation) {
-	// TODO: how to manage the memory for raw requests.
+	// TODO: how to manage memory for raw requests.
 	return IModbusClient::request(fcode, request, data_length, confirmation);
 }
 

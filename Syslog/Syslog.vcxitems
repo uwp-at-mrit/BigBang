@@ -16,13 +16,13 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog\logging.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\rsyslog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\racket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog\logging.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\rsyslog.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\racket.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.hpp" />
   </ItemGroup>
 </Project>

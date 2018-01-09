@@ -1,7 +1,7 @@
 #pragma once
 
 #include "syslog/logging.hpp"
-#include "syslog/receiver/rsyslog.hpp"
+#include "syslog/receiver/racket.hpp"
 #include "syslog/receiver/stdout.hpp"
 
 WarGrey::SCADA::Syslog* default_logger();

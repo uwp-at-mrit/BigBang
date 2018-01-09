@@ -467,13 +467,10 @@ public:
 
 		this->color = make_solid_brush(caption_color);
 		this->caption = make_text_layout(speak(caption), font);
-		this->grid = new GridDecorator();
 	};
 
 public:
 	void draw_before(IUniverse* self, CanvasDrawingSession^ ds, float Width, float Height) {
-		this->grid->draw_before(self, ds, Width, Height);
-
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
@@ -481,13 +478,18 @@ public:
 	}
 
 	void draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
-		this->grid->draw_before_snip(self, ds, x, y, width, height);
-
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
 				ds->DrawLine(0, height, width, height, this->color, 2.0F);
-			} else if (dynamic_cast<Statuslinelet*>(self) != nullptr) { // statusline's topline
+			} else if (self == this->statusline) { // statusline's topline
 				ds->DrawLine(0, y, width, y, this->color, 2.0F);
+			} else { // avoid dynamic_cast every time.
+				auto maybe_statusline = dynamic_cast<Statuslinelet*>(self);
+				
+				if (maybe_statusline != nullptr) {
+					this->statusline = maybe_statusline;
+					ds->DrawLine(0, y, width, y, this->color, 2.0F);
+				}
 			}
 		}
 	}
@@ -495,10 +497,10 @@ public:
 private:
 	ICanvasBrush^ color;
 	CanvasTextLayout^ caption;
-	IUniverseDecorator* grid;
+	Statuslinelet* statusline;
 };
 
-BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 4) {
+BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 16) {
 	this->console = new BConsole(this, "RR" + label, plc);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }

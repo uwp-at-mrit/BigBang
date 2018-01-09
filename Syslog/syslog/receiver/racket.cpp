@@ -1,6 +1,6 @@
 ﻿#include <ppltasks.h>
 
-#include "syslog/receiver/rsyslog.hpp"
+#include "syslog/receiver/racket.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -19,7 +19,7 @@ static void send_to(IDataWriter^ udpout, Platform::String^ ts, Platform::String^
 	udpout->StoreAsync();
 }
 
-RSyslogReceiver::RSyslogReceiver(Platform::String^ server, unsigned short service, Log level, Platform::String^ topic)
+RacketReceiver::RacketReceiver(Platform::String^ server, unsigned short service, Log level, Platform::String^ topic)
 	: ISyslogReceiver(level, topic) {
 	auto logserver = ref new HostName(server);
 
@@ -40,7 +40,7 @@ RSyslogReceiver::RSyslogReceiver(Platform::String^ server, unsigned short servic
 	});
 }
 
-void RSyslogReceiver::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
+void RacketReceiver::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
 	Platform::String^ timestamp = data.timestamp;
 
 	if (udpout == nullptr) {
