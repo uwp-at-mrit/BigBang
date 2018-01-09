@@ -1,5 +1,16 @@
 #lang scribble/manual
 
-@title{睿博环保设备有限公司}
+@(require "../Documentations/handbook.rkt")
 
-SCADA System for Windows 10
+@title{工业数据采集与监控系统}
+@author["睿博环保设备有限公司"]
+
+@handbook-smart-table[]
+
+@;include-section[]
+
+@handbook-appendix[#:index? #true
+ (bib-entry #:key      "libmodbus"
+            #:title    "A Modbus library for Linux, Mac OS X, FreeBSD, QNX and Windows"
+            #:author   (authors "Stéphane Raimbault")
+            #:url      "http://libmodbus.org")]
