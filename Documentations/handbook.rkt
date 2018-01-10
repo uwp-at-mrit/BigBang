@@ -6,7 +6,42 @@
 (require scribble/core)
 (require scribble/manual)
 (require scriblib/autobib)
+(require scribble/html-properties)
 
+(define sln-root (make-parameter #false))
+
+(define document-root
+  (lambda []
+    (simplify-path (build-path (sln-root) "Documentations"))))
+
+(define handbook-root
+  (lambda []
+    (build-path (document-root) "Handbook")))
+
+(define handbook-entry
+  (lambda [[proj-root (current-directory)]]
+    (define-values (parent projname _) (split-path proj-root))
+    (simplify-path (build-path proj-root (path-add-extension projname #".scrbl")))))
+
+(define handbook-style
+  (lambda [[proj-root (current-directory)]]
+    (define-values (parent projname _) (split-path proj-root))
+    (simplify-path (build-path proj-root (path-add-extension projname #".css")))))
+
+(define find-solution-root-dir
+  (lambda [[dir (current-directory)]]
+    (cond [(ormap (curry regexp-match? #px"[.]sln$") (directory-list dir)) dir]
+          [else (let-values ([(parent dirname _) (split-path dir)])
+                  (and parent (find-solution-root-dir parent)))])))
+
+(define handbook-title
+  (lambda [#:authors authors . pre-contents]
+    (parameterize ([sln-root (find-solution-root-dir)])
+      (define styles (filter file-exists? (list (build-path (document-root) "handbook.css") (handbook-style))))
+      (list (title #:style (make-style #false (map make-css-addition styles)) #:tag "handbook"
+                   (if (pair? pre-contents) pre-contents (list (literal "开发手册"))))
+            (apply author authors)))))
+  
 (define handbook-smart-table
   (lambda []
     (table-of-contents)))
@@ -25,7 +60,7 @@
     (lambda [#:index? [index? #true] . bibentries]
       (define appendix-style (make-style 'index '(grouper)))
       ((curry filter-not void?)
-       (list (struct-copy part (apply bibliography #:tag "handtool-bibliography" (append entries bibentries))
+       (list (struct-copy part (apply bibliography #:tag "handbook-bibliography" (append entries bibentries))
                           [title-content (list "参考文献")])
              (unless (false? index?)
                (struct-copy part (index-section #:tag "handbook-index")
