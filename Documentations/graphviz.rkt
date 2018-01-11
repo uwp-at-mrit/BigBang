@@ -11,7 +11,7 @@
              #:padding-space [gapsize 8] #:padding-x [offset 12] #:padding-box [delta 8]
              #:dir-color [cdir 'LightSkyBlue] #:file-color [cfile 'Ghostwhite] #:line-color [cline 'Gainsboro]]
       (define yoffset (* 0.5 (+ delta hint)))
-      (define xy-find (lambda [p f] (let-values ([(x y) (lt-find p f)]) (values (+ x offset) (+ y yoffset)))))
+      (define xy-find (λ [p f] (let-values ([(x y) (lt-find p f)]) (values (+ x offset) (+ y yoffset)))))
       (define (leaf->pict v color)
         (define content (value->pict v))
         ((curryr cc-superimpose content)
