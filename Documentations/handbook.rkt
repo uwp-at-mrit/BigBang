@@ -1,12 +1,18 @@
 #lang racket
 
 (provide (all-defined-out))
-(provide (all-from-out scriblib/autobib))
+(provide (all-from-out "bibliography.rkt"))
 
 (require scribble/core)
 (require scribble/manual)
-(require scriblib/autobib)
 (require scribble/html-properties)
+
+(require "bibliography.rkt")
+
+(require syntax/location)
+(require (for-syntax syntax/parse))
+
+(define preface-style (make-style 'index '(grouper unnumbered)))
 
 (define sln-root (make-parameter #false))
 
@@ -58,10 +64,9 @@
                                   #:author   (authors "Matthew Flatt" "Eli Barzilay")
                                   #:url      "https://docs.racket-lang.org/scribble/index.html"))])
     (lambda [#:index? [index? #true] . bibentries]
-      (define appendix-style (make-style 'index '(grouper)))
       ((curry filter-not void?)
-       (list (struct-copy part (apply bibliography #:tag "handbook-bibliography" (append entries bibentries))
+       (list (struct-copy part (apply bibliography #:tag "handbook::bibliography" (append entries bibentries))
                           [title-content (list "参考文献")])
              (unless (false? index?)
-               (struct-copy part (index-section #:tag "handbook-index")
+               (struct-copy part (index-section #:tag "handbook::index")
                             [title-content (list "关键词索引")])))))))
