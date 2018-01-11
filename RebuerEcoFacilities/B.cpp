@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-#define SNIPS_ARITY(a) sizeof(a) / sizeof(Snip*)
+#define SNIPS_ARITY(a) (sizeof(a) / sizeof(Snip*))
 
 static inline Motorlet* load_motorlet(IUniverse* master, float width, double degree = 0.0) {
 	Motorlet* motor = new Motorlet(width);

@@ -4,12 +4,12 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 
 using namespace Windows::UI;
-using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml;
 using namespace Windows::UI::ViewManagement;
 
 static UISettings^ sysUI = nullptr;
 
-static inline Size adjust_size(float Width, float Height, Panel^ workspace) {
+static inline Size adjust_size(float Width, float Height, FrameworkElement^ workspace) {
     auto margin = workspace->Margin;
 
     float width = Width - float(margin.Left + margin.Right);
@@ -24,7 +24,7 @@ Size system_screen_size() {
     return { float(display->ScreenWidthInRawPixels) / scaling, float(display->ScreenHeightInRawPixels) / scaling };
 }
 
-Size adjusted_workspace_size(Rect region, Panel^ workspace) {
+Size adjusted_workspace_size(Rect region, FrameworkElement^ workspace) {
     return adjust_size(region.Width, region.Height, workspace);
 }
 

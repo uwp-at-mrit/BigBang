@@ -9,6 +9,7 @@ using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::ApplicationModel::Core;
 
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::ViewManagement;
 
 namespace WarGrey::SCADA {
@@ -16,7 +17,7 @@ namespace WarGrey::SCADA {
 
     private ref class Rebuer sealed : public Application {
     protected:
-        void RebuerMain(ApplicationView^ self, Console^ workspace) {
+        void RebuerMain(ApplicationView^ self, FrameworkElement^ screen) {
             this->Suspending += ref new SuspendingEventHandler(this, &Rebuer::OnSuspending);
             self->VisibleBoundsChanged += ref new TypedEventHandler<ApplicationView^, Object^>(this, &Rebuer::DoResize);
             CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Rebuer::OnUncaughtException);
@@ -26,41 +27,37 @@ namespace WarGrey::SCADA {
             this->RequestedTheme = ApplicationTheme::Dark;
 
             // WARNING: Force Using the default TitleBar if a custom one was set once.
-            CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;            
-            self->Title = workspace->ToString();
+            CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
+			self->Title = screen->ToString();
         }
 
         virtual void OnLaunched(LaunchActivatedEventArgs^ e) override {
             auto self = ApplicationView::GetForCurrentView();
-            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
+            auto screen = dynamic_cast<Console^>(Window::Current->Content);
 
-            if (workspace != nullptr) {
-                if (e->PrelaunchActivated == false) {
-                    workspace->initialize_component(adjusted_workspace_size(self->VisibleBounds, workspace));
-                    Window::Current->Activate();
-                }
-            } else {
-                workspace = ref new Console();
-                this->RebuerMain(self, workspace);
+            if (screen == nullptr) {
+                screen = ref new Console();
+                this->RebuerMain(self, screen);
             
                 if (e->PreviousExecutionState == ApplicationExecutionState::Terminated) {
                     // TODO: Restore the saved session state only when appropriate, scheduling the
                     // final launch steps after the restore is complete
                 }
 
-                if (e->PrelaunchActivated == false) {
-                    workspace->initialize_component(adjusted_workspace_size(self->VisibleBounds, workspace));
-                    Window::Current->Content = workspace;
-                    Window::Current->Activate();
-                }
+				Window::Current->Content = screen;
             }
+
+			if (e->PrelaunchActivated == false) {
+				screen->initialize_component(adjusted_workspace_size(self->VisibleBounds, screen));
+				Window::Current->Activate();
+			}
         }
 
     private:
         void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
-            if (workspace != nullptr) workspace->suspend(e->SuspendingOperation);
+            auto screen = dynamic_cast<Console^>(Window::Current->Content);
+            if (screen != nullptr) screen->suspend(e->SuspendingOperation);
         }
 
         void OnUncaughtException(Platform::Object^ sender, UnhandledErrorDetectedEventArgs^ e) {
@@ -77,10 +74,10 @@ namespace WarGrey::SCADA {
         }
 
         void DoResize(ApplicationView^ view, Platform::Object^ obj) {
-            auto workspace = dynamic_cast<Console^>(Window::Current->Content);
-            if (workspace != nullptr) {
-                auto region = adjusted_workspace_size(view->VisibleBounds, workspace);
-                workspace->reflow(region.Width, region.Height);
+            auto screen = dynamic_cast<Console^>(Window::Current->Content);
+            if (screen != nullptr) {
+                auto region = adjusted_workspace_size(view->VisibleBounds, screen);
+                screen->reflow(region.Width, region.Height);
             }
         }
     };

@@ -8,32 +8,76 @@ using namespace Windows::ApplicationModel;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Input;
 
-Console::Console() : StackPanel() {
-    this->Orientation = ::Orientation::Vertical;
-    this->Margin = ThicknessHelper::FromUniformLength(4.0);
+/*************************************************************************************************/
+Console::Console() : SplitView() {
+	this->Margin = ThicknessHelper::FromUniformLength(4.0);
+	this->PanePlacement = SplitViewPanePlacement::Left;
+
+	this->DisplayMode = SplitViewDisplayMode::Overlay;
+	this->IsPaneOpen = false;
+
+	this->ManipulationMode = ManipulationModes::TranslateX;
+	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
+	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
 }
 
 Console::~Console() {
-    if (this->universe != nullptr) {
-        delete this->universe;
-    }
+	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
+		if (this->universes[i] != nullptr) {
+			delete this->universes[i];
+		}
+	}
 }
 
 void Console::initialize_component(Size region) {
-    if (this->universe == nullptr) {
-        //this->universe = new BSegment(this, "B1", "192.168.0.188");
-		this->universe = new BSegment(this, "B1", "192.168.1.114");
-    }
+	ListView^ navigator = ref new ListView();
 
-    this->reflow(region.Width, region.Height);
+	navigator->SelectionMode = ListViewSelectionMode::Single;
+
+	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
+		auto label = ref new TextBlock();
+		this->voids[i] = ref new StackPanel();
+
+		label->Text = static_cast<RR>(i).ToString();
+
+		navigator->Items->Append(label);
+		if (navigator->SelectedItem == nullptr) {
+			navigator->SelectedItem = label;
+		}
+	}
+
+	// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
+	this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
+
+	this->Content = this->voids[0];
+	this->Pane = navigator;
+
+	this->reflow(region.Width, region.Height);
 }
 
 void Console::reflow(float width, float height) {
-    this->universe->resize(width, height);
+	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
+		if (this->universes[i] != nullptr) {
+			this->universes[i]->resize(width, height);
+		}
+	}
 }
 
-void Console::suspend(SuspendingOperation^ op) {
-    // TODO: Save application state and stop any background activity.
-    // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
+void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
+	if (e->Delta.Translation.X < 0) {
+		this->IsPaneOpen = true;
+	} else {
+		this->IsPaneOpen = false;
+	}
+}
+
+void Console::animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) {
+	// this->IsPaneOpen = false;
+}
+
+void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
+	// TODO: Save application state and stop any background activity.
+	// Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }
