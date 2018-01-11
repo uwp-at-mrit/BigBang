@@ -1,4 +1,5 @@
 ﻿#include "console.hxx"
+#include "tongue.hpp"
 #include "B.hpp"
 
 using namespace WarGrey::SCADA;
@@ -40,10 +41,10 @@ void Console::initialize_component(Size region) {
 		auto label = ref new TextBlock();
 		this->voids[i] = ref new StackPanel();
 
-		label->Text = static_cast<RR>(i).ToString();
+		label->Text = speak("RR" + static_cast<RR>(i).ToString());
 
 		navigator->Items->Append(label);
-		if (navigator->SelectedItem == nullptr) {
+		if (i == 0) {
 			navigator->SelectedItem = label;
 		}
 	}
