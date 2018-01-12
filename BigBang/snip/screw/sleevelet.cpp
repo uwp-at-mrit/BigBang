@@ -54,7 +54,7 @@ void Sleevelet::load() {
     auto pipe = rectangle(pipe_x, ascent, pipe_length, this->thickness);
     this->cartoon_style = make_dash_stroke(CanvasDashStyle::Dash);
     this->body_mask = rectangle(hollow_x, ascent + hollow_offset, hollow_width, hollow_height);
-    this->hollow_body = geometry_freeze(geometry_substract(pipe, this->body_mask));
+    this->hollow_body = geometry_freeze(geometry_subtract(pipe, this->body_mask));
 }
 
 void Sleevelet::fill_extent(float x, float y, float* w, float* h) {

@@ -70,12 +70,12 @@ void Vibratorlet::initialize_hat() {
 
     auto midbox = rotate_rectangle(mid_x, mid_y, mid_width, mid_height, -d_angle);
     auto midfg = geometry_rotate(rounded_rectangle(midfg_x, midfg_y, midfg_width, midfg_height, -0.04F, -0.03F), -d_angle);
-    auto hollow_midbg = geometry_substract(midbox, midfg);
+    auto hollow_midbg = geometry_subtract(midbox, midfg);
 
     this->hat_adjust_yoff = -(backend->ComputeBounds()).Y;
-    this->hat_decorator_sides = geometry_freeze(geometry_union(frontend, geometry_substract(backend, hat)));
+    this->hat_decorator_sides = geometry_freeze(geometry_union(frontend, geometry_subtract(backend, hat)));
     this->hat_bottom = geometry_freeze(bottom);
-    this->hat = geometry_substract(geometry_substract(hat, frontend), midbox);
+    this->hat = geometry_subtract(geometry_subtract(hat, frontend), midbox);
     this->hat_frontend_midbg = geometry_freeze(hollow_midbg);
     this->hat_frontend_midfg = geometry_freeze(midfg);
     this->hat_brush = make_linear_gradient_brush(hat_width, 0.0F, MAKE_GRADIENT_STOPS(hat_colors));

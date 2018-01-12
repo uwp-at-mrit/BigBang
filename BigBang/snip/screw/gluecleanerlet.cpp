@@ -66,7 +66,7 @@ void GlueCleanerlet::load() {
     auto bottom = rectangle(bottom_x, bottom_y, bottom_width, base_height);
     auto full_pipe = rounded_rectangle(0.0F, 0.0F, vpipe_x + pipe_rx, this->pipe_thickness, pipe_rx, -0.5F);
     auto pipe_head = rectangle(0.0F, 0.0F, this->fitting_width + fitting_rx, this->pipe_thickness);
-    this->pipe = geometry_freeze(geometry_substract(full_pipe, pipe_head));
+    this->pipe = geometry_freeze(geometry_subtract(full_pipe, pipe_head));
     this->fitting = geometry_freeze(cylinder_rl_surface(fitting_rx, fitting_ry, this->fitting_width));
     this->endpoint = geometry_freeze(geometry_union(top, bottom));
     this->pipe_brush = make_linear_gradient_brush(vpipe_x, hpipe_y, vpipe_x, hpipe_y + this->pipe_thickness, pipe_stops);

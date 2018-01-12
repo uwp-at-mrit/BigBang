@@ -80,7 +80,7 @@ void Motorlet::load() {
             auto bar = rectangle(bar_x, 0.0F, bar_width, bar_height);
             auto small_box = rectangle(small_box_x, body_y, small_box_size, small_box_size);
             auto small_status = circle(small_box_x + centeroff, body_y + centeroff, radius);
-            auto small_background = geometry_substract(small_box, small_status);
+            auto small_background = geometry_subtract(small_box, small_status);
 
             { // motor status
                 float box_size = bar_width * 0.618F;
@@ -92,14 +92,14 @@ void Motorlet::load() {
 
                 auto box = rectangle(box_x, box_y, box_size, box_size);
                 auto status = rectangle(status_x, status_y, status_size, status_size);
-                auto background = geometry_union(geometry_substract(box, status), small_background);
+                auto background = geometry_union(geometry_subtract(box, status), small_background);
 
                 { // TODO: is it really more efficient to make the body hollow?
-                    auto hollow_lines = geometry_substract(lines, box);
+                    auto hollow_lines = geometry_subtract(lines, box);
                     auto body_masks = geometry_union(geometry_union(small_box, box), geometry_union(bar, lines));
-                    auto hollow_body = geometry_substract(body_part, body_masks);
+                    auto hollow_body = geometry_subtract(body_part, body_masks);
 
-                    this->head = geometry_freeze(geometry_substract(head_part, body_part));
+                    this->head = geometry_freeze(geometry_subtract(head_part, body_part));
                     this->body = geometry_freeze(geometry_union(tail_part, hollow_body));
                     this->lines = geometry_freeze(geometry_union(small_status, hollow_lines));
                 }
