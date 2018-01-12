@@ -2,16 +2,18 @@
 
 (provide (all-defined-out))
 (provide (all-from-out "bibliography.rkt"))
+(provide (all-from-out "graphviz.rkt"))
 
 (require scribble/core)
 (require scribble/manual)
 (require scribble/html-properties)
 
+(require "graphviz.rkt")
 (require "bibliography.rkt")
 
 (define preface-style (make-style 'index '(grouper unnumbered)))
 
-(define sln-root (make-parameter #false))
+(define sln-root (make-parameter #false)) 
 
 (define document-root
   (lambda []
@@ -44,8 +46,25 @@
       (list (title #:style (make-style #false (map make-css-addition styles)) #:tag "handbook"
                    (if (pair? pre-contents) pre-contents (list (literal "开发手册"))))
             (apply author authors)))))
-  
-(define handbook-smart-table
+
+(define handbook-statistics
+  (lambda [#:ignore [excludes null] . argl]
+    (define languages (filter pair? argl))
+    (when (pair? languages)
+      (make-delayed-block
+       (λ [render% pthis infobase]
+         (parameterize ([sln-root (find-solution-root-dir)])
+           (define statistics (language-statistics languages excludes))
+           (nested #:style (make-style "boxed" null)
+                   (filebox (literal (path->string (sln-root)))
+                            (tabular #:style 'boxed #:column-properties '(left left right)
+                                     (for/list ([language (in-list (map car languages))])
+                                       (define stat (hash-ref statistics language (λ [] lang-stat-identity)))
+                                       (list (racket #,language)
+                                             (racket #,(lang-stat-lines stat))
+                                             (racket #,(lang-stat-bytes stat)))))))))))))
+
+(define handbook-table
   (lambda []
     (table-of-contents)))
 
@@ -67,3 +86,38 @@
              (unless (false? index?)
                (struct-copy part (index-section #:tag "handbook::index")
                             [title-content (list "关键词索引")])))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(struct lang-stat (lines bytes) #:prefab)
+(define lang-stat-identity (lang-stat 0 0))
+
+(define lang-stat++
+  (lambda [s0 sr]
+    (lang-stat (+ (lang-stat-lines s0) (lang-stat-lines sr))
+               (+ (lang-stat-bytes s0) (lang-stat-bytes sr)))))
+
+(define language-statistics
+  (lambda [languages excludes]
+    (define (use-dir? dir)
+      (not (ormap (curryr regexp-match? dir)
+                  (cons #px"/(.git|compiled)$" excludes))))
+    (parameterize ([sln-root (find-solution-root-dir)])
+      (define statistics (make-hasheq))
+      (for ([path (in-directory (find-solution-root-dir) use-dir?)]
+            #:when (file-exists? path))
+        (define language
+          (for/or ([l.px (in-list languages)])
+            (and (regexp-match? (cdr l.px) path) (car l.px))))
+        (when (symbol? language)
+          (define /dev/srcin (open-input-file path))
+          (port-count-lines! /dev/srcin)
+          (define-values (line col position)
+            (let wc ()
+              (cond [(string? (read-line /dev/srcin)) (wc)]
+                    [else (port-next-location /dev/srcin)])))
+          (close-input-port /dev/srcin)
+          (hash-set! statistics language
+                     (lang-stat++ (hash-ref statistics language (λ [] lang-stat-identity))
+                                  (lang-stat line (file-size path))))))
+      statistics)))

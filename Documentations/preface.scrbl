@@ -1,7 +1,6 @@
 #lang scribble/manual
 
 @(require "../Documentations/handbook.rkt")
-@(require "../Documentations/graphviz.rkt")
 
 @(define-bib isocpp
    #:title    "C++ Core Guidelines"
