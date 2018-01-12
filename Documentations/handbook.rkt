@@ -9,9 +9,6 @@
 
 (require "bibliography.rkt")
 
-(require syntax/location)
-(require (for-syntax syntax/parse))
-
 (define preface-style (make-style 'index '(grouper unnumbered)))
 
 (define sln-root (make-parameter #false))

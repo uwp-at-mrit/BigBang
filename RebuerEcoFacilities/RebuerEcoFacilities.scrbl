@@ -11,8 +11,7 @@
 @handbook-smart-table[]
 
 @include-section["../Documentations/preface.scrbl"]
-@;include-section["../Documentations/coding-style.scrbl"]
-@;include-section["../Documentations/architecture.scrbl"]
+@include-section["../Documentations/architecture.scrbl"]
 
 @handbook-appendix[#:index? #true
  (bib-entry #:key      "libmodbus"

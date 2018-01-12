@@ -15,10 +15,28 @@
 (define tamer-cites (make-parameter void))
 (define tamer-reference (make-parameter void))
 
+(define tamer-story->modpath
+  (lambda [story-path]
+    `(file ,story-path)))
+
+(define-syntax (tamer-story->tag stx)
+  (syntax-case stx []
+    [(_ story-sexp)
+     #'(let ([modpath (with-handlers ([exn? (const (quote-source-file))]) (cadr story-sexp))])
+         (path->string (path-replace-extension (file-name-from-path modpath) "")))]))
+
 (define-syntax (define-bib stx)
   (syntax-parse stx #:literals []
     [(_ id bib-args ...)
      #'(define id (in-bib (make-bib bib-args ...) (format ":~a" 'id)))]))
+
+(define-syntax (handbook-start stx)
+  (syntax-case stx [scribble +]
+    [(_)
+     #'(let ([modpath (quote-module-path)])
+         (cond [(path? modpath) (tamer-story (tamer-story->modpath modpath))]
+               [else (let ([story (tamer-story->modpath (cadr modpath))])
+                       (tamer-story story))]))]))
 
 (define ~cite
   (lambda [bib #:same-author? [same? #false] . bibs]
@@ -26,15 +44,10 @@
         (apply (tamer-cites) bib bibs)
         (apply (tamer-cite) bib bibs))))
 
-(define-syntax (tamer-story->tag stx)
-  (syntax-case stx []
-    [(_ modpath)
-     #'(path->string (path-replace-extension (file-name-from-path modpath) ""))]))
-
 (define-syntax (handbook-story stx)
   (syntax-parse stx #:literals []
     [(_ (~optional (~seq #:style s:expr)) contents ...)
-     #`(begin (tamer-story (quote-source-file))
+     #`(begin (handbook-start)
               (define-cite ~cite ~cites ~reference #:style number-style)
               (tamer-reference ~reference)
               (tamer-cites ~cites)
@@ -45,7 +58,6 @@
 
 (define handbook-references
   (lambda []
-    (list (tamer-story)
-          ((tamer-reference) #:sec-title "参考文献"
+    (list ((tamer-reference) #:sec-title "参考文献"
                              #:tag (format "~a:reference" (path-replace-extension (tamer-story->tag (tamer-story)) "")))
           (tamer-story #false))))
