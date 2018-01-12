@@ -48,6 +48,7 @@
       (when (pair? datasource)
         (define 1ch (send dc get-char-width))
         (define 1em (send dc get-char-height))
+        (define lineheight (* 1em 1.618))
         (define ring-width (* 1em pi))
         (define legend-diameter (* 1em 0.618))
         (define legend-off (* (- 1em legend-diameter) 1/2))
@@ -85,7 +86,7 @@
           
           (when (pair? rest)
             (draw-data (car rest) (cdr rest)
-                      radiann (+ legend-y 1em)))))
+                      radiann (+ legend-y lineheight)))))
       pie)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
