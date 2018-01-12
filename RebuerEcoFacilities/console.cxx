@@ -19,7 +19,7 @@ Console::Console() : SplitView() {
 
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
 	this->OpenPaneLength = 48;
-	this->IsPaneOpen = true;
+	this->IsPaneOpen = false;
 
 	this->transform = ref new CompositeTransform3D();
 	this->ManipulationMode = ManipulationModes::TranslateX;
