@@ -25,7 +25,7 @@ CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStroke
     return (style == nullptr) ? g->Stroke(thickness) : g->Stroke(thickness, style);
 }
 
-CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
     return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Exclude);
 }
 
@@ -41,7 +41,7 @@ CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, f
     return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Xor);
 }
 
-CanvasGeometry^ geometry_substract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
+CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
     return g1->CombineWith(g2, t, CanvasGeometryCombine::Exclude);
 }
 

@@ -10,7 +10,7 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_stroke(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, float thickness,
     Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_substract(
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_subtract(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
     float tx = 0.0F, float ty = 0.0F);
@@ -30,7 +30,7 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
     float tx = 0.0F, float ty = 0.0F);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_substract(
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_subtract(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g2,
     Windows::Foundation::Numerics::float3x2 transform);
