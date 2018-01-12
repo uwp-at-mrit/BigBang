@@ -1,5 +1,6 @@
 ﻿#include <algorithm>
 #include <ppltasks.h>
+#include <shared_mutex>
 
 #include "text.hpp"
 #include "paint.hpp"
@@ -34,13 +35,31 @@ static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
 
 // delegate only accepts C++/CX class
-ref class Status sealed {
+private ref class Status sealed {
+internal:
+	Status(Statusbarlet* master) {
+		this->master = master;
+		this->clock = ref new DispatcherTimer();
+
+		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
+		// WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
+
+		this->update_powerinfo();
+		this->update_wifiinfo();
+		this->update_sdinfo();
+		this->update_ipinfo();
+
+		this->clock->Tick += ref new EventHandler<Object^>(this, &Status::refresh_timestamp);
+		this->clock->Interval = this->update_timestamp();
+		this->clock->Start();
+	}
+
 public:
     TimeSpan update_timestamp() {
         int l00ns;
 
         this->timestamp = make_text_layout(update_nowstamp(false, &l00ns), status_font);
-
+		
         return TimeSpan{ 10000000 - l00ns };
     }
 
@@ -61,7 +80,7 @@ public:
 		this->powercapacity = make_text_layout(power, status_font);
     }
 
-    void update_wifiinfo(WiFiAdapter^ info) {
+    void update_wifiinfo() {
         auto nics = NetworkInformation::GetConnectionProfiles();
         Platform::String^ signal = speak("nowifi");
 
@@ -93,30 +112,43 @@ public:
             }
         }
 
-        this->ipv4 = make_text_layout(speak("ipv4label") + ipv4, status_font);
+		this->ipv4 = make_text_layout(speak("ipv4label") + ipv4, status_font);
     }
 
-internal:
-    Status(Statusbarlet* master) {
-        this->master = master;
+public:
+	void enter_critical_section() {
+		this->section.lock();
+	}
 
-        Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
-        // WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
+	void leave_critical_section() {
+		this->section.unlock();
+	}
 
-        this->update_timestamp();
-        this->update_powerinfo();
-        this->update_wifiinfo(nullptr);
-        this->update_sdinfo();
-        this->update_ipinfo();
-    }
+	void enter_shared_section() {
+		this->section.lock_shared();
+	}
+
+	void leave_shared_section() {
+		this->section.unlock_shared();
+	}
 
 private:
-    void refresh_powerinfo(Battery^ sender, Platform::Object^ e) {
-        this->update_powerinfo();
+	void refresh_timestamp(Platform::Object^ sender, Platform::Object^ e) {
+		this->enter_critical_section();
+		this->clock->Interval = this->update_timestamp();
+		this->leave_critical_section();
+	}
+	
+	void refresh_powerinfo(Battery^ sender, Platform::Object^ e) {
+		this->enter_critical_section();
+		this->update_powerinfo();
+		this->leave_critical_section();
     }
 
     void refresh_wifiinfo(WiFiAdapter^ sender, Platform::Object^ e) {
-        this->update_wifiinfo(sender);
+		this->enter_critical_section();
+		this->update_wifiinfo();
+		this->leave_critical_section();
     }
 
 private:
@@ -128,6 +160,13 @@ private:
     
 private:
     Statusbarlet* master; // this will be destructed by master Control;
+	DispatcherTimer^ clock;
+	std::shared_mutex section;
+
+private:
+	~Status() {
+		this->clock->Stop();
+	}
 
     friend class WarGrey::SCADA::Statusbarlet;
 };
@@ -153,7 +192,7 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IMo
 	}
 
 	initialize_status_font();
-	this->caption = make_text_layout(speak(caption), status_font);
+	this->caption = make_text_layout(speak("RR") + " " + speak(caption), status_font);
 	this->client = new ModbusClient(logger, plc, console);
 	console->fill_application_input_register_interval(&this->start_address, &this->end_address, &this->quantity);
 }
@@ -184,8 +223,6 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
 	uint16 address = this->start_address;
 
-	statusbar->update_timestamp();
-
 	while (address < this->end_address) {
 		uint16 q = min(this->quantity, this->end_address - address);
 		this->client->read_input_registers(address, q);
@@ -195,14 +232,16 @@ void Statusbarlet::update(long long count, long long interval, long long uptime,
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float width = Width / 7.0F;
+	
+	statusbar->enter_shared_section();
 	float timestamp_xoff = (Width - statusbar->timestamp->LayoutBounds.Width);
-
-    ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
+	ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
     ds->DrawTextLayout(statusbar->ipv4,          x + width * 1.0F,   y, Colors::White);
     ds->DrawTextLayout(statusbar->powercapacity, x + width * 3.0F,   y, Colors::Green);
     ds->DrawTextLayout(statusbar->wifi_strength, x + width * 4.0F,   y, Colors::Yellow);
     ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow);
     ds->DrawTextLayout(statusbar->timestamp,     x + timestamp_xoff, y, Colors::Yellow);
+	statusbar->leave_shared_section();
 
     { // highlight PLC Status
         auto plc_x = x + width * 2.0F;

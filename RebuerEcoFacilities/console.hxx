@@ -3,7 +3,7 @@
 #include "universe.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class RR { B1, Count };
+	private enum class RR { B1, B2, B3, B4, Count };
 
     [::Windows::Foundation::Metadata::WebHostHidden]
 	public ref class Console sealed : public Windows::UI::Xaml::Controls::SplitView {
@@ -22,6 +22,7 @@ namespace WarGrey::SCADA {
 		void animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 
 	private:
+		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
 		Windows::UI::Xaml::Controls::StackPanel^ voids[static_cast<unsigned int>(RR::Count)];
 		WarGrey::SCADA::IUniverse* universes[static_cast<unsigned int>(RR::Count)];
 	};

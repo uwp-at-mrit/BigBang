@@ -135,8 +135,8 @@
   <data name="powerlabel" xml:space="preserve">
     <value>Power:  </value>
   </data>
-  <data name="RRB1" xml:space="preserve">
-    <value>Recycled Rubber B1</value>
+  <data name="RR" xml:space="preserve">
+    <value>Recycled Rubber</value>
   </data>
   <data name="sdlabel" xml:space="preserve">
     <value>Card Storage:  </value>
@@ -146,9 +146,6 @@
   </data>
   <data name="wifilabel" xml:space="preserve">
     <value>WiFi: </value>
-  </data>
-  <data name="RRB2" xml:space="preserve">
-    <value>Recycled Rubber B2</value>
   </data>
   <data name="cleanmotor" xml:space="preserve">
     <value>Glue Cleaning Motor</value>
@@ -170,9 +167,6 @@
   </data>
   <data name="storagetank" xml:space="preserve">
     <value>Storage Tank</value>
-  </data>
-  <data name="B1" xml:space="preserve">
-    <value>B1</value>
   </data>
   <data name="bar" xml:space="preserve">
     <value>bar</value>

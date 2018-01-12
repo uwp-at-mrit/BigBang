@@ -8,9 +8,9 @@
 namespace WarGrey::SCADA {
     private class IUniverse abstract {
     public:
-        IUniverse(Windows::UI::Xaml::Controls::Panel^ parent, int frame_rate);
-        virtual ~IUniverse() noexcept;
-
+		virtual ~IUniverse() noexcept;
+		IUniverse(Windows::UI::Xaml::Controls::Panel^ parent, int frame_rate);
+		
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
 
 	public:
-		virtual Snip * find_snip(float x, float y) = 0;
+		virtual Snip* find_snip(float x, float y) = 0;
 		virtual void fill_snip_location(Snip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 		virtual void fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
@@ -55,7 +55,7 @@ namespace WarGrey::SCADA {
     public:
 		void enter_critical_section();
 		void leave_critical_section();
-        void resize(float width, float height);
+		void resize(float width, float height);
 		void fill_actual_extent(float* width, float* height);
 
     protected:

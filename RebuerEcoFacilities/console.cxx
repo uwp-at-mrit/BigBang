@@ -10,6 +10,7 @@ using namespace Windows::ApplicationModel;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
+using namespace Windows::UI::Xaml::Media::Media3D;
 
 /*************************************************************************************************/
 Console::Console() : SplitView() {
@@ -17,8 +18,10 @@ Console::Console() : SplitView() {
 	this->PanePlacement = SplitViewPanePlacement::Left;
 
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
-	this->IsPaneOpen = false;
+	this->OpenPaneLength = 48;
+	this->IsPaneOpen = true;
 
+	this->transform = ref new CompositeTransform3D();
 	this->ManipulationMode = ManipulationModes::TranslateX;
 	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
 	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
@@ -41,7 +44,7 @@ void Console::initialize_component(Size region) {
 		auto label = ref new TextBlock();
 		this->voids[i] = ref new StackPanel();
 
-		label->Text = speak("RR" + static_cast<RR>(i).ToString());
+		label->Text = speak(speak(static_cast<RR>(i).ToString()));
 
 		navigator->Items->Append(label);
 		if (i == 0) {
@@ -51,6 +54,9 @@ void Console::initialize_component(Size region) {
 
 	// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
 	this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
+	this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
+	//this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
+	//this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
 
 	this->Content = this->voids[0];
 	this->Pane = navigator;
@@ -67,15 +73,12 @@ void Console::reflow(float width, float height) {
 }
 
 void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
-	if (e->Delta.Translation.X < 0) {
-		this->IsPaneOpen = true;
-	} else {
-		this->IsPaneOpen = false;
-	}
+	this->transform->TranslateX += e->Delta.Translation.X;
+	this->Content->Transform3D = this->transform;
 }
 
 void Console::animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) {
-	// this->IsPaneOpen = false;
+	this->Content->Transform3D = nullptr;
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
