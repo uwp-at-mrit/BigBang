@@ -9,9 +9,9 @@
 本手册是公司软件系统的架构和设计文档，旨在帮助源码阅读者快速理解系统、融入研发，减少或消除不同专业背景同事之间的无效沟通。新同事读完本手册将有能力独立开发同类应用程序。
 
 @handbook-statistics[#:ignore '(#px"/Handbook$")
- '(C++ . #px"[.][ch](pp|xx)?$")
- '(Racket . #px"[.]rkt$")
- '(Scribble . #px"[.]scrbl$")]
+ #(C++ #px"[.][ch](pp|xx)?$" VioletRed)
+ #(Racket #px"[.]rkt$" Green)
+ #(Scribble #px"[.]scrbl$" Blue)]
 
 @handbook-table[]
 

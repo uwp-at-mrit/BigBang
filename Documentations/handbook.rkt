@@ -48,8 +48,8 @@
             (apply author authors)))))
 
 (define handbook-statistics
-  (lambda [#:ignore [excludes null] . argl]
-    (define languages (filter pair? argl))
+  (lambda [#:ignore [excludes null] #:width [width #false] #:height [height #false] . argl]
+    (define languages (filter vector? argl))
     (when (pair? languages)
       (make-delayed-block
        (λ [render% pthis infobase]
@@ -57,8 +57,17 @@
            (define statistics (language-statistics languages excludes))
            (nested #:style (make-style "boxed" null)
                    (filebox (literal (path->string (sln-root)))
+                            (let* ([pie-width (or width 256)]
+                                   [pie-height (or height (* pie-width 0.618))])
+                              (pie-chart pie-width pie-height
+                                         (for/list ([l.px.clr (in-list languages)])
+                                           (let ([language (vector-ref l.px.clr 0)])
+                                             (vector language
+                                                     (lang-stat-bytes (hash-ref statistics language (λ [] lang-stat-identity)))
+                                                     (vector-ref l.px.clr 2))))))
                             (tabular #:style 'boxed #:column-properties '(left left right)
-                                     (for/list ([language (in-list (map car languages))])
+                                     (for/list ([l.px.color (in-list languages)])
+                                       (define language (vector-ref l.px.color 0))
                                        (define stat (hash-ref statistics language (λ [] lang-stat-identity)))
                                        (list (racket #,language)
                                              (racket #,(lang-stat-lines stat))
@@ -107,8 +116,9 @@
       (for ([path (in-directory (find-solution-root-dir) use-dir?)]
             #:when (file-exists? path))
         (define language
-          (for/or ([l.px (in-list languages)])
-            (and (regexp-match? (cdr l.px) path) (car l.px))))
+          (for/or ([l.px.clr (in-list languages)])
+            (and (regexp-match? (vector-ref l.px.clr 1) path)
+                 (vector-ref l.px.clr 0))))
         (when (symbol? language)
           (define /dev/srcin (open-input-file path))
           (port-count-lines! /dev/srcin)

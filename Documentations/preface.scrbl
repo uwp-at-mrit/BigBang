@@ -15,7 +15,7 @@
    #:location (techrpt-location #:institution "JSF" #:number "2RDU00001 Rev C")
    #:url      "http://www.stroustrup.com/JSF-AV-rules.pdf")
 
-@handbook-story[#:style preface-style]{0 序}
+@handbook-story[#:style preface-style]{序}
 
 @section{浅谈微软系语言与系统}
 @subsection{Universal Windows Platform}
