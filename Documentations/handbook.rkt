@@ -63,15 +63,14 @@
                                          (for/list ([l.px.clr (in-list languages)])
                                            (let ([language (vector-ref l.px.clr 0)])
                                              (vector language
-                                                     (lang-stat-bytes (hash-ref statistics language (λ [] lang-stat-identity)))
+                                                     (hash-ref statistics language (λ [] 0))
                                                      (vector-ref l.px.clr 2))))))
-                            (tabular #:style 'boxed #:column-properties '(left left right)
+                            (tabular #:style 'boxed #:column-properties '(left right)
                                      (for/list ([l.px.color (in-list languages)])
                                        (define language (vector-ref l.px.color 0))
-                                       (define stat (hash-ref statistics language (λ [] lang-stat-identity)))
+                                       (define bytes (hash-ref statistics language (λ [] 0)))
                                        (list (racket #,language)
-                                             (racket #,(lang-stat-lines stat))
-                                             (racket #,(lang-stat-bytes stat)))))))))))))
+                                             (racket #,bytes))))))))))))
 
 (define handbook-table
   (lambda []
@@ -98,14 +97,6 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(struct lang-stat (lines bytes) #:prefab)
-(define lang-stat-identity (lang-stat 0 0))
-
-(define lang-stat++
-  (lambda [s0 sr]
-    (lang-stat (+ (lang-stat-lines s0) (lang-stat-lines sr))
-               (+ (lang-stat-bytes s0) (lang-stat-bytes sr)))))
-
 (define language-statistics
   (lambda [languages excludes]
     (define (use-dir? dir)
@@ -120,14 +111,7 @@
             (and (regexp-match? (vector-ref l.px.clr 1) path)
                  (vector-ref l.px.clr 0))))
         (when (symbol? language)
-          (define /dev/srcin (open-input-file path))
-          (port-count-lines! /dev/srcin)
-          (define-values (line col position)
-            (let wc ()
-              (cond [(string? (read-line /dev/srcin)) (wc)]
-                    [else (port-next-location /dev/srcin)])))
-          (close-input-port /dev/srcin)
           (hash-set! statistics language
-                     (lang-stat++ (hash-ref statistics language (λ [] lang-stat-identity))
-                                  (lang-stat line (file-size path))))))
+                     (+ (hash-ref statistics language (λ [] 0))
+                        (file-size path)))))
       statistics)))

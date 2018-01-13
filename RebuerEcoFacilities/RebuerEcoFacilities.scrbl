@@ -11,7 +11,7 @@
 @handbook-statistics[#:ignore '(#px"/Handbook$")
                      #(C++ #px"[.][ch](pp|xx)?$" VioletRed)
                      #(Racket #px"[.]rkt$" Green)
-                     #(Scribble #px"[.](scrbl|css)$" Blue)]
+                     #(Scribble #px"[.](scrbl|css)$" DodgerBlue)]
 
 @handbook-table[]
 

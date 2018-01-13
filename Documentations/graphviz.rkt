@@ -2,6 +2,7 @@
 
 (provide (all-defined-out))
 
+(require racket/flonum)
 (require racket/draw)
 (require pict)
 
@@ -37,57 +38,74 @@
 (define pie-chart
   (let ([2pi (* 2 pi)])
     (lambda [flwidth flheight datasource
-                     #:legend-font [legend-font (make-font #:weight 'bold)]
+                     #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold)]
                      #:label-color [lbl-clr (make-color 0 0 0)]
                      #:%-color [clr% (make-color 106 114 143)]]
-      (define-values (width height) (values (exact-round flwidth) (exact-round flheight)))
-      (define pie (make-bitmap width height #:backing-scale 2.0))
-      (define dc (send pie make-dc))
-      (send dc set-font legend-font)
+      (dc (λ [dc dx dy]
+            (define saved-font (send dc get-font))
+            (define saved-color (send dc get-text-foreground))
+            (define saved-pen (send dc get-pen))
+            (define saved-brush (send dc get-brush))
+
+            (send dc set-smoothing 'aligned)
+            (send dc set-font legend-font)
+            (send dc set-pen lbl-clr 0 'transparent)
       
-      (when (pair? datasource)
-        (define 1ch (send dc get-char-width))
-        (define 1em (send dc get-char-height))
-        (define lineheight (* 1em 1.618))
-        (define ring-width (* 1em pi))
-        (define legend-diameter (* 1em 0.618))
-        (define legend-off (* (- 1em legend-diameter) 1/2))
-        (define ring-diameter (min width height))
-        (define hollow-diameter (- ring-diameter ring-width))
-        (define hollow-off (/ (- ring-diameter hollow-diameter) 2))
-        (define-values (ring-x ring-y) (values (- width ring-diameter) (/ (- height ring-diameter) 2)))
-        (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
-        (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 1)))
-        (define ring (make-object region% #false))
-        (define hollow (make-object region% #false))
-        (send ring set-rectangle 0 0 width height)
-        (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
-        (send ring subtract hollow)
-        (send dc set-clipping-region ring)
-        (send dc set-pen lbl-clr 1 'transparent)
-        (send dc set-smoothing 'aligned)
-        (let draw-data ([ds (car datasource)]
-                        [rest (cdr datasource)]
-                        [radian0 ring-diameter]
-                        [legend-y 0])
-          (define color (let ([c (vector-ref ds 2)]) (if (symbol? c) (symbol->string c) c)))
-          (define ds% (/ (vector-ref ds 1) total))
-          (define label (~a (vector-ref ds 0)))
-          (define lbl% (string-append (~r (* ds% 100) #:precision '(= 1)) "%"))
-          (define radiann (+ radian0 (* 2pi ds%)))
-          (define-values (label-width _h _d _s) (send dc get-text-extent label legend-font))
-          (send dc set-brush color 'solid)
-          (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
-          (send dc draw-ellipse legend-off (+ legend-y legend-off) legend-diameter legend-diameter)
-          (send dc set-text-foreground lbl-clr)
-          (send dc draw-text label 1em legend-y)
-          (send dc set-text-foreground clr%)
-          (send dc draw-text lbl% (+ 1em label-width 1ch) legend-y)
+            (when (pair? datasource)
+              (define 1ch (send dc get-char-width))
+              (define 1em (send dc get-char-height))
+              (define lineheight (* 1em 1.2))
+              (define ring-width (* 1em pi))
+              (define legend-diameter (* 1em 0.618))
+              (define legend-off (* (- 1em legend-diameter) 1/2))
+              (define ring-diameter (min flwidth flheight))
+              (define hollow-diameter (- ring-diameter ring-width))
+              (define hollow-off (/ (- ring-diameter hollow-diameter) 2))
+              (define-values (ring-x ring-y) (values (+ dx (- flwidth ring-diameter)) (+ dy (/ (- flheight ring-diameter) 2))))
+              (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
+              (define-values (cx cy) (let ([r (/ ring-diameter 2)]) (values (+ ring-x r) (+ ring-y r))))
+              (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 1)))
+              (define ring (make-object region% #false))
+              (define hollow (make-object region% #false))
+              (send ring set-rectangle dx dy flwidth flheight)
+              (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
+              (send ring subtract hollow)
+              (send dc set-clipping-region ring)
+              (let draw-data ([ds (car datasource)]
+                              [rest (cdr datasource)]
+                              [radian0 ring-diameter]
+                              [legend-y dy])
+                (define label (symbol->string (vector-ref ds 0)))
+                (define d% (/ (vector-ref ds 1) total))
+                (define color (let ([c (vector-ref ds 2)]) (if (symbol? c) (symbol->string c) c)))
+                (define lbl% (string-append (~r (* d% 100) #:precision '(= 2)) "%"))
+                (define radiann (+ radian0 (* 2pi d%)))
+                (define-values (label-width _h _d _s) (send dc get-text-extent label legend-font #true))
+                (send dc set-brush color 'solid)
+                (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
+                (send dc draw-ellipse (+ dx legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
+                (send dc set-text-foreground lbl-clr)
+                (send dc draw-text label (+ dx 1em) legend-y #true)
+                (send dc set-text-foreground clr%)
+                (send dc draw-text lbl% (+ dx 1em label-width 1ch) legend-y)
           
-          (when (pair? rest)
-            (draw-data (car rest) (cdr rest)
-                      radiann (+ legend-y lineheight)))))
-      pie)))
+                (when (pair? rest)
+                  (draw-data (car rest) (cdr rest)
+                             radiann (+ legend-y lineheight))))
+
+              (let ([bytes (~size total)])
+                (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
+                (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
+                (send dc set-clipping-region #false)
+                (send dc draw-text bytes tx ty #true)))
+
+            
+            (send* dc
+              (set-font saved-font)
+              (set-text-foreground saved-color)
+              (set-pen saved-pen)
+              (set-brush saved-brush)))
+          flwidth flheight))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define filesystem-value->pict
@@ -104,3 +122,13 @@
                              (ht-append 4 (value->pict filename) (ftext info substyle color))]
                             [val (ftext val)])])
       value->pict)))
+
+(define units '(KB MB GB TB))
+(define ~size
+  (lambda [size [unit 'Bytes] #:precision [prcs '(= 3)]]
+    (if (eq? unit 'Bytes)
+        (cond [(< -1024.0 size 1024.0) (~a (exact-round size) "Bytes")]
+              [else (~size (fl/ (real->double-flonum size) 1024.0) 'KB #:precision prcs)])
+        (let try-next-unit ([s (real->double-flonum size)] [us (memq unit units)])
+          (cond [(or (fl< (flabs s) 1024.0) (null? (cdr us))) (string-append (~r s #:precision prcs) (symbol->string (car us)))]
+                [else (try-next-unit (fl/ s 1024.0) (cdr us))])))))
