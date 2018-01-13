@@ -4,7 +4,7 @@
 (provide (all-from-out "bibliography.rkt"))
 (provide (all-from-out "graphviz.rkt"))
 
-(require scribble/core)
+(require (except-in scribble/core table))
 (require scribble/manual)
 (require scribble/html-properties)
 
@@ -55,22 +55,19 @@
        (λ [render% pthis infobase]
          (parameterize ([sln-root (find-solution-root-dir)])
            (define statistics (language-statistics languages excludes))
-           (nested #:style (make-style "boxed" null)
-                   (filebox (literal (path->string (sln-root)))
-                            (let* ([pie-width (or width 256)]
-                                   [pie-height (or height (* pie-width 0.618))])
-                              (pie-chart pie-width pie-height
-                                         (for/list ([l.px.clr (in-list languages)])
-                                           (let ([language (vector-ref l.px.clr 0)])
-                                             (vector language
-                                                     (hash-ref statistics language (λ [] 0))
-                                                     (vector-ref l.px.clr 2))))))
-                            (tabular #:style 'boxed #:column-properties '(left right)
-                                     (for/list ([l.px.color (in-list languages)])
-                                       (define language (vector-ref l.px.color 0))
-                                       (define bytes (hash-ref statistics language (λ [] 0)))
-                                       (list (racket #,language)
-                                             (racket #,bytes))))))))))))
+           (define language-pie
+             (let* ([pie-width (or width 200)]
+                    [pie-height (or height pie-width)])
+               (pie-chart pie-width pie-height #:radian0 0.618
+                          (for/list ([l.px.clr (in-list languages)])
+                            (let ([language (vector-ref l.px.clr 0)])
+                              (vector language
+                                      (hash-ref statistics language (λ [] 0))
+                                      (vector-ref l.px.clr 2)))))))
+           (nested (filebox (tt "系统实时统计信息")
+                            (tabular #:sep (hspace 1) #:column-properties '(left left)
+                                     (list (list language-pie
+                                                 (literal "here"))))))))))))
 
 (define handbook-table
   (lambda []
