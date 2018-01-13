@@ -7,6 +7,8 @@
 (require racket/draw)
 (require pict)
 
+(require plot/no-gui)
+
 (define filesystem-tree
   (let ([1em (pict-height (text ""))] [phantom (blank 0)])
     (lambda [tree #:value-pict [value->pict filesystem-value->pict]
@@ -134,6 +136,19 @@
               (set-pen saved-pen)
               (set-brush saved-brush)))
           flwidth flheight))))
+
+(define git-time-series
+  (lambda [datasource]
+    (define dates (sort (hash-keys datasource) <))
+    (define-values (xmin xmax) (values (car dates) (last dates)))
+    (define addition
+      (for/fold ([addition (list (vector 0 0))]) ([i (in-list dates)])
+        (define datum (hash-ref datasource i))
+        (cons (vector i (+ (- (car datum) (cdr datum)) (vector-ref (car addition) 1))) addition)))
+    (vl-append (text (format "[~a, ~a]" xmin xmax))
+               (plot-pict #:x-min xmin #:x-max xmax #:width 600
+                          (lines #:color "Green" #:label "insertion"
+                                 (cdr (reverse addition)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define filesystem-value->pict

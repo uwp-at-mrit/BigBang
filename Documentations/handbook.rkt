@@ -8,8 +8,9 @@
 (require scribble/manual)
 (require scribble/html-properties)
 
-(require "graphviz.rkt")
 (require "bibliography.rkt")
+(require "graphviz.rkt")
+(require "statistics.rkt")
 
 (define preface-style (make-style 'index '(grouper unnumbered)))
 
@@ -53,21 +54,21 @@
     (when (pair? languages)
       (make-delayed-block
        (λ [render% pthis infobase]
-         (parameterize ([sln-root (find-solution-root-dir)])
-           (define statistics (language-statistics languages excludes))
-           (define language-pie
-             (let* ([pie-width (or width 200)]
-                    [pie-height (or height pie-width)])
-               (pie-chart pie-width pie-height #:radian0 0.618
-                          (for/list ([l.px.clr (in-list languages)])
-                            (let ([language (vector-ref l.px.clr 0)])
-                              (vector language
-                                      (hash-ref statistics language (λ [] 0))
-                                      (vector-ref l.px.clr 2)))))))
-           (nested (filebox (tt "系统实时统计信息")
-                            (tabular #:sep (hspace 1) #:column-properties '(left left)
-                                     (list (list language-pie
-                                                 (literal "here"))))))))))))
+         (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
+         (define workday-statistics (git-log))
+         (define language-pie
+           (let* ([pie-width (or width 200)]
+                  [pie-height (or height pie-width)])
+             (pie-chart pie-width pie-height #:radian0 0.618
+                        (for/list ([l.px.clr (in-list languages)])
+                          (let ([language (vector-ref l.px.clr 0)])
+                            (vector language
+                                    (hash-ref lang-statistics language (λ [] 0))
+                                    (vector-ref l.px.clr 2)))))))
+         (nested (filebox (tt "系统实时统计信息")
+                          (tabular #:sep (hspace 1) #:column-properties '(left)
+                                   (list (list language-pie)
+                                         (list (git-time-series workday-statistics)))))))))))
 
 (define handbook-table
   (lambda []
@@ -91,24 +92,3 @@
              (unless (false? index?)
                (struct-copy part (index-section #:tag "handbook::index")
                             [title-content (list "关键词索引")])))))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define language-statistics
-  (lambda [languages excludes]
-    (define (use-dir? dir)
-      (not (ormap (curryr regexp-match? dir)
-                  (cons #px"/(.git|compiled)$" excludes))))
-    (parameterize ([sln-root (find-solution-root-dir)])
-      (define statistics (make-hasheq))
-      (for ([path (in-directory (find-solution-root-dir) use-dir?)]
-            #:when (file-exists? path))
-        (define language
-          (for/or ([l.px.clr (in-list languages)])
-            (and (regexp-match? (vector-ref l.px.clr 1) path)
-                 (vector-ref l.px.clr 0))))
-        (when (symbol? language)
-          (hash-set! statistics language
-                     (+ (hash-ref statistics language (λ [] 0))
-                        (file-size path)))))
-      statistics)))
