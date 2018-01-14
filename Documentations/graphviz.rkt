@@ -142,13 +142,13 @@
     (define dates (sort (hash-keys datasource) <))
     (define-values (xmin xmax) (values (car dates) (last dates)))
     (define addition
-      (for/fold ([addition (list (vector 0 0))]) ([i (in-list dates)])
+      (for/fold ([addition null]) ([i (in-list dates)])
         (define datum (hash-ref datasource i))
-        (cons (vector i (+ (- (car datum) (cdr datum)) (vector-ref (car addition) 1))) addition)))
+        (cons (vector i (- (car datum) (cdr datum))) addition)))
     (vl-append (text (format "[~a, ~a]" xmin xmax))
                (plot-pict #:x-min xmin #:x-max xmax #:width 600
-                          (lines #:color "Green" #:label "insertion"
-                                 (cdr (reverse addition)))))))
+                            (lines #:color "Green" #:label "insertion"
+                                     (cdr (reverse addition)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define filesystem-value->pict

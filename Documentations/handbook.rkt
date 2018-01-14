@@ -55,7 +55,7 @@
       (make-delayed-block
        (λ [render% pthis infobase]
          (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
-         (define workday-statistics (git-log))
+         (define workday-statistics (git-log-numstat languages excludes))
          (define language-pie
            (let* ([pie-width (or width 200)]
                   [pie-height (or height pie-width)])
@@ -68,7 +68,7 @@
          (nested (filebox (tt "系统实时统计信息")
                           (tabular #:sep (hspace 1) #:column-properties '(left)
                                    (list (list language-pie)
-                                         (list (git-time-series workday-statistics)))))))))))
+                                         (list (racket #,workday-statistics)))))))))))
 
 (define handbook-table
   (lambda []
