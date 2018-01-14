@@ -2,13 +2,19 @@
 
 (provide (all-defined-out))
 
-(require racket/date)
-
 (define detect-language
   (lambda [languages path]
     (for/or ([l.px.clr (in-list languages)])
-      (and (regexp-match? (vector-ref l.px.clr 1) path)
+      (and (regexp-match? (vector-ref l.px.clr 2) path)
            (vector-ref l.px.clr 0)))))
+
+(define detect-week-midnight
+  (lambda [ts]
+    (define the-day (seconds->date ts))
+    (- ts (+ (* (date-week-day the-day) 86400)
+             (* (date-hour the-day) 3600)
+             (* (date-minute the-day) 60)
+             (date-second the-day)))))
 
 (define language-statistics
   (lambda [sln-root languages excludes]
@@ -28,19 +34,25 @@
 (define git-log-shortstat
   (lambda []
     (define statistics (make-hasheq))
+    (define-values (&insertion &deletion) (values (box 0) (box 0)))
+    (define-values (&date0 &daten) (values (box #false) (box #false)))
     (define git (find-executable-path "git"))
     (with-handlers ([exn? void])
       (define (stat++ ts tokens)
-        (define the-day (seconds->date ts))
-        (define midnight (find-seconds 0 0 0 (date-day the-day) (date-month the-day) (date-year the-day)))
-        (define-values (insertion deletion)
+        (define midnight (detect-week-midnight ts))
+        (unless (unbox &date0)
+          (set-box! &date0 midnight))
+        (set-box! &daten midnight)
+        (define-values ($insertion $deletion)
           (cond [(= (length tokens) 4) (values (car tokens) (caddr tokens))]
                 [(char-ci=? (string-ref (cadr tokens) 0) #\i) (values (car tokens) "0")]
                 [else (values "0" (car tokens))]))
+        (define-values (insertion deletion) (values (string->number $insertion) (string->number $deletion)))
+        (set-box! &insertion (+ insertion (unbox &insertion)))
+        (set-box! &deletion (+ deletion (unbox &deletion)))
         (hash-set! statistics midnight
                    (let ([stat0 (hash-ref statistics midnight (λ [] (cons 0 0)))])
-                     (cons (+ (car stat0) (string->number insertion))
-                           (+ (cdr stat0) (string->number deletion))))))
+                     (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion)))))
       (parameterize ([current-custodian (make-custodian)]
                      [current-subprocess-custodian-mode 'kill])
         (define-values (git-log /dev/gitin _out _err)
@@ -54,27 +66,38 @@
                           (stat++ (string->number timestamp) (cdddr tokens))
                           (shortstat (read-line /dev/gitin)))])))
         (custodian-shutdown-all (current-custodian))))
-    statistics))
+
+    (values statistics
+            (unbox &insertion) (unbox &deletion)
+            (unbox &date0) (unbox &daten))))
 
 (define git-log-numstat
   (lambda [languages excludes]
     (define statistics (make-hasheq))
+    (define insertions (make-hasheq))
+    (define deletions (make-hasheq))
+    (define &date0 (box #false))
+    (define &daten (box #false))
     (define git (find-executable-path "git"))
     (with-handlers ([exn? void])
       (define (use-dir? dir) (not (ormap (curryr regexp-match? dir) excludes)))
       (define (stat++ ts stats)
-        (define the-day (seconds->date ts))
-        (define midnight (find-seconds 0 0 0 (date-day the-day) (date-month the-day) (date-year the-day)))
+        (define midnight (detect-week-midnight ts))
+        (unless (unbox &date0)
+          (set-box! &date0 midnight))
+        (set-box! &daten midnight)
         (for ([stat (in-list stats)])
           (define path (caddr stat))
           (when (use-dir? path)
             (define language (detect-language languages path))
             (when (symbol? language)
-              (define lang-stats (hash-ref! statistics midnight (λ [] (make-hasheq))))
-              (hash-set! lang-stats language
-                         (let ([stat0 (hash-ref lang-stats language (λ [] (cons 0 0)))])
-                           (cons (+ (car stat0) (car stat))
-                                 (+ (cdr stat0) (cadr stat)))))))))
+              (define lang-stats (hash-ref! statistics language (λ [] (make-hasheq))))
+              (define-values (insertion deletion) (values (car stat) (cadr stat)))
+              (hash-set! insertions language (+ insertion (hash-ref insertions language (λ [] 0))))
+              (hash-set! deletions language (+ deletion (hash-ref deletions language (λ [] 0))))
+              (hash-set! lang-stats midnight
+                         (let ([stat0 (hash-ref lang-stats midnight (λ [] (cons 0 0)))])
+                           (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion))))))))
       (parameterize ([current-custodian (make-custodian)]
                      [current-subprocess-custodian-mode 'kill])
         (define-values (git-log /dev/gitin _out _err)
@@ -93,4 +116,7 @@
                 [else (stat++ (string->number timestamp) (reverse stats))
                       (pretty-numstat (read-line /dev/gitin))]))))
         (custodian-shutdown-all (current-custodian))))
-    statistics))
+
+    (values statistics
+            insertions deletions
+            (unbox &date0) (unbox &daten))))

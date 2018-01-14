@@ -31,7 +31,11 @@
 
             (define maybe-output-to (get-output-string /dev/hbout))
             (with-handlers ([exn:fail? (λ [e] (displayln maybe-output-to))])
-              (define index.html (caddr (read (open-input-string maybe-output-to))))
-              (system (format "open ~a" index.html))
-              (printf "[Output to ~a]~n" index.html))
+              (define /dev/hbin (open-input-string maybe-output-to))
+              (let read-with ([last-line #false])
+                (define line (read-line /dev/hbin))
+                (cond [(string? line) (when (string? last-line) (println last-line)) (read-with line)]
+                      [else (let ([index.html (caddr (read (open-input-string last-line)))])
+                              (system (format "open ~a" index.html))
+                              (printf "[Output to ~a]~n" index.html))])))
             (custodian-shutdown-all (current-custodian))))))))

@@ -49,26 +49,35 @@
             (apply author authors)))))
 
 (define handbook-statistics
-  (lambda [#:ignore [excludes null] #:width [width #false] #:height [height #false] . argl]
+  (lambda [#:ignore [excludes null] #:height [height #false] . argl]
     (define languages (filter vector? argl))
     (when (pair? languages)
       (make-delayed-block
        (λ [render% pthis infobase]
          (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
-         (define workday-statistics (git-log-numstat languages excludes))
+         (define-values (workday-statistics insertions deletions date0 daten) (git-log-numstat languages excludes))
+         (define-values (lang-source workday-source)
+           (for/fold ([lang-src null] [workday-src null])
+                     ([l.px.clr (in-list languages)])
+             (let ([lang (vector-ref l.px.clr 0)]
+                   [color (let ([c (vector-ref l.px.clr 1)]) (if (symbol? c) (symbol->string c) c))])
+               (values (cons (vector lang color (hash-ref lang-statistics lang (λ [] 0))) lang-src)
+                       (cons (vector lang color (hash-ref workday-statistics lang (λ [] (make-hasheq)))) workday-src)))))
          (define language-pie
-           (let* ([pie-width (or width 200)]
-                  [pie-height (or height pie-width)])
-             (pie-chart pie-width pie-height #:radian0 0.618
-                        (for/list ([l.px.clr (in-list languages)])
-                          (let ([language (vector-ref l.px.clr 0)])
-                            (vector language
-                                    (hash-ref lang-statistics language (λ [] 0))
-                                    (vector-ref l.px.clr 2)))))))
-         (nested (filebox (tt "系统实时统计信息")
-                          (tabular #:sep (hspace 1) #:column-properties '(left)
-                                   (list (list language-pie)
-                                         (list (racket #,workday-statistics)))))))))))
+           (let* ([pie-height (or height 200)]
+                  [pie-width pie-height])
+             (pie-chart #:radian0 0.618
+                        pie-width pie-height (reverse lang-source))))
+         (define workday-chart
+           (let* ([chart-height (or height 200)]
+                  [chart-width (* chart-height 2.0)])
+             (git-time-series #:line0 -1600 #:linen 1600 #:date0 date0 #:daten daten
+                              chart-width chart-height (reverse workday-source))))
+         (nested (filebox (tt "源码计数"
+                              ~ (italic (racketvalfont (number->string (apply + (hash-values insertions))) (superscript "++")))
+                              ~ (racketerror (number->string (apply + (hash-values deletions))) (superscript (literal "--"))))
+                          (tabular #:sep (hspace 2) #:column-properties '(left right)
+                                   (list (list language-pie workday-chart))))))))))
 
 (define handbook-table
   (lambda []

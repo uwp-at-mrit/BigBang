@@ -3,6 +3,7 @@
 (provide (all-defined-out))
 (provide (all-from-out pict))
 
+(require racket/hash)
 (require racket/flonum)
 (require racket/draw)
 (require pict)
@@ -70,7 +71,7 @@
               (define-values (ring-x ring-y) (values (+ dx (- flwidth ring-diameter)) (+ dy (/ (- flheight ring-diameter) 2))))
               (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
               (define-values (cx cy) (let ([r (/ ring-diameter 2)]) (values (+ ring-x r) (+ ring-y r))))
-              (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 1)))
+              (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 2)))
               (define ring (make-object region% #false))
               (define hollow (make-object region% #false))
               (send ring set-rectangle dx dy flwidth flheight)
@@ -85,9 +86,8 @@
                                 [legends null])
                   (cond [(null? rest) (values max-width (reverse legends))]
                         [else (let ([datum (car rest)])
-                                (define datum% (/ (vector-ref datum 1) total))
-                                (define color (vector-ref datum 2))
-                                (define brush (make-brush #:color (if (symbol? color) (symbol->string color) color)))
+                                (define datum% (/ (vector-ref datum 2) total))
+                                (define brush (make-brush #:color (vector-ref datum 1)))
                                 (define radiann (+ radian0 (* datum% pi 2)))
                                 (send dc set-brush brush)
                                 (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
@@ -138,17 +138,74 @@
           flwidth flheight))))
 
 (define git-time-series
-  (lambda [datasource]
-    (define dates (sort (hash-keys datasource) <))
-    (define-values (xmin xmax) (values (car dates) (last dates)))
-    (define addition
-      (for/fold ([addition null]) ([i (in-list dates)])
-        (define datum (hash-ref datasource i))
-        (cons (vector i (- (car datum) (cdr datum))) addition)))
-    (vl-append (text (format "[~a, ~a]" xmin xmax))
-               (plot-pict #:x-min xmin #:x-max xmax #:width 600
-                            (lines #:color "Green" #:label "insertion"
-                                     (cdr (reverse addition)))))))
+  (let ([no-pen (make-pen #:style 'transparent)]
+        [axis-pen (make-pen #:color (make-color 187 187 187 1.0))])
+    (lambda [flwidth flheight datasource
+                     #:date0 [date-start #false] #:daten [date-end #false]
+                     #:line0 [line-start #false] #:linen [line-end #false]
+                     #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold)]
+                     #:label-color [lbl-clr (make-color 0 0 0)]
+                     #:%-color [clr% (make-color 106 114 143)]]
+      (dc (λ [dc dx dy]
+            (define saved-font (send dc get-font))
+            (define saved-color (send dc get-text-foreground))
+            (define saved-pen (send dc get-pen))
+            (define saved-brush (send dc get-brush))
+
+            (send dc set-smoothing 'aligned)
+            (send dc set-font legend-font)
+            (send dc set-pen no-pen)
+      
+            (when (pair? datasource)
+              (define 1ch (send dc get-char-width))
+              (define 1em (send dc get-char-height))
+              (define x-length flwidth)
+              (define x-start (+ dx 0.0))
+              (define y-length (- flheight 1em))
+              (define y-start (+ dy y-length (* 1em 1/2)))
+
+              (define-values (date0 daten)
+                (cond [(and date-start date-end) (values date-start date-end)]
+                      [else (let ([dates (make-hasheq)])
+                              (apply hash-union! #:combine (λ [v1 v2] v1)
+                                     dates (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
+                              (let ([dates (sort (hash-keys dates) <)])
+                                (values (car dates) (cdr dates))))]))
+
+              (define-values (line0 linen)
+                (cond [(and line-start line-end) (values line-start line-end)]
+                      [else (let ([dates (make-hasheq)])
+                              (apply hash-union! #:combine (λ [v1 v2] v1)
+                                     dates (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
+                              (let ([dates (sort (hash-keys dates) <)])
+                                (values (car dates) (cdr dates))))]))
+              
+              (define date-length (- daten date0))
+              (define line-length (- linen line0))
+              (define date-fraction (/ x-length date-length))
+              (define line-fraction (/ y-length line-length))
+              
+              (send dc set-pen axis-pen)
+              (send dc set-text-foreground (send axis-pen get-color))
+              (for ([y-axis (in-range line0 (+ linen 1) (/ line-length 4))])
+                (define y (- y-start (* (- y-axis line0) line-fraction)))
+                (send dc draw-text (~r (/ y-axis 1000) #:precision '(= 1) #:sign '+) x-start y)
+                (send dc draw-line x-start y (+ x-start x-length) y))
+              
+              (for ([lang-source (in-list (reverse datasource))])
+                (send dc set-pen (make-pen #:color (vector-ref lang-source 1)))
+                (for ([(date stat) (in-hash (vector-ref lang-source 2))])
+                  (define line (- (car stat) (cdr stat)))
+                  (define x (+ x-start (* (- date date0) date-fraction)))
+                  (define y (- y-start (* (- line line0) line-fraction)))
+                  (send dc draw-ellipse x y 4 4))))
+            
+            (send* dc
+              (set-font saved-font)
+              (set-text-foreground saved-color)
+              (set-pen saved-pen)
+              (set-brush saved-brush)))
+          flwidth flheight))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define filesystem-value->pict
