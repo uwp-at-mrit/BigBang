@@ -77,16 +77,15 @@
         (define midnight (detect-midnight ts))
         (for ([stat (in-list stats)])
           (define path (caddr stat))
-          (when (use-dir? path)
-            (define language (detect-language languages path))
-            (when (symbol? language)
-              (define lang-stats (hash-ref! statistics language (λ [] (make-hasheq))))
-              (define-values (insertion deletion) (values (car stat) (cadr stat)))
-              (hash-set! insertions language (+ insertion (hash-ref insertions language (λ [] 0))))
-              (hash-set! deletions language (+ deletion (hash-ref deletions language (λ [] 0))))
-              (hash-set! lang-stats midnight
-                         (let ([stat0 (hash-ref lang-stats midnight (λ [] (cons 0 0)))])
-                           (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion))))))))
+          (define language (detect-language languages path))
+          (when (and (symbol? language) (use-dir? path))
+            (define lang-stats (hash-ref! statistics language (λ [] (make-hasheq))))
+            (define-values (insertion deletion) (values (car stat) (cadr stat)))
+            (hash-set! insertions language (+ insertion (hash-ref insertions language (λ [] 0))))
+            (hash-set! deletions language (+ deletion (hash-ref deletions language (λ [] 0))))
+            (hash-set! lang-stats midnight
+                       (let ([stat0 (hash-ref lang-stats midnight (λ [] (cons 0 0)))])
+                         (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion)))))))
       (parameterize ([current-custodian (make-custodian)]
                      [current-subprocess-custodian-mode 'kill])
         (define-values (git-log /dev/gitin _out _err)
@@ -99,8 +98,9 @@
             (let numstat ([stats null])
               (define tokens (string-split (read-line /dev/gitin)))
               (cond [(= (length tokens) 3)
-                     (let ([stat (list (string->number (car tokens)) (string->number (cadr tokens)) (caddr tokens))])
-                       (numstat (cond [(and (car stat) (cadr stat)) (cons stat stats)]
+                     (let ([insertion (string->number (car tokens))]
+                           [deletion (string->number (cadr tokens))])
+                       (numstat (cond [(and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats)]
                                       [else stats])))]
                     [else (stat++ (string->number timestamp) (reverse stats))
                           (pretty-numstat)]))))
