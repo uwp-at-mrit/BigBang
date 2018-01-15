@@ -55,7 +55,7 @@
       (make-delayed-block
        (λ [render% pthis infobase]
          (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
-         (define-values (workday-statistics insertions deletions date0 daten) (git-log-numstat languages excludes))
+         (define-values (workday-statistics insertions deletions) (git-log-numstat languages excludes))
          (define-values (lang-source workday-source)
            (for/fold ([lang-src null] [workday-src null])
                      ([l.px.clr (in-list languages)])
@@ -70,12 +70,14 @@
                         pie-width pie-height (reverse lang-source))))
          (define workday-chart
            (let* ([chart-height (or height 200)]
-                  [chart-width (* chart-height 2.0)])
-             (git-time-series #:line0 -1600 #:linen 1600 #:date0 date0 #:daten daten
-                              chart-width chart-height (reverse workday-source))))
-         (nested (filebox (tt "源码计数"
-                              ~ (italic (racketvalfont (number->string (apply + (hash-values insertions))) (superscript "++")))
-                              ~ (racketerror (number->string (apply + (hash-values deletions))) (superscript (literal "--"))))
+                  [chart-width (* chart-height 2.5)])
+             (git-codeline-series chart-width chart-height (reverse workday-source))))
+         (define LoI (/ (apply + (hash-values insertions)) 1000))
+         (define LoD (/ (apply + (hash-values deletions)) 1000))
+         (define K (subscript "k"))
+         (nested (filebox (tt "源码计量"
+                              ~ (italic (racketvalfont (~r LoI #:precision '(= 3)) K (superscript "++")))
+                              ~ (racketerror (~r LoD #:precision '(= 3)) K (superscript (literal "--"))))
                           (tabular #:sep (hspace 2) #:column-properties '(left right)
                                    (list (list language-pie workday-chart))))))))))
 

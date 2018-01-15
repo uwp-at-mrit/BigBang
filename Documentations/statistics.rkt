@@ -8,10 +8,10 @@
       (and (regexp-match? (vector-ref l.px.clr 2) path)
            (vector-ref l.px.clr 0)))))
 
-(define detect-week-midnight
+(define detect-midnight
   (lambda [ts]
     (define the-day (seconds->date ts))
-    (- ts (+ (* (date-week-day the-day) 86400)
+    (- ts (+ ;(* (date-week-day the-day) 86400)
              (* (date-hour the-day) 3600)
              (* (date-minute the-day) 60)
              (date-second the-day)))))
@@ -35,14 +35,10 @@
   (lambda []
     (define statistics (make-hasheq))
     (define-values (&insertion &deletion) (values (box 0) (box 0)))
-    (define-values (&date0 &daten) (values (box #false) (box #false)))
     (define git (find-executable-path "git"))
     (with-handlers ([exn? void])
       (define (stat++ ts tokens)
-        (define midnight (detect-week-midnight ts))
-        (unless (unbox &daten)
-          (set-box! &daten midnight))
-        (set-box! &date0 midnight)
+        (define midnight (detect-midnight ts))
         (define-values ($insertion $deletion)
           (cond [(= (length tokens) 4) (values (car tokens) (caddr tokens))]
                 [(char-ci=? (string-ref (cadr tokens) 0) #\i) (values (car tokens) "0")]
@@ -67,25 +63,18 @@
                           (shortstat (read-line /dev/gitin)))])))
         (custodian-shutdown-all (current-custodian))))
 
-    (values statistics
-            (unbox &insertion) (unbox &deletion)
-            (unbox &date0) (unbox &daten))))
+    (values statistics (unbox &insertion) (unbox &deletion))))
 
 (define git-log-numstat
   (lambda [languages excludes]
     (define statistics (make-hasheq))
     (define insertions (make-hasheq))
     (define deletions (make-hasheq))
-    (define &date0 (box #false))
-    (define &daten (box #false))
     (define git (find-executable-path "git"))
     (with-handlers ([exn? void])
       (define (use-dir? dir) (not (ormap (curryr regexp-match? dir) excludes)))
       (define (stat++ ts stats)
-        (define midnight (detect-week-midnight ts))
-        (unless (unbox &daten)
-          (set-box! &daten midnight))
-        (set-box! &date0 midnight)
+        (define midnight (detect-midnight ts))
         (for ([stat (in-list stats)])
           (define path (caddr stat))
           (when (use-dir? path)
@@ -117,6 +106,4 @@
                       (pretty-numstat (read-line /dev/gitin))]))))
         (custodian-shutdown-all (current-custodian))))
 
-    (values statistics
-            insertions deletions
-            (unbox &date0) (unbox &daten))))
+    (values statistics insertions deletions)))
