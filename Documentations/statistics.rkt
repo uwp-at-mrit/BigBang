@@ -53,14 +53,14 @@
                      [current-subprocess-custodian-mode 'kill])
         (define-values (git-log /dev/gitin _out _err)
           (subprocess #false #false #false 'new
-                      git "log" "--pretty=format:%at" "--shortstat"))
+                      git "log" "--pretty=format:%at" "--shortstat" "--no-merges"))
         (with-handlers ([exn? void])
-          (let shortstat ([timestamp (read-line /dev/gitin)])
+          (let shortstat ()
+            (define timestamp (read-line /dev/gitin))
             (define tokens (string-split (read-line /dev/gitin)))
-            (cond [(= (length tokens) 1) (shortstat (car tokens)) #|merged commits|#]
-                  [else (let ([skip-empty-line (read-line /dev/gitin)])
-                          (stat++ (string->number timestamp) (cdddr tokens))
-                          (shortstat (read-line /dev/gitin)))])))
+            (read-line /dev/gitin) ; skip-empty-line 
+            (stat++ (string->number timestamp) (cdddr tokens))
+            (shortstat)))
         (custodian-shutdown-all (current-custodian))))
 
     (values statistics (unbox &insertion) (unbox &deletion))))
@@ -91,19 +91,19 @@
                      [current-subprocess-custodian-mode 'kill])
         (define-values (git-log /dev/gitin _out _err)
           (subprocess #false #false #false 'new
-                      git "log" "--pretty=format:%at" "--numstat"))
+                      git "log" "--pretty=format:%at" "--numstat" "--no-merges"))
         (with-handlers ([exn? void])
-          (let pretty-numstat ([timestamp (read-line /dev/gitin)])
+          (let pretty-numstat ()
+            (define timestamp (read-line /dev/gitin))
             (define tokens (string-split (read-line /dev/gitin)))
             (let numstat ([stats null])
               (define tokens (string-split (read-line /dev/gitin)))
-              (case (length tokens)
-                [(1) (pretty-numstat (car tokens)) #|merged commits|#]
-                [(3) (let ([stat (list (string->number (car tokens)) (string->number (cadr tokens)) (caddr tokens))])
+              (cond [(= (length tokens) 3)
+                     (let ([stat (list (string->number (car tokens)) (string->number (cadr tokens)) (caddr tokens))])
                        (numstat (cond [(and (car stat) (cadr stat)) (cons stat stats)]
                                       [else stats])))]
-                [else (stat++ (string->number timestamp) (reverse stats))
-                      (pretty-numstat (read-line /dev/gitin))]))))
+                    [else (stat++ (string->number timestamp) (reverse stats))
+                          (pretty-numstat)]))))
         (custodian-shutdown-all (current-custodian))))
 
     (values statistics insertions deletions)))
