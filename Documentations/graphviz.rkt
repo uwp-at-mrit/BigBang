@@ -78,12 +78,13 @@
               (send ring subtract hollow)
               (send dc set-clipping-region ring)
 
-              (define-values (legend-width-hint legends)
+              (define-values (legend-label-width legend-%width legends)
                 (let draw-ring ([rest datasource]
                                 [radian0 r0]
-                                [max-width 0]
+                                [max-lwidth 0]
+                                [max-pwidth 0]
                                 [legends null])
-                  (cond [(null? rest) (values max-width (reverse legends))]
+                  (cond [(null? rest) (values max-lwidth max-pwidth (reverse legends))]
                         [else (let ([datum (car rest)])
                                 (define datum% (/ (vector-ref datum 2) total))
                                 (define brush (make-brush #:color (vector-ref datum 1)))
@@ -94,15 +95,15 @@
                                 (define label (symbol->string (vector-ref datum 0)))
                                 (define percentage (string-append (~r (* datum% 100) #:precision '(= 2)) "%"))
 
-                                (define-values (l-width _lh _ld _ls) (send dc get-text-extent label legend-font #true))
-                                (define-values (p-width _ph _pd _ps) (send dc get-text-extent percentage legend-font #true))
-                                (draw-ring (cdr rest) radiann (max (+ l-width p-width) max-width)
-                                           (cons (vector label percentage brush l-width) legends)))])))
+                                (define-values (lwidth _lh _ld _ls) (send dc get-text-extent label legend-font #true))
+                                (define-values (pwidth _ph _pd _ps) (send dc get-text-extent percentage legend-font #true))
+                                (draw-ring (cdr rest) radiann (max lwidth max-lwidth) (max pwidth max-pwidth)
+                                           (cons (vector label percentage brush) legends)))])))
 
               (send dc set-clipping-region #false)
               (define legend-box-x (+ dx legend-off))
               (define legend-box-y (+ dy legend-off))
-              (define legend-box-width (+ 1em 1ch legend-width-hint legend-off legend-off))
+              (define legend-box-width (+ 1em legend-label-width 1ch legend-%width legend-off legend-off))
               (define legend-box-height (+ legend-off (* lineheight (length datasource))))
               (define-values (legend-x0 legend-y0) (values (+ legend-box-x legend-off) (+ legend-box-y legend-off)))
               (send dc set-pen legend-pen)
@@ -115,13 +116,12 @@
                 (define label (vector-ref lgd 0))
                 (define lbl% (vector-ref lgd 1))
                 (define legend-y (+ legend-y0 (* lineheight idx)))
-                (define label-width (vector-ref lgd 3))
                 (send dc set-brush (vector-ref lgd 2))
                 (send dc draw-ellipse (+ legend-x0 legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
                 (send dc set-text-foreground lbl-clr)
                 (send dc draw-text label (+ legend-x0 1em) legend-y #true)
                 (send dc set-text-foreground clr%)
-                (send dc draw-text lbl% (+ legend-x0 1em label-width 1ch) legend-y #true))
+                (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true))
           
               (let ([bytes (~size total)])
                 (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
@@ -268,7 +268,7 @@
 
 (define ~loc
   (lambda [loc]
-    (string-append (~r (/ loc 1000) #:precision '(= 2)) "K")))
+    (string-append (~r (/ loc 1000) #:precision '(= 3)) "K")))
 
 (define ~month
   (lambda [m]
