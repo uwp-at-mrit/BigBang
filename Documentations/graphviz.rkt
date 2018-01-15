@@ -137,8 +137,7 @@
           flwidth flheight))))
 
 (define git-codeline-series
-  (let ([no-pen (make-pen #:style 'transparent)]
-        [axis-pen (make-pen #:color (make-color 187 187 187 1.0))])
+  (let ([axis-pen (make-pen #:color (make-color 187 187 187 1.0))])
     (lambda [flwidth flheight datasource
                      #:date0 [date-start #false] #:daten [date-end #false]
                      #:line0 [line-start #false] #:linen [line-end #false] #:line-axis-count [axis-count 5]
@@ -153,8 +152,7 @@
 
             (send dc set-smoothing 'aligned)
             (send dc set-font mark-font)
-            (send dc set-pen no-pen)
-      
+            
             (when (pair? datasource)
               (define 1ch (send dc get-char-width))
               (define 1em (send dc get-char-height))
@@ -165,13 +163,14 @@
                           ([lang-source (in-list datasource)])
                   (define stats (vector-ref lang-source 2))
                   (define pen (make-pen #:color (vector-ref lang-source 1)))
-                  (define LoCs
-                    (for/fold ([LoCs (list (cons 0 0))])
+                  (define-values (LoCs total)
+                    (for/fold ([LoCs null] [total 0])
                               ([date (in-list (sort (hash-keys stats) <))])
                       (define stat (hash-ref stats date (λ [] (cons 0 0))))
-                      (cons (cons date (+ (cdar LoCs) (- (car stat) (cdr stat)))) LoCs)))
-                  (values (cons (vector (vector-ref lang-source 0) pen (cdr (reverse LoCs))) src)
-                          (max peak (cdar LoCs)))))
+                      (define total++ (+ total (- (car stat) (cdr stat))))
+                      (values (cons (cons date total++) LoCs) total++)))
+                  (values (cons (vector (vector-ref lang-source 0) pen (reverse LoCs) total) src)
+                          (max peak total))))
 
               (define-values (date0 daten)
                 (cond [(and date-start date-end) (values date-start date-end)]
@@ -188,7 +187,7 @@
 
               (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc peak) mark-font #true))
               (define x-start (+ dx mark-max-width 1ch))
-              (define x-length (- (+ dx flwidth) x-start))
+              (define x-length (- (+ dx flwidth) x-start mark-max-width 1ch))
               (define y-start (- (+ dy flheight) 1ex 1em))
               (define y-length (- y-start dy 1ex))
               (define date-length (- daten date0))
@@ -200,20 +199,23 @@
               (send dc set-text-foreground (send axis-pen get-color))
 
               (let draw-x-axis ([this-date date0])
+                (define (draw-x x-axis x-mark)
+                  (define x (+ x-start (* (- x-axis date0) date-fraction)))
+                  (define-values (x-width _w _d _s) (send dc get-text-extent x-mark mark-font #true))
+                  (send dc draw-text x-mark (- x (/ x-width 2)) (+ y-start 1ex) #true)
+                  (send dc draw-line x y-start x (+ y-start 1ex)))
                 (when (<= this-date daten)
                   (define the-date (seconds->date this-date))
                   (define-values (year month) (values (date-year the-date) (date-month the-date)))
                   (define month-starts (find-seconds 0 0 0 1 month year))
                   (define-values (x-axis x-mark)
-                    (cond [(= this-date date0) (values this-date (format "~~~a" (date-day the-date)))]
+                    (cond [(= this-date date0) (values this-date (~day (date-day the-date)))]
                           [(= month 1) (values month-starts (number->string year))]
                           [else (values month-starts (~month month))]))
-                  (define x (+ x-start (* (- x-axis date0) date-fraction)))
-                  (define-values (x-width _w _d _s) (send dc get-text-extent x-mark mark-font #true))
-                  (send dc draw-text x-mark (- x (/ x-width 2)) (+ y-start 1ex) #true)
-                  (send dc draw-line x y-start x (+ y-start 1ex))
-                  (draw-x-axis (+ month-starts (* 3600 24 31)))))
-              
+                  (draw-x x-axis x-mark)
+                  (draw-x-axis (+ month-starts (* 3600 24 31))))
+                (draw-x daten (~day (date-day (seconds->date daten)))))
+
               (for ([y-axis (in-range line0 (+ linen 1) (/ line-length (- axis-count 1)))])
                 (define y (- y-start (* (- y-axis line0) line-fraction)))
                 (define y-mark (if (zero? y-axis) "0" (~loc y-axis)))
@@ -223,6 +225,10 @@
               
               (for ([lang-source (in-list linesource)])
                 (send dc set-pen (vector-ref lang-source 1))
+                (send dc set-text-foreground (send (vector-ref lang-source 1) get-color))
+                (define y-axis (vector-ref lang-source 3))
+                (define y (- y-start (* (- y-axis line0) line-fraction)))
+                (send dc draw-text (~loc y-axis) (+ x-start x-length 1ch) (- y 1ex) #true)
                 (send dc draw-lines
                       (for/list ([date.LoC (in-list (vector-ref lang-source 2))])
                         (define-values (x-axis y-axis) (values (car date.LoC) (cdr date.LoC)))
@@ -266,6 +272,11 @@
   (lambda [loc]
     (string-append (~r (/ loc 1000) #:precision '(= 2)) "K")))
 
-(define (~month m)
-  (cond [(< m 10) (string-append "0" (number->string m))]
-        [else (number->string m)]))
+(define ~month
+  (lambda [m]
+    (cond [(< m 10) (string-append "0" (number->string m))]
+          [else (number->string m)])))
+
+(define ~day
+  (lambda [d]
+    (format "~~~a" d)))
