@@ -49,7 +49,7 @@
             (apply author authors)))))
 
 (define handbook-statistics
-  (lambda [#:ignore [excludes null] #:height [height #false] . argl]
+  (lambda [#:gitstat-width [git-width #false] #:gitstat-height [git-height #false] #:ignore [excludes null] . argl]
     (define languages (filter vector? argl))
     (when (pair? languages)
       (make-delayed-block
@@ -58,19 +58,19 @@
          (define-values (workday-statistics insertions deletions) (git-log-numstat languages excludes))
          (define-values (lang-source workday-source)
            (for/fold ([lang-src null] [workday-src null])
-                     ([l.px.clr (in-list languages)])
+                     ([l.px.clr (in-list (remove-duplicates languages eq? #:key (λ [l.px.clr] (vector-ref l.px.clr 0))))])
              (let ([lang (vector-ref l.px.clr 0)]
                    [color (let ([c (vector-ref l.px.clr 1)]) (if (symbol? c) (symbol->string c) c))])
                (values (cons (vector lang color (hash-ref lang-statistics lang (λ [] 0))) lang-src)
                        (cons (vector lang color (hash-ref workday-statistics lang (λ [] (make-hasheq)))) workday-src)))))
          (define language-pie
-           (let* ([pie-height (or height 200)]
+           (let* ([pie-height (or git-height 200)]
                   [pie-width pie-height])
              (pie-chart #:radian0 0.618
                         pie-width pie-height (reverse lang-source))))
          (define workday-chart
-           (let* ([chart-height (or height 200)]
-                  [chart-width (* chart-height 2.5)])
+           (let* ([chart-height (or git-height 200)]
+                  [chart-width (or git-width (* chart-height 2.4))])
              (git-codeline-series chart-width chart-height (reverse workday-source))))
          (define LoI (/ (apply + (hash-values insertions)) 1000))
          (define LoD (/ (apply + (hash-values deletions)) 1000))
@@ -78,7 +78,7 @@
          (nested (filebox (tt "源码计量"
                               ~ (italic (racketvalfont (~r LoI #:precision '(= 3)) K (superscript "++")))
                               ~ (racketerror (~r LoD #:precision '(= 3)) K (superscript (literal "--"))))
-                          (tabular #:sep (hspace 2) #:column-properties '(left right)
+                          (tabular #:sep (hspace 1) #:column-properties '(left right)
                                    (list (list language-pie workday-chart))))))))))
 
 (define handbook-table

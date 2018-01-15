@@ -141,7 +141,7 @@
                    #:date0 [date-start #false] #:daten [date-end #false]
                    #:line0 [line-start #false] #:linen [line-end #false] #:line-axis-count [axis-count 5]
                    #:mark-font [mark-font (make-font #:family 'modern #:weight 'bold)]
-                   #:axis-color [axis-color (make-color 187 187 187 1.0)]]
+                   #:axis-color [axis-color (make-color 0 0 0 0.3)]]
     (dc (λ [dc dx dy]
           (define saved-font (send dc get-font))
           (define saved-color (send dc get-text-foreground))
@@ -195,24 +195,24 @@
               
             (send dc set-pen axis-color 1 'solid)
             (send dc set-text-foreground axis-color)
-
+              
             (let draw-x-axis ([this-date date0])
               (define (draw-x x-axis x-mark)
                 (define x (+ x-start (* (- x-axis date0) date-fraction)))
                 (define-values (x-width _w _d _s) (send dc get-text-extent x-mark mark-font #true))
                 (send dc draw-text x-mark (- x (/ x-width 2)) (+ y-start 1ex) #true)
                 (send dc draw-line x y-start x (+ y-start 1ex)))
-              (when (<= this-date daten)
-                (define the-date (seconds->date this-date))
-                (define-values (year month) (values (date-year the-date) (date-month the-date)))
-                (define month-starts (find-seconds 0 0 0 1 month year))
-                (define-values (x-axis x-mark)
-                  (cond [(= this-date date0) (values this-date (~day (date-day the-date)))]
-                        [(= month 1) (values month-starts (number->string year))]
-                        [else (values month-starts (~month month))]))
-                (draw-x x-axis x-mark)
-                (draw-x-axis (+ month-starts (* 3600 24 31))))
-              (draw-x daten (~day (date-day (seconds->date daten)))))
+              (cond [(<= this-date daten)
+                     (let ([the-date (seconds->date this-date)])
+                       (define-values (year month) (values (date-year the-date) (date-month the-date)))
+                       (define month-starts (find-seconds 0 0 0 1 month year))
+                       (define-values (x-axis x-mark)
+                         (cond [(= this-date date0) (values this-date (~day (date-day the-date)))]
+                               [(= month 1) (values month-starts (number->string year))]
+                               [else (values month-starts (~month month))]))
+                       (draw-x x-axis x-mark)
+                       (draw-x-axis (+ month-starts (* 3600 24 31))))]
+                    [else (draw-x daten (~day (date-day (seconds->date daten))))]))
 
             (for ([y-axis (in-range line0 (+ linen 1) (/ line-length (- axis-count 1)))])
               (define y (- y-start (* (- y-axis line0) line-fraction)))

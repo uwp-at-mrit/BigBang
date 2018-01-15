@@ -17,13 +17,14 @@
            @item{@tt{C++} 编写完整的主程序。}
            @item{@tt{Racket} 编写所有不包含在主程序中但可以提高开发效率的程序。如：探索系统原型、修正其他同事代码中的纰漏、绘制系统图表。}
            @item{@tt{Scribble} 编写本手册和文档(与 Word 同类，但更方便，方便得多)。}
-           @item{@tt{VS.resw} 目前只用来定义主程序软件界面的中英文字符串，并且由 Visual Studio 自行管理无须直接编码。}]}
+           @item{@tt{CSS} 微调 Scribble 默认的页面样式。}]}
 
-@handbook-statistics[#:ignore '(#px"/Handbook/?") #:height 168
+@handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
+                     #:ignore '(#px"/Handbook/?")
                      #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
                      #(Racket   Green      #px"[.]rkt$")
-                     #(Scribble DodgerBlue #px"[.](scrbl|css)$")
-                     #(VS.resw  GhostWhite #px"[.](resw)$")]
+                     #(Scribble DodgerBlue #px"[.]scrbl$")
+                     #(CSS      GhostWhite #px"[.]css$")]
 
 @handbook-table[]
 
