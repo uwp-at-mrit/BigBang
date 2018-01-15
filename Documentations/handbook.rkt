@@ -13,6 +13,8 @@
 (require "statistics.rkt")
 
 (define preface-style (make-style 'index '(grouper unnumbered)))
+(define insertion-color (make-style 'tt (list (make-color-property (list #x28 #xA7 #x45)))))
+(define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
 
 (define sln-root (make-parameter #false)) 
 
@@ -71,14 +73,11 @@
          (define workday-chart
            (let* ([chart-height (or git-height 200)]
                   [chart-width (or git-width (* chart-height 2.4))])
-             (git-codeline-series chart-width chart-height (reverse workday-source))))
-         (define LoI (/ (apply + (hash-values insertions)) 1000))
-         (define LoD (/ (apply + (hash-values deletions)) 1000))
-         (define K (subscript "k"))
+             (git-loc-series chart-width chart-height (reverse workday-source))))
          (nested (filebox (tt "源码计量"
-                              ~ (italic (racketvalfont (~r LoI #:precision '(= 3)) K (superscript "++")))
-                              ~ (racketerror (~r LoD #:precision '(= 3)) K (superscript (literal "--"))))
-                          (tabular #:sep (hspace 1) #:column-properties '(left right)
+                              ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
+                              ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
+                          (tabular #:sep (hspace 2) #:column-properties '(left right)
                                    (list (list language-pie workday-chart))))))))))
 
 (define handbook-table

@@ -138,12 +138,13 @@
               (set-brush saved-brush)))
           flwidth flheight))))
 
-(define git-codeline-series
+(define git-loc-series
   (lambda [flwidth flheight datasource
                    #:date0 [date-start #false] #:daten [date-end #false]
                    #:line0 [line-start #false] #:linen [line-end #false] #:line-axis-count [axis-count 5]
-                   #:mark-font [mark-font (make-font #:family 'modern #:weight 'bold)]
-                   #:axis-color [axis-color (make-color 0 0 0 0.3)]]
+                   #:mark-font [mark-font (make-font #:family 'system)]
+                   #:mark-color [mark-color (make-color #x6A #x73 #x7D)]
+                   #:axis-color [axis-color (make-color #x00 #x00 #x00 0.3)]]
     (dc (λ [dc dx dy]
           (define saved-font (send dc get-font))
           (define saved-color (send dc get-text-foreground))
@@ -196,7 +197,7 @@
             (define line-fraction (/ y-length line-length))
               
             (send dc set-pen axis-color 1 'solid)
-            (send dc set-text-foreground axis-color)
+            (send dc set-text-foreground mark-color)
               
             (let draw-x-axis ([this-date date0])
               (define (draw-x x-axis x-mark)
@@ -270,7 +271,8 @@
 
 (define ~loc
   (lambda [loc]
-    (string-append (~r (/ loc 1000) #:precision '(= 3)) "K")))
+    (cond [(< loc 1000) (number->string loc)]
+          [else (string-replace (~r (/ loc 1000) #:precision '(= 3)) "." ",")])))
 
 (define ~month
   (lambda [m]
