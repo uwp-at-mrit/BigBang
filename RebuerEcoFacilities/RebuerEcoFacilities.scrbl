@@ -12,19 +12,21 @@
  @item{详细说明系统开发过程中碰到的疑难杂症和解决方案;}
  @item{脚本化展示简单的软件质量指标和测试报告。}]
 
-@margin-note{本系统所用开发语言及其分工
+@margin-note{本系统所用程序语言及其分工
  @itemlist[#:style 'compact
            @item{@tt{C++} 编写完整的主程序。}
            @item{@tt{Racket} 编写所有不包含在主程序中但可以提高开发效率的程序。如：探索系统原型、修正其他同事代码中的纰漏、绘制系统图表。}
-           @item{@tt{Scribble} 编写本手册和文档(与 Word 同类，但更方便，方便得多)。}
-           @item{@tt{CSS} 微调 Scribble 默认的页面样式。}]}
+           @item{@tt{Scribble} 编写本手册和文档(同 Word，但更方便，方便得多)。}
+           @item{@tt{CSS} 微调 Scribble 默认的页面样式。}
+           @item{@tt{VS::XML} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
-                     #:ignore '(#px"/Handbook/?")
-                     #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
-                     #(Racket   Green      #px"[.]rkt$")
-                     #(Scribble DodgerBlue #px"[.]scrbl$")
-                     #(CSS      GhostWhite #px"[.]css$")]
+ #:ignore '(#px"/Handbook/?")
+ #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
+ #(Racket   Green      #px"[.]rkt$")
+ #(Scribble DodgerBlue #px"[.]scrbl$")
+ #(CSS      Orange     #px"[.]css$")
+ #(VS::XML  GhostWhite #px"[.]resw$")]
 
 @handbook-table[]
 

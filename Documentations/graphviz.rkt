@@ -44,8 +44,9 @@
         [legend-brush (make-brush #:color (make-color 255 255 255 0.618))])
     (lambda [flwidth flheight datasource
                      #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold)]
-                     #:label-color [lbl-clr (make-color 0 0 0)]
-                     #:%-color [clr% (make-color 106 114 143)]
+                     #:label-color [label-color (make-color 0 0 0)]
+                     #:%-color [%-color (make-color 106 114 143)]
+                     #:total-color [total-color (make-color 0 0 0 0.3)]
                      #:radian0 [r0 0.0]]
       (dc (λ [dc dx dy]
             (define saved-font (send dc get-font))
@@ -111,6 +112,12 @@
               (send dc draw-rectangle legend-box-y legend-box-y legend-box-width legend-box-height)
               (send dc set-pen no-pen)
 
+              (let ([bytes (~size total)])
+                (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
+                (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
+                (send dc set-text-foreground total-color)
+                (send dc draw-text bytes tx ty #true))
+              
               (for ([lgd (in-list legends)]
                     [idx (in-naturals)])
                 (define label (vector-ref lgd 0))
@@ -118,15 +125,10 @@
                 (define legend-y (+ legend-y0 (* lineheight idx)))
                 (send dc set-brush (vector-ref lgd 2))
                 (send dc draw-ellipse (+ legend-x0 legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
-                (send dc set-text-foreground lbl-clr)
+                (send dc set-text-foreground label-color)
                 (send dc draw-text label (+ legend-x0 1em) legend-y #true)
-                (send dc set-text-foreground clr%)
-                (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true))
-          
-              (let ([bytes (~size total)])
-                (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
-                (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
-                (send dc draw-text bytes tx ty #true)))
+                (send dc set-text-foreground %-color)
+                (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true)))
 
             
             (send* dc
