@@ -14,9 +14,9 @@
   (lambda [ts]
     (define the-day (seconds->date ts))
     (- ts (+ ;(* (date-week-day the-day) 86400)
-             (* (date-hour the-day) 3600)
-             (* (date-minute the-day) 60)
-             (date-second the-day)))))
+           (* (date-hour the-day) 3600)
+           (* (date-minute the-day) 60)
+           (date-second the-day)))))
 
 (define language-statistics
   (lambda [sln-root languages excludes]
@@ -33,12 +33,12 @@
                       (file-size path)))))
     statistics))
 
-(define git-log-shortstat
+(define git-shortstat
   (lambda []
     (define statistics (make-hasheq))
     (define-values (&insertion &deletion) (values (box 0) (box 0)))
     (define git (find-executable-path "git"))
-    (with-handlers ([exn? void])
+    (unless (not git)
       (define (stat++ ts tokens)
         (define midnight (detect-midnight ts))
         (define-values ($insertion $deletion)
@@ -70,15 +70,13 @@
 
     (values statistics (unbox &insertion) (unbox &deletion))))
 
-(git-log-shortstat)
-
-(define git-log-numstat
+(define git-numstat
   (lambda [languages excludes]
     (define statistics (make-hasheq))
     (define insertions (make-hasheq))
     (define deletions (make-hasheq))
     (define git (find-executable-path "git"))
-    (with-handlers ([exn? void])
+    (unless (not git)
       (define (use-dir? dir) (not (ormap (curryr regexp-match? dir) excludes)))
       (define (stat++ ts stats)
         (define midnight (detect-midnight ts))
@@ -101,16 +99,17 @@
           (define /dev/gitin (input-port-append #true /dev/login /dev/datin /dev/diffin))
           (let pretty-numstat ()
             (define timestamp (read-line /dev/gitin))
-            (let numstat ([stats null])
-              (define +-path (read-line /dev/gitin))
-              (define tokens (if (eof-object? +-path) null (string-split +-path)))
-              (cond [(= (length tokens) 3)
-                     (let ([insertion (string->number (car tokens))]
-                           [deletion (string->number (cadr tokens))])
-                       (numstat (cond [(and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats)]
-                                      [else stats])))]
-                    [else (stat++ (string->number timestamp) (reverse stats))
-                          (pretty-numstat)]))))
+            (when (string? timestamp)
+              (let numstat ([stats null])
+                (define +-path (read-line /dev/gitin))
+                (define tokens (if (eof-object? +-path) null (string-split +-path)))
+                (cond [(= (length tokens) 3)
+                       (let ([insertion (string->number (car tokens))]
+                             [deletion (string->number (cadr tokens))])
+                         (numstat (cond [(and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats)]
+                                        [else stats])))]
+                      [else (stat++ (string->number timestamp) (reverse stats))
+                            (pretty-numstat)])))))
         (custodian-shutdown-all (current-custodian))))
 
     (values statistics insertions deletions)))

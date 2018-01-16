@@ -153,37 +153,36 @@
 
           (send dc set-smoothing 'aligned)
           (send dc set-font mark-font)
-            
-          (when (pair? datasource)
+
+          (define all-dates
+            (let ([dates (make-hasheq)])
+              (apply hash-union! #:combine (λ [v1 v2] v1)
+                     dates (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
+              (sort (hash-keys dates) <)))
+          
+          (when (pair? all-dates)
             (define 1ch (send dc get-char-width))
             (define 1em (send dc get-char-height))
             (define 1ex (* 1em 1/2))
-
-            (define-values (linesource peak)
+            
+            (define-values (locsource peak)
               (for/fold ([src null] [peak 0])
-                        ([lang-source (in-list datasource)])
-                (define stats (vector-ref lang-source 2))
-                (define pen (make-pen #:color (vector-ref lang-source 1)))
+                        ([lang-src (in-list datasource)])
+                (define stats (vector-ref lang-src 2))
+                (define pen (make-pen #:color (vector-ref lang-src 1)))
                 (define-values (LoCs total)
                   (for/fold ([LoCs null] [total 0])
                             ([date (in-list (sort (hash-keys stats) <))])
                     (define stat (hash-ref stats date (λ [] (cons 0 0))))
                     (define total++ (+ total (- (car stat) (cdr stat))))
                     (values (cons (cons date total++) LoCs) total++)))
-                (values (cons (vector (vector-ref lang-source 0) pen (reverse LoCs) total) src)
+                (values (cons (vector (vector-ref lang-src 0) pen (reverse LoCs) total) src)
                         (max peak total))))
-
-            (define-values (date0 daten)
-              (cond [(and date-start date-end) (values date-start date-end)]
-                    [else (let ([dates (make-hasheq)])
-                            (apply hash-union! #:combine (λ [v1 v2] v1)
-                                   dates (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
-                            (let ([dates (sort (hash-keys dates) <)])
-                              (values (or date-start (car dates))
-                                      (or date-end (last dates)))))]))
               
-            (define-values (line0 linen)
-              (values (or line-start 0)
+            (define-values (date0 daten line0 linen)
+              (values (or date-start (car all-dates))
+                      (or date-end (last all-dates))
+                      (or line-start 0)
                       (or line-end (* (exact-ceiling (/ peak 1000)) 1000))))
 
             (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc peak) mark-font #true))
@@ -224,14 +223,14 @@
               (send dc draw-text y-mark (- x-start 1ch y-width) (- y 1ex) #true)
               (send dc draw-line x-start y (+ x-start x-length) y))
               
-            (for ([lang-source (in-list linesource)])
-              (send dc set-pen (vector-ref lang-source 1))
-              (send dc set-text-foreground (send (vector-ref lang-source 1) get-color))
-              (define y-axis (vector-ref lang-source 3))
+            (for ([loc-src (in-list locsource)])
+              (send dc set-pen (vector-ref loc-src 1))
+              (send dc set-text-foreground (send (vector-ref loc-src 1) get-color))
+              (define y-axis (vector-ref loc-src 3))
               (define y (- y-start (* (- y-axis line0) line-fraction)))
               (send dc draw-text (~loc y-axis) (+ x-start x-length 1ch) (- y 1ex) #true)
               (send dc draw-lines
-                    (for/list ([date.LoC (in-list (vector-ref lang-source 2))])
+                    (for/list ([date.LoC (in-list (vector-ref loc-src 2))])
                       (define-values (x-axis y-axis) (values (car date.LoC) (cdr date.LoC)))
                       (cons (+ x-start (* (- x-axis date0) date-fraction))
                             (- y-start (* (- y-axis line0) line-fraction)))))))

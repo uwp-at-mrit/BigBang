@@ -57,28 +57,26 @@
       (make-delayed-block
        (λ [render% pthis infobase]
          (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
-         (define-values (workday-statistics insertions deletions) (git-log-numstat languages excludes))
-         (define-values (lang-source workday-source)
-           (for/fold ([lang-src null] [workday-src null])
+         (define-values (loc-statistics insertions deletions) (git-numstat languages excludes))
+         (define-values (lang-source loc-source)
+           (for/fold ([lang-src null] [loc-src null])
                      ([l.px.clr (in-list (remove-duplicates languages eq? #:key (λ [l.px.clr] (vector-ref l.px.clr 0))))])
              (let ([lang (vector-ref l.px.clr 0)]
                    [color (let ([c (vector-ref l.px.clr 1)]) (if (symbol? c) (symbol->string c) c))])
                (values (cons (vector lang color (hash-ref lang-statistics lang (λ [] 0))) lang-src)
-                       (cons (vector lang color (hash-ref workday-statistics lang (λ [] (make-hasheq)))) workday-src)))))
-         (define language-pie
+                       (cons (vector lang color (hash-ref loc-statistics lang (λ [] (make-hasheq)))) loc-src)))))
+         (define-values (language-pie loc-series)
            (let* ([pie-height (or git-height 200)]
-                  [pie-width pie-height])
-             (pie-chart #:radian0 0.618
-                        pie-width pie-height (reverse lang-source))))
-         (define workday-chart
-           (let* ([chart-height (or git-height 200)]
-                  [chart-width (or git-width (* chart-height 2.4))])
-             (git-loc-series chart-width chart-height (reverse workday-source))))
+                  [pie-width pie-height]
+                  [series-height (or git-height 200)]
+                  [series-width (or git-width (* series-height 2.4))])
+             (values (pie-chart #:radian0 0.618 pie-width pie-height (reverse lang-source))
+                     (git-loc-series series-width series-height (reverse loc-source)))))
          (nested (filebox (tt "源码计量"
                               ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
                               ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
                           (tabular #:sep (hspace 2) #:column-properties '(left right)
-                                   (list (list language-pie workday-chart))))))))))
+                                   (list (list language-pie loc-series))))))))))
 
 (define handbook-table
   (lambda []
