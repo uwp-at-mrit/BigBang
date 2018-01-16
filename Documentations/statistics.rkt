@@ -94,7 +94,6 @@
         (with-handlers ([exn? void])
           (let pretty-numstat ()
             (define timestamp (read-line /dev/gitin))
-            (define tokens (string-split (read-line /dev/gitin)))
             (let numstat ([stats null])
               (define tokens (string-split (read-line /dev/gitin)))
               (cond [(= (length tokens) 3)

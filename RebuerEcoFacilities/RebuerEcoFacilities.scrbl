@@ -22,11 +22,11 @@
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Handbook/?")
- #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
- #(Racket   Green      #px"[.]rkt$")
- #(Scribble DodgerBlue #px"[.]scrbl$")
- #(CSS      Orange     #px"[.]css$")
- #(VS::XML  GhostWhite #px"[.]resw$")]
+ #(C++      VioletRed   #px"[.][ch](pp|xx)?$")
+ #(Racket   LimeGreen   #px"[.]rkt$")
+ #(Scribble DodgerBlue  #px"[.]scrbl$")
+ #(CSS      Orange      #px"[.]css$")
+ #(VS::XML  GhostWhite  #px"[.]resw$")]
 
 @handbook-table[]
 
