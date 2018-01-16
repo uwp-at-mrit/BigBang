@@ -500,7 +500,7 @@ private:
 	Statuslinelet* statusline;
 };
 
-BSegment::BSegment(Panel^ parent, Platform::String^ label, Platform::String^ plc) : Universe(parent, 16) {
+BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Universe() {
 	this->console = new BConsole(this, label, plc);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }

@@ -18,7 +18,7 @@
 namespace WarGrey::SCADA {
 	private class BSegment : public WarGrey::SCADA::Universe {
 	public:
-		BSegment(Windows::UI::Xaml::Controls::Panel^ parent, Platform::String^ label, Platform::String^ plc);
+		BSegment(Platform::String^ label, Platform::String^ plc);
 		~BSegment() noexcept;
 
 	public:

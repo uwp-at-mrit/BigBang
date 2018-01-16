@@ -12,18 +12,18 @@ namespace WarGrey::SCADA {
 		void initialize_component(Windows::Foundation::Size region);
 
 	public:
-		void reflow(float width, float height);
 		void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
 	private:
-		~Console();
+		void switch_console(RR id);
+		void switch_console(unsigned int idx);
 
 		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
 		void animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 
 	private:
+		WarGrey::SCADA::Win2DUniverse^ universe;
 		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
-		Windows::UI::Xaml::Controls::StackPanel^ voids[static_cast<unsigned int>(RR::Count)];
-		WarGrey::SCADA::IUniverse* universes[static_cast<unsigned int>(RR::Count)];
+		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};
 }

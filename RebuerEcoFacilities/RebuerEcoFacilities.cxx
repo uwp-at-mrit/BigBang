@@ -19,7 +19,6 @@ namespace WarGrey::SCADA {
     protected:
         void RebuerMain(ApplicationView^ self, FrameworkElement^ screen) {
             this->Suspending += ref new SuspendingEventHandler(this, &Rebuer::OnSuspending);
-            self->VisibleBoundsChanged += ref new TypedEventHandler<ApplicationView^, Object^>(this, &Rebuer::DoResize);
             CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Rebuer::OnUncaughtException);
 
             ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
@@ -70,14 +69,6 @@ namespace WarGrey::SCADA {
                 } catch (Platform::Exception^ e) {
                     syslog(Log::Panic, "Unhandled Error: " + e->Message);
 				}
-            }
-        }
-
-        void DoResize(ApplicationView^ view, Platform::Object^ obj) {
-            auto screen = dynamic_cast<Console^>(Window::Current->Content);
-            if (screen != nullptr) {
-                auto region = adjusted_workspace_size(view->VisibleBounds, screen);
-                screen->reflow(region.Width, region.Height);
             }
         }
     };

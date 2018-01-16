@@ -42,8 +42,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 #define SNIP_INFO(snip) (static_cast<SnipInfo*>(snip->info))
 
-ref class Win2DUniverse;
-
 class PlaceHolderListener : public IUniverseListener {};
 class PlaceHolderDecorator : public IUniverseDecorator {};
 
@@ -138,7 +136,7 @@ static inline void snip_center_point_offset(Snip* snip, float width, float heigh
 }
 
 /*************************************************************************************************/
-Universe::Universe(Panel^ parent, int frame_rate) : IUniverse(parent, frame_rate) {
+Universe::Universe() : IUniverse() {
     this->set_decorator(nullptr);
 	this->set_pointer_listener(nullptr);
 }
@@ -539,134 +537,6 @@ void Universe::clear() {
 }
 
 /*************************************************************************************************/
-private ref class Win2DUniverse sealed : public WarGrey::SCADA::Win2DControl {
-public:
-    void fill_actual_extent(float* width, float* height) override {
-        Size region = this->planet->Size;
-
-        SET_VALUES(width, region.Width, height, region.Height);
-    };
-
-internal:
-    Win2DUniverse(IUniverse* world, int frame_rate, Panel^ parent, Platform::String^ id = "") : world(world) {
-        this->planet = ref new CanvasAnimatedControl();
-        if (id != nullptr) this->planet->Name = id;
-
-        if (frame_rate > 0) {
-            this->planet->TargetElapsedTime = TimeSpan({ 10000000LL / frame_rate });
-        } else if (frame_rate < 0) {
-            this->planet->TargetElapsedTime = TimeSpan({ -10000000LL * frame_rate });
-        }
-
-        this->planet->UseSharedDevice = true; // this is required
-        this->planet->SizeChanged += ref new SizeChangedEventHandler(this, &Win2DUniverse::do_resize);
-        this->planet->CreateResources += ref new UniverseLoadHandler(this, &Win2DUniverse::do_load);
-        this->planet->GameLoopStarting += ref new UniverseHandler(this, &Win2DUniverse::do_start);
-        this->planet->GameLoopStopped += ref new UniverseHandler(this, &Win2DUniverse::do_stop);
-        this->planet->Update += ref new UniverseUpdateHandler(this, &Win2DUniverse::do_update);
-        this->planet->Draw += ref new UniverseDrawHandler(this, &Win2DUniverse::do_paint);
-
-        this->planet->PointerMoved += ref new PointerEventHandler(this, &Win2DUniverse::on_pointer_moved);
-        this->planet->PointerPressed += ref new PointerEventHandler(this, &Win2DUniverse::on_pointer_pressed);
-        this->planet->PointerReleased += ref new PointerEventHandler(this, &Win2DUniverse::on_pointer_released);
-
-        Win2DControl::universe = this->planet;
-        Win2DControl::control = this->planet;
-
-        parent->Children->Append(this->planet);
-    }
-
-private:
-    void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args) {
-        float width = args->NewSize.Width;
-        float height = args->NewSize.Height;
-
-        if ((width > 0.0F) && (height > 0.0F)) {
-            if (this->loaded) {
-                this->world->reflow(width, height);
-            } else {
-                this->pending_resize = true;
-            }
-        }
-    }
-
-    void do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-        this->world->start();
-    }
-
-    void do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-        Size region = this->planet->Size;
-
-        this->world->load(args, region.Width, region.Height);
-        this->loaded = true;
-
-        if (this->pending_resize) {
-            this->pending_resize = false;
-            this->world->reflow(region.Width, region.Height);
-        }
-    }
-
-	void do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
-        long long count = args->Timing.UpdateCount - 1;
-        long long elapsed = args->Timing.ElapsedTime.Duration;
-        long long uptime = args->Timing.TotalTime.Duration;
-        bool is_slow = args->Timing.IsRunningSlowly;
-
-        this->world->update(count, elapsed, uptime, is_slow);
-
-		if (is_slow) {
-			syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
-		}
-	}
-
-    void do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
-        Size region = this->planet->Size;
-
-		try {
-			this->world->enter_critical_section();
-            this->world->draw(args->DrawingSession, region.Width, region.Height);
-			this->world->leave_critical_section();
-		} catch (Platform::Exception^ wte) {
-			this->world->leave_critical_section();
-            syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
-		}
-	}
-
-    void do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-        this->world->stop();
-        this->pending_resize = false;
-    }
-
-private:
-    void on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-        this->world->on_pointer_moved(Win2DControl::canvas, args);
-    }
-
-    void on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-        this->world->on_pointer_pressed(Win2DControl::canvas, args);
-    }
-
-    void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-        this->world->on_pointer_released(Win2DControl::canvas, args);
-    }
-
-private:
-    CanvasAnimatedControl^ planet;
-    IUniverse* world;
-
-private:
-    bool loaded = false;
-    bool pending_resize = false;
-};
-
-IUniverse::IUniverse(Panel^ parent, int frame_rate) {
-    this->control = ref new Win2DUniverse(this, frame_rate, parent, nullptr);
-}
-
-IUniverse::~IUniverse() {
-    this->control = nullptr;
-}
-
 void IUniverse::enter_critical_section() {
 	this->section.lock();
 }
@@ -683,5 +553,6 @@ void IUniverse::resize(float width, float height) {
 }
 
 void IUniverse::fill_actual_extent(float* width, float* height) {
-	this->control->fill_actual_extent(width, height);
+	SET_BOX(width, this->control->actual_width);
+	SET_BOX(height, this->control->actual_height);
 }

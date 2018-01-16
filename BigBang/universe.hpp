@@ -8,8 +8,8 @@
 namespace WarGrey::SCADA {
     private class IUniverse abstract {
     public:
-		virtual ~IUniverse() noexcept;
-		IUniverse(Windows::UI::Xaml::Controls::Panel^ parent, int frame_rate);
+		virtual ~IUniverse() noexcept {};
+		IUniverse() {};
 		
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
@@ -65,10 +65,10 @@ namespace WarGrey::SCADA {
 		std::mutex section;
     };
 
-    private class Universe : public WarGrey::SCADA::IUniverse {
-    public:
-        Universe(Windows::UI::Xaml::Controls::Panel^ parent, int frame_rate = 0);
-        virtual ~Universe() noexcept;
+	private class Universe : public WarGrey::SCADA::IUniverse {
+	public:
+		~Universe() noexcept;
+		Universe();
 
     public:
         void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) override;

@@ -12,6 +12,12 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media::Media3D;
 
+using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::UI;
+using namespace Microsoft::Graphics::Canvas::UI::Xaml;
+using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
+
 /*************************************************************************************************/
 Console::Console() : SplitView() {
 	this->Margin = ThicknessHelper::FromUniformLength(4.0);
@@ -27,49 +33,34 @@ Console::Console() : SplitView() {
 	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
 }
 
-Console::~Console() {
-	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
-		if (this->universes[i] != nullptr) {
-			delete this->universes[i];
-		}
-	}
-}
-
 void Console::initialize_component(Size region) {
 	ListView^ navigator = ref new ListView();
 
 	navigator->SelectionMode = ListViewSelectionMode::Single;
 
 	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
-		auto label = ref new TextBlock();
-		this->voids[i] = ref new StackPanel();
-
-		label->Text = speak(speak(static_cast<RR>(i).ToString()));
-
-		navigator->Items->Append(label);
-		if (i == 0) {
-			navigator->SelectedItem = label;
-		}
+		this->labels[i] = ref new TextBlock();
+		this->labels[i]->Text = speak(speak(static_cast<RR>(i).ToString()));
+		navigator->Items->Append(this->labels[i]);
 	}
 
 	// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
-	this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
-	this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
-	//this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
-	//this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
+	// this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
+	// this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
+	// this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
+	// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
 
-	this->Content = this->voids[0];
-	this->Pane = navigator;
+	// this->Pane = navigator;
+	// this->switch_console(0);
 
-	this->reflow(region.Width, region.Height);
+	this->universe = ref new Win2DUniverse(this, 16);
 }
 
-void Console::reflow(float width, float height) {
-	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
-		if (this->universes[i] != nullptr) {
-			this->universes[i]->resize(width, height);
-		}
-	}
+void Console::switch_console(unsigned int idx) {
+}
+
+void Console::switch_console(RR id) {
+	this->switch_console(static_cast<unsigned int>(id));
 }
 
 void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
