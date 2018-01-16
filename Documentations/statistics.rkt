@@ -2,6 +2,8 @@
 
 (provide (all-defined-out))
 
+(define git:%at "--pretty=format:%at")
+
 (define detect-language
   (lambda [languages path]
     (for/or ([l.px.clr (in-list languages)])
@@ -51,19 +53,24 @@
                      (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion)))))
       (parameterize ([current-custodian (make-custodian)]
                      [current-subprocess-custodian-mode 'kill])
-        (define-values (git-log /dev/gitin _out _err)
-          (subprocess #false #false #false 'new
-                      git "log" "--pretty=format:%at" "--shortstat" "--no-merges"))
-        (with-handlers ([exn? void])
+        (let-values ([(git-log /dev/login _lo _le) (subprocess #false #false #false 'new git "log" git:%at "--shortstat" "--no-merges")]
+                     [(/dev/datin) (open-input-string (format "~n~a~n" (current-seconds)))]
+                     [(git-diff /dev/diffin _do _de) (subprocess #false #false #false 'new git "diff" "--shortstat")])
+          (define /dev/gitin (input-port-append #true /dev/login /dev/datin /dev/diffin))
           (let shortstat ()
             (define timestamp (read-line /dev/gitin))
-            (define tokens (string-split (read-line /dev/gitin)))
-            (read-line /dev/gitin) ; skip-empty-line 
-            (stat++ (string->number timestamp) (cdddr tokens))
-            (shortstat)))
+            (when (string? timestamp)
+              (define stat-line (read-line /dev/gitin))
+              (define tokens (if (eof-object? stat-line) null (string-split stat-line)))
+              (when (pair? tokens)
+                (read-line /dev/gitin) ; skip-empty-line 
+                (stat++ (string->number timestamp) (cdddr tokens))
+                (shortstat)))))
         (custodian-shutdown-all (current-custodian))))
 
     (values statistics (unbox &insertion) (unbox &deletion))))
+
+(git-log-shortstat)
 
 (define git-log-numstat
   (lambda [languages excludes]
@@ -88,14 +95,15 @@
                          (cons (+ (car stat0) insertion) (+ (cdr stat0) deletion)))))))
       (parameterize ([current-custodian (make-custodian)]
                      [current-subprocess-custodian-mode 'kill])
-        (define-values (git-log /dev/gitin _out _err)
-          (subprocess #false #false #false 'new
-                      git "log" "--pretty=format:%at" "--numstat" "--no-merges"))
-        (with-handlers ([exn? void])
+        (let-values ([(git-log /dev/login _lo _le) (subprocess #false #false #false 'new git "log" git:%at "--numstat" "--no-merges")]
+                     [(/dev/datin) (open-input-string (format "~n~a~n" (current-seconds)))]
+                     [(git-diff /dev/diffin _do _de) (subprocess #false #false #false 'new git "diff" "--numstat")])
+          (define /dev/gitin (input-port-append #true /dev/login /dev/datin /dev/diffin))
           (let pretty-numstat ()
             (define timestamp (read-line /dev/gitin))
             (let numstat ([stats null])
-              (define tokens (string-split (read-line /dev/gitin)))
+              (define +-path (read-line /dev/gitin))
+              (define tokens (if (eof-object? +-path) null (string-split +-path)))
               (cond [(= (length tokens) 3)
                      (let ([insertion (string->number (car tokens))]
                            [deletion (string->number (cadr tokens))])
