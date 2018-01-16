@@ -75,7 +75,7 @@
          (nested (filebox (tt "源码计量"
                               ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
                               ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
-                          (tabular #:sep (hspace 2) #:column-properties '(left right)
+                          (tabular #:sep (hspace 1) #:column-properties '(left right)
                                    (list (list language-pie loc-series))))))))))
 
 (define handbook-table
