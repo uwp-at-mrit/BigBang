@@ -18,15 +18,15 @@
            @item{@tt{Racket} 编写所有不包含在主程序中但可以提高开发效率的程序。如：探索系统原型、修正其他同事代码中的纰漏、绘制系统图表。}
            @item{@tt{Scribble} 编写本手册和文档(含微调页面的 CSS)。}
            @;item{@tt{CSS} 微调 Scribble 默认的页面样式。}
-           @item{@tt{VS::XML} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
+           @item{@tt{ResX} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Handbook/?")
  #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
  #(Racket   LimeGreen  #px"[.]rkt$")
- #(Scribble DodgerBlue #px"[.]scrbl$")
+ #(Scribble DodgerBlue #px"[.](scrbl|css)$")
  #;(CSS     Orange     #px"[.]css$")
- #(VS::XML  GhostWhite #px"[.]resw$")]
+ #(ResX     GhostWhite #px"[.]resw$")]
 
 @handbook-table[]
 
@@ -34,6 +34,12 @@
 @include-section["../Documentations/architecture.scrbl"]
 
 @handbook-appendix[#:index? #true
+ (bib-entry #:key      "SE:APA"
+            #:title    "Software Engineering: A Practitioner's Approach"
+            #:author   (authors "Roger S. Pressman" "Bruce R. Maxim")
+            #:date     "2015"
+            #:location (book-location #:edition "Eighth" #:publisher "China Machine Press")
+            #:is-book? #true)
  (bib-entry #:key      "libmodbus"
             #:title    "A Modbus library for Linux, Mac OS X, FreeBSD, QNX and Windows"
             #:author   (authors "Stéphane Raimbault")
