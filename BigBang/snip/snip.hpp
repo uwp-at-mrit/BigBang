@@ -1,17 +1,17 @@
 #pragma once
 
-#include "control.hxx"
+#include "universe.hxx"
 #include "forward.hpp"
 #include "box.hpp"
 
 namespace WarGrey::SCADA {
     private class ISnipInfo abstract {
     public:
-        ISnipInfo(IUniverse* master) : master(master) {};
+        ISnipInfo(IPlanet* master) : master(master) {};
 		virtual ~ISnipInfo() noexcept {};
 
     public:
-		IUniverse* master;
+		IPlanet* master;
     };
 
     private class Snip abstract {

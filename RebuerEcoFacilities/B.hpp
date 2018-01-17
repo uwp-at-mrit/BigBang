@@ -1,6 +1,6 @@
 #pragma once
 
-#include "universe.hpp"
+#include "planet.hpp"
 #include "modbus.hpp"
 
 #include "snip/textlet.hpp"
@@ -16,7 +16,7 @@
 #include "snip/screw/gluecleanerlet.hpp"
 
 namespace WarGrey::SCADA {
-	private class BSegment : public WarGrey::SCADA::Universe {
+	private class BSegment : public WarGrey::SCADA::Planet {
 	public:
 		BSegment(Platform::String^ label, Platform::String^ plc);
 		~BSegment() noexcept;

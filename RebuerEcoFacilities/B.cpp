@@ -24,54 +24,54 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 #define SNIPS_ARITY(a) (sizeof(a) / sizeof(Snip*))
 
-static inline Motorlet* load_motorlet(IUniverse* master, float width, double degree = 0.0) {
+static inline Motorlet* load_motorlet(IPlanet* master, float width, double degree = 0.0) {
 	Motorlet* motor = new Motorlet(width);
 	master->insert(motor, degree);
 
 	return motor;
 }
 
-static inline Gaugelet* load_gaugelet(IUniverse* master, Platform::String^ caption, int A, int RPM) {
+static inline Gaugelet* load_gaugelet(IPlanet* master, Platform::String^ caption, int A, int RPM) {
 	Gaugelet* gauge = new Gaugelet(caption, A, RPM);
 	master->insert(gauge);
 
 	return gauge;
 }
 
-static inline Scalelet* load_scalelet(IUniverse* master, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript) {
+static inline Scalelet* load_scalelet(IPlanet* master, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript) {
 	Scalelet* scale = new Scalelet(unit, label, subscript);
 	master->insert(scale);
 
 	return scale;
 }
 
-static inline LSleevelet* load_sleevelet(IUniverse* master, float length, float thickness, double hue, double saturation, double light, double highlight) {
+static inline LSleevelet* load_sleevelet(IPlanet* master, float length, float thickness, double hue, double saturation, double light, double highlight) {
 	LSleevelet* pipe = new LSleevelet(length, 0.0F, thickness, hue, saturation, light, highlight);
 	master->insert(pipe);
 
 	return pipe;
 }
 
-static inline Liquidlet* load_water_pipe(IUniverse* master, float length, double degrees, ArrowPosition ap = ArrowPosition::End) {
+static inline Liquidlet* load_water_pipe(IPlanet* master, float length, double degrees, ArrowPosition ap = ArrowPosition::End) {
 	Liquidlet* waterpipe = new Liquidlet(length, ap, 209.60, 1.000, 0.559);
 	master->insert(waterpipe, degrees);
 
 	return waterpipe;
 }
 
-static inline Liquidlet* load_oil_pipe(IUniverse* master, float length, double degrees) {
+static inline Liquidlet* load_oil_pipe(IPlanet* master, float length, double degrees) {
 	Liquidlet* oilpipe = new Liquidlet(length, ArrowPosition::Start, 38.825, 1.000, 0.500);
 	master->insert(oilpipe, degrees);
 
 	return oilpipe;
 }
 
-static inline void connect_pipes(IUniverse* master, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
+static inline void connect_pipes(IPlanet* master, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
     pipe_connecting_position(prev, pipe, x, y, fx, fy);
     master->move_to(pipe, (*x), (*y));
 }
 
-void connect_motor(IUniverse* master, IMotorSnip* pipe, Motorlet* motor, Scalelet* scale, float x, float y, double fx = 1.0, double fy = 1.0) {
+void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet* scale, float x, float y, double fx = 1.0, double fy = 1.0) {
 	// TODO: there must be a more elegant way to deal with rotated motors
 	float motor_width, motor_height, scale_width, scale_height, yoff;
 	Rect mport = pipe->get_motor_port();
@@ -470,7 +470,7 @@ public:
 	};
 
 public:
-	void draw_before(IUniverse* self, CanvasDrawingSession^ ds, float Width, float Height) {
+	void draw_before(IPlanet* self, CanvasDrawingSession^ ds, float Width, float Height) {
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
@@ -500,7 +500,7 @@ private:
 	Statuslinelet* statusline;
 };
 
-BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Universe() {
+BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Planet() {
 	this->console = new BConsole(this, label, plc);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }

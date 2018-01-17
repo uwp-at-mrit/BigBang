@@ -53,7 +53,7 @@ void Console::initialize_component(Size region) {
 	// this->Pane = navigator;
 	// this->switch_console(0);
 
-	this->universe = ref new Win2DUniverse(this, 16);
+	this->universe = ref new UniverseDisplay(this, 16);
 }
 
 void Console::switch_console(unsigned int idx) {

@@ -2,14 +2,14 @@
 
 #include <mutex>
 
-#include "control.hxx"
+#include "universe.hxx"
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
-    private class IUniverse abstract {
+    private class IPlanet abstract {
     public:
-		virtual ~IUniverse() noexcept {};
-		IUniverse() {};
+		virtual ~IPlanet() noexcept {};
+		IPlanet() {};
 		
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
@@ -59,16 +59,16 @@ namespace WarGrey::SCADA {
 		void fill_actual_extent(float* width, float* height);
 
     protected:
-        WarGrey::SCADA::Win2DControl^ control;
+        WarGrey::SCADA::IDisplay^ master;
 
 	private:
 		std::mutex section;
     };
 
-	private class Universe : public WarGrey::SCADA::IUniverse {
+	private class Planet : public WarGrey::SCADA::IPlanet {
 	public:
-		~Universe() noexcept;
-		Universe();
+		~Planet() noexcept;
+		Planet();
 
     public:
         void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) override;

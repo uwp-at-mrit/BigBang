@@ -1,8 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)control.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)universe.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
@@ -44,11 +42,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)universe.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
@@ -100,6 +98,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

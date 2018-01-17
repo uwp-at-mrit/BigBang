@@ -15,7 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)control.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
@@ -33,10 +33,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)universe.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)control.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp" />
@@ -59,6 +59,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)universe.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
   </ItemGroup>
 </Project>

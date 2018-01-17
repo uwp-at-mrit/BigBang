@@ -18,10 +18,10 @@ static inline Size adjust_size(float Width, float Height, FrameworkElement^ work
 }
 
 Size system_screen_size() {
-    auto display = DisplayInformation::GetForCurrentView();
-    auto scaling = float(display->RawPixelsPerViewPixel);
+    auto master = DisplayInformation::GetForCurrentView();
+    auto scaling = float(master->RawPixelsPerViewPixel);
 
-    return { float(display->ScreenWidthInRawPixels) / scaling, float(display->ScreenHeightInRawPixels) / scaling };
+    return { float(master->ScreenWidthInRawPixels) / scaling, float(master->ScreenHeightInRawPixels) / scaling };
 }
 
 Size adjusted_workspace_size(Rect region, FrameworkElement^ workspace) {

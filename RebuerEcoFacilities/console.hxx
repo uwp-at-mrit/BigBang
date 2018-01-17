@@ -1,6 +1,6 @@
 #pragma once
 
-#include "universe.hpp"
+#include "planet.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class RR { B1, B2, B3, B4, Count };
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		void animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 
 	private:
-		WarGrey::SCADA::Win2DUniverse^ universe;
+		WarGrey::SCADA::UniverseDisplay^ universe;
 		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
 		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};

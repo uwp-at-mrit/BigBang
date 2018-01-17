@@ -1,5 +1,6 @@
 #pragma once
 
+#define vpure_read_only_property(T, name) property T name { virtual T get() = 0; }
 #define virtual_read_only_property(T, name) property T name { virtual T get(); }
 #define override_read_only_property(T, name) property T name { T get() override; }
 

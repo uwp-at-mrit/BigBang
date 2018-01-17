@@ -2,8 +2,8 @@
 #include <WindowsNumerics.h>
 #include <ppltasks.h>
 
-#include "control.hxx"
-#include "universe.hpp"
+#include "universe.hxx"
+#include "planet.hpp"
 
 #include "syslog.hpp"
 #include "system.hpp"
@@ -47,7 +47,7 @@ class PlaceHolderDecorator : public IUniverseDecorator {};
 
 class SnipInfo : public WarGrey::SCADA::ISnipInfo {
 public:
-    SnipInfo(IUniverse* master) : ISnipInfo(master) {};
+    SnipInfo(IPlanet* master) : ISnipInfo(master) {};
 
 public:
     float x;
@@ -56,7 +56,7 @@ public:
     bool selected;
 };
 
-static inline SnipInfo* bind_snip_owership(IUniverse* master, Snip* snip, double degrees) {
+static inline SnipInfo* bind_snip_owership(IPlanet* master, Snip* snip, double degrees) {
     auto info = new SnipInfo(master);
     snip->info = info;
 
@@ -89,7 +89,7 @@ static inline void unsafe_fill_snip_bound(Snip* snip, SnipInfo* info, float* x, 
 	}
 }
 
-static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, float x, float y, bool absolute) {
+static inline void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -103,13 +103,13 @@ static inline void unsafe_move_snip_via_info(Universe* master, SnipInfo* info, f
     }
 }
 
-static inline void unsafe_add_selected(IUniverse* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
+static inline void unsafe_add_selected(IPlanet* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
 	listener->before_select(master, snip, true);
 	info->selected = true;
 	listener->after_select(master, snip, true);
 }
 
-static inline void unsafe_set_selected(IUniverse* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
+static inline void unsafe_set_selected(IPlanet* master, IUniverseListener* listener, Snip* snip, SnipInfo* info) {
 	master->no_selected();
 	unsafe_add_selected(master, listener, snip, info);
 }
@@ -136,18 +136,18 @@ static inline void snip_center_point_offset(Snip* snip, float width, float heigh
 }
 
 /*************************************************************************************************/
-Universe::Universe() : IUniverse() {
+Planet::Planet() : IPlanet() {
     this->set_decorator(nullptr);
 	this->set_pointer_listener(nullptr);
 }
 
-Universe::~Universe() {
+Planet::~Planet() {
 	this->clear();
 	this->listener->destroy();
     this->decorator->destroy();
 }
 
-void Universe::insert(Snip* snip, double degrees, float x, float y) {
+void Planet::insert(Snip* snip, double degrees, float x, float y) {
     if (snip->info == nullptr) {
         if (this->head_snip == nullptr) {
             this->head_snip = snip;
@@ -165,7 +165,7 @@ void Universe::insert(Snip* snip, double degrees, float x, float y) {
     }
 }
 
-void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
+void Planet::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
@@ -178,7 +178,7 @@ void Universe::move_to(Snip* snip, float x, float y, SnipCenterPoint cp) {
     }
 }
 
-void Universe::move(Snip* snip, float x, float y) {
+void Planet::move(Snip* snip, float x, float y) {
     if (snip != nullptr) {
 		if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
@@ -197,7 +197,7 @@ void Universe::move(Snip* snip, float x, float y) {
     }
 }
 
-Snip* Universe::find_snip(float x, float y) {
+Snip* Planet::find_snip(float x, float y) {
     float sx, sy, sw, sh;
     Snip* found = nullptr;
 
@@ -220,7 +220,7 @@ Snip* Universe::find_snip(float x, float y) {
     return found;
 }
 
-void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoint cp) {
+void Planet::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoint cp) {
     if ((snip != nullptr) && (snip->info != nullptr)) {
         if (snip->info->master == this) {
             SnipInfo* info = SNIP_INFO(snip);
@@ -234,7 +234,7 @@ void Universe::fill_snip_location(Snip* snip, float* x, float* y, SnipCenterPoin
     }
 }
 
-void Universe::fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) {
+void Planet::fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) {
 	if ((snip != nullptr) && (snip->info != nullptr)) {
 		if (snip->info->master == this) {
 			SnipInfo* info = SNIP_INFO(snip);
@@ -247,18 +247,18 @@ void Universe::fill_snip_bound(Snip* snip, float* x, float* y, float* width, flo
 	}
 }
 
-void Universe::fill_snips_bounds(float* x, float* y, float* width, float* height) {
+void Planet::fill_snips_bounds(float* x, float* y, float* width, float* height) {
     this->recalculate_snips_extent_when_invalid();
     SET_VALUES(x, this->snips_left, y, this->snips_top);
     SET_BOX(width, this->snips_right - this->snips_left);
     SET_BOX(height, this->snips_bottom - this->snips_top);
 }
 
-void Universe::size_cache_invalid() {
+void Planet::size_cache_invalid() {
     this->snips_right = this->snips_left - 1.0F;
 }
 
-void Universe::recalculate_snips_extent_when_invalid() {
+void Planet::recalculate_snips_extent_when_invalid() {
     if (this->snips_right < this->snips_left) {
         float rx, ry, width, height;
 
@@ -287,12 +287,12 @@ void Universe::recalculate_snips_extent_when_invalid() {
             } while (child != this->head_snip);
         }
 
-        this->control->min_width = max(this->snips_right, this->preferred_min_width);
-        this->control->min_height = max(this->snips_bottom, this->preferred_min_height);
+        this->master->min_width = max(this->snips_right, this->preferred_min_width);
+        this->master->min_height = max(this->snips_bottom, this->preferred_min_height);
     }
 }
 
-void Universe::add_selected(Snip* snip) {
+void Planet::add_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
@@ -303,7 +303,7 @@ void Universe::add_selected(Snip* snip) {
     }
 }
 
-void Universe::set_selected(Snip* snip) {
+void Planet::set_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
@@ -314,7 +314,7 @@ void Universe::set_selected(Snip* snip) {
     }
 }
 
-void Universe::no_selected() {
+void Planet::no_selected() {
 	if (this->head_snip != nullptr) {
 		Snip* child = this->head_snip;
 
@@ -332,9 +332,9 @@ void Universe::no_selected() {
 }
 
 /************************************************************************************************/
-void Universe::on_pointer_moved(UIElement^ control, PointerRoutedEventArgs^ e) {
+void Planet::on_pointer_moved(UIElement^ master, PointerRoutedEventArgs^ e) {
     if (!e->Handled) {
-        auto ppt = e->GetCurrentPoint(control);
+        auto ppt = e->GetCurrentPoint(master);
         float x = ppt->Position.X;
         float y = ppt->Position.Y;
 
@@ -354,9 +354,9 @@ void Universe::on_pointer_moved(UIElement^ control, PointerRoutedEventArgs^ e) {
     }
 }
 
-void Universe::on_pointer_pressed(UIElement^ control, PointerRoutedEventArgs^ e) {
-	if ((!e->Handled) && (control->CapturePointer(e->Pointer))) {
-		auto ppt = e->GetCurrentPoint(control);
+void Planet::on_pointer_pressed(UIElement^ master, PointerRoutedEventArgs^ e) {
+	if ((!e->Handled) && (master->CapturePointer(e->Pointer))) {
+		auto ppt = e->GetCurrentPoint(master);
 		float x = ppt->Position.X;
 		float y = ppt->Position.Y;
 
@@ -392,7 +392,7 @@ void Universe::on_pointer_pressed(UIElement^ control, PointerRoutedEventArgs^ e)
     }
 }
 
-void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e) {
+void Planet::on_pointer_released(UIElement^ master, PointerRoutedEventArgs^ e) {
     if (!e->Handled) {
         if (this->rubberband_y != nullptr) {
             this->rubberband_y = nullptr;
@@ -404,7 +404,7 @@ void Universe::on_pointer_released(UIElement^ control, PointerRoutedEventArgs^ e
 }
 
 /*************************************************************************************************/
-void Universe::set_pointer_listener(IUniverseListener* listener) {
+void Planet::set_pointer_listener(IUniverseListener* listener) {
     if (this->listener != nullptr) {
 		this->listener->destroy();
     }
@@ -414,7 +414,7 @@ void Universe::set_pointer_listener(IUniverseListener* listener) {
     this->rubberband_allowed = this->listener->can_select_multiple(this);
 }
 
-void Universe::set_decorator(IUniverseDecorator* decorator) {
+void Planet::set_decorator(IUniverseDecorator* decorator) {
     if (this->decorator != nullptr) {
         this->decorator->destroy();
     }
@@ -424,7 +424,7 @@ void Universe::set_decorator(IUniverseDecorator* decorator) {
 }
 
 /*************************************************************************************************/
-void Universe::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {
+void Planet::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {
     if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
@@ -435,7 +435,7 @@ void Universe::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventA
     }
 }
 
-void Universe::update(long long count, long long interval, long long uptime, bool is_slow) {
+void Planet::update(long long count, long long interval, long long uptime, bool is_slow) {
     if (this->head_snip != nullptr) {
         Snip* child = this->head_snip;
 
@@ -446,7 +446,7 @@ void Universe::update(long long count, long long interval, long long uptime, boo
     }
 }
 
-void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
+void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     CanvasActiveLayer ^layer = nullptr;
     float3x2 transform = ds->Transform;
     float width, height;
@@ -504,7 +504,7 @@ void Universe::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     this->decorator->draw_after(this, ds, Width, Height);
 }
 
-void Universe::save(Platform::String^ path, float width, float height, float dpi) {
+void Planet::save(Platform::String^ path, float width, float height, float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
 	CanvasRenderTarget^ offscreen = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
 	CanvasDrawingSession^ ds = offscreen->CreateDrawingSession();
@@ -521,7 +521,7 @@ void Universe::save(Platform::String^ path, float width, float height, float dpi
 	});
 }
 
-void Universe::clear() {
+void Planet::clear() {
 	if (this->head_snip != nullptr) {
 		Snip* temp_head = this->head_snip;
 		this->head_snip = nullptr;
@@ -537,22 +537,22 @@ void Universe::clear() {
 }
 
 /*************************************************************************************************/
-void IUniverse::enter_critical_section() {
+void IPlanet::enter_critical_section() {
 	this->section.lock();
 }
 
-void IUniverse::leave_critical_section() {
+void IPlanet::leave_critical_section() {
 	this->section.unlock();
 }
 
-void IUniverse::resize(float width, float height) {
-    if ((width != this->control->actual_width) || (height != this->control->actual_height)) {
-        this->control->width = width;
-		this->control->height = height;
+void IPlanet::resize(float width, float height) {
+    if ((width != this->master->actual_width) || (height != this->master->actual_height)) {
+        this->master->width = width;
+		this->master->height = height;
     }
 }
 
-void IUniverse::fill_actual_extent(float* width, float* height) {
-	SET_BOX(width, this->control->actual_width);
-	SET_BOX(height, this->control->actual_height);
+void IPlanet::fill_actual_extent(float* width, float* height) {
+	SET_BOX(width, this->master->actual_width);
+	SET_BOX(height, this->master->actual_height);
 }

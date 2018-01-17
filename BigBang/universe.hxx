@@ -24,32 +24,31 @@ namespace WarGrey::SCADA {
         Platform::Object^>
         UniverseHandler;
 
-    private ref class Win2DControl abstract {
+    private ref class IDisplay abstract {
+	public:
+		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
+		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
+
     public:
         virtual_read_only_property(float, actual_width);
         virtual_read_only_property(float, actual_height);
 
+	public:
         read_write_property(float, width);
         read_write_property(float, height);
         read_write_property(float, min_width);
         read_write_property(float, min_height);
         read_write_property(float, max_width);
         read_write_property(float, max_height);
-
-    public:
-        read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
-        read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
-
-    protected private:
-        Microsoft::Graphics::Canvas::ICanvasResourceCreator^ universe;
-        Windows::UI::Xaml::Controls::UserControl^ control;
     };
 
-	private ref class Win2DUniverse sealed : public Win2DControl {
+	private ref class UniverseDisplay sealed : public IDisplay {
 	public:
-		Win2DUniverse(Windows::UI::Xaml::Controls::SplitView^ parent, int frame_rate, Platform::String^ id = "");
+		UniverseDisplay(Windows::UI::Xaml::Controls::SplitView^ parent, int frame_rate, Platform::String^ id = "");
 
 	public:
+		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
+		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
 		
@@ -76,9 +75,9 @@ namespace WarGrey::SCADA {
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 
 	private:
-		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl ^ planet;
+		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
 		Windows::UI::Xaml::Controls::SplitView^ parent;
-		WarGrey::SCADA::IUniverse* world;
+		WarGrey::SCADA::IPlanet* planets;
 
 	private:
 		bool loaded = false;
