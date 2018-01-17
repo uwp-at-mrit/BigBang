@@ -20,6 +20,7 @@
 
 (define language-statistics
   (lambda [sln-root languages excludes]
+    (define &count (box 0))
     (define (use-dir? dir)
       (not (ormap (curryr regexp-match? dir)
                   (cons #px"/(.git|compiled)/?$" excludes))))
@@ -28,10 +29,11 @@
           #:when (file-exists? path))
       (define language (detect-language languages path))
       (when (symbol? language)
+        (set-box! &count (add1 (unbox &count)))
         (hash-set! statistics language
                    (+ (hash-ref statistics language (λ [] 0))
                       (file-size path)))))
-    statistics))
+    (values statistics (unbox &count))))
 
 (define git-shortstat
   (lambda []

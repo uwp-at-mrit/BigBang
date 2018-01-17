@@ -13,6 +13,7 @@
 (require "statistics.rkt")
 
 (define preface-style (make-style 'index '(grouper unnumbered)))
+(define file-color (make-style 'tt (list (make-color-property (list #x58 #x60 #x69)))))
 (define insertion-color (make-style 'tt (list (make-color-property (list #x28 #xA7 #x45)))))
 (define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
 
@@ -56,7 +57,7 @@
     (when (pair? languages)
       (make-delayed-block
        (λ [render% pthis infobase]
-         (define lang-statistics (language-statistics (find-solution-root-dir) languages excludes))
+         (define-values (lang-statistics file-count) (language-statistics (find-solution-root-dir) languages excludes))
          (define-values (loc-statistics insertions deletions) (git-numstat languages excludes))
          (define-values (lang-source loc-source)
            (for/fold ([lang-src null] [loc-src null])
@@ -72,9 +73,9 @@
                   [series-width (or git-width (* series-height 2.4))])
              (values (pie-chart #:radian0 0.618 pie-width pie-height (reverse lang-source))
                      (git-loc-series series-width series-height (reverse loc-source)))))
-         (nested (filebox (tt "源码计量"
-                              ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
-                              ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
+         (nested (filebox (elem #:style file-color (~loc file-count) (superscript "files")
+                                ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
+                                ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
                           (tabular #:sep (hspace 1) #:column-properties '(left right)
                                    (list (list language-pie loc-series))))))))))
 
