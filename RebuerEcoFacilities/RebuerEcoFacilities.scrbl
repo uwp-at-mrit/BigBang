@@ -10,23 +10,23 @@
 @itemlist[#:style 'compact
  @item{帮助源码阅读者快速理解系统、融入公司，减少或消除不同专业背景同事之间的无效沟通。读完本文档，新同事将有能力独立开发同类应用程序；}
  @item{详细说明系统开发过程中碰到的疑难杂症和解决方案;}
- @item{脚本化展示简单的软件质量指标和测试报告。}]
+ @item{展示自动化的软件质量指标。}]
 
 @margin-note{本系统所用程序语言及其分工
  @itemlist[#:style 'compact
            @item{@tt{C++} 编写完整的主程序。}
-           @item{@tt{Racket} 编写所有不包含在主程序中但可以提高开发效率的程序。如：探索系统原型、修正其他同事代码中的纰漏、绘制系统图表。}
-           @item{@tt{Scribble} 编写本手册和文档(含微调页面的 CSS)。}
+           @item{@tt{Racket} 编写所有辅助程序。如：探索系统原型、测试主程序、绘制文档中的图表、修正其他同事代码中的纰漏。}
+           @item{@tt{Scribble} 编写本手册(含微调页面的 CSS)。}
            @;item{@tt{CSS} 微调 Scribble 默认的页面样式。}
            @item{@tt{ResX} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Handbook/?")
- #(C++      VioletRed  #px"[.][ch](pp|xx)?$")
- #(Racket   LimeGreen  #px"[.]rkt$")
- #(Scribble DodgerBlue #px"[.](scrbl|css)$")
- #;(CSS     Orange     #px"[.]css$")
- #(ResX     GhostWhite #px"[.]resw$")]
+ #(C++      VioletRed    #px"[.][ch](pp|xx)?$")
+ #(Racket   LimeGreen    #px"[.]rkt$")
+ #(Scribble DodgerBlue   #px"[.](scrbl|css)$")
+ #;(CSS     Orange       #px"[.]css$")
+ #(ResX     AntiqueWhite #px"[.]resw$")]
 
 @handbook-table[]
 
