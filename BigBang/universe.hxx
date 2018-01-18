@@ -43,8 +43,8 @@ namespace WarGrey::SCADA {
     };
 
 	private ref class UniverseDisplay sealed : public IDisplay {
-	public:
-		UniverseDisplay(Windows::UI::Xaml::Controls::SplitView^ parent, int frame_rate, Platform::String^ id = "");
+	internal:
+		UniverseDisplay(Windows::UI::Xaml::Controls::SplitView^ parent, IPlanet* planet, int frame_rate, Platform::String^ id = "");
 
 	public:
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -77,7 +77,7 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
 		Windows::UI::Xaml::Controls::SplitView^ parent;
-		WarGrey::SCADA::IPlanet* planets;
+		WarGrey::SCADA::IPlanet* head_planet;
 
 	private:
 		bool loaded = false;

@@ -2,9 +2,7 @@
 #include <WindowsNumerics.h>
 #include <ppltasks.h>
 
-#include "universe.hxx"
 #include "planet.hpp"
-
 #include "syslog.hpp"
 #include "system.hpp"
 #include "paint.hpp"
@@ -54,6 +52,10 @@ public:
     float y;
     float rotation;
     bool selected;
+
+public:
+	Snip* next;
+	Snip* prev;
 };
 
 static inline SnipInfo* bind_snip_owership(IPlanet* master, Snip* snip, double degrees) {
@@ -149,17 +151,21 @@ Planet::~Planet() {
 
 void Planet::insert(Snip* snip, double degrees, float x, float y) {
     if (snip->info == nullptr) {
-        if (this->head_snip == nullptr) {
+		SnipInfo* info = bind_snip_owership(this, snip, degrees);
+		
+		if (this->head_snip == nullptr) {
             this->head_snip = snip;
-            snip->prev = this->head_snip;
+            info->prev = this->head_snip;
         } else {
-            snip->prev = this->head_snip->prev;
-            this->head_snip->prev->next = snip;
-            this->head_snip->prev = snip;
+			SnipInfo* head_info = SNIP_INFO(this->head_snip);
+			SnipInfo* prev_info = SNIP_INFO(head_info->prev);
+			
+			info->prev = head_info->prev;
+            prev_info->next = snip;
+            head_info->prev = snip;
         }
-        snip->next = this->head_snip;
+        info->next = this->head_snip;
 
-        auto info = bind_snip_owership(this, snip, degrees);
         unsafe_move_snip_via_info(this, info, x, y, true);
         this->size_cache_invalid();
     }
@@ -192,7 +198,7 @@ void Planet::move(Snip* snip, float x, float y) {
             if (info->selected) {
                 unsafe_move_snip_via_info(this, info, x, y, false);
             }
-            child = child->next;
+            child = info->next;
         } while (child != this->head_snip);
     }
 }
@@ -202,7 +208,8 @@ Snip* Planet::find_snip(float x, float y) {
     Snip* found = nullptr;
 
     if (this->head_snip != nullptr) {
-        Snip* child = this->head_snip->prev;
+		SnipInfo* head_info = SNIP_INFO(this->head_snip);
+        Snip* child = head_info->prev;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
@@ -213,8 +220,8 @@ Snip* Planet::find_snip(float x, float y) {
                 break;
             }
 
-            child = child->prev;
-        } while (child != this->head_snip->prev);
+            child = info->prev;
+        } while (child != head_info->prev);
     }
 
     return found;
@@ -283,7 +290,7 @@ void Planet::recalculate_snips_extent_when_invalid() {
                 this->snips_right = max(this->snips_right, rx + width);
                 this->snips_bottom = max(this->snips_bottom, ry + height);
 
-                child = child->next;
+                child = info->next;
             } while (child != this->head_snip);
         }
 
@@ -326,7 +333,7 @@ void Planet::no_selected() {
 				this->listener->after_select(this, child, false);
 			}
 
-			child = child->next;
+			child = info->next;
 		} while (child != this->head_snip);
 	}
 }
@@ -429,8 +436,10 @@ void Planet::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArg
         Snip* child = this->head_snip;
 
         do {
+			SnipInfo* info = SNIP_INFO(child);
+
             child->load();
-            child = child->next;
+            child = info->next;
         } while (child != this->head_snip);
     }
 }
@@ -440,14 +449,16 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
         Snip* child = this->head_snip;
 
         do {
+			SnipInfo* info = SNIP_INFO(child);
+
             child->update(count, interval, uptime, is_slow);
-            child = child->next;
+            child = info->next;
         } while (child != this->head_snip);
     }
 }
 
 void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
-    CanvasActiveLayer ^layer = nullptr;
+    CanvasActiveLayer^ layer = nullptr;
     float3x2 transform = ds->Transform;
     float width, height;
     
@@ -483,7 +494,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                 ds->Transform = transform;
             }
 
-            child = child->next;
+            child = info->next;
         } while (child != this->head_snip);
     }
 
@@ -524,13 +535,17 @@ void Planet::save(Platform::String^ path, float width, float height, float dpi) 
 void Planet::clear() {
 	if (this->head_snip != nullptr) {
 		Snip* temp_head = this->head_snip;
-		this->head_snip = nullptr;
 		Snip* child = nullptr;
-		temp_head->prev->next = nullptr;
+		SnipInfo* temp_info = SNIP_INFO(temp_head);
+		SnipInfo* prev_info = SNIP_INFO(temp_info->prev);
+		
+		this->head_snip = nullptr;
+		prev_info->next = nullptr;
 		
 		do {
+			temp_info = SNIP_INFO(temp_head);
 			child = temp_head;
-			temp_head = temp_head->next;
+			temp_head = temp_info->next;
 			delete child; // snip's destructor will delete the associated info object
 		} while (temp_head != nullptr);
 	}

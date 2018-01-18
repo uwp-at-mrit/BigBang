@@ -6,10 +6,23 @@
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
+	private class IPlanetInfo abstract {
+	public:
+		virtual ~IPlanetInfo() noexcept {};
+		IPlanetInfo(IDisplay^ master) : master(master) {};
+		
+	public:
+		IDisplay^ master;
+	};
+
     private class IPlanet abstract {
     public:
-		virtual ~IPlanet() noexcept {};
-		IPlanet() {};
+		virtual ~IPlanet() noexcept {
+			if (this->info != nullptr) {
+				delete this->info;
+				this->info = nullptr;
+			}
+		};
 		
     public:
         virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
@@ -58,7 +71,14 @@ namespace WarGrey::SCADA {
 		void resize(float width, float height);
 		void fill_actual_extent(float* width, float* height);
 
-    protected:
+	public:
+		IPlanetInfo* info;
+
+	public:
+		IPlanet* prev;
+		IPlanet* next;
+
+    public:
         WarGrey::SCADA::IDisplay^ master;
 
 	private:

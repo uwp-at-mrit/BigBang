@@ -1,4 +1,5 @@
 #include "universe.hxx"
+#include "planet.hpp"
 #include "syslog.hpp"
 
 using namespace WarGrey::SCADA;
@@ -41,7 +42,7 @@ void IDisplay::height::set(float v) { this->canvas->Height = double(v); }
 float IDisplay::height::get() { return float(this->canvas->Height); };
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ id) : parent(parent) {
+UniverseDisplay::UniverseDisplay(SplitView^ parent, IPlanet* planet, int frame_rate, Platform::String^ id) : parent(parent) {
 	this->display = ref new CanvasAnimatedControl();
 	if (id != nullptr) this->display->Name = id;
 
@@ -63,6 +64,8 @@ UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::St
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
 
+	this->head_planet = planet;
+	this->head_planet->master = this;
 	this->parent->Content = this->display;
 }
 
@@ -78,7 +81,9 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 
 	if ((width > 0.0F) && (height > 0.0F)) {
 		if (this->loaded) {
-			//this->planets->reflow(width, height);
+			if (this->head_planet != nullptr) {
+				this->head_planet->reflow(width, height);
+			}
 		} else {
 			this->pending_resize = true;
 		}
@@ -86,60 +91,82 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 }
 
 void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	//this->planets->start();
+	if (this->head_planet != nullptr) {
+		this->head_planet->start();
+	}
 }
 
 void UniverseDisplay::do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
 	Size region = this->display->Size;
 
-	//this->planets->load(args, region.Width, region.Height);
+	syslog(Log::Debug, "loading");
+
+	if (this->head_planet != nullptr) {
+		this->head_planet->load(args, region.Width, region.Height);
+	}
+
 	this->loaded = true;
 
 	if (this->pending_resize) {
 		this->pending_resize = false;
-		//this->planets->reflow(region.Width, region.Height);
+		if (this->head_planet != nullptr) {
+			this->head_planet->reflow(region.Width, region.Height);
+		}
 	}
 }
 
 void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
-	long long count = args->Timing.UpdateCount - 1;
-	long long elapsed = args->Timing.ElapsedTime.Duration;
-	long long uptime = args->Timing.TotalTime.Duration;
-	bool is_slow = args->Timing.IsRunningSlowly;
+	if (this->head_planet != nullptr) {
+		long long count = args->Timing.UpdateCount - 1;
+		long long elapsed = args->Timing.ElapsedTime.Duration;
+		long long uptime = args->Timing.TotalTime.Duration;
+		bool is_slow = args->Timing.IsRunningSlowly;
 
-	//this->planets->update(count, elapsed, uptime, is_slow);
+		this->head_planet->update(count, elapsed, uptime, is_slow);
 
-	if (is_slow) {
-		syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+		if (is_slow) {
+			syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+		}
 	}
 }
 
 void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
-	Size region = this->display->Size;
+	if (this->head_planet != nullptr) {
+		Size region = this->display->Size;
 
-	try {
-		//this->planets->enter_critical_section();
-		//this->planets->draw(args->DrawingSession, region.Width, region.Height);
-		//this->planets->leave_critical_section();
-	} catch (Platform::Exception^ wte) {
-		//this->planets->leave_critical_section();
-		syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
+		try {
+			this->head_planet->enter_critical_section();
+			this->head_planet->draw(args->DrawingSession, region.Width, region.Height);
+			this->head_planet->leave_critical_section();
+		} catch (Platform::Exception^ wte) {
+			this->head_planet->leave_critical_section();
+			syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
+		}
 	}
 }
 
 void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	// this->planets->stop();
+	if (this->head_planet != nullptr) {
+		this->head_planet->stop();
+	}
+
 	this->pending_resize = false;
 }
 
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	// this->planets->on_pointer_moved(IDisplay::canvas, args);
+	if (this->head_planet != nullptr) {
+		this->head_planet->on_pointer_moved(this->canvas, args);
+	}
 }
 
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	// this->planets->on_pointer_pressed(IDisplay::canvas, args);
+	if (this->head_planet != nullptr) {
+		this->head_planet->on_pointer_pressed(this->canvas, args);
+	}
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	// this->planets->on_pointer_released(IDisplay::canvas, args);
+	if (this->head_planet != nullptr) {
+		this->head_planet->on_pointer_released(this->canvas, args);
+	}
 }

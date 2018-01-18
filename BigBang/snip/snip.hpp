@@ -7,9 +7,9 @@
 namespace WarGrey::SCADA {
     private class ISnipInfo abstract {
     public:
-        ISnipInfo(IPlanet* master) : master(master) {};
 		virtual ~ISnipInfo() noexcept {};
-
+		ISnipInfo(IPlanet* master) : master(master) {};
+		
     public:
 		IPlanet* master;
     };
@@ -31,10 +31,6 @@ namespace WarGrey::SCADA {
         
     public:
         ISnipInfo* info;
-
-    public:
-        Snip* next;
-        Snip* prev;
     };
 
 	private class IPipeSnip : public WarGrey::SCADA::Snip {
