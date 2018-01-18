@@ -34,7 +34,7 @@
               (define /dev/hbin (open-input-string maybe-output-to))
               (let read-with ([last-line #false])
                 (define line (read-line /dev/hbin))
-                (cond [(string? line) (when (string? last-line) (println last-line)) (read-with line)]
+                (cond [(string? line) (when (string? last-line) (displayln last-line)) (read-with line)]
                       [else (let ([index.html (caddr (read (open-input-string last-line)))])
                               (system (format "open ~a" index.html))
                               (printf "[Output to ~a]~n" index.html))])))

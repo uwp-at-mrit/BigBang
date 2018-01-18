@@ -65,7 +65,7 @@
              (let ([lang (vector-ref l.px.clr 0)]
                    [color (let ([c (vector-ref l.px.clr 1)]) (if (symbol? c) (symbol->string c) c))])
                (values (cons (vector lang color (hash-ref lang-statistics lang (λ [] 0))) lang-src)
-                       (cons (vector lang color (hash-ref loc-statistics lang (λ [] (make-hasheq)))) loc-src)))))
+                       (cons (vector lang color (hash-ref loc-statistics lang (λ [] null))) loc-src)))))
          (define-values (language-pie loc-series)
            (let* ([pie-height (or git-height 200)]
                   [pie-width pie-height]

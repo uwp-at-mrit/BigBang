@@ -72,64 +72,65 @@
               (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
               (define-values (cx cy) (let ([r (/ ring-diameter 2)]) (values (+ ring-x r) (+ ring-y r))))
               (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 2)))
-              (define ring (make-object region% #false))
-              (define hollow (make-object region% #false))
-              (send ring set-rectangle dx dy flwidth flheight)
-              (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
-              (send ring subtract hollow)
-              (send dc set-clipping-region ring)
 
-              (define-values (legend-label-width legend-%width legends)
-                (let draw-ring ([rest datasource]
-                                [radian0 r0]
-                                [max-lwidth 0]
-                                [max-pwidth 0]
-                                [legends null])
-                  (cond [(null? rest) (values max-lwidth max-pwidth (reverse legends))]
-                        [else (let ([datum (car rest)])
-                                (define datum% (/ (vector-ref datum 2) total))
-                                (define brush (make-brush #:color (vector-ref datum 1)))
-                                (define radiann (+ radian0 (* datum% pi 2)))
-                                (send dc set-brush brush)
-                                (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
-
-                                (define label (symbol->string (vector-ref datum 0)))
-                                (define percentage (string-append (~r (* datum% 100) #:precision '(= 2)) "%"))
-
-                                (define-values (lwidth _lh _ld _ls) (send dc get-text-extent label legend-font #true))
-                                (define-values (pwidth _ph _pd _ps) (send dc get-text-extent percentage legend-font #true))
-                                (draw-ring (cdr rest) radiann (max lwidth max-lwidth) (max pwidth max-pwidth)
-                                           (cons (vector label percentage brush) legends)))])))
-
-              (send dc set-clipping-region #false)
-              (define legend-box-x (+ dx legend-off))
-              (define legend-box-y (+ dy legend-off))
-              (define legend-box-width (+ 1em legend-label-width 1ch legend-%width legend-off legend-off))
-              (define legend-box-height (+ legend-off (* lineheight (length datasource))))
-              (define-values (legend-x0 legend-y0) (values (+ legend-box-x legend-off) (+ legend-box-y legend-off)))
-              (send dc set-pen legend-pen)
-              (send dc set-brush legend-brush)
-              (send dc draw-rectangle legend-box-y legend-box-y legend-box-width legend-box-height)
-              (send dc set-pen no-pen)
-
-              (let ([bytes (~size total)])
-                (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
-                (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
-                (send dc set-text-foreground total-color)
-                (send dc draw-text bytes tx ty #true))
-              
-              (for ([lgd (in-list legends)]
-                    [idx (in-naturals)])
-                (define label (vector-ref lgd 0))
-                (define lbl% (vector-ref lgd 1))
-                (define legend-y (+ legend-y0 (* lineheight idx)))
-                (send dc set-brush (vector-ref lgd 2))
-                (send dc draw-ellipse (+ legend-x0 legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
-                (send dc set-text-foreground label-color)
-                (send dc draw-text label (+ legend-x0 1em) legend-y #true)
-                (send dc set-text-foreground %-color)
-                (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true)))
-
+              (when (positive? total)
+                (define ring (make-object region% #false))
+                (define hollow (make-object region% #false))
+                (send ring set-rectangle dx dy flwidth flheight)
+                (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
+                (send ring subtract hollow)
+                (send dc set-clipping-region ring)
+                
+                (define-values (legend-label-width legend-%width legends)
+                  (let draw-ring ([rest datasource]
+                                  [radian0 r0]
+                                  [max-lwidth 0]
+                                  [max-pwidth 0]
+                                  [legends null])
+                    (cond [(null? rest) (values max-lwidth max-pwidth (reverse legends))]
+                          [else (let ([datum (car rest)])
+                                  (define datum% (/ (vector-ref datum 2) total))
+                                  (define brush (make-brush #:color (vector-ref datum 1)))
+                                  (define radiann (+ radian0 (* datum% pi 2)))
+                                  (send dc set-brush brush)
+                                  (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
+                                  
+                                  (define label (symbol->string (vector-ref datum 0)))
+                                  (define percentage (string-append (~r (* datum% 100) #:precision '(= 2)) "%"))
+                                  
+                                  (define-values (lwidth _lh _ld _ls) (send dc get-text-extent label legend-font #true))
+                                  (define-values (pwidth _ph _pd _ps) (send dc get-text-extent percentage legend-font #true))
+                                  (draw-ring (cdr rest) radiann (max lwidth max-lwidth) (max pwidth max-pwidth)
+                                             (cons (vector label percentage brush) legends)))])))
+                
+                (send dc set-clipping-region #false)
+                (define legend-box-x (+ dx legend-off))
+                (define legend-box-y (+ dy legend-off))
+                (define legend-box-width (+ 1em legend-label-width 1ch legend-%width legend-off legend-off))
+                (define legend-box-height (+ legend-off (* lineheight (length datasource))))
+                (define-values (legend-x0 legend-y0) (values (+ legend-box-x legend-off) (+ legend-box-y legend-off)))
+                (send dc set-pen legend-pen)
+                (send dc set-brush legend-brush)
+                (send dc draw-rectangle legend-box-y legend-box-y legend-box-width legend-box-height)
+                (send dc set-pen no-pen)
+                
+                (let ([bytes (~size total)])
+                  (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
+                  (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
+                  (send dc set-text-foreground total-color)
+                  (send dc draw-text bytes tx ty #true))
+                
+                (for ([lgd (in-list legends)]
+                      [idx (in-naturals)])
+                  (define label (vector-ref lgd 0))
+                  (define lbl% (vector-ref lgd 1))
+                  (define legend-y (+ legend-y0 (* lineheight idx)))
+                  (send dc set-brush (vector-ref lgd 2))
+                  (send dc draw-ellipse (+ legend-x0 legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
+                  (send dc set-text-foreground label-color)
+                  (send dc draw-text label (+ legend-x0 1em) legend-y #true)
+                  (send dc set-text-foreground %-color)
+                  (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true))))
             
             (send* dc
               (set-font saved-font)
@@ -153,35 +154,34 @@
 
           (send dc set-smoothing 'aligned)
           (send dc set-font mark-font)
-
-          (define all-dates
-            (let ([dates (make-hasheq)])
-              (apply hash-union! #:combine (λ [v1 v2] v1)
-                     dates (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
-              (sort (hash-keys dates) <)))
-          
-          (when (pair? all-dates)
+        
+          (when (ormap pair? (map (λ [lsrc] (vector-ref lsrc 2)) datasource))
             (define 1ch (send dc get-char-width))
             (define 1em (send dc get-char-height))
             (define 1ex (* 1em 1/2))
             
-            (define-values (locsource peak)
-              (for/fold ([src null] [peak 0])
+            (define-values (locsource peak x0 xn)
+              (for/fold ([src null] [peak 0] [x0 +inf.0] [xn 0])
                         ([lang-src (in-list datasource)])
-                (define stats (vector-ref lang-src 2))
+                (define lang (vector-ref lang-src 0))
                 (define pen (make-pen #:color (vector-ref lang-src 1)))
+                (define stats (vector-ref lang-src 2))
+                (define-values (date0 daten)
+                  (cond [(null? stats) (values x0 xn)]
+                        [else (values (caar stats) (car (last stats)))]))
                 (define-values (LoCs total)
                   (for/fold ([LoCs null] [total 0])
-                            ([date (in-list (sort (hash-keys stats) <))])
-                    (define stat (hash-ref stats date (λ [] (cons 0 0))))
-                    (define total++ (+ total (- (car stat) (cdr stat))))
-                    (values (cons (cons date total++) LoCs) total++)))
-                (values (cons (vector (vector-ref lang-src 0) pen (reverse LoCs) total) src)
-                        (max peak total))))
+                            ([stat (in-list stats)])
+                    (define total++ (+ total (- (cadr stat) (cddr stat))))
+                    (values (cons (cons (car stat) total++) LoCs) total++)))
+                (values (cons (vector lang pen (reverse LoCs) total) src)
+                        (max peak total)
+                        (min x0 date0)
+                        (max xn daten))))
               
             (define-values (date0 daten line0 linen)
-              (values (or date-start (car all-dates))
-                      (or date-end (last all-dates))
+              (values (or date-start x0)
+                      (or date-end xn)
                       (or line-start 0)
                       (or line-end (* (exact-ceiling (/ peak 1000)) 1000))))
 
