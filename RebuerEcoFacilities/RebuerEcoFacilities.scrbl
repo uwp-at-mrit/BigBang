@@ -15,7 +15,7 @@
 @margin-note{本系统所用程序语言及其分工
  @itemlist[#:style 'compact
            @item{@tt{C++} 编写完整的主程序。}
-           @item{@tt{Racket} 编写所有辅助程序。如：探索系统原型、测试主程序、绘制文档中的图表、修正其他同事代码中的纰漏。}
+           @item{@tt{Racket} 编写所有辅助程序。如：探索系统原型、测试主程序、绘制文档中的图表、转换老代码的编码等等。}
            @item{@tt{Scribble} 编写本手册(含微调页面的 CSS)。}
            @;item{@tt{CSS} 微调 Scribble 默认的页面样式。}
            @item{@tt{ResX} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
