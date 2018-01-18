@@ -188,6 +188,7 @@ void Planet::move(Snip* snip, float x, float y) {
     if (snip != nullptr) {
 		if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
+
             unsafe_move_snip_via_info(this, info, x, y, false);
         }
     } else if (this->head_snip != nullptr) {
@@ -195,9 +196,11 @@ void Planet::move(Snip* snip, float x, float y) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
+
             if (info->selected) {
                 unsafe_move_snip_via_info(this, info, x, y, false);
             }
+
             child = info->next;
         } while (child != this->head_snip);
     }
@@ -213,6 +216,7 @@ Snip* Planet::find_snip(float x, float y) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
+
             unsafe_fill_snip_bound(child, info, &sx, &sy, &sw, &sh);
 
             if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
@@ -284,6 +288,7 @@ void Planet::recalculate_snips_extent_when_invalid() {
 
             do {
                 SnipInfo* info = SNIP_INFO(child);
+
                 unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
                 this->snips_left = min(this->snips_left, rx);
                 this->snips_top = min(this->snips_top, ry);
@@ -303,6 +308,7 @@ void Planet::add_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
+
             if ((!info->selected) && (this->rubberband_allowed && this->listener->can_select(this, snip))) {
                 unsafe_add_selected(this, this->listener, snip, info);
             }
@@ -314,6 +320,7 @@ void Planet::set_selected(Snip* snip) {
     if (snip != nullptr) {
         if ((snip->info != nullptr) && (snip->info->master == this)) {
             SnipInfo* info = SNIP_INFO(snip);
+
             if ((!info->selected) && (this->listener->can_select(this, snip))) {
 				unsafe_set_selected(this, this->listener, snip, info);
             }
@@ -327,6 +334,7 @@ void Planet::no_selected() {
 
 		do {
 			SnipInfo* info = SNIP_INFO(child);
+
             if (info->selected) {
 				this->listener->before_select(this, child, false);
 				info->selected = false;
@@ -379,8 +387,10 @@ void Planet::on_pointer_pressed(UIElement^ master, PointerRoutedEventArgs^ e) {
 				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
 				this->no_selected();
 			} else {
-				this->rubberband_y = nullptr;
 				SnipInfo* info = SNIP_INFO(snip);
+				
+				this->rubberband_y = nullptr;
+
 				if ((!info->selected) && this->listener->can_select(this, snip)) {
 					if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
 						if (this->rubberband_allowed) {
@@ -436,10 +446,8 @@ void Planet::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArg
         Snip* child = this->head_snip;
 
         do {
-			SnipInfo* info = SNIP_INFO(child);
-
             child->load();
-            child = info->next;
+            child = SNIP_INFO(child)->next;
         } while (child != this->head_snip);
     }
 }
@@ -449,10 +457,8 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
         Snip* child = this->head_snip;
 
         do {
-			SnipInfo* info = SNIP_INFO(child);
-
             child->update(count, interval, uptime, is_slow);
-            child = info->next;
+            child = SNIP_INFO(child)->next;
         } while (child != this->head_snip);
     }
 }
@@ -469,8 +475,8 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
         do {
             SnipInfo* info = SNIP_INFO(child);
-            child->fill_extent(info->x, info->y, &width, &height);
 
+            child->fill_extent(info->x, info->y, &width, &height);
             if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
@@ -535,7 +541,6 @@ void Planet::save(Platform::String^ path, float width, float height, float dpi) 
 void Planet::clear() {
 	if (this->head_snip != nullptr) {
 		Snip* temp_head = this->head_snip;
-		Snip* child = nullptr;
 		SnipInfo* temp_info = SNIP_INFO(temp_head);
 		SnipInfo* prev_info = SNIP_INFO(temp_info->prev);
 		
@@ -543,9 +548,9 @@ void Planet::clear() {
 		prev_info->next = nullptr;
 		
 		do {
-			temp_info = SNIP_INFO(temp_head);
-			child = temp_head;
-			temp_head = temp_info->next;
+			Snip* child = temp_head;
+
+			temp_head = SNIP_INFO(temp_head)->next;
 			delete child; // snip's destructor will delete the associated info object
 		} while (temp_head != nullptr);
 	}
