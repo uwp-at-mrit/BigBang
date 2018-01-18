@@ -2,6 +2,6 @@
 
 @(require "../Documentations/handbook.rkt")
 
-@handbook-story{系统架构}
+@handbook-story{疑难杂症}
 
 @handbook-references[]

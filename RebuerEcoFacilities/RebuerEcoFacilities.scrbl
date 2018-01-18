@@ -31,7 +31,9 @@
 @handbook-table[]
 
 @include-section["../Documentations/preface.scrbl"]
+@include-section["../Documentations/infrastructure.scrbl"]
 @include-section["../Documentations/architecture.scrbl"]
+@include-section["../Documentations/misc.scrbl"]
 
 @handbook-appendix[#:index? #true
  (bib-entry #:key      "SE:APA"
