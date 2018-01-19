@@ -16,7 +16,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Rect snip_enclosing_box(Snip* snip, float x, float y, float3x2 transform) {
+Rect snip_enclosing_box(ISnip* snip, float x, float y, float3x2 transform) {
     float width, height;
 
     snip->fill_extent(x, y, &width, &height);
@@ -24,7 +24,7 @@ Rect snip_enclosing_box(Snip* snip, float x, float y, float3x2 transform) {
     return rectangle(x, y, width, height)->ComputeBounds(transform);
 }
 
-void snip_save(Snip* snip, Platform::String^ path, float dpi) {
+void snip_save(ISnip* snip, Platform::String^ path, float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
 	float width, height;
 

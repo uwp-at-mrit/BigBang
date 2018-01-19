@@ -17,12 +17,12 @@ namespace WarGrey::SCADA {
             float Width, float Height) {};
 
         virtual void draw_before_snip(
-            WarGrey::SCADA::Snip* snip,
+            WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height) {};
 
         virtual void draw_after_snip(
-            WarGrey::SCADA::Snip* snip,
+            WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height) {};
     };

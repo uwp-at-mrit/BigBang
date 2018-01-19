@@ -3,7 +3,7 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Vibratorlet : public WarGrey::SCADA::Snip {
+    private class Vibratorlet : public WarGrey::SCADA::ISnip {
     public:
         Vibratorlet(float width, float height = 0.0F);
 

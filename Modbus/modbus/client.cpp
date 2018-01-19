@@ -102,7 +102,7 @@ void ModbusConfirmation::fill_application_holding_register_interval(uint16* addr
 IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
 	this->logger = ((sl == nullptr) ? new Syslog(Log::None, "Modbus Silent Client", nullptr) : sl);
 	this->logger->reference();
-	
+
 	this->device = ref new HostName(h);
     this->service = p.ToString();
 

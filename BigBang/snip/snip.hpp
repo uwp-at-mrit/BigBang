@@ -14,9 +14,9 @@ namespace WarGrey::SCADA {
 		IPlanet* master;
     };
 
-    private class Snip abstract {
+    private class ISnip abstract {
     public:
-		virtual ~Snip() noexcept {
+		virtual ~ISnip() noexcept {
 			if (this->info != nullptr) {
 				delete this->info;
 				this->info = nullptr;
@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
         ISnipInfo* info;
     };
 
-	private class IPipeSnip : public WarGrey::SCADA::Snip {
+	private class IPipeSnip : public WarGrey::SCADA::ISnip {
 	public:
 		virtual Windows::Foundation::Rect get_input_port() = 0;
 		virtual Windows::Foundation::Rect get_output_port() = 0;

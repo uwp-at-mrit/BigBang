@@ -3,7 +3,7 @@
 #include "snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Alarmlet : public WarGrey::SCADA::Snip {
+    private class Alarmlet : public WarGrey::SCADA::ISnip {
     public:
         Alarmlet(float size);
         ~Alarmlet() noexcept;

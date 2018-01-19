@@ -2,6 +2,7 @@
 
 #include "sugar.hpp"
 #include "forward.hpp"
+#include "syslog.hpp"
 
 namespace WarGrey::SCADA {
     typedef Windows::Foundation::TypedEventHandler<
@@ -43,8 +44,13 @@ namespace WarGrey::SCADA {
     };
 
 	private ref class UniverseDisplay sealed : public IDisplay {
-	internal:
-		UniverseDisplay(Windows::UI::Xaml::Controls::SplitView^ parent, IPlanet* planet, int frame_rate, Platform::String^ id = "");
+	public:
+		virtual ~UniverseDisplay();
+		UniverseDisplay(
+			Windows::UI::Xaml::Controls::SplitView^ parent,
+			int frame_rate,
+			Platform::String^ id = "",
+			WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
 
 	public:
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -52,6 +58,10 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
 		
+	internal:
+		void add_planet(IPlanet* planet);
+		void clear();
+
 	private:
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
 		void do_start(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
@@ -78,6 +88,9 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
 		Windows::UI::Xaml::Controls::SplitView^ parent;
 		WarGrey::SCADA::IPlanet* head_planet;
+
+	private:
+		WarGrey::SCADA::Syslog* logger;
 
 	private:
 		bool loaded = false;

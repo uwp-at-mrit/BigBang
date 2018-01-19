@@ -19,6 +19,28 @@ using namespace Microsoft::Graphics::Canvas::UI::Xaml;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+#define PLANET_INFO(planet) (static_cast<PlanetInfo*>(planet->info))
+
+class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
+public:
+	PlanetInfo(IDisplay^ master) : IPlanetInfo(master) {};
+
+public:
+	bool loaded = false;
+	bool pending_resize = false;
+
+public:
+	IPlanet* next;
+	IPlanet* prev;
+};
+
+static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet) {
+	auto info = new PlanetInfo(master);
+	planet->info = info;
+
+	return info;
+}
+
 /*************************************************************************************************/
 float IDisplay::actual_width::get() { return float(this->canvas->ActualWidth); };
 float IDisplay::actual_height::get() { return float(this->canvas->ActualHeight); };
@@ -42,7 +64,10 @@ void IDisplay::height::set(float v) { this->canvas->Height = double(v); }
 float IDisplay::height::get() { return float(this->canvas->Height); };
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(SplitView^ parent, IPlanet* planet, int frame_rate, Platform::String^ id) : parent(parent) {
+UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ id, Log level) : parent(parent) {
+	this->logger = new Syslog(level, (id != nullptr) ? id : "Universe", nullptr);
+	this->logger->reference();
+	
 	this->display = ref new CanvasAnimatedControl();
 	if (id != nullptr) this->display->Name = id;
 
@@ -64,9 +89,12 @@ UniverseDisplay::UniverseDisplay(SplitView^ parent, IPlanet* planet, int frame_r
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
 
-	this->head_planet = planet;
-	this->head_planet->master = this;
 	this->parent->Content = this->display;
+}
+
+UniverseDisplay::~UniverseDisplay() {
+	this->logger->destroy();
+	this->clear();
 }
 
 UserControl^ UniverseDisplay::canvas::get() { return this->display; };
@@ -75,31 +103,72 @@ CanvasDevice^ UniverseDisplay::device::get() { return this->display->Device; };
 float UniverseDisplay::actual_width::get() { return float(this->display->Size.Width); };
 float UniverseDisplay::actual_height::get() { return float(this->display->Size.Height); };
 
+void UniverseDisplay::add_planet(IPlanet* planet) {
+	if (planet->info == nullptr) {
+		auto info = bind_planet_owership(this, planet);
+
+		if (this->head_planet == nullptr) {
+			this->head_planet = planet;
+			info->prev = this->head_planet;
+		} else {
+			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
+			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
+
+			info->prev = head_info->prev;
+			prev_info->next = planet;
+			head_info->prev = planet;
+		}
+		info->next = this->head_planet;
+	}
+}
+
+void UniverseDisplay::clear() {
+	if (this->head_planet != nullptr) {
+		IPlanet* temp_head = this->head_planet;
+		PlanetInfo* temp_info = PLANET_INFO(temp_head);
+		PlanetInfo* prev_info = PLANET_INFO(temp_info->prev);
+
+		this->head_planet = nullptr;
+		prev_info->next = nullptr;
+
+		do {
+			IPlanet* child = temp_head;
+
+			temp_head = PLANET_INFO(temp_head)->next;
+			delete child; // planet's destructor will delete the associated info object
+		} while (temp_head != nullptr);
+	}
+}
+
 void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ args) {
 	float width = args->NewSize.Width;
 	float height = args->NewSize.Height;
 
 	if ((width > 0.0F) && (height > 0.0F)) {
 		if (this->loaded) {
+			this->logger->log_message(Log::Debug, L"resize(%f, %f)", width, height);
 			if (this->head_planet != nullptr) {
 				this->head_planet->reflow(width, height);
 			}
 		} else {
+			this->logger->log_message(Log::Debug, L"delay_resize(%f, %f)", width, height);
 			this->pending_resize = true;
 		}
 	}
 }
 
 void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
+	this->logger->log_message(Log::Debug, "starting");
+	
 	if (this->head_planet != nullptr) {
-		this->head_planet->start();
+		this->head_planet->on_start();
 	}
 }
 
 void UniverseDisplay::do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
 	Size region = this->display->Size;
 
-	syslog(Log::Debug, "loading");
+	this->logger->log_message(Log::Debug, "loading");
 
 	if (this->head_planet != nullptr) {
 		this->head_planet->load(args, region.Width, region.Height);
@@ -108,6 +177,8 @@ void UniverseDisplay::do_load(CanvasAnimatedControl^ sender, CanvasCreateResourc
 	this->loaded = true;
 
 	if (this->pending_resize) {
+		this->logger->log_message(Log::Debug, L"do_resize(%f, %f)", region.Width, region.Height);
+
 		this->pending_resize = false;
 		if (this->head_planet != nullptr) {
 			this->head_planet->reflow(region.Width, region.Height);
@@ -125,7 +196,7 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		this->head_planet->update(count, elapsed, uptime, is_slow);
 
 		if (is_slow) {
-			syslog(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+			this->logger->log_message(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
 		}
 	}
 }
@@ -140,14 +211,16 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 			this->head_planet->leave_critical_section();
 		} catch (Platform::Exception^ wte) {
 			this->head_planet->leave_critical_section();
-			syslog(Log::Warning, L"rendering: %s", wte->Message->Data());
+			this->logger->log_message(Log::Warning, L"rendering: %s", wte->Message->Data());
 		}
 	}
 }
 
 void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
+	this->logger->log_message(Log::Debug, "stopping");
+
 	if (this->head_planet != nullptr) {
-		this->head_planet->stop();
+		this->head_planet->on_stop();
 	}
 
 	this->pending_resize = false;

@@ -1,5 +1,6 @@
 ﻿#include "console.hxx"
 #include "tongue.hpp"
+#include "syslog.hpp"
 #include "B.hpp"
 
 using namespace WarGrey::SCADA;
@@ -35,7 +36,7 @@ Console::Console() : SplitView() {
 
 void Console::initialize_component(Size region) {
 	ListView^ navigator = ref new ListView();
-
+	
 	navigator->SelectionMode = ListViewSelectionMode::Single;
 
 	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
@@ -53,7 +54,8 @@ void Console::initialize_component(Size region) {
 	// this->Pane = navigator;
 	// this->switch_console(0);
 
-	this->universe = ref new UniverseDisplay(this, new BSegment(RR::B1.ToString(), "192.168.1.114"), 16);
+	this->universe = ref new UniverseDisplay(this, 16);
+	this->universe->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
 }
 
 void Console::switch_console(unsigned int idx) {

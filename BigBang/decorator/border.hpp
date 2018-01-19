@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
             float Width, float Height) override;
 
         void draw_before_snip(
-            WarGrey::SCADA::Snip* snip,
+            WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height) override;
 

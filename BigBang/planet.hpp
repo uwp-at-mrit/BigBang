@@ -31,12 +31,10 @@ namespace WarGrey::SCADA {
 		virtual void clear() = 0;
 
     public:
-        virtual void start() {};
+        virtual void on_start() {};
         virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
-        virtual void stop() {};
-
-    public:
-        virtual void reflow(float width, float height) {};
+		virtual void reflow(float width, float height) {};
+        virtual void on_stop() {};
 
     public:
         virtual void on_pointer_moved(
@@ -52,34 +50,26 @@ namespace WarGrey::SCADA {
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
 
 	public:
-		virtual Snip* find_snip(float x, float y) = 0;
-		virtual void fill_snip_location(Snip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
-		virtual void fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) = 0;
+		virtual ISnip* find_snip(float x, float y) = 0;
+		virtual void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
+		virtual void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
-		virtual void insert(Snip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
-		virtual void move(Snip* snip, float x, float y) = 0;
-		virtual void move_to(Snip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
+		virtual void insert(ISnip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
+		virtual void move(ISnip* snip, float x, float y) = 0;
+		virtual void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 
 	public:
-		virtual void add_selected(Snip* snip) = 0;
-		virtual void set_selected(Snip* snip) = 0;
+		virtual void add_selected(ISnip* snip) = 0;
+		virtual void set_selected(ISnip* snip) = 0;
 		virtual void no_selected() = 0;
 
     public:
 		void enter_critical_section();
 		void leave_critical_section();
-		void resize(float width, float height);
 		void fill_actual_extent(float* width, float* height);
 
 	public:
 		IPlanetInfo* info;
-
-	public:
-		IPlanet* prev;
-		IPlanet* next;
-
-    public:
-        WarGrey::SCADA::IDisplay^ master;
 
 	private:
 		std::mutex section;
@@ -122,16 +112,16 @@ namespace WarGrey::SCADA {
         void set_decorator(WarGrey::SCADA::IUniverseDecorator* decorator);
 
     public:
-        Snip* find_snip(float x, float y) override;
-        void fill_snip_location(Snip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
-		void fill_snip_bound(Snip* snip, float* x, float* y, float* width, float* height) override;
-		void insert(Snip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
-        void move(Snip* snip, float x, float y) override;
-        void move_to(Snip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+        ISnip* find_snip(float x, float y) override;
+        void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+		void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) override;
+		void insert(ISnip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
+        void move(ISnip* snip, float x, float y) override;
+        void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
 
     public:
-        void add_selected(Snip* snip) override;
-        void set_selected(Snip* snip) override;
+        void add_selected(ISnip* snip) override;
+        void set_selected(ISnip* snip) override;
         void no_selected() override;
 
     private:
@@ -155,6 +145,6 @@ namespace WarGrey::SCADA {
 
     private:
         WarGrey::SCADA::IUniverseDecorator* decorator = nullptr;
-        WarGrey::SCADA::Snip* head_snip = nullptr;
+        WarGrey::SCADA::ISnip* head_snip = nullptr;
     };
 }

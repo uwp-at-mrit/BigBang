@@ -4,7 +4,7 @@
 #include "modbus.hpp"
 
 namespace WarGrey::SCADA {
-    private class Statusbarlet : public WarGrey::SCADA::Snip {
+    private class Statusbarlet : public WarGrey::SCADA::ISnip {
     public:
 		~Statusbarlet() noexcept;
 		Statusbarlet(Platform::String^ caption, Platform::String^ plc,
@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
 		uint16 quantity;
     };
 
-	private class Statuslinelet : public WarGrey::SCADA::Snip, public WarGrey::SCADA::ISyslogReceiver {
+	private class Statuslinelet : public WarGrey::SCADA::ISnip, public WarGrey::SCADA::ISyslogReceiver {
 	public:
 		~Statuslinelet() noexcept {};
 		Statuslinelet(WarGrey::SCADA::Log level) : ISyslogReceiver(level) {}

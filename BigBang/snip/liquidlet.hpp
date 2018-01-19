@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private enum ArrowPosition { Start, End };
 
-    private class Liquidlet : public WarGrey::SCADA::Snip {
+    private class Liquidlet : public WarGrey::SCADA::ISnip {
     public:
         Liquidlet(float length, WarGrey::SCADA::ArrowPosition = WarGrey::SCADA::Start,
 			double color = 38.825, double saturation = 1.000, double lightness = 0.500,

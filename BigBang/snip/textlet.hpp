@@ -3,7 +3,7 @@
 #include "snip.hpp"
 
 namespace WarGrey::SCADA {
-	private class Textlet : public WarGrey::SCADA::Snip {};
+	private class Textlet : public WarGrey::SCADA::ISnip {};
 
     private class Labellet : public WarGrey::SCADA::Textlet {
     public:

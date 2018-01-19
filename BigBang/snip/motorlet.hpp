@@ -3,7 +3,7 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Motorlet : public WarGrey::SCADA::Snip {
+    private class Motorlet : public WarGrey::SCADA::ISnip {
     public:
         Motorlet(float width, float height = 0.0F);
 

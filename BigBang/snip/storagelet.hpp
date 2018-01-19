@@ -3,7 +3,7 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class StorageTanklet : public WarGrey::SCADA::Snip {
+    private class StorageTanklet : public WarGrey::SCADA::ISnip {
     public:
         StorageTanklet(float width , float height = 0.0F);
 

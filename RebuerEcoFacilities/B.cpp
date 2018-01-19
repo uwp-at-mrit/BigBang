@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-#define SNIPS_ARITY(a) (sizeof(a) / sizeof(Snip*))
+#define SNIPS_ARITY(a) (sizeof(a) / sizeof(ISnip*))
 
 static inline Motorlet* load_motorlet(IPlanet* master, float width, double degree = 0.0) {
 	Motorlet* motor = new Motorlet(width);
@@ -427,7 +427,7 @@ private:
 private:
 	Statusbarlet* statusbar;
 	Statuslinelet* statusline;
-	Snip* icons[1];
+	ISnip* icons[1];
 	Gaugelet* gauges[B::Count];
 
 private:
@@ -477,7 +477,7 @@ public:
 		ds->DrawTextLayout(this->caption, x, y, this->color);
 	}
 
-	void draw_before_snip(Snip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+	void draw_before_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
 				ds->DrawLine(0, height, width, height, this->color, 2.0F);

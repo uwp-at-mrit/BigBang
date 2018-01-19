@@ -3,7 +3,7 @@
 #include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
-    private class Gaugelet : public WarGrey::SCADA::Snip {
+    private class Gaugelet : public WarGrey::SCADA::ISnip {
     public:
         Gaugelet(Platform::String^ caption, int ampere , int rpm, unsigned char step = 10,
             Windows::UI::Color& ampere_color = Windows::UI::Colors::RoyalBlue,
