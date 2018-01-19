@@ -93,7 +93,19 @@
                        (bib-entry #:key      "Scribble"
                                   #:title    "The Racket Documentation Tool"
                                   #:author   (authors "Matthew Flatt" "Eli Barzilay")
-                                  #:url      "https://docs.racket-lang.org/scribble/index.html"))])
+                                  #:url      "https://docs.racket-lang.org/scribble/index.html")
+                       (bib-entry #:key      "LP:WEB"
+                                  #:title    "Literate Programming"
+                                  #:author   (authors "Donald E. Knuth")
+                                  #:date     "1984"
+                                  #:location (journal-location "The Computer Journal" #:number "10.1093/comjnl/27.2.97")
+                                  #:url      "http://www.literateprogramming.com/knuthweb.pdf")
+                       (bib-entry #:key      "LP:Issues"
+                                  #:title    "Literate Programming - Issues and Problems"
+                                  #:author   (authors "Kurt Nørmark")
+                                  #:date     "1998"
+                                  #:location (dissertation-location #:institution "Department of Computer Science Aalborg University" #:degree "Lektor")
+                                  #:url      "http://people.cs.aau.dk/~normark/litpro/issues-and-problems.html"))])
     (lambda [#:index? [index? #true] . bibentries]
       ((curry filter-not void?)
        (list (struct-copy part (apply bibliography #:tag "handbook::bibliography" (append entries bibentries))

@@ -2,45 +2,20 @@
 
 @(require "../Documentations/handbook.rkt")
 
-@(define-bib isocpp
-   #:title    "C++ Core Guidelines"
-   #:author   (authors "Bjarne Stroustrup" "Herb Sutter")
-   #:date     "2018"
-   #:url      "http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines")
+@handbook-story[#:style preface-style]{序：浅谈微软系语言与系统}
 
-@(define-bib JSF++
-   #:title    "JOINT STRIKE FIGHTER AIR VEHICLE C++ CODING STANDARDS"
-   #:author   (authors "Bjarne Stroustrup" "JSF")
-   #:date     "2005"
-   #:location (techrpt-location #:institution "JSF" #:number "2RDU00001 Rev C")
-   #:url      "http://www.stroustrup.com/JSF-AV-rules.pdf")
+@margin-note{我此前对微软系语言和系统没有系统的研究经历，貌似
+Windows 世界里也没有诸如 《Unix 编程艺术》或《Unix 痛恨者手册》这样的兼顾技术和文化的专业读物。
+因此目前我只保证大方向上可靠，很多细节还需要后续考察。}
 
-@handbook-story[#:style preface-style]{序}
+本章将会简单介绍微软最新的操作系统和运行时环境，如果读者对计算机文化不感兴趣可以跳过本章。
+不过我依然建议@bold{不要跳过}，因为新的运行环境跟以往的 Windows 有很多本质上的差异，
+过去的编程经验不一定能直接套用。
 
-@section{浅谈微软系语言与系统}
-@subsection{Universal Windows Platform}
+@section{Universal Windows Platform}
 
-@subsection{Visual C++/CX}
+@section{Visual C++/CX}
 
-@section{编码风格与习惯}
-@subsection{C++/CX 编码规范}
-@margin-note{全面的 C++ 编码规范可以阅读 @~cite[isocpp]，本项目文档目录中包含 @~cite[JSF++]。}
-
-@subsection{源码组织结构}
-@centered{@filesystem-tree[
- '(WinSCADA
-   (RebuerEcoFacilities . "主程序入口源码")
-   (BigBang . "界面和图元源码")
-   (Graphics . "绘图原语源码")
-   (Modbus . "通信协议源码")
-   (Syslog . "日志系统源码")
-   (Auxiliary . "辅助函数源码")
-   ((Documentations . "文档和其他资源")
-    (Handbook . "本手册的网页版")
-    (Modbus . "官方规范和实现建议")
-    (misc . "其他文档，如 编码规范"))
-   (#(Scripts  "辅助开发脚本" LightSlateGray)
-    #(libmodbus "Modbus 协议测试套件" LightSlateGray)
-    #(#&rsyslog.rkt "系统日志服务器" LightSlateGray)))]}
+@section{SCADA}
 
 @handbook-references[]
