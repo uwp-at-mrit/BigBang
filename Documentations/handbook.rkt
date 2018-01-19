@@ -71,7 +71,7 @@
                   [pie-width pie-height]
                   [series-height (or git-height 200)]
                   [series-width (or git-width (* series-height 2.4))])
-             (values (pie-chart #:radian0 0.618 pie-width pie-height (reverse lang-source))
+             (values (pie-chart #:radian0 0.618 #:bytes-fy 0.618 pie-width pie-height (reverse lang-source))
                      (git-loc-series series-width series-height (reverse loc-source)))))
          (nested (filebox (elem #:style file-color (~loc file-count) (superscript "files")
                                 ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))

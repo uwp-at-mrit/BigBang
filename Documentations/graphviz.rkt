@@ -46,11 +46,11 @@
         [legend-pen (make-pen #:color (make-color 187 187 187 1.0))]
         [legend-brush (make-brush #:color (make-color 255 255 255 0.618))])
     (lambda [flwidth flheight datasource
+                     #:radian0 [r0 0.0] #:bytes-fx [fx 0.5] #:bytes-fy [fy 0.5]
                      #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold)]
                      #:label-color [label-color (make-color 0 0 0)]
                      #:%-color [%-color (make-color 106 114 143)]
-                     #:total-color [total-color (make-color 0 0 0 0.3)]
-                     #:radian0 [r0 0.0]]
+                     #:total-color [total-color (make-color 0 0 0 0.3)]]
       (dc (λ [dc dx dy]
             (define saved-font (send dc get-font))
             (define saved-color (send dc get-text-foreground))
@@ -73,7 +73,6 @@
               (define hollow-off (/ (- ring-diameter hollow-diameter) 2))
               (define-values (ring-x ring-y) (values (+ dx (- flwidth ring-diameter)) (+ dy (/ (- flheight ring-diameter) 2))))
               (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
-              (define-values (cx cy) (let ([r (/ ring-diameter 2)]) (values (+ ring-x r) (+ ring-y r))))
               (define total (for/sum ([ds (in-list datasource)]) (vector-ref ds 2)))
 
               (when (positive? total)
@@ -118,8 +117,9 @@
                 (send dc set-pen no-pen)
                 
                 (let ([bytes (~size total)])
-                  (define-values (total-width total_height _d _s) (send dc get-text-extent bytes legend-font #true))
-                  (define-values (tx ty) (values (- cx (/ total-width 2)) (- cy (/ total_height 2))))
+                  (define-values (total-width total-height _d _s) (send dc get-text-extent bytes legend-font #true))
+                  (define tx (+ ring-x (* (- ring-diameter total-width)  fx)))
+                  (define ty (+ ring-y (* (- ring-diameter total-height) fy)))
                   (send dc set-text-foreground total-color)
                   (send dc draw-text bytes tx ty #true))
                 
