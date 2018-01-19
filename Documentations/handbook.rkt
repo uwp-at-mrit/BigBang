@@ -63,7 +63,7 @@
            (for/fold ([lang-src null] [loc-src null])
                      ([l.px.clr (in-list (remove-duplicates languages eq? #:key (λ [l.px.clr] (vector-ref l.px.clr 0))))])
              (let ([lang (vector-ref l.px.clr 0)]
-                   [color (let ([c (vector-ref l.px.clr 1)]) (if (symbol? c) (symbol->string c) c))])
+                   [color (vector-ref l.px.clr 1)])
                (values (cons (vector lang color (hash-ref lang-statistics lang (λ [] 0))) lang-src)
                        (cons (vector lang color (hash-ref loc-statistics lang (λ [] null))) loc-src)))))
          (define-values (language-pie loc-series)

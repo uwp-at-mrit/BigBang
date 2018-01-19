@@ -5,7 +5,10 @@
 
 (require racket/date)
 (require racket/hash)
+
 (require racket/flonum)
+(require racket/fixnum)
+
 (require racket/draw)
 (require pict)
 
@@ -90,7 +93,7 @@
                     (cond [(null? rest) (values max-lwidth max-pwidth (reverse legends))]
                           [else (let ([datum (car rest)])
                                   (define datum% (/ (vector-ref datum 2) total))
-                                  (define brush (make-brush #:color (vector-ref datum 1)))
+                                  (define brush (make-brush #:color (rgba (vector-ref datum 1))))
                                   (define radiann (+ radian0 (* datum% pi 2)))
                                   (send dc set-brush brush)
                                   (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
@@ -164,7 +167,7 @@
               (for/fold ([src null] [peak 0] [x0 +inf.0] [xn 0])
                         ([lang-src (in-list datasource)])
                 (define lang (vector-ref lang-src 0))
-                (define pen (make-pen #:color (vector-ref lang-src 1)))
+                (define pen (make-pen #:color (rgba (vector-ref lang-src 1))))
                 (define stats (vector-ref lang-src 2))
                 (define-values (date0 daten)
                   (cond [(null? stats) (values x0 xn)]
@@ -257,6 +260,19 @@
                              (ht-append 4 (value->pict filename) (ftext info substyle color))]
                             [val (ftext val)])])
       value->pict)))
+
+(define hex->rgb-bytes
+  (lambda [rgb]
+    (values (fxand (fxrshift rgb 16) #xFF)
+            (fxand (fxrshift rgb 8) #xFF)
+            (fxand rgb #xFF))))
+
+(define rgba
+  (lambda [src]
+    (cond [(symbol? src) (make-object color% (symbol->string src))]
+          [(exact-integer? src) (let-values ([(r g b) (hex->rgb-bytes src)]) (make-color r g b))]
+          [(is-a? src color%) src]
+          [else (make-object color% (~a src))])))
 
 (define units '(KB MB GB TB))
 (define ~size
