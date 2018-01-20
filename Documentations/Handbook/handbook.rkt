@@ -32,6 +32,11 @@
     (define-values (parent projname _) (split-path proj-root))
     (simplify-path (build-path proj-root (path-add-extension projname #".scrbl")))))
 
+(define handbook-dest
+  (lambda [[proj-root (current-directory)]]
+    (define-values (parent projname _) (split-path proj-root))
+    (simplify-path (build-path proj-root "Generated Files" "Handbook"))))
+
 (define handbook-style
   (lambda [[proj-root (current-directory)]]
     (define-values (parent projname _) (split-path proj-root))
@@ -46,7 +51,7 @@
 (define handbook-title
   (lambda [#:authors authors . pre-contents]
     (parameterize ([sln-root (find-solution-root-dir)])
-      (define styles (filter file-exists? (list (build-path (document-root) "handbook.css") (handbook-style))))
+      (define styles (filter file-exists? (list (build-path (handbook-root) "handbook.css") (handbook-style))))
       (list (title #:style (make-style #false (map make-css-addition styles)) #:tag "handbook"
                    (if (pair? pre-contents) pre-contents (list (literal "开发手册"))))
             (apply author authors)))))
