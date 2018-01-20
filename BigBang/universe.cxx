@@ -26,16 +26,13 @@ public:
 	PlanetInfo(IDisplay^ master) : IPlanetInfo(master) {};
 
 public:
-	bool loaded = false;
-	bool pending_resize = false;
-
-public:
 	IPlanet* next;
 	IPlanet* prev;
 };
 
 static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet) {
 	auto info = new PlanetInfo(master);
+	
 	planet->info = info;
 
 	return info;
@@ -65,11 +62,11 @@ float IDisplay::height::get() { return float(this->canvas->Height); };
 
 /*************************************************************************************************/
 UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ id, Log level) : parent(parent) {
-	this->logger = new Syslog(level, (id != nullptr) ? id : "Universe", default_logger());
-	this->logger->reference();
-	
 	this->display = ref new CanvasAnimatedControl();
 	if (id != nullptr) this->display->Name = id;
+
+	this->logger = new Syslog(level, (id != nullptr) ? id : "UniverseDisplay", default_logger());
+	this->logger->reference();
 
 	if (frame_rate > 0) {
 		this->display->TargetElapsedTime = TimeSpan({ 10000000LL / frame_rate });
@@ -104,22 +101,53 @@ float UniverseDisplay::actual_width::get() { return float(this->display->Size.Wi
 float UniverseDisplay::actual_height::get() { return float(this->display->Size.Height); };
 
 void UniverseDisplay::add_planet(IPlanet* planet) {
+	// NOTE: this method is designed to be invoked before CreateResources event
+
 	if (planet->info == nullptr) {
-		auto info = bind_planet_owership(this, planet);
+		PlanetInfo* info = bind_planet_owership(this, planet);
 
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;
+			this->current_planet = planet;
 			info->prev = this->head_planet;
-		} else {
+		} else { 
 			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
 			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
-
+			 
 			info->prev = head_info->prev;
 			prev_info->next = planet;
 			head_info->prev = planet;
 		}
+
 		info->next = this->head_planet;
 	}
+}
+
+void UniverseDisplay::transfer(int delta_idx) {
+	if ((this->current_planet != nullptr) && (delta_idx != 0)) {
+		if (delta_idx > 0) {
+			for (int i = 0; i < delta_idx; i++) {
+				this->current_planet = PLANET_INFO(this->current_planet)->next;
+			}
+		} else {
+			for (int i = 0; i > delta_idx; i--) {
+				this->current_planet = PLANET_INFO(this->current_planet)->prev;
+			}
+		}
+	}
+}
+
+void UniverseDisplay::transfer_to(int idx) {
+	this->current_planet = this->head_planet;
+	this->transfer(idx);
+}
+
+void UniverseDisplay::transfer_previous() {
+	this->transfer(-1);
+}
+
+void UniverseDisplay::transfer_next() {
+	this->transfer(1);
 }
 
 void UniverseDisplay::collapse() {
@@ -129,6 +157,7 @@ void UniverseDisplay::collapse() {
 		PlanetInfo* prev_info = PLANET_INFO(temp_info->prev);
 
 		this->head_planet = nullptr;
+		this->current_planet = nullptr;
 		prev_info->next = nullptr;
 
 		do {
@@ -148,8 +177,19 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 		float pheight = args->PreviousSize.Height;
 
 		if ((nwidth > 0.0F) && (nheight > 0.0F) && ((nwidth != pwidth) || (nheight != pheight))) {
+			IPlanet* child = this->current_planet;
+			
 			this->logger->log_message(Log::Info, L"resize(%f, %f)", nwidth, nheight);
-			this->head_planet->reflow(nwidth, nheight);
+			
+			do {
+				PlanetInfo* info = PLANET_INFO(child);
+
+				child->enter_critical_section();
+				child->reflow(nwidth, nheight);
+				child->leave_critical_section();
+
+				child = info->next;
+			} while (child != this->current_planet);
 		}
 	}
 }
@@ -163,11 +203,18 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 	this->logger->log_message(Log::Debug, L"construct planet because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
-	if (this->head_planet != nullptr) {
+	if (this->current_planet != nullptr) {
+		IPlanet* child = this->head_planet;
 		Size region = this->display->Size;
 
-		this->head_planet->construct(args->Reason, region.Width, region.Height);
-		this->head_planet->reflow(region.Width, region.Height);
+		do {
+			PlanetInfo* info = PLANET_INFO(child);
+
+			child->construct(args->Reason, region.Width, region.Height);
+			child->reflow(region.Width, region.Height);
+
+			child = info->next;
+		} while (child != this->current_planet);
 	}
 }
 
@@ -177,8 +224,12 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		long long elapsed = args->Timing.ElapsedTime.Duration;
 		long long uptime = args->Timing.TotalTime.Duration;
 		bool is_slow = args->Timing.IsRunningSlowly;
+		IPlanet* child = this->current_planet;
 
-		this->head_planet->update(count, elapsed, uptime, is_slow);
+		do {
+			child->update(count, elapsed, uptime, is_slow);
+			child = PLANET_INFO(child)->next;
+		} while (child != this->current_planet);
 
 		if (is_slow) {
 			this->logger->log_message(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
@@ -187,15 +238,17 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 }
 
 void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
-	if (this->head_planet != nullptr) {
+	if (this->current_planet != nullptr) {
 		Size region = this->display->Size;
 
+		// NOTE: only the current planet needs to be drawn
+
 		try {
-			this->head_planet->enter_critical_section();
-			this->head_planet->draw(args->DrawingSession, region.Width, region.Height);
-			this->head_planet->leave_critical_section();
+			this->current_planet->enter_critical_section();
+			this->current_planet->draw(args->DrawingSession, region.Width, region.Height);
+			this->current_planet->leave_critical_section();
 		} catch (Platform::Exception^ wte) {
-			this->head_planet->leave_critical_section();
+			this->current_planet->leave_critical_section();
 			this->logger->log_message(Log::Warning, L"rendering: %s", wte->Message->Data());
 		}
 	}
@@ -207,19 +260,19 @@ void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ 
 }
 
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	if (this->head_planet != nullptr) {
-		this->head_planet->on_pointer_moved(this->canvas, args);
+	if (this->current_planet != nullptr) {
+		this->current_planet->on_pointer_moved(this->canvas, args);
 	}
 }
 
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	if (this->head_planet != nullptr) {
-		this->head_planet->on_pointer_pressed(this->canvas, args);
+	if (this->current_planet != nullptr) {
+		this->current_planet->on_pointer_pressed(this->canvas, args);
 	}
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	if (this->head_planet != nullptr) {
-		this->head_planet->on_pointer_released(this->canvas, args);
+	if (this->current_planet != nullptr) {
+		this->current_planet->on_pointer_released(this->canvas, args);
 	}
 }

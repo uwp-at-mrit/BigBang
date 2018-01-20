@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 /*************************************************************************************************/
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
-	Universe(SplitView^ parent) : UniverseDisplay(parent, 16) {}
+	Universe(SplitView^ parent) : UniverseDisplay(parent, 16, "Console") {}
 
 public:
 	void construct() override {
@@ -33,6 +33,8 @@ public:
 		// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
 
 		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
+		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.0.188"));
+		this->transfer_next();
 	}
 };
 

@@ -61,6 +61,12 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_height);
 		
 	public:
+		void transfer(int delta_idx);
+		void transfer_to(int idx);
+		void transfer_previous();
+		void transfer_next();
+
+	public:
 		virtual void big_bang() {};  // occurs at game loop thread
 		virtual void construct() {}; // occurs at UI thread
 		virtual void big_rip() {};   // occurs at game loop thread
@@ -96,5 +102,6 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::SplitView^ parent;
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
+		WarGrey::SCADA::IPlanet* current_planet;
 	};
 }
