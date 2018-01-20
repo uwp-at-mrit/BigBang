@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require "../Documentations/handbook.rkt")
+@(require "../../Documentations/handbook.rkt")
 
 @(define-bib isocpp
    #:title    "C++ Core Guidelines"
@@ -15,7 +15,7 @@
    #:location (techrpt-location #:institution "JSF" #:number "2RDU00001 Rev C")
    #:url      "http://www.stroustrup.com/JSF-AV-rules.pdf")
 
-@handbook-story[#:style preface-style]{序：编码风格与习惯}
+@handbook-story[#:style 'grouper]{编码风格与习惯}
 
 @section{C++/CX 编码规范}
 @margin-note{全面的 C++ 编码规范可以阅读 @~cite[isocpp]，本项目文档目录中包含 @~cite[JSF++]。}

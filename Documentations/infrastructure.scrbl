@@ -1,13 +1,7 @@
 #lang scribble/manual
 
-@(require "../Documentations/handbook.rkt")
+@title{基础设施}
 
-@handbook-story{基础设施}
-
-@section{图形系统}
-
-@section{日志系统}
-
-@section{通信协议}
-
-@handbook-references[]
+@include-section{infrastructure/graphics.scrbl}
+@include-section{infrastructure/syslog.scrbl}
+@include-section{infrastructure/modbus.scrbl}
