@@ -34,7 +34,6 @@ public:
 
 		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
 		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.0.188"));
-		this->transfer_next();
 	}
 };
 

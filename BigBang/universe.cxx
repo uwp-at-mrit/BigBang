@@ -204,7 +204,7 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 	
 	this->construct();
 	if (this->current_planet != nullptr) {
-		IPlanet* child = this->head_planet;
+		IPlanet* child = this->current_planet;
 		Size region = this->display->Size;
 
 		do {
