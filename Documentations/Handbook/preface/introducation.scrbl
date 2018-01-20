@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require "../../Documentations/handbook.rkt")
+@(require "../handbook.rkt")
 
 @(define-bib dark-age
    #:title    "A second dark age for C++"

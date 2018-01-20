@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require "../../Documentations/handbook.rkt")
+@(require "../handbook.rkt")
 
 @handbook-story{绘图系统}
 

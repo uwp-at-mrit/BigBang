@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require "../Documentations/handbook.rkt")
+@(require "../Documentations/Handbook/handbook.rkt")
 
 @handbook-title[#:authors '("睿博环保设备有限公司")]{工业数据采集与监控系统手册}
 
@@ -24,7 +24,7 @@
            @item{@tt{ResX} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
- #:ignore '(#px"/Handbook/?")
+ #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities")
  #(C++      #xF34B7D #px"[.][ch](pp|xx)?$")
  #(Racket   #x89E051 #px"[.]rkt$")
  #(Scribble #x1E4AEC #px"[.]scrbl$")
@@ -33,10 +33,10 @@
 
 @handbook-table[]
 
-@include-section{../Documentations/preface.scrbl}
-@include-section{../Documentations/infrastructure.scrbl}
-@include-section{../Documentations/architecture.scrbl}
-@include-section{../Documentations/misc.scrbl}
+@include-section{../Documentations/Handbook/preface.scrbl}
+@include-section{../Documentations/Handbook/infrastructure.scrbl}
+@include-section{../Documentations/Handbook/architecture.scrbl}
+@include-section{../Documentations/Handbook/misc.scrbl}
 
 @handbook-appendix[#:index? #true
  (bib-entry #:key      "SE:APA"

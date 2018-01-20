@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require "../../Documentations/handbook.rkt")
+@(require "../handbook.rkt")
 
 @(define-bib isocpp
    #:title    "C++ Core Guidelines"
@@ -30,7 +30,7 @@
    (Syslog . "日志系统源码")
    (Auxiliary . "辅助函数源码")
    ((Documentations . "文档和其他资源")
-    (Handbook . "本手册的网页版")
+    (Handbook . "本手册源码")
     (Modbus . "官方规范和实现建议")
     (misc . "其他文档，如 编码规范"))
    (#(Scripts  "辅助开发脚本" LightSlateGray)
