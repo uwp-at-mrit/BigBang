@@ -13,10 +13,10 @@
 (define detect-midnight
   (lambda [ts]
     (define the-day (seconds->date ts))
-    (- ts (+ ;(* (date-week-day the-day) 86400)
-           (* (date-hour the-day) 3600)
-           (* (date-minute the-day) 60)
-           (date-second the-day)))))
+    (- ts (+ #;(* (date-week-day the-day) 86400)
+             (* (date-hour the-day) 3600)
+             (* (date-minute the-day) 60)
+             (date-second the-day)))))
 
 (define language-statistics
   (lambda [sln-root languages excludes]

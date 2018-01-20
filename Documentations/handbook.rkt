@@ -73,9 +73,11 @@
                   [series-width (or git-width (* series-height 2.4))])
              (values (pie-chart #:radian0 0.618 #:bytes-fy 0.618 pie-width pie-height (reverse lang-source))
                      (git-loc-series series-width series-height (reverse loc-source)))))
+         (define loi (apply + (hash-values insertions)))
+         (define lod (apply + (hash-values deletions)))
          (nested (filebox (elem #:style file-color (~loc file-count) (superscript "files")
-                                ~ (elem #:style insertion-color (~loc (apply + (hash-values insertions))) (superscript "++"))
-                                ~ (elem #:style deletion-color (~loc (apply + (hash-values deletions))) (superscript (literal "--"))))
+                                ~ (elem #:style insertion-color (~loc loi) (superscript "++"))
+                                ~ (elem #:style deletion-color (~loc lod) (superscript (literal "--"))))
                           (tabular #:sep (hspace 1) #:column-properties '(left right)
                                    (list (list language-pie loc-series))))))))))
 

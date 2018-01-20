@@ -28,7 +28,7 @@
  #(C++      #xF34B7D #px"[.][ch](pp|xx)?$")
  #(Racket   #x89E051 #px"[.]rkt$")
  #(Scribble #x1E4AEC #px"[.]scrbl$")
- #(CSS     #xC34C26 #px"[.]css$")
+ #(CSS      #xC34C26 #px"[.]css$")
  #(ResX     #xEDEDED #px"[.]resw$")]
 
 @handbook-table[]
