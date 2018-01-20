@@ -160,7 +160,7 @@ void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^
 }
 
 void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-	this->logger->log_message(Log::Debug, L"construct planet because of %s", args->Reason.ToString());
+	this->logger->log_message(Log::Debug, L"construct planet because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
 	if (this->head_planet != nullptr) {

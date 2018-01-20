@@ -30,7 +30,7 @@ Syslog* default_logger() {
 void syslog(Log level, Platform::String^ message) {
 	auto self = default_logger();
 
-	self->log_message(level, message, "");
+	self->log_message(level, message);
 }
 
 void syslog(Log level, const wchar_t *fmt, ...) {

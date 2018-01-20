@@ -38,15 +38,15 @@ void Syslog::append_log_receiver(ISyslogReceiver* receiver) {
 	}
 }
 
-void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
+void Syslog::log_message(WarGrey::SCADA::Log level, Platform::String^ message) {
 	if (level >= this->level) {
-		this->do_log_message(level, message, this->topic, prefix);
+		this->do_log_message(level, message, this->topic, true);
 	}
 }
 
-void Syslog::log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message, bool prefix) {
+void Syslog::log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message) {
 	if (level >= this->level) {
-		this->do_log_message(level, message, alt_topic, prefix);
+		this->do_log_message(level, message, alt_topic, true);
 	}
 }
 

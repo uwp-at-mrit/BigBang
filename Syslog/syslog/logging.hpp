@@ -41,10 +41,10 @@ namespace WarGrey::SCADA {
 	public:
 		void append_log_receiver(ISyslogReceiver* receiver);
 		
-		void log_message(WarGrey::SCADA::Log level, Platform::String^ message, bool prefix = true);
+		void log_message(WarGrey::SCADA::Log level, Platform::String^ message);
 		void log_message(WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);
 		
-		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message, bool prefix = true);
+		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message);
 		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);
 
 	private:

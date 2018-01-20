@@ -26,6 +26,12 @@ public:
 
 public:
 	void construct() override {
+		// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
+		// this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
+		// this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
+		// this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
+		// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
+
 		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
 	}
 };
@@ -55,12 +61,6 @@ void Console::initialize_component(Size region) {
 		this->labels[i]->Text = speak(speak(static_cast<RR>(i).ToString()));
 		navigator->Items->Append(this->labels[i]);
 	}
-
-	// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
-	// this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
-	// this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
-	// this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
-	// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
 
 	this->universe = ref new Universe(this);
 }
