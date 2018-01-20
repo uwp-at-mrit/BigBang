@@ -31,7 +31,7 @@ Funnellet::Funnellet(float width, float height, double color, double saturation,
     this->highlight_color = hsla(color, saturation, light);
 }
 
-void Funnellet::load() {
+void Funnellet::construct() {
     Color topface_colors[] = { this->color, this->color, this->highlight_color, this->color };
     Color body_colors[] = { this->color, this->highlight_color, this->color };
 

@@ -30,7 +30,7 @@ Gearboxlet::Gearboxlet(float width, float height, float thickness, double color,
     this->gbox_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
-void Gearboxlet::load() {
+void Gearboxlet::construct() {
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);

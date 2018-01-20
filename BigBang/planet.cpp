@@ -66,7 +66,7 @@ static inline SnipInfo* bind_snip_owership(IPlanet* master, ISnip* snip, double 
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
 
-    snip->load();
+    snip->construct();
 
     return info;
 }
@@ -144,7 +144,7 @@ Planet::Planet() : IPlanet() {
 }
 
 Planet::~Planet() {
-	this->clear();
+	this->collapse();
 	this->listener->destroy();
     this->decorator->destroy();
 }
@@ -441,12 +441,12 @@ void Planet::set_decorator(IUniverseDecorator* decorator) {
 }
 
 /*************************************************************************************************/
-void Planet::load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {
+void Planet::construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {
     if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
 
         do {
-            child->load();
+            child->construct();
             child = SNIP_INFO(child)->next;
         } while (child != this->head_snip);
     }
@@ -538,7 +538,7 @@ void Planet::save(Platform::String^ path, float width, float height, float dpi) 
 	});
 }
 
-void Planet::clear() {
+void Planet::collapse() {
 	if (this->head_snip != nullptr) {
 		ISnip* temp_head = this->head_snip;
 		SnipInfo* temp_info = SNIP_INFO(temp_head);

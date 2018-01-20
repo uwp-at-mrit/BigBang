@@ -32,7 +32,7 @@ Sleevelet::Sleevelet(float width, float height, float thickness, double color, d
     this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
 }
 
-void Sleevelet::load() {
+void Sleevelet::construct() {
     Color colors[] = { this->color, this->highlight_color, this->color, this->color };
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);

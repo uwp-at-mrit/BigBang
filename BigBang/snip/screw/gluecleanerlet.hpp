@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
             double light = 0.339, double highlight = 0.839);
 
     public:
-        void load() override;
+        void construct() override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 

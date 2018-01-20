@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		~BSegment() noexcept;
 
 	public:
-		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float width, float height) override;
+		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 
 	private:

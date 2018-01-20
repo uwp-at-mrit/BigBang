@@ -511,7 +511,7 @@ BSegment::~BSegment() {
 	}
 }
 
-void BSegment::load(CanvasCreateResourcesEventArgs^ args, float width, float height) {
+void BSegment::construct(CanvasCreateResourcesReason reason, float width, float height) {
 	auto console = dynamic_cast<BConsole*>(this->console);
 
 	if (console != nullptr) {

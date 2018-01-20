@@ -28,7 +28,7 @@ Vibratorlet::Vibratorlet(float width, float height) : width(width), height(heigh
     }
 }
 
-void Vibratorlet::load() {
+void Vibratorlet::construct() {
     this->initialize_hat();
     this->initialize_rings();
 }

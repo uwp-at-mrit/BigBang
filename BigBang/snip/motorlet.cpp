@@ -22,7 +22,7 @@ Motorlet::Motorlet(float width, float height) : width(width), height(height) {
     }
 }
 
-void Motorlet::load() {
+void Motorlet::construct() {
     Color screw_colors[] = { Colors::White, Colors::Black };
     Color body_colors[] = {
         dark_color, light_color, light_color, light_color,

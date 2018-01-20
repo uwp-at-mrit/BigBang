@@ -25,17 +25,15 @@ namespace WarGrey::SCADA {
 		};
 		
     public:
-        virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) {};
+        virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 		virtual void save(Platform::String^ path, float width, float height, float dpi = 96.0) = 0;
-		virtual void clear() = 0;
+		virtual void collapse() = 0;
 
     public:
-        virtual void on_start() {};
         virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
 		virtual void reflow(float width, float height) {};
-        virtual void on_stop() {};
-
+		
     public:
         virtual void on_pointer_moved(
             Windows::UI::Xaml::UIElement^ obj,
@@ -81,11 +79,11 @@ namespace WarGrey::SCADA {
 		Planet();
 
     public:
-        void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args, float Width, float Height) override;
+        void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
         void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0) override;
-		void clear() override;
+		void collapse() override;
 
     public:
         virtual void on_pointer_moved(

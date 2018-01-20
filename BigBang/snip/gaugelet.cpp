@@ -62,7 +62,7 @@ void Gaugelet::initialize_meters() {
     }
 }
 
-void Gaugelet::load() {	
+void Gaugelet::construct() {	
 	this->initialize_meters();
 
     this->meter_gapsize = this->Rscales->LayoutBounds.Height - this->Rscales->DrawBounds.Height;

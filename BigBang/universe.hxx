@@ -43,9 +43,11 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_height);
     };
 
-	private ref class UniverseDisplay sealed : public IDisplay {
+	private ref class UniverseDisplay : public IDisplay {
 	public:
 		virtual ~UniverseDisplay();
+
+	internal:
 		UniverseDisplay(
 			Windows::UI::Xaml::Controls::SplitView^ parent,
 			int frame_rate,
@@ -58,16 +60,21 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
 		
-	internal:
-		void add_planet(IPlanet* planet);
-		void clear();
+	public:
+		virtual void big_bang() {};  // occurs at game loop thread
+		virtual void construct() {}; // occurs at UI thread
+		virtual void big_rip() {};   // occurs at game loop thread
 
+	protected private:
+		void add_planet(IPlanet* planet);
+		void collapse();
+		
 	private:
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
 		void do_start(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
 		void do_stop(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
-
-		void do_load(
+		
+		void do_construct(
 			Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ sender,
 			Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args);
 
@@ -87,13 +94,7 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
 		Windows::UI::Xaml::Controls::SplitView^ parent;
-		WarGrey::SCADA::IPlanet* head_planet;
-
-	private:
 		WarGrey::SCADA::Syslog* logger;
-
-	private:
-		bool loaded = false;
-		bool pending_resize = false;
+		WarGrey::SCADA::IPlanet* head_planet;
 	};
 }

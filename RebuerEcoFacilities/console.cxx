@@ -20,6 +20,17 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
+private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
+public:
+	Universe(SplitView^ parent) : UniverseDisplay(parent, 16) {}
+
+public:
+	void construct() override {
+		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
+	}
+};
+
+/*************************************************************************************************/
 Console::Console() : SplitView() {
 	this->Margin = ThicknessHelper::FromUniformLength(4.0);
 	this->PanePlacement = SplitViewPanePlacement::Left;
@@ -51,11 +62,7 @@ void Console::initialize_component(Size region) {
 	// this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
 	// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
 
-	// this->Pane = navigator;
-	// this->switch_console(0);
-
-	this->universe = ref new UniverseDisplay(this, 16);
-	this->universe->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
+	this->universe = ref new Universe(this);
 }
 
 void Console::switch_console(unsigned int idx) {

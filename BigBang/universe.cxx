@@ -65,7 +65,7 @@ float IDisplay::height::get() { return float(this->canvas->Height); };
 
 /*************************************************************************************************/
 UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ id, Log level) : parent(parent) {
-	this->logger = new Syslog(level, (id != nullptr) ? id : "Universe", nullptr);
+	this->logger = new Syslog(level, (id != nullptr) ? id : "Universe", default_logger());
 	this->logger->reference();
 	
 	this->display = ref new CanvasAnimatedControl();
@@ -79,7 +79,7 @@ UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::St
 
 	this->display->UseSharedDevice = true; // this is required
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
-	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_load);
+	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
 	this->display->GameLoopStarting += ref new UniverseHandler(this, &UniverseDisplay::do_start);
 	this->display->GameLoopStopped += ref new UniverseHandler(this, &UniverseDisplay::do_stop);
 	this->display->Update += ref new UniverseUpdateHandler(this, &UniverseDisplay::do_update);
@@ -94,7 +94,7 @@ UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::St
 
 UniverseDisplay::~UniverseDisplay() {
 	this->logger->destroy();
-	this->clear();
+	this->collapse();
 }
 
 UserControl^ UniverseDisplay::canvas::get() { return this->display; };
@@ -122,7 +122,7 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 	}
 }
 
-void UniverseDisplay::clear() {
+void UniverseDisplay::collapse() {
 	if (this->head_planet != nullptr) {
 		IPlanet* temp_head = this->head_planet;
 		PlanetInfo* temp_info = PLANET_INFO(temp_head);
@@ -141,48 +141,33 @@ void UniverseDisplay::clear() {
 }
 
 void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ args) {
-	float width = args->NewSize.Width;
-	float height = args->NewSize.Height;
+	if (this->head_planet != nullptr) {
+		float nwidth = args->NewSize.Width;
+		float nheight = args->NewSize.Height;
+		float pwidth = args->PreviousSize.Width;
+		float pheight = args->PreviousSize.Height;
 
-	if ((width > 0.0F) && (height > 0.0F)) {
-		if (this->loaded) {
-			this->logger->log_message(Log::Debug, L"resize(%f, %f)", width, height);
-			if (this->head_planet != nullptr) {
-				this->head_planet->reflow(width, height);
-			}
-		} else {
-			this->logger->log_message(Log::Debug, L"delay_resize(%f, %f)", width, height);
-			this->pending_resize = true;
+		if ((nwidth > 0.0F) && (nheight > 0.0F) && ((nwidth != pwidth) || (nheight != pheight))) {
+			this->logger->log_message(Log::Info, L"resize(%f, %f)", nwidth, nheight);
+			this->head_planet->reflow(nwidth, nheight);
 		}
 	}
 }
 
 void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	this->logger->log_message(Log::Debug, "starting");
-	
-	if (this->head_planet != nullptr) {
-		this->head_planet->on_start();
-	}
+	this->logger->log_message(Log::Debug, "big bang");
+	this->big_bang();
 }
 
-void UniverseDisplay::do_load(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-	Size region = this->display->Size;
-
-	this->logger->log_message(Log::Debug, "loading");
-
+void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
+	this->logger->log_message(Log::Debug, L"construct planet because of %s", args->Reason.ToString());
+	
+	this->construct();
 	if (this->head_planet != nullptr) {
-		this->head_planet->load(args, region.Width, region.Height);
-	}
+		Size region = this->display->Size;
 
-	this->loaded = true;
-
-	if (this->pending_resize) {
-		this->logger->log_message(Log::Debug, L"do_resize(%f, %f)", region.Width, region.Height);
-
-		this->pending_resize = false;
-		if (this->head_planet != nullptr) {
-			this->head_planet->reflow(region.Width, region.Height);
-		}
+		this->head_planet->construct(args->Reason, region.Width, region.Height);
+		this->head_planet->reflow(region.Width, region.Height);
 	}
 }
 
@@ -217,13 +202,8 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 }
 
 void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	this->logger->log_message(Log::Debug, "stopping");
-
-	if (this->head_planet != nullptr) {
-		this->head_planet->on_stop();
-	}
-
-	this->pending_resize = false;
+	this->logger->log_message(Log::Debug, "big rip");
+	this->big_rip();
 }
 
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {

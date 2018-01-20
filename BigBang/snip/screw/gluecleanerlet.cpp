@@ -33,7 +33,7 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
     this->endpoint_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
 }
 
-void GlueCleanerlet::load() {
+void GlueCleanerlet::construct() {
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
     Color hat_colors[] = { hat_color, hat_hlcolor, hat_color };

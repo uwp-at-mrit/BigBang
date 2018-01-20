@@ -28,7 +28,7 @@ void Liquidlet::set_temperatures(float in, float out) {
 	this->out_temperature = out;
 }
 
-void Liquidlet::load() {
+void Liquidlet::construct() {
 	auto ts = get_text_extent("100.000", this->font);
 	this->scale_width = ts.width;
 	this->scale_height = ts.height;

@@ -203,7 +203,7 @@ Statusbarlet::~Statusbarlet() {
 	}
 }
 
-void Statusbarlet::load() {
+void Statusbarlet::construct() {
     if (statusbar == nullptr) {
         statusbar = ref new Status(this);
     }
@@ -262,7 +262,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
 static ICanvasBrush^ status_nolog_color = nullptr;
 
-void Statuslinelet::load() {
+void Statuslinelet::construct() {
 	initialize_status_font();
 
 	if (status_nolog_color == nullptr) {
