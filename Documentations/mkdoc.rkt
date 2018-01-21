@@ -4,9 +4,32 @@
 
 (require compiler/cm)
 
+(define &again? (box #false))
+(define compiling-round 1)
+
+(define compile-docs
+  (lambda [handbook.scrbl [round 1]]
+    (set-box! &again? #false)
+    (define (filter-verbose info)
+      (define px.in (pregexp (path->string (current-directory))))
+      (define traceln (curry printf "round[~a]: ~a~n" round))
+      (match info
+        [(pregexp #px"checking:") '|Skip Checking|]
+        [(pregexp #px"compiling ") (set-box! &again? #true)]
+        [(pregexp #px"done:") (when (regexp-match? px.in info) (traceln info) (set-box! &again? #true))]
+        [(pregexp #px"maybe-compile-zo starting") (traceln info)]
+        [(pregexp #px"(wrote|compiled|processing:|maybe-compile-zo finished)") '|Skip Task Endline|]
+        [(pregexp #px"(newer|skipping:)") '|Skip Reasons|]
+        [_ (traceln info)]))
+    (parameterize ([manager-trace-handler filter-verbose])
+      (managed-compile-zo handbook.scrbl))
+    
+    (when (unbox &again?)
+      (compile-docs handbook.scrbl (add1 round)))))
+
 (define make-docs
   (lambda [handbook.scrbl]
-    (managed-compile-zo handbook.scrbl)
+    (compile-docs handbook.scrbl)
     (parameterize ([current-namespace (make-base-namespace)])
       (parameterize ([exit-handler (thunk* (error 'make "[fatal] ~a needs a proper `exit-handler`!" handbook.scrbl))])
         ;;; WARNING: the eval namespace does not share handbook module with the main namespace.

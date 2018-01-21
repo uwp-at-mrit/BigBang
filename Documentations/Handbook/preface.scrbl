@@ -5,4 +5,4 @@
 @title[#:style preface-style]{序}
 
 @include-section{preface/introducation.scrbl}
-@include-section{preface/coding-style.scrbl}
+@include-section{preface/style.scrbl}
