@@ -18,7 +18,7 @@
 @handbook-story[#:style 'grouper]{编码风格与习惯}
 
 @section{C++/CX 编码规范}
-@margin-note{全面的 C++ 编码规范可以阅读 @~cite[isocpp]，本项目文档目录中包含 @~cite[JSF++]。}
+@margin-note{完整的 C++ 编码规范可以阅读 @~cite[isocpp]，本项目文档目录中包含 @~cite[JSF++]。}
 
 @section{源码组织结构}
 @centered{@filesystem-tree[

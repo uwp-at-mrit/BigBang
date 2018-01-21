@@ -12,7 +12,6 @@
 (require "graphviz.rkt")
 (require "statistics.rkt")
 
-(define preface-style (make-style 'index '(grouper unnumbered)))
 (define file-color (make-style 'tt (list (make-color-property (list #x58 #x60 #x69)))))
 (define insertion-color (make-style 'tt (list (make-color-property (list #x28 #xA7 #x45)))))
 (define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
@@ -55,6 +54,14 @@
       (list (title #:style (make-style #false (map make-css-addition styles)) #:tag "handbook"
                    (if (pair? pre-contents) pre-contents (list (literal "开发手册"))))
             (apply author authors)))))
+
+(define handbook-purposes
+  (lambda []
+    (list "编写本手册主要有如下几个目的"
+          (itemlist #:style 'compact
+                    (item "帮助新同事快速理解系统、融入公司,减少不同专业背景同事之间的无效沟通;")
+                    (item "阐述系统开发过程中碰到的疑难杂症和解决方案;")
+                    (item "展示各类自动生成的软件质量报告。")))))
 
 (define handbook-statistics
   (lambda [#:gitstat-width [git-width #false] #:gitstat-height [git-height #false] #:ignore [excludes null] . argl]
