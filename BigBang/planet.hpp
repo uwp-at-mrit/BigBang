@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mutex>
+#include <shared_mutex>
 
 #include "universe.hxx"
 #include "decorator/decorator.hpp"
@@ -63,14 +63,16 @@ namespace WarGrey::SCADA {
 
     public:
 		void enter_critical_section();
+		void enter_shared_section();
 		void leave_critical_section();
+		void leave_shared_section();
 		void fill_actual_extent(float* width, float* height);
 
 	public:
 		IPlanetInfo* info;
 
 	private:
-		std::mutex section;
+		std::shared_mutex section;
     };
 
 	private class Planet : public WarGrey::SCADA::IPlanet {

@@ -561,8 +561,16 @@ void IPlanet::enter_critical_section() {
 	this->section.lock();
 }
 
+void IPlanet::enter_shared_section() {
+	this->section.lock_shared();
+}
+
 void IPlanet::leave_critical_section() {
 	this->section.unlock();
+}
+
+void IPlanet::leave_shared_section() {
+	this->section.unlock_shared();
 }
 
 void IPlanet::fill_actual_extent(float* width, float* height) {

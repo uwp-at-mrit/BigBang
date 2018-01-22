@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "sugar.hpp"
 #include "forward.hpp"
 #include "syslog.hpp"
@@ -27,6 +29,10 @@ namespace WarGrey::SCADA {
 
     private ref class IDisplay abstract {
 	public:
+		void enter_critical_section();
+		void leave_critical_section();
+
+	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 
@@ -41,6 +47,9 @@ namespace WarGrey::SCADA {
         read_write_property(float, min_height);
         read_write_property(float, max_width);
         read_write_property(float, max_height);
+
+	private:
+		std::mutex section;
     };
 
 	private ref class UniverseDisplay : public IDisplay {

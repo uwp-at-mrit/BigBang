@@ -74,12 +74,15 @@ void Console::switch_console(RR id) {
 }
 
 void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
-	this->transform->TranslateX += e->Delta.Translation.X;
-	this->Content->Transform3D = this->transform;
+	//this->transform->TranslateX += e->Delta.Translation.X;
+	//this->Content->Transform3D = this->transform;
 }
 
 void Console::animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) {
 	this->Content->Transform3D = nullptr;
+	this->universe->enter_critical_section();
+	this->universe->transfer_next();
+	this->universe->leave_critical_section();
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
