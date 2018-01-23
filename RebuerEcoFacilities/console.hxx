@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
 		void switch_console(RR id);
 		void switch_console(unsigned int idx);
 
+		void animate(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationStartedRoutedEventArgs^ e);
 		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
 		void animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 

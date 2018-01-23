@@ -221,12 +221,14 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-	uint16 address = this->start_address;
+	if (this->client->connected()) {
+		uint16 address = this->start_address;
 
-	while (address < this->end_address) {
-		uint16 q = min(this->quantity, this->end_address - address);
-		this->client->read_input_registers(address, q);
-		address += q;
+		while (address < this->end_address) {
+			uint16 q = min(this->quantity, this->end_address - address);
+			this->client->read_input_registers(address, q);
+			address += q;
+		}
 	}
 }
 

@@ -242,7 +242,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 				child->leave_critical_section();
 
 				child = info->next;
-			} while (child != this->current_planet);
+			} while (child != this->head_planet);
 		}
 	}
 }
@@ -267,7 +267,7 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 			child->reflow(region.Width, region.Height);
 
 			child = info->next;
-		} while (child != this->current_planet);
+		} while (child != this->head_planet);
 	}
 }
 
@@ -282,7 +282,7 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		do {
 			child->update(count, elapsed, uptime, is_slow);
 			child = PLANET_INFO(child)->next;
-		} while (child != this->current_planet);
+		} while (child != this->head_planet);
 
 		if (is_slow) {
 			this->logger->log_message(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
@@ -291,12 +291,12 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 }
 
 void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
-	this->enter_critical_section(); 
+	// NOTE: only the current planet needs to be drawn
+
+	this->enter_critical_section();
 	
 	if (this->current_planet != nullptr) {
 		Size region = this->display->Size;
-
-		// NOTE: only the current planet needs to be drawn
 
 		try {
 			this->current_planet->enter_shared_section();
@@ -328,17 +328,17 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
-
+	
 	if (this->current_planet != nullptr) {
 		this->current_planet->on_pointer_pressed(this->canvas, args);
 	}
-	
+
 	this->leave_critical_section();
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
-
+	
 	if (this->current_planet != nullptr) {
 		this->current_planet->on_pointer_released(this->canvas, args);
 	}

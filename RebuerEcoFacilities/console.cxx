@@ -26,14 +26,10 @@ public:
 
 public:
 	void construct() override {
-		// this->universes[0] = new BSegment(this->voids[0], RR::A.ToString(), "192.168.0.188");
-		// this->universes[0] = new BSegment(this->voids[0], RR::B1.ToString(), "192.168.1.114");
-		// this->universes[1] = new BSegment(this->voids[0], RR::B2.ToString(), "192.168.1.188");
-		// this->universes[2] = new BSegment(this->voids[0], RR::B3.ToString(), "192.168.1.114");
-		// this->universes[3] = new BSegment(this->voids[0], RR::B4.ToString(), "192.168.1.114");
-
-		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.1.114"));
-		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.0.188"));
+		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.0.188"));
+		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.1.114"));
+		this->add_planet(new BSegment(RR::B3.ToString(), "192.168.1.128"));
+		this->add_planet(new BSegment(RR::B4.ToString(), "192.168.8.114"));
 	}
 };
 
@@ -48,6 +44,7 @@ Console::Console() : SplitView() {
 
 	this->transform = ref new CompositeTransform3D();
 	this->ManipulationMode = ManipulationModes::TranslateX;
+	this->ManipulationStarted += ref new ManipulationStartedEventHandler(this, &Console::animate);
 	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
 	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
 }
@@ -73,16 +70,29 @@ void Console::switch_console(RR id) {
 	this->switch_console(static_cast<unsigned int>(id));
 }
 
+void Console::animate(Platform::Object^ sender, ManipulationStartedRoutedEventArgs^ e) {
+}
+
 void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
-	//this->transform->TranslateX += e->Delta.Translation.X;
-	//this->Content->Transform3D = this->transform;
+	this->transform->TranslateX += e->Delta.Translation.X;
+	this->Content->Transform3D = this->transform;
 }
 
 void Console::animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) {
-	this->Content->Transform3D = nullptr;
-	this->universe->enter_critical_section();
-	this->universe->transfer_next();
-	this->universe->leave_critical_section();
+	double delta = this->transform->TranslateX;
+
+	if (delta < -128) {
+		this->universe->enter_critical_section();
+		this->universe->transfer_next();
+		this->universe->leave_critical_section();
+	} else if (delta > 128) {
+		this->universe->enter_critical_section();
+		this->universe->transfer_previous();
+		this->universe->leave_critical_section();
+	}
+
+	this->transform->TranslateX = 0;
+	this->Content->Transform3D = this->transform;
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
