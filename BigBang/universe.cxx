@@ -16,6 +16,7 @@ using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -116,7 +117,8 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log lev
 	this->display = ref new CanvasAnimatedControl();
 	this->display->Name = this->logger->get_name();
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
-	this->display->UseSharedDevice = true; // this is required
+	this->display->UseSharedDevice = true;                         // this is required
+	this->display->RenderTransform = ref new TranslateTransform(); // for independent animation 
 
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
 	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);

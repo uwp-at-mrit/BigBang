@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 	private class IUniverseListener abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		virtual bool can_move(IPlanet* master, ISnip* snip) { return false; }
-		virtual bool can_select(IPlanet* master, ISnip* snip) { return true; }
+		virtual bool can_select(IPlanet* master, ISnip* snip) { return false; }
 		virtual bool can_select_multiple(IPlanet* master) { return false; }
 
 	public:

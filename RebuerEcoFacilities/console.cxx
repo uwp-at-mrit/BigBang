@@ -11,8 +11,7 @@ using namespace Windows::ApplicationModel;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Media::Media3D;
-
+using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Media::Animation;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -43,8 +42,7 @@ Console::Console() : SplitView() {
 	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
 
-	this->duration = make_timespan_from_ms(10);
-	this->transform = ref new CompositeTransform3D();
+	this->duration = make_timespan_from_ms(256);
 	this->ManipulationMode = ManipulationModes::TranslateX;
 	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animate);
 	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animating);
@@ -66,7 +64,7 @@ void Console::initialize_component(Size region) {
 }
 
 void Console::animate(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
-	this->transform->TranslateX += e->Delta.Translation.X;
+	this->transformX += e->Delta.Translation.X;
 }
 
 void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
@@ -75,32 +73,32 @@ void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEve
 	this->nt_action = ref new DoubleAnimation();
 	this->nt_action->Duration = duration;
 	this->nt_action->From = 0.0;
+	this->nt_action->AutoReverse = true;
 	this->nt_action->To = -double(width);
 
-	//this->nt_story = ref new Storyboard();
-	//this->nt_story->Children->Append(this->nt_action);
-	//this->nt_story->SetTarget(this->nt_action, this->Content->Transform3D);
-	//this->nt_story->SetTargetProperty(this->nt_action, "X");
-	//this->nt_story->Completed += ref new EventHandler<Platform::Object^>(this, &Console::animated);
+	this->nt_story = ref new Storyboard();
+	this->nt_story->Children->Append(this->nt_action);
+	this->nt_story->SetTarget(this->nt_action, this->Content);
+	this->nt_story->SetTargetProperty(this->nt_action, "(UIElement.RenderTransform).(TranslateTransform.X)");
+	this->nt_story->Completed += ref new EventHandler<Platform::Object^>(this, &Console::animated);
 
-	//this->nt_story->Begin();
+	this->nt_story->Begin();
 }
 
 void Console::animated(Platform::Object^ sender, Platform::Object^ e) {
-	double delta = this->transform->TranslateX;
+	float delta = this->transformX;
 
-	if (delta < -128) {
+	if (delta < -128.0F) {
 		this->universe->enter_critical_section();
 		this->universe->transfer_next();
 		this->universe->leave_critical_section();
-	} else if (delta > 128) {
+	} else if (delta > 128.0F) {
 		this->universe->enter_critical_section();
 		this->universe->transfer_previous();
 		this->universe->leave_critical_section();
 	}
 
-	this->transform->TranslateX = 0;
-	//this->Content->Transform3D = this->transform;
+	this->transformX = 0.0F;
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {

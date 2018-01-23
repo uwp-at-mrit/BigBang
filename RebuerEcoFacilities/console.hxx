@@ -20,13 +20,13 @@ namespace WarGrey::SCADA {
 		void animated(Platform::Object^ sender, Platform::Object^ e);
 
 	private:
+		float transformX; 
 		WarGrey::SCADA::UniverseDisplay^ universe;
 		Windows::Foundation::TimeSpan duration;
 		Windows::UI::Xaml::Media::Animation::Storyboard^ pt_story;
 		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ pt_action;
 		Windows::UI::Xaml::Media::Animation::Storyboard^ nt_story;
 		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ nt_action;
-		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
 		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};
 }
