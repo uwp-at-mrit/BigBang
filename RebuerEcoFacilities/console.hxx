@@ -15,16 +15,17 @@ namespace WarGrey::SCADA {
 		void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 
 	private:
-		void switch_console(RR id);
-		void switch_console(unsigned int idx);
-
 		void animate(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
 		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 		void animated(Platform::Object^ sender, Platform::Object^ e);
 
 	private:
 		WarGrey::SCADA::UniverseDisplay^ universe;
-		Windows::UI::Xaml::Media::Animation::Storyboard^ flash;
+		Windows::Foundation::TimeSpan duration;
+		Windows::UI::Xaml::Media::Animation::Storyboard^ pt_story;
+		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ pt_action;
+		Windows::UI::Xaml::Media::Animation::Storyboard^ nt_story;
+		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ nt_action;
 		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
 		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};

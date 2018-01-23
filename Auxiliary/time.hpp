@@ -1,6 +1,6 @@
 #pragma once
 
-Windows::Foundation::TimeSpan make_timespan_from_seconds(unsigned int seconds);
+Windows::Foundation::TimeSpan make_timespan_from_ms(unsigned int ms);
 Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
 
 wchar_t* update_wnowstamp(bool need_us = true, int *l00ns = nullptr);

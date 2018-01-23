@@ -22,8 +22,8 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
     return self->CpuUsage->GetReport();
 }
 
-TimeSpan make_timespan_from_seconds(unsigned int seconds) {
-	long long l00ns = seconds * 10000000LL;
+TimeSpan make_timespan_from_ms(unsigned int ms) {
+	long long l00ns = ms * 10000LL;
 
 	return TimeSpan({ l00ns });
 }

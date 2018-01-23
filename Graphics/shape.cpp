@@ -3,6 +3,7 @@
 
 #include "shape.hpp"
 #include "geometry.hpp"
+#include "transformation.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -26,7 +27,7 @@ CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
     if ((x >= 0.0F) && (y >= 0.0F)) {
         return layout;
     } else {
-        return geometry_union(blank(), layout, make_float3x2_translation(float2(-x, -y)));
+        return geometry_union(blank(), layout, make_translation_matrix(-x, -y));
     }
 }
 
@@ -95,8 +96,8 @@ CanvasGeometry^ rectangle(float w, float h) {
 }
 
 CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
-    float radius_x = (rx < 0.0F) ? (w * std::abs(rx)) : rx;
-    float radius_y = (ry < 0.0F) ? (h * std::abs(ry)) : ry;
+    float radius_x = (rx < 0.0F) ? -(w * rx) : rx;
+    float radius_y = (ry < 0.0F) ? -(h * ry) : ry;
 
     return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
 }

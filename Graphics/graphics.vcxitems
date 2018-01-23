@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)paint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shape.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)transformation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
@@ -27,5 +28,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)paint.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shape.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)transformation.hpp" />
   </ItemGroup>
 </Project>

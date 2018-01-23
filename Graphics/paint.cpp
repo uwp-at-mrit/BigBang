@@ -1,14 +1,13 @@
-#include <WindowsNumerics.h>
-
 #include "paint.hpp"
+#include "transformation.hpp"
 
 using namespace Windows::UI;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-using namespace Windows::Foundation::Numerics;
 
 static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
 
@@ -28,7 +27,7 @@ GradientStops^ make_gradient_stops(Color colors[], int total) {
 }
 
 void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, float x, float y) {
-    brush->Transform = make_float3x2_translation(float2(x, y));
+    brush->Transform = make_translation_matrix(x, y);
 }
 
 CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& color) {

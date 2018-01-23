@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <WindowsNumerics.h>
+
 #include "universe.hxx"
 #include "planet.hpp"
 #include "syslog.hpp"
@@ -6,6 +9,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
@@ -105,7 +109,7 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ name, Log level) : parent(parent) {
+UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log level) {
 	this->logger = new Syslog(level, (name != nullptr) ? name : "UniverseDisplay", default_logger());
 	this->logger->reference();
 
@@ -124,8 +128,6 @@ UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::St
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
-
-	this->parent->Content = this->display;
 }
 
 UniverseDisplay::~UniverseDisplay() {

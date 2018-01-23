@@ -1,7 +1,5 @@
-#define _USE_MATH_DEFINES
-#include <WindowsNumerics.h>
-
 #include "geometry.hpp"
+#include "transformation.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
@@ -17,8 +15,8 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d) {
         region.Y + region.Height * 0.5F);
 }
 
-CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d, float cx, float cy) {
-    return g->Transform(make_float3x2_rotation(float(d * M_PI / 180.0), float2(cx, cy)));
+CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double degrees, float cx, float cy) {
+    return g->Transform(make_rotation_matrix(degrees, cx, cy));
 }
 
 CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStrokeStyle^ style) {
@@ -26,19 +24,19 @@ CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStroke
 }
 
 CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
-    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Exclude);
+    return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Exclude);
 }
 
 CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
-    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Intersect);
+    return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Intersect);
 }
 
 CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
-    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Union);
+    return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Union);
 }
 
 CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
-    return g1->CombineWith(g2, make_float3x2_translation(float2(tx, ty)), CanvasGeometryCombine::Xor);
+    return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Xor);
 }
 
 CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {

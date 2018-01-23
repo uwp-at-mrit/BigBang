@@ -57,11 +57,7 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(
-			Windows::UI::Xaml::Controls::SplitView^ parent,
-			int frame_rate,
-			Platform::String^ name = "",
-			WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
+		UniverseDisplay(int frame_rate, Platform::String^ name = "", WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
 
 	public:
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -108,7 +104,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
-		Windows::UI::Xaml::Controls::SplitView^ parent;
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* current_planet;

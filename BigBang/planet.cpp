@@ -7,6 +7,7 @@
 #include "system.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
+#include "transformation.hpp"
 
 #include "snip/snip.hpp"
 #include "decorator/decorator.hpp"
@@ -481,11 +482,11 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 } else {
-                    float cx = info->x + width * 0.5F;
-                    float cy = info->y + height * 0.5F;
-
-                    ds->Transform = make_float3x2_rotation(info->rotation, float2(cx, cy));
-                    layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+					float cx = info->x + width * 0.5F;
+					float cy = info->y + height * 0.5F;
+					
+					ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transform.m31, transform.m32);
+					layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 }
 
 				this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
