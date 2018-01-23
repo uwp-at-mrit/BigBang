@@ -1,6 +1,7 @@
 #include "universe.hxx"
 #include "planet.hpp"
 #include "syslog.hpp"
+#include "time.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -104,20 +105,15 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ id, Log level) : parent(parent) {
-	this->display = ref new CanvasAnimatedControl();
-	if (id != nullptr) this->display->Name = id;
-
-	this->logger = new Syslog(level, (id != nullptr) ? id : "UniverseDisplay", default_logger());
+UniverseDisplay::UniverseDisplay(SplitView^ parent, int frame_rate, Platform::String^ name, Log level) : parent(parent) {
+	this->logger = new Syslog(level, (name != nullptr) ? name : "UniverseDisplay", default_logger());
 	this->logger->reference();
 
-	if (frame_rate > 0) {
-		this->display->TargetElapsedTime = TimeSpan({ 10000000LL / frame_rate });
-	} else if (frame_rate < 0) {
-		this->display->TargetElapsedTime = TimeSpan({ -10000000LL * frame_rate });
-	}
-
+	this->display = ref new CanvasAnimatedControl();
+	this->display->Name = this->logger->get_name();
+	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
 	this->display->UseSharedDevice = true; // this is required
+
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
 	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
 	this->display->GameLoopStarting += ref new UniverseHandler(this, &UniverseDisplay::do_start);

@@ -1,5 +1,8 @@
 #pragma once
 
+Windows::Foundation::TimeSpan make_timespan_from_seconds(unsigned int seconds);
+Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
+
 wchar_t* update_wnowstamp(bool need_us = true, int *l00ns = nullptr);
 Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
 

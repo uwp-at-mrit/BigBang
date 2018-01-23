@@ -39,6 +39,9 @@ namespace WarGrey::SCADA {
 		Syslog(WarGrey::SCADA::Log level, Platform::String^ topic = "", WarGrey::SCADA::Syslog* parent = nullptr);
 
 	public:
+		Platform::String^ get_name();
+
+	public:
 		void append_log_receiver(ISyslogReceiver* receiver);
 		
 		void log_message(WarGrey::SCADA::Log level, Platform::String^ message);

@@ -60,7 +60,7 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(
 			Windows::UI::Xaml::Controls::SplitView^ parent,
 			int frame_rate,
-			Platform::String^ id = "",
+			Platform::String^ name = "",
 			WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
 
 	public:

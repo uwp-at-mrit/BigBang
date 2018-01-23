@@ -1,6 +1,7 @@
 ﻿#include "console.hxx"
 #include "tongue.hpp"
 #include "syslog.hpp"
+#include "time.hpp"
 #include "B.hpp"
 
 using namespace WarGrey::SCADA;
@@ -12,6 +13,8 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media::Media3D;
+
+using namespace Windows::UI::Xaml::Media::Animation;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -42,11 +45,12 @@ Console::Console() : SplitView() {
 	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
 
+	this->flash = ref new Storyboard();
 	this->transform = ref new CompositeTransform3D();
+
 	this->ManipulationMode = ManipulationModes::TranslateX;
-	this->ManipulationStarted += ref new ManipulationStartedEventHandler(this, &Console::animate);
-	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
-	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
+	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animate);
+	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animating);
 }
 
 void Console::initialize_component(Size region) {
@@ -70,15 +74,15 @@ void Console::switch_console(RR id) {
 	this->switch_console(static_cast<unsigned int>(id));
 }
 
-void Console::animate(Platform::Object^ sender, ManipulationStartedRoutedEventArgs^ e) {
-}
-
-void Console::animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) {
+void Console::animate(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
 	this->transform->TranslateX += e->Delta.Translation.X;
-	this->Content->Transform3D = this->transform;
 }
 
-void Console::animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) {
+void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
+	
+}
+
+void Console::animated(Platform::Object^ sender, Platform::Object^ e) {
 	double delta = this->transform->TranslateX;
 
 	if (delta < -128) {

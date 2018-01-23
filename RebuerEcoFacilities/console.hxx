@@ -18,12 +18,13 @@ namespace WarGrey::SCADA {
 		void switch_console(RR id);
 		void switch_console(unsigned int idx);
 
-		void animate(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationStartedRoutedEventArgs^ e);
-		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
-		void animated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
+		void animate(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
+		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
+		void animated(Platform::Object^ sender, Platform::Object^ e);
 
 	private:
 		WarGrey::SCADA::UniverseDisplay^ universe;
+		Windows::UI::Xaml::Media::Animation::Storyboard^ flash;
 		Windows::UI::Xaml::Media::Media3D::CompositeTransform3D^ transform;
 		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};

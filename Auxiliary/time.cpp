@@ -3,14 +3,14 @@
 #include "time.hpp"
 #include "box.hpp"
 
+using namespace Windows::Foundation;
 using namespace Windows::Globalization;
 using namespace Windows::System::Diagnostics;
 
 #define STRFTIME(datetime) \
-datetime->Year, datetime->Month, datetime->Day, \
-datetime->Hour, datetime->Minute, datetime->Second
+    datetime->Year, datetime->Month, datetime->Day, \
+    datetime->Hour, datetime->Minute, datetime->Second
 
-static Calendar^ datetime = ref new Calendar();
 
 static ProcessCpuUsageReport^ process_cpu_usage() {
     static ProcessDiagnosticInfo^ self = nullptr;
@@ -22,7 +22,20 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
     return self->CpuUsage->GetReport();
 }
 
+TimeSpan make_timespan_from_seconds(unsigned int seconds) {
+	long long l00ns = seconds * 10000000LL;
+
+	return TimeSpan({ l00ns });
+}
+
+TimeSpan make_timespan_from_rate(int rate) {
+	long long l00ns = ((rate > 0) ? (10000000LL / rate) : (-10000000LL * rate));
+	
+	return TimeSpan({ l00ns });
+}
+
 wchar_t* update_wnowstamp(bool need_us, int* l00nanosecond) {
+	static Calendar^ datetime = ref new Calendar();
     static wchar_t timestamp[32];
 
 	datetime->SetToNow();
