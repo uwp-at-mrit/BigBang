@@ -72,6 +72,9 @@ namespace WarGrey::SCADA {
 		void transfer_next();
 
 	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
+
+	public:
 		virtual void big_bang() {};  // occurs at game loop thread
 		virtual void construct() {}; // occurs at UI thread
 		virtual void big_rip() {};   // occurs at game loop thread

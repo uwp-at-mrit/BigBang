@@ -203,6 +203,18 @@ void UniverseDisplay::transfer_next() {
 	this->transfer(1);
 }
 
+CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
+	CanvasRenderTarget^ snapshot = nullptr;
+
+	if (this->current_planet != nullptr) {
+		Size region = this->display->Size;
+
+		snapshot = this->current_planet->take_snapshot(region.Width, region.Height, dpi);
+	}
+
+	return snapshot;
+}
+
 void UniverseDisplay::collapse() {
 	if (this->head_planet != nullptr) {
 		IPlanet* temp_head = this->head_planet;
@@ -279,7 +291,6 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		bool is_slow = args->Timing.IsRunningSlowly;
 		IPlanet* child = this->head_planet;
 
-		syslog(Log::Warning, "updating");
 		do {
 			child->update(count, elapsed, uptime, is_slow);
 			child = PLANET_INFO(child)->next;
@@ -295,7 +306,6 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 	// NOTE: only the current planet needs to be drawn
 
 	this->enter_critical_section();
-	syslog(Log::Error, "painting");
 	
 	if (this->current_planet != nullptr) {
 		Size region = this->display->Size;

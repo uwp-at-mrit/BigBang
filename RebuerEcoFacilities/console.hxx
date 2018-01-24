@@ -17,16 +17,17 @@ namespace WarGrey::SCADA {
 	private:
 		void animate(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e);
 		void animating(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
-		void animated(Platform::Object^ sender, Platform::Object^ e);
+		void animated(Windows::UI::Xaml::Controls::SplitView^ sender, Platform::Object^ e);
+
+		void do_paint(
+			Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
+			Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
 	private:
 		float transformX; 
 		WarGrey::SCADA::UniverseDisplay^ universe;
 		Windows::Foundation::TimeSpan duration;
-		Windows::UI::Xaml::Media::Animation::Storyboard^ pt_story;
-		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ pt_action;
-		Windows::UI::Xaml::Media::Animation::Storyboard^ nt_story;
-		Windows::UI::Xaml::Media::Animation::DoubleAnimation^ nt_action;
+		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ snapshot_panel;
 		Windows::UI::Xaml::Controls::TextBlock^ labels[static_cast<unsigned int>(RR::Count)];
 	};
 }
