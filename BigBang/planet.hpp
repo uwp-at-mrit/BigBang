@@ -26,12 +26,15 @@ namespace WarGrey::SCADA {
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
-        virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
-		virtual void save(Platform::String^ path, float width, float height, float dpi = 96.0) = 0;
-		virtual void collapse() = 0;
+		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}; 
+		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
+		virtual void collapse() {};
+
+	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
+		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
     public:
-        virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
 		virtual void reflow(float width, float height) {};
 		
     public:
@@ -84,7 +87,6 @@ namespace WarGrey::SCADA {
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
         void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
-		void save(Platform::String^ path, float width, float height, float dpi = 96.0) override;
 		void collapse() override;
 
     public:

@@ -522,23 +522,6 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     this->decorator->draw_after(this, ds, Width, Height);
 }
 
-void Planet::save(Platform::String^ path, float width, float height, float dpi) {
-	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
-	CanvasRenderTarget^ offscreen = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
-	CanvasDrawingSession^ ds = offscreen->CreateDrawingSession();
-
-	ds->Clear(ColorHelper::FromArgb(0, 0, 0, 0));
-	this->draw(ds, width, height);
-	Concurrency::create_task(offscreen->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
-		.then([=](Concurrency::task<void> saving) {
-		try {
-			saving.get();
-		} catch (Platform::Exception^ e) {
-			syslog(Log::Alert, "failed to save universe as bitmap:" + e->Message);
-		}
-	});
-}
-
 void Planet::collapse() {
 	if (this->head_snip != nullptr) {
 		ISnip* temp_head = this->head_snip;
@@ -577,4 +560,31 @@ void IPlanet::leave_shared_section() {
 void IPlanet::fill_actual_extent(float* width, float* height) {
 	SET_BOX(width, this->info->master->actual_width);
 	SET_BOX(height, this->info->master->actual_height);
+}
+
+
+CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, float dpi) {
+	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
+	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
+	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
+
+	ds->Clear(ColorHelper::FromArgb(0, 0, 0, 0));
+	this->enter_shared_section();
+	this->draw(ds, width, height);
+	this->leave_shared_section();
+
+	return snapshot;
+}
+
+void IPlanet::save(Platform::String^ path, float width, float height, float dpi) {
+	CanvasRenderTarget^ snapshot = this->take_snapshot(width, height, dpi);
+
+	Concurrency::create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
+		.then([=](Concurrency::task<void> saving) {
+		try {
+			saving.get();
+		} catch (Platform::Exception^ e) {
+			syslog(Log::Alert, "failed to save universe as bitmap:" + e->Message);
+		}
+	});
 }

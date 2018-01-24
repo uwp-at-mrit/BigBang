@@ -61,10 +61,12 @@ void Console::initialize_component(Size region) {
 
 	this->universe = ref new Universe("Console");
 	this->Content = this->universe->canvas;
+	this->Pane = navigator;
 }
 
 void Console::animate(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
 	this->transformX += e->Delta.Translation.X;
+	syslog(Log::Info, L"%f", this->transformX);
 }
 
 void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
@@ -82,6 +84,9 @@ void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEve
 	this->nt_story->SetTargetProperty(this->nt_action, "(UIElement.RenderTransform).(TranslateTransform.X)");
 	this->nt_story->Completed += ref new EventHandler<Platform::Object^>(this, &Console::animated);
 
+	this->OpenPaneLength = double(width);
+	this->PanePlacement = SplitViewPanePlacement::Right;
+	this->IsPaneOpen = true;
 	this->nt_story->Begin();
 }
 
@@ -99,6 +104,9 @@ void Console::animated(Platform::Object^ sender, Platform::Object^ e) {
 	}
 
 	this->transformX = 0.0F;
+	//this->PanePlacement = SplitViewPanePlacement::Left;
+	this->OpenPaneLength = 0.0;
+	this->IsPaneOpen = false;
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
