@@ -60,7 +60,7 @@ public:
 
         this->timestamp = make_text_layout(update_nowstamp(false, &l00ns), status_font);
 		
-        return TimeSpan{ 10000000 - l00ns };
+        return TimeSpan{ 10000000LL - l00ns };
     }
 
     void update_powerinfo() {

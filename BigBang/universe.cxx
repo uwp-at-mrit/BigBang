@@ -291,6 +291,8 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		bool is_slow = args->Timing.IsRunningSlowly;
 		IPlanet* child = this->head_planet;
 
+		syslog(Log::Info, "update");
+
 		do {
 			child->update(count, elapsed, uptime, is_slow);
 			child = PLANET_INFO(child)->next;
@@ -307,9 +309,11 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 
 	this->enter_critical_section();
 	
+	syslog(Log::Notice, "draw");
+
 	if (this->current_planet != nullptr) {
 		Size region = this->display->Size;
-
+		
 		try {
 			this->current_planet->enter_shared_section();
 			this->current_planet->draw(args->DrawingSession, region.Width, region.Height);

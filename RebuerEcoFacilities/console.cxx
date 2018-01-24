@@ -36,11 +36,9 @@ Console::Console() : SplitView() {
 	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
 
-	this->duration = make_timespan_from_ms(256);
 	this->ManipulationMode = ManipulationModes::TranslateX;
-	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animate);
-	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animating);
-	this->PaneOpened += ref new TypedEventHandler<SplitView^, Platform::Object^>(this, &Console::animated);
+	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
+	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
 }
 
 void Console::initialize_component(Size region) {
@@ -57,59 +55,27 @@ void Console::initialize_component(Size region) {
 	this->universe = ref new Universe("Console");
 	this->Content = this->universe->canvas;
 	this->Pane = navigator;
-
-	this->snapshot_panel = ref new CanvasControl();
-	this->snapshot_panel->Draw += ref new TypedEventHandler<CanvasControl^, CanvasDrawEventArgs^>(this, &Console::do_paint);
 }
 
-void Console::animate(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
-	this->transformX += e->Delta.Translation.X;
-	syslog(Log::Info, L"%f", this->transformX);
+void Console::animating(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
 }
 
-void Console::animating(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
+void Console::animated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
 	float width = this->universe->actual_width;
+	float delta = e->Cumulative.Translation.X;
+	float distance = width * 0.0618F;
 
-	//this->nt_action = ref new DoubleAnimation();
-	//this->nt_action->Duration = duration;
-	//this->nt_action->From = 0.0;
-	//this->nt_action->AutoReverse = true;
-	//this->nt_action->To = 0.0;
-
-	//this->nt_story = ref new Storyboard();
-	//this->nt_story->Completed += ref new EventHandler<Platform::Object^>(this, &Console::animated);
-
-	this->Pane = this->snapshot_panel;
-	this->snapshot_panel->Invalidate();
-	this->OpenPaneLength = double(width);
-	this->PanePlacement = SplitViewPanePlacement::Right;
-	this->IsPaneOpen = true;
-	//this->nt_story->Begin();
-}
-
-void Console::animated(SplitView^ sender, Platform::Object^ e) {
-	float delta = this->transformX;
-
-	if (delta < -128.0F) {
+	if (delta < -distance) {
 		this->universe->enter_critical_section();
 		this->universe->transfer_next();
 		this->universe->leave_critical_section();
-	} else if (delta > 128.0F) {
+	} else if (delta > distance) {
 		this->universe->enter_critical_section();
 		this->universe->transfer_previous();
 		this->universe->leave_critical_section();
 	}
 
-	this->transformX = 0.0F;
-	this->PanePlacement = SplitViewPanePlacement::Left;
-	this->snapshot_panel->Invalidate();
-	this->IsPaneOpen = false;
-}
-
-void Console::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args) {
-	if (this->universe != nullptr) {
-		args->DrawingSession->DrawImage(this->universe->take_snapshot());
-	}
+	e->Handled = true;
 }
 
 void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {

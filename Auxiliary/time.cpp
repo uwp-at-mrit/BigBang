@@ -11,7 +11,6 @@ using namespace Windows::System::Diagnostics;
     datetime->Year, datetime->Month, datetime->Day, \
     datetime->Hour, datetime->Minute, datetime->Second
 
-
 static ProcessCpuUsageReport^ process_cpu_usage() {
     static ProcessDiagnosticInfo^ self = nullptr;
 
@@ -25,13 +24,14 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
 TimeSpan make_timespan_from_ms(unsigned int ms) {
 	long long l00ns = ms * 10000LL;
 
-	return TimeSpan({ l00ns });
+	return TimeSpan{ l00ns };
 }
 
 TimeSpan make_timespan_from_rate(int rate) {
-	long long l00ns = ((rate > 0) ? (10000000LL / rate) : (-10000000LL * rate));
+	long long l00ns = 10000000LL;
+	long long duration = ((rate > 0) ? (l00ns / rate) : (-l00ns * rate));
 	
-	return TimeSpan({ l00ns });
+	return TimeSpan{ duration };
 }
 
 wchar_t* update_wnowstamp(bool need_us, int* l00nanosecond) {
@@ -73,8 +73,8 @@ Platform::String^ timing_string(long long kernel, long long user) {
     
     process_usage_diff(&kernel, &user);
 
-    auto kms = kernel / 10000;
-    auto ums = user / 10000;
+    auto kms = kernel / 10000LL;
+    auto ums = user / 10000LL;
     swprintf(benchmark, 31, L"time: %lldms(%lldms + %lldms)", kms + ums, kms, ums);
 
     return ref new Platform::String(benchmark);

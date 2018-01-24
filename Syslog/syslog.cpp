@@ -36,5 +36,21 @@ void syslog(Log level, Platform::String^ message) {
 void syslog(Log level, const wchar_t *fmt, ...) {
 	VSWPRINT(message, fmt);
 
-    syslog(level, message);
+	syslog(level, message);
 }
+
+/*************************************************************************************************/
+#define implement_syslog(fun, level) \
+void syslog_##fun(const wchar_t *fmt, ...) { VSWPRINT(message, fmt); syslog(level, message); } \
+void syslog_##fun(Platform::String^ message) { syslog(level, message); }
+
+implement_syslog(debug,    Log::Debug)
+implement_syslog(info,     Log::Info)
+implement_syslog(notice,   Log::Notice)
+implement_syslog(warning,  Log::Warning)
+implement_syslog(error,    Log::Error)
+implement_syslog(critical, Log::Critical)
+implement_syslog(alert,    Log::Alert)
+implement_syslog(panic,    Log::Panic)
+
+#undef implement_syslog
