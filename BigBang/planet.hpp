@@ -18,7 +18,13 @@ namespace WarGrey::SCADA {
     private class IPlanet abstract {
     public:
 		virtual ~IPlanet() noexcept;
+		IPlanet(Platform::String^ name) : caption(name) {};
 
+	public:
+		Platform::String^ name() { return this->caption; }
+		void fill_actual_extent(float* width, float* height);
+
+	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 		
@@ -63,19 +69,19 @@ namespace WarGrey::SCADA {
 		void enter_shared_section();
 		void leave_critical_section();
 		void leave_shared_section();
-		void fill_actual_extent(float* width, float* height);
 
 	public:
 		IPlanetInfo* info;
 
 	private:
+		Platform::String^ caption;
 		std::shared_mutex section;
     };
 
 	private class Planet : public WarGrey::SCADA::IPlanet {
 	public:
 		~Planet() noexcept;
-		Planet();
+		Planet(Platform::String^ caption);
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;

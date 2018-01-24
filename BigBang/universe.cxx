@@ -1,6 +1,4 @@
-#define _USE_MATH_DEFINES
-#include <WindowsNumerics.h>
-
+#include "transformation.hpp"
 #include "universe.hxx"
 #include "planet.hpp"
 #include "syslog.hpp"
@@ -42,6 +40,17 @@ static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet
 	planet->info = info;
 
 	return info;
+}
+
+static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, float height, Syslog* logger) {
+	try {
+		planet->enter_shared_section();
+		planet->draw(ds, width, height);
+		planet->leave_shared_section();
+	} catch (Platform::Exception^ wte) {
+		planet->leave_shared_section();
+		logger->log_message(Log::Warning, L"%s: rendering: %s", planet->name()->Data(), wte->Message->Data());
+	}
 }
 
 /*************************************************************************************************/
@@ -117,8 +126,7 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log lev
 	this->display = ref new CanvasAnimatedControl();
 	this->display->Name = this->logger->get_name();
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
-	this->display->UseSharedDevice = true;                         // this is required
-	this->display->RenderTransform = ref new TranslateTransform(); // for independent animation 
+	this->display->UseSharedDevice = true; // this is required
 
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
 	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
@@ -130,11 +138,15 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log lev
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
+
+	this->transfer_clock = ref new DispatcherTimer();
+	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 }
 
 UniverseDisplay::~UniverseDisplay() {
 	this->logger->destroy();
 	this->collapse();
+	this->transfer_clock->Stop();
 }
 
 UserControl^ UniverseDisplay::canvas::get() {
@@ -176,8 +188,16 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 	}
 }
 
-void UniverseDisplay::transfer(int delta_idx) {
+void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int count) {
 	if ((this->current_planet != nullptr) && (delta_idx != 0)) {
+		bool is_animated = ((!this->transfer_clock->IsEnabled) && ((ms * count) > 0));
+
+		if (is_animated && (this->from_planet == nullptr)) {
+			// thread-safe is granteed for `from_planet`
+			this->from_planet = this->current_planet;
+		}
+
+		this->enter_critical_section();
 		if (delta_idx > 0) {
 			for (int i = 0; i < delta_idx; i++) {
 				this->current_planet = PLANET_INFO(this->current_planet)->next;
@@ -187,20 +207,39 @@ void UniverseDisplay::transfer(int delta_idx) {
 				this->current_planet = PLANET_INFO(this->current_planet)->prev;
 			}
 		}
+		this->leave_critical_section();
+
+		if (is_animated) {
+			TimeSpan ts = make_timespan_from_ms(ms);
+			float width = this->display->Size.Width;
+
+			ts.Duration = ms / count;
+			this->transfer_clock->Interval = ts;
+			this->transfer_delta = width / float(count) * ((delta_idx > 0) ? -1.0F : 1.0F);
+			this->transferX = this->transfer_delta;
+			this->transfer_clock->Start();
+		}
 	}
 }
 
-void UniverseDisplay::transfer_to(int idx) {
+void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) {
+	bool is_animated = ((!this->transfer_clock->IsEnabled) && ((ms * count) > 0));
+	
+	if (is_animated) {
+		// thread-safe is granteed for `from_planet`
+		this->from_planet = this->current_planet;
+	}
+
 	this->current_planet = this->head_planet;
 	this->transfer(idx);
 }
 
-void UniverseDisplay::transfer_previous() {
-	this->transfer(-1);
+void UniverseDisplay::transfer_previous(unsigned int ms, unsigned int count) {
+	this->transfer(-1, ms, count);
 }
 
-void UniverseDisplay::transfer_next() {
-	this->transfer(1);
+void UniverseDisplay::transfer_next(unsigned int ms, unsigned int count) {
+	this->transfer(1, ms, count);
 }
 
 CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
@@ -229,6 +268,7 @@ void UniverseDisplay::collapse() {
 			IPlanet* child = temp_head;
 
 			temp_head = PLANET_INFO(temp_head)->next;
+
 			delete child; // planet's destructor will delete the associated info object
 		} while (temp_head != nullptr);
 	}
@@ -291,8 +331,6 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 		bool is_slow = args->Timing.IsRunningSlowly;
 		IPlanet* child = this->head_planet;
 
-		syslog(Log::Info, "update");
-
 		do {
 			child->update(count, elapsed, uptime, is_slow);
 			child = PLANET_INFO(child)->next;
@@ -305,26 +343,50 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 }
 
 void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
-	// NOTE: only the current planet needs to be drawn
+	// NOTE: only the current planet and the one transferred from need to be drawn
 
 	this->enter_critical_section();
-	
-	syslog(Log::Notice, "draw");
 
 	if (this->current_planet != nullptr) {
+		CanvasDrawingSession^ ds = args->DrawingSession;
 		Size region = this->display->Size;
+		float width = region.Width;
+		float height = region.Height;
 		
-		try {
-			this->current_planet->enter_shared_section();
-			this->current_planet->draw(args->DrawingSession, region.Width, region.Height);
-			this->current_planet->leave_shared_section();
-		} catch (Platform::Exception^ wte) {
-			this->current_planet->leave_shared_section();
-			this->logger->log_message(Log::Warning, L"rendering: %s", wte->Message->Data());
+		this->current_planet->enter_shared_section();
+
+		if (this->from_planet == nullptr) {
+			draw_planet(ds, this->current_planet, width, height, this->logger);
+		} else {
+			float deltaX = ((this->transferX < 0.0F) ? width : -width);
+
+			this->logger->log_message(Log::Debug, L"from %s to %s",
+				this->from_planet->name()->Data(),
+				this->current_planet->name()->Data());
+
+			ds->Transform = make_translation_matrix(this->transferX);
+			draw_planet(ds, this->from_planet, width, height, this->logger);
+
+			ds->Transform = make_translation_matrix(this->transferX + deltaX);
+			draw_planet(ds, this->current_planet, width, height, this->logger);
 		}
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ args) {
+	float width = this->display->Size.Width;
+
+	if ((this->transferX <= -width) || (this->transferX >= width)) {
+		this->transfer_delta = 0.0F;
+		this->transferX = 0.0F;
+		this->from_planet = nullptr;
+		this->transfer_clock->Stop();
+	} else {
+		this->display->Invalidate();
+		this->transferX += this->transfer_delta;
+	}
 }
 
 void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {

@@ -139,7 +139,7 @@ static inline void snip_center_point_offset(ISnip* snip, float width, float heig
 }
 
 /*************************************************************************************************/
-Planet::Planet() : IPlanet() {
+Planet::Planet(Platform::String^ name) : IPlanet(name) {
     this->set_decorator(nullptr);
 	this->set_pointer_listener(nullptr);
 }
@@ -465,27 +465,33 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
 }
 
 void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
-    CanvasActiveLayer^ layer = nullptr;
+	CanvasActiveLayer^ layer = nullptr;
     float3x2 transform = ds->Transform;
-    float width, height;
-    
+	float transformX = transform.m31;
+	float transformY = transform.m32;
+	float dsX = abs(min(0.0F, transformX));
+	float dsY = abs(min(0.0F, transformY));
+	float dsWidth = Width - max(transformX, 0.0F);
+	float dsHeight = Height - max(transformY, 0.0F);
+
     this->decorator->draw_before(this, ds, Width, Height);
 
     if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
+		float width, height;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
 
             child->fill_extent(info->x, info->y, &width, &height);
-            if ((info->x < Width) && (info->y < Height) && ((info->x + width) > 0) && ((info->y + height) > 0)) {
+            if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
                 if (info->rotation == 0.0F) {
                     layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 } else {
 					float cx = info->x + width * 0.5F;
 					float cy = info->y + height * 0.5F;
 					
-					ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transform.m31, transform.m32);
+					ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
 					layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
                 }
 
@@ -499,7 +505,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
                 delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
                 ds->Transform = transform;
-            }
+			}
 
             child = info->next;
         } while (child != this->head_snip);
@@ -510,8 +516,8 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
         float left = min(this->last_pointer_x, (*this->rubberband_x));
         float top = min(this->last_pointer_y, (*this->rubberband_y));
-        float width = std::abs((*this->rubberband_x) - this->last_pointer_x);
-        float height = std::abs((*this->rubberband_y) - this->last_pointer_y);
+        float width = abs((*this->rubberband_x) - this->last_pointer_x);
+        float height = abs((*this->rubberband_y) - this->last_pointer_y);
 
         rubberband_color->Opacity = 0.32F;
         ds->FillRectangle(left, top, width, height, rubberband_color);

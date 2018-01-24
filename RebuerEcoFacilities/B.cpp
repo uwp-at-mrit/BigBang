@@ -239,7 +239,7 @@ public:
 		this->desulphurizers[0]->fill_extent(0.0F, 0.0F, &pipe_length, &pipe_thickness);
 		this->funnel->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
 
-		float current_x = pipe_length * 2.0F;
+		float current_x = pipe_length * 2.4F;
 		float current_y = (height - pipe_length * 3.14F) * 0.5F;
 		this->bench->move_to(this->funnel, current_x, current_y);
 		this->move_motor(B::Funnel, this->funnel, current_x, current_y, 0.5, 1.0);
@@ -500,7 +500,7 @@ private:
 	Statuslinelet* statusline;
 };
 
-BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Planet() {
+BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)) {
 	this->console = new BConsole(this, label, plc);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }

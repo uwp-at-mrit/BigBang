@@ -66,10 +66,10 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_height);
 		
 	public:
-		void transfer(int delta_idx);
-		void transfer_to(int idx);
-		void transfer_previous();
-		void transfer_next();
+		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
+		void transfer_to(int idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
+		void transfer_previous(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
+		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
@@ -84,6 +84,7 @@ namespace WarGrey::SCADA {
 		void collapse();
 		
 	private:
+		void do_refresh(Platform::Object^ sender, Platform::Object^ args);
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
 		void do_start(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
 		void do_stop(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
@@ -110,5 +111,11 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* current_planet;
+
+	private:
+		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;
+		WarGrey::SCADA::IPlanet* from_planet;
+		float transfer_delta;
+		float transferX;
 	};
 }

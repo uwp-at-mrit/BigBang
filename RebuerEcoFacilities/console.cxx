@@ -66,13 +66,9 @@ void Console::animated(Platform::Object^ sender, ManipulationCompletedRoutedEven
 	float distance = width * 0.0618F;
 
 	if (delta < -distance) {
-		this->universe->enter_critical_section();
-		this->universe->transfer_next();
-		this->universe->leave_critical_section();
+		this->universe->transfer_next(128);
 	} else if (delta > distance) {
-		this->universe->enter_critical_section();
-		this->universe->transfer_previous();
-		this->universe->leave_critical_section();
+		this->universe->transfer_previous(128);
 	}
 
 	e->Handled = true;
