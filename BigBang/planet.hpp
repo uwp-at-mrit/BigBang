@@ -17,22 +17,16 @@ namespace WarGrey::SCADA {
 
     private class IPlanet abstract {
     public:
-		virtual ~IPlanet() noexcept {
-			if (this->info != nullptr) {
-				delete this->info;
-				this->info = nullptr;
-			}
-		};
+		virtual ~IPlanet() noexcept;
+
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
+		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
 		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}; 
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 		virtual void collapse() {};
-
-	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
-		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
     public:
 		virtual void reflow(float width, float height) {};

@@ -541,6 +541,13 @@ void Planet::collapse() {
 }
 
 /*************************************************************************************************/
+IPlanet::~IPlanet() {
+	if (this->info != nullptr) {
+		delete this->info;
+		this->info = nullptr;
+	}
+};
+
 void IPlanet::enter_critical_section() {
 	this->section.lock();
 }

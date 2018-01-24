@@ -44,6 +44,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />

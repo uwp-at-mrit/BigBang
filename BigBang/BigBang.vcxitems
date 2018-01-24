@@ -15,6 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
