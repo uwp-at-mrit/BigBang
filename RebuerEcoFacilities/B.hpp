@@ -10,10 +10,10 @@
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
 #include "snip/liquidlet.hpp"
-#include "snip/screw/funnellet.hpp"
-#include "snip/screw/sleevelet.hpp"
-#include "snip/screw/gearboxlet.hpp"
-#include "snip/screw/gluecleanerlet.hpp"
+#include "snip/serew/funnellet.hpp"
+#include "snip/serew/sleevelet.hpp"
+#include "snip/serew/gearboxlet.hpp"
+#include "snip/serew/gluecleanerlet.hpp"
 
 namespace WarGrey::SCADA {
 	private class BSegment : public WarGrey::SCADA::Planet {

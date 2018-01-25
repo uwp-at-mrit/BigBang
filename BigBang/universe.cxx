@@ -360,9 +360,9 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 
-			this->logger->log_message(Log::Debug, L"from %s to %s",
-				this->from_planet->name()->Data(),
-				this->current_planet->name()->Data());
+			this->logger->log_message(Log::Debug, L"transfer to %s from %s",
+				this->current_planet->name()->Data(),
+				this->from_planet->name()->Data());
 
 			ds->Transform = make_translation_matrix(this->transferX);
 			draw_planet(ds, this->from_planet, width, height, this->logger);

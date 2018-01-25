@@ -1,8 +1,8 @@
 ﻿#include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/screw/gearboxlet.hpp"
-#include "snip/screw/constants.hpp"
+#include "snip/serew/gearboxlet.hpp"
+#include "snip/serew/constants.hpp"
 
 using namespace WarGrey::SCADA;
 

@@ -3,7 +3,7 @@
 #include "paint.hpp"
 #include "shape.hpp"
 #include "colorspace.hpp"
-#include "snip/screw/funnellet.hpp"
+#include "snip/serew/funnellet.hpp"
 
 using namespace WarGrey::SCADA;
 

@@ -3,7 +3,7 @@
 #include <collection.h>
 #include <algorithm>
 
-#include "snip/screw/screwsnip.hpp"
+#include "snip/serew/serewsnip.hpp"
 
 namespace WarGrey::SCADA {
     private class Funnellet : public WarGrey::SCADA::IMotorSnip {

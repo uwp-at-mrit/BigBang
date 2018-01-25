@@ -37,14 +37,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
       <Filter>snip\pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\funnellet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -93,14 +93,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
       <Filter>interaction</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\constants.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\sleevelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\funnellet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gluecleanerlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\screwsnip.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\screw\gearboxlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
