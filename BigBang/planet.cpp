@@ -442,7 +442,7 @@ void Planet::set_decorator(IUniverseDecorator* decorator) {
 }
 
 /*************************************************************************************************/
-void Planet::construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {
+void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
     if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
 

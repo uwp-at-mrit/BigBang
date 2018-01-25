@@ -362,8 +362,6 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 		Size region = this->display->Size;
 		float width = region.Width;
 		float height = region.Height;
-		
-		this->current_planet->enter_shared_section();
 
 		if (this->from_planet == nullptr) {
 			draw_planet(ds, this->current_planet, width, height, this->logger);

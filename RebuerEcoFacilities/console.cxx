@@ -22,7 +22,7 @@ public:
 public:
 	void construct() override {
 		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.0.188"));
-		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.0.114"));
+		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.1.114"));
 		this->add_planet(new BSegment(RR::B3.ToString(), "192.168.1.128"));
 		this->add_planet(new BSegment(RR::B4.ToString(), "192.168.8.114"));
 	}
