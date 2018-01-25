@@ -123,6 +123,14 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log lev
 	this->logger = new Syslog(level, (name != nullptr) ? name : "UniverseDisplay", default_logger());
 	this->logger->reference();
 
+	this->navigator_view = ref new ListView();
+	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
+	this->navigator_view->IsItemClickEnabled = true;
+	this->navigator_view->ItemClick += ref new ItemClickEventHandler(this, &UniverseDisplay::do_transfer);
+
+	this->transfer_clock = ref new DispatcherTimer();
+	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
+
 	this->display = ref new CanvasAnimatedControl();
 	this->display->Name = this->logger->get_name();
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
@@ -138,15 +146,16 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log lev
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
-
-	this->transfer_clock = ref new DispatcherTimer();
-	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 }
 
 UniverseDisplay::~UniverseDisplay() {
 	this->logger->destroy();
 	this->collapse();
 	this->transfer_clock->Stop();
+}
+
+UIElement^ UniverseDisplay::navigator::get() {
+	return this->navigator_view;
 }
 
 UserControl^ UniverseDisplay::canvas::get() {
@@ -170,11 +179,15 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 
 	if (planet->info == nullptr) {
 		PlanetInfo* info = bind_planet_owership(this, planet);
+		Platform::Object^ label = planet->navigation_label();
 
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;
 			this->current_planet = planet;
 			info->prev = this->head_planet;
+			
+			this->navigator_view->Items->Append(label);
+			this->navigator_view->SelectedValue = label;
 		} else { 
 			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
 			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
@@ -182,6 +195,8 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 			info->prev = head_info->prev;
 			prev_info->next = planet;
 			head_info->prev = planet;
+
+			this->navigator_view->Items->Append(label);
 		}
 
 		info->next = this->head_planet;
@@ -209,6 +224,8 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 		}
 		this->leave_critical_section();
 
+		this->navigator_view->SelectedValue = this->current_planet->navigation_label();
+
 		if (is_animated) {
 			TimeSpan ts = make_timespan_from_ms(ms);
 			float width = this->display->Size.Width;
@@ -218,20 +235,13 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 			this->transfer_delta = width / float(count) * ((delta_idx > 0) ? -1.0F : 1.0F);
 			this->transferX = this->transfer_delta;
 			this->transfer_clock->Start();
+		} else if (this->from_planet != nullptr) {
+			this->logger->log_message(Log::Debug, L"transferred immediately: %s ==> %s",
+				this->from_planet->name()->Data(),
+				this->current_planet->name()->Data());
+			this->from_planet = nullptr;
 		}
 	}
-}
-
-void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) {
-	bool is_animated = ((!this->transfer_clock->IsEnabled) && ((ms * count) > 0));
-	
-	if (is_animated) {
-		// thread-safe is granteed for `from_planet`
-		this->from_planet = this->current_planet;
-	}
-
-	this->current_planet = this->head_planet;
-	this->transfer(idx);
 }
 
 void UniverseDisplay::transfer_previous(unsigned int ms, unsigned int count) {
@@ -360,10 +370,6 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 
-			this->logger->log_message(Log::Debug, L"transfer to %s from %s",
-				this->current_planet->name()->Data(),
-				this->from_planet->name()->Data());
-
 			ds->Transform = make_translation_matrix(this->transferX);
 			draw_planet(ds, this->from_planet, width, height, this->logger);
 
@@ -376,16 +382,34 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 }
 
 void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ args) {
+	const wchar_t* from = this->from_planet->name()->Data();
+	const wchar_t* to = this->current_planet->name()->Data();
 	float width = this->display->Size.Width;
+	float percentage = abs(this->transferX) / width;
 
-	if ((this->transferX <= -width) || (this->transferX >= width)) {
+	if (percentage < 1.0F) {
+		this->logger->log_message(Log::Debug, L"transferring[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
+		this->display->Invalidate();
+		this->transferX += this->transfer_delta;
+	} else {
+		this->logger->log_message(Log::Debug, L"transferred[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
 		this->transfer_delta = 0.0F;
 		this->transferX = 0.0F;
 		this->from_planet = nullptr;
 		this->transfer_clock->Stop();
-	} else {
-		this->display->Invalidate();
-		this->transferX += this->transfer_delta;
+	}
+}
+
+void UniverseDisplay::do_transfer(Platform::Object^ sender, ItemClickEventArgs^ args) {
+	int from_idx = this->navigator_view->SelectedIndex;
+	int delta_idx = 0;
+
+	this->navigator_view->SelectedValue = args->ClickedItem;
+
+	delta_idx = this->navigator_view->SelectedIndex - from_idx;
+	if (delta_idx != 0) {
+		this->from_planet = this->current_planet;
+		this->transfer(this->navigator_view->SelectedIndex - from_idx, 0U);
 	}
 }
 

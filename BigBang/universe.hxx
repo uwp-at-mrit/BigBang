@@ -60,19 +60,17 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(int frame_rate, Platform::String^ name = "", WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
 
 	public:
-		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
+		read_only_property(Windows::UI::Xaml::UIElement^, navigator);
 		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
+		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
 		
 	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
-		void transfer_to(int idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_previous(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
-
-	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 
 	public:
 		virtual void big_bang() {};  // occurs at game loop thread
@@ -85,6 +83,7 @@ namespace WarGrey::SCADA {
 		
 	private:
 		void do_refresh(Platform::Object^ sender, Platform::Object^ args);
+		void do_transfer(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ args);
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
 		void do_start(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
 		void do_stop(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
@@ -108,6 +107,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
+		Windows::UI::Xaml::Controls::ListView^ navigator_view;
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* current_planet;

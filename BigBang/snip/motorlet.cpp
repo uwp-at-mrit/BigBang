@@ -23,33 +23,33 @@ Motorlet::Motorlet(float width, float height) : width(width), height(height) {
 }
 
 void Motorlet::construct() {
-    Color screw_colors[] = { Colors::White, Colors::Black };
+    Color serew_colors[] = { Colors::White, Colors::Black };
     Color body_colors[] = {
         dark_color, light_color, light_color, light_color,
         light_color, light_color, light_color, dark_color
     };
 
-    auto screw_stops = MAKE_GRADIENT_STOPS(screw_colors);
+    auto serew_stops = MAKE_GRADIENT_STOPS(serew_colors);
     auto body_stops = MAKE_GRADIENT_STOPS(body_colors);
 
     float thread = fmax(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;
     float body_y = this->height - body_height;
-    float screw_x = this->width * 0.8F;
+    float serew_x = this->width * 0.8F;
 
-    this->screw_brush = make_linear_gradient_brush(screw_x, screw_x, screw_x + thread, screw_x - thread, screw_stops);
+    this->serew_brush = make_linear_gradient_brush(serew_x, serew_x, serew_x + thread, serew_x - thread, serew_stops);
 
     { // body and parts
         float head_height = body_height * 0.8F;
         float head_width = this->width * 0.10F;
         float body_width = this->width * 0.54F;
         float tail_width = this->width * 0.16F;
-        float head_bar_x = screw_x - head_width;
-        float head_x = screw_x - head_width * 1.25F;
+        float head_bar_x = serew_x - head_width;
+        float head_x = serew_x - head_width * 1.25F;
         float head_y = body_y + (body_height - head_height) * 0.5F;
         float body_x = tail_width;
 
-        auto head_part = rounded_rectangle(head_x, head_y, screw_x - head_x, head_height, -0.10F, -0.06F);
+        auto head_part = rounded_rectangle(head_x, head_y, serew_x - head_x, head_height, -0.10F, -0.06F);
         auto body_part = rectangle(body_x, body_y, body_width, body_height);
         auto tail_part = rounded_rectangle(0.0F, body_y, tail_width * 1.25F, body_height, -0.25F, -0.10F);
 
@@ -124,20 +124,20 @@ void Motorlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Motorlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-    brush_translate(this->screw_brush, float(count), 0.0F);
+    brush_translate(this->serew_brush, float(count), 0.0F);
 }
 
 void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float body_y = y + this->body_brush->StartPoint.y;
     float body_height = this->body_brush->EndPoint.y - this->body_brush->StartPoint.y;
     
-    { // draw screw
+    { // draw serew
         float head_height = this->head_brush->EndPoint.y - this->head_brush->StartPoint.y;
-        float screw_x = x + this->screw_brush->StartPoint.x;
-        float screw_y = body_y + body_height * 0.5F;
+        float serew_x = x + this->serew_brush->StartPoint.x;
+        float serew_y = body_y + body_height * 0.5F;
         float thickness = this->height * 0.12F;
 
-        ds->DrawLine(screw_x, screw_y, x + this->width, screw_y, this->screw_brush, thickness);
+        ds->DrawLine(serew_x, serew_y, x + this->width, serew_y, this->serew_brush, thickness);
     }
 
     { // draw body

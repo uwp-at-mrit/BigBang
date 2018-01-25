@@ -230,7 +230,7 @@ public:
 		}
 	}
 
-	void reflow_screwline(float width, float height) {
+	void reflow_serew(float width, float height) {
 		float pipe_length, pipe_thickness, snip_width, snip_height;
 		size_t gc = SNIPS_ARITY(this->gbscales) / 2;
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
@@ -529,6 +529,6 @@ void BSegment::reflow(float width, float height) {
 		console->reflow_window_frame(width, height);
 		console->reflow_icons(width, height);
 		console->reflow_gauges(width, height);
-		console->reflow_screwline(width, height);
+		console->reflow_serew(width, height);
 	}
 }

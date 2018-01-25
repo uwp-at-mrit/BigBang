@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
         float height;
 
     private:
-        Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ screw_brush;
+        Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ serew_brush;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ head_brush;
         Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ body_brush;
         Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head;

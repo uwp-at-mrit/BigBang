@@ -42,19 +42,9 @@ Console::Console() : SplitView() {
 }
 
 void Console::initialize_component(Size region) {
-	ListView^ navigator = ref new ListView();
-	
-	navigator->SelectionMode = ListViewSelectionMode::Single;
-
-	for (size_t i = 0; i < static_cast<unsigned int>(RR::Count); i++) {
-		this->labels[i] = ref new TextBlock();
-		this->labels[i]->Text = speak(speak(static_cast<RR>(i).ToString()));
-		navigator->Items->Append(this->labels[i]);
-	}
-
 	this->universe = ref new Universe("Console");
 	this->Content = this->universe->canvas;
-	this->Pane = navigator;
+	this->Pane = this->universe->navigator;
 }
 
 void Console::animating(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {

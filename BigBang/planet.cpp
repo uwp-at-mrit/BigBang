@@ -151,7 +151,7 @@ Planet::~Planet() {
 }
 
 void Planet::insert(ISnip* snip, double degrees, float x, float y) {
-    if (snip->info == nullptr) {
+	if (snip->info == nullptr) {
 		SnipInfo* info = bind_snip_owership(this, snip, degrees);
 		
 		if (this->head_snip == nullptr) {
@@ -169,7 +169,7 @@ void Planet::insert(ISnip* snip, double degrees, float x, float y) {
 
         unsafe_move_snip_via_info(this, info, x, y, true);
         this->size_cache_invalid();
-    }
+	}
 }
 
 void Planet::move_to(ISnip* snip, float x, float y, SnipCenterPoint cp) {

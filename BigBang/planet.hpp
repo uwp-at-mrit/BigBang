@@ -22,11 +22,12 @@ namespace WarGrey::SCADA {
 
 	public:
 		Platform::String^ name() { return this->caption; }
-		void fill_actual_extent(float* width, float* height);
+		Platform::Object^ navigation_label() { return this->caption; }
 
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
+		void fill_actual_extent(float* width, float* height);
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
@@ -51,7 +52,7 @@ namespace WarGrey::SCADA {
             Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
 
 	public:
-		virtual ISnip* find_snip(float x, float y) = 0;
+		virtual WarGrey::SCADA::ISnip* find_snip(float x, float y) = 0;
 		virtual void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 		virtual void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
@@ -114,7 +115,7 @@ namespace WarGrey::SCADA {
         void set_decorator(WarGrey::SCADA::IUniverseDecorator* decorator);
 
     public:
-        ISnip* find_snip(float x, float y) override;
+		WarGrey::SCADA::ISnip* find_snip(float x, float y) override;
         void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
 		void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) override;
 		void insert(ISnip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
