@@ -1,6 +1,5 @@
 ﻿#include "console.hxx"
 #include "tongue.hpp"
-#include "time.hpp"
 #include "B.hpp"
 
 using namespace WarGrey::SCADA;
@@ -8,23 +7,20 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Media::Animation;
-
-using namespace Microsoft::Graphics::Canvas::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
 
 /*************************************************************************************************/
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
-	Universe(Platform::String^ name) : UniverseDisplay(4, name) {}
+	Universe(Platform::String^ name) : UniverseDisplay(name, 4) {}
 
 public:
 	void construct() override {
-		this->add_planet(new BSegment(RR::B1.ToString(), "192.168.0.188"));
-		this->add_planet(new BSegment(RR::B2.ToString(), "192.168.1.114"));
-		this->add_planet(new BSegment(RR::B3.ToString(), "192.168.1.128"));
-		this->add_planet(new BSegment(RR::B4.ToString(), "192.168.8.114"));
+		this->add_planet(new BSegment("B1", "192.168.0.188"));
+		this->add_planet(new BSegment("B2", "192.168.1.114"));
+		this->add_planet(new BSegment("B3", "192.168.1.128"));
+		this->add_planet(new BSegment("B4", "192.168.8.114"));
 	}
 };
 
@@ -37,8 +33,7 @@ Console::Console() : SplitView() {
 	this->IsPaneOpen = false;
 
 	this->ManipulationMode = ManipulationModes::TranslateX;
-	this->ManipulationDelta += ref new ManipulationDeltaEventHandler(this, &Console::animating);
-	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::animated);
+	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::transfer);
 }
 
 void Console::initialize_component(Size region) {
@@ -47,10 +42,7 @@ void Console::initialize_component(Size region) {
 	this->Pane = this->universe->navigator;
 }
 
-void Console::animating(Platform::Object^ sender, ManipulationDeltaRoutedEventArgs^ e) {
-}
-
-void Console::animated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
+void Console::transfer(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
 	float width = this->universe->actual_width;
 	float delta = e->Cumulative.Translation.X;
 	float distance = width * 0.0618F;

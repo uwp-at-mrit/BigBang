@@ -57,7 +57,7 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(int frame_rate, Platform::String^ name = "", WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
+		UniverseDisplay(Platform::String^ name, int frame_rate, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
 
 	public:
 		read_only_property(Windows::UI::Xaml::UIElement^, navigator);

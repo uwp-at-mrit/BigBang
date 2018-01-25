@@ -93,7 +93,7 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 	}
 }
 
-// WARNING: order matters, Desulphurizer, Cleaner and Mooney are also the anchors for water pipes 
+// WARNING: order matters, Desulphurizer, Cleaner and Mooney are also anchors for water pipes 
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
 
 private class BConsole : public ModbusConfirmation {

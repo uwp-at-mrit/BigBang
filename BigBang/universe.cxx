@@ -119,7 +119,7 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(int frame_rate, Platform::String^ name, Log level) {
+UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log level) {
 	this->logger = new Syslog(level, (name != nullptr) ? name : "UniverseDisplay", default_logger());
 	this->logger->reference();
 
