@@ -1,6 +1,6 @@
 #lang racket
 
-(require "Handbook/handbook.rkt")
+(require "Handbook/env.rkt")
 
 (require compiler/cm)
 
@@ -23,7 +23,7 @@
         [_ (traceln info)]))
     (parameterize ([manager-trace-handler filter-verbose])
       (managed-compile-zo handbook.scrbl))
-    
+
     (when (unbox &again?)
       (compile-docs handbook.scrbl (add1 round)))))
 

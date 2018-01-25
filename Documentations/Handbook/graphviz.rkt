@@ -145,7 +145,8 @@
 (define git-loc-series
   (lambda [flwidth flheight datasource
                    #:date0 [date-start #false] #:daten [date-end #false]
-                   #:line0 [line-start #false] #:linen [line-end #false] #:line-axis-count [axis-count 5]
+                   #:line0 [line-start #false] #:linen [line-end #false]
+                   #:line-axis-count [axis-count 5] #:line-peak-ahead-factor [peak-factor 500]
                    #:mark-font [mark-font (make-font #:family 'system)]
                    #:mark-color [mark-color (make-color #x6A #x73 #x7D)]
                    #:axis-color [axis-color (make-color #x00 #x00 #x00 0.3)]]
@@ -186,7 +187,7 @@
               (values (or date-start x0)
                       (or date-end xn)
                       (or line-start 0)
-                      (or line-end (* (exact-ceiling (/ peak 1000)) 1000))))
+                      (or line-end (* (exact-ceiling (/ peak peak-factor)) peak-factor))))
 
             (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc peak) mark-font #true))
             (define x-start (+ dx mark-max-width 1ch))

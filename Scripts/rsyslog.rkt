@@ -12,7 +12,7 @@
        (case (string->symbol (string-downcase (cadr px:level)))
          [(debug) "gray"]
          [(info) "green"]
-         [(notice) 82 #|YellowGreen|#]
+         [(notice) 154 #|YellowGreen|#]
          [(warning) "yellow"]
          [(error) "red"]
          [(critical alert panic) "darkred"]

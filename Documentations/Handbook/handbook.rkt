@@ -8,6 +8,7 @@
 (require scribble/manual)
 (require scribble/html-properties)
 
+(require "env.rkt")
 (require "bibliography.rkt")
 (require "graphviz.rkt")
 (require "statistics.rkt")
@@ -15,37 +16,6 @@
 (define file-color (make-style 'tt (list (make-color-property (list #x58 #x60 #x69)))))
 (define insertion-color (make-style 'tt (list (make-color-property (list #x28 #xA7 #x45)))))
 (define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
-
-(define sln-root (make-parameter #false)) 
-
-(define document-root
-  (lambda []
-    (simplify-path (build-path (sln-root) "Documentations"))))
-
-(define handbook-root
-  (lambda []
-    (build-path (document-root) "Handbook")))
-
-(define handbook-entry
-  (lambda [[proj-root (current-directory)]]
-    (define-values (parent projname _) (split-path proj-root))
-    (simplify-path (build-path proj-root (path-add-extension projname #".scrbl")))))
-
-(define handbook-dest
-  (lambda [[proj-root (current-directory)]]
-    (define-values (parent projname _) (split-path proj-root))
-    (simplify-path (build-path proj-root "Generated Files" "Handbook"))))
-
-(define handbook-style
-  (lambda [[proj-root (current-directory)]]
-    (define-values (parent projname _) (split-path proj-root))
-    (simplify-path (build-path proj-root (path-add-extension projname #".css")))))
-
-(define find-solution-root-dir
-  (lambda [[dir (current-directory)]]
-    (cond [(ormap (curry regexp-match? #px"[.]sln$") (directory-list dir)) dir]
-          [else (let-values ([(parent dirname _) (split-path dir)])
-                  (and parent (find-solution-root-dir parent)))])))
 
 (define handbook-title
   (lambda [#:authors authors . pre-contents]
@@ -59,7 +29,7 @@
   (lambda []
     (list "编写本手册主要有如下几个目的"
           (itemlist #:style 'compact
-                    (item "帮助新同事快速理解系统、融入公司,减少不同专业背景同事之间的无效沟通;")
+                    (item "帮助新同事快速理解系统、融入公司，减少不同专业背景同事之间的无效沟通;")
                     (item "阐述系统开发过程中碰到的疑难杂症和解决方案;")
                     (item "展示各类自动生成的软件质量报告。")))))
 
