@@ -95,22 +95,13 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 
 // WARNING: order matters, Desulphurizer, Cleaner and Mooney are also anchors for water pipes 
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
+private enum BMode { WindowUI = 0, View, Operation };
 
 private class BConsole : public ModbusConfirmation {
 public:
-	BConsole(BSegment* master, Platform::String^ caption, Platform::String^ plc)
-		: bench(master), caption(caption), device(plc)
-		, inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
+	BConsole(BSegment* master) : bench(master), inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
 
 public:
-	void load_window_frame(float width, float height) {
-		this->statusline = new Statuslinelet(Log::Debug);
-		this->statusbar = new Statusbarlet(this->caption, this->device, this, this->statusline);
-
-		this->bench->insert(this->statusbar);
-		this->bench->insert(this->statusline);
-	}
-
 	void load_icons(float width, float height) {
 		this->icons[0] = new StorageTanklet(80.0F);
 
@@ -191,16 +182,11 @@ public:
 	}
 
 public:
-	void reflow_window_frame(float width, float height) {
-		this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &this->console_y);
-		this->bench->move_to(this->statusline, 0.0F, height - console_y);
-	}
-
-	void reflow_icons(float width, float height) {
+	void reflow_icons(float vinset, float width, float height) {
 		float icon_gapsize = 64.0F;
 		float icon_hmax = 0.0F;
 		float icon_x = 0.0F;
-		float icon_y = this->console_y * 1.618F;
+		float icon_y = vinset * 1.618F;
 		float icon_width, icon_height;
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->icons) && this->icons[i] != nullptr; i++) {
@@ -215,14 +201,14 @@ public:
 		}
 	}
 
-	void reflow_gauges(float width, float height) {
+	void reflow_gauges(float vinset, float width, float height) {
 		float gauge_gapsize = 32.0F;
 		float gauge_x = 0.0F;
 		float gauge_y = 0.0F;
 		float snip_width, snip_height;
 
 		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
-		gauge_y = height - snip_height - console_y;
+		gauge_y = height - snip_height - vinset;
 		for (size_t i = 0; i < SNIPS_ARITY(this->gauges); i++) {
 			this->bench->move_to(this->gauges[i], gauge_x, gauge_y);
 			this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
@@ -230,7 +216,7 @@ public:
 		}
 	}
 
-	void reflow_serew(float width, float height) {
+	void reflow_serew(float vinset, float width, float height) {
 		float pipe_length, pipe_thickness, snip_width, snip_height;
 		size_t gc = SNIPS_ARITY(this->gbscales) / 2;
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
@@ -425,8 +411,6 @@ private:
 
 // never deletes these snips mannually
 private:
-	Statusbarlet* statusbar;
-	Statuslinelet* statusline;
 	ISnip* icons[1];
 	Gaugelet* gauges[B::Count];
 
@@ -447,14 +431,7 @@ private:
 	Liquidlet* water_pipes[6];
 
 private:
-	Platform::String^ caption;
-	Platform::String^ device;
-	BSegment* bench;
-
-private:
-	float console_y;
-
-private:
+	BSegment * bench;
 	uint16 inaddr0;
 	uint16 inaddrn;
 	uint16 inaddrq;
@@ -500,8 +477,8 @@ private:
 	Statuslinelet* statusline;
 };
 
-BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)) {
-	this->console = new BConsole(this, label, plc);
+BSegment::BSegment(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)), caption(label), device(plc) {
+	this->console = new BConsole(this);
 	this->set_decorator(new BConsoleDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 
@@ -515,20 +492,32 @@ void BSegment::construct(CanvasCreateResourcesReason reason, float width, float 
 	auto console = dynamic_cast<BConsole*>(this->console);
 
 	if (console != nullptr) {
+		this->change_mode(BMode::View);
 		console->load_icons(width, height);
 		console->load_gauges(width, height);
 		console->load_workline(width, height);
-		console->load_window_frame(width, height);
+
+		this->change_mode(BMode::WindowUI);
+		this->statusline = new Statuslinelet(Log::Debug);
+		this->statusbar = new Statusbarlet(this->caption, this->device, console, this->statusline);
+		this->insert(this->statusbar);
+		this->insert(this->statusline);
 	}
 }
 
 void BSegment::reflow(float width, float height) {
 	auto console = dynamic_cast<BConsole*>(this->console);
-
+	
 	if (console != nullptr) {
-		console->reflow_window_frame(width, height);
-		console->reflow_icons(width, height);
-		console->reflow_gauges(width, height);
-		console->reflow_serew(width, height);
+		float vinset;
+
+		this->change_mode(BMode::WindowUI);
+		this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &vinset);
+		this->move_to(this->statusline, 0.0F, height - vinset);
+
+		this->change_mode(BMode::View);
+		console->reflow_icons(vinset, width, height);
+		console->reflow_gauges(vinset, width, height);
+		console->reflow_serew(vinset, width, height);
 	}
 }

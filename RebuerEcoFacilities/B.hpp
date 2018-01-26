@@ -27,5 +27,12 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
+		Platform::String^ caption;
+		Platform::String^ device;
+
+	// never deletes these snips mannually	
+	private:
+		WarGrey::SCADA::Statusbarlet* statusbar;
+		WarGrey::SCADA::Statuslinelet* statusline;
 	};
 }
