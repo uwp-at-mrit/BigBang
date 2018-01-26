@@ -6,8 +6,8 @@
 #include "text.hpp"
 #include "paint.hpp"
 
-#include "decorator/grid.hpp"
-#include "decorator/pipeline.hpp"
+#include "interaction/listener.hpp"
+#include "decorator/border.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -97,7 +97,7 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
 private enum BMode { WindowUI = 0, Monitor, Control };
 
-private class BConsole : public ModbusConfirmation {
+private class BConsole : public WarGrey::SCADA::ModbusConfirmation {
 public:
 	BConsole(BWorkbench* master) : workbench(master), inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
 
@@ -437,9 +437,20 @@ private:
 	uint16 inaddrq;
 };
 
-private class BDecorator : public IUniverseDecorator {
+private class BListener : public WarGrey::SCADA::IUniverseListener {
 public:
-	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) {
+	bool can_select(IPlanet* master, ISnip* snip) override {
+		return (dynamic_cast<Gaugelet*>(snip) != nullptr);
+	}
+
+	void after_select(IPlanet* master, ISnip* snip, bool on_or_off) {
+		syslog(Log::Info, L"%d", on_or_off);
+	}
+};
+
+private class BDecorator : public WarGrey::SCADA::BorderDecorator {
+public:
+	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : BorderDecorator(false, false, true) {
 		auto font = make_text_format("Consolas", fontsize);
 
 		this->color = make_solid_brush(caption_color);
@@ -447,7 +458,7 @@ public:
 	};
 
 public:
-	void draw_before(IPlanet* self, CanvasDrawingSession^ ds, float Width, float Height) {
+	void draw_before(IPlanet* self, CanvasDrawingSession^ ds, float Width, float Height) override {
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
@@ -479,6 +490,7 @@ private:
 
 BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)), caption(label), device(plc) {
 	this->console = new BConsole(this);
+	this->set_pointer_listener(new BListener());
 	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 

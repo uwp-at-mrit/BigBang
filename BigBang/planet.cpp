@@ -542,7 +542,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
 
 					if (info->selected) {
-						ds->DrawRectangle(info->x, info->y, width, height, system_color(UIElementType::HighlightText));
+						this->decorator->draw_selected_snip(child, ds, info->x, info->y, width, height);
 					}
 
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.

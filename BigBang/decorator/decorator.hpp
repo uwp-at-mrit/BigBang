@@ -25,5 +25,10 @@ namespace WarGrey::SCADA {
             WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height) {};
+
+		virtual void draw_selected_snip(
+			WarGrey::SCADA::ISnip* snip,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float x, float y, float width, float height) {};
     };
 }
