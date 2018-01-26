@@ -131,6 +131,8 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 
+	this->gesture_detector = ref new GestureRecognizer();
+
 	this->display = ref new CanvasAnimatedControl();
 	this->display->Name = this->logger->get_name();
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
@@ -146,6 +148,9 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
+
+	this->display->ManipulationMode = ManipulationModes::TranslateX;
+	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -416,6 +421,8 @@ void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ 
 	this->big_rip();
 }
 
+
+// TODO: distinguish rubberhand event and maniplation
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
 	
@@ -444,4 +451,18 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_maniplated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ args) {
+	float width = this->actual_width;
+	float delta = args->Cumulative.Translation.X;
+	float distance = width * 0.0618F;
+
+	if (delta < -distance) {
+		this->transfer_next(256);
+	} else if (delta > distance) {
+		this->transfer_previous(256);
+	}
+
+	args->Handled = true;
 }

@@ -443,10 +443,6 @@ public:
 		return (dynamic_cast<Gaugelet*>(snip) != nullptr);
 	}
 
-	bool can_select_multiple(IPlanet* master) override {
-		return true;
-	}
-
 	void after_select(IPlanet* master, ISnip* snip, bool on_or_off) {
 	}
 };

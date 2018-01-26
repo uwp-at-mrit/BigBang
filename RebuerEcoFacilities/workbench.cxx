@@ -5,10 +5,8 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
-using namespace Windows::Devices::Input;
 
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 
 /*************************************************************************************************/
@@ -19,7 +17,7 @@ public:
 public:
 	void construct() override {
 		this->add_planet(new BWorkbench("B1", "192.168.0.188"));
-		this->add_planet(new BWorkbench("B2", "192.168.1.114"));
+		this->add_planet(new BWorkbench("B2", "192.168.0.114"));
 		this->add_planet(new BWorkbench("B3", "192.168.1.128"));
 		this->add_planet(new BWorkbench("B4", "192.168.8.114"));
 	}
@@ -32,29 +30,12 @@ Workbench::Workbench() : SplitView() {
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
 	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
-
-	this->ManipulationMode = ManipulationModes::TranslateX;
-	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Workbench::transfer);
 }
 
 void Workbench::initialize_component(Size region) {
 	this->universe = ref new Universe("Workbench");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
-}
-
-void Workbench::transfer(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
-	float width = this->universe->actual_width;
-	float delta = e->Cumulative.Translation.X;
-	float distance = width * 0.0618F;
-
-	if (delta < -distance) {
-		this->universe->transfer_next(256);
-	} else if (delta > distance) {
-		this->universe->transfer_previous(256);
-	}
-
-	e->Handled = true;
 }
 
 void Workbench::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {

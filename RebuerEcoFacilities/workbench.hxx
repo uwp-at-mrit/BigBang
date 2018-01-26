@@ -11,9 +11,6 @@ namespace WarGrey::SCADA {
 	public:
 		void initialize_component(Windows::Foundation::Size region);
 		void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
-
-	private:
-		void transfer(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e);
 		
 	private:
 		WarGrey::SCADA::UniverseDisplay^ universe;
