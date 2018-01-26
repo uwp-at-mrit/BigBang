@@ -31,13 +31,11 @@ namespace WarGrey::SCADA {
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
-		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}; 
+		virtual void reflow(float width, float height) {}; 
+		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 		virtual void collapse() {};
 
-    public:
-		virtual void reflow(float width, float height) {};
-		
     public:
         virtual void on_pointer_moved(
             Windows::UI::Xaml::UIElement^ obj,
@@ -82,7 +80,15 @@ namespace WarGrey::SCADA {
 	private class Planet : public WarGrey::SCADA::IPlanet {
 	public:
 		~Planet() noexcept;
-		Planet(Platform::String^ caption);
+		Planet(Platform::String^ caption, unsigned int initial_mode = 0);
+
+	public:
+		/** NOTE
+		 * mode 0 is designed for UI snips which will be unmasked in all modes;
+		 * however, only UI snips are unmasked in mode 0.
+		 */
+		void change_mode(unsigned int mode);
+		bool snip_unmasked(WarGrey::SCADA::ISnip* snip);
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
@@ -149,5 +155,6 @@ namespace WarGrey::SCADA {
     private:
         WarGrey::SCADA::IUniverseDecorator* decorator = nullptr;
         WarGrey::SCADA::ISnip* head_snip = nullptr;
+		unsigned int mode;
     };
 }

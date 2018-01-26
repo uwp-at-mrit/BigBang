@@ -46,7 +46,8 @@ class PlaceHolderDecorator : public IUniverseDecorator {};
 
 class SnipInfo : public WarGrey::SCADA::ISnipInfo {
 public:
-    SnipInfo(IPlanet* master) : ISnipInfo(master) {};
+    SnipInfo(IPlanet* master, unsigned int mode)
+		: ISnipInfo(master), mode(mode) {};
 
 public:
     float x;
@@ -55,12 +56,15 @@ public:
     bool selected;
 
 public:
+	unsigned int mode;
+
+public:
 	ISnip* next;
 	ISnip* prev;
 };
 
-static inline SnipInfo* bind_snip_owership(IPlanet* master, ISnip* snip, double degrees) {
-    auto info = new SnipInfo(master);
+static SnipInfo* bind_snip_owership(IPlanet* master, unsigned int mode, ISnip* snip, double degrees) {
+    auto info = new SnipInfo(master, mode);
     snip->info = info;
 
     while (degrees <  0.000) degrees += 360.0;
@@ -72,7 +76,23 @@ static inline SnipInfo* bind_snip_owership(IPlanet* master, ISnip* snip, double 
     return info;
 }
 
-static inline void unsafe_fill_snip_bound(ISnip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
+static inline SnipInfo* planet_snip_info(IPlanet* master, ISnip* snip) {
+	SnipInfo* info = nullptr;
+
+	if ((snip != nullptr) && (snip->info != nullptr)) {
+		if (snip->info->master == master) {
+			info = SNIP_INFO(snip);
+		}
+	}
+	
+	return info;
+}
+
+static inline bool unsafe_snip_unmasked(SnipInfo* info, unsigned int mode) {
+	return ((info->mode == 0) || (info->mode == mode));
+}
+
+static void unsafe_fill_snip_bound(ISnip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
 	snip->fill_extent(info->x, info->y, width, height);
 
 	(*x) = info->x;
@@ -92,7 +112,7 @@ static inline void unsafe_fill_snip_bound(ISnip* snip, SnipInfo* info, float* x,
 	}
 }
 
-static inline void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, float y, bool absolute) {
+static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -117,7 +137,7 @@ static inline void unsafe_set_selected(IPlanet* master, IUniverseListener* liste
 	unsafe_add_selected(master, listener, snip, info);
 }
 
-static inline void snip_center_point_offset(ISnip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
+static void snip_center_point_offset(ISnip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
     xoff = 0.0F;
     yoff = 0.0F;
 
@@ -139,7 +159,7 @@ static inline void snip_center_point_offset(ISnip* snip, float width, float heig
 }
 
 /*************************************************************************************************/
-Planet::Planet(Platform::String^ name) : IPlanet(name) {
+Planet::Planet(Platform::String^ name, unsigned int initial_mode) : IPlanet(name), mode(initial_mode) {
     this->set_decorator(nullptr);
 	this->set_pointer_listener(nullptr);
 }
@@ -150,9 +170,23 @@ Planet::~Planet() {
     this->decorator->destroy();
 }
 
+void Planet::change_mode(unsigned int mode) {
+	if (mode != this->mode) {
+		this->no_selected();
+		this->mode = mode;
+		this->size_cache_invalid();
+	}
+}
+
+bool Planet::snip_unmasked(ISnip* snip) {
+	SnipInfo* info = planet_snip_info(this, snip);
+
+	return ((info != nullptr) && unsafe_snip_unmasked(info, this->mode));
+}
+
 void Planet::insert(ISnip* snip, double degrees, float x, float y) {
 	if (snip->info == nullptr) {
-		SnipInfo* info = bind_snip_owership(this, snip, degrees);
+		SnipInfo* info = bind_snip_owership(this, this->mode, snip, degrees);
 		
 		if (this->head_snip == nullptr) {
             this->head_snip = snip;
@@ -173,32 +207,31 @@ void Planet::insert(ISnip* snip, double degrees, float x, float y) {
 }
 
 void Planet::move_to(ISnip* snip, float x, float y, SnipCenterPoint cp) {
-    if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this) {
-            SnipInfo* info = SNIP_INFO(snip);
-            float sx, sy, sw, sh, xoff, yoff;
-
-			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-            snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
-            unsafe_move_snip_via_info(this, info, x - xoff, y - yoff, true);
-        }
-    }
+	SnipInfo* info = planet_snip_info(this, snip);
+	
+	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+		float sx, sy, sw, sh, xoff, yoff;
+		
+		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+		snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
+		unsafe_move_snip_via_info(this, info, x - xoff, y - yoff, true);
+	}
 }
 
 void Planet::move(ISnip* snip, float x, float y) {
-    if (snip != nullptr) {
-		if ((snip->info != nullptr) && (snip->info->master == this)) {
-            SnipInfo* info = SNIP_INFO(snip);
+	SnipInfo* info = planet_snip_info(this, snip);
 
-            unsafe_move_snip_via_info(this, info, x, y, false);
-        }
+    if (info != nullptr) {
+		if (unsafe_snip_unmasked(info, this->mode)) {
+			unsafe_move_snip_via_info(this, info, x, y, false);
+		}
     } else if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
 
-            if (info->selected) {
+            if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
                 unsafe_move_snip_via_info(this, info, x, y, false);
             }
 
@@ -208,7 +241,6 @@ void Planet::move(ISnip* snip, float x, float y) {
 }
 
 ISnip* Planet::find_snip(float x, float y) {
-    float sx, sy, sw, sh;
     ISnip* found = nullptr;
 
     if (this->head_snip != nullptr) {
@@ -218,12 +250,16 @@ ISnip* Planet::find_snip(float x, float y) {
         do {
             SnipInfo* info = SNIP_INFO(child);
 
-            unsafe_fill_snip_bound(child, info, &sx, &sy, &sw, &sh);
+			if (unsafe_snip_unmasked(info, this->mode)) {
+				float sx, sy, sw, sh;
 
-            if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
-                found = child;
-                break;
-            }
+				unsafe_fill_snip_bound(child, info, &sx, &sy, &sw, &sh);
+
+				if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
+					found = child;
+					break;
+				}
+			}
 
             child = info->prev;
         } while (child != head_info->prev);
@@ -233,29 +269,27 @@ ISnip* Planet::find_snip(float x, float y) {
 }
 
 void Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint cp) {
-    if ((snip != nullptr) && (snip->info != nullptr)) {
-        if (snip->info->master == this) {
-            SnipInfo* info = SNIP_INFO(snip);
-            float sx, sy, sw, sh, xoff, yoff;
+	SnipInfo* info = planet_snip_info(this, snip);
+	
+	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+		float sx, sy, sw, sh, xoff, yoff;
 
-			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-            snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
-            SET_BOX(x, sx + xoff);
-            SET_BOX(y, sy + yoff);
-        }
+		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+		snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
+		SET_BOX(x, sx + xoff);
+		SET_BOX(y, sy + yoff);
     }
 }
 
 void Planet::fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) {
-	if ((snip != nullptr) && (snip->info != nullptr)) {
-		if (snip->info->master == this) {
-			SnipInfo* info = SNIP_INFO(snip);
-			float sx, sy, sw, sh;
+	SnipInfo* info = planet_snip_info(this, snip);
+
+	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+		float sx, sy, sw, sh;
 			
-			unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-			SET_VALUES(x, sx, y, sy);
-			SET_VALUES(width, sw, height, sh);
-		}
+		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+		SET_VALUES(x, sx, y, sy);
+		SET_VALUES(width, sw, height, sh);
 	}
 }
 
@@ -290,11 +324,13 @@ void Planet::recalculate_snips_extent_when_invalid() {
             do {
                 SnipInfo* info = SNIP_INFO(child);
 
-                unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
-                this->snips_left = min(this->snips_left, rx);
-                this->snips_top = min(this->snips_top, ry);
-                this->snips_right = max(this->snips_right, rx + width);
-                this->snips_bottom = max(this->snips_bottom, ry + height);
+				if (unsafe_snip_unmasked(info, this->mode)) {
+					unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
+					this->snips_left = min(this->snips_left, rx);
+					this->snips_top = min(this->snips_top, ry);
+					this->snips_right = max(this->snips_right, rx + width);
+					this->snips_bottom = max(this->snips_bottom, ry + height);
+				}
 
                 child = info->next;
             } while (child != this->head_snip);
@@ -306,26 +342,24 @@ void Planet::recalculate_snips_extent_when_invalid() {
 }
 
 void Planet::add_selected(ISnip* snip) {
-    if (snip != nullptr) {
-        if ((snip->info != nullptr) && (snip->info->master == this)) {
-            SnipInfo* info = SNIP_INFO(snip);
+	if (this->rubberband_allowed) {
+		SnipInfo* info = planet_snip_info(this, snip);
 
-            if ((!info->selected) && (this->rubberband_allowed && this->listener->can_select(this, snip))) {
-                unsafe_add_selected(this, this->listener, snip, info);
-            }
-        }
-    }
+		if ((info != nullptr) && (!info->selected)) {
+			if (unsafe_snip_unmasked(info, this->mode) && this->listener->can_select(this, snip)) {
+				unsafe_add_selected(this, this->listener, snip, info);
+			}
+		}
+	}
 }
 
 void Planet::set_selected(ISnip* snip) {
-    if (snip != nullptr) {
-        if ((snip->info != nullptr) && (snip->info->master == this)) {
-            SnipInfo* info = SNIP_INFO(snip);
+	SnipInfo* info = planet_snip_info(this, snip);
 
-            if ((!info->selected) && (this->listener->can_select(this, snip))) {
-				unsafe_set_selected(this, this->listener, snip, info);
-            }
-        }
+    if ((info != nullptr) && (!info->selected)) {
+		if (unsafe_snip_unmasked(info, this->mode) && (this->listener->can_select(this, snip))) {
+			unsafe_set_selected(this, this->listener, snip, info);
+		}
     }
 }
 
@@ -336,7 +370,7 @@ void Planet::no_selected() {
 		do {
 			SnipInfo* info = SNIP_INFO(child);
 
-            if (info->selected) {
+            if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
 				this->listener->before_select(this, child, false);
 				info->selected = false;
 				this->listener->after_select(this, child, false);
@@ -392,13 +426,15 @@ void Planet::on_pointer_pressed(UIElement^ master, PointerRoutedEventArgs^ e) {
 				
 				this->rubberband_y = nullptr;
 
-				if ((!info->selected) && this->listener->can_select(this, snip)) {
-					if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
-						if (this->rubberband_allowed) {
-							unsafe_add_selected(this, this->listener, snip, info);
+				if (unsafe_snip_unmasked(info, this->mode)) {
+					if ((!info->selected) && this->listener->can_select(this, snip)) {
+						if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
+							if (this->rubberband_allowed) {
+								unsafe_add_selected(this, this->listener, snip, info);
+							}
+						} else {
+							unsafe_set_selected(this, this->listener, snip, info);
 						}
-					} else {
-						unsafe_set_selected(this, this->listener, snip, info);
 					}
 				}
 			}
@@ -458,8 +494,13 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
         ISnip* child = this->head_snip;
 
         do {
-            child->update(count, interval, uptime, is_slow);
-            child = SNIP_INFO(child)->next;
+			SnipInfo* info = SNIP_INFO(child);
+
+			if (unsafe_snip_unmasked(info, this->mode)) {
+				child->update(count, interval, uptime, is_slow);
+			}
+			
+			child = info->next;
         } while (child != this->head_snip);
     }
 }
@@ -483,28 +524,30 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
         do {
             SnipInfo* info = SNIP_INFO(child);
 
-            child->fill_extent(info->x, info->y, &width, &height);
-            if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
-                if (info->rotation == 0.0F) {
-                    layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
-                } else {
-					float cx = info->x + width * 0.5F;
-					float cy = info->y + height * 0.5F;
-					
-					ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
-					layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
-                }
+			if (unsafe_snip_unmasked(info, this->mode)) {
+				child->fill_extent(info->x, info->y, &width, &height);
+				if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
+					if (info->rotation == 0.0F) {
+						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+					} else {
+						float cx = info->x + width * 0.5F;
+						float cy = info->y + height * 0.5F;
 
-				this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
-				child->draw(ds, info->x, info->y, width, height);
-				this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
+						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
+						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
+					}
 
-				if (info->selected) {
-					ds->DrawRectangle(info->x, info->y, width, height, system_color(UIElementType::HighlightText));
+					this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
+					child->draw(ds, info->x, info->y, width, height);
+					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
+
+					if (info->selected) {
+						ds->DrawRectangle(info->x, info->y, width, height, system_color(UIElementType::HighlightText));
+					}
+
+					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
+					ds->Transform = transform;
 				}
-
-                delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
-                ds->Transform = transform;
 			}
 
             child = info->next;
@@ -541,6 +584,7 @@ void Planet::collapse() {
 			ISnip* child = temp_head;
 
 			temp_head = SNIP_INFO(temp_head)->next;
+
 			delete child; // snip's destructor will delete the associated info object
 		} while (temp_head != nullptr);
 	}
