@@ -443,12 +443,15 @@ public:
 		return (dynamic_cast<Gaugelet*>(snip) != nullptr);
 	}
 
+	bool can_select_multiple(IPlanet* master) override {
+		return true;
+	}
+
 	void after_select(IPlanet* master, ISnip* snip, bool on_or_off) {
-		syslog(Log::Info, L"%d", on_or_off);
 	}
 };
 
-private class BDecorator : public WarGrey::SCADA::BorderDecorator {
+private class BDecorator : public virtual WarGrey::SCADA::BorderDecorator {
 public:
 	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : BorderDecorator(false, false, true) {
 		auto font = make_text_format("Consolas", fontsize);

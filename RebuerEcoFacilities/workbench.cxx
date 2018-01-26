@@ -5,6 +5,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Devices::Input;
 
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
