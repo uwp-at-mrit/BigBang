@@ -23,8 +23,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RebuerEcoFacilities.cxx" />
-    <ClCompile Include="console.cxx" />
     <ClCompile Include="B.cpp" />
+    <ClCompile Include="workbench.cxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -200,7 +200,7 @@
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="console.hxx" />
     <ClInclude Include="B.hpp" />
+    <ClInclude Include="workbench.hxx" />
   </ItemGroup>
 </Project>

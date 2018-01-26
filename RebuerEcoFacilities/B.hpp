@@ -16,10 +16,10 @@
 #include "snip/serew/gluecleanerlet.hpp"
 
 namespace WarGrey::SCADA {
-	private class BSegment : public WarGrey::SCADA::Planet {
+	private class BWorkbench : public WarGrey::SCADA::Planet {
 	public:
-		BSegment(Platform::String^ label, Platform::String^ plc);
-		~BSegment() noexcept;
+		BWorkbench(Platform::String^ label, Platform::String^ plc);
+		~BWorkbench() noexcept;
 
 	public:
 		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

@@ -1,4 +1,4 @@
-﻿#include "console.hxx"
+﻿#include "workbench.hxx"
 #include "syslog.hpp"
 #include "system.hpp"
 
@@ -32,10 +32,10 @@ namespace WarGrey::SCADA {
 
         virtual void OnLaunched(LaunchActivatedEventArgs^ e) override {
             auto self = ApplicationView::GetForCurrentView();
-            auto screen = dynamic_cast<Console^>(Window::Current->Content);
+            auto screen = dynamic_cast<Workbench^>(Window::Current->Content);
 
             if (screen == nullptr) {
-                screen = ref new Console();
+                screen = ref new Workbench();
                 this->RebuerMain(self, screen);
             
                 if (e->PreviousExecutionState == ApplicationExecutionState::Terminated) {
@@ -55,7 +55,7 @@ namespace WarGrey::SCADA {
     private:
         void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ e) {
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-            auto screen = dynamic_cast<Console^>(Window::Current->Content);
+            auto screen = dynamic_cast<Workbench^>(Window::Current->Content);
             if (screen != nullptr) screen->suspend(e->SuspendingOperation);
         }
 

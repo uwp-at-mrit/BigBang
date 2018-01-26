@@ -1,4 +1,4 @@
-﻿#include "console.hxx"
+﻿#include "workbench.hxx"
 #include "tongue.hpp"
 #include "B.hpp"
 
@@ -17,15 +17,15 @@ public:
 
 public:
 	void construct() override {
-		this->add_planet(new BSegment("B1", "192.168.0.188"));
-		this->add_planet(new BSegment("B2", "192.168.1.114"));
-		this->add_planet(new BSegment("B3", "192.168.1.128"));
-		this->add_planet(new BSegment("B4", "192.168.8.114"));
+		this->add_planet(new BWorkbench("B1", "192.168.0.188"));
+		this->add_planet(new BWorkbench("B2", "192.168.1.114"));
+		this->add_planet(new BWorkbench("B3", "192.168.1.128"));
+		this->add_planet(new BWorkbench("B4", "192.168.8.114"));
 	}
 };
 
 /*************************************************************************************************/
-Console::Console() : SplitView() {
+Workbench::Workbench() : SplitView() {
 	this->Margin = ThicknessHelper::FromUniformLength(4.0);
 	this->PanePlacement = SplitViewPanePlacement::Left;
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
@@ -33,16 +33,16 @@ Console::Console() : SplitView() {
 	this->IsPaneOpen = false;
 
 	this->ManipulationMode = ManipulationModes::TranslateX;
-	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Console::transfer);
+	this->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &Workbench::transfer);
 }
 
-void Console::initialize_component(Size region) {
-	this->universe = ref new Universe("Console");
+void Workbench::initialize_component(Size region) {
+	this->universe = ref new Universe("Workbench");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
 }
 
-void Console::transfer(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
+void Workbench::transfer(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ e) {
 	float width = this->universe->actual_width;
 	float delta = e->Cumulative.Translation.X;
 	float distance = width * 0.0618F;
@@ -56,7 +56,7 @@ void Console::transfer(Platform::Object^ sender, ManipulationCompletedRoutedEven
 	e->Handled = true;
 }
 
-void Console::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
+void Workbench::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
 	// TODO: Save application state and stop any background activity.
 	// Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }

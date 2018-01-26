@@ -211,11 +211,11 @@
   <ItemGroup>
     <ClCompile Include="B.cpp" />
     <ClCompile Include="RebuerEcoFacilities.cxx" />
-    <ClCompile Include="console.cxx" />
+    <ClCompile Include="workbench.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="B.hpp" />
-    <ClInclude Include="console.hxx" />
+    <ClInclude Include="workbench.hxx" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

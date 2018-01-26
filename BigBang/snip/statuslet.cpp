@@ -184,7 +184,7 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* console, ISyslogReceiver* uirecv) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* workbench, ISyslogReceiver* uirecv) {
 	auto logger = new Syslog(Log::Debug, caption, default_logger());
 	
 	if (uirecv != nullptr) {
@@ -193,8 +193,8 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IMo
 
 	initialize_status_font();
 	this->caption = make_text_layout(speak("RR") + " " + speak(caption), status_font);
-	this->client = new ModbusClient(logger, plc, console);
-	console->fill_application_input_register_interval(&this->start_address, &this->end_address, &this->quantity);
+	this->client = new ModbusClient(logger, plc, workbench);
+	workbench->fill_application_input_register_interval(&this->start_address, &this->end_address, &this->quantity);
 }
 
 Statusbarlet::~Statusbarlet() {

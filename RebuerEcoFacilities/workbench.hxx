@@ -4,9 +4,9 @@
 
 namespace WarGrey::SCADA {
     [::Windows::Foundation::Metadata::WebHostHidden]
-	public ref class Console sealed : public Windows::UI::Xaml::Controls::SplitView {
+	public ref class Workbench sealed : public Windows::UI::Xaml::Controls::SplitView {
 	public:
-		Console();
+		Workbench();
 
 	public:
 		void initialize_component(Windows::Foundation::Size region);
