@@ -103,7 +103,7 @@
                                   (define-values (lwidth _lh _ld _ls) (send dc get-text-extent label legend-font #true))
                                   (define-values (pwidth _ph _pd _ps) (send dc get-text-extent percentage legend-font #true))
                                   (draw-ring (cdr rest) radiann (max lwidth max-lwidth) (max pwidth max-pwidth)
-                                             (cons (vector label percentage brush) legends)))])))
+                                             (cons (vector label percentage pwidth brush) legends)))])))
                 
                 (send dc set-clipping-region #false)
                 (define legend-box-x (+ dx legend-off))
@@ -127,13 +127,14 @@
                       [idx (in-naturals)])
                   (define label (vector-ref lgd 0))
                   (define lbl% (vector-ref lgd 1))
+                  (define legend-x (+ legend-x0 1em legend-label-width (- 1ch legend-off) (- legend-%width (vector-ref lgd 2))))
                   (define legend-y (+ legend-y0 (* lineheight idx)))
-                  (send dc set-brush (vector-ref lgd 2))
+                  (send dc set-brush (vector-ref lgd 3))
                   (send dc draw-ellipse (+ legend-x0 legend-off) (+ legend-y legend-off) legend-diameter legend-diameter)
                   (send dc set-text-foreground label-color)
                   (send dc draw-text label (+ legend-x0 1em) legend-y #true)
                   (send dc set-text-foreground %-color)
-                  (send dc draw-text lbl% (+ legend-x0 1em legend-label-width (- 1ch legend-off)) legend-y #true))))
+                  (send dc draw-text lbl% legend-x legend-y #true))))
             
             (send* dc
               (set-font saved-font)
