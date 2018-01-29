@@ -37,17 +37,20 @@ namespace WarGrey::SCADA {
 		virtual void collapse() {};
 
     public:
-        virtual void on_pointer_moved(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
+        virtual bool on_pointer_moved(
+			Windows::UI::Input::PointerPoint^ pt,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
 
-        virtual void on_pointer_pressed(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
-
-        virtual void on_pointer_released(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {};
+        virtual bool on_pointer_pressed(
+			Windows::UI::Input::PointerPoint^ pt,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
+        
+		virtual bool on_pointer_released(
+			Windows::UI::Input::PointerPoint^ pt,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
 
 	public:
 		virtual WarGrey::SCADA::ISnip* find_snip(float x, float y) = 0;
@@ -97,20 +100,9 @@ namespace WarGrey::SCADA {
 		void collapse() override;
 
     public:
-        virtual void on_pointer_moved(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args)
-            override;
-
-        virtual void on_pointer_pressed(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args)
-            override;
-
-        virtual void on_pointer_released(
-            Windows::UI::Xaml::UIElement^ obj,
-            Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args)
-            override;
+		bool on_pointer_moved(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_pressed(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_released(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
 
     public:
         void fill_snips_bounds(float* x, float* y, float* width, float* height);

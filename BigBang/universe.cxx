@@ -421,33 +421,45 @@ void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ 
 	this->big_rip();
 }
 
-
 // TODO: distinguish rubberhand event and maniplation
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
-	
+
 	if (this->current_planet != nullptr) {
-		this->current_planet->on_pointer_moved(this->canvas, args);
+		auto pt = args->GetCurrentPoint(this->canvas);
+		auto vkms = args->KeyModifiers;
+
+		args->Handled = this->current_planet->on_pointer_moved(pt, vkms);
 	}
 
 	this->leave_critical_section();
 }
 
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	this->enter_critical_section();
-	
-	if (this->current_planet != nullptr) {
-		this->current_planet->on_pointer_pressed(this->canvas, args);
-	}
+	if (this->canvas->CapturePointer(args->Pointer)) {
+		this->enter_critical_section();
 
-	this->leave_critical_section();
+		if (this->current_planet != nullptr) {
+			auto pt = args->GetCurrentPoint(this->canvas);
+			auto vkms = args->KeyModifiers;
+
+			args->Handled = this->current_planet->on_pointer_pressed(pt, vkms);
+		}
+
+		this->leave_critical_section();
+	}
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	this->canvas->ReleasePointerCapture(args->Pointer);
+
 	this->enter_critical_section();
-	
+
 	if (this->current_planet != nullptr) {
-		this->current_planet->on_pointer_released(this->canvas, args);
+		auto pt = args->GetCurrentPoint(this->canvas);
+		auto vkms = args->KeyModifiers;
+
+		args->Handled = this->current_planet->on_pointer_released(pt, vkms);
 	}
 
 	this->leave_critical_section();

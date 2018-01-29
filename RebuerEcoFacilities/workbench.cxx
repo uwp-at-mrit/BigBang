@@ -6,8 +6,10 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 
+using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Input;
 
 /*************************************************************************************************/
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
@@ -25,17 +27,34 @@ public:
 
 /*************************************************************************************************/
 Workbench::Workbench() : SplitView() {
-	this->Margin = ThicknessHelper::FromUniformLength(4.0);
+	this->Margin = ThicknessHelper::FromUniformLength(0.0);
 	this->PanePlacement = SplitViewPanePlacement::Left;
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
 	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
+
+	this->PointerMoved += ref new PointerEventHandler(this, &Workbench::on_pointer_moved);
 }
 
 void Workbench::initialize_component(Size region) {
 	this->universe = ref new Universe("Workbench");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
+}
+
+void Workbench::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	auto pt = args->GetCurrentPoint(this);
+	float x = pt->Position.X;
+
+	if (!pt->Properties->IsLeftButtonPressed) {
+		if (x <= this->Margin.Left) {
+			this->IsPaneOpen = true;
+			args->Handled = true;
+		} else if (x > this->OpenPaneLength) {
+			this->IsPaneOpen = false;
+			args->Handled = true;
+		}
+	}
 }
 
 void Workbench::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {

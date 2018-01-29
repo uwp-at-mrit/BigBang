@@ -16,12 +16,10 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::System;
-using namespace Windows::Devices::Input;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::ViewManagement;
 
@@ -388,81 +386,86 @@ void Planet::no_selected() {
 }
 
 /************************************************************************************************/
-void Planet::on_pointer_moved(UIElement^ master, PointerRoutedEventArgs^ e) {
-    if (!e->Handled) {
-        auto ppt = e->GetCurrentPoint(master);
-        float x = ppt->Position.X;
-        float y = ppt->Position.Y;
-
-        if (ppt->Properties->IsLeftButtonPressed) {
-            if (this->rubberband_y == nullptr) {
-				// TODO: implement interactive moving
-                this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
-				this->last_pointer_x = x;
-				this->last_pointer_y = y;
-            } else {
-                (*this->rubberband_x) = x;
-                (*this->rubberband_y) = y;
-            }
-        }
-
-        e->Handled = true;
-    }
-}
-
-void Planet::on_pointer_pressed(UIElement^ master, PointerRoutedEventArgs^ e) {
-	if ((!e->Handled) && (master->CapturePointer(e->Pointer))) {
-		auto ppt = e->GetCurrentPoint(master);
+bool Planet::on_pointer_moved(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+	bool handled = false;
+	
+	if (ppt->Properties->IsLeftButtonPressed) {
 		float x = ppt->Position.X;
 		float y = ppt->Position.Y;
 
-		if (ppt->Properties->IsLeftButtonPressed) {
-			ISnip* snip = this->find_snip(x, y);
-
+		if (this->rubberband_y == nullptr) {
+			// TODO: implement interactive moving
+			this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
 			this->last_pointer_x = x;
 			this->last_pointer_y = y;
+		} else {
+			(*this->rubberband_x) = x;
+			(*this->rubberband_y) = y;
+		}
 
-			if (snip == nullptr) {
-				this->rubberband_x[0] = x;
-				this->rubberband_x[1] = y;
-				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-				this->no_selected();
-			} else {
-				SnipInfo* info = SNIP_INFO(snip);
-				float selected_x = x - info->x;
-				float selected_y = y - info->y;
-				
-				this->rubberband_y = nullptr;
+		handled = true;
+	}
 
-				if (unsafe_snip_unmasked(info, this->mode)) {
-					if ((!info->selected) && this->listener->can_select(this, snip, selected_x, selected_y)) {
-						if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
-							if (this->rubberband_allowed) {
-								unsafe_add_selected(this, this->listener, snip, info, selected_x, selected_y);
-							}
-						} else {
-							unsafe_set_selected(this, this->listener, snip, info, selected_x, selected_y);
+	return handled;
+}
+
+bool Planet::on_pointer_pressed(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+	bool handled = false;
+	
+	if (ppt->Properties->IsLeftButtonPressed) {
+		float x = ppt->Position.X;
+		float y = ppt->Position.Y;
+		ISnip* snip = this->find_snip(x, y);
+
+		this->last_pointer_x = x;
+		this->last_pointer_y = y;
+
+		if (snip == nullptr) {
+			this->rubberband_x[0] = x;
+			this->rubberband_x[1] = y;
+			this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
+			this->no_selected();
+		} else {
+			SnipInfo* info = SNIP_INFO(snip);
+			float selected_x = x - info->x;
+			float selected_y = y - info->y;
+
+			this->rubberband_y = nullptr;
+
+			if (unsafe_snip_unmasked(info, this->mode)) {
+				if ((!info->selected) && this->listener->can_select(this, snip, selected_x, selected_y)) {
+					if (vkms == VirtualKeyModifiers::Shift) {
+						if (this->rubberband_allowed) {
+							unsafe_add_selected(this, this->listener, snip, info, selected_x, selected_y);
 						}
+					} else {
+						unsafe_set_selected(this, this->listener, snip, info, selected_x, selected_y);
 					}
 				}
 			}
-		} else {
-			this->no_selected();
 		}
 
-		e->Handled = true;
-    }
+		handled = true;
+	} else {
+		this->no_selected();
+
+		handled = true;
+	}
+
+	return handled;
 }
 
-void Planet::on_pointer_released(UIElement^ master, PointerRoutedEventArgs^ e) {
-    if (!e->Handled) {
-        if (this->rubberband_y != nullptr) {
-            this->rubberband_y = nullptr;
-			// TODO: select all touched snips
-		}
+bool Planet::on_pointer_released(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+	bool handled = false;
 
-        e->Handled = true;
-    }
+	if (this->rubberband_y != nullptr) {
+		this->rubberband_y = nullptr;
+		// TODO: select all touched snips
+
+		handled = true;
+	}
+
+	return handled;
 }
 
 /*************************************************************************************************/
