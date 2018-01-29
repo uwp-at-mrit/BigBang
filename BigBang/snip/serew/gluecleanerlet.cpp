@@ -16,7 +16,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static const Color hat_color = hsla(194.74, 0.53, 0.79);
 static const Color hat_hlcolor = hsla(40.0, 1.0, 0.97);
 
-GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
     if (thickness == 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
@@ -26,16 +26,16 @@ GlueCleanerlet::GlueCleanerlet(float width, float height, float thickness, doubl
 
     this->fitting_width = this->pipe_thickness * default_fitting_width_pipe_ratio;
 
-    this->color = hsla(color, saturation, light);
-    this->highlight_color = hsla(color, saturation, highlight);
-    this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
-    this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
-    this->endpoint_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
+    this->ckcolor = hsla(ckcolor, saturation, light);
+    this->highlight_color = hsla(ckcolor, saturation, highlight);
+    this->fitting_color = hsla(ckcolor, saturation, light * default_fitting_lightness_rate);
+    this->body_color = hsla(ckcolor, saturation, light * default_body_lightness_rate);
+    this->endpoint_color = hsla(ckcolor, saturation, light * default_endpoint_lightness_rate);
 }
 
 void GlueCleanerlet::construct() {
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
-    Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
+    Color pipe_colors[] = { this->ckcolor, this->highlight_color, this->ckcolor, this->ckcolor };
     Color hat_colors[] = { hat_color, hat_hlcolor, hat_color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors); 
     auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
@@ -114,7 +114,7 @@ void GlueCleanerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
         brush_translate(this->fitting_brush, x, y);
         brush_translate(this->pipe_brush, x, y);
-        ds->FillEllipse(fitting_cx, fitting_cy, fitting_rx, fitting_cy - fitting_y, this->color);
+        ds->FillEllipse(fitting_cx, fitting_cy, fitting_rx, fitting_cy - fitting_y, this->ckcolor);
         ds->DrawCachedGeometry(this->pipe, x, hpipe_y, this->pipe_brush);
         ds->DrawCachedGeometry(this->fitting, x, fitting_y, this->fitting_brush);
     }

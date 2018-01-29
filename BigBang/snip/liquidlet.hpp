@@ -9,14 +9,14 @@ namespace WarGrey::SCADA {
     private class Liquidlet : public WarGrey::SCADA::ISnip {
     public:
         Liquidlet(float length, WarGrey::SCADA::ArrowPosition = WarGrey::SCADA::Start,
-			double color = 38.825, double saturation = 1.000, double lightness = 0.500,
+			double ckcolor = 38.825, double saturation = 1.000, double lightness = 0.500,
 			Windows::UI::Color& scale_color = Windows::UI::Colors::Yellow);
 
     public:
 		void construct() override;
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-        void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+        
 	public:
 		void set_temperatures(float in, float out);
 

@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class Gearboxlet : public WarGrey::SCADA::IMotorSnip {
     public:
-        Gearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight);
+        Gearboxlet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight);
 
     public:
         void construct() override;
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
         float fitting_width;
 
     protected:
-        Windows::UI::Color color;
+        Windows::UI::Color ckcolor;
         Windows::UI::Color fitting_color;
         Windows::UI::Color highlight_color;
         Windows::UI::Color body_color;
@@ -40,7 +40,7 @@ namespace WarGrey::SCADA {
     private class LGearboxlet : public WarGrey::SCADA::Gearboxlet {
     public:
         LGearboxlet(float width, float height, float thickness = 0.0F,
-            double color = 120.0, double saturation = 0.607,
+            double ckcolor = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
     
     public:
@@ -58,7 +58,7 @@ namespace WarGrey::SCADA {
     private class RGearboxlet : public WarGrey::SCADA::Gearboxlet {
     public:
         RGearboxlet(float width, float height, float thickness = 0.0F,
-            double color = 120.0, double saturation = 0.607,
+            double ckcolor = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
 
     public:

@@ -103,7 +103,7 @@ void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
 void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scale, int mscale
 	, CanvasTextLayout^ scales_layout, CanvasTextLayout^ scale_layout, CanvasTextLayout^ label_layout
-	, ICanvasBrush^ color) {
+	, ICanvasBrush^ ckcolor) {
     float body_yoff = scales_layout->DrawBounds.Y + this->mark_interval * 0.5F;
     float body_x = x + this->mark_width * 5.0F;
     float body_y = y + body_yoff;
@@ -112,7 +112,7 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scal
 	float current_height = std::fmin(scale * body_height / float(mscale), body_height);
 
     ds->FillRectangle(body_x, body_y, body_width, body_height, Colors::Gray);
-    ds->FillRectangle(body_x, body_y + body_height - current_height, body_width, current_height, color);
+    ds->FillRectangle(body_x, body_y + body_height - current_height, body_width, current_height, ckcolor);
     ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::GhostWhite);
     
     { // draw scales and marks

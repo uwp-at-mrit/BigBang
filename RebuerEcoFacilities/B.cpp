@@ -7,7 +7,6 @@
 #include "paint.hpp"
 
 #include "interaction/listener.hpp"
-#include "decorator/border.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -95,7 +94,7 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 
 // WARNING: order matters, Desulphurizer, Cleaner and Mooney are also anchors for water pipes 
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
-private enum BMode { WindowUI = 0, Monitor, Control };
+private enum BMode { WindowUI = 0, View, Control };
 
 private class BConsole : public WarGrey::SCADA::ModbusConfirmation {
 public:
@@ -439,20 +438,29 @@ private:
 
 private class BListener : public WarGrey::SCADA::IUniverseListener {
 public:
-	bool can_select(IPlanet* master, ISnip* snip) override {
-		return (dynamic_cast<Gaugelet*>(snip) != nullptr);
+	bool can_select(IPlanet* master, ISnip* snip, float x, float y) override {
+		return ((dynamic_cast<Togglet*>(snip) != nullptr) || (dynamic_cast<Statusbarlet*>(snip) != nullptr));
 	}
 
-	void after_select(IPlanet* master, ISnip* snip, bool on_or_off) {
+	void after_select(IPlanet* master, ISnip* snip, bool is_on, float x, float y) {
+		if (is_on) {
+			BWorkbench* workbench = static_cast<BWorkbench*>(master);
+			Togglet* button = dynamic_cast<Togglet*>(snip);
+
+			if (button != nullptr) {
+				button->toggle();
+				workbench->change_mode(button->checked() ? BMode::Control : BMode::View);
+			}
+		}
 	}
 };
 
-private class BDecorator : public virtual WarGrey::SCADA::BorderDecorator {
+private class BDecorator : public virtual WarGrey::SCADA::IUniverseDecorator {
 public:
-	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : BorderDecorator(false, false, true) {
+	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : IUniverseDecorator() {
 		auto font = make_text_format("Consolas", fontsize);
 
-		this->color = make_solid_brush(caption_color);
+		this->ckcolor = make_solid_brush(caption_color);
 		this->caption = make_text_layout(speak(caption), font);
 	};
 
@@ -461,28 +469,28 @@ public:
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
-		ds->DrawTextLayout(this->caption, x, y, this->color);
+		ds->DrawTextLayout(this->caption, x, y, this->ckcolor);
 	}
 
 	void draw_before_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
-				ds->DrawLine(0, height, width, height, this->color, 2.0F);
+				ds->DrawLine(0, height, width, height, this->ckcolor, 2.0F);
 			} else if (self == this->statusline) { // statusline's topline
-				ds->DrawLine(0, y, width, y, this->color, 2.0F);
+				ds->DrawLine(0, y, width, y, this->ckcolor, 2.0F);
 			} else { // avoid dynamic_cast every time.
 				auto maybe_statusline = dynamic_cast<Statuslinelet*>(self);
 				
 				if (maybe_statusline != nullptr) {
 					this->statusline = maybe_statusline;
-					ds->DrawLine(0, y, width, y, this->color, 2.0F);
+					ds->DrawLine(0, y, width, y, this->ckcolor, 2.0F);
 				}
 			}
 		}
 	}
 
 private:
-	ICanvasBrush^ color;
+	ICanvasBrush^ ckcolor;
 	CanvasTextLayout^ caption;
 	Statuslinelet* statusline;
 };
@@ -503,7 +511,7 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 	auto console = dynamic_cast<BConsole*>(this->console);
 
 	if (console != nullptr) {
-		this->change_mode(BMode::Monitor);
+		this->change_mode(BMode::View);
 		console->load_icons(width, height);
 		console->load_gauges(width, height);
 		console->load_workline(width, height);
@@ -511,8 +519,10 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 		this->change_mode(BMode::WindowUI);
 		this->statusline = new Statuslinelet(Log::Debug);
 		this->statusbar = new Statusbarlet(this->caption, this->device, console, this->statusline);
+		this->shift = new Togglet(false, "control_mode", "view_mode");
 		this->insert(this->statusbar);
 		this->insert(this->statusline);
+		this->insert(this->shift);
 	}
 }
 
@@ -520,13 +530,15 @@ void BWorkbench::reflow(float width, float height) {
 	auto console = dynamic_cast<BConsole*>(this->console);
 	
 	if (console != nullptr) {
-		float vinset;
+		float vinset, toggle_width;
 
 		this->change_mode(BMode::WindowUI);
 		this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &vinset);
+		this->shift->fill_extent(0.0F, 0.0F, &toggle_width, nullptr);
 		this->move_to(this->statusline, 0.0F, height - vinset);
+		this->move_to(this->shift, width - toggle_width - vinset, vinset + vinset);
 
-		this->change_mode(BMode::Monitor);
+		this->change_mode(BMode::View);
 		console->reflow_icons(vinset, width, height);
 		console->reflow_gauges(vinset, width, height);
 		console->reflow_serew(vinset, width, height);

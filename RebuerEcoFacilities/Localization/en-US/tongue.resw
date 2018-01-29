@@ -186,4 +186,10 @@
   <data name="temperature" xml:space="preserve">
     <value>T</value>
   </data>
+  <data name="control_mode" xml:space="preserve">
+    <value>Ctrl Mode</value>
+  </data>
+  <data name="view_mode" xml:space="preserve">
+    <value>View Mode</value>
+  </data>
 </root>

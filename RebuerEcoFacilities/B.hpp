@@ -3,6 +3,7 @@
 #include "planet.hpp"
 #include "modbus.hpp"
 
+#include "snip/togglet.hpp"
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
 #include "snip/storagelet.hpp"
@@ -34,5 +35,6 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
+		WarGrey::SCADA::Togglet* shift;
 	};
 }

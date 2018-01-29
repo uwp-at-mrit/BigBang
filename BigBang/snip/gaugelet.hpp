@@ -11,9 +11,9 @@ namespace WarGrey::SCADA {
 
 	public:
         void construct() override;
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-        void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+        
 	public:
 		void set_ampere(float ampere, bool force_update = false);
 		void set_rpm(int rpm, bool force_update = false);
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
             Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scales,
             Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scale,
 			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ label,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ckcolor);
 
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;

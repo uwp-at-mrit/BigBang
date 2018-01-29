@@ -17,7 +17,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static const float default_ratio = 1.8F;
 static const Color particle_color = Colors::Sienna;
 
-Funnellet::Funnellet(float width, float height, double color, double saturation, double dark, double light) {
+Funnellet::Funnellet(float width, float height, double ckcolor, double saturation, double dark, double light) {
     this->width = width;
     this->height = height;
     
@@ -27,13 +27,13 @@ Funnellet::Funnellet(float width, float height, double color, double saturation,
         this->height = -(width * height);
     }
 
-    this->color = hsla(color, saturation, dark);
-    this->highlight_color = hsla(color, saturation, light);
+    this->ckcolor = hsla(ckcolor, saturation, dark);
+    this->highlight_color = hsla(ckcolor, saturation, light);
 }
 
 void Funnellet::construct() {
-    Color topface_colors[] = { this->color, this->color, this->highlight_color, this->color };
-    Color body_colors[] = { this->color, this->highlight_color, this->color };
+    Color topface_colors[] = { this->ckcolor, this->ckcolor, this->highlight_color, this->ckcolor };
+    Color body_colors[] = { this->ckcolor, this->highlight_color, this->ckcolor };
 
     float radiusT = this->width * 0.500F;
     float radiusB = this->width * 0.125F;

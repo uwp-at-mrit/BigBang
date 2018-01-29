@@ -13,12 +13,12 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 static const float arrow_xoff = 2.0F;
 
-Liquidlet::Liquidlet(float length, ArrowPosition position, double color, double saturation, double lightness, Color& scolor) {
+Liquidlet::Liquidlet(float length, ArrowPosition position, double ckcolor, double saturation, double lightness, Color& scolor) {
 	this->length = length;
 	this->position = position;
 	this->arrowhead_size = 4.0F;
-	this->arrow_brush = make_solid_brush(hsla(color, saturation, lightness, 1.00));
-	this->pipe_brush = make_solid_brush(hsla(color, saturation, lightness, 0.40));
+	this->arrow_brush = make_solid_brush(hsla(ckcolor, saturation, lightness, 1.00));
+	this->pipe_brush = make_solid_brush(hsla(ckcolor, saturation, lightness, 0.40));
 	this->scale_brush = make_solid_brush(scolor);
 	this->font = make_text_format(8.0F);
 }

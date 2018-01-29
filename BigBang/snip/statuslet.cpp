@@ -283,8 +283,8 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::set_message(Platform::String^ message, Log level) {
-	auto color = status_colors[static_cast<unsigned int>(level)]; 
-	this->color = ((color == nullptr) ? status_nolog_color : color);
+	auto ckcolor = status_colors[static_cast<unsigned int>(level)]; 
+	this->ckcolor = ((ckcolor == nullptr) ? status_nolog_color : ckcolor);
 
 	if (this->info == nullptr) {
 		this->status = make_text_layout(message, status_font);
@@ -307,7 +307,7 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->DrawTextLayout(this->status, x, y, this->color);
+	ds->DrawTextLayout(this->status, x, y, this->ckcolor);
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {

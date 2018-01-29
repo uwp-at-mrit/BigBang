@@ -13,7 +13,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Gearboxlet::Gearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+Gearboxlet::Gearboxlet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
     : width(width), height(height), pipe_thickness(thickness) {
     if (thickness <= 0.0F) {
         this->pipe_thickness = this->width * default_pipe_thickness_ratio;
@@ -23,16 +23,16 @@ Gearboxlet::Gearboxlet(float width, float height, float thickness, double color,
 
     this->fitting_width = this->pipe_thickness * default_fitting_width_pipe_ratio;
 
-    this->color = hsla(color, saturation, light);
-    this->highlight_color = hsla(color, saturation, highlight);
-    this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
-    this->body_color = hsla(color, saturation, light * default_body_lightness_rate);
-    this->gbox_color = hsla(color, saturation, light * default_endpoint_lightness_rate);
+    this->ckcolor = hsla(ckcolor, saturation, light);
+    this->highlight_color = hsla(ckcolor, saturation, highlight);
+    this->fitting_color = hsla(ckcolor, saturation, light * default_fitting_lightness_rate);
+    this->body_color = hsla(ckcolor, saturation, light * default_body_lightness_rate);
+    this->gbox_color = hsla(ckcolor, saturation, light * default_endpoint_lightness_rate);
 }
 
 void Gearboxlet::construct() {
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
-    Color pipe_colors[] = { this->color, this->highlight_color, this->color, this->color };
+    Color pipe_colors[] = { this->ckcolor, this->highlight_color, this->ckcolor, this->ckcolor };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);
     auto pipe_stops = MAKE_GRADIENT_STOPS(pipe_colors);
 
@@ -88,17 +88,17 @@ void Gearboxlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
         brush_translate(this->basefit_brush, x, y - base_height);
         brush_translate(this->outfit_brush, x, y);
         this->locate_pipe(x, body_x, 0.1618F, basefit_rx, outfit_rx, &pipe_x, &basefit_x, &basefit_cx, &outfit_x, &outfit_cx);
-        ds->FillEllipse(basefit_cx, cy, basefit_rx, cy - y, this->color);
+        ds->FillEllipse(basefit_cx, cy, basefit_rx, cy - y, this->ckcolor);
         ds->DrawLine(pipe_x, cy, pipe_x + pipe_length, cy, this->pipe_brush, this->pipe_thickness);
         ds->DrawCachedGeometry(this->base_fitting, basefit_x, y, this->basefit_brush);
-        ds->FillEllipse(outfit_cx, cy, outfit_rx, outfit_ry, this->color);
+        ds->FillEllipse(outfit_cx, cy, outfit_rx, outfit_ry, this->ckcolor);
         ds->DrawCachedGeometry(this->outlet_fitting, outfit_x, y + this->outfit_brush->StartPoint.y, this->outfit_brush);
     }
 }
 
 /*************************************************************************************************/
-LGearboxlet::LGearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Gearboxlet(width, height, thickness, color, saturation, light, highlight) {}
+LGearboxlet::LGearboxlet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
+    : Gearboxlet(width, height, thickness, ckcolor, saturation, light, highlight) {}
     
 CanvasGeometry^ LGearboxlet::make_fitting(float rx, float ry) {
     return cylinder_rl_surface(rx, ry, this->fitting_width);
@@ -142,8 +142,8 @@ void LGearboxlet::locate_pipe(float x, float body_x, float offrate, float basefi
 }
 
 /*************************************************************************************************/
-RGearboxlet::RGearboxlet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Gearboxlet(width, height, thickness, color, saturation, light, highlight) {}
+RGearboxlet::RGearboxlet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
+    : Gearboxlet(width, height, thickness, ckcolor, saturation, light, highlight) {}
 
 CanvasGeometry^ RGearboxlet::make_fitting(float rx, float ry) {
     return cylinder_lr_surface(rx, ry, this->fitting_width);

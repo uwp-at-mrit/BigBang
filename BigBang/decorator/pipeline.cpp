@@ -26,15 +26,15 @@ void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, f
 
        if (pipe != nullptr) {
            if (this->draw_inport) {
-               static auto color = make_solid_brush(Colors::Orange);
+               static auto ckcolor = make_solid_brush(Colors::Orange);
                Rect region = pipe->get_input_port();
-               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
+               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, ckcolor, 1.0F);
            }
 
            if (this->draw_outport) {
-               static auto color = make_solid_brush(Colors::Firebrick);
+               static auto ckcolor = make_solid_brush(Colors::Firebrick);
                Rect region = pipe->get_output_port();
-               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
+               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, ckcolor, 1.0F);
            }
        }
     }
@@ -43,10 +43,10 @@ void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, f
 		IMotorSnip* pipe = dynamic_cast<IMotorSnip*>(self);
 
 		if (pipe != nullptr) {
-			static auto color = make_solid_brush(Colors::ForestGreen);
+			static auto ckcolor = make_solid_brush(Colors::ForestGreen);
 
 			Rect region = pipe->get_motor_port();
-			ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, color, 1.0F);
+			ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, ckcolor, 1.0F);
 		}
 	}
 }

@@ -13,10 +13,10 @@ namespace WarGrey::SCADA {
 
     public:
         void construct() override;
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
         void update(long long count, long long interval, long long uptime, bool is_slow) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-        void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-
+        
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
         WarGrey::SCADA::IModbusClient* client;
@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ckcolor;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
 	};
 }

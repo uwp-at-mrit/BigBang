@@ -30,8 +30,8 @@ void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, 
     brush->Transform = make_translation_matrix(x, y);
 }
 
-CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& color) {
-    return ref new CanvasSolidColorBrush(shared_ds, color);
+CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& ckcolor) {
+    return ref new CanvasSolidColorBrush(shared_ds, ckcolor);
 }
 
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey

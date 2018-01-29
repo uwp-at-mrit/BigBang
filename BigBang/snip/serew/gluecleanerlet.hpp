@@ -6,14 +6,14 @@ namespace WarGrey::SCADA {
     private class GlueCleanerlet : public WarGrey::SCADA::IMotorSnip {
     public:
         GlueCleanerlet(float width, float height, float thickness = 0.0F,
-            double color = 120.0, double saturation = 0.607,
+            double ckcolor = 120.0, double saturation = 0.607,
             double light = 0.339, double highlight = 0.839);
 
     public:
         void construct() override;
-        void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-        void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+        
     public:
         Windows::Foundation::Rect get_input_port() override;
         Windows::Foundation::Rect get_output_port() override;
@@ -26,7 +26,7 @@ namespace WarGrey::SCADA {
         float fitting_width;
 
     private:
-        Windows::UI::Color color;
+        Windows::UI::Color ckcolor;
         Windows::UI::Color fitting_color;
         Windows::UI::Color highlight_color;
         Windows::UI::Color body_color;

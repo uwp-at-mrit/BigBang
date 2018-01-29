@@ -53,7 +53,11 @@ public:
     float x;
     float y;
     float rotation;
+
+public:
     bool selected;
+	float selected_x;
+	float selected_y;
 
 public:
 	unsigned int mode;
@@ -126,15 +130,17 @@ static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, f
     }
 }
 
-static inline void unsafe_add_selected(IPlanet* master, IUniverseListener* listener, ISnip* snip, SnipInfo* info) {
-	listener->before_select(master, snip, true);
+static inline void unsafe_add_selected(IPlanet* master, IUniverseListener* listener, ISnip* snip, SnipInfo* info, float x, float y) {
+	listener->before_select(master, snip, true, x, y);
 	info->selected = true;
-	listener->after_select(master, snip, true);
+	info->selected_x = x;
+	info->selected_y = y;
+	listener->after_select(master, snip, true, x, y);
 }
 
-static inline void unsafe_set_selected(IPlanet* master, IUniverseListener* listener, ISnip* snip, SnipInfo* info) {
+static inline void unsafe_set_selected(IPlanet* master, IUniverseListener* listener, ISnip* snip, SnipInfo* info, float x, float y) {
 	master->no_selected();
-	unsafe_add_selected(master, listener, snip, info);
+	unsafe_add_selected(master, listener, snip, info, x, y);
 }
 
 static void snip_center_point_offset(ISnip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
@@ -346,8 +352,8 @@ void Planet::add_selected(ISnip* snip) {
 		SnipInfo* info = planet_snip_info(this, snip);
 
 		if ((info != nullptr) && (!info->selected)) {
-			if (unsafe_snip_unmasked(info, this->mode) && this->listener->can_select(this, snip)) {
-				unsafe_add_selected(this, this->listener, snip, info);
+			if (unsafe_snip_unmasked(info, this->mode) && this->listener->can_select(this, snip, 0.0F, 0.0F)) {
+				unsafe_add_selected(this, this->listener, snip, info, 0.0F, 0.0F);
 			}
 		}
 	}
@@ -357,8 +363,8 @@ void Planet::set_selected(ISnip* snip) {
 	SnipInfo* info = planet_snip_info(this, snip);
 
     if ((info != nullptr) && (!info->selected)) {
-		if (unsafe_snip_unmasked(info, this->mode) && (this->listener->can_select(this, snip))) {
-			unsafe_set_selected(this, this->listener, snip, info);
+		if (unsafe_snip_unmasked(info, this->mode) && (this->listener->can_select(this, snip, 0.0F, 0.0F))) {
+			unsafe_set_selected(this, this->listener, snip, info, 0.0F, 0.0F);
 		}
     }
 }
@@ -371,9 +377,9 @@ void Planet::no_selected() {
 			SnipInfo* info = SNIP_INFO(child);
 
             if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
-				this->listener->before_select(this, child, false);
+				this->listener->before_select(this, child, false, info->selected_x, info->selected_y);
 				info->selected = false;
-				this->listener->after_select(this, child, false);
+				this->listener->after_select(this, child, false, info->selected_x, info->selected_y);
 			}
 
 			child = info->next;
@@ -423,17 +429,19 @@ void Planet::on_pointer_pressed(UIElement^ master, PointerRoutedEventArgs^ e) {
 				this->no_selected();
 			} else {
 				SnipInfo* info = SNIP_INFO(snip);
+				float selected_x = x - info->x;
+				float selected_y = y - info->y;
 				
 				this->rubberband_y = nullptr;
 
 				if (unsafe_snip_unmasked(info, this->mode)) {
-					if ((!info->selected) && this->listener->can_select(this, snip)) {
+					if ((!info->selected) && this->listener->can_select(this, snip, selected_x, selected_y)) {
 						if (e->KeyModifiers == VirtualKeyModifiers::Shift) {
 							if (this->rubberband_allowed) {
-								unsafe_add_selected(this, this->listener, snip, info);
+								unsafe_add_selected(this, this->listener, snip, info, selected_x, selected_y);
 							}
 						} else {
-							unsafe_set_selected(this, this->listener, snip, info);
+							unsafe_set_selected(this, this->listener, snip, info, selected_x, selected_y);
 						}
 					}
 				}
@@ -451,7 +459,7 @@ void Planet::on_pointer_released(UIElement^ master, PointerRoutedEventArgs^ e) {
         if (this->rubberband_y != nullptr) {
             this->rubberband_y = nullptr;
 			// TODO: select all touched snips
-        }
+		}
 
         e->Handled = true;
     }

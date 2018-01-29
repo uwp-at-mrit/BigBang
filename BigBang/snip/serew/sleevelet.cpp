@@ -13,7 +13,7 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Sleevelet::Sleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
+Sleevelet::Sleevelet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
     : width(width), height(height), thickness(thickness) {
     if (thickness <= 0.0F) {
         this->thickness = this->width * default_pipe_thickness_ratio;
@@ -27,13 +27,13 @@ Sleevelet::Sleevelet(float width, float height, float thickness, double color, d
 
     this->fitting_width = this->thickness * default_fitting_width_pipe_ratio;
 
-    this->color = hsla(color, saturation, light);
-    this->highlight_color = hsla(color, saturation, highlight);
-    this->fitting_color = hsla(color, saturation, light * default_fitting_lightness_rate);
+    this->ckcolor = hsla(ckcolor, saturation, light);
+    this->highlight_color = hsla(ckcolor, saturation, highlight);
+    this->fitting_color = hsla(ckcolor, saturation, light * default_fitting_lightness_rate);
 }
 
 void Sleevelet::construct() {
-    Color colors[] = { this->color, this->highlight_color, this->color, this->color };
+    Color colors[] = { this->ckcolor, this->highlight_color, this->ckcolor, this->ckcolor };
     Color fitting_colors[] = { this->fitting_color, this->highlight_color, this->fitting_color, this->fitting_color };
     auto fitting_stops = MAKE_GRADIENT_STOPS(fitting_colors);
     
@@ -88,8 +88,8 @@ void Sleevelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
         
         this->brush->Opacity = 1.0F;
         this->locate_pipe(x, fitting_rx, fitting_off, &infit_x, &infit_cx, &outfit_x, &outfit_cx);
-        ds->FillEllipse(infit_cx, y + fitting_ry, fitting_rx, fitting_ry, this->color);
-        ds->FillEllipse(outfit_cx, y + fitting_ry, fitting_rx, fitting_ry, this->color);
+        ds->FillEllipse(infit_cx, y + fitting_ry, fitting_rx, fitting_ry, this->ckcolor);
+        ds->FillEllipse(outfit_cx, y + fitting_ry, fitting_rx, fitting_ry, this->ckcolor);
         ds->DrawCachedGeometry(this->hollow_body, x, y, this->brush);
         ds->DrawCachedGeometry(this->fitting, infit_x, y, this->fitting_brush);
         ds->DrawCachedGeometry(this->fitting, outfit_x, y, this->fitting_brush);
@@ -97,8 +97,8 @@ void Sleevelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 }
 
 /*************************************************************************************************/
-LSleevelet::LSleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Sleevelet(width, height, thickness, color, saturation, light, highlight) {}
+LSleevelet::LSleevelet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
+    : Sleevelet(width, height, thickness, ckcolor, saturation, light, highlight) {}
 
 void LSleevelet::update(long long count, long long interval, long long uptime, bool is_slow) {
     this->cartoon_style->DashOffset = -float(count);
@@ -128,8 +128,8 @@ void LSleevelet::locate_pipe(float x, float rx, float off, float* infit_x, float
 }
 
 /*************************************************************************************************/
-RSleevelet::RSleevelet(float width, float height, float thickness, double color, double saturation, double light, double highlight)
-    : Sleevelet(width, height, thickness, color, saturation, light, highlight) {}
+RSleevelet::RSleevelet(float width, float height, float thickness, double ckcolor, double saturation, double light, double highlight)
+    : Sleevelet(width, height, thickness, ckcolor, saturation, light, highlight) {}
 
 void RSleevelet::update(long long count, long long interval, long long uptime, bool is_slow) {
     this->cartoon_style->DashOffset = float(count);
