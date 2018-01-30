@@ -2,6 +2,7 @@
 
 #include "object.hpp"
 #include "planet.hpp"
+#include "snip/snip.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class Menu { Start, Stop };
@@ -17,7 +18,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void append(WarGrey::SCADA::Menu cmd, WarGrey::SCADA::IMenuCommand* exe);
-		void show(WarGrey::SCADA::IPlanet* planet, WarGrey::SCADA::ISnip* snip, float local_x, float local_y);
+		void show_for(WarGrey::SCADA::ISnip* snip, float local_x, float local_y);
 		WarGrey::SCADA::ISnip* current_snip();
 
 	private:

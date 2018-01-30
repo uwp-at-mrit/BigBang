@@ -601,7 +601,7 @@ void BWorkbench::after_select(ISnip* snip, bool is_on, float local_x, float loca
 			Motorlet* motor = dynamic_cast<Motorlet*>(snip);
 
 			if (motor != nullptr) {
-				this->motorcmd->show(this, motor, local_x, local_y);
+				this->motorcmd->show_for(motor, local_x, local_y);
 				this->no_selected();
 			}
 		}

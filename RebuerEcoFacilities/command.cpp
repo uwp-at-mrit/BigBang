@@ -9,24 +9,29 @@ using namespace Windows::Foundation;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 
+/** NOTE
+ * interface linguistically is not a class
+ * all the required methods therefore should be marked as `virtual` instead of `override`.
+ */
+
 private ref class MenuCommand sealed : public ICommand {
 internal:
 	MenuCommand(CommandMenu* menu, IMenuCommand* exe, Menu cmd) : master(menu), executor(exe), command(cmd) {}
 
 public:
-	bool CanExecute(Platform::Object^ who_cares) override {
+	virtual bool CanExecute(Platform::Object^ who_cares) {
 		return true;
 	}
 
-	void Execute(Platform::Object^ who_cares) override {
+	virtual void Execute(Platform::Object^ who_cares) {
 		this->executor->execute(this->command, this->master->current_snip());
 	}
 
 public:
 	event EventHandler<Platform::Object^>^ CanExecuteChanged {
 		// this event is useless in this project but to satisfy the C++/CX compiler
-		EventRegistrationToken add(EventHandler<Platform::Object^>^ handler) override { return EventRegistrationToken{ 0L }; }
-		void remove(EventRegistrationToken token) override {}
+		virtual EventRegistrationToken add(EventHandler<Platform::Object^>^ handler) { return EventRegistrationToken{ 0L }; }
+		virtual void remove(EventRegistrationToken token) {}
 	}
 
 private:
@@ -49,7 +54,9 @@ void CommandMenu::append(Menu cmd, IMenuCommand* exe) {
 	menu->Items->Append(item);
 }
 
-void CommandMenu::show(IPlanet* console, ISnip* snip, float x, float y) {
+void CommandMenu::show_for(ISnip* snip, float x, float y) {
+	IPlanet* console = snip->info->master;
+
 	this->snip = snip;
 	this->menu->ShowAt(console->info->master->canvas, console->local_to_global_point(snip, x, y));
 }
