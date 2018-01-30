@@ -44,7 +44,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\liquidlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.hpp" />

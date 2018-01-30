@@ -4,7 +4,7 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	private class IUniverseDecorator abstract : public WarGrey::SCADA::SharedObject {
+	private class IPlanetDecorator abstract : public WarGrey::SCADA::SharedObject {
     public:
         virtual void draw_before(
             WarGrey::SCADA::IPlanet* master,

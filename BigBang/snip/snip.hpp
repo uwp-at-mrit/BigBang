@@ -18,8 +18,14 @@ namespace WarGrey::SCADA {
     public:
 		virtual ~ISnip() noexcept;
 
+	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void save(Platform::String^ path, float dpi = 96.0F);
+
+	public:
+		// `id` is designed for user-applications, in order to distinguish instances of a snip class.
+		// User-Applications should define and maintain the enumerations on their own.
+		int id = -1;
 
     public:
         virtual void construct() {}

@@ -91,9 +91,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
       <Filter>snip\pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)interaction\listener.hpp">
-      <Filter>interaction</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\constants.hpp" />

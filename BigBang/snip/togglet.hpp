@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private class Togglet : public WarGrey::SCADA::ISnip {
 	public:
-		Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label,
+		Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width = 0.0F,
 			Windows::UI::Color& checked_color = system_color(Windows::UI::ViewManagement::UIElementType::Highlight),
 			Windows::UI::Color& unchecked_color = system_color(Windows::UI::ViewManagement::UIElementType::InactiveCaption),
 			Windows::UI::Color& label_color = system_color(Windows::UI::ViewManagement::UIElementType::HighlightText));
@@ -27,6 +27,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lblcolor;
 
 	private:
+		float width;
 		bool state;
 	};
 }

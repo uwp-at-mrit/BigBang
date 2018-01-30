@@ -3,7 +3,7 @@
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
-    private class PipelineDecorator : public virtual WarGrey::SCADA::IUniverseDecorator {
+    private class PipelineDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
     public:
         PipelineDecorator(bool draw_inport = true, bool draw_outport = true, bool draw_motorport = true);
 

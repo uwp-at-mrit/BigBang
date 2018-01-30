@@ -2,9 +2,7 @@
 
 namespace WarGrey::SCADA {
     class IPlanet;
-
-    class IUniverseListener;
-    class IUniverseDecorator;
+    class IPlanetDecorator;
 
     class ISnip;
 

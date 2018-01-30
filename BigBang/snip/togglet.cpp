@@ -12,8 +12,9 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Windows::Foundation::Numerics;
 
-Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label
-	, Color& ckcolor, Color& uncolor, Color& label_color) {
+Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width
+	, Color& ckcolor, Color& uncolor, Color& label_color)
+	: state(initial_state), width(width) {
 	CanvasTextFormat^ font = make_text_format("Consolas", 24.0F);
 
 	this->label = make_text_layout(speak(checked_label), font);
@@ -23,14 +24,24 @@ Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::
 	this->lblcolor = make_solid_brush(label_color);
 
 	this->state = initial_state;
+	this->width = width;
+	
+	if (this->width <= 0.0F) {
+		float label_height = this->label->LayoutBounds.Height;
+
+		if (width == 0.0F) {
+			float label_width = std::max(this->label->LayoutBounds.Width, this->unlabel->LayoutBounds.Width);
+
+			this->width = label_width + label_height * 1.618F;
+		} else {
+			this->width *= (-label_height);
+		}
+	}
 }
 
 void Togglet::fill_extent(float x, float y, float* width, float* height) {
-	float label_width = std::max(this->label->LayoutBounds.Width, this->unlabel->LayoutBounds.Width);
-	float label_height = this->label->LayoutBounds.Height;
-
-	SET_BOX(width, label_width + label_height * 1.618F);
-	SET_BOX(height, label_height);
+	SET_BOX(width, this->width);
+	SET_BOX(height, this->label->LayoutBounds.Height);
 }
 
 void Togglet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

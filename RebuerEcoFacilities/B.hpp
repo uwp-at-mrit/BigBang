@@ -26,6 +26,10 @@ namespace WarGrey::SCADA {
 		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 
+	public:
+		bool can_select(ISnip* snip, float x, float y) override;
+		void after_select(ISnip* snip, bool is_on, float x, float y) override;
+
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
 		Platform::String^ caption;

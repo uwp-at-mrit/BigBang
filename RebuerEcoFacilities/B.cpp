@@ -6,8 +6,6 @@
 #include "text.hpp"
 #include "paint.hpp"
 
-#include "interaction/listener.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -22,6 +20,15 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 #define SNIPS_ARITY(a) (sizeof(a) / sizeof(ISnip*))
+
+static inline Motorlet* load_motorlet(IPlanet* master, float width, unsigned int id) {
+	Motorlet* motor = new Motorlet(width);
+
+	motor->id = id;
+	master->insert(motor);
+
+	return motor;
+}
 
 static inline Motorlet* load_motorlet(IPlanet* master, float width, double degree = 0.0) {
 	Motorlet* motor = new Motorlet(width);
@@ -180,6 +187,15 @@ public:
 		}
 	}
 
+	void load_controlable_motors() {
+		size_t mc = SNIPS_ARITY(this->controlable_motors);
+		float motor_width = 64.0F;
+
+		for (unsigned int idx = 0; idx < mc; idx++) {
+			this->controlable_motors[idx] = load_motorlet(this->workbench, motor_width, idx);
+		}
+	}
+
 public:
 	void reflow_icons(float vinset, float width, float height) {
 		float icon_gapsize = 64.0F;
@@ -297,6 +313,20 @@ public:
 
 			this->workbench->fill_snip_bound(this->mooneys[0], &pipe_x, &pipe_y, nullptr, nullptr);
 			this->move_scales_ptt(this->mscales, mc, pipe_x + scale_xoff, pipe_y + pport.Y, scale_height, pipe_length, pport.Height);
+		}
+	}
+
+	void reflow_controlable_motors(float vinset, float width, float height) {
+		size_t mc = SNIPS_ARITY(this->controlable_motors);
+		float motor_width, motor_height, gapsize;
+		int lcount = 8;
+
+		this->controlable_motors[0]->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
+		gapsize = motor_width * 0.382F;
+		for (unsigned int idx = 0; idx < mc; idx++) {
+			this->workbench->move_to(this->controlable_motors[idx],
+				(idx % lcount) * (motor_width + gapsize) + gapsize,
+				(idx / lcount) * (motor_height + gapsize) + vinset + gapsize);
 		}
 	}
 
@@ -430,34 +460,18 @@ private:
 	Liquidlet* water_pipes[6];
 
 private:
+	Motorlet* controlable_motors[30];
+
+private:
 	BWorkbench* workbench;
 	uint16 inaddr0;
 	uint16 inaddrn;
 	uint16 inaddrq;
 };
 
-private class BListener : public WarGrey::SCADA::IUniverseListener {
+private class BDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
 public:
-	bool can_select(IPlanet* master, ISnip* snip, float x, float y) override {
-		return ((dynamic_cast<Togglet*>(snip) != nullptr) || (dynamic_cast<Statusbarlet*>(snip) != nullptr));
-	}
-
-	void after_select(IPlanet* master, ISnip* snip, bool is_on, float x, float y) {
-		if (is_on) {
-			BWorkbench* workbench = static_cast<BWorkbench*>(master);
-			Togglet* button = dynamic_cast<Togglet*>(snip);
-
-			if (button != nullptr) {
-				button->toggle();
-				workbench->change_mode(button->checked() ? BMode::Control : BMode::View);
-			}
-		}
-	}
-};
-
-private class BDecorator : public virtual WarGrey::SCADA::IUniverseDecorator {
-public:
-	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : IUniverseDecorator() {
+	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : IPlanetDecorator() {
 		auto font = make_text_format("Consolas", fontsize);
 
 		this->ckcolor = make_solid_brush(caption_color);
@@ -497,7 +511,6 @@ private:
 
 BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)), caption(label), device(plc) {
 	this->console = new BConsole(this);
-	this->set_pointer_listener(new BListener());
 	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 
@@ -516,10 +529,13 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 		console->load_gauges(width, height);
 		console->load_workline(width, height);
 
+		this->change_mode(BMode::Control);
+		console->load_controlable_motors();
+
 		this->change_mode(BMode::WindowUI);
 		this->statusline = new Statuslinelet(Log::Debug);
 		this->statusbar = new Statusbarlet(this->caption, this->device, console, this->statusline);
-		this->shift = new Togglet(false, "control_mode", "view_mode");
+		this->shift = new Togglet(false, "control_mode", "view_mode", -6.18F);
 		this->insert(this->statusbar);
 		this->insert(this->statusline);
 		this->insert(this->shift);
@@ -538,9 +554,25 @@ void BWorkbench::reflow(float width, float height) {
 		this->move_to(this->statusline, 0.0F, height - vinset);
 		this->move_to(this->shift, width - toggle_width - vinset, vinset + vinset);
 
+		this->change_mode(BMode::Control);
+		console->reflow_controlable_motors(vinset, width, height);
+
 		this->change_mode(BMode::View);
 		console->reflow_icons(vinset, width, height);
 		console->reflow_gauges(vinset, width, height);
 		console->reflow_serew(vinset, width, height);
+	}
+}
+
+bool BWorkbench::can_select(ISnip* snip, float x, float y) {
+	return ((dynamic_cast<Togglet*>(snip) != nullptr) || (dynamic_cast<Statusbarlet*>(snip) != nullptr));
+}
+
+void BWorkbench::after_select(ISnip* snip, bool is_on, float x, float y) {
+	if (is_on) {
+		if (this->shift == snip) {
+			this->shift->toggle();
+			this->change_mode(this->shift->checked() ? BMode::Control : BMode::View);
+		}
 	}
 }

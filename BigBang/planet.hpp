@@ -66,6 +66,13 @@ namespace WarGrey::SCADA {
 		virtual void set_selected(ISnip* snip) = 0;
 		virtual void no_selected() = 0;
 
+	public:
+		virtual bool can_interactive_move(ISnip* snip, float x, float y) { return false; }
+		virtual bool can_select(ISnip* snip, float x, float y) { return false; }
+		virtual bool can_select_multiple() { return false; }
+		virtual void before_select(ISnip* snip, bool on_or_off, float x, float y) {}
+		virtual void after_select(ISnip* snip, bool on_or_off, float x, float y) {}
+
     public:
 		void enter_critical_section();
 		void enter_shared_section();
@@ -109,8 +116,7 @@ namespace WarGrey::SCADA {
         void size_cache_invalid();
 
     public:
-        void set_pointer_listener(WarGrey::SCADA::IUniverseListener* listener);
-        void set_decorator(WarGrey::SCADA::IUniverseDecorator* decorator);
+        void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 
     public:
 		WarGrey::SCADA::ISnip* find_snip(float x, float y) override;
@@ -129,7 +135,6 @@ namespace WarGrey::SCADA {
         void recalculate_snips_extent_when_invalid();
 
     private:
-        WarGrey::SCADA::IUniverseListener* listener;
         float last_pointer_x;
         float last_pointer_y;
         float rubberband_x[2];
@@ -145,7 +150,7 @@ namespace WarGrey::SCADA {
         float preferred_min_height;
 
     private:
-        WarGrey::SCADA::IUniverseDecorator* decorator = nullptr;
+        WarGrey::SCADA::IPlanetDecorator* decorator = nullptr;
         WarGrey::SCADA::ISnip* head_snip = nullptr;
 		unsigned int mode;
     };

@@ -260,6 +260,10 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
     }
 }
 
+IModbusClient* Statusbarlet::get_modbus_client() {
+	return this->client;
+}
+
 /*************************************************************************************************/
 static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
 static ICanvasBrush^ status_nolog_color = nullptr;
