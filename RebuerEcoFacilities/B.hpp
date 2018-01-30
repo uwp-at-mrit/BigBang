@@ -19,8 +19,8 @@
 namespace WarGrey::SCADA {
 	private class BWorkbench : public WarGrey::SCADA::Planet {
 	public:
-		BWorkbench(Platform::String^ label, Platform::String^ plc);
 		~BWorkbench() noexcept;
+		BWorkbench(Platform::String^ label, Platform::String^ plc);
 
 	public:
 		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

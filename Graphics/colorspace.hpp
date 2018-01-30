@@ -8,4 +8,4 @@ Windows::UI::Color hsva(double hue, double saturation, double value, double alph
 Windows::UI::Color hsla(double hue, double saturation, double lightness, double alpha = 1.0);
 Windows::UI::Color hsia(double hue, double saturation, double intensity, double alpha = 1.0);
 
-void test_colorspace();
+Windows::UI::Color contrast_color(Windows::UI::Color& src);

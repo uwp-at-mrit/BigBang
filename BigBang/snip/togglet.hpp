@@ -1,15 +1,13 @@
 #pragma once
 
 #include "snip/snip.hpp"
-#include "system.hpp"
 
 namespace WarGrey::SCADA {
 	private class Togglet : public WarGrey::SCADA::ISnip {
 	public:
-		Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width = 0.0F,
-			Windows::UI::Color& checked_color = system_color(Windows::UI::ViewManagement::UIElementType::Highlight),
-			Windows::UI::Color& unchecked_color = system_color(Windows::UI::ViewManagement::UIElementType::InactiveCaption),
-			Windows::UI::Color& label_color = system_color(Windows::UI::ViewManagement::UIElementType::HighlightText));
+		Togglet(bool state0, Platform::String^ checked_label, Platform::String^ unchecked_label, float width = 0.0F,
+			Windows::UI::Color& checked_color = Windows::UI::Colors::DodgerBlue,
+			Windows::UI::Color& unchecked_color = Windows::UI::Colors::SlateGray);
 
 	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
@@ -25,6 +23,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ckcolor;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ uncolor;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lblcolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ unlblcolor;
 
 	private:
 		float width;

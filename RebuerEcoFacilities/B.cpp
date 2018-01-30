@@ -318,15 +318,16 @@ public:
 
 	void reflow_controlable_motors(float vinset, float width, float height) {
 		size_t mc = SNIPS_ARITY(this->controlable_motors);
-		float motor_width, motor_height, gapsize;
+		float motor_width, motor_height, gapsize, y0;
 		int lcount = 8;
 
 		this->controlable_motors[0]->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
 		gapsize = motor_width * 0.382F;
+		y0 = (height - float(std::ceil(double(mc) / double(lcount))) * (motor_height + gapsize)) * 0.5F;
 		for (unsigned int idx = 0; idx < mc; idx++) {
 			this->workbench->move_to(this->controlable_motors[idx],
 				(idx % lcount) * (motor_width + gapsize) + gapsize,
-				(idx / lcount) * (motor_height + gapsize) + vinset + gapsize);
+				(idx / lcount) * (motor_height + gapsize) + y0);
 		}
 	}
 
@@ -460,7 +461,7 @@ private:
 	Liquidlet* water_pipes[6];
 
 private:
-	Motorlet* controlable_motors[30];
+	Motorlet* controlable_motors[32];
 
 private:
 	BWorkbench* workbench;

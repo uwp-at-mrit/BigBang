@@ -4,6 +4,7 @@
 #include "text.hpp"
 #include "tongue.hpp"
 #include "paint.hpp"
+#include "colorspace.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -13,15 +14,15 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Windows::Foundation::Numerics;
 
 Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width
-	, Color& ckcolor, Color& uncolor, Color& label_color)
-	: state(initial_state), width(width) {
+	, Color& ckcolor, Color& uncolor) : state(initial_state), width(width) {
 	CanvasTextFormat^ font = make_text_format("Consolas", 24.0F);
 
 	this->label = make_text_layout(speak(checked_label), font);
 	this->unlabel = make_text_layout(speak(unchecked_label), font);
 	this->ckcolor = make_solid_brush(ckcolor);
 	this->uncolor = make_solid_brush(uncolor);
-	this->lblcolor = make_solid_brush(label_color);
+	this->lblcolor = make_solid_brush(contrast_color(ckcolor));
+	this->unlblcolor = make_solid_brush(contrast_color(uncolor));
 
 	this->state = initial_state;
 	this->width = width;
@@ -49,7 +50,7 @@ void Togglet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float 
 	
 	this->fill_extent(x, y, &width, &diameter);
 	radius = diameter * 0.5F;
-	bradius = radius * 0.618F;
+	bradius = radius * 0.80F;
 
 	if (this->state) {
 		ds->FillRoundedRectangle(x, y, width, diameter, radius, radius, this->ckcolor);
@@ -57,8 +58,8 @@ void Togglet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float 
 		ds->FillCircle(float2(x + width - radius, y + radius), bradius, this->lblcolor);
 	} else {
 		ds->FillRoundedRectangle(x, y, width, diameter, radius, radius, this->uncolor);
-		ds->DrawTextLayout(this->unlabel, x + diameter, y, this->lblcolor);
-		ds->FillCircle(float2(x + radius, y + radius), bradius, this->lblcolor);
+		ds->DrawTextLayout(this->unlabel, x + width - radius - this->unlabel->LayoutBounds.Width, y, this->unlblcolor);
+		ds->FillCircle(float2(x + radius, y + radius), bradius, this->unlblcolor);
 	}
 }
 

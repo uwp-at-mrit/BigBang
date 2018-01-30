@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)colorspace.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)color_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)paint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shape.cpp" />
@@ -24,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)color_test.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)paint.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shape.hpp" />
