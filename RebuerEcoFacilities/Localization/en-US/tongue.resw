@@ -192,4 +192,10 @@
   <data name="view_mode" xml:space="preserve">
     <value>View Mode</value>
   </data>
+  <data name="start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
 </root>

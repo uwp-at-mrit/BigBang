@@ -103,7 +103,7 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
 private enum BMode { WindowUI = 0, View, Control };
 
-private class BConsole : public WarGrey::SCADA::ModbusConfirmation {
+private class BConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand {
 public:
 	BConsole(BWorkbench* master) : workbench(master), inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
 
@@ -337,6 +337,12 @@ public:
 		SET_BOX(addrq, this->inaddrq);
 	}
 
+	void execute(Menu cmd, WarGrey::SCADA::ISnip* snip) override {
+		auto motor = static_cast<Motorlet*>(snip);
+
+		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), motor->id);
+	}
+
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		size_t dc = SNIPS_ARITY(this->desulphurizers);
 		size_t vc1 = SNIPS_ARITY(this->mooneys);
@@ -511,13 +517,20 @@ private:
 };
 
 BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(speak(label)), caption(label), device(plc) {
-	this->console = new BConsole(this);
+	BConsole* console = new BConsole(this);
+
+	this->console = console;
+	this->motorcmd = make_start_stop_menu(console);
 	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 
 BWorkbench::~BWorkbench() {
 	if (this->console != nullptr) {
 		delete this->console;
+	}
+
+	if (this->motorcmd != nullptr) {
+		delete this->motorcmd;
 	}
 }
 
@@ -566,14 +579,31 @@ void BWorkbench::reflow(float width, float height) {
 }
 
 bool BWorkbench::can_select(ISnip* snip, float x, float y) {
-	return ((dynamic_cast<Togglet*>(snip) != nullptr) || (dynamic_cast<Statusbarlet*>(snip) != nullptr));
+	bool selectable = false;
+
+	if (snip == this->shift) {
+		selectable = true;
+	}
+
+	if (this->shift->checked() && (dynamic_cast<Motorlet*>(snip) != nullptr)) {
+		selectable = true;
+	}
+
+	return selectable;
 }
 
-void BWorkbench::after_select(ISnip* snip, bool is_on, float x, float y) {
+void BWorkbench::after_select(ISnip* snip, bool is_on, float local_x, float local_y) {
 	if (is_on) {
-		if (this->shift == snip) {
+		if (snip == this->shift) {
 			this->shift->toggle();
 			this->change_mode(this->shift->checked() ? BMode::Control : BMode::View);
+		} else if (this->shift->checked()) {
+			Motorlet* motor = dynamic_cast<Motorlet*>(snip);
+
+			if (motor != nullptr) {
+				this->motorcmd->show(this, motor, local_x, local_y);
+				this->no_selected();
+			}
 		}
 	}
 }

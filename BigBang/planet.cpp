@@ -611,12 +611,6 @@ void IPlanet::leave_shared_section() {
 	this->section.unlock_shared();
 }
 
-void IPlanet::fill_actual_extent(float* width, float* height) {
-	SET_BOX(width, this->info->master->actual_width);
-	SET_BOX(height, this->info->master->actual_height);
-}
-
-
 CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
 	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
@@ -641,4 +635,25 @@ void IPlanet::save(Platform::String^ path, float width, float height, float dpi)
 			syslog(Log::Alert, "failed to save universe as bitmap:" + e->Message);
 		}
 	});
+}
+
+void IPlanet::fill_actual_extent(float* width, float* height) {
+	SET_BOX(width, this->info->master->actual_width);
+	SET_BOX(height, this->info->master->actual_height);
+}
+
+Point IPlanet::global_to_local_point(ISnip* snip, float global_x, float global_y) {
+	float snip_x, snip_y;
+
+	this->fill_snip_location(snip, &snip_x, &snip_y);
+
+	return Point(global_x - snip_x, global_y - snip_y);
+}
+
+Point IPlanet::local_to_global_point(ISnip* snip, float local_x, float local_y) {
+	float snip_x, snip_y;
+
+	this->fill_snip_location(snip, &snip_x, &snip_y);
+	
+	return Point(snip_x + local_x, snip_y + local_y);
 }

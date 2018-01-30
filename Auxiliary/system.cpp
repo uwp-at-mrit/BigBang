@@ -5,6 +5,7 @@ using namespace Windows::Graphics::Display;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::ViewManagement;
 
 static UISettings^ sysUI = nullptr;

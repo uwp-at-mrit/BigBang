@@ -25,6 +25,7 @@
     <ClCompile Include="RebuerEcoFacilities.cxx" />
     <ClCompile Include="B.cpp" />
     <ClCompile Include="workbench.cxx" />
+    <ClCompile Include="command.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -202,5 +203,6 @@
   <ItemGroup>
     <ClInclude Include="B.hpp" />
     <ClInclude Include="workbench.hxx" />
+    <ClInclude Include="command.hpp" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 #include "planet.hpp"
 #include "modbus.hpp"
+#include "command.hpp"
 
 #include "snip/togglet.hpp"
 #include "snip/textlet.hpp"
@@ -32,6 +33,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
+		WarGrey::SCADA::CommandMenu* motorcmd;
 		Platform::String^ caption;
 		Platform::String^ device;
 

@@ -27,6 +27,10 @@ namespace WarGrey::SCADA {
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
+
+	public:
+		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y);
+		Windows::Foundation::Point local_to_global_point(ISnip* snip, float local_x, float local_y);
 		void fill_actual_extent(float* width, float* height);
 		
     public:
@@ -67,11 +71,11 @@ namespace WarGrey::SCADA {
 		virtual void no_selected() = 0;
 
 	public:
-		virtual bool can_interactive_move(ISnip* snip, float x, float y) { return false; }
-		virtual bool can_select(ISnip* snip, float x, float y) { return false; }
+		virtual bool can_interactive_move(ISnip* snip, float local_x, float local_y) { return false; }
+		virtual bool can_select(ISnip* snip, float local_x, float local_y) { return false; }
 		virtual bool can_select_multiple() { return false; }
-		virtual void before_select(ISnip* snip, bool on_or_off, float x, float y) {}
-		virtual void after_select(ISnip* snip, bool on_or_off, float x, float y) {}
+		virtual void before_select(ISnip* snip, bool on_or_off, float local_x, float local_y) {}
+		virtual void after_select(ISnip* snip, bool on_or_off, float local_x, float local_y) {}
 
     public:
 		void enter_critical_section();

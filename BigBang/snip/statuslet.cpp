@@ -37,8 +37,7 @@ static float status_height = 0.0F;
 // delegate only accepts C++/CX class
 private ref class Status sealed {
 internal:
-	Status(Statusbarlet* master) {
-		this->master = master;
+	Status() {
 		this->clock = ref new DispatcherTimer();
 
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
@@ -159,7 +158,6 @@ private:
 	CanvasTextLayout^ ipv4;
     
 private:
-    Statusbarlet* master; // this will be destructed by master Control;
 	DispatcherTimer^ clock;
 	std::shared_mutex section;
 
@@ -184,7 +182,8 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, IModbusConfirmation* workbench, ISyslogReceiver* uirecv) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc
+	, IModbusConfirmation* workbench, ISyslogReceiver* uirecv) {
 	auto logger = new Syslog(Log::Debug, caption, default_logger());
 	
 	if (uirecv != nullptr) {
@@ -204,9 +203,9 @@ Statusbarlet::~Statusbarlet() {
 }
 
 void Statusbarlet::construct() {
-    if (statusbar == nullptr) {
-        statusbar = ref new Status(this);
-    }
+	if (statusbar == nullptr) {
+		statusbar = ref new Status();
+	}
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
