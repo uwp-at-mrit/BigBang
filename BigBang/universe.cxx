@@ -131,8 +131,6 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 
-	this->gesture_detector = ref new GestureRecognizer();
-
 	this->display = ref new CanvasAnimatedControl();
 	this->display->Name = this->logger->get_name();
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
@@ -421,20 +419,6 @@ void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ 
 	this->big_rip();
 }
 
-// TODO: distinguish rubberhand event and maniplation
-void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	this->enter_critical_section();
-
-	if (this->current_planet != nullptr) {
-		auto pt = args->GetCurrentPoint(this->canvas);
-		auto vkms = args->KeyModifiers;
-
-		args->Handled = this->current_planet->on_pointer_moved(pt, vkms);
-	}
-
-	this->leave_critical_section();
-}
-
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	if (this->canvas->CapturePointer(args->Pointer)) {
 		this->enter_critical_section();
@@ -443,6 +427,7 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 			auto pt = args->GetCurrentPoint(this->canvas);
 			auto vkms = args->KeyModifiers;
 
+			this->saved_pressed_pt = pt;
 			args->Handled = this->current_planet->on_pointer_pressed(pt, vkms);
 		}
 
@@ -450,19 +435,38 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 	}
 }
 
-void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	this->canvas->ReleasePointerCapture(args->Pointer);
-
+// TODO: distinguish rubberhand event and maniplation
+void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
 	if (this->current_planet != nullptr) {
 		auto pt = args->GetCurrentPoint(this->canvas);
+		auto pts = args->GetIntermediatePoints(this->canvas);
 		auto vkms = args->KeyModifiers;
 
-		args->Handled = this->current_planet->on_pointer_released(pt, vkms);
+		args->Handled = this->current_planet->on_pointer_moved(pt, pts, vkms);
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	if (this->saved_pressed_pt != nullptr) {
+		// TODO: deal with PointerCaptureLost event;
+		this->canvas->ReleasePointerCapture(args->Pointer);
+
+		this->enter_critical_section();
+
+		if (this->current_planet != nullptr) {
+			auto pt = args->GetCurrentPoint(this->canvas);
+			auto vkms = args->KeyModifiers;
+
+			args->Handled = this->current_planet->on_pointer_released(pt, this->saved_pressed_pt, vkms);
+			this->saved_pressed_pt = nullptr;
+		}
+
+		this->leave_critical_section();
+	}
 }
 
 void UniverseDisplay::on_maniplated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ args) {

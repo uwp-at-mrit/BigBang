@@ -6,6 +6,8 @@
 #include "decorator/decorator.hpp"
 
 namespace WarGrey::SCADA {
+	typedef Windows::Foundation::Collections::IVector<Windows::UI::Input::PointerPoint^> VectorOfPointerPoint;
+
 	private class IPlanetInfo abstract {
 	public:
 		virtual ~IPlanetInfo() noexcept {};
@@ -40,22 +42,6 @@ namespace WarGrey::SCADA {
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 		virtual void collapse() {};
 
-    public:
-        virtual bool on_pointer_moved(
-			Windows::UI::Input::PointerPoint^ pt,
-			Windows::System::VirtualKeyModifiers vkms)
-		{ return false; }
-
-        virtual bool on_pointer_pressed(
-			Windows::UI::Input::PointerPoint^ pt,
-			Windows::System::VirtualKeyModifiers vkms)
-		{ return false; }
-        
-		virtual bool on_pointer_released(
-			Windows::UI::Input::PointerPoint^ pt,
-			Windows::System::VirtualKeyModifiers vkms)
-		{ return false; }
-
 	public:
 		virtual WarGrey::SCADA::ISnip* find_snip(float x, float y) = 0;
 		virtual void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
@@ -66,22 +52,47 @@ namespace WarGrey::SCADA {
 		virtual void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 
 	public:
+		virtual void on_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {};
+		virtual void on_right_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {};
+
+	public:
 		virtual void add_selected(ISnip* snip) = 0;
 		virtual void set_selected(ISnip* snip) = 0;
 		virtual void no_selected() = 0;
 
 	public:
 		virtual bool can_interactive_move(ISnip* snip, float local_x, float local_y) { return false; }
-		virtual bool can_select(ISnip* snip, float local_x, float local_y) { return false; }
+		virtual bool can_select(ISnip* snip) { return false; }
 		virtual bool can_select_multiple() { return false; }
-		virtual void before_select(ISnip* snip, bool on_or_off, float local_x, float local_y) {}
-		virtual void after_select(ISnip* snip, bool on_or_off, float local_x, float local_y) {}
+		virtual void before_select(ISnip* snip, bool on_or_off) {}
+		virtual void after_select(ISnip* snip, bool on_or_off) {}
 
     public:
 		void enter_critical_section();
 		void enter_shared_section();
 		void leave_critical_section();
 		void leave_shared_section();
+
+	public:
+		virtual bool on_pointer_moved(
+			Windows::UI::Input::PointerPoint^ pt,
+			WarGrey::SCADA::VectorOfPointerPoint^ pts,
+			Windows::System::VirtualKeyModifiers vkms) {
+			return false;
+		}
+
+		virtual bool on_pointer_pressed(
+			Windows::UI::Input::PointerPoint^ pt,
+			Windows::System::VirtualKeyModifiers vkms) {
+			return false;
+		}
+
+		virtual bool on_pointer_released(
+			Windows::UI::Input::PointerPoint^ released_pt,
+			Windows::UI::Input::PointerPoint^ pressed_pt,
+			Windows::System::VirtualKeyModifiers vkms) {
+			return false;
+		}
 
 	public:
 		IPlanetInfo* info;
@@ -111,11 +122,6 @@ namespace WarGrey::SCADA {
 		void collapse() override;
 
     public:
-		bool on_pointer_moved(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_pressed(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_released(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
-
-    public:
         void fill_snips_bounds(float* x, float* y, float* width, float* height);
         void size_cache_invalid();
 
@@ -130,10 +136,18 @@ namespace WarGrey::SCADA {
         void move(ISnip* snip, float x, float y) override;
         void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
 
-    public:
+	public:
+		void on_tap(WarGrey::SCADA::ISnip* snip, float x, float y, bool shifted, bool controled) override;
+
+	public:
         void add_selected(ISnip* snip) override;
         void set_selected(ISnip* snip) override;
         void no_selected() override;
+
+	public:
+		bool on_pointer_pressed(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_moved(Windows::UI::Input::PointerPoint^ pt, WarGrey::SCADA::VectorOfPointerPoint^ pts, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_released(Windows::UI::Input::PointerPoint^ rpt, Windows::UI::Input::PointerPoint^ ppt, Windows::System::VirtualKeyModifiers vkms) override;
 
     private:
         void recalculate_snips_extent_when_invalid();
@@ -154,8 +168,8 @@ namespace WarGrey::SCADA {
         float preferred_min_height;
 
     private:
-        WarGrey::SCADA::IPlanetDecorator* decorator = nullptr;
-        WarGrey::SCADA::ISnip* head_snip = nullptr;
+        WarGrey::SCADA::IPlanetDecorator* decorator;
+        WarGrey::SCADA::ISnip* head_snip;
 		unsigned int mode;
     };
 }

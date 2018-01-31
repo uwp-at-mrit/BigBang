@@ -49,11 +49,7 @@ public:
     float x;
     float y;
     float rotation;
-
-public:
     bool selected;
-	float selected_x;
-	float selected_y;
 
 public:
 	unsigned int mode;
@@ -126,17 +122,15 @@ static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, f
     }
 }
 
-static inline void unsafe_add_selected(IPlanet* master, ISnip* snip, SnipInfo* info, float x, float y) {
-	master->before_select(snip, true, x, y);
+static inline void unsafe_add_selected(IPlanet* master, ISnip* snip, SnipInfo* info) {
+	master->before_select(snip, true);
 	info->selected = true;
-	info->selected_x = x;
-	info->selected_y = y;
-	master->after_select(snip, true, x, y);
+	master->after_select(snip, true);
 }
 
-static inline void unsafe_set_selected(IPlanet* master, ISnip* snip, SnipInfo* info, float x, float y) {
+static inline void unsafe_set_selected(IPlanet* master, ISnip* snip, SnipInfo* info) {
 	master->no_selected();
-	unsafe_add_selected(master, snip, info, x, y);
+	unsafe_add_selected(master, snip, info);
 }
 
 static void snip_center_point_offset(ISnip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
@@ -346,8 +340,8 @@ void Planet::add_selected(ISnip* snip) {
 		SnipInfo* info = planet_snip_info(this, snip);
 
 		if ((info != nullptr) && (!info->selected)) {
-			if (unsafe_snip_unmasked(info, this->mode) && this->can_select(snip, 0.0F, 0.0F)) {
-				unsafe_add_selected(this, snip, info, 0.0F, 0.0F);
+			if (unsafe_snip_unmasked(info, this->mode) && this->can_select(snip)) {
+				unsafe_add_selected(this, snip, info);
 			}
 		}
 	}
@@ -357,8 +351,8 @@ void Planet::set_selected(ISnip* snip) {
 	SnipInfo* info = planet_snip_info(this, snip);
 
     if ((info != nullptr) && (!info->selected)) {
-		if (unsafe_snip_unmasked(info, this->mode) && (this->can_select(snip, 0.0F, 0.0F))) {
-			unsafe_set_selected(this, snip, info, 0.0F, 0.0F);
+		if (unsafe_snip_unmasked(info, this->mode) && (this->can_select(snip))) {
+			unsafe_set_selected(this, snip, info);
 		}
     }
 }
@@ -371,9 +365,9 @@ void Planet::no_selected() {
 			SnipInfo* info = SNIP_INFO(child);
 
             if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
-				this->before_select(child, false, info->selected_x, info->selected_y);
+				this->before_select(child, false);
 				info->selected = false;
-				this->after_select(child, false, info->selected_x, info->selected_y);
+				this->after_select(child, false);
 			}
 
 			child = info->next;
@@ -382,9 +376,51 @@ void Planet::no_selected() {
 }
 
 /************************************************************************************************/
-bool Planet::on_pointer_moved(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool with_shift, bool with_control) {
+	SnipInfo* info = SNIP_INFO(snip);
+
+	if ((!info->selected) && this->can_select(snip)) {
+		if (with_shift) {
+			if (this->rubberband_allowed) {
+				unsafe_add_selected(this, snip, info);
+			}
+		} else {
+			unsafe_set_selected(this, snip, info);
+		}
+	}
+}
+
+/************************************************************************************************/
+bool Planet::on_pointer_pressed(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
 	bool handled = false;
 	
+	if (ppt->Properties->IsLeftButtonPressed) {
+		float x = ppt->Position.X;
+		float y = ppt->Position.Y;
+		ISnip* snip = this->find_snip(x, y);
+
+		this->last_pointer_x = x;
+		this->last_pointer_y = y;
+
+		if (snip == nullptr) {
+			this->rubberband_x[0] = x;
+			this->rubberband_x[1] = y;
+			this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
+			this->no_selected();
+		} else {
+			this->rubberband_y = nullptr;
+		}
+	} else {
+		this->no_selected();
+	}
+
+	handled = true;
+	return handled;
+}
+
+bool Planet::on_pointer_moved(PointerPoint^ ppt, VectorOfPointerPoint^ pts, VirtualKeyModifiers vkms) {
+	bool handled = false;
+
 	if (ppt->Properties->IsLeftButtonPressed) {
 		float x = ppt->Position.X;
 		float y = ppt->Position.Y;
@@ -405,53 +441,7 @@ bool Planet::on_pointer_moved(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
 	return handled;
 }
 
-bool Planet::on_pointer_pressed(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
-	bool handled = false;
-	
-	if (ppt->Properties->IsLeftButtonPressed) {
-		float x = ppt->Position.X;
-		float y = ppt->Position.Y;
-		ISnip* snip = this->find_snip(x, y);
-
-		this->last_pointer_x = x;
-		this->last_pointer_y = y;
-
-		if (snip == nullptr) {
-			this->rubberband_x[0] = x;
-			this->rubberband_x[1] = y;
-			this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-			this->no_selected();
-		} else {
-			SnipInfo* info = SNIP_INFO(snip);
-			float selected_x = x - info->x;
-			float selected_y = y - info->y;
-
-			this->rubberband_y = nullptr;
-
-			if (unsafe_snip_unmasked(info, this->mode)) {
-				if ((!info->selected) && this->can_select(snip, selected_x, selected_y)) {
-					if (vkms == VirtualKeyModifiers::Shift) {
-						if (this->rubberband_allowed) {
-							unsafe_add_selected(this, snip, info, selected_x, selected_y);
-						}
-					} else {
-						unsafe_set_selected(this, snip, info, selected_x, selected_y);
-					}
-				}
-			}
-		}
-
-		handled = true;
-	} else {
-		this->no_selected();
-
-		handled = true;
-	}
-
-	return handled;
-}
-
-bool Planet::on_pointer_released(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+bool Planet::on_pointer_released(PointerPoint^ rpt, PointerPoint^ ppt, VirtualKeyModifiers vkms) {
 	bool handled = false;
 
 	if (this->rubberband_y != nullptr) {
@@ -459,6 +449,30 @@ bool Planet::on_pointer_released(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
 		// TODO: select all touched snips
 
 		handled = true;
+	} else {
+		float x = ppt->Position.X;
+		float y = ppt->Position.Y;
+		ISnip* snip = this->find_snip(x, y);
+
+		if (snip != nullptr) {
+			SnipInfo* info = SNIP_INFO(snip);
+
+			if (unsafe_snip_unmasked(info, this->mode)) {
+				bool shifted = ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift);
+				bool controled = ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control);
+				float local_x = x - info->x;
+				float local_y = y - info->y;
+
+				if (ppt->Properties->IsLeftButtonPressed) {
+					this->on_tap(snip, local_x, local_y, shifted, controled);
+					handled = true;
+				} else if (ppt->Properties->IsRightButtonPressed) {
+					// NOTE: In macOS, Control + clicking produces a right clicking
+					this->on_right_tap(snip, local_x, local_y, shifted, controled);
+					handled = true;
+				}
+			}
+		}
 	}
 
 	return handled;

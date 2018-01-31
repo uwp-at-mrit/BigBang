@@ -101,8 +101,9 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedDrawEventArgs^ args);
 
 	private:
-		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+		Windows::UI::Input::PointerPoint^ saved_pressed_pt;
 		void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_maniplated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ args);
 
@@ -112,9 +113,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* current_planet;
-
-	private:
-		Windows::UI::Input::GestureRecognizer^ gesture_detector;
 
 	private:
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;

@@ -520,7 +520,7 @@ BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(
 	BConsole* console = new BConsole(this);
 
 	this->console = console;
-	this->motorcmd = make_start_stop_menu(console);
+	this->cmdmenu = make_start_stop_menu(console);
 	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
 }
 
@@ -529,8 +529,8 @@ BWorkbench::~BWorkbench() {
 		delete this->console;
 	}
 
-	if (this->motorcmd != nullptr) {
-		delete this->motorcmd;
+	if (this->cmdmenu != nullptr) {
+		delete this->cmdmenu;
 	}
 }
 
@@ -578,32 +578,16 @@ void BWorkbench::reflow(float width, float height) {
 	}
 }
 
-bool BWorkbench::can_select(ISnip* snip, float x, float y) {
-	bool selectable = false;
-
+void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, bool ctrled) {
 	if (snip == this->shift) {
-		selectable = true;
-	}
+		this->shift->toggle();
+		this->change_mode(this->shift->checked() ? BMode::Control : BMode::View);
+	} else if (this->shift->checked()) {
+		Motorlet* motor = dynamic_cast<Motorlet*>(snip);
 
-	if (this->shift->checked() && (dynamic_cast<Motorlet*>(snip) != nullptr)) {
-		selectable = true;
-	}
-
-	return selectable;
-}
-
-void BWorkbench::after_select(ISnip* snip, bool is_on, float local_x, float local_y) {
-	if (is_on) {
-		if (snip == this->shift) {
-			this->shift->toggle();
-			this->change_mode(this->shift->checked() ? BMode::Control : BMode::View);
-		} else if (this->shift->checked()) {
-			Motorlet* motor = dynamic_cast<Motorlet*>(snip);
-
-			if (motor != nullptr) {
-				this->motorcmd->show_for(motor, local_x, local_y);
-				this->no_selected();
-			}
+		if (motor != nullptr) {
+			this->cmdmenu->show_for(motor, local_x, local_y);
+			this->no_selected();
 		}
 	}
 }
