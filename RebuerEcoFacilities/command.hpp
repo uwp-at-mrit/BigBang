@@ -1,6 +1,6 @@
 #pragma once
 
-#include "menu.hpp"
+#include "menu.idl"
 
 namespace WarGrey::SCADA {
 	private enum class Menu { Start, Stop };

@@ -57,7 +57,7 @@ namespace WarGrey::SCADA {
 	};
 
 	template <typename Menu>
-	private class CommandMenu : public WarGrey::SCADA::SharedObject {
+	private class CommandMenu {
 	public:
 		CommandMenu() { this->menu = ref new Windows::UI::Xaml::Controls::MenuFlyout(); }
 

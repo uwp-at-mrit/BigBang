@@ -101,7 +101,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
