@@ -15,6 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
@@ -38,6 +39,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />

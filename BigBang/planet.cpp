@@ -656,18 +656,18 @@ void IPlanet::fill_actual_extent(float* width, float* height) {
 	SET_BOX(height, this->info->master->actual_height);
 }
 
-Point IPlanet::global_to_local_point(ISnip* snip, float global_x, float global_y) {
+Point IPlanet::global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff, float yoff) {
 	float snip_x, snip_y;
 
 	this->fill_snip_location(snip, &snip_x, &snip_y);
 
-	return Point(global_x - snip_x, global_y - snip_y);
+	return Point(global_x - snip_x + xoff, global_y - snip_y + yoff);
 }
 
-Point IPlanet::local_to_global_point(ISnip* snip, float local_x, float local_y) {
+Point IPlanet::local_to_global_point(ISnip* snip, float local_x, float local_y, float xoff, float yoff) {
 	float snip_x, snip_y;
 
 	this->fill_snip_location(snip, &snip_x, &snip_y);
 	
-	return Point(snip_x + local_x, snip_y + local_y);
+	return Point(snip_x + local_x + xoff, snip_y + local_y + yoff);
 }

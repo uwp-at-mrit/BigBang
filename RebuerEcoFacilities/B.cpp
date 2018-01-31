@@ -1,4 +1,5 @@
 ﻿#include "B.hpp"
+
 #include "tongue.hpp"
 #include "system.hpp"
 #include "syslog.hpp"
@@ -103,7 +104,7 @@ void connect_motor(IPlanet* master, IMotorSnip* pipe, Motorlet* motor, Scalelet*
 private enum B { Desulphurizer = 0, Funnel, Cleaner, Mooney, Count };
 private enum BMode { WindowUI = 0, View, Control };
 
-private class BConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand {
+private class BConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
 public:
 	BConsole(BWorkbench* master) : workbench(master), inaddr0(126), inaddrn(358), inaddrq(MODBUS_MAX_READ_REGISTERS) {};
 
@@ -337,7 +338,7 @@ public:
 		SET_BOX(addrq, this->inaddrq);
 	}
 
-	void execute(Menu cmd, WarGrey::SCADA::ISnip* snip) override {
+	void execute(WarGrey::SCADA::Menu cmd, WarGrey::SCADA::ISnip* snip) override {
 		auto motor = static_cast<Motorlet*>(snip);
 
 		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), motor->id);
@@ -586,7 +587,7 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 		Motorlet* motor = dynamic_cast<Motorlet*>(snip);
 
 		if (motor != nullptr) {
-			this->cmdmenu->show_for(motor, local_x, local_y);
+			this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
 			this->no_selected();
 		}
 	}

@@ -46,6 +46,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -100,6 +101,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -107,9 +109,6 @@
     </Filter>
     <Filter Include="snip">
       <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="interaction">
-      <UniqueIdentifier>{26bba27d-d03f-45eb-8b5c-6dd3b5d34440}</UniqueIdentifier>
     </Filter>
     <Filter Include="snip\pipeline">
       <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>

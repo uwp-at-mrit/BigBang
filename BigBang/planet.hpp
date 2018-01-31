@@ -31,8 +31,8 @@ namespace WarGrey::SCADA {
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
 	public:
-		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y);
-		Windows::Foundation::Point local_to_global_point(ISnip* snip, float local_x, float local_y);
+		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
+		Windows::Foundation::Point local_to_global_point(ISnip* snip, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 		void fill_actual_extent(float* width, float* height);
 		
     public:
