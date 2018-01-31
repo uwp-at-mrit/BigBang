@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Syslog", "Syslog\Syslog.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Documentations", "Documentations\Documentations.vcxproj", "{032D8967-FBCF-4056-8110-5008A8168581}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Scripts", "Scripts\Scripts.vcxproj", "{B07735E3-F0D8-4175-B39F-B68915555CBF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Syslog\Syslog.vcxitems*{01974307-edb2-486f-a3f2-2f4e8eb07d20}*SharedItemsImports = 9
@@ -67,6 +69,16 @@ Global
 		{032D8967-FBCF-4056-8110-5008A8168581}.Release|x64.Build.0 = Release|x64
 		{032D8967-FBCF-4056-8110-5008A8168581}.Release|x86.ActiveCfg = Release|Win32
 		{032D8967-FBCF-4056-8110-5008A8168581}.Release|x86.Build.0 = Release|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Debug|ARM.ActiveCfg = Debug|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Debug|x64.ActiveCfg = Debug|x64
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Debug|x64.Build.0 = Debug|x64
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Debug|x86.ActiveCfg = Debug|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Debug|x86.Build.0 = Debug|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Release|ARM.ActiveCfg = Release|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Release|x64.ActiveCfg = Release|x64
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Release|x64.Build.0 = Release|x64
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Release|x86.ActiveCfg = Release|Win32
+		{B07735E3-F0D8-4175-B39F-B68915555CBF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
