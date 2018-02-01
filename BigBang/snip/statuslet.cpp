@@ -234,6 +234,8 @@ void Statusbarlet::update(long long count, long long interval, long long uptime,
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float width = Width / 7.0F;
 	
+	ds->FillRectangle(x, y, Width, Height, system_background_brush());
+
 	statusbar->enter_shared_section();
 	float timestamp_xoff = (Width - statusbar->timestamp->LayoutBounds.Width);
 	ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
@@ -286,8 +288,8 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::set_message(Platform::String^ message, Log level) {
-	auto ckcolor = status_colors[static_cast<unsigned int>(level)]; 
-	this->ckcolor = ((ckcolor == nullptr) ? status_nolog_color : ckcolor);
+	auto lcolor = status_colors[static_cast<unsigned int>(level)]; 
+	this->color = ((lcolor == nullptr) ? status_nolog_color : lcolor);
 
 	if (this->info == nullptr) {
 		this->status = make_text_layout(message, status_font);
@@ -310,7 +312,8 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->DrawTextLayout(this->status, x, y, this->ckcolor);
+	ds->FillRectangle(x, y, Width, Height, system_background_brush());
+	ds->DrawTextLayout(this->status, x, y, this->color);
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {

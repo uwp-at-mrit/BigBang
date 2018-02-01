@@ -12,7 +12,6 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 
 using namespace Windows::UI;
-using namespace Windows::UI::ViewManagement;
 using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -194,6 +193,8 @@ public:
 
 		for (unsigned int idx = 0; idx < mc; idx++) {
 			this->controlable_motors[idx] = load_motorlet(this->workbench, motor_width, idx);
+			this->motor_labels[idx] = new Labellet(L"Motor %d", idx);
+			this->workbench->insert(this->motor_labels[idx]);
 		}
 	}
 
@@ -319,16 +320,23 @@ public:
 
 	void reflow_controlable_motors(float vinset, float width, float height) {
 		size_t mc = SNIPS_ARITY(this->controlable_motors);
-		float motor_width, motor_height, gapsize, y0;
+		float motor_width, motor_height, label_width, label_height;
+		float column_width, line_height, y0;
 		int lcount = 8;
 
 		this->controlable_motors[0]->fill_extent(0.0F, 0.0F, &motor_width, &motor_height);
-		gapsize = motor_width * 0.382F;
-		y0 = (height - float(std::ceil(double(mc) / double(lcount))) * (motor_height + gapsize)) * 0.5F;
+		this->motor_labels[0]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+		
+		column_width = motor_width * 1.382F;
+		line_height = motor_height + label_height * 1.618F;
+		y0 = (height - float(std::ceil(double(mc) / double(lcount))) * line_height) * 0.5F;
 		for (unsigned int idx = 0; idx < mc; idx++) {
-			this->workbench->move_to(this->controlable_motors[idx],
-				(idx % lcount) * (motor_width + gapsize) + gapsize,
-				(idx / lcount) * (motor_height + gapsize) + y0);
+			float mx = (idx % lcount) * column_width + label_height;
+			float my = (idx / lcount) * line_height + y0;
+
+			this->motor_labels[idx]->fill_extent(0.0F, 0.0F, &label_width);
+			this->workbench->move_to(this->controlable_motors[idx], mx, my);
+			this->workbench->move_to(this->motor_labels[idx], mx + (motor_width - label_width) * 0.5F, my + motor_height);
 		}
 	}
 
@@ -469,6 +477,7 @@ private:
 
 private:
 	Motorlet* controlable_motors[32];
+	Labellet* motor_labels[32];
 
 private:
 	BWorkbench* workbench;
@@ -479,10 +488,9 @@ private:
 
 private class BDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
 public:
-	BDecorator(Platform::String^ caption, Color& caption_color, float fontsize) : IPlanetDecorator() {
+	BDecorator(Platform::String^ caption, ICanvasBrush^ brush, float fontsize) : IPlanetDecorator(), brush(brush) {
 		auto font = make_text_format("Consolas", fontsize);
 
-		this->ckcolor = make_solid_brush(caption_color);
 		this->caption = make_text_layout(speak(caption), font);
 	};
 
@@ -491,28 +499,28 @@ public:
 		float x = (Width - this->caption->LayoutBounds.Width) * 0.5F;
 		float y = this->caption->DrawBounds.Y - this->caption->LayoutBounds.Y;
 
-		ds->DrawTextLayout(this->caption, x, y, this->ckcolor);
+		ds->DrawTextLayout(this->caption, x, y, this->brush);
 	}
 
-	void draw_before_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
-				ds->DrawLine(0, height, width, height, this->ckcolor, 2.0F);
+				ds->DrawLine(0, height, width, height, this->brush, 2.0F);
 			} else if (self == this->statusline) { // statusline's topline
-				ds->DrawLine(0, y, width, y, this->ckcolor, 2.0F);
+				ds->DrawLine(0, y, width, y, this->brush, 2.0F);
 			} else { // avoid dynamic_cast every time.
 				auto maybe_statusline = dynamic_cast<Statuslinelet*>(self);
 				
 				if (maybe_statusline != nullptr) {
 					this->statusline = maybe_statusline;
-					ds->DrawLine(0, y, width, y, this->ckcolor, 2.0F);
+					ds->DrawLine(0, y, width, y, this->brush, 2.0F);
 				}
 			}
 		}
 	}
 
 private:
-	ICanvasBrush^ ckcolor;
+	ICanvasBrush^ brush;
 	CanvasTextLayout^ caption;
 	Statuslinelet* statusline;
 };
@@ -522,9 +530,8 @@ BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(
 
 	this->console = console;
 	this->cmdmenu = make_start_stop_menu(console);
-	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
-
-	this->numpad = ref new NumpadFlyout();
+	this->set_decorator(new BDecorator(label, system_graytext_brush(), 64.0F));
+	this->numpad_view = ref new NumpadFlyout();
 }
 
 BWorkbench::~BWorkbench() {
@@ -547,6 +554,8 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 		console->load_workline(width, height);
 
 		this->change_mode(BMode::Control);
+		this->numpad = new Numpadlet();
+		this->insert(this->numpad);
 		console->load_controlable_motors();
 
 		this->change_mode(BMode::WindowUI);
@@ -591,7 +600,8 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 		if (motor != nullptr) {
 			// TODO: protect the menu from showing out of screen
 			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
-			this->numpad->ShowAt(motor->info->master->info->master->canvas);
+			this->numpad_view->ShowAt(motor->info->master->info->master->canvas);
+			this->numpad->show(motor, local_x, local_y);
 		}
 	}
 }

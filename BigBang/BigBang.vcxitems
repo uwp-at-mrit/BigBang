@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)numpad.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\numpadlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
@@ -44,6 +45,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl">
       <FileType>Document</FileType>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\numpadlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />

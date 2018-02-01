@@ -6,13 +6,10 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::UI;
 using namespace Windows::Foundation;
 
-using namespace Windows::UI;
-using namespace Windows::UI::ViewManagement;
-
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Brushes;
 
 PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out, bool draw_motor) {
     this->draw_inport = draw_in;

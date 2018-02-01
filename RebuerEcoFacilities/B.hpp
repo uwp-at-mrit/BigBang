@@ -13,6 +13,7 @@
 #include "snip/gaugelet.hpp"
 #include "snip/vibratorlet.hpp"
 #include "snip/liquidlet.hpp"
+#include "snip/numpadlet.hpp"
 #include "snip/serew/funnellet.hpp"
 #include "snip/serew/sleevelet.hpp"
 #include "snip/serew/gearboxlet.hpp"
@@ -34,7 +35,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
 		WarGrey::SCADA::CommandMenu<WarGrey::SCADA::Menu>* cmdmenu;
-		WarGrey::SCADA::NumpadFlyout^ numpad;
+		WarGrey::SCADA::NumpadFlyout^ numpad_view;
 		Platform::String^ caption;
 		Platform::String^ device;
 
@@ -42,6 +43,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
+		WarGrey::SCADA::Numpadlet* numpad;
 		WarGrey::SCADA::Togglet* shift;
 	};
 }

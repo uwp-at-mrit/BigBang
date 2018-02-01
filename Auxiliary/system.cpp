@@ -18,15 +18,15 @@ static inline Size adjust_size(float Width, float Height, FrameworkElement^ work
     return Size(width, height);
 }
 
+Size adjusted_workspace_size(Rect region, FrameworkElement^ workspace) {
+	return adjust_size(region.Width, region.Height, workspace);
+}
+
 Size system_screen_size() {
     auto master = DisplayInformation::GetForCurrentView();
     auto scaling = float(master->RawPixelsPerViewPixel);
 
     return { float(master->ScreenWidthInRawPixels) / scaling, float(master->ScreenHeightInRawPixels) / scaling };
-}
-
-Size adjusted_workspace_size(Rect region, FrameworkElement^ workspace) {
-    return adjust_size(region.Width, region.Height, workspace);
 }
 
 Color system_color(UIColorType type) {

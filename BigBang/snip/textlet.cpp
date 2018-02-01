@@ -1,12 +1,9 @@
-#include <cwchar>
-#include <cstdarg>
-#include <cstdlib>
+#include "textlet.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"
 #include "tongue.hpp"
 #include "string.hpp"
-#include "textlet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -35,7 +32,7 @@ void Labellet::fill_extent(float x, float y, float* w, float* h) {
     TextExtent ts = get_text_extent(content, label_font);
 
     SET_VALUES(w, ts.width, h, ts.height);
-};
+}
 
 void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     ds->DrawText(content, x, y, Colors::Snow, label_font);
@@ -82,7 +79,7 @@ void Scalelet::fill_extent(float x, float y, float* w, float* h) {
 	}
 
 	SET_VALUES(w, width, h, height);
-};
+}
 
 void Scalelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float start_x = x;

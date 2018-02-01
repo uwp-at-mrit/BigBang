@@ -23,3 +23,10 @@ Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(Platf
 Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(
     Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle style,
     float offset = 0.0F);
+
+/*************************************************************************************************/
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_accentdark1_brush();
+
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_background_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_highlight_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_graytext_brush();

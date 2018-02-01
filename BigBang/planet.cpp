@@ -15,15 +15,13 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::System;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::ViewManagement;
-
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -376,11 +374,11 @@ void Planet::no_selected() {
 }
 
 /************************************************************************************************/
-void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool with_shift, bool with_control) {
+void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, bool controlled) {
 	SnipInfo* info = SNIP_INFO(snip);
 
 	if ((!info->selected) && this->can_select(snip)) {
-		if (with_shift) {
+		if (shifted) {
 			if (this->rubberband_allowed) {
 				unsafe_add_selected(this, snip, info);
 			}
@@ -562,7 +560,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     }
 
     if (this->rubberband_y != nullptr) {
-        static auto rubberband_color = make_solid_brush(system_color(UIElementType::Highlight));
+        ICanvasBrush^ rubberband_color = system_highlight_brush();
 
         float left = min(this->last_pointer_x, (*this->rubberband_x));
         float top = min(this->last_pointer_y, (*this->rubberband_y));

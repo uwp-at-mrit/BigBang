@@ -40,9 +40,9 @@ void syslog(Log level, const wchar_t *fmt, ...) {
 }
 
 /*************************************************************************************************/
-#define implement_syslog(fun, level) \
-void syslog_##fun(const wchar_t *fmt, ...) { VSWPRINT(message, fmt); syslog(level, message); } \
-void syslog_##fun(Platform::String^ message) { syslog(level, message); }
+#define implement_syslog(fname, level) \
+void syslog_##fname(const wchar_t *fmt, ...) { VSWPRINT(message, fmt); syslog(level, message); } \
+void syslog_##fname(Platform::String^ message) { syslog(level, message); }
 
 implement_syslog(debug,    Log::Debug)
 implement_syslog(info,     Log::Info)

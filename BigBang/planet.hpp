@@ -74,21 +74,18 @@ namespace WarGrey::SCADA {
 		void leave_shared_section();
 
 	public:
-		virtual bool on_pointer_moved(
-			float x, float y,
+		virtual bool on_pointer_moved(float x, float y,
 			WarGrey::SCADA::VectorOfPointerPoint^ pts,
 			Windows::UI::Input::PointerUpdateKind puk,
 			Windows::System::VirtualKeyModifiers vkms)
 		{ return false; }
 
-		virtual bool on_pointer_pressed(
-			float x, float y,
+		virtual bool on_pointer_pressed(float x, float y,
 			Windows::UI::Input::PointerUpdateKind puk,
 			Windows::System::VirtualKeyModifiers vkms)
 		{ return false; }
 
-		virtual bool on_pointer_released(
-			float x, float y,
+		virtual bool on_pointer_released(float x, float y,
 			Windows::UI::Input::PointerUpdateKind puk,
 			Windows::System::VirtualKeyModifiers vkms)
 		{ return false; }

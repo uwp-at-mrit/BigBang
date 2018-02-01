@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ckcolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
 	};
 }

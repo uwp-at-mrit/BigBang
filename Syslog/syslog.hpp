@@ -10,9 +10,9 @@ WarGrey::SCADA::ISyslogReceiver* default_racket_receiver();
 void syslog(WarGrey::SCADA::Log level, Platform::String^ message);
 void syslog(WarGrey::SCADA::Log level, const wchar_t *fmt, ...);
 
-#define declare_syslog(fun) \
-    void syslog_##fun(const wchar_t *fmt, ...); \
-    void syslog_##fun(Platform::String^ message);
+#define declare_syslog(level) \
+    void syslog_##level(const wchar_t *fmt, ...); \
+    void syslog_##level(Platform::String^ message);
 
 declare_syslog(debug)
 declare_syslog(info)

@@ -32,22 +32,39 @@
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
-      <Filter>snip\pipeline</Filter>
+      <Filter>snip\serew</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
-      <Filter>snip\pipeline</Filter>
+      <Filter>snip\serew</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)numpad.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\numpadlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -88,22 +105,39 @@
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
-      <Filter>snip\pipeline</Filter>
+      <Filter>snip\serew</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
-      <Filter>snip\pipeline</Filter>
+      <Filter>snip\serew</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\constants.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
     <ClInclude Include="$(MSBuildThisFileDirectory)numpad.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\numpadlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\constants.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -112,7 +146,7 @@
     <Filter Include="snip">
       <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="snip\pipeline">
+    <Filter Include="snip\serew">
       <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

@@ -1,13 +1,15 @@
 #include "paint.hpp"
+#include "system.hpp"
 #include "transformation.hpp"
 
 using namespace Windows::UI;
+using namespace Windows::UI::ViewManagement;
+
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
-
 
 static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
 
@@ -26,11 +28,11 @@ GradientStops^ make_gradient_stops(Color colors[], int total) {
     return stopa;
 }
 
-void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, float x, float y) {
+void brush_translate(ICanvasBrush^ brush, float x, float y) {
     brush->Transform = make_translation_matrix(x, y);
 }
 
-CanvasSolidColorBrush^ make_solid_brush(Windows::UI::Color& ckcolor) {
+CanvasSolidColorBrush^ make_solid_brush(Color& ckcolor) {
     return ref new CanvasSolidColorBrush(shared_ds, ckcolor);
 }
 
@@ -65,3 +67,17 @@ CanvasStrokeStyle^ make_dash_stroke(CanvasDashStyle style, float offset) {
 
     return dash;
 }
+
+/*************************************************************************************************/
+#define implement_system_brush(name, UIEVAL) \
+CanvasSolidColorBrush^ system_##name##_brush() { \
+    static CanvasSolidColorBrush^ name = make_solid_brush(system_color(UIEVAL)); \
+    return name; \
+}
+
+implement_system_brush(accentdark1, UIColorType::AccentDark1)
+
+implement_system_brush(background, UIElementType::Background)
+implement_system_brush(highlight, UIElementType::Highlight)
+implement_system_brush(graytext, UIElementType::GrayText)
+
