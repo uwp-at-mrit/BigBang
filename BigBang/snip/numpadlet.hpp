@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class Numpadlet : public WarGrey::SCADA::ISnip {
     public:
-		Numpadlet(float cell_size = 48.0F);
+		Numpadlet(float fontsize = 32.0F);
 
     public:
 		void construct() override;
@@ -13,12 +13,20 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void show(WarGrey::SCADA::ISnip* target_snip, float xoff, float yoff);
-        
-    private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+		void show(WarGrey::SCADA::ISnip* target_snip, float xoff = 0.0F, float yoff = 0.0F);
+		void own_caret(bool is_on) override;
 
 	private:
-		bool shown;
+		bool has_focus();
+		void draw_cell(
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y,
+			Platform::String^ label, int col, int row, int ncol, int nrow);
+
+    private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+		float cellsize;
+		float gapsize;
+		float radius;
+		float em;
 	};
 }

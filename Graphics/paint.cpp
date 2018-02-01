@@ -78,6 +78,7 @@ CanvasSolidColorBrush^ system_##name##_brush() { \
 implement_system_brush(accentdark1, UIColorType::AccentDark1)
 
 implement_system_brush(background, UIElementType::Background)
+implement_system_brush(foreground, UIElementType::HighlightText)
 implement_system_brush(highlight, UIElementType::Highlight)
 implement_system_brush(graytext, UIElementType::GrayText)
 

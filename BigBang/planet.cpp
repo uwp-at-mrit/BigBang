@@ -373,6 +373,30 @@ void Planet::no_selected() {
 	}
 }
 
+ISnip* Planet::get_focus_snip() {
+	return (this->snip_unmasked(this->focus_snip) ? this->focus_snip : nullptr);
+}
+
+void Planet::set_caret_owner(ISnip* snip) {
+	if (this->focus_snip != snip) {
+		if (snip == nullptr) {
+			this->focus_snip->own_caret(false);
+			this->focus_snip = nullptr;
+		} else {
+			SnipInfo* info = planet_snip_info(this, snip);
+
+			if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+				if (this->focus_snip != nullptr) {
+					this->focus_snip->own_caret(false);
+				}
+
+				this->focus_snip = snip;
+				snip->own_caret(true);
+			}
+		}
+	}
+}
+
 /************************************************************************************************/
 void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, bool controlled) {
 	SnipInfo* info = SNIP_INFO(snip);
@@ -398,6 +422,8 @@ bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, Virtual
 		this->last_pointer_x = x;
 		this->last_pointer_y = y;
 
+		this->set_caret_owner(snip);
+
 		if (snip == nullptr) {
 			this->rubberband_x[0] = x;
 			this->rubberband_x[1] = y;
@@ -408,6 +434,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, Virtual
 		}
 	} else {
 		this->no_selected();
+		this->set_caret_owner(nullptr);
 	}
 
 	handled = true;

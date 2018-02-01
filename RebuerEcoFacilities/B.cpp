@@ -555,8 +555,8 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 
 		this->change_mode(BMode::Control);
 		this->numpad = new Numpadlet();
-		this->insert(this->numpad);
 		console->load_controlable_motors();
+		this->insert(this->numpad);
 
 		this->change_mode(BMode::WindowUI);
 		this->statusline = new Statuslinelet(Log::Debug);
@@ -601,7 +601,7 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 			// TODO: protect the menu from showing out of screen
 			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
 			this->numpad_view->ShowAt(motor->info->master->info->master->canvas);
-			this->numpad->show(motor, local_x, local_y);
+			this->numpad->show(motor);
 		}
 	}
 }

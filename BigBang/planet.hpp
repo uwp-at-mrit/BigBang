@@ -25,15 +25,6 @@ namespace WarGrey::SCADA {
 	public:
 		Platform::String^ name() { return this->caption; }
 		Platform::Object^ navigation_label() { return this->caption; }
-
-	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
-		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
-
-	public:
-		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
-		Windows::Foundation::Point local_to_global_point(ISnip* snip, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
-		void fill_actual_extent(float* width, float* height);
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
@@ -67,11 +58,9 @@ namespace WarGrey::SCADA {
 		virtual void before_select(ISnip* snip, bool on_or_off) {}
 		virtual void after_select(ISnip* snip, bool on_or_off) {}
 
-    public:
-		void enter_critical_section();
-		void enter_shared_section();
-		void leave_critical_section();
-		void leave_shared_section();
+	public:
+		virtual WarGrey::SCADA::ISnip* get_focus_snip() = 0;
+		virtual void set_caret_owner(ISnip* snip) = 0;
 
 	public:
 		virtual bool on_pointer_moved(float x, float y,
@@ -89,6 +78,21 @@ namespace WarGrey::SCADA {
 			Windows::UI::Input::PointerUpdateKind puk,
 			Windows::System::VirtualKeyModifiers vkms)
 		{ return false; }
+
+	public:
+		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
+		Windows::Foundation::Point local_to_global_point(ISnip* snip, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
+		void fill_actual_extent(float* width, float* height);
+
+	public:
+		void enter_critical_section();
+		void enter_shared_section();
+		void leave_critical_section();
+		void leave_shared_section();
+
+	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
+		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
 	public:
 		IPlanetInfo* info;
@@ -141,6 +145,10 @@ namespace WarGrey::SCADA {
         void no_selected() override;
 
 	public:
+		WarGrey::SCADA::ISnip* get_focus_snip() override;
+		void set_caret_owner(ISnip* snip) override;
+
+	public:
 		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
 		bool on_pointer_moved(float x, float y, VectorOfPointerPoint^ pts, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
 		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
@@ -166,6 +174,7 @@ namespace WarGrey::SCADA {
     private:
         WarGrey::SCADA::IPlanetDecorator* decorator;
         WarGrey::SCADA::ISnip* head_snip;
+		WarGrey::SCADA::ISnip* focus_snip;
 		unsigned int mode;
     };
 }

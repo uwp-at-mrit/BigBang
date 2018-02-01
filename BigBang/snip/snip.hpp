@@ -33,6 +33,9 @@ namespace WarGrey::SCADA {
 		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
         
+	public:
+		virtual void own_caret(bool is_own) {}
+
     public:
         ISnipInfo* info;
     };
