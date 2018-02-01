@@ -6,6 +6,7 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
@@ -143,12 +144,11 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->display->Update += ref new UniverseUpdateHandler(this, &UniverseDisplay::do_update);
 	this->display->Draw += ref new UniverseDrawHandler(this, &UniverseDisplay::do_paint);
 
-	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
-	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
-	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
-
 	this->display->ManipulationMode = ManipulationModes::TranslateX;
+	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
+	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
+	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -424,11 +424,14 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 		this->enter_critical_section();
 
 		if (this->current_planet != nullptr) {
-			auto pt = args->GetCurrentPoint(this->canvas);
-			auto vkms = args->KeyModifiers;
+			VirtualKeyModifiers vkms = args->KeyModifiers;
+			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+			PointerPointProperties^ ppp = pp->Properties;
+			PointerUpdateKind puk = ppp->PointerUpdateKind;
+			Point pt = pp->Position;
 
-			this->saved_pressed_pt = pt;
-			args->Handled = this->current_planet->on_pointer_pressed(pt, vkms);
+			this->saved_pressed_ppp = ppp;
+			args->Handled = this->current_planet->on_pointer_pressed(pt.X, pt.Y, puk, vkms);
 		}
 
 		this->leave_critical_section();
@@ -440,38 +443,23 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 	this->enter_critical_section();
 
 	if (this->current_planet != nullptr) {
-		auto pt = args->GetCurrentPoint(this->canvas);
-		auto pts = args->GetIntermediatePoints(this->canvas);
-		auto vkms = args->KeyModifiers;
+		VectorOfPointerPoint^ pps = args->GetIntermediatePoints(this->canvas);
+		VirtualKeyModifiers vkms = args->KeyModifiers;
+		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+		PointerPointProperties^ ppp = pp->Properties;
+		PointerUpdateKind puk = ppp->PointerUpdateKind;
+		Point pt = pp->Position;
 
-		args->Handled = this->current_planet->on_pointer_moved(pt, pts, vkms);
+		args->Handled = this->current_planet->on_pointer_moved(pt.X, pt.Y, pps, puk, vkms);
 	}
 
 	this->leave_critical_section();
 }
 
-void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	if (this->saved_pressed_pt != nullptr) {
-		// TODO: deal with PointerCaptureLost event;
-		this->canvas->ReleasePointerCapture(args->Pointer);
-
-		this->enter_critical_section();
-
-		if (this->current_planet != nullptr) {
-			auto pt = args->GetCurrentPoint(this->canvas);
-			auto vkms = args->KeyModifiers;
-
-			args->Handled = this->current_planet->on_pointer_released(pt, this->saved_pressed_pt, vkms);
-			this->saved_pressed_pt = nullptr;
-		}
-
-		this->leave_critical_section();
-	}
-}
-
 void UniverseDisplay::on_maniplated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ args) {
 	float width = this->actual_width;
 	float delta = args->Cumulative.Translation.X;
+	float speed = args->Velocities.Linear.X;
 	float distance = width * 0.0618F;
 
 	if (delta < -distance) {
@@ -481,4 +469,24 @@ void UniverseDisplay::on_maniplated(Platform::Object^ sender, ManipulationComple
 	}
 
 	args->Handled = true;
+}
+
+void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	if (this->saved_pressed_ppp != nullptr) {
+		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
+
+		this->enter_critical_section();
+
+		if (this->current_planet != nullptr) {
+			VirtualKeyModifiers vkms = args->KeyModifiers;
+			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+			PointerUpdateKind puk = this->saved_pressed_ppp->PointerUpdateKind;
+			Point pt = pp->Position;
+
+			args->Handled = this->current_planet->on_pointer_released(pt.X, pt.Y, puk, vkms);
+			this->saved_pressed_ppp = nullptr;
+		}
+
+		this->leave_critical_section();
+	}
 }

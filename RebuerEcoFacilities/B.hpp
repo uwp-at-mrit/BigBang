@@ -2,6 +2,7 @@
 
 #include "planet.hpp"
 #include "modbus.hpp"
+#include "numpad.hxx"
 #include "command.hpp"
 
 #include "snip/togglet.hpp"
@@ -33,6 +34,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
 		WarGrey::SCADA::CommandMenu<WarGrey::SCADA::Menu>* cmdmenu;
+		WarGrey::SCADA::NumpadFlyout^ numpad;
 		Platform::String^ caption;
 		Platform::String^ device;
 

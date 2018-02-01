@@ -391,12 +391,10 @@ void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool with_shift, 
 }
 
 /************************************************************************************************/
-bool Planet::on_pointer_pressed(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
 	bool handled = false;
 	
-	if (ppt->Properties->IsLeftButtonPressed) {
-		float x = ppt->Position.X;
-		float y = ppt->Position.Y;
+	if (puk == PointerUpdateKind::LeftButtonPressed) {
 		ISnip* snip = this->find_snip(x, y);
 
 		this->last_pointer_x = x;
@@ -418,13 +416,10 @@ bool Planet::on_pointer_pressed(PointerPoint^ ppt, VirtualKeyModifiers vkms) {
 	return handled;
 }
 
-bool Planet::on_pointer_moved(PointerPoint^ ppt, VectorOfPointerPoint^ pts, VirtualKeyModifiers vkms) {
+bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
 	bool handled = false;
 
-	if (ppt->Properties->IsLeftButtonPressed) {
-		float x = ppt->Position.X;
-		float y = ppt->Position.Y;
-
+	if (puk == PointerUpdateKind::LeftButtonPressed) {
 		if (this->rubberband_y == nullptr) {
 			// TODO: implement interactive moving
 			this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
@@ -441,7 +436,7 @@ bool Planet::on_pointer_moved(PointerPoint^ ppt, VectorOfPointerPoint^ pts, Virt
 	return handled;
 }
 
-bool Planet::on_pointer_released(PointerPoint^ rpt, PointerPoint^ ppt, VirtualKeyModifiers vkms) {
+bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
 	bool handled = false;
 
 	if (this->rubberband_y != nullptr) {
@@ -450,8 +445,6 @@ bool Planet::on_pointer_released(PointerPoint^ rpt, PointerPoint^ ppt, VirtualKe
 
 		handled = true;
 	} else {
-		float x = ppt->Position.X;
-		float y = ppt->Position.Y;
 		ISnip* snip = this->find_snip(x, y);
 
 		if (snip != nullptr) {
@@ -463,13 +456,16 @@ bool Planet::on_pointer_released(PointerPoint^ rpt, PointerPoint^ ppt, VirtualKe
 				float local_x = x - info->x;
 				float local_y = y - info->y;
 
-				if (ppt->Properties->IsLeftButtonPressed) {
+				switch (puk) {
+				case PointerUpdateKind::LeftButtonPressed: {
 					this->on_tap(snip, local_x, local_y, shifted, controled);
 					handled = true;
-				} else if (ppt->Properties->IsRightButtonPressed) {
+				} break;
+				case PointerUpdateKind::RightButtonPressed: {
 					// NOTE: In macOS, Control + clicking produces a right clicking
 					this->on_right_tap(snip, local_x, local_y, shifted, controled);
 					handled = true;
+				} break;
 				}
 			}
 		}

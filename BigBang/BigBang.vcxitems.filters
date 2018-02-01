@@ -47,6 +47,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)numpad.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)numpad.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

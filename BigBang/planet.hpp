@@ -75,24 +75,23 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool on_pointer_moved(
-			Windows::UI::Input::PointerPoint^ pt,
+			float x, float y,
 			WarGrey::SCADA::VectorOfPointerPoint^ pts,
-			Windows::System::VirtualKeyModifiers vkms) {
-			return false;
-		}
+			Windows::UI::Input::PointerUpdateKind puk,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
 
 		virtual bool on_pointer_pressed(
-			Windows::UI::Input::PointerPoint^ pt,
-			Windows::System::VirtualKeyModifiers vkms) {
-			return false;
-		}
+			float x, float y,
+			Windows::UI::Input::PointerUpdateKind puk,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
 
 		virtual bool on_pointer_released(
-			Windows::UI::Input::PointerPoint^ released_pt,
-			Windows::UI::Input::PointerPoint^ pressed_pt,
-			Windows::System::VirtualKeyModifiers vkms) {
-			return false;
-		}
+			float x, float y,
+			Windows::UI::Input::PointerUpdateKind puk,
+			Windows::System::VirtualKeyModifiers vkms)
+		{ return false; }
 
 	public:
 		IPlanetInfo* info;
@@ -145,9 +144,9 @@ namespace WarGrey::SCADA {
         void no_selected() override;
 
 	public:
-		bool on_pointer_pressed(Windows::UI::Input::PointerPoint^ pt, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_moved(Windows::UI::Input::PointerPoint^ pt, WarGrey::SCADA::VectorOfPointerPoint^ pts, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_released(Windows::UI::Input::PointerPoint^ rpt, Windows::UI::Input::PointerPoint^ ppt, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_moved(float x, float y, VectorOfPointerPoint^ pts, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
 
     private:
         void recalculate_snips_extent_when_invalid();

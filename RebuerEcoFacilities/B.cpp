@@ -523,6 +523,8 @@ BWorkbench::BWorkbench(Platform::String^ label, Platform::String^ plc) : Planet(
 	this->console = console;
 	this->cmdmenu = make_start_stop_menu(console);
 	this->set_decorator(new BDecorator(label, system_color(UIElementType::GrayText), 64.0F));
+
+	this->numpad = ref new NumpadFlyout();
 }
 
 BWorkbench::~BWorkbench() {
@@ -587,8 +589,9 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 		Motorlet* motor = dynamic_cast<Motorlet*>(snip);
 
 		if (motor != nullptr) {
-			this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
-			this->no_selected();
+			// TODO: protect the menu from showing out of screen
+			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
+			this->numpad->ShowAt(motor->info->master->info->master->canvas);
 		}
 	}
 }
