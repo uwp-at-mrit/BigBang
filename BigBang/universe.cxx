@@ -25,6 +25,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 #define PLANET_INFO(planet) (static_cast<PlanetInfo*>(planet->info))
+#define SHIFTED(vkms) ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift)
+#define CONTROLLED(vkms) ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control)
 
 class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
 public:
@@ -424,14 +426,13 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 		this->enter_critical_section();
 
 		if (this->current_planet != nullptr) {
-			VirtualKeyModifiers vkms = args->KeyModifiers;
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerPointProperties^ ppp = pp->Properties;
-			PointerUpdateKind puk = ppp->PointerUpdateKind;
-			Point pt = pp->Position;
 
 			this->saved_pressed_ppp = ppp;
-			args->Handled = this->current_planet->on_pointer_pressed(pt.X, pt.Y, puk, vkms);
+			args->Handled = this->current_planet->on_pointer_pressed(
+				pp->Position.X, pp->Position.Y, ppp->PointerUpdateKind,
+				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 		}
 
 		this->leave_critical_section();
@@ -443,14 +444,11 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 	this->enter_critical_section();
 
 	if (this->current_planet != nullptr) {
-		VectorOfPointerPoint^ pps = args->GetIntermediatePoints(this->canvas);
-		VirtualKeyModifiers vkms = args->KeyModifiers;
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
-		PointerPointProperties^ ppp = pp->Properties;
-		PointerUpdateKind puk = ppp->PointerUpdateKind;
-		Point pt = pp->Position;
-
-		args->Handled = this->current_planet->on_pointer_moved(pt.X, pt.Y, pps, puk, vkms);
+		
+		args->Handled = this->current_planet->on_pointer_moved(
+			pp->Position.X, pp->Position.Y, args->GetIntermediatePoints(this->canvas),
+			pp->Properties->PointerUpdateKind, SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 	}
 
 	this->leave_critical_section();
@@ -478,13 +476,14 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 		this->enter_critical_section();
 
 		if (this->current_planet != nullptr) {
-			VirtualKeyModifiers vkms = args->KeyModifiers;
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerUpdateKind puk = this->saved_pressed_ppp->PointerUpdateKind;
-			Point pt = pp->Position;
 
-			args->Handled = this->current_planet->on_pointer_released(pt.X, pt.Y, puk, vkms);
 			this->saved_pressed_ppp = nullptr;
+			args->Handled = this->current_planet->on_pointer_released(
+				pp->Position.X, pp->Position.Y, puk,
+				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+			
 		}
 
 		this->leave_critical_section();

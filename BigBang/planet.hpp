@@ -66,17 +66,17 @@ namespace WarGrey::SCADA {
 		virtual bool on_pointer_moved(float x, float y,
 			WarGrey::SCADA::VectorOfPointerPoint^ pts,
 			Windows::UI::Input::PointerUpdateKind puk,
-			Windows::System::VirtualKeyModifiers vkms)
+			bool shifted, bool ctrled)
 		{ return false; }
 
 		virtual bool on_pointer_pressed(float x, float y,
 			Windows::UI::Input::PointerUpdateKind puk,
-			Windows::System::VirtualKeyModifiers vkms)
+			bool shifted, bool ctrled)
 		{ return false; }
 
 		virtual bool on_pointer_released(float x, float y,
 			Windows::UI::Input::PointerUpdateKind puk,
-			Windows::System::VirtualKeyModifiers vkms)
+			bool shifted, bool ctrled)
 		{ return false; }
 
 	public:
@@ -149,9 +149,9 @@ namespace WarGrey::SCADA {
 		void set_caret_owner(ISnip* snip) override;
 
 	public:
-		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_moved(float x, float y, VectorOfPointerPoint^ pts, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
-		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, Windows::System::VirtualKeyModifiers vkms) override;
+		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
+		bool on_pointer_moved(float x, float y, VectorOfPointerPoint^ pts, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
+		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
 
     private:
         void recalculate_snips_extent_when_invalid();
@@ -175,6 +175,7 @@ namespace WarGrey::SCADA {
         WarGrey::SCADA::IPlanetDecorator* decorator;
         WarGrey::SCADA::ISnip* head_snip;
 		WarGrey::SCADA::ISnip* focus_snip;
+		WarGrey::SCADA::ISnip* hover_snip;
 		unsigned int mode;
     };
 }

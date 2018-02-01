@@ -14,7 +14,7 @@ using namespace Windows::UI::Xaml::Input;
 /*************************************************************************************************/
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
-	Universe(Platform::String^ name) : UniverseDisplay(name, 4) {}
+	Universe(Platform::String^ name) : UniverseDisplay(name, 16) {}
 
 public:
 	void construct() override {

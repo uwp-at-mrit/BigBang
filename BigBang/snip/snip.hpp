@@ -34,7 +34,12 @@ namespace WarGrey::SCADA {
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
         
 	public:
+		virtual bool handles_events() { return false; }
 		virtual void own_caret(bool is_own) {}
+		virtual void on_hover(float local_x, float local_y, bool shifted, bool controled) {};
+		virtual void on_tap(float local_x, float local_y, bool shifted, bool controled) {};
+		virtual void on_right_tap(float local_x, float local_y, bool shifted, bool controled) {};
+		virtual void on_goodbye() {};
 
     public:
         ISnipInfo* info;

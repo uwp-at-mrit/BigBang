@@ -13,13 +13,18 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		bool handles_events() override;
+		void on_hover(float local_x, float local_y, bool shifted, bool controled) override;
+		void on_tap(float local_x, float local_y, bool shifted, bool controled) override;
+		void on_right_tap(float local_x, float local_y, bool shifted, bool controled) override;
+		void on_goodbye() override;
+
+	public:
 		void show(WarGrey::SCADA::ISnip* target_snip, float xoff = 0.0F, float yoff = 0.0F);
-		void own_caret(bool is_on) override;
 
 	private:
 		bool has_focus();
-		void draw_cell(
-			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y,
+		void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y,
 			Platform::String^ label, int col, int row, int ncol, int nrow);
 
     private:

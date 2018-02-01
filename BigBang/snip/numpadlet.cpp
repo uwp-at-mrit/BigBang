@@ -12,6 +12,7 @@ using namespace Windows::UI::Text;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
+/*************************************************************************************************/
 Numpadlet::Numpadlet(float fontsize) {
 	this->label_font = make_text_format("Consolas", fontsize);
 }
@@ -33,6 +34,22 @@ void Numpadlet::fill_extent(float x, float y, float* w, float* h) {
 	} else {
 		SET_VALUES(w, 0.0F, h, 0.0F);
 	}
+}
+
+bool Numpadlet::handles_events() {
+	return true;
+}
+
+void Numpadlet::on_hover(float local_x, float local_y, bool shifted, bool controled) {
+}
+
+void Numpadlet::on_tap(float local_x, float local_y, bool shifted, bool controled) {
+}
+
+void Numpadlet::on_right_tap(float local_x, float local_y, bool shifted, bool controled) {
+}
+
+void Numpadlet::on_goodbye() {
 }
 
 void Numpadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

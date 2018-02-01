@@ -382,7 +382,7 @@ void Planet::set_caret_owner(ISnip* snip) {
 		if (snip == nullptr) {
 			this->focus_snip->own_caret(false);
 			this->focus_snip = nullptr;
-		} else {
+		} else if (snip->handles_events()) {
 			SnipInfo* info = planet_snip_info(this, snip);
 
 			if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
@@ -413,35 +413,33 @@ void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, boo
 }
 
 /************************************************************************************************/
-bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
-	bool handled = false;
+bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
+	ISnip* unmasked_snip = this->find_snip(x, y);
 	
-	if (puk == PointerUpdateKind::LeftButtonPressed) {
-		ISnip* snip = this->find_snip(x, y);
+	this->set_caret_owner(unmasked_snip);
+	if (unmasked_snip == nullptr) {
+		this->no_selected();
+	}
 
+	switch (puk) {
+	case PointerUpdateKind::LeftButtonPressed: {
 		this->last_pointer_x = x;
 		this->last_pointer_y = y;
 
-		this->set_caret_owner(snip);
-
-		if (snip == nullptr) {
+		if (unmasked_snip == nullptr) {
 			this->rubberband_x[0] = x;
 			this->rubberband_x[1] = y;
 			this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-			this->no_selected();
 		} else {
 			this->rubberband_y = nullptr;
 		}
-	} else {
-		this->no_selected();
-		this->set_caret_owner(nullptr);
+	} break;
 	}
 
-	handled = true;
-	return handled;
+	return true;
 }
 
-bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
+bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerUpdateKind puk, bool shifted, bool ctrled) {
 	bool handled = false;
 
 	if (puk == PointerUpdateKind::LeftButtonPressed) {
@@ -456,47 +454,65 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 		}
 
 		handled = true;
+	} else {
+		// NOTE non-left clicking always produces PointerUpdateKind::Other
+		ISnip* unmasked_snip = this->find_snip(x, y);
+
+		if (unmasked_snip != this->hover_snip) {
+			if (this->hover_snip != nullptr) {
+				// see next comment
+				this->hover_snip->on_goodbye();
+				this->hover_snip = nullptr;
+			}
+		}
+
+		if (unmasked_snip != nullptr) {
+			if (unmasked_snip->handles_events()) {
+				// NOTE: only snip that handles events will be saved
+				SnipInfo* info = SNIP_INFO(unmasked_snip);
+
+				this->hover_snip = unmasked_snip;
+				this->hover_snip->on_hover(x - info->x, y - info->y, shifted, ctrled);
+			}
+
+			handled = true;
+		}
 	}
 
 	return handled;
 }
 
-bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, VirtualKeyModifiers vkms) {
-	bool handled = false;
-
+bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
 	if (this->rubberband_y != nullptr) {
 		this->rubberband_y = nullptr;
 		// TODO: select all touched snips
-
-		handled = true;
 	} else {
-		ISnip* snip = this->find_snip(x, y);
+		ISnip* unmasked_snip = this->find_snip(x, y);
 
-		if (snip != nullptr) {
-			SnipInfo* info = SNIP_INFO(snip);
+		if (unmasked_snip != nullptr) {
+			SnipInfo* info = SNIP_INFO(unmasked_snip);
+			float local_x = x - info->x;
+			float local_y = y - info->y;
 
-			if (unsafe_snip_unmasked(info, this->mode)) {
-				bool shifted = ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift);
-				bool controled = ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control);
-				float local_x = x - info->x;
-				float local_y = y - info->y;
-
-				switch (puk) {
-				case PointerUpdateKind::LeftButtonPressed: {
-					this->on_tap(snip, local_x, local_y, shifted, controled);
-					handled = true;
-				} break;
-				case PointerUpdateKind::RightButtonPressed: {
-					// NOTE: In macOS, Control + clicking produces a right clicking
-					this->on_right_tap(snip, local_x, local_y, shifted, controled);
-					handled = true;
-				} break;
+			switch (puk) {
+			case PointerUpdateKind::LeftButtonPressed: {
+				if (unmasked_snip->handles_events()) {
+					unmasked_snip->on_tap(local_x, local_y, shifted, ctrled);
 				}
+				this->on_tap(unmasked_snip, local_x, local_y, shifted, ctrled);
+			} break;
+			case PointerUpdateKind::RightButtonPressed: {
+				// NOTE: In macOS, Control + clicking produces a right clicking
+				if (unmasked_snip->handles_events()) {
+					unmasked_snip->on_right_tap(local_x, local_y, shifted, ctrled);
+				}
+				this->on_right_tap(unmasked_snip, local_x, local_y, shifted, ctrled);
+			} break;
 			}
 		}
 	}
 
-	return handled;
+	return true;
 }
 
 /*************************************************************************************************/

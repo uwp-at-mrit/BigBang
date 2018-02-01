@@ -40,7 +40,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)numpad.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.cpp">
       <Filter>snip\serew</Filter>
     </ClCompile>
@@ -113,7 +112,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)numpad.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.hpp">
       <Filter>snip\serew</Filter>
     </ClInclude>
