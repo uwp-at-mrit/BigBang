@@ -199,16 +199,12 @@
             (define line-length (- linen line0))
             (define date-fraction (/ x-length date-length))
             (define line-fraction (/ y-length line-length))
-              
+            
             (send dc set-pen axis-color 1 'solid)
             (send dc set-text-foreground mark-color)
-              
-            (let draw-x-axis ([this-date date0])
-              (define (draw-x x-axis x-mark)
-                (define x (+ x-start (* (- x-axis date0) date-fraction)))
-                (define-values (x-width _w _d _s) (send dc get-text-extent x-mark mark-font #true))
-                (send dc draw-text x-mark (- x (/ x-width 2)) (+ y-start 1ex) #true)
-                (send dc draw-line x y-start x (+ y-start 1ex)))
+
+            (let draw-x-axis ([this-endx 0.0]
+                              [this-date date0])
               (cond [(<= this-date daten)
                      (let ([the-date (seconds->date this-date)])
                        (define-values (year month) (values (date-year the-date) (date-month the-date)))
@@ -217,9 +213,14 @@
                          (cond [(= this-date date0) (values this-date (~day (date-day the-date)))]
                                [(= month 1) (values month-starts (number->string year))]
                                [else (values month-starts (~month month))]))
-                       (draw-x x-axis x-mark)
-                       (draw-x-axis (+ month-starts (* 3600 24 31))))]
-                    [else (draw-x daten (~day (date-day (seconds->date daten))))]))
+                       (draw-x-axis (draw-x dc (- x-axis date0) x-mark this-endx
+                                            mark-font x-start y-start
+                                            date-fraction 1ex)
+                                    (+ month-starts (* 3600 24 31))))]
+                    [else (draw-x dc (- daten date0)
+                                  (~day (date-day (seconds->date daten)))
+                                  this-endx mark-font x-start y-start
+                                  date-fraction 1ex)]))
 
             (define adjust-count
               (cond [(and (integer? axis-count) (> axis-count 1)) axis-count]
@@ -269,6 +270,16 @@
                              (ht-append 4 (value->pict filename) (ftext info substyle color))]
                             [val (ftext val)])])
       value->pict)))
+
+(define (draw-x dc x-axis x-mark last-mark-endx mark-font x-start y-start date-fraction 1ex)
+  (define x (+ x-start (* x-axis date-fraction)))
+  (define-values (x-width x-height _d _s) (send dc get-text-extent x-mark mark-font #true))
+  (let ([mark-x (- x (/ x-width 2))])
+    (cond [(> mark-x last-mark-endx)
+           (send dc draw-line x y-start x (+ y-start 1ex))
+           (send dc draw-text x-mark mark-x (+ y-start 1ex) #true)
+           (+ mark-x x-width)]
+          [else mark-x])))
 
 (define hex->rgb-bytes
   (lambda [rgb]
