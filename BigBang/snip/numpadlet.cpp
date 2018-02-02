@@ -16,6 +16,8 @@ using namespace Microsoft::Graphics::Canvas::Text;
 private enum Numpad { Col = 0, Row, NCol, NRow };
 private enum NumpadCell { X = 0, Y, Width, Height, Xoff, Yoff };
 
+static long long numpad_tap_duration = 3000000LL;
+
 static Platform::String^ labels[] = { "9", "8", "7", "6", "5", "4", "3", "2", "1", ".", "0", "B", "E", "R" };
 static const char lmetas[][4] = {
 	{ 2, 0, 1, 1 }, { 1, 0, 1, 1 }, { 0, 0, 1, 1 },
@@ -55,7 +57,7 @@ void Numpadlet::construct() {
 	Color bg = system_background_brush()->Color;
 	
 	this->foreground = system_foreground_brush();
-	this->background = make_solid_brush(rgba(bg, 0.618));
+	this->background = make_solid_brush(rgba(bg, 0.8));
 	this->border = make_solid_brush(rgba(fg, 0.618));
 	this->highlight = make_solid_brush(rgba(fg, 0.382));
 	this->taplight = make_solid_brush(rgba(bg, 0.618));
@@ -78,10 +80,14 @@ void Numpadlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Numpadlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-	this->uptime = uptime;
+	if (interval > numpad_tap_duration) {
+		this->uptime = uptime + interval;
+	} else {
+		this->uptime = uptime;
+	}
 
 	if (this->tapped) {
-		if (uptime - this->taptime > 2000000) {
+		if (uptime - this->taptime > numpad_tap_duration) {
 			this->tapped = false;
 		}
 	}
