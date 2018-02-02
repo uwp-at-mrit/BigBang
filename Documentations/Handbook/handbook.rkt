@@ -53,7 +53,7 @@
                   [pie-width pie-height]
                   [series-height (or git-height 200)]
                   [series-width (or git-width (* series-height 2.4))])
-             (values (pie-chart #:radian0 0.618 #:bytes-fy 0.618 pie-width pie-height (reverse lang-source))
+             (values (pie-chart #:bytes-fy 0.618 pie-width pie-height (reverse lang-source))
                      (git-loc-series series-width series-height (reverse loc-source)))))
          (define loi (apply + (hash-values insertions)))
          (define lod (apply + (hash-values deletions)))
