@@ -46,7 +46,7 @@
         [legend-pen (make-pen #:color (make-color 187 187 187 1.0))]
         [legend-brush (make-brush #:color (make-color 255 255 255 0.618))])
     (lambda [flwidth flheight datasource
-                     #:radian0 [r0 0.0] #:bytes-fx [fx 0.5] #:bytes-fy [fy 0.5]
+                     #:radian0 [r0 #false] #:bytes-fx [fx 0.5] #:bytes-fy [fy 0.5]
                      #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold)]
                      #:label-color [label-color (make-color 0 0 0)]
                      #:%-color [%-color (make-color 106 114 143)]
@@ -78,6 +78,7 @@
               (when (positive? total)
                 (define ring (make-object region% #false))
                 (define hollow (make-object region% #false))
+                (define nonfirst% (- 1.0 (/ (vector-ref (car datasource) 2) total)))
                 (send ring set-rectangle dx dy flwidth flheight)
                 (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
                 (send ring subtract hollow)
@@ -85,7 +86,7 @@
                 
                 (define-values (legend-label-width legend-%width legends)
                   (let draw-ring ([rest datasource]
-                                  [radian0 r0]
+                                  [radian0 (if (flonum? r0) r0 (* nonfirst% pi))]
                                   [max-lwidth 0]
                                   [max-pwidth 0]
                                   [legends null])
