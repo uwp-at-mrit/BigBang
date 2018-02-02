@@ -60,7 +60,7 @@ Color rgba(int hex, double a) {
     return ColorHelper::FromArgb(UCHAR(a), r, g, b);
 }
 
-Color rgba(Color src, double a) {
+Color rgba(Color& src, double a) {
     return ColorHelper::FromArgb(UCHAR(a), src.R, src.G, src.B);
 }
 

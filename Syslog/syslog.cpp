@@ -20,7 +20,7 @@ Syslog* default_logger() {
 	if (winlog == nullptr) {
 		winlog = new Syslog(Log::Debug, "WinSCADA", nullptr);
 		winlog->append_log_receiver(default_racket_receiver());
-		winlog->append_log_receiver(new StdoutReceiver());
+		winlog->append_log_receiver(new VisualStudioReceiver());
 		winlog->reference();
 	}
 

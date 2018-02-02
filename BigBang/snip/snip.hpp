@@ -24,6 +24,10 @@ namespace WarGrey::SCADA {
 		long int id = -1L;
 
 	public:
+		void enable_events(bool yes) { this->deal_with_events = yes; }
+		bool handles_events() { return this->deal_with_events; }
+
+	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void save(Platform::String^ path, float dpi = 96.0F);
 
@@ -34,7 +38,6 @@ namespace WarGrey::SCADA {
         virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
         
 	public:
-		virtual bool handles_events() { return false; }
 		virtual void own_caret(bool is_own) {}
 		virtual void on_hover(float local_x, float local_y, bool shifted, bool controled) {};
 		virtual void on_tap(float local_x, float local_y, bool shifted, bool controled) {};
@@ -43,6 +46,9 @@ namespace WarGrey::SCADA {
 
     public:
         ISnipInfo* info;
+
+	private:
+		bool deal_with_events = false;
     };
 
 	private class IPipeSnip : public WarGrey::SCADA::ISnip {

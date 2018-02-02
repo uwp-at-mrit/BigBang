@@ -2,7 +2,7 @@
 
 #include "syslog/logging.hpp"
 #include "syslog/receiver/racket.hpp"
-#include "syslog/receiver/stdout.hpp"
+#include "syslog/receiver/vstudio.hpp"
 
 WarGrey::SCADA::Syslog* default_logger();
 WarGrey::SCADA::ISyslogReceiver* default_racket_receiver();

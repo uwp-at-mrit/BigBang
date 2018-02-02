@@ -3,9 +3,9 @@
 #include "syslog/logging.hpp"
 
 namespace WarGrey::SCADA {
-	private class StdoutReceiver : public WarGrey::SCADA::ISyslogReceiver {
+	private class VisualStudioReceiver : public WarGrey::SCADA::ISyslogReceiver {
 	public:
-		StdoutReceiver(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug, Platform::String^ topic = "")
+		VisualStudioReceiver(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug, Platform::String^ topic = "")
 			: ISyslogReceiver(level, topic) {};
 
 	protected:

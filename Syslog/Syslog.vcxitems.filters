@@ -13,15 +13,15 @@
       <Filter>syslog</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\racket.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)syslog\receiver\vstudio.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog\logging.cpp">
       <Filter>syslog</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\stdout.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\racket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)syslog\receiver\vstudio.cpp" />
   </ItemGroup>
 </Project>
