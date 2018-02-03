@@ -155,11 +155,13 @@ static void snip_center_point_offset(ISnip* snip, float width, float height, Sni
 /*************************************************************************************************/
 Planet::Planet(Platform::String^ name, unsigned int initial_mode) : IPlanet(name), mode(initial_mode) {
     this->set_decorator(nullptr);
+	this->numpad = new Numpad(this);
 }
 
 Planet::~Planet() {
 	this->collapse();
     this->decorator->destroy();
+	delete this->numpad;
 }
 
 void Planet::change_mode(unsigned int mode) {
@@ -260,7 +262,8 @@ ISnip* Planet::find_snip(float x, float y) {
     return found;
 }
 
-void Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint cp) {
+bool Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint cp) {
+	bool okay = false;
 	SnipInfo* info = planet_snip_info(this, snip);
 	
 	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
@@ -270,10 +273,15 @@ void Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint
 		snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
 		SET_BOX(x, sx + xoff);
 		SET_BOX(y, sy + yoff);
+
+		okay = true;
     }
+
+	return okay;
 }
 
-void Planet::fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) {
+bool Planet::fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) {
+	bool okay = false;
 	SnipInfo* info = planet_snip_info(this, snip);
 
 	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
@@ -282,7 +290,11 @@ void Planet::fill_snip_bound(ISnip* snip, float* x, float* y, float* width, floa
 		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
 		SET_VALUES(x, sx, y, sy);
 		SET_VALUES(width, sw, height, sh);
+
+		okay = true;
 	}
+
+	return okay;
 }
 
 void Planet::fill_snips_bounds(float* x, float* y, float* width, float* height) {
@@ -515,6 +527,19 @@ bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool s
 	return true;
 }
 
+void Planet::show_virtual_keyboard(Keyboard type) {
+	float auto_x, auto_y;
+
+	this->numpad->fill_auto_position(&auto_x, &auto_y);
+	this->show_virtual_keyboard(type, auto_x, auto_y);
+}
+
+void Planet::show_virtual_keyboard(Keyboard type, float x, float y) {
+	this->numpad->show(true);
+	this->keyboard_x = x;
+	this->keyboard_y = y;
+}
+
 /*************************************************************************************************/
 void Planet::set_decorator(IPlanetDecorator* decorator) {
     if (this->decorator != nullptr) {
@@ -525,8 +550,9 @@ void Planet::set_decorator(IPlanetDecorator* decorator) {
     this->decorator->reference();
 }
 
-/*************************************************************************************************/
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
+	this->numpad->construct();
+
     if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
 
@@ -590,7 +616,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
 
 					if (info->selected) {
-						this->decorator->draw_selected_snip(child, ds, info->x, info->y, width, height);
+						this->decorator->draw_for_selected_snip(child, ds, info->x, info->y, width, height);
 					}
 
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
@@ -617,6 +643,14 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     }
 
     this->decorator->draw_after(this, ds, Width, Height);
+
+	if (this->numpad->shown()) {
+		float width, height;
+
+		this->numpad->fill_extent(0.0F, 0.0F, &width, &height);
+		syslog(Log::Critical, L"%f*%f@(%f, %f)", width, height, this->keyboard_x, this->keyboard_y);
+		this->numpad->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
+	}
 }
 
 void Planet::collapse() {

@@ -553,9 +553,7 @@ void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, floa
 		console->load_workline(width, height);
 
 		this->change_mode(BMode::Control);
-		this->numpad = new Numpadlet();
 		console->load_controlable_motors();
-		this->insert(this->numpad);
 
 		this->change_mode(BMode::WindowUI);
 		this->statusline = new Statuslinelet(Log::Debug);
@@ -599,7 +597,9 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 		if (motor != nullptr) {
 			// TODO: protect the menu from showing out of screen
 			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
-			this->numpad->show(motor);
+			this->set_caret_owner(motor);
+
+			this->show_virtual_keyboard(Keyboard::Numpad);
 		}
 	}
 }

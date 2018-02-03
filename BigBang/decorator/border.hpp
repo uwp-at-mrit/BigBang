@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float Width, float Height) override;
 
-        void draw_selected_snip(
+        void draw_for_selected_snip(
             WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height) override;

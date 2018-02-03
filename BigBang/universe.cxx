@@ -11,6 +11,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Windows::UI;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
@@ -139,6 +140,11 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
 	this->display->UseSharedDevice = true; // this is required
 
+	/** TODO
+	 * All these events should be unloaded,
+	 *  however this control has the same lifetime with the application,
+	 *  currently there is no such code for unloading.
+	 */
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
 	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
 	this->display->GameLoopStarting += ref new UniverseHandler(this, &UniverseDisplay::do_start);
@@ -151,6 +157,8 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
+	this->display->KeyDown += ref new KeyEventHandler(this, &UniverseDisplay::on_key_pressed);
+	this->display->KeyUp += ref new KeyEventHandler(this, &UniverseDisplay::on_key_released);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -488,4 +496,32 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 		this->leave_critical_section();
 	}
+}
+
+void UniverseDisplay::on_key_pressed(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
+	this->enter_critical_section();
+
+	if (this->current_planet != nullptr) {
+		VirtualKey vkey = args->Key;
+		CorePhysicalKeyStatus cpks = args->KeyStatus;
+
+		syslog(Log::Info, L"(%s, %s)", cpks.WasKeyDown.ToString()->Data(), cpks.IsKeyReleased.ToString()->Data());
+		args->Handled = true;
+	}
+
+	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_key_released(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
+	this->enter_critical_section();
+
+	if (this->current_planet != nullptr) {
+		VirtualKey vkey = args->Key;
+		CorePhysicalKeyStatus cpks = args->KeyStatus;
+
+		syslog(Log::Info, L"(%s, %s)", cpks.WasKeyDown.ToString()->Data(), cpks.IsKeyReleased.ToString()->Data());
+		args->Handled = true;
+	}
+
+	this->leave_critical_section();
 }

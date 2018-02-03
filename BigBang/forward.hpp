@@ -5,6 +5,7 @@ namespace WarGrey::SCADA {
     class IPlanetDecorator;
 
     class ISnip;
+	class Numpadlet;
 
     enum SnipCenterPoint { LT, CT, RT, LC, CC, RC, LB, CB, RB };
 }

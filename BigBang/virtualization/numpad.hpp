@@ -1,32 +1,26 @@
 #pragma once
 
-#include "snip.hpp"
+#include "virtualization/keyboard.hpp"
 
 namespace WarGrey::SCADA {
-    #define NUMPAD_KEYNUM 14
-
-    private class Numpadlet : public WarGrey::SCADA::ISnip {
+    private class Numpad : public WarGrey::SCADA::IKeyboard {
     public:
-		Numpadlet(float fontsize = 32.0F);
+		Numpad(IPlanet* master, float fontsize = 32.0F);
 
     public:
-		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void update(long long count, long long interval, long long uptime, bool is_slow) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
+		void fill_auto_position(float* x, float* y) override;
+		
 	public:
 		void on_hover(float local_x, float local_y, bool shifted, bool controled) override;
 		void on_tap(float local_x, float local_y, bool shifted, bool controled) override;
 		void on_goodbye() override;
 
-	public:
-		void show(WarGrey::SCADA::ISnip* target_snip, float xoff = 0.0F, float yoff = 0.0F);
-
-	private:
-		bool has_focus();
-		void fill_cells();
-		int find_cell(float mouse_x, float mouse_y);
+	protected:
+		void create() override;
+		void fill_cell(KeyboardCell* cell, unsigned int idx) override;
 
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
@@ -37,7 +31,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ taplight;
 
 	private:
-		float cells[NUMPAD_KEYNUM][6];
 		float cellsize;
 		float gapsize;
 		float radius;

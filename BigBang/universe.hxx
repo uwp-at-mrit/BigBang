@@ -106,7 +106,9 @@ namespace WarGrey::SCADA {
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_maniplated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-
+		void on_key_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+		void on_key_released(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+		
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
 		Windows::UI::Xaml::Controls::ListView^ navigator_view;

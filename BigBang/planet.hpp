@@ -4,6 +4,7 @@
 
 #include "universe.hxx"
 #include "decorator/decorator.hpp"
+#include "virtualization/numpad.hpp"
 
 namespace WarGrey::SCADA {
 	typedef Windows::Foundation::Collections::IVector<Windows::UI::Input::PointerPoint^> VectorOfPointerPoint;
@@ -35,8 +36,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual WarGrey::SCADA::ISnip* find_snip(float x, float y) = 0;
-		virtual void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
-		virtual void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) = 0;
+		virtual bool fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
+		virtual bool fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
 		virtual void insert(ISnip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
 		virtual void move(ISnip* snip, float x, float y) = 0;
@@ -114,6 +115,7 @@ namespace WarGrey::SCADA {
 		 */
 		void change_mode(unsigned int mode);
 		bool snip_unmasked(WarGrey::SCADA::ISnip* snip);
+		void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
@@ -122,19 +124,14 @@ namespace WarGrey::SCADA {
 		void collapse() override;
 
     public:
-        void fill_snips_bounds(float* x, float* y, float* width, float* height);
-        void size_cache_invalid();
-
-    public:
-        void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
-
-    public:
 		WarGrey::SCADA::ISnip* find_snip(float x, float y) override;
-        void fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
-		void fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) override;
+        bool fill_snip_location(ISnip* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+		bool fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) override;
+		void fill_snips_bounds(float* x, float* y, float* width, float* height);
 		void insert(ISnip* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
         void move(ISnip* snip, float x, float y) override;
         void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+		void size_cache_invalid();
 
 	public:
 		void on_tap(WarGrey::SCADA::ISnip* snip, float x, float y, bool shifted, bool controled) override;
@@ -147,6 +144,8 @@ namespace WarGrey::SCADA {
 	public:
 		WarGrey::SCADA::ISnip* get_focus_snip() override;
 		void set_caret_owner(ISnip* snip) override;
+		void show_virtual_keyboard(Keyboard type);
+		void show_virtual_keyboard(Keyboard type, float x, float y);
 
 	public:
 		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
@@ -177,5 +176,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::ISnip* focus_snip;
 		WarGrey::SCADA::ISnip* hover_snip;
 		unsigned int mode;
+
+	private:
+		WarGrey::SCADA::Numpad* numpad;
+		float keyboard_x;
+		float keyboard_y;
     };
 }

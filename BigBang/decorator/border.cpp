@@ -28,7 +28,7 @@ void BorderDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, flo
     }
 }
 
-void BorderDecorator::draw_selected_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
+void BorderDecorator::draw_for_selected_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
     if (this->draw_snip_enclosing_box) {
         ds->DrawRectangle(x, y, width, height, system_highlight_brush(), 1.0F);
     }

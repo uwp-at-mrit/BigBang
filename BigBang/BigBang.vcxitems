@@ -16,9 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\numpadlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
@@ -38,12 +39,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\numpadlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp" />
@@ -68,5 +71,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
 </Project>
