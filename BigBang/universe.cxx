@@ -332,7 +332,7 @@ void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^
 }
 
 void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-	this->logger->log_message(Log::Debug, L"construct planet because of %s", args->Reason.ToString()->Data());
+	this->logger->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
 	if (this->head_planet != nullptr) {
@@ -342,7 +342,9 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
+			this->logger->log_message(Log::Debug, L">> constructing planet %s", child->name()->Data());
 			child->construct(args->Reason, region.Width, region.Height);
+			child->load(args->Reason, region.Width, region.Height);
 			child->reflow(region.Width, region.Height);
 
 			child = info->next;

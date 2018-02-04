@@ -543,7 +543,7 @@ BWorkbench::~BWorkbench() {
 	}
 }
 
-void BWorkbench::construct(CanvasCreateResourcesReason reason, float width, float height) {
+void BWorkbench::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto console = dynamic_cast<BConsole*>(this->console);
 
 	if (console != nullptr) {

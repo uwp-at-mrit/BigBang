@@ -24,7 +24,6 @@ Syslog* IKeyboard::get_logger() {
 }
 
 void IKeyboard::construct() {
-	syslog(Log::Info, "construct");
 	this->create();
 
 	this->cells = new KeyboardCell[this->keynum];

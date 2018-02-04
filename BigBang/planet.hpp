@@ -25,6 +25,7 @@ namespace WarGrey::SCADA {
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
+		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
 		virtual void reflow(float width, float height) {}; 
 		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};

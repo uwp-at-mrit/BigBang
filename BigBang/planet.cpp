@@ -551,18 +551,7 @@ void Planet::set_decorator(IPlanetDecorator* decorator) {
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
-	this->get_logger()->log_message(Log::Critical, "planet");
-
 	this->numpad->construct();
-
-    if (this->head_snip != nullptr) {
-        ISnip* child = this->head_snip;
-
-        do {
-            child->construct();
-            child = SNIP_INFO(child)->next;
-        } while (child != this->head_snip);
-    }
 }
 
 void Planet::update(long long count, long long interval, long long uptime, bool is_slow) {
@@ -650,7 +639,6 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 		float width, height;
 
 		this->numpad->fill_extent(0.0F, 0.0F, &width, &height);
-		syslog(Log::Critical, L"%f*%f@(%f, %f)", width, height, this->keyboard_x, this->keyboard_y);
 		this->numpad->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
 	}
 }

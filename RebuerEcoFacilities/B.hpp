@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		BWorkbench(Platform::String^ label, Platform::String^ plc);
 
 	public:
-		void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
+		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 
 	public:
