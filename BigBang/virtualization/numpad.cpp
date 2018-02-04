@@ -53,6 +53,7 @@ Numpad::Numpad(IPlanet* master, float fontsize) : IKeyboard(master, NUMPAD_KEYNU
 }
 
 void Numpad::create() {
+	syslog(Log::Info, "create");
 	TextExtent ts = get_text_extent("0", this->label_font);
 	Color fg = system_foreground_brush()->Color;
 	Color bg = system_background_brush()->Color;

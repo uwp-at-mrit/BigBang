@@ -23,7 +23,10 @@ namespace WarGrey::SCADA {
 		// `id` is designed for user-applications, in order to distinguish instances of a snip class.
 		// User-Applications should define and maintain the enumerations on their own.
 		long int id = -1L;
-        
+
+	public:
+		WarGrey::SCADA::Syslog* get_logger() override;
+
 	public:
 		virtual void own_caret(bool is_own) {}
 

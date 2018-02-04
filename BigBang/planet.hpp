@@ -22,10 +22,6 @@ namespace WarGrey::SCADA {
     public:
 		virtual ~IPlanet() noexcept;
 		IPlanet(Platform::String^ name) : caption(name) {};
-
-	public:
-		Platform::String^ name() { return this->caption; }
-		Platform::Object^ navigation_label() { return this->caption; }
 		
     public:
         virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
@@ -79,6 +75,11 @@ namespace WarGrey::SCADA {
 			Windows::UI::Input::PointerUpdateKind puk,
 			bool shifted, bool ctrled)
 		{ return false; }
+
+	public:
+		Platform::String^ name() { return this->caption; }
+		Platform::Object^ navigation_label() { return this->caption; }
+		WarGrey::SCADA::Syslog* get_logger();
 
 	public:
 		Windows::Foundation::Point global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);

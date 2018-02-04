@@ -167,6 +167,10 @@ UniverseDisplay::~UniverseDisplay() {
 	this->transfer_clock->Stop();
 }
 
+Syslog* UniverseDisplay::get_logger() {
+	return this->logger;
+}
+
 UIElement^ UniverseDisplay::navigator::get() {
 	return this->navigator_view;
 }

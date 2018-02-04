@@ -19,6 +19,7 @@ namespace WarGrey::SCADA {
 	public:
 		~IKeyboard();
 		IKeyboard(IPlanet* master, unsigned int keynum);
+		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
 		void construct() override;

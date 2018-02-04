@@ -28,9 +28,8 @@ namespace WarGrey::SCADA {
         UniverseHandler;
 
     private ref class IDisplay abstract {
-	public:
-		void enter_critical_section();
-		void leave_critical_section();
+	internal:
+		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
 
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -48,6 +47,10 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_width);
         read_write_property(float, max_height);
 
+	public:
+		void enter_critical_section();
+		void leave_critical_section();
+
 	private:
 		std::mutex section;
     };
@@ -58,6 +61,7 @@ namespace WarGrey::SCADA {
 
 	internal:
 		UniverseDisplay(Platform::String^ name, int frame_rate, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
+		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
 		read_only_property(Windows::UI::Xaml::UIElement^, navigator);

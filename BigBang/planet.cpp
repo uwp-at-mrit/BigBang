@@ -551,6 +551,8 @@ void Planet::set_decorator(IPlanetDecorator* decorator) {
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
+	this->get_logger()->log_message(Log::Critical, "planet");
+
 	this->numpad->construct();
 
     if (this->head_snip != nullptr) {
@@ -678,7 +680,17 @@ IPlanet::~IPlanet() {
 		delete this->info;
 		this->info = nullptr;
 	}
-};
+}
+
+Syslog* IPlanet::get_logger() {
+	Syslog* logger = nullptr;
+
+	if (this->info != nullptr) {
+		logger = this->info->master->get_logger();
+	}
+
+	return logger;
+}
 
 void IPlanet::enter_critical_section() {
 	this->section.lock();

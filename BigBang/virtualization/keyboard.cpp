@@ -1,4 +1,5 @@
 ﻿#include "virtualization/keyboard.hpp"
+#include "planet.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -18,7 +19,12 @@ IKeyboard::~IKeyboard() {
 	}
 }
 
+Syslog* IKeyboard::get_logger() {
+	return this->master->get_logger();
+}
+
 void IKeyboard::construct() {
+	syslog(Log::Info, "construct");
 	this->create();
 
 	this->cells = new KeyboardCell[this->keynum];
