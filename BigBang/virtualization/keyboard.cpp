@@ -49,6 +49,21 @@ int IKeyboard::find_cell(float mouse_x, float mouse_y) {
 	return found;
 }
 
+bool IKeyboard::is_colliding_with_mouse(float mouse_x, float mouse_y, float keyboard_x, float keyboard_y) {
+	bool yes = false;
+
+	if ((this->_shown && (keyboard_x < mouse_x) && (keyboard_y < mouse_y))) {
+		float keyboard_width, keyboard_height;
+
+		this->fill_extent(keyboard_x, keyboard_y, &keyboard_width, &keyboard_height);
+		if ((mouse_x < keyboard_x + keyboard_width) && (mouse_y < keyboard_y + keyboard_height)) {
+			yes = true;
+		}
+	}
+
+	return yes;
+}
+
 void IKeyboard::show(bool shown) {
 	this->_shown = shown;
 }

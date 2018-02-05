@@ -167,6 +167,7 @@ Planet::~Planet() {
 void Planet::change_mode(unsigned int mode) {
 	if (mode != this->mode) {
 		this->no_selected();
+		this->numpad->show(false);
 		this->mode = mode;
 		this->size_cache_invalid();
 	}
@@ -426,26 +427,31 @@ void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, boo
 
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
-	ISnip* unmasked_snip = this->find_snip(x, y);
-	
-	this->set_caret_owner(unmasked_snip);
-	if (unmasked_snip == nullptr) {
-		this->no_selected();
-	}
+	if (!this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+		ISnip* unmasked_snip = this->find_snip(x, y);
 
-	switch (puk) {
-	case PointerUpdateKind::LeftButtonPressed: {
-		this->last_pointer_x = x;
-		this->last_pointer_y = y;
+		this->numpad->show(false);
+		this->numpad->on_goodbye();
 
+		this->set_caret_owner(unmasked_snip);
 		if (unmasked_snip == nullptr) {
-			this->rubberband_x[0] = x;
-			this->rubberband_x[1] = y;
-			this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-		} else {
-			this->rubberband_y = nullptr;
+			this->no_selected();
 		}
-	} break;
+
+		switch (puk) {
+		case PointerUpdateKind::LeftButtonPressed: {
+			this->last_pointer_x = x;
+			this->last_pointer_y = y;
+
+			if (unmasked_snip == nullptr) {
+				this->rubberband_x[0] = x;
+				this->rubberband_x[1] = y;
+				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
+			} else {
+				this->rubberband_y = nullptr;
+			}
+		} break;
+		}
 	}
 
 	return true;
@@ -468,26 +474,30 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 		handled = true;
 	} else {
 		// NOTE non-left clicking always produces PointerUpdateKind::Other
-		ISnip* unmasked_snip = this->find_snip(x, y);
+		if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+			this->numpad->on_hover(x - keyboard_x, y - keyboard_y, shifted, ctrled);
+		} else {
+			ISnip* unmasked_snip = this->find_snip(x, y);
 
-		if (unmasked_snip != this->hover_snip) {
-			if (this->hover_snip != nullptr) {
-				// see next comment
-				this->hover_snip->on_goodbye();
-				this->hover_snip = nullptr;
-			}
-		}
-
-		if (unmasked_snip != nullptr) {
-			if (unmasked_snip->handles_events()) {
-				// NOTE: only snip that handles events will be saved
-				SnipInfo* info = SNIP_INFO(unmasked_snip);
-
-				this->hover_snip = unmasked_snip;
-				this->hover_snip->on_hover(x - info->x, y - info->y, shifted, ctrled);
+			if (unmasked_snip != this->hover_snip) {
+				if (this->hover_snip != nullptr) {
+					// see next	comment
+					this->hover_snip->on_goodbye();
+					this->hover_snip = nullptr;
+				}
 			}
 
-			handled = true;
+			if (unmasked_snip != nullptr) {
+				if (unmasked_snip->handles_events()) {
+					// NOTE: only snip that handles events will be saved
+					SnipInfo* info = SNIP_INFO(unmasked_snip);
+
+					this->hover_snip = unmasked_snip;
+					this->hover_snip->on_hover(x - info->x, y - info->y, shifted, ctrled);
+				}
+
+				handled = true;
+			}
 		}
 	}
 
@@ -495,7 +505,19 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 }
 
 bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
-	if (this->rubberband_y != nullptr) {
+	if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+		float local_x = x - keyboard_x;
+		float local_y = y - keyboard_y;
+
+		switch (puk) {
+		case PointerUpdateKind::LeftButtonPressed: {
+			this->numpad->on_tap(local_x, local_y, shifted, ctrled);
+		}; break;
+		case PointerUpdateKind::RightButtonPressed: {
+			this->numpad->on_right_tap(local_x, local_y, shifted, ctrled);
+		}; break;
+		}
+	} else if (this->rubberband_y != nullptr) {
 		this->rubberband_y = nullptr;
 		// TODO: select all touched snips
 	} else {
@@ -555,6 +577,10 @@ void Planet::construct(CanvasCreateResourcesReason reason, float Width, float He
 }
 
 void Planet::update(long long count, long long interval, long long uptime, bool is_slow) {
+	if (this->numpad->shown()) {
+		this->numpad->update(count, interval, uptime, is_slow);
+	}
+
     if (this->head_snip != nullptr) {
         ISnip* child = this->head_snip;
 

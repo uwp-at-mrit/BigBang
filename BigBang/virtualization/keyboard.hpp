@@ -28,6 +28,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void fill_auto_position(float* x, float* y) = 0;
+		virtual bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y);
 		
 	protected:
 		virtual void create() = 0;
