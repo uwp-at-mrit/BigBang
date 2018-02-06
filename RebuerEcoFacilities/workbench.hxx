@@ -10,7 +10,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		void initialize_component(Windows::Foundation::Size region);
-		void suspend(Windows::ApplicationModel::SuspendingOperation^ op);
 		
 	private:
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);

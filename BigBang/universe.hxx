@@ -81,6 +81,9 @@ namespace WarGrey::SCADA {
 		virtual void construct() {}; // occurs at UI thread
 		virtual void big_rip() {};   // occurs at game loop thread
 
+	public:
+		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+
 	protected private:
 		void add_planet(IPlanet* planet);
 		void collapse();
@@ -110,8 +113,6 @@ namespace WarGrey::SCADA {
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_maniplated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-		void on_key_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
-		void on_key_released(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
 		
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;

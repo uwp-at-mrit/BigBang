@@ -599,7 +599,7 @@ void BWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifted,
 			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
 			this->set_caret_owner(motor);
 
-			this->show_virtual_keyboard(Keyboard::Numpad);
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 		}
 	}
 }

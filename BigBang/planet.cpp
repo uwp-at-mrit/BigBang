@@ -411,6 +411,20 @@ void Planet::set_caret_owner(ISnip* snip) {
 }
 
 /************************************************************************************************/
+bool Planet::on_char(VirtualKey key) {
+	bool handled = false;
+
+	if (this->numpad->shown()) {
+		handled = this->numpad->on_char(key);
+	} else if (this->focus_snip != nullptr) {
+		if (this->focus_snip->handles_events()) {
+			handled = this->focus_snip->on_char(key);
+		}
+	}
+
+	return handled;
+}
+
 void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, bool controlled) {
 	SnipInfo* info = SNIP_INFO(snip);
 
@@ -431,7 +445,6 @@ bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool sh
 		ISnip* unmasked_snip = this->find_snip(x, y);
 
 		this->numpad->show(false);
-		this->numpad->on_goodbye();
 
 		this->set_caret_owner(unmasked_snip);
 		if (unmasked_snip == nullptr) {
@@ -474,22 +487,31 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 		handled = true;
 	} else {
 		// NOTE non-left clicking always produces PointerUpdateKind::Other
-		if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
-			this->numpad->on_hover(x - keyboard_x, y - keyboard_y, shifted, ctrled);
+		if (this->numpad->shown()) {
+			float local_x = x - keyboard_x;
+			float local_y = y - keyboard_y;
+
+			if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+				this->numpad->on_hover(local_x, local_y, shifted, ctrled);
+			} else {
+				this->numpad->on_goodbye(local_x, local_y, shifted, ctrled);
+			}
 		} else {
 			ISnip* unmasked_snip = this->find_snip(x, y);
 
 			if (unmasked_snip != this->hover_snip) {
+				// NOTE: only snip that handles events will be traced
 				if (this->hover_snip != nullptr) {
-					// see next	comment
-					this->hover_snip->on_goodbye();
+					SnipInfo* info = SNIP_INFO(this->hover_snip);
+
+					this->hover_snip->on_goodbye(x - info->x, y - info->y, shifted, ctrled);
 					this->hover_snip = nullptr;
 				}
 			}
 
 			if (unmasked_snip != nullptr) {
 				if (unmasked_snip->handles_events()) {
-					// NOTE: only snip that handles events will be saved
+					// NOTE: only snip that handles events will be traced
 					SnipInfo* info = SNIP_INFO(unmasked_snip);
 
 					this->hover_snip = unmasked_snip;
@@ -549,14 +571,14 @@ bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool s
 	return true;
 }
 
-void Planet::show_virtual_keyboard(Keyboard type) {
+void Planet::show_virtual_keyboard(ScreenKeyboard type) {
 	float auto_x, auto_y;
 
 	this->numpad->fill_auto_position(&auto_x, &auto_y);
 	this->show_virtual_keyboard(type, auto_x, auto_y);
 }
 
-void Planet::show_virtual_keyboard(Keyboard type, float x, float y) {
+void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y) {
 	this->numpad->show(true);
 	this->keyboard_x = x;
 	this->keyboard_y = y;
@@ -581,10 +603,10 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
 		this->numpad->update(count, interval, uptime, is_slow);
 	}
 
-    if (this->head_snip != nullptr) {
-        ISnip* child = this->head_snip;
+	if (this->head_snip != nullptr) {
+		ISnip* child = this->head_snip;
 
-        do {
+		do {
 			SnipInfo* info = SNIP_INFO(child);
 
 			if (unsafe_snip_unmasked(info, this->mode)) {
@@ -592,7 +614,7 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
 			}
 			
 			child = info->next;
-        } while (child != this->head_snip);
+		} while (child != this->head_snip);
     }
 }
 

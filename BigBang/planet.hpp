@@ -18,15 +18,15 @@ namespace WarGrey::SCADA {
 		IDisplay^ master;
 	};
 
-    private class IPlanet abstract {
-    public:
+	private class IPlanet abstract {
+	public:
 		virtual ~IPlanet() noexcept;
 		IPlanet(Platform::String^ name) : caption(name) {};
-		
-    public:
-        virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
+
+	public:
+		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
 		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
-		virtual void reflow(float width, float height) {}; 
+		virtual void reflow(float width, float height) {};
 		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
 		virtual void collapse() {};
@@ -41,8 +41,9 @@ namespace WarGrey::SCADA {
 		virtual void move_to(ISnip* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
 
 	public:
-		virtual void on_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {};
-		virtual void on_right_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {};
+		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
+		virtual void on_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_right_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {}
 
 	public:
 		virtual void add_selected(ISnip* snip) = 0;
@@ -136,6 +137,7 @@ namespace WarGrey::SCADA {
 		void size_cache_invalid();
 
 	public:
+		bool on_char(Windows::System::VirtualKey key) override;
 		void on_tap(WarGrey::SCADA::ISnip* snip, float x, float y, bool shifted, bool controled) override;
 
 	public:
@@ -146,8 +148,8 @@ namespace WarGrey::SCADA {
 	public:
 		WarGrey::SCADA::ISnip* get_focus_snip() override;
 		void set_caret_owner(ISnip* snip) override;
-		void show_virtual_keyboard(Keyboard type);
-		void show_virtual_keyboard(Keyboard type, float x, float y);
+		void show_virtual_keyboard(ScreenKeyboard type);
+		void show_virtual_keyboard(ScreenKeyboard type, float x, float y);
 
 	public:
 		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;

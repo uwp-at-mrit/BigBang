@@ -40,6 +40,9 @@ void Workbench::initialize_component(Size region) {
 	this->universe = ref new Universe("Workbench");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
+
+	// TODO: Why SplitView::Content cannot do it on its own?
+	this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);
 }
 
 void Workbench::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
@@ -55,9 +58,4 @@ void Workbench::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArg
 			args->Handled = true;
 		}
 	}
-}
-
-void Workbench::suspend(Windows::ApplicationModel::SuspendingOperation^ op) {
-	// TODO: Save application state and stop any background activity.
-	// Do not assume that the application will be terminated or resumed with the contents of memory still intact.
 }

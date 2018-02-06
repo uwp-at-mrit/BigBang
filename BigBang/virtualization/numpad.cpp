@@ -8,48 +8,31 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::System;
+
 using namespace Windows::UI;
 using namespace Windows::UI::Text;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
-static unsigned int NUMPAD_KEYNUM = 14;
-static long long numpad_tap_duration = 3000000LL;
+static KeyboardCell keys[] = {
+	{ VirtualKey::Number9, 2, 0, 1, 1 }, { VirtualKey::Number8, 1, 0, 1, 1 }, { VirtualKey::Number7, 0, 0, 1, 1 },
+    { VirtualKey::Number6, 2, 1, 1, 1 }, { VirtualKey::Number5, 1, 1, 1, 1 }, { VirtualKey::Number4, 0, 1, 1, 1 },
+    { VirtualKey::Number3, 2, 2, 1, 1 }, { VirtualKey::Number2, 1, 2, 1, 1 }, { VirtualKey::Number1, 0, 2, 1, 1 },
+    { VirtualKey::Number0, 2, 3, 1, 1 }, { VirtualKey::Decimal, 0, 3, 2, 1 },
 
-static Platform::String^ labels[] = { "9", "8", "7", "6", "5", "4", "3", "2", "1", ".", "0", "B", "E", "R" };
-static const char lmetas[][4] = {
-	{ 2, 0, 1, 1 }, { 1, 0, 1, 1 }, { 0, 0, 1, 1 },
-    { 2, 1, 1, 1 }, { 1, 1, 1, 1 }, { 0, 1, 1, 1 },
-    { 2, 2, 1, 1 }, { 1, 2, 1, 1 }, { 0, 2, 1, 1 },
-    { 2, 3, 1, 1 }, { 0, 3, 2, 1 },
-
-    { 3, 0, 1, 1 }, { 3, 1, 1, 1 }, { 3, 2, 1, 2 }
+    { VirtualKey::Back, 3, 0, 1, 1 }, { VirtualKey::Enter, 3, 1, 1, 3 }
 };
 
-static void numpad_fill_cell(KeyboardCell* cell, int idx, float cellsize, float gapsize, float em, float ch) {
-	char col = lmetas[idx][NumpadCell::Col];
-	char row = lmetas[idx][NumpadCell::Row];
-	char ncol = lmetas[idx][NumpadCell::NCol];
-	char nrow = lmetas[idx][NumpadCell::NRow];
-	float cwidth = cellsize * float(ncol) + gapsize * float(ncol - 1);
-	float cheight = cellsize * float(nrow) + gapsize * float(nrow - 1);
-
-	cell->x = gapsize * float(col + 1) + cellsize * float(col);
-	cell->y = gapsize * float(row + 1) + cellsize * float(row);
-	cell->width = cwidth;
-	cell->height = cheight;
-	cell->label_x = (cwidth - ch) * 0.5F;
-	cell->label_y = (cheight - em) * 0.5F;
-}
+static unsigned int NUMPAD_KEYNUM = sizeof(keys) / sizeof(KeyboardCell);
 
 /*************************************************************************************************/
-Numpad::Numpad(IPlanet* master, float fontsize) : IKeyboard(master, NUMPAD_KEYNUM) {
+Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys, NUMPAD_KEYNUM) {
 	this->label_font = make_text_format("Consolas", fontsize);
-	this->enable_events(true);
-	this->show(false);
-	this->on_goodbye();
+	this->current_key = VirtualKey::None;
 }
 
 void Numpad::create() {
@@ -69,64 +52,52 @@ void Numpad::create() {
 	this->radius = this->gapsize * 0.5F;
 }
 
-void Numpad::fill_cell(KeyboardCell* cell, unsigned int idx) {
-	numpad_fill_cell(cell, idx, this->cellsize, this->gapsize, this->em, this->em * 0.5F);
-}
-
 void Numpad::fill_extent(float x, float y, float* w, float* h) {
 	float size = this->cellsize * 4.0F + this->gapsize * 5.0F;
 
 	SET_VALUES(w, size, h, size);
 }
 
-void Numpad::update(long long count, long long interval, long long uptime, bool is_slow) {
-	if (interval > numpad_tap_duration) {
-		this->uptime = uptime + interval;
-	} else {
-		this->uptime = uptime;
+void Numpad::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	float width, height;
+
+	this->fill_extent(x, y, &width, &height);
+	ds->FillRoundedRectangle(x, y, width, height, this->radius, this->radius, this->background);
+}
+
+void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
+	Platform::String^ label = "";
+
+	if (focused) {
+		auto highbrush = (tapped ? this->taplight : this->highlight);
+		ds->FillRoundedRectangle(x, y, width, height, this->radius, this->radius, highbrush);
 	}
 
-	if (this->tapped) {
-		if (uptime - this->taptime > numpad_tap_duration) {
-			this->tapped = false;
-		}
+	ds->DrawRoundedRectangle(x, y, width, height, this->radius, this->radius, this->border, 2.0F);
+
+	switch (key) {
+	case VirtualKey::Number1: label = "1"; break;
+	case VirtualKey::Number2: label = "2"; break;
+	case VirtualKey::Number3: label = "3"; break;
+	case VirtualKey::Number4: label = "4"; break;
+	case VirtualKey::Number5: label = "5"; break;
+	case VirtualKey::Number6: label = "6"; break;
+	case VirtualKey::Number7: label = "7"; break;
+	case VirtualKey::Number8: label = "8"; break;
+	case VirtualKey::Number9: label = "9"; break;
+	case VirtualKey::Number0: label = "0"; break;
+	case VirtualKey::Decimal: label = "."; break;
+
+	case VirtualKey::Back: label = "B"; break;
+	case VirtualKey::Enter: label = "E"; break;
 	}
-}
 
-void Numpad::on_hover(float local_x, float local_y, bool shifted, bool controled) {
-	if (!this->tapped) {
-		this->current_cell = this->find_cell(local_x, local_y);
-	}
-}
+	if (label != nullptr) {
+		float tx, ty;
 
-void Numpad::on_tap(float local_x, float local_y, bool shifted, bool controled) {
-	this->current_cell = this->find_cell(local_x, local_y);
-	this->taptime = this->uptime;
-	this->tapped = true;
-}
-
-void Numpad::on_goodbye() {
-	this->current_cell = -1;
-}
-
-void Numpad::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->FillRoundedRectangle(x, y, Width, Height, this->radius, this->radius, this->background);
-		
-	for (unsigned char i = 0; i < NUMPAD_KEYNUM; i++) {
-		float cx = x + this->cells[i].x;
-		float cy = y + this->cells[i].y;
-		float cwidth = this->cells[i].width;
-		float cheight = this->cells[i].height;
-		float tx = cx + this->cells[i].label_x;
-		float ty = cy + this->cells[i].label_y;
-
-		if (this->current_cell == i) {
-			auto highbrush = (this->tapped ? this->taplight : this->highlight);
-			ds->FillRoundedRectangle(cx, cy, cwidth, cheight, this->radius, this->radius, highbrush);
-		}
-
-		ds->DrawRoundedRectangle(cx, cy, cwidth, cheight, this->radius, this->radius, this->border, 2.0F);
-		ds->DrawText(labels[i], tx, ty, this->foreground, this->label_font);
+		tx = x + (width - this->em * 0.5F) * 0.5F;
+		ty = y + (height - this->em) * 0.5F;
+		ds->DrawText(label, tx, ty, this->foreground, this->label_font);
 	}
 }
 

@@ -157,8 +157,6 @@ UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log lev
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
-	this->display->KeyDown += ref new KeyEventHandler(this, &UniverseDisplay::on_key_pressed);
-	this->display->KeyUp += ref new KeyEventHandler(this, &UniverseDisplay::on_key_released);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -504,29 +502,13 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 	}
 }
 
-void UniverseDisplay::on_key_pressed(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
+void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
 	if (this->current_planet != nullptr) {
 		VirtualKey vkey = args->Key;
-		CorePhysicalKeyStatus cpks = args->KeyStatus;
 
-		syslog(Log::Info, L"(%s, %s)", cpks.WasKeyDown.ToString()->Data(), cpks.IsKeyReleased.ToString()->Data());
-		args->Handled = true;
-	}
-
-	this->leave_critical_section();
-}
-
-void UniverseDisplay::on_key_released(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
-	this->enter_critical_section();
-
-	if (this->current_planet != nullptr) {
-		VirtualKey vkey = args->Key;
-		CorePhysicalKeyStatus cpks = args->KeyStatus;
-
-		syslog(Log::Info, L"(%s, %s)", cpks.WasKeyDown.ToString()->Data(), cpks.IsKeyReleased.ToString()->Data());
-		args->Handled = true;
+		args->Handled = this->current_planet->on_char(args->Key);
 	}
 
 	this->leave_critical_section();

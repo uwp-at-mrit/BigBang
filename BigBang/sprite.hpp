@@ -14,10 +14,11 @@ namespace WarGrey::SCADA {
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
 
 	public:
-		virtual void on_hover(float local_x, float local_y, bool shifted, bool controled) {};
-		virtual void on_tap(float local_x, float local_y, bool shifted, bool controled) {};
-		virtual void on_right_tap(float local_x, float local_y, bool shifted, bool controled) {};
-		virtual void on_goodbye() {};
+		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
+		virtual void on_hover(float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_tap(float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_right_tap(float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_goodbye(float local_x, float local_y, bool shifted, bool controled) {}
 
 	public:
 		void enable_events(bool yes) { this->deal_with_events = yes; }
