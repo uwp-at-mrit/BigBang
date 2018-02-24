@@ -1,6 +1,6 @@
 #pragma once
 
-#include "snip.hpp"
+#include "snip/snip.hpp"
 #include "text.hpp"
 
 namespace WarGrey::SCADA {

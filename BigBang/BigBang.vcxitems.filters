@@ -7,14 +7,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp">
       <Filter>decorator</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\liquidlet.cpp">
-      <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp">
       <Filter>snip</Filter>
@@ -25,45 +19,24 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\storagelet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp">
       <Filter>snip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\vibratorlet.cpp">
-      <Filter>snip\serew</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.cpp">
-      <Filter>snip\serew</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp">
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -76,14 +49,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\liquidlet.hpp">
-      <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp">
       <Filter>snip</Filter>
@@ -91,51 +58,27 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\storagelet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\vibratorlet.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gluecleanerlet.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\gearboxlet.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\funnellet.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\serewsnip.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\sleevelet.hpp">
-      <Filter>snip\serew</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp">
       <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\serew\constants.hpp">
-      <Filter>snip\serew</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -143,9 +86,6 @@
     </Filter>
     <Filter Include="snip">
       <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="snip\serew">
-      <UniqueIdentifier>{63fab50f-aef7-4e5c-a07e-6e94effb1454}</UniqueIdentifier>
     </Filter>
     <Filter Include="virtualization">
       <UniqueIdentifier>{51d12611-f966-472f-ba3e-d77571c9ece6}</UniqueIdentifier>

@@ -20,12 +20,45 @@
     <Filter Include="Localization\tongue\zh-CN">
       <UniqueIdentifier>{df4eeec5-4394-4e6b-a96d-958bd58e9b6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="snip">
+      <UniqueIdentifier>{b5b3bcba-dc0a-4283-9e89-667929bcaadf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="snip\serew">
+      <UniqueIdentifier>{8b55b09b-611f-4ca7-af6f-a86f1ed75e6b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RebuerEcoFacilities.cxx" />
     <ClCompile Include="B.cpp" />
     <ClCompile Include="workbench.cxx" />
     <ClCompile Include="command.cpp" />
+    <ClCompile Include="snip\serew\funnellet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\serew\gearboxlet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\serew\gluecleanerlet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\serew\serewsnip.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\serew\sleevelet.cpp">
+      <Filter>snip\serew</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\gaugelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\liquidlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\storagelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="snip\vibratorlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -204,5 +237,35 @@
     <ClInclude Include="B.hpp" />
     <ClInclude Include="workbench.hxx" />
     <ClInclude Include="command.hpp" />
+    <ClInclude Include="snip\serew\constants.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\serew\funnellet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\serew\gearboxlet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\serew\gluecleanerlet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\serew\serewsnip.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\serew\sleevelet.hpp">
+      <Filter>snip\serew</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\gaugelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\liquidlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\storagelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="snip\vibratorlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

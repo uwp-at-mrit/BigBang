@@ -212,11 +212,30 @@
     <ClCompile Include="B.cpp" />
     <ClCompile Include="command.cpp" />
     <ClCompile Include="RebuerEcoFacilities.cxx" />
+    <ClCompile Include="snip\gaugelet.cpp" />
+    <ClCompile Include="snip\liquidlet.cpp" />
+    <ClCompile Include="snip\serew\funnellet.cpp" />
+    <ClCompile Include="snip\serew\gearboxlet.cpp" />
+    <ClCompile Include="snip\serew\gluecleanerlet.cpp" />
+    <ClCompile Include="snip\serew\serewsnip.cpp" />
+    <ClCompile Include="snip\serew\sleevelet.cpp" />
+    <ClCompile Include="snip\storagelet.cpp" />
+    <ClCompile Include="snip\vibratorlet.cpp" />
     <ClCompile Include="workbench.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="B.hpp" />
     <ClInclude Include="command.hpp" />
+    <ClInclude Include="snip\gaugelet.hpp" />
+    <ClInclude Include="snip\liquidlet.hpp" />
+    <ClInclude Include="snip\serew\constants.hpp" />
+    <ClInclude Include="snip\serew\funnellet.hpp" />
+    <ClInclude Include="snip\serew\gearboxlet.hpp" />
+    <ClInclude Include="snip\serew\gluecleanerlet.hpp" />
+    <ClInclude Include="snip\serew\serewsnip.hpp" />
+    <ClInclude Include="snip\serew\sleevelet.hpp" />
+    <ClInclude Include="snip\storagelet.hpp" />
+    <ClInclude Include="snip\vibratorlet.hpp" />
     <ClInclude Include="workbench.hxx" />
   </ItemGroup>
   <ItemGroup>
