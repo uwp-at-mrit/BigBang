@@ -1,7 +1,7 @@
 #pragma once
 
 #include "decorator/pipeline.hpp"
-#include "snip/serew/serewsnip.hpp"
+#include "snip/snip.hpp"
 #include "paint.hpp"
 
 using namespace WarGrey::SCADA;
@@ -11,10 +11,9 @@ using namespace Windows::Foundation;
 
 using namespace Microsoft::Graphics::Canvas;
 
-PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out, bool draw_motor) {
+PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out) {
     this->draw_inport = draw_in;
     this->draw_outport = draw_out;
-	this->draw_motorport = draw_motor;
 }
 
 void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
@@ -35,15 +34,4 @@ void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, f
            }
        }
     }
-
-	if (this->draw_motorport) {
-		IMotorSnip* pipe = dynamic_cast<IMotorSnip*>(self);
-
-		if (pipe != nullptr) {
-			static auto ckcolor = make_solid_brush(Colors::ForestGreen);
-
-			Rect region = pipe->get_motor_port();
-			ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, ckcolor, 1.0F);
-		}
-	}
 }

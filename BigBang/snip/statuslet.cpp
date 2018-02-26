@@ -182,8 +182,7 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc
-	, IModbusConfirmation* workbench, ISyslogReceiver* uirecv) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, ISyslogReceiver* uirecv) {
 	auto logger = new Syslog(Log::Debug, caption, default_logger());
 	
 	if (uirecv != nullptr) {
@@ -192,14 +191,9 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc
 
 	initialize_status_font();
 	this->caption = make_text_layout(speak("RR") + " " + speak(caption), status_font);
-	this->client = new ModbusClient(logger, plc, workbench);
-	workbench->fill_application_input_register_interval(&this->start_address, &this->end_address, &this->quantity);
 }
 
 Statusbarlet::~Statusbarlet() {
-	if (this->client != nullptr) {
-		delete this->client;
-	}
 }
 
 void Statusbarlet::construct() {
@@ -220,15 +214,6 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-	if (this->client->connected()) {
-		uint16 address = this->start_address;
-
-		while (address < this->end_address) {
-			uint16 q = min(this->quantity, this->end_address - address);
-			this->client->read_input_registers(address, q);
-			address += q;
-		}
-	}
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -249,20 +234,13 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
     { // highlight PLC Status
         auto plc_x = x + width * 2.0F;
         ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, status_font);
-        if (this->client->connected()) {
-            ds->DrawText(this->client->device_hostname(), plc_x + status_prefix_width, y, Colors::Green, status_font);
-        } else {
-			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
-			static unsigned int retry_count = 0;
-			int idx = (retry_count ++) % (sizeof(dots) / sizeof(Platform::String^));
+        
+		static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
+		static unsigned int retry_count = 0;
+		int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 
-			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, status_font);
-        }
+		ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, status_font);
     }
-}
-
-IModbusClient* Statusbarlet::get_modbus_client() {
-	return this->client;
 }
 
 /*************************************************************************************************/
