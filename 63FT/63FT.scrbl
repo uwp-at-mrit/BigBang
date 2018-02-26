@@ -2,7 +2,7 @@
 
 @(require "../Documentations/Handbook/handbook.rkt")
 
-@handbook-title[#:authors '("睿博环保设备有限公司")]{工业数据采集与监控系统手册}
+@handbook-title[#:authors '("WarGrey")]{工业数据采集与监控系统手册}
 
 @margin-note{软件工程领域有很多项目文档模版,这里不做比较。
 我喜欢像写书一样的来写项目文档,这是@cite{LP:WEB}理念的延续。
