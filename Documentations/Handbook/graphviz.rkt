@@ -167,7 +167,7 @@
             (define 1ex (* 1em 1/2))
             
             (define-values (locsource peak x0 xn)
-              (for/fold ([src null] [peak 0] [x0 +inf.0] [xn 0])
+              (for/fold ([src null] [all-peak 0] [x0 +inf.0] [xn 0])
                         ([lang-src (in-list datasource)])
                 (define lang (vector-ref lang-src 0))
                 (define pen (make-pen #:color (rgba (vector-ref lang-src 1))))
@@ -175,13 +175,15 @@
                 (define-values (date0 daten)
                   (cond [(null? stats) (values x0 xn)]
                         [else (values (caar stats) (car (last stats)))]))
-                (define-values (LoCs total)
-                  (for/fold ([LoCs null] [total 0])
+                (define-values (LoCs total peak)
+                  (for/fold ([LoCs null] [total 0] [peak 0])
                             ([stat (in-list stats)])
                     (define total++ (+ total (- (cadr stat) (cddr stat))))
-                    (values (cons (cons (car stat) total++) LoCs) total++)))
+                    (values (cons (cons (car stat) total++) LoCs)
+                            total++
+                            (max peak total++))))
                 (values (cons (vector lang pen (reverse LoCs) total) src)
-                        (max peak total)
+                        (max all-peak peak)
                         (min x0 date0)
                         (max xn daten))))
               
