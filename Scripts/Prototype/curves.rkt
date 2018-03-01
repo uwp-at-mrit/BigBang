@@ -5,13 +5,15 @@
 
 ; https://pomax.github.io/bezierinfo/
 
-(define (bezier-bouding-box point others)
+(define (bezier-enclosing-box point others)
   (define-values (x0 y0) (values (real-part point) (imag-part point)))
-  (let tr ([xmin x0] [xmax x0] [ymin y0] [ymax y0] [points others])
+  (let tr ([xmin x0] [ymin y0] [xmax x0] [ymax y0] [points others])
     (cond [(null? points) (values xmin ymin xmax ymax)]
-          [else (let-values ([(x y) (values (real-part (car points)) (imag-part (car points)))])
-                  (tr (min xmin x) (max xmax x)
-                      (min ymin y) (max ymax y)
+          [else (let ([point (car points)])
+                  (define x (real-part point))
+                  (define y (imag-part point))
+                  (tr (min xmin x) (min ymin y)
+                      (max xmax x) (max ymax y)
                       (cdr points)))])))
 
 (define (make-bezier-function point others)
@@ -26,9 +28,9 @@
                          (+ i 1) (cdr points)))]))))
 
 (define (make-point-transform x0 y0 xn yn width height margin)
-  (define-values (x-length y-length) (values (- width margin margin) (- height margin margin)))
-  (define-values (x-ratio y-ratio) (values (/ (- xn x0) x-length) (/ (- yn y0) y-length)))
   (define-values (x-start y-start) (values margin margin))
+  (define-values (x-range y-range) (values (- width x-start x-start) (- height y-start y-start)))
+  (define-values (x-ratio y-ratio) (values (/ x-range (- xn x0)) (/ y-range (- yn y0))))
   (lambda [p]
     (cons (+ x-start (* (- (real-part p) x0) x-ratio))
           (+ y-start (* (- (imag-part p) y0) y-ratio)))))
@@ -44,8 +46,8 @@
         (- (cdr point) radius)
         diameter diameter))
 
-(define (bezier #:width [width 300] #:height [height 300] #:samples [samples 64] #:dot-diameter [diameter 4.0] point . others)
-  (define-values (x0 y0 xn yn) (bezier-bouding-box point others))
+(define (bezier #:width [width 256] #:height [height 256] #:samples [samples 64] #:dot-diameter [diameter 4.0] point . others)
+  (define-values (x0 y0 xn yn) (bezier-enclosing-box point others))
   (define point-transform (make-point-transform x0 y0 xn yn width height diameter))
   (define make-intermediate-point (compose1 point-transform (make-bezier-function point others)))
   (define curve-nodes (map make-intermediate-point (make-bezier-range samples)))

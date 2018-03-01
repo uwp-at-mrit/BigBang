@@ -195,13 +195,13 @@
 
             (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc peak) mark-font #true))
             (define x-start (+ dx mark-max-width 1ch))
-            (define x-length (- (+ dx flwidth) x-start mark-max-width 1ch))
+            (define x-range (- (+ dx flwidth) x-start mark-max-width 1ch))
             (define y-start (- (+ dy flheight) 1ex 1em))
-            (define y-length (- y-start dy 1ex))
-            (define date-length (- daten date0))
-            (define line-length (- linen line0))
-            (define date-fraction (/ x-length date-length))
-            (define line-fraction (/ y-length line-length))
+            (define y-range (- y-start dy 1ex))
+            (define date-interval (- daten date0))
+            (define line-interval (- linen line0))
+            (define date-fraction (/ x-range date-interval))
+            (define line-fraction (/ y-range line-interval))
             
             (send dc set-pen axis-color 1 'solid)
             (send dc set-text-foreground mark-color)
@@ -227,24 +227,24 @@
 
             (define adjust-count
               (cond [(and (integer? axis-count) (> axis-count 1)) axis-count]
-                    [else (exact-ceiling (/ y-length (* 1em 2.0)))]))
+                    [else (exact-ceiling (/ y-range (* 1em 2.0)))]))
             (if (<= adjust-count 1)
                 (send* dc
                   (draw-text "0" (- x-start 1ch 1ch) (- y-start 1ex) #true)
-                  (draw-line x-start y-start (+ x-start x-length) y-start))
-                (for ([y-axis (in-range line0 (+ linen 1) (/ line-length (- adjust-count 1)))])
+                  (draw-line x-start y-start (+ x-start x-range) y-start))
+                (for ([y-axis (in-range line0 (+ linen 1) (/ line-interval (- adjust-count 1)))])
                   (define y (- y-start (* (- y-axis line0) line-fraction)))
                   (define y-mark (if (zero? y-axis) "0" (~loc y-axis)))
                   (define-values (y-width _w _d _s) (send dc get-text-extent y-mark mark-font #true))
                   (send dc draw-text y-mark (- x-start 1ch y-width) (- y 1ex) #true)
-                  (send dc draw-line x-start y (+ x-start x-length) y)))
+                  (send dc draw-line x-start y (+ x-start x-range) y)))
               
             (for ([loc-src (in-list locsource)])
               (send dc set-pen (vector-ref loc-src 1))
               (send dc set-text-foreground (send (vector-ref loc-src 1) get-color))
               (define this-y-axis (vector-ref loc-src 3))
               (define y (- y-start (* (- this-y-axis line0) line-fraction)))
-              (send dc draw-text (~loc this-y-axis) (+ x-start x-length 1ch) (- y 1ex) #true)
+              (send dc draw-text (~loc this-y-axis) (+ x-start x-range 1ch) (- y 1ex) #true)
               (send dc draw-lines
                     (for/list ([date.LoC (in-list (vector-ref loc-src 2))])
                       (define-values (x-axis y-axis) (values (car date.LoC) (cdr date.LoC)))
