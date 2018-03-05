@@ -9,8 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BigBang", "BigBang\BigBang.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\graphics.vcxitems", "{73BFE193-7352-40AB-99C0-717F6EBEE2D8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Modbus", "Modbus\Modbus.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Syslog", "Syslog\Syslog.vcxitems", "{01974307-EDB2-486F-A3F2-2F4E8EB07D20}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Documentations", "Documentations\Documentations.vcxproj", "{032D8967-FBCF-4056-8110-5008A8168581}"
@@ -19,16 +17,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Scripts", "Scripts\Scripts.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "63FT", "63FT\63FT.vcxproj", "{A88B286A-26FE-4D0A-8BA4-5DC6CAF08FD3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PLCIO", "PLCIO\PLCIO.vcxitems", "{A218BF46-1F55-4B99-B000-62F2DE40576C}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Syslog\Syslog.vcxitems*{01974307-edb2-486f-a3f2-2f4e8eb07d20}*SharedItemsImports = 9
 		BigBang\BigBang.vcxitems*{6a826f3b-23f9-432c-86bd-f9d318096966}*SharedItemsImports = 9
 		Graphics\graphics.vcxitems*{73bfe193-7352-40ab-99c0-717f6ebee2d8}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
-		Modbus\Modbus.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
+		PLCIO\PLCIO.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}*SharedItemsImports = 4
 		BigBang\BigBang.vcxitems*{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}*SharedItemsImports = 4
+		PLCIO\PLCIO.vcxitems*{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

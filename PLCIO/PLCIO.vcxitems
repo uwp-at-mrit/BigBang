@@ -4,7 +4,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{a218bf46-1f55-4b99-b000-62f2de40576c}</ItemsProjectGuid>
-    <ItemsProjectName>Modbus</ItemsProjectName>
+    <ItemsProjectName>PLCIO</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -15,6 +15,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IPLCClient.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp" />
@@ -23,11 +24,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\sockexn.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus_test.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus_test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\protocol.cpp" />

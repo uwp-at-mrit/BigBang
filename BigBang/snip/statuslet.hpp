@@ -1,13 +1,13 @@
 #pragma once
 
 #include "snip.hpp"
+#include "IPLCClient.hpp"
 
 namespace WarGrey::SCADA {
     private class Statusbarlet : public WarGrey::SCADA::ISnip {
     public:
-		~Statusbarlet() noexcept;
-		Statusbarlet(Platform::String^ caption, Platform::String^ plc,
-			WarGrey::SCADA::ISyslogReceiver* ui_receiver = nullptr);
+		~Statusbarlet() noexcept {};
+		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCClient* device = nullptr);
 
     public:
         void construct() override;
@@ -17,6 +17,7 @@ namespace WarGrey::SCADA {
         
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
+		WarGrey::SCADA::IPLCClient* device;
     };
 
 	private class Statuslinelet : public WarGrey::SCADA::ISnip, public WarGrey::SCADA::ISyslogReceiver {

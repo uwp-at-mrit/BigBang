@@ -182,18 +182,10 @@ static void initialize_status_font() {
 	}
 }
 
-Statusbarlet::Statusbarlet(Platform::String^ caption, Platform::String^ plc, ISyslogReceiver* uirecv) {
-	auto logger = new Syslog(Log::Debug, caption, default_logger());
-	
-	if (uirecv != nullptr) {
-		logger->append_log_receiver(uirecv);
-	}
-
+Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();
-	this->caption = make_text_layout(speak("RR") + " " + speak(caption), status_font);
-}
-
-Statusbarlet::~Statusbarlet() {
+	this->device = device;
+	this->caption = make_text_layout(speak(caption), status_font);
 }
 
 void Statusbarlet::construct() {
@@ -214,6 +206,7 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
+	this->device->send_scheduled_request(count, interval, uptime, is_slow);
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -222,25 +215,29 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->FillRectangle(x, y, Width, Height, system_background_brush());
 
 	statusbar->enter_shared_section();
-	float timestamp_xoff = (Width - statusbar->timestamp->LayoutBounds.Width);
+	float lastfield_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
 	ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->ipv4,          x + width * 1.0F,   y, Colors::White);
-    ds->DrawTextLayout(statusbar->powercapacity, x + width * 3.0F,   y, Colors::Green);
-    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 4.0F,   y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F,   y, Colors::White);
+    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F,   y, Colors::Green);
+    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F,   y, Colors::Yellow);
     ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->timestamp,     x + timestamp_xoff, y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->ipv4,          x + lastfield_xoff, y, Colors::Yellow);
 	statusbar->leave_shared_section();
 
-    { // highlight PLC Status
-        auto plc_x = x + width * 2.0F;
-        ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, status_font);
-        
-		static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
-		static unsigned int retry_count = 0;
-		int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
+	{ // highlight PLC Status
+		auto plc_x = x + width * 4.0F;
+		ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, status_font);
 
-		ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, status_font);
-    }
+		if ((this->device != nullptr) && (this->device->connected())) {
+			ds->DrawText(this->device->device_hostname(), plc_x + status_prefix_width, y, Colors::Green, status_font);
+		} else {
+			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
+			static unsigned int retry_count = 0;
+			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
+
+			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, status_font);
+		}
+	}
 }
 
 /*************************************************************************************************/

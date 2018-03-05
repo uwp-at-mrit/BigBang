@@ -4,11 +4,13 @@
 #include <queue>
 
 #include "modbus/constants.hpp"
+#include "IPLCClient.hpp"
 #include "syslog.hpp"
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
 	struct ModbusTransaction;
+	class IModbusClient;
 
 	private class IModbusTransactionIdGenerator abstract : public WarGrey::SCADA::SharedObject {
 	public:
@@ -33,11 +35,10 @@ namespace WarGrey::SCADA {
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 
 	public:
-		virtual void fill_application_input_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) = 0;
-		virtual void fill_application_holding_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) = 0;
+		virtual void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) = 0;
 	};
 
-    private class IModbusClient abstract {
+	private class IModbusClient abstract : public WarGrey::SCADA::IPLCClient {
     public:
         virtual ~IModbusClient() noexcept;
 
@@ -46,11 +47,13 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::IModbusConfirmation* confirmation,
 			WarGrey::SCADA::IModbusTransactionIdGenerator* generator);
 
-		Platform::String^ device_hostname();
+	public:
+		Platform::String^ device_hostname() override;
+		bool connected() override;
+		void send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) override;
 
 	public:
 		uint8* calloc_pdu();
-		bool connected();
 
     public: // data access
 		virtual uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
@@ -97,7 +100,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
-		WarGrey::SCADA::IModbusConfirmation* fallback_confirmation;
+		WarGrey::SCADA::IModbusConfirmation* confirmation;
 		WarGrey::SCADA::Syslog* logger;
     };
 
@@ -129,26 +132,26 @@ namespace WarGrey::SCADA {
 			: IModbusClient(logger, server, port, confirmation, generator) {};
 
     public: // data access
-		uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation = nullptr) override;
-        uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* confirmation = nullptr) override;
+		uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* alt_confirm = nullptr) override;
+        uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* alt_confirm = nullptr) override;
 
-		uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 read_queues(uint16 address, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation = nullptr) override;
-		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation = nullptr) override;
+		uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 read_queues(uint16 address, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* alt_confirm = nullptr) override;
 		
 		uint16 write_read_registers(
 			uint16 waddr, uint16 wquantity,
 			uint16 raddr, uint16 rquantity, uint16* src,
-			IModbusConfirmation* confirmation = nullptr) override;
+			IModbusConfirmation* alt_confirm = nullptr) override;
 
 	public: // Others
 		uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length,
-			IModbusConfirmation* confirmation = nullptr) override;
+			IModbusConfirmation* alt_confirm = nullptr) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
@@ -171,7 +174,6 @@ namespace WarGrey::SCADA {
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {};
 
 	public:
-		void fill_application_input_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) override;
-		void fill_application_holding_register_interval(uint16* start_address, uint16* end_address, uint16* quantity) override;
+		void on_scheduled_request(WarGrey::SCADA::IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) {};
 	};
 }

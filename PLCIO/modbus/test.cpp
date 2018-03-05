@@ -1,4 +1,4 @@
-#include "modbus_test.hpp"
+#include "modbus/test.hpp"
 #include "syslog.hpp"
 
 using namespace WarGrey::SCADA;

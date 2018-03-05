@@ -10,14 +10,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.xaml.cpp" />
-    <ClCompile Include="MainPage.xaml.cpp" />
     <ClCompile Include="63FT.cxx" />
     <ClCompile Include="workbench.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.xaml.h" />
-    <ClInclude Include="MainPage.xaml.h" />
     <ClInclude Include="workbench.hxx" />
   </ItemGroup>
   <ItemGroup>
