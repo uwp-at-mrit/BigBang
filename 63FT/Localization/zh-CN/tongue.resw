@@ -147,14 +147,14 @@
   <data name="wifilabel" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name="cleanmotor" xml:space="preserve">
-    <value>清胶器螺杆电机</value>
+  <data name=":hpc:" xml:space="preserve">
+    <value>液压控制</value>
   </data>
   <data name="feedmotor" xml:space="preserve">
     <value>进料电机</value>
   </data>
-  <data name="mastermotor" xml:space="preserve">
-    <value>主螺杆电机</value>
+  <data name="oilmpa" xml:space="preserve">
+    <value>油泵油压（Mpa）</value>
   </data>
   <data name="slavemotor" xml:space="preserve">
     <value>副螺杆电机</value>

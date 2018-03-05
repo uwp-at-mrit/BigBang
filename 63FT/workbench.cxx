@@ -1,6 +1,8 @@
 ﻿#include "workbench.hxx"
 #include "tongue.hpp"
 
+#include "page/hydraulic_pressure.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -17,6 +19,7 @@ public:
 
 public:
 	void construct() override {
+		this->add_planet(new HPCWorkbench("192.168.8.101"));
 	}
 };
 

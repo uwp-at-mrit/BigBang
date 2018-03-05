@@ -147,14 +147,14 @@
   <data name="wifilabel" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name="cleanmotor" xml:space="preserve">
-    <value>Glue Cleaning Motor</value>
+  <data name=":hpc:" xml:space="preserve">
+    <value>Hydraulic Pressure</value>
   </data>
   <data name="feedmotor" xml:space="preserve">
     <value>Feedstock Motor</value>
   </data>
-  <data name="mastermotor" xml:space="preserve">
-    <value>Main Screw Motor</value>
+  <data name="oilmpa" xml:space="preserve">
+    <value>Oil Pump Pressure（Mpa）</value>
   </data>
   <data name="slavemotor" xml:space="preserve">
     <value>Auxilliary Screw Motor</value>

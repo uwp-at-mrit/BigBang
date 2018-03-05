@@ -10,9 +10,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\misc.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
@@ -37,6 +34,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp">
       <Filter>snip</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -51,9 +51,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\misc.hpp">
-      <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp">
       <Filter>snip</Filter>
@@ -77,6 +74,9 @@
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
   </ItemGroup>

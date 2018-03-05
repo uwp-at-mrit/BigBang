@@ -166,9 +166,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="63FT.cxx" />
+    <ClCompile Include="command.cpp" />
+    <ClCompile Include="page\hydraulic_pressure.cpp" />
     <ClCompile Include="workbench.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="command.hpp" />
+    <ClInclude Include="page\hydraulic_pressure.hpp" />
     <ClInclude Include="workbench.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
