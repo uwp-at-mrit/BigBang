@@ -147,8 +147,9 @@
   <data name=":hpc:" xml:space="preserve">
     <value>液压控制</value>
   </data>
-  <data name="oilmpa" xml:space="preserve">
-    <value>油泵油压（Mpa）</value>
+  <data name="n_oilmpa" xml:space="preserve">
+    <value>#油泵油压(Mpa)</value>
+    <comment>名称字符串里不能包含 '#'</comment>
   </data>
   <data name="ampere" xml:space="preserve">
     <value>电流</value>
@@ -185,5 +186,8 @@
   </data>
   <data name="stop" xml:space="preserve">
     <value>停止</value>
+  </data>
+  <data name="oilmpa" xml:space="preserve">
+    <value>总管油压(Mpa)</value>
   </data>
 </root>

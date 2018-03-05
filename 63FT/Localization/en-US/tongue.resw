@@ -147,8 +147,9 @@
   <data name=":hpc:" xml:space="preserve">
     <value>Hydraulic Pressure</value>
   </data>
-  <data name="oilmpa" xml:space="preserve">
-    <value>Oil Pump Pressure（Mpa）</value>
+  <data name="n_oilmpa" xml:space="preserve">
+    <value>#Oil Pump Pressure(Mpa)</value>
+    <comment>name cannot contains '#'</comment>
   </data>
   <data name="ampere" xml:space="preserve">
     <value>Ampere</value>
@@ -188,5 +189,8 @@
   </data>
   <data name="String" xml:space="preserve">
     <value>SNIPS_ARITY(this-&gt;gauges)</value>
+  </data>
+  <data name="oilmpa" xml:space="preserve">
+    <value>Total Oil Pressure(Mpa)</value>
   </data>
 </root>

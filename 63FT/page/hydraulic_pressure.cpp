@@ -36,14 +36,17 @@ private enum HPCMode { WindowUI = 0, View, Control };
 
 private class HPCConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
 public:
-	HPCConsole(HPCWorkbench* master) : workbench(master) {};
+	HPCConsole(HPCWorkbench* master) : workbench(master) {}
 
 public:
 	void load_gauges(float width, float height) {
-		Platform::String^ caption = "#" + speak("oilmpa");
+		Platform::String^ caption_suffix = speak("n_oilmpa");
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->gauges); i++) {
-			this->gauges[i] = new Gaugelet((i + 1).ToString() + caption, 40);
+		this->gauges[0] = new Gaugelet(speak("oilmpa"), 40);
+		this->workbench->insert(this->gauges[0]);
+
+		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
+			this->gauges[i] = new Gaugelet(i.ToString() + caption_suffix, 40);
 			this->workbench->insert(this->gauges[i]);
 		}
 	}
@@ -57,11 +60,13 @@ public:
 
 		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
 		gauge_y = height - snip_height - vinset;
-		for (size_t i = 0; i < SNIPS_ARITY(this->gauges); i++) {
+		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
 			this->workbench->move_to(this->gauges[i], gauge_x, gauge_y);
 			this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
 			gauge_x += (snip_width + gauge_gapsize);
 		}
+
+		this->workbench->move_to(this->gauges[0], gauge_x, gauge_y);
 	}
 
 public:
@@ -125,7 +130,7 @@ private:
 
 // never deletes these snips mannually
 private:
-	Gaugelet* gauges[6];
+	Gaugelet* gauges[7];
 
 private:
 	HPCWorkbench* workbench;
@@ -133,7 +138,7 @@ private:
 
 private class HPCDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
 public:
-	HPCDecorator(ICanvasBrush^ brush) : IPlanetDecorator(), brush(brush) {};
+	HPCDecorator(ICanvasBrush^ brush) : IPlanetDecorator(), brush(brush) {}
 
 public:
 	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
@@ -181,7 +186,7 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 
 	if (console != nullptr) {
 		this->change_mode(HPCMode::View);
-		// console->load_gauges(width, height);
+		console->load_gauges(width, height);
 		
 		this->change_mode(HPCMode::Control);
 		
@@ -211,7 +216,7 @@ void HPCWorkbench::reflow(float width, float height) {
 		this->change_mode(HPCMode::Control);
 
 		this->change_mode(HPCMode::View);
-		// console->reflow_gauges(vinset, width, height);
+		console->reflow_gauges(vinset, width, height);
 	}
 }
 

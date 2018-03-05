@@ -18,10 +18,10 @@ namespace WarGrey::SCADA {
     private:
         void initialize_meter();
         void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float x, float y, float cscale, int mscale,
+            float x, float y, float scale, int range,
             Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scales,
-            Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scale,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ckcolor);
+            Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ cscale,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;

@@ -17,7 +17,8 @@ Gaugelet::Gaugelet(Platform::String^ caption, int range, unsigned char step, Col
 	: range(range), step((step > 0) ? step : 10) {
 	this->label_font = make_text_format(12.0F);
 	this->caption = make_text_layout(caption, this->label_font);
-	this->set_scale(1.0F, true);
+	this->color = make_solid_brush(color);
+	this->set_scale(0.0F, true);
 }
 
 void Gaugelet::initialize_meter() {
@@ -34,20 +35,20 @@ void Gaugelet::initialize_meter() {
         int delta = this->range / this->step;
 
         auto marks = blank();
-        Platform::String^ scales = "";
+        Platform::String^ scale_sequences = "";
         for (char i = 0; i <= step; i++) {
             auto ythis = mark_interval * i;
 
             if (i % 2 == 0) {
                 marks = geometry_union(marks, hline(0.0F, ythis, mark_width));
-                scales = scales + " " + (this->scale - delta * i).ToString();
+                scale_sequences = scale_sequences + " " + (this->range - delta * i).ToString();
             } else {
                 marks = geometry_union(marks, hline(short_mark_x, ythis, short_mark_length));
             }
         }
 
         this->scale_marks = geometry_freeze(marks);
-        this->scales = make_vertical_layout(scales, font, linespacing, CanvasHorizontalAlignment::Right);
+        this->scales = make_vertical_layout(scale_sequences, font, linespacing, CanvasHorizontalAlignment::Right);
     }
 }
 
@@ -58,13 +59,13 @@ void Gaugelet::update_scale() {
 void Gaugelet::construct() {	
 	this->initialize_meter();
 
-    this->meter_width = this->mark_width * 9.0F /* must greater than 5.0F which is the width of meter body */;
+    this->meter_width = this->mark_width * 10.0F /* must greater than 5.0F which is the width of meter body */;
     this->width = std::fmax(this->caption->LayoutBounds.Width, this->meter_width);
-    this->height = this->caption->LayoutBounds.Height * 1.618F + this->scales->LayoutBounds.Height;
+    this->height = this->caption->LayoutBounds.Height + this->scales->LayoutBounds.Height;
 }
 
 void Gaugelet::fill_extent(float x, float y, float* w, float* h) {
-    SET_VALUES(w, this->width, h, this->height);
+	SET_VALUES(w, this->width, h, this->height);
 }
 
 void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -74,23 +75,26 @@ void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     
     ds->DrawTextLayout(this->caption, caption_x, y, Colors::Khaki);
     this->draw_meter(ds, meter_x, meter_y, this->scale, this->range, this->scales, this->cscale, this->color);
+	ds->DrawRectangle(meter_x, meter_y, this->meter_width, this->scales->LayoutBounds.Height, Colors::DodgerBlue);
+	ds->DrawRectangle(x, y, this->width, this->height, Colors::Firebrick);
 }
 
-void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scale, int mscale
-	, CanvasTextLayout^ scales, CanvasTextLayout^ cscale, ICanvasBrush^ ckcolor) {
+void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scale, int range
+	, CanvasTextLayout^ scales, CanvasTextLayout^ cscale, ICanvasBrush^ color) {
+	float body_xoff = scales->DrawBounds.X * 0.5F;
     float body_yoff = scales->DrawBounds.Y + this->mark_interval * 0.5F;
-    float body_x = x + this->mark_width * 5.0F;
+    float body_x = x + this->mark_width * 5.0F - body_xoff;
     float body_y = y + body_yoff;
 	float body_height = this->mark_interval * float(this->step);
     float body_width = this->meter_width + x - body_x;
-	float current_height = std::fmin(scale * body_height / float(mscale), body_height);
+	float current_height = std::fmin(scale * body_height / float(range), body_height);
 
     ds->FillRectangle(body_x, body_y, body_width, body_height, Colors::Gray);
-    ds->FillRectangle(body_x, body_y + body_height - current_height, body_width, current_height, ckcolor);
-    ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::GhostWhite);
-    
+    ds->FillRectangle(body_x, body_y + body_height - current_height, body_width, current_height, color);
+	ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::GhostWhite);
+
     { // draw scales and marks
-        float scale_xoff = -scales->LayoutBounds.X - (this->mark_width * 2.0F);
+        float scale_xoff = -scales->LayoutBounds.X - (this->mark_width * 2.0F) + body_xoff;
         float scale_width = scales->LayoutBounds.Width;
         float scale_spacing = scales->DrawBounds.Y;
 
@@ -101,7 +105,7 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scal
 
 	{ // draw current value and label
 		float scale_x = body_x - cscale->LayoutBounds.Width * 0.5F;
-		float scale_y = y + this->height - cscale->LayoutBounds.Height;
+		float scale_y = body_y + body_height;
 
 		ds->DrawTextLayout(cscale, scale_x, scale_y, Colors::Yellow);
 	}

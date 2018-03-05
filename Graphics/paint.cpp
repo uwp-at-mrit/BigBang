@@ -32,8 +32,8 @@ void brush_translate(ICanvasBrush^ brush, float x, float y) {
     brush->Transform = make_translation_matrix(x, y);
 }
 
-CanvasSolidColorBrush^ make_solid_brush(Color& ckcolor) {
-    return ref new CanvasSolidColorBrush(shared_ds, ckcolor);
+CanvasSolidColorBrush^ make_solid_brush(Color& color) {
+    return ref new CanvasSolidColorBrush(shared_ds, color);
 }
 
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey

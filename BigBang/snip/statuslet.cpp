@@ -222,7 +222,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colors::Brown);
+	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colors::Chocolate);
     ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, Colors::White);
     ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, Colors::Green);
     ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, Colors::Yellow);
