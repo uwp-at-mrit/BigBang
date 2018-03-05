@@ -42,7 +42,7 @@ namespace WarGrey::SCADA {
 	private class Keyboard abstract : public WarGrey::SCADA::IKeyboard {
 	public:
 		~Keyboard();
-		Keyboard(IPlanet* master, KeyboardCell* keys, unsigned int keynum);
+		Keyboard(IPlanet* master, const KeyboardCell* keys, unsigned int keynum);
 
 	public:
 		void construct() override;
@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 		float em;
 
 	private:
-		WarGrey::SCADA::KeyboardCell* cells;
+		const WarGrey::SCADA::KeyboardCell* cells;
 		unsigned int keynum;
 		float* cell_boxes;
 

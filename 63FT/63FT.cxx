@@ -19,7 +19,7 @@ namespace WarGrey::SCADA {
     protected:
         void RebuerMain(ApplicationView^ self, FrameworkElement^ screen) {
             this->Suspending += ref new SuspendingEventHandler(this, &Boat63FT::OnSuspending);
-            CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Boat63FT::OnUncaughtException);
+			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Boat63FT::OnUncaughtException);
 
             ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
             ApplicationView::PreferredLaunchViewSize = system_screen_size();
@@ -74,7 +74,8 @@ namespace WarGrey::SCADA {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
-    // Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-cn";
+	// Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
+	Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "en-US";
 	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Boat63FT(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

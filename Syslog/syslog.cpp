@@ -7,7 +7,7 @@ ISyslogReceiver* default_racket_receiver() {
 	static ISyslogReceiver* rsyslog;
 
 	if (rsyslog == nullptr) {
-		rsyslog = new RacketReceiver("172.16.1.1", 18030, Log::Debug);
+		rsyslog = new RacketReceiver("192.168.1.101", 18030, Log::Debug);
 		rsyslog->reference();
 	}
 

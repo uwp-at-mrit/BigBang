@@ -340,10 +340,10 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
-			this->logger->log_message(Log::Debug, L">> constructing planet %s", child->name()->Data());
 			child->construct(args->Reason, region.Width, region.Height);
 			child->load(args->Reason, region.Width, region.Height);
 			child->reflow(region.Width, region.Height);
+			this->logger->log_message(Log::Debug, L">> planet[%s] is constructed", child->name()->Data());
 
 			child = info->next;
 		} while (child != this->head_planet);

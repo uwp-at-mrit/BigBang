@@ -123,50 +123,38 @@
   <data name="disconnected" xml:space="preserve">
     <value>Disconnected</value>
   </data>
-  <data name="ipv4label" xml:space="preserve">
+  <data name=":ipv4:" xml:space="preserve">
     <value>Local IPv4: </value>
   </data>
   <data name="nowifi" xml:space="preserve">
     <value>Not Found</value>
   </data>
-  <data name="plclabel" xml:space="preserve">
+  <data name=":plc:" xml:space="preserve">
     <value>PLC:  </value>
   </data>
-  <data name="powerlabel" xml:space="preserve">
+  <data name=":power:" xml:space="preserve">
     <value>Power:  </value>
   </data>
-  <data name="RR" xml:space="preserve">
-    <value>Recycled Rubber</value>
-  </data>
-  <data name="sdlabel" xml:space="preserve">
+  <data name=":sd:" xml:space="preserve">
     <value>Card Storage:  </value>
   </data>
   <data name="noipv4" xml:space="preserve">
     <value>0.0.0.0</value>
   </data>
-  <data name="wifilabel" xml:space="preserve">
+  <data name=":wifi:" xml:space="preserve">
     <value>WiFi: </value>
   </data>
   <data name=":hpc:" xml:space="preserve">
     <value>Hydraulic Pressure</value>
   </data>
-  <data name="feedmotor" xml:space="preserve">
-    <value>Feedstock Motor</value>
-  </data>
   <data name="oilmpa" xml:space="preserve">
     <value>Oil Pump Pressure（Mpa）</value>
-  </data>
-  <data name="slavemotor" xml:space="preserve">
-    <value>Auxilliary Screw Motor</value>
   </data>
   <data name="ampere" xml:space="preserve">
     <value>Ampere</value>
   </data>
   <data name="rpm" xml:space="preserve">
     <value>RPM</value>
-  </data>
-  <data name="storagetank" xml:space="preserve">
-    <value>Storage Tank</value>
   </data>
   <data name="bar" xml:space="preserve">
     <value>bar</value>
@@ -197,5 +185,8 @@
   </data>
   <data name="stop" xml:space="preserve">
     <value>Stop</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>SNIPS_ARITY(this-&gt;gauges)</value>
   </data>
 </root>

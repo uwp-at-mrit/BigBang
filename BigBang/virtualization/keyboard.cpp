@@ -12,7 +12,7 @@ private enum KeyboardCellBox { X, Y, Width, Height };
 static const size_t box_size = sizeof(float) * 4;
 static const long long numpad_tap_duration = 3000000LL;
 
-static void fill_cellbox(float* box, KeyboardCell cell, float cellsize, float gapsize) {
+static void fill_cellbox(float* box, const KeyboardCell cell, float cellsize, float gapsize) {
 	float flcol = float(cell.col);
 	float flrow = float(cell.row);
 	float flncol = float(cell.ncol);
@@ -25,19 +25,27 @@ static void fill_cellbox(float* box, KeyboardCell cell, float cellsize, float ga
 }
 
 /*************************************************************************************************/
-Keyboard::Keyboard(IPlanet* master, KeyboardCell* cells, unsigned int keynum) : IKeyboard(master), cells(cells), keynum(keynum) {
+Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keynum)
+	: IKeyboard(master), cells(cells), keynum(keynum) {
 	this->enable_events(true);
 }
 
 Keyboard::~Keyboard() {
-	free(this->cells);
+	if (this->cell_boxes != nullptr) {
+		free(this->cell_boxes);
+	}
 }
 
 void Keyboard::construct() {
 	this->create();
+
+	if (this->cell_boxes != nullptr) {
+		free(this->cell_boxes);
+	}
+
 	this->cell_boxes = (float *)calloc(this->keynum, box_size);
 	for (size_t i = 0; i < keynum; i++) {
-		fill_cellbox(this->cell_boxes + (i * box_size), cells[i], cellsize, gapsize);
+		fill_cellbox(this->cell_boxes + (i * box_size), this->cells[i], cellsize, gapsize);
 	}
 }
 

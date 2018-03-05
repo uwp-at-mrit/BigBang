@@ -42,7 +42,7 @@ public:
 	void load_gauges(float width, float height) {
 		Platform::String^ caption = "#" + speak("oilmpa");
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->gauges) && this->gauges[i] != nullptr; i++) {
+		for (size_t i = 0; i < SNIPS_ARITY(this->gauges); i++) {
 			this->gauges[i] = new Gaugelet((i + 1).ToString() + caption, 40);
 			this->workbench->insert(this->gauges[i]);
 		}
@@ -52,7 +52,7 @@ public:
 	void reflow_gauges(float vinset, float width, float height) {
 		float gauge_gapsize = 32.0F;
 		float gauge_x = 0.0F;
-		float gauge_y = 0.0F;
+		float gauge_y = vinset;
 		float snip_width, snip_height;
 
 		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
@@ -66,9 +66,7 @@ public:
 
 public:
 	void execute(WarGrey::SCADA::Menu cmd, WarGrey::SCADA::ISnip* snip) override {
-		auto motor = static_cast<Motorlet*>(snip);
-
-		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), motor->id);
+		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), snip->id);
 	}
 
 private:
@@ -160,7 +158,7 @@ private:
 	Statuslinelet* statusline;
 };
 
-HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(speak(":hpc:")), device(plc) {
+HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:"), device(plc) {
 	HPCConsole* console = new HPCConsole(this);
 
 	this->console = console;
@@ -183,13 +181,14 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 
 	if (console != nullptr) {
 		this->change_mode(HPCMode::View);
-		console->load_gauges(width, height);
+		// console->load_gauges(width, height);
 		
 		this->change_mode(HPCMode::Control);
 		
 		this->change_mode(HPCMode::WindowUI);
+		this->statusbar = new Statusbarlet(this->name());
 		this->statusline = new Statuslinelet(Log::Debug);
-		this->statusbar = new Statusbarlet(this->caption);
+		
 		this->shift = new Togglet(false, "control_mode", "view_mode", -6.18F);
 		this->insert(this->statusbar);
 		this->insert(this->statusline);
@@ -212,7 +211,7 @@ void HPCWorkbench::reflow(float width, float height) {
 		this->change_mode(HPCMode::Control);
 
 		this->change_mode(HPCMode::View);
-		console->reflow_gauges(vinset, width, height);
+		// console->reflow_gauges(vinset, width, height);
 	}
 }
 

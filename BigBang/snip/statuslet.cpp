@@ -14,6 +14,7 @@ using namespace WarGrey::SCADA;
 using namespace Concurrency;
 
 using namespace Windows::UI;
+using namespace Windows::UI::Text;
 using namespace Windows::UI::Xaml;
 using namespace Windows::Foundation;
 
@@ -68,12 +69,12 @@ public:
 		Platform::String^ power = nullptr;
 
 		if (maybe_remaining == nullptr) {
-			power = speak("powerlabel") + "100%";
+			power = speak(":power:") + "100%";
 		} else {
 			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
 			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
-			power = speak("powerlabel") + round((remaining / full) * 100.0F).ToString() + "%";
+			power = speak(":power:") + round((remaining / full) * 100.0F).ToString() + "%";
 		}
 
 		this->powercapacity = make_text_layout(power, status_font);
@@ -92,11 +93,11 @@ public:
             }
         }
 
-        this->wifi_strength = make_text_layout(speak("wifilabel") + signal, status_font);
+        this->wifi_strength = make_text_layout(speak(":wifi:") + signal, status_font);
     }
 
     void update_sdinfo() {
-        this->storage = make_text_layout(speak("sdlabel") + L"0MB", status_font);
+        this->storage = make_text_layout(speak(":sd:") + L"0MB", status_font);
     }
 
     void update_ipinfo() {
@@ -111,7 +112,7 @@ public:
             }
         }
 
-		this->ipv4 = make_text_layout(speak("ipv4label") + ipv4, status_font);
+		this->ipv4 = make_text_layout(speak(":ipv4:") + ipv4, status_font);
     }
 
 public:
@@ -174,14 +175,16 @@ static Status^ statusbar = nullptr;
 
 static void initialize_status_font() {
 	if (status_font == nullptr) {
-		status_font = make_text_format();
+		status_font = make_text_format("Microsoft YaHei", 12.0F);
+		status_font->FontWeight = FontWeights::Bold;
 
-		TextExtent ts = get_text_extent(speak("plclabel"), status_font);
-		status_height = ts.height;
+		TextExtent ts = get_text_extent(speak(":plc:"), status_font);
+		status_height = ts.height * 1.2F;
 		status_prefix_width = ts.width;
 	}
 }
 
+/*************************************************************************************************/
 Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();
 	this->device = device;
@@ -206,36 +209,39 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
-	this->device->send_scheduled_request(count, interval, uptime, is_slow);
+	if ((this->device != nullptr) && (this->device->connected())) {
+		this->device->send_scheduled_request(count, interval, uptime, is_slow);
+	}
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
     float width = Width / 7.0F;
+	float context_y = y + (status_height - this->caption->LayoutBounds.Height) * 0.5F;
 	
 	ds->FillRectangle(x, y, Width, Height, system_background_brush());
 
 	statusbar->enter_shared_section();
-	float lastfield_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,            x + width * 0.0F,   y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F,   y, Colors::White);
-    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F,   y, Colors::Green);
-    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F,   y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F,   y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->ipv4,          x + lastfield_xoff, y, Colors::Yellow);
+	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
+	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colors::Brown);
+    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, Colors::White);
+    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, Colors::Green);
+    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, Colors::Yellow);
+    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, Colors::Yellow);
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status
 		auto plc_x = x + width * 4.0F;
-		ds->DrawText(speak("plclabel"), plc_x, y, Colors::Yellow, status_font);
+		ds->DrawText(speak(":plc:"), plc_x, y, Colors::Yellow, status_font);
 
 		if ((this->device != nullptr) && (this->device->connected())) {
-			ds->DrawText(this->device->device_hostname(), plc_x + status_prefix_width, y, Colors::Green, status_font);
+			ds->DrawText(this->device->device_hostname(), plc_x + status_prefix_width, context_y, Colors::Green, status_font);
 		} else {
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 
-			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, y, Colors::Red, status_font);
+			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, context_y, Colors::Red, status_font);
 		}
 	}
 }
@@ -287,8 +293,10 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	float content_y = y + (status_height - this->status->LayoutBounds.Height) * 0.5F;
+
 	ds->FillRectangle(x, y, Width, Height, system_background_brush());
-	ds->DrawTextLayout(this->status, x, y, this->color);
+	ds->DrawTextLayout(this->status, x, content_y, this->color);
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {

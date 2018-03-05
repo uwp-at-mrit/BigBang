@@ -26,7 +26,6 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::IModbusConfirmation* console;
 		WarGrey::SCADA::CommandMenu<WarGrey::SCADA::Menu>* cmdmenu;
-		Platform::String^ caption;
 		Platform::String^ device;
 
 	// never deletes these snips mannually	

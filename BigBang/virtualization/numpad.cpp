@@ -18,7 +18,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
-static KeyboardCell keys[] = {
+const static KeyboardCell keys[] = {
 	{ VirtualKey::Number9, 2, 0, 1, 1 }, { VirtualKey::Number8, 1, 0, 1, 1 }, { VirtualKey::Number7, 0, 0, 1, 1 },
     { VirtualKey::Number6, 2, 1, 1, 1 }, { VirtualKey::Number5, 1, 1, 1, 1 }, { VirtualKey::Number4, 0, 1, 1, 1 },
     { VirtualKey::Number3, 2, 2, 1, 1 }, { VirtualKey::Number2, 1, 2, 1, 1 }, { VirtualKey::Number1, 0, 2, 1, 1 },
