@@ -189,6 +189,7 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();
 	this->device = device;
 	this->caption = make_text_layout(speak(caption), status_font);
+	this->device_name = make_text_layout(device->device_hostname(), status_font);
 }
 
 void Statusbarlet::construct() {
@@ -231,11 +232,12 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status
-		auto plc_x = x + width * 4.0F;
-		ds->DrawText(speak(":plc:"), plc_x, y, Colors::Yellow, status_font);
+		float plc_x = x + width * 4.0F;
+		
+		ds->DrawText(speak(":plc:"), plc_x, context_y, Colors::Yellow, status_font);
 
 		if ((this->device != nullptr) && (this->device->connected())) {
-			ds->DrawText(this->device->device_hostname(), plc_x + status_prefix_width, context_y, Colors::Green, status_font);
+			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colors::Green);
 		} else {
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;

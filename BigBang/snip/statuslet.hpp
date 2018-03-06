@@ -17,6 +17,7 @@ namespace WarGrey::SCADA {
         
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ device_name;
 		WarGrey::SCADA::IPLCClient* device;
     };
 
