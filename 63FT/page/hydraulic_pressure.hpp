@@ -24,12 +24,11 @@ namespace WarGrey::SCADA {
 		void on_tap(ISnip* snip, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
+		WarGrey::SCADA::IModbusClient* device;
 		WarGrey::SCADA::IModbusConfirmation* console;
 		WarGrey::SCADA::CommandMenu<WarGrey::SCADA::Menu>* cmdmenu;
-		Platform::String^ device;
 
-	// never deletes these snips mannually	
-	private:
+	private: // never deletes these snips mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
 		WarGrey::SCADA::Togglet* shift;

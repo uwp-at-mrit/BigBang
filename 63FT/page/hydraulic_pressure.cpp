@@ -70,6 +70,31 @@ public:
 	}
 
 public:
+	void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) override {
+		device->read_input_registers(0, SNIPS_ARITY(this->gauges));
+	}
+
+	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
+		float Mpa = 0.0F;
+		
+		this->workbench->enter_critical_section(); 
+		
+		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
+			float mpa = float(register_values[i]) * 0.1F;
+
+			Mpa = Mpa + mpa;
+			this->gauges[i]->set_scale(mpa);
+		}
+
+		this->gauges[0]->set_scale(Mpa);
+		this->workbench->leave_critical_section();
+	}
+
+	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
+		logger->log_message(Log::Error, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
+	};
+
+public:
 	void execute(WarGrey::SCADA::Menu cmd, WarGrey::SCADA::ISnip* snip) override {
 		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), snip->id);
 	}
@@ -163,15 +188,26 @@ private:
 	Statuslinelet* statusline;
 };
 
-HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:"), device(plc) {
+HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 	HPCConsole* console = new HPCConsole(this);
+	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
 
+	this->statusline = new Statuslinelet(Log::Debug);
+
+	alarm->reference();
+	alarm->append_log_receiver(this->statusline);
+	
 	this->console = console;
+	this->device = new ModbusClient(alarm, plc, console);
 	this->cmdmenu = make_start_stop_menu(console);
 	this->set_decorator(new HPCDecorator(system_graytext_brush()));
 }
 
 HPCWorkbench::~HPCWorkbench() {
+	if (this->device != nullptr) {
+		delete this->device;
+	}
+
 	if (this->console != nullptr) {
 		delete this->console;
 	}
@@ -191,9 +227,7 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 		this->change_mode(HPCMode::Control);
 		
 		this->change_mode(HPCMode::WindowUI);
-		this->statusbar = new Statusbarlet(this->name());
-		this->statusline = new Statuslinelet(Log::Debug);
-		
+		this->statusbar = new Statusbarlet(this->name(), this->device);
 		this->shift = new Togglet(false, "control_mode", "view_mode", -6.18F);
 		this->insert(this->statusbar);
 		this->insert(this->statusline);
