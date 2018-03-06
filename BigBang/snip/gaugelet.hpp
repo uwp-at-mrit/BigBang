@@ -34,10 +34,10 @@ namespace WarGrey::SCADA {
         unsigned char step;
 
     private:
-        float width;
+		float ch; 
+		float width;
         float height;
         float meter_width;
-        float mark_width;
         float mark_interval;
     };
 }

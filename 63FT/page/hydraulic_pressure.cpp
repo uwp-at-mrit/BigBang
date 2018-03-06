@@ -59,7 +59,7 @@ public:
 		float snip_width, snip_height;
 
 		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
-		gauge_y = height - snip_height - vinset;
+		gauge_y = height - snip_height - vinset - vinset;
 		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
 			this->workbench->move_to(this->gauges[i], gauge_x, gauge_y);
 			this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
