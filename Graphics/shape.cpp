@@ -14,6 +14,21 @@ using namespace Windows::Foundation::Numerics;
 
 static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
 
+inline static void circle_point(float radius, double degree, float* x, float* y) {
+	float radian = float(degree * M_PI / 180.0);
+
+	(*x) = radius * (cosf(radian) + 1.0F);
+	(*y) = radius * (sinf(radian) + 1.0F);
+}
+
+inline static void add_clockwise_arc(CanvasPathBuilder^ path, float x, float y, float r) {
+	path->AddArc(float2(x, y), r, r, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
+}
+
+inline static void add_counterclockwise_arc(CanvasPathBuilder^ path, float x, float y, float r) {
+	path->AddArc(float2(x, y), r, r, 0.0F, CanvasSweepDirection::CounterClockwise, CanvasArcSize::Small);
+}
+
 /*************************************************************************************************/
 CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
@@ -59,6 +74,45 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
+CanvasGeometry^ pipeline(Platform::Array<PipeMove>^ moves, float usize, float th, CanvasStrokeStyle^ style) {
+	return pipeline(0.0F, 0.0F, moves, usize, th, style);
+}
+
+CanvasGeometry^ pipeline(float x, float y, Platform::Array<PipeMove>^ moves, float ulength, float th, CanvasStrokeStyle^ style) {
+	auto pipe = ref new CanvasPathBuilder(shared_ds);
+	float usize = ((ulength <= 0.0F) ? 16.0F : ulength);
+	float uradius = usize * 0.5F;
+
+	pipe->BeginFigure(x, y);
+	for (unsigned int i = 0; i < moves->Length; i++) {
+		switch (moves[i]) {
+		case PipeMove::Left:          x -= usize; pipe->AddLine(x, y); break;
+		case PipeMove::Right:         x += usize; pipe->AddLine(x, y); break;
+		case PipeMove::Up:            y -= usize; pipe->AddLine(x, y); break;
+		case PipeMove::Down:          y += usize; pipe->AddLine(x, y); break;
+		case PipeMove::DownLeft:      x -= uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::LeftDown:      x -= uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::DownRight:     x += uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::RightDown:     x += uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::LeftUp:        x -= uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::UpLeft:        x -= uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::RightUp:       x += uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::UpRight:       x += uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::DownLeftUp:    x -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::DownRightUp:   x += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::UpLeftDown:    x -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::UpRightDown:   x += usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::LeftDownRight: y += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::LeftUpRight:   y -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::RightDownLeft: y += usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case PipeMove::RightUpLeft:   y -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		}
+	}
+	pipe->EndFigure(CanvasFigureLoop::Open);
+
+	return geometry_stroke(CanvasGeometry::CreatePath(pipe), th, style);
+}
+
 CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
     auto arc = ref new CanvasPathBuilder(shared_ds);
     
@@ -86,6 +140,22 @@ CanvasGeometry^ circle(float cx, float cy, float r) {
 CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
     return CanvasGeometry::CreateEllipse(shared_ds, cx, cy, rx, ry);
 }
+
+CanvasGeometry^ triangle(float r, double d) {
+	auto equilateral_triangle = ref new CanvasPathBuilder(shared_ds);
+	float x, y;
+
+	circle_point(r, d, &x, &y);
+	equilateral_triangle->BeginFigure(x, y);
+	circle_point(r, d + 120.0, &x, &y);
+	equilateral_triangle->AddLine(x, y);
+	circle_point(r, d - 120.0, &x, &y);
+	equilateral_triangle->AddLine(x, y);
+	equilateral_triangle->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(equilateral_triangle);
+}
+
 
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {
     return CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h));

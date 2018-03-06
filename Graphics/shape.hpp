@@ -2,6 +2,14 @@
 
 #include "geometry.hpp"
 
+private enum class PipeMove {
+	Left, Right, Up, Down,
+	DownLeft, LeftDown, DownRight, RightDown, UpLeft, LeftUp, UpRight, RightUp,
+	DownLeftUp, DownRightUp, UpLeftDown, UpRightDown, LeftDownRight, LeftUpRight, RightDownLeft, RightUpLeft
+};
+
+#define MAKE_PIPELINE_MOVES(moves) (ref new Platform::Array<PipeMove>(moves, sizeof(moves) / sizeof(PipeMove)))
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl);
 
@@ -18,11 +26,21 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
     Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
-    float x, float y, float length, float thickness = 1.0F,
-    Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+	float x, float y, float length, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pipeline(
+	Platform::Array<PipeMove>^ moves, float unit_length = 0.0F,
+	float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pipeline(
+	float x, float y, Platform::Array<PipeMove>^ moves, float unit_length = 0.0F,
+	float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float radius, double degree);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);

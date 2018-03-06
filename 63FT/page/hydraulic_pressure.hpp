@@ -7,8 +7,9 @@
 #include "snip/togglet.hpp"
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
-#include "snip/motorlet.hpp"
+#include "snip/pumplet.hpp"
 #include "snip/gaugelet.hpp"
+#include "snip/pipelinelet.hpp"
 
 namespace WarGrey::SCADA {
 	private class HPCWorkbench : public WarGrey::SCADA::Planet {

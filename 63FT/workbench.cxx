@@ -19,7 +19,7 @@ public:
 
 public:
 	void construct() override {
-		this->add_planet(new HPCWorkbench("192.168.8.101"));
+		this->add_planet(new HPCWorkbench("192.168.8.102"));
 	}
 };
 

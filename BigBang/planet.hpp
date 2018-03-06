@@ -52,7 +52,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool can_interactive_move(ISnip* snip, float local_x, float local_y) { return false; }
-		virtual bool can_select(ISnip* snip) { return false; }
+		virtual bool can_select(ISnip* snip) { return true; }
 		virtual bool can_select_multiple() { return false; }
 		virtual void before_select(ISnip* snip, bool on_or_off) {}
 		virtual void after_select(ISnip* snip, bool on_or_off) {}

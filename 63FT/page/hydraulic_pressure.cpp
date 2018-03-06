@@ -7,6 +7,8 @@
 #include "text.hpp"
 #include "paint.hpp"
 
+#include "decorator/border.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -51,6 +53,25 @@ public:
 		}
 	}
 
+	void load_workline(float width, float height) {
+		PipeMove moves[] = { PipeMove::Right, PipeMove::Right, PipeMove::Down, PipeMove::Down,
+			PipeMove::DownLeftUp, PipeMove::LeftDownRight, PipeMove::UpLeftDown, PipeMove::DownRightUp
+		};
+
+		this->pipeline = new Pipelinelet(MAKE_PIPELINE_MOVES(moves), 16.0F);
+		this->pumps[0] = new Pumplet(32.0F, 0.0);
+		this->pumps[1] = new Pumplet(32.0F, 90.0);
+		this->pumps[2] = new Pumplet(32.0F, 180.0);
+		this->pumps[3] = new Pumplet(32.0F, 270.0);
+		this->pumps[4] = new Pumplet(32.0F, -45.0);
+		this->pumps[5] = new Pumplet(32.0F, 135.0);
+
+		this->workbench->insert(this->pipeline);
+		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
+			this->workbench->insert(this->pumps[i]);
+		}
+	}
+
 public:
 	void reflow_gauges(float vinset, float width, float height) {
 		float gauge_gapsize = 32.0F;
@@ -67,6 +88,24 @@ public:
 		}
 
 		this->workbench->move_to(this->gauges[0], gauge_x, gauge_y);
+	}
+
+	void reflow_workline(float vinset, float width, float height) {
+		float pump_gapsize = 32.0F;
+		float pump_x = 0.0F;
+		float pump_y = vinset + vinset;
+		float snip_width, snip_height;
+
+		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
+			if (this->pumps[i] != nullptr) {
+				this->workbench->move_to(this->pumps[i], pump_x, pump_y);
+				this->pumps[i]->fill_extent(pump_x, pump_y, &snip_width);
+				pump_x += (snip_width + pump_gapsize);
+			}
+		}
+
+		this->pipeline->fill_extent(0.0F, vinset, &snip_width, &snip_height);
+		this->workbench->move_to(this->pipeline, (width - snip_width) * 0.5F, (height - snip_height) * 0.5F);
 	}
 
 public:
@@ -156,14 +195,16 @@ private:
 // never deletes these snips mannually
 private:
 	Gaugelet* gauges[7];
+	Pumplet* pumps[6];
+	Pipelinelet* pipeline;
 
 private:
 	HPCWorkbench* workbench;
 };
 
-private class HPCDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
+private class HPCDecorator : public virtual WarGrey::SCADA::BorderDecorator {
 public:
-	HPCDecorator(ICanvasBrush^ brush) : IPlanetDecorator(), brush(brush) {}
+	HPCDecorator(ICanvasBrush^ brush) : BorderDecorator(false, false, true), brush(brush) {}
 
 public:
 	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
@@ -181,6 +222,8 @@ public:
 				}
 			}
 		}
+
+		BorderDecorator::draw_after_snip(self, ds, x, y, width, height);
 	}
 
 private:
@@ -191,10 +234,9 @@ private:
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 	HPCConsole* console = new HPCConsole(this);
 	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
+	// NOTE: Syslog inherits SharedObject, therefore, `alarm` will be deleted when `this->device` is deleting.
 
 	this->statusline = new Statuslinelet(Log::Debug);
-
-	alarm->reference();
 	alarm->append_log_receiver(this->statusline);
 	
 	this->console = console;
@@ -223,6 +265,7 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 	if (console != nullptr) {
 		this->change_mode(HPCMode::View);
 		console->load_gauges(width, height);
+		console->load_workline(width, height);
 		
 		this->change_mode(HPCMode::Control);
 		
@@ -250,6 +293,7 @@ void HPCWorkbench::reflow(float width, float height) {
 		this->change_mode(HPCMode::Control);
 
 		this->change_mode(HPCMode::View);
+		console->reflow_workline(vinset, width, height);
 		console->reflow_gauges(vinset, width, height);
 	}
 }
@@ -259,14 +303,18 @@ void HPCWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifte
 		this->shift->toggle();
 		this->change_mode(this->shift->checked() ? HPCMode::Control : HPCMode::View);
 	} else if (this->shift->checked()) {
-		Motorlet* motor = dynamic_cast<Motorlet*>(snip);
+		// Motorlet* motor = dynamic_cast<Motorlet*>(snip);
 
-		if (motor != nullptr) {
+		// if (motor != nullptr) {
 			// TODO: protect the menu from showing out of screen
-			//this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
-			this->set_caret_owner(motor);
+			//  this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
+			//  this->set_caret_owner(motor);
 
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+			//  this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		// }
+	} else {
+		if ((snip != this->statusbar) && (snip != this->statusline)) {
+			this->set_selected(snip);
 		}
 	}
 }

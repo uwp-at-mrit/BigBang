@@ -26,8 +26,6 @@
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)sprite.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
@@ -35,6 +33,18 @@
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipelinelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp">
+      <Filter>virtualization</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp">
+      <Filter>virtualization</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pumplet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,8 +78,6 @@
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
@@ -77,6 +85,18 @@
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipelinelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp">
+      <Filter>virtualization</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp">
+      <Filter>virtualization</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pumplet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
   </ItemGroup>
