@@ -74,38 +74,47 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ pipeline(Platform::Array<PipeMove>^ moves, float usize, float th, CanvasStrokeStyle^ style) {
-	return pipeline(0.0F, 0.0F, moves, usize, th, style);
+CanvasGeometry^ traceline(Platform::Array<TurtleMove>^ moves, float usize, float th, CanvasStrokeStyle^ style) {
+	return traceline(0.0F, 0.0F, moves, usize, th, style);
 }
 
-CanvasGeometry^ pipeline(float x, float y, Platform::Array<PipeMove>^ moves, float ulength, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ traceline(float x, float y, Platform::Array<TurtleMove>^ moves, float ulength, float th, CanvasStrokeStyle^ style) {
 	auto pipe = ref new CanvasPathBuilder(shared_ds);
 	float usize = ((ulength <= 0.0F) ? 16.0F : ulength);
 	float uradius = usize * 0.5F;
+	float dsize = usize + usize;
 
 	pipe->BeginFigure(x, y);
 	for (unsigned int i = 0; i < moves->Length; i++) {
 		switch (moves[i]) {
-		case PipeMove::Left:          x -= usize; pipe->AddLine(x, y); break;
-		case PipeMove::Right:         x += usize; pipe->AddLine(x, y); break;
-		case PipeMove::Up:            y -= usize; pipe->AddLine(x, y); break;
-		case PipeMove::Down:          y += usize; pipe->AddLine(x, y); break;
-		case PipeMove::DownLeft:      x -= uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::LeftDown:      x -= uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::DownRight:     x += uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::RightDown:     x += uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::LeftUp:        x -= uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::UpLeft:        x -= uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::RightUp:       x += uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::UpRight:       x += uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::DownLeftUp:    x -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::DownRightUp:   x += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::UpLeftDown:    x -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::UpRightDown:   x += usize; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::LeftDownRight: y += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::LeftUpRight:   y -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::RightDownLeft: y += usize; add_clockwise_arc(pipe, x, y, uradius); break;
-		case PipeMove::RightUpLeft:   y -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::HalfLeft:      x -= uradius; pipe->AddLine(x, y); break;
+		case TurtleMove::HalfRight:     x += uradius; pipe->AddLine(x, y); break;
+		case TurtleMove::HalfUp:        y -= uradius; pipe->AddLine(x, y); break;
+		case TurtleMove::HalfDown:      y += uradius; pipe->AddLine(x, y); break;
+		case TurtleMove::Left:          x -= usize; pipe->AddLine(x, y); break;
+		case TurtleMove::Right:         x += usize; pipe->AddLine(x, y); break;
+		case TurtleMove::Up:            y -= usize; pipe->AddLine(x, y); break;
+		case TurtleMove::Down:          y += usize; pipe->AddLine(x, y); break;
+		case TurtleMove::DoubleLeft:    x -= dsize; pipe->AddLine(x, y); break;
+		case TurtleMove::DoubleRight:   x += dsize; pipe->AddLine(x, y); break;
+		case TurtleMove::DoubleUp:      y -= dsize; pipe->AddLine(x, y); break;
+		case TurtleMove::DoubleDown:    y += dsize; pipe->AddLine(x, y); break;
+		case TurtleMove::DownLeft:      x -= uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::LeftDown:      x -= uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::DownRight:     x += uradius; y += uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::RightDown:     x += uradius; y += uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::LeftUp:        x -= uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::UpLeft:        x -= uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::RightUp:       x += uradius; y -= uradius; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::UpRight:       x += uradius; y -= uradius; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::DownLeftUp:    x -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::DownRightUp:   x += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::UpLeftDown:    x -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::UpRightDown:   x += usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::LeftDownRight: y += usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::LeftUpRight:   y -= usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::RightDownLeft: y += usize; add_clockwise_arc(pipe, x, y, uradius); break;
+		case TurtleMove::RightUpLeft:   y -= usize; add_counterclockwise_arc(pipe, x, y, uradius); break;
 		}
 	}
 	pipe->EndFigure(CanvasFigureLoop::Open);

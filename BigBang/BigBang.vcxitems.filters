@@ -35,9 +35,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pipelinelet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
@@ -47,6 +44,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pumplet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -87,9 +85,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pipelinelet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
@@ -99,6 +94,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pumplet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\shapelet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

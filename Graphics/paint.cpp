@@ -69,14 +69,21 @@ CanvasStrokeStyle^ make_dash_stroke(CanvasDashStyle style, float offset) {
 }
 
 /*************************************************************************************************/
+#define implement_solid_brush(name, Color) \
+CanvasSolidColorBrush^ ##name##_brush() { \
+    static CanvasSolidColorBrush^ name = make_solid_brush(Color); \
+    return name; \
+}
+
 #define implement_system_brush(name, UIEVAL) \
 CanvasSolidColorBrush^ system_##name##_brush() { \
     static CanvasSolidColorBrush^ name = make_solid_brush(system_color(UIEVAL)); \
     return name; \
 }
 
-implement_system_brush(accentdark1, UIColorType::AccentDark1)
+implement_solid_brush(transparent, Colors::Transparent)
 
+implement_system_brush(accentdark1, UIColorType::AccentDark1)
 implement_system_brush(background, UIElementType::Background)
 implement_system_brush(foreground, UIElementType::HighlightText)
 implement_system_brush(highlight, UIElementType::Highlight)

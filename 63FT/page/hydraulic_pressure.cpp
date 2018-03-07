@@ -8,6 +8,7 @@
 #include "paint.hpp"
 
 #include "decorator/border.hpp"
+#include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -36,6 +37,20 @@ static inline void connect_pipes(IPlanet* master, IPipeSnip* prev, IPipeSnip* pi
 // WARNING: order matters, Desulphurizer, Cleaner and Mooney are also anchors for water pipes 
 private enum HPCMode { WindowUI = 0, View, Control };
 
+static TurtleMove filter_moves[] = {
+	TurtleMove::HalfDown, TurtleMove::Right, TurtleMove::RightDownLeft,
+	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
+	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
+	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight,
+	TurtleMove::DoubleRight, TurtleMove::DoubleRight,
+	TurtleMove::DoubleRight, TurtleMove::DoubleRight, TurtleMove::RightUp,
+	TurtleMove::HalfLeft, TurtleMove::Left,
+	TurtleMove::DoubleUp, TurtleMove::DoubleUp, TurtleMove::DoubleUp, TurtleMove::HalfUp,
+	TurtleMove::HalfRight, TurtleMove::Right, TurtleMove::UpLeft,
+	TurtleMove::DoubleLeft, TurtleMove::DoubleLeft, TurtleMove::DoubleLeft,
+	TurtleMove::Down, TurtleMove::DoubleLeft, TurtleMove::Left
+};
+
 private class HPCConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
 public:
 	HPCConsole(HPCWorkbench* master) : workbench(master) {}
@@ -54,11 +69,7 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		PipeMove moves[] = { PipeMove::Right, PipeMove::Right, PipeMove::Down, PipeMove::Down,
-			PipeMove::DownLeftUp, PipeMove::LeftDownRight, PipeMove::UpLeftDown, PipeMove::DownRightUp
-		};
-
-		this->pipeline = new Pipelinelet(MAKE_PIPELINE_MOVES(moves), 16.0F);
+		this->pipeline = new Pipelinelet(MAKE_TURTLE_MOVES(filter_moves), 16.0F);
 		this->pumps[0] = new Pumplet(32.0F, 0.0);
 		this->pumps[1] = new Pumplet(32.0F, 90.0);
 		this->pumps[2] = new Pumplet(32.0F, 180.0);
@@ -202,9 +213,9 @@ private:
 	HPCWorkbench* workbench;
 };
 
-private class HPCDecorator : public virtual WarGrey::SCADA::BorderDecorator {
+private class HPCDecorator : public virtual WarGrey::SCADA::GridDecorator {
 public:
-	HPCDecorator(ICanvasBrush^ brush) : BorderDecorator(false, false, true), brush(brush) {}
+	HPCDecorator(ICanvasBrush^ brush) : GridDecorator(16.0F), brush(brush) {}
 
 public:
 	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
@@ -223,7 +234,7 @@ public:
 			}
 		}
 
-		BorderDecorator::draw_after_snip(self, ds, x, y, width, height);
+		GridDecorator::draw_after_snip(self, ds, x, y, width, height);
 	}
 
 private:

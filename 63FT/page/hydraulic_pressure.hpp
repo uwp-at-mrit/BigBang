@@ -9,7 +9,7 @@
 #include "snip/statuslet.hpp"
 #include "snip/pumplet.hpp"
 #include "snip/gaugelet.hpp"
-#include "snip/pipelinelet.hpp"
+#include "snip/shapelet.hpp"
 
 namespace WarGrey::SCADA {
 	private class HPCWorkbench : public WarGrey::SCADA::Planet {
