@@ -19,22 +19,8 @@ using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static inline Scalelet* load_scalelet(IPlanet* master, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript) {
-	Scalelet* scale = new Scalelet(unit, label, subscript);
-	master->insert(scale);
-
-	return scale;
-}
-
-static inline void connect_pipes(IPlanet* master, IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx = 0.5, double fy = 0.5) {
-    pipe_connecting_position(prev, pipe, x, y, fx, fy);
-    master->move_to(pipe, (*x), (*y));
-}
-
-// WARNING: order matters, Desulphurizer, Cleaner and Mooney are also anchors for water pipes 
 private enum HPCMode { WindowUI = 0, View, Control };
 
 static TurtleMove filter_moves[] = {
@@ -42,13 +28,37 @@ static TurtleMove filter_moves[] = {
 	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
 	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
 	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight,
-	TurtleMove::DoubleRight, TurtleMove::DoubleRight,
-	TurtleMove::DoubleRight, TurtleMove::DoubleRight, TurtleMove::RightUp,
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::RightUp,
 	TurtleMove::HalfLeft, TurtleMove::Left,
-	TurtleMove::DoubleUp, TurtleMove::DoubleUp, TurtleMove::DoubleUp, TurtleMove::HalfUp,
+	TurtleMove::QuadrupleUp, TurtleMove::DoubleUp, TurtleMove::HalfUp,
 	TurtleMove::HalfRight, TurtleMove::Right, TurtleMove::UpLeft,
-	TurtleMove::DoubleLeft, TurtleMove::DoubleLeft, TurtleMove::DoubleLeft,
+	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft,
 	TurtleMove::Down, TurtleMove::DoubleLeft, TurtleMove::Left
+};
+
+static TurtleMove hp_moves[] = {
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::Right,
+	TurtleMove::TripleDown, TurtleMove::DoubleDown, TurtleMove::DownLeft,
+	TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft,
+	TurtleMove::LeftUp, TurtleMove::QuadrupleUp, TurtleMove::TripleUp, TurtleMove::UpLeft,
+	TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft,
+	TurtleMove::LeftUp, TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp,
+	TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::UpRight,
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight,
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::Right,
+	TurtleMove::RightDown, TurtleMove::TripleDown, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleDown,
+	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::Down,
+	TurtleMove::DownLeft, TurtleMove::TripleLeft, TurtleMove::LeftDown, TurtleMove::DoubleDown
+};
+
+static TurtleMove wp_moves[] = {
+	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown,
+	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft, TurtleMove::LeftDown,
+	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::DoubleLeft, TurtleMove::DoubleRight,
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight,
+	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleLeft, TurtleMove::TripleLeft,
+	TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::UpLeft,
+	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft
 };
 
 private class HPCConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
@@ -69,7 +79,12 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		this->filter_line = new Tracelinelet(MAKE_TURTLE_MOVES(filter_moves), 16.0F);
+		this->usize = 16.0F;
+
+		this->filter_line = new Tracelinelet(MAKE_TURTLE_MOVES(filter_moves), this->usize);
+		this->hp_line = new Tracelinelet(MAKE_TURTLE_MOVES(hp_moves), this->usize);
+		this->wp_line = new Tracelinelet(MAKE_TURTLE_MOVES(wp_moves), this->usize);
+
 		this->pumps[0] = new Pumplet(32.0F, 0.0);
 		this->pumps[1] = new Pumplet(32.0F, 90.0);
 		this->pumps[2] = new Pumplet(32.0F, 180.0);
@@ -78,6 +93,9 @@ public:
 		this->pumps[5] = new Pumplet(32.0F, 135.0);
 
 		this->workbench->insert(this->filter_line);
+		this->workbench->insert(this->hp_line);
+		this->workbench->insert(this->wp_line);
+
 		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
 			this->workbench->insert(this->pumps[i]);
 		}
@@ -102,21 +120,27 @@ public:
 	}
 
 	void reflow_workline(float vinset, float width, float height) {
-		float pump_gapsize = 32.0F;
-		float pump_x = 0.0F;
-		float pump_y = vinset + vinset;
+		float pump_gapsize = 16.0F;
 		float snip_width, snip_height;
+		float pump_x, pump_y;
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
 			if (this->pumps[i] != nullptr) {
+				this->pumps[i]->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
+				pump_x = width - snip_width - vinset;
+				pump_y = height - vinset - vinset - snip_height - (snip_height + pump_gapsize) * float(i);
 				this->workbench->move_to(this->pumps[i], pump_x, pump_y);
-				this->pumps[i]->fill_extent(pump_x, pump_y, &snip_width);
-				pump_x += (snip_width + pump_gapsize);
 			}
 		}
 
+		this->hp_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
+		this->workbench->move_to(this->hp_line, (width - snip_width) * 0.05F, (height - snip_height) * 0.15F);
+
 		this->filter_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
-		this->workbench->move_to(this->filter_line, (width - snip_width) * 0.5F, (height - snip_height) * 0.5F);
+		this->workbench->move_to(this->filter_line, (width - snip_width) * 0.15F, (height - snip_height) * 0.15F);
+
+		this->wp_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
+		this->workbench->move_to(this->wp_line, (width - snip_width) * 0.75F, (height - snip_height) * 0.40F);
 	}
 
 public:
@@ -142,65 +166,11 @@ public:
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
 		logger->log_message(Log::Error, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
-	};
+	}
 
 public:
 	void execute(WarGrey::SCADA::Menu cmd, WarGrey::SCADA::ISnip* snip) override {
 		syslog(Log::Info, L"%s motor %ld", cmd.ToString()->Data(), snip->id);
-	}
-
-private:
-	void load_scales_t(Scalelet* scales[], size_t arity) {
-		for (size_t i = 0; i < arity; i++) {
-			scales[i] = load_scalelet(this->workbench, "celsius", "temperature", nullptr);
-		}
-	}
-
-	void load_scales_pt(Scalelet* scales[], size_t arity) {
-		for (size_t i = 0; i < arity; i++) {
-			scales[i + arity * 0] = load_scalelet(this->workbench, "bar", "pressure", nullptr);
-			scales[i + arity * 1] = load_scalelet(this->workbench, "celsius", "temperature", nullptr);
-		}
-	}
-
-	void load_scales_ptt(Scalelet* scales[], size_t arity) {
-		for (size_t i = 0; i < arity; i++) {
-			scales[i + arity * 0] = load_scalelet(this->workbench, "bar", "pressure", nullptr);
-			scales[i + arity * 1] = load_scalelet(this->workbench, "celsius", "temperature", "inside");
-			scales[i + arity * 2] = load_scalelet(this->workbench, "celsius", "temperature", "outside");
-		}
-	}
-
-	void move_scales_pt(Scalelet* scales[], size_t arity, size_t idx, float x, float y, float scale_height) {
-		this->workbench->move_to(scales[idx + arity * 0], x, y);
-		this->workbench->move_to(scales[idx + arity * 1], x, y + scale_height);
-	}
-
-	void move_scales_ptt(Scalelet* scales[], size_t arity, float x0, float y_ascent, float scale_height, float hgap, float vgap) {
-		float y_descent = y_ascent + vgap;
-
-		for (size_t idx = 0; idx < arity; idx++) {
-			float x = x0 + hgap * float(idx);
-
-			this->workbench->move_to(scales[idx + arity * 0], x, y_ascent - scale_height);
-			this->workbench->move_to(scales[idx + arity * 1], x, y_descent + scale_height * 0.0F);
-			this->workbench->move_to(scales[idx + arity * 2], x, y_descent + scale_height * 1.0F);
-		}
-	}
-
-	void update_scales_pt(Scalelet* scales[], size_t i, uint16* modbus, size_t idx, float ratio) {
-		scales[i + 0]->set_scale(float(modbus[idx + 0]) * ratio);
-		scales[i + 1]->set_scale(float(modbus[idx + 1]) * ratio);
-	}
-
-	void update_scales_ptt(Scalelet* scales[], size_t arity, uint16* modbus, size_t addr, float ratio) {
-		for (size_t i = 0; i < arity; i++) {
-			size_t idx = addr + i * 3;
-		
-			scales[i + arity * 0]->set_scale(float(modbus[idx + 0] * ratio));
-			scales[i + arity * 1]->set_scale(float(modbus[idx + 1] * ratio));
-			scales[i + arity * 2]->set_scale(float(modbus[idx + 2] * ratio));
-		}
 	}
 
 // never deletes these snips mannually
@@ -208,9 +178,12 @@ private:
 	Gaugelet* gauges[7];
 	Pumplet* pumps[6];
 	Tracelinelet* filter_line;
+	Tracelinelet* hp_line;
+	Tracelinelet* wp_line;
 
 private:
 	HPCWorkbench* workbench;
+	float usize;
 };
 
 private class HPCDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {

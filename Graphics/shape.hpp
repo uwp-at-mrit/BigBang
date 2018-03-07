@@ -4,6 +4,7 @@
 
 private enum class TurtleMove {
 	Left, Right, Up, Down, HalfLeft, HalfRight, HalfUp, HalfDown, DoubleLeft, DoubleRight, DoubleUp, DoubleDown,
+	TripleLeft, TripleRight, TripleUp, TripleDown, QuadrupleLeft, QuadrupleRight, QuadrupleUp, QuadrupleDown,
 	DownLeft, LeftDown, DownRight, RightDown, UpLeft, LeftUp, UpRight, RightUp,
 	DownLeftUp, DownRightUp, UpLeftDown, UpRightDown, LeftDownRight, LeftUpRight, RightDownLeft, RightUpLeft
 };
