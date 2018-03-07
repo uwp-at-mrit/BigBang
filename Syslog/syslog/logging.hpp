@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ topic;
 	};
 
-	private class Syslog : public WarGrey::SCADA::SharedObject {
+	private class Syslog final : public WarGrey::SCADA::SharedObject {
 	public:
 		Syslog(WarGrey::SCADA::Log level, Platform::String^ topic = "", WarGrey::SCADA::Syslog* parent = nullptr);
 

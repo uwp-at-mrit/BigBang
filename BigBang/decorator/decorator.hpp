@@ -4,6 +4,8 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
+    #define MAKE_COMPOSE_DECORATOR(src) (new ComposeDecorator(src, sizeof(src) / sizeof(IPlanetDecorator*)))
+
 	private class IPlanetDecorator abstract : public WarGrey::SCADA::SharedObject {
     public:
         virtual void draw_before(
@@ -33,7 +35,7 @@ namespace WarGrey::SCADA {
 	private class ComposeDecorator final : public WarGrey::SCADA::IPlanetDecorator {
 	public:
 		ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second);
-		ComposeDecorator(const IPlanetDecorator** decorators, unsigned int count);
+		ComposeDecorator(IPlanetDecorator** decorators, unsigned int count);
 
 	public:
 		void draw_before(

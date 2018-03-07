@@ -115,6 +115,9 @@ namespace WarGrey::SCADA {
 		void reset() override;
 		uint16 yield() override;
 
+	protected:
+		~ModbusSequenceGenerator() noexcept {}
+
 	private:
 		uint16 start;
 		uint16 sequence;

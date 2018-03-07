@@ -1,30 +1,38 @@
-#include "decorator/decorator.hpp"
+#include <cstdlib>
 
-#include "paint.hpp"
+#include "decorator/decorator.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 
-inline static void do_reference(IPlanetDecorator** decorators, unsigned int count) {
+static IPlanetDecorator** make_decorator_list(IPlanetDecorator** src, unsigned int count) {
+	auto decorators = (IPlanetDecorator**)calloc(count, sizeof(IPlanetDecorator*));
+	
 	for (unsigned int i = 0; i < count; i++) {
+		decorators[i] = src[i];
 		decorators[i]->reference();
 	}
+
+	return decorators;
 }
 
 /*************************************************************************************************/
-ComposeDecorator::ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second) {
-
+ComposeDecorator::ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second) : count(2) {
+	IPlanetDecorator* decorators[] = { first, second };
+	this->decorators = make_decorator_list(decorators, 2);
 }
 
-ComposeDecorator::ComposeDecorator(const IPlanetDecorator** decorators, unsigned int count) {
-
+ComposeDecorator::ComposeDecorator(IPlanetDecorator** decorators, unsigned int count) : count(count) {
+	this->decorators = make_decorator_list(decorators, count);
 }
 
 ComposeDecorator::~ComposeDecorator() {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->destroy();
 	}
+
+	free(this->decorators);
 }
 
 void ComposeDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {

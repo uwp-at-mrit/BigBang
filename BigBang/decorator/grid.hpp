@@ -13,6 +13,9 @@ namespace WarGrey::SCADA {
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float Width, float Height) override;
 
+	protected:
+		~GridDecorator() noexcept {}
+
     private:
         float width;
         float height;

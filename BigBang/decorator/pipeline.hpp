@@ -13,6 +13,9 @@ namespace WarGrey::SCADA {
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) override;
 
+	protected:
+		~PipelineDecorator() noexcept {}
+
     private:
         bool draw_inport;
         bool draw_outport;

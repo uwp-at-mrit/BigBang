@@ -15,6 +15,9 @@ namespace WarGrey::SCADA {
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
+	protected:
+		~RacketReceiver() noexcept {}
+
 	private:
 		std::queue<Platform::String^> timestamps;
 		std::queue<Platform::String^> levels;

@@ -213,9 +213,9 @@ private:
 	HPCWorkbench* workbench;
 };
 
-private class HPCDecorator : public virtual WarGrey::SCADA::GridDecorator {
+private class HPCDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
 public:
-	HPCDecorator(ICanvasBrush^ brush) : GridDecorator(16.0F), brush(brush) {}
+	HPCDecorator(ICanvasBrush^ brush) : brush(brush) {}
 
 public:
 	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
@@ -233,9 +233,10 @@ public:
 				}
 			}
 		}
-
-		GridDecorator::draw_after_snip(self, ds, x, y, width, height, selected);
 	}
+
+protected:
+	~HPCDecorator() noexcept {}
 
 private:
 	ICanvasBrush^ brush;
@@ -243,6 +244,7 @@ private:
 };
 
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
+	IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), new GridDecorator(16.0F) };
 	HPCConsole* console = new HPCConsole(this);
 	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
 	
@@ -252,7 +254,7 @@ HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 	this->console = console;
 	this->device = new ModbusClient(alarm, plc, console);
 	this->cmdmenu = make_start_stop_menu(console);
-	this->set_decorator(new HPCDecorator(system_graytext_brush()));
+	this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
 }
 
 HPCWorkbench::~HPCWorkbench() {
