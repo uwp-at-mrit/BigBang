@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
         void draw_after_snip(
             WarGrey::SCADA::ISnip* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float x, float y, float width, float height) override;
+            float x, float y, float width, float height, bool selected) override;
 
     private:
         bool draw_inport;

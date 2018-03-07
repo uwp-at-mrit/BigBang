@@ -16,7 +16,7 @@ PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out) {
     this->draw_outport = draw_out;
 }
 
-void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) {
+void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
     if (this->draw_inport || this->draw_outport) {
        IPipeSnip* pipe = dynamic_cast<IPipeSnip*>(self);
 

@@ -11,8 +11,8 @@ namespace WarGrey::SCADA {
 
 	private class IPlanetInfo abstract {
 	public:
-		virtual ~IPlanetInfo() noexcept {};
-		IPlanetInfo(IDisplay^ master) : master(master) {};
+		virtual ~IPlanetInfo() noexcept {}
+		IPlanetInfo(IDisplay^ master) : master(master) {}
 		
 	public:
 		IDisplay^ master;
@@ -21,15 +21,15 @@ namespace WarGrey::SCADA {
 	private class IPlanet abstract {
 	public:
 		virtual ~IPlanet() noexcept;
-		IPlanet(Platform::String^ name) : caption(name) {};
+		IPlanet(Platform::String^ name) : caption(name) {}
 
 	public:
-		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
-		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {};
-		virtual void reflow(float width, float height) {};
-		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {};
-		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {};
-		virtual void collapse() {};
+		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
+		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
+		virtual void reflow(float width, float height) {}
+		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}
+		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
+		virtual void collapse() {}
 
 	public:
 		virtual WarGrey::SCADA::ISnip* find_snip(float x, float y) = 0;
@@ -46,6 +46,7 @@ namespace WarGrey::SCADA {
 		virtual void on_right_tap(WarGrey::SCADA::ISnip* snip, float local_x, float local_y, bool shifted, bool controled) {}
 
 	public:
+		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
 		virtual void add_selected(ISnip* snip) = 0;
 		virtual void set_selected(ISnip* snip) = 0;
 		virtual void no_selected() = 0;
@@ -141,6 +142,7 @@ namespace WarGrey::SCADA {
 		void on_tap(WarGrey::SCADA::ISnip* snip, float x, float y, bool shifted, bool controled) override;
 
 	public:
+		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) override;
         void add_selected(ISnip* snip) override;
         void set_selected(ISnip* snip) override;
         void no_selected() override;

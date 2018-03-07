@@ -650,12 +650,12 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					}
 
-					this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height);
+					this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height, info->selected);
 					child->draw(ds, info->x, info->y, width, height);
-					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height);
+					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height, info->selected);
 
 					if (info->selected) {
-						this->decorator->draw_for_selected_snip(child, ds, info->x, info->y, width, height);
+						this->draw_visible_selection(ds, info->x, info->y, width, height);
 					}
 
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
@@ -689,6 +689,10 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 		this->numpad->fill_extent(0.0F, 0.0F, &width, &height);
 		this->numpad->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
 	}
+}
+
+void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) {
+	ds->DrawRectangle(x, y, width, height, system_highlight_brush(), 1.0F);
 }
 
 void Planet::collapse() {

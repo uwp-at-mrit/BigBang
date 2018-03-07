@@ -218,7 +218,7 @@ public:
 	HPCDecorator(ICanvasBrush^ brush) : GridDecorator(16.0F), brush(brush) {}
 
 public:
-	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+	void draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
 		if (x == 0.0) {
 			if (y == 0.0) { // statusbar's bottomline 
 				ds->DrawLine(0, height, width, height, this->brush, 2.0F);
@@ -234,7 +234,7 @@ public:
 			}
 		}
 
-		GridDecorator::draw_after_snip(self, ds, x, y, width, height);
+		GridDecorator::draw_after_snip(self, ds, x, y, width, height, selected);
 	}
 
 private:
