@@ -13,7 +13,6 @@ namespace WarGrey::SCADA {
 
 	private class ISyslogReceiver abstract : public WarGrey::SCADA::SharedObject {
 	public:
-		virtual ~ISyslogReceiver() noexcept {};
 		ISyslogReceiver(WarGrey::SCADA::Log level, Platform::String^ topic = "")
 			: level(level), topic(topic) {};
 
@@ -28,6 +27,9 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::SyslogMetainfo& data,
 			Platform::String^ topic) = 0;
 
+	protected:
+		~ISyslogReceiver() noexcept {}
+
 	private:
 		WarGrey::SCADA::Log level;
 		Platform::String^ topic;
@@ -35,7 +37,6 @@ namespace WarGrey::SCADA {
 
 	private class Syslog : public WarGrey::SCADA::SharedObject {
 	public:
-		virtual ~Syslog() noexcept;
 		Syslog(WarGrey::SCADA::Log level, Platform::String^ topic = "", WarGrey::SCADA::Syslog* parent = nullptr);
 
 	public:
@@ -49,6 +50,9 @@ namespace WarGrey::SCADA {
 		
 		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, Platform::String^ message);
 		void log_message(Platform::String^ alt_topic, WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);
+
+	protected:
+		~Syslog() noexcept;
 
 	private:
 		void do_log_message(WarGrey::SCADA::Log level, Platform::String^ message, Platform::String^ alt_topic, bool prefix);

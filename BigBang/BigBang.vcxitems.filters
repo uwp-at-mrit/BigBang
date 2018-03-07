@@ -45,6 +45,7 @@
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />

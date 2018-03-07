@@ -69,7 +69,7 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		this->pipeline = new Pipelinelet(MAKE_TURTLE_MOVES(filter_moves), 16.0F);
+		this->filter_line = new Tracelinelet(MAKE_TURTLE_MOVES(filter_moves), 16.0F);
 		this->pumps[0] = new Pumplet(32.0F, 0.0);
 		this->pumps[1] = new Pumplet(32.0F, 90.0);
 		this->pumps[2] = new Pumplet(32.0F, 180.0);
@@ -77,7 +77,7 @@ public:
 		this->pumps[4] = new Pumplet(32.0F, -45.0);
 		this->pumps[5] = new Pumplet(32.0F, 135.0);
 
-		this->workbench->insert(this->pipeline);
+		this->workbench->insert(this->filter_line);
 		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
 			this->workbench->insert(this->pumps[i]);
 		}
@@ -115,8 +115,8 @@ public:
 			}
 		}
 
-		this->pipeline->fill_extent(0.0F, vinset, &snip_width, &snip_height);
-		this->workbench->move_to(this->pipeline, (width - snip_width) * 0.5F, (height - snip_height) * 0.5F);
+		this->filter_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
+		this->workbench->move_to(this->filter_line, (width - snip_width) * 0.5F, (height - snip_height) * 0.5F);
 	}
 
 public:
@@ -207,7 +207,7 @@ private:
 private:
 	Gaugelet* gauges[7];
 	Pumplet* pumps[6];
-	Pipelinelet* pipeline;
+	Tracelinelet* filter_line;
 
 private:
 	HPCWorkbench* workbench;
@@ -245,8 +245,7 @@ private:
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 	HPCConsole* console = new HPCConsole(this);
 	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
-	// NOTE: Syslog inherits SharedObject, therefore, `alarm` will be deleted when `this->device` is deleting.
-
+	
 	this->statusline = new Statuslinelet(Log::Debug);
 	alarm->append_log_receiver(this->statusline);
 	

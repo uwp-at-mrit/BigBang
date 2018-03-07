@@ -30,5 +30,48 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::ISnip* snip,
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float x, float y, float width, float height) {};
-    };
+
+	protected:
+		~IPlanetDecorator() noexcept {}
+	};
+
+	/*
+	private class ComposeDecorator final : public WarGrey::SCADA::IPlanetDecorator {
+	public:
+		~ComposeDecorator() noexcept;
+
+		ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second);
+		ComposeDecorator(const IPlanetDecorator** decorators, unsigned int count);
+
+	public:
+		virtual void draw_before(
+			WarGrey::SCADA::IPlanet* master,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float Width, float Height);
+
+		virtual void draw_after(
+			WarGrey::SCADA::IPlanet* master,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float Width, float Height);
+
+		virtual void draw_before_snip(
+			WarGrey::SCADA::ISnip* snip,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float x, float y, float width, float height);
+
+		virtual void draw_after_snip(
+			WarGrey::SCADA::ISnip* snip,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float x, float y, float width, float height);
+
+		virtual void draw_for_selected_snip(
+			WarGrey::SCADA::ISnip* snip,
+			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			float x, float y, float width, float height);
+
+	private:
+		WarGrey::SCADA::IPlanetDecorator** decorators;
+		unsigned int count;
+	};
+	*/
 }

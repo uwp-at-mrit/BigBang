@@ -11,7 +11,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Shapelet::Shapelet(CanvasGeometry^ shape, Color& color, Color& border_color, float thickness) {
+Geometrylet::Geometrylet(CanvasGeometry^ shape, Color& color, Color& border_color, float thickness) {
 	this->surface = geometry_freeze(shape);
 	this->color = make_solid_brush(color);
 
@@ -26,15 +26,11 @@ Shapelet::Shapelet(CanvasGeometry^ shape, Color& color, Color& border_color, flo
 	}
 }
 
-void Shapelet::fill_extent(float x, float y, float* w, float* h) {
+void Geometrylet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->box.Width, h, this->box.Height);
 }
 
-void Shapelet::fill_extent_offset(float* x, float* y) {
-	SET_VALUES(x, this->box.X, y, this->box.Y);
-}
-
-void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Geometrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float px = x - this->box.X;
 	float py = y - this->box.Y;
 	
@@ -45,6 +41,5 @@ void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-Pipelinelet::Pipelinelet(Platform::Array<TurtleMove>^ moves, float usize, float thickness, Color& color)
-	: Shapelet(traceline(moves, usize, thickness), color) {
-}
+Tracelinelet::Tracelinelet(Platform::Array<TurtleMove>^ moves, float usize, float thickness, Color& color)
+	: Geometrylet(traceline(moves, usize, thickness), color) {}

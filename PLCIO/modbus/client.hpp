@@ -16,6 +16,9 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void reset() = 0;
 		virtual uint16 yield() = 0;
+
+	protected:
+		~IModbusTransactionIdGenerator() noexcept {}
 	};
 
 	private class IModbusConfirmation abstract {
