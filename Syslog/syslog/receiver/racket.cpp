@@ -28,6 +28,7 @@ RacketReceiver::RacketReceiver(Platform::String^ server, unsigned short service,
 		conn.get();
 		udpout = ref new DataWriter(client->OutputStream);
 
+		this->section.lock();
 		while (!this->timestamps.empty()) {
 			auto ts = this->timestamps.front();
 			auto lvl = this->levels.front();
@@ -37,6 +38,7 @@ RacketReceiver::RacketReceiver(Platform::String^ server, unsigned short service,
 			this->levels.pop();
 			this->messages.pop();
 		};
+		this->section.unlock();
 	});
 }
 
@@ -44,9 +46,11 @@ void RacketReceiver::on_log_message(Log level, Platform::String^ message, Syslog
 	Platform::String^ timestamp = data.timestamp;
 
 	if (udpout == nullptr) {
+		this->section.lock();
 		this->levels.push(level.ToString());
 		this->messages.push(message);
 		this->timestamps.push(timestamp);
+		this->section.unlock();
 	} else {
 		send_to(udpout, timestamp, level.ToString(), message);
 	}

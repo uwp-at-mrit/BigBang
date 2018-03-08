@@ -208,7 +208,7 @@ HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 
 	this->console = console;
 	this->cmdmenu = make_start_stop_menu(console);
-	//this->device = new ModbusClient(alarm, plc, this->console);
+	this->device = new ModbusClient(alarm, plc, this->console);
 }
 
 HPCWorkbench::~HPCWorkbench() {
@@ -253,7 +253,10 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 			IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), grid };
 
 			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
-			//this->device->get_logger()->append_log_receiver(this->statusline);
+
+			if (this->device != nullptr) {
+				this->device->get_logger()->append_log_receiver(this->statusline);
+			}
 		}
 	}
 }

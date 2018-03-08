@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <mutex>
 
 #include "syslog/logging.hpp"
 
@@ -19,6 +20,7 @@ namespace WarGrey::SCADA {
 		~RacketReceiver() noexcept {}
 
 	private:
+		std::mutex section;
 		std::queue<Platform::String^> timestamps;
 		std::queue<Platform::String^> levels;
 		std::queue<Platform::String^> messages;

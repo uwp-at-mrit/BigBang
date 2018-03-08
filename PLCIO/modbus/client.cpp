@@ -104,18 +104,25 @@ IModbusClient::~IModbusClient() {
 	this->generator->destroy();
 
 	delete this->socket; // stop the confirmation loop before release PDU pool.
+
+	this->blocking_section.lock();
 	while (!this->blocking_requests.empty()) {
 		POP_REQUEST(this->blocking_requests);
 	}
+	this->blocking_section.unlock();
 
+	this->pending_section.lock();
 	while (!this->pending_requests.empty()) {
 		POP_REQUEST(this->pending_requests);
 	}
+	this->pending_section.unlock();
 
+	this->pdu_section.lock();
 	while (!this->pdu_pool.empty()) {
 		free(this->pdu_pool.front());
 		this->pdu_pool.pop();
 	}
+	this->pdu_section.unlock();
 }
 
 Platform::String^ IModbusClient::device_hostname() {
@@ -160,12 +167,14 @@ void IModbusClient::connect() {
 
 			this->wait_process_confirm_loop();
 
+			this->blocking_section.lock();
 			while (!this->blocking_requests.empty()) {
 				auto current = this->blocking_requests.begin();
 
 				this->apply_request(std::pair<uint16, ModbusTransaction>(current->first, current->second));
 				this->blocking_requests.erase(current);
 			}
+			this->blocking_section.unlock();
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, modbus_socket_strerror(e));
 			this->connect();
@@ -176,12 +185,14 @@ void IModbusClient::connect() {
 uint8* IModbusClient::calloc_pdu() {
 	uint8* pdu = nullptr;
 
+	this->pdu_section.lock();
 	if (this->pdu_pool.empty()) {
 		pdu = (uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8));
 	} else {
 		pdu = this->pdu_pool.front();
 		this->pdu_pool.pop();
 	}
+	this->pdu_section.unlock();
 
 	return pdu;
 }
@@ -194,7 +205,9 @@ uint16 IModbusClient::request(uint8 function_code, uint8* data, uint16 size, IMo
 	auto transaction = std::pair<uint16, ModbusTransaction>(id, mt);
 
 	if (this->mbout == nullptr) {
+		this->blocking_section.lock();
 		this->blocking_requests.insert(transaction);
+		this->blocking_section.unlock();
 	} else {
 		this->apply_request(transaction);
 	}
@@ -208,7 +221,10 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 
 	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second.pdu_data, transaction.second.size);
 
+	this->pending_section.lock();
 	this->pending_requests.insert(transaction);
+	this->pending_section.unlock();
+
 	create_task(this->mbout->StoreAsync()).then([=](task<unsigned int> sending) {
 		try {
 			unsigned int sent = sending.get();
@@ -219,7 +235,6 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transact
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
-			this->blocking_requests.insert(transaction);
 			this->connect();
 		}});
 }
@@ -252,15 +267,20 @@ void IModbusClient::wait_process_confirm_loop() {
 					size, pdu_length);
 			}
 
+			this->pending_section.lock();
 			auto maybe_transaction = this->pending_requests.find(transaction);
 			if (maybe_transaction == this->pending_requests.end()) {
+				this->pending_section.unlock();
 				modbus_discard_current_adu(this->logger,
 					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
 					transaction, this->device->RawName->Data(), this->service->Data());
 			} else {
+				this->pdu_section.lock();
 				this->pdu_pool.push(maybe_transaction->second.pdu_data);
+				this->pdu_section.unlock();
 				this->pending_requests.erase(maybe_transaction);
 			}
+			this->pending_section.unlock();
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
 				modbus_discard_current_adu(this->logger,

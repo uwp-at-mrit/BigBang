@@ -2,6 +2,7 @@
 
 #include <map>
 #include <queue>
+#include <mutex>
 
 #include "modbus/constants.hpp"
 #include "IPLCClient.hpp"
@@ -101,6 +102,9 @@ namespace WarGrey::SCADA {
 		std::map<uint16, ModbusTransaction> blocking_requests;
 		std::map<uint16, ModbusTransaction> pending_requests;
 		std::queue<uint8*> pdu_pool;
+		std::mutex pdu_section;
+		std::mutex blocking_section;
+		std::mutex pending_section;
 
 	private:
 		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
