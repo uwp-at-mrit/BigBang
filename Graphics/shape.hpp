@@ -2,15 +2,6 @@
 
 #include "geometry.hpp"
 
-private enum class TurtleMove {
-	Left, Right, Up, Down, HalfLeft, HalfRight, HalfUp, HalfDown, DoubleLeft, DoubleRight, DoubleUp, DoubleDown,
-	TripleLeft, TripleRight, TripleUp, TripleDown, QuadrupleLeft, QuadrupleRight, QuadrupleUp, QuadrupleDown,
-	DownLeft, LeftDown, DownRight, RightDown, UpLeft, LeftUp, UpRight, RightUp,
-	DownLeftUp, DownRightUp, UpLeftDown, UpRightDown, LeftDownRight, LeftUpRight, RightDownLeft, RightUpLeft
-};
-
-#define MAKE_TURTLE_MOVES(moves) (ref new Platform::Array<TurtleMove>(moves, sizeof(moves) / sizeof(TurtleMove)))
-
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl);
 
@@ -29,14 +20,6 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 	float x, float y, float length, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
-
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ traceline(
-	Platform::Array<TurtleMove>^ moves, float unit_length = 0.0F,
-	float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
-
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ traceline(
-	float x, float y, Platform::Array<TurtleMove>^ moves, float unit_length = 0.0F,
-	float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);

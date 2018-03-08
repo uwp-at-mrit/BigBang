@@ -4,9 +4,10 @@
 #include "IPLCClient.hpp"
 
 namespace WarGrey::SCADA {
+	float statusbar_height();
+
     private class Statusbarlet : public WarGrey::SCADA::ISnip {
     public:
-		~Statusbarlet() noexcept {};
 		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCClient* device = nullptr);
 
     public:
@@ -23,7 +24,6 @@ namespace WarGrey::SCADA {
 
 	private class Statuslinelet : public WarGrey::SCADA::ISnip, public WarGrey::SCADA::ISyslogReceiver {
 	public:
-		~Statuslinelet() noexcept {};
 		Statuslinelet(WarGrey::SCADA::Log level) : ISyslogReceiver(level) {}
 
 	public:

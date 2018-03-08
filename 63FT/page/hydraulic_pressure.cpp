@@ -6,16 +6,12 @@
 
 #include "text.hpp"
 #include "paint.hpp"
+#include "turtle.hpp"
 
 #include "decorator/border.hpp"
 #include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;
-
-using namespace Windows::Foundation;
-
-using namespace Windows::UI;
-using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -23,47 +19,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HPCMode { WindowUI = 0, View, Control };
 
-static TurtleMove filter_moves[] = {
-	TurtleMove::HalfDown, TurtleMove::Right, TurtleMove::RightDownLeft,
-	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
-	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight, TurtleMove::RightDownLeft,
-	TurtleMove::DoubleLeft, TurtleMove::LeftDownRight, TurtleMove::DoubleRight,
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::RightUp,
-	TurtleMove::HalfLeft, TurtleMove::Left,
-	TurtleMove::QuadrupleUp, TurtleMove::DoubleUp, TurtleMove::HalfUp,
-	TurtleMove::HalfRight, TurtleMove::Right, TurtleMove::UpLeft,
-	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft,
-	TurtleMove::Down, TurtleMove::DoubleLeft, TurtleMove::Left
-};
-
-static TurtleMove hp_moves[] = {
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::Right,
-	TurtleMove::TripleDown, TurtleMove::DoubleDown, TurtleMove::DownLeft,
-	TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft,
-	TurtleMove::LeftUp, TurtleMove::QuadrupleUp, TurtleMove::TripleUp, TurtleMove::UpLeft,
-	TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft, TurtleMove::QuadrupleLeft,
-	TurtleMove::LeftUp, TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp,
-	TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::UpRight,
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight,
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::Right,
-	TurtleMove::RightDown, TurtleMove::TripleDown, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleDown,
-	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::Down,
-	TurtleMove::DownLeft, TurtleMove::TripleLeft, TurtleMove::LeftDown, TurtleMove::DoubleDown
-};
-
-static TurtleMove wp_moves[] = {
-	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown,
-	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft, TurtleMove::LeftDown,
-	TurtleMove::QuadrupleDown, TurtleMove::QuadrupleDown, TurtleMove::DoubleLeft, TurtleMove::DoubleRight,
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight, TurtleMove::QuadrupleRight,
-	TurtleMove::QuadrupleRight, TurtleMove::QuadrupleLeft, TurtleMove::TripleLeft,
-	TurtleMove::QuadrupleUp, TurtleMove::QuadrupleUp, TurtleMove::UpLeft,
-	TurtleMove::QuadrupleLeft, TurtleMove::DoubleLeft
-};
-
 private class HPCConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
 public:
-	HPCConsole(HPCWorkbench* master) : workbench(master) {}
+	HPCConsole(HPCWorkbench* master, float stepsize) : workbench(master), stepsize(stepsize) {}
 
 public:
 	void load_gauges(float width, float height) {
@@ -79,25 +37,48 @@ public:
 	}
 
 	void load_workline(float width, float height) {
-		this->usize = 16.0F;
+		{ // load pipelines
+			Turtle* filter_turtle = new Turtle(this->stepsize);
+			Turtle* hp_turtle = new Turtle(this->stepsize);
+			Turtle* wp_turtle = new Turtle(this->stepsize);
 
-		this->filter_line = new Tracelinelet(MAKE_TURTLE_MOVES(filter_moves), this->usize);
-		this->hp_line = new Tracelinelet(MAKE_TURTLE_MOVES(hp_moves), this->usize);
-		this->wp_line = new Tracelinelet(MAKE_TURTLE_MOVES(wp_moves), this->usize);
+			filter_turtle->move_down(0.5F)->move_right()->turn_right_down_left();
+			filter_turtle->move_left(2)->turn_left_down_right()->move_right(2)->turn_right_down_left();
+			filter_turtle->move_left(2)->turn_left_down_right()->move_right(2)->turn_right_down_left();
+			filter_turtle->move_left(2)->turn_left_down_right()->move_right(10);
+			filter_turtle->turn_right_up()->move_up(6.5F)->turn_up_left()->move_left(9);
+			filter_turtle->move_down();
 
-		this->pumps[0] = new Pumplet(32.0F, 0.0);
-		this->pumps[1] = new Pumplet(32.0F, 90.0);
-		this->pumps[2] = new Pumplet(32.0F, 180.0);
-		this->pumps[3] = new Pumplet(32.0F, 270.0);
-		this->pumps[4] = new Pumplet(32.0F, -45.0);
-		this->pumps[5] = new Pumplet(32.0F, 135.0);
+			hp_turtle->move_right(13)->move_down(4.5F)->turn_down_left()->move_left(12);
+			hp_turtle->turn_left_up()->move_up(6)->turn_up_left()->move_left(16);
+			hp_turtle->turn_left_up()->move_up(18)->turn_up_right()->move_right(29);
+			hp_turtle->turn_right_down()->move_down(2)->move_right(4)->move_down(16);
+			hp_turtle->turn_down_left()->move_left(3)->turn_left_down()->move_down(1.5F);
 
-		this->workbench->insert(this->filter_line);
-		this->workbench->insert(this->hp_line);
-		this->workbench->insert(this->wp_line);
+			wp_turtle->move_down(8)->move_left(6)->turn_left_down()->move_down(8);
+			wp_turtle->move_left(2)->move_right(22)->move_left(7)->move_up(8)->turn_up_left()->move_left(6);
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
-			this->workbench->insert(this->pumps[i]);
+			this->filter_line = new Tracklet(filter_turtle);
+			this->hp_line = new Tracklet(hp_turtle);
+			this->wp_line = new Tracklet(wp_turtle);
+
+			this->workbench->insert(this->hp_line);
+			this->workbench->insert(this->wp_line);
+			this->workbench->insert(this->filter_line);
+		}
+
+		{ // load pumps
+			float pump_radius = this->stepsize;
+
+			for (size_t i = 0; i < SNIPS_ARITY(this->hpumps); i++) {
+				this->hpumps[i] = new Pumplet(pump_radius, 180.0);
+				this->workbench->insert(this->hpumps[i]);
+			}
+
+			for (size_t i = 0; i < SNIPS_ARITY(this->wpumps); i++) {
+				this->wpumps[i] = new Pumplet(pump_radius, -90.0);
+				this->workbench->insert(this->wpumps[i]);
+			}
 		}
 	}
 
@@ -120,27 +101,28 @@ public:
 	}
 
 	void reflow_workline(float vinset, float width, float height) {
-		float pump_gapsize = 16.0F;
-		float snip_width, snip_height;
-		float pump_x, pump_y;
+		float hp_xmax, hp_ymax, wp_x;
 
-		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
-			if (this->pumps[i] != nullptr) {
-				this->pumps[i]->fill_extent(0.0F, 0.0F, &snip_width, &snip_height);
-				pump_x = width - snip_width - vinset;
-				pump_y = height - vinset - vinset - snip_height - (snip_height + pump_gapsize) * float(i);
-				this->workbench->move_to(this->pumps[i], pump_x, pump_y);
-			}
+		{ // reflow pipelines
+			this->workbench->move_to(this->hp_line, this->stepsize * 3.0F, this->stepsize * 2.0F);
+			this->workbench->move_to(this->filter_line, this->stepsize * 10.0F, this->stepsize * 4.0F);
+
+			this->workbench->fill_snip_location(this->hp_line, &hp_xmax, &hp_ymax, SnipCenterPoint::RB);
+			wp_x = hp_xmax + this->stepsize * 8.0F;
+			this->workbench->move_to(this->wp_line, wp_x, hp_ymax, SnipCenterPoint::LB);
 		}
 
-		this->hp_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
-		this->workbench->move_to(this->hp_line, (width - snip_width) * 0.05F, (height - snip_height) * 0.15F);
+		{ // reflow pumps
+			float pump_x, pump_y;
 
-		this->filter_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
-		this->workbench->move_to(this->filter_line, (width - snip_width) * 0.15F, (height - snip_height) * 0.15F);
+			pump_x = hp_xmax - this->stepsize * 10.5F;
+			this->workbench->move_to(this->hpumps[0], pump_x, hp_ymax - this->stepsize * 5.0F, SnipCenterPoint::CC);
+			this->workbench->move_to(this->hpumps[1], pump_x, hp_ymax - this->stepsize * 0.0F, SnipCenterPoint::CC);
 
-		this->wp_line->fill_extent(0.0F, vinset, &snip_width, &snip_height);
-		this->workbench->move_to(this->wp_line, (width - snip_width) * 0.75F, (height - snip_height) * 0.40F);
+			pump_y = hp_ymax - this->stepsize * 4.5F;
+			this->workbench->move_to(this->wpumps[0], wp_x + this->stepsize * 2.50F, pump_y, SnipCenterPoint::CC);
+			this->workbench->move_to(this->wpumps[1], wp_x + this->stepsize * 15.5F, pump_y, SnipCenterPoint::CC);
+		}
 	}
 
 public:
@@ -176,14 +158,15 @@ public:
 // never deletes these snips mannually
 private:
 	Gaugelet* gauges[7];
-	Pumplet* pumps[6];
-	Tracelinelet* filter_line;
-	Tracelinelet* hp_line;
-	Tracelinelet* wp_line;
+	Pumplet* hpumps[2];
+	Pumplet* wpumps[2];
+	Shapelet* filter_line;
+	Shapelet* hp_line;
+	Shapelet* wp_line;
 
 private:
 	HPCWorkbench* workbench;
-	float usize;
+	float stepsize;
 };
 
 private class HPCDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
@@ -217,17 +200,23 @@ private:
 };
 
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
-	IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), new GridDecorator(16.0F) };
-	HPCConsole* console = new HPCConsole(this);
 	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
-	
-	this->statusline = new Statuslinelet(Log::Debug);
-	alarm->append_log_receiver(this->statusline);
-	
-	this->console = console;
-	this->device = new ModbusClient(alarm, plc, console);
-	this->cmdmenu = make_start_stop_menu(console);
-	this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
+	float stepsize = statusbar_height();
+
+	{ // prepare the logger
+		this->statusline = new Statuslinelet(Log::Debug);
+		alarm->append_log_receiver(this->statusline);
+	}
+
+	{ // prepare the console
+		IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), new GridDecorator(stepsize) };
+		HPCConsole* console = new HPCConsole(this, stepsize);
+
+		this->console = console;
+		this->device = new ModbusClient(alarm, plc, console);
+		this->cmdmenu = make_start_stop_menu(console);
+		this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
+	}
 }
 
 HPCWorkbench::~HPCWorkbench() {
@@ -287,19 +276,16 @@ void HPCWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifte
 	if (snip == this->shift) {
 		this->shift->toggle();
 		this->change_mode(this->shift->checked() ? HPCMode::Control : HPCMode::View);
-	} else if (this->shift->checked()) {
-		// Motorlet* motor = dynamic_cast<Motorlet*>(snip);
+	} else if (!this->shift->checked()) {
+		Pumplet* pump = dynamic_cast<Pumplet*>(snip);
 
-		// if (motor != nullptr) {
-			// TODO: protect the menu from showing out of screen
-			//  this->cmdmenu->show_for(motor, local_x, local_y, 2.0F, 2.0F);
-			//  this->set_caret_owner(motor);
-
-			//  this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-		// }
-	} else {
-		if ((snip != this->statusbar) && (snip != this->statusline)) {
+		if (pump != nullptr) {
 			this->set_selected(snip);
+			// TODO: protect the menu from showing out of screen
+			this->cmdmenu->show_for(pump, local_x, local_y, 2.0F, 2.0F);
+			this->set_caret_owner(pump);
+
+			// this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 		}
 	}
 }

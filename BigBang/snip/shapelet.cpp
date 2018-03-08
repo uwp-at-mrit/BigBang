@@ -41,5 +41,11 @@ void Geometrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 }
 
 /*************************************************************************************************/
-Tracelinelet::Tracelinelet(Platform::Array<TurtleMove>^ moves, float usize, float thickness, Color& color)
-	: Geometrylet(traceline(moves, usize, thickness), color) {}
+Tracklet::Tracklet(Turtle* turtle, float thickness, Color& color)
+	: Geometrylet(turtle->snap_track(thickness), color), turtle(turtle) {
+	this->turtle->reference();
+}
+
+Tracklet::~Tracklet() {
+	turtle->destroy();
+}

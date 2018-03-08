@@ -15,6 +15,10 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 GridDecorator::GridDecorator(float w, float h) : width(w), height(h) {
+	if (this->width <= 0.0F) {
+		this->width = 16.0F;
+	}
+
     if (this->height <= 0.0F) {
         this->height = this->width;
     }

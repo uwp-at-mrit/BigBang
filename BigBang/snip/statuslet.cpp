@@ -184,6 +184,12 @@ static void initialize_status_font() {
 	}
 }
 
+float WarGrey::SCADA::statusbar_height() {
+	initialize_status_font();
+
+	return status_height;
+}
+
 /*************************************************************************************************/
 Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();

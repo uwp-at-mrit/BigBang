@@ -1,11 +1,10 @@
 #pragma once
 
 #include "snip/snip.hpp"
-#include "shape.hpp"
+#include "turtle.hpp"
 
 namespace WarGrey::SCADA {
-	private class Shapelet : public WarGrey::SCADA::ISnip {
-	};
+	private class Shapelet : public WarGrey::SCADA::ISnip {};
 
 	private class Geometrylet : public WarGrey::SCADA::Shapelet {
 	public:
@@ -27,9 +26,14 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Rect box;
 	};
 
-	private class Tracelinelet : public WarGrey::SCADA::Geometrylet {
+	private class Tracklet : public WarGrey::SCADA::Geometrylet {
 	public:
-		Tracelinelet(Platform::Array<TurtleMove>^ moves, float unit_length = 16.0F, float thickness = 1.0F,
+		~Tracklet() noexcept;
+
+		Tracklet(WarGrey::SCADA::Turtle* turtle, float thickness = 1.0F,
 			Windows::UI::Color& color = Windows::UI::Colors::Azure);
+
+	private:
+		WarGrey::SCADA::Turtle* turtle;
 	};
 }
