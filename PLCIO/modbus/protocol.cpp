@@ -77,7 +77,7 @@ void modbus_write_registers(uint16 *dest, uint16 address, uint16 quantity, uint8
 }
 
 void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src) {
-    for (size_t i = 0; i < 8; i++) {
+    for (unsigned int i = 0; i < 8; i++) {
         dest[idx + i] = (src & (1 << i)) ? 1 : 0;
     }
 }
@@ -86,7 +86,7 @@ void modbus_set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src) {
 void modbus_set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uint8 *src) {
     uint8 shift = 0;
 
-    for (size_t i = idx; i < idx + count; i++) {
+    for (unsigned short i = idx; i < idx + count; i++) {
         dest[i] = src[(i - idx) / 8] & (1 << shift) ? 1 : 0;
         shift = (shift + 1) % 8;
     }

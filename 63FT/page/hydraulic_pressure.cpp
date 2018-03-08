@@ -103,14 +103,14 @@ public:
 	}
 
 	void reflow_workline(float vinset, float width, float height) {
-		float hp_xmax, hp_ymax, wp_x;
+		float hp_xmax, hp_ymax;
+		float wp_x = this->stepsize * 45.0F;
 
 		{ // reflow pipelines
 			this->workbench->move_to(this->hp_line, this->stepsize * 3.0F, this->stepsize * 1.0F + vinset);
 			this->workbench->move_to(this->filter_line, this->stepsize * 10.0F, this->stepsize * 3.0F + vinset);
 
 			this->workbench->fill_snip_location(this->hp_line, &hp_xmax, &hp_ymax, SnipCenterPoint::RB);
-			wp_x = hp_xmax + this->stepsize * 8.0F;
 			this->workbench->move_to(this->wp_line, wp_x, hp_ymax, SnipCenterPoint::LB);
 		}
 
@@ -122,8 +122,8 @@ public:
 			this->workbench->move_to(this->hpumps[1], pump_x, hp_ymax - this->stepsize * 0.0F, SnipCenterPoint::CC);
 
 			pump_y = hp_ymax - this->stepsize * 4.50F;
-			this->workbench->move_to(this->wpumps[0], wp_x + this->stepsize * 2.50F, pump_y, SnipCenterPoint::CC);
-			this->workbench->move_to(this->wpumps[1], wp_x + this->stepsize * 15.5F, pump_y, SnipCenterPoint::CC);
+			this->workbench->move_to(this->wpumps[0], wp_x + this->stepsize * 2.0F, pump_y, SnipCenterPoint::CC);
+			this->workbench->move_to(this->wpumps[1], wp_x + this->stepsize * 15.0F, pump_y, SnipCenterPoint::CC);
 		}
 	}
 
@@ -208,7 +208,7 @@ HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 
 	this->console = console;
 	this->cmdmenu = make_start_stop_menu(console);
-	this->device = new ModbusClient(alarm, plc, this->console);
+	//this->device = new ModbusClient(alarm, plc, this->console);
 }
 
 HPCWorkbench::~HPCWorkbench() {
@@ -253,7 +253,7 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 			IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), grid };
 
 			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
-			this->device->get_logger()->append_log_receiver(this->statusline);
+			//this->device->get_logger()->append_log_receiver(this->statusline);
 		}
 	}
 }

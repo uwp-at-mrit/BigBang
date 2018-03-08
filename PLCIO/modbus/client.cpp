@@ -165,7 +165,7 @@ void IModbusClient::connect() {
 
 				this->apply_request(std::pair<uint16, ModbusTransaction>(current->first, current->second));
 				this->blocking_requests.erase(current);
-			};
+			}
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, modbus_socket_strerror(e));
 			this->connect();

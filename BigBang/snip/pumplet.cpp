@@ -16,7 +16,6 @@ Pumplet::Pumplet(float radius, double degree, float thickness, Color& color, Col
 	: radius(radius), thickness((thickness <= 0.0F) ? 1.0F : thickness) {
 	this->color = make_solid_brush(color);
 	this->ring_color = make_solid_brush(ring_color);
-
 	this->triangle = geometry_freeze(::triangle(radius, degree));
 }
 

@@ -414,7 +414,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 	}; break;
     default: {
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
-        int data_length = mbin->UnconsumedBufferLength;
+        unsigned int data_length = mbin->UnconsumedBufferLength;
 
         MODBUS_READ_BYTES(mbin, request, data_length);
 

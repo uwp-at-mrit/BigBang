@@ -190,4 +190,7 @@
   <data name="oilmpa" xml:space="preserve">
     <value>总管油压(Mpa)</value>
   </data>
+  <data name="unknown" xml:space="preserve">
+    <value>未使用</value>
+  </data>
 </root>
