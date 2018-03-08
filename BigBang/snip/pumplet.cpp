@@ -27,12 +27,11 @@ void Pumplet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float adjust_offset = this->thickness * 0.5F;
-	float center = this->radius + adjust_offset;
-	float cx = x + center;
-	float cy = y + center;
+	float center = this->radius;
+	float cx = x + center + this->thickness * 0.5F;
+	float cy = y + center + this->thickness * 0.5F;
 
 	ds->FillCircle(cx, cy, this->radius, system_background_brush());
-	ds->DrawCachedGeometry(this->triangle, x + adjust_offset, y + adjust_offset, this->color);
+	ds->DrawCachedGeometry(this->triangle, x, y, this->color);
 	ds->DrawCircle(cx, cy, this->radius, this->ring_color, this->thickness);
 }

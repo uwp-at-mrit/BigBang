@@ -35,5 +35,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::Turtle* turtle;
+		float thickness;
 	};
 }

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <algorithm>
+
 #include "decorator/grid.hpp"
 #include "system.hpp"
 #include "paint.hpp"
+#include "text.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -14,7 +17,7 @@ using namespace Windows::UI::ViewManagement;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-GridDecorator::GridDecorator(float w, float h) : width(w), height(h) {
+GridDecorator::GridDecorator(float w, float h, float x, float y) : width(w), height(h), x0(x), y0(y) {
 	if (this->width <= 0.0F) {
 		this->width = 16.0F;
 	}
@@ -26,13 +29,20 @@ GridDecorator::GridDecorator(float w, float h) : width(w), height(h) {
 
 void GridDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
     static auto grid_color = make_solid_brush(system_color(UIElementType::GrayText));
+	static auto font = make_text_format(fmin(this->width, this->height) * 0.42F);
+	size_t idx = 0;
 
     grid_color->Opacity = 0.64F;
-    for (float w = this->width; w <= Width; w += this->width) {
-        ds->DrawLine(w, 0.0F, w, Height, grid_color);
+    for (float x = this->x0; x <= Width; x += this->width) {
+        ds->DrawLine(x, 0.0F, x, Height, grid_color);
+		ds->DrawText(idx.ToString(), x, this->y0, grid_color, font);
+		idx++;
     }
 
-    for (float h = this->height; h <= Height; h += this->height) {
-        ds->DrawLine(0.0F, h, Width, h, grid_color);
-    }
+	idx = 0;
+    for (float y = this->y0; y <= Height; y += this->height) {
+        ds->DrawLine(0.0F, y, Width, y, grid_color);
+		ds->DrawText(idx.ToString(), this->x0, y, grid_color, font);
+		idx++;
+	}
 }

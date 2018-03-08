@@ -18,7 +18,7 @@ Geometrylet::Geometrylet(CanvasGeometry^ shape, Color& color, Color& border_colo
 	if (border_color.A == 0) {
 		this->border = nullptr;
 		this->border_color = transparent_brush();
-		this->box = shape->ComputeStrokeBounds(1.0);
+		this->box = shape->ComputeBounds();
 	} else {
 		this->border = geometry_draft(shape, thickness);
 		this->border_color = make_solid_brush(border_color);

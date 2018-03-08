@@ -52,6 +52,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		Platform::String^ device_hostname() override;
+		Syslog* get_logger() override;
 		bool connected() override;
 		void send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) override;
 

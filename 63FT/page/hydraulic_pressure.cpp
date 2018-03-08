@@ -21,7 +21,7 @@ private enum HPCMode { WindowUI = 0, View, Control };
 
 private class HPCConsole : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::IMenuCommand<WarGrey::SCADA::Menu> {
 public:
-	HPCConsole(HPCWorkbench* master, float stepsize) : workbench(master), stepsize(stepsize) {}
+	HPCConsole(HPCWorkbench* master) : workbench(master) {}
 
 public:
 	void load_gauges(float width, float height) {
@@ -36,7 +36,9 @@ public:
 		}
 	}
 
-	void load_workline(float width, float height) {
+	void load_workline(float stepsize, float width, float height) {
+		this->stepsize = stepsize;
+
 		{ // load pipelines
 			Turtle* filter_turtle = new Turtle(this->stepsize);
 			Turtle* hp_turtle = new Turtle(this->stepsize);
@@ -104,8 +106,8 @@ public:
 		float hp_xmax, hp_ymax, wp_x;
 
 		{ // reflow pipelines
-			this->workbench->move_to(this->hp_line, this->stepsize * 3.0F, this->stepsize * 2.0F);
-			this->workbench->move_to(this->filter_line, this->stepsize * 10.0F, this->stepsize * 4.0F);
+			this->workbench->move_to(this->hp_line, this->stepsize * 3.0F, this->stepsize * 1.0F + vinset);
+			this->workbench->move_to(this->filter_line, this->stepsize * 10.0F, this->stepsize * 3.0F + vinset);
 
 			this->workbench->fill_snip_location(this->hp_line, &hp_xmax, &hp_ymax, SnipCenterPoint::RB);
 			wp_x = hp_xmax + this->stepsize * 8.0F;
@@ -119,7 +121,7 @@ public:
 			this->workbench->move_to(this->hpumps[0], pump_x, hp_ymax - this->stepsize * 5.0F, SnipCenterPoint::CC);
 			this->workbench->move_to(this->hpumps[1], pump_x, hp_ymax - this->stepsize * 0.0F, SnipCenterPoint::CC);
 
-			pump_y = hp_ymax - this->stepsize * 4.5F;
+			pump_y = hp_ymax - this->stepsize * 4.50F;
 			this->workbench->move_to(this->wpumps[0], wp_x + this->stepsize * 2.50F, pump_y, SnipCenterPoint::CC);
 			this->workbench->move_to(this->wpumps[1], wp_x + this->stepsize * 15.5F, pump_y, SnipCenterPoint::CC);
 		}
@@ -133,7 +135,7 @@ public:
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		float Mpa = 0.0F;
 		
-		this->workbench->enter_critical_section(); 
+		this->workbench->enter_critical_section();
 		
 		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
 			float mpa = float(register_values[i]) * 0.1F;
@@ -143,6 +145,7 @@ public:
 		}
 
 		this->gauges[0]->set_scale(Mpa);
+
 		this->workbench->leave_critical_section();
 	}
 
@@ -201,22 +204,11 @@ private:
 
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
 	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
-	float stepsize = statusbar_height();
+	HPCConsole* console = new HPCConsole(this);
 
-	{ // prepare the logger
-		this->statusline = new Statuslinelet(Log::Debug);
-		alarm->append_log_receiver(this->statusline);
-	}
-
-	{ // prepare the console
-		IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), new GridDecorator(stepsize) };
-		HPCConsole* console = new HPCConsole(this, stepsize);
-
-		this->console = console;
-		this->device = new ModbusClient(alarm, plc, console);
-		this->cmdmenu = make_start_stop_menu(console);
-		this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
-	}
+	this->console = console;
+	this->cmdmenu = make_start_stop_menu(console);
+	this->device = new ModbusClient(alarm, plc, this->console);
 }
 
 HPCWorkbench::~HPCWorkbench() {
@@ -235,20 +227,34 @@ HPCWorkbench::~HPCWorkbench() {
 
 void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto console = dynamic_cast<HPCConsole*>(this->console);
-
+	
 	if (console != nullptr) {
-		this->change_mode(HPCMode::View);
-		console->load_gauges(width, height);
-		console->load_workline(width, height);
-		
-		this->change_mode(HPCMode::Control);
-		
-		this->change_mode(HPCMode::WindowUI);
-		this->statusbar = new Statusbarlet(this->name(), this->device);
-		this->shift = new Togglet(false, "control_mode", "view_mode", -6.18F);
-		this->insert(this->statusbar);
-		this->insert(this->statusline);
-		this->insert(this->shift);
+		float vinset = statusbar_height();
+		float stepsize = vinset;
+
+		{ // load snips
+			this->change_mode(HPCMode::View);
+			console->load_gauges(width, height);
+			console->load_workline(stepsize, width, height);
+
+			this->change_mode(HPCMode::Control);
+
+			this->change_mode(HPCMode::WindowUI);
+			this->statusline = new Statuslinelet(Log::Debug);
+			this->statusbar = new Statusbarlet(this->name(), this->device);
+			this->shift = new Togglet(false, "control_mode", "view_mode", -6.18F);
+			this->insert(this->statusbar);
+			this->insert(this->statusline);
+			this->insert(this->shift);
+		}
+
+		{ // delayed initializing
+			GridDecorator* grid = new GridDecorator(stepsize, 0.0F, 0.0F, vinset);
+			IPlanetDecorator* decorators[] = { new HPCDecorator(system_graytext_brush()), grid };
+
+			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
+			this->device->get_logger()->append_log_receiver(this->statusline);
+		}
 	}
 }
 
@@ -281,6 +287,7 @@ void HPCWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifte
 
 		if (pump != nullptr) {
 			this->set_selected(snip);
+			
 			// TODO: protect the menu from showing out of screen
 			this->cmdmenu->show_for(pump, local_x, local_y, 2.0F, 2.0F);
 			this->set_caret_owner(pump);

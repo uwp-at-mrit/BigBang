@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
     private class GridDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
     public:
-        GridDecorator(float grid_width = 16.0F, float grid_height = 0.0F);
+        GridDecorator(float grid_width = 16.0F, float grid_height = 0.0F, float start_x = 0.0F, float start_y = 0.0F);
 
     public:
         void draw_before(
@@ -19,5 +19,7 @@ namespace WarGrey::SCADA {
     private:
         float width;
         float height;
+		float x0;
+		float y0;
     };
 }
