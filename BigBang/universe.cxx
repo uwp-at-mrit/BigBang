@@ -364,12 +364,11 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 
 		do {
 			child->update(count, elapsed, uptime, is_slow);
-			this->logger->log_message(Log::Debug, L"planet[%s] is updated", child->name()->Data());
 			child = PLANET_INFO(child)->next;
 		} while (child != this->head_planet);
 
 		if (is_slow) {
-			this->logger->log_message(Log::Notice, L"the updating spent longer than %fms", float(elapsed) / 10000.0F);
+			this->logger->log_message(Log::Notice, L"planets update spent longer than %fms", float(elapsed) / 10000.0F);
 		}
 	}
 }
@@ -387,7 +386,6 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 
 		if (this->from_planet == nullptr) {
 			draw_planet(ds, this->current_planet, width, height, this->logger);
-			this->logger->log_message(Log::Debug, L"planet[%s] is rendered", this->current_planet->name()->Data());
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 
@@ -396,14 +394,6 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 
 			ds->Transform = make_translation_matrix(this->transferX + deltaX);
 			draw_planet(ds, this->current_planet, width, height, this->logger);
-
-			if (this->current_planet == this->from_planet) {
-				this->logger->log_message(Log::Debug, L"planet[%s] is rendered", this->current_planet->name()->Data());
-			} else {
-				this->logger->log_message(Log::Debug, L"planet[%s] and planet[%s] are rendered",
-					this->from_planet->name()->Data(),
-					this->from_planet->name()->Data());
-			}
 		}
 	}
 

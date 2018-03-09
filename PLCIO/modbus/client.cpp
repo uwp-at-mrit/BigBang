@@ -203,11 +203,11 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transac
 	uint16 tid = transaction.first;
 	uint8 fcode = transaction.second->function_code;
 
-	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second->pdu_data, transaction.second->size);
-
 	this->pending_section.lock();
 	this->pending_requests.insert(transaction);
 	this->pending_section.unlock();
+
+	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second->pdu_data, transaction.second->size);
 
 	create_task(this->mbout->StoreAsync()).then([=](task<unsigned int> sending) {
 		try {
@@ -217,8 +217,14 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transac
 				L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
 				sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
 		} catch (task_canceled&) {
+			this->pending_section.lock();
+			this->pending_requests.erase(tid);
+			this->pending_section.unlock();
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
+			this->pending_section.lock();
+			this->pending_requests.erase(tid);
+			this->pending_section.unlock();
 			this->connect();
 		}});
 }
@@ -244,6 +250,8 @@ void IModbusClient::wait_process_confirm_loop() {
 		uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
+			uint16 address0, origin_fcode;
+
 			if (size < pdu_length) {
 				modbus_protocol_fatal(this->logger,
 					L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
@@ -253,16 +261,23 @@ void IModbusClient::wait_process_confirm_loop() {
 
 			this->pending_section.lock();
 			auto id_transaction = this->pending_requests.find(transaction);
-			if (id_transaction == this->pending_requests.end()) {
+			if (id_transaction != this->pending_requests.end()) {	
+				address0 = id_transaction->second->address0;
+				origin_fcode = id_transaction->second->function_code;
+				free(id_transaction->second);
+
+				/** WARNING
+				 *   `erase` also invalids its iterator, thus, this operation must occur at the end,
+				 *   although, sometimes, the dirty iterator won't cause troubles.
+				 */
+				this->pending_requests.erase(id_transaction);
+				this->pending_section.unlock();
+			} else {
 				this->pending_section.unlock();
 				modbus_discard_current_adu(this->logger,
 					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
 					transaction, this->device->RawName->Data(), this->service->Data());
-			} else {
-				free(id_transaction->second);
-				this->pending_requests.erase(id_transaction);
 			}
-			this->pending_section.unlock();
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
 				modbus_discard_current_adu(this->logger,
@@ -270,12 +285,10 @@ void IModbusClient::wait_process_confirm_loop() {
 					transaction, protocol, length, unit, this->device->RawName->Data(), this->service->Data());
 			}
 
-			uint16 address0 = id_transaction->second->address0;
-			uint8 origin_code = id_transaction->second->function_code;
 			uint8 raw_code = mbin->ReadByte();
 			uint8 function_code = ((raw_code > 0x80) ? (raw_code - 0x80) : raw_code);
 
-			if (function_code != origin_code) {
+			if (function_code != origin_fcode) {
 				modbus_discard_current_adu(this->logger,
 					L"<discarded negative confirmation due to non-expected function(0x%02X) comes from %s:%s>",
 					function_code, this->device->RawName->Data(), this->service->Data());
