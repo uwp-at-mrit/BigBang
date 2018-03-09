@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)testbed.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\shapelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testbed.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />

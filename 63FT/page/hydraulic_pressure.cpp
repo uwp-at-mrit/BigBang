@@ -1,4 +1,5 @@
-﻿#include "hydraulic_pressure.hpp"
+﻿#include "page/hydraulic_pressure.hpp"
+#include "configuration.hpp"
 
 #include "tongue.hpp"
 #include "system.hpp"
@@ -203,7 +204,7 @@ private:
 };
 
 HPCWorkbench::HPCWorkbench(Platform::String^ plc) : Planet(":hpc:") {
-	Syslog* alarm = new Syslog(Log::Debug, "HPC", default_logger());
+	Syslog* alarm = make_system_logger(default_logging_level, "HPC");
 	HPCConsole* console = new HPCConsole(this);
 
 	this->console = console;

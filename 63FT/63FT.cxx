@@ -12,22 +12,26 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::ViewManagement;
 
+using namespace Windows::Globalization;
+using namespace Windows::System::UserProfile;
+
 namespace WarGrey::SCADA {
     typedef EventHandler<UnhandledErrorDetectedEventArgs^> UncaughtExceptionHandler;
 
     private ref class Boat63FT sealed : public Application {
     protected:
         void RebuerMain(ApplicationView^ self, FrameworkElement^ screen) {
-            this->Suspending += ref new SuspendingEventHandler(this, &Boat63FT::OnSuspending);
-			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Boat63FT::OnUncaughtException);
+			ApplicationLanguages::PrimaryLanguageOverride = GlobalizationPreferences::Languages->GetAt(0);
+			ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
+			ApplicationView::PreferredLaunchViewSize = system_screen_size();
 
-            ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
-            ApplicationView::PreferredLaunchViewSize = system_screen_size();
+			CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false; // Force Using the default TitleBar.
+			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Boat63FT::OnUncaughtException);
+			
+			this->Suspending += ref new SuspendingEventHandler(this, &Boat63FT::OnSuspending);
             this->RequestedTheme = ApplicationTheme::Dark;
 
-            // WARNING: Force Using the default TitleBar if a custom one was set once.
-            CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
-			self->Title = screen->ToString();
+            self->Title = screen->ToString();
         }
 
         virtual void OnLaunched(LaunchActivatedEventArgs^ e) override {
@@ -74,8 +78,6 @@ namespace WarGrey::SCADA {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
-	// Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
-	Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "en-US";
 	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Boat63FT(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

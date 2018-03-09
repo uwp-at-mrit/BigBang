@@ -123,8 +123,8 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Platform::String^ name, int frame_rate, Log level) {
-	this->logger = new Syslog(level, (name != nullptr) ? name : "UniverseDisplay", default_logger());
+UniverseDisplay::UniverseDisplay(int frame_rate, Syslog* logger) {
+	this->logger = ((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger);
 	this->logger->reference();
 
 	this->navigator_view = ref new ListView();

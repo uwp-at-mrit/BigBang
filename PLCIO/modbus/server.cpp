@@ -148,7 +148,7 @@ IModbusServer::IModbusServer(Syslog* logger, uint16 port
 	, const char* vendor, const char* code, const char* revision
 	, const char* url, const char* name, const char* model, const char* appname)
 	: service(port.ToString()) {
-	this->logger = ((logger == nullptr) ? new Syslog(Log::None, "Modbus Silent Server", nullptr) : logger);
+	this->logger = ((logger == nullptr) ? make_silent_logger("Modbus Silent Server") : logger);
 	this->logger->reference();
 
 	this->listener = ref new StreamSocketListener();

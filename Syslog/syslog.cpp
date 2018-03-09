@@ -18,7 +18,7 @@ Syslog* default_logger() {
 	static Syslog* winlog;
 
 	if (winlog == nullptr) {
-		winlog = new Syslog(Log::Debug, "WinSCADA", nullptr);
+		winlog = make_logger(Log::Debug, "WinSCADA", nullptr);
 		winlog->append_log_receiver(default_racket_receiver());
 		winlog->append_log_receiver(new VisualStudioReceiver());
 		winlog->reference();
@@ -54,3 +54,16 @@ implement_syslog(alert,    Log::Alert)
 implement_syslog(panic,    Log::Panic)
 
 #undef implement_syslog
+
+/*************************************************************************************************/
+Syslog* make_logger(Log level, Platform::String^ topic, Syslog* parent) {
+	return new Syslog(level, topic, parent);
+}
+
+Syslog* make_silent_logger(Platform::String^ topic) {
+	return make_logger(Log::None, topic);
+}
+
+Syslog* make_system_logger(Log level, Platform::String^ topic) {
+	return make_logger(level, topic, default_logger());
+}

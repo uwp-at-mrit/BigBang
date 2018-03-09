@@ -60,7 +60,7 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(Platform::String^ name, int frame_rate, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug);
+		UniverseDisplay(int frame_rate, WarGrey::SCADA::Syslog* logger = nullptr);
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
@@ -77,14 +77,12 @@ namespace WarGrey::SCADA {
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 
 	public:
-		virtual void big_bang() {};  // occurs at game loop thread
-		virtual void construct() {}; // occurs at UI thread
-		virtual void big_rip() {};   // occurs at game loop thread
-
-	public:
 		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
 
 	protected private:
+		virtual void big_bang() {};  // occurs at game loop thread
+		virtual void construct() {}; // occurs at UI thread
+		virtual void big_rip() {};   // occurs at game loop thread
 		void add_planet(IPlanet* planet);
 		void collapse();
 		

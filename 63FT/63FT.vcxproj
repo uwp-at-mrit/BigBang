@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="command.hpp" />
+    <ClInclude Include="configuration.hpp" />
     <ClInclude Include="page\hydraulic_pressure.hpp" />
     <ClInclude Include="workbench.hxx" />
   </ItemGroup>

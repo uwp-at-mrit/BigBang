@@ -86,7 +86,7 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 
 /*************************************************************************************************/
 IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
-	this->logger = ((sl == nullptr) ? new Syslog(Log::None, "Silent Modbus Client", nullptr) : sl);
+	this->logger = ((sl == nullptr) ? make_silent_logger("Silent Modbus Client") : sl);
 	this->logger->reference();
 
 	this->device = ref new HostName(h);

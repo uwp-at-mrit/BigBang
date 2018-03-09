@@ -35,6 +35,7 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="command.hpp" />
+    <ClInclude Include="configuration.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
