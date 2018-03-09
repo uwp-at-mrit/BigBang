@@ -80,8 +80,8 @@ namespace WarGrey::SCADA {
 		{ return false; }
 
 	public:
-		Platform::String^ name() { return this->caption; }
-		Platform::Object^ navigation_label() { return this->caption; }
+		Platform::String^ name();
+		Platform::Object^ navigation_label();
 		WarGrey::SCADA::Syslog* get_logger();
 
 	public:

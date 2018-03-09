@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value, WarGrey::SCADA::Syslog* logger) = 0;
 		virtual void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, WarGrey::SCADA::Syslog* logger) = 0;
 
 	public:
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
@@ -57,38 +57,31 @@ namespace WarGrey::SCADA {
 		bool connected() override;
 		void send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) override;
 
-	public:
-		uint8* calloc_pdu();
-
     public: // data access
-		virtual uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
-        virtual uint16 write_coil(uint16 address, bool value, IModbusConfirmation* confirmation = nullptr) = 0;
-        virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* confirmation = nullptr) = 0;
+		virtual uint16 read_coils(uint16 address, uint16 quantity) = 0;
+		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity) = 0;
+        virtual uint16 write_coil(uint16 address, bool value) = 0;
+        virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src) = 0;
 		
-		virtual uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 read_queues(uint16 address, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation = nullptr) = 0;
-		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* confirmation = nullptr) = 0;
-		
-		virtual uint16 write_read_registers(
-			uint16 waddr, uint16 wquantity,
-			uint16 raddr, uint16 rquantity, uint16* src,
-			IModbusConfirmation* confirmation = nullptr) = 0;
+		virtual uint16 read_holding_registers(uint16 address, uint16 quantity) = 0;
+		virtual uint16 read_input_registers(uint16 address, uint16 quantity) = 0;
+		virtual uint16 read_queues(uint16 address) = 0;
+		virtual uint16 write_register(uint16 address, uint16 value) = 0;
+		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src) = 0;
+		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or) = 0;
+		virtual uint16 write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) = 0;
 
 	public: // Other
-		virtual uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length, IModbusConfirmation* confirmation) = 0;
+		virtual uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length) = 0;
 
 	protected:
-		uint16 request(uint8 function_code, uint8* pdu_data, uint16 size, IModbusConfirmation* confirmation);
-		uint16 do_simple_request(uint8 function_code, uint16 addr, uint16 val, IModbusConfirmation* confirmation);
-		uint16 do_write_registers(uint8* pdu_data, uint8 offset, uint8 fcode, uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* confirmation);
+		uint16 request(ModbusTransaction* mt);
+		uint16 do_simple_request(uint8 function_code, uint16 addr, uint16 val);
+		uint16 do_write_registers(ModbusTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src);
 
 	private:
 		void connect();
-		void apply_request(std::pair<uint16, ModbusTransaction>& transaction);
+		void apply_request(std::pair<uint16, ModbusTransaction*>& transaction);
 		void wait_process_confirm_loop();
 
     private:
@@ -99,10 +92,8 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mbin;
 		Windows::Storage::Streams::DataWriter^ mbout;
-		std::map<uint16, ModbusTransaction> blocking_requests;
-		std::map<uint16, ModbusTransaction> pending_requests;
-		std::queue<uint8*> pdu_pool;
-		std::mutex pdu_section;
+		std::map<uint16, ModbusTransaction*> blocking_requests;
+		std::map<uint16, ModbusTransaction*> pending_requests;
 		std::mutex blocking_section;
 		std::mutex pending_section;
 
@@ -143,26 +134,21 @@ namespace WarGrey::SCADA {
 			: IModbusClient(logger, server, port, confirmation, generator) {};
 
     public: // data access
-		uint16 read_coils(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 write_coil(uint16 address, bool value, IModbusConfirmation* alt_confirm = nullptr) override;
-        uint16 write_coils(uint16 address, uint16 quantity, uint8* dest, IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 read_coils(uint16 address, uint16 quantity) override;
+		uint16 read_discrete_inputs(uint16 address, uint16 quantity) override;
+		uint16 write_coil(uint16 address, bool value) override;
+        uint16 write_coils(uint16 address, uint16 quantity, uint8* dest) override;
 
-		uint16 read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 read_queues(uint16 address, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 write_register(uint16 address, uint16 value, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* alt_confirm = nullptr) override;
-		uint16 mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* alt_confirm = nullptr) override;
-		
-		uint16 write_read_registers(
-			uint16 waddr, uint16 wquantity,
-			uint16 raddr, uint16 rquantity, uint16* src,
-			IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 read_holding_registers(uint16 address, uint16 quantity) override;
+		uint16 read_input_registers(uint16 address, uint16 quantity) override;
+		uint16 read_queues(uint16 address) override;
+		uint16 write_register(uint16 address, uint16 value) override;
+		uint16 write_registers(uint16 address, uint16 quantity, uint16* src) override;
+		uint16 mask_write_register(uint16 address, uint16 and, uint16 or) override;
+		uint16 write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) override;
 
 	public: // Others
-		uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length,
-			IModbusConfirmation* alt_confirm = nullptr) override;
+		uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
@@ -179,7 +165,7 @@ namespace WarGrey::SCADA {
 	public:
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 value, Syslog* logger) override {};
 		void on_echo_response(uint16 transaction, uint8 function_code, uint16 address, uint16 and, uint16 or, Syslog* logger) override {};
-		void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {};
+		void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, Syslog* logger) override {};
 
 	public:
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {};

@@ -17,15 +17,24 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-#define POP_REQUEST(self) auto it = self.begin(); free(it->second.pdu_data); self.erase(it);
+#define POP_REQUEST(self) auto it = self.begin(); free(it->second); self.erase(it);
 
 private struct WarGrey::SCADA::ModbusTransaction {
 	uint8 function_code;
-	uint8* pdu_data;
+	uint8 pdu_data[MODBUS_MAX_PDU_LENGTH];
 	uint16 size;
-	uint16 maybe_address;
-	IModbusConfirmation* confirmation;
+	uint16 address0;
 };
+
+inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, uint16 size = 0) {
+	ModbusTransaction* mt = new ModbusTransaction();
+
+	mt->function_code = fcode;
+	mt->size = size;
+	mt->address0 = address;
+
+	return mt;
+}
 
 static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
 	, uint16 transaction, uint8 function_code, uint16 address) {
@@ -100,9 +109,6 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
 };
 
 IModbusClient::~IModbusClient() {
-	this->logger->destroy();
-	this->generator->destroy();
-
 	delete this->socket; // stop the confirmation loop before release PDU pool.
 
 	this->blocking_section.lock();
@@ -117,12 +123,8 @@ IModbusClient::~IModbusClient() {
 	}
 	this->pending_section.unlock();
 
-	this->pdu_section.lock();
-	while (!this->pdu_pool.empty()) {
-		free(this->pdu_pool.front());
-		this->pdu_pool.pop();
-	}
-	this->pdu_section.unlock();
+	this->logger->destroy();
+	this->generator->destroy();
 }
 
 Platform::String^ IModbusClient::device_hostname() {
@@ -171,7 +173,7 @@ void IModbusClient::connect() {
 			while (!this->blocking_requests.empty()) {
 				auto current = this->blocking_requests.begin();
 
-				this->apply_request(std::pair<uint16, ModbusTransaction>(current->first, current->second));
+				this->apply_request(std::pair<uint16, ModbusTransaction*>(current->first, current->second));
 				this->blocking_requests.erase(current);
 			}
 			this->blocking_section.unlock();
@@ -182,44 +184,26 @@ void IModbusClient::connect() {
     });
 }
 
-uint8* IModbusClient::calloc_pdu() {
-	uint8* pdu = nullptr;
-
-	this->pdu_section.lock();
-	if (this->pdu_pool.empty()) {
-		pdu = (uint8*)calloc(MODBUS_MAX_PDU_LENGTH, sizeof(uint8));
-	} else {
-		pdu = this->pdu_pool.front();
-		this->pdu_pool.pop();
-	}
-	this->pdu_section.unlock();
-
-	return pdu;
-}
-
-uint16 IModbusClient::request(uint8 function_code, uint8* data, uint16 size, IModbusConfirmation* alt_confirmation) {
-	IModbusConfirmation* cf = ((alt_confirmation == nullptr) ? this->confirmation : alt_confirmation);
-	uint16 maybe_address = MODBUS_GET_INT16_FROM_INT8(data, 0);
-	ModbusTransaction mt = { function_code, data, size, maybe_address, cf };
+uint16 IModbusClient::request(ModbusTransaction* mt) {
 	uint16 id = this->generator->yield();
-	auto transaction = std::pair<uint16, ModbusTransaction>(id, mt);
+	auto transaction = std::pair<uint16, ModbusTransaction*>(id, mt);
 
-	if (this->mbout == nullptr) {
+	if (this->connected()) {
+		this->apply_request(transaction);
+	} else {
 		this->blocking_section.lock();
 		this->blocking_requests.insert(transaction);
 		this->blocking_section.unlock();
-	} else {
-		this->apply_request(transaction);
 	}
 
 	return id;
 }
 
-void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction>& transaction) {
+void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transaction) {
 	uint16 tid = transaction.first;
-	uint8 fcode = transaction.second.function_code;
+	uint8 fcode = transaction.second->function_code;
 
-	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second.pdu_data, transaction.second.size);
+	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second->pdu_data, transaction.second->size);
 
 	this->pending_section.lock();
 	this->pending_requests.insert(transaction);
@@ -268,17 +252,15 @@ void IModbusClient::wait_process_confirm_loop() {
 			}
 
 			this->pending_section.lock();
-			auto maybe_transaction = this->pending_requests.find(transaction);
-			if (maybe_transaction == this->pending_requests.end()) {
+			auto id_transaction = this->pending_requests.find(transaction);
+			if (id_transaction == this->pending_requests.end()) {
 				this->pending_section.unlock();
 				modbus_discard_current_adu(this->logger,
 					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
 					transaction, this->device->RawName->Data(), this->service->Data());
 			} else {
-				this->pdu_section.lock();
-				this->pdu_pool.push(maybe_transaction->second.pdu_data);
-				this->pdu_section.unlock();
-				this->pending_requests.erase(maybe_transaction);
+				free(id_transaction->second);
+				this->pending_requests.erase(id_transaction);
 			}
 			this->pending_section.unlock();
 
@@ -288,9 +270,8 @@ void IModbusClient::wait_process_confirm_loop() {
 					transaction, protocol, length, unit, this->device->RawName->Data(), this->service->Data());
 			}
 
-			IModbusConfirmation* cf = maybe_transaction->second.confirmation;
-			uint16 maybe_address = maybe_transaction->second.maybe_address;
-			uint8 origin_code = maybe_transaction->second.function_code;
+			uint16 address0 = id_transaction->second->address0;
+			uint8 origin_code = id_transaction->second->function_code;
 			uint8 raw_code = mbin->ReadByte();
 			uint8 function_code = ((raw_code > 0x80) ? (raw_code - 0x80) : raw_code);
 
@@ -305,11 +286,11 @@ void IModbusClient::wait_process_confirm_loop() {
 					this->device->RawName->Data(), this->service->Data());
 			}
 
-			if (cf != nullptr) {
+			if (this->confirmation != nullptr) {
 				if (function_code != raw_code) {
-					cf->on_exception(transaction, function_code, maybe_address, this->mbin->ReadByte(), this->logger);
+					this->confirmation->on_exception(transaction, function_code, address0, this->mbin->ReadByte(), this->logger);
 				} else {
-					modbus_apply_positive_confirmation(cf, this->logger, this->mbin, transaction, function_code, maybe_address);
+					modbus_apply_positive_confirmation(this->confirmation, this->logger, this->mbin, transaction, function_code, address0);
 				}
 			}
 		});
@@ -348,102 +329,107 @@ bool IModbusClient::connected() {
 	return (this->mbout != nullptr);
 }
 
-uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val, IModbusConfirmation* cf) {
-	uint8* pdu_data = this->calloc_pdu();
+uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
+	ModbusTransaction* mt = make_transaction(fcode, addr, 4);
 
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, addr);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, val);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, addr);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, val);
 
-	return this->request(fcode, pdu_data, 4, cf);
+	return this->request(mt);
 }
 
-uint16 IModbusClient::do_write_registers(uint8* pdu_data, uint8 offset
-	, uint8 fcode, uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* cf) {
-	uint8* data = pdu_data + offset;
+uint16 IModbusClient::do_write_registers(ModbusTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src) {
+	uint8* data = mt->pdu_data + offset;
 	uint8 NStar = MODBUS_REGISTER_NStar(quantity);
 
 	MODBUS_SET_INT16_TO_INT8(data, 0, address);
 	MODBUS_SET_INT16_TO_INT8(data, 2, quantity);
 	data[4] = NStar;
 	modbus_read_registers(src, 0, NStar, data + 5);
+	
+	mt->size = offset + 5 + NStar;
 
-	return this->request(fcode, pdu_data, offset + 5 + NStar, cf);
+	return this->request(mt);
 }
 
 /*************************************************************************************************/
-uint16 ModbusClient::read_coils(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirmation) { // MAP: Page 11
-	return IModbusClient::do_simple_request(MODBUS_READ_COILS, address, quantity, alt_confirmation);
+uint16 ModbusClient::read_coils(uint16 address, uint16 quantity) { // MAP: Page 11
+	return IModbusClient::do_simple_request(MODBUS_READ_COILS, address, quantity);
 }
 
-uint16 ModbusClient::read_discrete_inputs(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirmation) { // MAP: Page 12
-	return IModbusClient::do_simple_request(MODBUS_READ_DISCRETE_INPUTS, address, quantity, alt_confirmation);
+uint16 ModbusClient::read_discrete_inputs(uint16 address, uint16 quantity) { // MAP: Page 12
+	return IModbusClient::do_simple_request(MODBUS_READ_DISCRETE_INPUTS, address, quantity);
 }
 
-uint16 ModbusClient::write_coil(uint16 address, bool value, IModbusConfirmation* alt_confirmation) { // MAP: Page 17
-	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_COIL, address, (value ? 0xFF00 : 0x0000), alt_confirmation);
+uint16 ModbusClient::write_coil(uint16 address, bool value) { // MAP: Page 17
+	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_COIL, address, (value ? 0xFF00 : 0x0000));
 }
 
-uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src, IModbusConfirmation* alt_confirmation) { // MAP: Page 29
-	uint8* pdu_data = this->calloc_pdu();
+uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 29
 	uint8 NStar = MODBUS_COIL_NStar(quantity);
+	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_COILS, address, 5 + NStar);
+	uint8* pdu_data = mt->pdu_data;
 
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, quantity);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, quantity);
 	pdu_data[4] = NStar;
 	memcpy(pdu_data + 5, src, NStar);
 	
-	return IModbusClient::request(MODBUS_WRITE_MULTIPLE_COILS, pdu_data, 5 + NStar, alt_confirmation);
+	return IModbusClient::request(mt);
 }
 
-uint16 ModbusClient::read_holding_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirmation) {
-	return IModbusClient::do_simple_request(MODBUS_READ_HOLDING_REGISTERS, address, quantity, alt_confirmation);
+uint16 ModbusClient::read_holding_registers(uint16 address, uint16 quantity) {
+	return IModbusClient::do_simple_request(MODBUS_READ_HOLDING_REGISTERS, address, quantity);
 }
 
-uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity, IModbusConfirmation* alt_confirmation) {
-	return IModbusClient::do_simple_request(MODBUS_READ_INPUT_REGISTERS, address, quantity, alt_confirmation);
+uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity) {
+	return IModbusClient::do_simple_request(MODBUS_READ_INPUT_REGISTERS, address, quantity);
 }
 
-uint16 ModbusClient::read_queues(uint16 address, IModbusConfirmation* alt_confirmation) {
-	uint8* pdu_data = this->calloc_pdu();
+uint16 ModbusClient::read_queues(uint16 address) {
+	ModbusTransaction* mt = make_transaction(MODBUS_READ_FIFO_QUEUES, address, 2);
 
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
 
-	return IModbusClient::request(MODBUS_READ_FIFO_QUEUES, pdu_data, 2, alt_confirmation);
+	return IModbusClient::request(mt);
 }
 
 
-uint16 ModbusClient::write_register(uint16 address, uint16 value, IModbusConfirmation* alt_confirmation) { // MAP: Page 19
-	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_REGISTER, address, value, alt_confirmation);
+uint16 ModbusClient::write_register(uint16 address, uint16 value) { // MAP: Page 19
+	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_REGISTER, address, value);
 }
 
-uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* src, IModbusConfirmation* alt_confirmation) { // MAP: Page 30
-	uint8* pdu_data = this->calloc_pdu();
+uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* src) { // MAP: Page 30
+	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_REGISTERS, address);
 
-	return IModbusClient::do_write_registers(pdu_data, 0, MODBUS_WRITE_MULTIPLE_REGISTERS, address, quantity, src, alt_confirmation);
+	return IModbusClient::do_write_registers(mt, 0, address, quantity, src);
 }
 
-uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or, IModbusConfirmation* alt_confirmation) { // MAP: Page 36
-	uint8* pdu_data = this->calloc_pdu();
+uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or) { // MAP: Page 36
+	ModbusTransaction* mt = make_transaction(MODBUS_MASK_WRITE_REGISTER, address, 6);
 
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, and);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 4, or);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, and);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 4, or);
 
-	return IModbusClient::request(MODBUS_MASK_WRITE_REGISTER, pdu_data, 6, alt_confirmation);
+	return IModbusClient::request(mt);
 }
 
-uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src, IModbusConfirmation* alt_confirmation) {
-	uint8* pdu_data = this->calloc_pdu();
+uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) {
+	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_AND_READ_REGISTERS, raddr);
 
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 0, raddr);
-	MODBUS_SET_INT16_TO_INT8(pdu_data, 2, rquantity);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, raddr);
+	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, rquantity);
 
-	return IModbusClient::do_write_registers(pdu_data, 4, MODBUS_WRITE_AND_READ_REGISTERS, waddr, wquantity, src, alt_confirmation);
+	return IModbusClient::do_write_registers(mt, 4, waddr, wquantity, src);
 }
 
-uint16 ModbusClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length, IModbusConfirmation* alt_confirmation) {
-	// TODO: how to manage memory for raw requests.
-	return IModbusClient::request(fcode, request, data_length, alt_confirmation);
+uint16 ModbusClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length) {
+	ModbusTransaction* mt = make_transaction(fcode, 0, data_length);
+
+	// TODO: find a better way to deal with raw requests.
+	memcpy(mt->pdu_data, request, data_length);
+	return IModbusClient::request(mt);
 }
 
 /*************************************************************************************************/

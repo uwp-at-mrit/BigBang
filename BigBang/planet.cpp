@@ -5,6 +5,7 @@
 #include "planet.hpp"
 #include "syslog.hpp"
 #include "system.hpp"
+#include "tongue.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
 #include "transformation.hpp"
@@ -720,6 +721,14 @@ IPlanet::~IPlanet() {
 		delete this->info;
 		this->info = nullptr;
 	}
+}
+
+Platform::String^ IPlanet::name() {
+	return this->caption;
+}
+
+Platform::Object^ IPlanet::navigation_label() {
+	return speak(this->caption);
 }
 
 Syslog* IPlanet::get_logger() {

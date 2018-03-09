@@ -21,13 +21,13 @@ Syslog::Syslog(Log level, Platform::String^ topic, Syslog* parent) : level(level
 }
 
 Syslog::~Syslog() {
-	if (parent != nullptr) {
-		this->parent->destroy();
-	}
-
 	while (!this->receivers.empty()) {
 		this->receivers.front()->destroy();
 		this->receivers.pop_front();
+	}
+
+	if (parent != nullptr) {
+		this->parent->destroy();
 	}
 }
 

@@ -166,13 +166,14 @@ IModbusServer::IModbusServer(Syslog* logger, uint16 port
 };
 
 IModbusServer::~IModbusServer() {
-	this->logger->destroy();
 	auto uuid = this->listener->GetHashCode();
 	auto self = modbus_smart_listeners.find(uuid);
 
 	if (self != modbus_smart_listeners.end()) {
 		modbus_smart_listeners.erase(self);
 	}
+
+	this->logger->destroy();
 }
 
 void IModbusServer::listen() {

@@ -160,9 +160,9 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Syslog* logger) {
 }
 
 UniverseDisplay::~UniverseDisplay() {
-	this->logger->destroy();
 	this->collapse();
 	this->transfer_clock->Stop();
+	this->logger->destroy();
 }
 
 Syslog* UniverseDisplay::get_logger() {
@@ -203,6 +203,8 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 			
 			this->navigator_view->Items->Append(label);
 			this->navigator_view->SelectedValue = label;
+
+			this->logger->log_message(Log::Debug, L"found the first planet[%s]", planet->name()->Data());
 		} else { 
 			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
 			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
@@ -212,6 +214,8 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 			head_info->prev = planet;
 
 			this->navigator_view->Items->Append(label);
+
+			this->logger->log_message(Log::Debug, L"found another planet[%s]", planet->name()->Data());
 		}
 
 		info->next = this->head_planet;
@@ -343,7 +347,7 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 			child->construct(args->Reason, region.Width, region.Height);
 			child->load(args->Reason, region.Width, region.Height);
 			child->reflow(region.Width, region.Height);
-			this->logger->log_message(Log::Debug, L">> planet[%s] is constructed", child->name()->Data());
+			this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 
 			child = info->next;
 		} while (child != this->head_planet);
@@ -360,11 +364,12 @@ void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUp
 
 		do {
 			child->update(count, elapsed, uptime, is_slow);
+			this->logger->log_message(Log::Debug, L"planet[%s] is updated", child->name()->Data());
 			child = PLANET_INFO(child)->next;
 		} while (child != this->head_planet);
 
 		if (is_slow) {
-			this->logger->log_message(Log::Notice, L"cannot update the universe within %fms.", float(elapsed) / 10000.0F);
+			this->logger->log_message(Log::Notice, L"the updating spent longer than %fms", float(elapsed) / 10000.0F);
 		}
 	}
 }
@@ -382,6 +387,7 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 
 		if (this->from_planet == nullptr) {
 			draw_planet(ds, this->current_planet, width, height, this->logger);
+			this->logger->log_message(Log::Debug, L"planet[%s] is rendered", this->current_planet->name()->Data());
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 
@@ -390,6 +396,14 @@ void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDra
 
 			ds->Transform = make_translation_matrix(this->transferX + deltaX);
 			draw_planet(ds, this->current_planet, width, height, this->logger);
+
+			if (this->current_planet == this->from_planet) {
+				this->logger->log_message(Log::Debug, L"planet[%s] is rendered", this->current_planet->name()->Data());
+			} else {
+				this->logger->log_message(Log::Debug, L"planet[%s] and planet[%s] are rendered",
+					this->from_planet->name()->Data(),
+					this->from_planet->name()->Data());
+			}
 		}
 	}
 

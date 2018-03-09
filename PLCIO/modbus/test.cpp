@@ -35,7 +35,7 @@ public:
 		logger->log_message(Log::Info, L"Job(%hu, 0x%02X, 0x%04X, 0x%04X) done", transaction, function_code, address, value);
 	};
 
-	void on_exception(uint16 transaction, uint8 function_code, uint16 maybe_address, uint8 reason, Syslog* logger) override {
+	void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, Syslog* logger) override {
 		logger->log_message(Log::Info, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	};
 
