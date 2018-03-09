@@ -17,7 +17,7 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-#define POP_REQUEST(self) auto it = self.begin(); free(it->second); self.erase(it);
+#define POP_REQUEST(self) auto it = self.begin(); delete it->second; self.erase(it);
 
 private struct WarGrey::SCADA::ModbusTransaction {
 	uint8 function_code;
@@ -109,7 +109,7 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
 };
 
 IModbusClient::~IModbusClient() {
-	delete this->socket; // stop the confirmation loop before release PDU pool.
+	delete this->socket; // stop the confirmation loop before release transactions.
 
 	this->blocking_section.lock();
 	while (!this->blocking_requests.empty()) {
@@ -259,21 +259,20 @@ void IModbusClient::wait_process_confirm_loop() {
 					size, pdu_length);
 			}
 
-			this->pending_section.lock();
 			auto id_transaction = this->pending_requests.find(transaction);
 			if (id_transaction != this->pending_requests.end()) {	
 				address0 = id_transaction->second->address0;
 				origin_fcode = id_transaction->second->function_code;
-				free(id_transaction->second);
+				delete id_transaction->second;
 
 				/** WARNING
 				 *   `erase` also invalids its iterator, thus, this operation must occur at the end,
 				 *   although, sometimes, the dirty iterator won't cause troubles.
 				 */
+				this->pending_section.lock();
 				this->pending_requests.erase(id_transaction);
 				this->pending_section.unlock();
 			} else {
-				this->pending_section.unlock();
 				modbus_discard_current_adu(this->logger,
 					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
 					transaction, this->device->RawName->Data(), this->service->Data());
