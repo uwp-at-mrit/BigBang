@@ -27,10 +27,13 @@ void Pumplet::fill_extent(float x, float y, float* w, float* h) {
 
 void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float center = this->radius;
-	float cx = x + center + this->thickness * 0.5F;
-	float cy = y + center + this->thickness * 0.5F;
+	float thickoff = this->thickness * 0.5F;
+	float cx = x + center + thickoff;
+	float cy = y + center + thickoff;
+	float tx = x + thickoff;
+	float ty = y; // TODO: why doesn't `ty` have to add the `thickoff` 
 
 	ds->FillCircle(cx, cy, this->radius, system_background_brush());
-	ds->DrawCachedGeometry(this->triangle, x, y, this->color);
+	ds->DrawCachedGeometry(this->triangle, tx, ty, this->color);
 	ds->DrawCircle(cx, cy, this->radius, this->ring_color, this->thickness);
 }

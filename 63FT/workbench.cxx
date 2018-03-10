@@ -2,7 +2,6 @@
 #include "configuration.hpp"
 
 #include "page/hydraulic_pressure.hpp"
-#include "testbed.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -20,8 +19,7 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new HPCWorkbench("192.168.8.101"));
-		this->add_planet(new Testbed());
+		this->add_planet(new HPCWorkbench("192.168.2.166"));
 	}
 };
 
@@ -39,7 +37,7 @@ Workbench::Workbench() : SplitView() {
 void Workbench::initialize_component(Size region) {
 	this->universe = ref new Universe("Workbench@63FT");
 	this->Content = this->universe->canvas;
-	//this->Pane = this->universe->navigator;
+	this->Pane = this->universe->navigator;
 
 	// TODO: Why SplitView::Content cannot do it on its own?
 	this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);

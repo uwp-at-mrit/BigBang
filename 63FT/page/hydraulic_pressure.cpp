@@ -52,14 +52,15 @@ public:
 			filter_turtle->turn_right_up()->move_up(6.5F)->turn_up_left()->move_left(9);
 			filter_turtle->move_down();
 
-			hp_turtle->move_right(13)->move_down(4.5F)->turn_down_left()->move_left(12);
-			hp_turtle->turn_left_up()->move_up(6)->turn_up_left()->move_left(16);
+			hp_turtle->move_right(6.5F, 3)->move_right(6.5F)->move_down(4.5F);
+			hp_turtle->move_left(6.5F, 6)->move_left(6.5F)->move_up(6)->turn_up_left()->move_left(16);
 			hp_turtle->turn_left_up()->move_up(18)->turn_up_right()->move_right(29);
 			hp_turtle->turn_right_down()->move_down(2)->move_right(4)->move_down(16);
 			hp_turtle->turn_down_left()->move_left(3)->turn_left_down()->move_down(1.5F);
 
-			wp_turtle->move_down(8)->move_left(6)->turn_left_down()->move_down(8);
-			wp_turtle->move_left(2)->move_right(22)->move_left(7)->move_up(8)->turn_up_left()->move_left(6);
+			wp_turtle->move_down(8)->move_left(6)->turn_left_down()->move_down(4, 1)->move_down(4);
+			wp_turtle->move_left(2)->move_right(22)->move_left(7)->move_up(4, 2)->move_up(4);
+			wp_turtle->turn_up_left()->move_left(6);
 
 			this->filter_line = new Tracklet(filter_turtle);
 			this->hp_line = new Tracklet(hp_turtle);
@@ -104,27 +105,29 @@ public:
 	}
 
 	void reflow_workline(float vinset, float width, float height) {
-		float hp_xmax, hp_ymax;
-		float wp_x = this->stepsize * 45.0F;
+		float hp_x = this->stepsize * 3.0F;
+		float hp_y = this->stepsize * 1.0F + vinset;
+		float wp_x = this->stepsize * 48.0F;
+		float wp_y = this->stepsize * 12.0F + vinset;
 
 		{ // reflow pipelines
-			this->workbench->move_to(this->hp_line, this->stepsize * 3.0F, this->stepsize * 1.0F + vinset);
+			this->workbench->move_to(this->hp_line, hp_x, hp_y);
 			this->workbench->move_to(this->filter_line, this->stepsize * 10.0F, this->stepsize * 3.0F + vinset);
-
-			this->workbench->fill_snip_location(this->hp_line, &hp_xmax, &hp_ymax, SnipCenterPoint::RB);
-			this->workbench->move_to(this->wp_line, wp_x, hp_ymax, SnipCenterPoint::LB);
+			this->workbench->move_to(this->wp_line, wp_x, wp_y);
 		}
 
 		{ // reflow pumps
 			float pump_x, pump_y;
 
-			pump_x = hp_xmax - this->stepsize * 10.5F;
-			this->workbench->move_to(this->hpumps[0], pump_x, hp_ymax - this->stepsize * 5.0F, SnipCenterPoint::CC);
-			this->workbench->move_to(this->hpumps[1], pump_x, hp_ymax - this->stepsize * 0.0F, SnipCenterPoint::CC);
+			this->hp_line->fill_anchor_location(3, &pump_x, &pump_y);
+			this->workbench->move_to(this->hpumps[0], hp_x + pump_x, hp_y + pump_y, SnipCenterPoint::CC);
+			this->hp_line->fill_anchor_location(6, &pump_x, &pump_y);
+			this->workbench->move_to(this->hpumps[1], hp_x + pump_x, hp_y + pump_y, SnipCenterPoint::CC);
 
-			pump_y = hp_ymax - this->stepsize * 4.50F;
-			this->workbench->move_to(this->wpumps[0], wp_x + this->stepsize * 2.0F, pump_y, SnipCenterPoint::CC);
-			this->workbench->move_to(this->wpumps[1], wp_x + this->stepsize * 15.0F, pump_y, SnipCenterPoint::CC);
+			this->wp_line->fill_anchor_location(1, &pump_x, &pump_y);
+			this->workbench->move_to(this->wpumps[0], wp_x + pump_x, wp_y + pump_y, SnipCenterPoint::CC);
+			this->wp_line->fill_anchor_location(2, &pump_x, &pump_y);
+			this->workbench->move_to(this->wpumps[1], wp_x + pump_x, wp_y + pump_y, SnipCenterPoint::CC);
 		}
 	}
 
@@ -164,9 +167,9 @@ private:
 	Gaugelet* gauges[7];
 	Pumplet* hpumps[2];
 	Pumplet* wpumps[2];
-	Shapelet* filter_line;
-	Shapelet* hp_line;
-	Shapelet* wp_line;
+	Tracklet* filter_line;
+	Tracklet* hp_line;
+	Tracklet* wp_line;
 
 private:
 	HPCWorkbench* workbench;
@@ -231,7 +234,7 @@ void HPCWorkbench::load(CanvasCreateResourcesReason reason, float width, float h
 	
 	if (console != nullptr) {
 		float vinset = statusbar_height();
-		float stepsize = vinset;
+		float stepsize = 16.0F;
 
 		{ // load snips
 			this->change_mode(HPCMode::View);
@@ -290,13 +293,15 @@ void HPCWorkbench::on_tap(ISnip* snip, float local_x, float local_y, bool shifte
 		Pumplet* pump = dynamic_cast<Pumplet*>(snip);
 
 		if (pump != nullptr) {
-			this->set_selected(snip);
+			// this->set_selected(snip);
 			
 			// TODO: protect the menu from showing out of screen
 			this->cmdmenu->show_for(pump, local_x, local_y, 2.0F, 2.0F);
 			this->set_caret_owner(pump);
 
 			// this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		} else {
+			// this->no_selected();
 		}
 	}
 }

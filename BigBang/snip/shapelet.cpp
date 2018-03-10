@@ -49,3 +49,12 @@ Tracklet::Tracklet(Turtle* turtle, float thickness, Color& color)
 Tracklet::~Tracklet() {
 	turtle->destroy();
 }
+
+void Tracklet::fill_anchor_location(int node, float* x, float* y) {
+	float raw_x, raw_y;
+
+	this->turtle->fill_anchor_location(node, &raw_x, &raw_y);
+
+	SET_BOX(x, raw_x - Geometrylet::box.X);
+	SET_BOX(y, raw_y - Geometrylet::box.Y);
+}

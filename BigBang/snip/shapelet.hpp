@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 
-	private:
+	protected:
 		Windows::Foundation::Rect box;
 	};
 
@@ -32,6 +32,9 @@ namespace WarGrey::SCADA {
 
 		Tracklet(WarGrey::SCADA::Turtle* turtle, float thickness = 1.0F,
 			Windows::UI::Color& color = Windows::UI::Colors::Azure);
+
+	public:
+		void fill_anchor_location(int node, float* x, float* y);
 
 	private:
 		WarGrey::SCADA::Turtle* turtle;
