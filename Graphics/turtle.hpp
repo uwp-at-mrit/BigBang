@@ -17,6 +17,17 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 	public:
+		Turtle* jump_up(int step = 1, int anchor_id = -1);
+		Turtle* jump_right(int step = 1, int anchor_id = -1);
+		Turtle* jump_down(int step = 1, int anchor_id = -1);
+		Turtle* jump_left(int step = 1, int anchor_id = -1);
+
+		Turtle* jump_up(float step, int anchor_id = -1);
+		Turtle* jump_right(float step, int anchor_id = -1);
+		Turtle* jump_down(float step, int anchor_id = -1);
+		Turtle* jump_left(float step, int anchor_id = -1);
+
+	public:
 		Turtle* move_up(int step = 1, int anchor_id = -1);
 		Turtle* move_right(int step = 1, int anchor_id = -1);
 		Turtle* move_down(int step = 1, int anchor_id = -1);
@@ -53,6 +64,7 @@ namespace WarGrey::SCADA {
 	private:
 		void do_step(int id);
 		void do_anchor(int id);
+		WarGrey::SCADA::Turtle* do_jump(int id);
 		WarGrey::SCADA::Turtle* do_move(int id);
 		WarGrey::SCADA::Turtle* do_clockwise_turn(int id);
 		WarGrey::SCADA::Turtle* do_counterclockwise_turn(int id);

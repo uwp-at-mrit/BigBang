@@ -38,9 +38,12 @@ CanvasGeometry^ Turtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 }
 
 void Turtle::clear() {
+	this->anchors.clear();
+	this->snapshot = nullptr;
+	this->moved = false;
+
 	this->track = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	this->track->BeginFigure(this->x, this->y);
-	this->moved = false;
 }
 
 void Turtle::fill_anchor_location(int id, float* x, float* y) {
@@ -53,6 +56,16 @@ void Turtle::fill_anchor_location(int id, float* x, float* y) {
 		SET_BOX(y, pt.imag());
 	}
 }
+
+Turtle* Turtle::jump_up(int step, int id) { return this->jump_up(float(step), id); }
+Turtle* Turtle::jump_right(int step, int id) { return this->jump_right(float(step), id); }
+Turtle* Turtle::jump_down(int step, int id) { return this->jump_down(float(step), id); }
+Turtle* Turtle::jump_left(int step, int id) { return this->jump_left(float(step), id); }
+
+Turtle* Turtle::jump_up(float step, int id) { this->y -= (this->stepsize * step); return do_jump(id); }
+Turtle* Turtle::jump_right(float step, int id) { this->x += (this->stepsize * step); return do_jump(id); }
+Turtle* Turtle::jump_down(float step, int id) { this->y += (this->stepsize * step); return do_jump(id); }
+Turtle* Turtle::jump_left(float step, int id) { this->x -= (this->stepsize * step); return do_jump(id); }
 
 Turtle* Turtle::move_up(int step, int id)    { return this->move_up(float(step), id); }
 Turtle* Turtle::move_right(int step, int id) { return this->move_right(float(step), id); }
@@ -93,6 +106,14 @@ void Turtle::do_anchor(int id) {
 		auto anchor = std::pair<int, std::complex<float>>(id, key_point);
 		this->anchors.insert(anchor);
 	}
+}
+
+Turtle* Turtle::do_jump(int id) {
+	this->do_anchor(id);
+	this->track->EndFigure(CanvasFigureLoop::Open);
+	this->track->BeginFigure(this->x, this->y);
+
+	return this;
 }
 
 Turtle* Turtle::do_move(int id) {
