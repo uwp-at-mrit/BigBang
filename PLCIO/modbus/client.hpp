@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 
 	public:
-		virtual void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) = 0;
+		virtual void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime) = 0;
 	};
 
 	private class IModbusClient abstract : public WarGrey::SCADA::IPLCClient {
@@ -55,7 +55,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ device_hostname() override;
 		Syslog* get_logger() override;
 		bool connected() override;
-		void send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) override;
+		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
     public: // data access
 		virtual uint16 read_coils(uint16 address, uint16 quantity) = 0;
@@ -171,6 +171,6 @@ namespace WarGrey::SCADA {
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {};
 
 	public:
-		void on_scheduled_request(WarGrey::SCADA::IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) {};
+		void on_scheduled_request(WarGrey::SCADA::IModbusClient* device, long long count, long long interval, long long uptime) {};
 	};
 }

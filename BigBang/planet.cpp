@@ -599,9 +599,9 @@ void Planet::construct(CanvasCreateResourcesReason reason, float Width, float He
 	this->numpad->construct();
 }
 
-void Planet::update(long long count, long long interval, long long uptime, bool is_slow) {
+void Planet::update(long long count, long long interval, long long uptime) {
 	if (this->numpad->shown()) {
-		this->numpad->update(count, interval, uptime, is_slow);
+		this->numpad->update(count, interval, uptime);
 	}
 
 	if (this->head_snip != nullptr) {
@@ -611,7 +611,7 @@ void Planet::update(long long count, long long interval, long long uptime, bool 
 			SnipInfo* info = SNIP_INFO(child);
 
 			if (unsafe_snip_unmasked(info, this->mode)) {
-				child->update(count, interval, uptime, is_slow);
+				child->update(count, interval, uptime);
 			}
 			
 			child = info->next;

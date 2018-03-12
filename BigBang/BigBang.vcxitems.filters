@@ -46,6 +46,7 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -96,6 +97,7 @@
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\shapelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

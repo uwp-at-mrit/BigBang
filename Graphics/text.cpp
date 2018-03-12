@@ -7,10 +7,8 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
-
 CanvasTextLayout^ make_text_layout(Platform::String^ para, CanvasTextFormat^ font) {
-    return ref new CanvasTextLayout(shared_ds, para, font, 0.0F, 0.0F);
+    return ref new CanvasTextLayout(CanvasDevice::GetSharedDevice(), para, font, 0.0F, 0.0F);
 }
 
 CanvasTextLayout^ make_vertical_layout(Platform::String^ para, CanvasTextFormat^ font, float spacing, CanvasHorizontalAlignment align) {
@@ -49,7 +47,7 @@ CanvasTextFormat^ make_text_format(Platform::String^ face, float size, CanvasWor
 }
 
 TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ font, bool trim) {
-    return get_text_extent(shared_ds, message, font, trim);
+    return get_text_extent(CanvasDevice::GetSharedDevice(), message, font, trim);
 }
 
 TextExtent get_text_extent(ICanvasResourceCreator^ ds, Platform::String^ message, CanvasTextFormat^ font, bool trim) {

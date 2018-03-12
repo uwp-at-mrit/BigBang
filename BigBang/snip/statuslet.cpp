@@ -215,9 +215,9 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(height, status_height);
 }
 
-void Statusbarlet::update(long long count, long long interval, long long uptime, bool is_slow) {
+void Statusbarlet::update(long long count, long long interval, long long uptime) {
 	if ((this->device != nullptr) && (this->device->connected())) {
-		this->device->send_scheduled_request(count, interval, uptime, is_slow);
+		this->device->send_scheduled_request(count, interval, uptime);
 	}
 }
 

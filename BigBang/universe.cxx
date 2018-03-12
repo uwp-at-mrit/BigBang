@@ -123,7 +123,7 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(int frame_rate, Syslog* logger) {
+UniverseDisplay::UniverseDisplay(Syslog* logger) {
 	this->logger = ((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger);
 	this->logger->reference();
 
@@ -135,10 +135,11 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Syslog* logger) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 
-	this->display = ref new CanvasAnimatedControl();
+	this->display = ref new CanvasControl();
 	this->display->Name = this->logger->get_name();
-	this->display->TargetElapsedTime = make_timespan_from_rate(frame_rate);
-	this->display->UseSharedDevice = true; // this is required
+	
+	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
+	// this->display->UseSharedDevice = true;
 
 	/** TODO
 	 * All these events should be unloaded,
@@ -147,9 +148,6 @@ UniverseDisplay::UniverseDisplay(int frame_rate, Syslog* logger) {
 	 */
 	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
 	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
-	this->display->GameLoopStarting += ref new UniverseHandler(this, &UniverseDisplay::do_start);
-	this->display->GameLoopStopped += ref new UniverseHandler(this, &UniverseDisplay::do_stop);
-	this->display->Update += ref new UniverseUpdateHandler(this, &UniverseDisplay::do_update);
 	this->display->Draw += ref new UniverseDrawHandler(this, &UniverseDisplay::do_paint);
 
 	this->display->ManipulationMode = ManipulationModes::TranslateX;
@@ -187,6 +185,19 @@ float UniverseDisplay::actual_width::get() {
 
 float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
+}
+
+void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long uptime) {
+	if (this->head_planet != nullptr) {
+		IPlanet* child = this->head_planet;
+
+		do {
+			child->update(count, elapsed, uptime);
+			child = PLANET_INFO(child)->next;
+		} while (child != this->head_planet);
+
+		this->display->Invalidate();
+	}
 }
 
 void UniverseDisplay::add_planet(IPlanet* planet) {
@@ -328,12 +339,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 	}
 }
 
-void UniverseDisplay::do_start(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	this->logger->log_message(Log::Debug, "big bang");
-	this->big_bang();
-}
-
-void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateResourcesEventArgs^ args) {
+void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) {
 	this->logger->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
@@ -354,26 +360,7 @@ void UniverseDisplay::do_construct(CanvasAnimatedControl^ sender, CanvasCreateRe
 	}
 }
 
-void UniverseDisplay::do_update(ICanvasAnimatedControl^ sender, CanvasAnimatedUpdateEventArgs^ args) {
-	if (this->head_planet != nullptr) {
-		long long count = args->Timing.UpdateCount - 1;
-		long long elapsed = args->Timing.ElapsedTime.Duration;
-		long long uptime = args->Timing.TotalTime.Duration;
-		bool is_slow = args->Timing.IsRunningSlowly;
-		IPlanet* child = this->head_planet;
-
-		do {
-			child->update(count, elapsed, uptime, is_slow);
-			child = PLANET_INFO(child)->next;
-		} while (child != this->head_planet);
-
-		if (is_slow) {
-			this->logger->log_message(Log::Notice, L"planets update spent longer than %fms", float(elapsed) / 10000.0F);
-		}
-	}
-}
-
-void UniverseDisplay::do_paint(ICanvasAnimatedControl^ sender, CanvasAnimatedDrawEventArgs^ args) {
+void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args) {
 	// NOTE: only the current planet and the one transferred from need to be drawn
 
 	this->enter_critical_section();
@@ -430,11 +417,6 @@ void UniverseDisplay::do_transfer(Platform::Object^ sender, ItemClickEventArgs^ 
 		this->from_planet = this->current_planet;
 		this->transfer(this->navigator_view->SelectedIndex - from_idx, 0U);
 	}
-}
-
-void UniverseDisplay::do_stop(ICanvasAnimatedControl^ sender, Platform::Object^ args) {
-	this->logger->log_message(Log::Debug, "big rip");
-	this->big_rip();
 }
 
 void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {

@@ -62,6 +62,7 @@ namespace WarGrey::SCADA {
 		~Turtle() noexcept {}
 
 	private:
+		void do_rebuild();
 		void do_step(int id);
 		void do_anchor(int id);
 		WarGrey::SCADA::Turtle* do_jump(int id);

@@ -10,6 +10,6 @@ namespace WarGrey::SCADA {
 		virtual bool connected() = 0;
 
 	public:
-		virtual void send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) = 0;
+		virtual void send_scheduled_request(long long count, long long interval, long long uptime) = 0;
 	};
 }

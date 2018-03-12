@@ -11,8 +11,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
-
 GradientStops^ make_gradient_stops(Color colors[], int total) {
     GradientStops^ stopa = nullptr;
     CanvasGradientStop* stops = new CanvasGradientStop[total];
@@ -33,12 +31,12 @@ void brush_translate(ICanvasBrush^ brush, float x, float y) {
 }
 
 CanvasSolidColorBrush^ make_solid_brush(Color& color) {
-    return ref new CanvasSolidColorBrush(shared_ds, color);
+    return ref new CanvasSolidColorBrush(CanvasDevice::GetSharedDevice(), color);
 }
 
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey
     , GradientStops^ stops, CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
-    auto brush = ref new CanvasLinearGradientBrush(shared_ds, stops, edge, alpha);
+    auto brush = ref new CanvasLinearGradientBrush(CanvasDevice::GetSharedDevice(), stops, edge, alpha);
 
     brush->StartPoint = float2(sx, sy);
     brush->EndPoint = float2(ex, ey);

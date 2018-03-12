@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void construct() {}
 		virtual void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) = 0;
-		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}
+		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
 
 	public:

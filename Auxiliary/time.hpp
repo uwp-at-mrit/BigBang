@@ -3,6 +3,8 @@
 Windows::Foundation::TimeSpan make_timespan_from_ms(unsigned int ms);
 Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
 
+void sleep(unsigned int ms);
+
 wchar_t* update_wnowstamp(bool need_us = true, int *l00ns = nullptr);
 Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
 

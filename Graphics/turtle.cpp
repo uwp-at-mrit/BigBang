@@ -14,7 +14,7 @@ using namespace Windows::Foundation::Numerics;
 
 /*************************************************************************************************/
 Turtle::Turtle(float stepsize, int start_anchor) : stepsize(stepsize), tradius(stepsize * 0.5F), x(0.0F), y(0.0F) {
-	this->clear();
+	this->do_rebuild();
 	this->do_anchor(start_anchor);
 }
 
@@ -31,7 +31,7 @@ CanvasGeometry^ Turtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 			this->snapshot = geometry_union(this->snapshot, trackline);
 		}
 
-		this->clear();
+		this->do_rebuild();
 	}
 
 	return this->snapshot;
@@ -40,10 +40,8 @@ CanvasGeometry^ Turtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 void Turtle::clear() {
 	this->anchors.clear();
 	this->snapshot = nullptr;
-	this->moved = false;
 
-	this->track = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	this->track->BeginFigure(this->x, this->y);
+	this->do_rebuild();
 }
 
 void Turtle::fill_anchor_location(int id, float* x, float* y) {
@@ -94,6 +92,13 @@ Turtle* Turtle::turn_left_down_right(int id) { this->y += this->stepsize; return
 Turtle* Turtle::turn_left_up_right(int id)   { this->y -= this->stepsize; return this->do_clockwise_turn(id); }
 Turtle* Turtle::turn_right_down_left(int id) { this->y += this->stepsize; return this->do_clockwise_turn(id); }
 Turtle* Turtle::turn_right_up_left(int id)   { this->y -= this->stepsize; return this->do_counterclockwise_turn(id); }
+
+void Turtle::do_rebuild() {
+	this->moved = false;
+
+	this->track = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	this->track->BeginFigure(this->x, this->y);
+}
 
 void Turtle::do_step(int id) {
 	this->do_anchor(id);

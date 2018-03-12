@@ -2,35 +2,29 @@
 
 #include <mutex>
 
+#include "timer.hxx"
+
 #include "sugar.hpp"
 #include "forward.hpp"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
     typedef Windows::Foundation::TypedEventHandler<
-        Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^,
-        Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedDrawEventArgs^>
+        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^,
+        Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^>
         UniverseDrawHandler;
 
     typedef Windows::Foundation::TypedEventHandler<
-        Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^,
+        Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^,
         Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^>
         UniverseLoadHandler;
 
     typedef Windows::Foundation::TypedEventHandler<
-        Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^,
-        Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedUpdateEventArgs^>
-        UniverseUpdateHandler;
-
-    typedef Windows::Foundation::TypedEventHandler<
-        Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^,
+        Microsoft::Graphics::Canvas::UI::Xaml::ICanvasControl^,
         Platform::Object^>
         UniverseHandler;
 
-    private ref class IDisplay abstract {
-	internal:
-		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
-
+	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerAction {
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
@@ -60,7 +54,7 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(int frame_rate, WarGrey::SCADA::Syslog* logger = nullptr);
+		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr);
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
@@ -77,12 +71,11 @@ namespace WarGrey::SCADA {
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 
 	public:
+		void on_elapsed(long long count, long long interval, long long uptime) override;
 		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
 
 	protected private:
-		virtual void big_bang() {};  // occurs at game loop thread
 		virtual void construct() {}; // occurs at UI thread
-		virtual void big_rip() {};   // occurs at game loop thread
 		void add_planet(IPlanet* planet);
 		void collapse();
 		
@@ -90,20 +83,14 @@ namespace WarGrey::SCADA {
 		void do_refresh(Platform::Object^ sender, Platform::Object^ args);
 		void do_transfer(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ args);
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
-		void do_start(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
-		void do_stop(Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender, Platform::Object^ args);
 		
 		void do_construct(
-			Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ sender,
+			Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
 			Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesEventArgs^ args);
 
-		void do_update(
-			Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender,
-			Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedUpdateEventArgs^ args);
-
 		void do_paint(
-			Microsoft::Graphics::Canvas::UI::Xaml::ICanvasAnimatedControl^ sender,
-			Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedDrawEventArgs^ args);
+			Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ sender,
+			Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
 	private:
 		Windows::UI::Input::PointerPointProperties^ saved_pressed_ppp;
@@ -113,7 +100,7 @@ namespace WarGrey::SCADA {
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		
 	private:
-		Microsoft::Graphics::Canvas::UI::Xaml::CanvasAnimatedControl^ display;
+		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		Windows::UI::Xaml::Controls::ListView^ navigator_view;
 		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;

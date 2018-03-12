@@ -5,7 +5,8 @@
 namespace WarGrey::SCADA {
     private class Gaugelet : public WarGrey::SCADA::IScaleSnip<float> {
     public:
-        Gaugelet(Platform::String^ caption, int range, unsigned char step = 0, Windows::UI::Color& color = Windows::UI::Colors::Green);
+        Gaugelet(Platform::String^ caption, int range, unsigned char step = 0,
+			Windows::UI::Color& color = Windows::UI::Colors::Green);
 
 	public:
         void construct() override;

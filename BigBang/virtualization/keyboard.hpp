@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
-		void update(long long count, long long interval, long long uptime, bool is_slow) override;
+		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) override;
 

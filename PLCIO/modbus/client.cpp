@@ -135,9 +135,9 @@ Syslog* IModbusClient::get_logger() {
 	return this->logger;
 }
 
-void IModbusClient::send_scheduled_request(long long count, long long interval, long long uptime, bool is_slow) {
+void IModbusClient::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->confirmation != nullptr) {
-		this->confirmation->on_scheduled_request(this, count, interval, uptime, is_slow);
+		this->confirmation->on_scheduled_request(this, count, interval, uptime);
 	}
 }
 

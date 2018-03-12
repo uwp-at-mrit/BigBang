@@ -1,4 +1,5 @@
-﻿#include "workbench.hxx"
+﻿#include "timer.hxx"
+#include "workbench.hxx"
 #include "configuration.hpp"
 
 #include "page/hydraulic_pressure.hpp"
@@ -12,15 +13,23 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
 
+using namespace Microsoft::Graphics::Canvas;
+
 /*************************************************************************************************/
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
-	Universe(Platform::String^ name) : UniverseDisplay(16, make_system_logger(default_logging_level, name)) {}
+	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		this->timer = ref new Timer(this, 8);
+	}
 
 protected:
 	void construct() override {
-		this->add_planet(new HPCWorkbench("192.168.2.166"));
+		//this->add_planet(new HPCWorkbench("192.168.2.166"));
+		this->add_planet(new HPCWorkbench("192.168.8.114"));
 	}
+
+private:
+	WarGrey::SCADA::Timer^ timer;
 };
 
 /*************************************************************************************************/

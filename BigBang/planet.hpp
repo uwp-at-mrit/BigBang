@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void reflow(float width, float height) {}
-		virtual void update(long long count, long long interval, long long uptime, bool is_slow) {}
+		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
 		virtual void collapse() {}
 
@@ -123,7 +123,7 @@ namespace WarGrey::SCADA {
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
-        void update(long long count, long long interval, long long uptime, bool is_slow) override;
+        void update(long long count, long long interval, long long uptime) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 		void collapse() override;
 

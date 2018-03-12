@@ -49,7 +49,7 @@ void Keyboard::construct() {
 	}
 }
 
-void Keyboard::update(long long count, long long interval, long long uptime, bool is_slow) {
+void Keyboard::update(long long count, long long interval, long long uptime) {
 	if (interval > numpad_tap_duration) {
 		this->uptime = uptime + interval;
 	} else {

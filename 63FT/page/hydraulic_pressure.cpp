@@ -132,7 +132,7 @@ public:
 	}
 
 public:
-	void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime, bool is_slow) override {
+	void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime) override {
 		device->read_input_registers(0, SNIPS_ARITY(this->gauges));
 	}
 

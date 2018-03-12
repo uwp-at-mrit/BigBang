@@ -12,8 +12,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-static CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
-
 inline static void circle_point(float radius, double degree, float* x, float* y) {
 	float radian = float(degree * M_PI / 180.0);
 
@@ -23,7 +21,7 @@ inline static void circle_point(float radius, double degree, float* x, float* y)
 
 /*************************************************************************************************/
 CanvasGeometry^ blank() {
-    return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(shared_ds));
+    return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
 }
 
 CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
@@ -39,7 +37,7 @@ CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
 }
 
 CanvasGeometry^ hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
-    auto line = ref new CanvasPathBuilder(shared_ds);
+    auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
     line->BeginFigure(x, y);
     line->AddLine(x + l, y);
@@ -53,7 +51,7 @@ CanvasGeometry^ hline(float l, float th, CanvasStrokeStyle^ style) {
 }
 
 CanvasGeometry^ vline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
-    auto line = ref new CanvasPathBuilder(shared_ds);
+    auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
     line->BeginFigure(x, y);
     line->AddLine(x, y + l);
@@ -67,7 +65,7 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
 }
 
 CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
-    auto arc = ref new CanvasPathBuilder(shared_ds);
+    auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
@@ -77,7 +75,7 @@ CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, floa
 }
 
 CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
-    auto arc = ref new CanvasPathBuilder(shared_ds);
+    auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Large);
@@ -87,15 +85,15 @@ CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float
 }
 
 CanvasGeometry^ circle(float cx, float cy, float r) {
-    return CanvasGeometry::CreateCircle(shared_ds, cx, cy, r);
+    return CanvasGeometry::CreateCircle(CanvasDevice::GetSharedDevice(), cx, cy, r);
 }
 
 CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
-    return CanvasGeometry::CreateEllipse(shared_ds, cx, cy, rx, ry);
+    return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), cx, cy, rx, ry);
 }
 
 CanvasGeometry^ triangle(float r, double d) {
-	auto equilateral_triangle = ref new CanvasPathBuilder(shared_ds);
+	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
 	circle_point(r, d, &x, &y);
@@ -111,7 +109,7 @@ CanvasGeometry^ triangle(float r, double d) {
 
 
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {
-    return CanvasGeometry::CreateRectangle(shared_ds, Rect(x, y, w, h));
+    return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h));
 }
 
 CanvasGeometry^ rectangle(float w, float h) {
@@ -122,7 +120,7 @@ CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, 
     float radius_x = (rx < 0.0F) ? -(w * rx) : rx;
     float radius_y = (ry < 0.0F) ? -(h * ry) : ry;
 
-    return CanvasGeometry::CreateRoundedRectangle(shared_ds, Rect(x, y, w, h), radius_x, radius_y);
+    return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h), radius_x, radius_y);
 }
 
 CanvasGeometry^ rounded_rectangle(float w, float h, float rx, float ry) {
@@ -146,7 +144,7 @@ CanvasGeometry^ rotate_rectangle(float w, float h, double d, float cx, float cy)
 }
 
 CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
-	auto arrow = ref new CanvasPathBuilder(shared_ds);
+	auto arrow = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float arrowheadsize = head_size * thickness;
 	float alignoff = thickness * 1.0F;
 	float wingsize = arrowheadsize * 0.5F;
@@ -173,7 +171,7 @@ CanvasGeometry^ double_arrow(float arrow_size, float arrowhead_size, float spaci
 
 /*************************************************************************************************/
 CanvasGeometry^ cylinder_tb_surface(float x, float y, float rx, float ry, float height) {
-    auto surface = ref new CanvasPathBuilder(shared_ds);
+    auto surface = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     float cx = x + rx;
     float cy = y + ry;
     
@@ -187,7 +185,7 @@ CanvasGeometry^ cylinder_tb_surface(float x, float y, float rx, float ry, float 
 }
 
 CanvasGeometry^ cylinder_rl_surface(float x, float y, float rx, float ry, float width) {
-    auto surface = ref new CanvasPathBuilder(shared_ds);
+    auto surface = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     float cx = x + rx;
     float cy = y + ry;
 
@@ -201,7 +199,7 @@ CanvasGeometry^ cylinder_rl_surface(float x, float y, float rx, float ry, float 
 }
 
 CanvasGeometry^ cylinder_lr_surface(float x, float y, float rx, float ry, float width) {
-    auto surface = ref new CanvasPathBuilder(shared_ds);
+    auto surface = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     float cx = x + rx;
     float cy = y + ry;
 
@@ -215,7 +213,7 @@ CanvasGeometry^ cylinder_lr_surface(float x, float y, float rx, float ry, float 
 }
 
 CanvasGeometry^ pyramid_surface(float x, float y, float rt, float rb, float ry, float height) {
-    auto surface = ref new CanvasPathBuilder(shared_ds);
+    auto surface = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     float cx = x + rt;
     float cy = y + ry;
 

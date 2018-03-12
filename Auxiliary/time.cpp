@@ -1,4 +1,6 @@
 #include <cwchar>
+#include <chrono>
+#include <thread>
 
 #include "time.hpp"
 #include "box.hpp"
@@ -32,6 +34,10 @@ TimeSpan make_timespan_from_rate(int rate) {
 	long long duration = ((rate > 0) ? (l00ns / rate) : (-l00ns * rate));
 	
 	return TimeSpan{ duration };
+}
+
+void sleep(unsigned int ms) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 wchar_t* update_wnowstamp(bool need_us, int* l00nanosecond) {

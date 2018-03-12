@@ -123,7 +123,7 @@ void Motorlet::fill_extent(float x, float y, float* w, float* h) {
     SET_VALUES(w, this->width, h, this->height);
 }
 
-void Motorlet::update(long long count, long long interval, long long uptime, bool is_slow) {
+void Motorlet::update(long long count, long long interval, long long uptime) {
     brush_translate(this->serew_brush, float(count), 0.0F);
 }
 
