@@ -47,7 +47,7 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 			float(interval) / 10000.0F);
 	} else {
 		this->timer->Interval = TimeSpan{ next_interval };
-		this->target->get_logger()->log_message(Log::Notice,
+		this->target->get_logger()->log_message(Log::Debug,
 			L"it took %fms to update planets",
 			float(elapsed) / 10000.0F);
 	}
