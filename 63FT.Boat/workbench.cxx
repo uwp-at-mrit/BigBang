@@ -44,7 +44,7 @@ Workbench::Workbench() : SplitView() {
 }
 
 void Workbench::initialize_component(Size region) {
-	this->universe = ref new Universe("Workbench@63FT");
+	this->universe = ref new Universe("Workbench@63FT.Boat");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
 

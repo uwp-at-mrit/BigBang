@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 		
 	private:
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-
+		
 	private:
 		WarGrey::SCADA::UniverseDisplay^ universe;
 	};

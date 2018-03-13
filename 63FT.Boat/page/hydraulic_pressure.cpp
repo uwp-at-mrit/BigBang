@@ -9,7 +9,6 @@
 #include "paint.hpp"
 #include "turtle.hpp"
 
-#include "decorator/border.hpp"
 #include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;

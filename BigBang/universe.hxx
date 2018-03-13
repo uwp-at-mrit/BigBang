@@ -75,7 +75,7 @@ namespace WarGrey::SCADA {
 		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
 
 	protected private:
-		virtual void construct() {}; // occurs at UI thread
+		virtual void construct() {};
 		void add_planet(IPlanet* planet);
 		void collapse();
 		

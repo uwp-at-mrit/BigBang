@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{a88b286a-26fe-4d0a-8ba4-5dc6caf08fd3}</ProjectGuid>
-    <RootNamespace>_63FT</RootNamespace>
+    <ProjectGuid>{a9d609ed-87c6-4e9a-a45c-39f2e6af7650}</ProjectGuid>
+    <RootNamespace>Yacht</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
@@ -81,8 +81,8 @@
     <Import Project="..\Auxiliary\Auxiliary.vcxitems" Label="Shared" />
     <Import Project="..\BigBang\BigBang.vcxitems" Label="Shared" />
     <Import Project="..\Graphics\graphics.vcxitems" Label="Shared" />
-    <Import Project="..\Syslog\Syslog.vcxitems" Label="Shared" />
     <Import Project="..\PLCIO\PLCIO.vcxitems" Label="Shared" />
+    <Import Project="..\Syslog\Syslog.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -104,10 +104,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <PackageCertificateKeyFile>63FT_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-    <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
+    <PackageCertificateKeyFile>Yacht_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -161,8 +158,9 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="63FT_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="Yacht.scrbl" />
+    <None Include="Yacht_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
@@ -174,20 +172,20 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Localization\en-US\tongue.resw" />
-    <PRIResource Include="Localization\zh-CN\tongue.resw" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="63FT.cxx" />
     <ClCompile Include="command.cpp" />
-    <ClCompile Include="page\hydraulic_pressure.cpp" />
-    <ClCompile Include="workbench.cxx" />
+    <ClCompile Include="page\airconditioning.cpp" />
+    <ClCompile Include="cosmos.cxx" />
+    <ClCompile Include="Yacht.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="command.hpp" />
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="page\hydraulic_pressure.hpp" />
-    <ClInclude Include="workbench.hxx" />
+    <ClInclude Include="page\airconditioning.hpp" />
+    <ClInclude Include="cosmos.hxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Localization\en-US\tongue.resw" />
+    <PRIResource Include="Localization\zh-CN\tongue.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
