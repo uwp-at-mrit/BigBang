@@ -1,5 +1,7 @@
 #lang racket
 
+(provide (all-defined-out))
+
 (require racket/draw)
 (require math/number-theory)
 
@@ -7,7 +9,7 @@
 
 ; https://pomax.github.io/bezierinfo/
 
-(define (bezier-enclosing-box point others)
+(define (bezier-window-enclosing-box point others)
   (define-values (x0 y0) (values (real-part point) (imag-part point)))
   (let tr ([xmin x0] [ymin y0] [xmax x0] [ymax y0] [points others])
     (cond [(null? points) (values xmin ymin xmax ymax)]
@@ -18,32 +20,45 @@
                       (max xmax x) (max ymax y)
                       (cdr points)))])))
 
-(define (bezier-derivative-weights point others)
-  (define n (length others))
-  (for/list ([p1 (in-list (cons point others))]
-             [p2 (in-list others)])
-    (* n (- p2 p1))))
+(define (bezier-extremities #:samples [samples 200] point . others)
+  (define fbezier   (make-bezier-function #:derivative 0 point others))
+  (define fbezier~  (make-bezier-function #:derivative 1 point others))
+  (define fbezier~~ (make-bezier-function #:derivative 2 point others))
+  (cond [(or (not fbezier~) (not fbezier~~)) null]
+        [else (filter-map (λ [t0]
+                            (let Newton-Raphson ([tn t0])
+                              (and (<= 0.0 tn 1.0)
+                                   (let ([f~tn (imag-part (fbezier~ tn))])
+                                     (cond [(< (abs f~tn) 1.0e-8) (fbezier tn)]
+                                           [else (Newton-Raphson (- tn (/ f~tn (imag-part (fbezier~~ tn)))))])))))
+                          (bezier-domain samples))]))
 
-(define (make-bezier-function point others)
+(define (bezier-derivative-weights #:order [order 1] point others)
   (define n (length others))
-  (lambda [t]
-    (let sum ([i 0] [points (cons point others)] [intermediate-point 0.0])
-      (cond [(null? points) intermediate-point]
-            [else (sum (+ i 1) (cdr points)
-                       (+ intermediate-point
-                          (* (binomial n i)
-                             (expt (- 1.0 t) (- n i))
-                             (expt t i)
-                             (car points))))]))))
+  (define weights
+    (for/list ([p1 (in-list (cons point others))]
+               [p2 (in-list others)])
+      (* n (- p2 p1))))
+  (cond [(<= order 1) weights]
+        [(null? weights) null]
+        [else (bezier-derivative-weights #:order (sub1 order) (car weights) (cdr weights))]))
 
-(define (make-bezier-derivative-function point others)
-  (define derivative-points (bezier-derivative-weights point others))
-  (and (pair? derivative-points)
-       (make-bezier-function (car derivative-points)
-                             (cdr derivative-points))))
+(define (make-bezier-function #:derivative [order 0] point others)
+  (define points (if (positive-integer? order) (bezier-derivative-weights #:order order point others) (cons point others)))
+  (define n (sub1 (length points)))
+  (and (nonnegative-integer? n)
+       (lambda [t]
+         (let sum ([i 0] [points points] [intermediate-point 0.0])
+           (cond [(null? points) intermediate-point]
+                 [else (sum (+ i 1) (cdr points)
+                            (+ intermediate-point
+                               (* (binomial n i)
+                                  (expt (- 1.0 t) (- n i))
+                                  (expt t i)
+                                  (car points))))])))))
 
 (define (make-bezier-directional-vector-function point others)
-  (define make-derivative-point (make-bezier-derivative-function point others))
+  (define make-derivative-point (make-bezier-function #:derivative 1 point others))
   (cond [(not make-derivative-point) (values #false #false)]
         [else (let ([make-tangent-point (λ [t] (let ([dp (make-derivative-point t)]) (/ dp (magnitude dp))))])
                 (values make-tangent-point
@@ -59,12 +74,12 @@
     (cons (+ x-start (* (- (real-part p) x0) x-ratio))
           (- y-start (* (- (imag-part p) y0) y-ratio)))))
 
-(define (in-bezier-range sample-count)
+(define (in-bezier-domain sample-count)
   (define step (/ 1 sample-count))
   (in-range 0 (+ 1 step) step))
 
-(define (bezier-range sample-count)
-  (sequence->list (in-bezier-range sample-count)))
+(define (bezier-domain sample-count)
+  (sequence->list (in-bezier-domain sample-count)))
 
 (define (draw-endpoint dc point diameter)
   (define radius (* diameter 0.5))
@@ -74,11 +89,11 @@
         diameter diameter))
 
 (define (bezier #:width [width 256] #:height [height 256] #:samples [samples #false] #:dot-diameter [diameter 4.0] point . others)
-  (define-values (x0 y0 xn yn) (bezier-enclosing-box point others))
+  (define-values (x0 y0 xn yn) (bezier-window-enclosing-box point others))
   (define sample-count (or samples (max width height)))
   (define point-transform (make-point-transform x0 y0 xn yn width height diameter))
   (define make-intermediate-point (make-bezier-function point others))
-  (define curve-nodes (for/list ([t (in-bezier-range sample-count)]) (point-transform (make-intermediate-point t))))
+  (define curve-nodes (for/list ([t (in-bezier-domain sample-count)]) (point-transform (make-intermediate-point t))))
   (define point-nodes (map point-transform (cons point others)))
   (define canvas (make-bitmap width height #:backing-scale 2.0))
   (define dc (send canvas make-dc))
@@ -96,10 +111,10 @@
   canvas)
 
 (define (bezier* #:width [width 512] #:height [height 512] #:samples [samples #false] #:fps [fps 60] #:dot-diameter [diameter 4.0] point . others)
-  (define-values (x0 y0 xn yn) (bezier-enclosing-box point others))
+  (define-values (x0 y0 xn yn) (bezier-window-enclosing-box point others))
   (define point-transform (make-point-transform x0 y0 xn yn width height diameter))
   (define make-intermediate-point (make-bezier-function point others))
-  (define time-series (bezier-range (or samples (max width height))))
+  (define time-series (bezier-domain (or samples (max width height))))
   (define point-nodes (map point-transform (cons point others)))
   (define curve-nodes (for/list ([t (in-list time-series)]) (point-transform (make-intermediate-point t))))
   (define curve-node-count (length curve-nodes))
@@ -144,8 +159,8 @@
 (define (bezier-directional-vectors #:size [size 256] #:samples [samples #false] #:mark-length [marker-length 16] #:dot-diameter [diameter 4.0] point . others)
   (define-values (make-tangent-point make-normal-point) (make-bezier-directional-vector-function point others))
   (when (and make-tangent-point)
-    (define-values (x0 y0 xn yn) (bezier-enclosing-box point others))
-    (define time-series (bezier-range (or samples size)))
+    (define-values (x0 y0 xn yn) (bezier-window-enclosing-box point others))
+    (define time-series (bezier-domain (or samples size)))
     (define point-transform (make-point-transform (min x0 y0) (min x0 y0) (max xn yn) (max xn yn) size size diameter))
     (define make-intermediate-point (make-bezier-function point others))
     (define curve-nodes (map make-intermediate-point time-series))
@@ -167,7 +182,7 @@
       (define curve-point (point-transform pt))
       (define-values (x y) (values (car curve-point) (cdr curve-point)))
       (define-values (tx ty) (let ([tp (point-transform (+ pt (* tan marker-length)))]) (values (car tp) (cdr tp))))
-      (define-values (nx ny) (let ([np (point-transform (- pt (* norm marker-length)))]) (values (car np) (cdr np))))
+      (define-values (nx ny) (let ([np (point-transform (+ pt (* norm marker-length)))]) (values (car np) (cdr np))))
       (send dc set-pen (make-pen #:color "Black"))
       (draw-endpoint dc curve-point diameter)
       (send dc set-pen (make-pen #:color "RoyalBlue"))
@@ -176,17 +191,20 @@
       (send dc draw-line x y nx ny))
     canvas))
 
-(time (bezier-directional-vectors 100.0+75.0i  20.0+110.0i  70.0+155.0i))
-(time (bezier-directional-vectors 60.0+105.0i  75.0+30.0i   215.0+115.0i 140.0+160.0i))
-(time (bezier-directional-vectors 120.0+160.0i 35.0+200.0i  220.0+260.0i 220.0+40.0i))
-(time (bezier-directional-vectors 25.0+128.0i  102.4+230.4i 153.6+25.6i  230.4+128.0i))
-(time (bezier-directional-vectors 198.0+18.0i  34.0+57.0i   18.0+156.0i  221.0+90.0i
-                                  186.0+177.0i 14.0+82.0i   12.0+236.0i  45.0+290.0i
-                                  218.0+294.0i 248.0+188.0i))
+#;(time (bezier-directional-vectors 100.0+75.0i  20.0+110.0i  70.0+155.0i))
+#;(time (bezier-directional-vectors 60.0+105.0i  75.0+30.0i   215.0+115.0i 140.0+160.0i))
+#;(time (bezier-directional-vectors 120.0+160.0i 35.0+200.0i  220.0+260.0i 220.0+40.0i))
+#;(time (bezier-directional-vectors 25.0+128.0i  102.4+230.4i 153.6+25.6i  230.4+128.0i))
+#;(time (bezier-directional-vectors 198.0+18.0i  34.0+57.0i   18.0+156.0i  221.0+90.0i
+                                    186.0+177.0i 14.0+82.0i   12.0+236.0i  45.0+290.0i
+                                    218.0+294.0i 248.0+188.0i))
 
+#;(time (bezier-extremities 60.0+105.0i  75.0+30.0i   215.0+115.0i 140.0+160.0i));
+#;(time (bezier-extremities 120.0+160.0i 35.0+200.0i  220.0+260.0i 220.0+40.0i))
 
 #;(bezier* 120.0+160.0i 35.0+200.0i  220.0+260.0i 220.0+40.0i)
 
-#;(bezier* 198.0+18.0i  34.0+57.0i   18.0+156.0i  221.0+90.0i
+#;(bezier* #:samples 200
+           198.0+18.0i  34.0+57.0i   18.0+156.0i  221.0+90.0i
            186.0+177.0i 14.0+82.0i   12.0+236.0i  45.0+290.0i
            218.0+294.0i 248.0+188.0i)
