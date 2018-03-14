@@ -88,8 +88,9 @@
         (- (cdr point) radius)
         diameter diameter))
 
-(define (bezier #:width [width 256] #:height [height 256] #:samples [samples #false] #:dot-diameter [diameter 4.0] point . others)
+(define (bezier #:width [width 256] #:height [maybe-height #false] #:samples [samples #false] #:dot-diameter [diameter 4.0] point . others)
   (define-values (x0 y0 xn yn) (bezier-window-enclosing-box point others))
+  (define height (or maybe-height width))
   (define sample-count (or samples (max width height)))
   (define point-transform (make-point-transform x0 y0 xn yn width height diameter))
   (define make-intermediate-point (make-bezier-function point others))
@@ -110,8 +111,9 @@
   (send dc draw-lines curve-nodes)
   canvas)
 
-(define (bezier* #:width [width 512] #:height [height 512] #:samples [samples #false] #:fps [fps 60] #:dot-diameter [diameter 4.0] point . others)
+(define (bezier* #:width [width 512] #:height [maybe-height #false] #:samples [samples #false] #:fps [fps 60] #:dot-diameter [diameter 4.0] point . others)
   (define-values (x0 y0 xn yn) (bezier-window-enclosing-box point others))
+  (define height (or maybe-height width))
   (define point-transform (make-point-transform x0 y0 xn yn width height diameter))
   (define make-intermediate-point (make-bezier-function point others))
   (define time-series (bezier-domain (or samples (max width height))))
