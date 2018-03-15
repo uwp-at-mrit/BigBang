@@ -3,7 +3,7 @@
 (define argn (vector-length (current-command-line-arguments)))
 
 (define vertices.txt
-  (cond [(zero? argn) (format "vertices.~a.txt" (current-milliseconds))]
+  (cond [(zero? argn) (format "vertices.~a.rktl" (current-milliseconds))]
         [else (vector-ref (current-command-line-arguments) 0)]))
 
 (define memory (make-hash))
@@ -11,9 +11,10 @@
 (displayln (format "~a:" vertices.txt))
 (call-with-output-file* vertices.txt #:exists 'truncate/replace
   (λ [/dev/stdout]
+    (displayln #\( /dev/stdout)
     (let watch-clipboard ()
       (define datum (send the-clipboard get-clipboard-string 0))
-      (unless (regexp-match? #px"^0+$" datum)
+      (unless (regexp-match? #px"^[0.]+$" datum)
         (for ([line (in-lines (open-input-string datum))] #:unless (hash-has-key? memory (string-trim line)))
           (define raw (regexp-match #px"X = ([-0-9.]+), Y = ([-0-9.]+)" line))
           (when (pair? raw)
@@ -22,5 +23,8 @@
             (displayln pt /dev/stdout)
             (displayln pt)))
         (sleep 1)
-        (watch-clipboard)))))
-(displayln (format "[Output to ~a]" vertices.txt))
+        (watch-clipboard)))
+    (displayln #\) /dev/stdout)
+    (newline /dev/stdout)
+    (send the-clipboard set-clipboard-string "" 0)))
+(displayln (format "[Output ~a vertices to ~a]" (hash-count memory) vertices.txt))

@@ -21,7 +21,7 @@
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities")
  #(C++      #xF34B7D #px"[.](([ch](pp|xx)?)|idl)$")
- #(Racket   #x89E051 #px"[.]rkt$")
+ #(Racket   #x89E051 #px"[.]rkt[ld]?$")
  #(Scribble #x1E4AEC #px"[.](scrbl|css)$")
  #;(CSS      #xC34C26 #px"[.]css$")
  #(ResX     #xEDEDED #px"[.]resw$")]
