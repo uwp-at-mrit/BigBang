@@ -5,6 +5,10 @@
 (define-values (samples window-size) (values 64 512))
 (define-values (x0 y0 xn yn) (values 528467.29464027 -62041.37096839 571267.29464027 -42041.37096839))
 
+(define parts
+  (for/list ([vertices.txt (in-list (list "deck_bottom.rktl" "deck_top.rktl" "cabin_rt.rktl"))])
+    (call-with-input-file* vertices.txt read)))
+
 (define vertices-take
   (lambda [vertices count]
     (define total (length vertices))
@@ -34,10 +38,6 @@
     (draw-endpoint dc (last point-nodes) diameter)
     (send dc set-pen (make-pen #:color "Black"))
     (send dc draw-lines curve-nodes)))
-
-(define parts
-  (for/list ([vertices.txt (in-list (list "deck_bottom.rktl" "deck_top.rktl" "cabin_rt.rktl"))])
-    (call-with-input-file* vertices.txt read)))
 
 (define yacht%
   (class canvas% (super-new)
