@@ -62,6 +62,7 @@
     (define-values (width height) (values 1 1))
     (define sample-count (or samples 128))
     (define pt-transform (void))
+    (define vertices (make-hash))
 
     (define point-count 2)
     (define curve-count (length parts))
@@ -83,19 +84,17 @@
         (send this with-gl-context
               (lambda []
                 (glClear (bitwise-ior GL_COLOR_BUFFER_BIT GL_DEPTH_BUFFER_BIT GL_STENCIL_BUFFER_BIT))
-                #;(for ([seq (in-range curve-count)])
+                (for ([seq (in-range curve-count)])
                   (define key (list seq point-count width height))
-                  (define points
-                    (hash-ref! images key
-                               (thunk (thread (thunk (let ([src (list-ref parts seq)])
-                                                       (define points (vertices-take src point-count))
-                                                       (define-values (curve-nodes point-nodes)
-                                                         (compute-curve-points points sample-count pt-transform))
-                                                       (hash-set! points key (cons curve-nodes point-nodes))
-                                                       (send this refresh)))))))
-        
+                  (let ([src (list-ref parts seq)])
+                    (define points (vertices-take src point-count))
+                    (define-values (curve-nodes point-nodes) (compute-curve-points points sample-count pt-transform))
+                    #;(hash-set! points key (cons curve-nodes point-nodes))
+                    #;(send this refresh)
+                    (void))
+                
                   #;(cond [(thread? image) (send dc draw-text (format "Drawing curves with ~a control points" point-count) 0 0 #true)]
-                        [else (send* dc (draw-bitmap image 0 0) (draw-text (format "Control points: ~a" point-count) 0 0 #true))]))
+                          [else (send* dc (draw-bitmap image 0 0) (draw-text (format "Control points: ~a" point-count) 0 0 #true))]))
                 
                 (glFlush)
                 (send this swap-gl-buffers)))))
