@@ -225,7 +225,7 @@ void Planet::move(ISnip* snip, float x, float y) {
         ISnip* child = this->head_snip;
 
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            info = SNIP_INFO(child);
 
             if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
                 unsafe_move_snip_via_info(this, info, x, y, false);

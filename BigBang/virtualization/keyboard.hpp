@@ -72,7 +72,7 @@ namespace WarGrey::SCADA {
 	private:
 		const WarGrey::SCADA::KeyboardCell* cells;
 		unsigned int keynum;
-		float* cell_boxes;
+		Windows::Foundation::Rect* cell_boxes;
 
 	private:
 		bool tapped;

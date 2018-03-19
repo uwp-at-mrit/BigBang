@@ -9,9 +9,11 @@ using namespace Microsoft::Graphics::Canvas;
 static IPlanetDecorator** make_decorator_list(IPlanetDecorator** src, unsigned int count) {
 	auto decorators = (IPlanetDecorator**)calloc(count, sizeof(IPlanetDecorator*));
 	
-	for (unsigned int i = 0; i < count; i++) {
-		decorators[i] = src[i];
-		decorators[i]->reference();
+	if (decorators != nullptr) {
+		for (unsigned int i = 0; i < count; i++) {
+			decorators[i] = src[i];
+			decorators[i]->reference();
+		}
 	}
 
 	return decorators;

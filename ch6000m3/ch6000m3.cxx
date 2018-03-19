@@ -58,13 +58,13 @@ namespace WarGrey::SCADA {
         }
 
     private:
-        void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ e) {
+        void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args) {
 			// TODO: Save application state and stop any background activity.
             // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
         }
 
-        void OnUncaughtException(Platform::Object^ sender, UnhandledErrorDetectedEventArgs^ e) {
-            auto error = e->UnhandledError;
+        void OnUncaughtException(Platform::Object^ sender, UnhandledErrorDetectedEventArgs^ args) {
+            auto error = args->UnhandledError;
 
             if (!error->Handled) {
                 try {

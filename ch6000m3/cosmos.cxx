@@ -3,6 +3,8 @@
 #include "timer.hxx"
 #include "configuration.hpp"
 
+#include "page/airconditioning.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -23,6 +25,7 @@ public:
 
 protected:
 	void construct() override {
+		this->add_planet(new AirConditioning("192.168.1.135"));
 		// this->add_planet(new AirConditioning("192.168.2.166"));
 		// this->add_planet(new AirConditioning("192.168.8.114"));
 	}
@@ -43,7 +46,7 @@ Cosmos::Cosmos() : SplitView() {
 }
 
 void Cosmos::initialize_component(Size region) {
-	this->universe = ref new Universe("YachtCosmos");
+	this->universe = ref new Universe("Ch6000m3");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
 

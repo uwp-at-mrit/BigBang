@@ -37,7 +37,7 @@ inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, u
 }
 
 static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
-	, uint16 transaction, uint8 function_code, uint16 address) {
+	, uint16 transaction, uint8 function_code, uint16 maybe_address) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
 		static uint8 status[MODBUS_MAX_PDU_LENGTH];
@@ -45,9 +45,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		MODBUS_READ_BYTES(mbin, status, count);
 
 		if (function_code == MODBUS_READ_COILS) {
-			cf->on_coils(transaction, address, status, count, logger);
+			cf->on_coils(transaction, maybe_address, status, count, logger);
 		} else {
-			cf->on_discrete_inputs(transaction, address, status, count, logger);
+			cf->on_discrete_inputs(transaction, maybe_address, status, count, logger);
 		}
 	} break;
 	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS:     // MAP: Page 15, 16
@@ -57,9 +57,9 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		MODBUS_READ_DOUBLES(mbin, registers, count);
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
-			cf->on_input_registers(transaction, address, registers, count, logger);
+			cf->on_input_registers(transaction, maybe_address, registers, count, logger);
 		} else {
-			cf->on_holding_registers(transaction, address, registers, count, logger);
+			cf->on_holding_registers(transaction, maybe_address, registers, count, logger);
 		}
 	} break;
 	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
@@ -81,7 +81,7 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		uint16 useless = mbin->ReadUInt16();
 		uint16 count = mbin->ReadUInt16();
 
-		cf->on_queue_registers(transaction, address, queues, count, logger);
+		cf->on_queue_registers(transaction, maybe_address, queues, count, logger);
 	} break;
 	default: {
 		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
@@ -250,7 +250,8 @@ void IModbusClient::wait_process_confirm_loop() {
 		uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
 		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
-			uint16 address0, origin_fcode;
+			uint16 address0 = 0;
+			uint16 origin_fcode = 0;
 
 			if (size < pdu_length) {
 				modbus_protocol_fatal(this->logger,

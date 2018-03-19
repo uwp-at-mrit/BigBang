@@ -326,7 +326,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		retcode = this->read_queues(address, response + 4);
 
 		if (retcode >= 0) {
-			if (retcode = 31) {
+			if (retcode == 31) {
 				retcode = -modbus_illegal_data_value(retcode, 0, 32, this->logger);
 			} else {
 				uint8 NStar = MODBUS_QUEUE_NStar(retcode);

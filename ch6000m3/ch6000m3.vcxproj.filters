@@ -8,18 +8,25 @@
       <UniqueIdentifier>06266bb5-785b-433a-9fc0-c94a59272319</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
+    <Filter Include="Localization">
+      <UniqueIdentifier>{4aed4355-aa89-490e-ac2f-1df7c274121f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Localization\en-US">
+      <UniqueIdentifier>{dda3866b-7c10-438f-a837-b59172a135b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Localization\zh-CN">
+      <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.xaml.cpp" />
-    <ClCompile Include="MainPage.xaml.cpp" />
     <ClCompile Include="cosmos.cxx" />
     <ClCompile Include="ch6000m3.cxx" />
+    <ClCompile Include="page\airconditioning.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.xaml.h" />
-    <ClInclude Include="MainPage.xaml.h" />
     <ClInclude Include="cosmos.hxx" />
     <ClInclude Include="configuration.hpp" />
+    <ClInclude Include="page\airconditioning.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -53,7 +60,11 @@
     <None Include="ch6000m3.scrbl" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Localization\en-US\tongue.resw" />
-    <PRIResource Include="Localization\zh-CN\tongue.resw" />
+    <PRIResource Include="Localization\en-US\tongue.resw">
+      <Filter>Localization\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="Localization\zh-CN\tongue.resw">
+      <Filter>Localization\zh-CN</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

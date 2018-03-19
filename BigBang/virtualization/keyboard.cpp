@@ -3,25 +3,25 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
+
 using namespace Windows::UI;
 using namespace Windows::System;
 using namespace Microsoft::Graphics::Canvas;
 
-private enum KeyboardCellBox { X, Y, Width, Height };
-
 static const size_t box_size = sizeof(float) * 4;
 static const long long numpad_tap_duration = 3000000LL;
 
-static void fill_cellbox(float* box, const KeyboardCell cell, float cellsize, float gapsize) {
+static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, float gapsize) {
 	float flcol = float(cell.col);
 	float flrow = float(cell.row);
 	float flncol = float(cell.ncol);
 	float flnrow = float(cell.nrow);
 	
-	box[KeyboardCellBox::X] = gapsize * (flcol + 1.0F) + cellsize * flcol;
-	box[KeyboardCellBox::Y] = gapsize * (flrow + 1.0F) + cellsize * flrow;
-	box[KeyboardCellBox::Width] = cellsize * flncol + gapsize * (flncol - 1.0F);
-	box[KeyboardCellBox::Height] = cellsize * flnrow + gapsize * (flnrow - 1.0F);
+	box.X = gapsize * (flcol + 1.0F) + cellsize * flcol;
+	box.Y = gapsize * (flrow + 1.0F) + cellsize * flrow;
+	box.Width = cellsize * flncol + gapsize * (flncol - 1.0F);
+	box.Height = cellsize * flnrow + gapsize * (flnrow - 1.0F);
 }
 
 /*************************************************************************************************/
@@ -32,7 +32,7 @@ Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keyn
 
 Keyboard::~Keyboard() {
 	if (this->cell_boxes != nullptr) {
-		free(this->cell_boxes);
+		delete [] this->cell_boxes;
 	}
 }
 
@@ -40,12 +40,12 @@ void Keyboard::construct() {
 	this->create();
 
 	if (this->cell_boxes != nullptr) {
-		free(this->cell_boxes);
+		delete [] this->cell_boxes;
 	}
 
-	this->cell_boxes = (float *)calloc(this->keynum, box_size);
+	this->cell_boxes = new Rect[box_size];
 	for (size_t i = 0; i < keynum; i++) {
-		fill_cellbox(this->cell_boxes + (i * box_size), this->cells[i], cellsize, gapsize);
+		fill_cellbox(this->cell_boxes[i * box_size], this->cells[i], cellsize, gapsize);
 	}
 }
 
@@ -67,13 +67,13 @@ void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	this->draw_before(ds, x, y, Width, Height);
 
 	for (unsigned char i = 0; i < this->keynum; i++) {
-		float* box = this->cell_boxes + (box_size * i);
+		Rect box = this->cell_boxes[box_size * i];
 
 		VirtualKey key = this->cells[i].key;
-		float cx = x + box[KeyboardCellBox::X];
-		float cy = y + box[KeyboardCellBox::Y];
-		float cwidth = box[KeyboardCellBox::Width];
-		float cheight = box[KeyboardCellBox::Height];
+		float cx = x + box.X;
+		float cy = y + box.Y;
+		float cwidth = box.Width;
+		float cheight = box.Height;
 
 		this->draw_cell(ds, key, this->current_key == key, this->tapped, cx, cy, cwidth, cheight);
 	}
@@ -101,11 +101,11 @@ VirtualKey Keyboard::find_tapped_key(float mouse_x, float mouse_y) {
 	VirtualKey found = VirtualKey::None;
 
 	for (unsigned char i = 0; i < this->keynum; i++) {
-		float* box = this->cell_boxes + (i * box_size);
-		float cx = box[KeyboardCellBox::X];
-		float cy = box[KeyboardCellBox::Y];
-		float cwidth = box[KeyboardCellBox::Width];
-		float cheight = box[KeyboardCellBox::Height];
+		Rect box = this->cell_boxes[i * box_size];
+		float cx = box.X;
+		float cy = box.Y;
+		float cwidth = box.Width;
+		float cheight = box.Height;
 
 		if ((cx < mouse_x) && (mouse_x < cx + cwidth) && (cy < mouse_y) && (mouse_y < cy + cheight)) {
 			found = this->cells[i].key;
