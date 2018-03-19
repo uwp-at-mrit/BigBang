@@ -20,6 +20,12 @@
     <Filter Include="Localization\zh-CN">
       <UniqueIdentifier>{b2f8f704-a418-47fc-813f-88579499691a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="snip">
+      <UniqueIdentifier>{313415e7-9497-4385-a6f8-15c627b4feb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="snip\icon">
+      <UniqueIdentifier>{6abe1eda-79e5-4f4a-af2e-4ce5d9c0ab77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
@@ -30,6 +36,9 @@
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="cosmos.cxx" />
+    <ClCompile Include="snip\icon\snowflakelet.cpp">
+      <Filter>snip\icon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -40,6 +49,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="cosmos.hxx" />
+    <ClInclude Include="snip\icon\snowflakelet.hpp">
+      <Filter>snip\icon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

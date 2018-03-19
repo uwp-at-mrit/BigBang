@@ -66,15 +66,15 @@ public:
     void update_powerinfo() {
         auto info = Battery::AggregateBattery->GetReport();
 		auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
-		Platform::String^ power = nullptr;
+		Platform::String^ power = speak(":power:");
 
 		if (maybe_remaining == nullptr) {
-			power = speak(":power:") + "100%";
+			power += "100%";
 		} else {
 			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
 			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
 
-			power = speak(":power:") + round((remaining / full) * 100.0F).ToString() + "%";
+			power += (round((remaining / full) * 100.0F).ToString() + "%");
 		}
 
 		this->powercapacity = make_text_layout(power, status_font);
@@ -82,7 +82,7 @@ public:
 
     void update_wifiinfo() {
         auto nics = NetworkInformation::GetConnectionProfiles();
-        Platform::String^ signal = speak("nowifi");
+        Platform::String^ signal = speak(":nowifi:");
 
         for (unsigned int i = 0; i < nics->Size; ++i) {
             auto nic = nics->GetAt(i);
@@ -102,7 +102,7 @@ public:
 
     void update_ipinfo() {
         auto names = NetworkInformation::GetHostNames();
-        Platform::String^ ipv4 = speak("noipv4");
+        Platform::String^ ipv4 = speak(":noipv4:");
 
         for (unsigned int i = 0; i < names->Size; ++i) {
             auto host = names->GetAt(i);
@@ -195,7 +195,7 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();
 	this->device = device;
 	this->caption = make_text_layout(speak(caption), status_font);
-	this->device_name = make_text_layout((this->device == nullptr) ? speak("unknown") : device->device_hostname(), status_font);
+	this->device_name = make_text_layout((this->device == nullptr) ? speak(":unknown:") : device->device_hostname(), status_font);
 }
 
 void Statusbarlet::construct() {
@@ -251,7 +251,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 
-			ds->DrawText(speak("connecting") + dots[idx], plc_x + status_prefix_width, context_y, Colors::Red, status_font);
+			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, Colors::Red, status_font);
 		}
 	}
 }

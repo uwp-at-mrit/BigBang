@@ -4,11 +4,9 @@
 #include "modbus.hpp"
 #include "command.hpp"
 
-#include "snip/togglet.hpp"
 #include "snip/textlet.hpp"
 #include "snip/statuslet.hpp"
-#include "snip/pumplet.hpp"
-#include "snip/gaugelet.hpp"
+#include "snip/iconlet.hpp"
 #include "snip/shapelet.hpp"
 
 namespace WarGrey::SCADA {
