@@ -9,9 +9,12 @@
 #include "paint.hpp"
 #include "turtle.hpp"
 
+#include "snip/icon/snowflakelet.hpp"
 #include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;
+
+using namespace Windows::UI;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -24,56 +27,57 @@ public:
 	AirController(AirConditioning* master) : workbench(master) {}
 
 public:
-	void load_controllers(float stepsize, float width, float height) {
-		Platform::String^ caption_suffix = speak("n_oilmpa");
+	void load_icons(float stepsize, float width, float height) {
+		this->stepsize = stepsize;
 
-		this->gauges[0] = new Gaugelet(speak("oilmpa"), 40);
-		this->workbench->insert(this->gauges[0]);
+		this->icons[0] = new Snowflakelet(stepsize * 4.0F);
+		this->workbench->insert(this->icons[0]);
 
-		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
-			this->gauges[i] = new Gaugelet(i.ToString() + caption_suffix, 40);
-			this->workbench->insert(this->gauges[i]);
+		for (size_t i = 0; i < SNIPS_ARITY(this->icons); i++) {
+			if (this->icons[i] != nullptr) {
+				this->workbench->insert(this->icons[i]);
+			}
 		}
 	}
 
 public:
-	void reflow_controllers(float vinset, float width, float height) {
-		float gauge_gapsize = 32.0F;
-		float gauge_x = 0.0F;
-		float gauge_y = vinset;
-		float snip_width, snip_height;
+	void reflow_icons(float vinset, float width, float height) {
+		size_t ic = SNIPS_ARITY(this->icons);
+		float gapsize = 32.0F;
+		float icon_x = 0.0F;
+		float icon_y = vinset;
+		float icon_width, icon_height;
 
-		this->gauges[0]->fill_extent(gauge_x, gauge_y, nullptr, &snip_height);
-		gauge_y = height - snip_height - vinset - vinset;
-		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
-			this->workbench->move_to(this->gauges[i], gauge_x, gauge_y);
-			this->gauges[i]->fill_extent(gauge_x, gauge_y, &snip_width);
-			gauge_x += (snip_width + gauge_gapsize);
+		this->icons[0]->fill_extent(icon_x, icon_y, &icon_width, &icon_height);
+		icon_x = (width - icon_width * float(ic) - gapsize * float(ic - 1)) * 0.5F;
+		icon_y = vinset + icon_height;
+
+		for (size_t i = 0; i < ic; i++) {
+			this->workbench->move_to(this->icons[i], icon_x, icon_y);
+			icon_x += (icon_width + gapsize);
 		}
-
-		this->workbench->move_to(this->gauges[0], gauge_x, gauge_y);
 	}
 
 public:
 	void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime) override {
-		device->read_input_registers(0, SNIPS_ARITY(this->gauges));
+		device->read_input_registers(0, SNIPS_ARITY(this->icons));
 	}
 
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		float Mpa = 0.0F;
 		
-		this->workbench->enter_critical_section();
+		//this->workbench->enter_critical_section();
 		
-		for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
-			float mpa = float(register_values[i]) * 0.1F;
+		//for (size_t i = 1; i < SNIPS_ARITY(this->gauges); i++) {
+		//	float mpa = float(register_values[i]) * 0.1F;
 
-			Mpa = Mpa + mpa;
-			this->gauges[i]->set_scale(mpa);
-		}
+		//	Mpa = Mpa + mpa;
+		//	this->gauges[i]->set_scale(mpa);
+		//}
 
-		this->gauges[0]->set_scale(Mpa);
+		//this->gauges[0]->set_scale(Mpa);
 
-		this->workbench->leave_critical_section();
+		//this->workbench->leave_critical_section();
 	}
 
 	void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, Syslog* logger) override {
@@ -82,12 +86,7 @@ public:
 
 // never deletes these snips mannually
 private:
-	Gaugelet* gauges[7];
-	Pumplet* hpumps[2];
-	Pumplet* wpumps[2];
-	Tracklet* filter_line;
-	Tracklet* hp_line;
-	Tracklet* wp_line;
+	Iconlet* icons[5];
 
 private:
 	AirConditioning* workbench;
@@ -124,8 +123,8 @@ private:
 	Statuslinelet* statusline;
 };
 
-AirConditioning::AirConditioning(Platform::String^ plc) : Planet(":hpc:") {
-	Syslog* alarm = make_system_logger(default_logging_level, "HPC");
+AirConditioning::AirConditioning(Platform::String^ plc) : Planet(":ac:") {
+	Syslog* alarm = make_system_logger(default_logging_level, "AC");
 	AirController* console = new AirController(this);
 
 	this->console = console;
@@ -147,11 +146,11 @@ void AirConditioning::load(CanvasCreateResourcesReason reason, float width, floa
 	
 	if (console != nullptr) {
 		float vinset = statusbar_height();
-		float stepsize = 16.0F;
+		float stepsize = vinset;
 
 		{ // load snips
 			this->change_mode(HPCMode::View);
-			console->load_controllers(stepsize, width, height);
+			console->load_icons(stepsize, width, height);
 
 			this->change_mode(HPCMode::Control);
 
@@ -179,16 +178,15 @@ void AirConditioning::reflow(float width, float height) {
 	auto console = dynamic_cast<AirController*>(this->console);
 	
 	if (console != nullptr) {
-		float vinset;
+		float vinset = statusbar_height();
 
 		this->change_mode(HPCMode::WindowUI);
-		this->statusbar->fill_extent(0.0F, 0.0F, nullptr, &vinset);
-		this->move_to(this->statusline, 0.0F, height - vinset);
+		this->move_to(this->statusline, 0.0F, height, SnipCenterPoint::LB);
 		
 		this->change_mode(HPCMode::Control);
 
 		this->change_mode(HPCMode::View);
-		console->reflow_controllers(vinset, width, height);
+		console->reflow_icons(vinset, width, height);
 	}
 }
 

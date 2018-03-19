@@ -56,3 +56,6 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ double_arrow(
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ double_arrow(
 	float length, float arrowhead_size = 4.0F, float spacing = -1.0F, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float length, float radius);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float x, float y, float length, float radius);

@@ -106,7 +106,6 @@ CanvasGeometry^ triangle(float r, double d) {
 	return CanvasGeometry::CreatePath(equilateral_triangle);
 }
 
-
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {
     return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h));
 }
@@ -166,4 +165,24 @@ CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size
 
 CanvasGeometry^ double_arrow(float arrow_size, float arrowhead_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
 	return double_arrow(0.0F, 0.0F, arrow_size, arrowhead_size, spacing, thickness, style);
+}
+
+Geometry::CanvasGeometry^ stadium(float length, float radius) {
+	return stadium(0.0F, 0.0F, length, radius);
+}
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float x, float y, float length, float radius) {
+	auto discorectangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float lx = x + radius;
+	float rx = lx + length;
+	float by = y + radius + radius;
+
+	discorectangle->BeginFigure(lx, y);
+	discorectangle->AddLine(rx, y);
+	discorectangle->AddArc(float2(rx, by), radius, radius, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
+	discorectangle->AddLine(lx, by);
+	discorectangle->AddArc(float2(lx, y), radius, radius, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
+	discorectangle->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(discorectangle);
 }
