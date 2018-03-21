@@ -4,6 +4,9 @@
 #include "syslog/receiver/racket.hpp"
 #include "syslog/receiver/vstudio.hpp"
 
+void set_default_logger_topic(Platform::String^ topic = "WinSCADA");
+void set_default_racket_receiver_host(Platform::String^ ipv4);
+
 WarGrey::SCADA::Syslog* default_logger();
 WarGrey::SCADA::Syslog* make_silent_logger(Platform::String^ topic);
 WarGrey::SCADA::Syslog* make_system_logger(WarGrey::SCADA::Log level, Platform::String^ topic);

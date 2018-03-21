@@ -1,4 +1,4 @@
-﻿#include "page/airconditioning.hpp"
+﻿#include "page/hp_setting.hpp"
 #include "configuration.hpp"
 
 #include "tongue.hpp"

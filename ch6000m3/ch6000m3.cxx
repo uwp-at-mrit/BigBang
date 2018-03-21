@@ -1,4 +1,5 @@
 ﻿#include "cosmos.hxx"
+#include "configuration.hpp"
 
 #include "syslog.hpp"
 #include "system.hpp"
@@ -19,7 +20,7 @@ using namespace Windows::System::UserProfile;
 namespace WarGrey::SCADA {
     typedef EventHandler<UnhandledErrorDetectedEventArgs^> UncaughtExceptionHandler;
 
-    private ref class Yacht sealed : public Application {
+    private ref class CH6000M3 sealed : public Application {
     protected:
         void YachtMain(ApplicationView^ self, FrameworkElement^ screen) {
 			ApplicationLanguages::PrimaryLanguageOverride = GlobalizationPreferences::Languages->GetAt(0);
@@ -27,12 +28,14 @@ namespace WarGrey::SCADA {
 			ApplicationView::PreferredLaunchViewSize = system_screen_size();
 
 			CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false; // Force Using the default TitleBar.
-			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &Yacht::OnUncaughtException);
+			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &CH6000M3::OnUncaughtException);
 			
-			this->Suspending += ref new SuspendingEventHandler(this, &Yacht::OnSuspending);
+			this->Suspending += ref new SuspendingEventHandler(this, &CH6000M3::OnSuspending);
             this->RequestedTheme = ApplicationTheme::Dark;
 
             self->Title = screen->ToString();
+
+			set_default_racket_receiver_host(remote_test_server);
         }
 
         void OnLaunched(LaunchActivatedEventArgs^ e) override {
@@ -79,6 +82,6 @@ namespace WarGrey::SCADA {
 }
 
 int main(Platform::Array<Platform::String^>^ args) {
-	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::Yacht(); };
+	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::CH6000M3(); };
     Application::Start(ref new ApplicationInitializationCallback(lazy_main));
 }

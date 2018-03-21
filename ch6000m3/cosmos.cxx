@@ -3,7 +3,7 @@
 #include "timer.hxx"
 #include "configuration.hpp"
 
-#include "page/airconditioning.hpp"
+#include "page/hp_setting.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,9 +25,7 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new AirConditioning("192.168.1.135"));
-		// this->add_planet(new AirConditioning("192.168.2.166"));
-		// this->add_planet(new AirConditioning("192.168.8.114"));
+		this->add_planet(new AirConditioning(remote_test_server));
 	}
 
 private:
@@ -46,7 +44,7 @@ Cosmos::Cosmos() : SplitView() {
 }
 
 void Cosmos::initialize_component(Size region) {
-	this->universe = ref new Universe("Ch6000m3");
+	this->universe = ref new Universe("CH6000M3");
 	this->Content = this->universe->canvas;
 	this->Pane = this->universe->navigator;
 

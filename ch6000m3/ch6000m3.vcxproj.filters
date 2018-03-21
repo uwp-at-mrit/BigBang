@@ -21,12 +21,12 @@
   <ItemGroup>
     <ClCompile Include="cosmos.cxx" />
     <ClCompile Include="ch6000m3.cxx" />
-    <ClCompile Include="page\airconditioning.cpp" />
+    <ClCompile Include="page\hp_setting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cosmos.hxx" />
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="page\airconditioning.hpp" />
+    <ClInclude Include="page\hp_setting.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

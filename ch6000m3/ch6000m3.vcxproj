@@ -208,12 +208,12 @@
   <ItemGroup>
     <ClCompile Include="cosmos.cxx" />
     <ClCompile Include="ch6000m3.cxx" />
-    <ClCompile Include="page\airconditioning.cpp" />
+    <ClCompile Include="page\hp_setting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="cosmos.hxx" />
-    <ClInclude Include="page\airconditioning.hpp" />
+    <ClInclude Include="page\hp_setting.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

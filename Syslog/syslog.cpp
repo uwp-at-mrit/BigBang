@@ -3,11 +3,24 @@
 
 using namespace WarGrey::SCADA;
 
+static Platform::String^ default_racket_receiver_host = "172.16.1.1";
+static Platform::String^ default_logger_topic = "WinSCADA";
+
+
+void set_default_logger_topic(Platform::String^ topic) {
+	default_logger_topic = topic;
+}
+
+void set_default_racket_receiver_host(Platform::String^ ipv4) {
+	default_racket_receiver_host = ipv4;
+}
+
+/*************************************************************************************************/
 ISyslogReceiver* default_racket_receiver() {
 	static ISyslogReceiver* rsyslog;
 
 	if (rsyslog == nullptr) {
-		rsyslog = new RacketReceiver("172.16.1.1", 18030, Log::Debug);
+		rsyslog = new RacketReceiver(default_racket_receiver_host, 18030, Log::Debug);
 		rsyslog->reference();
 	}
 
@@ -18,7 +31,7 @@ Syslog* default_logger() {
 	static Syslog* winlog;
 
 	if (winlog == nullptr) {
-		winlog = make_logger(Log::Debug, "WinSCADA", nullptr);
+		winlog = make_logger(Log::Debug, default_logger_topic, nullptr);
 		winlog->append_log_receiver(default_racket_receiver());
 		winlog->append_log_receiver(new VisualStudioReceiver());
 		winlog->reference();
