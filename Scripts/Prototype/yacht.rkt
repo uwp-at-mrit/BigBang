@@ -34,6 +34,11 @@
     (cons (+ x-start (* (- (real-part p) x0) x-ratio))
           (- y-start (* (- (imag-part p) y0) y-ratio)))))
 
+(define make-vertex-array
+  (lambda [nodes]
+    (define array (glGenVertexArrays 1))
+    (void)))
+
 (define compute-curve-points
   (lambda [src samples pt-transform]
     (define-values (point others) (values (car src) (cdr src)))
