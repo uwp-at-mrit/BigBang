@@ -9,7 +9,6 @@ using namespace Windows::UI;
 using namespace Windows::System;
 using namespace Microsoft::Graphics::Canvas;
 
-static const size_t box_size = sizeof(float) * 4;
 static const long long numpad_tap_duration = 3000000LL;
 
 static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, float gapsize) {
@@ -43,9 +42,9 @@ void Keyboard::construct() {
 		delete [] this->cell_boxes;
 	}
 
-	this->cell_boxes = new Rect[box_size];
-	for (size_t i = 0; i < keynum; i++) {
-		fill_cellbox(this->cell_boxes[i * box_size], this->cells[i], cellsize, gapsize);
+	this->cell_boxes = new Rect[this->keynum];
+	for (size_t i = 0; i < this->keynum; i++) {
+		fill_cellbox(this->cell_boxes[i], this->cells[i], cellsize, gapsize);
 	}
 }
 
@@ -67,7 +66,7 @@ void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	this->draw_before(ds, x, y, Width, Height);
 
 	for (unsigned char i = 0; i < this->keynum; i++) {
-		Rect box = this->cell_boxes[box_size * i];
+		Rect box = this->cell_boxes[i];
 
 		VirtualKey key = this->cells[i].key;
 		float cx = x + box.X;
@@ -101,7 +100,7 @@ VirtualKey Keyboard::find_tapped_key(float mouse_x, float mouse_y) {
 	VirtualKey found = VirtualKey::None;
 
 	for (unsigned char i = 0; i < this->keynum; i++) {
-		Rect box = this->cell_boxes[i * box_size];
+		Rect box = this->cell_boxes[i];
 		float cx = box.X;
 		float cy = box.Y;
 		float cwidth = box.Width;

@@ -144,8 +144,8 @@
   <data name=":wifi:" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name=":ac:" xml:space="preserve">
-    <value>船用空调</value>
+  <data name=":hps:" xml:space="preserve">
+    <value>液压泵单动</value>
   </data>
   <data name=":unknown:" xml:space="preserve">
     <value>未使用</value>

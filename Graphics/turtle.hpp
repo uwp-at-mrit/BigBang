@@ -8,7 +8,7 @@
 namespace WarGrey::SCADA {
 	private class Turtle final : public WarGrey::SCADA::SharedObject {
 	public:
-		Turtle(float stepsize, int start_anchor_id = -1);
+		Turtle(float stepsize, bool big_turn = false, int start_anchor_id = -1);
 
 	public:
 		void clear();

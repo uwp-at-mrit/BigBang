@@ -9,10 +9,10 @@
 #include "snip/shapelet.hpp"
 
 namespace WarGrey::SCADA {
-	private class AirConditioning : public WarGrey::SCADA::Planet {
+	private class HPSingle : public WarGrey::SCADA::Planet {
 	public:
-		~AirConditioning() noexcept;
-		AirConditioning(Platform::String^ plc);
+		~HPSingle() noexcept;
+		HPSingle(Platform::String^ plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -28,5 +28,8 @@ namespace WarGrey::SCADA {
 	private: // never deletes these snips mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
+
+	private:
+		float gridsize;
 	};
 }

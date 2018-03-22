@@ -13,7 +13,8 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 /*************************************************************************************************/
-Turtle::Turtle(float stepsize, int start_anchor) : stepsize(stepsize), tradius(stepsize * 0.5F), x(0.0F), y(0.0F) {
+Turtle::Turtle(float stepsize, bool big_turn, int start_anchor)
+	: stepsize(stepsize), tradius(stepsize * (big_turn ? 1.0F : 0.5F)), x(0.0F), y(0.0F) {
 	this->do_rebuild();
 	this->do_anchor(start_anchor);
 }

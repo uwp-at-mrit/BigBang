@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 
     private ref class CH6000M3 sealed : public Application {
     protected:
-        void YachtMain(ApplicationView^ self, FrameworkElement^ screen) {
+        void AppMain(ApplicationView^ self, FrameworkElement^ screen) {
 			ApplicationLanguages::PrimaryLanguageOverride = GlobalizationPreferences::Languages->GetAt(0);
 			ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
 			ApplicationView::PreferredLaunchViewSize = system_screen_size();
@@ -44,7 +44,7 @@ namespace WarGrey::SCADA {
 
             if (screen == nullptr) {
                 screen = ref new Cosmos();
-                this->YachtMain(self, screen);
+                this->AppMain(self, screen);
             
                 if (e->PreviousExecutionState == ApplicationExecutionState::Terminated) {
                     // TODO: Restore the saved session state only when appropriate, scheduling the

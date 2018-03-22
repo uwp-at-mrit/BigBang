@@ -3,7 +3,7 @@
 #include "timer.hxx"
 #include "configuration.hpp"
 
-#include "page/hp_setting.hpp"
+#include "page/hp_single.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,7 +25,7 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new AirConditioning(remote_test_server));
+		this->add_planet(new HPSingle(remote_test_server));
 	}
 
 private:

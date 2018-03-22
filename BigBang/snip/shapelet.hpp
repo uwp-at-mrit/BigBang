@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 		~Tracklet() noexcept;
 
 		Tracklet(WarGrey::SCADA::Turtle* turtle, float thickness = 1.0F,
-			Windows::UI::Color& color = Windows::UI::Colors::Azure);
+			Windows::UI::Color& color = Windows::UI::Colors::Silver);
 
 	public:
 		void fill_anchor_location(int node, float* x, float* y);

@@ -144,8 +144,8 @@
   <data name=":wifi:" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name=":ac:" xml:space="preserve">
-    <value>Air Conditioning</value>
+  <data name=":hps:" xml:space="preserve">
+    <value>H.P Single</value>
   </data>
   <data name=":unknown:" xml:space="preserve">
     <value>Unknown</value>
