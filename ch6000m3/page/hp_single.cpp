@@ -31,7 +31,7 @@ public:
 	HPS(HPSingle* master) : workbench(master) {}
 
 public:
-	void load_pipelines(float width, float height, float gridsize) {
+	void load_pump_station(float width, float height, float gridsize) {
 		Turtle<HPSlot>* pump_station = new Turtle<HPSlot>(gridsize, true, HPSlot::SQ1);
 
 		pump_station->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
@@ -57,11 +57,11 @@ public:
 		}
 	}
 
-	void reflow_pipelines(float width, float height, float stepsize, float vinset) {
-		float w, h;
+	void reflow_pump_station(float width, float height, float stepsize, float vinset) {
+		float station_width, station_height;
 
-		this->stations[0]->fill_extent(0.0F, 0.0F, &w, &h);
-		this->workbench->move_to(this->stations[0], (width - w) * 0.5F, (height - h) * 0.5F);
+		this->stations[0]->fill_extent(0.0F, 0.0F, &station_width, &station_height);
+		this->workbench->move_to(this->stations[0], (width - station_width) * 0.5F, (height - station_height) * 0.5F);
 	}
 
 public:
@@ -155,7 +155,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 
 		{ // load snips
 			this->change_mode(HPSMode::View);
-			console->load_pipelines(width, height, this->gridsize);
+			console->load_pump_station(width, height, this->gridsize);
 
 			this->change_mode(HPSMode::Control);
 
@@ -191,7 +191,7 @@ void HPSingle::reflow(float width, float height) {
 		this->change_mode(HPSMode::Control);
 
 		this->change_mode(HPSMode::View);
-		console->reflow_pipelines(width, height, this->gridsize, vinset);
+		console->reflow_pump_station(width, height, this->gridsize, vinset);
 	}
 }
 
