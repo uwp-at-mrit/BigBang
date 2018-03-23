@@ -21,22 +21,54 @@ namespace WarGrey::SCADA {
 		Turtle* jump_right(int step = 1, int anchor_id = -1);
 		Turtle* jump_down(int step = 1, int anchor_id = -1);
 		Turtle* jump_left(int step = 1, int anchor_id = -1);
+		Turtle* jump_up_right(int step = 1, int anchor_id = -1);
+		Turtle* jump_right_up(int step = 1, int anchor_id = -1);
+		Turtle* jump_right_down(int step = 1, int anchor_id = -1);
+		Turtle* jump_down_right(int step = 1, int anchor_id = -1);
+		Turtle* jump_down_left(int step = 1, int anchor_id = -1);
+		Turtle* jump_left_down(int step = 1, int anchor_id = -1);
+		Turtle* jump_left_up(int step = 1, int anchor_id = -1);
+		Turtle* jump_up_left(int step = 1, int anchor_id = -1);
 
 		Turtle* jump_up(float step, int anchor_id = -1);
 		Turtle* jump_right(float step, int anchor_id = -1);
 		Turtle* jump_down(float step, int anchor_id = -1);
 		Turtle* jump_left(float step, int anchor_id = -1);
+		Turtle* jump_up_right(float step, int anchor_id = -1);
+		Turtle* jump_right_up(float step, int anchor_id = -1);
+		Turtle* jump_right_down(float step, int anchor_id = -1);
+		Turtle* jump_down_right(float step, int anchor_id = -1);
+		Turtle* jump_down_left(float step, int anchor_id = -1);
+		Turtle* jump_left_down(float step, int anchor_id = -1);
+		Turtle* jump_left_up(float step, int anchor_id = -1);
+		Turtle* jump_up_left(float step, int anchor_id = -1);
 
 	public:
 		Turtle* move_up(int step = 1, int anchor_id = -1);
 		Turtle* move_right(int step = 1, int anchor_id = -1);
 		Turtle* move_down(int step = 1, int anchor_id = -1);
 		Turtle* move_left(int step = 1, int anchor_id = -1);
+		Turtle* move_up_right(int step = 1, int anchor_id = -1);
+		Turtle* move_right_up(int step = 1, int anchor_id = -1);
+		Turtle* move_right_down(int step = 1, int anchor_id = -1);
+		Turtle* move_down_right(int step = 1, int anchor_id = -1);
+		Turtle* move_down_left(int step = 1, int anchor_id = -1);
+		Turtle* move_left_down(int step = 1, int anchor_id = -1);
+		Turtle* move_left_up(int step = 1, int anchor_id = -1);
+		Turtle* move_up_left(int step = 1, int anchor_id = -1);
 
 		Turtle* move_up(float step, int anchor_id = -1);
 		Turtle* move_right(float step, int anchor_id = -1);
 		Turtle* move_down(float step, int anchor_id = -1);
 		Turtle* move_left(float step, int anchor_id = -1);
+		Turtle* move_up_right(float step, int anchor_id = -1);
+		Turtle* move_right_up(float step, int anchor_id = -1);
+		Turtle* move_right_down(float step, int anchor_id = -1);
+		Turtle* move_down_right(float step, int anchor_id = -1);
+		Turtle* move_down_left(float step, int anchor_id = -1);
+		Turtle* move_left_down(float step, int anchor_id = -1);
+		Turtle* move_left_up(float step, int anchor_id = -1);
+		Turtle* move_up_left(float step, int anchor_id = -1);
 
 	public:
 		Turtle* turn_down_left(int anchor_id = -1);

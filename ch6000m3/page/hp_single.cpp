@@ -26,8 +26,8 @@ public:
 	HPS(HPSingle* master) : workbench(master) {}
 
 public:
-	void load_pipelines(float stepsize, float width, float height) {
-		Turtle* oil_line = new Turtle(stepsize, true);
+	void load_pipelines(float width, float height, float gridsize) {
+		Turtle* oil_line = new Turtle(gridsize, true);
 
 		oil_line->move_left(2)->move_up(2)->move_right(2)->jump_left(2);
 		oil_line->move_up(2)->move_right(2)->jump_left(2);
@@ -53,7 +53,7 @@ public:
 		}
 	}
 
-	void reflow_pipelines(float stepsize, float vinset, float width, float height) {
+	void reflow_pipelines(float width, float height, float stepsize, float vinset) {
 		float w, h;
 
 		this->pipelines[1]->fill_extent(0.0F, 0.0F, &w, &h);
@@ -152,7 +152,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 
 		{ // load snips
 			this->change_mode(HPSMode::View);
-			console->load_pipelines(this->gridsize, width, height);
+			console->load_pipelines(width, height, this->gridsize);
 
 			this->change_mode(HPSMode::Control);
 
@@ -188,7 +188,7 @@ void HPSingle::reflow(float width, float height) {
 		this->change_mode(HPSMode::Control);
 
 		this->change_mode(HPSMode::View);
-		console->reflow_pipelines(this->gridsize, vinset, width, height);
+		console->reflow_pipelines(width, height, this->gridsize, vinset);
 	}
 }
 

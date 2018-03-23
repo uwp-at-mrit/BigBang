@@ -60,39 +60,260 @@ Turtle* Turtle::jump_up(int step, int id) { return this->jump_up(float(step), id
 Turtle* Turtle::jump_right(int step, int id) { return this->jump_right(float(step), id); }
 Turtle* Turtle::jump_down(int step, int id) { return this->jump_down(float(step), id); }
 Turtle* Turtle::jump_left(int step, int id) { return this->jump_left(float(step), id); }
+Turtle* Turtle::jump_up_right(int step, int id) { return this->jump_up_right(float(step), id); }
+Turtle* Turtle::jump_right_up(int step, int id) { return this->jump_up_right(float(step), id); }
+Turtle* Turtle::jump_right_down(int step, int id) { return this->jump_right_down(float(step), id); }
+Turtle* Turtle::jump_down_right(int step, int id) { return this->jump_right_down(float(step), id); }
+Turtle* Turtle::jump_down_left(int step, int id) { return this->jump_down_left(float(step), id); }
+Turtle* Turtle::jump_left_down(int step, int id) { return this->jump_down_left(float(step), id); }
+Turtle* Turtle::jump_left_up(int step, int id) { return this->jump_left_up(float(step), id); }
+Turtle* Turtle::jump_up_left(int step, int id) { return this->jump_left_up(float(step), id); }
+Turtle* Turtle::jump_right_up(float step, int id) { return this->jump_up_right(step, id); }
+Turtle* Turtle::jump_down_right(float step, int id) { return this->jump_right_down(step, id); }
+Turtle* Turtle::jump_left_down(float step, int id) { return this->jump_down_left(step, id); }
+Turtle* Turtle::jump_up_left(float step, int id) { return this->jump_left_up(step, id); }
 
-Turtle* Turtle::jump_up(float step, int id) { this->y -= (this->stepsize * step); return do_jump(id); }
-Turtle* Turtle::jump_right(float step, int id) { this->x += (this->stepsize * step); return do_jump(id); }
-Turtle* Turtle::jump_down(float step, int id) { this->y += (this->stepsize * step); return do_jump(id); }
-Turtle* Turtle::jump_left(float step, int id) { this->x -= (this->stepsize * step); return do_jump(id); }
-
-Turtle* Turtle::move_up(int step, int id)    { return this->move_up(float(step), id); }
+Turtle* Turtle::move_up(int step, int id) { return this->move_up(float(step), id); }
 Turtle* Turtle::move_right(int step, int id) { return this->move_right(float(step), id); }
-Turtle* Turtle::move_down(int step, int id)  { return this->move_down(float(step), id); }
-Turtle* Turtle::move_left(int step, int id)  { return this->move_left(float(step), id); }
+Turtle* Turtle::move_down(int step, int id) { return this->move_down(float(step), id); }
+Turtle* Turtle::move_left(int step, int id) { return this->move_left(float(step), id); }
+Turtle* Turtle::move_up_right(int step, int id) { return this->move_up_right(float(step), id); }
+Turtle* Turtle::move_right_up(int step, int id) { return this->move_up_right(float(step), id); }
+Turtle* Turtle::move_right_down(int step, int id) { return this->move_right_down(float(step), id); }
+Turtle* Turtle::move_down_right(int step, int id) { return this->move_right_down(float(step), id); }
+Turtle* Turtle::move_down_left(int step, int id) { return this->move_down_left(float(step), id); }
+Turtle* Turtle::move_left_down(int step, int id) { return this->move_down_left(float(step), id); }
+Turtle* Turtle::move_left_up(int step, int id) { return this->move_left_up(float(step), id); }
+Turtle* Turtle::move_up_left(int step, int id) { return this->move_left_up(float(step), id); }
+Turtle* Turtle::move_right_up(float step, int id) { return this->move_up_right(step, id); }
+Turtle* Turtle::move_down_right(float step, int id) { return this->move_right_down(step, id); }
+Turtle* Turtle::move_left_down(float step, int id) { return this->move_down_left(step, id); }
+Turtle* Turtle::move_up_left(float step, int id) { return this->move_left_up(step, id); }
 
-Turtle* Turtle::move_up(float step, int id)    { this->y -= (this->stepsize * step); return do_move(id); }
-Turtle* Turtle::move_right(float step, int id) { this->x += (this->stepsize * step); return do_move(id); }
-Turtle* Turtle::move_down(float step, int id)  { this->y += (this->stepsize * step); return do_move(id); }
-Turtle* Turtle::move_left(float step, int id)  { this->x -= (this->stepsize * step); return do_move(id); }
+Turtle* Turtle::jump_up(float step, int id) {
+	this->y -= (this->stepsize * step);
+	
+	return this->do_jump(id);
+}
 
-Turtle* Turtle::turn_down_left(int id)  { this->x -= this->tradius; this->y += this->tradius; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_left_down(int id)  { this->x -= this->tradius; this->y += this->tradius; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_down_right(int id) { this->x += this->tradius; this->y += this->tradius; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_right_down(int id) { this->x += this->tradius; this->y += this->tradius; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_left_up(int id)    { this->x -= this->tradius; this->y -= this->tradius; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_up_left(int id)    { this->x -= this->tradius; this->y -= this->tradius; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_right_up(int id)   { this->x += this->tradius; this->y -= this->tradius; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_up_right(int id)   { this->x += this->tradius; this->y -= this->tradius; return this->do_clockwise_turn(id); }
+Turtle* Turtle::jump_right(float step, int id) {
+	this->x += (this->stepsize * step);
+	
+	return this->do_jump(id);
+}
 
-Turtle* Turtle::turn_down_left_up(int id)    { this->x -= this->stepsize; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_down_right_up(int id)   { this->x += this->stepsize; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_up_left_down(int id)    { this->x -= this->stepsize; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_up_right_down(int id)   { this->x += this->stepsize; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_left_down_right(int id) { this->y += this->stepsize; return this->do_counterclockwise_turn(id); }
-Turtle* Turtle::turn_left_up_right(int id)   { this->y -= this->stepsize; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_right_down_left(int id) { this->y += this->stepsize; return this->do_clockwise_turn(id); }
-Turtle* Turtle::turn_right_up_left(int id)   { this->y -= this->stepsize; return this->do_counterclockwise_turn(id); }
+Turtle* Turtle::jump_down(float step, int id) {
+	this->y += (this->stepsize * step);
+	
+	return this->do_jump(id);
+}
+
+Turtle* Turtle::jump_left(float step, int id) {
+	this->x -= (this->stepsize * step);
+	
+	return this->do_jump(id);
+}
+
+
+Turtle* Turtle::jump_up_right(float step, int id) {
+	float _ = (this->stepsize * step);
+
+	this->x += _;
+	this->y -= _;
+
+	return this->do_jump(id);
+}
+
+Turtle* Turtle::jump_right_down(float step, int id) {
+	float _ = (this->stepsize * step);
+
+	this->x += _;
+	this->y += _;
+
+	return this->do_jump(id);
+}
+
+Turtle* Turtle::jump_down_left(float step, int id) {
+	float _ = (this->stepsize * step);
+
+	this->x -= _;
+	this->y += _;
+
+	return this->do_jump(id);
+}
+
+Turtle* Turtle::jump_left_up(float step, int id) {
+	float _ = (this->stepsize * step);
+
+	this->x -= _;
+	this->y -= _;
+
+	return this->do_jump(id);
+}
+
+Turtle* Turtle::move_up(float step, int id) {
+	this->y -= (this->stepsize * step);
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_right(float step, int id) {
+	this->x += (this->stepsize * step);
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_down(float step, int id) {
+	this->y += (this->stepsize * step);
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_left(float step, int id) {
+	this->x -= (this->stepsize * step);
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_up_right(float step, int id) {
+	float _ = (this->stepsize * step);
+
+	this->x += _;
+	this->y -= _;
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_right_down(float step, int id) {
+	float _ = (this->stepsize * step);
+	
+	this->x += _;
+	this->y += _;
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_down_left(float step, int id) {
+	float _ = (this->stepsize * step);
+	
+	this->x -= _;
+	this->y += _;
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::move_left_up(float step, int id) {
+	float _ = (this->stepsize * step);
+	
+	this->x -= _;
+	this->y -= _;
+	
+	return this->do_move(id);
+}
+
+Turtle* Turtle::turn_down_left(int id) {
+	this->x -= this->tradius;
+	this->y += this->tradius;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_left_down(int id) {
+	this->x -= this->tradius;
+	this->y += this->tradius;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_down_right(int id) {
+	this->x += this->tradius;
+	this->y += this->tradius;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_right_down(int id) {
+	this->x += this->tradius;
+	this->y += this->tradius;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_left_up(int id) {
+	this->x -= this->tradius;
+	this->y -= this->tradius;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_up_left(int id) {
+	this->x -= this->tradius;
+	this->y -= this->tradius;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_right_up(int id) {
+	this->x += this->tradius;
+	this->y -= this->tradius;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_up_right(int id) {
+	this->x += this->tradius;
+	this->y -= this->tradius;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_down_left_up(int id) {
+	this->x -= this->stepsize;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_down_right_up(int id) {
+	this->x += this->stepsize;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_up_left_down(int id) {
+	this->x -= this->stepsize;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_up_right_down(int id) {
+	this->x += this->stepsize;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_left_down_right(int id) {
+	this->y += this->stepsize;
+	
+	return this->do_counterclockwise_turn(id);
+}
+
+Turtle* Turtle::turn_left_up_right(int id) {
+	this->y -= this->stepsize;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_right_down_left(int id) {
+	this->y += this->stepsize;
+	
+	return this->do_clockwise_turn(id);
+}
+
+Turtle* Turtle::turn_right_up_left(int id) {
+	this->y -= this->stepsize;
+	
+	return this->do_counterclockwise_turn(id);
+}
 
 void Turtle::do_rebuild() {
 	this->moved = false;

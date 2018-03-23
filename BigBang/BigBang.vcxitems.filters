@@ -4,36 +4,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp">
       <Filter>decorator</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp">
-      <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)universe.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp">
       <Filter>decorator</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp">
-      <Filter>snip</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp">
-      <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp">
       <Filter>virtualization</Filter>
@@ -41,13 +20,34 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pumplet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\alarmlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\gaugelet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)snip\iconlet.cpp" />
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\motorlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\pumplet.cpp">
       <Filter>snip</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\iconlet.cpp" />
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\statuslet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\textlet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\togglet.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\snip\snip.cpp">
+      <Filter>snip</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -57,36 +57,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\border.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp">
-      <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)universe.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)sprite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp">
-      <Filter>snip</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp">
-      <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\keyboard.hpp">
       <Filter>virtualization</Filter>
@@ -94,12 +73,33 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp">
       <Filter>virtualization</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pumplet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\alarmlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\gaugelet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)snip\iconlet.hpp" />
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\motorlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\pumplet.hpp">
       <Filter>snip</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)snip\shapelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\iconlet.hpp" />
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\statuslet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\textlet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\togglet.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\snip\snip.hpp">
+      <Filter>snip</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
