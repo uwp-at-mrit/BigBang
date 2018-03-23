@@ -35,18 +35,21 @@ public:
 		Turtle<HPSlot>* pump_station = new Turtle<HPSlot>(gridsize, true, HPSlot::SQ1);
 
 		pump_station->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
-		pump_station->move_down(4)->move_right(3, HPSlot::SQf)->move_right(4, HPSlot::F)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQc)->move_right(4, HPSlot::C)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQd)->move_right(4, HPSlot::D)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQe)->move_right(4, HPSlot::E)->move_right(3)->move_up(30);
-		pump_station->turn_up_left()->move_left(24)->turn_left_down()->move_down(1.5F, HPSlot::F001)->move_down(1.5F);
-		pump_station->jump_up(3)->turn_up_left()->move_left(18)->turn_left_down()->move_down(17);
-		pump_station->move_down(4)->move_right(3, HPSlot::A)->move_right(4, HPSlot::SQa)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::B)->move_right(4, HPSlot::SQb)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::G)->move_right(4, HPSlot::SQg)->move_right(3)->jump_left(10);
-		pump_station->move_down(3)->move_right(3, HPSlot::H)->move_right(4, HPSlot::SQh)->move_right(3)->move_up(16);
+		pump_station->move_down(4)->move_right(3, HPSlot::SQf)->move_right(6, HPSlot::F)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQc)->move_right(6, HPSlot::C)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQd)->move_right(6, HPSlot::D)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQe)->move_right(6, HPSlot::E)->move_right(3)->move_up(30);
+		pump_station->turn_up_left()->move_left(26)->turn_left_down()->move_down(1.5F, HPSlot::F001)->move_down(1.5F);
+		pump_station->jump_up(3)->turn_up_left()->move_left(20)->turn_left_down()->move_down(17);
+		pump_station->move_down(4)->move_right(3, HPSlot::A)->move_right(6, HPSlot::SQa)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::B)->move_right(6, HPSlot::SQb)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::G)->move_right(6, HPSlot::SQg)->move_right(3)->jump_left(12);
+		pump_station->move_down(3)->move_right(3, HPSlot::H)->move_right(6, HPSlot::SQh)->move_right(3)->move_up(16);
 		pump_station->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPSlot::SQ2);
 		pump_station->jump_right(8, HPSlot::SQ3)->move_down()->turn_down_right()->move_right(8);
+		pump_station->move_right(3, HPSlot::SQk)->move_right(3)->turn_right_up();
+		pump_station->move_up(8, HPSlot::K)->move_up(5)->jump_left(7);
+		pump_station->move_down(5, HPSlot::Y)->move_down(4, HPSlot::SQy)->move_down(5);
 
 		this->stations[0] = new Tracklet<HPSlot>(pump_station, 1.5F, Colors::Goldenrod);
 

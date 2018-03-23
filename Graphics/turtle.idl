@@ -59,6 +59,12 @@ namespace WarGrey::SCADA {
         }
 
 	public:
+	WarGrey::SCADA::Turtle<Anchor>* jump_to(Anchor id) {
+		this->fill_anchor_location(id, &this->x, &this->y);
+
+		return do_jump(Anchor::_);
+	}
+
 	WarGrey::SCADA::Turtle<Anchor>* jump_up(int step = 1, Anchor id = Anchor::_) {
 		return this->jump_up(float(step), id);
 	}
@@ -248,12 +254,6 @@ namespace WarGrey::SCADA {
 		this->y -= _;
 
 		return this->do_jump(id);
-	}
-
-	WarGrey::SCADA::Turtle<Anchor>* jump_to_anchor(Anchor id = Anchor::_) {
-		this->fill_anchor_location(id, &this->x, &this->y);
-
-		return do_jump(-1);
 	}
 
 	public:
