@@ -26,7 +26,7 @@ namespace WarGrey::SCADA {
 	template <typename Menu>
 	private ref class MenuCommand sealed : public Windows::UI::Xaml::Input::ICommand {
 		/** NOTE	
-		 * Interface linguistically is not a class
+		 * Interface linguistically is not class,
 		 * all the required methods therefore should be marked as `virtual` instead of `override`.
 		 */
 	internal:

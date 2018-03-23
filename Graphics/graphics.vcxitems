@@ -23,7 +23,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)shape3d.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)transformation.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)turtle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
@@ -34,6 +33,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)shape3d.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)transformation.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)turtle.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)turtle.idl" />
   </ItemGroup>
 </Project>

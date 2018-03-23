@@ -39,22 +39,3 @@ void Geometrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 		ds->DrawCachedGeometry(this->border, px, py, this->border_color);
 	}
 }
-
-/*************************************************************************************************/
-Tracklet::Tracklet(Turtle* turtle, float thickness, Color& color)
-	: Geometrylet(turtle->snap_track(thickness), color), turtle(turtle) {
-	this->turtle->reference();
-}
-
-Tracklet::~Tracklet() {
-	turtle->destroy();
-}
-
-void Tracklet::fill_anchor_location(int node, float* x, float* y) {
-	float raw_x, raw_y;
-
-	this->turtle->fill_anchor_location(node, &raw_x, &raw_y);
-
-	SET_BOX(x, raw_x - Geometrylet::box.X);
-	SET_BOX(y, raw_y - Geometrylet::box.Y);
-}

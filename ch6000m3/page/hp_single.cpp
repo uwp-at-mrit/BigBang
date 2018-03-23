@@ -7,7 +7,7 @@
 
 #include "text.hpp"
 #include "paint.hpp"
-#include "turtle.hpp"
+#include "turtle.idl"
 
 #include "decorator/grid.hpp"
 
@@ -21,34 +21,38 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HPSMode { WindowUI = 0, View, Control };
 
+private enum class HPSlot { _,
+	A, B, C, D, E, F, G, H, I, J, K, Y, F001, SQ1, SQ2, SQ3,
+	SQa, SQb, SQc, SQd, SQe, SQf, SQg, SQh, SQi, SQj, SQk, SQy,
+};
+
 private class HPS : public WarGrey::SCADA::ModbusConfirmation {
 public:
 	HPS(HPSingle* master) : workbench(master) {}
 
 public:
 	void load_pipelines(float width, float height, float gridsize) {
-		Turtle* oil_line = new Turtle(gridsize, true);
+		Turtle<HPSlot>* pump_station = new Turtle<HPSlot>(gridsize, true, HPSlot::SQ1);
 
-		oil_line->move_left(2)->move_up(2)->move_right(2)->jump_left(2);
-		oil_line->move_up(2)->move_right(2)->jump_left(2);
-		oil_line->move_up(2)->move_right(2)->jump_left(2)->move_up(3);
-		oil_line->turn_up_left()->move_left(8)->turn_left_up()->move_up(4);
-		oil_line->jump_down(4)->turn_down_left()->move_left(14);
-		oil_line->jump_right(2)->move_down(2)->move_left(2);
-		oil_line->jump_up(2)->jump_right(6)->move_down(4)->move_left(6);
-		oil_line->jump_right(6)->move_down(2)->move_left(6);
-		oil_line->jump_right(6)->move_down(2)->move_left(6);
-		oil_line->jump_right(6)->move_down(2)->move_left(6);
+		pump_station->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
+		pump_station->move_down(4)->move_right(3, HPSlot::SQf)->move_right(4, HPSlot::F)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQc)->move_right(4, HPSlot::C)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQd)->move_right(4, HPSlot::D)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::SQe)->move_right(4, HPSlot::E)->move_right(3)->move_up(30);
+		pump_station->turn_up_left()->move_left(24)->turn_left_down()->move_down(1.5F, HPSlot::F001)->move_down(1.5F);
+		pump_station->jump_up(3)->turn_up_left()->move_left(18)->turn_left_down()->move_down(17);
+		pump_station->move_down(4)->move_right(3, HPSlot::A)->move_right(4, HPSlot::SQa)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::B)->move_right(4, HPSlot::SQb)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::G)->move_right(4, HPSlot::SQg)->move_right(3)->jump_left(10);
+		pump_station->move_down(3)->move_right(3, HPSlot::H)->move_right(4, HPSlot::SQh)->move_right(3)->move_up(16);
+		pump_station->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPSlot::SQ2);
+		pump_station->jump_right(8, HPSlot::SQ3)->move_down()->turn_down_right()->move_right(8);
 
-		this->pipelines[1] = new Tracklet(oil_line, 1.5F, Colors::Goldenrod);
+		this->stations[0] = new Tracklet<HPSlot>(pump_station, 1.5F, Colors::Goldenrod);
 
-		oil_line->move_left(2);
-
-		this->pipelines[0] = new Tracklet(oil_line, 1.5F, Colors::Silver);
-
-		for (size_t i = 0; i < SNIPS_ARITY(this->pipelines); i++) {
-			if (this->pipelines[i] != nullptr) {
-				this->workbench->insert(this->pipelines[i]);
+		for (size_t i = 0; i < SNIPS_ARITY(this->stations); i++) {
+			if (this->stations[i] != nullptr) {
+				this->workbench->insert(this->stations[i]);
 			}
 		}
 	}
@@ -56,9 +60,8 @@ public:
 	void reflow_pipelines(float width, float height, float stepsize, float vinset) {
 		float w, h;
 
-		this->pipelines[1]->fill_extent(0.0F, 0.0F, &w, &h);
-		this->workbench->move_to(this->pipelines[0], (width - w) * 0.5F - stepsize * 2.0F, (height - h) * 0.5F);
-		this->workbench->move_to(this->pipelines[1], (width - w) * 0.5F, (height - h) * 0.5F);
+		this->stations[0]->fill_extent(0.0F, 0.0F, &w, &h);
+		this->workbench->move_to(this->stations[0], (width - w) * 0.5F, (height - h) * 0.5F);
 	}
 
 public:
@@ -89,7 +92,7 @@ public:
 
 // never deletes these snips mannually
 private:
-	Tracklet* pipelines[2];
+	Tracklet<HPSlot>* stations[2];
 
 private:
 	HPSingle* workbench;
