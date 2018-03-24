@@ -10,8 +10,11 @@ namespace WarGrey::SCADA {
 			Windows::UI::Color& ring_color = Windows::UI::Colors::WhiteSmoke);
 
 	public:
-		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		double get_direction_degree();
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ triangle;
@@ -19,6 +22,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color;
 
 	private:
+		double degree;
 		float radius;
 		float thickness;
 	};

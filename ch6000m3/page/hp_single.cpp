@@ -37,19 +37,19 @@ public:
 		Turtle<HPS>* pump_station = new Turtle<HPS>(gridsize, true, HPS::SQ1);
 
 		pump_station->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
-		pump_station->move_down(4, HPS::f)->move_right(3, HPS::SQf)->move_right(6, HPS::F)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::c)->move_right(3, HPS::SQc)->move_right(6, HPS::C)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::d)->move_right(3, HPS::SQd)->move_right(6, HPS::D)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::e)->move_right(3, HPS::SQe)->move_right(6, HPS::E)->move_right(3)->move_up(30);
-		pump_station->turn_up_left()->move_left(26)->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F);
-		pump_station->jump_up(3)->turn_up_left()->move_left(20)->turn_left_down()->move_down(17);
-		pump_station->move_down(4, HPS::a)->move_right(3, HPS::A)->move_right(6, HPS::SQa)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::b)->move_right(3, HPS::B)->move_right(6, HPS::SQb)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::g)->move_right(3, HPS::G)->move_right(6, HPS::SQg)->move_right(3)->jump_back();
-		pump_station->move_down(3, HPS::h)->move_right(3, HPS::H)->move_right(6, HPS::SQh)->move_right(3)->move_up(16);
+		pump_station->move_down(4, HPS::f)->move_right(4, HPS::SQf)->move_right(6, HPS::F)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::c)->move_right(4, HPS::SQc)->move_right(6, HPS::C)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(6, HPS::D)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(6, HPS::E)->move_right(4)->move_up(30);
+		pump_station->turn_up_left()->move_left(28)->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F);
+		pump_station->jump_up(3)->turn_up_left()->move_left(22)->turn_left_down()->move_down(17);
+		pump_station->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(6, HPS::SQa)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(6, HPS::SQb)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(6, HPS::SQg)->move_right(4)->jump_back();
+		pump_station->move_down(3, HPS::h)->move_right(4, HPS::H)->move_right(6, HPS::SQh)->move_right(4)->move_up(16);
 		pump_station->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPS::SQ2);
 		pump_station->jump_right(8, HPS::SQ3)->move_down()->turn_down_right()->move_right(8, HPS::k);
-		pump_station->move_right(3, HPS::SQk)->move_right(3)->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
+		pump_station->move_right(4, HPS::SQk)->move_right(4)->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
 		pump_station->move_up(5, HPS::SQy)->move_up(4, HPS::Y)->move_up(5);
 
 		this->stations[0] = new Tracklet<HPS>(pump_station, 1.5F, Colors::Goldenrod);
@@ -96,13 +96,22 @@ public:
 	}
 	
 	void reflow_pump_elements(float width, float height, float gridsize, float vinset) {
-		float station_x, station_y;
+		float station_x, station_y, label_dx, label_dy;
+		SnipCenterPoint scp;
 
 		this->workbench->fill_snip_location(this->stations[0], &station_x, &station_y);
 
 		for (size_t i = 0; i < SNIPS_ARITY(this->pumps); i++) {
-			this->place_id_element(this->pumps[i], station_x, station_y);
-			this->place_id_element(this->pump_labels[i], station_x + gridsize, station_y + gridsize);
+			if (this->pumps[i] != nullptr) {
+				switch (int(this->pumps[i]->get_direction_degree())) {
+				case -90: label_dx = station_x - gridsize; label_dy = station_y - gridsize; scp = SnipCenterPoint::RT; break;
+				case 180: label_dx = station_x - gridsize; label_dy = station_y + gridsize; scp = SnipCenterPoint::RB; break;
+				default: label_dx = station_x + gridsize; label_dy = station_y + gridsize; scp = SnipCenterPoint::LB;  break;
+				}
+
+				this->place_id_element(this->pumps[i], station_x, station_y, SnipCenterPoint::CC);
+				this->place_id_element(this->pump_labels[i], label_dx, label_dy, scp);
+			}
 		}
 	}
 
@@ -151,13 +160,11 @@ private:
 		return label;
 	}
 
-	void place_id_element(ISnip* snip, float dx, float dy) {
-		if (snip != nullptr) {
-			float x, y;
+	void place_id_element(ISnip* snip, float dx, float dy, SnipCenterPoint scp) {
+		float x, y;
 
-			this->stations[0]->fill_anchor_location(static_cast<HPS>(snip->id), &x, &y);
-			this->workbench->move_to(snip, x + dx, y + dy, SnipCenterPoint::CC);
-		}
+		this->stations[0]->fill_anchor_location(static_cast<HPS>(snip->id), &x, &y);
+		this->workbench->move_to(snip, x + dx, y + dy, scp);
 	}
 
 // never deletes these snips mannually

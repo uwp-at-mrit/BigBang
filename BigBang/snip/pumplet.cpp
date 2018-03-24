@@ -13,7 +13,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 Pumplet::Pumplet(float radius, double degree, float thickness, Color& color, Color& ring_color)
-	: radius(radius), thickness((thickness <= 0.0F) ? 1.0F : thickness) {
+	: radius(radius), degree(degree), thickness((thickness <= 0.0F) ? 1.0F : thickness) {
 	this->color = make_solid_brush(color);
 	this->ring_color = make_solid_brush(ring_color);
 	this->triangle = geometry_freeze(::triangle(radius, degree));
@@ -23,6 +23,10 @@ void Pumplet::fill_extent(float x, float y, float* w, float* h) {
 	float length = radius * 2.0F + this->thickness;
 
 	SET_BOXES(w, h, length);
+}
+
+double Pumplet::get_direction_degree() {
+	return this->degree;
 }
 
 void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
