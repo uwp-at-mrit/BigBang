@@ -14,28 +14,46 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 Labellet::Labellet(const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
+	this->set_color();
     this->set_text(label);
 }
 
+Labellet::Labellet(Color& color, const wchar_t *fmt, ...) {
+	VSWPRINT(label, fmt);
+	this->set_color(color);
+	this->set_text(label);
+}
+
 Labellet::Labellet(Platform::String^ content) {
+	this->set_color();
+	this->set_text(content);
+}
+
+Labellet::Labellet(Color& color, Platform::String^ content) {
+	this->set_color(color);
     this->set_text(content);
 }
 
 void Labellet::set_text(Platform::String^ content) {
-    this->content = content;
     if (this->label_font == nullptr) {
         this->label_font = make_text_format();
     }
+
+	this->content = make_text_layout(content, this->label_font);
+}
+
+void Labellet::set_color(Color& color) {
+	this->label_color = make_solid_brush(color);
 }
 
 void Labellet::fill_extent(float x, float y, float* w, float* h) {
-    TextExtent ts = get_text_extent(content, label_font);
+	auto box = this->content->LayoutBounds;
 
-    SET_VALUES(w, ts.width, h, ts.height);
+    SET_VALUES(w, box.Width, h, box.Height);
 }
 
 void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    ds->DrawText(content, x, y, Colors::Snow, label_font);
+    ds->DrawTextLayout(this->content, x, y, this->label_color);
 }
 
 /*************************************************************************************************/

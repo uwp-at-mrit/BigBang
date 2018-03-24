@@ -7,6 +7,7 @@
 #include "snip/statuslet.hpp"
 #include "snip/iconlet.hpp"
 #include "snip/shapelet.hpp"
+#include "snip/pumplet.hpp"
 
 namespace WarGrey::SCADA {
 	private class HPSingle : public WarGrey::SCADA::Planet {

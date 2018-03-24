@@ -8,18 +8,23 @@ namespace WarGrey::SCADA {
     private class Labellet : public WarGrey::SCADA::Textlet {
     public:
         Labellet(const wchar_t* fmt, ...);
-        Labellet(Platform::String^ content = "");
+		Labellet(Windows::UI::Color& color, const wchar_t* fmt, ...);
+
+		Labellet(Platform::String^ content = "");
+		Labellet(Windows::UI::Color& color, Platform::String^ content = "");
 
     public:
         void set_text(Platform::String^ content);
+		void set_color(Windows::UI::Color& color = Windows::UI::Colors::Silver);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
         void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
     private:
-        Platform::String^ content;
+        Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ content;
         Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ label_color;
     };
 
 	private class Scalelet : public WarGrey::SCADA::Textlet {
