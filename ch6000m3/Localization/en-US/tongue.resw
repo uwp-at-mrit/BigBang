@@ -150,4 +150,34 @@
   <data name=":unknown:" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="HPS:A" xml:space="preserve">
+    <value>Left Harrow Head</value>
+  </data>
+  <data name="HPS:B" xml:space="preserve">
+    <value>Left Harrow Body</value>
+  </data>
+  <data name="HPS:C" xml:space="preserve">
+    <value>Left Curved Pipe</value>
+  </data>
+  <data name="HPS:D" xml:space="preserve">
+    <value>Hopper Door Lock Pump</value>
+  </data>
+  <data name="HPS:E" xml:space="preserve">
+    <value>Disc Valve Control Pump</value>
+  </data>
+  <data name="HPS:F" xml:space="preserve">
+    <value>Right Curved Pipe</value>
+  </data>
+  <data name="HPS:G" xml:space="preserve">
+    <value>Right Harrow Body</value>
+  </data>
+  <data name="HPS:H" xml:space="preserve">
+    <value>Right Harrow Head</value>
+  </data>
+  <data name="HPS:K" xml:space="preserve">
+    <value>Circulation Cooling</value>
+  </data>
+  <data name="HPS:Y" xml:space="preserve">
+    <value>Emergency</value>
+  </data>
 </root>
