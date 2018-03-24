@@ -8,6 +8,8 @@
 #include "object.hpp"
 #include "geometry.hpp"
 
+#include "syslog.hpp"
+
 namespace WarGrey::SCADA {
 	template<typename Anchor>
 	private class Turtle final : public WarGrey::SCADA::SharedObject {
@@ -22,6 +24,7 @@ namespace WarGrey::SCADA {
 		void clear() {
 			this->anchors.clear();
 			this->snapshot = nullptr;
+			this->last_backtrace_anchor = Anchor::_;
 
 			this->do_rebuild();
         }
@@ -59,10 +62,17 @@ namespace WarGrey::SCADA {
         }
 
 	public:
-	WarGrey::SCADA::Turtle<Anchor>* jump_to(Anchor id) {
-		this->fill_anchor_location(id, &this->x, &this->y);
+	WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {
+		Anchor target = ((id == Anchor::_) ? this->last_backtrace_anchor : id);
 
-		return do_jump(Anchor::_);
+		if(target != Anchor::_) {
+			this->fill_anchor_location(target, &this->x, &this->y);
+		} else{
+			this->x = 0.0F;
+		    this->y = 0.0F;
+		}
+
+		return this->do_jump(Anchor::_);
 	}
 
 	WarGrey::SCADA::Turtle<Anchor>* jump_up(int step = 1, Anchor id = Anchor::_) {
@@ -441,10 +451,14 @@ namespace WarGrey::SCADA {
 		}
 
 		void Turtle::do_anchor(Anchor id) {
-			if(id != Anchor::_) {
+			if (id != Anchor::_) {
 				std::complex<float> key_point(this->x, this->y);
 				auto anchor = std::pair<Anchor, std::complex<float>>(id, key_point);
 				this->anchors.insert(anchor);
+
+				if (id > Anchor::_) {
+					this->last_backtrace_anchor = id;
+				}
 			}
 		}
 
@@ -493,6 +507,7 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ snapshot;
 		std::unordered_map<Anchor, std::complex<float>> anchors;
+		Anchor last_backtrace_anchor = Anchor::_;
 		bool moved;
 	};
 }

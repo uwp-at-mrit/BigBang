@@ -21,9 +21,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HPSMode { WindowUI = 0, View, Control };
 
-private enum class HPSlot { _,
+private enum class HPSlot {
 	A, B, C, D, E, F, G, H, I, J, K, Y, F001, SQ1, SQ2, SQ3,
 	SQa, SQb, SQc, SQd, SQe, SQf, SQg, SQh, SQi, SQj, SQk, SQy,
+	_,
+	a, b, c, d, e, f, g, h, k
 };
 
 private class HPS : public WarGrey::SCADA::ModbusConfirmation {
@@ -35,21 +37,20 @@ public:
 		Turtle<HPSlot>* pump_station = new Turtle<HPSlot>(gridsize, true, HPSlot::SQ1);
 
 		pump_station->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
-		pump_station->move_down(4)->move_right(3, HPSlot::SQf)->move_right(6, HPSlot::F)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQc)->move_right(6, HPSlot::C)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQd)->move_right(6, HPSlot::D)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::SQe)->move_right(6, HPSlot::E)->move_right(3)->move_up(30);
+		pump_station->move_down(4, HPSlot::f)->move_right(3, HPSlot::SQf)->move_right(6, HPSlot::F)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::c)->move_right(3, HPSlot::SQc)->move_right(6, HPSlot::C)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::d)->move_right(3, HPSlot::SQd)->move_right(6, HPSlot::D)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::e)->move_right(3, HPSlot::SQe)->move_right(6, HPSlot::E)->move_right(3)->move_up(30);
 		pump_station->turn_up_left()->move_left(26)->turn_left_down()->move_down(1.5F, HPSlot::F001)->move_down(1.5F);
 		pump_station->jump_up(3)->turn_up_left()->move_left(20)->turn_left_down()->move_down(17);
-		pump_station->move_down(4)->move_right(3, HPSlot::A)->move_right(6, HPSlot::SQa)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::B)->move_right(6, HPSlot::SQb)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::G)->move_right(6, HPSlot::SQg)->move_right(3)->jump_left(12);
-		pump_station->move_down(3)->move_right(3, HPSlot::H)->move_right(6, HPSlot::SQh)->move_right(3)->move_up(16);
+		pump_station->move_down(4, HPSlot::a)->move_right(3, HPSlot::A)->move_right(6, HPSlot::SQa)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::b)->move_right(3, HPSlot::B)->move_right(6, HPSlot::SQb)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::g)->move_right(3, HPSlot::G)->move_right(6, HPSlot::SQg)->move_right(3)->jump_back();
+		pump_station->move_down(3, HPSlot::h)->move_right(3, HPSlot::H)->move_right(6, HPSlot::SQh)->move_right(3)->move_up(16);
 		pump_station->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPSlot::SQ2);
-		pump_station->jump_right(8, HPSlot::SQ3)->move_down()->turn_down_right()->move_right(8);
-		pump_station->move_right(3, HPSlot::SQk)->move_right(3)->turn_right_up();
-		pump_station->move_up(8, HPSlot::K)->move_up(5)->jump_left(7);
-		pump_station->move_down(5, HPSlot::Y)->move_down(4, HPSlot::SQy)->move_down(5);
+		pump_station->jump_right(8, HPSlot::SQ3)->move_down()->turn_down_right()->move_right(8, HPSlot::k);
+		pump_station->move_right(3, HPSlot::SQk)->move_right(3)->turn_right_up()->move_up(8, HPSlot::K)->move_up(5)->jump_back();
+		pump_station->move_up(5, HPSlot::SQy)->move_up(4, HPSlot::Y)->move_up(5);
 
 		this->stations[0] = new Tracklet<HPSlot>(pump_station, 1.5F, Colors::Goldenrod);
 
@@ -60,11 +61,19 @@ public:
 		}
 	}
 
+	void load_pump_elements(float width, float height, float gridsize) {
+
+	}
+
 	void reflow_pump_station(float width, float height, float stepsize, float vinset) {
 		float station_width, station_height;
 
 		this->stations[0]->fill_extent(0.0F, 0.0F, &station_width, &station_height);
 		this->workbench->move_to(this->stations[0], (width - station_width) * 0.5F, (height - station_height) * 0.5F);
+	}
+	
+	void reflow_pump_elements(float width, float height, float stepsize, float vinset) {
+
 	}
 
 public:
@@ -159,6 +168,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 		{ // load snips
 			this->change_mode(HPSMode::View);
 			console->load_pump_station(width, height, this->gridsize);
+			console->load_pump_elements(width, height, this->gridsize);
 
 			this->change_mode(HPSMode::Control);
 
@@ -195,6 +205,7 @@ void HPSingle::reflow(float width, float height) {
 
 		this->change_mode(HPSMode::View);
 		console->reflow_pump_station(width, height, this->gridsize, vinset);
+		console->reflow_pump_elements(width, height, this->gridsize, vinset);
 	}
 }
 
