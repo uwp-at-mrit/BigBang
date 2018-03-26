@@ -49,13 +49,13 @@ void ComposeDecorator::draw_after(IPlanet* master, CanvasDrawingSession^ ds, flo
 	}
 }
 
-void ComposeDecorator::draw_before_snip(ISnip* snip, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void ComposeDecorator::draw_before_snip(IGraphlet* snip, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_before_snip(snip, ds, x, y, width, height, selected);
 	}
 }
 
-void ComposeDecorator::draw_after_snip(ISnip* snip, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void ComposeDecorator::draw_after_snip(IGraphlet* snip, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_after_snip(snip, ds, x, y, width, height, selected);
 	}

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private class Textlet : public WarGrey::SCADA::ISnip {};
+	private class Textlet : public WarGrey::SCADA::IGraphlet {};
 
     private class Labellet : public WarGrey::SCADA::Textlet {
     public:

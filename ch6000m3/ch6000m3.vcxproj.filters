@@ -17,16 +17,40 @@
     <Filter Include="Localization\zh-CN">
       <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="page">
+      <UniqueIdentifier>{7531e696-e7c2-47f3-a1ff-27dddae97b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet">
+      <UniqueIdentifier>{e1753d11-e073-49f7-90c2-9c17acc77e3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cosmos.cxx" />
     <ClCompile Include="ch6000m3.cxx" />
-    <ClCompile Include="page\hp_single.cpp" />
+    <ClCompile Include="page\hp_single.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\graphlets.cpp" />
+    <ClCompile Include="graphlet\pumplet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="graphlet\valvelet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cosmos.hxx" />
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="page\hp_single.hpp" />
+    <ClInclude Include="page\hp_single.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\graphlets.hpp" />
+    <ClInclude Include="graphlet\pumplet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="graphlet\valvelet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

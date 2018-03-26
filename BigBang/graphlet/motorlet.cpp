@@ -1,8 +1,9 @@
 ﻿#include <algorithm>
 
+#include "graphlet/motorlet.hpp"
+
 #include "shape.hpp"
 #include "paint.hpp"
-#include "snip/motorlet.hpp"
 
 using namespace WarGrey::SCADA;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "decorator/pipeline.hpp"
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 #include "paint.hpp"
 
 using namespace WarGrey::SCADA;
@@ -16,9 +16,9 @@ PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out) {
     this->draw_outport = draw_out;
 }
 
-void PipelineDecorator::draw_after_snip(ISnip* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void PipelineDecorator::draw_after_snip(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
     if (this->draw_inport || this->draw_outport) {
-       IPipeSnip* pipe = dynamic_cast<IPipeSnip*>(self);
+       IPipelet* pipe = dynamic_cast<IPipelet*>(self);
 
        if (pipe != nullptr) {
            if (this->draw_inport) {

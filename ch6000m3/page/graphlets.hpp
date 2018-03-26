@@ -8,12 +8,13 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/pumplet.hpp"
+#include "graphlet/valvelet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HPSingle : public WarGrey::SCADA::Planet {
+	private class Graphlets : public WarGrey::SCADA::Planet {
 	public:
-		~HPSingle() noexcept;
-		HPSingle(Platform::String^ plc);
+		~Graphlets() noexcept;
+		Graphlets(Platform::String^ plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

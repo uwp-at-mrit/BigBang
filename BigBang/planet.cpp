@@ -10,7 +10,7 @@
 #include "shape.hpp"
 #include "transformation.hpp"
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 #include "decorator/decorator.hpp"
 
 using namespace WarGrey::SCADA;
@@ -39,10 +39,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 class PlaceHolderDecorator : public IPlanetDecorator {};
 
-class SnipInfo : public WarGrey::SCADA::ISnipInfo {
+class SnipInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
     SnipInfo(IPlanet* master, unsigned int mode)
-		: ISnipInfo(master), mode(mode) {};
+		: IGraphletInfo(master), mode(mode) {};
 
 public:
     float x;
@@ -54,11 +54,11 @@ public:
 	unsigned int mode;
 
 public:
-	ISnip* next;
-	ISnip* prev;
+	IGraphlet* next;
+	IGraphlet* prev;
 };
 
-static SnipInfo* bind_snip_owership(IPlanet* master, unsigned int mode, ISnip* snip, double degrees) {
+static SnipInfo* bind_snip_owership(IPlanet* master, unsigned int mode, IGraphlet* snip, double degrees) {
     auto info = new SnipInfo(master, mode);
     snip->info = info;
 
@@ -71,7 +71,7 @@ static SnipInfo* bind_snip_owership(IPlanet* master, unsigned int mode, ISnip* s
     return info;
 }
 
-static inline SnipInfo* planet_snip_info(IPlanet* master, ISnip* snip) {
+static inline SnipInfo* planet_snip_info(IPlanet* master, IGraphlet* snip) {
 	SnipInfo* info = nullptr;
 
 	if ((snip != nullptr) && (snip->info != nullptr)) {
@@ -87,7 +87,7 @@ static inline bool unsafe_snip_unmasked(SnipInfo* info, unsigned int mode) {
 	return ((info->mode == 0) || (info->mode == mode));
 }
 
-static void unsafe_fill_snip_bound(ISnip* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
+static void unsafe_fill_snip_bound(IGraphlet* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
 	snip->fill_extent(info->x, info->y, width, height);
 
 	(*x) = info->x;
@@ -121,18 +121,18 @@ static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, f
     }
 }
 
-static inline void unsafe_add_selected(IPlanet* master, ISnip* snip, SnipInfo* info) {
+static inline void unsafe_add_selected(IPlanet* master, IGraphlet* snip, SnipInfo* info) {
 	master->before_select(snip, true);
 	info->selected = true;
 	master->after_select(snip, true);
 }
 
-static inline void unsafe_set_selected(IPlanet* master, ISnip* snip, SnipInfo* info) {
+static inline void unsafe_set_selected(IPlanet* master, IGraphlet* snip, SnipInfo* info) {
 	master->no_selected();
 	unsafe_add_selected(master, snip, info);
 }
 
-static void snip_center_point_offset(ISnip* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
+static void snip_center_point_offset(IGraphlet* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
     xoff = 0.0F;
     yoff = 0.0F;
 
@@ -174,13 +174,13 @@ void Planet::change_mode(unsigned int mode) {
 	}
 }
 
-bool Planet::snip_unmasked(ISnip* snip) {
+bool Planet::snip_unmasked(IGraphlet* snip) {
 	SnipInfo* info = planet_snip_info(this, snip);
 
 	return ((info != nullptr) && unsafe_snip_unmasked(info, this->mode));
 }
 
-void Planet::insert(ISnip* snip, double degrees, float x, float y) {
+void Planet::insert(IGraphlet* snip, double degrees, float x, float y) {
 	if (snip->info == nullptr) {
 		SnipInfo* info = bind_snip_owership(this, this->mode, snip, degrees);
 		
@@ -202,7 +202,7 @@ void Planet::insert(ISnip* snip, double degrees, float x, float y) {
 	}
 }
 
-void Planet::move_to(ISnip* snip, float x, float y, SnipCenterPoint cp) {
+void Planet::move_to(IGraphlet* snip, float x, float y, SnipCenterPoint cp) {
 	SnipInfo* info = planet_snip_info(this, snip);
 	
 	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
@@ -214,7 +214,7 @@ void Planet::move_to(ISnip* snip, float x, float y, SnipCenterPoint cp) {
 	}
 }
 
-void Planet::move(ISnip* snip, float x, float y) {
+void Planet::move(IGraphlet* snip, float x, float y) {
 	SnipInfo* info = planet_snip_info(this, snip);
 
     if (info != nullptr) {
@@ -222,7 +222,7 @@ void Planet::move(ISnip* snip, float x, float y) {
 			unsafe_move_snip_via_info(this, info, x, y, false);
 		}
     } else if (this->head_snip != nullptr) {
-        ISnip* child = this->head_snip;
+        IGraphlet* child = this->head_snip;
 
         do {
             info = SNIP_INFO(child);
@@ -236,12 +236,12 @@ void Planet::move(ISnip* snip, float x, float y) {
     }
 }
 
-ISnip* Planet::find_snip(float x, float y) {
-    ISnip* found = nullptr;
+IGraphlet* Planet::find_snip(float x, float y) {
+    IGraphlet* found = nullptr;
 
     if (this->head_snip != nullptr) {
 		SnipInfo* head_info = SNIP_INFO(this->head_snip);
-        ISnip* child = head_info->prev;
+        IGraphlet* child = head_info->prev;
 
         do {
             SnipInfo* info = SNIP_INFO(child);
@@ -264,7 +264,7 @@ ISnip* Planet::find_snip(float x, float y) {
     return found;
 }
 
-bool Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint cp) {
+bool Planet::fill_snip_location(IGraphlet* snip, float* x, float* y, SnipCenterPoint cp) {
 	bool okay = false;
 	SnipInfo* info = planet_snip_info(this, snip);
 	
@@ -282,7 +282,7 @@ bool Planet::fill_snip_location(ISnip* snip, float* x, float* y, SnipCenterPoint
 	return okay;
 }
 
-bool Planet::fill_snip_bound(ISnip* snip, float* x, float* y, float* width, float* height) {
+bool Planet::fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) {
 	bool okay = false;
 	SnipInfo* info = planet_snip_info(this, snip);
 
@@ -320,7 +320,7 @@ void Planet::recalculate_snips_extent_when_invalid() {
             this->snips_right = 0.0F;
             this->snips_bottom = 0.0F;
         } else {
-            ISnip* child = this->head_snip;
+            IGraphlet* child = this->head_snip;
 
             this->snips_left = FLT_MAX;
             this->snips_top = FLT_MAX;
@@ -347,7 +347,7 @@ void Planet::recalculate_snips_extent_when_invalid() {
     }
 }
 
-void Planet::add_selected(ISnip* snip) {
+void Planet::add_selected(IGraphlet* snip) {
 	if (this->rubberband_allowed) {
 		SnipInfo* info = planet_snip_info(this, snip);
 
@@ -359,7 +359,7 @@ void Planet::add_selected(ISnip* snip) {
 	}
 }
 
-void Planet::set_selected(ISnip* snip) {
+void Planet::set_selected(IGraphlet* snip) {
 	SnipInfo* info = planet_snip_info(this, snip);
 
     if ((info != nullptr) && (!info->selected)) {
@@ -371,7 +371,7 @@ void Planet::set_selected(ISnip* snip) {
 
 void Planet::no_selected() {
 	if (this->head_snip != nullptr) {
-		ISnip* child = this->head_snip;
+		IGraphlet* child = this->head_snip;
 
 		do {
 			SnipInfo* info = SNIP_INFO(child);
@@ -387,11 +387,11 @@ void Planet::no_selected() {
 	}
 }
 
-ISnip* Planet::get_focus_snip() {
+IGraphlet* Planet::get_focus_snip() {
 	return (this->snip_unmasked(this->focus_snip) ? this->focus_snip : nullptr);
 }
 
-void Planet::set_caret_owner(ISnip* snip) {
+void Planet::set_caret_owner(IGraphlet* snip) {
 	if (this->focus_snip != snip) {
 		if (snip == nullptr) {
 			this->focus_snip->own_caret(false);
@@ -426,7 +426,7 @@ bool Planet::on_char(VirtualKey key) {
 	return handled;
 }
 
-void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, bool controlled) {
+void Planet::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted, bool controlled) {
 	SnipInfo* info = SNIP_INFO(snip);
 
 	if ((!info->selected) && this->can_select(snip)) {
@@ -443,7 +443,7 @@ void Planet::on_tap(ISnip* snip, float local_x, float local_y, bool shifted, boo
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
 	if (!this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
-		ISnip* unmasked_snip = this->find_snip(x, y);
+		IGraphlet* unmasked_snip = this->find_snip(x, y);
 
 		this->numpad->show(false);
 
@@ -498,7 +498,7 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 				this->numpad->on_goodbye(local_x, local_y, shifted, ctrled);
 			}
 		} else {
-			ISnip* unmasked_snip = this->find_snip(x, y);
+			IGraphlet* unmasked_snip = this->find_snip(x, y);
 
 			if (unmasked_snip != this->hover_snip) {
 				// NOTE: only snip that handles events will be traced
@@ -544,7 +544,7 @@ bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool s
 		this->rubberband_y = nullptr;
 		// TODO: select all touched snips
 	} else {
-		ISnip* unmasked_snip = this->find_snip(x, y);
+		IGraphlet* unmasked_snip = this->find_snip(x, y);
 
 		if (unmasked_snip != nullptr) {
 			SnipInfo* info = SNIP_INFO(unmasked_snip);
@@ -605,7 +605,7 @@ void Planet::update(long long count, long long interval, long long uptime) {
 	}
 
 	if (this->head_snip != nullptr) {
-		ISnip* child = this->head_snip;
+		IGraphlet* child = this->head_snip;
 
 		do {
 			SnipInfo* info = SNIP_INFO(child);
@@ -632,7 +632,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     this->decorator->draw_before(this, ds, Width, Height);
 
     if (this->head_snip != nullptr) {
-        ISnip* child = this->head_snip;
+        IGraphlet* child = this->head_snip;
 		float width, height;
 
         do {
@@ -698,7 +698,7 @@ void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, 
 
 void Planet::collapse() {
 	if (this->head_snip != nullptr) {
-		ISnip* temp_head = this->head_snip;
+		IGraphlet* temp_head = this->head_snip;
 		SnipInfo* temp_info = SNIP_INFO(temp_head);
 		SnipInfo* prev_info = SNIP_INFO(temp_info->prev);
 		
@@ -706,7 +706,7 @@ void Planet::collapse() {
 		prev_info->next = nullptr;
 		
 		do {
-			ISnip* child = temp_head;
+			IGraphlet* child = temp_head;
 
 			temp_head = SNIP_INFO(temp_head)->next;
 
@@ -788,7 +788,7 @@ void IPlanet::fill_actual_extent(float* width, float* height) {
 	SET_BOX(height, this->info->master->actual_height);
 }
 
-Point IPlanet::global_to_local_point(ISnip* snip, float global_x, float global_y, float xoff, float yoff) {
+Point IPlanet::global_to_local_point(IGraphlet* snip, float global_x, float global_y, float xoff, float yoff) {
 	float snip_x, snip_y;
 
 	this->fill_snip_location(snip, &snip_x, &snip_y);
@@ -796,7 +796,7 @@ Point IPlanet::global_to_local_point(ISnip* snip, float global_x, float global_y
 	return Point(global_x - snip_x + xoff, global_y - snip_y + yoff);
 }
 
-Point IPlanet::local_to_global_point(ISnip* snip, float local_x, float local_y, float xoff, float yoff) {
+Point IPlanet::local_to_global_point(IGraphlet* snip, float local_x, float local_y, float xoff, float yoff) {
 	float snip_x, snip_y;
 
 	this->fill_snip_location(snip, &snip_x, &snip_y);

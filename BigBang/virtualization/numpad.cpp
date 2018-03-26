@@ -103,7 +103,7 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 
 void Numpad::fill_auto_position(float* x, float* y) {
 	IPlanet* planet = this->master;
-	ISnip* target_snip = planet->get_focus_snip();
+	IGraphlet* target_snip = planet->get_focus_snip();
 
 	if (target_snip == nullptr) {
 		float Width = planet->info->master->actual_width;

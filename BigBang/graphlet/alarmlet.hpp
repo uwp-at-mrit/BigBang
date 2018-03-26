@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-    private class Alarmlet : public WarGrey::SCADA::ISnip {
+    private class Alarmlet : public WarGrey::SCADA::IGraphlet {
     public:
         Alarmlet(float size);
         ~Alarmlet() noexcept;

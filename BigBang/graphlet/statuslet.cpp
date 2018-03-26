@@ -2,12 +2,13 @@
 #include <ppltasks.h>
 #include <shared_mutex>
 
+#include "graphlet/statuslet.hpp"
+
 #include "text.hpp"
 #include "paint.hpp"
 #include "time.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"
-#include "snip/statuslet.hpp"
 
 using namespace WarGrey::SCADA;
 

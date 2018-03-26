@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 
     public:
         void draw_after_snip(
-            WarGrey::SCADA::ISnip* snip,
+            WarGrey::SCADA::IGraphlet* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) override;
 

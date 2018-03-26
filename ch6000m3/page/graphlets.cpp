@@ -1,4 +1,4 @@
-﻿#include "page/hp_single.hpp"
+﻿#include "page/graphlets.hpp"
 #include "configuration.hpp"
 
 #include "tongue.hpp"
@@ -30,7 +30,7 @@ private enum class HPS {
 
 private class HPSConsole : public WarGrey::SCADA::ModbusConfirmation {
 public:
-	HPSConsole(HPSingle* master) : workbench(master) {}
+	HPSConsole(Graphlets* master) : workbench(master) {}
 
 public:
 	void load_pump_station(float width, float height, float gridsize) {
@@ -179,7 +179,7 @@ private:
 	Labellet* pump_captions[12];
 
 private:
-	HPSingle* workbench;
+	Graphlets* workbench;
 };
 
 private class HPSDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
@@ -212,7 +212,7 @@ private:
 	Statuslinelet* statusline;
 };
 
-HPSingle::HPSingle(Platform::String^ plc) : Planet(":hps:") {
+Graphlets::Graphlets(Platform::String^ plc) : Planet(":hps:") {
 	Syslog* alarm = make_system_logger(default_logging_level, "HPS");
 	HPSConsole* console = new HPSConsole(this);
 
@@ -221,7 +221,7 @@ HPSingle::HPSingle(Platform::String^ plc) : Planet(":hps:") {
 	this->gridsize = statusbar_height();
 }
 
-HPSingle::~HPSingle() {
+Graphlets::~Graphlets() {
 	if (this->device != nullptr) {
 		delete this->device;
 	}
@@ -231,7 +231,7 @@ HPSingle::~HPSingle() {
 	}
 }
 
-void HPSingle::load(CanvasCreateResourcesReason reason, float width, float height) {
+void Graphlets::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto console = dynamic_cast<HPSConsole*>(this->console);
 	
 	if (console != nullptr) {
@@ -264,7 +264,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 	}
 }
 
-void HPSingle::reflow(float width, float height) {
+void Graphlets::reflow(float width, float height) {
 	auto console = dynamic_cast<HPSConsole*>(this->console);
 	
 	if (console != nullptr) {
@@ -281,6 +281,6 @@ void HPSingle::reflow(float width, float height) {
 	}
 }
 
-void HPSingle::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted, bool ctrled) {
+void Graphlets::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted, bool ctrled) {
 	// this->set_caret_owner(snip);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "forward.hpp"
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class ScreenKeyboard { Numpad };

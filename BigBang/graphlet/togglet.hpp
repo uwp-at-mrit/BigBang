@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private class Togglet : public WarGrey::SCADA::ISnip {
+	private class Togglet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Togglet(bool state0, Platform::String^ checked_label, Platform::String^ unchecked_label, float width = 0.0F,
 			Windows::UI::Color& checked_color = Windows::UI::Colors::DodgerBlue,

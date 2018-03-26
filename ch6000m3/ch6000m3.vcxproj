@@ -208,12 +208,18 @@
   <ItemGroup>
     <ClCompile Include="cosmos.cxx" />
     <ClCompile Include="ch6000m3.cxx" />
+    <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="page\hp_single.cpp" />
+    <ClCompile Include="graphlet\pumplet.cpp" />
+    <ClCompile Include="graphlet\valvelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="cosmos.hxx" />
+    <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hp_single.hpp" />
+    <ClInclude Include="graphlet\pumplet.hpp" />
+    <ClInclude Include="graphlet\valvelet.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -20,18 +20,34 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp">
       <Filter>virtualization</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\iconlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\shapelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\gaugelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\pumplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\snip.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\togglet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\motorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\statuslet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\textlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)snip\alarmlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\alarmlet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\gaugelet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\motorlet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\shapelet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\statuslet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\textlet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\togglet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\primitive.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -58,26 +74,40 @@
       <Filter>virtualization</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\iconlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\shapelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\gaugelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\pumplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\togglet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\motorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\statuslet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\snip.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\textlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)snip\alarmlet.hpp" />
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\alarmlet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\gaugelet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\motorlet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\shapelet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\statuslet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\textlet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\togglet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\primitive.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
       <UniqueIdentifier>{61fcef44-48ce-4d1a-856e-d8db43e4531e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="snip">
-      <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
-    </Filter>
     <Filter Include="virtualization">
       <UniqueIdentifier>{51d12611-f966-472f-ba3e-d77571c9ece6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet">
+      <UniqueIdentifier>{a14e9e04-43b8-4d62-8917-75bc80410e16}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

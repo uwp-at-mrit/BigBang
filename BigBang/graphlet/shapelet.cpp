@@ -1,4 +1,4 @@
-#include "shapelet.hpp"
+#include "graphlet/shapelet.hpp"
 
 #include "paint.hpp"
 #include "geometry.hpp"

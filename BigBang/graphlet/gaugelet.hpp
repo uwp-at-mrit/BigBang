@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-    private class Gaugelet : public WarGrey::SCADA::IScaleSnip<float> {
+    private class Gaugelet : public WarGrey::SCADA::IScalelet<float> {
     public:
         Gaugelet(Platform::String^ caption, int range, unsigned char step = 0,
 			Windows::UI::Color& color = Windows::UI::Colors::Green);

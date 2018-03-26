@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private class Pumplet : public WarGrey::SCADA::ISnip {
+	private class Pumplet : public WarGrey::SCADA::IGraphlet {
 	public:
 		Pumplet(float radius, double degree = -90.0, float thickness = 1.0F,
 			Windows::UI::Color& color = Windows::UI::Colors::Gray,

@@ -1,4 +1,4 @@
-#include "textlet.hpp"
+#include "graphlet/textlet.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"

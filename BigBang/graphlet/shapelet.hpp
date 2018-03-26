@@ -1,10 +1,10 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 #include "turtle.idl"
 
 namespace WarGrey::SCADA {
-	private class Shapelet : public WarGrey::SCADA::ISnip {};
+	private class Shapelet : public WarGrey::SCADA::IGraphlet {};
 
 	private class Geometrylet : public WarGrey::SCADA::Shapelet {
 	public:

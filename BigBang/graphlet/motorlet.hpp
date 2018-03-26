@@ -1,9 +1,9 @@
 #pragma once
 
-#include "snip/snip.hpp"
+#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-    private class Motorlet : public WarGrey::SCADA::ISnip {
+    private class Motorlet : public WarGrey::SCADA::IGraphlet {
     public:
         Motorlet(float width, float height = 0.0F);
 

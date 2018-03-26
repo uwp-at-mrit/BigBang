@@ -1,4 +1,5 @@
-#include "snip.hpp"
+#include "graphlet/primitive.hpp"
+
 #include "planet.hpp"
 #include "shape.hpp"
 
@@ -7,7 +8,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-Rect snip_enclosing_box(ISnip* snip, float x, float y, float3x2 transform) {
+Rect snip_enclosing_box(IGraphlet* snip, float x, float y, float3x2 transform) {
 	float width, height;
 
 	snip->fill_extent(x, y, &width, &height);
@@ -15,7 +16,7 @@ Rect snip_enclosing_box(ISnip* snip, float x, float y, float3x2 transform) {
 	return rectangle(x, y, width, height)->ComputeBounds(transform);
 }
 
-void WarGrey::SCADA::pipe_connecting_position(IPipeSnip* prev, IPipeSnip* pipe, float* x, float* y, double fx, double fy) {
+void WarGrey::SCADA::pipe_connecting_position(IPipelet* prev, IPipelet* pipe, float* x, float* y, double fx, double fy) {
 	Rect in = pipe->get_input_port();
 	Rect out = prev->get_output_port();
 
@@ -26,7 +27,7 @@ void WarGrey::SCADA::pipe_connecting_position(IPipeSnip* prev, IPipeSnip* pipe, 
 	if (y != nullptr) { (*y) = (*y) + delta_y; }
 }
 
-float2 WarGrey::SCADA::pipe_connecting_position(IPipeSnip* prev, IPipeSnip* pipe, float x0, float y0, double fx, double fy) {
+float2 WarGrey::SCADA::pipe_connecting_position(IPipelet* prev, IPipelet* pipe, float x0, float y0, double fx, double fy) {
 	float x = x0;
 	float y = y0;
 
@@ -37,14 +38,14 @@ float2 WarGrey::SCADA::pipe_connecting_position(IPipeSnip* prev, IPipeSnip* pipe
 
 /*************************************************************************************************/
 
-ISnip::~ISnip() {
+IGraphlet::~IGraphlet() {
 	if (this->info != nullptr) {
 		delete this->info;
 		this->info = nullptr;
 	}
 }
 
-Syslog* ISnip::get_logger() {
+Syslog* IGraphlet::get_logger() {
 	Syslog* logger = nullptr;
 
 	if (this->info != nullptr) {

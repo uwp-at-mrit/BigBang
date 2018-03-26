@@ -1,10 +1,11 @@
 ﻿#include <cmath>
 
+#include "graphlet/gaugelet.hpp"
+
 #include "text.hpp"
 #include "paint.hpp"
 #include "tongue.hpp"
 #include "shape.hpp"
-#include "snip/gaugelet.hpp"
 
 using namespace WarGrey::SCADA;
 

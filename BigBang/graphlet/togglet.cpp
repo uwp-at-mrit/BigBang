@@ -1,4 +1,4 @@
-#include "snip/togglet.hpp"
+#include "graphlet/togglet.hpp"
 
 #include "box.hpp"
 #include "text.hpp"

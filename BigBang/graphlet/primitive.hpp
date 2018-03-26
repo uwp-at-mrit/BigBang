@@ -6,20 +6,20 @@
 #include "box.hpp"
 
 namespace WarGrey::SCADA {
-    #define SNIPS_ARITY(a) (sizeof(a) / sizeof(ISnip*))
+    #define GRAPHLETS_ARITY(a) (sizeof(a) / sizeof(IGraphlet*))
 
-    private class ISnipInfo abstract {
+    private class IGraphletInfo abstract {
     public:
-		virtual ~ISnipInfo() noexcept {};
-		ISnipInfo(IPlanet* master) : master(master) {};
+		virtual ~IGraphletInfo() noexcept {};
+		IGraphletInfo(IPlanet* master) : master(master) {};
 		
     public:
 		IPlanet* master;
     };
 
-	private class ISnip abstract : public WarGrey::SCADA::ISprite {
+	private class IGraphlet abstract : public WarGrey::SCADA::ISprite {
     public:
-		virtual ~ISnip() noexcept;
+		virtual ~IGraphlet() noexcept;
 
 	public:
 		// `id` is designed for user-applications, in order to distinguish instances of a snip class.
@@ -33,11 +33,11 @@ namespace WarGrey::SCADA {
 		virtual void own_caret(bool is_own) {}
 
     public:
-        ISnipInfo* info;
+        IGraphletInfo* info;
     };
 
 	template<typename T>
-	private class IScaleSnip : public WarGrey::SCADA::ISnip {
+	private class IScalelet : public WarGrey::SCADA::IGraphlet {
 	public:
 		T get_scale() {
 			return this->scale;
@@ -57,7 +57,7 @@ namespace WarGrey::SCADA {
 		T scale;
 	};
 
-	private class IPipeSnip : public WarGrey::SCADA::ISnip {
+	private class IPipelet : public WarGrey::SCADA::IGraphlet {
 	public:
 		virtual Windows::Foundation::Rect get_input_port() = 0;
 		virtual Windows::Foundation::Rect get_output_port() = 0;
@@ -65,14 +65,14 @@ namespace WarGrey::SCADA {
 
 	/************************************************************************************************/
 	Windows::Foundation::Rect snip_enclosing_box(
-		WarGrey::SCADA::ISnip* snip, float x, float y,
+		WarGrey::SCADA::IGraphlet* snip, float x, float y,
 		Windows::Foundation::Numerics::float3x2 tf);
 
 	void pipe_connecting_position(
-		WarGrey::SCADA::IPipeSnip* prev, WarGrey::SCADA::IPipeSnip* pipe,
+		WarGrey::SCADA::IPipelet* prev, WarGrey::SCADA::IPipelet* pipe,
 		float* x, float* y, double factor_x = 0.5, double factor_y = 0.5);
 
 	Windows::Foundation::Numerics::float2 pipe_connecting_position(
-		WarGrey::SCADA::IPipeSnip* prev, WarGrey::SCADA::IPipeSnip* pipe,
+		WarGrey::SCADA::IPipelet* prev, WarGrey::SCADA::IPipelet* pipe,
 		float x = 0.0F, float y = 0.0F, double factor_x = 0.5, double factor_y = 0.5);
 }

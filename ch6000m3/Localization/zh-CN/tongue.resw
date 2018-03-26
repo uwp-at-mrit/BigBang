@@ -152,6 +152,7 @@
   </data>
   <data name="HPS_A" xml:space="preserve">
     <value>左耙头</value>
+    <comment>":" 不能出现在名称中间</comment>
   </data>
   <data name="HPS_B" xml:space="preserve">
     <value>左耙中</value>

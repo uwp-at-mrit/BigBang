@@ -19,12 +19,12 @@ namespace WarGrey::SCADA {
             float Width, float Height) {};
 
         virtual void draw_before_snip(
-            WarGrey::SCADA::ISnip* snip,
+            WarGrey::SCADA::IGraphlet* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) {};
 
         virtual void draw_after_snip(
-            WarGrey::SCADA::ISnip* snip,
+            WarGrey::SCADA::IGraphlet* snip,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) {};
 
@@ -49,12 +49,12 @@ namespace WarGrey::SCADA {
 			float Width, float Height) override;
 
 		void draw_before_snip(
-			WarGrey::SCADA::ISnip* snip,
+			WarGrey::SCADA::IGraphlet* snip,
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float x, float y, float width, float height, bool selected) override;
 
 		void draw_after_snip(
-			WarGrey::SCADA::ISnip* snip,
+			WarGrey::SCADA::IGraphlet* snip,
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float x, float y, float width, float height, bool selected) override;
 
