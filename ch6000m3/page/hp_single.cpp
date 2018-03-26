@@ -9,6 +9,11 @@
 #include "paint.hpp"
 #include "turtle.idl"
 
+#include "graphlet/shapelet.hpp"
+#include "graphlet/pumplet.hpp"
+#include "graphlet/valvelet.hpp"
+
+#include "decorator/page.hpp"
 #include "decorator/grid.hpp"
 
 using namespace WarGrey::SCADA;
@@ -182,36 +187,6 @@ private:
 	HPSingle* workbench;
 };
 
-private class HPSDecorator : public virtual WarGrey::SCADA::IPlanetDecorator {
-public:
-	HPSDecorator(ICanvasBrush^ brush) : brush(brush) {}
-
-public:
-	void draw_after_snip(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
-		if (x == 0.0) {
-			if (y == 0.0) { // statusbar's bottomline 
-				ds->DrawLine(0, height, width, height, this->brush, 2.0F);
-			} else if (self == this->statusline) { // statusline's topline
-				ds->DrawLine(0, y, width, y, this->brush, 2.0F);
-			} else { // avoid dynamic_cast every time.
-				auto maybe_statusline = dynamic_cast<Statuslinelet*>(self);
-				
-				if (maybe_statusline != nullptr) {
-					this->statusline = maybe_statusline;
-					ds->DrawLine(0, y, width, y, this->brush, 2.0F);
-				}
-			}
-		}
-	}
-
-protected:
-	~HPSDecorator() noexcept {}
-
-private:
-	ICanvasBrush^ brush;
-	Statuslinelet* statusline;
-};
-
 HPSingle::HPSingle(Platform::String^ plc) : Planet(":hps:") {
 	Syslog* alarm = make_system_logger(default_logging_level, "HPS");
 	HPSConsole* console = new HPSConsole(this);
@@ -253,7 +228,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 
 		{ // delayed initializing
 			GridDecorator* grid = new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset);
-			IPlanetDecorator* decorators[] = { new HPSDecorator(system_graytext_brush()), grid };
+			IPlanetDecorator* decorators[] = { new PageDecorator(system_graytext_brush()), grid };
 
 			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
 

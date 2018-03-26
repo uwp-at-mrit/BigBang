@@ -147,7 +147,7 @@
   <data name=":hps:" xml:space="preserve">
     <value>液压泵单动</value>
   </data>
-  <data name=":unknown:" xml:space="preserve">
+  <data name=":offline:" xml:space="preserve">
     <value>未使用</value>
   </data>
   <data name="HPS_A" xml:space="preserve">
@@ -180,5 +180,8 @@
   </data>
   <data name="HPS_Y" xml:space="preserve">
     <value>应急</value>
+  </data>
+  <data name=":gview:" xml:space="preserve">
+    <value>图元说明</value>
   </data>
 </root>

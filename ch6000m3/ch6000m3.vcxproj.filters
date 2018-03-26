@@ -30,13 +30,16 @@
     <ClCompile Include="page\hp_single.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="graphlet\pumplet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
     <ClCompile Include="graphlet\valvelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="page\graphlets.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="decorator\page.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cosmos.hxx" />
@@ -44,13 +47,16 @@
     <ClInclude Include="page\hp_single.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="graphlet\pumplet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="graphlet\valvelet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
+    <ClInclude Include="page\graphlets.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="decorator\page.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

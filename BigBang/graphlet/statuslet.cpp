@@ -196,7 +196,7 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
 	initialize_status_font();
 	this->device = device;
 	this->caption = make_text_layout(speak(caption), status_font);
-	this->device_name = make_text_layout((this->device == nullptr) ? speak(":unknown:") : device->device_hostname(), status_font);
+	this->device_name = make_text_layout((this->device == nullptr) ? speak(":offline:") : device->device_hostname(), status_font);
 }
 
 void Statusbarlet::construct() {

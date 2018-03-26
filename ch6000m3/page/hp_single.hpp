@@ -5,9 +5,6 @@
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
-#include "graphlet/shapelet.hpp"
-
-#include "graphlet/pumplet.hpp"
 
 namespace WarGrey::SCADA {
 	private class HPSingle : public WarGrey::SCADA::Planet {

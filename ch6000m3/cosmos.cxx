@@ -4,6 +4,7 @@
 #include "configuration.hpp"
 
 #include "page/hp_single.hpp"
+#include "page/graphlets.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -26,6 +27,7 @@ public:
 protected:
 	void construct() override {
 		this->add_planet(new HPSingle(remote_test_server));
+		this->add_planet(new Graphlets());
 	}
 
 private:

@@ -147,8 +147,8 @@
   <data name=":hps:" xml:space="preserve">
     <value>H.P Single</value>
   </data>
-  <data name=":unknown:" xml:space="preserve">
-    <value>Unknown</value>
+  <data name=":offline:" xml:space="preserve">
+    <value>Offline</value>
   </data>
   <data name="HPS_A" xml:space="preserve">
     <value>Left Harrow Head</value>
@@ -180,5 +180,8 @@
   </data>
   <data name="HPS_Y" xml:space="preserve">
     <value>Emergency</value>
+  </data>
+  <data name=":gview:" xml:space="preserve">
+    <value>Graphlets Overview </value>
   </data>
 </root>
