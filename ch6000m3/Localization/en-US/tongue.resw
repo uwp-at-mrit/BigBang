@@ -150,34 +150,35 @@
   <data name=":unknown:" xml:space="preserve">
     <value>Unknown</value>
   </data>
-  <data name="HPS:A" xml:space="preserve">
+  <data name="HPS_A" xml:space="preserve">
     <value>Left Harrow Head</value>
+    <comment>':' cannot appear between letters</comment>
   </data>
-  <data name="HPS:B" xml:space="preserve">
+  <data name="HPS_B" xml:space="preserve">
     <value>Left Harrow Body</value>
   </data>
-  <data name="HPS:C" xml:space="preserve">
+  <data name="HPS_C" xml:space="preserve">
     <value>Left Curved Pipe</value>
   </data>
-  <data name="HPS:D" xml:space="preserve">
+  <data name="HPS_D" xml:space="preserve">
     <value>Hopper Door Lock Pump</value>
   </data>
-  <data name="HPS:E" xml:space="preserve">
+  <data name="HPS_E" xml:space="preserve">
     <value>Disc Valve Control Pump</value>
   </data>
-  <data name="HPS:F" xml:space="preserve">
+  <data name="HPS_F" xml:space="preserve">
     <value>Right Curved Pipe</value>
   </data>
-  <data name="HPS:G" xml:space="preserve">
+  <data name="HPS_G" xml:space="preserve">
     <value>Right Harrow Body</value>
   </data>
-  <data name="HPS:H" xml:space="preserve">
+  <data name="HPS_H" xml:space="preserve">
     <value>Right Harrow Head</value>
   </data>
-  <data name="HPS:K" xml:space="preserve">
+  <data name="HPS_K" xml:space="preserve">
     <value>Circulation Cooling</value>
   </data>
-  <data name="HPS:Y" xml:space="preserve">
+  <data name="HPS_Y" xml:space="preserve">
     <value>Emergency</value>
   </data>
 </root>

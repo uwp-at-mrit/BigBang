@@ -37,16 +37,16 @@ public:
 		Turtle<HPS>* pTurtle = new Turtle<HPS>(gridsize, true, HPS::SQ1);
 
 		pTurtle->move_down(4)->turn_down_right()->move_right(10)->turn_right_down();
-		pTurtle->move_down(4, HPS::f)->move_right(4, HPS::SQf)->move_right(6, HPS::F)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::c)->move_right(4, HPS::SQc)->move_right(6, HPS::C)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(6, HPS::D)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(6, HPS::E)->move_right(4)->move_up(30);
-		pTurtle->turn_up_left()->move_left(28)->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F);
-		pTurtle->jump_up(3)->turn_up_left()->move_left(22)->turn_left_down()->move_down(17);
-		pTurtle->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(6, HPS::SQa)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(6, HPS::SQb)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(6, HPS::SQg)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::h)->move_right(4, HPS::H)->move_right(6, HPS::SQh)->move_right(4)->move_up(16);
+		pTurtle->move_down(4, HPS::f)->move_right(4, HPS::SQf)->move_right(10, HPS::F)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::c)->move_right(4, HPS::SQc)->move_right(10, HPS::C)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4)->move_up(30);
+		pTurtle->turn_up_left()->move_left(32)->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F);
+		pTurtle->jump_up(3)->turn_up_left()->move_left(26)->turn_left_down()->move_down(17);
+		pTurtle->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(10, HPS::SQg)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HPS::h)->move_right(4, HPS::H)->move_right(10, HPS::SQh)->move_right(4)->move_up(16);
 		pTurtle->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPS::SQ2);
 		pTurtle->jump_right(8, HPS::SQ3)->move_down()->turn_down_right()->move_right(8, HPS::k);
 		pTurtle->move_right(4, HPS::SQk)->move_right(4)->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
@@ -145,9 +145,11 @@ public:
 
 private:
 	void load_pumplet(unsigned int idx, float radius, double degree, HPS id) {
+		Platform::String^ idname = id.ToString();
+
 		this->pumps[idx] = new Pumplet(radius, degree);
-		this->pump_labels[idx] = this->make_labellet(id.ToString(), id);
-		this->pump_captions[idx] = this->make_labellet(speak("HPS:" + id.ToString()), id);
+		this->pump_labels[idx] = this->make_labellet(idname, id);
+		this->pump_captions[idx] = this->make_labellet(speak("HPS_" + idname), id);
 
 		this->pumps[idx]->id = static_cast<long>(id);
 		this->workbench->insert(this->pumps[idx]);
