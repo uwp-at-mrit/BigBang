@@ -184,4 +184,28 @@
   <data name=":gview:" xml:space="preserve">
     <value>Graphlets Overview </value>
   </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Remote" xml:space="preserve">
+    <value>Control Remotely</value>
+  </data>
+  <data name="Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Starting" xml:space="preserve">
+    <value>Turning On</value>
+  </data>
+  <data name="Stopped" xml:space="preserve">
+    <value>Not Running</value>
+  </data>
+  <data name="Stopping" xml:space="preserve">
+    <value>Turning Off</value>
+  </data>
+  <data name="Unstartable" xml:space="preserve">
+    <value>Failed to Turn On</value>
+  </data>
+  <data name="Unstoppable" xml:space="preserve">
+    <value>Failed to Turn Off</value>
+  </data>
 </root>

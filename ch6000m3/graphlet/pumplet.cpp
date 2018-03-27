@@ -28,7 +28,7 @@ PumpStyle WarGrey::SCADA::make_default_pump_style(PumpState state) {
 	case PumpState::Starting: s.body_color = dimgray_brush(); s.mask_color = green_brush(); break;
 	case PumpState::Unstartable: s.body_color = dimgray_brush(); s.mask_color = green_brush(); break;
 	case PumpState::Remote: s.border_color = cyan_brush(); break;
-	case PumpState::Stopped: break; // this is the default state
+	case PumpState::Stopped: break; // this is the default to draw
 	case PumpState::Stopping: s.mask_color = forest_brush(); break;
 	case PumpState::Unstoppable: s.mask_color = forest_brush(); break;
 	case PumpState::Ready: s.skeleton_color = cyan_brush(); break;

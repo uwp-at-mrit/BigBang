@@ -184,4 +184,28 @@
   <data name=":gview:" xml:space="preserve">
     <value>图元说明</value>
   </data>
+  <data name="Ready" xml:space="preserve">
+    <value>准备就绪</value>
+  </data>
+  <data name="Remote" xml:space="preserve">
+    <value>遥控</value>
+  </data>
+  <data name="Running" xml:space="preserve">
+    <value>运行</value>
+  </data>
+  <data name="Starting" xml:space="preserve">
+    <value>正在运行</value>
+  </data>
+  <data name="Stopped" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Stopping" xml:space="preserve">
+    <value>正在停止</value>
+  </data>
+  <data name="Unstartable" xml:space="preserve">
+    <value>运行失败</value>
+  </data>
+  <data name="Unstoppable" xml:space="preserve">
+    <value>停止失败</value>
+  </data>
 </root>
