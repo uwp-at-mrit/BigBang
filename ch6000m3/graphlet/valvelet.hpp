@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private class Valvelet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Valvelet(float length, double degree = -90.0, float thickness = 1.0F,
+		Valvelet(float length, double degrees = -90.0, float thickness = 1.0F,
 			Windows::UI::Color& color = Windows::UI::Colors::Cyan,
 			Windows::UI::Color& border_color = Windows::UI::Colors::WhiteSmoke);
 
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 
 	private:
-		double degree;
+		double degrees;
 		float radius;
 		float thickness;
 	};

@@ -12,11 +12,11 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-Valvelet::Valvelet(float radius, double degree, float thickness, Color& color, Color& border_color)
-	: radius(radius), degree(degree), thickness((thickness <= 0.0F) ? 1.0F : thickness) {
+Valvelet::Valvelet(float radius, double degrees, float thickness, Color& color, Color& border_color)
+	: radius(radius), degrees(degrees), thickness((thickness <= 0.0F) ? 1.0F : thickness) {
 	this->color = make_solid_brush(color);
 	this->border_color = make_solid_brush(border_color);
-	this->triangle = geometry_freeze(::triangle(radius, degree));
+	this->triangle = geometry_freeze(::triangle(radius, degrees));
 }
 
 void Valvelet::fill_extent(float x, float y, float* w, float* h) {
@@ -26,7 +26,7 @@ void Valvelet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 double Valvelet::get_direction_degree() {
-	return this->degree;
+	return this->degrees;
 }
 
 void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

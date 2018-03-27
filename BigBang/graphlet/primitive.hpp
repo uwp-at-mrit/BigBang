@@ -74,6 +74,11 @@ namespace WarGrey::SCADA {
 			for (State s = static_cast<State>(0); s < State::_; s++) {
 				this->set_style(s, make_default_style(s));
 			}
+
+			/** WARNING
+			 *    invoking `on_state_change` here has no effect
+			 *    since its virtual and here is inside the constructor
+			 */
 		}
 
 	public:
@@ -84,6 +89,10 @@ namespace WarGrey::SCADA {
 				this->current_state = new_state;
 				this->on_state_change(static_cast<State>(new_state));
 			}
+		}
+
+		State get_state() {
+			return static_cast<State>(this->current_state);
 		}
 
 		void set_style(State state, Style style) {
@@ -97,11 +106,9 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual void on_state_change(State state) {}
 
-	protected:
-		unsigned long long current_state;
-
 	private:
 		unsigned long long default_state;
+		unsigned long long current_state;
 		Style styles[static_cast<unsigned long long>(State::_)];
 	};
 

@@ -67,22 +67,22 @@ public:
 	}
 
 	void load_pump_elements(float width, float height, float gridsize) {
-		double left_degree = 180.0;
-		double right_degree = 0.0;
-		double up_degree = -90.0;
+		double left_degrees = 180.0;
+		double right_degrees = 0.0;
+		double up_degrees = -90.0;
 
-		this->load_pumplet(0U, gridsize, left_degree, HPS::A);
-		this->load_pumplet(1U, gridsize, left_degree, HPS::B);
-		this->load_pumplet(2U, gridsize, left_degree, HPS::G);
-		this->load_pumplet(3U, gridsize, left_degree, HPS::H);
+		this->load_pumplet(0U, gridsize, left_degrees, HPS::A);
+		this->load_pumplet(1U, gridsize, left_degrees, HPS::B);
+		this->load_pumplet(2U, gridsize, left_degrees, HPS::G);
+		this->load_pumplet(3U, gridsize, left_degrees, HPS::H);
 
-		this->load_pumplet(4U, gridsize, right_degree, HPS::F);
-		this->load_pumplet(5U, gridsize, right_degree, HPS::C);
-		this->load_pumplet(6U, gridsize, right_degree, HPS::D);
-		this->load_pumplet(7U, gridsize, right_degree, HPS::E);
+		this->load_pumplet(4U, gridsize, right_degrees, HPS::F);
+		this->load_pumplet(5U, gridsize, right_degrees, HPS::C);
+		this->load_pumplet(6U, gridsize, right_degrees, HPS::D);
+		this->load_pumplet(7U, gridsize, right_degrees, HPS::E);
 
-		this->load_pumplet(8U, gridsize, up_degree, HPS::Y);
-		this->load_pumplet(9U, gridsize, up_degree, HPS::K);
+		this->load_pumplet(8U, gridsize, up_degrees, HPS::Y);
+		this->load_pumplet(9U, gridsize, up_degrees, HPS::K);
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
@@ -100,7 +100,7 @@ public:
 
 		for (size_t i = 0; i < GRAPHLETS_ARITY(this->pumps); i++) {
 			if (this->pumps[i] != nullptr) {
-				switch (int(this->pumps[i]->get_direction_degree())) {
+				switch (int(this->pumps[i]->get_direction_degrees())) {
 				case -90: {
 					ldx = x0 - gridsize; ldy = y0 - gridsize; lcp = SnipCenterPoint::RT;
 					cdx = x0 + gridsize; cdy = y0 - gridsize; ccp = SnipCenterPoint::LT;
@@ -149,10 +149,10 @@ public:
 	}
 
 private:
-	void load_pumplet(unsigned int idx, float radius, double degree, HPS id) {
+	void load_pumplet(unsigned int idx, float radius, double degrees, HPS id) {
 		Platform::String^ idname = id.ToString();
 
-		this->pumps[idx] = new Pumplet(radius, degree);
+		this->pumps[idx] = new Pumplet(radius, degrees);
 		this->pump_labels[idx] = this->make_labellet(idname, id);
 		this->pump_captions[idx] = this->make_labellet(speak("HPS_" + idname), id);
 

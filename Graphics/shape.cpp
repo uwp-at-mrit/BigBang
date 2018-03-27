@@ -11,11 +11,18 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-inline static void circle_point(float radius, double degree, float* x, float* y) {
-	float radian = float(degree * M_PI / 180.0);
+inline static void circle_point(float radius, double degrees, float* x, float* y) {
+	float radians = float(degrees * M_PI / 180.0);
 
-	(*x) = radius * (cosf(radian) + 1.0F);
-	(*y) = radius * (sinf(radian) + 1.0F);
+	(*x) = radius * (cosf(radians) + 1.0F);
+	(*y) = radius * (sinf(radians) + 1.0F);
+}
+
+inline static void line_point(float x0, float y0, float x1, float y1, double ratio, float* x, float* y) {
+	float flratio = float(ratio);
+
+	(*x) = (x0 - x1) * flratio + x1;
+	(*y) = (y0 - y1) * flratio + y1;
 }
 
 /*************************************************************************************************/
@@ -104,6 +111,33 @@ CanvasGeometry^ triangle(float r, double d) {
 	equilateral_triangle->EndFigure(CanvasFigureLoop::Closed);
 
 	return CanvasGeometry::CreatePath(equilateral_triangle);
+}
+
+CanvasGeometry^ trapezoid(float r, double d, double ratio) {
+	if (ratio <= 0.0) {
+		return blank();
+	} else if (ratio >= 1.0) {
+		return triangle(r, d);
+	} else {
+		auto equilateral_trapezoid = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+		float x0, y0, x1, y1, x2, y2, x, y;
+
+		circle_point(r, d, &x0, &y0);
+		circle_point(r, d + 120.0, &x1, &y1);
+		circle_point(r, d - 120.0, &x2, &y2);
+
+		equilateral_trapezoid->BeginFigure(x1, y1);
+		equilateral_trapezoid->AddLine(x2, y2);
+		line_point(x0, y0, x2, y2, ratio, &x, &y);
+		equilateral_trapezoid->AddLine(x, y);
+		line_point(x0, y0, x1, y1, ratio, &x, &y);
+		equilateral_trapezoid->AddLine(x, y);
+		equilateral_trapezoid->AddLine(x1, y1);
+
+		equilateral_trapezoid->EndFigure(CanvasFigureLoop::Closed);
+
+		return CanvasGeometry::CreatePath(equilateral_trapezoid);
+	}
 }
 
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {

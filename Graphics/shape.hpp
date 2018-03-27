@@ -24,7 +24,8 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float radius, double degree);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float radius, double degrees);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trapezoid(float raidus, double degrees, double height_ratio);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
