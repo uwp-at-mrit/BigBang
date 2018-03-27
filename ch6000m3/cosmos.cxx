@@ -27,7 +27,7 @@ public:
 protected:
 	void construct() override {
 		this->add_planet(new HPSingle(remote_test_server));
-		this->add_planet(new Graphlets());
+		this->add_planet(new GraphletOverview());
 	}
 
 private:

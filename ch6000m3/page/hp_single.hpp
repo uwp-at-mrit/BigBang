@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IModbusClient* device;
 		WarGrey::SCADA::IModbusConfirmation* console;
 
-	private: // never deletes these snips mannually	
+	private: // never deletes these graphlets mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
 

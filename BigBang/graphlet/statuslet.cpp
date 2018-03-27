@@ -230,29 +230,29 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colors::Chocolate);
-    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, Colors::White);
-    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, Colors::Green);
-    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, Colors::Yellow);
-    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, Colors::Yellow);
+	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, chocolate_brush());
+    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, system_foreground_brush());
+    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, green_brush());
+    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, yellow_brush());
+    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, yellow_brush());
+    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, yellow_brush());
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status
 		float plc_x = x + width * 4.0F;
 		
-		ds->DrawText(speak(":plc:"), plc_x, context_y, Colors::Yellow, status_font);
+		ds->DrawText(speak(":plc:"), plc_x, context_y, yellow_brush(), status_font);
 
 		if (this->device == nullptr) {
-			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colors::Red);
+			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, red_brush());
 		} else if (this->device->connected()) {
-			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colors::Green);
+			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, green_brush());
 		} else {
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 
-			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, Colors::Red, status_font);
+			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, red_brush(), status_font);
 		}
 	}
 }
@@ -265,15 +265,15 @@ void Statuslinelet::construct() {
 	initialize_status_font();
 
 	if (status_nolog_color == nullptr) {
-		status_nolog_color = make_solid_brush(Colors::GhostWhite);
-		status_colors[static_cast<unsigned int>(Log::Debug)] = make_solid_brush(Colors::Gray);
-		status_colors[static_cast<unsigned int>(Log::Info)] = make_solid_brush(Colors::Green);
-		status_colors[static_cast<unsigned int>(Log::Notice)] = make_solid_brush(Colors::GreenYellow);
-		status_colors[static_cast<unsigned int>(Log::Warning)] = make_solid_brush(Colors::Yellow);
-		status_colors[static_cast<unsigned int>(Log::Error)] = make_solid_brush(Colors::Red);
-		status_colors[static_cast<unsigned int>(Log::Critical)] = make_solid_brush(Colors::Crimson);
-		status_colors[static_cast<unsigned int>(Log::Alert)] = make_solid_brush(Colors::Firebrick);
-		status_colors[static_cast<unsigned int>(Log::Panic)] = make_solid_brush(Colors::Firebrick);
+		status_nolog_color = ghostwhite_brush();
+		status_colors[static_cast<unsigned int>(Log::Debug)] = silver_brush();
+		status_colors[static_cast<unsigned int>(Log::Info)] = green_brush();
+		status_colors[static_cast<unsigned int>(Log::Notice)] = greenyellow_brush();
+		status_colors[static_cast<unsigned int>(Log::Warning)] = yellow_brush();
+		status_colors[static_cast<unsigned int>(Log::Error)] = red_brush();
+		status_colors[static_cast<unsigned int>(Log::Critical)] = crimson_brush();
+		status_colors[static_cast<unsigned int>(Log::Alert)] = firebrick_brush();
+		status_colors[static_cast<unsigned int>(Log::Panic)] = firebrick_brush();
 	}
 
 	this->set_message("");

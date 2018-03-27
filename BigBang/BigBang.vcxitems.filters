@@ -24,28 +24,28 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\alarmlet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\alarmlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\gaugelet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\motorlet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\motorlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\shapelet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\primitive.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\statuslet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\textlet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\statuslet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\togglet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\primitive.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,28 +74,28 @@
       <Filter>virtualization</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx" />
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\alarmlet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\alarmlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\gaugelet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\motorlet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\motorlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\shapelet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\primitive.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\statuslet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\textlet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\statuslet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\togglet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\primitive.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\togglet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>

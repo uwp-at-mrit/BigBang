@@ -36,6 +36,12 @@ namespace WarGrey::SCADA {
         IGraphletInfo* info;
     };
 
+	private class IPipelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		virtual Windows::Foundation::Rect get_input_port() = 0;
+		virtual Windows::Foundation::Rect get_output_port() = 0;
+	};
+
 	template<typename T>
 	private class IScalelet : public WarGrey::SCADA::IGraphlet {
 	public:
@@ -57,10 +63,46 @@ namespace WarGrey::SCADA {
 		T scale;
 	};
 
-	private class IPipelet : public WarGrey::SCADA::IGraphlet {
+	template<typename State, typename Style>
+	private class IStatelet : public WarGrey::SCADA::IGraphlet {
 	public:
-		virtual Windows::Foundation::Rect get_input_port() = 0;
-		virtual Windows::Foundation::Rect get_output_port() = 0;
+		template<typename Lambda>
+		IStatelet(State default_state, Lambda make_default_style) {
+			this->default_state = ((default_state == State::_) ? 0 : static_cast<unsigned long long>(default_state));
+			this->current_state = this->default_state;
+
+			for (State s = static_cast<State>(0); s < State::_; s++) {
+				this->set_style(s, make_default_style(s));
+			}
+		}
+
+	public:
+		void set_state(State state) {
+			unsigned long long new_state = ((state == State::_) ? this->default_state : static_cast<unsigned long long>(state));
+			
+			if (this->current_state != new_state) {
+				this->current_state = new_state;
+				this->on_state_change(static_cast<State>(new_state));
+			}
+		}
+
+		void set_style(State state, Style style) {
+			this->styles[(state == State::_) ? this->current_state : static_cast<unsigned long long>(state)] = style;
+		}
+
+		const Style& get_style(State state = State::_) {			
+			return this->styles[(state == State::_) ? this->current_state : static_cast<unsigned long long>(state)];
+		}
+
+	protected:
+		virtual void on_state_change(State state) {}
+
+	protected:
+		unsigned long long current_state;
+
+	private:
+		unsigned long long default_state;
+		Style styles[static_cast<unsigned long long>(State::_)];
 	};
 
 	/************************************************************************************************/

@@ -7,16 +7,16 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class Graphlets : public WarGrey::SCADA::Planet {
+	private class GraphletOverview : public WarGrey::SCADA::Planet {
 	public:
-		~Graphlets() noexcept;
-		Graphlets();
+		~GraphletOverview() noexcept;
+		GraphletOverview();
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 
-	private: // never deletes these snips mannually	
+	private: // never deletes these graphlets mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
 	};

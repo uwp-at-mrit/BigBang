@@ -3,11 +3,21 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private class Pumplet : public WarGrey::SCADA::IGraphlet {
+	private enum class PumpState { Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _ };
+
+	private struct PumpStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ effect_color;
+	};
+
+	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpState state);
+
+	private class Pumplet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::PumpState, WarGrey::SCADA::PumpStyle> {
 	public:
-		Pumplet(float radius, double degree = -90.0, float thickness = 1.0F,
-			Windows::UI::Color& color = Windows::UI::Colors::Gray,
-			Windows::UI::Color& ring_color = Windows::UI::Colors::WhiteSmoke);
+		Pumplet(WarGrey::SCADA::PumpState default_state, float radius, double degree = -90.0);
+		Pumplet(float radius, double degree = -90.0);
 
 	public:
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
@@ -17,13 +27,12 @@ namespace WarGrey::SCADA {
 		double get_direction_degree();
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ triangle;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ ring_color;
-
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+		
 	private:
 		double degree;
-		float radius;
+		float size;
 		float thickness;
 	};
 }

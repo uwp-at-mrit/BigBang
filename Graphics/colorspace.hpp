@@ -1,6 +1,6 @@
 #pragma once
 
-Windows::UI::Color rgba(int hex, double alpha = 1.0);
+Windows::UI::Color rgba(unsigned int hex, double alpha = 1.0);
 Windows::UI::Color rgba(Windows::UI::Color& src, double alpha = 1.0);
 Windows::UI::Color rgba(double red, double green, double blue, double alpha = 1.0);
 

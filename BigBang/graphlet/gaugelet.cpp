@@ -80,7 +80,7 @@ void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float meter_x = x + (this->width - this->meter_width) * 0.5F;
     float meter_y = y + this->caption->LayoutBounds.Height;
     
-    ds->DrawTextLayout(this->caption, caption_x, y, Colors::Khaki);
+    ds->DrawTextLayout(this->caption, caption_x, y, khaki_brush());
     this->draw_meter(ds, meter_x, meter_y, this->scale, this->range, this->scales, this->cscale, this->color);
 }
 
@@ -92,9 +92,9 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scal
     float body_y = y + scales->DrawBounds.Y;
 	float current_height = std::fmin(scale * body_height / float(range), body_height);
 
-    ds->FillRectangle(body_x, body_y, body_width, body_height, Colors::Gray);
+    ds->FillRectangle(body_x, body_y, body_width, body_height, gray_brush());
     ds->FillRectangle(body_x, body_y + body_height - current_height, body_width, current_height, color);
-	ds->DrawRectangle(body_x, body_y, body_width, body_height, Colors::GhostWhite);
+	ds->DrawRectangle(body_x, body_y, body_width, body_height, ghostwhite_brush());
 
     { // draw scales and marks
 		float scale_mark_xoff = this->ch * scale_lmark_ratio;
@@ -103,14 +103,14 @@ void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scal
 		float scale_width = scales->LayoutBounds.Width;
 
         // WARNING: the box mode of the Direct2D text layout is not intuitive
-		ds->DrawTextLayout(scales, body_x + scale_xoff - scale_width, y + scale_yoff, Colors::WhiteSmoke);
-		ds->DrawCachedGeometry(this->scale_marks, body_x - scale_mark_xoff, body_y, Colors::WhiteSmoke);
+		ds->DrawTextLayout(scales, body_x + scale_xoff - scale_width, y + scale_yoff, whitesmoke_brush());
+		ds->DrawCachedGeometry(this->scale_marks, body_x - scale_mark_xoff, body_y, whitesmoke_brush());
 	}
 
 	{ // draw current value and label
 		float scale_x = body_x + (body_width - cscale->LayoutBounds.Width) * 0.5F;
 		float scale_y = body_y + body_height;
 
-		ds->DrawTextLayout(cscale, scale_x, scale_y, Colors::Yellow);
+		ds->DrawTextLayout(cscale, scale_x, scale_y, yellow_brush());
 	}
 }

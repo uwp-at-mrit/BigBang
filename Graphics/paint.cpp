@@ -1,5 +1,6 @@
 #include "paint.hpp"
 #include "system.hpp"
+#include "colorspace.hpp"
 #include "transformation.hpp"
 
 using namespace Windows::UI;
@@ -32,6 +33,10 @@ void brush_translate(ICanvasBrush^ brush, float x, float y) {
 
 CanvasSolidColorBrush^ make_solid_brush(Color& color) {
     return ref new CanvasSolidColorBrush(CanvasDevice::GetSharedDevice(), color);
+}
+
+CanvasSolidColorBrush^ make_solid_brush(unsigned int hex, double alpha) {
+	return ref new CanvasSolidColorBrush(CanvasDevice::GetSharedDevice(), rgba(hex, alpha));
 }
 
 CanvasLinearGradientBrush^ make_linear_gradient_brush(float sx, float sy, float ex, float ey
@@ -79,7 +84,11 @@ CanvasSolidColorBrush^ system_##name##_brush() { \
     return name; \
 }
 
-implement_solid_brush(transparent, Colors::Transparent)
+CanvasSolidColorBrush^ green_brush() {
+	static CanvasSolidColorBrush^ real_green = make_solid_brush(0x00FF00);
+
+	return real_green;
+}
 
 implement_system_brush(accentdark1, UIColorType::AccentDark1)
 implement_system_brush(background, UIElementType::Background)
@@ -87,3 +96,20 @@ implement_system_brush(foreground, UIElementType::HighlightText)
 implement_system_brush(highlight, UIElementType::Highlight)
 implement_system_brush(graytext, UIElementType::GrayText)
 
+implement_solid_brush(transparent, Colors::Transparent)
+implement_solid_brush(whitesmoke, Colors::WhiteSmoke)
+implement_solid_brush(ghostwhite, Colors::GhostWhite)
+implement_solid_brush(silver, Colors::Silver)
+implement_solid_brush(gray, Colors::Gray)
+implement_solid_brush(darkgray, Colors::DarkGray)
+implement_solid_brush(dimgray, Colors::DimGray)
+implement_solid_brush(orange, Colors::Orange)
+implement_solid_brush(khaki, Colors::Khaki)
+implement_solid_brush(red, Colors::Red)
+implement_solid_brush(yellow, Colors::Yellow)
+implement_solid_brush(crimson, Colors::Crimson)
+implement_solid_brush(firebrick, Colors::Firebrick)
+implement_solid_brush(chocolate, Colors::Chocolate)
+implement_solid_brush(greenyellow, Colors::GreenYellow)
+implement_solid_brush(forest, Colors::ForestGreen)
+implement_solid_brush(cyan, Colors::Cyan)

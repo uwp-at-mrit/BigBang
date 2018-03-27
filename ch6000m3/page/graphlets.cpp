@@ -24,24 +24,46 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private class Stage final {
 public:
-	Stage(Graphlets* master) : stagebench(master) {}
+	Stage(GraphletOverview* master) : master(master) {}
 
 public:
-	void load(float width, float height) {}
-	void reflow(float width, float height, float vinset) {}
+	void load(float width, float height) {
+		float unitsize = 32.0F;
+
+		for (PumpState s = static_cast<PumpState>(0); s < PumpState::_; s++) {
+			auto pump = new Pumplet(s, unitsize);
+
+			this->pumps[static_cast<unsigned int>(s)] = pump;
+			this->master->insert(pump);
+		}
+	}
+
+	void reflow(float width, float height, float vinset) {
+		float unitsize;
+		float x0 = vinset;
+		float y0 = vinset + vinset;
+
+		this->pumps[0]->fill_extent(0.0F, 0.0F, &unitsize);
+		for (size_t i = 0; i < GRAPHLETS_ARITY(this->pumps); i++) {
+			this->master->move_to(this->pumps[i], x0 + float(i) * unitsize * 1.618F, y0);
+		}
+	}
+
+private: // never delete these graphlets manually.
+	Pumplet* pumps[static_cast<unsigned long long>(PumpState::_)];
 
 private:
-	Graphlets * stagebench;
+	GraphletOverview* master;
 };
 
 /*************************************************************************************************/
-static std::unordered_map<Graphlets*, Stage*> stages;
+static std::unordered_map<GraphletOverview*, Stage*> stages;
 
-Graphlets::Graphlets() : Planet(":gview:") {
+GraphletOverview::GraphletOverview() : Planet(":gview:") {
 	this->set_decorator(new PageDecorator(system_graytext_brush()));
 }
 
-Graphlets::~Graphlets() {
+GraphletOverview::~GraphletOverview() {
 	auto maybe_stage = stages.find(this);
 
 	if (maybe_stage != stages.end()) {
@@ -51,11 +73,11 @@ Graphlets::~Graphlets() {
 	}
 }
 
-void Graphlets::load(CanvasCreateResourcesReason reason, float width, float height) {
+void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (stages.find(this) == stages.end()) {
 		Stage* stage = new Stage(this);
 		
-		stages.insert(std::pair<Graphlets*, Stage*>(this, stage));
+		stages.insert(std::pair<GraphletOverview*, Stage*>(this, stage));
 
 		{ // load snips
 			stage->load(width, height);
@@ -68,7 +90,7 @@ void Graphlets::load(CanvasCreateResourcesReason reason, float width, float heig
 	}
 }
 
-void Graphlets::reflow(float width, float height) {
+void GraphletOverview::reflow(float width, float height) {
 	auto maybe_stage = stages.find(this);
 	
 	if (maybe_stage != stages.end()) {

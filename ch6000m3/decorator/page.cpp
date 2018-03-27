@@ -11,7 +11,7 @@ PageDecorator::~PageDecorator() {}
 
 void PageDecorator::draw_after_snip(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	if (x == 0.0) {
-		if (y == 0.0) { // statusbar's bottomline
+		if (dynamic_cast<Statusbarlet*>(self) != nullptr) { // statusbar's bottomline
 			ds->DrawLine(0, height, width, height, this->brush, 2.0F);
 		} else if (dynamic_cast<Statuslinelet*>(self) != nullptr) { // statusline's topline
 			ds->DrawLine(0, y, width, y, this->brush, 2.0F);

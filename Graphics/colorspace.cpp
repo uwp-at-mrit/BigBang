@@ -52,7 +52,7 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
     }
 }
 
-Color rgba(int hex, double a) {
+Color rgba(unsigned int hex, double a) {
     auto r = (unsigned char)((hex >> 16) & 0xFF);
     auto g = (unsigned char)((hex >> 8) & 0xFF);
     auto b = (unsigned char)(hex & 0xFF);
