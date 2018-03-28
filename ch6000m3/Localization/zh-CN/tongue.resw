@@ -208,4 +208,7 @@
   <data name="Unstoppable" xml:space="preserve">
     <value>停止失败</value>
   </data>
+  <data name="hp_state" xml:space="preserve">
+    <value>液压泵状态</value>
+  </data>
 </root>

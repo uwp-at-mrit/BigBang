@@ -114,6 +114,6 @@ void Numpad::fill_auto_position(float* x, float* y) {
 		SET_BOX(x, Width - this_width);
 		SET_BOX(y, Height - this_height);
 	} else {
-		planet->fill_snip_location(target_snip, x, y, SnipCenterPoint::LB);
+		planet->fill_snip_location(target_snip, x, y, GraphletAlignment::LB);
 	}
 }

@@ -94,7 +94,7 @@ public:
 	
 	void reflow_pump_elements(float width, float height, float gridsize, float vinset) {
 		float x0, y0, ldx, ldy, cdx, cdy;
-		SnipCenterPoint lcp, ccp;
+		GraphletAlignment lcp, ccp;
 
 		this->workbench->fill_snip_location(this->stations[0], &x0, &y0);
 
@@ -102,20 +102,20 @@ public:
 			if (this->pumps[i] != nullptr) {
 				switch (int(this->pumps[i]->get_direction_degrees())) {
 				case -90: {
-					ldx = x0 - gridsize; ldy = y0 - gridsize; lcp = SnipCenterPoint::RT;
-					cdx = x0 + gridsize; cdy = y0 - gridsize; ccp = SnipCenterPoint::LT;
+					ldx = x0 - gridsize; ldy = y0 - gridsize; lcp = GraphletAlignment::RT;
+					cdx = x0 + gridsize; cdy = y0 - gridsize; ccp = GraphletAlignment::LT;
 				} break;
 				case 180: {
-					ldx = x0 - gridsize; ldy = y0 + gridsize; lcp = SnipCenterPoint::RB;
-					cdx = x0 + gridsize; cdy = y0 + gridsize; ccp = SnipCenterPoint::LB;
+					ldx = x0 - gridsize; ldy = y0 + gridsize; lcp = GraphletAlignment::RB;
+					cdx = x0 + gridsize; cdy = y0 + gridsize; ccp = GraphletAlignment::LB;
 				} break;
 				default: {
-					ldx = x0 + gridsize; ldy = y0 + gridsize; lcp = SnipCenterPoint::LB;
-					cdx = x0 - gridsize; cdy = y0 + gridsize; ccp = SnipCenterPoint::RB;
+					ldx = x0 + gridsize; ldy = y0 + gridsize; lcp = GraphletAlignment::LB;
+					cdx = x0 - gridsize; cdy = y0 + gridsize; ccp = GraphletAlignment::RB;
 				} break;
 				}
 
-				this->place_id_element(this->pumps[i], x0, y0, SnipCenterPoint::CC);
+				this->place_id_element(this->pumps[i], x0, y0, GraphletAlignment::CC);
 				this->place_id_element(this->pump_labels[i], ldx, ldy, lcp);
 				this->place_id_element(this->pump_captions[i], cdx, cdy, ccp);
 			}
@@ -169,7 +169,7 @@ private:
 		return label;
 	}
 
-	void place_id_element(IGraphlet* snip, float dx, float dy, SnipCenterPoint scp) {
+	void place_id_element(IGraphlet* snip, float dx, float dy, GraphletAlignment scp) {
 		float x, y;
 
 		this->stations[0]->fill_anchor_location(static_cast<HPS>(snip->id), &x, &y);
@@ -246,7 +246,7 @@ void HPSingle::reflow(float width, float height) {
 		float vinset = statusbar_height();
 
 		this->change_mode(HPSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, SnipCenterPoint::LB);
+		this->move_to(this->statusline, 0.0F, height, GraphletAlignment::LB);
 		
 		this->change_mode(HPSMode::Control);
 

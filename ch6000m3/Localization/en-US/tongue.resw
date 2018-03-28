@@ -208,4 +208,7 @@
   <data name="Unstoppable" xml:space="preserve">
     <value>Failed to Turn Off</value>
   </data>
+  <data name="hp_state" xml:space="preserve">
+    <value>Hydraulic Pump State</value>
+  </data>
 </root>

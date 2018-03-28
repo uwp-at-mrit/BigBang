@@ -132,23 +132,23 @@ static inline void unsafe_set_selected(IPlanet* master, IGraphlet* snip, SnipInf
 	unsafe_add_selected(master, snip, info);
 }
 
-static void snip_center_point_offset(IGraphlet* snip, float width, float height, SnipCenterPoint& cp, float& xoff, float& yoff) {
+static void snip_center_point_offset(IGraphlet* snip, float width, float height, GraphletAlignment& cp, float& xoff, float& yoff) {
     xoff = 0.0F;
     yoff = 0.0F;
 
-    if (cp != SnipCenterPoint::LT) {
+    if (cp != GraphletAlignment::LT) {
 		float halfw = width  * 0.5F;
 		float halfh = height * 0.5F;
 
         switch (cp) {
-        case SnipCenterPoint::LC:               yoff = halfh;  break;
-        case SnipCenterPoint::LB:               yoff = height; break;
-        case SnipCenterPoint::CT: xoff = halfw;                break;
-        case SnipCenterPoint::CC: xoff = halfw; yoff = halfh;  break;
-        case SnipCenterPoint::CB: xoff = halfw; yoff = height; break;
-        case SnipCenterPoint::RT: xoff = width;                break;
-        case SnipCenterPoint::RC: xoff = width; yoff = halfh;  break;
-        case SnipCenterPoint::RB: xoff = width; yoff = height; break;
+        case GraphletAlignment::LC:               yoff = halfh;  break;
+        case GraphletAlignment::LB:               yoff = height; break;
+        case GraphletAlignment::CT: xoff = halfw;                break;
+        case GraphletAlignment::CC: xoff = halfw; yoff = halfh;  break;
+        case GraphletAlignment::CB: xoff = halfw; yoff = height; break;
+        case GraphletAlignment::RT: xoff = width;                break;
+        case GraphletAlignment::RC: xoff = width; yoff = halfh;  break;
+        case GraphletAlignment::RB: xoff = width; yoff = height; break;
         }
     }
 }
@@ -202,7 +202,7 @@ void Planet::insert(IGraphlet* snip, double degrees, float x, float y) {
 	}
 }
 
-void Planet::move_to(IGraphlet* snip, float x, float y, SnipCenterPoint cp) {
+void Planet::move_to(IGraphlet* snip, float x, float y, GraphletAlignment cp) {
 	SnipInfo* info = planet_snip_info(this, snip);
 	
 	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
@@ -264,7 +264,7 @@ IGraphlet* Planet::find_snip(float x, float y) {
     return found;
 }
 
-bool Planet::fill_snip_location(IGraphlet* snip, float* x, float* y, SnipCenterPoint cp) {
+bool Planet::fill_snip_location(IGraphlet* snip, float* x, float* y, GraphletAlignment cp) {
 	bool okay = false;
 	SnipInfo* info = planet_snip_info(this, snip);
 	

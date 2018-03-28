@@ -9,12 +9,17 @@ namespace WarGrey::SCADA {
     public:
         Labellet(const wchar_t* fmt, ...);
 		Labellet(Windows::UI::Color& color, const wchar_t* fmt, ...);
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, const wchar_t* fmt, ...);
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Windows::UI::Color& color, const wchar_t* fmt, ...);
 
 		Labellet(Platform::String^ content = "");
 		Labellet(Windows::UI::Color& color, Platform::String^ content = "");
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Platform::String^ content = "");
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Windows::UI::Color& color, Platform::String^ content = "");
 
     public:
         void set_text(Platform::String^ content);
+		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
 		void set_color(Windows::UI::Color& color = Windows::UI::Colors::Silver);
 
     public:

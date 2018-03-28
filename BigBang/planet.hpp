@@ -33,12 +33,12 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual WarGrey::SCADA::IGraphlet* find_snip(float x, float y) = 0;
-		virtual bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
+		virtual bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
 		virtual bool fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
 		virtual void insert(IGraphlet* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
 		virtual void move(IGraphlet* snip, float x, float y) = 0;
-		virtual void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) = 0;
+		virtual void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
@@ -129,12 +129,12 @@ namespace WarGrey::SCADA {
 
     public:
 		WarGrey::SCADA::IGraphlet* find_snip(float x, float y) override;
-        bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+        bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
 		bool fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) override;
 		void fill_snips_bounds(float* x, float* y, float* width, float* height);
 		void insert(IGraphlet* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
         void move(IGraphlet* snip, float x, float y) override;
-        void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::SnipCenterPoint cp = SnipCenterPoint::LT) override;
+        void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
 		void size_cache_invalid();
 
 	public:

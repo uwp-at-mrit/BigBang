@@ -24,6 +24,20 @@ Labellet::Labellet(Color& color, const wchar_t *fmt, ...) {
 	this->set_text(label);
 }
 
+Labellet::Labellet(CanvasTextFormat^ font, const wchar_t *fmt, ...) {
+	VSWPRINT(label, fmt);
+	this->set_font(font);
+	this->set_color();
+	this->set_text(label);
+}
+
+Labellet::Labellet(CanvasTextFormat^ font, Color& color, const wchar_t *fmt, ...) {
+	VSWPRINT(label, fmt);
+	this->set_font(font);
+	this->set_color(color);
+	this->set_text(label);
+}
+
 Labellet::Labellet(Platform::String^ content) {
 	this->set_color();
 	this->set_text(content);
@@ -32,6 +46,18 @@ Labellet::Labellet(Platform::String^ content) {
 Labellet::Labellet(Color& color, Platform::String^ content) {
 	this->set_color(color);
     this->set_text(content);
+}
+
+Labellet::Labellet(CanvasTextFormat^ font, Platform::String^ content) {
+	this->set_font(font);
+	this->set_color();
+	this->set_text(content);
+}
+
+Labellet::Labellet(CanvasTextFormat^ font, Color& color, Platform::String^ content) {
+	this->set_font(font);
+	this->set_color(color);
+	this->set_text(content);
 }
 
 void Labellet::set_text(Platform::String^ content) {
@@ -44,6 +70,10 @@ void Labellet::set_text(Platform::String^ content) {
 
 void Labellet::set_color(Color& color) {
 	this->label_color = make_solid_brush(color);
+}
+
+void Labellet::set_font(CanvasTextFormat^ font) {
+	this->label_font = font;
 }
 
 void Labellet::fill_extent(float x, float y, float* w, float* h) {
