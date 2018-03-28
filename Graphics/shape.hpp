@@ -25,8 +25,12 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float radius, double degrees);
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trapezoid(float raidus, double degrees, double height_ratio);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ masked_triangle(float raidus, double degrees, double height_ratio);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sandglass(float radius, double degrees);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ masked_sandglass(float raidus, double degrees, double height_ratio);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float radius, double degrees);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
 

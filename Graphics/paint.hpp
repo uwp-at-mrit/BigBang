@@ -35,6 +35,7 @@ Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_graytext_bru
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ transparent_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ whitesmoke_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ghostwhite_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lightgray_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ silver_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ gray_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ darkgray_brush();
@@ -51,4 +52,6 @@ Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ green_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ greenyellow_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ forest_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cyan_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ darkcyan_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cadetblue_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ teal_brush();

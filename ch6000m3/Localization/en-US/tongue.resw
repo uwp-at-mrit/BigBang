@@ -214,4 +214,37 @@
   <data name="v_state" xml:space="preserve">
     <value>Valve State</value>
   </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Fully Closed</value>
+  </data>
+  <data name="Closing" xml:space="preserve">
+    <value>Turning Off</value>
+  </data>
+  <data name="ConditionalClose" xml:space="preserve">
+    <value>Conditional Turn Off</value>
+  </data>
+  <data name="ConditionalOpen" xml:space="preserve">
+    <value>Conditional Turn On</value>
+  </data>
+  <data name="FalseClose" xml:space="preserve">
+    <value>False Close</value>
+  </data>
+  <data name="FalseOpen" xml:space="preserve">
+    <value>False Open</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manually Operation</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Fully Open</value>
+  </data>
+  <data name="Opening" xml:space="preserve">
+    <value>Turning On</value>
+  </data>
+  <data name="Unclosable" xml:space="preserve">
+    <value>Failed to Turn Off</value>
+  </data>
+  <data name="Unopenable" xml:space="preserve">
+    <value>Failed to Turn On</value>
+  </data>
 </root>

@@ -118,7 +118,7 @@ private:
 private:
 	template<typename T>
 	void reflow_graphlets(T* gs[], Labellet* ls[], float x0, float y, float cellsize, size_t size) {
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->pumps); i++) {
+		for (size_t i = 0; i < size; i++) {
 			float x = x0 + float(i) * cellsize;
 
 			this->master->move_to(gs[i], x, y, GraphletAlignment::CB);

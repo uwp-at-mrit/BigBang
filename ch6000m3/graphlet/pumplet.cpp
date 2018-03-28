@@ -60,7 +60,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = trapezoid(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 	} break;
 	case PumpState::Stopping: {
 		this->mask_percentage
@@ -68,7 +68,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = trapezoid(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 	} break;
 	}
 }
@@ -77,13 +77,13 @@ void Pumplet::on_state_change(PumpState state) {
 	switch (state) {
 	case PumpState::Unstartable: {
 		if (this->unstartable_mask == nullptr) {
-			this->unstartable_mask = trapezoid(this->tradius, this->degrees, 0.382);
+			this->unstartable_mask = masked_triangle(this->tradius, this->degrees, 0.382);
 		}
 		this->mask = this->unstartable_mask;
 	} break;
 	case PumpState::Unstoppable: {
 		if (this->unstoppable_mask == nullptr) {
-			this->unstoppable_mask = trapezoid(this->tradius, this->degrees, 0.618);
+			this->unstoppable_mask = masked_triangle(this->tradius, this->degrees, 0.618);
 		}
 		this->mask = this->unstoppable_mask;
 	} break;
@@ -111,8 +111,8 @@ void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	float radius = this->size * 0.5F - this->thickness;
 	float cx = x + radius + this->thickness;
 	float cy = y + radius + this->thickness;
-	float bx = cx - radius + this->thickness;
-	float by = cy - radius + this->thickness;
+	float bx = cx - this->tradius;
+	float by = cy - this->tradius;
 
 	ds->FillCircle(cx, cy, radius, system_background_brush());
 	ds->DrawCircle(cx, cy, radius, border_color, this->thickness);

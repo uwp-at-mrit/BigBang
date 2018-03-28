@@ -4,10 +4,10 @@
 
 namespace WarGrey::SCADA {
 	private enum class ValveState {
-		Handle,
+		Manual,
 		Open, Opening, Unopenable, ConditionalOpen,
 		Closed, Closing, Unclosable, ConditionalClose,
-		FalseOpen, FalseClosed,
+		FalseOpen, FalseClose,
 		_ };
 
 	private struct ValveStyle {
@@ -38,14 +38,17 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstartable_mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstoppable_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unopenable_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unclosable_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ manual_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ frame;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
 		double degrees;
-		float tradius;
+		float sgradius;
+		float fradius;
 		float size;
 		float thickness;
 

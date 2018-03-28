@@ -214,4 +214,37 @@
   <data name="v_state" xml:space="preserve">
     <value>阀状态</value>
   </data>
+  <data name="Closed" xml:space="preserve">
+    <value>完全关闭</value>
+  </data>
+  <data name="Closing" xml:space="preserve">
+    <value>正在关闭</value>
+  </data>
+  <data name="ConditionalClose" xml:space="preserve">
+    <value>关闭条件</value>
+  </data>
+  <data name="ConditionalOpen" xml:space="preserve">
+    <value>打开条件</value>
+  </data>
+  <data name="FalseClose" xml:space="preserve">
+    <value>假关</value>
+  </data>
+  <data name="FalseOpen" xml:space="preserve">
+    <value>假开</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>手动阀</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>完全打开</value>
+  </data>
+  <data name="Opening" xml:space="preserve">
+    <value>正在打开</value>
+  </data>
+  <data name="Unclosable" xml:space="preserve">
+    <value>关闭失败</value>
+  </data>
+  <data name="Unopenable" xml:space="preserve">
+    <value>打开失败</value>
+  </data>
 </root>
