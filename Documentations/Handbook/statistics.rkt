@@ -69,7 +69,7 @@
               (let numstat ([stats null])
                 (define +-path (read-line /dev/gitin))
                 (define tokens (if (eof-object? +-path) null (string-split +-path)))
-                (cond [(>= (length tokens) 3) ; e.g. `59 53 {src.ext => renamed.ext}`
+                (cond [(>= (length tokens) 3) ; e.g. `59 53 {src.ext => renamed.ext}` [only with `git diff`]
                        (let ([insertion (string->number (car tokens))]
                              [deletion (string->number (cadr tokens))])
                          (numstat (if (and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats) stats)))]

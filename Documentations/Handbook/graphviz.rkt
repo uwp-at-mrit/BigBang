@@ -193,7 +193,7 @@
                       (or line-start 0)
                       (or line-end (* (exact-ceiling (/ peak peak-factor)) peak-factor))))
 
-            (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc peak) mark-font #true))
+            (define-values (mark-max-width _h _d _s) (send dc get-text-extent (~loc linen) mark-font #true))
             (define x-start (+ dx mark-max-width 1ch))
             (define x-range (- (+ dx flwidth) x-start mark-max-width 1ch))
             (define y-start (- (+ dy flheight) 1ex 1em))
