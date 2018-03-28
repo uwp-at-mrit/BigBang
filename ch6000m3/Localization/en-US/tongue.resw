@@ -211,4 +211,7 @@
   <data name="hp_state" xml:space="preserve">
     <value>Hydraulic Pump State</value>
   </data>
+  <data name="v_state" xml:space="preserve">
+    <value>Valve State</value>
+  </data>
 </root>

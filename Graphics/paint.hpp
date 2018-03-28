@@ -51,3 +51,4 @@ Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ green_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ greenyellow_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ forest_brush();
 Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cyan_brush();
+Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cadetblue_brush();

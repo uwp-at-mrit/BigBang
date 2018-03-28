@@ -17,7 +17,7 @@ void BorderDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, flo
     if (this->draw_enclosing_box) {
         float x, y, width, height;
 
-        master->fill_snips_bounds(&x, &y, &width, &height);
+        master->fill_graphlets_bounds(&x, &y, &width, &height);
         ds->DrawRectangle(x, y, width, height, system_graytext_brush(), 1.0F);
     }
 

@@ -6,7 +6,7 @@
 #include "box.hpp"
 
 namespace WarGrey::SCADA {
-    #define GRAPHLETS_ARITY(a) (sizeof(a) / sizeof(IGraphlet*))
+    #define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))
 
     private class IGraphletInfo abstract {
     public:
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		virtual ~IGraphlet() noexcept;
 
 	public:
-		// `id` is designed for user-applications, in order to distinguish instances of a snip class.
+		// `id` is designed for user-applications, in order to distinguish instances of a graphlet class.
 		// User-Applications should define and maintain the enumerations on their own.
 		long int id = -1L;
 
@@ -113,8 +113,8 @@ namespace WarGrey::SCADA {
 	};
 
 	/************************************************************************************************/
-	Windows::Foundation::Rect snip_enclosing_box(
-		WarGrey::SCADA::IGraphlet* snip, float x, float y,
+	Windows::Foundation::Rect graphlet_enclosing_box(
+		WarGrey::SCADA::IGraphlet* g, float x, float y,
 		Windows::Foundation::Numerics::float3x2 tf);
 
 	void pipe_connecting_position(

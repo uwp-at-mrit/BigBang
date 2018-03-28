@@ -16,7 +16,7 @@ PipelineDecorator::PipelineDecorator(bool draw_in, bool draw_out) {
     this->draw_outport = draw_out;
 }
 
-void PipelineDecorator::draw_after_snip(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void PipelineDecorator::draw_after_graphlet(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
     if (this->draw_inport || this->draw_outport) {
        IPipelet* pipe = dynamic_cast<IPipelet*>(self);
 

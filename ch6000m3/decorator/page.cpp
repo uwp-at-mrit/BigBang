@@ -9,7 +9,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 PageDecorator::PageDecorator(ICanvasBrush^ brush) : brush(brush) {}
 PageDecorator::~PageDecorator() {}
 
-void PageDecorator::draw_after_snip(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void PageDecorator::draw_after_graphlet(IGraphlet* self, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	if (x == 0.0) {
 		if (dynamic_cast<Statusbarlet*>(self) != nullptr) { // statusbar's bottomline
 			ds->DrawLine(0, height, width, height, this->brush, 2.0F);

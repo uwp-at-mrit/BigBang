@@ -18,13 +18,13 @@ namespace WarGrey::SCADA {
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float Width, float Height) {};
 
-        virtual void draw_before_snip(
-            WarGrey::SCADA::IGraphlet* snip,
+        virtual void draw_before_graphlet(
+            WarGrey::SCADA::IGraphlet* g,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) {};
 
-        virtual void draw_after_snip(
-            WarGrey::SCADA::IGraphlet* snip,
+        virtual void draw_after_graphlet(
+            WarGrey::SCADA::IGraphlet* g,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) {};
 
@@ -48,13 +48,13 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float Width, float Height) override;
 
-		void draw_before_snip(
-			WarGrey::SCADA::IGraphlet* snip,
+		void draw_before_graphlet(
+			WarGrey::SCADA::IGraphlet* g,
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float x, float y, float width, float height, bool selected) override;
 
-		void draw_after_snip(
-			WarGrey::SCADA::IGraphlet* snip,
+		void draw_after_graphlet(
+			WarGrey::SCADA::IGraphlet* g,
 			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			float x, float y, float width, float height, bool selected) override;
 

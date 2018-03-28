@@ -16,7 +16,7 @@ CanvasRenderTarget^ ISprite::take_snapshot(float dpi) {
 
 	this->fill_extent(0.0F, 0.0F, &width, &height);
 
-	{ // WARNING: there is no synchronous mechanism for snip.
+	{ // WARNING: there is no synchronous mechanism for graphlet.
 		CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
 		CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
 
@@ -34,7 +34,7 @@ void ISprite::save(Platform::String^ path, float dpi) {
 		try {
 			saving.get();
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Alert, "failed to save snip as bitmap:" + e->Message);
+			syslog(Log::Alert, "failed to save graphlet as bitmap:" + e->Message);
 		}
 	});
 }

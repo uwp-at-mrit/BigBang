@@ -9,6 +9,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Text;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
@@ -63,6 +64,7 @@ Labellet::Labellet(CanvasTextFormat^ font, Color& color, Platform::String^ conte
 void Labellet::set_text(Platform::String^ content) {
     if (this->label_font == nullptr) {
         this->label_font = make_text_format();
+		this->label_font->FontWeight = FontWeights::Bold;
     }
 
 	this->content = make_text_layout(content, this->label_font);

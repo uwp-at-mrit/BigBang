@@ -103,9 +103,9 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 
 void Numpad::fill_auto_position(float* x, float* y) {
 	IPlanet* planet = this->master;
-	IGraphlet* target_snip = planet->get_focus_snip();
+	IGraphlet* target = planet->get_focus_graphlet();
 
-	if (target_snip == nullptr) {
+	if (target == nullptr) {
 		float Width = planet->info->master->actual_width;
 		float Height = planet->info->master->actual_height;
 		float this_width, this_height;
@@ -114,6 +114,6 @@ void Numpad::fill_auto_position(float* x, float* y) {
 		SET_BOX(x, Width - this_width);
 		SET_BOX(y, Height - this_height);
 	} else {
-		planet->fill_snip_location(target_snip, x, y, GraphletAlignment::LB);
+		planet->fill_graphlet_location(target, x, y, GraphletAlignment::LB);
 	}
 }

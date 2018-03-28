@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 		void reflow(float width, float height) override;
 
 	public:
-		void on_tap(IGraphlet* snip, float x, float y, bool shifted, bool ctrled) override;
+		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
 		WarGrey::SCADA::IModbusClient* device;

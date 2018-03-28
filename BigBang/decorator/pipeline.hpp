@@ -8,8 +8,8 @@ namespace WarGrey::SCADA {
         PipelineDecorator(bool draw_inport = true, bool draw_outport = true);
 
     public:
-        void draw_after_snip(
-            WarGrey::SCADA::IGraphlet* snip,
+        void draw_after_graphlet(
+            WarGrey::SCADA::IGraphlet* g,
             Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
             float x, float y, float width, float height, bool selected) override;
 

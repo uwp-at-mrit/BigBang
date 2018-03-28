@@ -59,7 +59,7 @@ public:
 
 		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colors::Goldenrod);
 
-		for (size_t i = 0; i < GRAPHLETS_ARITY(this->stations); i++) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->stations); i++) {
 			if (this->stations[i] != nullptr) {
 				this->workbench->insert(this->stations[i]);
 			}
@@ -96,9 +96,9 @@ public:
 		float x0, y0, ldx, ldy, cdx, cdy;
 		GraphletAlignment lcp, ccp;
 
-		this->workbench->fill_snip_location(this->stations[0], &x0, &y0);
+		this->workbench->fill_graphlet_location(this->stations[0], &x0, &y0);
 
-		for (size_t i = 0; i < GRAPHLETS_ARITY(this->pumps); i++) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->pumps); i++) {
 			if (this->pumps[i] != nullptr) {
 				switch (int(this->pumps[i]->get_direction_degrees())) {
 				case -90: {
@@ -132,7 +132,7 @@ public:
 		
 		//this->workbench->enter_critical_section();
 		
-		//for (size_t i = 1; i < GRAPHLETS_ARITY(this->gauges); i++) {
+		//for (size_t i = 1; i < GRAPHLETS_LENGTH(this->gauges); i++) {
 		//	float mpa = float(register_values[i]) * 0.1F;
 
 		//	Mpa = Mpa + mpa;
@@ -169,14 +169,14 @@ private:
 		return label;
 	}
 
-	void place_id_element(IGraphlet* snip, float dx, float dy, GraphletAlignment scp) {
+	void place_id_element(IGraphlet* g, float dx, float dy, GraphletAlignment scp) {
 		float x, y;
 
-		this->stations[0]->fill_anchor_location(static_cast<HPS>(snip->id), &x, &y);
-		this->workbench->move_to(snip, x + dx, y + dy, scp);
+		this->stations[0]->fill_anchor_location(static_cast<HPS>(g->id), &x, &y);
+		this->workbench->move_to(g, x + dx, y + dy, scp);
 	}
 
-// never deletes these snips mannually
+// never deletes these graphlets mannually
 private:
 	Tracklet<HPS>* stations[2];
 	Pumplet* pumps[12];
@@ -212,7 +212,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 	if (console != nullptr) {
 		float vinset = statusbar_height();
 
-		{ // load snips
+		{ // load graphlets
 			this->change_mode(HPSMode::View);
 			console->load_pump_station(width, height, this->gridsize);
 			console->load_pump_elements(width, height, this->gridsize);
@@ -256,6 +256,6 @@ void HPSingle::reflow(float width, float height) {
 	}
 }
 
-void HPSingle::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted, bool ctrled) {
-	// this->set_caret_owner(snip);
+void HPSingle::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	// this->set_caret_owner(g);
 }

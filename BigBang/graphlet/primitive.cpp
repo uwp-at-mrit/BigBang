@@ -8,10 +8,10 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-Rect snip_enclosing_box(IGraphlet* snip, float x, float y, float3x2 transform) {
+Rect graphlet_enclosing_box(IGraphlet* g, float x, float y, float3x2 transform) {
 	float width, height;
 
-	snip->fill_extent(x, y, &width, &height);
+	g->fill_extent(x, y, &width, &height);
 
 	return rectangle(x, y, width, height)->ComputeBounds(transform);
 }

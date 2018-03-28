@@ -35,13 +35,13 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
  *   reinterpret_cast may cause "Access violation reading location 0xFFFFFFFFFFFFFFFF" even for subtype casting.
  */
 
-#define SNIP_INFO(snip) (static_cast<SnipInfo*>(snip->info))
+#define GRAPHLET_INFO(g) (static_cast<GraphletInfo*>(g->info))
 
 class PlaceHolderDecorator : public IPlanetDecorator {};
 
-class SnipInfo : public WarGrey::SCADA::IGraphletInfo {
+class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
-    SnipInfo(IPlanet* master, unsigned int mode)
+    GraphletInfo(IPlanet* master, unsigned int mode)
 		: IGraphletInfo(master), mode(mode) {};
 
 public:
@@ -58,43 +58,43 @@ public:
 	IGraphlet* prev;
 };
 
-static SnipInfo* bind_snip_owership(IPlanet* master, unsigned int mode, IGraphlet* snip, double degrees) {
-    auto info = new SnipInfo(master, mode);
-    snip->info = info;
+static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, double degrees) {
+    auto info = new GraphletInfo(master, mode);
+    g->info = info;
 
     while (degrees <  0.000) degrees += 360.0;
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
 
-    snip->construct();
+    g->construct();
 
     return info;
 }
 
-static inline SnipInfo* planet_snip_info(IPlanet* master, IGraphlet* snip) {
-	SnipInfo* info = nullptr;
+static inline GraphletInfo* planet_graphlet_info(IPlanet* master, IGraphlet* g) {
+	GraphletInfo* info = nullptr;
 
-	if ((snip != nullptr) && (snip->info != nullptr)) {
-		if (snip->info->master == master) {
-			info = SNIP_INFO(snip);
+	if ((g != nullptr) && (g->info != nullptr)) {
+		if (g->info->master == master) {
+			info = GRAPHLET_INFO(g);
 		}
 	}
 	
 	return info;
 }
 
-static inline bool unsafe_snip_unmasked(SnipInfo* info, unsigned int mode) {
+static inline bool unsafe_graphlet_unmasked(GraphletInfo* info, unsigned int mode) {
 	return ((info->mode == 0) || (info->mode == mode));
 }
 
-static void unsafe_fill_snip_bound(IGraphlet* snip, SnipInfo* info, float* x, float* y, float* width, float* height) {
-	snip->fill_extent(info->x, info->y, width, height);
+static void unsafe_fill_graphlet_bound(IGraphlet* g, GraphletInfo* info, float* x, float* y, float* width, float* height) {
+	g->fill_extent(info->x, info->y, width, height);
 
 	(*x) = info->x;
 	(*y) = info->y;
 
 	if (info->rotation != 0.0F) {
-		// TODO: the resulting rectangle is inaccurate especially for small snips.
+		// TODO: the resulting rectangle is inaccurate especially for small graphlets.
 		auto cx = (*x) + (*width) * 0.5F;
 		auto cy = (*y) + (*height) * 0.5F;
 		auto clip = rectangle((*x), (*y), (*width), (*height));
@@ -107,7 +107,7 @@ static void unsafe_fill_snip_bound(IGraphlet* snip, SnipInfo* info, float* x, fl
 	}
 }
 
-static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, float y, bool absolute) {
+static void unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
     if (!absolute) {
         x += info->x;
         y += info->y;
@@ -121,18 +121,18 @@ static void unsafe_move_snip_via_info(Planet* master, SnipInfo* info, float x, f
     }
 }
 
-static inline void unsafe_add_selected(IPlanet* master, IGraphlet* snip, SnipInfo* info) {
-	master->before_select(snip, true);
+static inline void unsafe_add_selected(IPlanet* master, IGraphlet* g, GraphletInfo* info) {
+	master->before_select(g, true);
 	info->selected = true;
-	master->after_select(snip, true);
+	master->after_select(g, true);
 }
 
-static inline void unsafe_set_selected(IPlanet* master, IGraphlet* snip, SnipInfo* info) {
+static inline void unsafe_set_selected(IPlanet* master, IGraphlet* g, GraphletInfo* info) {
 	master->no_selected();
-	unsafe_add_selected(master, snip, info);
+	unsafe_add_selected(master, g, info);
 }
 
-static void snip_center_point_offset(IGraphlet* snip, float width, float height, GraphletAlignment& cp, float& xoff, float& yoff) {
+static void graphlet_alignment_offset(IGraphlet* g, float width, float height, GraphletAlignment& cp, float& xoff, float& yoff) {
     xoff = 0.0F;
     yoff = 0.0F;
 
@@ -174,82 +174,82 @@ void Planet::change_mode(unsigned int mode) {
 	}
 }
 
-bool Planet::snip_unmasked(IGraphlet* snip) {
-	SnipInfo* info = planet_snip_info(this, snip);
+bool Planet::graphlet_unmasked(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
 
-	return ((info != nullptr) && unsafe_snip_unmasked(info, this->mode));
+	return ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode));
 }
 
-void Planet::insert(IGraphlet* snip, double degrees, float x, float y) {
-	if (snip->info == nullptr) {
-		SnipInfo* info = bind_snip_owership(this, this->mode, snip, degrees);
+void Planet::insert(IGraphlet* g, double degrees, float x, float y) {
+	if (g->info == nullptr) {
+		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, degrees);
 		
-		if (this->head_snip == nullptr) {
-            this->head_snip = snip;
-            info->prev = this->head_snip;
+		if (this->head_graphlet == nullptr) {
+            this->head_graphlet = g;
+            info->prev = this->head_graphlet;
         } else {
-			SnipInfo* head_info = SNIP_INFO(this->head_snip);
-			SnipInfo* prev_info = SNIP_INFO(head_info->prev);
+			GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
+			GraphletInfo* prev_info = GRAPHLET_INFO(head_info->prev);
 			
 			info->prev = head_info->prev;
-            prev_info->next = snip;
-            head_info->prev = snip;
+            prev_info->next = g;
+            head_info->prev = g;
         }
-        info->next = this->head_snip;
+        info->next = this->head_graphlet;
 
-        unsafe_move_snip_via_info(this, info, x, y, true);
+        unsafe_move_graphlet_via_info(this, info, x, y, true);
         this->size_cache_invalid();
 	}
 }
 
-void Planet::move_to(IGraphlet* snip, float x, float y, GraphletAlignment cp) {
-	SnipInfo* info = planet_snip_info(this, snip);
+void Planet::move_to(IGraphlet* g, float x, float y, GraphletAlignment cp) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
 	
-	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
 		float sx, sy, sw, sh, xoff, yoff;
 		
-		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-		snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
-		unsafe_move_snip_via_info(this, info, x - xoff, y - yoff, true);
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		graphlet_alignment_offset(g, sw, sh, cp, xoff, yoff);
+		unsafe_move_graphlet_via_info(this, info, x - xoff, y - yoff, true);
 	}
 }
 
-void Planet::move(IGraphlet* snip, float x, float y) {
-	SnipInfo* info = planet_snip_info(this, snip);
+void Planet::move(IGraphlet* g, float x, float y) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
 
     if (info != nullptr) {
-		if (unsafe_snip_unmasked(info, this->mode)) {
-			unsafe_move_snip_via_info(this, info, x, y, false);
+		if (unsafe_graphlet_unmasked(info, this->mode)) {
+			unsafe_move_graphlet_via_info(this, info, x, y, false);
 		}
-    } else if (this->head_snip != nullptr) {
-        IGraphlet* child = this->head_snip;
+    } else if (this->head_graphlet != nullptr) {
+        IGraphlet* child = this->head_graphlet;
 
         do {
-            info = SNIP_INFO(child);
+            info = GRAPHLET_INFO(child);
 
-            if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
-                unsafe_move_snip_via_info(this, info, x, y, false);
+            if (info->selected && unsafe_graphlet_unmasked(info, this->mode)) {
+                unsafe_move_graphlet_via_info(this, info, x, y, false);
             }
 
             child = info->next;
-        } while (child != this->head_snip);
+        } while (child != this->head_graphlet);
     }
 }
 
-IGraphlet* Planet::find_snip(float x, float y) {
+IGraphlet* Planet::find_graphlet(float x, float y) {
     IGraphlet* found = nullptr;
 
-    if (this->head_snip != nullptr) {
-		SnipInfo* head_info = SNIP_INFO(this->head_snip);
+    if (this->head_graphlet != nullptr) {
+		GraphletInfo* head_info = GRAPHLET_INFO(this->head_graphlet);
         IGraphlet* child = head_info->prev;
 
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            GraphletInfo* info = GRAPHLET_INFO(child);
 
-			if (unsafe_snip_unmasked(info, this->mode)) {
+			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				float sx, sy, sw, sh;
 
-				unsafe_fill_snip_bound(child, info, &sx, &sy, &sw, &sh);
+				unsafe_fill_graphlet_bound(child, info, &sx, &sy, &sw, &sh);
 
 				if ((sx < x) && (x < (sx + sw)) && (sy < y) && (y < (sy + sh))) {
 					found = child;
@@ -264,15 +264,15 @@ IGraphlet* Planet::find_snip(float x, float y) {
     return found;
 }
 
-bool Planet::fill_snip_location(IGraphlet* snip, float* x, float* y, GraphletAlignment cp) {
+bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAlignment cp) {
 	bool okay = false;
-	SnipInfo* info = planet_snip_info(this, snip);
+	GraphletInfo* info = planet_graphlet_info(this, g);
 	
-	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
 		float sx, sy, sw, sh, xoff, yoff;
 
-		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
-		snip_center_point_offset(snip, sw, sh, cp, xoff, yoff);
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		graphlet_alignment_offset(g, sw, sh, cp, xoff, yoff);
 		SET_BOX(x, sx + xoff);
 		SET_BOX(y, sy + yoff);
 
@@ -282,14 +282,14 @@ bool Planet::fill_snip_location(IGraphlet* snip, float* x, float* y, GraphletAli
 	return okay;
 }
 
-bool Planet::fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) {
+bool Planet::fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) {
 	bool okay = false;
-	SnipInfo* info = planet_snip_info(this, snip);
+	GraphletInfo* info = planet_graphlet_info(this, g);
 
-	if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
 		float sx, sy, sw, sh;
 			
-		unsafe_fill_snip_bound(snip, info, &sx, &sy, &sw, &sh);
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
 		SET_VALUES(x, sx, y, sy);
 		SET_VALUES(width, sw, height, sh);
 
@@ -299,113 +299,113 @@ bool Planet::fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, 
 	return okay;
 }
 
-void Planet::fill_snips_bounds(float* x, float* y, float* width, float* height) {
-    this->recalculate_snips_extent_when_invalid();
-    SET_VALUES(x, this->snips_left, y, this->snips_top);
-    SET_BOX(width, this->snips_right - this->snips_left);
-    SET_BOX(height, this->snips_bottom - this->snips_top);
+void Planet::fill_graphlets_bounds(float* x, float* y, float* width, float* height) {
+    this->recalculate_graphlets_extent_when_invalid();
+    SET_VALUES(x, this->graphlets_left, y, this->graphlets_top);
+    SET_BOX(width, this->graphlets_right - this->graphlets_left);
+    SET_BOX(height, this->graphlets_bottom - this->graphlets_top);
 }
 
 void Planet::size_cache_invalid() {
-    this->snips_right = this->snips_left - 1.0F;
+    this->graphlets_right = this->graphlets_left - 1.0F;
 }
 
-void Planet::recalculate_snips_extent_when_invalid() {
-    if (this->snips_right < this->snips_left) {
+void Planet::recalculate_graphlets_extent_when_invalid() {
+    if (this->graphlets_right < this->graphlets_left) {
         float rx, ry, width, height;
 
-        if (this->head_snip == nullptr) {
-            this->snips_left = 0.0F;
-            this->snips_top = 0.0F;
-            this->snips_right = 0.0F;
-            this->snips_bottom = 0.0F;
+        if (this->head_graphlet == nullptr) {
+            this->graphlets_left = 0.0F;
+            this->graphlets_top = 0.0F;
+            this->graphlets_right = 0.0F;
+            this->graphlets_bottom = 0.0F;
         } else {
-            IGraphlet* child = this->head_snip;
+            IGraphlet* child = this->head_graphlet;
 
-            this->snips_left = FLT_MAX;
-            this->snips_top = FLT_MAX;
-            this->snips_right = -FLT_MAX;
-            this->snips_bottom = -FLT_MAX;
+            this->graphlets_left = FLT_MAX;
+            this->graphlets_top = FLT_MAX;
+            this->graphlets_right = -FLT_MAX;
+            this->graphlets_bottom = -FLT_MAX;
 
             do {
-                SnipInfo* info = SNIP_INFO(child);
+                GraphletInfo* info = GRAPHLET_INFO(child);
 
-				if (unsafe_snip_unmasked(info, this->mode)) {
-					unsafe_fill_snip_bound(child, info, &rx, &ry, &width, &height);
-					this->snips_left = min(this->snips_left, rx);
-					this->snips_top = min(this->snips_top, ry);
-					this->snips_right = max(this->snips_right, rx + width);
-					this->snips_bottom = max(this->snips_bottom, ry + height);
+				if (unsafe_graphlet_unmasked(info, this->mode)) {
+					unsafe_fill_graphlet_bound(child, info, &rx, &ry, &width, &height);
+					this->graphlets_left = min(this->graphlets_left, rx);
+					this->graphlets_top = min(this->graphlets_top, ry);
+					this->graphlets_right = max(this->graphlets_right, rx + width);
+					this->graphlets_bottom = max(this->graphlets_bottom, ry + height);
 				}
 
                 child = info->next;
-            } while (child != this->head_snip);
+            } while (child != this->head_graphlet);
         }
 
-        this->info->master->min_width = max(this->snips_right, this->preferred_min_width);
-        this->info->master->min_height = max(this->snips_bottom, this->preferred_min_height);
+        this->info->master->min_width = max(this->graphlets_right, this->preferred_min_width);
+        this->info->master->min_height = max(this->graphlets_bottom, this->preferred_min_height);
     }
 }
 
-void Planet::add_selected(IGraphlet* snip) {
+void Planet::add_selected(IGraphlet* g) {
 	if (this->rubberband_allowed) {
-		SnipInfo* info = planet_snip_info(this, snip);
+		GraphletInfo* info = planet_graphlet_info(this, g);
 
 		if ((info != nullptr) && (!info->selected)) {
-			if (unsafe_snip_unmasked(info, this->mode) && this->can_select(snip)) {
-				unsafe_add_selected(this, snip, info);
+			if (unsafe_graphlet_unmasked(info, this->mode) && this->can_select(g)) {
+				unsafe_add_selected(this, g, info);
 			}
 		}
 	}
 }
 
-void Planet::set_selected(IGraphlet* snip) {
-	SnipInfo* info = planet_snip_info(this, snip);
+void Planet::set_selected(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
 
     if ((info != nullptr) && (!info->selected)) {
-		if (unsafe_snip_unmasked(info, this->mode) && (this->can_select(snip))) {
-			unsafe_set_selected(this, snip, info);
+		if (unsafe_graphlet_unmasked(info, this->mode) && (this->can_select(g))) {
+			unsafe_set_selected(this, g, info);
 		}
     }
 }
 
 void Planet::no_selected() {
-	if (this->head_snip != nullptr) {
-		IGraphlet* child = this->head_snip;
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* child = this->head_graphlet;
 
 		do {
-			SnipInfo* info = SNIP_INFO(child);
+			GraphletInfo* info = GRAPHLET_INFO(child);
 
-            if (info->selected && unsafe_snip_unmasked(info, this->mode)) {
+            if (info->selected && unsafe_graphlet_unmasked(info, this->mode)) {
 				this->before_select(child, false);
 				info->selected = false;
 				this->after_select(child, false);
 			}
 
 			child = info->next;
-		} while (child != this->head_snip);
+		} while (child != this->head_graphlet);
 	}
 }
 
-IGraphlet* Planet::get_focus_snip() {
-	return (this->snip_unmasked(this->focus_snip) ? this->focus_snip : nullptr);
+IGraphlet* Planet::get_focus_graphlet() {
+	return (this->graphlet_unmasked(this->focus_graphlet) ? this->focus_graphlet : nullptr);
 }
 
-void Planet::set_caret_owner(IGraphlet* snip) {
-	if (this->focus_snip != snip) {
-		if (snip == nullptr) {
-			this->focus_snip->own_caret(false);
-			this->focus_snip = nullptr;
-		} else if (snip->handles_events()) {
-			SnipInfo* info = planet_snip_info(this, snip);
+void Planet::set_caret_owner(IGraphlet* g) {
+	if (this->focus_graphlet != g) {
+		if (g == nullptr) {
+			this->focus_graphlet->own_caret(false);
+			this->focus_graphlet = nullptr;
+		} else if (g->handles_events()) {
+			GraphletInfo* info = planet_graphlet_info(this, g);
 
-			if ((info != nullptr) && unsafe_snip_unmasked(info, this->mode)) {
-				if (this->focus_snip != nullptr) {
-					this->focus_snip->own_caret(false);
+			if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
+				if (this->focus_graphlet != nullptr) {
+					this->focus_graphlet->own_caret(false);
 				}
 
-				this->focus_snip = snip;
-				snip->own_caret(true);
+				this->focus_graphlet = g;
+				g->own_caret(true);
 			}
 		}
 	}
@@ -417,25 +417,25 @@ bool Planet::on_char(VirtualKey key) {
 
 	if (this->numpad->shown()) {
 		handled = this->numpad->on_char(key);
-	} else if (this->focus_snip != nullptr) {
-		if (this->focus_snip->handles_events()) {
-			handled = this->focus_snip->on_char(key);
+	} else if (this->focus_graphlet != nullptr) {
+		if (this->focus_graphlet->handles_events()) {
+			handled = this->focus_graphlet->on_char(key);
 		}
 	}
 
 	return handled;
 }
 
-void Planet::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted, bool controlled) {
-	SnipInfo* info = SNIP_INFO(snip);
+void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+	GraphletInfo* info = GRAPHLET_INFO(g);
 
-	if ((!info->selected) && this->can_select(snip)) {
+	if ((!info->selected) && this->can_select(g)) {
 		if (shifted) {
 			if (this->rubberband_allowed) {
-				unsafe_add_selected(this, snip, info);
+				unsafe_add_selected(this, g, info);
 			}
 		} else {
-			unsafe_set_selected(this, snip, info);
+			unsafe_set_selected(this, g, info);
 		}
 	}
 }
@@ -443,12 +443,12 @@ void Planet::on_tap(IGraphlet* snip, float local_x, float local_y, bool shifted,
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool shifted, bool ctrled) {
 	if (!this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
-		IGraphlet* unmasked_snip = this->find_snip(x, y);
+		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 		this->numpad->show(false);
 
-		this->set_caret_owner(unmasked_snip);
-		if (unmasked_snip == nullptr) {
+		this->set_caret_owner(unmasked_graphlet);
+		if (unmasked_graphlet == nullptr) {
 			this->no_selected();
 		}
 
@@ -457,7 +457,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerUpdateKind puk, bool sh
 			this->last_pointer_x = x;
 			this->last_pointer_y = y;
 
-			if (unmasked_snip == nullptr) {
+			if (unmasked_graphlet == nullptr) {
 				this->rubberband_x[0] = x;
 				this->rubberband_x[1] = y;
 				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
@@ -498,25 +498,25 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 				this->numpad->on_goodbye(local_x, local_y, shifted, ctrled);
 			}
 		} else {
-			IGraphlet* unmasked_snip = this->find_snip(x, y);
+			IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
-			if (unmasked_snip != this->hover_snip) {
-				// NOTE: only snip that handles events will be traced
-				if (this->hover_snip != nullptr) {
-					SnipInfo* info = SNIP_INFO(this->hover_snip);
+			if (unmasked_graphlet != this->hover_graphlet) {
+				// NOTE: only graphlet that handles events will be traced
+				if (this->hover_graphlet != nullptr) {
+					GraphletInfo* info = GRAPHLET_INFO(this->hover_graphlet);
 
-					this->hover_snip->on_goodbye(x - info->x, y - info->y, shifted, ctrled);
-					this->hover_snip = nullptr;
+					this->hover_graphlet->on_goodbye(x - info->x, y - info->y, shifted, ctrled);
+					this->hover_graphlet = nullptr;
 				}
 			}
 
-			if (unmasked_snip != nullptr) {
-				if (unmasked_snip->handles_events()) {
-					// NOTE: only snip that handles events will be traced
-					SnipInfo* info = SNIP_INFO(unmasked_snip);
+			if (unmasked_graphlet != nullptr) {
+				if (unmasked_graphlet->handles_events()) {
+					// NOTE: only graphlet that handles events will be traced
+					GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 
-					this->hover_snip = unmasked_snip;
-					this->hover_snip->on_hover(x - info->x, y - info->y, shifted, ctrled);
+					this->hover_graphlet = unmasked_graphlet;
+					this->hover_graphlet->on_hover(x - info->x, y - info->y, shifted, ctrled);
 				}
 
 				handled = true;
@@ -542,28 +542,28 @@ bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool s
 		}
 	} else if (this->rubberband_y != nullptr) {
 		this->rubberband_y = nullptr;
-		// TODO: select all touched snips
+		// TODO: select all touched graphlets
 	} else {
-		IGraphlet* unmasked_snip = this->find_snip(x, y);
+		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
-		if (unmasked_snip != nullptr) {
-			SnipInfo* info = SNIP_INFO(unmasked_snip);
+		if (unmasked_graphlet != nullptr) {
+			GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 			float local_x = x - info->x;
 			float local_y = y - info->y;
 
 			switch (puk) {
 			case PointerUpdateKind::LeftButtonPressed: {
-				if (unmasked_snip->handles_events()) {
-					unmasked_snip->on_tap(local_x, local_y, shifted, ctrled);
+				if (unmasked_graphlet->handles_events()) {
+					unmasked_graphlet->on_tap(local_x, local_y, shifted, ctrled);
 				}
-				this->on_tap(unmasked_snip, local_x, local_y, shifted, ctrled);
+				this->on_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
 			} break;
 			case PointerUpdateKind::RightButtonPressed: {
 				// NOTE: In macOS, Control + clicking produces a right clicking
-				if (unmasked_snip->handles_events()) {
-					unmasked_snip->on_right_tap(local_x, local_y, shifted, ctrled);
+				if (unmasked_graphlet->handles_events()) {
+					unmasked_graphlet->on_right_tap(local_x, local_y, shifted, ctrled);
 				}
-				this->on_right_tap(unmasked_snip, local_x, local_y, shifted, ctrled);
+				this->on_right_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
 			} break;
 			}
 		}
@@ -604,18 +604,18 @@ void Planet::update(long long count, long long interval, long long uptime) {
 		this->numpad->update(count, interval, uptime);
 	}
 
-	if (this->head_snip != nullptr) {
-		IGraphlet* child = this->head_snip;
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* child = this->head_graphlet;
 
 		do {
-			SnipInfo* info = SNIP_INFO(child);
+			GraphletInfo* info = GRAPHLET_INFO(child);
 
-			if (unsafe_snip_unmasked(info, this->mode)) {
+			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->update(count, interval, uptime);
 			}
 			
 			child = info->next;
-		} while (child != this->head_snip);
+		} while (child != this->head_graphlet);
     }
 }
 
@@ -631,14 +631,14 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 
     this->decorator->draw_before(this, ds, Width, Height);
 
-    if (this->head_snip != nullptr) {
-        IGraphlet* child = this->head_snip;
+    if (this->head_graphlet != nullptr) {
+        IGraphlet* child = this->head_graphlet;
 		float width, height;
 
         do {
-            SnipInfo* info = SNIP_INFO(child);
+            GraphletInfo* info = GRAPHLET_INFO(child);
 
-			if (unsafe_snip_unmasked(info, this->mode)) {
+			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);
 				if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
 					if (info->rotation == 0.0F) {
@@ -651,9 +651,9 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					}
 
-					this->decorator->draw_before_snip(child, ds, info->x, info->y, width, height, info->selected);
+					this->decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
 					child->draw(ds, info->x, info->y, width, height);
-					this->decorator->draw_after_snip(child, ds, info->x, info->y, width, height, info->selected);
+					this->decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
 
 					if (info->selected) {
 						this->draw_visible_selection(ds, info->x, info->y, width, height);
@@ -665,7 +665,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 			}
 
             child = info->next;
-        } while (child != this->head_snip);
+        } while (child != this->head_graphlet);
     }
 
     if (this->rubberband_y != nullptr) {
@@ -697,20 +697,20 @@ void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, 
 }
 
 void Planet::collapse() {
-	if (this->head_snip != nullptr) {
-		IGraphlet* temp_head = this->head_snip;
-		SnipInfo* temp_info = SNIP_INFO(temp_head);
-		SnipInfo* prev_info = SNIP_INFO(temp_info->prev);
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* temp_head = this->head_graphlet;
+		GraphletInfo* temp_info = GRAPHLET_INFO(temp_head);
+		GraphletInfo* prev_info = GRAPHLET_INFO(temp_info->prev);
 		
-		this->head_snip = nullptr;
+		this->head_graphlet = nullptr;
 		prev_info->next = nullptr;
 		
 		do {
 			IGraphlet* child = temp_head;
 
-			temp_head = SNIP_INFO(temp_head)->next;
+			temp_head = GRAPHLET_INFO(temp_head)->next;
 
-			delete child; // snip's destructor will delete the associated info object
+			delete child; // g's destructor will delete the associated info object
 		} while (temp_head != nullptr);
 	}
 }
@@ -788,18 +788,18 @@ void IPlanet::fill_actual_extent(float* width, float* height) {
 	SET_BOX(height, this->info->master->actual_height);
 }
 
-Point IPlanet::global_to_local_point(IGraphlet* snip, float global_x, float global_y, float xoff, float yoff) {
-	float snip_x, snip_y;
+Point IPlanet::global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff, float yoff) {
+	float gx, gy;
 
-	this->fill_snip_location(snip, &snip_x, &snip_y);
+	this->fill_graphlet_location(g, &gx, &gy);
 
-	return Point(global_x - snip_x + xoff, global_y - snip_y + yoff);
+	return Point(global_x - gx + xoff, global_y - gy + yoff);
 }
 
-Point IPlanet::local_to_global_point(IGraphlet* snip, float local_x, float local_y, float xoff, float yoff) {
-	float snip_x, snip_y;
+Point IPlanet::local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff, float yoff) {
+	float gx, gy;
 
-	this->fill_snip_location(snip, &snip_x, &snip_y);
+	this->fill_graphlet_location(g, &gx, &gy);
 	
-	return Point(snip_x + local_x + xoff, snip_y + local_y + yoff);
+	return Point(gx + local_x + xoff, gy + local_y + yoff);
 }

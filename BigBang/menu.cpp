@@ -11,7 +11,7 @@ using namespace Windows::UI::Xaml::Controls;
 
 static IGraphlet* cpp_is_really_ugly_and_template_is_totally_a_bullshit = nullptr;
 
-IGraphlet* WarGrey::SCADA::menu_current_target_snip() {
+IGraphlet* WarGrey::SCADA::menu_current_target_graphlet() {
 	return cpp_is_really_ugly_and_template_is_totally_a_bullshit;
 }
 
@@ -25,10 +25,10 @@ void WarGrey::SCADA::menu_append(MenuFlyout^ menu, Platform::String^ label, ICom
 }
 
 
-void WarGrey::SCADA::menu_show(MenuFlyout^ menu, IGraphlet* snip, float local_x, float local_y, float xoff, float yoff) {
-	IPlanet* console = snip->info->master;
-	Point position = console->local_to_global_point(snip, local_x, local_y, xoff, yoff);
+void WarGrey::SCADA::menu_show(MenuFlyout^ menu, IGraphlet* g, float local_x, float local_y, float xoff, float yoff) {
+	IPlanet* console = g->info->master;
+	Point position = console->local_to_global_point(g, local_x, local_y, xoff, yoff);
 
-	cpp_is_really_ugly_and_template_is_totally_a_bullshit = snip;
+	cpp_is_really_ugly_and_template_is_totally_a_bullshit = g;
 	menu->ShowAt(console->info->master->canvas, position);
 }

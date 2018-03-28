@@ -4,7 +4,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	WarGrey::SCADA::IGraphlet* menu_current_target_snip();
+	WarGrey::SCADA::IGraphlet* menu_current_target_graphlet();
 
 	void menu_append(
 		Windows::UI::Xaml::Controls::MenuFlyout^ menu,
@@ -13,14 +13,14 @@ namespace WarGrey::SCADA {
 
 	void menu_show(
 		Windows::UI::Xaml::Controls::MenuFlyout^ menu,
-		WarGrey::SCADA::IGraphlet* snip,
+		WarGrey::SCADA::IGraphlet* g,
 		float local_x, float local_y,
 		float xoff, float yoff);
 
 	template <typename Menu>
 	private class IMenuCommand abstract {
 	public:
-		virtual void execute(Menu cmd, WarGrey::SCADA::IGraphlet* snip) = 0;
+		virtual void execute(Menu cmd, WarGrey::SCADA::IGraphlet* g) = 0;
 	};
 
 	template <typename Menu>
@@ -38,7 +38,7 @@ namespace WarGrey::SCADA {
 		}
 
 		virtual void Execute(Platform::Object^ who_cares) {
-			this->executor->execute(this->command, menu_current_target_snip());
+			this->executor->execute(this->command, menu_current_target_graphlet());
 		}
 
 	public:
@@ -66,8 +66,8 @@ namespace WarGrey::SCADA {
 			menu_append(this->menu, cmd.ToString(), ref new WarGrey::SCADA::MenuCommand<Menu>(exe, cmd));
 		}
 
-		void show_for(WarGrey::SCADA::IGraphlet* snip, float local_x, float local_y, float xoff = 2.0F, float yoff = 2.0F) {
-			menu_show(this->menu, snip, local_x, local_y, xoff, yoff);
+		void show_for(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, float xoff = 2.0F, float yoff = 2.0F) {
+			menu_show(this->menu, g, local_x, local_y, xoff, yoff);
 		}
 
 	private:

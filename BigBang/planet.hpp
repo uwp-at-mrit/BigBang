@@ -32,35 +32,35 @@ namespace WarGrey::SCADA {
 		virtual void collapse() {}
 
 	public:
-		virtual WarGrey::SCADA::IGraphlet* find_snip(float x, float y) = 0;
-		virtual bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
-		virtual bool fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) = 0;
-		virtual void fill_snips_bounds(float* x, float* y, float* width, float* height) = 0;
-		virtual void insert(IGraphlet* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
-		virtual void move(IGraphlet* snip, float x, float y) = 0;
-		virtual void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
+		virtual WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) = 0;
+		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
+		virtual bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
+		virtual void fill_graphlets_bounds(float* x, float* y, float* width, float* height) = 0;
+		virtual void insert(IGraphlet* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
+		virtual void move(IGraphlet* g, float x, float y) = 0;
+		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
-		virtual void on_tap(WarGrey::SCADA::IGraphlet* snip, float local_x, float local_y, bool shifted, bool controled) {}
-		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* snip, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
-		virtual void add_selected(IGraphlet* snip) = 0;
-		virtual void set_selected(IGraphlet* snip) = 0;
+		virtual void add_selected(IGraphlet* g) = 0;
+		virtual void set_selected(IGraphlet* g) = 0;
 		virtual void no_selected() = 0;
 
 	public:
-		virtual bool can_interactive_move(IGraphlet* snip, float local_x, float local_y) { return false; }
-		virtual bool can_select(IGraphlet* snip) { return true; }
+		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
+		virtual bool can_select(IGraphlet* g) { return true; }
 		virtual bool can_select_multiple() { return false; }
-		virtual void before_select(IGraphlet* snip, bool on_or_off) {}
-		virtual void after_select(IGraphlet* snip, bool on_or_off) {}
+		virtual void before_select(IGraphlet* g, bool on_or_off) {}
+		virtual void after_select(IGraphlet* g, bool on_or_off) {}
 
 	public:
-		virtual WarGrey::SCADA::IGraphlet* get_focus_snip() = 0;
-		virtual void set_caret_owner(IGraphlet* snip) = 0;
+		virtual WarGrey::SCADA::IGraphlet* get_focus_graphlet() = 0;
+		virtual void set_caret_owner(IGraphlet* g) = 0;
 
 	public:
 		virtual bool on_pointer_moved(float x, float y,
@@ -85,8 +85,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger();
 
 	public:
-		Windows::Foundation::Point global_to_local_point(IGraphlet* snip, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
-		Windows::Foundation::Point local_to_global_point(IGraphlet* snip, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
+		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
+		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 		void fill_actual_extent(float* width, float* height);
 
 	public:
@@ -114,11 +114,11 @@ namespace WarGrey::SCADA {
 
 	public:
 		/** NOTE
-		 * mode 0 is designed for UI snips which will be unmasked in all modes;
-		 * however, only UI snips are unmasked in mode 0.
+		 * mode 0 is designed for UI graphlets which will be unmasked in all modes;
+		 * however, only UI graphlets are unmasked in mode 0.
 		 */
 		void change_mode(unsigned int mode);
-		bool snip_unmasked(WarGrey::SCADA::IGraphlet* snip);
+		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
 		void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 
     public:
@@ -128,28 +128,28 @@ namespace WarGrey::SCADA {
 		void collapse() override;
 
     public:
-		WarGrey::SCADA::IGraphlet* find_snip(float x, float y) override;
-        bool fill_snip_location(IGraphlet* snip, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
-		bool fill_snip_bound(IGraphlet* snip, float* x, float* y, float* width, float* height) override;
-		void fill_snips_bounds(float* x, float* y, float* width, float* height);
-		void insert(IGraphlet* snip, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
-        void move(IGraphlet* snip, float x, float y) override;
-        void move_to(IGraphlet* snip, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
+		WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) override;
+        bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
+		bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) override;
+		void fill_graphlets_bounds(float* x, float* y, float* width, float* height);
+		void insert(IGraphlet* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
+        void move(IGraphlet* g, float x, float y) override;
+        void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
 		void size_cache_invalid();
 
 	public:
 		bool on_char(Windows::System::VirtualKey key) override;
-		void on_tap(WarGrey::SCADA::IGraphlet* snip, float x, float y, bool shifted, bool controled) override;
+		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
 
 	public:
 		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) override;
-        void add_selected(IGraphlet* snip) override;
-        void set_selected(IGraphlet* snip) override;
+        void add_selected(IGraphlet* g) override;
+        void set_selected(IGraphlet* g) override;
         void no_selected() override;
 
 	public:
-		WarGrey::SCADA::IGraphlet* get_focus_snip() override;
-		void set_caret_owner(IGraphlet* snip) override;
+		WarGrey::SCADA::IGraphlet* get_focus_graphlet() override;
+		void set_caret_owner(IGraphlet* g) override;
 		void show_virtual_keyboard(ScreenKeyboard type);
 		void show_virtual_keyboard(ScreenKeyboard type, float x, float y);
 
@@ -159,7 +159,7 @@ namespace WarGrey::SCADA {
 		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
 
     private:
-        void recalculate_snips_extent_when_invalid();
+        void recalculate_graphlets_extent_when_invalid();
 
     private:
         float last_pointer_x;
@@ -169,18 +169,18 @@ namespace WarGrey::SCADA {
         bool rubberband_allowed;
 
     private:
-        float snips_left;
-        float snips_top;
-        float snips_right;
-        float snips_bottom;
+        float graphlets_left;
+        float graphlets_top;
+        float graphlets_right;
+        float graphlets_bottom;
         float preferred_min_width;
         float preferred_min_height;
 
     private:
         WarGrey::SCADA::IPlanetDecorator* decorator;
-        WarGrey::SCADA::IGraphlet* head_snip;
-		WarGrey::SCADA::IGraphlet* focus_snip;
-		WarGrey::SCADA::IGraphlet* hover_snip;
+        WarGrey::SCADA::IGraphlet* head_graphlet;
+		WarGrey::SCADA::IGraphlet* focus_graphlet;
+		WarGrey::SCADA::IGraphlet* hover_graphlet;
 		unsigned int mode;
 
 	private:

@@ -28,28 +28,30 @@ private class Stage final {
 public:
 	Stage(GraphletOverview* master) : master(master) {
 		this->font = make_text_format(16.0F);
-
-		this->subfont = make_text_format();
-		this->subfont->FontWeight = FontWeights::Bold;
+		this->font->FontWeight = FontWeights::Bold;
 	}
 
 public:
 	void load(float width, float height) {
-		Platform::String^ all_labels[] = { "hp_state" };
+		Platform::String^ all_labels[] = { "hp_state", "v_state" };
 		float unitsize = 32.0F;
+
+		for (size_t i = 0; i < sizeof(all_labels) / sizeof(Platform::String^); i++) {
+			this->labels[i] = make_label(speak(all_labels[i]) + ":", this->font);
+		}
 
 		for (PumpState s = static_cast<PumpState>(0); s < PumpState::_; s++) {
 			unsigned int idx = static_cast<unsigned int>(s);
 			
-			this->pumps[idx] = new Pumplet(s, unitsize);
-			this->pump_labels[idx] = new Labellet(this->subfont, speak(s.ToString()));
-			this->master->insert(this->pumps[idx]);
-			this->master->insert(this->pump_labels[idx]);
+			this->pumps[idx] = make_pump(s, unitsize);
+			this->hplabels[idx] = make_label(speak(s.ToString()));
 		}
 
-		for (size_t i = 0; i < std::min(sizeof(all_labels) / sizeof(Platform::String^), GRAPHLETS_ARITY(this->labels)); i++) {
-			this->labels[i] = new Labellet(this->font, speak(all_labels[i]) + ":");
-			this->master->insert(this->labels[i]);
+		for (ValveState s = static_cast<ValveState>(0); s < ValveState::_; s++) {
+			unsigned int idx = static_cast<unsigned int>(s);
+
+			this->valves[idx] = make_valve(s, unitsize);
+			this->vlabels[idx] = make_label(speak(s.ToString()));
 		}
 	}
 
@@ -60,7 +62,7 @@ public:
 		float x0 = offset;
 		float y0 = vinset + offset;
 
-		for (size_t i = 0; i < GRAPHLETS_ARITY(this->labels); i++) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->labels); i++) {
 			if (this->labels[i] != nullptr) {
 				float label_width;
 
@@ -73,7 +75,7 @@ public:
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 
-		for (size_t i = 0; i < GRAPHLETS_ARITY(this->labels); i++) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->labels); i++) {
 			if (this->labels[i] != nullptr) {
 				float y = y0 + halfunit + float(i) * cellsize;
 
@@ -81,23 +83,59 @@ public:
 			}
 		}
 
-		for (size_t i = 0; i < GRAPHLETS_ARITY(this->pumps); i++) {
-			float x = x0 + label_max_width + offset + halfunit + float(i) * cellsize;
+		x0 += (label_max_width + offset + halfunit);
+		y0 += unitsize;
+		this->reflow_graphlets(this->pumps, this->hplabels, x0, y0 + cellsize * 0.0F, cellsize, GRAPHLETS_LENGTH(this->pumps));
+		this->reflow_graphlets(this->valves, this->vlabels, x0, y0 + cellsize * 1.0F, cellsize, GRAPHLETS_LENGTH(this->valves));
+	}
 
-			this->master->move_to(this->pumps[i], x, y0 + unitsize, GraphletAlignment::CB);
-			this->master->move_to(this->pump_labels[i], x, y0 + unitsize, GraphletAlignment::CT);
+private:
+	Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
+		Labellet* label = ((font == nullptr) ? new Labellet(text) : new Labellet(font, text));
+
+		this->master->insert(label);
+
+		return label;
+	}
+
+	Pumplet* make_pump(PumpState s, float unitsize) {
+		Pumplet* pump = new Pumplet(s, unitsize);
+
+		this->master->insert(pump);
+
+		return pump;
+	}
+
+
+	Valvelet* make_valve(ValveState s, float unitsize) {
+		Valvelet* valve = new Valvelet(s, unitsize);
+
+		this->master->insert(valve);
+
+		return valve;
+	}
+
+private:
+	template<typename T>
+	void reflow_graphlets(T* gs[], Labellet* ls[], float x0, float y, float cellsize, size_t size) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->pumps); i++) {
+			float x = x0 + float(i) * cellsize;
+
+			this->master->move_to(gs[i], x, y, GraphletAlignment::CB);
+			this->master->move_to(ls[i], x, y, GraphletAlignment::CT);
 		}
 	}
 
 private: // never delete these graphlets manually.
 	Labellet* labels[5];
 	Pumplet* pumps[static_cast<unsigned long long>(PumpState::_)];
-	Labellet* pump_labels[static_cast<unsigned long long>(PumpState::_)];
+	Labellet* hplabels[static_cast<unsigned long long>(PumpState::_)];
+	Valvelet* valves[static_cast<unsigned long long>(ValveState::_)];
+	Labellet* vlabels[static_cast<unsigned long long>(ValveState::_)];
 
 private:
 	GraphletOverview* master;
 	CanvasTextFormat^ font;
-	CanvasTextFormat^ subfont;
 };
 
 /*************************************************************************************************/
@@ -123,7 +161,7 @@ void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, flo
 		
 		stages.insert(std::pair<GraphletOverview*, Stage*>(this, stage));
 
-		{ // load snips
+		{ // load graphlets
 			stage->load(width, height);
 
 			this->statusline = new Statuslinelet(Log::Debug);

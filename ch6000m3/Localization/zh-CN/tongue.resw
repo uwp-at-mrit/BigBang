@@ -211,4 +211,7 @@
   <data name="hp_state" xml:space="preserve">
     <value>液压泵状态</value>
   </data>
+  <data name="v_state" xml:space="preserve">
+    <value>阀状态</value>
+  </data>
 </root>
