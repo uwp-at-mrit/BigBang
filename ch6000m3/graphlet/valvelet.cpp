@@ -14,9 +14,10 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 1.5F;
+static float default_handler_radius = default_thickness * 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static ValveState default_pump_state = ValveState::Closed;
+static ValveState default_pump_state = ValveState::Manual;
 static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
 
 ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
@@ -28,11 +29,11 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	case ValveState::Manual: s.mask_color = Colours::Teal; break;
 	case ValveState::Open: s.body_color = Colours::Green; break;
 	case ValveState::Opening: s.mask_color = Colours::Green; break;
-	case ValveState::ConditionalOpen: s.skeleton_color = Colours::Cyan; s.body_color = Colours::ForestGreen; break;
+	case ValveState::ConditionalOpen: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
 	case ValveState::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
 	case ValveState::Closed: s.body_color = Colours::LightGray; break;
 	case ValveState::Closing: s.mask_color = Colours::DarkGray; break;
-	case ValveState::ConditionalClose: s.skeleton_color = Colours::Cyan; s.body_color = Colours::DimGray; break;
+	case ValveState::ConditionalClose: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
 	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
 	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
 	case ValveState::FalseClose: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
@@ -53,8 +54,13 @@ Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
 }
 
 void Valvelet::construct() {
-	this->frame = rectangle(this->fradius, this->degrees);
-	this->skeleton = sandglass(this->sgradius, this->degrees);
+	float handle_length = this->sgradius * 0.618F;
+	auto handler_axis = polar_axis(handle_length, this->degrees);
+	auto handler_pole = polar_pole(handle_length, this->degrees, default_handler_radius);
+
+	this->frame = polar_rectangle(this->fradius, this->degrees);
+	this->handler = geometry_union(handler_axis, handler_pole);
+	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
@@ -66,7 +72,7 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
 	} break;
 	case ValveState::Closing: {
 		this->mask_percentage
@@ -74,7 +80,7 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, -this->mask_percentage);
 	} break;
 	}
 }
@@ -82,22 +88,28 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 void Valvelet::on_state_change(ValveState state) {
 	switch (state) {
 	case ValveState::Unopenable: {
-		if (this->unopenable_mask == nullptr) {
-			this->unopenable_mask = masked_sandglass(this->sgradius, this->degrees, 0.382);
+		if (this->bottom_up_mask == nullptr) {
+			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
 		}
-		this->mask = this->unopenable_mask;
+		this->mask = this->bottom_up_mask;
 	} break;
-	case ValveState::Unclosable: {
-		if (this->unclosable_mask == nullptr) {
-			this->unclosable_mask = masked_sandglass(this->sgradius, this->degrees, 0.618);
+	case ValveState::Unclosable: case ValveState::Manual: {
+		if (this->top_down_mask == nullptr) {
+			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
 		}
-		this->mask = this->unclosable_mask;
+		this->mask = this->top_down_mask;
 	} break;
-	case ValveState::Manual: {
-		if (this->manual_mask == nullptr) {
-			this->manual_mask = masked_sandglass(this->sgradius, this->degrees, 0.382);
+	case ValveState::ConditionalOpen: {
+		if (this->bottom_up_conditional_mask == nullptr) {
+			this->bottom_up_conditional_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
 		}
-		this->mask = this->manual_mask;
+		this->mask = this->bottom_up_conditional_mask;
+	} break;
+	case ValveState::ConditionalClose: {
+		if (this->top_down_conditional_mask == nullptr) {
+			this->top_down_conditional_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
+		}
+		this->mask = this->top_down_conditional_mask;
 	} break;
 	default: {
 		this->mask = nullptr;
@@ -122,23 +134,22 @@ void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
-	float bx = cx - this->sgradius;
-	float by = cy - this->sgradius;
-	float fx = cx - this->fradius;
-	float fy = cy - this->fradius;
-
+	
 	if (style.border_color != nullptr) {
-		ds->DrawGeometry(this->frame, fx, fy, style.border_color, default_thickness);
+		ds->DrawGeometry(this->frame, cx, cy, style.border_color, default_thickness);
 	}
 
-	ds->DrawCachedGeometry(this->body, bx, by, body_color);
+	ds->DrawCachedGeometry(this->body, cx, cy, body_color);
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
 		
-		ds->FillGeometry(mask, bx, by, style.mask_color);
-		ds->DrawGeometry(mask, bx, by, style.mask_color, default_thickness);
+		ds->FillGeometry(mask, cx, cy, style.mask_color);
+		ds->DrawGeometry(mask, cx, cy, style.mask_color, default_thickness);
 	}
 
-	ds->DrawGeometry(this->skeleton, bx, by, skeleton_color, default_thickness);
+	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
+	if (this->get_state() == ValveState::Manual) {
+		ds->DrawGeometry(this->handler, cx, cy, skeleton_color, default_thickness);
+	}
 }

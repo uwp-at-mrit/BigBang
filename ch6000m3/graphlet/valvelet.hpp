@@ -38,11 +38,13 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unopenable_mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unclosable_mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ manual_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ bottom_up_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ top_down_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ bottom_up_conditional_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ top_down_conditional_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ frame;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ handler;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:

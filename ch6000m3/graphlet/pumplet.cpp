@@ -51,7 +51,7 @@ Pumplet::Pumplet(PumpState default_state, float radius, double degrees)
 }
 
 void Pumplet::construct() {
-	this->skeleton = triangle(this->tradius, this->degrees);
+	this->skeleton = polar_triangle(this->tradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
@@ -63,7 +63,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 	} break;
 	case PumpState::Stopping: {
 		this->mask_percentage
@@ -71,7 +71,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 	} break;
 	}
 }
@@ -80,13 +80,13 @@ void Pumplet::on_state_change(PumpState state) {
 	switch (state) {
 	case PumpState::Unstartable: {
 		if (this->unstartable_mask == nullptr) {
-			this->unstartable_mask = masked_triangle(this->tradius, this->degrees, 0.382);
+			this->unstartable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);
 		}
 		this->mask = this->unstartable_mask;
 	} break;
 	case PumpState::Unstoppable: {
 		if (this->unstoppable_mask == nullptr) {
-			this->unstoppable_mask = masked_triangle(this->tradius, this->degrees, 0.618);
+			this->unstoppable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.618);
 		}
 		this->mask = this->unstoppable_mask;
 	} break;
@@ -114,18 +114,16 @@ void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
-	float bx = cx - this->tradius;
-	float by = cy - this->tradius;
-
+	
 	ds->FillCircle(cx, cy, radius, Colours::Background);
 	ds->DrawCircle(cx, cy, radius, border_color, default_thickness);
-	ds->DrawCachedGeometry(this->body, bx, by, body_color);
-	ds->DrawGeometry(this->skeleton, bx, by, skeleton_color, default_thickness);
+	ds->DrawCachedGeometry(this->body, cx, cy, body_color);
+	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
 		
-		ds->FillGeometry(mask, bx, by, style.mask_color);
-		ds->DrawGeometry(mask, bx, by, style.mask_color, default_thickness);
+		ds->FillGeometry(mask, cx, cy, style.mask_color);
+		ds->DrawGeometry(mask, cx, cy, style.mask_color, default_thickness);
 	}
 }
