@@ -8,6 +8,7 @@
 #include "tongue.hpp"
 #include "paint.hpp"
 #include "shape.hpp"
+#include "brushes.hxx"
 #include "transformation.hpp"
 
 #include "graphlet/primitive.hpp"
@@ -669,7 +670,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
     }
 
     if (this->rubberband_y != nullptr) {
-        ICanvasBrush^ rubberband_color = system_highlight_brush();
+        ICanvasBrush^ rubberband_color = Colours::Highlight;
 
         float left = min(this->last_pointer_x, (*this->rubberband_x));
         float top = min(this->last_pointer_y, (*this->rubberband_y));
@@ -693,7 +694,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 }
 
 void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) {
-	ds->DrawRectangle(x, y, width, height, system_highlight_brush(), 1.0F);
+	ds->DrawRectangle(x, y, width, height, Colours::Highlight, 1.0F);
 }
 
 void Planet::collapse() {

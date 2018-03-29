@@ -1,8 +1,10 @@
 #pragma once
 
 #include "decorator/border.hpp"
+
 #include "planet.hpp"
 #include "paint.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -18,10 +20,10 @@ void BorderDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, flo
         float x, y, width, height;
 
         master->fill_graphlets_bounds(&x, &y, &width, &height);
-        ds->DrawRectangle(x, y, width, height, system_graytext_brush(), 1.0F);
+        ds->DrawRectangle(x, y, width, height, Colours::GrayText, 1.0F);
     }
 
     if (this->draw_border) {
-        ds->DrawRectangle(0.0F, 0.0F, Width, Height, system_accentdark1_brush());
+        ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colours::AccentDark);
     }
 }

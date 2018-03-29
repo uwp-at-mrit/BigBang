@@ -7,6 +7,7 @@
 
 #include "text.hpp"
 #include "paint.hpp"
+#include "brushes.hxx"
 #include "turtle.idl"
 
 #include "graphlet/shapelet.hpp"
@@ -228,7 +229,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 
 		{ // delayed initializing
 			GridDecorator* grid = new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset);
-			IPlanetDecorator* decorators[] = { new PageDecorator(system_graytext_brush()), grid };
+			IPlanetDecorator* decorators[] = { new PageDecorator(Colours::GrayText), grid };
 
 			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
 

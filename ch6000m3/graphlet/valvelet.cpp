@@ -3,6 +3,7 @@
 #include "polar_shape.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -16,7 +17,7 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 static ValveState default_pump_state = ValveState::Closed;
-static CanvasSolidColorBrush^ default_sketeton_color = darkgray_brush();
+static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
 
 ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	ValveStyle s;
@@ -24,17 +25,17 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	s.skeleton_color = default_sketeton_color;
 
 	switch (state) {
-	case ValveState::Manual: s.mask_color = teal_brush(); break;
-	case ValveState::Open: s.body_color = green_brush(); break;
-	case ValveState::Opening: s.mask_color = green_brush(); break;
-	case ValveState::ConditionalOpen: s.skeleton_color = cyan_brush(); s.body_color = forest_brush(); break;
-	case ValveState::Unopenable: s.skeleton_color = red_brush(); s.mask_color = green_brush(); break;
-	case ValveState::Closed: s.body_color = lightgray_brush(); break;
-	case ValveState::Closing: s.mask_color = darkgray_brush(); break;
-	case ValveState::ConditionalClose: s.skeleton_color = cyan_brush(); s.body_color = dimgray_brush(); break;
-	case ValveState::Unclosable: s.skeleton_color = red_brush(); s.mask_color = darkgray_brush(); break;
-	case ValveState::FalseOpen: s.border_color = red_brush(); s.body_color = forest_brush(); break;
-	case ValveState::FalseClose: s.border_color = red_brush(); s.body_color = dimgray_brush(); break;
+	case ValveState::Manual: s.mask_color = Colours::Teal; break;
+	case ValveState::Open: s.body_color = Colours::Green; break;
+	case ValveState::Opening: s.mask_color = Colours::Green; break;
+	case ValveState::ConditionalOpen: s.skeleton_color = Colours::Cyan; s.body_color = Colours::ForestGreen; break;
+	case ValveState::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
+	case ValveState::Closed: s.body_color = Colours::LightGray; break;
+	case ValveState::Closing: s.mask_color = Colours::DarkGray; break;
+	case ValveState::ConditionalClose: s.skeleton_color = Colours::Cyan; s.body_color = Colours::DimGray; break;
+	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
+	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
+	case ValveState::FalseClose: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
 	}
 
 	return s;
@@ -116,7 +117,7 @@ double Valvelet::get_direction_degrees() {
 void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const ValveStyle style = this->get_style();
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
-	auto body_color = (style.body_color != nullptr) ? style.body_color : system_background_brush();
+	auto body_color = (style.body_color != nullptr) ? style.body_color : Colours::Background;
 
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;

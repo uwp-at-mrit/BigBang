@@ -5,6 +5,7 @@
 #include "paint.hpp"
 #include "syslog.hpp"
 #include "colorspace.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -37,10 +38,10 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys, NUMPAD_
 
 void Numpad::create() {
 	TextExtent ts = get_text_extent("0", this->label_font);
-	Color fg = system_foreground_brush()->Color;
-	Color bg = system_background_brush()->Color;
+	Color fg = Colours::Foreground->Color;
+	Color bg = Colours::Background->Color;
 	
-	this->foreground = system_foreground_brush();
+	this->foreground = Colours::Foreground;
 	this->background = make_solid_brush(rgba(bg, 0.8));
 	this->border = make_solid_brush(rgba(fg, 0.618));
 	this->highlight = make_solid_brush(rgba(fg, 0.382));

@@ -8,6 +8,7 @@
 
 #include "text.hpp"
 #include "paint.hpp"
+#include "brushes.hxx"
 
 #include "graphlet/pumplet.hpp"
 #include "graphlet/valvelet.hpp"
@@ -142,7 +143,7 @@ private:
 static std::unordered_map<GraphletOverview*, Stage*> stages;
 
 GraphletOverview::GraphletOverview() : Planet(":gview:") {
-	this->set_decorator(new PageDecorator(system_graytext_brush()));
+	this->set_decorator(new PageDecorator(Colours::GrayText));
 }
 
 GraphletOverview::~GraphletOverview() {

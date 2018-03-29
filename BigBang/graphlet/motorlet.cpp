@@ -4,6 +4,7 @@
 
 #include "shape.hpp"
 #include "paint.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -150,13 +151,13 @@ void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
         ds->DrawCachedGeometry(this->head, x, y, this->head_brush);
         ds->DrawCachedGeometry(this->body, x, y, this->body_brush);
         ds->DrawCachedGeometry(this->lines, x, y, dark_color);
-        ds->DrawLine(body_x, body_y, body_x, body_y + body_height, dimgray_brush());
-        ds->DrawLine(head_x, body_y, head_x, body_y + body_height, dimgray_brush());
+        ds->DrawLine(body_x, body_y, body_x, body_y + body_height, Colours::DimGray);
+        ds->DrawLine(head_x, body_y, head_x, body_y + body_height, Colours::DimGray);
     }
 
     { // draw body parts
         ds->DrawCachedGeometry(this->parts, x, y, light_color);
         ds->DrawCachedGeometry(this->outline, x, y, dark_color);
-        ds->DrawCachedGeometry(this->status, x, y, green_brush());
+        ds->DrawCachedGeometry(this->status, x, y, Colours::Green);
     }
 }

@@ -24,34 +24,3 @@ Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(Platf
 Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(
     Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle style,
     float offset = 0.0F);
-
-/*************************************************************************************************/
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_accentdark1_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_background_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_foreground_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_highlight_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ system_graytext_brush();
-
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ transparent_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ whitesmoke_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ ghostwhite_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lightgray_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ silver_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ gray_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ darkgray_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ dimgray_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ red_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ orange_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ khaki_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ yellow_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ crimson_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ firebrick_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ crimson_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ chocolate_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ green_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ greenyellow_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ forest_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cyan_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ darkcyan_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ cadetblue_brush();
-Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ teal_brush();

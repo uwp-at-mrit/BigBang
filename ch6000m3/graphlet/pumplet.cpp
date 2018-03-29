@@ -2,6 +2,7 @@
 
 #include "polar_shape.hpp"
 #include "paint.hpp"
+#include "brushes.hxx"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -12,12 +13,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static double default_thickness = 2.0F;
+static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 static PumpState default_pump_state = PumpState::Stopped;
-static CanvasSolidColorBrush^ default_body_color = darkgray_brush();
-static CanvasSolidColorBrush^ default_border_color = whitesmoke_brush();
+static CanvasSolidColorBrush^ default_body_color = Colours::DarkGray;
+static CanvasSolidColorBrush^ default_border_color = Colours::WhiteSmoke;
 
 PumpStyle WarGrey::SCADA::make_default_pump_style(PumpState state) {
 	PumpStyle s;
@@ -26,14 +27,14 @@ PumpStyle WarGrey::SCADA::make_default_pump_style(PumpState state) {
 	s.body_color = default_body_color;
 
 	switch (state) {
-	case PumpState::Running: s.body_color = green_brush(); break;
-	case PumpState::Starting: s.body_color = dimgray_brush(); s.mask_color = green_brush(); break;
-	case PumpState::Unstartable: s.body_color = dimgray_brush(); s.mask_color = green_brush(); break;
-	case PumpState::Remote: s.border_color = cyan_brush(); break;
+	case PumpState::Running: s.body_color = Colours::Green; break;
+	case PumpState::Starting: s.body_color = Colours::DimGray; s.mask_color = Colours::Green; break;
+	case PumpState::Unstartable: s.body_color = Colours::DimGray; s.mask_color = Colours::Green; break;
+	case PumpState::Remote: s.border_color = Colours::Cyan; break;
 	case PumpState::Stopped: break; // this is the default to draw
-	case PumpState::Stopping: s.mask_color = forest_brush(); break;
-	case PumpState::Unstoppable: s.mask_color = forest_brush(); break;
-	case PumpState::Ready: s.skeleton_color = cyan_brush(); break;
+	case PumpState::Stopping: s.mask_color = Colours::ForestGreen; break;
+	case PumpState::Unstoppable: s.mask_color = Colours::ForestGreen; break;
+	case PumpState::Ready: s.skeleton_color = Colours::Cyan; break;
 	}
 
 	return s;
@@ -116,7 +117,7 @@ void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	float bx = cx - this->tradius;
 	float by = cy - this->tradius;
 
-	ds->FillCircle(cx, cy, radius, system_background_brush());
+	ds->FillCircle(cx, cy, radius, Colours::Background);
 	ds->DrawCircle(cx, cy, radius, border_color, default_thickness);
 	ds->DrawCachedGeometry(this->body, bx, by, body_color);
 	ds->DrawGeometry(this->skeleton, bx, by, skeleton_color, default_thickness);

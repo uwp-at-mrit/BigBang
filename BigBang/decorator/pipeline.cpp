@@ -2,7 +2,9 @@
 
 #include "decorator/pipeline.hpp"
 #include "graphlet/primitive.hpp"
+
 #include "paint.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -23,12 +25,12 @@ void PipelineDecorator::draw_after_graphlet(IGraphlet* self, CanvasDrawingSessio
        if (pipe != nullptr) {
            if (this->draw_inport) {
                Rect region = pipe->get_input_port();
-               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, orange_brush(), 1.0F);
+               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, Colours::Orange, 1.0F);
            }
 
            if (this->draw_outport) {
                Rect region = pipe->get_output_port();
-               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, firebrick_brush(), 1.0F);
+               ds->DrawRectangle(x + region.X, y + region.Y, region.Width, region.Height, Colours::Firebrick, 1.0F);
            }
        }
     }

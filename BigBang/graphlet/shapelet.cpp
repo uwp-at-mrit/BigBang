@@ -1,6 +1,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "paint.hpp"
+#include "brushes.hxx"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -17,7 +18,7 @@ Geometrylet::Geometrylet(CanvasGeometry^ shape, Color& color, Color& border_colo
 
 	if (border_color.A == 0) {
 		this->border = nullptr;
-		this->border_color = transparent_brush();
+		this->border_color = Colours::Transparent;
 		this->box = shape->ComputeBounds();
 	} else {
 		this->border = geometry_draft(shape, thickness);

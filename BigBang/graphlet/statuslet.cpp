@@ -9,6 +9,7 @@
 #include "time.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -226,33 +227,33 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
     float width = Width / 7.0F;
 	float context_y = y + (status_height - this->caption->LayoutBounds.Height) * 0.5F;
 	
-	ds->FillRectangle(x, y, Width, Height, system_background_brush());
+	ds->FillRectangle(x, y, Width, Height, Colours::Background);
 
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, chocolate_brush());
-    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, system_foreground_brush());
-    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, green_brush());
-    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, yellow_brush());
-    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, yellow_brush());
-    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, yellow_brush());
+	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colours::Chocolate);
+    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, Colours::Foreground);
+    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, Colours::Green);
+    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, Colours::Yellow);
+    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, Colours::Yellow);
+    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status
 		float plc_x = x + width * 4.0F;
 		
-		ds->DrawText(speak(":plc:"), plc_x, context_y, yellow_brush(), status_font);
+		ds->DrawText(speak(":plc:"), plc_x, context_y, Colours::Yellow, status_font);
 
 		if (this->device == nullptr) {
-			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, red_brush());
+			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Red);
 		} else if (this->device->connected()) {
-			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, green_brush());
+			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
 		} else {
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 
-			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, red_brush(), status_font);
+			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, Colours::Red, status_font);
 		}
 	}
 }
@@ -265,15 +266,15 @@ void Statuslinelet::construct() {
 	initialize_status_font();
 
 	if (status_nolog_color == nullptr) {
-		status_nolog_color = ghostwhite_brush();
-		status_colors[static_cast<unsigned int>(Log::Debug)] = silver_brush();
-		status_colors[static_cast<unsigned int>(Log::Info)] = green_brush();
-		status_colors[static_cast<unsigned int>(Log::Notice)] = greenyellow_brush();
-		status_colors[static_cast<unsigned int>(Log::Warning)] = yellow_brush();
-		status_colors[static_cast<unsigned int>(Log::Error)] = red_brush();
-		status_colors[static_cast<unsigned int>(Log::Critical)] = crimson_brush();
-		status_colors[static_cast<unsigned int>(Log::Alert)] = firebrick_brush();
-		status_colors[static_cast<unsigned int>(Log::Panic)] = firebrick_brush();
+		status_nolog_color = Colours::GhostWhite;
+		status_colors[static_cast<unsigned int>(Log::Debug)] = Colours::Silver;
+		status_colors[static_cast<unsigned int>(Log::Info)] = Colours::Green;
+		status_colors[static_cast<unsigned int>(Log::Notice)] = Colours::GreenYellow;
+		status_colors[static_cast<unsigned int>(Log::Warning)] = Colours::Yellow;
+		status_colors[static_cast<unsigned int>(Log::Error)] = Colours::Red;
+		status_colors[static_cast<unsigned int>(Log::Critical)] = Colours::Crimson;
+		status_colors[static_cast<unsigned int>(Log::Alert)] = Colours::Firebrick;
+		status_colors[static_cast<unsigned int>(Log::Panic)] = Colours::Firebrick;
 	}
 
 	this->set_message("");
@@ -306,7 +307,7 @@ void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float content_y = y + (status_height - this->status->LayoutBounds.Height) * 0.5F;
 
-	ds->FillRectangle(x, y, Width, Height, system_background_brush());
+	ds->FillRectangle(x, y, Width, Height, Colours::Background);
 	ds->DrawTextLayout(this->status, x, content_y, this->color);
 }
 
