@@ -50,7 +50,6 @@ namespace WarGrey::SCADA {
 		float sgradius;
 		float fradius;
 		float size;
-		float thickness;
 
 	private:
 		double mask_percentage;

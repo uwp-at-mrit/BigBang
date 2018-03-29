@@ -42,7 +42,6 @@ namespace WarGrey::SCADA {
 		double degrees;
 		float tradius;
 		float size;
-		float thickness;
 
 	private:
 		double mask_percentage;

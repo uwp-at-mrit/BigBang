@@ -1,6 +1,6 @@
 #include "pumplet.hpp"
 
-#include "shape.hpp"
+#include "polar_shape.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
 
@@ -12,7 +12,9 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static double default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
+
 static PumpState default_pump_state = PumpState::Stopped;
 static CanvasSolidColorBrush^ default_body_color = darkgray_brush();
 static CanvasSolidColorBrush^ default_border_color = whitesmoke_brush();
@@ -41,9 +43,9 @@ PumpStyle WarGrey::SCADA::make_default_pump_style(PumpState state) {
 Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_state, radius, degrees) {}
 
 Pumplet::Pumplet(PumpState default_state, float radius, double degrees)
-	: IStatelet(default_state, &make_default_pump_style), size(radius * 2.0F), degrees(degrees), thickness(2.0F) {
+	: IStatelet(default_state, &make_default_pump_style), size(radius * 2.0F), degrees(degrees) {
 	
-	this->tradius = radius - this->thickness * 2.0F;
+	this->tradius = radius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
 }
 
@@ -108,21 +110,21 @@ void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, floa
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : body_color;
 	auto border_color = (style.border_color != nullptr) ? style.border_color : default_border_color;
 
-	float radius = this->size * 0.5F - this->thickness;
-	float cx = x + radius + this->thickness;
-	float cy = y + radius + this->thickness;
+	float radius = this->size * 0.5F - default_thickness;
+	float cx = x + radius + default_thickness;
+	float cy = y + radius + default_thickness;
 	float bx = cx - this->tradius;
 	float by = cy - this->tradius;
 
 	ds->FillCircle(cx, cy, radius, system_background_brush());
-	ds->DrawCircle(cx, cy, radius, border_color, this->thickness);
+	ds->DrawCircle(cx, cy, radius, border_color, default_thickness);
 	ds->DrawCachedGeometry(this->body, bx, by, body_color);
-	ds->DrawGeometry(this->skeleton, bx, by, skeleton_color, this->thickness);
+	ds->DrawGeometry(this->skeleton, bx, by, skeleton_color, default_thickness);
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
 		
 		ds->FillGeometry(mask, bx, by, style.mask_color);
-		ds->DrawGeometry(mask, bx, by, style.mask_color, this->thickness);
+		ds->DrawGeometry(mask, bx, by, style.mask_color, default_thickness);
 	}
 }
