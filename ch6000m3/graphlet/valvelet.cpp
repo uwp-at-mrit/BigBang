@@ -14,7 +14,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 1.5F;
-static float default_handler_radius = default_thickness * 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 static ValveState default_pump_state = ValveState::Manual;
@@ -26,7 +25,7 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	s.skeleton_color = default_sketeton_color;
 
 	switch (state) {
-	case ValveState::Manual: s.mask_color = Colours::Teal; break;
+	case ValveState::Manual: s.mask_color = Colours::Teal; s.handler_color = default_sketeton_color; break;
 	case ValveState::Open: s.body_color = Colours::Green; break;
 	case ValveState::Opening: s.mask_color = Colours::Green; break;
 	case ValveState::ConditionalOpen: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
@@ -36,7 +35,7 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	case ValveState::ConditionalClose: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
 	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
 	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
-	case ValveState::FalseClose: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
+	case ValveState::FalseClosed: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
 	}
 
 	return s;
@@ -56,7 +55,7 @@ Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
 void Valvelet::construct() {
 	float handle_length = this->sgradius * 0.618F;
 	auto handler_axis = polar_axis(handle_length, this->degrees);
-	auto handler_pole = polar_pole(handle_length, this->degrees, default_handler_radius);
+	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
 
 	this->frame = polar_rectangle(this->fradius, this->degrees);
 	this->handler = geometry_union(handler_axis, handler_pole);
@@ -149,7 +148,8 @@ void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	}
 
 	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
-	if (this->get_state() == ValveState::Manual) {
-		ds->DrawGeometry(this->handler, cx, cy, skeleton_color, default_thickness);
+
+	if (style.handler_color != nullptr) {
+		ds->DrawGeometry(this->handler, cx, cy, style.handler_color, default_thickness);
 	}
 }

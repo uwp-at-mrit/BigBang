@@ -226,7 +226,7 @@
   <data name="ConditionalOpen" xml:space="preserve">
     <value>打开条件</value>
   </data>
-  <data name="FalseClose" xml:space="preserve">
+  <data name="FalseClosed" xml:space="preserve">
     <value>假关</value>
   </data>
   <data name="FalseOpen" xml:space="preserve">

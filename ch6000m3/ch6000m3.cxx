@@ -23,6 +23,7 @@ namespace WarGrey::SCADA {
     private ref class CH6000M3 sealed : public Application {
     protected:
         void AppMain(ApplicationView^ self, FrameworkElement^ screen) {
+			// ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
 			ApplicationLanguages::PrimaryLanguageOverride = GlobalizationPreferences::Languages->GetAt(0);
 			ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
 			ApplicationView::PreferredLaunchViewSize = system_screen_size();

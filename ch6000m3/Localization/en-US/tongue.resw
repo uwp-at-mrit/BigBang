@@ -226,8 +226,8 @@
   <data name="ConditionalOpen" xml:space="preserve">
     <value>Conditional Turn On</value>
   </data>
-  <data name="FalseClose" xml:space="preserve">
-    <value>False Close</value>
+  <data name="FalseClosed" xml:space="preserve">
+    <value>False Closed</value>
   </data>
   <data name="FalseOpen" xml:space="preserve">
     <value>False Open</value>
@@ -246,5 +246,35 @@
   </data>
   <data name="Unopenable" xml:space="preserve">
     <value>Failed to Turn On</value>
+  </data>
+  <data name="SQa" xml:space="preserve">
+    <value>SQ.A</value>
+  </data>
+  <data name="SQb" xml:space="preserve">
+    <value>SQ.B</value>
+  </data>
+  <data name="SQc" xml:space="preserve">
+    <value>SQ.C</value>
+  </data>
+  <data name="SQd" xml:space="preserve">
+    <value>SQ.D</value>
+  </data>
+  <data name="SQe" xml:space="preserve">
+    <value>SQ.E</value>
+  </data>
+  <data name="SQf" xml:space="preserve">
+    <value>SQ.F</value>
+  </data>
+  <data name="SQg" xml:space="preserve">
+    <value>SQ.G</value>
+  </data>
+  <data name="SQh" xml:space="preserve">
+    <value>SQ.H</value>
+  </data>
+  <data name="SQk" xml:space="preserve">
+    <value>SQ.K1</value>
+  </data>
+  <data name="SQy" xml:space="preserve">
+    <value>SQ.Y</value>
   </data>
 </root>

@@ -68,22 +68,30 @@ public:
 	}
 
 	void load_pump_elements(float width, float height, float gridsize) {
-		double left_degrees = 180.0;
-		double right_degrees = 0.0;
-		double up_degrees = -90.0;
+		{ // load pumps
+			HPS pids[] = {
+				HPS::A, HPS::B, HPS::G, HPS::H,
+				HPS::F, HPS::C, HPS::D, HPS::E,
+				HPS::Y, HPS::K
+			};
 
-		this->load_pumplet(0U, gridsize, left_degrees, HPS::A);
-		this->load_pumplet(1U, gridsize, left_degrees, HPS::B);
-		this->load_pumplet(2U, gridsize, left_degrees, HPS::G);
-		this->load_pumplet(3U, gridsize, left_degrees, HPS::H);
+			this->load_devices(this->pumps, this->plabels, pids, gridsize, 180.0, 0, 4, this->pcaptions);
+			this->load_devices(this->pumps, this->plabels, pids, gridsize, 0.000, 4, 4, this->pcaptions);
+			this->load_devices(this->pumps, this->plabels, pids, gridsize, -90.0, 8, 2, this->pcaptions);
+		}
 
-		this->load_pumplet(4U, gridsize, right_degrees, HPS::F);
-		this->load_pumplet(5U, gridsize, right_degrees, HPS::C);
-		this->load_pumplet(6U, gridsize, right_degrees, HPS::D);
-		this->load_pumplet(7U, gridsize, right_degrees, HPS::E);
+		{ // load valves
+			float adjust_gridsize = gridsize * 1.2F;
+			HPS vids[] = {
+				HPS::SQ1, HPS::SQ2, HPS::SQ3, HPS::SQy,
+				HPS::SQa, HPS::SQb, HPS::SQg, HPS::SQh, HPS::SQk,
+				HPS::SQf, HPS::SQc, HPS::SQd, HPS::SQe,
+			};
 
-		this->load_pumplet(8U, gridsize, up_degrees, HPS::Y);
-		this->load_pumplet(9U, gridsize, up_degrees, HPS::K);
+			this->load_devices(this->valves, this->vlabels, vids, adjust_gridsize, 0.000, 0, 4);
+			this->load_devices(this->valves, this->vlabels, vids, adjust_gridsize, -90.0, 4, 5);
+			this->load_devices(this->valves, this->vlabels, vids, adjust_gridsize, 90.00, 9, 4);
+		}
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
@@ -94,8 +102,9 @@ public:
 	}
 	
 	void reflow_pump_elements(float width, float height, float gridsize, float vinset) {
-		float x0, y0, ldx, ldy, cdx, cdy;
-		GraphletAlignment lcp, ccp;
+		float x0, y0, lbl_dx, lbl_dy, cpt_dx, cpt_dy;
+		float adjust_offset = gridsize * 0.8F;
+		GraphletAlignment lbl_align, cpt_align;
 
 		this->workbench->fill_graphlet_location(this->stations[0], &x0, &y0);
 
@@ -103,22 +112,35 @@ public:
 			if (this->pumps[i] != nullptr) {
 				switch (int(this->pumps[i]->get_direction_degrees())) {
 				case -90: {
-					ldx = x0 - gridsize; ldy = y0 - gridsize; lcp = GraphletAlignment::RT;
-					cdx = x0 + gridsize; cdy = y0 - gridsize; ccp = GraphletAlignment::LT;
+					lbl_dx = x0 - gridsize; lbl_dy = y0 - gridsize; lbl_align = GraphletAlignment::RT;
+					cpt_dx = x0 + gridsize; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LT;
 				} break;
 				case 180: {
-					ldx = x0 - gridsize; ldy = y0 + gridsize; lcp = GraphletAlignment::RB;
-					cdx = x0 + gridsize; cdy = y0 + gridsize; ccp = GraphletAlignment::LB;
+					lbl_dx = x0 - gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::RB;
+					cpt_dx = x0 + gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::LB;
 				} break;
 				default: {
-					ldx = x0 + gridsize; ldy = y0 + gridsize; lcp = GraphletAlignment::LB;
-					cdx = x0 - gridsize; cdy = y0 + gridsize; ccp = GraphletAlignment::RB;
+					lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
+					cpt_dx = x0 - gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::RB;
 				} break;
 				}
 
 				this->place_id_element(this->pumps[i], x0, y0, GraphletAlignment::CC);
-				this->place_id_element(this->pump_labels[i], ldx, ldy, lcp);
-				this->place_id_element(this->pump_captions[i], cdx, cdy, ccp);
+				this->place_id_element(this->plabels[i], lbl_dx, lbl_dy, lbl_align);
+				this->place_id_element(this->pcaptions[i], cpt_dx, cpt_dy, cpt_align);
+			}
+		}
+
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->valves); i++) {
+			if (this->valves[i] != nullptr) {
+				if (this->valves[i]->get_direction_degrees() == 0.0) {
+					lbl_dx = x0 - adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
+				} else {
+					lbl_dx = x0; lbl_dy = y0 - adjust_offset; lbl_align = GraphletAlignment::CB;
+				}
+
+				this->place_id_element(this->valves[i], x0, y0, GraphletAlignment::CC);
+				this->place_id_element(this->vlabels[i], lbl_dx, lbl_dy, lbl_align);
 			}
 		}
 	}
@@ -133,11 +155,11 @@ public:
 		
 		//this->workbench->enter_critical_section();
 		
-		//for (size_t i = 1; i < GRAPHLETS_LENGTH(this->gauges); i++) {
-		//	float mpa = float(register_values[i]) * 0.1F;
+		//for (size_t idx = 1; idx < GRAPHLETS_LENGTH(this->gauges); idx++) {
+		//	float mpa = float(register_values[idx]) * 0.1F;
 
 		//	Mpa = Mpa + mpa;
-		//	this->gauges[i]->set_scale(mpa);
+		//	this->gauges[idx]->set_scale(mpa);
 		//}
 
 		//this->gauges[0]->set_scale(Mpa);
@@ -150,18 +172,31 @@ public:
 	}
 
 private:
-	void load_pumplet(unsigned int idx, float radius, double degrees, HPS id) {
-		Platform::String^ idname = id.ToString();
+	template<typename T>
+	void load_devices(T* gs[], Labellet* ls[], HPS ids[], float radius, double degrees, size_t i0, size_t c, Labellet* cs[] = nullptr) {
+		size_t in = i0 + c;
+		
+		for (size_t idx = i0; idx < in; idx++) {
+			this->load_device(gs, ls, idx, radius, degrees, ids[idx]);
+		}
 
-		this->pumps[idx] = new Pumplet(radius, degrees);
-		this->pump_labels[idx] = this->make_labellet(idname, id);
-		this->pump_captions[idx] = this->make_labellet(speak("HPS_" + idname), id);
-
-		this->pumps[idx]->id = static_cast<long>(id);
-		this->workbench->insert(this->pumps[idx]);
+		if (cs != nullptr) {
+			for (size_t idx = i0; idx < in; idx++) {
+				cs[idx] = this->make_label(speak("HPS_" + ids[idx].ToString()), ids[idx]);
+			}
+		}
 	}
 
-	Labellet* make_labellet(Platform::String^ caption, HPS id = HPS::_) {
+	template<typename T>
+	void load_device(T* gs[], Labellet* ls[], size_t idx, float radius, double degrees, HPS id) {
+		gs[idx] = new T(radius, degrees);
+		ls[idx] = this->make_label(speak(id.ToString()), id);
+
+		gs[idx]->id = static_cast<long>(id);
+		this->workbench->insert(gs[idx]);
+	}
+
+	Labellet* make_label(Platform::String^ caption, HPS id = HPS::_) {
 		Labellet* label = new Labellet(caption);
 
 		label->id = static_cast<long>(id);
@@ -181,8 +216,10 @@ private:
 private:
 	Tracklet<HPS>* stations[2];
 	Pumplet* pumps[12];
-	Labellet* pump_labels[12];
-	Labellet* pump_captions[12];
+	Labellet* plabels[12];
+	Labellet* pcaptions[12];
+	Valvelet* valves[13];
+	Labellet* vlabels[13];
 
 private:
 	HPSingle* workbench;

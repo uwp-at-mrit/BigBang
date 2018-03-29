@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 		Manual,
 		Open, Opening, Unopenable, ConditionalOpen,
 		Closed, Closing, Unclosable, ConditionalClose,
-		FalseOpen, FalseClose,
+		FalseOpen, FalseClosed,
 		_ };
 
 	private struct ValveStyle {
@@ -15,6 +15,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handler_color;
 	};
 
 	WarGrey::SCADA::ValveStyle make_default_valve_style(WarGrey::SCADA::ValveState state);

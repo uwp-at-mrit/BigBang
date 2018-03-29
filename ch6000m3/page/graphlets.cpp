@@ -41,19 +41,8 @@ public:
 			this->labels[i] = make_label(speak(all_labels[i]) + ":", this->font);
 		}
 
-		for (PumpState s = static_cast<PumpState>(0); s < PumpState::_; s++) {
-			unsigned int idx = static_cast<unsigned int>(s);
-			
-			this->pumps[idx] = make_pump(s, unitsize);
-			this->hplabels[idx] = make_label(speak(s.ToString()));
-		}
-
-		for (ValveState s = static_cast<ValveState>(0); s < ValveState::_; s++) {
-			unsigned int idx = static_cast<unsigned int>(s);
-
-			this->valves[idx] = make_valve(s, unitsize);
-			this->vlabels[idx] = make_label(speak(s.ToString()));
-		}
+		this->load_primitives<Pumplet, PumpState>(this->pumps, this->hplabels, unitsize);
+		this->load_primitives<Valvelet, ValveState>(this->valves, this->vlabels, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -86,8 +75,8 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		y0 += unitsize;
-		this->reflow_graphlets(this->pumps, this->hplabels, x0, y0 + cellsize * 0.0F, cellsize, GRAPHLETS_LENGTH(this->pumps));
-		this->reflow_graphlets(this->valves, this->vlabels, x0, y0 + cellsize * 1.0F, cellsize, GRAPHLETS_LENGTH(this->valves));
+		this->reflow_primitives<Pumplet, PumpState>(this->pumps, this->hplabels,   x0, y0 + cellsize * 0.0F, cellsize);
+		this->reflow_primitives<Valvelet, ValveState>(this->valves, this->vlabels, x0, y0 + cellsize * 1.0F, cellsize);
 	}
 
 private:
@@ -99,27 +88,21 @@ private:
 		return label;
 	}
 
-	Pumplet* make_pump(PumpState s, float unitsize) {
-		Pumplet* pump = new Pumplet(s, unitsize);
+	template<typename T, typename S>
+	void load_primitives(T* gs[], Labellet* ls[], float unitsize) {
+		for (S s = static_cast<S>(0); s < S::_; s++) {
+			unsigned int idx = static_cast<unsigned int>(s);
 
-		this->master->insert(pump);
+			gs[idx] = new T(s, unitsize);
+			this->master->insert(gs[idx]);
 
-		return pump;
+			ls[idx] = make_label(speak(s.ToString()));
+		}
 	}
 
-
-	Valvelet* make_valve(ValveState s, float unitsize) {
-		Valvelet* valve = new Valvelet(s, unitsize);
-
-		this->master->insert(valve);
-
-		return valve;
-	}
-
-private:
-	template<typename T>
-	void reflow_graphlets(T* gs[], Labellet* ls[], float x0, float y, float cellsize, size_t size) {
-		for (size_t i = 0; i < size; i++) {
+	template<typename T, typename S>
+	void reflow_primitives(T* gs[], Labellet* ls[], float x0, float y, float cellsize) {
+		for (size_t i = 0; i < static_cast<unsigned int>(S::_); i++) {
 			float x = x0 + float(i) * cellsize;
 
 			this->master->move_to(gs[i], x, y, GraphletAlignment::CB);
