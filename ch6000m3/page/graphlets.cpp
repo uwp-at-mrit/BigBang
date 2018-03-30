@@ -34,13 +34,10 @@ public:
 
 public:
 	void load(float width, float height) {
-		Platform::String^ all_labels[] = { "hp_state", "v_state" };
+		Platform::String^ all_captions[] = { "hp_state", "v_state" };
 		float unitsize = 32.0F;
 
-		for (size_t i = 0; i < sizeof(all_labels) / sizeof(Platform::String^); i++) {
-			this->captions[i] = make_label(speak(all_labels[i]) + ":", this->font);
-		}
-
+		this->load_captions(all_captions);
 		this->load_primitives<Pumplet, PumpState>(this->pumps, this->hplabels, unitsize);
 		this->load_primitives<Valvelet, ValveState>(this->valves, this->vlabels, unitsize);
 	}
@@ -81,11 +78,20 @@ public:
 
 private:
 	Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
-		Labellet* label = ((font == nullptr) ? new Labellet(text) : new Labellet(font, text));
+		Labellet* label = new Labellet(text);
 
-		this->master->insert(label);
+		if (font != nullptr) {
+			label->set_font(font);
+		}
 
-		return label;
+		return this->master->insert_one(label);
+	}
+
+	template<unsigned int N>
+	void load_captions(Platform::String^ (&all_captions)[N]) {
+		for (size_t i = 0; i < N; i++) {
+			this->captions[i] = make_label(speak(all_captions[i]) + ":", this->font);
+		}
 	}
 
 	template<typename T, typename S>

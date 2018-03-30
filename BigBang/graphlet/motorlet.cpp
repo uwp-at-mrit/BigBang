@@ -33,8 +33,8 @@ void Motorlet::construct() {
         light_color, light_color, light_color, dark_color
     };
 
-    auto serew_stops = MAKE_GRADIENT_STOPS(serew_colors);
-    auto body_stops = MAKE_GRADIENT_STOPS(body_colors);
+    auto serew_stops = make_gradient_stops(serew_colors);
+    auto body_stops = make_gradient_stops(body_colors);
 
     float thread = fmax(this->width * 0.01F, 1.0F);
     float body_height = this->height * 0.97F;

@@ -39,7 +39,6 @@ Cosmos::Cosmos() : SplitView() {
 	this->Margin = ThicknessHelper::FromUniformLength(0.0);
 	this->PanePlacement = SplitViewPanePlacement::Left;
 	this->DisplayMode = SplitViewDisplayMode::Overlay;
-	this->OpenPaneLength = 48;
 	this->IsPaneOpen = false;
 
 	this->PointerMoved += ref new PointerEventHandler(this, &Cosmos::on_pointer_moved);

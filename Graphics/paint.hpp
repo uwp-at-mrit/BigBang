@@ -2,11 +2,11 @@
 
 typedef Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop> GradientStops;
 
-#define MAKE_GRADIENT_COLOR_STOPS(colors) make_gradient_stops(colors, sizeof(colors) / sizeof(Windows::UI::Color))
-#define MAKE_GRADIENT_STOPS(colors) make_gradient_stops(colors, sizeof(colors) / sizeof(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^))
-
 GradientStops^ make_gradient_stops(Windows::UI::Color colors[], int total);
 GradientStops^ make_gradient_stops(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brushes[], int total);
+
+template<class T, int N>
+GradientStops^ make_gradient_stops(T (&colors)[N]) { return make_gradient_stops(colors, N); };
 
 void brush_translate(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush, float x, float y);
 

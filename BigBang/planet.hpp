@@ -90,13 +90,20 @@ namespace WarGrey::SCADA {
 		void fill_actual_extent(float* width, float* height);
 		
 	public:
-		template<class G>
-		void insert_all(G* gs[], size_t count, unsigned int start_idx = 0) {
-			for (size_t idx = start_idx; idx < count; idx++) {
+		template<class G, unsigned int N>
+		void insert_all(G* (&gs)[N], unsigned int start_idx = 0) {
+			for (unsigned int idx = start_idx; idx < N; idx++) {
 				if (gs[idx] != nullptr) {
 					this->insert(gs[idx]);
 				}
 			}
+		}
+
+		template<class G>
+		G* insert_one(G* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) {
+			this->insert(g);
+
+			return g;
 		}
 
 	public:

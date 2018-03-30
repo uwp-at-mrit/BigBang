@@ -45,7 +45,6 @@ Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_state, rad
 
 Pumplet::Pumplet(PumpState default_state, float radius, double degrees)
 	: IStatelet(default_state, &make_default_pump_style), size(radius * 2.0F), degrees(degrees) {
-	
 	this->tradius = radius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
 }

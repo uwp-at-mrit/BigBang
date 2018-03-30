@@ -4,8 +4,6 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-    #define MAKE_COMPOSE_DECORATOR(src) (new ComposeDecorator(src, sizeof(src) / sizeof(IPlanetDecorator*)))
-
 	private class IPlanetDecorator abstract : public WarGrey::SCADA::SharedObject {
     public:
         virtual void draw_before(
@@ -32,10 +30,13 @@ namespace WarGrey::SCADA {
 		~IPlanetDecorator() noexcept {}
 	};
 
-	private class ComposeDecorator final : public WarGrey::SCADA::IPlanetDecorator {
+	private class CompositeDecorator final : public WarGrey::SCADA::IPlanetDecorator {
 	public:
-		ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second);
-		ComposeDecorator(IPlanetDecorator** decorators, unsigned int count);
+		CompositeDecorator(IPlanetDecorator* first, IPlanetDecorator* second);
+		CompositeDecorator(IPlanetDecorator** decorators, unsigned int count);
+
+		template<unsigned int N>
+		CompositeDecorator(IPlanetDecorator* (&decorators)[N]) : CompositeDecorator(decorators, N) {}
 
 	public:
 		void draw_before(
@@ -59,7 +60,7 @@ namespace WarGrey::SCADA {
 			float x, float y, float width, float height, bool selected) override;
 
 	protected:
-		~ComposeDecorator() noexcept;
+		~CompositeDecorator() noexcept;
 
 	private:
 		WarGrey::SCADA::IPlanetDecorator** decorators;

@@ -46,7 +46,6 @@ Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_pump_state, 
 
 Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
 	: IStatelet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
-	
 	this->fradius = radius - default_thickness;
 	this->sgradius = this->fradius - default_thickness * 4.0F;
 	this->on_state_change(default_state);

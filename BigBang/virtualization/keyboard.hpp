@@ -44,6 +44,9 @@ namespace WarGrey::SCADA {
 		~Keyboard();
 		Keyboard(IPlanet* master, const KeyboardCell* keys, unsigned int keynum);
 
+		template<unsigned int N>
+		Keyboard(IPlanet* master, const KeyboardCell (&all_keys)[N]) : Keyboard(master, all_keys, N) {}
+
 	public:
 		void construct() override;
 		void update(long long count, long long interval, long long uptime) override;

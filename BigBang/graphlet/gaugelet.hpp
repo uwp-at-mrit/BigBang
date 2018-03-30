@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void update_scale() override;
+		void on_scale_change(float scale) override;
 
     private:
         void initialize_meter();

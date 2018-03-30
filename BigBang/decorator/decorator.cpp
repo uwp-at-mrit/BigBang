@@ -20,16 +20,16 @@ static IPlanetDecorator** make_decorator_list(IPlanetDecorator** src, unsigned i
 }
 
 /*************************************************************************************************/
-ComposeDecorator::ComposeDecorator(IPlanetDecorator* first, IPlanetDecorator* second) : count(2) {
+CompositeDecorator::CompositeDecorator(IPlanetDecorator* first, IPlanetDecorator* second) : count(2) {
 	IPlanetDecorator* decorators[] = { first, second };
 	this->decorators = make_decorator_list(decorators, 2);
 }
 
-ComposeDecorator::ComposeDecorator(IPlanetDecorator** decorators, unsigned int count) : count(count) {
+CompositeDecorator::CompositeDecorator(IPlanetDecorator** decorators, unsigned int count) : count(count) {
 	this->decorators = make_decorator_list(decorators, count);
 }
 
-ComposeDecorator::~ComposeDecorator() {
+CompositeDecorator::~CompositeDecorator() {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->destroy();
 	}
@@ -37,25 +37,25 @@ ComposeDecorator::~ComposeDecorator() {
 	free(this->decorators);
 }
 
-void ComposeDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void CompositeDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_before(master, ds, Width, Height);
 	}
 }
 
-void ComposeDecorator::draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void CompositeDecorator::draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_after(master, ds, Width, Height);
 	}
 }
 
-void ComposeDecorator::draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void CompositeDecorator::draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_before_graphlet(g, ds, x, y, width, height, selected);
 	}
 }
 
-void ComposeDecorator::draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
+void CompositeDecorator::draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
 	for (unsigned int i = 0; i < this->count; i++) {
 		this->decorators[i]->draw_after_graphlet(g, ds, x, y, width, height, selected);
 	}

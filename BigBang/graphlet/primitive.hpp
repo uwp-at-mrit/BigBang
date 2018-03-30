@@ -62,23 +62,22 @@ namespace WarGrey::SCADA {
 		void set_scale(T scale, bool force_update = false) {
 			if ((this->scale != scale) || force_update) {
 				this->scale = scale;
-				this->update_scale();
+				this->on_scale_change(scale);
 			}
 		}
 		
 	protected:
-		virtual void update_scale() = 0;
+		virtual void on_scale_change(float scale) = 0;
 
-	protected:
+	private:
 		T scale;
 	};
 
 	template<typename State, typename Style>
 	private class IStatelet : public WarGrey::SCADA::IGraphlet {
 	public:
-		template<typename Lambda>
-		IStatelet(State default_state, Lambda make_default_style) {
-			this->default_state = ((default_state == State::_) ? 0 : static_cast<unsigned long long>(default_state));
+		IStatelet(State default_state, Style (*make_default_style)(State)) {
+			this->default_state = ((default_state == State::_) ? 0 : static_cast<unsigned int>(default_state));
 			this->current_state = this->default_state;
 
 			for (State s = static_cast<State>(0); s < State::_; s++) {
@@ -93,7 +92,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_state(State state) {
-			unsigned long long new_state = ((state == State::_) ? this->default_state : static_cast<unsigned long long>(state));
+			unsigned int new_state = ((state == State::_) ? this->default_state : static_cast<unsigned int>(state));
 			
 			if (this->current_state != new_state) {
 				this->current_state = new_state;
@@ -106,20 +105,20 @@ namespace WarGrey::SCADA {
 		}
 
 		void set_style(State state, Style& style) {
-			this->styles[(state == State::_) ? this->current_state : static_cast<unsigned long long>(state)] = style;
+			this->styles[(state == State::_) ? this->current_state : static_cast<unsigned int>(state)] = style;
 		}
 
 		const Style& get_style(State state = State::_) {			
-			return this->styles[(state == State::_) ? this->current_state : static_cast<unsigned long long>(state)];
+			return this->styles[(state == State::_) ? this->current_state : static_cast<unsigned int>(state)];
 		}
 
 	protected:
 		virtual void on_state_change(State state) {}
 
 	private:
-		unsigned long long default_state;
-		unsigned long long current_state;
-		Style styles[static_cast<unsigned long long>(State::_)];
+		unsigned int default_state;
+		unsigned int current_state;
+		Style styles[static_cast<unsigned int>(State::_)];
 	};
 
 	/************************************************************************************************/

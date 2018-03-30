@@ -57,8 +57,8 @@ void Gaugelet::initialize_meter() {
     }
 }
 
-void Gaugelet::update_scale() {
-	this->cscale = make_text_layout(this->scale.ToString(), this->label_font);
+void Gaugelet::on_scale_change(float scale) {
+	this->cscale = make_text_layout(scale.ToString(), this->label_font);
 }
 
 void Gaugelet::construct() {
@@ -80,7 +80,7 @@ void Gaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
     float meter_y = y + this->caption->LayoutBounds.Height;
     
     ds->DrawTextLayout(this->caption, caption_x, y, Colours::Khaki);
-    this->draw_meter(ds, meter_x, meter_y, this->scale, this->range, this->scales, this->cscale, this->color);
+    this->draw_meter(ds, meter_x, meter_y, this->get_scale(), this->range, this->scales, this->cscale, this->color);
 }
 
 void Gaugelet::draw_meter(CanvasDrawingSession^ ds, float x, float y, float scale, int range

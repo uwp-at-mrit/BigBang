@@ -81,24 +81,24 @@ public:
 		this->captions[0] = make_caption(HPS::Port, Colours::DarkKhaki);
 		this->captions[1] = make_caption(HPS::Starboard, Colours::DarkKhaki);
 
-		this->workbench->insert_all(this->stations, GRAPHLETS_LENGTH(this->stations));
-		this->workbench->insert_all(this->captions, GRAPHLETS_LENGTH(this->captions));
+		this->workbench->insert_all(this->stations);
+		this->workbench->insert_all(this->captions);
 	}
 
 	void load_pump_elements(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_devices(this->pumps, this->plabels, pump_ids, gridsize, 180.0, 0, 4, this->pcaptions);
-			this->load_devices(this->pumps, this->plabels, pump_ids, gridsize, 0.000, 4, 4, this->pcaptions);
-			this->load_devices(this->pumps, this->plabels, pump_ids, gridsize, -90.0, 8, 2, this->pcaptions);
-			this->load_devices(this->pumps, this->plabels, pump_ids, gridsize, 90.00, 10, 2, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 180.0, 0, 4, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 0.000, 4, 4, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, -90.0, 8, 2, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 90.00, 10, 2, this->pcaptions);
 		}
 
 		{ // load valves
 			float adjust_gridsize = gridsize * 1.2F;
 			
-			this->load_devices(this->valves, this->vlabels, valve_ids, adjust_gridsize, 0.000, 0, 6);
-			this->load_devices(this->valves, this->vlabels, valve_ids, adjust_gridsize, -90.0, 6, 5);
-			this->load_devices(this->valves, this->vlabels, valve_ids, adjust_gridsize, 90.00, 11, 4);
+			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, 0.000, 0, 6);
+			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, -90.0, 6, 5);
+			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, 90.00, 11, 4);
 		}
 	}
 
@@ -196,11 +196,11 @@ public:
 
 private:
 	template<typename T>
-	void load_devices(T* gs[], Labellet* ls[], HPS ids[], float radius, double degrees, size_t i0, size_t c, Labellet* cs[] = nullptr) {
+	void load_graphlets(T* gs[], Labellet* ls[], HPS ids[], float radius, double degrees, size_t i0, size_t c, Labellet* cs[] = nullptr) {
 		size_t in = i0 + c;
 		
 		for (size_t idx = i0; idx < in; idx++) {
-			this->load_device(gs, ls, idx, radius, degrees, ids[idx]);
+			this->load_graphlet(gs, ls, idx, radius, degrees, ids[idx]);
 		}
 
 		if (cs != nullptr) {
@@ -211,7 +211,7 @@ private:
 	}
 
 	template<typename T>
-	void load_device(T* gs[], Labellet* ls[], size_t idx, float radius, double degrees, HPS id) {
+	void load_graphlet(T* gs[], Labellet* ls[], size_t idx, float radius, double degrees, HPS id) {
 		gs[idx] = new T(radius, degrees);
 		ls[idx] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 
@@ -220,12 +220,12 @@ private:
 	}
 
 	Labellet* make_label(Platform::String^ caption, HPS id, CanvasSolidColorBrush^ color) {
-		Labellet* label = new Labellet(color, caption);
+		Labellet* label = new Labellet(caption);
 
 		label->set_id(id);
-		this->workbench->insert(label);
-
-		return label;
+		label->set_color(color);
+		
+		return this->workbench->insert_one(label);
 	}
 
 	Labellet* make_caption(HPS id, CanvasSolidColorBrush^ color) {
@@ -295,7 +295,7 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 #ifdef _DEBUG
 			IPlanetDecorator* decorators[] = { page, new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset) };
 
-			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
+			this->set_decorator(new CompositeDecorator(decorators));
 #else
 			this->set_decorator(page);
 #endif

@@ -28,10 +28,8 @@ const static KeyboardCell keys[] = {
     { VirtualKey::Back, 3, 0, 1, 1 }, { VirtualKey::Enter, 3, 1, 1, 3 }
 };
 
-static unsigned int NUMPAD_KEYNUM = sizeof(keys) / sizeof(KeyboardCell);
-
 /*************************************************************************************************/
-Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys, NUMPAD_KEYNUM) {
+Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	this->label_font = make_text_format("Consolas", fontsize);
 	this->current_key = VirtualKey::None;
 }
