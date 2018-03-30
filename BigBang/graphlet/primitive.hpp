@@ -95,7 +95,7 @@ namespace WarGrey::SCADA {
 			return static_cast<State>(this->current_state);
 		}
 
-		void set_style(State state, Style style) {
+		void set_style(State state, Style& style) {
 			this->styles[(state == State::_) ? this->current_state : static_cast<unsigned long long>(state)] = style;
 		}
 

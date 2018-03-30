@@ -221,10 +221,10 @@
     <value>Turning Off</value>
   </data>
   <data name="ConditionalClose" xml:space="preserve">
-    <value>Conditional Turn Off</value>
+    <value>Conditionally Close</value>
   </data>
   <data name="ConditionalOpen" xml:space="preserve">
-    <value>Conditional Turn On</value>
+    <value>Conditionally Open</value>
   </data>
   <data name="FalseClosed" xml:space="preserve">
     <value>False Closed</value>
@@ -242,10 +242,10 @@
     <value>Turning On</value>
   </data>
   <data name="Unclosable" xml:space="preserve">
-    <value>Failed to Turn Off</value>
+    <value>Failed to Close</value>
   </data>
   <data name="Unopenable" xml:space="preserve">
-    <value>Failed to Turn On</value>
+    <value>Failed to Open</value>
   </data>
   <data name="SQa" xml:space="preserve">
     <value>SQ.A</value>
