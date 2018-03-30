@@ -8,8 +8,6 @@
 #include "object.hpp"
 #include "geometry.hpp"
 
-#include "syslog.hpp"
-
 namespace WarGrey::SCADA {
 	template<typename Anchor>
 	private class Turtle final : public WarGrey::SCADA::SharedObject {
@@ -454,7 +452,12 @@ namespace WarGrey::SCADA {
 			if (id != Anchor::_) {
 				std::complex<float> key_point(this->x, this->y);
 				auto anchor = std::pair<Anchor, std::complex<float>>(id, key_point);
-				this->anchors.insert(anchor);
+				auto ret = this->anchors.insert(anchor);
+
+				if (!ret.second) {
+					this->anchors.erase(ret.first);
+					this->anchors.insert(anchor);
+				}
 
 				if (id > Anchor::_) {
 					this->last_backtrace_anchor = id;

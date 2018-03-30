@@ -49,8 +49,8 @@ public:
 		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4);
 		pTurtle->move_up(16, HPS::Starboard)->move_up(14)->turn_up_left()->move_left(32);
-		pTurtle->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F)->jump_up(3)->turn_up_left()->move_left(26);
-		pTurtle->turn_left_down()->move_down(14, HPS::Port)->move_down(3);
+		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F)->jump_back();
+		pTurtle->turn_up_left()->move_left(26)->turn_left_down()->move_down(14, HPS::Port)->move_down(3);
 		pTurtle->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(10, HPS::SQg)->move_right(4)->jump_back();
@@ -266,10 +266,14 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 		}
 
 		{ // delayed initializing
-			GridDecorator* grid = new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset);
-			IPlanetDecorator* decorators[] = { new PageDecorator(Colours::GrayText), grid };
+			PageDecorator* page = new PageDecorator(Colours::GrayText);
+#ifdef _DEBUG
+			IPlanetDecorator* decorators[] = { page, new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset) };
 
 			this->set_decorator(MAKE_COMPOSE_DECORATOR(decorators));
+#else
+			this->set_decorator(page);
+#endif
 
 			if (this->device != nullptr) {
 				this->device->get_logger()->append_log_receiver(this->statusline);
