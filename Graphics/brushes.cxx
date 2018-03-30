@@ -1,5 +1,6 @@
 #include "brushes.hxx"
 #include "paint.hpp"
+#include "colorspace.hpp"
 #include "system.hpp"
 
 using namespace WarGrey::SCADA;
@@ -8,6 +9,18 @@ using namespace Windows::UI;
 using namespace Windows::UI::ViewManagement;
 
 using namespace Microsoft::Graphics::Canvas::Brushes;
+
+CanvasSolidColorBrush^ Colours::make(double hue, double saturation, double lightness, double alpha) {
+	return make_solid_brush(hsla(hue, saturation, lightness, alpha));
+}
+
+CanvasSolidColorBrush^ Colours::make(unsigned int hex, double alpha) {
+	return make_solid_brush(hex, alpha);
+}
+
+CanvasSolidColorBrush^ Colours::contrast(CanvasSolidColorBrush^ src) {
+	return make_solid_brush(contrast_color(src->Color));
+}
 
 CanvasSolidColorBrush^ Colours::Background::get() {
 	static CanvasSolidColorBrush^ brush = make_solid_brush(system_color(UIElementType::Background));

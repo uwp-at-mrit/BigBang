@@ -3,26 +3,25 @@
 #include "box.hpp"
 #include "text.hpp"
 #include "tongue.hpp"
-#include "paint.hpp"
 #include "colorspace.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Windows::Foundation::Numerics;
 
+using namespace Microsoft::Graphics::Canvas::Text;
+using namespace Microsoft::Graphics::Canvas::Brushes;
+
 Togglet::Togglet(bool initial_state, Platform::String^ checked_label, Platform::String^ unchecked_label, float width
-	, Color& ckcolor, Color& uncolor) : state(initial_state), width(width) {
+	, CanvasSolidColorBrush^ ckcolor, CanvasSolidColorBrush^ uncolor)
+	: state(initial_state), width(width), ckcolor(ckcolor), uncolor(uncolor) {
 	CanvasTextFormat^ font = make_text_format("Consolas", 24.0F);
 
 	this->label = make_text_layout(speak(checked_label), font);
 	this->unlabel = make_text_layout(speak(unchecked_label), font);
-	this->ckcolor = make_solid_brush(ckcolor);
-	this->uncolor = make_solid_brush(uncolor);
-	this->lblcolor = make_solid_brush(contrast_color(ckcolor));
-	this->unlblcolor = make_solid_brush(contrast_color(uncolor));
+	this->lblcolor = Colours::contrast(ckcolor);
+	this->unlblcolor = Colours::contrast(uncolor);
 
 	this->state = initial_state;
 	this->width = width;

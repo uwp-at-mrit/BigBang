@@ -25,11 +25,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum HPSMode { WindowUI = 0, View, Control };
+private enum HPSMode { WindowUI = 0, View };
 
 private enum class HPS {
 	A, B, C, D, E, F, G, H, I, J, K, Y, F001, SQ1, SQ2, SQ3,
 	SQa, SQb, SQc, SQd, SQe, SQf, SQg, SQh, SQi, SQj, SQk, SQy,
+	Port, Starboard,
 	_,
 	a, b, c, d, e, f, g, h, k
 };
@@ -46,9 +47,10 @@ public:
 		pTurtle->move_down(4, HPS::f)->move_right(4, HPS::SQf)->move_right(10, HPS::F)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::c)->move_right(4, HPS::SQc)->move_right(10, HPS::C)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4)->move_up(30);
-		pTurtle->turn_up_left()->move_left(32)->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F);
-		pTurtle->jump_up(3)->turn_up_left()->move_left(26)->turn_left_down()->move_down(17);
+		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4);
+		pTurtle->move_up(16, HPS::Starboard)->move_up(14)->turn_up_left()->move_left(32);
+		pTurtle->turn_left_down()->move_down(1.5F, HPS::F001)->move_down(1.5F)->jump_up(3)->turn_up_left()->move_left(26);
+		pTurtle->turn_left_down()->move_down(14, HPS::Port)->move_down(3);
 		pTurtle->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(10, HPS::SQg)->move_right(4)->jump_back();
@@ -58,7 +60,7 @@ public:
 		pTurtle->move_right(4, HPS::SQk)->move_right(4)->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
 		pTurtle->move_up(5, HPS::SQy)->move_up(4, HPS::Y)->move_up(5);
 
-		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colors::Goldenrod);
+		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Goldenrod);
 
 		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->stations); i++) {
 			if (this->stations[i] != nullptr) {
@@ -214,6 +216,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
+	Labellet* labels[2];
 	Tracklet<HPS>* stations[2];
 	Pumplet* pumps[12];
 	Labellet* plabels[12];
@@ -255,8 +258,6 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 			console->load_pump_station(width, height, this->gridsize);
 			console->load_pump_elements(width, height, this->gridsize);
 
-			this->change_mode(HPSMode::Control);
-
 			this->change_mode(HPSMode::WindowUI);
 			this->statusline = new Statuslinelet(Log::Debug);
 			this->statusbar = new Statusbarlet(this->name(), this->device);
@@ -285,8 +286,6 @@ void HPSingle::reflow(float width, float height) {
 
 		this->change_mode(HPSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAlignment::LB);
-		
-		this->change_mode(HPSMode::Control);
 
 		this->change_mode(HPSMode::View);
 		console->reflow_pump_station(width, height, this->gridsize, vinset);

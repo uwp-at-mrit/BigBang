@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
+#include "brushes.hxx"
 #include "turtle.idl"
 
 namespace WarGrey::SCADA {
@@ -8,8 +9,9 @@ namespace WarGrey::SCADA {
 
 	private class Geometrylet : public WarGrey::SCADA::Shapelet {
 	public:
-		Geometrylet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape, Windows::UI::Color& color,
-			Windows::UI::Color& border_color = Windows::UI::Colors::Transparent,
+		Geometrylet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
 
 	public:
@@ -34,7 +36,7 @@ namespace WarGrey::SCADA {
 		}
 
 		Tracklet(WarGrey::SCADA::Turtle<Anchor>* turtle, float thickness = 1.0F
-			, Windows::UI::Color& color = Windows::UI::Colors::Silver)
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver)
 			: Geometrylet(turtle->snap_track(thickness), color), turtle(turtle) {
 			this->turtle->reference();
 		}

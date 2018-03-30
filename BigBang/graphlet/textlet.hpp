@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
+#include "brushes.hxx"
 
 namespace WarGrey::SCADA {
 	private class Textlet : public WarGrey::SCADA::IGraphlet {};
@@ -8,19 +9,19 @@ namespace WarGrey::SCADA {
     private class Labellet : public WarGrey::SCADA::Textlet {
     public:
         Labellet(const wchar_t* fmt, ...);
-		Labellet(Windows::UI::Color& color, const wchar_t* fmt, ...);
+		Labellet(WarGrey::SCADA::Colour^ color, const wchar_t* fmt, ...);
 		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, const wchar_t* fmt, ...);
-		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Windows::UI::Color& color, const wchar_t* fmt, ...);
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, WarGrey::SCADA::Colour^ color, const wchar_t* fmt, ...);
 
 		Labellet(Platform::String^ content = "");
-		Labellet(Windows::UI::Color& color, Platform::String^ content = "");
+		Labellet(WarGrey::SCADA::Colour^ color, Platform::String^ content = "");
 		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Platform::String^ content = "");
-		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, Windows::UI::Color& color, Platform::String^ content = "");
+		Labellet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, WarGrey::SCADA::Colour^ color, Platform::String^ content = "");
 
     public:
         void set_text(Platform::String^ content);
 		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
-		void set_color(Windows::UI::Color& color = Windows::UI::Colors::Silver);
+		void set_color_brush(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
@@ -35,8 +36,8 @@ namespace WarGrey::SCADA {
 	private class Scalelet : public WarGrey::SCADA::Textlet {
 	public:
 		Scalelet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
-			Windows::UI::Color& label_color = Windows::UI::ColorHelper::FromArgb(255, 35, 235, 185),
-			Windows::UI::Color& scale_color = Windows::UI::Colors::Yellow);
+			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U),
+			WarGrey::SCADA::Colour^ scale_color = WarGrey::SCADA::Colours::Yellow);
 
 	public:
 		void set_scale(float value);

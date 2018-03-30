@@ -6,7 +6,6 @@
 #include "paint.hpp"
 #include "tongue.hpp"
 #include "shape.hpp"
-#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
@@ -19,11 +18,10 @@ static const float scale_lmark_ratio = 1.0F;
 static const float scale_space_ratio = 1.0F;
 static const float mbody_width_ratio = 5.0F;
 
-Gaugelet::Gaugelet(Platform::String^ caption, int range, unsigned char step, Color& color)
-	: range(range), step((step > 0) ? step : 10) {
+Gaugelet::Gaugelet(Platform::String^ caption, int range, unsigned char step, ICanvasBrush^ color)
+	: range(range), step((step > 0) ? step : 10), color(color) {
 	this->label_font = make_text_format(12.0F);
 	this->caption = make_text_layout(caption, this->label_font);
-	this->color = make_solid_brush(color);
 	this->set_scale(0.0F, true);
 }
 

@@ -1,7 +1,6 @@
 #include "graphlet/shapelet.hpp"
 
 #include "paint.hpp"
-#include "brushes.hxx"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -12,17 +11,15 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Geometrylet::Geometrylet(CanvasGeometry^ shape, Color& color, Color& border_color, float thickness) {
+Geometrylet::Geometrylet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: color(color), border_color(border_color) {
 	this->surface = geometry_freeze(shape);
-	this->color = make_solid_brush(color);
 
-	if (border_color.A == 0) {
+	if (border_color->Color.A == 0) {
 		this->border = nullptr;
-		this->border_color = Colours::Transparent;
 		this->box = shape->ComputeBounds();
 	} else {
 		this->border = geometry_draft(shape, thickness);
-		this->border_color = make_solid_brush(border_color);
 		this->box = shape->ComputeStrokeBounds(thickness);
 	}
 }

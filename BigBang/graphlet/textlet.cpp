@@ -15,49 +15,49 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 Labellet::Labellet(const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
-	this->set_color();
+	this->set_color_brush();
     this->set_text(label);
 }
 
-Labellet::Labellet(Color& color, const wchar_t *fmt, ...) {
+Labellet::Labellet(Colour^ color, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
-	this->set_color(color);
+	this->set_color_brush(color);
 	this->set_text(label);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
 	this->set_font(font);
-	this->set_color();
+	this->set_color_brush();
 	this->set_text(label);
 }
 
-Labellet::Labellet(CanvasTextFormat^ font, Color& color, const wchar_t *fmt, ...) {
+Labellet::Labellet(CanvasTextFormat^ font, Colour^ color, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
 	this->set_font(font);
-	this->set_color(color);
+	this->set_color_brush(color);
 	this->set_text(label);
 }
 
 Labellet::Labellet(Platform::String^ content) {
-	this->set_color();
+	this->set_color_brush();
 	this->set_text(content);
 }
 
-Labellet::Labellet(Color& color, Platform::String^ content) {
-	this->set_color(color);
+Labellet::Labellet(Colour^ color, Platform::String^ content) {
+	this->set_color_brush(color);
     this->set_text(content);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, Platform::String^ content) {
 	this->set_font(font);
-	this->set_color();
+	this->set_color_brush();
 	this->set_text(content);
 }
 
-Labellet::Labellet(CanvasTextFormat^ font, Color& color, Platform::String^ content) {
+Labellet::Labellet(CanvasTextFormat^ font, Colour^ color, Platform::String^ content) {
 	this->set_font(font);
-	this->set_color(color);
+	this->set_color_brush(color);
 	this->set_text(content);
 }
 
@@ -70,8 +70,8 @@ void Labellet::set_text(Platform::String^ content) {
 	this->content = make_text_layout(content, this->label_font);
 }
 
-void Labellet::set_color(Color& color) {
-	this->label_color = make_solid_brush(color);
+void Labellet::set_color_brush(Colour^ color) {
+	this->label_color = color;
 }
 
 void Labellet::set_font(CanvasTextFormat^ font) {
@@ -89,7 +89,8 @@ void Labellet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
-Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Color& lcolor, Color& scolor) {
+Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Colour^ lcolor, Colour^ scolor)
+	: label_color(lcolor), scale_color(scolor) {
 	this->scale_font = make_text_format("Courier New");
 	this->unit = make_text_layout(speak(unit), this->scale_font);
 
@@ -111,8 +112,6 @@ Scalelet::Scalelet(Platform::String^ unit, Platform::String^ label, Platform::St
 		}
 	}
 
-	this->label_color = make_solid_brush(lcolor);
-	this->scale_color = make_solid_brush(scolor);
 	this->set_scale(0.0F);
 }
 

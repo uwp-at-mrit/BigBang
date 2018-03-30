@@ -3,7 +3,15 @@
 #include "sugar.hpp"
 
 namespace WarGrey::SCADA {
+	typedef Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush Colour;
+
 	private ref class Colours sealed {
+	public:
+		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make(double h, double s, double l, double alpha = 1.0);
+		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make(unsigned int hex, double alpha = 1.0);
+
+		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ contrast(WarGrey::SCADA::Colour^ src);
+
 	public:
 		static_read_only_property(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^, Background);
 		static_read_only_property(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^, Foreground);

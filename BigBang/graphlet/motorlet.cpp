@@ -9,11 +9,13 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static const float default_ratio = 0.6F;
-static Color dark_color = Colors::Gray;
-static Color light_color = Colors::Silver;
+static CanvasSolidColorBrush^ dark_color = Colours::Gray;
+static CanvasSolidColorBrush^ light_color = Colours::Silver;
 
 /*************************************************************************************************/
 Motorlet::Motorlet(float width, float height) : width(width), height(height) {
@@ -25,8 +27,8 @@ Motorlet::Motorlet(float width, float height) : width(width), height(height) {
 }
 
 void Motorlet::construct() {
-    Color serew_colors[] = { Colors::White, Colors::Black };
-    Color body_colors[] = {
+	CanvasSolidColorBrush^ serew_colors[] = { Colours::White, Colours::Black };
+	CanvasSolidColorBrush^ body_colors[] = {
         dark_color, light_color, light_color, light_color,
         light_color, light_color, light_color, dark_color
     };

@@ -12,19 +12,34 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+GradientStops^ make_gradient_stops(CanvasSolidColorBrush^ brushes[], int total) {
+	GradientStops^ stopa = nullptr;
+	CanvasGradientStop* stops = new CanvasGradientStop[total];
+	auto flstep = 1.0F / float(total - 1);
+
+	for (int i = 0; i < total; i++) {
+		stops[i] = CanvasGradientStop{ float(i) * flstep, brushes[i]->Color };
+	}
+
+	stopa = ref new Platform::Array<CanvasGradientStop>(stops, total);
+	delete[] stops;
+
+	return stopa;
+}
+
 GradientStops^ make_gradient_stops(Color colors[], int total) {
-    GradientStops^ stopa = nullptr;
-    CanvasGradientStop* stops = new CanvasGradientStop[total];
-    auto flstep = 1.0F / float(total - 1);
+	GradientStops^ stopa = nullptr;
+	CanvasGradientStop* stops = new CanvasGradientStop[total];
+	auto flstep = 1.0F / float(total - 1);
 
-    for (int i = 0; i < total; i++) {
-        stops[i] = CanvasGradientStop{ float(i) * flstep, colors[i] };
-    }
+	for (int i = 0; i < total; i++) {
+		stops[i] = CanvasGradientStop{ float(i) * flstep, colors[i] };
+	}
 
-    stopa = ref new Platform::Array<CanvasGradientStop>(stops, total);
-    delete[] stops;
+	stopa = ref new Platform::Array<CanvasGradientStop>(stops, total);
+	delete[] stops;
 
-    return stopa;
+	return stopa;
 }
 
 void brush_translate(ICanvasBrush^ brush, float x, float y) {

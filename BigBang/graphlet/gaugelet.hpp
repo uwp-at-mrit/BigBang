@@ -1,12 +1,13 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
+#include "brushes.hxx"
 
 namespace WarGrey::SCADA {
     private class Gaugelet : public WarGrey::SCADA::IScalelet<float> {
     public:
-        Gaugelet(Platform::String^ caption, int range, unsigned char step = 0,
-			Windows::UI::Color& color = Windows::UI::Colors::Green);
+		Gaugelet(Platform::String^ caption, int range, unsigned char step = 0,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Green);
 
 	public:
         void construct() override;
