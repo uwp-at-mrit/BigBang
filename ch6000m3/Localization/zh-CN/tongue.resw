@@ -247,4 +247,10 @@
   <data name="Unopenable" xml:space="preserve">
     <value>打开失败</value>
   </data>
+  <data name="HPS_Port" xml:space="preserve">
+    <value>左舷主泵站</value>
+  </data>
+  <data name="HPS_Starboard" xml:space="preserve">
+    <value>右舷主泵站</value>
+  </data>
 </root>

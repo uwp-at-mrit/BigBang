@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
     public:
         void set_text(Platform::String^ content);
 		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
-		void set_color_brush(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver);
+		void set_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver);
 
     public:
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

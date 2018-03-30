@@ -47,24 +47,33 @@ public:
 		pTurtle->move_down(4, HPS::f)->move_right(4, HPS::SQf)->move_right(10, HPS::F)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::c)->move_right(4, HPS::SQc)->move_right(10, HPS::C)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4);
-		pTurtle->move_up(16, HPS::Starboard)->move_up(14)->turn_up_left()->move_left(32);
+		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4)->move_up(12, HPS::Starboard);
+		pTurtle->move_up(18)->turn_up_left()->move_left(32);
 		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F)->jump_back();
-		pTurtle->turn_up_left()->move_left(26)->turn_left_down()->move_down(14, HPS::Port)->move_down(3);
+		pTurtle->turn_up_left()->move_left(26)->turn_left_down()->move_down(17);
 		pTurtle->move_down(4, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::g)->move_right(4, HPS::G)->move_right(10, HPS::SQg)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HPS::h)->move_right(4, HPS::H)->move_right(10, HPS::SQh)->move_right(4)->move_up(16);
-		pTurtle->turn_up_right()->move_right(8)->turn_right_up()->move_up(1, HPS::SQ2);
-		pTurtle->jump_right(8, HPS::SQ3)->move_down()->turn_down_right()->move_right(8, HPS::k);
-		pTurtle->move_right(4, HPS::SQk)->move_right(4)->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
+		pTurtle->move_down(3, HPS::h)->move_right(4, HPS::H)->move_right(10, HPS::SQh)->move_right(4)->move_up(12, HPS::Port);
+		pTurtle->move_up(4)->turn_up_right()->move_right(8)->turn_right_up();
+		pTurtle->move_up(1, HPS::SQ2)->jump_right(8, HPS::SQ3)->move_down()->turn_down_right();
+		pTurtle->move_right(8, HPS::k)->move_right(4, HPS::SQk)->move_right(4);
+		pTurtle->turn_right_up()->move_up(8, HPS::K)->move_up(5)->jump_back();
 		pTurtle->move_up(5, HPS::SQy)->move_up(4, HPS::Y)->move_up(5);
 
-		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Goldenrod);
+		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Silver);
+		this->captions[0] = make_caption(HPS::Port, Colours::DarkKhaki);
+		this->captions[1] = make_caption(HPS::Starboard, Colours::DarkKhaki);
 
 		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->stations); i++) {
 			if (this->stations[i] != nullptr) {
 				this->workbench->insert(this->stations[i]);
+			}
+		}
+
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+			if (this->captions[i] != nullptr) {
+				this->workbench->insert(this->captions[i]);
 			}
 		}
 	}
@@ -97,10 +106,17 @@ public:
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
-		float station_width, station_height;
+		float sw, sh, sx, sy;
 
-		this->stations[0]->fill_extent(0.0F, 0.0F, &station_width, &station_height);
-		this->workbench->move_to(this->stations[0], (width - station_width) * 0.5F, (height - station_height) * 0.5F);
+		this->stations[0]->fill_extent(0.0F, 0.0F, &sw, &sh);
+		this->workbench->move_to(this->stations[0], (width - sw) * 0.5F, (height - sh) * 0.5F);
+		this->workbench->fill_graphlet_location(this->stations[0], &sx, &sy);
+
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+			if (this->captions[i] != nullptr) {
+				this->place_id_element(this->captions[i], sx - gridsize, sy, GraphletAlignment::RB);
+			}
+		}
 	}
 	
 	void reflow_pump_elements(float width, float height, float gridsize, float vinset) {
@@ -184,7 +200,7 @@ private:
 
 		if (cs != nullptr) {
 			for (size_t idx = i0; idx < in; idx++) {
-				cs[idx] = this->make_label(speak("HPS_" + ids[idx].ToString()), ids[idx]);
+				cs[idx] = this->make_caption(ids[idx], Colours::Silver);
 			}
 		}
 	}
@@ -192,19 +208,23 @@ private:
 	template<typename T>
 	void load_device(T* gs[], Labellet* ls[], size_t idx, float radius, double degrees, HPS id) {
 		gs[idx] = new T(radius, degrees);
-		ls[idx] = this->make_label(speak(id.ToString()), id);
+		ls[idx] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 
 		gs[idx]->id = static_cast<long>(id);
 		this->workbench->insert(gs[idx]);
 	}
 
-	Labellet* make_label(Platform::String^ caption, HPS id = HPS::_) {
-		Labellet* label = new Labellet(caption);
+	Labellet* make_label(Platform::String^ caption, HPS id, CanvasSolidColorBrush^ color) {
+		Labellet* label = new Labellet(color, caption);
 
 		label->id = static_cast<long>(id);
 		this->workbench->insert(label);
 
 		return label;
+	}
+
+	Labellet* make_caption(HPS id, CanvasSolidColorBrush^ color) {
+		return make_label(speak("HPS_" + id.ToString()), id, color);
 	}
 
 	void place_id_element(IGraphlet* g, float dx, float dy, GraphletAlignment scp) {
@@ -216,7 +236,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Labellet* labels[2];
+	Labellet* captions[2];
 	Tracklet<HPS>* stations[2];
 	Pumplet* pumps[12];
 	Labellet* plabels[12];

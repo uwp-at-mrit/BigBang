@@ -38,7 +38,7 @@ public:
 		float unitsize = 32.0F;
 
 		for (size_t i = 0; i < sizeof(all_labels) / sizeof(Platform::String^); i++) {
-			this->labels[i] = make_label(speak(all_labels[i]) + ":", this->font);
+			this->captions[i] = make_label(speak(all_labels[i]) + ":", this->font);
 		}
 
 		this->load_primitives<Pumplet, PumpState>(this->pumps, this->hplabels, unitsize);
@@ -52,11 +52,11 @@ public:
 		float x0 = offset;
 		float y0 = vinset + offset;
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->labels); i++) {
-			if (this->labels[i] != nullptr) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+			if (this->captions[i] != nullptr) {
 				float label_width;
 
-				this->labels[i]->fill_extent(0.0F, 0.0F, &label_width);
+				this->captions[i]->fill_extent(0.0F, 0.0F, &label_width);
 				label_max_width = fmax(label_max_width, label_width);
 			}
 		}
@@ -65,11 +65,11 @@ public:
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->labels); i++) {
-			if (this->labels[i] != nullptr) {
+		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+			if (this->captions[i] != nullptr) {
 				float y = y0 + halfunit + float(i) * cellsize;
 
-				this->master->move_to(this->labels[i], x0 + label_max_width, y, GraphletAlignment::RC);
+				this->master->move_to(this->captions[i], x0 + label_max_width, y, GraphletAlignment::RC);
 			}
 		}
 
@@ -111,7 +111,7 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	Labellet* labels[5];
+	Labellet* captions[5];
 	Pumplet* pumps[static_cast<unsigned long long>(PumpState::_)];
 	Labellet* hplabels[static_cast<unsigned long long>(PumpState::_)];
 	Valvelet* valves[static_cast<unsigned long long>(ValveState::_)];

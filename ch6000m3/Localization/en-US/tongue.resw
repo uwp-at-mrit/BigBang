@@ -277,4 +277,10 @@
   <data name="SQy" xml:space="preserve">
     <value>SQ.Y</value>
   </data>
+  <data name="HPS_Port" xml:space="preserve">
+    <value>Port Pump Station</value>
+  </data>
+  <data name="HPS_Starboard" xml:space="preserve">
+    <value>Starboard Pump Station</value>
+  </data>
 </root>

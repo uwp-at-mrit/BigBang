@@ -15,49 +15,49 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 Labellet::Labellet(const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
-	this->set_color_brush();
+	this->set_color();
     this->set_text(label);
 }
 
 Labellet::Labellet(Colour^ color, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
-	this->set_color_brush(color);
+	this->set_color(color);
 	this->set_text(label);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
 	this->set_font(font);
-	this->set_color_brush();
+	this->set_color();
 	this->set_text(label);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, Colour^ color, const wchar_t *fmt, ...) {
 	VSWPRINT(label, fmt);
 	this->set_font(font);
-	this->set_color_brush(color);
+	this->set_color(color);
 	this->set_text(label);
 }
 
 Labellet::Labellet(Platform::String^ content) {
-	this->set_color_brush();
+	this->set_color();
 	this->set_text(content);
 }
 
 Labellet::Labellet(Colour^ color, Platform::String^ content) {
-	this->set_color_brush(color);
+	this->set_color(color);
     this->set_text(content);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, Platform::String^ content) {
 	this->set_font(font);
-	this->set_color_brush();
+	this->set_color();
 	this->set_text(content);
 }
 
 Labellet::Labellet(CanvasTextFormat^ font, Colour^ color, Platform::String^ content) {
 	this->set_font(font);
-	this->set_color_brush(color);
+	this->set_color(color);
 	this->set_text(content);
 }
 
@@ -70,7 +70,7 @@ void Labellet::set_text(Platform::String^ content) {
 	this->content = make_text_layout(content, this->label_font);
 }
 
-void Labellet::set_color_brush(Colour^ color) {
+void Labellet::set_color(Colour^ color) {
 	this->label_color = color;
 }
 
