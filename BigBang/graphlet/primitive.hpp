@@ -22,11 +22,6 @@ namespace WarGrey::SCADA {
 		virtual ~IGraphlet() noexcept;
 
 	public:
-		// `id` is designed for user-applications, in order to distinguish instances of a graphlet class.
-		// User-Applications should define and maintain the enumerations on their own.
-		long int id = -1L;
-
-	public:
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
@@ -34,6 +29,21 @@ namespace WarGrey::SCADA {
 
     public:
         IGraphletInfo* info;
+
+
+
+	/** NOTE
+	 * `id` is designed for user-applications, in order to distinguish instances of a graphlet class.
+	 * User-Applications should define and maintain the enumerations on their own.
+	 *
+	 * This implementation is ugly since C++ enum classes have no common superclass;  
+	 */
+	public:
+		template<class E> E get_id() { return static_cast<E>(this->id); }
+		template<class E> void set_id(E id) { this->id = static_cast<unsigned int>(id); }
+
+	private:
+		unsigned int id = 0U;
     };
 
 	private class IPipelet : public WarGrey::SCADA::IGraphlet {

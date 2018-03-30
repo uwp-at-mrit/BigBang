@@ -283,4 +283,16 @@
   <data name="HPS_Starboard" xml:space="preserve">
     <value>Starboard Pump Station</value>
   </data>
+  <data name="SQi" xml:space="preserve">
+    <value>SQ.I</value>
+  </data>
+  <data name="SQj" xml:space="preserve">
+    <value>SQ.J</value>
+  </data>
+  <data name="HPS_I" xml:space="preserve">
+    <value>Left Harrow Lip</value>
+  </data>
+  <data name="HPS_J" xml:space="preserve">
+    <value>Right Harrow Lip</value>
+  </data>
 </root>

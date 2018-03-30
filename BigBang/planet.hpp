@@ -88,6 +88,16 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 		void fill_actual_extent(float* width, float* height);
+		
+	public:
+		template<class G>
+		void insert_all(G* gs[], size_t count, unsigned int start_idx = 0) {
+			for (size_t idx = start_idx; idx < count; idx++) {
+				if (gs[idx] != nullptr) {
+					this->insert(gs[idx]);
+				}
+			}
+		}
 
 	public:
 		void enter_critical_section();

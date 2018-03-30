@@ -253,4 +253,10 @@
   <data name="HPS_Starboard" xml:space="preserve">
     <value>右舷主泵站</value>
   </data>
+  <data name="HPS_I" xml:space="preserve">
+    <value>左耙唇</value>
+  </data>
+  <data name="HPS_J" xml:space="preserve">
+    <value>右耙唇</value>
+  </data>
 </root>
