@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	float statusbar_height();
 
-    private class Statusbarlet : public WarGrey::SCADA::IGraphlet {
+    private class Statusbarlet : public virtual WarGrey::SCADA::IGraphlet {
     public:
 		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCClient* device = nullptr);
 
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPLCClient* device;
     };
 
-	private class Statuslinelet : public WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {
+	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {
 	public:
 		Statuslinelet(WarGrey::SCADA::Log level) : ISyslogReceiver(level) {}
 

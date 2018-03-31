@@ -3,6 +3,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -44,6 +45,22 @@ CanvasTextFormat^ make_text_format(Platform::String^ face, float size, CanvasWor
 
 
 	return font_config;
+}
+
+CanvasTextFormat^ make_bold_text_format(float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
+	auto font = make_text_format(nullptr, size, wrapping, align);
+	
+	font->FontWeight = FontWeights::Bold;
+
+	return font;
+}
+
+CanvasTextFormat^ make_bold_text_format(Platform::String^ face, float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
+	auto font = make_text_format(face, size, wrapping, align);
+
+	font->FontWeight = FontWeights::Bold;
+
+	return font;
 }
 
 TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ font, bool trim) {

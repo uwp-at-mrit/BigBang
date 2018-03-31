@@ -259,4 +259,16 @@
   <data name="HPS_J" xml:space="preserve">
     <value>右耙唇</value>
   </data>
+  <data name="level_high" xml:space="preserve">
+    <value>液位高</value>
+  </data>
+  <data name="level_low" xml:space="preserve">
+    <value>液位低</value>
+  </data>
+  <data name="level_low2" xml:space="preserve">
+    <value>液位过低</value>
+  </data>
+  <data name="HPS_MasterTank" xml:space="preserve">
+    <value>主油箱</value>
+  </data>
 </root>

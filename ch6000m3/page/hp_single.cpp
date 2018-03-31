@@ -23,6 +23,7 @@ using namespace Windows::UI;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
+using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HPSMode { WindowUI = 0, View };
@@ -30,7 +31,7 @@ private enum HPSMode { WindowUI = 0, View };
 private enum class HPS : unsigned int {
 	A, B, C, D, E, F, G, H, I, J, K, Y, F001, SQ1, SQ2, SQ3,
 	SQa, SQb, SQc, SQd, SQe, SQf, SQg, SQh, SQi, SQj, SQk, SQy,
-	Port, Starboard,
+	Port, Starboard, MasterTank,
 	_,
 	a, b, c, d, e, f, g, h, i, j, k
 };
@@ -50,7 +51,9 @@ static HPS valve_ids[] = {
 
 private class HPSConsole : public WarGrey::SCADA::ModbusConfirmation {
 public:
-	HPSConsole(HPSingle* master) : workbench(master) {}
+	HPSConsole(HPSingle* master) : workbench(master) {
+		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
+	}
 
 public:
 	void load_pump_station(float width, float height, float gridsize) {
@@ -62,7 +65,7 @@ public:
 		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4)->move_up(12, HPS::Starboard);
 		pTurtle->move_up(19)->turn_up_left()->move_left(32);
-		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F)->jump_back();
+		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F, HPS::MasterTank)->jump_back();
 		pTurtle->turn_up_left()->move_left(26)->turn_left_down()->move_down(17);
 		pTurtle->move_down(5, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
@@ -78,14 +81,16 @@ public:
 		pTurtle->jump_back()->jump_right(8, HPS::i)->move_down(2, HPS::SQi)->move_down(3, HPS::I)->move_down(2);
 
 		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Silver);
-		this->captions[0] = make_caption(HPS::Port, Colours::DarkKhaki);
-		this->captions[1] = make_caption(HPS::Starboard, Colours::DarkKhaki);
+
+		this->captions[0] = make_caption(HPS::MasterTank, Colours::Silver, this->caption_font);
+		this->captions[1] = make_caption(HPS::Port, Colours::DarkKhaki, this->caption_font);
+		this->captions[2] = make_caption(HPS::Starboard, Colours::DarkKhaki, this->caption_font);
 
 		this->workbench->insert_all(this->stations);
 		this->workbench->insert_all(this->captions);
 	}
 
-	void load_pump_elements(float width, float height, float gridsize) {
+	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
 			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 180.0, 0, 4, this->pcaptions);
 			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 0.000, 4, 4, this->pcaptions);
@@ -102,6 +107,13 @@ public:
 		}
 	}
 
+	void load_indicators(float width, float height, float gridsize) {
+		this->master_indicators[0] = make_indicator("hps_master_T", Colours::Green);
+		this->master_indicators[1] = make_indicator("hps_master_low", Colours::Green);
+		this->master_indicators[2] = make_indicator("hps_master_low2", Colours::Green);
+		this->master_indicators[3] = make_indicator("hps_master_high", Colours::Green);
+	}
+
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
 		float sw, sh, sx, sy;
 
@@ -116,7 +128,7 @@ public:
 		}
 	}
 	
-	void reflow_pump_elements(float width, float height, float gridsize, float vinset) {
+	void reflow_devices(float width, float height, float gridsize, float vinset) {
 		float x0, y0, lbl_dx, lbl_dy, cpt_dx, cpt_dy;
 		float adjust_offset = gridsize * 0.8F;
 		GraphletAlignment lbl_align, cpt_align;
@@ -153,7 +165,7 @@ public:
 		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->valves); i++) {
 			if (this->valves[i] != nullptr) {
 				if (this->valves[i]->get_direction_degrees() == 0.0) {
-					if (this->valves[i]->get_id<HPS>() == HPS::SQ2) {
+					if (this->valves[i]->id == HPS::SQ2) {
 						lbl_dx = x0 - adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
 					} else {
 						lbl_dx = x0 + adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
@@ -165,6 +177,20 @@ public:
 				this->place_id_element(this->valves[i], x0, y0, GraphletAlignment::CC);
 				this->place_id_element(this->vlabels[i], lbl_dx, lbl_dy, lbl_align);
 			}
+		}
+	}
+
+	void reflow_indicators(float width, float height, float gridsize, float vinset) {
+		float x0, y0, indicator_x, indicator_y, lineheight;
+
+		this->workbench->fill_graphlet_location(this->stations[0], &x0, &y0);
+		this->master_indicators[0]->fill_extent(0.0F, 0.0F, nullptr, &lineheight);
+
+		indicator_x = x0 + gridsize * 5.0F;
+		indicator_y = y0 + gridsize * 5.0F;
+		lineheight *= 1.2F;
+		for (unsigned int i = 0; i < GRAPHLETS_LENGTH(this->master_indicators); i++) {
+			this->workbench->move_to(this->master_indicators[i], indicator_x, indicator_y + lineheight * float(i));
 		}
 	}
 
@@ -196,7 +222,7 @@ public:
 
 private:
 	template<typename T>
-	void load_graphlets(T* gs[], Labellet* ls[], HPS ids[], float radius, double degrees, size_t i0, size_t c, Labellet* cs[] = nullptr) {
+	void load_graphlets(T* gs[], Credit<Labellet, HPS>* ls[], HPS ids[], float radius, double degrees, size_t i0, size_t c, Credit<Labellet, HPS>* cs[] = nullptr) {
 		size_t in = i0 + c;
 		
 		for (size_t idx = i0; idx < in; idx++) {
@@ -211,45 +237,60 @@ private:
 	}
 
 	template<typename T>
-	void load_graphlet(T* gs[], Labellet* ls[], size_t idx, float radius, double degrees, HPS id) {
+	void load_graphlet(T* gs[], Credit<Labellet, HPS>* ls[], size_t idx, float radius, double degrees, HPS id) {
 		gs[idx] = new T(radius, degrees);
 		ls[idx] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 
-		gs[idx]->set_id<HPS>(id);
+		gs[idx]->id = id;
 		this->workbench->insert(gs[idx]);
 	}
 
-	Labellet* make_label(Platform::String^ caption, HPS id, CanvasSolidColorBrush^ color) {
-		Labellet* label = new Labellet(caption);
+	Credit<Labellet, HPS>* make_label(Platform::String^ caption, HPS id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
+		Credit<Labellet, HPS>* label = new Credit<Labellet, HPS>(caption);
 
-		label->set_id(id);
+		label->id = id;
 		label->set_color(color);
+
+		if (font != nullptr) {
+			label->set_font(font);
+		}
 		
 		return this->workbench->insert_one(label);
 	}
 
-	Labellet* make_caption(HPS id, CanvasSolidColorBrush^ color) {
-		return make_label(speak("HPS_" + id.ToString()), id, color);
+	Credit<Labellet, HPS>* make_caption(HPS id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
+		return this->make_label(speak("HPS_" + id.ToString()), id, color, font);
 	}
 
-	void place_id_element(IGraphlet* g, float dx, float dy, GraphletAlignment scp) {
+	Credit<Booleanlet, HPS>* make_indicator(Platform::String^ caption, CanvasSolidColorBrush^ color) {
+		Credit<Booleanlet, HPS>* indicator = new Credit<Booleanlet, HPS>(speak(caption));
+
+		indicator->set_indicator_color(color);
+
+		return this->workbench->insert_one(indicator);
+	}
+
+	template<class CreditG>
+	void place_id_element(CreditG* g, float dx, float dy, GraphletAlignment scp) {
 		float x, y;
 
-		this->stations[0]->fill_anchor_location(g->get_id<HPS>(), &x, &y);
+		this->stations[0]->fill_anchor_location(g->id, &x, &y);
 		this->workbench->move_to(g, x + dx, y + dy, scp);
 	}
 
 // never deletes these graphlets mannually
 private:
-	Labellet* captions[2];
 	Tracklet<HPS>* stations[2];
-	Pumplet* pumps[sizeof(pump_ids) / sizeof(HPS)];
-	Labellet* plabels[sizeof(pump_ids) / sizeof(HPS)];
-	Labellet* pcaptions[sizeof(pump_ids) / sizeof(HPS)];
-	Valvelet* valves[sizeof(valve_ids) / sizeof(HPS)];
-	Labellet* vlabels[sizeof(valve_ids) / sizeof(HPS)];
+	Credit<Labellet, HPS>* captions[3];
+	Credit<Pumplet, HPS>* pumps[sizeof(pump_ids) / sizeof(HPS)];
+	Credit<Labellet, HPS>* plabels[sizeof(pump_ids) / sizeof(HPS)];
+	Credit<Labellet, HPS>* pcaptions[sizeof(pump_ids) / sizeof(HPS)];
+	Credit<Valvelet, HPS>* valves[sizeof(valve_ids) / sizeof(HPS)];
+	Credit<Labellet, HPS>* vlabels[sizeof(valve_ids) / sizeof(HPS)];
+	Credit<Booleanlet, HPS>* master_indicators[4];
 
 private:
+	CanvasTextFormat^ caption_font;
 	HPSingle* workbench;
 };
 
@@ -281,7 +322,8 @@ void HPSingle::load(CanvasCreateResourcesReason reason, float width, float heigh
 		{ // load graphlets
 			this->change_mode(HPSMode::View);
 			console->load_pump_station(width, height, this->gridsize);
-			console->load_pump_elements(width, height, this->gridsize);
+			console->load_devices(width, height, this->gridsize);
+			console->load_indicators(width, height, this->gridsize);
 
 			this->change_mode(HPSMode::WindowUI);
 			this->statusline = new Statuslinelet(Log::Debug);
@@ -318,7 +360,8 @@ void HPSingle::reflow(float width, float height) {
 
 		this->change_mode(HPSMode::View);
 		console->reflow_pump_station(width, height, this->gridsize, vinset);
-		console->reflow_pump_elements(width, height, this->gridsize, vinset);
+		console->reflow_devices(width, height, this->gridsize, vinset);
+		console->reflow_indicators(width, height, this->gridsize, vinset);
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "pumplet.hpp"
 
-#include "polar_shape.hpp"
+#include "polar.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
 #include "geometry.hpp"

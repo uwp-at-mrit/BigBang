@@ -5,9 +5,9 @@
 #include "turtle.idl"
 
 namespace WarGrey::SCADA {
-	private class Shapelet : public WarGrey::SCADA::IGraphlet {};
+	private class Shapelet : public virtual WarGrey::SCADA::IGraphlet {};
 
-	private class Geometrylet : public WarGrey::SCADA::Shapelet {
+	private class Geometrylet : public virtual WarGrey::SCADA::Shapelet {
 	public:
 		Geometrylet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 	};
 
 	template<typename Anchor>
-	private class Tracklet : public WarGrey::SCADA::Geometrylet {
+	private class Tracklet : public virtual WarGrey::SCADA::Geometrylet {
 	public:
 		~Tracklet() noexcept {
 			this->turtle->destroy();
@@ -42,13 +42,19 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		void fill_anchor_location(Anchor node, float* x, float* y) {
+		void fill_anchor_location(Anchor node, float* x, float* y, bool need_absolute_location = false) {
 			float raw_x, raw_y;
+			float x0 = 0.0F;
+			float y0 = 0.0F;
 
 			this->turtle->fill_anchor_location(node, &raw_x, &raw_y);
 
-			SET_BOX(x, raw_x - WarGrey::SCADA::Geometrylet::box.X);
-			SET_BOX(y, raw_y - WarGrey::SCADA::Geometrylet::box.Y);
+			if (need_absolute_location && (this->info != nullptr)) {
+				this->info->master->fill_graphlet_location(this, &x0, &y0);
+			}
+
+			SET_BOX(x, raw_x + x0 - WarGrey::SCADA::Geometrylet::box.X);
+			SET_BOX(y, raw_y + y0 - WarGrey::SCADA::Geometrylet::box.Y);
 		}
 
 	private:

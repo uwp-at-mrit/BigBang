@@ -16,6 +16,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pumplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
@@ -36,6 +38,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pumplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl">
       <FileType>Document</FileType>
     </ClInclude>

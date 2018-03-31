@@ -295,4 +295,16 @@
   <data name="HPS_J" xml:space="preserve">
     <value>Right Harrow Lip</value>
   </data>
+  <data name="level_high" xml:space="preserve">
+    <value>Level High</value>
+  </data>
+  <data name="level_low" xml:space="preserve">
+    <value>Level Low</value>
+  </data>
+  <data name="level_low2" xml:space="preserve">
+    <value>Level Low Low</value>
+  </data>
+  <data name="HPS_MasterTank" xml:space="preserve">
+    <value>Main Oil Tank</value>
+  </data>
 </root>

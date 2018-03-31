@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-    private class Motorlet : public WarGrey::SCADA::IGraphlet {
+    private class Motorlet : public virtual WarGrey::SCADA::IGraphlet {
     public:
         Motorlet(float width, float height = 0.0F);
 

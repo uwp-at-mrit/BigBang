@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
     };
 
 	private class IGraphlet abstract : public WarGrey::SCADA::ISprite {
-    public:
+	public:
 		virtual ~IGraphlet() noexcept;
 
 	public:
@@ -27,33 +27,26 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void own_caret(bool is_own) {}
 
-    public:
-        IGraphletInfo* info;
-
-
-
-	/** NOTE
-	 * `id` is designed for user-applications, in order to distinguish instances of a graphlet class.
-	 * User-Applications should define and maintain the enumerations on their own.
-	 *
-	 * This implementation is ugly since C++ enum classes have no common superclass;  
-	 */
 	public:
-		template<class E> E get_id() { return static_cast<E>(this->id); }
-		template<class E> void set_id(E id) { this->id = static_cast<unsigned int>(id); }
+		IGraphletInfo * info;
+	};
 
-	private:
-		unsigned int id = 0U;
-    };
+	template<class Graphlet, typename IDEnum>
+	private class Credit : public virtual Graphlet {
+		using Graphlet::Graphlet;
 
-	private class IPipelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		IDEnum id;
+	};
+
+	private class IPipelet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		virtual Windows::Foundation::Rect get_input_port() = 0;
 		virtual Windows::Foundation::Rect get_output_port() = 0;
 	};
 
 	template<typename T>
-	private class IScalelet : public WarGrey::SCADA::IGraphlet {
+	private class IScalelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		T get_scale() {
 			return this->scale;
@@ -67,14 +60,14 @@ namespace WarGrey::SCADA {
 		}
 		
 	protected:
-		virtual void on_scale_change(float scale) = 0;
+		virtual void on_scale_change(float scale) {}
 
 	private:
 		T scale;
 	};
 
 	template<typename State, typename Style>
-	private class IStatelet : public WarGrey::SCADA::IGraphlet {
+	private class IStatelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		IStatelet(State default_state, Style (*make_default_style)(State)) {
 			this->default_state = ((default_state == State::_) ? 0 : static_cast<unsigned int>(default_state));

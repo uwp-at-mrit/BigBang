@@ -4,7 +4,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Textlet abstract : public WarGrey::SCADA::IGraphlet {
+	private class Textlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		void set_text(Platform::String^ content);
 		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
@@ -15,8 +15,11 @@ namespace WarGrey::SCADA {
 		void set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style);
 
 	public:
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		virtual void on_font_change() {}
 
 	protected:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ text_font;
@@ -33,11 +36,32 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ content = "");
 	};
 
-	private class BooleanLabellet : public WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<bool> {
+	private class Booleanlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<bool> {
+	public:
+		Booleanlet(const wchar_t* fmt, ...);
+		Booleanlet(Platform::String^ content = "");
 
+	public:
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void on_font_change() override;
+
+	public:
+		void set_indicator_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ true_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ false_color = WarGrey::SCADA::Colours::WhiteSmoke);
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ true_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ false_color;
+
+	private:
+		float indicator_size;
+		float gapsize;
 	};
 
-	private class ScaleTextlet : public WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<float> {
+	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<float> {
 	public:
 		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U),

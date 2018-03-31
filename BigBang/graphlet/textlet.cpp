@@ -21,16 +21,17 @@ void Textlet::set_color(CanvasSolidColorBrush^ color) {
 void Textlet::set_font(CanvasTextFormat^ font) {
 	this->text_font = font;
 	this->set_text(this->raw);
+	this->on_font_change();
 }
 
 void Textlet::set_text(Platform::String^ content) {
-	if (this->text_font == nullptr) {
-		this->text_font = make_text_format();
-		this->text_font->FontWeight = FontWeights::Bold;
-	}
-
 	this->raw = content;
-	this->text_layout = make_text_layout(content, this->text_font);
+
+	if (this->text_font == nullptr) {
+		this->set_font(make_bold_text_format());
+	} else {
+		this->text_layout = make_text_layout(content, this->text_font);
+	}
 }
 
 void Textlet::set_layout_font_size(int char_idx, int char_count, float size) {
@@ -42,9 +43,13 @@ void Textlet::set_layout_font_style(int char_idx, int char_count, Windows::UI::T
 }
 
 void Textlet::fill_extent(float x, float y, float* w, float* h) {
-	auto box = this->text_layout->LayoutBounds;
+	if (this->text_layout != nullptr) {
+		auto box = this->text_layout->LayoutBounds;
 
-	SET_VALUES(w, box.Width, h, box.Height);
+		SET_VALUES(w, box.Width, h, box.Height);
+	} else {
+		SET_BOXES(w, h, 0.0F);
+	}
 }
 
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -65,6 +70,52 @@ Labellet::Labellet(const wchar_t *fmt, ...) {
 
 Labellet::Labellet(Platform::String^ content) {
 	this->set_text(content);
+}
+
+/*************************************************************************************************/
+Booleanlet::Booleanlet(const wchar_t *fmt, ...) {
+	VSWPRINT(label, fmt);
+	this->set_text(label);
+}
+
+Booleanlet::Booleanlet(Platform::String^ content) {
+	this->set_text(content);
+}
+
+void Booleanlet::fill_extent(float x, float y, float* w, float* h) {
+	Textlet::fill_extent(x, y, w, h);
+	
+	if (w != nullptr) {
+		if ((*w) == 0.0F) {
+			(*w) += this->indicator_size;
+		} else {
+			(*w) += (this->indicator_size + this->gapsize);
+		}
+	}
+
+	if (h != nullptr) {
+		(*h) = fmaxf(this->indicator_size, (*h));
+	}
+}
+
+void Booleanlet::on_font_change() {
+	TextExtent ts = get_text_extent("x", this->text_font);
+
+	this->indicator_size = ts.height * 1.2F;
+	this->gapsize = ts.width;
+}
+
+void Booleanlet::set_indicator_color(ICanvasBrush^ true_color, ICanvasBrush^ false_color) {
+	this->true_color = true_color;
+	this->false_color = false_color;
+}
+
+
+void Booleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	auto color = (this->get_scale() ? this->true_color : this->false_color);
+
+	Textlet::draw(ds, x + this->indicator_size + this->gapsize, y, Width, Height);
+	ds->FillRectangle(x, y, this->indicator_size, this->indicator_size, color);
 }
 
 /*************************************************************************************************/
@@ -95,19 +146,16 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 	this->set_scale(0.0F);
 }
 
-void ScaleTextlet::on_scale_change(float scale) {
-	this->scale_layout = make_text_layout(" " + scale.ToString(), this->text_font);
+void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
+	Textlet::fill_extent(x, y, w, h);
+
+	if (w != nullptr) {
+		(*w) += (this->scale_layout->LayoutBounds.Width + this->unit_layout->LayoutBounds.Width);
+	}
 }
 
-void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
-	float width = this->scale_layout->LayoutBounds.Width + this->unit_layout->LayoutBounds.Width;
-	float height = this->unit_layout->LayoutBounds.Height;
-
-	if (this->text_layout != nullptr) {
-		width += this->text_layout->LayoutBounds.Width;
-	}
-
-	SET_VALUES(w, width, h, height);
+void ScaleTextlet::on_scale_change(float scale) {
+	this->scale_layout = make_text_layout(" " + scale.ToString(), this->text_font);
 }
 
 void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

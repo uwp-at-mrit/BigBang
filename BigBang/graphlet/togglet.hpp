@@ -4,7 +4,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Togglet : public WarGrey::SCADA::IGraphlet {
+	private class Togglet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		Togglet(bool state0, Platform::String^ checked_label, Platform::String^ unchecked_label, float width = 0.0F,
 			WarGrey::SCADA::Colour^ checked_color = WarGrey::SCADA::Colours::DodgerBlue,

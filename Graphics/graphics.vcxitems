@@ -19,8 +19,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)colorspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)color_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)hatch.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)paint.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)polar_shape.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)polar.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shape.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shape3d.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
@@ -31,8 +33,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)colorspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)color_test.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)hatch.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)math.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)paint.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)polar_shape.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)polar.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shape.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shape3d.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />

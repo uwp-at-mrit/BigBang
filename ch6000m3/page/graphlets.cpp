@@ -18,7 +18,6 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
-using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -28,8 +27,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private class Stage final {
 public:
 	Stage(GraphletOverview* master) : master(master) {
-		this->font = make_text_format(16.0F);
-		this->font->FontWeight = FontWeights::Bold;
+		this->font = make_bold_text_format("Microsoft YaHei", 16.0F);
 	}
 
 public:
@@ -37,7 +35,7 @@ public:
 		Platform::String^ all_captions[] = { "hp_state", "v_state" };
 		float unitsize = 32.0F;
 
-		this->load_captions(all_captions);
+		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
 		this->load_primitives<Pumplet, PumpState>(this->pumps, this->hplabels, unitsize);
 		this->load_primitives<Valvelet, ValveState>(this->valves, this->vlabels, unitsize);
 	}

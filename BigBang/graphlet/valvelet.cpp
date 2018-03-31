@@ -1,6 +1,6 @@
 #include "valvelet.hpp"
 
-#include "polar_shape.hpp"
+#include "polar.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
 #include "brushes.hxx"
