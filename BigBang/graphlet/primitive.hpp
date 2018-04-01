@@ -31,14 +31,6 @@ namespace WarGrey::SCADA {
 		IGraphletInfo * info;
 	};
 
-	template<class Graphlet, typename IDEnum>
-	private class Credit : public virtual Graphlet {
-		using Graphlet::Graphlet;
-
-	public:
-		IDEnum id;
-	};
-
 	private class IPipelet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		virtual Windows::Foundation::Rect get_input_port() = 0;

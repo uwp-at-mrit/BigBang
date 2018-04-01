@@ -1,91 +1,82 @@
-﻿#include "cosmos.hxx"
+﻿#include "application.idl"
 #include "configuration.hpp"
 
-#include "syslog.hpp"
-#include "system.hpp"
+#include "planet.hpp"
+#include "timer.hxx"
+
+#include "page/hp_single.hpp"
+#include "page/graphlets.hpp"
+
+using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 
-using namespace Windows::ApplicationModel;
-using namespace Windows::ApplicationModel::Activation;
-using namespace Windows::ApplicationModel::Core;
-
+using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::ViewManagement;
+using namespace Windows::UI::Xaml::Input;
 
-using namespace Windows::Globalization;
-using namespace Windows::System::UserProfile;
+using namespace Microsoft::Graphics::Canvas;
 
-namespace WarGrey::SCADA {
-    typedef EventHandler<UnhandledErrorDetectedEventArgs^> UncaughtExceptionHandler;
+private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
+public:
+	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		this->timer = ref new Timer(this, 8);
+	}
 
-    private ref class CH6000M3 sealed : public Application {
-    protected:
-        void AppMain(ApplicationView^ self, FrameworkElement^ screen) {
-#ifdef _DEBUG
-			ApplicationLanguages::PrimaryLanguageOverride = GlobalizationPreferences::Languages->GetAt(0);
-#else
-			ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
-#endif
-			ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
-			ApplicationView::PreferredLaunchViewSize = system_screen_size();
+protected:
+	void construct() override {
+		this->add_planet(new HPSingle(remote_test_server));
+		this->add_planet(new GraphletOverview());
+	}
 
-			CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false; // Force Using the default TitleBar.
-			CoreApplication::UnhandledErrorDetected += ref new UncaughtExceptionHandler(this, &CH6000M3::OnUncaughtException);
-			
-			this->Suspending += ref new SuspendingEventHandler(this, &CH6000M3::OnSuspending);
-            this->RequestedTheme = ApplicationTheme::Dark;
+private:
+	WarGrey::SCADA::Timer^ timer;
+};
 
-            self->Title = screen->ToString();
+private ref class CH6000M3 sealed : public SplitView {
+public:
+	CH6000M3() : SplitView() {
+		this->Margin = ThicknessHelper::FromUniformLength(0.0);
+		this->PanePlacement = SplitViewPanePlacement::Left;
+		this->DisplayMode = SplitViewDisplayMode::Overlay;
+		this->IsPaneOpen = false;
 
-			set_default_racket_receiver_host(remote_test_server);
-        }
+		this->PointerMoved += ref new PointerEventHandler(this, &CH6000M3::on_pointer_moved);
+	}
 
-        void OnLaunched(LaunchActivatedEventArgs^ e) override {
-            auto self = ApplicationView::GetForCurrentView();
-            auto screen = dynamic_cast<Cosmos^>(Window::Current->Content);
+public:
+	void initialize_component(Windows::Foundation::Size region) {
+		this->universe = ref new Universe("CH6000M3");
+		this->Content = this->universe->canvas;
+		this->Pane = this->universe->navigator;
 
-            if (screen == nullptr) {
-                screen = ref new Cosmos();
-                this->AppMain(self, screen);
-            
-                if (e->PreviousExecutionState == ApplicationExecutionState::Terminated) {
-                    // TODO: Restore the saved session state only when appropriate, scheduling the
-                    // final launch steps after the restore is complete
-                }
+		// TODO: Why SplitView::Content cannot do it on its own?
+		this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);
+	}
 
-				Window::Current->Content = screen;
-            }
+private:
+	void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {
+		auto pt = args->GetCurrentPoint(this);
+		float x = pt->Position.X;
 
-			if (e->PrelaunchActivated == false) {
-				screen->initialize_component(adjusted_workspace_size(self->VisibleBounds, screen));
-				Window::Current->Activate();
+		if (!pt->Properties->IsLeftButtonPressed) {
+			if (x <= this->Margin.Left) {
+				this->IsPaneOpen = true;
+				args->Handled = true;
+			} else if (x > this->OpenPaneLength) {
+				this->IsPaneOpen = false;
+				args->Handled = true;
 			}
-        }
+		}
+	}
 
-    private:
-        void OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args) {
-			// TODO: Save application state and stop any background activity.
-            // Do not assume that the application will be terminated or resumed with the contents of memory still intact.
-        }
-
-        void OnUncaughtException(Platform::Object^ sender, UnhandledErrorDetectedEventArgs^ args) {
-            auto error = args->UnhandledError;
-
-            if (!error->Handled) {
-                try {
-                    // if an error is returned from a delegate, it will not be marked as Handled.
-                    error->Propagate();
-                } catch (Platform::Exception^ e) {
-                    syslog(Log::Panic, "Unhandled Error: " + e->Message);
-				}
-            }
-        }
-    };
-}
+private:
+	WarGrey::SCADA::UniverseDisplay^ universe;
+};
 
 int main(Platform::Array<Platform::String^>^ args) {
-	auto lazy_main = [](ApplicationInitializationCallbackParams^ p) { ref new WarGrey::SCADA::CH6000M3(); };
-    Application::Start(ref new ApplicationInitializationCallback(lazy_main));
+	launch_universal_windows_application<CH6000M3>(remote_test_server);
+
+	return 0;
 }

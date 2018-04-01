@@ -1,6 +1,7 @@
 ﻿#include "page/hp_single.hpp"
 #include "configuration.hpp"
 
+#include "credit.idl"
 #include "tongue.hpp"
 #include "system.hpp"
 #include "syslog.hpp"

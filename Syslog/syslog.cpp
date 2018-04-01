@@ -3,7 +3,7 @@
 
 using namespace WarGrey::SCADA;
 
-static Platform::String^ default_racket_receiver_host = "172.16.1.1";
+static Platform::String^ default_racket_receiver_host = nullptr;
 static Platform::String^ default_logger_topic = "WinSCADA";
 
 
