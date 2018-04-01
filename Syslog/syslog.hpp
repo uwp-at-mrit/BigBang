@@ -12,7 +12,7 @@ WarGrey::SCADA::Syslog* make_silent_logger(Platform::String^ topic);
 WarGrey::SCADA::Syslog* make_system_logger(WarGrey::SCADA::Log level, Platform::String^ topic);
 WarGrey::SCADA::Syslog* make_logger(WarGrey::SCADA::Log level, Platform::String^ topic, WarGrey::SCADA::Syslog* parent = nullptr);
 
-WarGrey::SCADA::ISyslogReceiver* default_racket_receiver();
+WarGrey::SCADA::RacketReceiver* default_racket_receiver();
 
 void syslog(WarGrey::SCADA::Log level, Platform::String^ message);
 void syslog(WarGrey::SCADA::Log level, const wchar_t *fmt, ...);

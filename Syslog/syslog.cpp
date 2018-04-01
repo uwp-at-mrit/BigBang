@@ -16,10 +16,10 @@ void set_default_racket_receiver_host(Platform::String^ ipv4) {
 }
 
 /*************************************************************************************************/
-ISyslogReceiver* default_racket_receiver() {
-	static ISyslogReceiver* rsyslog;
+RacketReceiver* default_racket_receiver() {
+	static RacketReceiver* rsyslog;
 
-	if (rsyslog == nullptr) {
+	if ((rsyslog == nullptr) && (default_racket_receiver_host != nullptr)) {
 		rsyslog = new RacketReceiver(default_racket_receiver_host, 18030, Log::Debug);
 		rsyslog->reference();
 	}
@@ -31,9 +31,15 @@ Syslog* default_logger() {
 	static Syslog* winlog;
 
 	if (winlog == nullptr) {
+		RacketReceiver* racket = default_racket_receiver();
+
 		winlog = make_logger(Log::Debug, default_logger_topic, nullptr);
-		winlog->append_log_receiver(default_racket_receiver());
 		winlog->append_log_receiver(new VisualStudioReceiver());
+
+		if (racket != nullptr) {
+			winlog->append_log_receiver(racket);
+		}
+
 		winlog->reference();
 	}
 
