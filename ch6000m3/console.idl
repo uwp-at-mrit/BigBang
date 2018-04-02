@@ -1,0 +1,86 @@
+#pragma once
+
+#include "credit.idl"
+#include "planet.hpp"
+
+#include "graphlet/shapelet.hpp"
+
+namespace WarGrey::SCADA {
+	template<class T, typename E>
+	private class Console abstract {
+	typedef Credit<Labellet, E> CreditLabellet;
+
+	public:
+		Console(T* master, Platform::String^ l10n) : master(master), l10n_prefix(l10n) {}
+
+	public:
+		template<class G>
+		void load_graphlets(G* gs[], Credit<WarGrey::SCADA::Labellet, E>* ls[], E ids[], float radius, double degrees
+			, size_t i0, size_t c, Credit<WarGrey::SCADA::Labellet, E>* cs[] = nullptr) {
+
+			size_t in = i0 + c;
+
+			for (size_t idx = i0; idx < in; idx++) {
+				this->load_graphlet(gs, ls, idx, radius, degrees, ids[idx]);
+			}
+
+			if (cs != nullptr) {
+				for (size_t idx = i0; idx < in; idx++) {
+					cs[idx] = this->make_label(ids[idx], Colours::Silver);
+				}
+			}
+		}
+
+		template<class G>
+		void load_graphlet(G* gs[], Credit<WarGrey::SCADA::Labellet, E>* ls[], size_t idx, float radius, double degrees, E id) {
+			gs[idx] = new G(radius, degrees);
+			ls[idx] = this->make_label(speak(id.ToString()), id, Colours::Silver);
+
+			gs[idx]->id = id;
+			this->master->insert(gs[idx]);
+		}
+
+		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
+			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
+			Credit<Labellet, E>* label = new Credit<Labellet, E>(caption);
+
+			label->id = id;
+			label->set_color(color);
+
+			if (font != nullptr) {
+				label->set_font(font);
+			}
+
+			return this->master->insert_one(label);
+		}
+
+		Credit<WarGrey::SCADA::Labellet, E>* make_label(E id
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
+			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
+			return this->make_label(speak(this->l10n_prefix + id.ToString()), id, color, font);
+		}
+
+		Credit<WarGrey::SCADA::Booleanlet, E>* make_indicator(Platform::String^ caption, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
+			Credit<WarGrey::SCADA::Booleanlet, E>* indicator = new Credit<WarGrey::SCADA::Booleanlet, E>(speak(caption));
+
+			indicator->set_indicator_color(color);
+
+			return master->insert_one(indicator);
+		}
+
+		template<class CreditG>
+		void place_id_element(WarGrey::SCADA::Tracklet<E>* track, CreditG* g, float dx, float dy, GraphletAlignment scp) {
+			float x, y;
+
+			track->fill_anchor_location(g->id, &x, &y);
+			this->master->move_to(g, x + dx, y + dy, scp);
+		}
+
+	protected:
+		T* master;
+
+	protected:
+		Platform::String^ l10n_prefix;
+	};
+}

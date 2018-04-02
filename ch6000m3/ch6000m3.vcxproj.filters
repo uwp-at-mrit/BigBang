@@ -43,6 +43,7 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="console.idl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
