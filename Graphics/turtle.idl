@@ -27,6 +27,11 @@ namespace WarGrey::SCADA {
 			this->do_rebuild();
         }
 
+		void wipe() {
+			this->snapshot = nullptr;
+			this->do_rebuild();
+        }
+
 		void fill_anchor_location(Anchor id, float* x, float* y) {
 			auto node = this->anchors.find(id);
 

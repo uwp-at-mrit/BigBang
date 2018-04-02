@@ -3,7 +3,7 @@
 #include "geometry.hpp"
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ blank();
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl, bool adjust = true);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(
     float length, float thickness = 1.0F,

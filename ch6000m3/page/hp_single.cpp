@@ -11,6 +11,7 @@
 #include "brushes.hxx"
 #include "turtle.idl"
 
+#include "graphlet/gaugelet.hpp"
 #include "graphlet/shapelet.hpp"
 #include "graphlet/pumplet.hpp"
 #include "graphlet/valvelet.hpp"
@@ -54,7 +55,7 @@ static HPS valve_ids[] = {
 
 private class HPSConsole final : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::Console<HPSingle, HPS> {
 public:
-	HPSConsole(HPSingle* master) : Console(master, "HPS_") {
+	HPSConsole(HPSingle* master) : Console(master, "HPS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
@@ -82,15 +83,25 @@ public:
 
 		pTurtle->jump_back(HPS::SQ2)->jump_down(12.8F, HPS::j)->move_down(2, HPS::SQj)->move_down(3, HPS::J)->move_down(2);
 		pTurtle->jump_back()->jump_right(8, HPS::i)->move_down(2, HPS::SQi)->move_down(3, HPS::I)->move_down(2);
+		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::DimGray);
 
-		this->stations[0] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Silver);
+		pTurtle->wipe();
+		pTurtle->jump_back(HPS::SQ1)->move_up(2);
+		pTurtle->jump_back(HPS::SQ2)->move_up(2);
+		pTurtle->jump_back(HPS::SQ3)->move_up(2);
+		this->stations[1] = new Tracklet<HPS>(pTurtle, 1.5F, Colours::Yellow); 
 
 		this->captions[0] = this->make_label(HPS::MasterTank, Colours::Silver, this->caption_font);
 		this->captions[1] = this->make_label(HPS::Port, Colours::DarkKhaki, this->caption_font);
 		this->captions[2] = this->make_label(HPS::Starboard, Colours::DarkKhaki, this->caption_font);
 
-		this->master->insert_all(this->stations);
+		this->visor = new IGaugelet(15.0F);
+
+		this->master->insert_all(this->stations, true);
 		this->master->insert_all(this->captions);
+		this->master->insert(this->visor);
+
+		this->visor->set_scale(8.0F);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -118,17 +129,23 @@ public:
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
-		float sw, sh, sx, sy;
+		float sw, sh, sx, sy, s1_x, s1_y;
 
 		this->stations[0]->fill_extent(0.0F, 0.0F, &sw, &sh);
-		this->master->move_to(this->stations[0], (width - sw) * 0.5F, (height - sh) * 0.5F);
-		this->master->fill_graphlet_location(this->stations[0], &sx, &sy);
+		this->stations[0]->fill_anchor_location(HPS::SQ1, &s1_x, &s1_y);
 
+		sx = (width - sw) * 0.5F;
+		sy = (height - sh) * 0.5F;
+		this->master->move_to(this->stations[0], sx, sy);
+		
 		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
 			if (this->captions[i] != nullptr) {
 				this->place_id_element(this->stations[0], this->captions[i], sx - gridsize, sy, GraphletAlignment::RB);
 			}
 		}
+
+		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::CB);
+		this->master->move_to(this->visor, sx + s1_x - gridsize, sy + s1_y - gridsize, GraphletAlignment::RB);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -233,6 +250,7 @@ private:
 	Credit<Valvelet, HPS>* valves[sizeof(valve_ids) / sizeof(HPS)];
 	Credit<Labellet, HPS>* vlabels[sizeof(valve_ids) / sizeof(HPS)];
 	Credit<Booleanlet, HPS>* master_indicators[4];
+	IGaugelet* visor;
 
 private:
 	CanvasTextFormat^ caption_font;
@@ -310,5 +328,8 @@ void HPSingle::reflow(float width, float height) {
 }
 
 void HPSingle::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	if (dynamic_cast<Tracklet<HPS>*>(g) == nullptr) {
+		this->set_selected(g);
+	}
 	// this->set_caret_owner(g);
 }

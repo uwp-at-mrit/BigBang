@@ -13,16 +13,19 @@ CanvasGeometry^ blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
 }
 
-CanvasGeometry^ paragraph(CanvasTextLayout^ tl) {
-    float x = tl->LayoutBounds.X;
-    float y = tl->LayoutBounds.Y;
-    auto layout = CanvasGeometry::CreateText(tl);
+CanvasGeometry^ paragraph(CanvasTextLayout^ tl, bool adjust) {
+    CanvasGeometry^ layout = CanvasGeometry::CreateText(tl);
+	float x = tl->LayoutBounds.X;
+	float y = tl->LayoutBounds.Y;
     
-    if ((x >= 0.0F) && (y >= 0.0F)) {
-        return layout;
-    } else {
-        return geometry_union(blank(), layout, make_translation_matrix(-x, -y));
+    if (adjust && ((x < 0.0F) || (y < 0.0F))) {
+		float xoff = (x >= 0.0F) ? x : -x;
+		float yoff = (y >= 0.0F) ? y : -y;
+
+        layout = geometry_union(blank(), layout, make_translation_matrix(xoff, yoff));
     }
+
+	return layout;
 }
 
 CanvasGeometry^ hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {

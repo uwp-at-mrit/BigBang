@@ -91,10 +91,14 @@ namespace WarGrey::SCADA {
 		
 	public:
 		template<class G, unsigned int N>
-		void insert_all(G* (&gs)[N], unsigned int start_idx = 0) {
-			for (unsigned int idx = start_idx; idx < N; idx++) {
-				if (gs[idx] != nullptr) {
-					this->insert(gs[idx]);
+		void insert_all(G* (&gs)[N], bool reversed = false) {
+			if (reversed) {
+				for (unsigned int idx = N; idx > 0; idx--) {
+					if (gs[idx - 1] != nullptr) this->insert(gs[idx - 1]);
+				}
+			} else {
+				for (unsigned int idx = 0; idx < N; idx++) {
+					if (gs[idx] != nullptr) this->insert(gs[idx]);
 				}
 			}
 		}
