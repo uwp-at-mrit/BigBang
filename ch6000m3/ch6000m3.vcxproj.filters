@@ -26,24 +26,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
-    <ClCompile Include="page\hp_single.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\graphlets.cpp">
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="decorator\page.cpp" />
+    <ClCompile Include="page\hpcontrol.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="page\hp_single.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\graphlets.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="console.idl" />
+    <ClInclude Include="page\hpcontrol.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

@@ -144,41 +144,41 @@
   <data name=":wifi:" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name=":hps:" xml:space="preserve">
-    <value>液压泵单动</value>
+  <data name=":hpc:" xml:space="preserve">
+    <value>液压泵控制</value>
   </data>
   <data name=":offline:" xml:space="preserve">
     <value>未使用</value>
   </data>
-  <data name="HPS_A" xml:space="preserve">
+  <data name="HPC_A" xml:space="preserve">
     <value>左耙头</value>
     <comment>":" 不能出现在名称中间</comment>
   </data>
-  <data name="HPS_B" xml:space="preserve">
+  <data name="HPC_B" xml:space="preserve">
     <value>左耙中</value>
   </data>
-  <data name="HPS_C" xml:space="preserve">
+  <data name="HPC_C" xml:space="preserve">
     <value>左弯管</value>
   </data>
-  <data name="HPS_D" xml:space="preserve">
+  <data name="HPC_D" xml:space="preserve">
     <value>泥门紧锁泵</value>
   </data>
-  <data name="HPS_E" xml:space="preserve">
+  <data name="HPC_E" xml:space="preserve">
     <value>蝶阀控制泵</value>
   </data>
-  <data name="HPS_F" xml:space="preserve">
+  <data name="HPC_F" xml:space="preserve">
     <value>右弯管</value>
   </data>
-  <data name="HPS_G" xml:space="preserve">
+  <data name="HPC_G" xml:space="preserve">
     <value>右耙中</value>
   </data>
-  <data name="HPS_H" xml:space="preserve">
+  <data name="HPC_H" xml:space="preserve">
     <value>右耙头</value>
   </data>
-  <data name="HPS_K" xml:space="preserve">
+  <data name="HPC_K" xml:space="preserve">
     <value>循环冷却</value>
   </data>
-  <data name="HPS_Y" xml:space="preserve">
+  <data name="HPC_Y" xml:space="preserve">
     <value>应急</value>
   </data>
   <data name=":gview:" xml:space="preserve">
@@ -247,16 +247,16 @@
   <data name="Unopenable" xml:space="preserve">
     <value>打开失败</value>
   </data>
-  <data name="HPS_Port" xml:space="preserve">
+  <data name="HPC_Port" xml:space="preserve">
     <value>左舷主泵站</value>
   </data>
-  <data name="HPS_Starboard" xml:space="preserve">
+  <data name="HPC_Starboard" xml:space="preserve">
     <value>右舷主泵站</value>
   </data>
-  <data name="HPS_I" xml:space="preserve">
+  <data name="HPC_I" xml:space="preserve">
     <value>左耙唇</value>
   </data>
-  <data name="HPS_J" xml:space="preserve">
+  <data name="HPC_J" xml:space="preserve">
     <value>右耙唇</value>
   </data>
   <data name="level_high" xml:space="preserve">
@@ -268,7 +268,7 @@
   <data name="level_low2" xml:space="preserve">
     <value>液位过低</value>
   </data>
-  <data name="HPS_MasterTank" xml:space="preserve">
+  <data name="HPC_MasterTank" xml:space="preserve">
     <value>主油箱</value>
   </data>
 </root>

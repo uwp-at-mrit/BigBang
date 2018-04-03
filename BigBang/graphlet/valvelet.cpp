@@ -28,11 +28,11 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	case ValveState::Manual: s.mask_color = Colours::Teal; s.handler_color = default_sketeton_color; break;
 	case ValveState::Open: s.body_color = Colours::Green; break;
 	case ValveState::Opening: s.mask_color = Colours::Green; break;
-	case ValveState::ConditionalOpen: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
+	case ValveState::OpenReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
 	case ValveState::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
 	case ValveState::Closed: s.body_color = Colours::LightGray; break;
 	case ValveState::Closing: s.mask_color = Colours::DarkGray; break;
-	case ValveState::ConditionalClose: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
+	case ValveState::CloseReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
 	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
 	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
 	case ValveState::FalseClosed: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
@@ -97,13 +97,13 @@ void Valvelet::on_state_change(ValveState state) {
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case ValveState::ConditionalOpen: {
+	case ValveState::OpenReady: {
 		if (this->bottom_up_conditional_mask == nullptr) {
 			this->bottom_up_conditional_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
 		}
 		this->mask = this->bottom_up_conditional_mask;
 	} break;
-	case ValveState::ConditionalClose: {
+	case ValveState::CloseReady: {
 		if (this->top_down_conditional_mask == nullptr) {
 			this->top_down_conditional_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
 		}

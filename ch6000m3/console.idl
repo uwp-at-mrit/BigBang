@@ -44,6 +44,20 @@ namespace WarGrey::SCADA {
 			ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 		}
 
+		void load_label(std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls, Platform::String^ caption, E id
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
+			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
+			
+			ls[id] = this->make_label(caption, id, color, font);
+		}
+
+		void load_label(std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls, E id
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
+			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
+			
+			ls[id] = this->make_label(id, color, font);
+		}
+
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {

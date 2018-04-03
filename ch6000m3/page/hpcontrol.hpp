@@ -7,10 +7,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HPSingle : public WarGrey::SCADA::Planet {
+	private class HPControl : public WarGrey::SCADA::Planet {
 	public:
-		~HPSingle() noexcept;
-		HPSingle(Platform::String^ plc);
+		~HPControl() noexcept;
+		HPControl(Platform::String^ plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
