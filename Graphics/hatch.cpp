@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "hatch.hpp"
 
 #include "box.hpp"
@@ -44,22 +46,23 @@ static CanvasGeometry^ make_vhatch(float width, float interval, unsigned char st
 }
 
 /*************************************************************************************************/
-CanvasGeometry^ vhatch(float range, unsigned char step, CanvasTextFormat^ font_src, float* mw, float* my, float* mh) {
-	Platform::String^ longest_mark = range.ToString();
-	unsigned int span = longest_mark->Length();
+CanvasGeometry^ vhatch(float vmin, float vmax, unsigned char step, CanvasTextFormat^ font_src, float* mw, float* my, float* mh) {
+	Platform::String^ min_mark = vmin.ToString(); 
+	Platform::String^ max_mark = vmax.ToString();
+	unsigned int span = std::max(max_mark->Length(), min_mark->Length());
 	CanvasTextFormat^ font = ((font_src == nullptr) ? make_text_format(8.0F) : font_src);
-	TextExtent ts = get_text_extent(longest_mark, font);
+	TextExtent ts = get_text_extent(max_mark, font);
 	float ch = ts.width / span;
-	float interval = ts.height * 0.8F;
+	float interval = ts.height * 1.0F;
 	float mark_width = ch * scale_lmark_ratio;
 	float mark_x = float(span) * ch + scale_space_ratio * ch;
 	float mark_y = ts.height * 0.5F - ts.tspace;
-	float delta = range / step;
+	float delta = (vmax - vmin) / step;
 	float scale_xoff;
 
 	auto marks = make_vhatch(mark_width, interval, step, mark_x, mark_y);
 	for (char i = 0; i <= step; i += 2) {
-		Platform::String^ scale = make_scale_string(range - delta * float(i), span, &scale_xoff);
+		Platform::String^ scale = make_scale_string(vmax - delta * float(i), span, &scale_xoff);
 
 		auto translation = make_translation_matrix(scale_xoff * ch, interval * float(i) - ts.tspace);
 		marks = geometry_union(marks, paragraph(make_text_layout(scale, font)), translation);

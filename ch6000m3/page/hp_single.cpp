@@ -28,29 +28,24 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static const Platform::String^ I10n = "HPS_";
-
 private enum HPSMode { WindowUI = 0, View };
 
+// WARNING: order matters
 private enum class HPS : unsigned int {
-	A, B, C, D, E, F, G, H, I, J, K, Y, F001, SQ1, SQ2, SQ3,
-	SQa, SQb, SQc, SQd, SQe, SQf, SQg, SQh, SQi, SQj, SQk, SQy,
-	Port, Starboard, MasterTank,
+	// for pumps
+	A, B, G, H,
+	F, C, D, E,
+	Y, K,
+	J, I,
+	// for valves
+	SQ1, SQ2, SQ3, SQy, SQi, SQj,
+	SQa, SQb, SQg, SQh, SQk,
+	SQf, SQc, SQd, SQe,
+	// otheres
+	F001, Port, Starboard, MasterTank,
 	_,
+	// anchors used for jumping back
 	a, b, c, d, e, f, g, h, i, j, k
-};
-
-static HPS pump_ids[] = {
-	HPS::A, HPS::B, HPS::G, HPS::H,
-	HPS::F, HPS::C, HPS::D, HPS::E,
-	HPS::Y, HPS::K,
-	HPS::J, HPS::I
-};
-
-static HPS valve_ids[] = {
-	HPS::SQ1, HPS::SQ2, HPS::SQ3, HPS::SQy, HPS::SQi, HPS::SQj,
-	HPS::SQa, HPS::SQb, HPS::SQg, HPS::SQh, HPS::SQk,
-	HPS::SQf, HPS::SQc, HPS::SQd, HPS::SQe,
 };
 
 private class HPSConsole final : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::Console<HPSingle, HPS> {
@@ -69,7 +64,7 @@ public:
 		pTurtle->move_down(3, HPS::d)->move_right(4, HPS::SQd)->move_right(10, HPS::D)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::e)->move_right(4, HPS::SQe)->move_right(10, HPS::E)->move_right(4)->move_up(12, HPS::Starboard);
 		pTurtle->move_up(19)->turn_up_left()->move_left(32);
-		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F, HPS::MasterTank)->jump_back();
+		pTurtle->turn_left_down(HPS::f)->move_down(1.5F, HPS::F001)->move_down(1.5F, HPS::MasterTank)->move_down(2)->jump_back();
 		pTurtle->turn_up_left()->move_left(26)->turn_left_down()->move_down(17);
 		pTurtle->move_down(5, HPS::a)->move_right(4, HPS::A)->move_right(10, HPS::SQa)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HPS::b)->move_right(4, HPS::B)->move_right(10, HPS::SQb)->move_right(4)->jump_back();
@@ -95,29 +90,29 @@ public:
 		this->captions[1] = this->make_label(HPS::Port, Colours::DarkKhaki, this->caption_font);
 		this->captions[2] = this->make_label(HPS::Starboard, Colours::DarkKhaki, this->caption_font);
 
-		this->visor = new IGaugelet(15.0F);
+		this->oiltanks[0] = new LiquidGaugelet(1.5F, 80.0F);
+		//this->oiltanks[1] = new LiquidGaugelet(0.7F, 80.0F);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert_all(this->captions);
-		this->master->insert(this->visor);
-
-		this->visor->set_scale(8.0F);
+		this->master->insert(this->oiltanks[0]);
+		//this->master->insert(this->oiltanks[1]);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 180.0, 0, 4, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 0.000, 4, 4, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, -90.0, 8, 2, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, pump_ids, gridsize, 90.00, 10, 2, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, HPS::A, HPS::H, gridsize, 180.0, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, HPS::F, HPS::E, gridsize, 0.000, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, HPS::Y, HPS::K, gridsize, -90.0, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, HPS::J, HPS::I, gridsize, 90.00, this->pcaptions);
 		}
 
 		{ // load valves
 			float adjust_gridsize = gridsize * 1.2F;
 			
-			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, 0.000, 0, 6);
-			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, -90.0, 6, 5);
-			this->load_graphlets(this->valves, this->vlabels, valve_ids, adjust_gridsize, 90.00, 11, 4);
+			this->load_graphlets(this->valves, this->vlabels, HPS::SQ1, HPS::SQj, adjust_gridsize, 0.000);
+			this->load_graphlets(this->valves, this->vlabels, HPS::SQa, HPS::SQk, adjust_gridsize, -90.0);
+			this->load_graphlets(this->valves, this->vlabels, HPS::SQf, HPS::SQe, adjust_gridsize, 90.00);
 		}
 	}
 
@@ -137,15 +132,17 @@ public:
 		sx = (width - sw) * 0.5F;
 		sy = (height - sh) * 0.5F;
 		this->master->move_to(this->stations[0], sx, sy);
+		this->master->move_to(this->captions[0], sx + gridsize * 6.0F, sy + gridsize * 3.0F);
 		
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+		for (size_t i = 1; i < GRAPHLETS_LENGTH(this->captions); i++) {
 			if (this->captions[i] != nullptr) {
 				this->place_id_element(this->stations[0], this->captions[i], sx - gridsize, sy, GraphletAlignment::RB);
 			}
 		}
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::CB);
-		this->master->move_to(this->visor, sx + s1_x - gridsize, sy + s1_y - gridsize, GraphletAlignment::RB);
+		this->master->move_to(this->oiltanks[0], sx + s1_x, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
+		//this->master->move_to(this->oiltanks[1], sx + s1_x, sy + s1_y + gridsize * 8.0F, GraphletAlignment::CT);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -155,48 +152,44 @@ public:
 
 		this->master->fill_graphlet_location(this->stations[0], &x0, &y0);
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->pumps); i++) {
-			if (this->pumps[i] != nullptr) {
-				switch (int(this->pumps[i]->get_direction_degrees())) {
-				case -90: {
-					lbl_dx = x0 - gridsize; lbl_dy = y0 - gridsize; lbl_align = GraphletAlignment::RT;
-					cpt_dx = x0 + gridsize; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LT;
-				} break;
-				case 90: {
-					lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
-					cpt_dx = x0; cpt_dy = y0 + gridsize + gridsize; cpt_align = GraphletAlignment::CT;
-				} break;
-				case 180: {
-					lbl_dx = x0 - gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::RB;
-					cpt_dx = x0 + gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::LB;
-				} break;
-				default: {
-					lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
-					cpt_dx = x0 - gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::RB;
-				} break;
-				}
-
-				this->place_id_element(this->stations[0], this->pumps[i], x0, y0, GraphletAlignment::CC);
-				this->place_id_element(this->stations[0], this->plabels[i], lbl_dx, lbl_dy, lbl_align);
-				this->place_id_element(this->stations[0], this->pcaptions[i], cpt_dx, cpt_dy, cpt_align);
+		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
+			switch (int(it->second->get_direction_degrees())) {
+			case -90: {
+				lbl_dx = x0 - gridsize; lbl_dy = y0 - gridsize; lbl_align = GraphletAlignment::RT;
+				cpt_dx = x0 + gridsize; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LT;
+			} break;
+			case 90: {
+				lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
+				cpt_dx = x0; cpt_dy = y0 + gridsize + gridsize; cpt_align = GraphletAlignment::CT;
+			} break;
+			case 180: {
+				lbl_dx = x0 - gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::RB;
+				cpt_dx = x0 + gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::LB;
+			} break;
+			default: {
+				lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
+				cpt_dx = x0 - gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::RB;
 			}
+			}
+
+			this->place_id_element(this->stations[0], it->second, x0, y0, GraphletAlignment::CC);
+			this->place_id_element(this->stations[0], this->plabels[it->first], lbl_dx, lbl_dy, lbl_align);
+			this->place_id_element(this->stations[0], this->pcaptions[it->first], cpt_dx, cpt_dy, cpt_align);
 		}
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->valves); i++) {
-			if (this->valves[i] != nullptr) {
-				if (this->valves[i]->get_direction_degrees() == 0.0) {
-					if (this->valves[i]->id == HPS::SQ2) {
-						lbl_dx = x0 - adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
-					} else {
-						lbl_dx = x0 + adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
-					}
+		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
+			if (it->second->get_direction_degrees() == 0.0) {
+				if (it->second->id == HPS::SQ2) {
+					lbl_dx = x0 - adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
 				} else {
-					lbl_dx = x0; lbl_dy = y0 - adjust_offset; lbl_align = GraphletAlignment::CB;
+					lbl_dx = x0 + adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
 				}
-
-				this->place_id_element(this->stations[0], this->valves[i], x0, y0, GraphletAlignment::CC);
-				this->place_id_element(this->stations[0], this->vlabels[i], lbl_dx, lbl_dy, lbl_align);
+			} else {
+				lbl_dx = x0; lbl_dy = y0 - adjust_offset; lbl_align = GraphletAlignment::CB;
 			}
+
+			this->place_id_element(this->stations[0], it->second, x0, y0, GraphletAlignment::CC);
+			this->place_id_element(this->stations[0], this->vlabels[it->first], lbl_dx, lbl_dy, lbl_align);
 		}
 	}
 
@@ -244,13 +237,13 @@ public:
 private:
 	Tracklet<HPS>* stations[2];
 	Credit<Labellet, HPS>* captions[3];
-	Credit<Pumplet, HPS>* pumps[sizeof(pump_ids) / sizeof(HPS)];
-	Credit<Labellet, HPS>* plabels[sizeof(pump_ids) / sizeof(HPS)];
-	Credit<Labellet, HPS>* pcaptions[sizeof(pump_ids) / sizeof(HPS)];
-	Credit<Valvelet, HPS>* valves[sizeof(valve_ids) / sizeof(HPS)];
-	Credit<Labellet, HPS>* vlabels[sizeof(valve_ids) / sizeof(HPS)];
+	std::map<HPS, Credit<Pumplet, HPS>*> pumps;
+	std::map<HPS, Credit<Labellet, HPS>*> plabels;
+	std::map<HPS, Credit<Labellet, HPS>*> pcaptions;
+	std::map<HPS, Credit<Valvelet, HPS>*> valves;
+	std::map<HPS, Credit<Labellet, HPS>*> vlabels;
 	Credit<Booleanlet, HPS>* master_indicators[4];
-	IGaugelet* visor;
+	IGaugelet* oiltanks[2];
 
 private:
 	CanvasTextFormat^ caption_font;

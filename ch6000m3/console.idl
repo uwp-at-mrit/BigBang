@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "credit.idl"
 #include "planet.hpp"
 
@@ -15,29 +17,31 @@ namespace WarGrey::SCADA {
 
 	public:
 		template<class G>
-		void load_graphlets(G* gs[], Credit<WarGrey::SCADA::Labellet, E>* ls[], E ids[], float radius, double degrees
-			, size_t i0, size_t c, Credit<WarGrey::SCADA::Labellet, E>* cs[] = nullptr) {
+		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
+			, E id0, E idn, float radius, double degrees) {
+		    for(E id = id0; id <= idn; id++) {
+			    this->load_graphlet(gs, ls, id, radius, degrees);
+		    }
+	    }
+	
+	    template<class G>
+		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
+			, E id0, E idn, float radius, double degrees, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& cs) {
+			this->load_graphlets(gs, ls, id0, idn, radius, degrees);
 
-			size_t in = i0 + c;
-
-			for (size_t idx = i0; idx < in; idx++) {
-				this->load_graphlet(gs, ls, idx, radius, degrees, ids[idx]);
-			}
-
-			if (cs != nullptr) {
-				for (size_t idx = i0; idx < in; idx++) {
-					cs[idx] = this->make_label(ids[idx], Colours::Silver);
-				}
+			for(E id = id0; id <= idn; id++) {
+				cs[id] = this->make_label(id, Colours::Silver);
 			}
 		}
 
 		template<class G>
-		void load_graphlet(G* gs[], Credit<WarGrey::SCADA::Labellet, E>* ls[], size_t idx, float radius, double degrees, E id) {
-			gs[idx] = new G(radius, degrees);
-			ls[idx] = this->make_label(speak(id.ToString()), id, Colours::Silver);
+		void load_graphlet(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
+			, E id, float radius, double degrees) {
+			G* glet = new G(radius, degrees);
+			glet->id = id;
 
-			gs[idx]->id = id;
-			this->master->insert(gs[idx]);
+			gs[id] = this->master->insert_one(glet);
+			ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 		}
 
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
