@@ -46,18 +46,19 @@ static CanvasGeometry^ make_vhatch(float width, float interval, unsigned char st
 }
 
 /*************************************************************************************************/
-CanvasGeometry^ vhatch(float vmin, float vmax, unsigned char step, CanvasTextFormat^ font_src, float* mw, float* my, float* mh) {
+CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned char step, CanvasTextFormat^ ft, float* mw, float* my, float* mh) {
 	Platform::String^ min_mark = vmin.ToString(); 
 	Platform::String^ max_mark = vmax.ToString();
 	unsigned int span = std::max(max_mark->Length(), min_mark->Length());
-	CanvasTextFormat^ font = ((font_src == nullptr) ? make_text_format(8.0F) : font_src);
+	CanvasTextFormat^ font = ((ft == nullptr) ? make_text_format(8.0F) : ft);
 	TextExtent ts = get_text_extent(max_mark, font);
 	float ch = ts.width / span;
-	float interval = ts.height * 1.0F;
+	float em = ts.height - ts.tspace - ts.bspace;
 	float mark_width = ch * scale_lmark_ratio;
 	float mark_x = float(span) * ch + scale_space_ratio * ch;
-	float mark_y = ts.height * 0.5F - ts.tspace;
-	float delta = (vmax - vmin) / step;
+	float mark_y = em * 0.5F;
+	float interval = (height - em) / float(step);
+	float delta = (vmax - vmin) / float(step);
 	float scale_xoff;
 
 	auto marks = make_vhatch(mark_width, interval, step, mark_x, mark_y);
@@ -68,7 +69,7 @@ CanvasGeometry^ vhatch(float vmin, float vmax, unsigned char step, CanvasTextFor
 		marks = geometry_union(marks, paragraph(make_text_layout(scale, font)), translation);
 	}
 
-	SET_BOX(mw, mark_width);
+	SET_BOX(mw, mark_x + mark_width);
 	SET_BOX(my, mark_y);
 	SET_BOX(mh, interval * float(step));
 

@@ -70,6 +70,7 @@ namespace WarGrey::SCADA {
 
 		if(target != Anchor::_) {
 			this->fill_anchor_location(target, &this->x, &this->y);
+			this->last_backtrace_anchor = target;
 		} else{
 			this->x = 0.0F;
 		    this->y = 0.0F;

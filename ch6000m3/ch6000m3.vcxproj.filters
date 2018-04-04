@@ -30,7 +30,7 @@
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="decorator\page.cpp" />
-    <ClCompile Include="page\hpcontrol.cpp">
+    <ClCompile Include="page\hydraulics.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,7 +41,7 @@
     </ClInclude>
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="console.idl" />
-    <ClInclude Include="page\hpcontrol.hpp">
+    <ClInclude Include="page\hydraulics.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>

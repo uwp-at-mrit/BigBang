@@ -18,17 +18,14 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-IGaugelet::IGaugelet(float vmin, float vmax, float mbody_ratio, unsigned char step, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
-	: min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {
-	float mark_width;
+IGaugelet::IGaugelet(float width, float height, float vmin, float vmax, unsigned char step0, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
+	: height(height), min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {
+	auto step = ((step0 == 0) ? 10 : step0);
 	auto font = make_text_format(8.0F);
-	auto marks = vhatch(vmin, vmax, ((step == 0) ? 10 : step), font, &mark_width, &this->body_y, &this->body_height);
-	Rect box = marks->ComputeStrokeBounds(1.0F);
+	auto marks = vhatch(height, vmin, vmax, step, font, &this->body_x, &this->body_y, &this->body_height);
 
 	this->scale_marks = geometry_freeze(marks);
-	this->height = box.Height; 
-	this->body_x = box.Width;
-	this->body_width = mark_width * mbody_ratio;
+	this->body_width = width - this->body_x;
 }
 
 void IGaugelet::fill_extent(float x, float y, float* w, float* h) {
@@ -47,5 +44,5 @@ void IGaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 }
 
 /*************************************************************************************************/
-LiquidGaugelet::LiquidGaugelet(float range, float mbody_ratio, unsigned char step, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
-	: IGaugelet(0.0F, range, mbody_ratio, step, color, bcolor, mcolor) {}
+LevelGaugelet::LevelGaugelet(float width, float height, float range, unsigned char step, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
+	: IGaugelet(width, height, 0.0F, range, step, color, bcolor, mcolor) {}

@@ -6,10 +6,10 @@
 namespace WarGrey::SCADA {
 	private class IGaugelet abstract : public WarGrey::SCADA::IScalelet<float> {
 	public:
-		IGaugelet(float vmin, float vmax, float meter_width_ratio, unsigned char step,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Green,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = WarGrey::SCADA::Colours::DarkGray,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mark_color = WarGrey::SCADA::Colours::GhostWhite);
+		IGaugelet(float width, float height, float vmin, float vmax, unsigned char step,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mark_color);
 
 	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
@@ -33,9 +33,9 @@ namespace WarGrey::SCADA {
 		float body_height;
 	};
 	
-	private class LiquidGaugelet : public WarGrey::SCADA::IGaugelet {
+	private class LevelGaugelet : public WarGrey::SCADA::IGaugelet {
     public:
-		LiquidGaugelet(float range, float meter_width_ratio, unsigned char step = 0,
+		LevelGaugelet(float width, float height, float range, unsigned char step = 0,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Green,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = WarGrey::SCADA::Colours::DarkGray,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mark_color = WarGrey::SCADA::Colours::GhostWhite);

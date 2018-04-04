@@ -144,41 +144,41 @@
   <data name=":wifi:" xml:space="preserve">
     <value>WiFi: </value>
   </data>
-  <data name=":hpc:" xml:space="preserve">
-    <value>Hydraulic Pump Control</value>
+  <data name=":hs:" xml:space="preserve">
+    <value>Hydraulic System</value>
   </data>
   <data name=":offline:" xml:space="preserve">
     <value>Offline</value>
   </data>
-  <data name="HPC_A" xml:space="preserve">
+  <data name="HS_A" xml:space="preserve">
     <value>Left Harrow Head</value>
     <comment>':' cannot appear between letters</comment>
   </data>
-  <data name="HPC_B" xml:space="preserve">
+  <data name="HS_B" xml:space="preserve">
     <value>Left Harrow Body</value>
   </data>
-  <data name="HPC_C" xml:space="preserve">
+  <data name="HS_C" xml:space="preserve">
     <value>Left Curved Pipe</value>
   </data>
-  <data name="HPC_D" xml:space="preserve">
+  <data name="HS_D" xml:space="preserve">
     <value>Hopper Door Lock Pump</value>
   </data>
-  <data name="HPC_E" xml:space="preserve">
+  <data name="HS_E" xml:space="preserve">
     <value>Disc Valve Control Pump</value>
   </data>
-  <data name="HPC_F" xml:space="preserve">
+  <data name="HS_F" xml:space="preserve">
     <value>Right Curved Pipe</value>
   </data>
-  <data name="HPC_G" xml:space="preserve">
+  <data name="HS_G" xml:space="preserve">
     <value>Right Harrow Body</value>
   </data>
-  <data name="HPC_H" xml:space="preserve">
+  <data name="HS_H" xml:space="preserve">
     <value>Right Harrow Head</value>
   </data>
-  <data name="HPC_K" xml:space="preserve">
-    <value>Circulation Cooling</value>
+  <data name="HS_K" xml:space="preserve">
+    <value>Circulating Cooling</value>
   </data>
-  <data name="HPC_Y" xml:space="preserve">
+  <data name="HS_Y" xml:space="preserve">
     <value>Emergency</value>
   </data>
   <data name=":gview:" xml:space="preserve">
@@ -271,17 +271,17 @@
   <data name="SQh" xml:space="preserve">
     <value>SQ.H</value>
   </data>
-  <data name="SQk" xml:space="preserve">
+  <data name="SQk1" xml:space="preserve">
     <value>SQ.K1</value>
   </data>
   <data name="SQy" xml:space="preserve">
     <value>SQ.Y</value>
   </data>
-  <data name="HPC_Port" xml:space="preserve">
-    <value>Port Pump Station</value>
+  <data name="HS_Port" xml:space="preserve">
+    <value>Port Hydraulic System</value>
   </data>
-  <data name="HPC_Starboard" xml:space="preserve">
-    <value>Starboard Pump Station</value>
+  <data name="HS_Starboard" xml:space="preserve">
+    <value>Starboard Hydraulic System</value>
   </data>
   <data name="SQi" xml:space="preserve">
     <value>SQ.I</value>
@@ -289,10 +289,10 @@
   <data name="SQj" xml:space="preserve">
     <value>SQ.J</value>
   </data>
-  <data name="HPC_I" xml:space="preserve">
+  <data name="HS_I" xml:space="preserve">
     <value>Left Harrow Lip</value>
   </data>
-  <data name="HPC_J" xml:space="preserve">
+  <data name="HS_J" xml:space="preserve">
     <value>Right Harrow Lip</value>
   </data>
   <data name="level_high" xml:space="preserve">
@@ -304,7 +304,16 @@
   <data name="level_low2" xml:space="preserve">
     <value>Level Low Low</value>
   </data>
-  <data name="HPC_MasterTank" xml:space="preserve">
+  <data name="HS_MasterTank" xml:space="preserve">
     <value>Main Oil Tank</value>
+  </data>
+  <data name="SQk2" xml:space="preserve">
+    <value>SQ.K2</value>
+  </data>
+  <data name="HS_II" xml:space="preserve">
+    <value>Circulating Cooling</value>
+  </data>
+  <data name="HS_L" xml:space="preserve">
+    <value>Circulating Cooling</value>
   </data>
 </root>

@@ -209,14 +209,14 @@
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="page\graphlets.cpp" />
-    <ClCompile Include="page\hpcontrol.cpp" />
+    <ClCompile Include="page\hydraulics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="console.idl" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
-    <ClInclude Include="page\hpcontrol.hpp" />
+    <ClInclude Include="page\hydraulics.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

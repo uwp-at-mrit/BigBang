@@ -25,7 +25,7 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 	s.skeleton_color = default_sketeton_color;
 
 	switch (state) {
-	case ValveState::Manual: s.mask_color = Colours::Teal; s.handler_color = default_sketeton_color; break;
+	case ValveState::Manual: s.mask_color = Colours::Teal; break;
 	case ValveState::Open: s.body_color = Colours::Green; break;
 	case ValveState::Opening: s.mask_color = Colours::Green; break;
 	case ValveState::OpenReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
@@ -46,8 +46,8 @@ Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_pump_state, 
 
 Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
 	: IStatelet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
-	this->fradius = radius - default_thickness;
-	this->sgradius = this->fradius - default_thickness * 4.0F;
+	this->fradius = radius;
+	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
 }
 
