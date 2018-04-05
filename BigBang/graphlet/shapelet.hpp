@@ -6,11 +6,9 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Shapelet : public virtual WarGrey::SCADA::IGraphlet {};
-
-	private class Geometrylet : public virtual WarGrey::SCADA::Shapelet {
+	private class IShapelet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		Geometrylet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
+		IShapelet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
@@ -22,15 +20,28 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ surface;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ border;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color;
 
 	protected:
 		Windows::Foundation::Rect box;
 	};
 
+	private class Rectanglelet : public WarGrey::SCADA::IShapelet {
+	public:
+		Rectanglelet(float edge_size,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+
+		Rectanglelet(float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
 	template<typename Anchor>
-	private class Tracklet : public virtual WarGrey::SCADA::Geometrylet {
+	private class Tracklet : public virtual WarGrey::SCADA::IShapelet {
 	public:
 		~Tracklet() noexcept {
 			this->turtle->destroy();
@@ -38,7 +49,7 @@ namespace WarGrey::SCADA {
 
 		Tracklet(WarGrey::SCADA::Turtle<Anchor>* turtle, float thickness = 1.0F
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver)
-			: Geometrylet(turtle->snap_track(thickness), color), turtle(turtle) {
+			: IShapelet(turtle->snap_track(thickness), color), turtle(turtle) {
 			this->turtle->reference();
 		}
 

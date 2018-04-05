@@ -1,6 +1,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "paint.hpp"
+#include "shape.hpp"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -11,7 +12,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-Geometrylet::Geometrylet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+/*************************************************************************************************/
+IShapelet::IShapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: color(color), border_color(border_color) {
 	this->surface = geometry_freeze(shape);
 
@@ -24,11 +26,11 @@ Geometrylet::Geometrylet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolid
 	}
 }
 
-void Geometrylet::fill_extent(float x, float y, float* w, float* h) {
+void IShapelet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->box.Width, h, this->box.Height);
 }
 
-void Geometrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void IShapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float px = x - this->box.X;
 	float py = y - this->box.Y;
 	
@@ -37,3 +39,10 @@ void Geometrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 		ds->DrawCachedGeometry(this->border, px, py, this->border_color);
 	}
 }
+
+/*************************************************************************************************/
+Rectanglelet::Rectanglelet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
+
+Rectanglelet::Rectanglelet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: IShapelet(rectangle(width, height), color, border_color, thickness) { }

@@ -316,4 +316,7 @@
   <data name="HS_L" xml:space="preserve">
     <value>Circulating Cooling</value>
   </data>
+  <data name="HS_OilTank" xml:space="preserve">
+    <value>Oil Tank</value>
+  </data>
 </root>

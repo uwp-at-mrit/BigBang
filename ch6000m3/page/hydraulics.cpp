@@ -48,6 +48,8 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
 };
 
+#include "shape.hpp"
+
 private class Hydraulics final : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
 public:
 	Hydraulics(HydraulicSystem* master) : Console(master, "HS") {
@@ -65,8 +67,8 @@ public:
 		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
 		
-		pTurtle->move_up(12, HS::Starboard)->move_up(20)->turn_up_left()->move_left(35);
-		pTurtle->turn_left_down()->move_down(4, HS::MasterTank)->jump_left(4);
+		pTurtle->move_up(12, HS::Port)->move_up(20)->turn_up_left()->move_left(35);
+		pTurtle->turn_left_down()->move_down(4)->jump_left(4);
 		pTurtle->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
 
 		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
@@ -74,7 +76,7 @@ public:
 		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Port)->move_up(6)->turn_up_right()->move_right(12)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(12, HS::Starboard)->move_up(6)->turn_up_right()->move_right(12)->turn_right_up()->move_up(1, HS::SQ2);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
@@ -83,7 +85,7 @@ public:
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
 		pTurtle->move_left(20)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
 
-		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2, HS::OilTank);
+		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::OilTank);
 
 		pTurtle->jump_back(HS::SQ1)->jump_down(11.8F)->move_down(2, HS::SQi)->move_down(3, HS::I)->move_down(3);
 		pTurtle->jump_back(HS::SQ2)->jump_down(11.8F)->move_down(2, HS::SQj)->move_down(3, HS::J)->move_down(3);
@@ -97,11 +99,14 @@ public:
 		this->load_label(this->captions, HS::MasterTank, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
+		this->load_label(this->captions, HS::OilTank, Colours::Silver);
 
+		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
 		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F);
 		//this->visor = new LevelGaugelet(gridsize * 12.0F, gridsize * 4.0F, 0.8F);
 
 		this->master->insert_all(this->stations, true);
+		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
 		//this->master->insert(this->visor);
 	}
@@ -137,18 +142,16 @@ public:
 		sx = (width - sw) * 0.5F;
 		sy = (height - sh) * 0.5F - vinset * 0.5F;
 		this->master->move_to(this->stations[0], sx, sy);
-		
-		for (auto lt = this->captions.begin(); lt != this->captions.end(); lt++) {
-			if (lt->second->id == HS::MasterTank) {
-				this->master->move_to(lt->second, sx + gridsize * 6.0F, sy + gridsize * 3.0F);
-			} else {
-				this->stations[0]->map_credit_graphlet(lt->second, -gridsize, 0.0F, GraphletAlignment::RB);
-			}
-		}
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
+		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, 0.0F, 0.0F, GraphletAlignment::LC);
 		this->master->move_to(this->heater, sx + sw * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
 		//this->master->move_to(this->visor, sx + sw * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
+
+		this->stations[0]->map_credit_graphlet(this->captions[HS::MasterTank], gridsize * 6.0F, gridsize * 3.0F);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
+		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -242,6 +245,9 @@ public:
 // never deletes these graphlets mannually
 private:
 	Tracklet<HS>* stations[2];
+	LevelGaugelet* heater;
+	LevelGaugelet* visor;
+	IShapelet* oil_tank;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;
@@ -249,9 +255,7 @@ private:
 	std::map<HS, Credit<Valvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	Credit<Booleanlet, HS>* master_indicators[4];
-	LevelGaugelet* heater;
-	LevelGaugelet* visor;
-
+	
 private:
 	CanvasTextFormat^ caption_font;
 };

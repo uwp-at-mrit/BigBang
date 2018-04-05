@@ -133,25 +133,28 @@ static inline void unsafe_set_selected(IPlanet* master, IGraphlet* g, GraphletIn
 	unsafe_add_selected(master, g, info);
 }
 
-static void graphlet_alignment_offset(IGraphlet* g, float width, float height, GraphletAlignment& cp, float& xoff, float& yoff) {
-    xoff = 0.0F;
-    yoff = 0.0F;
+static void graphlet_alignment_offset(IGraphlet* g, float width, float height, GraphletAlignment& cp, float* xoff, float* yoff) {
+    float dx = 0.0F;
+    float dy = 0.0F;
 
     if (cp != GraphletAlignment::LT) {
 		float halfw = width  * 0.5F;
 		float halfh = height * 0.5F;
 
         switch (cp) {
-        case GraphletAlignment::LC:               yoff = halfh;  break;
-        case GraphletAlignment::LB:               yoff = height; break;
-        case GraphletAlignment::CT: xoff = halfw;                break;
-        case GraphletAlignment::CC: xoff = halfw; yoff = halfh;  break;
-        case GraphletAlignment::CB: xoff = halfw; yoff = height; break;
-        case GraphletAlignment::RT: xoff = width;                break;
-        case GraphletAlignment::RC: xoff = width; yoff = halfh;  break;
-        case GraphletAlignment::RB: xoff = width; yoff = height; break;
+        case GraphletAlignment::LC:             dy = halfh;  break;
+        case GraphletAlignment::LB:             dy = height; break;
+        case GraphletAlignment::CT: dx = halfw;                break;
+        case GraphletAlignment::CC: dx = halfw; dy = halfh;  break;
+        case GraphletAlignment::CB: dx = halfw; dy = height; break;
+        case GraphletAlignment::RT: dx = width;                break;
+        case GraphletAlignment::RC: dx = width; dy = halfh;  break;
+        case GraphletAlignment::RB: dx = width; dy = height; break;
         }
     }
+
+	(*xoff) = dx;
+	(*yoff) = dy;
 }
 
 /*************************************************************************************************/
@@ -207,10 +210,29 @@ void Planet::move_to(IGraphlet* g, float x, float y, GraphletAlignment cp) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		float sx, sy, sw, sh, xoff, yoff;
+		float sx, sy, sw, sh, dx, dy;
 		
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(g, sw, sh, cp, xoff, yoff);
+		graphlet_alignment_offset(g, sw, sh, cp, &dx, &dy);
+		unsafe_move_graphlet_via_info(this, info, x - dx, y - dy, true);
+	}
+}
+
+void Planet::move_to(IGraphlet* g, IGraphlet* target, GraphletAlignment tcp, GraphletAlignment cp, float dx, float dy) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+	GraphletInfo* tinfo = planet_graphlet_info(this, target);
+
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)
+		&& (tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
+		float sx, sy, sw, sh, xoff, yoff, x, y;
+
+		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
+		graphlet_alignment_offset(target, sw, sh, tcp, &xoff, &yoff);
+		x = sx + xoff + dx;
+		y = sy + yoff + dy;
+
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		graphlet_alignment_offset(g, sw, sh, cp, &xoff, &yoff);
 		unsafe_move_graphlet_via_info(this, info, x - xoff, y - yoff, true);
 	}
 }
@@ -270,12 +292,12 @@ bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAl
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		float sx, sy, sw, sh, xoff, yoff;
+		float sx, sy, sw, sh, dx, dy;
 
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(g, sw, sh, cp, xoff, yoff);
-		SET_BOX(x, sx + xoff);
-		SET_BOX(y, sy + yoff);
+		graphlet_alignment_offset(g, sw, sh, cp, &dx, &dy);
+		SET_BOX(x, sx + dx);
+		SET_BOX(y, sy + dy);
 
 		okay = true;
     }

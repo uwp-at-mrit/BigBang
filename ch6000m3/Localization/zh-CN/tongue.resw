@@ -248,10 +248,10 @@
     <value>打开失败</value>
   </data>
   <data name="HS_Port" xml:space="preserve">
-    <value>左舷液压控制系统</value>
+    <value>左舷液压系统</value>
   </data>
   <data name="HS_Starboard" xml:space="preserve">
-    <value>右舷液压控制系统</value>
+    <value>右舷液压系统</value>
   </data>
   <data name="HS_I" xml:space="preserve">
     <value>左耙唇</value>
@@ -276,5 +276,8 @@
   </data>
   <data name="HS_L" xml:space="preserve">
     <value>循环冷却</value>
+  </data>
+  <data name="HS_OilTank" xml:space="preserve">
+    <value>储油罐</value>
   </data>
 </root>
