@@ -11,6 +11,7 @@
 #include "brushes.hxx"
 #include "turtle.idl"
 
+#include "graphlet/booleanlet.hpp"
 #include "graphlet/gaugelet.hpp"
 #include "graphlet/shapelet.hpp"
 #include "graphlet/pumplet.hpp"
@@ -34,19 +35,21 @@ private enum HSMode { WindowUI = 0, View };
 
 // WARNING: order matters
 private enum class HS : unsigned int {
-	// for pumps
+	// Pumps
 	A, B, G, H,
 	F, C, D, E,
 	J, I,
 	Y, L, II, K,
-	// for valves
+	// Valves
 	SQ1, SQ2, SQy, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
-	// otheres
-	F001, Port, Starboard, MasterTank, Heater, Visor, OilTank,
+	// Key Labels
+	Heater, Visor, Port, Starboard, MasterTank, OilTank,
+	// Indicators
+	F001Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
 	_,
-	// anchors used for default jumping back
+	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
 };
 
@@ -67,9 +70,8 @@ public:
 		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
 		
-		pTurtle->move_up(12, HS::Port)->move_up(20)->turn_up_left()->move_left(35);
-		pTurtle->turn_left_down()->move_down(4)->jump_left(4);
-		pTurtle->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
+		pTurtle->move_up(12, HS::Port)->move_up(20)->turn_up_left()->move_left(35)->turn_left_down()->move_down(4);
+		pTurtle->jump_left(4)->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
 
 		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::b)->move_right(6, HS::B)->move_right(8, HS::SQb)->move_right(6)->jump_back();
@@ -83,7 +85,7 @@ public:
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::ii)->turn_right_up()->move_up(8, HS::II)->move_up(4)->jump_back();
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
-		pTurtle->move_left(21)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
+		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, HS::F001Blocked)->move_down(2.0F);
 
 		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::OilTank);
 
@@ -99,8 +101,9 @@ public:
 		this->load_label(this->captions, HS::MasterTank, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
+		this->load_label(this->captions, HS::Heater, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, HS::Visor, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::OilTank, Colours::Silver);
-		this->load_label(this->captions, HS::Heater, Colours::Silver);
 
 		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
 
@@ -125,11 +128,7 @@ public:
 			this->load_graphlets(this->pumps, this->plabels, HS::Y, HS::K, gridsize, -90.0, this->pcaptions);
 			this->load_graphlets(this->pumps, this->plabels, HS::J, HS::I, gridsize, 90.00, this->pcaptions);
 
-			for (HS idx = HS::A; idx <= HS::I; idx++) {
-				this->bars[idx] = new Credit<ScaleTextlet, HS>("bar");
-				this->bars[idx]->id = idx;
-				this->master->insert(this->bars[idx]);
-			}
+			this->load_scales(this->bars, HS::A, HS::I, "bar");
 		}
 
 		{ // load valves
@@ -139,11 +138,19 @@ public:
 		}
 	}
 
-	void load_indicators(float width, float height, float gridsize) {
-		this->master_indicators[0] = this->make_indicator("hpc_master_T", Colours::Green);
-		this->master_indicators[1] = this->make_indicator("hpc_master_low", Colours::Green);
-		this->master_indicators[2] = this->make_indicator("hpc_master_low2", Colours::Green);
-		this->master_indicators[3] = this->make_indicator("hpc_master_high", Colours::Green);
+	void load_state_indicators(float width, float height, float gridsize) {
+		float size = gridsize * 1.0F;
+
+		this->load_state_indicator(HS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
+
+		this->load_state_indicator(HS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_state_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_state_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
+
+		this->load_scales(this->temperatures, HS::Heater, HS::Visor, "celsius", "temperature");
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
@@ -161,11 +168,11 @@ public:
 		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
 		this->master->move_to(this->visor, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
 
-		this->stations[0]->map_credit_graphlet(this->captions[HS::MasterTank], gridsize * 6.0F, gridsize * 3.0F);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
 		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
+		this->master->move_to(this->captions[HS::Visor], this->visor, GraphletAlignment::CT, GraphletAlignment::CB);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -228,17 +235,31 @@ public:
 		}
 	}
 
-	void reflow_indicators(float width, float height, float gridsize, float vinset) {
-		float x0, y0, indicator_x, indicator_y, lineheight;
+	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
+		this->master->move_to(this->captions[HS::MasterTank], this->stations[0], GraphletAlignment::LT, GraphletAlignment::CB, gridsize * 12.0F, gridsize * 4.0F);
+		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::MasterTank], GraphletAlignment::LB, GraphletAlignment::LT, -gridsize, gridsize);
+		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
+		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], 0.0F, 0.0F, GraphletAlignment::CC);
 
-		this->master->fill_graphlet_location(this->stations[0], &x0, &y0);
-		this->master_indicators[0]->fill_extent(0.0F, 0.0F, nullptr, &lineheight);
+		this->master->move_to(this->visor_states[HS::LevelLow], this->visor, GraphletAlignment::RT, GraphletAlignment::LT, gridsize * 2.0F, 0.0F);
+		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[HS::Visor], this->visor_states[HS::FilterBlocked], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
 
-		indicator_x = x0 + gridsize * 5.0F;
-		indicator_y = y0 + gridsize * 5.0F;
-		lineheight *= 1.2F;
-		for (unsigned int i = 0; i < GRAPHLETS_LENGTH(this->master_indicators); i++) {
-			this->master->move_to(this->master_indicators[i], indicator_x, indicator_y + lineheight * float(i));
+		{ // reflow state labels
+			float gapsize = vinset * 0.25F;
+
+			for (auto lt = this->heater_states.begin(); lt != this->heater_states.end(); lt++) {
+				this->master->move_to(this->hslabels[lt->first], this->heater_states[lt->first],
+					GraphletAlignment::RC, GraphletAlignment::LC, gapsize);
+			}
+
+			for (auto lt = this->visor_states.begin(); lt != this->visor_states.end(); lt++) {
+				this->master->move_to(this->vslabels[lt->first], this->visor_states[lt->first],
+					GraphletAlignment::RC, GraphletAlignment::LC, gapsize);
+			}
 		}
 	}
 
@@ -281,7 +302,11 @@ private:
 	std::map<HS, Credit<Valvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<ScaleTextlet, HS>*> bars;
-	Credit<Booleanlet, HS>* master_indicators[4];
+	std::map<HS, Credit<ScaleTextlet, HS>*> temperatures;
+	std::map<HS, Credit<Booleanlet, HS>*> heater_states;
+	std::map<HS, Credit<Labellet, HS>*> hslabels;
+	std::map<HS, Credit<Booleanlet, HS>*> visor_states;
+	std::map<HS, Credit<Labellet, HS>*> vslabels;
 	
 private:
 	CanvasTextFormat^ caption_font;
@@ -316,7 +341,7 @@ void HydraulicSystem::load(CanvasCreateResourcesReason reason, float width, floa
 			this->change_mode(HSMode::View);
 			console->load_pump_station(width, height, this->gridsize);
 			console->load_devices(width, height, this->gridsize);
-			console->load_indicators(width, height, this->gridsize);
+			console->load_state_indicators(width, height, this->gridsize);
 
 			this->change_mode(HSMode::WindowUI);
 			this->statusline = new Statuslinelet(Log::Debug);
@@ -354,7 +379,7 @@ void HydraulicSystem::reflow(float width, float height) {
 		this->change_mode(HSMode::View);
 		console->reflow_pump_station(width, height, this->gridsize, vinset);
 		console->reflow_devices(width, height, this->gridsize, vinset);
-		console->reflow_indicators(width, height, this->gridsize, vinset);
+		console->reflow_state_indicators(width, height, this->gridsize, vinset);
 	}
 }
 

@@ -7,7 +7,6 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
 using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -81,56 +80,10 @@ Labellet::Labellet(Platform::String^ content) {
 }
 
 /*************************************************************************************************/
-Booleanlet::Booleanlet(const wchar_t *fmt, ...) {
-	VSWPRINT(label, fmt);
-	this->set_text(label);
-}
-
-Booleanlet::Booleanlet(Platform::String^ content) {
-	this->set_text(content);
-}
-
-void Booleanlet::fill_extent(float x, float y, float* w, float* h) {
-	Textlet::fill_extent(x, y, w, h);
-	
-	if (w != nullptr) {
-		if ((*w) == 0.0F) {
-			(*w) += this->indicator_size;
-		} else {
-			(*w) += (this->indicator_size + this->gapsize);
-		}
-	}
-
-	if (h != nullptr) {
-		(*h) = fmaxf(this->indicator_size, (*h));
-	}
-}
-
-void Booleanlet::on_font_change() {
-	TextExtent ts = get_text_extent("x", this->text_font);
-
-	this->indicator_size = ts.height * 1.2F;
-	this->gapsize = ts.width;
-}
-
-void Booleanlet::set_indicator_color(ICanvasBrush^ true_color, ICanvasBrush^ false_color) {
-	this->true_color = true_color;
-	this->false_color = false_color;
-}
-
-
-void Booleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	auto color = (this->get_scale() ? this->true_color : this->false_color);
-
-	Textlet::draw(ds, x + this->indicator_size + this->gapsize, y, Width, Height);
-	ds->FillRectangle(x, y, this->indicator_size, this->indicator_size, color);
-}
-
-/*************************************************************************************************/
 ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Colour^ lcolor, Colour^ scolor)
 	: scale_color(scolor) {
 	this->set_color(lcolor);
-	this->set_font(make_text_format("Courier New"));
+	this->set_font(make_bold_text_format());
 	this->unit_layout = make_text_layout(speak(unit), this->text_font);
 
 	if (label != nullptr) {

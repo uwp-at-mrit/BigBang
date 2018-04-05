@@ -3,9 +3,11 @@
 #include <map>
 
 #include "credit.idl"
+#include "brushes.hxx"
 #include "planet.hpp"
 
-#include "graphlet/shapelet.hpp"
+#include "graphlet/textlet.hpp"
+#include "graphlet/booleanlet.hpp"
 
 namespace WarGrey::SCADA {
 	template<class T, typename E>
@@ -20,11 +22,13 @@ namespace WarGrey::SCADA {
 		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, E id0, E idn, float radius, double degrees) {
 		    for(E id = id0; id <= idn; id++) {
-			    this->load_graphlet(gs, ls, id, radius, degrees);
+			    gs[id] = this->master->insert_one(new G(radius, degrees));
+				gs[id]->id = id;
+				ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 		    }
 	    }
-	
-	    template<class G>
+
+		template<class G>
 		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, E id0, E idn, float radius, double degrees, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& cs) {
 			this->load_graphlets(gs, ls, id0, idn, radius, degrees);
@@ -34,14 +38,12 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		template<class G>
-		void load_graphlet(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
-			, E id, float radius, double degrees) {
-			G* glet = new G(radius, degrees);
-			glet->id = id;
-
-			gs[id] = this->master->insert_one(glet);
-			ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
+		void load_scales(std::map<E, Credit<WarGrey::SCADA::ScaleTextlet, E>*>& sts, E id0, E idn
+			, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
+			for(E id = id0; id <= idn; id++) {
+				sts[id] = this->master->insert_one(new Credit<ScaleTextlet, HS>(unit, label, subscript));
+				sts[id]->id = id;
+			}
 		}
 
 		void load_label(std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls, Platform::String^ caption, E id
@@ -56,6 +58,14 @@ namespace WarGrey::SCADA {
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
 			
 			ls[id] = this->make_label(id, color, font);
+		}
+
+		void load_state_indicator(E id, float size
+			, std::map<E, Credit<WarGrey::SCADA::Booleanlet, E>*>& bs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
+			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
+			ls[id] = this->make_label(speak(id.ToString()), id, WarGrey::SCADA::Colours::Silver);
+			bs[id] = this->master->insert_one(new Credit<WarGrey::SCADA::Booleanlet, E>(size, color));
+			bs[id]->id = id;
 		}
 
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
@@ -80,14 +90,6 @@ namespace WarGrey::SCADA {
 			Platform::String^ caption = (this->l10n_prefix == nullptr ? idstr : this->l10n_prefix + "_" + idstr);
 
 			return this->make_label(speak(caption), id, color, font);
-		}
-
-		Credit<WarGrey::SCADA::Booleanlet, E>* make_indicator(Platform::String^ caption, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			Credit<WarGrey::SCADA::Booleanlet, E>* indicator = new Credit<WarGrey::SCADA::Booleanlet, E>(speak(caption));
-
-			indicator->set_indicator_color(color);
-
-			return master->insert_one(indicator);
 		}
 
 	protected:

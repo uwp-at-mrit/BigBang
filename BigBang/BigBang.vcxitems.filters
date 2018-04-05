@@ -54,6 +54,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\valvelet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -108,6 +109,9 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\valvelet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\booleanlet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
   </ItemGroup>

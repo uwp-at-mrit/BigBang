@@ -259,13 +259,13 @@
   <data name="HS_J" xml:space="preserve">
     <value>右耙唇</value>
   </data>
-  <data name="level_high" xml:space="preserve">
+  <data name="LevelHigh" xml:space="preserve">
     <value>液位高</value>
   </data>
-  <data name="level_low" xml:space="preserve">
+  <data name="LevelLow" xml:space="preserve">
     <value>液位低</value>
   </data>
-  <data name="level_low2" xml:space="preserve">
+  <data name="LevelLow2" xml:space="preserve">
     <value>液位过低</value>
   </data>
   <data name="HS_MasterTank" xml:space="preserve">
@@ -282,5 +282,17 @@
   </data>
   <data name="HS_Heater" xml:space="preserve">
     <value>加热器</value>
+  </data>
+  <data name="HS_Visor" xml:space="preserve">
+    <value>遮阳板</value>
+  </data>
+  <data name="F001Blocked" xml:space="preserve">
+    <value>滤器F0.01堵塞</value>
+  </data>
+  <data name="FilterBlocked" xml:space="preserve">
+    <value>滤器堵塞</value>
+  </data>
+  <data name="temperature" xml:space="preserve">
+    <value>温度</value>
   </data>
 </root>

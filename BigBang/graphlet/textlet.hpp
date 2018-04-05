@@ -36,31 +36,6 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ content = "");
 	};
 
-	private class Booleanlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<bool> {
-	public:
-		Booleanlet(const wchar_t* fmt, ...);
-		Booleanlet(Platform::String^ content = "");
-
-	public:
-		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		void on_font_change() override;
-
-	public:
-		void set_indicator_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ true_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ false_color = WarGrey::SCADA::Colours::WhiteSmoke);
-
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ true_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ false_color;
-
-	private:
-		float indicator_size;
-		float gapsize;
-	};
-
 	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<float> {
 	public:
 		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",

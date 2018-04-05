@@ -295,13 +295,13 @@
   <data name="HS_J" xml:space="preserve">
     <value>Right Harrow Lip</value>
   </data>
-  <data name="level_high" xml:space="preserve">
+  <data name="LevelHigh" xml:space="preserve">
     <value>Level High</value>
   </data>
-  <data name="level_low" xml:space="preserve">
+  <data name="LevelLow" xml:space="preserve">
     <value>Level Low</value>
   </data>
-  <data name="level_low2" xml:space="preserve">
+  <data name="LevelLow2" xml:space="preserve">
     <value>Level Low Low</value>
   </data>
   <data name="HS_MasterTank" xml:space="preserve">
@@ -321,5 +321,20 @@
   </data>
   <data name="HS_Heater" xml:space="preserve">
     <value>Heater</value>
+  </data>
+  <data name="HS_Visor" xml:space="preserve">
+    <value>Harrow Head Visor</value>
+  </data>
+  <data name="celsius" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="F001Blocked" xml:space="preserve">
+    <value>Filter F0.01 Blocked</value>
+  </data>
+  <data name="FilterBlocked" xml:space="preserve">
+    <value>Filter Blocked</value>
+  </data>
+  <data name="temperature" xml:space="preserve">
+    <value>Temperature</value>
   </data>
 </root>
