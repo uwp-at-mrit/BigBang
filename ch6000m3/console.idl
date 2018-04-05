@@ -90,14 +90,6 @@ namespace WarGrey::SCADA {
 			return master->insert_one(indicator);
 		}
 
-		template<class CreditG>
-		void place_id_element(WarGrey::SCADA::Tracklet<E>* track, CreditG* g, float dx, float dy, GraphletAlignment scp) {
-			float x, y;
-
-			track->fill_anchor_location(g->id, &x, &y);
-			this->master->move_to(g, x + dx, y + dy, scp);
-		}
-
 	protected:
 		T* master;
 

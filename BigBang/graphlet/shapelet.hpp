@@ -1,8 +1,9 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
-#include "brushes.hxx"
+#include "credit.idl"
 #include "turtle.idl"
+#include "brushes.hxx"
 
 namespace WarGrey::SCADA {
 	private class Shapelet : public virtual WarGrey::SCADA::IGraphlet {};
@@ -42,19 +43,35 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		void fill_anchor_location(Anchor node, float* x, float* y, bool need_absolute_location = false) {
+		void fill_anchor_location(Anchor a, float* x, float* y, bool need_absolute_location = false) {
 			float raw_x, raw_y;
 			float x0 = 0.0F;
 			float y0 = 0.0F;
 
-			this->turtle->fill_anchor_location(node, &raw_x, &raw_y);
+			this->turtle->fill_anchor_location(a, &raw_x, &raw_y);
 
 			if (need_absolute_location && (this->info != nullptr)) {
 				this->info->master->fill_graphlet_location(this, &x0, &y0);
 			}
 
-			SET_BOX(x, raw_x + x0 - WarGrey::SCADA::Geometrylet::box.X);
-			SET_BOX(y, raw_y + y0 - WarGrey::SCADA::Geometrylet::box.Y);
+			SET_BOX(x, raw_x + x0 - this->box.X);
+			SET_BOX(y, raw_y + y0 - this->box.Y);
+		}
+
+	public:
+		template<class G>
+		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, float dx = 0.0F, float dy = 0.0F, GraphletAlignment align = GraphletAlignment::CC) {
+			this->map_graphlet_at_anchor(g, g->id, dx, dy, align);
+		}
+
+		template<class G>
+		void map_graphlet_at_anchor(G* g, Anchor a, float dx = 0.0F, float dy = 0.0F, GraphletAlignment align = GraphletAlignment::CC) {
+			if (this->info != nullptr) {
+				float anchor_x, anchor_y;
+
+				this->fill_anchor_location(a, &anchor_x, &anchor_y, true);
+				this->info->master->move_to(g, anchor_x + dx, anchor_y + dy, align);
+			}
 		}
 
 	private:

@@ -42,7 +42,7 @@ private enum class HS : unsigned int {
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
 	// otheres
-	F001, Port, Starboard, MasterTank, Heater, OilTank,
+	F001, Port, Starboard, MasterTank, Heater, Visor, OilTank,
 	_,
 	// anchors used for default jumping back
 	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
@@ -60,30 +60,30 @@ public:
 
 		pTurtle->move_down()->turn_down_right()->move_right(12, HS::l)->turn_right_down()->move_down(6);
 		
-		pTurtle->move_down(3, HS::f)->move_right(4, HS::SQf)->move_right(12, HS::F)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::c)->move_right(4, HS::SQc)->move_right(12, HS::C)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::d)->move_right(4, HS::SQd)->move_right(12, HS::D)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::e)->move_right(4, HS::SQe)->move_right(12, HS::E)->move_right(4);
+		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::c)->move_right(6, HS::SQc)->move_right(8, HS::C)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
 		
 		pTurtle->move_up(12, HS::Starboard)->move_up(20)->turn_up_left()->move_left(35);
 		pTurtle->turn_left_down()->move_down(4, HS::MasterTank)->jump_left(4);
 		pTurtle->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
 
-		pTurtle->move_down(3, HS::a)->move_right(4, HS::A)->move_right(12, HS::SQa)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::b)->move_right(4, HS::B)->move_right(12, HS::SQb)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::g)->move_right(4, HS::G)->move_right(12, HS::SQg)->move_right(4)->jump_back();
-		pTurtle->move_down(3, HS::h)->move_right(4, HS::H)->move_right(12, HS::SQh)->move_right(4);
+		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::b)->move_right(6, HS::B)->move_right(8, HS::SQb)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
+		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
 		pTurtle->move_up(12, HS::Port)->move_up(6)->turn_up_right()->move_right(12)->turn_right_up()->move_up(1, HS::SQ2);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
-		pTurtle->move_right(6, HS::ii)->turn_right_up()->move_up(8, HS::II)->move_up(4)->jump_back();
-		pTurtle->move_right(4, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
-		pTurtle->move_left(25)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
+		pTurtle->move_right(5, HS::ii)->turn_right_up()->move_up(8, HS::II)->move_up(4)->jump_back();
+		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
+		pTurtle->move_left(20)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
 
-		pTurtle->jump_back(HS::k)->move_right(2, HS::SQk1)->move_right(2, HS::OilTank);
+		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2, HS::OilTank);
 
 		pTurtle->jump_back(HS::SQ1)->jump_down(11.8F)->move_down(2, HS::SQi)->move_down(3, HS::I)->move_down(3);
 		pTurtle->jump_back(HS::SQ2)->jump_down(11.8F)->move_down(2, HS::SQj)->move_down(3, HS::J)->move_down(3);
@@ -98,12 +98,12 @@ public:
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 
-		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 5.0F, 1.5F);
-		//this->oiltanks[1] = new LevelGaugelet(0.7F, 80.0F);
+		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F);
+		//this->visor = new LevelGaugelet(gridsize * 12.0F, gridsize * 4.0F, 0.8F);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert(this->heater);
-		//this->master->insert(this->oiltanks[1]);
+		//this->master->insert(this->visor);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -142,21 +142,21 @@ public:
 			if (lt->second->id == HS::MasterTank) {
 				this->master->move_to(lt->second, sx + gridsize * 6.0F, sy + gridsize * 3.0F);
 			} else {
-				this->place_id_element(this->stations[0], lt->second, sx - gridsize, sy, GraphletAlignment::RB);
+				this->stations[0]->map_credit_graphlet(lt->second, -gridsize, 0.0F, GraphletAlignment::RB);
 			}
 		}
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
-		this->master->move_to(this->heater, sx + sw * 0.5F, sy + s1_y - gridsize * 2.0F, GraphletAlignment::CB);
-		//this->master->move_to(this->oiltanks[1], sx + s1_x, sy + s1_y + gridsize * 8.0F, GraphletAlignment::CT);
+		this->master->move_to(this->heater, sx + sw * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
+		//this->master->move_to(this->visor, sx + sw * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
-		float x0, y0, lbl_dx, lbl_dy, cpt_dx, cpt_dy;
+		float lbl_dx, lbl_dy, cpt_dx, cpt_dy;
+		float x0 = 0.0F;
+		float y0 = 0.0F;
 		float adjust_offset = gridsize * 0.8F;
 		GraphletAlignment lbl_align, cpt_align;
-
-		this->master->fill_graphlet_location(this->stations[0], &x0, &y0);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (int(it->second->get_direction_degrees())) {
@@ -178,9 +178,9 @@ public:
 			}
 			}
 
-			this->place_id_element(this->stations[0], it->second, x0, y0, GraphletAlignment::CC);
-			this->place_id_element(this->stations[0], this->plabels[it->first], lbl_dx, lbl_dy, lbl_align);
-			this->place_id_element(this->stations[0], this->pcaptions[it->first], cpt_dx, cpt_dy, cpt_align);
+			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
+			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_dx, lbl_dy, lbl_align);
+			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_dx, cpt_dy, cpt_align);
 		}
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
@@ -194,8 +194,8 @@ public:
 				lbl_dx = x0; lbl_dy = y0 - adjust_offset; lbl_align = GraphletAlignment::CB;
 			}
 
-			this->place_id_element(this->stations[0], it->second, x0, y0, GraphletAlignment::CC);
-			this->place_id_element(this->stations[0], this->vlabels[it->first], lbl_dx, lbl_dy, lbl_align);
+			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
+			this->stations[0]->map_credit_graphlet(this->vlabels[it->first], lbl_dx, lbl_dy, lbl_align);
 		}
 	}
 
@@ -250,6 +250,7 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	Credit<Booleanlet, HS>* master_indicators[4];
 	LevelGaugelet* heater;
+	LevelGaugelet* visor;
 
 private:
 	CanvasTextFormat^ caption_font;
