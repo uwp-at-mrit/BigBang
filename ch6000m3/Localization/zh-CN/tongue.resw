@@ -280,4 +280,7 @@
   <data name="HS_OilTank" xml:space="preserve">
     <value>储油罐</value>
   </data>
+  <data name="HS_Heater" xml:space="preserve">
+    <value>加热器</value>
+  </data>
 </root>

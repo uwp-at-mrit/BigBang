@@ -17,7 +17,9 @@
 #include "graphlet/valvelet.hpp"
 
 #include "decorator/page.hpp"
+#ifdef _DEBUG
 #include "decorator/grid.hpp"
+#endif
 
 using namespace WarGrey::SCADA;
 
@@ -35,8 +37,8 @@ private enum class HS : unsigned int {
 	// for pumps
 	A, B, G, H,
 	F, C, D, E,
-	Y, L, II, K,
 	J, I,
+	Y, L, II, K,
 	// for valves
 	SQ1, SQ2, SQy, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
@@ -48,8 +50,6 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
 };
 
-#include "shape.hpp"
-
 private class Hydraulics final : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
 public:
 	Hydraulics(HydraulicSystem* master) : Console(master, "HS") {
@@ -60,7 +60,7 @@ public:
 	void load_pump_station(float width, float height, float gridsize) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
 
-		pTurtle->move_down()->turn_down_right()->move_right(12, HS::l)->turn_right_down()->move_down(6);
+		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(6);
 		
 		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::c)->move_right(6, HS::SQc)->move_right(8, HS::C)->move_right(6)->jump_back();
@@ -76,14 +76,14 @@ public:
 		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Starboard)->move_up(6)->turn_up_right()->move_right(12)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(12, HS::Starboard)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::ii)->turn_right_up()->move_up(8, HS::II)->move_up(4)->jump_back();
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
-		pTurtle->move_left(20)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
+		pTurtle->move_left(21)->turn_left_down()->move_down(1.5F, HS::F001)->move_down(1.5F);
 
 		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::OilTank);
 
@@ -100,15 +100,22 @@ public:
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::OilTank, Colours::Silver);
+		this->load_label(this->captions, HS::Heater, Colours::Silver);
 
 		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
-		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F);
-		//this->visor = new LevelGaugelet(gridsize * 12.0F, gridsize * 4.0F, 0.8F);
+
+		/** TODO
+		 * These two construtions may fail due to D2DERR_BAD_NUMBER(HRESULT: 0x88990011),
+		 * It it happens try to change the `step` to ensure that `height / step >= 0.1F`,
+		 * the default `step` is 10.
+		 */
+		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F, 6);
+		this->visor = new LevelGaugelet(gridsize * 12.0F, gridsize * 5.0F, 0.8F, 8);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
-		//this->master->insert(this->visor);
+		this->master->insert(this->visor);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -117,6 +124,12 @@ public:
 			this->load_graphlets(this->pumps, this->plabels, HS::F, HS::E, gridsize, 0.000, this->pcaptions);
 			this->load_graphlets(this->pumps, this->plabels, HS::Y, HS::K, gridsize, -90.0, this->pcaptions);
 			this->load_graphlets(this->pumps, this->plabels, HS::J, HS::I, gridsize, 90.00, this->pcaptions);
+
+			for (HS idx = HS::A; idx <= HS::I; idx++) {
+				this->bars[idx] = new Credit<ScaleTextlet, HS>("bar");
+				this->bars[idx]->id = idx;
+				this->master->insert(this->bars[idx]);
+			}
 		}
 
 		{ // load valves
@@ -145,56 +158,69 @@ public:
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
 		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, 0.0F, 0.0F, GraphletAlignment::LC);
-		this->master->move_to(this->heater, sx + sw * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
-		//this->master->move_to(this->visor, sx + sw * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
+		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
+		this->master->move_to(this->visor, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
 
 		this->stations[0]->map_credit_graphlet(this->captions[HS::MasterTank], gridsize * 6.0F, gridsize * 3.0F);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
+		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
-		float lbl_dx, lbl_dy, cpt_dx, cpt_dy;
+		GraphletAlignment lbl_align, cpt_align, bar_align;
+		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy;
+		float valve_adjust_gridsize = gridsize * 0.618F;
+		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
-		float adjust_offset = gridsize * 0.8F;
-		GraphletAlignment lbl_align, cpt_align;
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (int(it->second->get_direction_degrees())) {
 			case -90: { // for Y, L, II, K
-				lbl_dx = x0 - gridsize; lbl_dy = y0 - gridsize; lbl_align = GraphletAlignment::RT;
-				cpt_dx = x0 + vinset * 0.25F; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LB;
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LB;
+				bar_dx = x0; bar_dy = y0; bar_align = GraphletAlignment::CC; // these devices have no scales
 			} break;
 			case 90: {  // for J, I
-				lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
+				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LT;
 				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_align = GraphletAlignment::CT;
+				bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_align = GraphletAlignment::LT;
 			} break;
 			case 180: { // for A, B, G, H
-				lbl_dx = x0 - gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::RB;
-				cpt_dx = x0 + gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::LB;
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RT;
+				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_align = GraphletAlignment::LT;
+				bar_dx = x0 + gridsize; bar_dy = y0; bar_align = GraphletAlignment::LB;
 			} break;
 			default: {  // for F, C, D, E
-				lbl_dx = x0 + gridsize; lbl_dy = y0 + gridsize; lbl_align = GraphletAlignment::LB;
-				cpt_dx = x0 - gridsize; cpt_dy = y0 + gridsize; cpt_align = GraphletAlignment::RB;
+				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LT;
+				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_align = GraphletAlignment::RT;
+				bar_dx = x0 - gridsize; bar_dy = y0; bar_align = GraphletAlignment::RB;
 			}
 			}
 
 			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
 			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_dx, lbl_dy, lbl_align);
 			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_dx, cpt_dy, cpt_align);
+
+			if (this->bars.find(it->first) != this->bars.end()) {
+				this->stations[0]->map_credit_graphlet(this->bars[it->first], bar_dx, bar_dy, bar_align);
+			}
 		}
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 0.0) {
-				if (it->second->id == HS::SQ2) {
-					lbl_dx = x0 - adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
-				} else {
-					lbl_dx = x0 + adjust_offset; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
+				switch (it->first) {
+				case HS::SQ2: case HS::SQy: {
+					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
+				} break;
+				default: {
+					lbl_dx = x0 + valve_adjust_gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
+				}
 				}
 			} else {
-				lbl_dx = x0; lbl_dy = y0 - adjust_offset; lbl_align = GraphletAlignment::CB;
+				lbl_dx = x0; lbl_dy = y0 - valve_adjust_gridsize; lbl_align = GraphletAlignment::CB;
 			}
 
 			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
@@ -254,6 +280,7 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
 	std::map<HS, Credit<Valvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
+	std::map<HS, Credit<ScaleTextlet, HS>*> bars;
 	Credit<Booleanlet, HS>* master_indicators[4];
 	
 private:

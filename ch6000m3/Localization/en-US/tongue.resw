@@ -319,4 +319,7 @@
   <data name="HS_OilTank" xml:space="preserve">
     <value>Oil Tank</value>
   </data>
+  <data name="HS_Heater" xml:space="preserve">
+    <value>Heater</value>
+  </data>
 </root>

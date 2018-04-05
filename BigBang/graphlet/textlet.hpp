@@ -68,6 +68,7 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::Colour^ scale_color = WarGrey::SCADA::Colours::Yellow);
 
 	public:
+		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 

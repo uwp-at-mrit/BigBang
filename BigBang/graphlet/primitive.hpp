@@ -70,8 +70,8 @@ namespace WarGrey::SCADA {
 			}
 
 			/** WARNING
-			 *    invoking `on_state_change` here has no effect
-			 *    since its virtual and here is inside the constructor
+			 * invoking `on_state_change` here has no effect
+			 * since its virtual and here is inside the constructor
 			 */
 		}
 

@@ -16,6 +16,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static CanvasTextFormat^ default_scale_font = make_text_format(8.0F);
 static const float scale_lmark_ratio = 1.0F;
 static const float scale_space_ratio = 1.0F;
 
@@ -26,14 +27,14 @@ inline static Platform::String^ make_scale_string(float scale, unsigned int widt
 	return s;
 }
 
-static CanvasGeometry^ make_vhatch(float width, float interval, unsigned char step, float x = 0.0F, float y = 0.0F) {
+static CanvasGeometry^ make_vhatch(float width, float interval, unsigned int step, float x = 0.0F, float y = 0.0F) {
 	CanvasPathBuilder^ mark = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float short_x = x + width * (1.0F - 0.618F);
 	float height = interval * step;
 
 	mark->BeginFigure(x + width, y);
 	mark->AddLine(x + width, y + height);
-	for (unsigned char i = 0; i <= step; i++) {
+	for (unsigned int i = 0; i <= step; i++) {
 		float ythis = interval * float(i) + y;
 
 		mark->EndFigure(CanvasFigureLoop::Open);
@@ -46,11 +47,11 @@ static CanvasGeometry^ make_vhatch(float width, float interval, unsigned char st
 }
 
 /*************************************************************************************************/
-CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned char step, CanvasTextFormat^ ft, float* mw, float* my, float* mh) {
+CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, CanvasTextFormat^ ft, float* mw, float* my, float* mh) {
 	Platform::String^ min_mark = vmin.ToString(); 
 	Platform::String^ max_mark = vmax.ToString();
 	unsigned int span = std::max(max_mark->Length(), min_mark->Length());
-	CanvasTextFormat^ font = ((ft == nullptr) ? make_text_format(8.0F) : ft);
+	CanvasTextFormat^ font = ((ft == nullptr) ? default_scale_font : ft);
 	TextExtent ts = get_text_extent(max_mark, font);
 	float ch = ts.width / span;
 	float em = ts.height - ts.tspace - ts.bspace;
@@ -62,7 +63,7 @@ CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned char step,
 	float scale_xoff;
 
 	auto marks = make_vhatch(mark_width, interval, step, mark_x, mark_y);
-	for (char i = 0; i <= step; i += 2) {
+	for (unsigned int i = 0; i <= step; i += 2) {
 		Platform::String^ scale = make_scale_string(vmax - delta * float(i), span, &scale_xoff);
 
 		auto translation = make_translation_matrix(scale_xoff * ch, interval * float(i) - ts.tspace);

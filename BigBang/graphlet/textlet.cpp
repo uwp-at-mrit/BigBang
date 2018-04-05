@@ -14,6 +14,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static CanvasTextFormat^ default_text_font = make_bold_text_format();
+/*************************************************************************************************/
 void Textlet::set_color(CanvasSolidColorBrush^ color) {
 	this->text_color = color;
 }
@@ -28,18 +30,24 @@ void Textlet::set_text(Platform::String^ content) {
 	this->raw = content;
 
 	if (this->text_font == nullptr) {
-		this->set_font(make_bold_text_format());
+		this->set_font(default_text_font);
+	} else if (this->raw == nullptr) {
+		this->text_layout = nullptr;
 	} else {
-		this->text_layout = make_text_layout(content, this->text_font);
+		this->text_layout = make_text_layout(this->raw, this->text_font);
 	}
 }
 
 void Textlet::set_layout_font_size(int char_idx, int char_count, float size) {
-	this->text_layout->SetFontSize(char_idx, char_count, size);
+	if (this->text_layout != nullptr) {
+		this->text_layout->SetFontSize(char_idx, char_count, size);
+	}
 }
 
 void Textlet::set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style) {
-	this->text_layout->SetFontStyle(char_idx, char_count, style);
+	if (this->text_layout != nullptr) {
+		this->text_layout->SetFontStyle(char_idx, char_count, style);
+	}
 }
 
 void Textlet::fill_extent(float x, float y, float* w, float* h) {
@@ -127,7 +135,7 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
-		Platform::String^ suffix = " =";
+		Platform::String^ suffix = ":";
 
 		if (subscript == nullptr) {
 			this->set_text(symbol + suffix);
@@ -142,8 +150,10 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 			this->set_layout_font_style(symcount, subcount, FontStyle::Italic);
 		}
 	}
+}
 
-	this->set_scale(0.0F);
+void ScaleTextlet::construct() {
+	this->set_scale(0.0F, true);
 }
 
 void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
@@ -152,15 +162,24 @@ void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
 	if (w != nullptr) {
 		(*w) += (this->scale_layout->LayoutBounds.Width + this->unit_layout->LayoutBounds.Width);
 	}
+
+	if (h != nullptr) {
+		(*h) = fmax((*h), fmax(this->scale_layout->LayoutBounds.Height, this->unit_layout->LayoutBounds.Height));
+	}
 }
 
 void ScaleTextlet::on_scale_change(float scale) {
-	this->scale_layout = make_text_layout(" " + scale.ToString(), this->text_font);
+	Platform::String^ s = scale.ToString();
+	
+	if (this->text_layout != nullptr) {
+		s = " " + s;
+	}
+		
+	this->scale_layout = make_text_layout(s, this->text_font);
 }
 
 void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float start_x = x;
-	float swidth = this->scale_layout->LayoutBounds.Width;
 
 	if (this->text_layout != nullptr) {
 		ds->DrawTextLayout(this->text_layout, x, y, this->text_color);
@@ -168,5 +187,5 @@ void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	}
 
 	ds->DrawTextLayout(this->scale_layout, start_x, y, this->scale_color);
-	ds->DrawTextLayout(this->unit_layout, start_x + swidth, y, this->text_color);
+	ds->DrawTextLayout(this->unit_layout, start_x + this->scale_layout->LayoutBounds.Width, y, this->text_color);
 }
