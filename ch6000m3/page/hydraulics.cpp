@@ -172,7 +172,7 @@ public:
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
 		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
-		this->master->move_to(this->captions[HS::Visor], this->visor, GraphletAlignment::CT, GraphletAlignment::CB);
+		this->master->move_to(this->captions[HS::Visor], this->visor, GraphletAlignment::CT, GraphletAlignment::CB, gridsize * 0.5F);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {

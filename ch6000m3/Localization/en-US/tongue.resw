@@ -151,11 +151,11 @@
     <value>Offline</value>
   </data>
   <data name="HS_A" xml:space="preserve">
-    <value>Left Harrow Head</value>
+    <value>Left Drag Head</value>
     <comment>':' cannot appear between letters</comment>
   </data>
   <data name="HS_B" xml:space="preserve">
-    <value>Left Harrow Body</value>
+    <value>Left Drag Pipe</value>
   </data>
   <data name="HS_C" xml:space="preserve">
     <value>Left Curved Pipe</value>
@@ -170,10 +170,10 @@
     <value>Right Curved Pipe</value>
   </data>
   <data name="HS_G" xml:space="preserve">
-    <value>Right Harrow Body</value>
+    <value>Right Drag Pipe</value>
   </data>
   <data name="HS_H" xml:space="preserve">
-    <value>Right Harrow Head</value>
+    <value>Right Drag Head</value>
   </data>
   <data name="HS_K" xml:space="preserve">
     <value>Circulating Cooling</value>
@@ -290,10 +290,10 @@
     <value>SQ.J</value>
   </data>
   <data name="HS_I" xml:space="preserve">
-    <value>Left Harrow Lip</value>
+    <value>Left Drag Nozzle</value>
   </data>
   <data name="HS_J" xml:space="preserve">
-    <value>Right Harrow Lip</value>
+    <value>Right Drag Nozzle</value>
   </data>
   <data name="LevelHigh" xml:space="preserve">
     <value>Level High</value>
@@ -323,7 +323,7 @@
     <value>Heater</value>
   </data>
   <data name="HS_Visor" xml:space="preserve">
-    <value>Harrow Head Visor</value>
+    <value>Draghead Visor</value>
   </data>
   <data name="celsius" xml:space="preserve">
     <value>°C</value>

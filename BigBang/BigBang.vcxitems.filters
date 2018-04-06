@@ -111,9 +111,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\valvelet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\booleanlet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

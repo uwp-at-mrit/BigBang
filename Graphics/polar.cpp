@@ -145,17 +145,18 @@ CanvasGeometry^ polar_masked_sandglass(float r, double d, double ratio) {
 	}
 }
 
-CanvasGeometry^ polar_rectangle(float r, double d) {
+CanvasGeometry^ polar_rectangle(float r, double alpha, double rotation) {
 	auto frame = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	double theta = 180.0 - alpha;
 	float x, y;
 
-	circle_point(r, d + 60.0, &x, &y);
+	circle_point(r, rotation + alpha, &x, &y);
 	frame->BeginFigure(x, y);
-	circle_point(r, d + 120.0, &x, &y);
+	circle_point(r, rotation + theta, &x, &y);
 	frame->AddLine(x, y);
-	circle_point(r, d - 120.0, &x, &y);
+	circle_point(r, rotation - theta, &x, &y);
 	frame->AddLine(x, y);
-	circle_point(r, d - 60.0, &x, &y);
+	circle_point(r, rotation - alpha, &x, &y);
 	frame->AddLine(x, y);
 	frame->EndFigure(CanvasFigureLoop::Closed);
 

@@ -11,4 +11,4 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_masked_triangle(flo
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_sandglass(float radius, double degrees);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_masked_sandglass(float raidus, double degrees, double height_ratio);
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_rectangle(float radius, double degrees);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_rectangle(float radius, double alpha_degrees, double rotation_degrees);

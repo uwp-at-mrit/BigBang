@@ -56,7 +56,7 @@ void Valvelet::construct() {
 	auto handler_axis = polar_axis(handle_length, this->degrees);
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
 
-	this->frame = polar_rectangle(this->fradius, this->degrees);
+	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
 	this->handler = geometry_union(handler_axis, handler_pole);
 	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
