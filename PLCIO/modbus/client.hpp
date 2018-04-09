@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		~IModbusTransactionIdGenerator() noexcept {}
 	};
 
-	private class IModbusConfirmation abstract {
+	private class IASCIIConfirmation abstract {
 	public:
 		virtual void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 		virtual void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
@@ -48,7 +48,7 @@ namespace WarGrey::SCADA {
 
 		IModbusClient(WarGrey::SCADA::Syslog* logger,
 			Platform::String^ server, uint16 service,
-			WarGrey::SCADA::IModbusConfirmation* confirmation,
+			WarGrey::SCADA::IASCIIConfirmation* confirmation,
 			WarGrey::SCADA::IModbusTransactionIdGenerator* generator);
 
 	public:
@@ -99,7 +99,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
-		WarGrey::SCADA::IModbusConfirmation* confirmation;
+		WarGrey::SCADA::IASCIIConfirmation* confirmation;
 		WarGrey::SCADA::Syslog* logger;
     };
 
@@ -125,11 +125,11 @@ namespace WarGrey::SCADA {
 			: IModbusClient(logger, server, port, nullptr, nullptr) {};
 		
 		ModbusClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IModbusConfirmation* confirmation, uint16 port = MODBUS_TCP_DEFAULT_PORT)
+			IASCIIConfirmation* confirmation, uint16 port = MODBUS_TCP_DEFAULT_PORT)
 			: IModbusClient(logger, server, port, confirmation, nullptr) {};
 
 		ModbusClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IModbusConfirmation* confirmation, IModbusTransactionIdGenerator* generator,
+			IASCIIConfirmation* confirmation, IModbusTransactionIdGenerator* generator,
 			uint16 port = MODBUS_TCP_DEFAULT_PORT)
 			: IModbusClient(logger, server, port, confirmation, generator) {};
 
@@ -154,7 +154,7 @@ namespace WarGrey::SCADA {
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
     };
 
-	private class ModbusConfirmation : public WarGrey::SCADA::IModbusConfirmation {
+	private class ModbusConfirmation : public WarGrey::SCADA::IASCIIConfirmation {
 	public:
 		void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count, Syslog* logger) override {};
 		void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count, Syslog* logger) override {};

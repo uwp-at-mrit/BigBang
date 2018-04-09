@@ -36,7 +36,7 @@ inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, u
 	return mt;
 }
 
-static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
+static void modbus_apply_positive_confirmation(IASCIIConfirmation* cf, Syslog* logger, DataReader^ mbin
 	, uint16 transaction, uint8 function_code, uint16 maybe_address) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
@@ -94,7 +94,7 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 }
 
 /*************************************************************************************************/
-IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
+IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IASCIIConfirmation* cf, IModbusTransactionIdGenerator* g) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent Modbus Client") : sl);
 	this->logger->reference();
 
@@ -152,6 +152,8 @@ void IModbusClient::connect() {
 
 	this->socket = ref new StreamSocket();
 	this->socket->Control->KeepAlive = false;
+
+	this->logger->log_message(Log::Debug, L">> connecting to %s:%s", this->device->RawName->Data(), this->service->Data());
 
     create_task(this->socket->ConnectAsync(this->device, this->service)).then([this](task<void> handshaking) {
         try {

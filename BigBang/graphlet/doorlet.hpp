@@ -3,14 +3,9 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ValveState {
-		Manual,
-		Open, Opening, Unopenable, OpenReady,
-		Closed, Closing, Unclosable, CloseReady,
-		FalseOpen, FalseClosed,
-		_ };
+	private enum class DoorState { Open, Opening, Closed, Closing, Disabled, _ };
 
-	private struct ValveStyle {
+	private struct DoorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
@@ -18,12 +13,12 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handler_color;
 	};
 
-	WarGrey::SCADA::ValveStyle make_default_valve_style(WarGrey::SCADA::ValveState state);
+	WarGrey::SCADA::DoorStyle make_default_door_style(WarGrey::SCADA::DoorState state);
 
-	private class Valvelet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::ValveState, WarGrey::SCADA::ValveStyle> {
+	private class HopperDoorlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
 	public:
-		Valvelet(WarGrey::SCADA::ValveState default_state, float radius, double degrees = -90.0);
-		Valvelet(float radius, double degrees = -90.0);
+		HopperDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
+		HopperDoorlet(float radius, double degrees = -90.0);
 
 	public:
 		void construct() override;
@@ -35,7 +30,7 @@ namespace WarGrey::SCADA {
 		double get_direction_degrees();
 
 	protected:
-		void on_state_change(ValveState state) override;
+		void on_state_change(DoorState state) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
@@ -56,5 +51,9 @@ namespace WarGrey::SCADA {
 
 	private:
 		double mask_percentage;
+	};
+
+	private class Doorlet : public WarGrey::SCADA::HopperDoorlet {
+		using HopperDoorlet::HopperDoorlet;
 	};
 }

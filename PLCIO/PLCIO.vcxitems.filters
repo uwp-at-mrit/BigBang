@@ -19,9 +19,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\test.cpp">
-      <Filter>modbus</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)plc_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp">
@@ -46,10 +44,8 @@
       <Filter>modbus</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\test.hpp">
-      <Filter>modbus</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)IPLCClient.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)plc_test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="modbus">

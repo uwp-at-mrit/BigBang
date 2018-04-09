@@ -12,6 +12,7 @@
 
 #include "graphlet/pumplet.hpp"
 #include "graphlet/valvelet.hpp"
+#include "graphlet/doorlet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -32,12 +33,14 @@ public:
 
 public:
 	void load(float width, float height) {
-		Platform::String^ all_captions[] = { "hp_state", "v_state" };
+		Platform::String^ all_captions[] = { "winch_state", "pump_state", "valve_state", "hopper_state", "door_state" };
 		float unitsize = 32.0F;
 
 		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
-		this->load_primitives<Pumplet, PumpState>(this->pumps, this->hplabels, unitsize);
+		this->load_primitives<Pumplet, PumpState>(this->pumps, this->plabels, unitsize);
 		this->load_primitives<Valvelet, ValveState>(this->valves, this->vlabels, unitsize);
+		this->load_primitives<HopperDoorlet, DoorState>(this->hoppers, this->hlabels, unitsize);
+		this->load_primitives<Doorlet, DoorState>(this->doors, this->dlabels, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -70,8 +73,10 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		y0 += unitsize;
-		this->reflow_primitives<Pumplet, PumpState>(this->pumps, this->hplabels,   x0, y0 + cellsize * 0.0F, cellsize);
-		this->reflow_primitives<Valvelet, ValveState>(this->valves, this->vlabels, x0, y0 + cellsize * 1.0F, cellsize);
+		this->reflow_primitives<Pumplet, PumpState>(this->pumps, this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
+		this->reflow_primitives<Valvelet, ValveState>(this->valves, this->vlabels, x0, y0 + cellsize * 2.0F, cellsize);
+		this->reflow_primitives<HopperDoorlet, DoorState>(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
+		this->reflow_primitives<Doorlet, DoorState>(this->doors, this->dlabels, x0, y0 + cellsize * 4.0F, cellsize);
 	}
 
 private:
@@ -117,9 +122,13 @@ private:
 private: // never delete these graphlets manually.
 	Labellet* captions[5];
 	Pumplet* pumps[static_cast<unsigned long long>(PumpState::_)];
-	Labellet* hplabels[static_cast<unsigned long long>(PumpState::_)];
+	Labellet* plabels[static_cast<unsigned long long>(PumpState::_)];
 	Valvelet* valves[static_cast<unsigned long long>(ValveState::_)];
 	Labellet* vlabels[static_cast<unsigned long long>(ValveState::_)];
+	HopperDoorlet* hoppers[static_cast<unsigned long long>(DoorState::_)];
+	Labellet* hlabels[static_cast<unsigned long long>(DoorState::_)];
+	Doorlet* doors[static_cast<unsigned long long>(DoorState::_)];
+	Labellet* dlabels[static_cast<unsigned long long>(DoorState::_)];
 
 private:
 	GraphletOverview* master;

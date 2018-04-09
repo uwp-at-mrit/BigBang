@@ -182,7 +182,7 @@
     <value>应急</value>
   </data>
   <data name=":gview:" xml:space="preserve">
-    <value>图元说明</value>
+    <value>图元状态示例</value>
   </data>
   <data name="Ready" xml:space="preserve">
     <value>准备就绪</value>
@@ -208,11 +208,11 @@
   <data name="Unstoppable" xml:space="preserve">
     <value>停止失败</value>
   </data>
-  <data name="hp_state" xml:space="preserve">
-    <value>液压泵状态</value>
+  <data name="pump_state" xml:space="preserve">
+    <value>液压泵</value>
   </data>
-  <data name="v_state" xml:space="preserve">
-    <value>阀状态</value>
+  <data name="valve_state" xml:space="preserve">
+    <value>阀</value>
   </data>
   <data name="Closed" xml:space="preserve">
     <value>完全关闭</value>
@@ -294,5 +294,17 @@
   </data>
   <data name="temperature" xml:space="preserve">
     <value>温度</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="door_state" xml:space="preserve">
+    <value>小泥门</value>
+  </data>
+  <data name="hopper_state" xml:space="preserve">
+    <value>大泥门</value>
+  </data>
+  <data name="winch_state" xml:space="preserve">
+    <value>绞车</value>
   </data>
 </root>

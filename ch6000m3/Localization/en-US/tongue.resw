@@ -155,22 +155,22 @@
     <comment>':' cannot appear between letters</comment>
   </data>
   <data name="HS_B" xml:space="preserve">
-    <value>Left Drag Pipe</value>
+    <value>Left Drag Pipeline</value>
   </data>
   <data name="HS_C" xml:space="preserve">
-    <value>Left Curved Pipe</value>
+    <value>Left Gland</value>
   </data>
   <data name="HS_D" xml:space="preserve">
-    <value>Hopper Door Lock Pump</value>
+    <value>Door-Locking Pump</value>
   </data>
   <data name="HS_E" xml:space="preserve">
-    <value>Disc Valve Control Pump</value>
+    <value>Butterfly Valve Pump</value>
   </data>
   <data name="HS_F" xml:space="preserve">
-    <value>Right Curved Pipe</value>
+    <value>Right Gland</value>
   </data>
   <data name="HS_G" xml:space="preserve">
-    <value>Right Drag Pipe</value>
+    <value>Right Drag Pipeline</value>
   </data>
   <data name="HS_H" xml:space="preserve">
     <value>Right Drag Head</value>
@@ -182,7 +182,7 @@
     <value>Emergency</value>
   </data>
   <data name=":gview:" xml:space="preserve">
-    <value>Graphlets Overview </value>
+    <value>Graphlets States Overview </value>
   </data>
   <data name="Ready" xml:space="preserve">
     <value>Ready</value>
@@ -208,11 +208,11 @@
   <data name="Unstoppable" xml:space="preserve">
     <value>Failed to Turn Off</value>
   </data>
-  <data name="hp_state" xml:space="preserve">
-    <value>Hydraulic Pump State</value>
+  <data name="pump_state" xml:space="preserve">
+    <value>Hydraulic Pump</value>
   </data>
-  <data name="v_state" xml:space="preserve">
-    <value>Valve State</value>
+  <data name="valve_state" xml:space="preserve">
+    <value>Valve</value>
   </data>
   <data name="Closed" xml:space="preserve">
     <value>Fully Closed</value>
@@ -336,5 +336,17 @@
   </data>
   <data name="temperature" xml:space="preserve">
     <value>Temperature</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="door_state" xml:space="preserve">
+    <value>Small Hopper Door</value>
+  </data>
+  <data name="hopper_state" xml:space="preserve">
+    <value>Large Hopper Door</value>
+  </data>
+  <data name="winch_state" xml:space="preserve">
+    <value>Winch</value>
   </data>
 </root>

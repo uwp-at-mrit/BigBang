@@ -1,4 +1,4 @@
-#include "modbus/test.hpp"
+#include "plc_test.hpp"
 #include "syslog.hpp"
 
 using namespace WarGrey::SCADA;
@@ -55,7 +55,7 @@ IModbusServer* make_modbus_test_server(Syslog* logger) {
 	return device;
 }
 
-IModbusClient* make_modbus_test_client(Syslog* logger, Platform::String^ device, IModbusConfirmation* confirmation) {
+IModbusClient* make_modbus_test_client(Syslog* logger, Platform::String^ device, IASCIIConfirmation* confirmation) {
 	return new ModbusClient(logger, device, confirmation);
 }
 

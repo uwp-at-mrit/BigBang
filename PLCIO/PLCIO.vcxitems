@@ -24,11 +24,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\sockexn.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\test.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)plc_test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)plc_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\protocol.cpp" />
