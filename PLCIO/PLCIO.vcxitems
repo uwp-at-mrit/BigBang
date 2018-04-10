@@ -23,14 +23,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\dataunit.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\master.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared\databytes.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)shared\sockexn.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)plcio_test.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\taskexn.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\netexn.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\test.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\master.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shared\databytes.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)shared\sockexn.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)plcio_test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\netexn.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\dataunit.cpp" />

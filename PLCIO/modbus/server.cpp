@@ -118,7 +118,7 @@ private:
 				}
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
-			} catch (modbus_discarded&) {
+			} catch (task_discarded&) {
 				unsigned int dirty = mbin->UnconsumedBufferLength;
 
 				if (dirty > 0) {
@@ -126,7 +126,7 @@ private:
 				}
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
-			} catch (modbus_error&) {
+			} catch (task_terminated&) {
 				this->logger->log_message(Log::Debug, L"Cancel responding to %s", id->Data());
 				delete client;
 			} catch (Platform::Exception^ e) {

@@ -1,6 +1,6 @@
 #include <ppltasks.h>
 
-#include "modbus/client.hpp"
+#include "mrit/master.hpp"
 #include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
 
@@ -19,17 +19,15 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-#define POP_REQUEST(self) auto it = self.begin(); delete it->second; self.erase(it);
-
-private struct WarGrey::SCADA::ModbusTransaction {
+private struct WarGrey::SCADA::MRTransaction {
 	uint8 function_code;
 	uint8 pdu_data[MODBUS_MAX_PDU_LENGTH];
 	uint16 size;
 	uint16 address0;
 };
 
-inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, uint16 size = 0) {
-	ModbusTransaction* mt = new ModbusTransaction();
+inline static MRTransaction* make_transaction(uint8 fcode, uint16 address, uint16 size = 0) {
+	MRTransaction* mt = new MRTransaction();
 
 	mt->function_code = fcode;
 	mt->size = size;
@@ -38,7 +36,7 @@ inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, u
 	return mt;
 }
 
-static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
+static void modbus_apply_positive_confirmation(IMRConfirmation* cf, Syslog* logger, DataReader^ mbin
 	, uint16 transaction, uint8 function_code, uint16 maybe_address) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
@@ -96,7 +94,7 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 }
 
 /*************************************************************************************************/
-IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusConfirmation* cf, IModbusTransactionIdGenerator* g) {
+IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent Modbus Client") : sl);
 	this->logger->reference();
 
@@ -104,46 +102,37 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
     this->service = p.ToString();
 
 	this->confirmation = cf;
-	this->generator = ((g == nullptr) ? new WarGrey::SCADA::ModbusSequenceGenerator() : g);
-	this->generator->reference();
 
     this->connect();
 };
 
-IModbusClient::~IModbusClient() {
+IMRClient::~IMRClient() {
 	delete this->socket; // stop the confirmation loop before release transactions.
 
 	this->blocking_section.lock();
 	while (!this->blocking_requests.empty()) {
-		POP_REQUEST(this->blocking_requests);
+		this->blocking_requests.pop();
 	}
 	this->blocking_section.unlock();
 
-	this->pending_section.lock();
-	while (!this->pending_requests.empty()) {
-		POP_REQUEST(this->pending_requests);
-	}
-	this->pending_section.unlock();
-
 	this->logger->destroy();
-	this->generator->destroy();
 }
 
-Platform::String^ IModbusClient::device_hostname() {
+Platform::String^ IMRClient::device_hostname() {
 	return this->device->RawName;
 }
 
-Syslog* IModbusClient::get_logger() {
+Syslog* IMRClient::get_logger() {
 	return this->logger;
 }
 
-void IModbusClient::send_scheduled_request(long long count, long long interval, long long uptime) {
+void IMRClient::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->confirmation != nullptr) {
 		this->confirmation->on_scheduled_request(this, count, interval, uptime);
 	}
 }
 
-void IModbusClient::connect() {
+void IMRClient::connect() {
 	if (this->mbout != nullptr) {
 		delete this->socket;
 		delete this->mbin;
@@ -175,10 +164,8 @@ void IModbusClient::connect() {
 
 			this->blocking_section.lock();
 			while (!this->blocking_requests.empty()) {
-				auto current = this->blocking_requests.begin();
-
-				this->apply_request(std::pair<uint16, ModbusTransaction*>(current->first, current->second));
-				this->blocking_requests.erase(current);
+				this->apply_request(this->blocking_requests.front());
+				this->blocking_requests.pop();
 			}
 			this->blocking_section.unlock();
         } catch (Platform::Exception^ e) {
@@ -188,30 +175,23 @@ void IModbusClient::connect() {
     });
 }
 
-uint16 IModbusClient::request(ModbusTransaction* mt) {
-	uint16 id = this->generator->yield();
-	auto transaction = std::pair<uint16, ModbusTransaction*>(id, mt);
-
+uint16 IMRClient::request(MRTransaction* mt) {
 	if (this->connected()) {
-		this->apply_request(transaction);
+		this->apply_request(mt);
 	} else {
 		this->blocking_section.lock();
-		this->blocking_requests.insert(transaction);
+		this->blocking_requests.push(mt);
 		this->blocking_section.unlock();
 	}
 
-	return id;
+	return 0U;
 }
 
-void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transaction) {
-	uint16 tid = transaction.first;
-	uint8 fcode = transaction.second->function_code;
+void IMRClient::apply_request(MRTransaction* transaction) {
+	uint16 tid = 0U;
+	uint8 fcode = transaction->function_code;
 
-	this->pending_section.lock();
-	this->pending_requests.insert(transaction);
-	this->pending_section.unlock();
-
-	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction.second->pdu_data, transaction.second->size);
+	modbus_write_adu(this->mbout, tid, 0x00, 0xFF, fcode, transaction->pdu_data, transaction->size);
 
 	create_task(this->mbout->StoreAsync()).then([=](task<unsigned int> sending) {
 		try {
@@ -221,19 +201,13 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transac
 				L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
 				sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
 		} catch (task_canceled&) {
-			this->pending_section.lock();
-			this->pending_requests.erase(tid);
-			this->pending_section.unlock();
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
-			this->pending_section.lock();
-			this->pending_requests.erase(tid);
-			this->pending_section.unlock();
 			this->connect();
 		}});
 }
 
-void IModbusClient::wait_process_confirm_loop() {
+void IMRClient::wait_process_confirm_loop() {
 	create_task(this->mbin->LoadAsync(MODBUS_MBAP_LENGTH)).then([=](unsigned int size) {
 		uint16 transaction, protocol, length;
 		uint8 unit;
@@ -262,25 +236,6 @@ void IModbusClient::wait_process_confirm_loop() {
 					L"PDU data comes from server %s:%s has been truncated(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, pdu_length);
-			}
-
-			auto id_transaction = this->pending_requests.find(transaction);
-			if (id_transaction != this->pending_requests.end()) {	
-				address0 = id_transaction->second->address0;
-				origin_fcode = id_transaction->second->function_code;
-				delete id_transaction->second;
-
-				/** WARNING
-				 *   `erase` also invalids its iterator, thus, this operation must occur at the end,
-				 *   although, sometimes, the dirty iterator won't cause troubles.
-				 */
-				this->pending_section.lock();
-				this->pending_requests.erase(id_transaction);
-				this->pending_section.unlock();
-			} else {
-				modbus_discard_current_adu(this->logger,
-					L"<discarded non-pending confirmation(%hu) comes from %s:%s>",
-					transaction, this->device->RawName->Data(), this->service->Data());
 			}
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
@@ -342,12 +297,12 @@ void IModbusClient::wait_process_confirm_loop() {
 	});
 }
 
-bool IModbusClient::connected() {
+bool IMRClient::connected() {
 	return (this->mbout != nullptr);
 }
 
-uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
-	ModbusTransaction* mt = make_transaction(fcode, addr, 4);
+uint16 IMRClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
+	MRTransaction* mt = make_transaction(fcode, addr, 4);
 
 	SET_INT16_TO_INT8(mt->pdu_data, 0, addr);
 	SET_INT16_TO_INT8(mt->pdu_data, 2, val);
@@ -355,7 +310,7 @@ uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
 	return this->request(mt);
 }
 
-uint16 IModbusClient::do_write_registers(ModbusTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src) {
+uint16 IMRClient::do_write_registers(MRTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src) {
 	uint8* data = mt->pdu_data + offset;
 	uint8 NStar = MODBUS_REGISTER_NStar(quantity);
 
@@ -370,21 +325,21 @@ uint16 IModbusClient::do_write_registers(ModbusTransaction* mt, uint8 offset, ui
 }
 
 /*************************************************************************************************/
-uint16 ModbusClient::read_coils(uint16 address, uint16 quantity) { // MAP: Page 11
-	return IModbusClient::do_simple_request(MODBUS_READ_COILS, address, quantity);
+uint16 MRClient::read_coils(uint16 address, uint16 quantity) { // MAP: Page 11
+	return IMRClient::do_simple_request(MODBUS_READ_COILS, address, quantity);
 }
 
-uint16 ModbusClient::read_discrete_inputs(uint16 address, uint16 quantity) { // MAP: Page 12
-	return IModbusClient::do_simple_request(MODBUS_READ_DISCRETE_INPUTS, address, quantity);
+uint16 MRClient::read_discrete_inputs(uint16 address, uint16 quantity) { // MAP: Page 12
+	return IMRClient::do_simple_request(MODBUS_READ_DISCRETE_INPUTS, address, quantity);
 }
 
-uint16 ModbusClient::write_coil(uint16 address, bool value) { // MAP: Page 17
-	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_COIL, address, (value ? 0xFF00 : 0x0000));
+uint16 MRClient::write_coil(uint16 address, bool value) { // MAP: Page 17
+	return IMRClient::do_simple_request(MODBUS_WRITE_SINGLE_COIL, address, (value ? 0xFF00 : 0x0000));
 }
 
-uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 29
+uint16 MRClient::write_coils(uint16 address, uint16 quantity, uint8* src) { // MAP: Page 29
 	uint8 NStar = MODBUS_COIL_NStar(quantity);
-	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_COILS, address, 5 + NStar);
+	MRTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_COILS, address, 5 + NStar);
 	uint8* pdu_data = mt->pdu_data;
 
 	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
@@ -392,81 +347,59 @@ uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src) { 
 	pdu_data[4] = NStar;
 	memcpy(pdu_data + 5, src, NStar);
 	
-	return IModbusClient::request(mt);
+	return IMRClient::request(mt);
 }
 
-uint16 ModbusClient::read_holding_registers(uint16 address, uint16 quantity) {
-	return IModbusClient::do_simple_request(MODBUS_READ_HOLDING_REGISTERS, address, quantity);
+uint16 MRClient::read_holding_registers(uint16 address, uint16 quantity) {
+	return IMRClient::do_simple_request(MODBUS_READ_HOLDING_REGISTERS, address, quantity);
 }
 
-uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity) {
-	return IModbusClient::do_simple_request(MODBUS_READ_INPUT_REGISTERS, address, quantity);
+uint16 MRClient::read_input_registers(uint16 address, uint16 quantity) {
+	return IMRClient::do_simple_request(MODBUS_READ_INPUT_REGISTERS, address, quantity);
 }
 
-uint16 ModbusClient::read_queues(uint16 address) {
-	ModbusTransaction* mt = make_transaction(MODBUS_READ_FIFO_QUEUES, address, 2);
+uint16 MRClient::read_queues(uint16 address) {
+	MRTransaction* mt = make_transaction(MODBUS_READ_FIFO_QUEUES, address, 2);
 
 	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
 
-	return IModbusClient::request(mt);
+	return IMRClient::request(mt);
 }
 
 
-uint16 ModbusClient::write_register(uint16 address, uint16 value) { // MAP: Page 19
-	return IModbusClient::do_simple_request(MODBUS_WRITE_SINGLE_REGISTER, address, value);
+uint16 MRClient::write_register(uint16 address, uint16 value) { // MAP: Page 19
+	return IMRClient::do_simple_request(MODBUS_WRITE_SINGLE_REGISTER, address, value);
 }
 
-uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* src) { // MAP: Page 30
-	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_REGISTERS, address);
+uint16 MRClient::write_registers(uint16 address, uint16 quantity, uint16* src) { // MAP: Page 30
+	MRTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_REGISTERS, address);
 
-	return IModbusClient::do_write_registers(mt, 0, address, quantity, src);
+	return IMRClient::do_write_registers(mt, 0, address, quantity, src);
 }
 
-uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or) { // MAP: Page 36
-	ModbusTransaction* mt = make_transaction(MODBUS_MASK_WRITE_REGISTER, address, 6);
+uint16 MRClient::mask_write_register(uint16 address, uint16 and, uint16 or) { // MAP: Page 36
+	MRTransaction* mt = make_transaction(MODBUS_MASK_WRITE_REGISTER, address, 6);
 
 	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
 	SET_INT16_TO_INT8(mt->pdu_data, 2, and);
 	SET_INT16_TO_INT8(mt->pdu_data, 4, or);
 
-	return IModbusClient::request(mt);
+	return IMRClient::request(mt);
 }
 
-uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) {
-	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_AND_READ_REGISTERS, raddr);
+uint16 MRClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) {
+	MRTransaction* mt = make_transaction(MODBUS_WRITE_AND_READ_REGISTERS, raddr);
 
 	SET_INT16_TO_INT8(mt->pdu_data, 0, raddr);
 	SET_INT16_TO_INT8(mt->pdu_data, 2, rquantity);
 
-	return IModbusClient::do_write_registers(mt, 4, waddr, wquantity, src);
+	return IMRClient::do_write_registers(mt, 4, waddr, wquantity, src);
 }
 
-uint16 ModbusClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length) {
-	ModbusTransaction* mt = make_transaction(fcode, 0, data_length);
+uint16 MRClient::do_private_function(uint8 fcode, uint8* request, uint16 data_length) {
+	MRTransaction* mt = make_transaction(fcode, 0, data_length);
 
 	// TODO: find a better way to deal with raw requests.
 	memcpy(mt->pdu_data, request, data_length);
-	return IModbusClient::request(mt);
-}
-
-/*************************************************************************************************/
-ModbusSequenceGenerator::ModbusSequenceGenerator(uint16 start) {
-	this->start = ((start == 0) ? 1 : start);
-	this->sequence = this->start;
-}
-
-void ModbusSequenceGenerator::reset() {
-	this->sequence = this->start;
-}
-
-uint16 ModbusSequenceGenerator::yield() {
-	uint16 seq = this->sequence;
-
-	if (this->sequence == 0xFFFF) {
-		this->reset();
-	} else {
-		this->sequence++;
-	}
-
-	return seq;
+	return IMRClient::request(mt);
 }

@@ -7,18 +7,19 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\exception.cpp">
-      <Filter>modbus</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)plcio_test.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)shared\sockexn.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shared\databytes.cpp" />
     <ClCompile Include="D:\WinSCADA\PLCIO\modbus\dataunit.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\master.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\test.cpp" />
+    <ClCompile Include="D:\WinSCADA\PLCIO\modbus\exception.cpp">
+      <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\netexn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp">
@@ -27,21 +28,23 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp">
       <Filter>modbus</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp">
-      <Filter>modbus</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp">
       <Filter>modbus</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IPLCClient.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)plcio_test.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\codes.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)shared\sockexn.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared\databytes.hpp" />
     <ClInclude Include="D:\WinSCADA\PLCIO\modbus\dataunit.hpp">
       <Filter>modbus</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\master.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\test.hpp" />
+    <ClInclude Include="D:\WinSCADA\PLCIO\modbus\exception.hpp">
+      <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\taskexn.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\netexn.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="modbus">

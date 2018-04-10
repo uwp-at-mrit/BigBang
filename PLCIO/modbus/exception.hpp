@@ -1,9 +1,8 @@
 #pragma once
 
 #include <cinttypes>
-#include <exception>
 
-#include "shared/sockexn.hpp"
+#include "shared/taskexn.hpp"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
@@ -26,14 +25,4 @@ namespace WarGrey::SCADA {
 	void modbus_discard_current_adu();
 	void modbus_discard_current_adu(Platform::String^ message, WarGrey::SCADA::Syslog* logger);
 	void modbus_discard_current_adu(WarGrey::SCADA::Syslog* logger, const wchar_t *fmt, ...);
-
-	private class modbus_error : public std::exception {
-	public:
-		modbus_error() noexcept : exception() {}
-	};
-
-	private class modbus_discarded : public std::exception {
-	public:
-		modbus_discarded() noexcept : exception() {}
-	};
 }

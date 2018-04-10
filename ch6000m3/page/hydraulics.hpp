@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IModbusClient* device;
-		WarGrey::SCADA::IASCIIConfirmation* console;
+		WarGrey::SCADA::IModbusConfirmation* console;
 
 	private: // never deletes these graphlets mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;

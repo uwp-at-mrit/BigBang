@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <queue>
 #include <mutex>
 
 #include "modbus/codes.hpp"
@@ -9,19 +9,10 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	struct ModbusTransaction;
-	class IModbusClient;
+	struct MRTransaction;
+	class IMRClient;
 
-	private class IModbusTransactionIdGenerator abstract : public WarGrey::SCADA::SharedObject {
-	public:
-		virtual void reset() = 0;
-		virtual uint16 yield() = 0;
-
-	protected:
-		~IModbusTransactionIdGenerator() noexcept {}
-	};
-
-	private class IModbusConfirmation abstract {
+	private class IMRConfirmation abstract {
 	public:
 		virtual void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 		virtual void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
@@ -38,17 +29,16 @@ namespace WarGrey::SCADA {
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 
 	public:
-		virtual void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime) = 0;
+		virtual void on_scheduled_request(IMRClient* device, long long count, long long interval, long long uptime) = 0;
 	};
 
-	private class IModbusClient abstract : public WarGrey::SCADA::IPLCClient {
+	private class IMRClient abstract : public WarGrey::SCADA::IPLCClient {
     public:
-        virtual ~IModbusClient() noexcept;
+        virtual ~IMRClient() noexcept;
 
-		IModbusClient(WarGrey::SCADA::Syslog* logger,
+		IMRClient(WarGrey::SCADA::Syslog* logger,
 			Platform::String^ server, uint16 service,
-			WarGrey::SCADA::IModbusConfirmation* confirmation,
-			WarGrey::SCADA::IModbusTransactionIdGenerator* generator);
+			WarGrey::SCADA::IMRConfirmation* confirmation);
 
 	public:
 		Platform::String^ device_hostname() override;
@@ -74,13 +64,13 @@ namespace WarGrey::SCADA {
 		virtual uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length) = 0;
 
 	protected:
-		uint16 request(ModbusTransaction* mt);
+		uint16 request(MRTransaction* mt);
 		uint16 do_simple_request(uint8 function_code, uint16 addr, uint16 val);
-		uint16 do_write_registers(ModbusTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src);
+		uint16 do_write_registers(MRTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src);
 
 	private:
 		void connect();
-		void apply_request(std::pair<uint16, ModbusTransaction*>& transaction);
+		void apply_request(MRTransaction* transaction);
 		void wait_process_confirm_loop();
 
     private:
@@ -91,46 +81,22 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mbin;
 		Windows::Storage::Streams::DataWriter^ mbout;
-		std::map<uint16, ModbusTransaction*> blocking_requests;
-		std::map<uint16, ModbusTransaction*> pending_requests;
+		std::queue<MRTransaction*> blocking_requests;
 		std::mutex blocking_section;
-		std::mutex pending_section;
 
 	private:
-		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
-		WarGrey::SCADA::IModbusConfirmation* confirmation;
+		WarGrey::SCADA::IMRConfirmation* confirmation;
 		WarGrey::SCADA::Syslog* logger;
     };
 
-	private class ModbusSequenceGenerator : public WarGrey::SCADA::IModbusTransactionIdGenerator {
-	public:
-		ModbusSequenceGenerator(uint16 start = 1);
-
-	public:
-		void reset() override;
-		uint16 yield() override;
-
-	protected:
-		~ModbusSequenceGenerator() noexcept {}
-
-	private:
-		uint16 start;
-		uint16 sequence;
-	};
-
-    private class ModbusClient : public WarGrey::SCADA::IModbusClient {
+    private class MRClient : public WarGrey::SCADA::IMRClient {
     public:
-        ModbusClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MODBUS_TCP_DEFAULT_PORT)
-			: IModbusClient(logger, server, port, nullptr, nullptr) {};
+        MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MODBUS_TCP_DEFAULT_PORT)
+			: IMRClient(logger, server, port, nullptr) {};
 		
-		ModbusClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IModbusConfirmation* confirmation, uint16 port = MODBUS_TCP_DEFAULT_PORT)
-			: IModbusClient(logger, server, port, confirmation, nullptr) {};
-
-		ModbusClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IModbusConfirmation* confirmation, IModbusTransactionIdGenerator* generator,
-			uint16 port = MODBUS_TCP_DEFAULT_PORT)
-			: IModbusClient(logger, server, port, confirmation, generator) {};
+		MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
+			IMRConfirmation* confirmation, uint16 port = MODBUS_TCP_DEFAULT_PORT)
+			: IMRClient(logger, server, port, confirmation) {};
 
     public: // data access
 		uint16 read_coils(uint16 address, uint16 quantity) override;
@@ -153,7 +119,7 @@ namespace WarGrey::SCADA {
 		uint8 request[MODBUS_MAX_PDU_LENGTH];
     };
 
-	private class ModbusConfirmation : public WarGrey::SCADA::IModbusConfirmation {
+	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {
 	public:
 		void on_coils(uint16 transaction, uint16 address, uint8* coil_status, uint8 count, Syslog* logger) override {};
 		void on_discrete_inputs(uint16 transaction, uint16 address, uint8* input_status, uint8 count, Syslog* logger) override {};
@@ -170,6 +136,6 @@ namespace WarGrey::SCADA {
 		void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, Syslog* logger) override {};
 
 	public:
-		void on_scheduled_request(WarGrey::SCADA::IModbusClient* device, long long count, long long interval, long long uptime) {};
+		void on_scheduled_request(WarGrey::SCADA::IMRClient* device, long long count, long long interval, long long uptime) {};
 	};
 }

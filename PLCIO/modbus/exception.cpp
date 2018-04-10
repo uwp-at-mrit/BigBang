@@ -67,7 +67,7 @@ uint8 WarGrey::SCADA::modbus_illegal_enum_value(uint16 value, uint16 v1, uint16 
 
 /*************************************************************************************************/
 void WarGrey::SCADA::modbus_protocol_fatal() {
-	throw modbus_error();
+	throw task_terminated();
 }
 
 void WarGrey::SCADA::modbus_protocol_fatal(Syslog* logger, Platform::String^ message) {
@@ -82,7 +82,7 @@ void WarGrey::SCADA::modbus_protocol_fatal(Syslog* logger, const wchar_t *fmt, .
 
 /*************************************************************************************************/
 void WarGrey::SCADA::modbus_discard_current_adu() {
-	throw modbus_discarded();
+	throw task_discarded();
 }
 
 void WarGrey::SCADA::modbus_discard_current_adu(Platform::String^ message, Syslog* logger) {
