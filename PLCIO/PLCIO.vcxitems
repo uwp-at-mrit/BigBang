@@ -17,21 +17,23 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)IPLCClient.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\constants.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\codes.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\device.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\protocol.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\dataunit.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\server.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\sockexn.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)plc_test.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\databytes.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\sockexn.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)plcio_test.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\sockexn.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)plc_test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\databytes.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\sockexn.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)plcio_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\client.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\device.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\protocol.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\dataunit.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\server.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\exception.cpp" />
   </ItemGroup>

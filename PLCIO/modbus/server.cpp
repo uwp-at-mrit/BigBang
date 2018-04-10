@@ -2,9 +2,9 @@
 #include <cstring>
 #include <map>
 
-#include "modbus/constants.hpp"
+#include "modbus/codes.hpp"
 #include "modbus/server.hpp"
-#include "modbus/protocol.hpp"
+#include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
 
 #include "syslog.hpp"
@@ -19,15 +19,15 @@ using namespace Windows::Storage::Streams;
 #define MODBUS_CONFORMITY_LEVEL(id) ((id >= 0x80) ? 0x03 : ((id >= 0x03) ? 0x02 : 0x01))
 
 static inline int modbus_echo(uint8* response, uint16 address, uint16 value) {
-	MODBUS_SET_INT16_TO_INT8(response, 0, address);
-	MODBUS_SET_INT16_TO_INT8(response, 2, value);
+	SET_INT16_TO_INT8(response, 0, address);
+	SET_INT16_TO_INT8(response, 2, value);
 	return 4;
 }
 
 static inline int modbus_echo(uint8* response, uint16 address, uint16 value1, uint16 value2) {
-	MODBUS_SET_INT16_TO_INT8(response, 0, address);
-	MODBUS_SET_INT16_TO_INT8(response, 2, value1);
-	MODBUS_SET_INT16_TO_INT8(response, 4, value2);
+	SET_INT16_TO_INT8(response, 0, address);
+	SET_INT16_TO_INT8(response, 2, value1);
+	SET_INT16_TO_INT8(response, 4, value2);
 	return 6;
 }
 
@@ -110,7 +110,7 @@ private:
 					unsigned int dirty = mbin->UnconsumedBufferLength;
 
 					if (dirty > 0) {
-						MODBUS_DISCARD_BYTES(mbin, dirty);
+						DISCARD_BYTES(mbin, dirty);
 						this->logger->log_message(Log::Debug,
 							L"[discarded last %u bytes of the indication from %s]",
 							dirty, id->Data());
@@ -122,7 +122,7 @@ private:
 				unsigned int dirty = mbin->UnconsumedBufferLength;
 
 				if (dirty > 0) {
-					MODBUS_DISCARD_BYTES(mbin, dirty);
+					DISCARD_BYTES(mbin, dirty);
 				}
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
@@ -257,7 +257,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
         uint16 quantity = mbin->ReadUInt16();
         uint8 count = mbin->ReadByte();
         
-		MODBUS_READ_BYTES(mbin, response, count);
+		READ_BYTES(mbin, response, count);
 		
 		if (funcode == MODBUS_WRITE_MULTIPLE_COILS) {
 			if ((quantity < 0x01) || (quantity > MODBUS_MAX_WRITE_BITS)) {
@@ -304,7 +304,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
 		uint8 wcount = mbin->ReadByte();
 		uint8* rwpool = response + 1;
 
-		MODBUS_READ_BYTES(mbin, rwpool, wcount);
+		READ_BYTES(mbin, rwpool, wcount);
 
 		if ((rquantity < 0x01) || (rquantity > MODBUS_MAX_WR_READ_REGISTERS)) {
 			retcode = -modbus_illegal_data_value(rquantity, 0x01, MODBUS_MAX_WR_READ_REGISTERS, this->logger);
@@ -417,7 +417,7 @@ int IModbusServer::request(uint8 funcode, DataReader^ mbin, uint8 *response) { /
         uint8 request[MODBUS_TCP_MAX_ADU_LENGTH];
         unsigned int data_length = mbin->UnconsumedBufferLength;
 
-        MODBUS_READ_BYTES(mbin, request, data_length);
+        READ_BYTES(mbin, request, data_length);
 
         retcode = this->do_private_function(funcode, request, data_length, response);
     };

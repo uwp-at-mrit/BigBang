@@ -3,7 +3,7 @@
 #include <cinttypes>
 #include <exception>
 
-#include "sockexn.hpp"
+#include "shared/sockexn.hpp"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {

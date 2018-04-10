@@ -1,4 +1,4 @@
-#include "plc_test.hpp"
+#include "plcio_test.hpp"
 #include "syslog.hpp"
 
 using namespace WarGrey::SCADA;

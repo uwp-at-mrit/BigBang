@@ -1,9 +1,9 @@
 #include <ppltasks.h>
 
 #include "modbus/client.hpp"
-#include "modbus/protocol.hpp"
-#include "modbus/sockexn.hpp"
+#include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
+#include "shared/sockexn.hpp"
 #include "syslog.hpp"
 #include "box.hpp"
 
@@ -42,7 +42,7 @@ static void modbus_apply_positive_confirmation(IASCIIConfirmation* cf, Syslog* l
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
 		static uint8 status[MODBUS_MAX_PDU_LENGTH];
 		uint8 count = mbin->ReadByte();
-		MODBUS_READ_BYTES(mbin, status, count);
+		READ_BYTES(mbin, status, count);
 
 		if (function_code == MODBUS_READ_COILS) {
 			cf->on_coils(transaction, maybe_address, status, count, logger);
@@ -54,7 +54,7 @@ static void modbus_apply_positive_confirmation(IASCIIConfirmation* cf, Syslog* l
 	case MODBUS_WRITE_AND_READ_REGISTERS: {                                   // MAP: Page 38
 		static uint16 registers[MODBUS_MAX_PDU_LENGTH];
 		uint8 count = mbin->ReadByte() / 2;
-		MODBUS_READ_DOUBLES(mbin, registers, count);
+		READ_WORDS(mbin, registers, count);
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
 			cf->on_input_registers(transaction, maybe_address, registers, count, logger);
@@ -87,7 +87,7 @@ static void modbus_apply_positive_confirmation(IASCIIConfirmation* cf, Syslog* l
 		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
 		static uint8 count = (uint8)mbin->UnconsumedBufferLength;
 
-		MODBUS_READ_BYTES(mbin, raw_data, count);
+		READ_BYTES(mbin, raw_data, count);
 		cf->on_private_response(transaction, function_code, raw_data, count, logger);
 	}
 	}
@@ -180,7 +180,7 @@ void IModbusClient::connect() {
 			}
 			this->blocking_section.unlock();
         } catch (Platform::Exception^ e) {
-			this->logger->log_message(Log::Warning, modbus_socket_strerror(e));
+			this->logger->log_message(Log::Warning, socket_strerror(e));
 			this->connect();
         }
     });
@@ -316,7 +316,7 @@ void IModbusClient::wait_process_confirm_loop() {
 			unsigned int dirty = mbin->UnconsumedBufferLength;
 
 			if (dirty > 0) {
-				MODBUS_DISCARD_BYTES(mbin, dirty);
+				DISCARD_BYTES(mbin, dirty);
 				this->logger->log_message(Log::Debug,
 					L"<discarded last %u bytes of the confirmation comes from %s:%s>",
 					dirty, this->device->RawName->Data(), this->service->Data());
@@ -327,7 +327,7 @@ void IModbusClient::wait_process_confirm_loop() {
 			unsigned int rest = mbin->UnconsumedBufferLength;
 			
 			if (rest > 0) {
-				MODBUS_DISCARD_BYTES(mbin, rest);
+				DISCARD_BYTES(mbin, rest);
 			}
 			
 			this->wait_process_confirm_loop();
@@ -347,8 +347,8 @@ bool IModbusClient::connected() {
 uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
 	ModbusTransaction* mt = make_transaction(fcode, addr, 4);
 
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, addr);
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, val);
+	SET_INT16_TO_INT8(mt->pdu_data, 0, addr);
+	SET_INT16_TO_INT8(mt->pdu_data, 2, val);
 
 	return this->request(mt);
 }
@@ -357,10 +357,10 @@ uint16 IModbusClient::do_write_registers(ModbusTransaction* mt, uint8 offset, ui
 	uint8* data = mt->pdu_data + offset;
 	uint8 NStar = MODBUS_REGISTER_NStar(quantity);
 
-	MODBUS_SET_INT16_TO_INT8(data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(data, 2, quantity);
+	SET_INT16_TO_INT8(data, 0, address);
+	SET_INT16_TO_INT8(data, 2, quantity);
 	data[4] = NStar;
-	modbus_read_registers(src, 0, NStar, data + 5);
+	read_words(src, 0, NStar, data + 5);
 	
 	mt->size = offset + 5 + NStar;
 
@@ -385,8 +385,8 @@ uint16 ModbusClient::write_coils(uint16 address, uint16 quantity, uint8* src) { 
 	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_MULTIPLE_COILS, address, 5 + NStar);
 	uint8* pdu_data = mt->pdu_data;
 
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, quantity);
+	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
+	SET_INT16_TO_INT8(mt->pdu_data, 2, quantity);
 	pdu_data[4] = NStar;
 	memcpy(pdu_data + 5, src, NStar);
 	
@@ -404,7 +404,7 @@ uint16 ModbusClient::read_input_registers(uint16 address, uint16 quantity) {
 uint16 ModbusClient::read_queues(uint16 address) {
 	ModbusTransaction* mt = make_transaction(MODBUS_READ_FIFO_QUEUES, address, 2);
 
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
+	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
 
 	return IModbusClient::request(mt);
 }
@@ -423,9 +423,9 @@ uint16 ModbusClient::write_registers(uint16 address, uint16 quantity, uint16* sr
 uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or) { // MAP: Page 36
 	ModbusTransaction* mt = make_transaction(MODBUS_MASK_WRITE_REGISTER, address, 6);
 
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, address);
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, and);
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 4, or);
+	SET_INT16_TO_INT8(mt->pdu_data, 0, address);
+	SET_INT16_TO_INT8(mt->pdu_data, 2, and);
+	SET_INT16_TO_INT8(mt->pdu_data, 4, or);
 
 	return IModbusClient::request(mt);
 }
@@ -433,8 +433,8 @@ uint16 ModbusClient::mask_write_register(uint16 address, uint16 and, uint16 or) 
 uint16 ModbusClient::write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) {
 	ModbusTransaction* mt = make_transaction(MODBUS_WRITE_AND_READ_REGISTERS, raddr);
 
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 0, raddr);
-	MODBUS_SET_INT16_TO_INT8(mt->pdu_data, 2, rquantity);
+	SET_INT16_TO_INT8(mt->pdu_data, 0, raddr);
+	SET_INT16_TO_INT8(mt->pdu_data, 2, rquantity);
 
 	return IModbusClient::do_write_registers(mt, 4, waddr, wquantity, src);
 }

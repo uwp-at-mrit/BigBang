@@ -1,7 +1,7 @@
 #pragma once
 
 #include "modbus/server.hpp"
-#include "modbus/constants.hpp"
+#include "modbus/codes.hpp"
 
 namespace WarGrey::SCADA {
     private class ModbusVirtualDevice : public WarGrey::SCADA::IModbusServer {

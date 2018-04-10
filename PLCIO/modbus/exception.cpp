@@ -1,5 +1,5 @@
 #include "modbus/exception.hpp"
-#include "modbus/constants.hpp"
+#include "modbus/codes.hpp"
 
 #include "string.hpp"
 #include "syslog.hpp"

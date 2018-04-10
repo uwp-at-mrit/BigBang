@@ -4,7 +4,7 @@
 #include <queue>
 #include <mutex>
 
-#include "modbus/constants.hpp"
+#include "modbus/codes.hpp"
 #include "IPLCClient.hpp"
 #include "syslog.hpp"
 #include "object.hpp"
