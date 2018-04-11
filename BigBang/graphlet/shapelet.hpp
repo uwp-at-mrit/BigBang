@@ -1,8 +1,8 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
-#include "credit.idl"
-#include "turtle.idl"
+#include "credit.hpp"
+#include "turtle.hpp"
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {

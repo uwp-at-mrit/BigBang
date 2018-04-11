@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "credit.idl"
+#include "credit.hpp"
 #include "brushes.hxx"
 #include "planet.hpp"
 
@@ -12,8 +12,6 @@
 namespace WarGrey::SCADA {
 	template<class T, typename E>
 	private class Console abstract {
-	typedef Credit<Labellet, E> CreditLabellet;
-
 	public:
 		Console(T* master, Platform::String^ l10n) : master(master), l10n_prefix(l10n) {}
 

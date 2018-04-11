@@ -1,4 +1,4 @@
-﻿#include "application.idl"
+﻿#include "application.hxx"
 #include "configuration.hpp"
 
 #include "planet.hpp"

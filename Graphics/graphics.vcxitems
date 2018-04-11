@@ -41,6 +41,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)shape3d.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)transformation.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)turtle.idl" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)turtle.hpp" />
   </ItemGroup>
 </Project>

@@ -40,10 +40,10 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="decorator\page.hpp" />
-    <ClInclude Include="console.idl" />
     <ClInclude Include="page\hydraulics.hpp">
       <Filter>page</Filter>
     </ClInclude>
+    <ClInclude Include="console.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

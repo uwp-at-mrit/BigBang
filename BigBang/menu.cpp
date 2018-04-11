@@ -1,4 +1,4 @@
-#include "menu.idl"
+#include "menu.hpp"
 #include "planet.hpp"
 #include "tongue.hpp"
 

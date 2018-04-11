@@ -1,6 +1,6 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
-#include "console.idl"
+#include "console.hpp"
 
 #include "tongue.hpp"
 #include "system.hpp"
@@ -9,7 +9,7 @@
 #include "text.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
-#include "turtle.idl"
+#include "turtle.hpp"
 
 #include "graphlet/booleanlet.hpp"
 #include "graphlet/gaugelet.hpp"

@@ -46,7 +46,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\valvelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)menu.idl">
+    <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.hpp" />
