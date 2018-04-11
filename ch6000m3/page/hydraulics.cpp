@@ -17,6 +17,8 @@
 #include "graphlet/pumplet.hpp"
 #include "graphlet/valvelet.hpp"
 
+#include "graphlet/svglet.hpp"
+
 #include "decorator/page.hpp"
 #ifdef _DEBUG
 #include "decorator/grid.hpp"
@@ -119,6 +121,9 @@ public:
 		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
 		this->master->insert(this->visor);
+
+		this->test = new Svglet("StoreLogo.png", 100.0F, 100.0F, "Assets");
+		this->master->insert(this->test, 0.0F, 100.0F, 100.0F);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -307,6 +312,9 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> hslabels;
 	std::map<HS, Credit<Booleanlet, HS>*> visor_states;
 	std::map<HS, Credit<Labellet, HS>*> vslabels;
+
+private:
+	Svglet* test;
 	
 private:
 	CanvasTextFormat^ caption_font;

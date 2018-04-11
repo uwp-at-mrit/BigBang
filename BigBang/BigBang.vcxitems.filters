@@ -56,6 +56,7 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\doorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -114,6 +115,7 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\doorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

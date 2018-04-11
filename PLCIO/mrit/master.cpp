@@ -3,6 +3,7 @@
 #include "mrit/master.hpp"
 #include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
+#include "modbus/codes.hpp"
 
 #include "shared/netexn.hpp"
 

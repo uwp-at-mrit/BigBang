@@ -47,7 +47,7 @@ namespace WarGrey::SCADA {
 		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
     public: // data access
-		virtual uint16 read_coils(uint16 address, uint16 quantity) = 0;
+		virtual uint16 read_coils(/*data(uint16 data_block, */uint16 addr0, uint16 addrn) = 0;
 		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity) = 0;
         virtual uint16 write_coil(uint16 address, bool value) = 0;
         virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src) = 0;
