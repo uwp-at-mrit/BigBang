@@ -23,6 +23,12 @@
     <Filter Include="graphlet">
       <UniqueIdentifier>{e1753d11-e073-49f7-90c2-9c17acc77e3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Files">
+      <UniqueIdentifier>{0d151f54-1f55-4743-863a-4243983c04c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Files\graphlet.svg">
+      <UniqueIdentifier>{262c9dae-0cf7-4933-b766-6b273919d6f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
@@ -75,6 +81,12 @@
     <None Include="ch6000m3_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
+    <None Include="Assets\ch6000m3.rkt">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Files\graphlet.svg\ch6000m3.rkt">
+      <Filter>Files\graphlet.svg</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="Localization\en-US\tongue.resw">

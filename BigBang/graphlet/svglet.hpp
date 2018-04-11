@@ -8,7 +8,7 @@
 namespace WarGrey::SCADA {
 	private class Svglet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root = "Graphlet");
+		Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root = "graphlet.svg");
 
 	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;

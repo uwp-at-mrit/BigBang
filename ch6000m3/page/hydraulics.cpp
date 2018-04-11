@@ -122,7 +122,7 @@ public:
 		this->master->insert(this->heater);
 		this->master->insert(this->visor);
 
-		this->test = new Svglet("StoreLogo.png", 100.0F, 100.0F, "Assets");
+		this->test = new Svglet("ch6000m3.rkt", 100.0F, 100.0F);
 		this->master->insert(this->test, 0.0F, 100.0F, 100.0F);
 	}
 

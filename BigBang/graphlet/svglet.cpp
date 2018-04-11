@@ -36,7 +36,7 @@ Svglet::Svglet(Platform::String^ file_svg, float width, float height, Platform::
 			try {
 				this->graph_svg = doc_svg.get();
 			} catch (Platform::Exception^ e) {
-				this->get_logger()->log_message(Log::Error, L"Failed to load %s: %s", ms_appx_svg->Data(), e->Message->Data());
+				this->get_logger()->log_message(Log::Error, L"Failed to read %s: %s", ms_appx_svg->Data(), e->Message->Data());
 			} catch (task_canceled&) {
 				this->get_logger()->log_message(Log::Debug, L"Loading %s is canceled.", ms_appx_svg->Data());
 			}
