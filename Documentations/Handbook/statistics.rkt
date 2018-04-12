@@ -68,8 +68,8 @@
             (when (string? timestamp)
               (let numstat ([stats null])
                 (define +-path (read-line /dev/gitin))
-                (define tokens (if (eof-object? +-path) null (string-split +-path)))
-                (cond [(>= (length tokens) 3) ; e.g. `59 53 {src.ext => renamed.ext}` [only with `git diff`]
+                (define tokens (if (eof-object? +-path) null (numstat-line-split +-path)))
+                (cond [(= (length tokens) 3)
                        (let ([insertion (string->number (car tokens))]
                              [deletion (string->number (cadr tokens))])
                          (numstat (if (and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats) stats)))]
@@ -78,3 +78,12 @@
         (custodian-shutdown-all (current-custodian))))
 
     (values statistics insertions deletions)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define numstat-line-split
+  (lambda [line]
+    ; Note: lines like `59 53 {src.ext => renamed.ext}` are only produced by `git diff`
+    (define tokens (string-split line))
+    (cond [(<= (length tokens) 3) tokens]
+          [(regexp-match? #px" => " line) (list (car tokens) (cadr tokens) (caddr tokens))] ; TODO: is this correct?
+          [else (list (car tokens) (cadr tokens) (string-join (cddr tokens) " "))])))
