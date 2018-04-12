@@ -13,17 +13,17 @@
 @margin-note{本系统所用程序语言及其分工
  @itemlist[#:style 'compact
            @item{@tt{C++} 编写完整的主程序。}
+           @item{@tt{SVG} 定义外部图元。}
            @item{@tt{@cite{Racket}} 编写所有辅助程序。如：探索系统原型、分析主程序日志、绘制文档图表、转换老代码编码等等。}
            @item{@tt{@cite{Scribble}} 编写本手册。}
-           @item{@tt{SVG} 定义外部图元。}
            @item{@tt{ResX} 定义主程序界面的中英文字符串，由 Visual Studio 自行维护。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities")
  #(C++      #xF34B7D #px"[.]([ch](pp|xx)?)$")
+ #(SVG      #xC34C26 #px"[.]svg$")
  #(Racket   #x89E051 #px"[.]rkt$")
  #(Scribble #x1E4AEC #px"[.](scrbl|css)$")
- #(SVG      #xC34C26 #px"[.]svg$")
  #(ResX     #xEDEDED #px"[.]resw$")]
 
 @handbook-table[]
