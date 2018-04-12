@@ -197,11 +197,15 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="Assets\ch6000m3.rkt" />
+    <None Include="Assets\ch6000m3.rkt">
+      <DeploymentContent>false</DeploymentContent>
+    </None>
     <None Include="ch6000m3_TemporaryKey.pfx" />
-    <None Include="Files\graphlet.svg\ch6000m3.rkt" />
     <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
+    <None Include="usr\share\graphlet\Cool pump.svg">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
@@ -213,8 +217,8 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Localization\en-US\tongue.resw" />
-    <PRIResource Include="Localization\zh-CN\tongue.resw" />
+    <PRIResource Include="usr\share\locale\en-US\tongue.resw" />
+    <PRIResource Include="usr\share\locale\zh-CN\tongue.resw" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />

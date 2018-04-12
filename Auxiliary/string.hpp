@@ -31,3 +31,6 @@ Platform::String^ retval; { \
     retval = ref new Platform::String(pool); \
     if (pool != wpool) delete[] pool; \
 }
+
+Platform::String^ filename_from_path(Windows::Foundation::Uri^ uri);
+Platform::String^ filename_from_path(Platform::String^ path);

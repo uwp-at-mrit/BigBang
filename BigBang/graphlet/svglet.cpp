@@ -2,6 +2,7 @@
 
 #include "graphlet/svglet.hpp"
 
+#include "string.hpp"
 #include "text.hpp"
 
 using namespace WarGrey::SCADA;
@@ -9,6 +10,8 @@ using namespace WarGrey::SCADA;
 using namespace Concurrency;
 
 using namespace Windows::UI;
+using namespace Windows::Foundation;
+
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 
@@ -16,32 +19,42 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
 /*************************************************************************************************/
-Svglet::Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root) {
+Svglet::Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root) : file_svg(file_svg) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
-	this->file_svg = make_text_layout(file_svg, make_text_format());
 
-	{ // load svg asynchronously
-		CanvasDevice^ shared_ds = CanvasDevice::GetSharedDevice();
-		FileAccessMode FAM = FileAccessMode::Read;
-		StorageOpenOptions SOO = StorageOpenOptions::AllowOnlyReaders;
-		FileOpenDisposition FOD = FileOpenDisposition::OpenExisting;
-		Platform::String^ ms_appx_svg = "ms-appx:///" + ((root == nullptr) ? file_svg : (root + "/" + file_svg));
+	this->ms_appx_svg = ref new Uri("ms-appx:///usr/share/" + ((root == nullptr) ? file_svg : (root + "/" + file_svg)));
 
-		syslog(Log::Info, Windows::ApplicationModel::Package::Current->InstalledLocation->Path->ToString());
-		
-		create_task(FileRandomAccessStream::OpenAsync(ms_appx_svg, FAM, SOO, FOD)).then([=](task<IRandomAccessStream^> svg) {
-			return CanvasSvgDocument::LoadAsync(shared_ds, svg.get());
-		}).then([=](task<CanvasSvgDocument^> doc_svg) {
-			try {
-				this->graph_svg = doc_svg.get();
-			} catch (Platform::Exception^ e) {
-				this->get_logger()->log_message(Log::Error, L"Failed to read %s: %s", ms_appx_svg->Data(), e->Message->Data());
-			} catch (task_canceled&) {
-				this->get_logger()->log_message(Log::Debug, L"Loading %s is canceled.", ms_appx_svg->Data());
-			}
-		});
+	if (this->ms_appx_svg->Extension == nullptr) {
+		this->ms_appx_svg = ref new Uri(this->ms_appx_svg->ToString() + ".svg");
 	}
+}
+
+void Svglet::construct() {
+	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg)).then([=](task<StorageFile^> sf_svg) {
+		StorageFile^ svg = sf_svg.get();
+
+		this->get_logger()->log_message(Log::Debug,
+			L"Found the graphlet source: %s",
+			this->ms_appx_svg->ToString()->Data());
+
+		return svg->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders);
+	}).then([=](task<IRandomAccessStream^> svg) {
+		return CanvasSvgDocument::LoadAsync(CanvasDevice::GetSharedDevice(), svg.get());
+	}).then([=](task<CanvasSvgDocument^> doc_svg) {
+		try {
+			this->graph_svg = doc_svg.get();
+		} catch (Platform::Exception^ e) {
+			this->get_logger()->log_message(Log::Error,
+				L"Failed to read %s: %s",
+				this->ms_appx_svg->ToString()->Data(),
+				e->Message->Data());
+		} catch (task_canceled&) {
+			this->get_logger()->log_message(Log::Debug,
+				L"Loading %s is canceled.",
+				this->ms_appx_svg->ToString()->Data());
+		}
+	});
 }
 
 void Svglet::fill_extent(float x, float y, float* w, float* h) {
@@ -57,6 +70,7 @@ void Svglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float
 }
 
 void Svglet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	static auto font = make_text_format();
 	auto color = Colours::GrayText;
 	float thickness = 2.0F;
 	float x0 = x + thickness * 0.5F;
@@ -67,5 +81,5 @@ void Svglet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Wid
 	ds->DrawRectangle(x0, y0, xn - x0, yn - y0, color, thickness);
 	ds->DrawLine(x0, y0, xn, yn, color, thickness);
 	ds->DrawLine(x0, yn, xn, y0, color, thickness);
-	ds->DrawTextLayout(this->file_svg, x + thickness, y, color);
+	ds->DrawText(filename_from_path(this->ms_appx_svg), x + thickness, y, color, font);
 }

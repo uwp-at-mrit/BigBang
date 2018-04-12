@@ -8,9 +8,10 @@
 namespace WarGrey::SCADA {
 	private class Svglet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root = "graphlet.svg");
+		Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root = "graphlet");
 
 	public:
+		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
@@ -18,11 +19,12 @@ namespace WarGrey::SCADA {
 		virtual void draw_on_error(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height);
 
 	protected:
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ file_svg;
 		Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ graph_svg;
 
 	protected:
 		Windows::Foundation::Size viewport;
+		Windows::Foundation::Uri^ ms_appx_svg;
+		Platform::String^ file_svg;
 	};
 }
 	

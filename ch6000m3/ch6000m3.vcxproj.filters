@@ -1,33 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Common">
-      <UniqueIdentifier>a48fbec3-58b7-44ff-b428-4b63cd1c0f23</UniqueIdentifier>
-    </Filter>
     <Filter Include="Assets">
       <UniqueIdentifier>06266bb5-785b-433a-9fc0-c94a59272319</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
-    <Filter Include="Localization">
-      <UniqueIdentifier>{4aed4355-aa89-490e-ac2f-1df7c274121f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Localization\en-US">
-      <UniqueIdentifier>{dda3866b-7c10-438f-a837-b59172a135b6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Localization\zh-CN">
-      <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="page">
       <UniqueIdentifier>{7531e696-e7c2-47f3-a1ff-27dddae97b8e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphlet">
-      <UniqueIdentifier>{e1753d11-e073-49f7-90c2-9c17acc77e3e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Files">
+    <Filter Include="usr">
       <UniqueIdentifier>{0d151f54-1f55-4743-863a-4243983c04c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Files\graphlet.svg">
+    <Filter Include="usr\share">
+      <UniqueIdentifier>{bbc893c4-006f-43e5-9afa-9d1b40b24eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet">
       <UniqueIdentifier>{262c9dae-0cf7-4933-b766-6b273919d6f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale">
+      <UniqueIdentifier>{4aed4355-aa89-490e-ac2f-1df7c274121f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale\en-US">
+      <UniqueIdentifier>{dda3866b-7c10-438f-a837-b59172a135b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale\zh-CN">
+      <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -84,16 +81,16 @@
     <None Include="Assets\ch6000m3.rkt">
       <Filter>Assets</Filter>
     </None>
-    <None Include="Files\graphlet.svg\ch6000m3.rkt">
-      <Filter>Files\graphlet.svg</Filter>
+    <None Include="usr\share\graphlet\Cool pump.svg">
+      <Filter>usr\share\graphlet</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="Localization\en-US\tongue.resw">
-      <Filter>Localization\en-US</Filter>
+    <PRIResource Include="usr\share\locale\en-US\tongue.resw">
+      <Filter>usr\share\locale\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="Localization\zh-CN\tongue.resw">
-      <Filter>Localization\zh-CN</Filter>
+    <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
 </Project>
