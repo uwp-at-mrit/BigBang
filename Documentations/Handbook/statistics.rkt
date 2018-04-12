@@ -83,6 +83,7 @@
 (define numstat-line-split
   (lambda [line]
     ; Note: lines like `59 53 {src.ext => renamed.ext}` are only produced by `git diff`
+    ; TODO: seriously deal with spaces in filename
     (define tokens (string-split line))
     (cond [(<= (length tokens) 3) tokens]
           [(regexp-match? #px" => " line) (list (car tokens) (cadr tokens) (caddr tokens))] ; TODO: is this correct?
