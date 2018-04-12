@@ -122,7 +122,7 @@ public:
 		this->master->insert(this->heater);
 		this->master->insert(this->visor);
 
-		this->test = new Svglet("Cool Pump", 200.0F, 200.0F);
+		this->test = new Svglet("Cool Pump");
 		this->master->insert(this->test, 0.0F, 400.0F, 100.0F);
 	}
 

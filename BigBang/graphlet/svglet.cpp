@@ -19,36 +19,48 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
 /*************************************************************************************************/
-Svglet::Svglet(Platform::String^ file, float width, float height, Platform::String^ root) {
+Svglet::Svglet(Platform::String^ file, Platform::String^ rootdir) : Svglet(file, 0.0F, 0.0F, rootdir) {}
+
+Svglet::Svglet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
 
 	{ // adjust file name
 		Platform::String^ file_svg = (file_extension_from_path(file) == nullptr) ? (file + ".svg") : file;
-		Platform::String^ path_svg = ((root == nullptr) ? file_svg : (root + "/" + file_svg));
+		Platform::String^ path_svg = ((rootdir == nullptr) ? file_svg : (rootdir + "/" + file_svg));
 
 		this->ms_appx_svg = ref new Uri("ms-appx:///usr/share/" + path_svg);
 	}
 }
 
-void Svglet::construct() {
-	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg)).then([=](task<StorageFile^> sf_svg) {
-		StorageFile^ svg = sf_svg.get();
+Svglet::~Svglet() {
 
+}
+
+void Svglet::construct() {
+	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg)).then([=](task<StorageFile^> svg) {
 		this->get_logger()->log_message(Log::Debug,
 			L"Found the graphlet source: %s",
 			this->ms_appx_svg->ToString()->Data());
 
-		return svg->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders);
+		return svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders);
 	}).then([=](task<IRandomAccessStream^> svg) {
 		return CanvasSvgDocument::LoadAsync(CanvasDevice::GetSharedDevice(), svg.get());
 	}).then([=](task<CanvasSvgDocument^> doc_svg) {
 		try {
 			this->graph_svg = doc_svg.get();
-			this->get_logger()->log_message(Log::Info, this->graph_svg->GetXml());
+			this->root = this->graph_svg->Root;
+
+			if (this->viewport.Width != 0.0F) {
+				root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
+			}
+
+			if (this->viewport.Height != 0.0F) {
+				root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
+			}
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Error,
-				L"Failed to read %s: %s",
+				L"Failed to load %s: %s",
 				this->ms_appx_svg->ToString()->Data(),
 				e->Message->Data());
 		} catch (task_canceled&) {
@@ -60,7 +72,33 @@ void Svglet::construct() {
 }
 
 void Svglet::fill_extent(float x, float y, float* w, float* h) {
+	if (this->root != nullptr) {
+		CanvasSvgLengthUnits units;
+
+		if (this->viewport.Width == 0.0F) {
+			this->viewport.Width = this->get_length_attribute("width", &units, false);
+		}
+
+		if (this->viewport.Height == 0.0F) {
+			this->viewport.Height = this->get_length_attribute("height", &units, false);
+		}
+	}
+
 	SET_VALUES(w, this->viewport.Width, h, this->viewport.Height);
+}
+
+float Svglet::get_length_attribute(Platform::String^ name, CanvasSvgLengthUnits* units, bool inherited) {
+	// NOTE: this value is also the default length if both the client program and the SVG itself do not specific the size.
+	float value = 100.0F;
+	(*units) = CanvasSvgLengthUnits::Percentage;
+
+	if (this->root != nullptr) {
+		if (this->root->IsAttributeSpecified(name, inherited)) {
+			value = this->root->GetLengthAttribute(name, units);
+		}
+	}
+
+	return value;
 }
 
 void Svglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
