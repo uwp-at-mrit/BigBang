@@ -41,7 +41,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
+      <DeploymentContent>false</DeploymentContent>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\doorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />

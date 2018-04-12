@@ -123,7 +123,7 @@ public:
 		this->master->insert(this->visor);
 
 		this->test = new Svglet("Cool Pump", 200.0F, 200.0F);
-		this->master->insert(this->test, 0.0F, 100.0F, 100.0F);
+		this->master->insert(this->test, 0.0F, 400.0F, 100.0F);
 	}
 
 	void load_devices(float width, float height, float gridsize) {

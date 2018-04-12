@@ -19,9 +19,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PLCIO", "PLCIO\PLCIO.vcxite
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ch6000m3", "ch6000m3\ch6000m3.vcxproj", "{A48FBEC3-58B7-44FF-B428-4B63CD1C0F23}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScalableVectorGraphlet", "ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems", "{49211502-AD99-441E-87E5-3F5473DBF9F1}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Syslog\Syslog.vcxitems*{01974307-edb2-486f-a3f2-2f4e8eb07d20}*SharedItemsImports = 9
+		ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems*{49211502-ad99-441e-87e5-3f5473dbf9f1}*SharedItemsImports = 9
 		BigBang\BigBang.vcxitems*{6a826f3b-23f9-432c-86bd-f9d318096966}*SharedItemsImports = 9
 		Graphics\graphics.vcxitems*{73bfe193-7352-40ab-99c0-717f6ebee2d8}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
@@ -30,6 +33,7 @@ Global
 		BigBang\BigBang.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 		PLCIO\PLCIO.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
+		ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

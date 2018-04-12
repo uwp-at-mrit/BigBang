@@ -45,6 +45,7 @@ void Svglet::construct() {
 	}).then([=](task<CanvasSvgDocument^> doc_svg) {
 		try {
 			this->graph_svg = doc_svg.get();
+			this->get_logger()->log_message(Log::Info, this->graph_svg->GetXml());
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Error,
 				L"Failed to read %s: %s",
