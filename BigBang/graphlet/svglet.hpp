@@ -24,7 +24,6 @@ namespace WarGrey::SCADA {
 	protected:
 		Windows::Foundation::Size viewport;
 		Windows::Foundation::Uri^ ms_appx_svg;
-		Platform::String^ file_svg;
 	};
 }
 	

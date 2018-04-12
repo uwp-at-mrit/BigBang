@@ -19,14 +19,15 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
 /*************************************************************************************************/
-Svglet::Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ root) : file_svg(file_svg) {
+Svglet::Svglet(Platform::String^ file, float width, float height, Platform::String^ root) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
 
-	this->ms_appx_svg = ref new Uri("ms-appx:///usr/share/" + ((root == nullptr) ? file_svg : (root + "/" + file_svg)));
+	{ // adjust file name
+		Platform::String^ file_svg = (file_extension_from_path(file) == nullptr) ? (file + ".svg") : file;
+		Platform::String^ path_svg = ((root == nullptr) ? file_svg : (root + "/" + file_svg));
 
-	if (this->ms_appx_svg->Extension == nullptr) {
-		this->ms_appx_svg = ref new Uri(this->ms_appx_svg->ToString() + ".svg");
+		this->ms_appx_svg = ref new Uri("ms-appx:///usr/share/" + path_svg);
 	}
 }
 
@@ -81,5 +82,5 @@ void Svglet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Wid
 	ds->DrawRectangle(x0, y0, xn - x0, yn - y0, color, thickness);
 	ds->DrawLine(x0, y0, xn, yn, color, thickness);
 	ds->DrawLine(x0, yn, xn, y0, color, thickness);
-	ds->DrawText(filename_from_path(this->ms_appx_svg), x + thickness, y, color, font);
+	ds->DrawText(file_name_from_path(this->ms_appx_svg), x + thickness, y, color, font);
 }
