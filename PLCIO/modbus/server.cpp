@@ -107,10 +107,9 @@ private:
 				this->logger->log_message(Log::Debug, L"[sent %u-byte-response to %s]", sent, id->Data());
 
 				{ // clear dirty bytes
-					unsigned int dirty = mbin->UnconsumedBufferLength;
+					unsigned int dirty = discard_dirty_bytes(mbin);
 
 					if (dirty > 0) {
-						DISCARD_BYTES(mbin, dirty);
 						this->logger->log_message(Log::Debug,
 							L"[discarded last %u bytes of the indication from %s]",
 							dirty, id->Data());
@@ -119,12 +118,7 @@ private:
 
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (task_discarded&) {
-				unsigned int dirty = mbin->UnconsumedBufferLength;
-
-				if (dirty > 0) {
-					DISCARD_BYTES(mbin, dirty);
-				}
-
+				discard_dirty_bytes(mbin);
 				this->wait_process_reply_loop(mbin, mbout, pdu_data, client, id);
 			} catch (task_terminated&) {
 				this->logger->log_message(Log::Debug, L"Cancel responding to %s", id->Data());

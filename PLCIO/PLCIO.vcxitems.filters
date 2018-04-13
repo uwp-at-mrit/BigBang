@@ -24,6 +24,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\dataunit.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\exception.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\message.cpp">
+      <Filter>mrit</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\client.hpp">
@@ -60,6 +63,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\dataunit.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\message.hpp">
+      <Filter>mrit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="modbus">

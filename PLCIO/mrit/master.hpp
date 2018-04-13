@@ -46,27 +46,13 @@ namespace WarGrey::SCADA {
 		bool connected() override;
 		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
-    public: // data access
-		virtual uint16 read_coils(/*data(uint16 data_block, */uint16 addr0, uint16 addrn) = 0;
-		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity) = 0;
-        virtual uint16 write_coil(uint16 address, bool value) = 0;
-        virtual uint16 write_coils(uint16 address, uint16 quantity, uint8* src) = 0;
-		
-		virtual uint16 read_holding_registers(uint16 address, uint16 quantity) = 0;
-		virtual uint16 read_input_registers(uint16 address, uint16 quantity) = 0;
-		virtual uint16 read_queues(uint16 address) = 0;
-		virtual uint16 write_register(uint16 address, uint16 value) = 0;
-		virtual uint16 write_registers(uint16 address, uint16 quantity, uint16* src) = 0;
-		virtual uint16 mask_write_register(uint16 address, uint16 and, uint16 or) = 0;
-		virtual uint16 write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) = 0;
-
-	public: // Other
-		virtual uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length) = 0;
+    public:
+		virtual void read_data(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 
 	protected:
 		uint16 request(MRTransaction* mt);
-		uint16 do_simple_request(uint8 function_code, uint16 addr, uint16 val);
-		uint16 do_write_registers(MRTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src);
 
 	private:
 		void connect();
@@ -79,8 +65,8 @@ namespace WarGrey::SCADA {
         Platform::String^ service;
 
 	private:
-		Windows::Storage::Streams::DataReader^ mbin;
-		Windows::Storage::Streams::DataWriter^ mbout;
+		Windows::Storage::Streams::DataReader^ mrin;
+		Windows::Storage::Streams::DataWriter^ mrout;
 		std::queue<MRTransaction*> blocking_requests;
 		std::mutex blocking_section;
 
@@ -99,21 +85,9 @@ namespace WarGrey::SCADA {
 			: IMRClient(logger, server, port, confirmation) {};
 
     public: // data access
-		uint16 read_coils(uint16 address, uint16 quantity) override;
-		uint16 read_discrete_inputs(uint16 address, uint16 quantity) override;
-		uint16 write_coil(uint16 address, bool value) override;
-        uint16 write_coils(uint16 address, uint16 quantity, uint8* dest) override;
-
-		uint16 read_holding_registers(uint16 address, uint16 quantity) override;
-		uint16 read_input_registers(uint16 address, uint16 quantity) override;
-		uint16 read_queues(uint16 address) override;
-		uint16 write_register(uint16 address, uint16 value) override;
-		uint16 write_registers(uint16 address, uint16 quantity, uint16* src) override;
-		uint16 mask_write_register(uint16 address, uint16 and, uint16 or) override;
-		uint16 write_read_registers(uint16 waddr, uint16 wquantity, uint16 raddr, uint16 rquantity, uint16* src) override;
-
-	public: // Others
-		uint16 do_private_function(uint8 function_code, uint8* request, uint16 data_length) override;
+		void read_data(uint16 data_block, uint16 addr0, uint16 addrn) override;
+		void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
+		void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
 
 	protected:
 		uint8 request[MODBUS_MAX_PDU_LENGTH];

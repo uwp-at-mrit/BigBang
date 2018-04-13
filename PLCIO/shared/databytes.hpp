@@ -1,12 +1,5 @@
 #pragma once
 
-#define DISCARD_BYTES(mbin, count) \
-    do { \
-        for (uint16 i = 0; i < count; i++) { \
-            mbin->ReadByte(); \
-        } \
-    } while(0)
-
 #define READ_BYTES(mbin, dest, count) \
     do { \
         for (uint16 i = 0; i < count; i++) { \
@@ -59,6 +52,8 @@
         tab_int16[(index) + 2] = (value) >> 16; \
         tab_int16[(index) + 3] = (value); \
     } while (0)
+
+unsigned int discard_dirty_bytes(Windows::Storage::Streams::DataReader^ din);
 
 int read_bits(uint8 *src, uint16 address, uint16 quantity, uint8 *dest);
 int read_words(uint16 *src, uint16 address, uint16 quantity, uint8 *dest);

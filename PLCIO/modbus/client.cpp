@@ -7,7 +7,6 @@
 #include "shared/netexn.hpp"
 
 #include "syslog.hpp"
-#include "box.hpp"
 
 // MMIG: Page 20
 
@@ -253,7 +252,7 @@ void IModbusClient::wait_process_confirm_loop() {
 
 		uint16 pdu_length = modbus_read_mbap(mbin, &transaction, &protocol, &length, &unit);
 
-		return create_task(mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
+		return create_task(this->mbin->LoadAsync(pdu_length)).then([=](unsigned int size) {
 			uint16 address0 = 0;
 			uint16 origin_fcode = 0;
 
@@ -315,10 +314,9 @@ void IModbusClient::wait_process_confirm_loop() {
 		try {
 			confirm.get();
 
-			unsigned int dirty = mbin->UnconsumedBufferLength;
+			unsigned int dirty = discard_dirty_bytes(this->mbin);
 
 			if (dirty > 0) {
-				DISCARD_BYTES(mbin, dirty);
 				this->logger->log_message(Log::Debug,
 					L"<discarded last %u bytes of the confirmation comes from %s:%s>",
 					dirty, this->device->RawName->Data(), this->service->Data());
@@ -326,12 +324,7 @@ void IModbusClient::wait_process_confirm_loop() {
 
 			this->wait_process_confirm_loop();
 		} catch (task_discarded&) {
-			unsigned int rest = mbin->UnconsumedBufferLength;
-			
-			if (rest > 0) {
-				DISCARD_BYTES(mbin, rest);
-			}
-			
+			discard_dirty_bytes(this->mbin);
 			this->wait_process_confirm_loop();
 		} catch (task_canceled&) {
 			this->connect();

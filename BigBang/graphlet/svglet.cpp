@@ -59,8 +59,6 @@ void Svglet::construct() {
 			if (this->viewport.Height != 0.0F) {
 				root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
 			}
-
-			syslog(Log::Info, this->graph_svg->GetXml());
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Error,
 				L"Failed to load %s: %s",

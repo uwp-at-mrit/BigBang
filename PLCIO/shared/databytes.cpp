@@ -2,6 +2,18 @@
 
 #include "shared/databytes.hpp"
 
+using namespace Windows::Storage::Streams;
+
+unsigned int discard_dirty_bytes(DataReader^ din) {
+	unsigned int rest = din->UnconsumedBufferLength;
+
+	if (rest > 0) {
+		din->ReadBuffer(rest);
+	}
+
+	return rest;
+}
+
 int read_bits(uint8 *src, uint16 address, uint16 quantity, uint8 *dest) {
     uint8 shift = 0;
     uint8 byte = 0;
