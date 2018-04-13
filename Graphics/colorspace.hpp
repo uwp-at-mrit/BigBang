@@ -1,6 +1,7 @@
 #pragma once
 
 unsigned char color_double_to_char(double c);
+unsigned int color_to_hexadecimal(Windows::UI::Color& c);
 
 Windows::UI::Color rgba(unsigned int hex, double alpha = 1.0);
 Windows::UI::Color rgba(Windows::UI::Color& src, double alpha = 1.0);

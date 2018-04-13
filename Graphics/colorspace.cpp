@@ -52,8 +52,13 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
     }
 }
 
+/*************************************************************************************************/
 unsigned char color_double_to_char(double c) {
 	return UCHAR(c);
+}
+
+unsigned int color_to_hexadecimal(Color& c) {
+	return (c.R << 16) | (c.G << 8) | c.B; 
 }
 
 /*************************************************************************************************/
