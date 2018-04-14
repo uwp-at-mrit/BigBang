@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "modbus/device.hpp"
+#include "modbus/mbdevice.hpp"
 #include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
 #include "syslog.hpp"

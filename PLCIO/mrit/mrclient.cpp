@@ -1,6 +1,6 @@
 #include <ppltasks.h>
 
-#include "mrit/master.hpp"
+#include "mrit/mrclient.hpp"
 #include "mrit/magic.hpp"
 #include "mrit/message.hpp"
 
@@ -17,23 +17,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
-
-private struct WarGrey::SCADA::MRTransaction {
-	uint8 function_code;
-	uint8 pdu_data[MODBUS_MAX_PDU_LENGTH];
-	uint16 size;
-	uint16 address0;
-};
-
-inline static MRTransaction* make_transaction(uint8 fcode, uint16 address, uint16 size = 0) {
-	MRTransaction* mt = new MRTransaction();
-
-	mt->function_code = fcode;
-	mt->size = size;
-	mt->address0 = address;
-
-	return mt;
-}
 
 static void modbus_apply_positive_confirmation(IMRConfirmation* cf, Syslog* logger, uint8 function_code
 	, uint16 data_block, uint16 start_address, uint16 end_address, uint8* data_pool, uint16 data_size) {
@@ -54,12 +37,6 @@ IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation*
 
 IMRClient::~IMRClient() {
 	delete this->socket; // stop the confirmation loop before release transactions.
-
-	this->blocking_section.lock();
-	while (!this->blocking_requests.empty()) {
-		this->blocking_requests.pop();
-	}
-	this->blocking_section.unlock();
 
 	this->logger->destroy();
 }
@@ -107,13 +84,6 @@ void IMRClient::connect() {
             this->logger->log_message(Log::Info, L">> connected to %s:%s", this->device->RawName->Data(), this->service->Data());
 
 			this->wait_process_confirm_loop();
-
-			this->blocking_section.lock();
-			while (!this->blocking_requests.empty()) {
-				this->apply_request(this->blocking_requests.front());
-				this->blocking_requests.pop();
-			}
-			this->blocking_section.unlock();
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, socket_strerror(e));
 			this->connect();
@@ -121,31 +91,18 @@ void IMRClient::connect() {
     });
 }
 
-uint16 IMRClient::request(MRTransaction* mt) {
-	if (this->connected()) {
-		this->apply_request(mt);
-	} else {
-		this->blocking_section.lock();
-		this->blocking_requests.push(mt);
-		this->blocking_section.unlock();
-	}
-
-	return 0U;
-}
-
-void IMRClient::apply_request(MRTransaction* transaction) {
-	uint16 tid = 0U;
-	uint8 fcode = transaction->function_code;
-
-	modbus_write_adu(this->mrout, tid, 0x00, 0xFF, fcode, transaction->pdu_data, transaction->size);
+void IMRClient::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+	mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
+	mr_write_tail(this->mrout, data, size);
 
 	create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
 		try {
 			unsigned int sent = sending.get();
 
 			this->logger->log_message(Log::Debug,
-				L"<sent %u-byte-request for function 0x%02X as transaction %hu to %s:%s>",
-				sent, fcode, tid, this->device->RawName->Data(), this->service->Data());
+				L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to %s:%s>",
+				sent, fcode, data_block, addr0, addrn,
+				this->device->RawName->Data(), this->service->Data());
 		} catch (task_canceled&) {
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
@@ -242,4 +199,39 @@ void IMRClient::wait_process_confirm_loop() {
 
 bool IMRClient::connected() {
 	return (this->mrout != nullptr);
+}
+
+void IMRClient::read_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
+	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
+}
+
+/*************************************************************************************************/
+void MRClient::read_realtime_data() {
+	uint8 data_block;
+	uint16 addr0, addrn;
+	//this->read_signal();
+}
+
+void MRClient::read_analog_input_data(bool raw) {
+
+}
+
+void MRClient::read_analog_output_data(bool raw) {
+
+}
+
+void MRClient::read_digital_input_data(bool raw) {
+
+}
+
+void MRClient::read_digital_output_data(bool raw) {
+
+}
+
+void MRClient::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+
+}
+
+void MRClient::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+
 }

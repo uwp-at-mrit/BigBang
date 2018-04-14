@@ -1,6 +1,6 @@
 #pragma once
 
-#include "modbus/server.hpp"
+#include "modbus/mbserver.hpp"
 #include "modbus/codes.hpp"
 
 namespace WarGrey::SCADA {

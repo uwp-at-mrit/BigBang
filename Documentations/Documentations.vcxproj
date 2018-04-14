@@ -115,6 +115,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="Handbook\architecture.scrbl" />
+    <None Include="Handbook\bibliography.rkt" />
+    <None Include="Handbook\env.rkt" />
+    <None Include="Handbook\graphviz.rkt" />
+    <None Include="Handbook\handbook.css" />
+    <None Include="Handbook\handbook.rkt" />
+    <None Include="Handbook\infrastructure.scrbl" />
+    <None Include="Handbook\infrastructure\graphics.scrbl" />
+    <None Include="Handbook\infrastructure\modbus.scrbl" />
+    <None Include="Handbook\infrastructure\syslog.scrbl" />
+    <None Include="Handbook\misc.scrbl" />
+    <None Include="Handbook\preface.scrbl" />
+    <None Include="Handbook\preface\introducation.scrbl" />
+    <None Include="Handbook\preface\style.scrbl" />
+    <None Include="Handbook\statistics.rkt" />
+    <None Include="misc\JSF++.pdf" />
+    <None Include="mkdoc.rkt" />
+    <None Include="Modbus\CANopen.pdf" />
+    <None Include="Modbus\Modbus.Application.Protocol.pdf" />
+    <None Include="Modbus\Modbus.Messaging.Implementation.Guide.pdf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

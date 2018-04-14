@@ -1,6 +1,6 @@
 #include <ppltasks.h>
 
-#include "modbus/client.hpp"
+#include "modbus/mbclient.hpp"
 #include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
 

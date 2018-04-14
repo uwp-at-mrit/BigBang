@@ -1,17 +1,80 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Handbook">
+      <UniqueIdentifier>{305e8681-45e1-4e7b-9810-41f349a0548e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="Modbus">
+      <UniqueIdentifier>{ce06e661-3034-4765-84a7-7e38bcdaf015}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="misc">
+      <UniqueIdentifier>{6561fe98-6d6e-4c21-879f-fc145c11ef81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Handbook\preface">
+      <UniqueIdentifier>{9f890214-3bf0-4945-8573-03de71ea8c64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Handbook\infrastructure">
+      <UniqueIdentifier>{cf3aecb7-131d-46bc-b018-73a659d81a9e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mkdoc.rkt" />
+    <None Include="Handbook\architecture.scrbl">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\bibliography.rkt">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\env.rkt">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\graphviz.rkt">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\handbook.css">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\handbook.rkt">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\infrastructure.scrbl">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\misc.scrbl">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\preface.scrbl">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Handbook\statistics.rkt">
+      <Filter>Handbook</Filter>
+    </None>
+    <None Include="Modbus\Modbus.Application.Protocol.pdf">
+      <Filter>Modbus</Filter>
+    </None>
+    <None Include="Modbus\Modbus.Messaging.Implementation.Guide.pdf">
+      <Filter>Modbus</Filter>
+    </None>
+    <None Include="Modbus\CANopen.pdf">
+      <Filter>Modbus</Filter>
+    </None>
+    <None Include="misc\JSF++.pdf">
+      <Filter>misc</Filter>
+    </None>
+    <None Include="Handbook\preface\introducation.scrbl">
+      <Filter>Handbook\preface</Filter>
+    </None>
+    <None Include="Handbook\preface\style.scrbl">
+      <Filter>Handbook\preface</Filter>
+    </None>
+    <None Include="Handbook\infrastructure\modbus.scrbl">
+      <Filter>Handbook\infrastructure</Filter>
+    </None>
+    <None Include="Handbook\infrastructure\syslog.scrbl">
+      <Filter>Handbook\infrastructure</Filter>
+    </None>
+    <None Include="Handbook\infrastructure\graphics.scrbl">
+      <Filter>Handbook\infrastructure</Filter>
+    </None>
   </ItemGroup>
 </Project>

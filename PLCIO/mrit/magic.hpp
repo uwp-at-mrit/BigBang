@@ -9,6 +9,6 @@ static const uint8 MR_PROTOCOL_HEAD = 0x24; // $
 static const uint16 MR_PROTOCOL_END = (0x0D << 8) | 0x0A; // Carriage Return + Line Feed
 
 /* MRIT Protocol function codes */
-static const uint8 MR_READ_DATA              = 'A';
+static const uint8 MR_READ_SIGNAL            = 'A';
 static const uint8 MR_WRITE_ANALOG_QUANTITY  = 'B';
 static const uint8 MR_WRITE_DIGITAL_QUANTITY = 'C';

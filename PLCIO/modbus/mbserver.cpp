@@ -3,7 +3,7 @@
 #include <map>
 
 #include "modbus/codes.hpp"
-#include "modbus/server.hpp"
+#include "modbus/mbserver.hpp"
 #include "modbus/dataunit.hpp"
 #include "modbus/exception.hpp"
 

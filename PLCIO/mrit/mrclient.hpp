@@ -1,16 +1,18 @@
 #pragma once
 
-#include <queue>
-#include <mutex>
-
-#include "modbus/codes.hpp"
+#include "mrit/magic.hpp"
 #include "IPLCClient.hpp"
 #include "syslog.hpp"
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	struct MRTransaction;
 	class IMRClient;
+
+	private enum class MRSignal {
+		Realtime,
+		AnalogInput, AnalogOutput, AnalogInputRaw, AnalogOutputRaw,
+		DigitalInput, DigitalOutput, DigitalInputRaw, DigitalInputRaw
+	};
 
 	private class IMRConfirmation abstract {
 	public:
@@ -30,6 +32,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void on_scheduled_request(IMRClient* device, long long count, long long interval, long long uptime) = 0;
+
+	public:
+		virtual void fill_signal_reader_configuration(MRSignal type, uint8* data_block, uint16* addr0, uint16* addrn) = 0;
 	};
 
 	private class IMRClient abstract : public WarGrey::SCADA::IPLCClient {
@@ -47,16 +52,25 @@ namespace WarGrey::SCADA {
 		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
     public:
-		virtual void read_data(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void read_signal(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void read_signal(MRSignal signal) = 0;
+
+	public:
 		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 
+	public:
+		virtual void read_realtime_data() = 0;
+		virtual void read_analog_input_data(bool raw) = 0;
+		virtual void read_analog_output_data(bool raw) = 0;
+		virtual void read_digital_input_data(bool raw) = 0;
+		virtual void read_digital_output_data(bool raw) = 0;
+
 	protected:
-		uint16 request(MRTransaction* mt);
+		void request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size);
 
 	private:
 		void connect();
-		void apply_request(MRTransaction* transaction);
 		void wait_process_confirm_loop();
 
     private:
@@ -67,9 +81,7 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mrin;
 		Windows::Storage::Streams::DataWriter^ mrout;
-		std::queue<MRTransaction*> blocking_requests;
-		std::mutex blocking_section;
-
+		
 	private:
 		WarGrey::SCADA::IMRConfirmation* confirmation;
 		WarGrey::SCADA::Syslog* logger;
@@ -77,21 +89,24 @@ namespace WarGrey::SCADA {
 
     private class MRClient : public WarGrey::SCADA::IMRClient {
     public:
-        MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MODBUS_TCP_DEFAULT_PORT)
+        MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MR_TCP_DEFAULT_PORT)
 			: IMRClient(logger, server, port, nullptr) {};
 		
 		MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IMRConfirmation* confirmation, uint16 port = MODBUS_TCP_DEFAULT_PORT)
+			IMRConfirmation* confirmation, uint16 port = MR_TCP_DEFAULT_PORT)
 			: IMRClient(logger, server, port, confirmation) {};
 
-    public: // data access
-		void read_data(uint16 data_block, uint16 addr0, uint16 addrn) override;
+	public:
 		void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
 		void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
 
-	protected:
-		uint8 request[MODBUS_MAX_PDU_LENGTH];
-    };
+	public:
+		void read_realtime_data() override;
+		void read_analog_input_data(bool raw) override;
+		void read_analog_output_data(bool raw) override;
+		void read_digital_input_data(bool raw) override;
+		void read_digital_output_data(bool raw) override;
+	};
 
 	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {
 	public:

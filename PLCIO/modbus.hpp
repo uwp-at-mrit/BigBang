@@ -1,6 +1,7 @@
 #pragma once
 
-#include "modbus/device.hpp"
-#include "modbus/client.hpp"
-#include "modbus/dataunit.hpp"
+#include "modbus/mbdevice.hpp"
+#include "modbus/mbclient.hpp"
 #include "modbus/exception.hpp"
+
+#include "shared/databytes.hpp"

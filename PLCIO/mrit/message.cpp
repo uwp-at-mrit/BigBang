@@ -1,15 +1,8 @@
-#include "modbus/dataunit.hpp"
+#include "mrit/magic.hpp"
+
 #include "shared/databytes.hpp"
-#include "syslog.hpp"
 
 using namespace Windows::Storage::Streams;
-
-static void inline modbus_write_mbap(IDataWriter^ mrout, uint16 transaction, uint16 protocol, uint16 length, uint8 unit) {
-    mrout->WriteUInt16(transaction);
-    mrout->WriteUInt16(protocol);
-    mrout->WriteUInt16(length);
-    mrout->WriteByte(unit);
-}
 
 uint16 mr_read_header(IDataReader^ mrin, uint8* head, uint8* fcode, uint16* db_id, uint16* addr0, uint16* addrn, uint16* size) {
 	(*head) = mrin->ReadByte();
@@ -22,8 +15,28 @@ uint16 mr_read_header(IDataReader^ mrin, uint8* head, uint8* fcode, uint16* db_i
 	return (*size) + 4;
 }
 
-void mr_read_tail(Windows::Storage::Streams::IDataReader^ mrin, uint16 size, uint8* data, uint16* checksum, uint16* eom) {
+void mr_read_tail(IDataReader^ mrin, uint16 size, uint8* data, uint16* checksum, uint16* eom) {
 	READ_BYTES(mrin, data, size);
 	(*checksum) = mrin->ReadUInt16();
 	(*eom) = mrin->ReadUInt16();
+}
+
+void mr_write_header(IDataWriter^ mrout, uint8 fcode, uint16 db_id, uint16 addr0, uint16 addrn) {
+	mrout->WriteByte(MR_PROTOCOL_HEAD);
+	mrout->WriteByte(fcode);
+	mrout->WriteUInt16(db_id);
+	mrout->WriteUInt16(addr0);
+	mrout->WriteUInt16(addrn);
+}
+
+void mr_write_tail(IDataWriter^ mrout, uint8* data, uint16 size) {
+	if (data == nullptr) {
+		mrout->WriteUInt16(0);
+	} else {
+		mrout->WriteUInt16(size);
+		WRITE_BYTES(mrout, data, size);
+	}
+
+	mrout->WriteUInt16(0xFFFF); // checksum, but it is not used in the current implementation
+	mrout->WriteUInt16(MR_PROTOCOL_END);
 }

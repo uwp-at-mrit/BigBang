@@ -1,7 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
-#include "modbus.hpp"
+#include "mrit.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
@@ -20,10 +20,10 @@ namespace WarGrey::SCADA {
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
-		WarGrey::SCADA::IModbusClient* device;
-		WarGrey::SCADA::IModbusConfirmation* console;
+		WarGrey::SCADA::IMRClient* device;
+		WarGrey::SCADA::IMRConfirmation* console;
 
-	private: // never deletes these graphlets mannually	
+	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
 

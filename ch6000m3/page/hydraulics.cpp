@@ -55,7 +55,7 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
 };
 
-private class Hydraulics final : public WarGrey::SCADA::ModbusConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
+private class Hydraulics final : public WarGrey::SCADA::MRConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
 public:
 	Hydraulics(HydraulicSystem* master) : Console(master, "HS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
@@ -111,7 +111,7 @@ public:
 
 		/** TODO
 		 * These two construtions may fail due to D2DERR_BAD_NUMBER(HRESULT: 0x88990011),
-		 * It it happens try to change the `step` to ensure that `height / step >= 0.1F`,
+		 * If it happens please try to change the `step` to ensure that `height / step >= 0.1F`,
 		 * the default `step` is 10.
 		 */
 		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F, 6);
@@ -269,8 +269,8 @@ public:
 	}
 
 public:
-	void on_scheduled_request(IModbusClient* device, long long count, long long interval, long long uptime) override {
-		device->read_input_registers(0, 16);
+	void on_scheduled_request(IMRClient* device, long long count, long long interval, long long uptime) override {
+		//device->read_input_registers(0, 16);
 	}
 
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
@@ -325,7 +325,7 @@ HydraulicSystem::HydraulicSystem(Platform::String^ plc) : Planet(":hs:") {
 	Hydraulics* console = new Hydraulics(this);
 
 	this->console = console; 
-	this->device = new ModbusClient(alarm, plc, this->console);
+	this->device = new MRClient(alarm, plc, this->console);
 	this->gridsize = statusbar_height();
 }
 
