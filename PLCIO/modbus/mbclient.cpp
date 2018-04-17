@@ -37,7 +37,7 @@ inline static ModbusTransaction* make_transaction(uint8 fcode, uint16 address, u
 	return mt;
 }
 
-static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* logger, DataReader^ mbin
+static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> cfs, Syslog* logger, DataReader^ mbin
 	, uint16 transaction, uint8 function_code, uint16 maybe_address) {
 	switch (function_code) {
 	case MODBUS_READ_COILS: case MODBUS_READ_DISCRETE_INPUTS: {               // MAP: Page 11, 12
@@ -46,9 +46,13 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		READ_BYTES(mbin, status, count);
 
 		if (function_code == MODBUS_READ_COILS) {
-			cf->on_coils(transaction, maybe_address, status, count, logger);
+			for (auto cf : cfs) {
+				cf->on_coils(transaction, maybe_address, status, count, logger);
+			}
 		} else {
-			cf->on_discrete_inputs(transaction, maybe_address, status, count, logger);
+			for (auto cf : cfs) {
+				cf->on_discrete_inputs(transaction, maybe_address, status, count, logger);
+			}
 		}
 	} break;
 	case MODBUS_READ_HOLDING_REGISTERS: case MODBUS_READ_INPUT_REGISTERS:     // MAP: Page 15, 16
@@ -58,9 +62,13 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		READ_WORDS(mbin, registers, count);
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
-			cf->on_input_registers(transaction, maybe_address, registers, count, logger);
+			for (auto cf : cfs) {
+				cf->on_input_registers(transaction, maybe_address, registers, count, logger);
+			}
 		} else {
-			cf->on_holding_registers(transaction, maybe_address, registers, count, logger);
+			for (auto cf : cfs) {
+				cf->on_holding_registers(transaction, maybe_address, registers, count, logger);
+			}
 		}
 	} break;
 	case MODBUS_WRITE_SINGLE_COIL: case MODBUS_WRITE_SINGLE_REGISTER:         // MAP: Page 17, 19
@@ -68,28 +76,37 @@ static void modbus_apply_positive_confirmation(IModbusConfirmation* cf, Syslog* 
 		uint16 address = mbin->ReadUInt16();
 		uint16 value = mbin->ReadUInt16();
 
-		cf->on_echo_response(transaction, function_code, address, value, logger);
+		for (auto cf : cfs) {
+			cf->on_echo_response(transaction, function_code, address, value, logger);
+		}
 	} break;
 	case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
 		uint16 address = mbin->ReadUInt16();
 		uint16 and_mask = mbin->ReadUInt16();
 		uint16 or_mask = mbin->ReadUInt16();
 
-		cf->on_echo_response(transaction, function_code, address, and_mask, or_mask, logger);
+		for (auto cf : cfs) {
+			cf->on_echo_response(transaction, function_code, address, and_mask, or_mask, logger);
+		}
 	} break;
 	case MODBUS_READ_FIFO_QUEUES: {                                           // MAP: Page 40
 		static uint16 queues[MODBUS_MAX_PDU_LENGTH];
 		uint16 useless = mbin->ReadUInt16();
 		uint16 count = mbin->ReadUInt16();
 
-		cf->on_queue_registers(transaction, maybe_address, queues, count, logger);
+		for (auto cf : cfs) {
+			cf->on_queue_registers(transaction, maybe_address, queues, count, logger);
+		}
 	} break;
 	default: {
 		static uint8 raw_data[MODBUS_MAX_PDU_LENGTH];
 		static uint8 count = (uint8)mbin->UnconsumedBufferLength;
 
 		READ_BYTES(mbin, raw_data, count);
-		cf->on_private_response(transaction, function_code, raw_data, count, logger);
+		
+		for (auto cf : cfs) {
+			cf->on_private_response(transaction, function_code, raw_data, count, logger);
+		}
 	}
 	}
 }
@@ -102,7 +119,7 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
 	this->device = ref new HostName(h);
     this->service = p.ToString();
 
-	this->confirmation = cf;
+	this->append_confirmation_receiver(cf);
 	this->generator = ((g == nullptr) ? new WarGrey::SCADA::ModbusSequenceGenerator() : g);
 	this->generator->reference();
 
@@ -137,8 +154,14 @@ Syslog* IModbusClient::get_logger() {
 }
 
 void IModbusClient::send_scheduled_request(long long count, long long interval, long long uptime) {
-	if (this->confirmation != nullptr) {
-		this->confirmation->on_scheduled_request(this, count, interval, uptime);
+	for (IModbusConfirmation* confirmation : this->confirmations) {
+		confirmation->on_scheduled_request(this, count, interval, uptime);
+	}
+}
+
+void IModbusClient::append_confirmation_receiver(IModbusConfirmation* confirmation) {
+	if (confirmation != nullptr) {
+		this->confirmations.push_back(confirmation);
 	}
 }
 
@@ -302,11 +325,13 @@ void IModbusClient::wait_process_confirm_loop() {
 					this->device->RawName->Data(), this->service->Data());
 			}
 
-			if (this->confirmation != nullptr) {
+			if (!this->confirmations.empty()) {
 				if (function_code != raw_code) {
-					this->confirmation->on_exception(transaction, function_code, address0, this->mbin->ReadByte(), this->logger);
+					for (auto c : this->confirmations) {
+						c->on_exception(transaction, function_code, address0, this->mbin->ReadByte(), this->logger);
+					}
 				} else {
-					modbus_apply_positive_confirmation(this->confirmation, this->logger, this->mbin, transaction, function_code, address0);
+					modbus_apply_positive_confirmation(this->confirmations, this->logger, this->mbin, transaction, function_code, address0);
 				}
 			}
 		});

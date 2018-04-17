@@ -1,5 +1,8 @@
 #pragma once
 
+#include <map>
+#include <list>
+
 #include "mrit/magic.hpp"
 #include "IPLCClient.hpp"
 #include "syslog.hpp"
@@ -9,9 +12,18 @@ namespace WarGrey::SCADA {
 	class IMRClient;
 
 	private enum class MRSignal {
-		Realtime,
+		Realtime /* it must be the first, @see IMRClient::IMRClient() */,
+		DigitalInputRaw, DigitalOutputRaw, DigitalInput,
 		AnalogInput, AnalogOutput, AnalogInputRaw, AnalogOutputRaw,
-		DigitalInput, DigitalOutput, DigitalInputRaw, DigitalInputRaw
+		All /* it must be the last, @see IMRClient::IMRClient() */
+	};
+
+	private class IMRConfiguration : public WarGrey::SCADA::SharedObject {
+	public:
+		virtual bool fill_signal_preferences(MRSignal type, uint16 *data_block, uint16* addr0, uint16* addrn) = 0;
+
+	protected:
+		~IMRConfiguration() noexcept {}
 	};
 
 	private class IMRConfirmation abstract {
@@ -32,16 +44,13 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void on_scheduled_request(IMRClient* device, long long count, long long interval, long long uptime) = 0;
-
-	public:
-		virtual void fill_signal_reader_configuration(MRSignal type, uint8* data_block, uint16* addr0, uint16* addrn) = 0;
 	};
 
 	private class IMRClient abstract : public WarGrey::SCADA::IPLCClient {
     public:
         virtual ~IMRClient() noexcept;
 
-		IMRClient(WarGrey::SCADA::Syslog* logger,
+		IMRClient(WarGrey::SCADA::Syslog* logger, IMRConfiguration* configuration,
 			Platform::String^ server, uint16 service,
 			WarGrey::SCADA::IMRConfirmation* confirmation);
 
@@ -51,10 +60,13 @@ namespace WarGrey::SCADA {
 		bool connected() override;
 		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
+	public:
+		void read_signal(MRSignal type);
+		void append_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);
+
     public:
 		virtual void read_signal(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
-		virtual void read_signal(MRSignal signal) = 0;
-
+		
 	public:
 		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
@@ -83,18 +95,26 @@ namespace WarGrey::SCADA {
 		Windows::Storage::Streams::DataWriter^ mrout;
 		
 	private:
-		WarGrey::SCADA::IMRConfirmation* confirmation;
+		std::list<WarGrey::SCADA::IMRConfirmation*> confirmations; 
+		WarGrey::SCADA::IMRConfiguration* configuration;
 		WarGrey::SCADA::Syslog* logger;
+
+	private:
+		std::map<uint16, MRSignal> datablock_types;
     };
 
     private class MRClient : public WarGrey::SCADA::IMRClient {
     public:
-        MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MR_TCP_DEFAULT_PORT)
-			: IMRClient(logger, server, port, nullptr) {};
+        MRClient(WarGrey::SCADA::Syslog* logger, IMRConfiguration* configuration,
+			Platform::String^ server, uint16 port = MR_TCP_DEFAULT_PORT)
+			: IMRClient(logger, configuration, server, port, nullptr) {};
 		
-		MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server,
-			IMRConfirmation* confirmation, uint16 port = MR_TCP_DEFAULT_PORT)
-			: IMRClient(logger, server, port, confirmation) {};
+		MRClient(WarGrey::SCADA::Syslog* logger, IMRConfiguration* configuration,
+			Platform::String^ server, IMRConfirmation* confirmation, uint16 port = MR_TCP_DEFAULT_PORT)
+			: IMRClient(logger, configuration, server, port, confirmation) {};
+
+	public:
+		void read_signal(uint16 data_block, uint16 addr0, uint16 addrn) override;
 
 	public:
 		void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;

@@ -3,9 +3,12 @@
 
 #include "planet.hpp"
 #include "timer.hxx"
+#include "mrit.hpp"
 
 #include "page/hydraulics.hpp"
 #include "page/graphlets.hpp"
+
+#include "plc.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -20,18 +23,31 @@ using namespace Microsoft::Graphics::Canvas;
 
 private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
+	virtual ~Universe() {
+		if (this->device != nullptr) {
+			delete this->device;
+		}
+	}
+
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
+		IMRConfiguration* configuration = new PLCConfiguration();
+
 		this->timer = ref new Timer(this, 8);
+		this->device = new MRClient(alarm, configuration, remote_test_server);
 	}
 
 protected:
 	void construct() override {
-		this->add_planet(new HydraulicSystem(remote_test_server));
+		this->add_planet(new HydraulicSystem(this->device));
 		this->add_planet(new GraphletOverview());
 	}
 
 private:
 	WarGrey::SCADA::Timer^ timer;
+
+private:
+	WarGrey::SCADA::IMRClient* device;
 };
 
 private ref class CH6000M3 sealed : public SplitView {

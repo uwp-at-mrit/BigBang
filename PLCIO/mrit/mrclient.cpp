@@ -18,19 +18,28 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-static void modbus_apply_positive_confirmation(IMRConfirmation* cf, Syslog* logger, uint8 function_code
+static void modbus_apply_positive_confirmation(std::list<IMRConfirmation*> cfs, Syslog* logger, uint8 function_code
 	, uint16 data_block, uint16 start_address, uint16 end_address, uint8* data_pool, uint16 data_size) {
 }
 
 /*************************************************************************************************/
-IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
+IMRClient::IMRClient(Syslog* sl, IMRConfiguration* configuration, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
 	this->logger->reference();
 
+	this->configuration = configuration;
+	this->configuration->reference();
+
+	this->append_confirmation_receiver(cf);
 	this->device = ref new HostName(h);
     this->service = p.ToString();
 
-	this->confirmation = cf;
+	for (MRSignal signal = MRSignal::Realtime; signal <= MRSignal::All; signal++) {
+		uint16 data_block;
+
+		this->configuration->fill_signal_preferences(signal, &data_block, nullptr, nullptr);
+		this->datablock_types.insert(std::pair<int, MRSignal>(data_block, signal));
+	}
 
     this->connect();
 };
@@ -38,6 +47,7 @@ IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation*
 IMRClient::~IMRClient() {
 	delete this->socket; // stop the confirmation loop before release transactions.
 
+	this->configuration->destroy();
 	this->logger->destroy();
 }
 
@@ -50,8 +60,14 @@ Syslog* IMRClient::get_logger() {
 }
 
 void IMRClient::send_scheduled_request(long long count, long long interval, long long uptime) {
-	if (this->confirmation != nullptr) {
-		this->confirmation->on_scheduled_request(this, count, interval, uptime);
+	for (IMRConfirmation* confirmation : this->confirmations) {
+		confirmation->on_scheduled_request(this, count, interval, uptime);
+	}
+}
+
+void IMRClient::append_confirmation_receiver(IMRConfirmation* confirmation) {
+	if (confirmation != nullptr) {
+		this->confirmations.push_back(confirmation);
 	}
 }
 
@@ -164,8 +180,8 @@ void IMRClient::wait_process_confirm_loop() {
 					head, fcode, data_block, start_address, end_address,
 					this->device->RawName->Data(), this->service->Data());
 
-				if (this->confirmation != nullptr) {
-					modbus_apply_positive_confirmation(this->confirmation, this->logger,
+				if (!this->confirmations.empty()) {
+					modbus_apply_positive_confirmation(this->confirmations, this->logger,
 						fcode, data_block, start_address, end_address, data_pool, data_size);
 				}
 
@@ -201,11 +217,19 @@ bool IMRClient::connected() {
 	return (this->mrout != nullptr);
 }
 
-void IMRClient::read_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
-	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
+void IMRClient::read_signal(MRSignal type) {
+	uint16 data_block, start_address, end_address;
+
+	if (this->configuration->fill_signal_preferences(type, &data_block, &start_address, &end_address)) {
+		this->read_signal(data_block, start_address, end_address);
+	}
 }
 
 /*************************************************************************************************/
+void MRClient::read_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
+	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
+}
+
 void MRClient::read_realtime_data() {
 	uint8 data_block;
 	uint16 addr0, addrn;

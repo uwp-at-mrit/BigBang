@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <list>
 #include <mutex>
 
 #include "modbus/codes.hpp"
@@ -56,6 +57,9 @@ namespace WarGrey::SCADA {
 		bool connected() override;
 		void send_scheduled_request(long long count, long long interval, long long uptime) override;
 
+	public:
+		void append_confirmation_receiver(WarGrey::SCADA::IModbusConfirmation* confirmation);
+
     public: // data access
 		virtual uint16 read_coils(uint16 address, uint16 quantity) = 0;
 		virtual uint16 read_discrete_inputs(uint16 address, uint16 quantity) = 0;
@@ -97,8 +101,8 @@ namespace WarGrey::SCADA {
 		std::mutex pending_section;
 
 	private:
+		std::list<WarGrey::SCADA::IModbusConfirmation*> confirmations;
 		WarGrey::SCADA::IModbusTransactionIdGenerator* generator;
-		WarGrey::SCADA::IModbusConfirmation* confirmation;
 		WarGrey::SCADA::Syslog* logger;
     };
 

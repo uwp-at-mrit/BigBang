@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	private class HydraulicSystem : public WarGrey::SCADA::Planet {
 	public:
 		~HydraulicSystem() noexcept;
-		HydraulicSystem(Platform::String^ plc);
+		HydraulicSystem(WarGrey::SCADA::IMRClient* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

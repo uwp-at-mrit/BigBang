@@ -25,11 +25,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbserver.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\PLCIO\modbus\mbtest.cpp">
-      <Filter>modbus</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrclient.cpp">
       <Filter>mrit</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbtest.cpp">
+      <Filter>modbus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,11 +69,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbserver.hpp">
       <Filter>modbus</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\PLCIO\modbus\mbtest.hpp">
-      <Filter>modbus</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrclient.hpp">
       <Filter>mrit</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbtest.hpp">
+      <Filter>modbus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

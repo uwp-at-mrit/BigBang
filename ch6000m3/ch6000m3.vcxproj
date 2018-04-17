@@ -223,6 +223,7 @@
     <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
+    <ClCompile Include="plc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />
+    <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -77,11 +77,8 @@ void Syslog::do_log_message(WarGrey::SCADA::Log level, Platform::String^ message
 	attachment.timestamp = update_nowstamp();
 
 	while (logger != nullptr) {
-		auto readers = logger->receivers;
-		auto no_more = readers.end();
-
-		for (auto it = readers.begin(); it != no_more; it++) {
-			(*it)->log_message(level, actual_message, attachment, actual_topic);
+		for (auto r : logger->receivers) {
+			r->log_message(level, actual_message, attachment, actual_topic);
 		}
 
 		// TODO: do we need propagated level?

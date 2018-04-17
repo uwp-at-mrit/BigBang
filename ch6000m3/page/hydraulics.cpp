@@ -320,20 +320,16 @@ private:
 	CanvasTextFormat^ caption_font;
 };
 
-HydraulicSystem::HydraulicSystem(Platform::String^ plc) : Planet(":hs:") {
-	Syslog* alarm = make_system_logger(default_logging_level, "HS");
+HydraulicSystem::HydraulicSystem(IMRClient* plc) : Planet(":hs:"), device(plc) {
 	Hydraulics* console = new Hydraulics(this);
 
 	this->console = console; 
-	this->device = new MRClient(alarm, plc, this->console);
 	this->gridsize = statusbar_height();
+
+	this->device->append_confirmation_receiver(console);
 }
 
 HydraulicSystem::~HydraulicSystem() {
-	if (this->device != nullptr) {
-		delete this->device;
-	}
-
 	if (this->console != nullptr) {
 		delete this->console;
 	}
