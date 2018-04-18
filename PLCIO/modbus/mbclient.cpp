@@ -153,12 +153,6 @@ Syslog* IModbusClient::get_logger() {
 	return this->logger;
 }
 
-void IModbusClient::send_scheduled_request(long long count, long long interval, long long uptime) {
-	for (IModbusConfirmation* confirmation : this->confirmations) {
-		confirmation->on_scheduled_request(this, count, interval, uptime);
-	}
-}
-
 void IModbusClient::append_confirmation_receiver(IModbusConfirmation* confirmation) {
 	if (confirmation != nullptr) {
 		this->confirmations.push_back(confirmation);
@@ -306,6 +300,7 @@ void IModbusClient::wait_process_confirm_loop() {
 			}
 
 			if ((protocol != MODBUS_PROTOCOL) || (unit != MODBUS_TCP_SLAVE)) {
+				// TODO: is it right to check it here?
 				modbus_discard_current_adu(this->logger,
 					L"<discarded non-modbus-tcp confirmation(%hu, %hu, %hu, %hhu) comes from %s:%s>",
 					transaction, protocol, length, unit, this->device->RawName->Data(), this->service->Data());
@@ -351,6 +346,8 @@ void IModbusClient::wait_process_confirm_loop() {
 		} catch (task_discarded&) {
 			discard_dirty_bytes(this->mbin);
 			this->wait_process_confirm_loop();
+		} catch (task_terminated&) {
+			this->connect();
 		} catch (task_canceled&) {
 			this->connect();
 		} catch (Platform::Exception^ e) {

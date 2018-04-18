@@ -1,14 +1,13 @@
 ﻿#include "application.hxx"
 #include "configuration.hpp"
+#include "plc.hpp"
 
 #include "planet.hpp"
 #include "timer.hxx"
-#include "mrit.hpp"
 
 #include "page/hydraulics.hpp"
 #include "page/graphlets.hpp"
 
-#include "plc.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -31,10 +30,9 @@ public:
 
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
-		IMRConfiguration* configuration = new PLCConfiguration();
 
 		this->timer = ref new Timer(this, 8);
-		this->device = new MRClient(alarm, configuration, remote_test_server);
+		this->device = new PLCClient(alarm, remote_test_server);
 	}
 
 protected:
@@ -47,7 +45,7 @@ private:
 	WarGrey::SCADA::Timer^ timer;
 
 private:
-	WarGrey::SCADA::IMRClient* device;
+	PLCClient* device;
 };
 
 private ref class CH6000M3 sealed : public SplitView {

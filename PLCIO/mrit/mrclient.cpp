@@ -23,23 +23,13 @@ static void modbus_apply_positive_confirmation(std::list<IMRConfirmation*> cfs, 
 }
 
 /*************************************************************************************************/
-IMRClient::IMRClient(Syslog* sl, IMRConfiguration* configuration, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
+IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
 	this->logger->reference();
-
-	this->configuration = configuration;
-	this->configuration->reference();
 
 	this->append_confirmation_receiver(cf);
 	this->device = ref new HostName(h);
     this->service = p.ToString();
-
-	for (MRSignal signal = MRSignal::Realtime; signal <= MRSignal::All; signal++) {
-		uint16 data_block;
-
-		this->configuration->fill_signal_preferences(signal, &data_block, nullptr, nullptr);
-		this->datablock_types.insert(std::pair<int, MRSignal>(data_block, signal));
-	}
 
     this->connect();
 };
@@ -47,7 +37,6 @@ IMRClient::IMRClient(Syslog* sl, IMRConfiguration* configuration, Platform::Stri
 IMRClient::~IMRClient() {
 	delete this->socket; // stop the confirmation loop before release transactions.
 
-	this->configuration->destroy();
 	this->logger->destroy();
 }
 
@@ -57,12 +46,6 @@ Platform::String^ IMRClient::device_hostname() {
 
 Syslog* IMRClient::get_logger() {
 	return this->logger;
-}
-
-void IMRClient::send_scheduled_request(long long count, long long interval, long long uptime) {
-	for (IMRConfirmation* confirmation : this->confirmations) {
-		confirmation->on_scheduled_request(this, count, interval, uptime);
-	}
 }
 
 void IMRClient::append_confirmation_receiver(IMRConfirmation* confirmation) {
@@ -147,6 +130,13 @@ void IMRClient::wait_process_confirm_loop() {
 
 		uint16 tail_size = mr_read_header(mrin, &head, &fcode, &data_block, &start_address, &end_address, &data_size);
 
+		if (head != MR_PROTOCOL_HEAD) {
+			modbus_discard_current_adu(this->logger,
+				L"<discarded non-mrit-tcp message(%hhu, %hhu, %hu, %hu, %hu, %hu) comes from %s:%s>",
+				head, fcode, data_block, start_address, end_address, data_size,
+				this->device->RawName->Data(), this->service->Data());
+		}
+
 		return create_task(this->mrin->LoadAsync(tail_size)).then([=](unsigned int size) {
 			uint16 unused_checksum, end_of_message;
 
@@ -155,13 +145,6 @@ void IMRClient::wait_process_confirm_loop() {
 					L"message comes from server %s:%s has been truncated(%u < %hu)",
 					this->device->RawName->Data(), this->service->Data(),
 					size, tail_size);
-			}
-
-			if (head != MR_PROTOCOL_HEAD) {
-				modbus_discard_current_adu(this->logger,
-					L"<discarded non-mrit-tcp message(%hhu, %hhu, %hu, %hu, %hu, %hu) comes from %s:%s>",
-					head, fcode, data_block, start_address, end_address, data_size,
-					this->device->RawName->Data(), this->service->Data());
 			}
 
 			uint8* data_pool = new uint8[data_size];
@@ -204,6 +187,8 @@ void IMRClient::wait_process_confirm_loop() {
 		} catch (task_discarded&) {
 			discard_dirty_bytes(this->mrin);
 			this->wait_process_confirm_loop();
+		} catch (task_terminated&) {
+			this->connect();
 		} catch (task_canceled&) {
 			this->connect();
 		} catch (Platform::Exception^ e) {
@@ -217,39 +202,9 @@ bool IMRClient::connected() {
 	return (this->mrout != nullptr);
 }
 
-void IMRClient::read_signal(MRSignal type) {
-	uint16 data_block, start_address, end_address;
-
-	if (this->configuration->fill_signal_preferences(type, &data_block, &start_address, &end_address)) {
-		this->read_signal(data_block, start_address, end_address);
-	}
-}
-
 /*************************************************************************************************/
-void MRClient::read_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRClient::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
 	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
-}
-
-void MRClient::read_realtime_data() {
-	uint8 data_block;
-	uint16 addr0, addrn;
-	//this->read_signal();
-}
-
-void MRClient::read_analog_input_data(bool raw) {
-
-}
-
-void MRClient::read_analog_output_data(bool raw) {
-
-}
-
-void MRClient::read_digital_input_data(bool raw) {
-
-}
-
-void MRClient::read_digital_output_data(bool raw) {
-
 }
 
 void MRClient::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {

@@ -121,9 +121,6 @@ public:
 		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
 		this->master->insert(this->visor);
-
-		this->test = new Svglet("Cool Pump");
-		this->master->insert(this->test, 0.0F, 400.0F, 100.0F);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -269,10 +266,7 @@ public:
 	}
 
 public:
-	void on_scheduled_request(IMRClient* device, long long count, long long interval, long long uptime) override {
-		//device->read_input_registers(0, 16);
-	}
-
+	/*
 	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
 		float Mpa = 0.0F;
 		
@@ -289,10 +283,13 @@ public:
 
 		//this->workbench->leave_critical_section();
 	}
+	*/
 
+	/*
 	void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, Syslog* logger) override {
 		logger->log_message(Log::Error, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
 	}
+	*/
 
 // never deletes these graphlets mannually
 private:
@@ -312,9 +309,6 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> hslabels;
 	std::map<HS, Credit<Booleanlet, HS>*> visor_states;
 	std::map<HS, Credit<Labellet, HS>*> vslabels;
-
-private:
-	Svglet* test;
 	
 private:
 	CanvasTextFormat^ caption_font;

@@ -3,7 +3,13 @@
 
 using namespace WarGrey::SCADA;
 
-bool PLCConfiguration::fill_signal_preferences(MRSignal type, uint16* db, uint16* addr0, uint16* addrn) {
+PLCClient::PLCClient(Syslog* alarm, Platform::String^ ipv4) : MRClient(alarm, ipv4) {}
+
+void PLCClient::send_scheduled_request(long long count, long long interval, long long uptime) {
+	this->read_all_signal(98, 1, 4571);
+}
+
+bool PLCClient::fill_signal_preferences(MRSignal type, uint16* db, uint16* addr0, uint16* addrn) {
 	bool has_set = true;
 	uint16 data_block, end;
 
