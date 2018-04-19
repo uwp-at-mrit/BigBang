@@ -58,8 +58,12 @@ void StreamListener::listen(ISocketAcceptable* master, Platform::String^ service
 }
 
 /*************************************************************************************************/
-Platform::String^ WarGrey::SCADA::socket_description(StreamSocket^ client) {
+Platform::String^ WarGrey::SCADA::socket_remote_description(StreamSocket^ client) {
 	return client->Information->RemoteHostName->RawName + ":" + client->Information->RemotePort;
+}
+
+Platform::String^ WarGrey::SCADA::socket_local_description(StreamSocket^ client) {
+	return client->Information->LocalAddress->RawName + ":" + client->Information->LocalPort;
 }
 
 DataReader^ WarGrey::SCADA::make_socket_reader(StreamSocket^ socket) {

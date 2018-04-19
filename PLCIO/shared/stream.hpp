@@ -6,7 +6,8 @@ namespace WarGrey::SCADA {
 		virtual void on_socket(Windows::Networking::Sockets::StreamSocket^ socket) = 0;
 	};
 
-	Platform::String^ socket_description(Windows::Networking::Sockets::StreamSocket^ socket);
+	Platform::String^ socket_remote_description(Windows::Networking::Sockets::StreamSocket^ socket);
+	Platform::String^ socket_local_description(Windows::Networking::Sockets::StreamSocket^ socket);
 
 	Windows::Storage::Streams::DataReader^ make_socket_reader(Windows::Networking::Sockets::StreamSocket^ socket);
 	Windows::Storage::Streams::DataWriter^ make_socket_writer(Windows::Networking::Sockets::StreamSocket^ socket);

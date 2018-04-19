@@ -28,12 +28,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbtest.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\PLCIO\mrit\mrmaster.cpp">
-      <Filter>mrit</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\WinSCADA\PLCIO\shared\stream.cpp">
-      <Filter>shared</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrmaster.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\stream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
@@ -75,12 +71,8 @@
       <Filter>modbus</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)IPLCMaster.hpp" />
-    <ClInclude Include="D:\WinSCADA\PLCIO\mrit\mrmaster.hpp">
-      <Filter>mrit</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\WinSCADA\PLCIO\shared\stream.hpp">
-      <Filter>shared</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrmaster.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\stream.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="modbus">

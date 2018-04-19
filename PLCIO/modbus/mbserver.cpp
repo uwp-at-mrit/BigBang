@@ -417,7 +417,7 @@ int IModbusServer::do_private_function(uint8 function_code, uint8* request, uint
 /*************************************************************************************************/
 void IModbusServer::on_socket(StreamSocket^ client) {
 	uint8 pdu_data[MODBUS_TCP_MAX_ADU_LENGTH];
-	Platform::String^ id = socket_description(client);
+	Platform::String^ id = socket_remote_description(client);
 	DataReader^ mbin = make_socket_reader(client);
 	DataWriter^ mbout = make_socket_writer(client);
 	

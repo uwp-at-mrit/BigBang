@@ -64,6 +64,18 @@ Platform::String^ IMRMaster::device_hostname() {
 	return hostname;
 }
 
+Platform::String^ IMRMaster::device_description() {
+	Platform::String^ desc = nullptr;
+
+	if (this->device != nullptr) {
+		desc = this->device->RawName + ":" + this->service;
+	} else if (this->socket != nullptr) {
+		desc = socket_remote_description(this->socket);
+	}
+
+	return desc;
+}
+
 Syslog* IMRMaster::get_logger() {
 	return this->logger;
 }
@@ -83,13 +95,12 @@ void IMRMaster::shake_hands() {
 }
 
 void IMRMaster::connect() {
+	// TODO: should the `this->listener == nullptr` be checked here? 
 	this->clear();
 	this->socket = ref new StreamSocket();
 	this->socket->Control->KeepAlive = false;
 
-	this->logger->log_message(Log::Debug,
-		L">> connecting to device[%s:%s]",
-		this->device->RawName->Data(), this->service->Data());
+	this->logger->log_message(Log::Debug, L">> connecting to device[%s]", this->device_description()->Data());
 
     create_task(this->socket->ConnectAsync(this->device, this->service)).then([this](task<void> handshaking) {
         try {
@@ -98,9 +109,7 @@ void IMRMaster::connect() {
             this->mrin  = make_socket_reader(this->socket);
             this->mrout = make_socket_writer(this->socket);
 
-            this->logger->log_message(Log::Info,
-				L">> connected to device[%s:%s]",
-				this->device->RawName->Data(), this->service->Data());
+            this->logger->log_message(Log::Info, L">> connected to device[%s]", this->device_description()->Data());
 
 			this->wait_process_confirm_loop();
         } catch (Platform::Exception^ e) {
@@ -113,8 +122,9 @@ void IMRMaster::connect() {
 void IMRMaster::listen() {
 	if (this->listener != nullptr) {
 		try {
+			this->clear();
 			this->listener->listen(this, this->service);
-			this->logger->log_message(Log::Info, L"## listening on %s:%s", L"0.0.0.0", this->service->Data());
+			this->logger->log_message(Log::Info, L"## listening on 0.0.0.0:%s", this->service->Data());
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
 		}
@@ -122,13 +132,11 @@ void IMRMaster::listen() {
 }
 
 void IMRMaster::on_socket(StreamSocket^ plc) {
-	this->clear();
-
 	this->socket = plc;
 	this->mrin  = make_socket_reader(plc);
 	this->mrout = make_socket_writer(plc);
 
-	this->logger->log_message(Log::Info, L"# device[%s] is accepted", socket_description(plc)->Data());
+	this->logger->log_message(Log::Info, L"# device[%s] is accepted", this->device_description()->Data());
 
 	this->wait_process_confirm_loop();
 }
@@ -143,9 +151,8 @@ void IMRMaster::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 add
 				unsigned int sent = sending.get();
 
 				this->logger->log_message(Log::Debug,
-					L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to device[%s:%s]>",
-					sent, fcode, data_block, addr0, addrn,
-					this->device->RawName->Data(), this->service->Data());
+					L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to device[%s]>",
+					sent, fcode, data_block, addr0, addrn, this->device_description()->Data());
 			} catch (task_canceled&) {
 			} catch (Platform::Exception^ e) {
 				this->logger->log_message(Log::Warning, e->Message);
@@ -163,14 +170,11 @@ void IMRMaster::wait_process_confirm_loop() {
 
 		if (size < MR_PROTOCOL_HEADER_LENGTH) {
 			if (size == 0) {
-				modbus_protocol_fatal(this->logger,
-					L"device[%s:%s] has lost",
-					this->device->RawName->Data(), this->service->Data());
+				modbus_protocol_fatal(this->logger, L"device[%s] has lost", this->device_description()->Data());
 			} else {
 				modbus_protocol_fatal(this->logger,
-					L"message header comes from device[%s:%s] is too short(%u < %hu)",
-					this->device->RawName->Data(), this->service->Data(),
-					size, MR_PROTOCOL_HEADER_LENGTH);
+					L"message header comes from device[%s] is too short(%u < %hu)",
+					this->device_description()->Data(), size, MR_PROTOCOL_HEADER_LENGTH);
 			}
 		}
 
@@ -178,9 +182,8 @@ void IMRMaster::wait_process_confirm_loop() {
 
 		if (leading_head != MR_PROTOCOL_HEAD) {
 			modbus_discard_current_adu(this->logger,
-				L"<discarded non-mrit-tcp message(%hhu, %hhu, %hu, %hu, %hu, %hu) comes from device[%s:%s]>",
-				leading_head, fcode, data_block, start_address, end_address, data_size,
-				this->device->RawName->Data(), this->service->Data());
+				L"<discarded non-mrit-tcp message(%hhu, %hhu, %hu, %hu, %hu, %hu) comes from device[%s]>",
+				leading_head, fcode, data_block, start_address, end_address, data_size, this->device_description()->Data());
 		}
 
 		return create_task(this->mrin->LoadAsync(tail_size)).then([=](unsigned int size) {
@@ -188,9 +191,8 @@ void IMRMaster::wait_process_confirm_loop() {
 
 			if (size < tail_size) {
 				modbus_protocol_fatal(this->logger,
-					L"message comes from server device[%s:%s] has been truncated(%u < %hu)",
-					this->device->RawName->Data(), this->service->Data(),
-					size, tail_size);
+					L"message comes from server device[%s] has been truncated(%u < %hu)",
+					this->device_description()->Data(), size, tail_size);
 			}
 
 			uint8* data_pool = new uint8[data_size];
@@ -200,14 +202,12 @@ void IMRMaster::wait_process_confirm_loop() {
 				delete[] data_pool;
 
 				modbus_protocol_fatal(this->logger,
-					L"message comes from devce[%s:%s] has an malformed end(expected %hu, received %hu)",
-					this->device->RawName->Data(), this->service->Data(),
-					MR_PROTOCOL_END, end_of_message);
+					L"message comes from devce[%s] has an malformed end(expected %hu, received %hu)",
+					this->device_description()->Data(), MR_PROTOCOL_END, end_of_message);
 			} else {
 				this->logger->log_message(Log::Debug,
-					L"<received confirmation(%hhu, %hhu, %hu, %hu, %hu) for function 0x%02X comes from device[%s:%s]>",
-					leading_head, fcode, data_block, start_address, end_address,
-					this->device->RawName->Data(), this->service->Data());
+					L"<received confirmation(%hhu, %hhu, %hu, %hu, %hu) for function 0x%02X comes from device[%s]>",
+					leading_head, fcode, data_block, start_address, end_address, this->device_description()->Data());
 
 				if (!this->confirmations.empty()) {
 					modbus_apply_positive_confirmation(this->confirmations, this->logger,
@@ -225,8 +225,8 @@ void IMRMaster::wait_process_confirm_loop() {
 
 			if (dirty > 0) {
 				this->logger->log_message(Log::Debug,
-					L"<discarded last %u bytes of the confirmation comes from device[%s:%s]>",
-					dirty, this->device->RawName->Data(), this->service->Data());
+					L"<discarded last %u bytes of the confirmation comes from device[%s]>",
+					dirty, this->device_description()->Data());
 			}
 
 			this->wait_process_confirm_loop();

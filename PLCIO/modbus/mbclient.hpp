@@ -50,6 +50,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		Platform::String^ device_hostname() override;
+		Platform::String^ device_description() override;
 		Syslog* get_logger() override;
 		void shake_hands() override;
 		bool connected() override;
