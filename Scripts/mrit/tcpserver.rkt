@@ -15,19 +15,20 @@
                 (define-values (hostname port _r _p) (tcp-addresses listener #true))
                 (printf "> ~a:~a~n" hostname port)
                 (define-values (/dev/tcpin /dev/tcpout) (tcp-accept/enable-break listener))
+                (file-stream-buffer-mode /dev/tcpout 'none)
                 
                 (define-values (local lport remote rport) (tcp-addresses /dev/tcpout #true))
                 (printf "[accepted ~a:~a]~n" hostname port)
 
-                (define message (read-mrmsg /dev/tcpin))
-                (printf "[received ~a]~n" message)
-                (define-values (addr0 addrn) (values (mrmsg-addr0 message) (mrmsg-addrn message)))
+                (define-values (signature _) (read-mrmsg /dev/tcpin))
+                (printf "[received ~a]~n" signature)
+                (define-values (addr0 addrn) (values (mrmsg-addr0 signature) (mrmsg-addrn signature)))
 
                 (when (> addrn (bytes-length memory)) (set! memory (make-bytes (+ addrn 1))))
                 (for ([i (in-range addr0 (+ addrn 1))]) (bytes-set! memory i (random 0 256)))
-                
+
                 (printf ">> [sent ~a bytes to ~a:~a]~n"
-                        (write-mrmsg /dev/tcpout (mrmsg-code message) (mrmsg-block message) addr0 addrn memory)
+                        (write-mrmsg /dev/tcpout (mrmsg-code signature) (mrmsg-block signature) addr0 addrn memory)
                         remote rport)))
        (thunk (custodian-shutdown-all (current-custodian))))))
   (sleep 1)

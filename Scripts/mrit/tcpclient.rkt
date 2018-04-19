@@ -13,9 +13,8 @@
          (thunk (void))
          (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break "192.168.8.100" 2100)])
                   (write-mrmsg /dev/tcpout 65 98 1 4571)
-                  (define resp (read-mrmsg /dev/tcpin))
-                  (displayln (list (mrmsg-code resp) (mrmsg-block resp)
-                                   (mrmsg-addr0 resp) (mrmsg-addrn resp)))))
+                  (define-values (signature data) (read-mrmsg /dev/tcpin))
+                  (displayln signature)))
          (thunk (custodian-shutdown-all (current-custodian))))))
     
     (sleep 1)
