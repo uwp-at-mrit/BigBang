@@ -11,7 +11,7 @@
       (parameterize ([current-custodian (make-custodian)])
         (dynamic-wind
          (thunk (void))
-         (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break "127.0.0.1" 2100)])
+         (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break "192.168.8.100" 2100)])
                   (write-mrmsg /dev/tcpout 65 98 1 4571)
                   (define resp (read-mrmsg /dev/tcpin))
                   (displayln (list (mrmsg-code resp) (mrmsg-block resp)
