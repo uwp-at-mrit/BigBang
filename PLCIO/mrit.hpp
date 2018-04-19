@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mrit/mrclient.hpp"
+#include "mrit/mrmaster.hpp"
 
 #include "shared/databytes.hpp"
 #include "modbus/exception.hpp"

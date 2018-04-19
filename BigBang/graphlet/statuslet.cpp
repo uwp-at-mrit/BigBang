@@ -193,11 +193,10 @@ float WarGrey::SCADA::statusbar_height() {
 }
 
 /*************************************************************************************************/
-Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCClient* device) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCMaster* device) {
 	initialize_status_font();
 	this->device = device;
 	this->caption = make_text_layout(speak(caption), status_font);
-	this->device_name = make_text_layout((this->device == nullptr) ? speak(":offline:") : device->device_hostname(), status_font);
 }
 
 void Statusbarlet::construct() {
@@ -245,15 +244,24 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		ds->DrawText(speak(":plc:"), plc_x, context_y, Colours::Yellow, status_font);
 
 		if (this->device == nullptr) {
+			if (this->device_name == nullptr) {
+				this->device_name = make_text_layout(speak(":offline:"), status_font);
+			}
+
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Red);
 		} else if (this->device->connected()) {
+			if (this->device_name == nullptr) {
+				this->device_name = make_text_layout(this->device->device_hostname(), status_font);
+			}
+
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
 		} else {
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
-
+			
 			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, Colours::Red, status_font);
+			this->device_name = nullptr;
 		}
 	}
 }

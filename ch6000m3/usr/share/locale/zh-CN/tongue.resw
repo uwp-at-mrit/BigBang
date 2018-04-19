@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name=":connecting:" xml:space="preserve">
-    <value>连接中</value>
+    <value>监听中</value>
   </data>
   <data name=":disconnected:" xml:space="preserve">
     <value>断开</value>

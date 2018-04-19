@@ -5,7 +5,7 @@
 #include <mutex>
 
 #include "modbus/codes.hpp"
-#include "IPLCClient.hpp"
+#include "IPLCMaster.hpp"
 #include "syslog.hpp"
 #include "object.hpp"
 
@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 		virtual void on_private_response(uint16 transaction, uint8 function_code, uint8* data, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
-	private class IModbusClient abstract : public WarGrey::SCADA::IPLCClient {
+	private class IModbusClient abstract : public WarGrey::SCADA::IPLCMaster {
     public:
         virtual ~IModbusClient() noexcept;
 
@@ -51,6 +51,7 @@ namespace WarGrey::SCADA {
 	public:
 		Platform::String^ device_hostname() override;
 		Syslog* get_logger() override;
+		void shake_hands() override;
 		bool connected() override;
 
 	public:
@@ -79,7 +80,6 @@ namespace WarGrey::SCADA {
 		uint16 do_write_registers(ModbusTransaction* mt, uint8 offset, uint16 address, uint16 quantity, uint16* src);
 
 	private:
-		void connect();
 		void apply_request(std::pair<uint16, ModbusTransaction*>& transaction);
 		void wait_process_confirm_loop();
 

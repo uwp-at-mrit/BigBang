@@ -123,7 +123,7 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
 	this->generator = ((g == nullptr) ? new WarGrey::SCADA::ModbusSequenceGenerator() : g);
 	this->generator->reference();
 
-    this->connect();
+    this->shake_hands();
 };
 
 IModbusClient::~IModbusClient() {
@@ -159,7 +159,7 @@ void IModbusClient::append_confirmation_receiver(IModbusConfirmation* confirmati
 	}
 }
 
-void IModbusClient::connect() {
+void IModbusClient::shake_hands() {
 	if (this->mbout != nullptr) {
 		delete this->socket;
 		delete this->mbin;
@@ -203,7 +203,7 @@ void IModbusClient::connect() {
 			this->blocking_section.unlock();
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, socket_strerror(e));
-			this->connect();
+			this->shake_hands();
         }
     });
 }
@@ -249,7 +249,7 @@ void IModbusClient::apply_request(std::pair<uint16, ModbusTransaction*>& transac
 			this->pending_section.lock();
 			this->pending_requests.erase(tid);
 			this->pending_section.unlock();
-			this->connect();
+			this->shake_hands();
 		}});
 }
 
@@ -351,12 +351,12 @@ void IModbusClient::wait_process_confirm_loop() {
 			discard_dirty_bytes(this->mbin);
 			this->wait_process_confirm_loop();
 		} catch (task_terminated&) {
-			this->connect();
+			this->shake_hands();
 		} catch (task_canceled&) {
-			this->connect();
+			this->shake_hands();
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
-			this->connect();
+			this->shake_hands();
 		}
 	});
 }

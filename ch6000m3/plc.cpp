@@ -3,7 +3,7 @@
 
 using namespace WarGrey::SCADA;
 
-PLCClient::PLCClient(Syslog* alarm, Platform::String^ ipv4) : MRClient(alarm, ipv4) {}
+PLCClient::PLCClient(Syslog* alarm) : MRMaster(alarm) {}
 
 void PLCClient::send_scheduled_request(long long count, long long interval, long long uptime) {
 	this->read_all_signal(98, 1, 4571);

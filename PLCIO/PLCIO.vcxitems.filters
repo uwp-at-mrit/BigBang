@@ -25,16 +25,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbserver.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrclient.cpp">
-      <Filter>mrit</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbtest.cpp">
       <Filter>modbus</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\PLCIO\mrit\mrmaster.cpp">
+      <Filter>mrit</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\PLCIO\shared\stream.cpp">
+      <Filter>shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)IPLCClient.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mrit\magic.hpp">
       <Filter>mrit</Filter>
     </ClInclude>
@@ -69,11 +71,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbserver.hpp">
       <Filter>modbus</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrclient.hpp">
-      <Filter>mrit</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbtest.hpp">
       <Filter>modbus</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IPLCMaster.hpp" />
+    <ClInclude Include="D:\WinSCADA\PLCIO\mrit\mrmaster.hpp">
+      <Filter>mrit</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\PLCIO\shared\stream.hpp">
+      <Filter>shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

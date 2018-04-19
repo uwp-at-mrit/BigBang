@@ -1,14 +1,14 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
-#include "IPLCClient.hpp"
+#include "IPLCMaster.hpp"
 
 namespace WarGrey::SCADA {
 	float statusbar_height();
 
     private class Statusbarlet : public virtual WarGrey::SCADA::IGraphlet {
     public:
-		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCClient* device = nullptr);
+		Statusbarlet(Platform::String^ caption, WarGrey::SCADA::IPLCMaster* device = nullptr);
 
     public:
         void construct() override;
@@ -19,7 +19,7 @@ namespace WarGrey::SCADA {
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ device_name;
-		WarGrey::SCADA::IPLCClient* device;
+		WarGrey::SCADA::IPLCMaster* device;
     };
 
 	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {

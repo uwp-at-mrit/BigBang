@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	private class HydraulicSystem : public WarGrey::SCADA::Planet {
 	public:
 		~HydraulicSystem() noexcept;
-		HydraulicSystem(WarGrey::SCADA::IMRClient* plc);
+		HydraulicSystem(WarGrey::SCADA::IMRMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
-		WarGrey::SCADA::IMRClient* device;
+		WarGrey::SCADA::IMRMaster* device;
 		WarGrey::SCADA::IMRConfirmation* console;
 
 	private: // never deletes these graphlets mannually

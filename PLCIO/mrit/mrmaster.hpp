@@ -3,18 +3,20 @@
 #include <list>
 
 #include "mrit/magic.hpp"
-#include "IPLCClient.hpp"
+#include "shared/stream.hpp"
+
+#include "IPLCMaster.hpp"
 #include "syslog.hpp"
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	class IMRClient;
+	class IMRMaster;
 
 	private enum class MRSignal {
-		Realtime /* it must be the first, @see IMRClient::IMRClient() */,
+		Realtime /* it must be the first, @see IMRMaster::IMRMaster() */,
 		DigitalInputRaw, DigitalOutputRaw, DigitalInput,
 		AnalogInput, AnalogOutput, AnalogInputRaw, AnalogOutputRaw,
-		All /* it must be the last, @see IMRClient::IMRClient() */
+		All /* it must be the last, @see IMRMaster::IMRMaster() */
 	};
 
 	private class IMRConfirmation abstract {
@@ -26,15 +28,16 @@ namespace WarGrey::SCADA {
 		virtual void on_digital_output_data(uint16 address, uint16* input_registers, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
-	private class IMRClient abstract : public WarGrey::SCADA::IPLCClient {
+	private class IMRMaster abstract : public WarGrey::SCADA::IPLCMaster, public WarGrey::SCADA::ISocketAcceptable {
     public:
-        virtual ~IMRClient() noexcept;
+        virtual ~IMRMaster() noexcept;
 
-		IMRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 service, WarGrey::SCADA::IMRConfirmation* confirmation);
+		IMRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 service, WarGrey::SCADA::IMRConfirmation* confirmation);
 
 	public:
 		Platform::String^ device_hostname() override;
 		Syslog* get_logger() override;
+		void shake_hands() override;
 		bool connected() override;
 
 	public:
@@ -45,6 +48,9 @@ namespace WarGrey::SCADA {
 		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 
+	public:
+		void on_socket(Windows::Networking::Sockets::StreamSocket^ plc) override;
+
 	protected:
 		virtual bool fill_signal_preferences(MRSignal type, uint16 *data_block, uint16* addr0, uint16* addrn) = 0;
 
@@ -53,9 +59,13 @@ namespace WarGrey::SCADA {
 
 	private:
 		void connect();
+		void listen();
+		void clear();
 		void wait_process_confirm_loop();
 
     private:
+		// NOTE: Either `listener` or `socket` will work depends on the `device`.
+		WarGrey::SCADA::StreamListener* listener;
         Windows::Networking::Sockets::StreamSocket^ socket;
         Windows::Networking::HostName^ device;
         Platform::String^ service;
@@ -69,13 +79,13 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* logger;
     };
 
-    private class MRClient : public WarGrey::SCADA::IMRClient {
+    private class MRMaster : public WarGrey::SCADA::IMRMaster {
     public:
-        MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port = MR_TCP_DEFAULT_PORT)
-			: IMRClient(logger, server, port, nullptr) {}
+        MRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server = nullptr, uint16 port = MR_TCP_DEFAULT_PORT)
+			: IMRMaster(logger, server, port, nullptr) {}
 		
-		MRClient(WarGrey::SCADA::Syslog* logger, Platform::String^ server, IMRConfirmation* confirmation, uint16 port = MR_TCP_DEFAULT_PORT)
-			: IMRClient(logger, server, port, confirmation) {}
+		MRMaster(WarGrey::SCADA::Syslog* logger, IMRConfirmation* confirmation, Platform::String^ server = nullptr, uint16 port = MR_TCP_DEFAULT_PORT)
+			: IMRMaster(logger, server, port, confirmation) {}
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime) {}

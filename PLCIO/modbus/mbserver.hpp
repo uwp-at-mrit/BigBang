@@ -2,10 +2,12 @@
 
 #include <cinttypes>
 
+#include "shared/stream.hpp"
+
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-    private class IModbusServer abstract {
+	private class IModbusServer abstract : public WarGrey::SCADA::ISocketAcceptable {
     public:
 		virtual ~IModbusServer() noexcept;
 		IModbusServer(WarGrey::SCADA::Syslog* logger,
@@ -42,12 +44,22 @@ namespace WarGrey::SCADA {
     public: // Other
         virtual int do_private_function(uint8 function_code, uint8* request, uint16 request_data_length, uint8* response);
 
+	public: // run as tasks cocurrently 
+		void on_socket(Windows::Networking::Sockets::StreamSocket^ socket) override;
+
+	private: // run as tasks cocurrently
+		void wait_process_reply_loop(Windows::Networking::Sockets::StreamSocket^ client,
+			Platform::String^ id,
+			Windows::Storage::Streams::DataReader^ mbin,
+			Windows::Storage::Streams::DataWriter^ mbout,
+			uint8* pdu_data);
+
 	protected:
 		const char* standard_identifications[7];
 		WarGrey::SCADA::Syslog* logger;
 
     private:
-        Windows::Networking::Sockets::StreamSocketListener^ listener;
+        WarGrey::SCADA::StreamListener* listener;
 		Platform::String^ service;
     };
 }

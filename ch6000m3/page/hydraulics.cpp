@@ -314,7 +314,7 @@ private:
 	CanvasTextFormat^ caption_font;
 };
 
-HydraulicSystem::HydraulicSystem(IMRClient* plc) : Planet(":hs:"), device(plc) {
+HydraulicSystem::HydraulicSystem(IMRMaster* plc) : Planet(":hs:"), device(plc) {
 	Hydraulics* console = new Hydraulics(this);
 
 	this->console = console; 

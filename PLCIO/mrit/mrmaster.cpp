@@ -1,12 +1,13 @@
 #include <ppltasks.h>
 
-#include "mrit/mrclient.hpp"
 #include "mrit/magic.hpp"
 #include "mrit/message.hpp"
+#include "mrit/mrmaster.hpp"
+
+#include "shared/netexn.hpp"
 
 #include "modbus/exception.hpp"
 #include "modbus/dataunit.hpp"
-#include "shared/netexn.hpp"
 
 #include "syslog.hpp"
 
@@ -23,46 +24,66 @@ static void modbus_apply_positive_confirmation(std::list<IMRConfirmation*> cfs, 
 }
 
 /*************************************************************************************************/
-IMRClient::IMRClient(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
+IMRMaster::IMRMaster(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
 	this->logger->reference();
 
 	this->append_confirmation_receiver(cf);
-	this->device = ref new HostName(h);
     this->service = p.ToString();
 
-    this->connect();
+	if (h == nullptr) {
+		this->listener = new StreamListener();
+	} else {
+		this->device = ref new HostName(h);
+	}
+
+    this->shake_hands();
 };
 
-IMRClient::~IMRClient() {
-	delete this->socket; // stop the confirmation loop before release transactions.
+IMRMaster::~IMRMaster() {
+	if (this->socket != nullptr) {
+		delete this->socket; // stop the confirmation loop before release transactions.
+	}
+
+	if (this->listener != nullptr) {
+		delete this->listener;
+	}
 
 	this->logger->destroy();
 }
 
-Platform::String^ IMRClient::device_hostname() {
-	return this->device->RawName;
+Platform::String^ IMRMaster::device_hostname() {
+	Platform::String^ hostname = nullptr;
+
+	if (this->device != nullptr) {
+		hostname = this->device->RawName;
+	} else if (this->socket != nullptr) {
+		hostname = this->socket->Information->RemoteAddress->DisplayName;
+	}
+
+	return hostname;
 }
 
-Syslog* IMRClient::get_logger() {
+Syslog* IMRMaster::get_logger() {
 	return this->logger;
 }
 
-void IMRClient::append_confirmation_receiver(IMRConfirmation* confirmation) {
+void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
 	if (confirmation != nullptr) {
 		this->confirmations.push_back(confirmation);
 	}
 }
 
-void IMRClient::connect() {
-	if (this->mrout != nullptr) {
-		delete this->socket;
-		delete this->mrin;
-		delete this->mrout;
-
-		this->mrout = nullptr;
+void IMRMaster::shake_hands() {
+	if (this->listener != nullptr) {
+		this->listen();
+	} else {
+		this->connect();
 	}
+}
 
+void IMRMaster::connect() {
+	this->clear();
 	this->socket = ref new StreamSocket();
 	this->socket->Control->KeepAlive = false;
 
@@ -74,13 +95,8 @@ void IMRClient::connect() {
         try {
             handshaking.get();
 
-            this->mrin  = ref new DataReader(this->socket->InputStream);
-            this->mrout = ref new DataWriter(this->socket->OutputStream);
-
-            mrin->UnicodeEncoding = UnicodeEncoding::Utf8;
-            mrin->ByteOrder = ByteOrder::BigEndian;
-            mrout->UnicodeEncoding = UnicodeEncoding::Utf8;
-            mrout->ByteOrder = ByteOrder::BigEndian;
+            this->mrin  = make_socket_reader(this->socket);
+            this->mrout = make_socket_writer(this->socket);
 
             this->logger->log_message(Log::Info,
 				L">> connected to device[%s:%s]",
@@ -89,32 +105,57 @@ void IMRClient::connect() {
 			this->wait_process_confirm_loop();
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, socket_strerror(e));
-			this->connect();
+			this->shake_hands();
         }
     });
 }
 
-void IMRClient::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
-	mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
-	mr_write_tail(this->mrout, data, size);
-
-	create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
+void IMRMaster::listen() {
+	if (this->listener != nullptr) {
 		try {
-			unsigned int sent = sending.get();
-
-			this->logger->log_message(Log::Debug,
-				L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to device[%s:%s]>",
-				sent, fcode, data_block, addr0, addrn,
-				this->device->RawName->Data(), this->service->Data());
-		} catch (task_canceled&) {
+			this->listener->listen(this, this->service);
+			this->logger->log_message(Log::Info, L"## listening on %s:%s", L"0.0.0.0", this->service->Data());
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
-			this->connect();
 		}
-	});
+	}
 }
 
-void IMRClient::wait_process_confirm_loop() {
+void IMRMaster::on_socket(StreamSocket^ plc) {
+	this->clear();
+
+	this->socket = plc;
+	this->mrin  = make_socket_reader(plc);
+	this->mrout = make_socket_writer(plc);
+
+	this->logger->log_message(Log::Info, L"# device[%s] is accepted", socket_description(plc)->Data());
+
+	this->wait_process_confirm_loop();
+}
+
+void IMRMaster::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+	if (this->mrout != nullptr) {
+		mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
+		mr_write_tail(this->mrout, data, size);
+
+		create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
+			try {
+				unsigned int sent = sending.get();
+
+				this->logger->log_message(Log::Debug,
+					L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to device[%s:%s]>",
+					sent, fcode, data_block, addr0, addrn,
+					this->device->RawName->Data(), this->service->Data());
+			} catch (task_canceled&) {
+			} catch (Platform::Exception^ e) {
+				this->logger->log_message(Log::Warning, e->Message);
+				this->shake_hands();
+			}
+		});
+	}
+}
+
+void IMRMaster::wait_process_confirm_loop() {
 	create_task(this->mrin->LoadAsync(MR_PROTOCOL_HEADER_LENGTH)).then([=](unsigned int size) {
 		uint8 leading_head, fcode;
 		uint16 data_block, start_address, end_address;
@@ -193,29 +234,39 @@ void IMRClient::wait_process_confirm_loop() {
 			discard_dirty_bytes(this->mrin);
 			this->wait_process_confirm_loop();
 		} catch (task_terminated&) {
-			this->connect();
+			this->shake_hands();
 		} catch (task_canceled&) {
-			this->connect();
+			this->shake_hands();
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
-			this->connect();
+			this->shake_hands();
 		}
 	});
 }
 
-bool IMRClient::connected() {
+bool IMRMaster::connected() {
 	return (this->mrout != nullptr);
 }
 
+void IMRMaster::clear() {
+	if (this->mrout != nullptr) {
+		delete this->socket;
+		delete this->mrin;
+		delete this->mrout;
+
+		this->mrout = nullptr;
+	}
+}
+
 /*************************************************************************************************/
-void MRClient::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
 	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
 }
 
-void MRClient::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRMaster::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
 
 }
 
-void MRClient::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRMaster::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
 
 }
