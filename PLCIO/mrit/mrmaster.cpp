@@ -206,8 +206,8 @@ void IMRMaster::wait_process_confirm_loop() {
 					this->device_description()->Data(), MR_PROTOCOL_END, end_of_message);
 			} else {
 				this->logger->log_message(Log::Debug,
-					L"<received confirmation(%hhu, %hhu, %hu, %hu, %hu) for function 0x%02X comes from device[%s]>",
-					leading_head, fcode, data_block, start_address, end_address, this->device_description()->Data());
+					L"<received confirmation(%hu, %hu, %hu) comes for command '%c' from device[%s]>",
+					data_block, start_address, end_address, fcode, this->device_description()->Data());
 
 				if (!this->confirmations.empty()) {
 					modbus_apply_positive_confirmation(this->confirmations, this->logger,
