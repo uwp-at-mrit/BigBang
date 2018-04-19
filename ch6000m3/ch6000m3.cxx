@@ -32,7 +32,7 @@ public:
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, 8);
-		this->device = new PLCClient(alarm, remote_test_server);
+		this->device = new PLCClient(alarm, plc_device);
 	}
 
 protected:

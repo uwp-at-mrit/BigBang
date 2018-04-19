@@ -342,7 +342,7 @@ void HydraulicSystem::load(CanvasCreateResourcesReason reason, float width, floa
 			console->load_state_indicators(width, height, this->gridsize);
 
 			this->change_mode(HSMode::WindowUI);
-			this->statusline = new Statuslinelet(Log::Debug);
+			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name(), this->device);
 			this->insert(this->statusbar);
 			this->insert(this->statusline);

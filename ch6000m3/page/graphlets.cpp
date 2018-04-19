@@ -1,6 +1,7 @@
 ﻿#include <unordered_map>
 
 #include "page/graphlets.hpp"
+#include "configuration.hpp"
 
 #include "tongue.hpp"
 #include "system.hpp"
@@ -161,7 +162,7 @@ void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, flo
 		{ // load graphlets
 			stage->load(width, height);
 
-			this->statusline = new Statuslinelet(Log::Debug);
+			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name());
 			this->insert(this->statusbar);
 			this->insert(this->statusline);
