@@ -9,28 +9,29 @@ void PLCClient::send_scheduled_request(long long count, long long interval, long
 	this->read_all_signal(98, 1, 4571);
 }
 
-bool PLCClient::fill_signal_preferences(MRSignal type, uint16* db, uint16* addr0, uint16* addrn) {
+bool PLCClient::fill_signal_preferences(uint16 type, uint16* count, uint16* addr0, uint16* addrn) {
 	bool has_set = true;
-	uint16 data_block, end;
+	uint16 c = 0;
+	uint16 start = 0;
+	uint16 end = 0;
 
 	switch (type) {
-	case MRSignal::Realtime:         data_block = 2;   end = 600 - 1; break;
-
-	case MRSignal::DigitalInput:     data_block = 205; end = 300 - 1; break;
-	case MRSignal::DigitalInputRaw:  data_block = 4;   end = 104 - 1; break;
-	case MRSignal::DigitalOutputRaw: data_block = 6;   end = 100 - 1; break;
-
-	case MRSignal::AnalogInput:      data_block = 203; end = 768 - 1; break;
-	case MRSignal::AnalogInputRaw:   data_block = 3;   end = 768 - 1; break;
-	case MRSignal::AnalogOutput:     data_block = 204; end = 256 - 1; break;
-	case MRSignal::AnalogOutputRaw:  data_block = 5;   end = 256 - 1; break;
+	case MRDB_ANALOG_INPUT_RAW:   c = 280; start = 1;    end = 1120; break; // DB3
+	case MRDB_ANALOG_INPUT:       c = 280; start = 1121; end = 2240; break; // DB203
+	case MRDB_ANALOG_OUTPUT_RAW:  c = 48;  start = 2241; end = 2432;  break; // DB5
+	case MRDB_ANALOG_OUTPUT:      c = 48;  start = 2433; end = 2624;  break; // DB204
+	case MRDB_FORAT:              c = 166; start = 2625; end = 3282; break; // DB20
+	case MRDB_REALTIME:           c = 176; start = 3283; end = 3986; break; // DB2
+	case MRDB_DIGITAL_INPUT_RAW:  c = 124; start = 3987; end = 4110; break; // DB4
+	case MRDB_DIGITAL_OUTPUT_RAW: c = 76;  start = 4111; end = 4186;  break; // DB6
+	case MRDB_DIGITAL_INPUT:      c = 385; start = 4187; end = 4571; break; // DB205
 	
 	default: has_set = false; break;
 	}
 
 	if (has_set) {
-		SET_BOX(db, data_block);
-		SET_BOX(addr0, 0);
+		SET_BOX(count, c);
+		SET_BOX(addr0, start);
 		SET_BOX(addrn, end);
 	}
 

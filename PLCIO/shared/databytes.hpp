@@ -55,6 +55,8 @@
 
 unsigned int discard_dirty_bytes(Windows::Storage::Streams::DataReader^ din);
 
+/*************************************************************************************************/
+// These APIs come from libmodbus
 int read_bits(uint8 *src, uint16 address, uint16 quantity, uint8 *dest);
 int read_words(uint16 *src, uint16 address, uint16 quantity, uint8 *dest);
 void write_words(uint16 *dest, uint16 address, uint16 quantity, uint8 *src);
@@ -62,3 +64,9 @@ void write_words(uint16 *dest, uint16 address, uint16 quantity, uint8 *src);
 void set_bits_from_byte(uint8 *dest, uint16 idx, uint8 src);
 void set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uint8 *src);
 uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count);
+
+/*************************************************************************************************/
+// These APIs are designed for MRIT
+void read_floats(uint8* src, uint16 address, uint16 quantity, float* dest);
+
+float get_float_dcba(uint8* src, uint16 idx);

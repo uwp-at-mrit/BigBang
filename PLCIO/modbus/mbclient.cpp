@@ -189,7 +189,7 @@ void IModbusClient::shake_hands() {
             mbout->UnicodeEncoding = UnicodeEncoding::Utf8;
             mbout->ByteOrder = ByteOrder::BigEndian;
 
-            this->logger->log_message(Log::Info, L">> connected to device[%s]", this->device_description()->Data());
+            this->logger->log_message(Log::Debug, L">> connected to device[%s]", this->device_description()->Data());
 
 			this->wait_process_confirm_loop();
 

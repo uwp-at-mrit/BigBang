@@ -14,6 +14,7 @@ unsigned int discard_dirty_bytes(DataReader^ din) {
 	return rest;
 }
 
+/*************************************************************************************************/
 int read_bits(uint8 *src, uint16 address, uint16 quantity, uint8 *dest) {
     uint8 shift = 0;
     uint8 byte = 0;
@@ -85,4 +86,25 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
     }
 
     return value;
+}
+
+/*************************************************************************************************/
+void read_floats(uint8* src, uint16 address, uint16 quantity, float* dest) {
+	for (uint16 i = 0; i < quantity; i++) {
+		dest[i] = get_float_dcba(src, address + i * sizeof(float));
+	}
+}
+
+float get_float_dcba(uint8* src, uint16 idx) {
+	uint8 flbytes[sizeof(float)];
+	float dest = 0.0F;
+
+	flbytes[0] = src[idx + 3];
+	flbytes[1] = src[idx + 2];
+	flbytes[2] = src[idx + 1];
+	flbytes[3] = src[idx + 0];
+
+	memcpy((void*)&dest, (void*)flbytes, sizeof(float));
+
+	return dest;
 }

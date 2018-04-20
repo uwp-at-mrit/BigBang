@@ -19,8 +19,15 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-static void modbus_apply_positive_confirmation(std::list<IMRConfirmation*> cfs, Syslog* logger, uint8 function_code
-	, uint16 data_block, uint16 start_address, uint16 end_address, uint8* data_pool, uint16 data_size) {
+static void dispatch_confirmation(Syslog* logger, std::list<IMRConfirmation*> cfs, uint16 db, float* data, uint16 count) {
+	switch (db) {
+	case MRDB_REALTIME: for (auto cf : cfs) { cf->on_realtime_data(data, count, logger); } break;
+	case MRDB_FORAT: for (auto cf : cfs) { cf->on_forat_data(data, count, logger); } break;
+	case MRDB_ANALOG_INPUT: for (auto cf : cfs) { cf->on_analog_input_data(data, count, logger); } break;
+	case MRDB_ANALOG_INPUT_RAW: for (auto cf : cfs) { cf->on_raw_analog_input_data(data, count, logger); } break;
+	case MRDB_ANALOG_OUTPUT: for (auto cf : cfs) { cf->on_analog_output_data(data, count, logger); } break;
+	case MRDB_ANALOG_OUTPUT_RAW: for (auto cf : cfs) { cf->on_raw_analog_output_data(data, count, logger); } break;
+	}
 }
 
 /*************************************************************************************************/
@@ -109,7 +116,7 @@ void IMRMaster::connect() {
             this->mrin  = make_socket_reader(this->socket);
             this->mrout = make_socket_writer(this->socket);
 
-            this->logger->log_message(Log::Info, L">> connected to device[%s]", this->device_description()->Data());
+            this->logger->log_message(Log::Debug, L">> connected to device[%s]", this->device_description()->Data());
 
 			this->wait_process_confirm_loop();
         } catch (Platform::Exception^ e) {
@@ -124,7 +131,7 @@ void IMRMaster::listen() {
 		try {
 			this->clear();
 			this->listener->listen(this, this->service);
-			this->logger->log_message(Log::Info, L"## listening on 0.0.0.0:%s", this->service->Data());
+			this->logger->log_message(Log::Debug, L"## listening on 0.0.0.0:%s", this->service->Data());
 		} catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, e->Message);
 		}
@@ -136,7 +143,7 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 	this->mrin  = make_socket_reader(plc);
 	this->mrout = make_socket_writer(plc);
 
-	this->logger->log_message(Log::Info, L"# device[%s] is accepted", this->device_description()->Data());
+	this->logger->log_message(Log::Debug, L"# device[%s] is accepted", this->device_description()->Data());
 
 	this->wait_process_confirm_loop();
 }
@@ -210,8 +217,7 @@ void IMRMaster::wait_process_confirm_loop() {
 					data_block, start_address, end_address, fcode, this->device_description()->Data());
 
 				if (!this->confirmations.empty()) {
-					modbus_apply_positive_confirmation(this->confirmations, this->logger,
-						fcode, data_block, start_address, end_address, data_pool, data_size);
+					this->apply_confirmation(fcode, data_block, start_address, end_address, data_pool, data_size);
 				}
 
 				delete[] data_pool;
@@ -244,6 +250,14 @@ void IMRMaster::wait_process_confirm_loop() {
 	});
 }
 
+void IMRMaster::apply_confirmation(uint8 fcode, uint16 db, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+	if (fcode == MR_READ_SIGNAL) {
+		if (db == MRDB_FOR_ALL) {
+			this->on_all_signals(addr0, addrn, data, size);
+		}
+	}
+}
+
 bool IMRMaster::connected() {
 	return (this->mrout != nullptr);
 }
@@ -270,3 +284,43 @@ void MRMaster::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 add
 void MRMaster::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
 
 }
+
+void MRMaster::on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+	uint16 count, subaddr0, subaddrn;
+	uint16 adbs[] = { 3, 203, 5, 204, 20, 2 };
+	uint16 ddbs[] = { 4, 6, 205 };
+
+	for (size_t i = 0; i < sizeof(adbs) / sizeof(uint16); i++) {
+		if (this->fill_signal_preferences(adbs[i], &count, &subaddr0, &subaddrn)) {
+			size_t flsize = sizeof(float);
+
+			if (adbs[i] == MRDB_FORAT) {
+				// this is a special case, some digital data is stored in the first bytes. 
+				subaddr0 += 2;
+				count -= 2;
+			}
+
+			if (((subaddrn - subaddr0 + 1) != (count * flsize))) {
+				this->logger->log_message(Log::Warning,
+					L"the address range [%hu, %hu] of DB%hu is misconfigured or mistyped(count: %hu != %hu)",
+					adbs[i], subaddr0, subaddrn, count, (subaddrn - subaddr0 + 1) / flsize);
+			}
+
+			if ((subaddr0 + count * flsize) < size) {
+				float* decoded_data = new float[count];
+
+				read_floats(data, subaddr0, count, decoded_data);
+				dispatch_confirmation(this->logger, this->confirmations, adbs[i], decoded_data, count);
+				
+				delete[] decoded_data;
+			} else {
+				this->logger->log_message(Log::Error,
+					L"the end address of DB%hu is out of range (%hu !<- [%hu, %hu])",
+					subaddrn, addr0, addrn);
+			}
+		} else {
+			this->logger->log_message(Log::Warning, L"missing configuration for data block %hu", adbs[i]);
+		}
+	}
+}
+

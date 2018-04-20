@@ -12,6 +12,6 @@ namespace WarGrey::SCADA {
 		void send_scheduled_request(long long count, long long interval, long long uptime);
 
 	protected:
-		bool fill_signal_preferences(MRSignal type, uint16* data_block, uint16* addr0, uint16* addrn) override;
+		bool fill_signal_preferences(uint16 type, uint16* count, uint16* addr0, uint16* addrn) override;
 	};
 }
