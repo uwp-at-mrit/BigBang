@@ -282,7 +282,7 @@ void IMRMaster::clear() {
 void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) {
 	uint8 flbytes[4];
 
-	set_float_dcba(flbytes, 0, tidemark);
+	set_bigendian_float(flbytes, 0, tidemark);
 
 	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, flbytes, 4);
 }
@@ -319,7 +319,7 @@ void MRMaster::on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 si
 			if ((subaddr0 + count * flsize) < size) {
 				float* decoded_data = new float[count];
 
-				read_floats(data, subaddr0, count, decoded_data);
+				read_bigendian_floats(data, subaddr0, count, decoded_data);
 				dispatch_confirmation(this->logger, this->confirmations, adbs[i], decoded_data, count);
 				
 				delete[] decoded_data;

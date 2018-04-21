@@ -5,7 +5,7 @@
 using namespace Windows::Storage::Streams;
 
 inline static uint16 foldsum(uint16 word) {
-	return (word >> 8) + (word & 0xFF);
+	return WORD_HIGH_BYTE(word) + WORD_LOW_BYTE(word);
 }
 
 inline static uint16 foldsum(uint8* data, uint16 size) {

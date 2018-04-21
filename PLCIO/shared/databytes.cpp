@@ -89,13 +89,13 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
 }
 
 /*************************************************************************************************/
-void read_floats(uint8* src, uint16 address, uint16 quantity, float* dest) {
+void read_bigendian_floats(uint8* src, uint16 address, uint16 quantity, float* dest) {
 	for (uint16 i = 0; i < quantity; i++) {
-		dest[i] = get_float_dcba(src, address + i * sizeof(float));
+		dest[i] = get_bigendian_float(src, address + i * sizeof(float));
 	}
 }
 
-float get_float_dcba(uint8* src, uint16 idx) {
+float get_bigendian_float(const uint8* src, uint16 idx) {
 	uint8 flbytes[4];
 	float dest = 0.0F;
 
@@ -104,15 +104,15 @@ float get_float_dcba(uint8* src, uint16 idx) {
 	flbytes[2] = src[idx + 1];
 	flbytes[3] = src[idx + 0];
 
-	memcpy((void*)&dest, (void*)flbytes, sizeof(float));
+	memcpy((void*)&dest, (void*)flbytes, 4);
 
 	return dest;
 }
 
-void set_float_dcba(uint8* dest, uint16 idx, float src) {
+void set_bigendian_float(uint8* dest, uint16 idx, float src) {
 	uint8 flbytes[4];
 
-	memcpy((void*)flbytes, (void*)&src, sizeof(float));
+	memcpy((void*)flbytes, (void*)&src, 4);
 
 	dest[idx + 3] = flbytes[0];
 	dest[idx + 2] = flbytes[1];
