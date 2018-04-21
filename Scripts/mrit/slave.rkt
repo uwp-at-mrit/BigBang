@@ -4,8 +4,15 @@
 
 (require racket/tcp)
 
-(define memory (make-bytes 0))
+(define memory (make-bytes #x11DC))
 (define master-ipv4 (vector-ref (current-command-line-arguments) 0))
+
+(define refresh-memory
+  (lambda []
+    ;;; DB203
+    (for ([i (in-range 280)])
+      (define fl (round (* (random) 1000)))
+      (real->floating-point-bytes (* fl 0.01) 4 #true memory (+ 1121 (* i 4))))))
 
 (with-handlers ([exn:break? void])
   (let connect-send-wait-loop ()
@@ -21,8 +28,7 @@
                     (define-values (signature _) (read-mrmsg /dev/tcpin 40))
                     (define-values (addr0 addrn) (values (mrmsg-addr0 signature) (mrmsg-addrn signature)))
                     
-                    (when (> addrn (bytes-length memory)) (set! memory (make-bytes (+ addrn 1))))
-                    (for ([i (in-range addr0 (+ addrn 1))]) (bytes-set! memory i (random 0 256)))
+                    (refresh-memory)
                     
                     (printf ">> [sent ~a bytes to ~a:~a]~n"
                             (write-mrmsg /dev/tcpout (mrmsg-code signature) (mrmsg-block signature) addr0 addrn memory)
