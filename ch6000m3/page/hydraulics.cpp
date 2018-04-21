@@ -266,30 +266,19 @@ public:
 	}
 
 public:
-	/*
-	void on_input_registers(uint16 transaction, uint16 address, uint16* register_values, uint8 count, Syslog* logger) override {
-		float Mpa = 0.0F;
+	void on_analog_input_data(float* AI_DB203_RealData, uint16 count, Syslog* logger) override {
+		this->master->enter_critical_section();
 		
-		//this->workbench->enter_critical_section();
-		
-		//for (size_t idx = 1; idx < GRAPHLETS_LENGTH(this->gauges); idx++) {
-		//	float mpa = float(register_values[idx]) * 0.1F;
+		{ // pump pressures
+			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
+			
+			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
+				this->bars[bar_seq[i]]->set_scale(AI_DB203_RealData[i + 8]);
+			}
+		}
 
-		//	Mpa = Mpa + mpa;
-		//	this->gauges[idx]->set_scale(mpa);
-		//}
-
-		//this->gauges[0]->set_scale(Mpa);
-
-		//this->workbench->leave_critical_section();
+		this->master->leave_critical_section();
 	}
-	*/
-
-	/*
-	void on_exception(uint16 transaction, uint8 function_code, uint16 address0, uint8 reason, Syslog* logger) override {
-		logger->log_message(Log::Error, L"Job(%hu, 0x%02X) failed due to reason %d", transaction, function_code, reason);
-	}
-	*/
 
 // never deletes these graphlets mannually
 private:
