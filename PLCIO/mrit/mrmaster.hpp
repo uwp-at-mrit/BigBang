@@ -14,14 +14,15 @@ namespace WarGrey::SCADA {
 
 	private class IMRConfirmation abstract {
 	public:
-		virtual void on_realtime_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_forat_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_analog_input_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_raw_analog_input_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_analog_output_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_raw_analog_output_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_digital_input_data(uint16 address, uint16* register_values, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
-		virtual void on_digital_output_data(uint16 address, uint16* input_registers, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_realtime_data(float* db2, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_forat_data(float* db20, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_analog_input_data(float* db203, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_raw_analog_input_data(float* db3, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_analog_output_data(float* db204, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_raw_analog_output_data(float* db5, uint16 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_digital_input(uint16 address, uint16* db205, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_raw_digital_input(uint16 address, uint16* db4, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
+		virtual void on_raw_digital_output(uint16 address, uint16* db6, uint8 count, WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
 	private class IMRMaster abstract : public WarGrey::SCADA::IPLCMaster, public WarGrey::SCADA::ISocketAcceptable {
@@ -108,14 +109,14 @@ namespace WarGrey::SCADA {
 
 	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {
 	public:
-		void on_realtime_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_forat_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_analog_input_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_raw_analog_input_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_analog_output_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_raw_analog_output_data(float* data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
-
-		void on_digital_input_data(uint16 address, uint16* register_values, uint8 count, WarGrey::SCADA::Syslog* logger) override {}
-		void on_digital_output_data(uint16 address, uint16* input_registers, uint8 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_realtime_data(float* realtime_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_forat_data(float* forat_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_analog_input_data(float* analog_input_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_raw_analog_input_data(float* analog_input_raw_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_analog_output_data(float* analog_output_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_raw_analog_output_data(float* analog_output_raw_data, uint16 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_digital_input(uint16 address, uint16* digital_input, uint8 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_raw_digital_input(uint16 address, uint16* digital_input_raw, uint8 count, WarGrey::SCADA::Syslog* logger) override {}
+		void on_raw_digital_output(uint16 address, uint16* digital_output_raw, uint8 count, WarGrey::SCADA::Syslog* logger) override {}
 	};
 }
