@@ -47,7 +47,7 @@ private enum class HS : unsigned int {
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
 	// Key Labels
-	Heater, Visor, Port, Starboard, MasterTank, OilTank,
+	Heater, VisorTank, Port, Starboard, MasterTank, OilTank,
 	// Indicators
 	F001Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
 	_,
@@ -104,7 +104,7 @@ public:
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Heater, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::Visor, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, HS::VisorTank, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::OilTank, Colours::Silver);
 
 		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
@@ -115,12 +115,12 @@ public:
 		 * the default `step` is 10.
 		 */
 		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F, 6);
-		this->visor = new LevelGaugelet(gridsize * 12.0F, gridsize * 5.0F, 0.8F, 8);
+		this->visor_tank = new LevelGaugelet(gridsize * 12.0F, gridsize * 5.0F, 0.8F, 8);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
-		this->master->insert(this->visor);
+		this->master->insert(this->visor_tank);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -152,7 +152,7 @@ public:
 		this->load_state_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
 		this->load_state_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
 
-		this->load_scales(this->temperatures, HS::Heater, HS::Visor, "celsius", "temperature");
+		this->load_scales(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
@@ -168,13 +168,13 @@ public:
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
 		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, 0.0F, 0.0F, GraphletAlignment::LC);
 		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
-		this->master->move_to(this->visor, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
+		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
 
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
 		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
 		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
-		this->master->move_to(this->captions[HS::Visor], this->visor, GraphletAlignment::CT, GraphletAlignment::CB, gridsize * 0.5F);
+		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAlignment::CT, GraphletAlignment::CB, gridsize * 0.5F);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -245,10 +245,10 @@ public:
 		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
 		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], 0.0F, 0.0F, GraphletAlignment::CC);
 
-		this->master->move_to(this->visor_states[HS::LevelLow], this->visor, GraphletAlignment::RT, GraphletAlignment::LT, gridsize * 2.0F, 0.0F);
+		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAlignment::RT, GraphletAlignment::LT, gridsize * 2.0F, 0.0F);
 		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::Visor], this->visor_states[HS::FilterBlocked], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
+		this->master->move_to(this->temperatures[HS::VisorTank], this->visor_states[HS::FilterBlocked], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
@@ -295,7 +295,7 @@ public:
 private:
 	Tracklet<HS>* stations[2];
 	LevelGaugelet* heater;
-	LevelGaugelet* visor;
+	LevelGaugelet* visor_tank;
 	IShapelet* oil_tank;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;

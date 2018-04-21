@@ -4,9 +4,9 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-	private class PLCClient : public WarGrey::SCADA::MRMaster {
+	private class PLCMaster : public WarGrey::SCADA::MRMaster {
 	public:
-		PLCClient(Syslog* alarm);
+		PLCMaster(Syslog* alarm);
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);

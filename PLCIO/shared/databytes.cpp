@@ -96,7 +96,7 @@ void read_floats(uint8* src, uint16 address, uint16 quantity, float* dest) {
 }
 
 float get_float_dcba(uint8* src, uint16 idx) {
-	uint8 flbytes[sizeof(float)];
+	uint8 flbytes[4];
 	float dest = 0.0F;
 
 	flbytes[0] = src[idx + 3];
@@ -107,4 +107,15 @@ float get_float_dcba(uint8* src, uint16 idx) {
 	memcpy((void*)&dest, (void*)flbytes, sizeof(float));
 
 	return dest;
+}
+
+void set_float_dcba(uint8* dest, uint16 idx, float src) {
+	uint8 flbytes[4];
+
+	memcpy((void*)flbytes, (void*)&src, sizeof(float));
+
+	dest[idx + 3] = flbytes[0];
+	dest[idx + 2] = flbytes[1];
+	dest[idx + 1] = flbytes[2];
+	dest[idx + 0] = flbytes[3];
 }

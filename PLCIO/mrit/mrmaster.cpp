@@ -87,6 +87,10 @@ Syslog* IMRMaster::get_logger() {
 	return this->logger;
 }
 
+void IMRMaster::set_message_alignment_size(uint16 size) {
+	this->alignment_size = size;
+}
+
 void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
 	if (confirmation != nullptr) {
 		this->confirmations.push_back(confirmation);
@@ -150,14 +154,16 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 
 void IMRMaster::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
 	if (this->mrout != nullptr) {
-		mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
-		mr_write_tail(this->mrout, data, size);
+		uint16 foldsum;
+		
+		foldsum = mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
+		foldsum = mr_write_tail(this->mrout, data, size, foldsum, this->alignment_size);
 
 		create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
 			try {
 				unsigned int sent = sending.get();
 
-				this->logger->log_message(Log::Debug,
+				this->logger->log_message(Log::Info,
 					L"<sent %u-byte-request for command '%c' on data block %hu[%hu, %hu] to device[%s]>",
 					sent, fcode, data_block, addr0, addrn, this->device_description()->Data());
 			} catch (task_canceled&) {
@@ -212,7 +218,7 @@ void IMRMaster::wait_process_confirm_loop() {
 					L"message comes from devce[%s] has an malformed end(expected %hu, received %hu)",
 					this->device_description()->Data(), MR_PROTOCOL_END, end_of_message);
 			} else {
-				this->logger->log_message(Log::Debug,
+				this->logger->log_message(Log::Info,
 					L"<received confirmation(%hu, %hu, %hu) comes for command '%c' from device[%s]>",
 					data_block, start_address, end_address, fcode, this->device_description()->Data());
 
@@ -273,8 +279,12 @@ void IMRMaster::clear() {
 }
 
 /*************************************************************************************************/
-void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) {
-	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, nullptr, 0);
+void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) {
+	uint8 flbytes[4];
+
+	set_float_dcba(flbytes, 0, tidemark);
+
+	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, flbytes, 4);
 }
 
 void MRMaster::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {

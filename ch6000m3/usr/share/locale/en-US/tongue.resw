@@ -290,10 +290,10 @@
     <value>SQ.J</value>
   </data>
   <data name="HS_I" xml:space="preserve">
-    <value>Left Drag Nozzle</value>
+    <value>Left Draghead Visor</value>
   </data>
   <data name="HS_J" xml:space="preserve">
-    <value>Right Drag Nozzle</value>
+    <value>Right Draghead Visor</value>
   </data>
   <data name="LevelHigh" xml:space="preserve">
     <value>Level High</value>
@@ -322,8 +322,8 @@
   <data name="HS_Heater" xml:space="preserve">
     <value>Heater</value>
   </data>
-  <data name="HS_Visor" xml:space="preserve">
-    <value>Draghead Visor</value>
+  <data name="HS_VisorTank" xml:space="preserve">
+    <value>Draghead Visor Oil Tank</value>
   </data>
   <data name="celsius" xml:space="preserve">
     <value>°C</value>

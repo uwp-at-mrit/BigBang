@@ -33,6 +33,8 @@ namespace WarGrey::SCADA {
 	public:
 		Platform::String^ device_hostname() override;
 		Platform::String^ device_description() override;
+
+	public:
 		Syslog* get_logger() override;
 		void shake_hands() override;
 		bool connected() override;
@@ -41,7 +43,7 @@ namespace WarGrey::SCADA {
 		void append_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);
 
     public:
-		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) = 0;
 		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
 
@@ -54,6 +56,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size);
+		void set_message_alignment_size(uint16 size);
 
 	private:
 		void connect();
@@ -76,6 +79,9 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mrin;
 		Windows::Storage::Streams::DataWriter^ mrout;
+
+	private:
+		uint16 alignment_size;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
@@ -90,7 +96,7 @@ namespace WarGrey::SCADA {
 		void send_scheduled_request(long long count, long long interval, long long uptime) {}
 
 	public:
-		void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn) override;
+		void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) override;
 
 	public:
 		void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;

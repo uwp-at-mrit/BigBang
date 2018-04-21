@@ -31,8 +31,8 @@ public:
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
 
-		this->timer = ref new Timer(this, 8);
-		this->device = new PLCClient(alarm);
+		this->timer = ref new Timer(this, 2);
+		this->device = new PLCMaster(alarm);
 	}
 
 protected:
@@ -45,7 +45,7 @@ private:
 	WarGrey::SCADA::Timer^ timer;
 
 private:
-	PLCClient* device;
+	PLCMaster* device;
 };
 
 private ref class CH6000M3 sealed : public SplitView {

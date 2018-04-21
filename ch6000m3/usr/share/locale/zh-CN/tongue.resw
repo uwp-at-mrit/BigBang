@@ -283,8 +283,8 @@
   <data name="HS_Heater" xml:space="preserve">
     <value>加热器</value>
   </data>
-  <data name="HS_Visor" xml:space="preserve">
-    <value>耙头面罩</value>
+  <data name="HS_VisorTank" xml:space="preserve">
+    <value>耙唇油箱</value>
   </data>
   <data name="F001Blocked" xml:space="preserve">
     <value>滤器F0.01堵塞</value>
