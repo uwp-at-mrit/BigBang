@@ -19,14 +19,40 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-static void dispatch_confirmation(Syslog* logger, std::list<IMRConfirmation*> cfs, uint16 db, float* data, uint16 count) {
+static bool valid_address(Syslog* logger, uint16 db, uint16 addr0, uint16 addrn, uint16 count, size_t unit_size, uint16 total) {
+	bool valid = ((addr0 + count * unit_size) <= total);
+	
+	if (((addrn - addr0 + 1) != (count * unit_size))) {
+		logger->log_message(Log::Warning,
+			L"the address range [%hu, %hu] of DB%hu is misconfigured or mistyped(count: %hu != %hu)",
+			db, addr0, addrn, count, (addrn - addr0 + 1) / unit_size);
+	}
+
+	if (!valid) {
+		logger->log_message(Log::Error,
+			L"the end address of DB%hu is misconfigured or mistyped(address: %hu > %hu)",
+			db, addrn, total);
+	}
+
+	return valid;
+}
+
+static void dispatch_analog_quantities(Syslog* logger, std::list<IMRConfirmation*> cfs, uint16 db, float* data, uint16 count, uint8* dqs, uint16 dqc) {
 	switch (db) {
 	case MRDB_REALTIME: for (auto cf : cfs) { cf->on_realtime_data(data, count, logger); } break;
-	case MRDB_FORAT: for (auto cf : cfs) { cf->on_forat_data(data, count, logger); } break;
+	case MRDB_FORAT: for (auto cf : cfs) { cf->on_forat_data(dqs, dqc, data, count, logger); } break;
 	case MRDB_ANALOG_INPUT: for (auto cf : cfs) { cf->on_analog_input_data(data, count, logger); } break;
 	case MRDB_ANALOG_INPUT_RAW: for (auto cf : cfs) { cf->on_raw_analog_input_data(data, count, logger); } break;
 	case MRDB_ANALOG_OUTPUT: for (auto cf : cfs) { cf->on_analog_output_data(data, count, logger); } break;
 	case MRDB_ANALOG_OUTPUT_RAW: for (auto cf : cfs) { cf->on_raw_analog_output_data(data, count, logger); } break;
+	}
+}
+
+static void dispatch_digital_quantities(Syslog* logger, std::list<IMRConfirmation*> cfs, uint16 db, uint8* data, uint16 count) {
+	switch (db) {
+	case MRDB_DIGITAL_INPUT: for (auto cf : cfs) { cf->on_digital_input(data, count, logger); } break;
+	case MRDB_DIGITAL_INPUT_RAW: for (auto cf : cfs) { cf->on_raw_digital_input(data, count, logger); } break;
+	case MRDB_DIGITAL_OUTPUT_RAW: for (auto cf : cfs) { cf->on_raw_digital_output(data, count, logger); } break;
 	}
 }
 
@@ -297,39 +323,43 @@ void MRMaster::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 ad
 
 void MRMaster::on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
 	uint16 count, subaddr0, subaddrn;
-	uint16 adbs[] = { 3, 203, 5, 204, 20, 2 };
-	uint16 ddbs[] = { 4, 6, 205 };
+	uint16 analog_dbs[]  = { 3, 203, 5, 204, 20, 2 };
+	uint16 digital_dbs[] = { 4, 6, 205 };
+	uint16 dqcount = 2;
+	size_t analog_size = sizeof(float);
+	size_t digital_size = sizeof(uint8);
 
-	for (size_t i = 0; i < sizeof(adbs) / sizeof(uint16); i++) {
-		if (this->fill_signal_preferences(adbs[i], &count, &subaddr0, &subaddrn)) {
-			size_t flsize = sizeof(float);
-
-			if (adbs[i] == MRDB_FORAT) {
-				// this is a special case, some digital data is stored in the first bytes. 
-				subaddr0 += 2;
-				count -= 2;
+	for (size_t i = 0; i < sizeof(analog_dbs) / sizeof(uint16); i++) {
+		if (this->fill_signal_preferences(analog_dbs[i], &count, &subaddr0, &subaddrn)) {
+			if (analog_dbs[i] == MRDB_FORAT) {
+				// this is a special case, some digital data is stored in the first two bytes. 
+				subaddr0 += dqcount;
+				count -= dqcount;
 			}
 
-			if (((subaddrn - subaddr0 + 1) != (count * flsize))) {
-				this->logger->log_message(Log::Warning,
-					L"the address range [%hu, %hu] of DB%hu is misconfigured or mistyped(count: %hu != %hu)",
-					adbs[i], subaddr0, subaddrn, count, (subaddrn - subaddr0 + 1) / flsize);
-			}
-
-			if ((subaddr0 + count * flsize) < size) {
+			if (valid_address(this->logger, analog_dbs[i], subaddr0, subaddrn, count, analog_size, size)) {
 				float* decoded_data = new float[count];
 
 				read_bigendian_floats(data, subaddr0, count, decoded_data);
-				dispatch_confirmation(this->logger, this->confirmations, adbs[i], decoded_data, count);
+				dispatch_analog_quantities(this->logger, this->confirmations, analog_dbs[i],
+					decoded_data, count, data + (subaddr0 - dqcount), dqcount);
 				
 				delete[] decoded_data;
-			} else {
-				this->logger->log_message(Log::Error,
-					L"the end address of DB%hu is out of range (%hu !<- [%hu, %hu])",
-					subaddrn, addr0, addrn);
 			}
 		} else {
-			this->logger->log_message(Log::Warning, L"missing configuration for data block %hu", adbs[i]);
+			this->logger->log_message(Log::Warning, L"missing configuration for data block %hu", analog_dbs[i]);
+		}
+	}
+
+	for (size_t i = 0; i < sizeof(digital_dbs) / sizeof(uint16); i++) {
+		if (this->fill_signal_preferences(digital_dbs[i], &count, &subaddr0, &subaddrn)) {
+			if (valid_address(this->logger, digital_dbs[i], subaddr0, subaddrn, count, digital_size, size)) {
+				uint8* decoded_data = (data + subaddr0);
+
+				dispatch_digital_quantities(this->logger, this->confirmations, digital_dbs[i], decoded_data, count);
+			}
+		} else {
+			this->logger->log_message(Log::Warning, L"missing configuration for data block %hu", digital_dbs[i]);
 		}
 	}
 }

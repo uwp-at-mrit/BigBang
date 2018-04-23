@@ -62,6 +62,34 @@ public:
 	}
 
 public:
+	void on_analog_input_data(float* AI_DB203_RealData, uint16 count, Syslog* logger) override {
+		this->master->enter_critical_section();
+
+		{ // pump pressures
+			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
+
+			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
+				HS id = bar_seq[i];
+				ScaleTextlet* target = this->bars[id];
+				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
+				float anchor_x, anchor_y;
+
+				if (need_adjust_position) {
+					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAlignment::RB);
+				}
+
+				target->set_scale(AI_DB203_RealData[i + 8]);
+
+				if (need_adjust_position) {
+					this->master->move_to(target, anchor_x, anchor_y, GraphletAlignment::RB);
+				}
+			}
+		}
+
+		this->master->leave_critical_section();
+	}
+
+public:
 	void load_pump_station(float width, float height, float gridsize) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
 
@@ -263,34 +291,6 @@ public:
 					GraphletAlignment::RC, GraphletAlignment::LC, gapsize);
 			}
 		}
-	}
-
-public:
-	void on_analog_input_data(float* AI_DB203_RealData, uint16 count, Syslog* logger) override {
-		this->master->enter_critical_section();
-		
-		{ // pump pressures
-			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
-			
-			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
-				HS id = bar_seq[i];
-				ScaleTextlet* target = this->bars[id];
-				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
-				float anchor_x, anchor_y;
-
-				if (need_adjust_position) {
-					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAlignment::RB);
-				}
-
-				target->set_scale(AI_DB203_RealData[i + 8]);
-
-				if (need_adjust_position) {
-					this->master->move_to(target, anchor_x, anchor_y, GraphletAlignment::RB);
-				}
-			}
-		}
-
-		this->master->leave_critical_section();
 	}
 
 // never deletes these graphlets mannually

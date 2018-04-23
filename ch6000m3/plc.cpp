@@ -24,6 +24,7 @@ bool PLCMaster::fill_signal_preferences(uint16 type, uint16* count, uint16* addr
 	case MRDB_ANALOG_OUTPUT:      c = 48;  start = 2433; end = 2624; break; // DB204
 	case MRDB_FORAT:              c = 166; start = 2625; end = 3282; break; // DB20
 	case MRDB_REALTIME:           c = 176; start = 3283; end = 3986; break; // DB2
+	
 	case MRDB_DIGITAL_INPUT_RAW:  c = 124; start = 3987; end = 4110; break; // DB4
 	case MRDB_DIGITAL_OUTPUT_RAW: c = 76;  start = 4111; end = 4186; break; // DB6
 	case MRDB_DIGITAL_INPUT:      c = 385; start = 4187; end = 4571; break; // DB205
