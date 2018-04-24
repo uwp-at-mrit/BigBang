@@ -3,12 +3,17 @@
 
 using namespace WarGrey::SCADA;
 
-PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm) {
+PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm), tidemark(0.0F) {
 	this->set_message_alignment_size(40);
+	this->append_confirmation_receiver(this);
 }
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
-	this->read_all_signal(98, 0, 0x11DB, 0.0F);
+	this->read_all_signal(98, 0, 0x11DB, this->tidemark);
+}
+
+void PLCMaster::on_realtime_data(float* db2, uint16 count, Syslog* logger) {
+	this->tidemark = db2[0];
 }
 
 bool PLCMaster::fill_signal_preferences(uint16 type, uint16* count, uint16* addr0, uint16* addrn) {
