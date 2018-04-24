@@ -5,9 +5,6 @@
 #include "planet.hpp"
 #include "timer.hxx"
 
-#include "page/hydraulics.hpp"
-#include "page/graphlets.hpp"
-
 
 using namespace WarGrey::SCADA;
 
@@ -37,8 +34,6 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new HydraulicSystem(this->device));
-		this->add_planet(new GraphletOverview());
 	}
 
 private:

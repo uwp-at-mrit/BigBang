@@ -284,7 +284,7 @@
     <value>加热器</value>
   </data>
   <data name="HS_VisorTank" xml:space="preserve">
-    <value>耙唇油箱</value>
+    <value>耙唇液压系统油箱</value>
   </data>
   <data name="F001Blocked" xml:space="preserve">
     <value>滤器F0.01堵塞</value>
