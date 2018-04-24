@@ -5,6 +5,8 @@
 #include "planet.hpp"
 #include "timer.hxx"
 
+#include "page/homepage.hpp"
+
 
 using namespace WarGrey::SCADA;
 
@@ -34,6 +36,7 @@ public:
 
 protected:
 	void construct() override {
+		this->add_planet(new Homepage(this->device));
 	}
 
 private:

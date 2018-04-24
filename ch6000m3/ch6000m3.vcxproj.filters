@@ -23,29 +23,36 @@
     <Filter Include="usr\share\locale\zh-CN">
       <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="decorator">
+      <UniqueIdentifier>{eecbda96-f292-46b6-8faa-b10211167408}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="page\graphlets.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="page\hydraulics.cpp">
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="plc.cpp" />
+    <ClCompile Include="decorator\page.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="page\graphlets.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\hydraulics.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="console.hpp" />
     <ClInclude Include="plc.hpp" />
+    <ClInclude Include="decorator\page.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

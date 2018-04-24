@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>

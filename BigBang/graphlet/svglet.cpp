@@ -1,10 +1,11 @@
 #include <ppltasks.h>
+#include <map>
 
 #include "graphlet/svglet.hpp"
 
 #include "colorspace.hpp"
-#include "string.hpp"
-#include "text.hpp"
+#include "path.hpp"
+#include "draw.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -19,27 +20,37 @@ using namespace Windows::Storage::Streams;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
+static std::map<int, cancellation_token_source> lazy_tasks;
+
 /*************************************************************************************************/
 Svglet::Svglet(Platform::String^ file, Platform::String^ rootdir) : Svglet(file, 0.0F, 0.0F, rootdir) {}
 
 Svglet::Svglet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
-
-	{ // adjust file name
-		Platform::String^ file_svg = (file_extension_from_path(file) == nullptr) ? (file + ".svg") : file;
-		Platform::String^ path_svg = ((rootdir == nullptr) ? file_svg : (rootdir + "/" + file_svg));
-
-		this->ms_appx_svg = ref new Uri("ms-appx:///usr/share/" + path_svg);
-	}
+	this->ms_appx_svg = ms_appx_path(file, rootdir, ".svg");
 }
 
 Svglet::~Svglet() {
-	// TODO: cancel the loading task
+	int uuid = this->ms_appx_svg->GetHashCode();
+	auto t = lazy_tasks.find(uuid);
+
+	if (t != lazy_tasks.end()) {
+		if (this->graph_svg == nullptr) {
+			t->second.cancel();
+		}
+
+		lazy_tasks.erase(t);
+	}
 }
 
 void Svglet::construct() {
-	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg)).then([=](task<StorageFile^> svg) {
+	int uuid = this->ms_appx_svg->GetHashCode();
+	cancellation_token_source svg_task;
+
+	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, svg_task));
+
+	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg), svg_task.get_token()).then([=](task<StorageFile^> svg) {
 		this->get_logger()->log_message(Log::Debug,
 			L"Found the graphlet source: %s",
 			this->ms_appx_svg->ToString()->Data());
@@ -97,18 +108,9 @@ void Svglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float
 }
 
 void Svglet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	static auto font = make_text_format();
-	auto color = Colours::GrayText;
-	float thickness = 2.0F;
-	float x0 = x + thickness * 0.5F;
-	float y0 = y + thickness * 0.5F;
-	float xn = x0 + this->viewport.Width - thickness;
-	float yn = y0 + this->viewport.Height - thickness;
+	Platform::String^ hint = file_name_from_path(this->ms_appx_svg);
 
-	ds->DrawRectangle(x0, y0, xn - x0, yn - y0, color, thickness);
-	ds->DrawLine(x0, y0, xn, yn, color, thickness);
-	ds->DrawLine(x0, yn, xn, y0, color, thickness);
-	ds->DrawText(file_name_from_path(this->ms_appx_svg), x + thickness, y, color, font);
+	draw_invalid_bitmap(hint, ds, x, y, this->viewport.Width, this->viewport.Height);
 }
 
 /*************************************************************************************************/

@@ -63,6 +63,7 @@
     <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

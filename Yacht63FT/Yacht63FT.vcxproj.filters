@@ -1,12 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Common">
-      <UniqueIdentifier>7d6e8d5a-984e-4737-bd65-fa09f5614ad7</UniqueIdentifier>
-    </Filter>
     <Filter Include="Assets">
       <UniqueIdentifier>5705d810-3249-4dbc-afcf-4f882201afc3</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="usr">
+      <UniqueIdentifier>{46940e8f-96b3-4006-8c3f-f480831aa998}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share">
+      <UniqueIdentifier>{54721f39-0a41-4ca6-8ae9-762b740dec4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet">
+      <UniqueIdentifier>{d10260c3-c5ef-4a35-a443-b0a6b0a2927e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale">
+      <UniqueIdentifier>{7e87823e-6404-459a-b165-f0f304070ce5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale\en-US">
+      <UniqueIdentifier>{e5f37081-82a1-4f30-8de8-93ec8270df46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale\zh-CN">
+      <UniqueIdentifier>{ea10d042-1ab3-4a9d-aa9e-cd24f4573d2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="page">
+      <UniqueIdentifier>{cd9852f4-3c11-482e-a2e4-fab51145f2d8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -14,12 +32,18 @@
     <ClCompile Include="MainPage.xaml.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
     <ClCompile Include="plc.cpp" />
+    <ClCompile Include="page\homepage.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
     <ClInclude Include="MainPage.xaml.h" />
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="configuration.hpp" />
+    <ClInclude Include="page\homepage.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -37,10 +61,133 @@
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\StoreLogo.png">
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+    <Image Include="usr\share\graphlet\1_74.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\5_06.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="Assets\SmallTile.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallTile.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallTile.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallTile.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallTile.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LargeTile.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LargeTile.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LargeTile.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LargeTile.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LargeTile.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-16.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-32.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-48.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-256.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.altform-unplated_targetsize-16.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.altform-unplated_targetsize-32.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.altform-unplated_targetsize-48.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.altform-unplated_targetsize-256.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.scale-400.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
@@ -50,5 +197,13 @@
   <ItemGroup>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\en-US\tongue.resw">
+      <Filter>usr\share\locale\en-US</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>
