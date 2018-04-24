@@ -71,3 +71,5 @@ void read_bigendian_floats(uint8* src, uint16 address, uint16 quantity, float* d
 
 float get_bigendian_float(const uint8* src, uint16 idx);
 void set_bigendian_float(uint8* dest, uint16 idx, float x);
+
+bool get_quantity_bit(const uint8* src, uint16 idx, uint8 bit);

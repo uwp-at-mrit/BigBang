@@ -310,7 +310,7 @@
   <data name="SQk2" xml:space="preserve">
     <value>SQ.K2</value>
   </data>
-  <data name="HS_II" xml:space="preserve">
+  <data name="HS_M" xml:space="preserve">
     <value>Circulating Cooling</value>
   </data>
   <data name="HS_L" xml:space="preserve">
@@ -340,11 +340,11 @@
   <data name="Disabled" xml:space="preserve">
     <value>Disabled</value>
   </data>
-  <data name="door_state" xml:space="preserve">
-    <value>Small Hopper Door</value>
+  <data name="upperdoor_state" xml:space="preserve">
+    <value>Upper Hopper Door</value>
   </data>
-  <data name="hopper_state" xml:space="preserve">
-    <value>Large Hopper Door</value>
+  <data name="dumpdoor_state" xml:space="preserve">
+    <value>Dump Door</value>
   </data>
   <data name="winch_state" xml:space="preserve">
     <value>Winch</value>

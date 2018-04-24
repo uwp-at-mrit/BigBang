@@ -15,10 +15,10 @@ namespace WarGrey::SCADA {
 
 	WarGrey::SCADA::DoorStyle make_default_door_style(WarGrey::SCADA::DoorState state);
 
-	private class HopperDoorlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
+	private class DumpDoorlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
 	public:
-		HopperDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
-		HopperDoorlet(float radius, double degrees = -90.0);
+		DumpDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
+		DumpDoorlet(float radius, double degrees = -90.0);
 
 	public:
 		void construct() override;
@@ -53,7 +53,7 @@ namespace WarGrey::SCADA {
 		double mask_percentage;
 	};
 
-	private class Doorlet : public WarGrey::SCADA::HopperDoorlet {
-		using HopperDoorlet::HopperDoorlet;
+	private class UpperHopperDoorlet : public WarGrey::SCADA::DumpDoorlet {
+		using DumpDoorlet::DumpDoorlet;
 	};
 }

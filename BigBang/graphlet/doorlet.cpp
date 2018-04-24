@@ -35,16 +35,16 @@ DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
 }
 
 /*************************************************************************************************/
-HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(default_door_state, radius, degrees) {}
+DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
 
-HopperDoorlet::HopperDoorlet(DoorState default_state, float radius, double degrees)
+DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
 	: IStatelet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
 }
 
-void HopperDoorlet::construct() {
+void DumpDoorlet::construct() {
 	float handle_length = this->sgradius * 0.618F;
 	auto handler_axis = polar_axis(handle_length, this->degrees);
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
@@ -55,7 +55,7 @@ void HopperDoorlet::construct() {
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void HopperDoorlet::update(long long count, long long interval, long long uptime) {
+void DumpDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_state()) {
 	case DoorState::Opening: {
 		this->mask_percentage
@@ -76,7 +76,7 @@ void HopperDoorlet::update(long long count, long long interval, long long uptime
 	}
 }
 
-void HopperDoorlet::on_state_change(DoorState state) {
+void DumpDoorlet::on_state_change(DoorState state) {
 	switch (state) {
 	default: {
 		this->mask = nullptr;
@@ -85,15 +85,15 @@ void HopperDoorlet::on_state_change(DoorState state) {
 	}
 }
 
-void HopperDoorlet::fill_extent(float x, float y, float* w, float* h) {
+void DumpDoorlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, size);
 }
 
-double HopperDoorlet::get_direction_degrees() {
+double DumpDoorlet::get_direction_degrees() {
 	return this->degrees;
 }
 
-void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
 	auto body_color = (style.body_color != nullptr) ? style.body_color : Colours::Background;

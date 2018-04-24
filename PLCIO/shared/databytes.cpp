@@ -119,3 +119,7 @@ void set_bigendian_float(uint8* dest, uint16 idx, float src) {
 	dest[idx + 1] = flbytes[2];
 	dest[idx + 0] = flbytes[3];
 }
+
+bool get_quantity_bit(const uint8* src, uint16 idx, uint8 bit) {
+	return ((src[idx] && (0x1 << bit)) != 0);
+}

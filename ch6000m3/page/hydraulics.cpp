@@ -41,7 +41,7 @@ private enum class HS : unsigned int {
 	A, B, G, H,
 	F, C, D, E,
 	J, I,
-	Y, L, II, K,
+	Y, L, M, K,
 	// Valves
 	SQ1, SQ2, SQy, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
@@ -52,7 +52,7 @@ private enum class HS : unsigned int {
 	F001Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
 	_,
 	// anchors used as last jumping points
-	a, b, c, d, e, f, g, h, i, j, y, l, ii, k
+	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
 private class Hydraulics final : public WarGrey::SCADA::MRConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
@@ -89,6 +89,31 @@ public:
 		this->master->leave_critical_section();
 	}
 
+	void on_digital_input(uint8* DI_db205_X, uint16 count, Syslog* logger) {
+		this->master->enter_critical_section();
+
+		{ // pump states
+			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::G, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
+
+			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
+				Pumplet* target = this->pumps[pump_seq[i]];
+
+				switch (DI_db205_X[i]) {
+				case 0b00000001: target->set_state(PumpState::Starting); break;
+				case 0b00000010: target->set_state(PumpState::Stopping); break;
+				case 0b00000100: target->set_state(PumpState::Unstartable); break;
+				case 0b00001000: target->set_state(PumpState::Unstoppable); break;
+				case 0b00010000: target->set_state(PumpState::Running); break;
+				case 0b00100000: target->set_state(PumpState::Stopped); break;
+				case 0b01000000: target->set_state(PumpState::Remote); break;
+				case 0b10000000: target->set_state(PumpState::Ready); break;
+				}
+			}
+		}
+
+		this->master->leave_critical_section();
+	}
+
 public:
 	void load_pump_station(float width, float height, float gridsize) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
@@ -113,7 +138,7 @@ public:
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
-		pTurtle->move_right(5, HS::ii)->turn_right_up()->move_up(8, HS::II)->move_up(4)->jump_back();
+		pTurtle->move_right(5, HS::m)->turn_right_up()->move_up(8, HS::M)->move_up(4)->jump_back();
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
 		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, HS::F001Blocked)->move_down(2.0F);
 
@@ -215,7 +240,7 @@ public:
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (int(it->second->get_direction_degrees())) {
-			case -90: { // for Y, L, II, K
+			case -90: { // for Y, L, M, K
 				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RB;
 				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LB;
 				bar_dx = x0; bar_dy = y0; bar_align = GraphletAlignment::CC; // these devices have no scales

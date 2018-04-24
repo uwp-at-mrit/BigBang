@@ -34,14 +34,14 @@ public:
 
 public:
 	void load(float width, float height) {
-		Platform::String^ all_captions[] = { "winch_state", "pump_state", "valve_state", "hopper_state", "door_state" };
+		Platform::String^ all_captions[] = { "winch_state", "pump_state", "valve_state", "dumpdoor_state", "upperdoor_state" };
 		float unitsize = 32.0F;
 
 		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
 		this->load_primitives<Pumplet, PumpState>(this->pumps, this->plabels, unitsize);
 		this->load_primitives<Valvelet, ValveState>(this->valves, this->vlabels, unitsize);
-		this->load_primitives<HopperDoorlet, DoorState>(this->hoppers, this->hlabels, unitsize);
-		this->load_primitives<Doorlet, DoorState>(this->doors, this->dlabels, unitsize);
+		this->load_primitives<DumpDoorlet, DoorState>(this->hoppers, this->hlabels, unitsize);
+		this->load_primitives<UpperHopperDoorlet, DoorState>(this->doors, this->dlabels, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -76,8 +76,8 @@ public:
 		y0 += unitsize;
 		this->reflow_primitives<Pumplet, PumpState>(this->pumps, this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
 		this->reflow_primitives<Valvelet, ValveState>(this->valves, this->vlabels, x0, y0 + cellsize * 2.0F, cellsize);
-		this->reflow_primitives<HopperDoorlet, DoorState>(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
-		this->reflow_primitives<Doorlet, DoorState>(this->doors, this->dlabels, x0, y0 + cellsize * 4.0F, cellsize);
+		this->reflow_primitives<DumpDoorlet, DoorState>(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
+		this->reflow_primitives<UpperHopperDoorlet, DoorState>(this->doors, this->dlabels, x0, y0 + cellsize * 4.0F, cellsize);
 	}
 
 private:
@@ -126,9 +126,9 @@ private: // never delete these graphlets manually.
 	Labellet* plabels[static_cast<unsigned long long>(PumpState::_)];
 	Valvelet* valves[static_cast<unsigned long long>(ValveState::_)];
 	Labellet* vlabels[static_cast<unsigned long long>(ValveState::_)];
-	HopperDoorlet* hoppers[static_cast<unsigned long long>(DoorState::_)];
+	DumpDoorlet* hoppers[static_cast<unsigned long long>(DoorState::_)];
 	Labellet* hlabels[static_cast<unsigned long long>(DoorState::_)];
-	Doorlet* doors[static_cast<unsigned long long>(DoorState::_)];
+	UpperHopperDoorlet* doors[static_cast<unsigned long long>(DoorState::_)];
 	Labellet* dlabels[static_cast<unsigned long long>(DoorState::_)];
 
 private:
