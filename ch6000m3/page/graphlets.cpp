@@ -11,9 +11,9 @@
 #include "paint.hpp"
 #include "brushes.hxx"
 
-#include "graphlet/pumplet.hpp"
-#include "graphlet/valvelet.hpp"
-#include "graphlet/doorlet.hpp"
+#include "graphlet/symbol/pumplet.hpp"
+#include "graphlet/symbol/valvelet.hpp"
+#include "graphlet/symbol/doorlet.hpp"
 
 #include "decorator/page.hpp"
 

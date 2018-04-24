@@ -2,7 +2,7 @@
 #include <WindowsNumerics.h>
 #include <cmath>
 
-#include "graphlet/alarmlet.hpp"
+#include "graphlet/symbol/alarmlet.hpp"
 
 using namespace WarGrey::SCADA;
 

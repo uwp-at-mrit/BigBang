@@ -1,4 +1,4 @@
-#include "doorlet.hpp"
+#include "graphlet/symbol/valvelet.hpp"
 
 #include "polar.hpp"
 #include "paint.hpp"
@@ -16,35 +16,42 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static DoorState default_door_state = DoorState::Closed;
+static ValveState default_valve_state = ValveState::Manual;
 static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
 
-DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
-	DoorStyle s;
+ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
+	ValveStyle s;
 
 	s.skeleton_color = default_sketeton_color;
 
 	switch (state) {
-	case DoorState::Open: s.body_color = Colours::Green; break;
-	case DoorState::Opening: s.mask_color = Colours::Green; break;
-	case DoorState::Closed: s.body_color = Colours::LightGray; break;
-	case DoorState::Closing: s.mask_color = Colours::DarkGray; break;
+	case ValveState::Manual: s.mask_color = Colours::Teal; break;
+	case ValveState::Open: s.body_color = Colours::Green; break;
+	case ValveState::Opening: s.mask_color = Colours::Green; break;
+	case ValveState::OpenReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
+	case ValveState::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
+	case ValveState::Closed: s.body_color = Colours::LightGray; break;
+	case ValveState::Closing: s.mask_color = Colours::DarkGray; break;
+	case ValveState::CloseReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
+	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
+	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
+	case ValveState::FalseClosed: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
 	}
 
 	return s;
 }
 
 /*************************************************************************************************/
-DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
+Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_state, radius, degrees) {}
 
-DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
-	: IStatelet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
+Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
+	: IStatelet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
 }
 
-void DumpDoorlet::construct() {
+void Valvelet::construct() {
 	float handle_length = this->sgradius * 0.618F;
 	auto handler_axis = polar_axis(handle_length, this->degrees);
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
@@ -55,9 +62,9 @@ void DumpDoorlet::construct() {
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void DumpDoorlet::update(long long count, long long interval, long long uptime) {
+void Valvelet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_state()) {
-	case DoorState::Opening: {
+	case ValveState::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -65,7 +72,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
 	} break;
-	case DoorState::Closing: {
+	case ValveState::Closing: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -76,8 +83,32 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DumpDoorlet::on_state_change(DoorState state) {
+void Valvelet::on_state_change(ValveState state) {
 	switch (state) {
+	case ValveState::Unopenable: {
+		if (this->bottom_up_mask == nullptr) {
+			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
+		}
+		this->mask = this->bottom_up_mask;
+	} break;
+	case ValveState::Unclosable: case ValveState::Manual: {
+		if (this->top_down_mask == nullptr) {
+			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
+		}
+		this->mask = this->top_down_mask;
+	} break;
+	case ValveState::OpenReady: {
+		if (this->bottom_up_ready_mask == nullptr) {
+			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
+		}
+		this->mask = this->bottom_up_ready_mask;
+	} break;
+	case ValveState::CloseReady: {
+		if (this->top_down_ready_mask == nullptr) {
+			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
+		}
+		this->mask = this->top_down_ready_mask;
+	} break;
 	default: {
 		this->mask = nullptr;
 		this->mask_percentage = -1.0;
@@ -85,16 +116,16 @@ void DumpDoorlet::on_state_change(DoorState state) {
 	}
 }
 
-void DumpDoorlet::fill_extent(float x, float y, float* w, float* h) {
+void Valvelet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, size);
 }
 
-double DumpDoorlet::get_direction_degrees() {
+double Valvelet::get_direction_degrees() {
 	return this->degrees;
 }
 
-void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const DoorStyle style = this->get_style();
+void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	const ValveStyle style = this->get_style();
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
 	auto body_color = (style.body_color != nullptr) ? style.body_color : Colours::Background;
 

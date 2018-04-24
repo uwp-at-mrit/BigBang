@@ -1,4 +1,4 @@
-#include "pumplet.hpp"
+#include "graphlet/symbol/pumplet.hpp"
 
 #include "polar.hpp"
 #include "paint.hpp"

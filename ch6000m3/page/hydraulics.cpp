@@ -12,12 +12,12 @@
 #include "turtle.hpp"
 
 #include "graphlet/booleanlet.hpp"
-#include "graphlet/gaugelet.hpp"
 #include "graphlet/shapelet.hpp"
-#include "graphlet/pumplet.hpp"
-#include "graphlet/valvelet.hpp"
-
 #include "graphlet/svglet.hpp"
+
+#include "graphlet/symbol/gaugelet.hpp"
+#include "graphlet/symbol/pumplet.hpp"
+#include "graphlet/symbol/valvelet.hpp"
 
 #include "decorator/page.hpp"
 #ifdef _DEBUG

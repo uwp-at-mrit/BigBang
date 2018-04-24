@@ -17,12 +17,12 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\doorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\pumplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\valvelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
@@ -33,10 +33,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\grid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\pipeline.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\motorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\alarmlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
@@ -44,14 +44,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\doorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\pumplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\valvelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\gaugelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
@@ -64,12 +64,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\decorator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\grid.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\pipeline.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\motorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\motorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\statuslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\primitive.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\alarmlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
