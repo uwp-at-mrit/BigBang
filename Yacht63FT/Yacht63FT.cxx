@@ -48,8 +48,7 @@ private:
 
 private ref class StatusUniverse sealed : public WarGrey::SCADA::UniverseDisplay {
 public:
-	virtual ~StatusUniverse() {
-	}
+	virtual ~StatusUniverse() {}
 
 	StatusUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
 
@@ -68,10 +67,10 @@ public:
 
 public:
 	void initialize_component(Windows::Foundation::Size region) {
-		float fit_width = application_fit_size(resolution_width);
-		float fit_height = application_fit_size(resolution_height);
-		float fit_nav_height = application_fit_size(resolution_navigator_height);
-		float fit_bar_height = application_fit_size(resolution_statusbar_height);
+		float fit_width = application_fit_size(screen_width);
+		float fit_height = application_fit_size(screen_height);
+		float fit_nav_height = application_fit_size(screen_navigator_height);
+		float fit_bar_height = application_fit_size(screen_statusbar_height);
 		
 		this->navigator = ref new StackPanel();
 		this->workspace = ref new Universe("Yacht63FT");

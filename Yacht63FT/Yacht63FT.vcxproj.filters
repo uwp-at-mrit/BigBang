@@ -61,9 +61,6 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\1_74.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\5_06.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
@@ -186,6 +183,12 @@
     </Image>
     <Image Include="Assets\StoreLogo.scale-400.png">
       <Filter>Assets</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\yacht.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\skeleton.png">
+      <Filter>usr\share\graphlet</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

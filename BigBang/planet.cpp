@@ -224,6 +224,23 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAlignment align) {
 	}
 }
 
+void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAlignment talign, GraphletAlignment align, float dx, float dy) {
+	GraphletInfo* tinfo = planet_graphlet_info(this, target);
+	float x = 0.0F;
+	float y = 0.0F;
+
+	if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
+		float sx, sy, sw, sh, xoff, yoff;
+
+		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
+		graphlet_alignment_offset(target, sw, sh, talign, &xoff, &yoff);
+		x = sx + xoff + dx;
+		y = sy + yoff + dy;
+	}
+
+	this->insert(g, x, y, align);
+}
+
 void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 

@@ -28,7 +28,7 @@ Bitmaplet::Bitmaplet(Platform::String^ file, Platform::String^ rootdir) : Bitmap
 Bitmaplet::Bitmaplet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
 	this->window.Width = width;
 	this->window.Height = height;
-	this->ms_appx_bmp = ms_appx_path(file, rootdir, ".bmp");
+	this->ms_appx_bmp = ms_appx_path(file, rootdir, ".png");
 }
 
 Bitmaplet::~Bitmaplet() {
