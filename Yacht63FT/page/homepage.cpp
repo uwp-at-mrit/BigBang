@@ -1,13 +1,13 @@
 ﻿#include "page/homepage.hpp"
 #include "configuration.hpp"
 
+#include "graphlet/bitmaplet.hpp"
+
 #include "tongue.hpp"
 #include "system.hpp"
 
 #include "text.hpp"
 #include "math.hpp"
-
-#include "graphlet/bitmaplet.hpp"
 
 using namespace WarGrey::SCADA;
 
