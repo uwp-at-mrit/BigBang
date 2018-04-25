@@ -33,13 +33,9 @@ public:
 	}
 
 public:
-	void load(float width, float height, float gridsize) {
-		this->yacht = new Bitmaplet("1_74.png", 64.0F, 64.0F);
+	void load_and_flow(float width, float height, float gridsize) {
+		this->yacht = new Bitmaplet("1_74.png", width, height);
 		this->master->insert(this->yacht);
-	}
-
-	
-	void reflow(float width, float height, float gridsize, float vinset) {
 	}
 
 // never deletes these graphlets mannually
@@ -75,7 +71,7 @@ void Homepage::load(CanvasCreateResourcesReason reason, float width, float heigh
 
 		{ // load graphlets
 			this->change_mode(HSMode::View);
-			console->load(width, height, this->gridsize);
+			console->load_and_flow(width, height, this->gridsize);
 
 			this->change_mode(HSMode::WindowUI);
 		}
@@ -85,19 +81,6 @@ void Homepage::load(CanvasCreateResourcesReason reason, float width, float heigh
 			this->set_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, 0.0F));
 #endif
 		}
-	}
-}
-
-void Homepage::reflow(float width, float height) {
-	auto console = dynamic_cast<DefaultPage*>(this->console);
-	
-	if (console != nullptr) {
-		float vinset = statusbar_height();
-
-		this->change_mode(HSMode::WindowUI);
-
-		this->change_mode(HSMode::View);
-		console->reflow(width, height, this->gridsize, vinset);
 	}
 }
 

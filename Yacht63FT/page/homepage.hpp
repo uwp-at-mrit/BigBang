@@ -14,8 +14,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
-		void reflow(float width, float height) override;
-
+		
 	public:
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 

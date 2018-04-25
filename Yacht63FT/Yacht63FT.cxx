@@ -46,45 +46,38 @@ private:
 	PLCMaster* device;
 };
 
-private ref class Yacht63FT sealed : public SplitView {
+private ref class Yacht63FT sealed : public StackPanel {
 public:
-	Yacht63FT() : SplitView() {
+	Yacht63FT() : StackPanel() {
 		this->Margin = ThicknessHelper::FromUniformLength(0.0);
-		this->PanePlacement = SplitViewPanePlacement::Left;
-		this->DisplayMode = SplitViewDisplayMode::Overlay;
-		this->IsPaneOpen = false;
-
-		this->PointerMoved += ref new PointerEventHandler(this, &Yacht63FT::on_pointer_moved);
+		this->Orientation = ::Orientation::Vertical;
+		this->HorizontalAlignment = ::HorizontalAlignment::Center;
+		this->VerticalAlignment = ::VerticalAlignment::Center;
 	}
 
 public:
 	void initialize_component(Windows::Foundation::Size region) {
+		this->navigator = ref new StackPanel();
 		this->universe = ref new Universe("Yacht63FT");
-		this->Content = this->universe->canvas;
-		this->Pane = this->universe->navigator;
 
-		// TODO: Why SplitView::Content cannot do it on its own?
+		this->navigator->MinWidth = 1024;
+		this->navigator->MinHeight = 90;
+		this->navigator->Orientation = ::Orientation::Horizontal;
+		this->navigator->Margin = ThicknessHelper::FromUniformLength(0.0);
+		this->navigator->Children->Append(this->universe->navigator);
+
+		this->universe->min_width = 1024;
+		this->universe->min_height = 400;
+
+		this->Children->Append(this->navigator);
+		this->Children->Append(this->universe->canvas);
+
 		this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);
 	}
 
 private:
-	void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {
-		auto pt = args->GetCurrentPoint(this);
-		float x = pt->Position.X;
-
-		if (!pt->Properties->IsLeftButtonPressed) {
-			if (x <= this->Margin.Left) {
-				this->IsPaneOpen = true;
-				args->Handled = true;
-			} else if (x > this->OpenPaneLength) {
-				this->IsPaneOpen = false;
-				args->Handled = true;
-			}
-		}
-	}
-
-private:
 	WarGrey::SCADA::UniverseDisplay^ universe;
+	StackPanel^ navigator;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

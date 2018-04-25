@@ -184,7 +184,11 @@ bool Planet::graphlet_unmasked(IGraphlet* g) {
 	return ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode));
 }
 
-void Planet::insert(IGraphlet* g, double degrees, float x, float y) {
+void Planet::insert(IGraphlet* g, double degrees) {
+	this->insert(g, 0.0F, 0.0F, degrees);
+}
+
+void Planet::insert(IGraphlet* g, float x, float y, double degrees) {
 	if (g->info == nullptr) {
 		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, degrees);
 		

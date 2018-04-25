@@ -36,7 +36,8 @@ namespace WarGrey::SCADA {
 		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
 		virtual bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_graphlets_bounds(float* x, float* y, float* width, float* height) = 0;
-		virtual void insert(IGraphlet* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) = 0;
+		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, double degrees = 0.0) = 0;
+		virtual void insert(IGraphlet* g, double degrees) = 0;
 		virtual void move(IGraphlet* g, float x, float y) = 0;
 		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
 		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment tcp, GraphletAlignment cp, float dx = 0.0F, float dy = 0.0F) = 0;
@@ -154,7 +155,8 @@ namespace WarGrey::SCADA {
         bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
 		bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) override;
 		void fill_graphlets_bounds(float* x, float* y, float* width, float* height);
-		void insert(IGraphlet* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) override;
+		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, double degrees = 0.0) override;
+		void insert(IGraphlet* g, double degrees) override;
 		void move(IGraphlet* g, float x, float y) override;
 		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
 		void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment tcp, GraphletAlignment cp, float dx = 0.0F, float dy = 0.0F) override;
