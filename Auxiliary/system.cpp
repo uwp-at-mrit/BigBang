@@ -31,12 +31,6 @@ Size system_screen_size() {
     return { float(master->ScreenWidthInRawPixels) / scaling, float(master->ScreenHeightInRawPixels) / scaling };
 }
 
-float system_resolution_fit_scaling(float target_width, float target_height) {
-	Size screen = system_screen_size();
-
-	return std::fmin(screen.Width / target_width, screen.Height / target_height);
-}
-
 Color system_color(UIColorType type) {
     if (sysUI == nullptr) {
         sysUI = ref new UISettings();

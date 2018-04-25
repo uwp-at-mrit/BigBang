@@ -2,6 +2,7 @@
 #include <map>
 
 #include "graphlet/bitmaplet.hpp"
+#include "planet.hpp"
 
 #include "colorspace.hpp"
 #include "path.hpp"
@@ -25,8 +26,8 @@ static std::map<int, cancellation_token_source> lazy_tasks;
 Bitmaplet::Bitmaplet(Platform::String^ file, Platform::String^ rootdir) : Bitmaplet(file, 0.0F, 0.0F, rootdir) {}
 
 Bitmaplet::Bitmaplet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
-	this->viewport.Width = width;
-	this->viewport.Height = height;
+	this->window.Width = width;
+	this->window.Height = height;
 	this->ms_appx_bmp = ms_appx_path(file, rootdir, ".bmp");
 }
 
@@ -61,14 +62,17 @@ void Bitmaplet::construct() {
 	}).then([=](task<CanvasBitmap^> doc_bmp) {
 		try {
 			this->graph_bmp = doc_bmp.get();
-			
-			if (this->viewport.Width == 0.0F) {
-				this->viewport.Width = this->graph_bmp->Size.Width;
+
+			if (this->window.Width <= 0.0F) {
+				if (this->window.Height <= 0.0F) {
+					this->window.Height = this->graph_bmp->Size.Height;
+				}
+				this->window.Width = this->graph_bmp->Size.Width * (this->window.Height / this->graph_bmp->Size.Height);
+			} else if (this->window.Height <= 0.0F) {
+				this->window.Height = this->graph_bmp->Size.Height * (this->window.Width / this->graph_bmp->Size.Width);
 			}
 
-			if (this->viewport.Height == 0.0F) {
-				this->viewport.Height = this->graph_bmp->Size.Height;
-			}
+			this->info->master->notify_graphlet_ready(this);
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Error,
 				L"Failed to load %s: %s",
@@ -82,23 +86,23 @@ void Bitmaplet::construct() {
 	});
 }
 
+bool Bitmaplet::ready() {
+	return (this->graph_bmp != nullptr);
+}
+
 void Bitmaplet::fill_extent(float x, float y, float* w, float* h) {
-	SET_VALUES(w, this->viewport.Width, h, this->viewport.Height);
+	SET_VALUES(w, this->window.Width, h, this->window.Height);
 }
 
 void Bitmaplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->graph_bmp != nullptr) {
-		this->viewport.X = x;
-		this->viewport.Y = y;
+	this->window.X = x;
+	this->window.Y = y;
 
-		ds->DrawImage(this->graph_bmp, this->viewport);
-	} else {
-		this->draw_on_error(ds, x, y, Width, Height);
-	}
+	ds->DrawImage(this->graph_bmp, this->window);
 }
 
-void Bitmaplet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Bitmaplet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	Platform::String^ hint = file_name_from_path(this->ms_appx_bmp);
 
-	draw_invalid_bitmap(hint, ds, x, y, this->viewport.Width, this->viewport.Height);
+	draw_invalid_bitmap(hint, ds, x, y, this->window.Width, this->window.Height);
 }

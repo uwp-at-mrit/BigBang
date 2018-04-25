@@ -3,6 +3,16 @@
 
 #include "math.hpp"
 
+using namespace Windows::Foundation;
+
+float viewport_fit_scaling(Size& src_size, float target_width, float target_height) {
+	return viewport_fit_scaling(src_size.Width, src_size.Height, target_width, target_height);
+}
+
+float viewport_fit_scaling(float src_width, float src_height, float target_width, float target_height) {
+	return std::fmin(src_width / target_width, src_height / target_height);
+}
+
 void circle_point(float radius, double degrees, float* x, float* y) {
 	float radians = float(degrees * M_PI / 180.0);
 

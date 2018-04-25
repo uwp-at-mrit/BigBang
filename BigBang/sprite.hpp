@@ -12,6 +12,8 @@ namespace WarGrey::SCADA {
 		virtual void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) = 0;
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) = 0;
+		virtual void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {}
+		virtual bool ready() { return true; }
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }

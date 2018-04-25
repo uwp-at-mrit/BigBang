@@ -2,6 +2,7 @@
 #include <map>
 
 #include "graphlet/svglet.hpp"
+#include "planet.hpp"
 
 #include "colorspace.hpp"
 #include "path.hpp"
@@ -64,13 +65,26 @@ void Svglet::construct() {
 			this->graph_svg = doc_svg.get();
 			this->root = this->graph_svg->Root;
 
-			if (this->viewport.Width != 0.0F) {
+			if ((this->viewport.Width > 0.0F) && (this->viewport.Height > 0.0F)) {
 				root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
+				root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
+			} else {
+				CanvasSvgLengthUnits width_units, height_units;
+				float width = this->get_length_attribute("width", &width_units, false);
+				float height = this->get_length_attribute("height", &height_units, false);
+
+				// TODO: what if one of the lengths is measured in percentage
+				if (this->viewport.Width <= 0.0F) {
+					if (this->viewport.Height <= 0.0F) {
+						this->viewport.Height = height;
+					}
+					this->viewport.Width = width * (this->viewport.Height / height);
+				} else {
+					this->viewport.Height = height * (this->viewport.Width / width);
+				}
 			}
 
-			if (this->viewport.Height != 0.0F) {
-				root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
-			}
+			this->info->master->notify_graphlet_ready(this);
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Error,
 				L"Failed to load %s: %s",
@@ -84,31 +98,19 @@ void Svglet::construct() {
 	});
 }
 
+bool Svglet::ready() {
+	return (this->graph_svg != nullptr);
+}
+
 void Svglet::fill_extent(float x, float y, float* w, float* h) {
-	if (this->root != nullptr) {
-		CanvasSvgLengthUnits units;
-
-		if (this->viewport.Width == 0.0F) {
-			this->viewport.Width = this->get_length_attribute("width", &units, false);
-		}
-
-		if (this->viewport.Height == 0.0F) {
-			this->viewport.Height = this->get_length_attribute("height", &units, false);
-		}
-	}
-
 	SET_VALUES(w, this->viewport.Width, h, this->viewport.Height);
 }
 
 void Svglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->graph_svg != nullptr) {
-		ds->DrawSvg(this->graph_svg, this->viewport, x, y);
-	} else {
-		this->draw_on_error(ds, x, y, Width, Height);
-	}
+	ds->DrawSvg(this->graph_svg, this->viewport, x, y);
 }
 
-void Svglet::draw_on_error(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Svglet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	Platform::String^ hint = file_name_from_path(this->ms_appx_svg);
 
 	draw_invalid_bitmap(hint, ds, x, y, this->viewport.Width, this->viewport.Height);

@@ -33,14 +33,13 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) = 0;
-		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
+		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) = 0;
 		virtual bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_graphlets_bounds(float* x, float* y, float* width, float* height) = 0;
-		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, double degrees = 0.0) = 0;
-		virtual void insert(IGraphlet* g, double degrees) = 0;
+		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) = 0;
 		virtual void move(IGraphlet* g, float x, float y) = 0;
-		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) = 0;
-		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment tcp, GraphletAlignment cp, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) = 0;
+		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment talign, GraphletAlignment align, float dx = 0.0F, float dy = 0.0F) = 0;
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
@@ -59,6 +58,9 @@ namespace WarGrey::SCADA {
 		virtual bool can_select_multiple() { return false; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
+
+	public:
+		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
 
 	public:
 		virtual WarGrey::SCADA::IGraphlet* get_focus_graphlet() = 0;
@@ -152,14 +154,13 @@ namespace WarGrey::SCADA {
 
     public:
 		WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) override;
-        bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
+        bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) override;
 		bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) override;
 		void fill_graphlets_bounds(float* x, float* y, float* width, float* height);
-		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, double degrees = 0.0) override;
-		void insert(IGraphlet* g, double degrees) override;
+		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) override;
 		void move(IGraphlet* g, float x, float y) override;
-		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment cp = GraphletAlignment::LT) override;
-		void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment tcp, GraphletAlignment cp, float dx = 0.0F, float dy = 0.0F) override;
+		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAlignment align = GraphletAlignment::LT) override;
+		void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment talign, GraphletAlignment align, float dx = 0.0F, float dy = 0.0F) override;
 		void size_cache_invalid();
 
 	public:
@@ -171,6 +172,9 @@ namespace WarGrey::SCADA {
         void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;
+
+	public:
+		void notify_graphlet_ready(IGraphlet* g) override;
 
 	public:
 		WarGrey::SCADA::IGraphlet* get_focus_graphlet() override;

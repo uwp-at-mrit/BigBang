@@ -1,19 +1,11 @@
 ﻿#include "page/homepage.hpp"
 #include "configuration.hpp"
 
-#include "tongue.hpp"
 #include "system.hpp"
-#include "syslog.hpp"
-
 #include "text.hpp"
-#include "paint.hpp"
-#include "brushes.hxx"
+#include "math.hpp"
 
 #include "graphlet/bitmaplet.hpp"
-
-#ifdef _DEBUG
-#include "decorator/grid.hpp"
-#endif
 
 using namespace WarGrey::SCADA;
 
@@ -31,9 +23,10 @@ public:
 	}
 
 public:
-	void load_and_flow(float width, float height, float gridsize) {
-		this->yacht = new Bitmaplet("1_74.png", width);
-		this->master->insert(this->yacht);
+	void load_and_flow(float width, float height) {
+		this->yacht = new Bitmaplet("1_74.png", 0.0F, height);
+
+		this->master->insert(this->yacht, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
 	}
 
 // never deletes these graphlets mannually
@@ -46,13 +39,10 @@ private:
 	CanvasTextFormat^ caption_font;
 };
 
-Homepage::Homepage(IMRMaster* plc) : Planet(":homepage:"), device(plc) {
+Homepage::Homepage() : Planet(":homepage:") {
 	DefaultPage* console = new DefaultPage(this);
 
-	this->console = console; 
-	this->gridsize = statusbar_height();
-
-	this->device->append_confirmation_receiver(console);
+	this->console = console;
 }
 
 Homepage::~Homepage() {
@@ -65,11 +55,6 @@ void Homepage::load(CanvasCreateResourcesReason reason, float width, float heigh
 	auto console = dynamic_cast<DefaultPage*>(this->console);
 	
 	if (console != nullptr) {
-		console->load_and_flow(width, height, this->gridsize);
+		console->load_and_flow(width, height);
 	}
-}
-
-void Homepage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	this->set_selected(g);
-	// this->set_caret_owner(g);
 }

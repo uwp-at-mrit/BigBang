@@ -55,6 +55,11 @@ public:
 	unsigned int mode;
 
 public:
+	float inserted_to_x;
+	float inserted_to_y;
+	GraphletAlignment inserted_with_align;
+
+public:
 	IGraphlet* next;
 	IGraphlet* prev;
 };
@@ -66,8 +71,6 @@ static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, 
     while (degrees <  0.000) degrees += 360.0;
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
-
-    g->construct();
 
     return info;
 }
@@ -108,20 +111,6 @@ static void unsafe_fill_graphlet_bound(IGraphlet* g, GraphletInfo* info, float* 
 	}
 }
 
-static void unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
-    if (!absolute) {
-        x += info->x;
-        y += info->y;
-    }
-
-    if ((info->x != x) || (info->y != y)) {
-        info->x = x;
-        info->y = y;
-
-        master->size_cache_invalid();
-    }
-}
-
 static inline void unsafe_add_selected(IPlanet* master, IGraphlet* g, GraphletInfo* info) {
 	master->before_select(g, true);
 	info->selected = true;
@@ -133,15 +122,15 @@ static inline void unsafe_set_selected(IPlanet* master, IGraphlet* g, GraphletIn
 	unsafe_add_selected(master, g, info);
 }
 
-static void graphlet_alignment_offset(IGraphlet* g, float width, float height, GraphletAlignment& cp, float* xoff, float* yoff) {
+static void graphlet_alignment_offset(IGraphlet* g, float width, float height, GraphletAlignment& align, float* xoff, float* yoff) {
     float dx = 0.0F;
     float dy = 0.0F;
 
-    if (cp != GraphletAlignment::LT) {
+    if (align != GraphletAlignment::LT) {
 		float halfw = width  * 0.5F;
 		float halfh = height * 0.5F;
 
-        switch (cp) {
+        switch (align) {
         case GraphletAlignment::LC:             dy = halfh;  break;
         case GraphletAlignment::LB:             dy = height; break;
         case GraphletAlignment::CT: dx = halfw;                break;
@@ -155,6 +144,28 @@ static void graphlet_alignment_offset(IGraphlet* g, float width, float height, G
 
 	(*xoff) = dx;
 	(*yoff) = dy;
+}
+
+static void unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
+	if (!absolute) {
+		x += info->x;
+		y += info->y;
+	}
+
+	if ((info->x != x) || (info->y != y)) {
+		info->x = x;
+		info->y = y;
+
+		master->size_cache_invalid();
+	}
+}
+
+static void unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info, float x, float y, GraphletAlignment align, bool absolute) {
+	float sx, sy, sw, sh, dx, dy;
+
+	unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+	graphlet_alignment_offset(g, sw, sh, align, &dx, &dy);
+	unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
 }
 
 /*************************************************************************************************/
@@ -184,13 +195,9 @@ bool Planet::graphlet_unmasked(IGraphlet* g) {
 	return ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode));
 }
 
-void Planet::insert(IGraphlet* g, double degrees) {
-	this->insert(g, 0.0F, 0.0F, degrees);
-}
-
-void Planet::insert(IGraphlet* g, float x, float y, double degrees) {
+void Planet::insert(IGraphlet* g, float x, float y, GraphletAlignment align) {
 	if (g->info == nullptr) {
-		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, degrees);
+		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, 0.0);
 		
 		if (this->head_graphlet == nullptr) {
             this->head_graphlet = g;
@@ -205,39 +212,46 @@ void Planet::insert(IGraphlet* g, float x, float y, double degrees) {
         }
         info->next = this->head_graphlet;
 
-        unsafe_move_graphlet_via_info(this, info, x, y, true);
-        this->size_cache_invalid();
+		g->construct();
+		if (g->ready()) {
+			unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
+			this->size_cache_invalid();
+		} else {
+			info->inserted_to_x = x;
+			info->inserted_to_y = y;
+			info->inserted_with_align = align;
+		}
 	}
 }
 
-void Planet::move_to(IGraphlet* g, float x, float y, GraphletAlignment cp) {
+void Planet::notify_graphlet_ready(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+
+	if (info != nullptr) {
+		unsafe_move_graphlet_via_info(this, g, info, info->inserted_to_x, info->inserted_to_y, info->inserted_with_align, true);
+		this->size_cache_invalid();
+	}
+}
+
+void Planet::move_to(IGraphlet* g, float x, float y, GraphletAlignment align) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		float sx, sy, sw, sh, dx, dy;
-		
-		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(g, sw, sh, cp, &dx, &dy);
-		unsafe_move_graphlet_via_info(this, info, x - dx, y - dy, true);
+		unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
 	}
 }
 
-void Planet::move_to(IGraphlet* g, IGraphlet* target, GraphletAlignment tcp, GraphletAlignment cp, float dx, float dy) {
+void Planet::move_to(IGraphlet* g, IGraphlet* target, GraphletAlignment talign, GraphletAlignment align, float dx, float dy) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	GraphletInfo* tinfo = planet_graphlet_info(this, target);
 
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)
 		&& (tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
-		float sx, sy, sw, sh, xoff, yoff, x, y;
+		float sx, sy, sw, sh, xoff, yoff;
 
 		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(target, sw, sh, tcp, &xoff, &yoff);
-		x = sx + xoff + dx;
-		y = sy + yoff + dy;
-
-		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(g, sw, sh, cp, &xoff, &yoff);
-		unsafe_move_graphlet_via_info(this, info, x - xoff, y - yoff, true);
+		graphlet_alignment_offset(target, sw, sh, talign, &xoff, &yoff);
+		unsafe_move_graphlet_via_info(this, g, info, sx + xoff + dx, sy + yoff + dy, align, true);
 	}
 }
 
@@ -291,7 +305,7 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
     return found;
 }
 
-bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAlignment cp) {
+bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAlignment align) {
 	bool okay = false;
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
@@ -299,7 +313,7 @@ bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAl
 		float sx, sy, sw, sh, dx, dy;
 
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_alignment_offset(g, sw, sh, cp, &dx, &dy);
+		graphlet_alignment_offset(g, sw, sh, align, &dx, &dy);
 		SET_BOX(x, sx + dx);
 		SET_BOX(y, sy + dy);
 
@@ -679,7 +693,11 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					}
 
 					this->decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
-					child->draw(ds, info->x, info->y, width, height);
+					if (child->ready()) {
+						child->draw(ds, info->x, info->y, width, height);
+					} else {
+						child->draw_progress(ds, info->x, info->y, width, height);
+					}
 					this->decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
 
 					if (info->selected) {
