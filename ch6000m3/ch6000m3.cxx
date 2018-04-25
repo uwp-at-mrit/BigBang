@@ -90,7 +90,5 @@ private:
 };
 
 int main(Platform::Array<Platform::String^>^ args) {
-	launch_universal_windows_application<Yacht63FT>(remote_test_server);
-
-	return 0;
+	return launch_universal_windows_application<Yacht63FT, true>(remote_test_server);
 }

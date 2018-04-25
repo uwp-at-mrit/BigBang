@@ -4,7 +4,7 @@
 #include "system.hpp"
 
 namespace WarGrey::SCADA {
-	template<class UniversalWindowsScreen>
+	template<class UniversalWindowsScreen, bool fullscreen>
 	private ref class UniversalWindowsApplication sealed : public Windows::UI::Xaml::Application {
 	protected:
 		void AppMain(Windows::UI::ViewManagement::ApplicationView^ self, Windows::UI::Xaml::FrameworkElement^ screen) {
@@ -13,10 +13,23 @@ namespace WarGrey::SCADA {
 #else
 			Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
 #endif
-			Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::PreferredLaunchViewSize;
-			Windows::UI::ViewManagement::ApplicationView::PreferredLaunchViewSize = system_screen_size();
 
-			Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false; // Force Using the default TitleBar.
+
+			/** NOTE
+			* the Titlebar in Universal Windows Platform is freaky,
+			* it *can* be customized fully, but the caption buttons are always there.
+			*
+			* therefore, the default TitleBar is forced using here,
+			* and instead, the FullScreen mode is preferred.
+			*/
+			Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
+			if (fullscreen) {
+				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::FullScreen;
+			} else {
+				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::PreferredLaunchViewSize;
+				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchViewSize = system_screen_size();
+			}
+
 			Windows::ApplicationModel::Core::CoreApplication::UnhandledErrorDetected
 				+= ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::Core::UnhandledErrorDetectedEventArgs^>(this,
 					&UniversalWindowsApplication::OnUncaughtException);
@@ -69,13 +82,15 @@ namespace WarGrey::SCADA {
 		}
 	};
 
-	template<class UniversalWindowsScreen>
-	void launch_universal_windows_application(Platform::String^ remote_rsyslog_server = nullptr) {
+	template<class UniversalWindowsScreen, bool fullscreen>
+	int launch_universal_windows_application(Platform::String^ remote_rsyslog_server = nullptr) {
 		auto lazy_main = [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
-			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen>();
+			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen, fullscreen>();
 		};
 
 		set_default_racket_receiver_host(remote_rsyslog_server);
 		Windows::UI::Xaml::Application::Start(ref new Windows::UI::Xaml::ApplicationInitializationCallback(lazy_main));
+		
+		return 0;
 	}
 }

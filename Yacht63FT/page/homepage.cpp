@@ -24,8 +24,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum HSMode { WindowUI = 0, View };
-
 private class DefaultPage final : public WarGrey::SCADA::MRConfirmation {
 public:
 	DefaultPage(Homepage* master) : master(master) {
@@ -67,20 +65,7 @@ void Homepage::load(CanvasCreateResourcesReason reason, float width, float heigh
 	auto console = dynamic_cast<DefaultPage*>(this->console);
 	
 	if (console != nullptr) {
-		float vinset = statusbar_height();
-
-		{ // load graphlets
-			this->change_mode(HSMode::View);
-			console->load_and_flow(width, height, this->gridsize);
-
-			this->change_mode(HSMode::WindowUI);
-		}
-
-		{ // delayed initializing
-#ifdef _DEBUG
-			this->set_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, 0.0F));
-#endif
-		}
+		console->load_and_flow(width, height, this->gridsize);
 	}
 }
 

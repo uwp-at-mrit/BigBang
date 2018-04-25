@@ -46,6 +46,17 @@ private:
 	PLCMaster* device;
 };
 
+private ref class StatusUniverse sealed : public WarGrey::SCADA::UniverseDisplay {
+public:
+	virtual ~StatusUniverse() {
+	}
+
+	StatusUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
+
+protected:
+	void construct() override {}
+};
+
 private ref class Yacht63FT sealed : public StackPanel {
 public:
 	Yacht63FT() : StackPanel() {
@@ -58,30 +69,33 @@ public:
 public:
 	void initialize_component(Windows::Foundation::Size region) {
 		this->navigator = ref new StackPanel();
-		this->universe = ref new Universe("Yacht63FT");
+		this->workspace = ref new Universe("Yacht63FT");
+		this->statusbar = ref new StatusUniverse("Yacht63FT");
 
 		this->navigator->MinWidth = 1024;
 		this->navigator->MinHeight = 90;
 		this->navigator->Orientation = ::Orientation::Horizontal;
 		this->navigator->Margin = ThicknessHelper::FromUniformLength(0.0);
-		this->navigator->Children->Append(this->universe->navigator);
+		this->navigator->Children->Append(this->workspace->navigator);
 
-		this->universe->min_width = 1024;
-		this->universe->min_height = 400;
+		this->workspace->min_width = 1024;
+		this->workspace->min_height = 400;
+		this->statusbar->min_width = 1024;
+		this->statusbar->min_height = 215;
 
 		this->Children->Append(this->navigator);
-		this->Children->Append(this->universe->canvas);
+		this->Children->Append(this->workspace->canvas);
+		this->Children->Append(this->statusbar->canvas);
 
-		this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);
+		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 	}
 
 private:
-	WarGrey::SCADA::UniverseDisplay^ universe;
+	WarGrey::SCADA::UniverseDisplay^ workspace;
+	WarGrey::SCADA::UniverseDisplay^ statusbar;
 	StackPanel^ navigator;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {
-	launch_universal_windows_application<Yacht63FT>(remote_test_server);
-
-	return 0;
+	return launch_universal_windows_application<Yacht63FT, true>(remote_test_server);
 }
