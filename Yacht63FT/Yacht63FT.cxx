@@ -7,15 +7,15 @@
 
 #include "page/homepage.hpp"
 
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Input;
+using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 
@@ -68,20 +68,25 @@ public:
 
 public:
 	void initialize_component(Windows::Foundation::Size region) {
+		float fit_width = application_fit_size(resolution_width);
+		float fit_height = application_fit_size(resolution_height);
+		float fit_nav_height = application_fit_size(resolution_navigator_height);
+		float fit_bar_height = application_fit_size(resolution_statusbar_height);
+		
 		this->navigator = ref new StackPanel();
 		this->workspace = ref new Universe("Yacht63FT");
-		this->statusbar = ref new StatusUniverse("Yacht63FT");
+		this->statusbar = ref new StatusUniverse(this->workspace->get_logger()->get_name());
 
-		this->navigator->MinWidth = 1024;
-		this->navigator->MinHeight = 90;
+		this->navigator->Width = fit_width;
+		this->navigator->Height = fit_nav_height;
 		this->navigator->Orientation = ::Orientation::Horizontal;
 		this->navigator->Margin = ThicknessHelper::FromUniformLength(0.0);
 		this->navigator->Children->Append(this->workspace->navigator);
 
-		this->workspace->min_width = 1024;
-		this->workspace->min_height = 400;
-		this->statusbar->min_width = 1024;
-		this->statusbar->min_height = 215;
+		this->workspace->width = fit_width;
+		this->workspace->height = fit_height - fit_nav_height - fit_bar_height;
+		this->statusbar->width = fit_width;
+		this->statusbar->height = fit_bar_height;
 
 		this->Children->Append(this->navigator);
 		this->Children->Append(this->workspace->canvas);

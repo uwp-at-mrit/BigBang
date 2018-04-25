@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "system.hpp"
 
 using namespace Windows::Foundation;
@@ -27,6 +29,12 @@ Size system_screen_size() {
     auto scaling = float(master->RawPixelsPerViewPixel);
 
     return { float(master->ScreenWidthInRawPixels) / scaling, float(master->ScreenHeightInRawPixels) / scaling };
+}
+
+float system_resolution_fit_scaling(float target_width, float target_height) {
+	Size screen = system_screen_size();
+
+	return std::fmin(screen.Width / target_width, screen.Height / target_height);
 }
 
 Color system_color(UIColorType type) {

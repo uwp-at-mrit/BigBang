@@ -9,8 +9,8 @@ namespace WarGrey::SCADA {
 	public:
 		~Bitmaplet() noexcept;
 
-		Bitmaplet(Platform::String^ file_bmp, float width, float height, Platform::String^ rootdir = "graphlet");
-		Bitmaplet(Platform::String^ file_bmp, Platform::String^ rootdir = "graphlet");
+		Bitmaplet(Platform::String^ file_bmp, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
+		Bitmaplet(Platform::String^ file_bmp, Platform::String^ rootdir);
 
 	public:
 		void construct() override;

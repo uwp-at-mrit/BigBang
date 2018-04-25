@@ -60,10 +60,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -126,10 +124,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

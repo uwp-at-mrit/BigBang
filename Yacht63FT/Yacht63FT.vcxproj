@@ -212,6 +212,7 @@
     <Image Include="usr\share\graphlet\5_06.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="configuration.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />

@@ -28,17 +28,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.xaml.cpp" />
-    <ClCompile Include="MainPage.xaml.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="page\homepage.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="configuration.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.xaml.h" />
-    <ClInclude Include="MainPage.xaml.h" />
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="page\homepage.hpp">

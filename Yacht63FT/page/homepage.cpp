@@ -32,7 +32,7 @@ public:
 
 public:
 	void load_and_flow(float width, float height, float gridsize) {
-		this->yacht = new Bitmaplet("1_74.png", width, height);
+		this->yacht = new Bitmaplet("1_74.png", width);
 		this->master->insert(this->yacht);
 	}
 

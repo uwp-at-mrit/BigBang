@@ -9,8 +9,8 @@ namespace WarGrey::SCADA {
 	public:
 		~Svglet() noexcept;
 
-		Svglet(Platform::String^ file_svg, float width, float height, Platform::String^ rootdir = "graphlet");
-		Svglet(Platform::String^ file_svg, Platform::String^ rootdir = "graphlet");
+		Svglet(Platform::String^ file_svg, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
+		Svglet(Platform::String^ file_svg, Platform::String^ rootdir);
 
 	public:
 		void construct() override;
