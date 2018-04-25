@@ -46,18 +46,18 @@ Bitmaplet::~Bitmaplet() {
 void Bitmaplet::construct() {
 	int uuid = this->ms_appx_bmp->GetHashCode();
 	cancellation_token_source bmp_task;
+	cancellation_token bmp_token = bmp_task.get_token();
 
-	this->get_logger()->log_message(Log::Info, L"UUID: %d", uuid);
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, bmp_task));
 
-	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_bmp)).then([=](task<StorageFile^> svg) {
+	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_bmp), bmp_token).then([=](task<StorageFile^> svg) {
 		this->get_logger()->log_message(Log::Debug,
 			L"Found the graphlet source: %s",
 			this->ms_appx_bmp->ToString()->Data());
 
-		return svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders);
+		return create_task(svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders), bmp_token);
 	}).then([=](task<IRandomAccessStream^> bmp) {
-		return CanvasBitmap::LoadAsync(CanvasDevice::GetSharedDevice(), bmp.get());
+		return create_task(CanvasBitmap::LoadAsync(CanvasDevice::GetSharedDevice(), bmp.get()), bmp_token);
 	}).then([=](task<CanvasBitmap^> doc_bmp) {
 		try {
 			this->graph_bmp = doc_bmp.get();
@@ -76,7 +76,7 @@ void Bitmaplet::construct() {
 				e->Message->Data());
 		} catch (task_canceled&) {
 			this->get_logger()->log_message(Log::Debug,
-				L"Loading %s is canceled.",
+				L"Cancelled loading %s",
 				this->ms_appx_bmp->ToString()->Data());
 		}
 	});

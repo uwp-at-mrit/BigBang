@@ -47,17 +47,18 @@ Svglet::~Svglet() {
 void Svglet::construct() {
 	int uuid = this->ms_appx_svg->GetHashCode();
 	cancellation_token_source svg_task;
+	cancellation_token svg_token = svg_task.get_token();
 
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, svg_task));
 
-	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg), svg_task.get_token()).then([=](task<StorageFile^> svg) {
+	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg), svg_token).then([=](task<StorageFile^> svg) {
 		this->get_logger()->log_message(Log::Debug,
 			L"Found the graphlet source: %s",
 			this->ms_appx_svg->ToString()->Data());
 
-		return svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders);
+		return create_task(svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders), svg_token);
 	}).then([=](task<IRandomAccessStream^> svg) {
-		return CanvasSvgDocument::LoadAsync(CanvasDevice::GetSharedDevice(), svg.get());
+		return create_task(CanvasSvgDocument::LoadAsync(CanvasDevice::GetSharedDevice(), svg.get()), svg_token);
 	}).then([=](task<CanvasSvgDocument^> doc_svg) {
 		try {
 			this->graph_svg = doc_svg.get();
@@ -77,7 +78,7 @@ void Svglet::construct() {
 				e->Message->Data());
 		} catch (task_canceled&) {
 			this->get_logger()->log_message(Log::Debug,
-				L"Loading %s is canceled.",
+				L"Cancelled loading %s",
 				this->ms_appx_svg->ToString()->Data());
 		}
 	});

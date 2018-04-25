@@ -34,16 +34,12 @@ public:
 
 public:
 	void load(float width, float height, float gridsize) {
-		this->yacht = new Bitmaplet("5_06.png");
-		this->copyright = new Bitmaplet("5_06.png", 200.0F, 200.0F);
+		this->yacht = new Bitmaplet("1_74.png", 64.0F, 64.0F);
 		this->master->insert(this->yacht);
-		this->master->insert(this->copyright);
 	}
 
 	
 	void reflow(float width, float height, float gridsize, float vinset) {
-		this->master->move_to(this->yacht, 100.0F, 100.0F);
-		this->master->move_to(this->copyright, 200.0F, 200.0F);
 	}
 
 // never deletes these graphlets mannually
@@ -56,7 +52,7 @@ private:
 	CanvasTextFormat^ caption_font;
 };
 
-Homepage::Homepage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
+Homepage::Homepage(IMRMaster* plc) : Planet(":homepage:"), device(plc) {
 	DefaultPage* console = new DefaultPage(this);
 
 	this->console = console; 
