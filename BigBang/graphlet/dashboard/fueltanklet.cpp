@@ -1,19 +1,14 @@
 ﻿#include "graphlet/dashboard/fueltanklet.hpp"
 
-#include "text.hpp"
-#include "paint.hpp"
-#include "tongue.hpp"
 #include "shape.hpp"
-#include "hatch.hpp"
+#include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
@@ -77,7 +72,7 @@ void FuelTank::construct() {
 		tube->EndFigure(CanvasFigureLoop::Open);
 	}
 
-	this->skeleton = geometry_freeze(geometry_union(GEOMETRY_UNION(tank_parts),
+	this->skeleton = geometry_freeze(geometry_union(geometry_union(tank_parts), // don't mind, it's Visual Studio's fault
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
 }
 

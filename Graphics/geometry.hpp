@@ -1,7 +1,5 @@
 #pragma once
 
-#define GEOMETRY_UNION(gs) geometry_union(gs, sizeof(gs) / sizeof(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^))
-
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_rotate(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, double degrees);
 
@@ -30,6 +28,12 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ gs[],
 	size_t count);
+
+template<int N>
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ (&gs)[N]) {
+	return geometry_union(gs, N);
+};
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_xor(
     Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ g1,

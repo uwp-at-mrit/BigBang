@@ -7,10 +7,7 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
-
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 1.5F;

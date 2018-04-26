@@ -8,8 +8,6 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 

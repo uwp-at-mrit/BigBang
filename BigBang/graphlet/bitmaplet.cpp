@@ -12,7 +12,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
 
-using namespace Windows::UI;
 using namespace Windows::Foundation;
 
 using namespace Windows::Storage;

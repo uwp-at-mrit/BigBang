@@ -4,11 +4,7 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
-using namespace Windows::UI::Text;
-
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 Booleanlet::Booleanlet(float size, ICanvasBrush^ true_color, ICanvasBrush^ false_color)

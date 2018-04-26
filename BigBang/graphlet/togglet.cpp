@@ -7,7 +7,6 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
 using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas::Text;
