@@ -218,6 +218,7 @@
   <ItemGroup>
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="decorator\background.cpp" />
+    <ClCompile Include="decorator\cell.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="page\statusbar.cpp" />
     <ClCompile Include="plc.cpp" />
@@ -226,6 +227,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\background.hpp" />
+    <ClInclude Include="decorator\cell.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="page\statusbar.hpp" />
     <ClInclude Include="plc.hpp" />

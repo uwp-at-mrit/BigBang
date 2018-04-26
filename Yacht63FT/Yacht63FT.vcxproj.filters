@@ -43,6 +43,9 @@
     <ClCompile Include="decorator\background.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
+    <ClCompile Include="decorator\cell.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -54,6 +57,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="decorator\background.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="decorator\cell.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>

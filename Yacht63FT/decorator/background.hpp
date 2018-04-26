@@ -5,9 +5,9 @@
 namespace WarGrey::SCADA {
 	private class BackgroundDecorator : virtual public WarGrey::SCADA::IPlanetDecorator {
 	public:
-		BackgroundDecorator(float inset = 0.0F);
-		BackgroundDecorator(float horizontal_inset, float vertical_inset);
-		BackgroundDecorator(float top_inset, float right_inset, float bottom_inset, float left_inset);
+		BackgroundDecorator(unsigned int color, float inset = 0.0F);
+		BackgroundDecorator(unsigned int color, float horizontal_inset, float vertical_inset);
+		BackgroundDecorator(unsigned int color, float top_inset, float right_inset, float bottom_inset, float left_inset);
 
 	public:
 		void draw_before(WarGrey::SCADA::IPlanet* master,
@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
 		~BackgroundDecorator() noexcept;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ brush;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		float top_inset;
 		float right_inset;
 		float bottom_inset;

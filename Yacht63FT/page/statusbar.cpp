@@ -1,5 +1,6 @@
 ﻿#include "page/statusbar.hpp"
 #include "decorator/background.hpp"
+#include "decorator/cell.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/fueltanklet.hpp"
@@ -7,18 +8,22 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
-#include "decorator/decorator.hpp"
-
 #include "tongue.hpp"
 #include "text.hpp"
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+
+static Rect boxes[] = {
+	Rect(10.0F, 10.0F, 238.0F, 200.0F)
+};
 
 private class StatusPage final : public WarGrey::SCADA::MRConfirmation {
 public:
@@ -54,23 +59,13 @@ private:
 	Statusbar* master;
 };
 
-private class StatusbarDecorator : public IPlanetDecorator {
-public:
-	void draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
-		ds->FillRoundedRectangle(0.0F, 0.0F, 138.0F, Height, 4.0F, 4.0F, Colours::Background);
-	}
-
-protected:
-	~StatusbarDecorator() {}
-};
-
 /*************************************************************************************************/
 Statusbar::Statusbar() : Planet(":statusbar:") {
-	IPlanetDecorator* design_bg = new BackgroundDecorator();
-	IPlanetDecorator* self_bg = new StatusbarDecorator();
+	IPlanetDecorator* bg = new BackgroundDecorator(0x1E1E1E);
+	IPlanetDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
 
 	this->console = new StatusPage(this);
-	this->set_decorator(new CompositeDecorator(design_bg, self_bg));
+	this->set_decorator(new CompositeDecorator(bg, cells));
 }
 
 Statusbar::~Statusbar() {

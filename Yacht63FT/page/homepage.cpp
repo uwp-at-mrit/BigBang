@@ -66,7 +66,7 @@ private:
 /*************************************************************************************************/
 Homepage::Homepage() : Planet(":homepage:") {
 	this->console = new DefaultPage(this);
-	this->set_decorator(new BackgroundDecorator(0.0F, 0.0F, 1.0F, 0.0F));
+	this->set_decorator(new BackgroundDecorator(0x1E1E1E, 0.0F, 0.0F, 1.0F, 0.0F));
 }
 
 Homepage::~Homepage() {
