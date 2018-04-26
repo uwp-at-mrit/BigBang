@@ -4,10 +4,10 @@
 #include "mrit.hpp"
 
 namespace WarGrey::SCADA {
-	private class Homepage : public WarGrey::SCADA::Planet {
+	private class Statusbar : public WarGrey::SCADA::Planet {
 	public:
-		~Homepage() noexcept;
-		Homepage();
+		~Statusbar() noexcept;
+		Statusbar();
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

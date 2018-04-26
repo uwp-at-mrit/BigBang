@@ -26,6 +26,7 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float c
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(Windows::Foundation::Rect& region);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
     float sx, float sy, float ex, float ey, float radiusX, float radiusY,

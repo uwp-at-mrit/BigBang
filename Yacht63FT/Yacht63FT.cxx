@@ -6,6 +6,7 @@
 #include "timer.hxx"
 
 #include "page/homepage.hpp"
+#include "page/statusbar.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -53,7 +54,9 @@ public:
 	StatusUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
 
 protected:
-	void construct() override {}
+	void construct() override {
+		this->add_planet(new Statusbar());
+	}
 };
 
 private ref class Yacht63FT sealed : public StackPanel {

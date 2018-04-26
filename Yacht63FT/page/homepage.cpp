@@ -2,6 +2,7 @@
 #include "configuration.hpp"
 
 #include "graphlet/bitmaplet.hpp"
+#include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
 #include "system.hpp"

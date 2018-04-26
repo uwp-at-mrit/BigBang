@@ -1,4 +1,5 @@
 #include "geometry.hpp"
+#include "shape.hpp"
 #include "transformation.hpp"
 
 using namespace Microsoft::Graphics::Canvas;
@@ -33,6 +34,16 @@ CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float
 
 CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
     return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Union);
+}
+
+CanvasGeometry^ geometry_union(CanvasGeometry^ gs[], size_t count) {
+	CanvasGeometry^ g = ((count > 0) ? gs[0] : blank());
+	
+	for (size_t i = 1; i < count; i++) {
+		g = geometry_union(g, gs[i]);
+	}
+
+	return g;
 }
 
 CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {

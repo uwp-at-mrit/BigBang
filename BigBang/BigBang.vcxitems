@@ -18,6 +18,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />

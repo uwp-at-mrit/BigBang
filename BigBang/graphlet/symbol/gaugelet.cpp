@@ -15,7 +15,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-#include "syslog.hpp"
 /*************************************************************************************************/
 IGaugelet::IGaugelet(float width, float height, float vmin, float vmax, unsigned int step0, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
 	: height(height), min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {

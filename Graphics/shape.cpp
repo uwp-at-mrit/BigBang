@@ -84,12 +84,16 @@ CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
     return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), cx, cy, rx, ry);
 }
 
+CanvasGeometry^ rectangle(Rect& region) {
+	return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), region);
+}
+
 CanvasGeometry^ rectangle(float x, float y, float w, float h) {
-    return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h));
+	return rectangle(Rect(x, y, w, h));
 }
 
 CanvasGeometry^ rectangle(float w, float h) {
-    return rectangle(0.0F, 0.0F, w, h);
+    return rectangle(Rect(0.0F, 0.0F, w, h));
 }
 
 CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
@@ -97,10 +101,6 @@ CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, 
     float radius_y = (ry < 0.0F) ? -(h * ry) : ry;
 
     return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h), radius_x, radius_y);
-}
-
-CanvasGeometry^ rounded_rectangle(float w, float h, float rx, float ry) {
-    return rounded_rectangle(0.0F, 0.0F, w, h, rx, ry);
 }
 
 CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {

@@ -126,4 +126,7 @@
   <data name=":system:" xml:space="preserve">
     <value>四海风行游艇监控系统</value>
   </data>
+  <data name=":version:" xml:space="preserve">
+    <value>ver: 2017.6.18</value>
+  </data>
 </root>

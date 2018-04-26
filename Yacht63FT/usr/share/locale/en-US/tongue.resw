@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name=":author:" xml:space="preserve">
+    <value>中船重工 719 研究所</value>
+  </data>
   <data name=":homepage:" xml:space="preserve">
     <value>HomePage</value>
+  </data>
+  <data name=":system:" xml:space="preserve">
+    <value>四海风行游艇监控系统</value>
   </data>
   <data name=":version:" xml:space="preserve">
     <value>ver: 2017.6.18</value>
