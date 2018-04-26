@@ -2,10 +2,6 @@
 #include "configuration.hpp"
 #include "console.hpp"
 
-#include "tongue.hpp"
-#include "system.hpp"
-#include "syslog.hpp"
-
 #include "text.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
@@ -25,8 +21,6 @@
 #endif
 
 using namespace WarGrey::SCADA;
-
-using namespace Windows::UI;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;

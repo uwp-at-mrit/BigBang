@@ -63,3 +63,25 @@ void Timer::start() {
 void Timer::stop() {
 	this->timer->Stop();
 }
+
+/*************************************************************************************************/
+void CompositeTimerAction::on_elapsed(long long count, long long interval, long long uptime) {
+	for (auto action : this->actions) {
+		action->on_elapsed(count, interval, uptime);
+	}
+}
+
+void CompositeTimerAction::append_timer_action(ITimerAction^ action) {
+	this->actions.push_back(action);
+}
+
+Syslog* CompositeTimerAction::get_logger() {
+	Syslog* logger = default_logger();
+	auto maybe_action = this->actions.begin();
+
+	if (maybe_action != this->actions.end()) {
+		logger = (*maybe_action)->get_logger();
+	}
+
+	return logger;
+}

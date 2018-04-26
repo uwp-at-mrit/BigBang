@@ -4,9 +4,9 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class FuelTanklet : public WarGrey::SCADA::IScalelet<float> {
+	private class Batterylet : public WarGrey::SCADA::IScalelet<float> {
 	public:
-		FuelTanklet(float width, float height = 0.0F,
+		Batterylet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color = WarGrey::SCADA::Colours::make(0xB4F100),
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ warning_color = WarGrey::SCADA::Colours::make(0xFFB33C),
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ emergency_color;
 
 	private:
-		Windows::Foundation::Rect fuel;
+		Windows::Foundation::Rect electricity;
 		float width;
 		float height;
 		float thickness;

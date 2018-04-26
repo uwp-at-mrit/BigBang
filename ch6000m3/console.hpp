@@ -3,6 +3,7 @@
 #include <map>
 
 #include "credit.hpp"
+#include "tongue.hpp"
 #include "brushes.hxx"
 #include "planet.hpp"
 

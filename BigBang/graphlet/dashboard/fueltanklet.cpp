@@ -13,7 +13,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-FuelTank::FuelTank(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush^ ncolor, ICanvasBrush^ wcolor, ICanvasBrush^ ecolor)
+FuelTanklet::FuelTanklet(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush^ ncolor, ICanvasBrush^ wcolor, ICanvasBrush^ ecolor)
 	: width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor)
 	, normal_color(ncolor), warning_color(wcolor), emergency_color(ecolor) {
 
@@ -24,11 +24,11 @@ FuelTank::FuelTank(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush
 	}
 }
 
-void FuelTank::construct() {
+void FuelTanklet::construct() {
 	float corner_radius = this->thickness * 0.5F;
 	float tank_width = this->width * 0.4F / 0.7F;
-	float bottom_height = this->thickness * 1.618F;
-	float tank_height = this->height - bottom_height * 1.8F;
+	float base_height = this->thickness * 1.618F;
+	float tank_height = this->height - base_height * 1.8F;
 	float monitor_x = this->thickness * 2.0F;
 	float monitor_y = this->thickness * 3.6F;
 	float monitor_width = tank_width - monitor_x * 2.0F;
@@ -50,7 +50,7 @@ void FuelTank::construct() {
 	CanvasGeometry^ tank_parts[] = {
 		geometry_subtract(tank_region, fuel_region),
 		rectangle(monitor_x, monitor_y, monitor_width, monitor_height),
-		rectangle(0.0F, this->height - bottom_height, this->width, bottom_height),
+		rectangle(0.0F, this->height - base_height, this->width, base_height),
 		rounded_rectangle(fitting_x, fitting_y, fitting_width, fitting_height, corner_radius, corner_radius),
 	};
 
@@ -76,11 +76,11 @@ void FuelTank::construct() {
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
 }
 
-void FuelTank::fill_extent(float x, float y, float* w, float* h) {
+void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void FuelTank::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_scale();
 
 	if (capacity > 0.0F) {

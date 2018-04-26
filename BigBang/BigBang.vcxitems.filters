@@ -63,6 +63,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

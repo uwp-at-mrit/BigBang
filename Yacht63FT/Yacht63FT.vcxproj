@@ -211,6 +211,7 @@
     <Image Include="usr\share\graphlet\1_11.png" />
     <Image Include="usr\share\graphlet\1_13.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
+    <Image Include="usr\share\graphlet\workspace_bg.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
     <Image Include="usr\share\graphlet\5_06.png" />
   </ItemGroup>

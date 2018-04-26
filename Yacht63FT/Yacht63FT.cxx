@@ -30,8 +30,6 @@ public:
 
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
-
-		this->timer = ref new Timer(this, 4);
 		//this->device = new PLCMaster(alarm);
 	}
 
@@ -39,9 +37,6 @@ protected:
 	void construct() override {
 		this->add_planet(new Homepage());
 	}
-
-private:
-	WarGrey::SCADA::Timer^ timer;
 
 private:
 	PLCMaster* device;
@@ -75,9 +70,14 @@ public:
 		float fit_nav_height = application_fit_size(screen_navigator_height);
 		float fit_bar_height = application_fit_size(screen_statusbar_height);
 		
+		this->timeline = ref new CompositeTimerAction();
 		this->navigator = ref new StackPanel();
 		this->workspace = ref new Universe("Yacht63FT");
 		this->statusbar = ref new StatusUniverse(this->workspace->get_logger()->get_name());
+
+		this->timeline->append_timer_action(this->workspace);
+		this->timeline->append_timer_action(this->statusbar);
+		this->timer = ref new Timer(this->timeline, frame_per_second);
 
 		this->navigator->Width = fit_width;
 		this->navigator->Height = fit_nav_height;
@@ -96,6 +96,10 @@ public:
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 	}
+
+private:
+	WarGrey::SCADA::Timer^ timer;
+	WarGrey::SCADA::CompositeTimerAction^ timeline;
 
 private:
 	WarGrey::SCADA::UniverseDisplay^ workspace;

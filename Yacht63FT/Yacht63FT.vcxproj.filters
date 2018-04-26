@@ -202,6 +202,9 @@
     <Image Include="usr\share\graphlet\1_13.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="usr\share\graphlet\workspace_bg.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

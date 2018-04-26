@@ -2,18 +2,15 @@
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/fueltanklet.hpp"
+#include "graphlet/dashboard/batterylet.hpp"
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
-#include "system.hpp"
-
 #include "text.hpp"
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
-
-using namespace Windows::UI;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -30,20 +27,35 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		this->fueltank = new FuelTank(application_fit_size(70.0F) * 0.9F, -1.5714F);
+		float icon_width = application_fit_size(70.0F) * 0.9F;
+		float center_x = width * 0.5F;
+		float center_y = height * 0.5F;
+
+		// NOTE: the background content may be a rounded rectangle
+		this->background = new Bitmaplet("workspace_bg", width * 1.2F, height - 5.0F);
+		this->fueltank = new FuelTanklet(icon_width, -1.5714F);
+		this->battery = new Batterylet(icon_width);
+
 		this->fueltank->set_scale(0.80F);
-		this->master->insert(this->fueltank, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
+		this->battery->set_scale(0.16F);
+
+		this->master->insert(this->background, center_x, 0.0F, GraphletAlignment::CT);
+		this->master->insert(this->fueltank, center_x - icon_width, center_y, GraphletAlignment::RC);
+		this->master->insert(this->battery, center_x + icon_width, center_y, GraphletAlignment::LC);
 	}
 
 // never deletes these graphlets mannually
 private:
-	FuelTank* fueltank;
+	Bitmaplet* background;
+	FuelTanklet* fueltank;
+	Batterylet* battery;
 		
 private:
 	CanvasTextFormat^ fonts[3];
 	Statusbar* master;
 };
 
+/*************************************************************************************************/
 Statusbar::Statusbar() : Planet(":statusbar:") {
 	this->console = new StatusPage(this);
 }

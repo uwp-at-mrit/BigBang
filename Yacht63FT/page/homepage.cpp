@@ -12,8 +12,6 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -30,9 +28,14 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ copyright_items[] = { ":system:", ":author:", ":version:" };
+		float center_x = width * 0.5F;
+		float center_y = height * 0.5F;
 		
+		// NOTE: the background content may be a rounded rectangle
+		this->background = new Bitmaplet("workspace_bg", width * 1.2F, height);
 		this->yacht = new Bitmaplet("yacht", 0.0F, height * 0.9F);
-		this->master->insert(this->yacht, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
+		this->master->insert(this->background, center_x, 0.0F, GraphletAlignment::CT);
+		this->master->insert(this->yacht, center_x, center_y, GraphletAlignment::CC);
 		
 		for (size_t i = 0; i < sizeof(this->copyright) / sizeof(Labellet*); i++) {
 			this->copyright[i] = new Labellet(speak(copyright_items[i]));
@@ -40,15 +43,20 @@ public:
 			this->copyright[i]->set_color(Colours::GhostWhite);
 
 			if (i == 0) {
-				this->master->insert(this->copyright[i], application_fit_size(screen_copyright_xoff), application_fit_size(screen_copyright_yoff));
+				this->master->insert(this->copyright[i],
+					application_fit_size(screen_copyright_xoff),
+					application_fit_size(screen_copyright_yoff));
 			} else {
-				this->master->insert(this->copyright[i], this->copyright[i - 1], GraphletAlignment::LB, GraphletAlignment::LT);
+				this->master->insert(this->copyright[i],
+					this->copyright[i - 1], GraphletAlignment::LB,
+					GraphletAlignment::LT);
 			}
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
+	Bitmaplet * background;
 	Bitmaplet* yacht;
 	Labellet* copyright[3];
 		
@@ -57,6 +65,7 @@ private:
 	Homepage* master;
 };
 
+/*************************************************************************************************/
 Homepage::Homepage() : Planet(":homepage:") {
 	this->console = new DefaultPage(this);
 }

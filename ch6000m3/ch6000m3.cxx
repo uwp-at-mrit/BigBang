@@ -31,7 +31,7 @@ public:
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
 
-		this->timer = ref new Timer(this, 2);
+		this->timer = ref new Timer(this, frame_per_second);
 		this->device = new PLCMaster(alarm);
 	}
 

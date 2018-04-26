@@ -13,6 +13,8 @@ static Platform::String^ remote_host_at_19 = "192.168.8.106";
 static Platform::String^ remote_test_server = remote_host_at_19;
 
 /*************************************************************************************************/
+static unsigned int frame_per_second = 4;
+
 static float screen_width = 1920.0F;
 static float screen_height = 1080.0F;
 static float screen_navigator_height = 90.0F;

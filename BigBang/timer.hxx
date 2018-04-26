@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
@@ -32,5 +34,19 @@ namespace WarGrey::SCADA {
 		long long count;
 		long long interval;
 		long long uptime;
+	};
+
+	private ref class CompositeTimerAction : public WarGrey::SCADA::ITimerAction {
+	public:
+		void on_elapsed(long long count, long long interval, long long uptime) override;
+
+	public:
+		void append_timer_action(WarGrey::SCADA::ITimerAction^ receiver);
+
+	internal:
+		WarGrey::SCADA::Syslog* get_logger() override;
+
+	private:
+		std::list<ITimerAction^> actions;
 	};
 }

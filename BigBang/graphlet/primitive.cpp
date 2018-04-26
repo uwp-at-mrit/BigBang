@@ -46,7 +46,7 @@ IGraphlet::~IGraphlet() {
 }
 
 Syslog* IGraphlet::get_logger() {
-	Syslog* logger = nullptr;
+	Syslog* logger = default_logger();
 
 	if (this->info != nullptr) {
 		logger = this->info->master->get_logger();
