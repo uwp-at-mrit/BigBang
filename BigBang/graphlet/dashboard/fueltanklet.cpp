@@ -95,7 +95,9 @@ void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 			fuel_color = warning_color;
 		}
 
-		ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F, this->fuel.Width + 2.0F, fuel_height + 2.0F, fuel_color);
+		ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F,
+			this->fuel.Width + 2.0F, fuel_height + 2.0F,
+			fuel_color);
 	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);

@@ -29,12 +29,9 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ copyright_items[] = { ":system:", ":author:", ":version:" };
-		float center_x = width * 0.5F;
-		float center_y = height * 0.5F;
 		
-		// NOTE: the background content may be a rounded rectangle
 		this->yacht = new Bitmaplet("yacht", 0.0F, height * 0.9F);
-		this->master->insert(this->yacht, center_x, center_y, GraphletAlignment::CC);
+		this->master->insert(this->yacht, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
 		
 		for (size_t i = 0; i < sizeof(this->copyright) / sizeof(Labellet*); i++) {
 			this->copyright[i] = new Labellet(speak(copyright_items[i]));

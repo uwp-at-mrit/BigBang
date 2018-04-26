@@ -4,6 +4,7 @@
 
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
+using namespace Windows::Devices::Power;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Xaml;
@@ -45,4 +46,19 @@ Color system_color(UIElementType type) {
     }
 
     return sysUI->UIElementColor(type);
+}
+
+float system_battery_capacity(float defval_if_no_battery) {
+	auto info = Battery::AggregateBattery->GetReport();
+	auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
+	float capacity = defval_if_no_battery;
+
+	if (maybe_remaining != nullptr) {
+		auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
+		auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
+
+		capacity = remaining / full;
+	}
+
+	return capacity;
 }

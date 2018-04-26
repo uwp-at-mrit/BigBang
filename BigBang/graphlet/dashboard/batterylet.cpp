@@ -2,6 +2,7 @@
 
 #include "shape.hpp"
 #include "geometry.hpp"
+#include "system.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,6 +26,7 @@ Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasB
 }
 
 void Batterylet::construct() {
+	float corner_radius = this->thickness * 0.5F;
 	float battery_y = this->height * 0.1F;
 	float base_height = this->thickness * 1.618F;
 	float battery_height = this->height - battery_y - base_height * 1.8F;
@@ -49,7 +51,7 @@ void Batterylet::construct() {
 	this->electricity.Width = this->width - this->electricity.X * 2.0F;
 	this->electricity.Height = battery_height - (this->electricity.Y - battery_y) * 2.0F;
 
-	auto battery_region = rectangle(0.0F, battery_y, this->width, battery_height);
+	auto battery_region = rounded_rectangle(0.0F, battery_y, this->width, battery_height, corner_radius, corner_radius);
 	auto electricity_region = rectangle(this->electricity);
 	
 	CanvasGeometry^ battery_parts[] = {
@@ -69,22 +71,28 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
+void Batterylet::update(long long count, long long interval, long long uptime) {
+	this->set_scale(system_battery_capacity());
+}
+
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_scale();
 
 	if (capacity > 0.0F) {
-		float fuel_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
-		float fuel_x = x + this->electricity.X;
-		float fuel_y = y + this->electricity.Y + this->electricity.Height - fuel_height;
-		ICanvasBrush^ fuel_color = this->normal_color;
+		float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
+		float capacity_x = x + this->electricity.X;
+		float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
+		ICanvasBrush^ capacity_color = this->normal_color;
 
 		if (capacity < 0.1F) {
-			fuel_color = this->emergency_color;
+			capacity_color = this->emergency_color;
 		} else if (capacity < 0.2F) {
-			fuel_color = warning_color;
+			capacity_color = warning_color;
 		}
 
-		ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F, this->electricity.Width + 2.0F, fuel_height + 2.0F, fuel_color);
+		ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
+			this->electricity.Width + 2.0F, capacity_height + 2.0F,
+			capacity_color);
 	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);

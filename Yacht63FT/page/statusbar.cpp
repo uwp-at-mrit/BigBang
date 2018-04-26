@@ -21,50 +21,86 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Rect boxes[] = {
-	Rect(10.0F, 10.0F, 238.0F, 200.0F)
-};
-
 private class StatusPage final : public WarGrey::SCADA::MRConfirmation {
 public:
-	StatusPage(Statusbar* master) : master(master) {
-		this->fonts[0] = make_bold_text_format("Microsoft YaHei", application_fit_size(45.0F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(26.25F));
-		this->fonts[2] = this->fonts[1];
+	~StatusPage() noexcept {
+		if (this->decorator != nullptr) {
+			this->decorator->destroy();
+		}
+	}
+
+	StatusPage(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(30.0F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(41.27F));
+		
+		this->decorator->reference();
 	}
 
 public:
 	void load_and_flow(float width, float height) {
+		IGraphlet* target = nullptr;
+		float cell_x, cell_y, cell_width, cell_height;
 		float icon_width = application_fit_size(70.0F) * 0.9F;
-		float center_x = width * 0.5F;
-		float center_y = height * 0.5F;
+		float label_offset = application_fit_size(138.0F);
 
-		this->fueltank = new FuelTanklet(icon_width, -1.5714F);
-		this->battery = new Batterylet(icon_width);
+		for (unsigned int i = 0; i < 3; i ++) {
+			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
+			
+			switch (i) {
+			case 0: this->fueltank = new FuelTanklet(icon_width, -1.5714F); target = this->fueltank; break;
+			case 1: this->battery = new Batterylet(icon_width); target = this->battery; break;
+			case 2: this->gps = new Bitmaplet("gps", icon_width); target = this->gps; break;
+			}
 
-		this->fueltank->set_scale(0.80F);
-		this->battery->set_scale(0.16F);
+			this->master->insert(target,
+				cell_x + label_offset * 0.5F, cell_y + cell_height * 0.5F,
+				GraphletAlignment::CC);
+		}
 
-		this->master->insert(this->fueltank, center_x - icon_width, center_y, GraphletAlignment::RC);
-		this->master->insert(this->battery, center_x + icon_width, center_y, GraphletAlignment::LC);
+		{ // load yacht
+			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
+
+			float yacht_x = application_fit_size(1447.0F);
+			float yacht_width = cell_x + (cell_width - application_fit_size(48.0F)) - yacht_x;
+
+			this->yacht = new Bitmaplet("skeleton", yacht_width);
+			this->master->insert(this->yacht,
+				yacht_x, cell_y + cell_height * 0.5F,
+				GraphletAlignment::LC);
+		}
 	}
 
 // never deletes these graphlets mannually
 private:
+	Bitmaplet* yacht;
+	Bitmaplet* gps;
 	FuelTanklet* fueltank;
 	Batterylet* battery;
 		
 private:
-	CanvasTextFormat^ fonts[3];
+	CanvasTextFormat^ fonts[2];
 	Statusbar* master;
+	CellDecorator* decorator;
 };
 
 /*************************************************************************************************/
 Statusbar::Statusbar() : Planet(":statusbar:") {
-	IPlanetDecorator* bg = new BackgroundDecorator(0x1E1E1E);
-	IPlanetDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
+	float cell_y = 10.0F;
+	float cell_width = 382.0F;
+	float cell_height = 200.0F;
+	float cell_gapsize = 10.0F;
+	float yacht_x = 1387.0F;
+	Rect boxes[] = {
+		make_fit_cell((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y , cell_width, cell_height),
+		make_fit_cell((cell_width + cell_gapsize) * 1.0F + cell_gapsize, cell_y, cell_width, cell_height),
+		make_fit_cell((cell_width + cell_gapsize) * 2.0F + cell_gapsize, cell_y, cell_width, cell_height),
+		make_fit_cell(yacht_x, cell_y, screen_width - cell_gapsize - yacht_x, cell_height)
+	};
 
-	this->console = new StatusPage(this);
+	BackgroundDecorator* bg = new BackgroundDecorator(0x1E1E1E);
+	CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
+
+	this->console = new StatusPage(this, cells);
 	this->set_decorator(new CompositeDecorator(bg, cells));
 }
 

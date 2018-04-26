@@ -7,6 +7,7 @@
 #include "text.hpp"
 #include "paint.hpp"
 #include "time.hpp"
+#include "system.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"
 #include "brushes.hxx"
@@ -65,20 +66,9 @@ public:
     }
 
     void update_powerinfo() {
-        auto info = Battery::AggregateBattery->GetReport();
-		auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
 		Platform::String^ power = speak(":power:");
-
-		if (maybe_remaining == nullptr) {
-			power += "100%";
-		} else {
-			auto remaining = float(info->RemainingCapacityInMilliwattHours->Value);
-			auto full = float(info->FullChargeCapacityInMilliwattHours->Value);
-
-			power += (round((remaining / full) * 100.0F).ToString() + "%");
-		}
-
-		this->powercapacity = make_text_layout(power, status_font);
+		Platform::String^ capacity = (round(system_battery_capacity() * 100.0F).ToString() + "%");
+		this->powercapacity = make_text_layout(power + capacity, status_font);
     }
 
     void update_wifiinfo() {
