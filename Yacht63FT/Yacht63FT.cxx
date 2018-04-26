@@ -4,6 +4,7 @@
 
 #include "planet.hpp"
 #include "timer.hxx"
+#include "brushes.hxx"
 
 #include "page/homepage.hpp"
 #include "page/statusbar.hpp"
@@ -14,13 +15,13 @@ using namespace Windows::Foundation;
 
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
+private ref class Universe sealed : public UniverseDisplay {
 public:
 	virtual ~Universe() {
 		if (this->device != nullptr) {
@@ -42,7 +43,7 @@ private:
 	PLCMaster* device;
 };
 
-private ref class StatusUniverse sealed : public WarGrey::SCADA::UniverseDisplay {
+private ref class StatusUniverse sealed : public UniverseDisplay {
 public:
 	virtual ~StatusUniverse() {}
 
@@ -64,7 +65,7 @@ public:
 	}
 
 public:
-	void initialize_component(Windows::Foundation::Size region) {
+	void initialize_component(Size region) {
 		float fit_width = application_fit_size(screen_width);
 		float fit_height = application_fit_size(screen_height);
 		float fit_nav_height = application_fit_size(screen_navigator_height);
@@ -102,8 +103,8 @@ private:
 	WarGrey::SCADA::CompositeTimerAction^ timeline;
 
 private:
-	WarGrey::SCADA::UniverseDisplay^ workspace;
-	WarGrey::SCADA::UniverseDisplay^ statusbar;
+	UniverseDisplay^ workspace;
+	UniverseDisplay^ statusbar;
 	StackPanel^ navigator;
 };
 

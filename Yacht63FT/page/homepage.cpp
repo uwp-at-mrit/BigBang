@@ -1,4 +1,5 @@
 ﻿#include "page/homepage.hpp"
+#include "decorator/background.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/bitmaplet.hpp"
@@ -32,9 +33,7 @@ public:
 		float center_y = height * 0.5F;
 		
 		// NOTE: the background content may be a rounded rectangle
-		this->background = new Bitmaplet("workspace_bg", width * 1.2F, height);
 		this->yacht = new Bitmaplet("yacht", 0.0F, height * 0.9F);
-		this->master->insert(this->background, center_x, 0.0F, GraphletAlignment::CT);
 		this->master->insert(this->yacht, center_x, center_y, GraphletAlignment::CC);
 		
 		for (size_t i = 0; i < sizeof(this->copyright) / sizeof(Labellet*); i++) {
@@ -56,7 +55,6 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	Bitmaplet * background;
 	Bitmaplet* yacht;
 	Labellet* copyright[3];
 		
@@ -68,6 +66,7 @@ private:
 /*************************************************************************************************/
 Homepage::Homepage() : Planet(":homepage:") {
 	this->console = new DefaultPage(this);
+	this->set_decorator(new BackgroundDecorator(0.0F, 0.0F, 1.0F, 0.0F));
 }
 
 Homepage::~Homepage() {

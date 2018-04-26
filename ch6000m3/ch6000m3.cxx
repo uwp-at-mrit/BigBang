@@ -15,12 +15,12 @@ using namespace Windows::Foundation;
 
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
+using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 
-private ref class Universe sealed : public WarGrey::SCADA::UniverseDisplay {
+private ref class Universe sealed : public UniverseDisplay {
 public:
 	virtual ~Universe() {
 		if (this->device != nullptr) {
@@ -42,7 +42,7 @@ protected:
 	}
 
 private:
-	WarGrey::SCADA::Timer^ timer;
+	Timer^ timer;
 
 private:
 	PLCMaster* device;
@@ -60,7 +60,7 @@ public:
 	}
 
 public:
-	void initialize_component(Windows::Foundation::Size region) {
+	void initialize_component(Size region) {
 		this->universe = ref new Universe("Yacht63FT");
 		this->Content = this->universe->canvas;
 		this->Pane = this->universe->navigator;
@@ -70,7 +70,7 @@ public:
 	}
 
 private:
-	void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args) {
+	void on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 		auto pt = args->GetCurrentPoint(this);
 		float x = pt->Position.X;
 
@@ -86,7 +86,7 @@ private:
 	}
 
 private:
-	WarGrey::SCADA::UniverseDisplay^ universe;
+	UniverseDisplay^ universe;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

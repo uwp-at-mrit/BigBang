@@ -211,12 +211,13 @@
     <Image Include="usr\share\graphlet\1_11.png" />
     <Image Include="usr\share\graphlet\1_13.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
-    <Image Include="usr\share\graphlet\workspace_bg.png" />
+    <Image Include="usr\share\graphlet\yacht_background.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
     <Image Include="usr\share\graphlet\5_06.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="configuration.cpp" />
+    <ClCompile Include="decorator\background.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="page\statusbar.cpp" />
     <ClCompile Include="plc.cpp" />
@@ -224,6 +225,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
+    <ClInclude Include="decorator\background.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="page\statusbar.hpp" />
     <ClInclude Include="plc.hpp" />

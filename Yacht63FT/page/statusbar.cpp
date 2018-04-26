@@ -1,10 +1,13 @@
 ﻿#include "page/statusbar.hpp"
+#include "decorator/background.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/batterylet.hpp"
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
+
+#include "decorator/decorator.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -31,22 +34,18 @@ public:
 		float center_x = width * 0.5F;
 		float center_y = height * 0.5F;
 
-		// NOTE: the background content may be a rounded rectangle
-		this->background = new Bitmaplet("workspace_bg", width * 1.2F, height - 5.0F);
 		this->fueltank = new FuelTanklet(icon_width, -1.5714F);
 		this->battery = new Batterylet(icon_width);
 
 		this->fueltank->set_scale(0.80F);
 		this->battery->set_scale(0.16F);
 
-		this->master->insert(this->background, center_x, 0.0F, GraphletAlignment::CT);
 		this->master->insert(this->fueltank, center_x - icon_width, center_y, GraphletAlignment::RC);
 		this->master->insert(this->battery, center_x + icon_width, center_y, GraphletAlignment::LC);
 	}
 
 // never deletes these graphlets mannually
 private:
-	Bitmaplet* background;
 	FuelTanklet* fueltank;
 	Batterylet* battery;
 		
@@ -55,9 +54,23 @@ private:
 	Statusbar* master;
 };
 
+private class StatusbarDecorator : public IPlanetDecorator {
+public:
+	void draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
+		ds->FillRoundedRectangle(0.0F, 0.0F, 138.0F, Height, 4.0F, 4.0F, Colours::Background);
+	}
+
+protected:
+	~StatusbarDecorator() {}
+};
+
 /*************************************************************************************************/
 Statusbar::Statusbar() : Planet(":statusbar:") {
+	IPlanetDecorator* design_bg = new BackgroundDecorator();
+	IPlanetDecorator* self_bg = new StatusbarDecorator();
+
 	this->console = new StatusPage(this);
+	this->set_decorator(new CompositeDecorator(design_bg, self_bg));
 }
 
 Statusbar::~Statusbar() {

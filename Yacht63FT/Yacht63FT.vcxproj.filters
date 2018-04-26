@@ -26,6 +26,9 @@
     <Filter Include="page">
       <UniqueIdentifier>{cd9852f4-3c11-482e-a2e4-fab51145f2d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="decorator">
+      <UniqueIdentifier>{ca477ef1-824e-43c8-871f-3f942a4c4d1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -37,6 +40,9 @@
     <ClCompile Include="page\statusbar.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="decorator\background.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -46,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="page\statusbar.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="decorator\background.hpp">
+      <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -202,7 +211,7 @@
     <Image Include="usr\share\graphlet\1_13.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\workspace_bg.png">
+    <Image Include="usr\share\graphlet\yacht_background.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
