@@ -1,4 +1,4 @@
-﻿#include "page/statusbar.hpp"
+﻿#include "frame/statusbar.hpp"
 #include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"

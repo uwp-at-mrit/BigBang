@@ -29,6 +29,9 @@
     <Filter Include="decorator">
       <UniqueIdentifier>{ca477ef1-824e-43c8-871f-3f942a4c4d1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="frame">
+      <UniqueIdentifier>{659d284d-a719-45df-9bd0-ce4d6905a508}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -37,14 +40,14 @@
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="configuration.cpp" />
-    <ClCompile Include="page\statusbar.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="decorator\background.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
     <ClCompile Include="decorator\cell.cpp">
       <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="frame\statusbar.cpp">
+      <Filter>frame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -53,14 +56,14 @@
     <ClInclude Include="page\homepage.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\statusbar.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="decorator\background.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="decorator\cell.hpp">
       <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="frame\statusbar.hpp">
+      <Filter>frame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

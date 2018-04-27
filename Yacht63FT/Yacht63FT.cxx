@@ -7,7 +7,7 @@
 #include "brushes.hxx"
 
 #include "page/homepage.hpp"
-#include "page/statusbar.hpp"
+#include "frame/statusbar.hpp"
 
 using namespace WarGrey::SCADA;
 

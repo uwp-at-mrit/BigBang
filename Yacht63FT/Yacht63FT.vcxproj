@@ -219,7 +219,7 @@
     <ClCompile Include="decorator\background.cpp" />
     <ClCompile Include="decorator\cell.cpp" />
     <ClCompile Include="page\homepage.cpp" />
-    <ClCompile Include="page\statusbar.cpp" />
+    <ClCompile Include="frame\statusbar.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
@@ -228,7 +228,7 @@
     <ClInclude Include="decorator\background.hpp" />
     <ClInclude Include="decorator\cell.hpp" />
     <ClInclude Include="page\homepage.hpp" />
-    <ClInclude Include="page\statusbar.hpp" />
+    <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <ItemGroup>
