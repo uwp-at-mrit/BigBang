@@ -60,10 +60,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp">
+      <Filter>graphlet\symbol</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -126,10 +134,21 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp">
+      <Filter>graphlet\symbol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
+      <Filter>graphlet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

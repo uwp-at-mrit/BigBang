@@ -25,7 +25,7 @@ static float cell_y = 10.0F;
 static float cell_width = 385.0F;
 static float cell_height = 200.0F;
 static float cell_gapsize = 10.0F;
-static float yacht_x = 1387.0F;
+static float yacht_x = 1388.0F;
 
 static Rect boxes[] = {
 	Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),
@@ -54,7 +54,7 @@ public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ captions[] = { ":oiltank:", ":power:", ":gps:" };
 		IGraphlet* target = nullptr;
-		float cell_x, cell_y, cell_width, cell_height, icon_bottom;
+		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
 		float icon_size = application_fit_size(110.0F) * 0.618F;
 		float label_xoffset = application_fit_size(screen_status_label_xoff);
 		float label_yoffset = application_fit_size(screen_status_label_yoff);
@@ -71,8 +71,8 @@ public:
 			}
 
 			{ // load parameters
-				float px = cell_x + label_xoffset;
-				float py = cell_y + parameter_yoffset;
+				px = cell_x + label_xoffset;
+				py = cell_y + parameter_yoffset;
 
 				if (i < 2) {
 					this->parameters[i] = new Labellet("100%", this->fonts[1], 0xFEFEFE);
@@ -95,10 +95,9 @@ public:
 				case 2: this->gps = new Bitmaplet("gps", icon_size * 1.78F); target = this->gps; break;
 				}
 
-				this->master->insert(target,
-					cell_x + label_xoffset * 0.5F,
-					icon_bottom - ts.bspace,
-					GraphletAlignment::CB);
+				px = cell_x + label_xoffset * 0.5F;
+				py = icon_bottom - ts.bspace;
+				this->master->insert(target, px, py, GraphletAlignment::CB);
 			}
 		}
 

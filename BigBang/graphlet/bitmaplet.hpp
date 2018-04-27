@@ -1,13 +1,13 @@
 #pragma once
 
-#include "graphlet/primitive.hpp"
+#include "graphlet/msappxlet.hxx"
 
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Bitmaplet : public virtual WarGrey::SCADA::IGraphlet {
+	private class Bitmaplet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap> {
 	public:
-		~Bitmaplet() noexcept;
+		virtual ~Bitmaplet() noexcept;
 
 		Bitmaplet(Platform::String^ file_bmp, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
 		Bitmaplet(Platform::String^ file_bmp, Platform::String^ rootdir);
@@ -18,6 +18,9 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready() override;
+
+	protected:
+		void on_appx(Windows::Foundation::Uri^ ms_appx_bmp, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp) override;
 
 	protected:
 		Microsoft::Graphics::Canvas::CanvasBitmap^ graph_bmp;

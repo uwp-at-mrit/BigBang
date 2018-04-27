@@ -48,54 +48,33 @@ Svglet::~Svglet() {
 void Svglet::construct() {
 	int uuid = this->ms_appx_svg->GetHashCode();
 	cancellation_token_source svg_task;
-	cancellation_token svg_token = svg_task.get_token();
 
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, svg_task));
+	this->load_async(this->ms_appx_svg, svg_task.get_token());
+}
 
-	create_task(StorageFile::GetFileFromApplicationUriAsync(this->ms_appx_svg), svg_token).then([=](task<StorageFile^> svg) {
-		this->get_logger()->log_message(Log::Debug,
-			L"Found the graphlet source: %s",
-			this->ms_appx_svg->ToString()->Data());
+void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg) {
+	this->graph_svg = doc_svg;
+	this->root = this->graph_svg->Root;
 
-		return create_task(svg.get()->OpenAsync(FileAccessMode::Read, StorageOpenOptions::AllowOnlyReaders), svg_token);
-	}).then([=](task<IRandomAccessStream^> svg) {
-		return create_task(CanvasSvgDocument::LoadAsync(CanvasDevice::GetSharedDevice(), svg.get()), svg_token);
-	}).then([=](task<CanvasSvgDocument^> doc_svg) {
-		try {
-			this->graph_svg = doc_svg.get();
-			this->root = this->graph_svg->Root;
+	if ((this->viewport.Width > 0.0F) && (this->viewport.Height > 0.0F)) {
+		root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
+		root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
+	} else {
+		CanvasSvgLengthUnits width_units, height_units;
+		float width = this->get_length_attribute("width", &width_units, false);
+		float height = this->get_length_attribute("height", &height_units, false);
 
-			if ((this->viewport.Width > 0.0F) && (this->viewport.Height > 0.0F)) {
-				root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
-				root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
-			} else {
-				CanvasSvgLengthUnits width_units, height_units;
-				float width = this->get_length_attribute("width", &width_units, false);
-				float height = this->get_length_attribute("height", &height_units, false);
-
-				// TODO: what if one of the lengths is measured in percentage
-				if (this->viewport.Width <= 0.0F) {
-					if (this->viewport.Height <= 0.0F) {
-						this->viewport.Height = height;
-					}
-					this->viewport.Width = width * (this->viewport.Height / height);
-				} else {
-					this->viewport.Height = height * (this->viewport.Width / width);
-				}
+		// TODO: what if one of the lengths is measured in percentage
+		if (this->viewport.Width <= 0.0F) {
+			if (this->viewport.Height <= 0.0F) {
+				this->viewport.Height = height;
 			}
-
-			this->info->master->notify_graphlet_ready(this);
-		} catch (Platform::Exception^ e) {
-			this->get_logger()->log_message(Log::Error,
-				L"Failed to load %s: %s",
-				this->ms_appx_svg->ToString()->Data(),
-				e->Message->Data());
-		} catch (task_canceled&) {
-			this->get_logger()->log_message(Log::Debug,
-				L"Cancelled loading %s",
-				this->ms_appx_svg->ToString()->Data());
+			this->viewport.Width = width * (this->viewport.Height / height);
+		} else {
+			this->viewport.Height = height * (this->viewport.Width / width);
 		}
-	});
+	}
 }
 
 bool Svglet::ready() {

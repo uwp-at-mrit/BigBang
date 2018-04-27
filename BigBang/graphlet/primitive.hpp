@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 		IGraphletInfo * info;
 	};
 
-	private class IPipelet : public virtual WarGrey::SCADA::IGraphlet {
+	private class IPipelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		virtual Windows::Foundation::Rect get_input_port() = 0;
 		virtual Windows::Foundation::Rect get_output_port() = 0;

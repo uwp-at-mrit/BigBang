@@ -1,13 +1,13 @@
 #pragma once
 
-#include "graphlet/primitive.hpp"
+#include "graphlet/msappxlet.hxx"
 
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Svglet : public virtual WarGrey::SCADA::IGraphlet {
+	private class Svglet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument> {
 	public:
-		~Svglet() noexcept;
+		virtual ~Svglet() noexcept;
 
 		Svglet(Platform::String^ file_svg, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
 		Svglet(Platform::String^ file_svg, Platform::String^ rootdir);
@@ -19,6 +19,8 @@ namespace WarGrey::SCADA {
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready();
 
+	protected:
+		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg) override;
 
 	protected:
 		Windows::UI::Color get_fill_color(Platform::String^ id, Windows::UI::Color& default_color = Windows::UI::Colors::Transparent);
