@@ -24,7 +24,8 @@ static float screen_menu_width = 288.0F;
 static float screen_copyright_xoff = screen_menu_width + 34.0F;
 static float screen_copyright_yoff = 24.0F;
 
-static float screen_yacht_preview_xoff = 1447.0F;
-static float screen_yacht_preview_yoff = 1032.0F;
+static float screen_status_label_xoff = 148.0F;
+static float screen_status_label_yoff = 24.0F;
+static float screen_status_parameter_yoff = 120.0F;
 
 float application_fit_size(float src);

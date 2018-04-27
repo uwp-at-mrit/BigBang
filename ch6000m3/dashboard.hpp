@@ -12,9 +12,9 @@
 
 namespace WarGrey::SCADA {
 	template<class T, typename E>
-	private class Console abstract {
+	private class DashBoard abstract {
 	public:
-		Console(T* master, Platform::String^ l10n) : master(master), l10n_prefix(l10n) {}
+		DashBoard(T* master, Platform::String^ l10n) : master(master), l10n_prefix(l10n) {}
 
 	public:
 		template<class G>
@@ -70,14 +70,9 @@ namespace WarGrey::SCADA {
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
-			Credit<Labellet, E>* label = new Credit<Labellet, E>(caption);
+			Credit<Labellet, E>* label = new Credit<Labellet, E>(caption, font, color);
 
 			label->id = id;
-			label->set_color(color);
-
-			if (font != nullptr) {
-				label->set_font(font);
-			}
 
 			return this->master->insert_one(label);
 		}

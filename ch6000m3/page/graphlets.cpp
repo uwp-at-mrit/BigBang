@@ -79,11 +79,7 @@ public:
 
 private:
 	Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
-		Labellet* label = new Labellet(text);
-
-		if (font != nullptr) {
-			label->set_font(font);
-		}
+		Labellet* label = new Labellet(text, font);
 
 		return this->master->insert_one(label);
 	}

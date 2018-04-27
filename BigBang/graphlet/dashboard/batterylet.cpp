@@ -21,7 +21,7 @@ Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasB
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
-		this->height = this->width * 1.2F;
+		this->height = this->width * 1.618F;
 	}
 }
 

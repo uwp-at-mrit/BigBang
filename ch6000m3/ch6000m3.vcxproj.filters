@@ -48,11 +48,11 @@
     <ClInclude Include="page\hydraulics.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="console.hpp" />
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="decorator\page.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
+    <ClInclude Include="dashboard.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

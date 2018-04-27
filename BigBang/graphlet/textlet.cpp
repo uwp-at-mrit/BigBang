@@ -15,8 +15,12 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
 /*************************************************************************************************/
-void Textlet::set_color(CanvasSolidColorBrush^ color) {
+void Textlet::set_color(ICanvasBrush^ color) {
 	this->text_color = color;
+}
+
+void Textlet::set_color(unsigned int color_hex, double alpha) {
+	this->set_color(Colours::make(color_hex, alpha));
 }
 
 void Textlet::set_font(CanvasTextFormat^ font) {
@@ -35,6 +39,11 @@ void Textlet::set_text(Platform::String^ content) {
 	} else {
 		this->text_layout = make_text_layout(this->raw, this->text_font);
 	}
+}
+
+void Textlet::set_text(const wchar_t *fmt, ...) {
+	VSWPRINT(content, fmt);
+	this->set_text(content);
 }
 
 void Textlet::set_layout_font_size(int char_idx, int char_count, float size) {
@@ -75,7 +84,28 @@ Labellet::Labellet(const wchar_t *fmt, ...) {
     this->set_text(label);
 }
 
-Labellet::Labellet(Platform::String^ content) {
+Labellet::Labellet(Platform::String^ content, unsigned int color_hex, double alpha)
+	: Labellet(content, nullptr, color_hex, alpha) {
+}
+
+Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, ICanvasBrush^ color) {
+	if (font != nullptr) {
+		this->set_font(font);
+	}
+
+	if (color != nullptr) {
+		this->set_color(color);
+	}
+
+	this->set_text(content);
+}
+
+Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned int color_hex, double alpha) {
+	if (font != nullptr) {
+		this->set_font(font);
+	}
+
+	this->set_color(color_hex, alpha);
 	this->set_text(content);
 }
 

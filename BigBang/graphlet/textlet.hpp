@@ -6,9 +6,11 @@
 namespace WarGrey::SCADA {
 	private class Textlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
+		void set_text(const wchar_t* fmt, ...);
 		void set_text(Platform::String^ content);
 		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
-		void set_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver);
+		void set_color(unsigned int color_hex, double alpha = 1.0);
+		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Silver);
 
 	public:
 		void set_layout_font_size(int char_idx, int char_count, float size);
@@ -33,7 +35,16 @@ namespace WarGrey::SCADA {
     private class Labellet : public virtual WarGrey::SCADA::Textlet {
     public:
         Labellet(const wchar_t* fmt, ...);
-		Labellet(Platform::String^ content = "");
+
+		Labellet(Platform::String^ content = "",
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
+
+		Labellet(Platform::String^ caption,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
+			unsigned int color_hex, double alpha = 1.0);
+
+		Labellet(Platform::String^ caption, unsigned int color_hex, double alpha = 1.0);
 	};
 
 	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<float> {

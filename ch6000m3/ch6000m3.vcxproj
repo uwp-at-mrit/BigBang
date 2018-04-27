@@ -227,7 +227,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="console.hpp" />
+    <ClInclude Include="dashboard.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />

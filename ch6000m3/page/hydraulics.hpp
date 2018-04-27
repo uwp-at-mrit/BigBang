@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IMRMaster* device;
-		WarGrey::SCADA::IMRConfirmation* console;
+		WarGrey::SCADA::IMRConfirmation* dashboard;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

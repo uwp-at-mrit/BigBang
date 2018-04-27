@@ -14,6 +14,6 @@ namespace WarGrey::SCADA {
 		void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override;
 
 	private:
-		WarGrey::SCADA::IMRConfirmation* console;
+		WarGrey::SCADA::IMRConfirmation* dashboard;
 	};
 }

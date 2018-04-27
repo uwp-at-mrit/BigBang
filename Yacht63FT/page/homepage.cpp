@@ -62,21 +62,21 @@ private:
 
 /*************************************************************************************************/
 Homepage::Homepage() : Planet(":homepage:") {
-	this->console = new DefaultPage(this);
+	this->dashboard = new DefaultPage(this);
 	this->set_decorator(new BackgroundDecorator(0x1E1E1E, 0.0F, 0.0F, 1.0F, 0.0F));
 }
 
 Homepage::~Homepage() {
-	if (this->console != nullptr) {
-		delete this->console;
+	if (this->dashboard != nullptr) {
+		delete this->dashboard;
 	}
 }
 
 void Homepage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto console = dynamic_cast<DefaultPage*>(this->console);
+	auto dashboard = dynamic_cast<DefaultPage*>(this->dashboard);
 	
-	if (console != nullptr) {
-		console->load_and_flow(width, height);
+	if (dashboard != nullptr) {
+		dashboard->load_and_flow(width, height);
 	}
 }
 

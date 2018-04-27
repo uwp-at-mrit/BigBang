@@ -1,6 +1,6 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
-#include "console.hpp"
+#include "dashboard.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"
@@ -49,9 +49,9 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final : public WarGrey::SCADA::MRConfirmation, public WarGrey::SCADA::Console<HydraulicSystem, HS> {
+private class Hydraulics final : public WarGrey::SCADA::MRConfirmation, public WarGrey::SCADA::DashBoard<HydraulicSystem, HS> {
 public:
-	Hydraulics(HydraulicSystem* master) : Console(master, "HS") {
+	Hydraulics(HydraulicSystem* master) : DashBoard(master, "HS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
@@ -339,31 +339,31 @@ private:
 };
 
 HydraulicSystem::HydraulicSystem(IMRMaster* plc) : Planet(":hs:"), device(plc) {
-	Hydraulics* console = new Hydraulics(this);
+	Hydraulics* dashboard = new Hydraulics(this);
 
-	this->console = console; 
+	this->dashboard = dashboard; 
 	this->gridsize = statusbar_height();
 
-	this->device->append_confirmation_receiver(console);
+	this->device->append_confirmation_receiver(dashboard);
 }
 
 HydraulicSystem::~HydraulicSystem() {
-	if (this->console != nullptr) {
-		delete this->console;
+	if (this->dashboard != nullptr) {
+		delete this->dashboard;
 	}
 }
 
 void HydraulicSystem::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto console = dynamic_cast<Hydraulics*>(this->console);
+	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 	
-	if (console != nullptr) {
+	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 
 		{ // load graphlets
 			this->change_mode(HSMode::View);
-			console->load_pump_station(width, height, this->gridsize);
-			console->load_devices(width, height, this->gridsize);
-			console->load_state_indicators(width, height, this->gridsize);
+			dashboard->load_pump_station(width, height, this->gridsize);
+			dashboard->load_devices(width, height, this->gridsize);
+			dashboard->load_state_indicators(width, height, this->gridsize);
 
 			this->change_mode(HSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
@@ -390,18 +390,18 @@ void HydraulicSystem::load(CanvasCreateResourcesReason reason, float width, floa
 }
 
 void HydraulicSystem::reflow(float width, float height) {
-	auto console = dynamic_cast<Hydraulics*>(this->console);
+	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 	
-	if (console != nullptr) {
+	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 
 		this->change_mode(HSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAlignment::LB);
 
 		this->change_mode(HSMode::View);
-		console->reflow_pump_station(width, height, this->gridsize, vinset);
-		console->reflow_devices(width, height, this->gridsize, vinset);
-		console->reflow_state_indicators(width, height, this->gridsize, vinset);
+		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
+		dashboard->reflow_devices(width, height, this->gridsize, vinset);
+		dashboard->reflow_state_indicators(width, height, this->gridsize, vinset);
 	}
 }
 

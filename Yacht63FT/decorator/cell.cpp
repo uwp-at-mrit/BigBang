@@ -14,15 +14,6 @@ using namespace Windows::Foundation;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-Rect WarGrey::SCADA::make_raw_cell(float x, float y, float width, float height) {
-	return Rect(x, y, width, height);
-}
-
-Rect WarGrey::SCADA::make_fit_cell(float x, float y, float width, float height) {
-	return Rect(application_fit_size(x), application_fit_size(y),
-		application_fit_size(width), application_fit_size(height));
-}
-
 /*************************************************************************************************/
 CellDecorator::CellDecorator(unsigned int color, const Rect* src, size_t count, float radius)
 	: CellDecorator(Colours::make(color), src, count, radius) {}
@@ -31,7 +22,10 @@ CellDecorator::CellDecorator(ICanvasBrush^ color, const Rect* src, size_t count,
 	: color(color), count(count), radius(radius) {
 	this->boxes = new Rect[count];
 	for (size_t i = 0; i < count; i++) {
-		this->boxes[i] = src[i];
+		this->boxes[i].X = application_fit_size(src[i].X);
+		this->boxes[i].Y = application_fit_size(src[i].Y);
+		this->boxes[i].Width = application_fit_size(src[i].Width);
+		this->boxes[i].Height = application_fit_size(src[i].Height);
 	}
 }
 
