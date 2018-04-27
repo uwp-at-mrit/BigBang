@@ -27,5 +27,9 @@ static float screen_copyright_yoff = 24.0F;
 static float screen_status_label_xoff = 148.0F;
 static float screen_status_label_yoff = 24.0F;
 static float screen_status_parameter_yoff = 120.0F;
+static float screen_status_alarm_x = 1206.0F;
+static float screen_status_alarm_width = 160.0F;
+static float screen_status_yacht_x = 1447.0F;
+static float screen_status_yacht_width = 409.0F;
 
 float application_fit_size(float src);

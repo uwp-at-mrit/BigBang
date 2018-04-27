@@ -25,13 +25,13 @@ static float cell_y = 10.0F;
 static float cell_width = 385.0F;
 static float cell_height = 200.0F;
 static float cell_gapsize = 10.0F;
-static float yacht_x = 1388.0F;
+static float yacht_cell_x = 1388.0F;
 
 static Rect boxes[] = {
 	Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),
 	Rect((cell_width + cell_gapsize) * 1.0F + cell_gapsize, cell_y, cell_width, cell_height),
 	Rect((cell_width + cell_gapsize) * 2.0F + cell_gapsize, cell_y, cell_width, cell_height),
-	Rect(yacht_x, cell_y, screen_width - cell_gapsize - yacht_x, cell_height)
+	Rect(yacht_cell_x, cell_y, screen_width - cell_gapsize - yacht_cell_x, cell_height)
 };
 
 /*************************************************************************************************/
@@ -101,21 +101,21 @@ public:
 			}
 		}
 
-		{ // load yacht
+		{ // load alarm status and yacht
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
-
-			float yacht_x = application_fit_size(1447.0F);
-			float yacht_width = cell_x + (cell_width - application_fit_size(48.0F)) - yacht_x;
-
-			this->yacht = new Bitmaplet("skeleton", yacht_width);
-			this->master->insert(this->yacht,
-				yacht_x, cell_y + cell_height * 0.5F,
-				GraphletAlignment::LC);
+			py = cell_y + cell_height * 0.5F;
+			
+			this->alarm = new BitmapBooleanlet("alarm", application_fit_size(screen_status_alarm_width));
+			this->yacht = new Bitmaplet("skeleton", application_fit_size(screen_status_yacht_width));
+			
+			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
+			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
+	BitmapBooleanlet* alarm;
 	Bitmaplet* yacht;
 	Bitmaplet* gps;
 	FuelTanklet* fueltank;

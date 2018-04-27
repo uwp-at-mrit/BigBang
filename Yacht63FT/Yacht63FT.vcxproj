@@ -208,8 +208,8 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
-    <Image Include="usr\share\graphlet\1_11.png" />
-    <Image Include="usr\share\graphlet\1_13.png" />
+    <Image Include="usr\share\graphlet\alarm_true.png" />
+    <Image Include="usr\share\graphlet\alarm_false.png" />
     <Image Include="usr\share\graphlet\gps.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
     <Image Include="usr\share\graphlet\yacht.png" />

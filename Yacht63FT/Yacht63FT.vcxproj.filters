@@ -208,14 +208,14 @@
     <Image Include="usr\share\graphlet\skeleton.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\1_11.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\1_13.png">
-      <Filter>Assets</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\gps.png">
       <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\alarm_true.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\alarm_false.png">
+      <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
