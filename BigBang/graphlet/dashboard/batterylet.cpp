@@ -13,6 +13,20 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+private class BatteryStatus final : public ISystemStatusListener {
+	friend class WarGrey::SCADA::Batterylet;
+public:
+	void on_battery_capacity_changed(float capacity) {
+		this->capacity = capacity;
+	}
+
+private:
+	float capacity;
+};
+
+
+static BatteryStatus* battery_status = nullptr;
+
 /*************************************************************************************************/
 Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush^ ncolor, ICanvasBrush^ wcolor, ICanvasBrush^ ecolor)
 	: width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor)
@@ -65,6 +79,11 @@ void Batterylet::construct() {
 	};
 
 	this->skeleton = geometry_freeze(geometry_union(battery_parts)); // don't mind, it's Visual Studio's fault
+
+	if (battery_status == nullptr) {
+		battery_status = new BatteryStatus();
+		register_system_status_listener(battery_status);
+	}
 }
 
 void Batterylet::fill_extent(float x, float y, float* w, float* h) {
@@ -72,7 +91,7 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Batterylet::update(long long count, long long interval, long long uptime) {
-	this->set_scale(system_battery_capacity());
+	this->set_scale(battery_status->capacity);
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

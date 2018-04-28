@@ -54,7 +54,7 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr);
+		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr, Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:

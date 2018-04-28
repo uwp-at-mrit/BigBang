@@ -6,8 +6,9 @@
 #include "timer.hxx"
 #include "brushes.hxx"
 
-#include "page/homepage.hpp"
+#include "frame/navigatorbar.hpp"
 #include "frame/statusbar.hpp"
+#include "page/homepage.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -21,17 +22,39 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+template<class Bar>
+private ref class BarUniverse sealed : public UniverseDisplay {
+public:
+	BarUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		this->bar = new Bar();
+		this->add_planet(this->bar);
+	}
+
+internal:
+	Bar* get_universe() {
+		return this->bar;
+	}
+
+private:
+	Bar* bar;
+};
+
 private ref class Universe sealed : public UniverseDisplay {
 public:
 	virtual ~Universe() {
+		// NOTE: the `navigator` is managed by its own `Display`.
 		if (this->device != nullptr) {
 			delete this->device;
 		}
 	}
 
-	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+internal:
+	Universe(Navigatorbar* navigator, Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
 		//this->device = new PLCMaster(alarm);
+
+		this->navigator = navigator;
+		this->navigator->set_workspace(this);
 	}
 
 protected:
@@ -40,22 +63,12 @@ protected:
 	}
 
 private:
+	Navigatorbar* navigator;
 	PLCMaster* device;
 };
 
-private ref class StatusUniverse sealed : public UniverseDisplay {
-public:
-	virtual ~StatusUniverse() {}
-
-	StatusUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
-
-protected:
-	void construct() override {
-		this->add_planet(new Statusbar());
-	}
-};
-
 private ref class Yacht63FT sealed : public StackPanel {
+	friend ref class Universe;
 public:
 	Yacht63FT() : StackPanel() {
 		this->Margin = ThicknessHelper::FromUniformLength(0.0);
@@ -66,36 +79,34 @@ public:
 
 public:
 	void initialize_component(Size region) {
+		Platform::String^ logger_name = "Yacht63FT";
 		float fit_width = application_fit_size(screen_width);
 		float fit_height = application_fit_size(screen_height);
 		float fit_nav_height = application_fit_size(screen_navigator_height);
 		float fit_bar_height = application_fit_size(screen_statusbar_height);
 		
 		this->timeline = ref new CompositeTimerAction();
-		this->navigator = ref new StackPanel();
-		this->workspace = ref new Universe("Yacht63FT");
-		this->statusbar = ref new StatusUniverse(this->workspace->get_logger()->get_name());
+		this->navigatorbar = ref new BarUniverse<Navigatorbar>(logger_name);
+		this->statusbar = ref new BarUniverse<Statusbar>(logger_name);
+		this->workspace = ref new Universe(this->navigatorbar->get_universe(), logger_name);
 
 		this->timeline->append_timer_action(this->workspace);
 		this->timeline->append_timer_action(this->statusbar);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
-		this->navigator->Width = fit_width;
-		this->navigator->Height = fit_nav_height;
-		this->navigator->Orientation = ::Orientation::Horizontal;
-		this->navigator->Margin = ThicknessHelper::FromUniformLength(0.0);
-		this->navigator->Children->Append(this->workspace->navigator);
-
-		this->workspace->width = fit_width;
-		this->workspace->height = fit_height - fit_nav_height - fit_bar_height;
-		this->statusbar->width = fit_width;
-		this->statusbar->height = fit_bar_height;
-
-		this->Children->Append(this->navigator);
-		this->Children->Append(this->workspace->canvas);
-		this->Children->Append(this->statusbar->canvas);
+		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
+		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
+		this->load_display(this->statusbar, fit_width, fit_bar_height);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
+	}
+
+private:
+	void load_display(UniverseDisplay^ display, float width, float height) {
+		display->width = width;
+		display->height = height;
+
+		this->Children->Append(display->canvas);
 	}
 
 private:
@@ -103,9 +114,9 @@ private:
 	WarGrey::SCADA::CompositeTimerAction^ timeline;
 
 private:
+	BarUniverse<Navigatorbar>^ navigatorbar;
 	UniverseDisplay^ workspace;
-	UniverseDisplay^ statusbar;
-	StackPanel^ navigator;
+	BarUniverse<Statusbar>^ statusbar;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

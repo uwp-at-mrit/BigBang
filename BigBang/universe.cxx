@@ -123,11 +123,11 @@ void IDisplay::leave_critical_section() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger) {
+UniverseDisplay::UniverseDisplay(Syslog* logger, ListView^ navigator) {
 	this->logger = ((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger);
 	this->logger->reference();
 
-	this->navigator_view = ref new ListView();
+	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
 	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
 	this->navigator_view->IsItemClickEnabled = true;
 	this->navigator_view->ItemClick += ref new ItemClickEventHandler(this, &UniverseDisplay::do_transfer);

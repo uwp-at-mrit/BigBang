@@ -1,12 +1,10 @@
 ﻿#include <algorithm>
-#include <ppltasks.h>
 #include <shared_mutex>
 
 #include "graphlet/statuslet.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"
-#include "time.hpp"
 #include "system.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"
@@ -14,96 +12,58 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Concurrency;
-
-using namespace Windows::UI::Text;
-using namespace Windows::UI::Xaml;
-using namespace Windows::Foundation;
-
-using namespace Windows::Devices::Power;
-using namespace Windows::Devices::WiFi;
-
-using namespace Windows::Networking;
-using namespace Windows::Networking::Connectivity;
-
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-
-typedef TypedEventHandler<Battery^, Platform::Object^> BatteryUpdateHandler;
-typedef TypedEventHandler<WiFiAdapter^, Platform::Object^> WiFiUpdateHandler;
 
 static CanvasTextFormat^ status_font = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
 
-// delegate only accepts C++/CX class
-private ref class Status sealed {
-internal:
-	Status() {
-		this->clock = ref new DispatcherTimer();
+private class SingletonStatus final : public ISystemStatusListener {
+	friend class WarGrey::SCADA::Statusbarlet;
+public:
+	void on_timestamp_changed(Platform::String^ timestamp) override {
+		this->enter_critical_section();
+		this->clock = make_text_layout(timestamp, status_font);
+		this->leave_critical_section();
+    }
 
-		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &Status::refresh_powerinfo);
-		// WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &Status::refresh_wifiinfo);
+    void on_battery_capacity_changed(float capacity) override {
+		Platform::String^ label = speak(":power:");
+		Platform::String^ percentage = (round(capacity * 100.0F).ToString() + "%");
 
-		this->update_powerinfo();
-		this->update_wifiinfo();
-		this->update_sdinfo();
-		this->update_ipinfo();
-
-		this->clock->Tick += ref new EventHandler<Object^>(this, &Status::refresh_timestamp);
-		this->clock->Interval = this->update_timestamp();
-		this->clock->Start();
+		this->enter_critical_section();
+		this->battery = make_text_layout(label + percentage, status_font);
+		this->leave_critical_section();
 	}
 
-public:
-    TimeSpan update_timestamp() {
-        int l00ns;
+    void on_wifi_signal_strength_changed(char strength) override {
+		float percentage = std::roundf(float(strength) * 100.0F / 5.0F);
+		Platform::String^ label = speak(":wifi:");
+        Platform::String^ signal = ((strength < 0) ? speak(":nowifi:") : (percentage.ToString() + "%"));
 
-        this->timestamp = make_text_layout(update_nowstamp(false, &l00ns), status_font);
-		
-        return TimeSpan{ 10000000LL - l00ns };
-    }
+		this->enter_critical_section();
+        this->wifi = make_text_layout(label + signal, status_font);
+		this->leave_critical_section();
+	}
 
-    void update_powerinfo() {
-		Platform::String^ power = speak(":power:");
-		Platform::String^ capacity = (round(system_battery_capacity() * 100.0F).ToString() + "%");
-		this->powercapacity = make_text_layout(power + capacity, status_font);
-    }
+    void on_available_storage_changed(long long bytes) override {
+		Platform::String^ label = speak(":sd:");
+		Platform::String^ size = bytes.ToString();
 
-    void update_wifiinfo() {
-        auto nics = NetworkInformation::GetConnectionProfiles();
-        Platform::String^ signal = speak(":nowifi:");
+		this->enter_critical_section();
+        this->storage = make_text_layout(label + size, status_font);
+		this->leave_critical_section();
+	}
 
-        for (unsigned int i = 0; i < nics->Size; ++i) {
-            auto nic = nics->GetAt(i);
-            if (nic->IsWlanConnectionProfile) {
-                auto signal_bar = nic->GetSignalBars()->Value;
-                signal = round(signal_bar / 5 * 100).ToString() + L"%";
-                break;
-            }
-        }
+    void on_ipv4_address_changed(Platform::String^ ipv4) override {
+		Platform::String^ label = speak(":ipv4:");
+		Platform::String^ ip = ((ipv4 == nullptr) ? speak(":noipv4:") : ipv4);
 
-        this->wifi_strength = make_text_layout(speak(":wifi:") + signal, status_font);
-    }
-
-    void update_sdinfo() {
-        this->storage = make_text_layout(speak(":sd:") + L"0MB", status_font);
-    }
-
-    void update_ipinfo() {
-        auto names = NetworkInformation::GetHostNames();
-        Platform::String^ ipv4 = speak(":noipv4:");
-
-        for (unsigned int i = 0; i < names->Size; ++i) {
-            auto host = names->GetAt(i);
-            if (host->Type == HostNameType::Ipv4) {
-                ipv4 = host->RawName;
-                break;
-            }
-        }
-
-		this->ipv4 = make_text_layout(speak(":ipv4:") + ipv4, status_font);
+		this->enter_critical_section();
+		this->ipv4 = make_text_layout(label + ip, status_font);
+		this->leave_critical_section();
     }
 
 public:
@@ -124,51 +84,23 @@ public:
 	}
 
 private:
-	void refresh_timestamp(Platform::Object^ sender, Platform::Object^ e) {
-		this->enter_critical_section();
-		this->clock->Interval = this->update_timestamp();
-		this->leave_critical_section();
-	}
-	
-	void refresh_powerinfo(Battery^ sender, Platform::Object^ e) {
-		this->enter_critical_section();
-		this->update_powerinfo();
-		this->leave_critical_section();
-    }
-
-    void refresh_wifiinfo(WiFiAdapter^ sender, Platform::Object^ e) {
-		this->enter_critical_section();
-		this->update_wifiinfo();
-		this->leave_critical_section();
-    }
-
-private:
-    CanvasTextLayout^ timestamp;
-	CanvasTextLayout^ powercapacity;
-	CanvasTextLayout^ wifi_strength;
+    CanvasTextLayout^ clock;
+	CanvasTextLayout^ battery;
+	CanvasTextLayout^ wifi;
 	CanvasTextLayout^ storage;
 	CanvasTextLayout^ ipv4;
     
 private:
-	DispatcherTimer^ clock;
 	std::shared_mutex section;
-
-private:
-	~Status() {
-		this->clock->Stop();
-	}
-
-    friend class WarGrey::SCADA::Statusbarlet;
 };
 
 /*************************************************************************************************/
-static Status^ statusbar = nullptr;
+static SingletonStatus* statusbar = nullptr;
 
 static void initialize_status_font() {
 	if (status_font == nullptr) {
-		status_font = make_text_format("Microsoft YaHei", 12.0F);
-		status_font->FontWeight = FontWeights::Bold;
-
+		status_font = make_bold_text_format("Microsoft YaHei", 12.0F);
+		
 		TextExtent ts = get_text_extent(speak(":plc:"), status_font);
 		status_height = ts.height * 1.2F;
 		status_prefix_width = ts.width;
@@ -190,7 +122,8 @@ Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCMaster* device) {
 
 void Statusbarlet::construct() {
 	if (statusbar == nullptr) {
-		statusbar = ref new Status();
+		statusbar = new SingletonStatus();
+		register_system_status_listener(statusbar);
 	}
 }
 
@@ -219,12 +152,12 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,            x + width * 0.0F, context_y, Colours::Chocolate);
-    ds->DrawTextLayout(statusbar->timestamp,     x + width * 1.0F, context_y, Colours::Foreground);
-    ds->DrawTextLayout(statusbar->powercapacity, x + width * 2.0F, context_y, Colours::Green);
-    ds->DrawTextLayout(statusbar->wifi_strength, x + width * 3.0F, context_y, Colours::Yellow);
-    ds->DrawTextLayout(statusbar->storage,       x + width * 5.0F, context_y, Colours::Yellow);
-    ds->DrawTextLayout(statusbar->ipv4,          x + lastone_xoff, context_y, Colours::Yellow);
+	ds->DrawTextLayout(this->caption,      x + width * 0.0F, context_y, Colours::Chocolate);
+	ds->DrawTextLayout(statusbar->clock,   x + width * 1.0F, context_y, Colours::Foreground);
+	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
+	ds->DrawTextLayout(statusbar->wifi,    x + width * 3.0F, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->storage, x + width * 5.0F, context_y, Colours::Yellow);
+    ds->DrawTextLayout(statusbar->ipv4,    x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status

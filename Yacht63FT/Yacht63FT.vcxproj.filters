@@ -49,6 +49,9 @@
     <ClCompile Include="frame\statusbar.cpp">
       <Filter>frame</Filter>
     </ClCompile>
+    <ClCompile Include="frame\navigatorbar.cpp">
+      <Filter>frame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -63,6 +66,9 @@
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="frame\statusbar.hpp">
+      <Filter>frame</Filter>
+    </ClInclude>
+    <ClInclude Include="frame\navigatorbar.hpp">
       <Filter>frame</Filter>
     </ClInclude>
   </ItemGroup>

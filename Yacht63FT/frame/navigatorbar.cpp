@@ -1,4 +1,6 @@
-﻿#include "frame/statusbar.hpp"
+﻿#include <map>
+
+#include "frame/navigatorbar.hpp"
 #include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
@@ -9,7 +11,6 @@
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
-#include "system.hpp"
 #include "text.hpp"
 #include "math.hpp"
 
@@ -36,18 +37,18 @@ static Rect boxes[] = {
 };
 
 /*************************************************************************************************/
-private class StatusBoard final : public MRConfirmation, public ISystemStatusListener {
+private class NavigatorBoard final {
 public:
-	~StatusBoard() noexcept {
+	~NavigatorBoard() noexcept {
 		if (this->decorator != nullptr) {
 			this->decorator->destroy();
 		}
 	}
 
-	StatusBoard(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+	NavigatorBoard(Navigatorbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(30.0F));
 		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(41.27F));
-
+		
 		this->decorator->reference();
 	}
 
@@ -61,11 +62,11 @@ public:
 		float label_yoffset = application_fit_size(screen_status_label_yoff);
 		float parameter_yoffset = application_fit_size(screen_status_parameter_yoff);
 
-		for (unsigned int i = 0; i < 3; i++) {
+		for (unsigned int i = 0; i < 3; i ++) {
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
-
+			
 			{ // load label
-				this->labels[i] = new Labellet(speak(captions[i]), this->fonts[0], screen_status_label_color);
+				this->labels[i] = new Labellet(speak(captions[i]), this->fonts[0], 0xB0B0B0);
 				this->master->insert(this->labels[i],
 					cell_x + label_xoffset, cell_y + label_yoffset,
 					GraphletAlignment::LT);
@@ -76,16 +77,16 @@ public:
 				py = cell_y + parameter_yoffset;
 
 				if (i < 2) {
-					this->parameters[i] = new Labellet("%", this->fonts[1], screen_status_parameter_color);
+					this->parameters[i] = new Labellet("100%", this->fonts[1], 0xFEFEFE);
 					this->master->insert(this->parameters[i], px, py, GraphletAlignment::LT);
 				} else {
-					this->parameters[2] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
-					this->parameters[3] = new Labellet("N:", this->fonts[1], screen_status_parameter_color);
+					this->parameters[2] = new Labellet("E:", this->fonts[1], 0xFEFEFE);
+					this->parameters[3] = new Labellet("N:", this->fonts[1], 0xFEFEFE);
 					this->master->insert(this->parameters[2], px, py, GraphletAlignment::LB);
 					this->master->insert(this->parameters[3], px, py, GraphletAlignment::LT);
 				}
 			}
-
+			
 			{ // load icon
 				TextExtent ts = get_text_extent("%", this->fonts[1]);
 				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAlignment::LB);
@@ -105,20 +106,13 @@ public:
 		{ // load alarm status and yacht
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
 			py = cell_y + cell_height * 0.5F;
-
+			
 			this->alarm = new BitmapBooleanlet("alarm", application_fit_size(screen_status_alarm_width));
 			this->yacht = new Bitmaplet("skeleton", application_fit_size(screen_status_yacht_width));
-
+			
 			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
 			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
 		}
-	}
-
-public:
-	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
-		float percentage = std::roundf(flcapacity * 100.0F);
-		
-		this->parameters[1]->set_text(percentage.ToString() + "%");
 	}
 
 // never deletes these graphlets mannually
@@ -133,34 +127,41 @@ private:
 		
 private:
 	CanvasTextFormat^ fonts[2];
-	Statusbar* master;
+	Navigatorbar* master;
 	CellDecorator* decorator;
 };
 
 /*************************************************************************************************/
-Statusbar::Statusbar() : Planet(":statusbar:") {}
+std::map<Navigatorbar*, NavigatorBoard*> dashboards;
 
-Statusbar::~Statusbar() {
-	if (this->dashboard != nullptr) {
-		delete this->dashboard;
+Navigatorbar::Navigatorbar() : Planet(":statusbar:") {}
+
+Navigatorbar::~Navigatorbar() {
+	auto maybe_dashboard = dashboards.find(this);
+
+	if (maybe_dashboard != dashboards.end()) {
+		delete maybe_dashboard->second;
+		dashboards.erase(maybe_dashboard);
 	}
 }
 
-void Statusbar::load(CanvasCreateResourcesReason reason, float width, float height) {
-	if (this->dashboard == nullptr) {
+void Navigatorbar::set_workspace(UniverseDisplay^ master) {
+	this->master = master;
+}
+
+void Navigatorbar::load(CanvasCreateResourcesReason reason, float width, float height) {
+	if (dashboards.find(this) == dashboards.end()) {
 		BackgroundDecorator* bg = new BackgroundDecorator(0x1E1E1E);
 		CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
-		StatusBoard* status = new StatusBoard(this, cells);
+		NavigatorBoard* dashboard = new NavigatorBoard(this, cells);
 		
-		status->load_and_flow(width, height);
-		register_system_status_listener(status);
+		dashboards.insert(std::pair<Navigatorbar*, NavigatorBoard*>(this, dashboard));
+		dashboard->load_and_flow(width, height);
 
-		this->dashboard = status;
 		this->set_decorator(new CompositeDecorator(bg, cells));
-
 	}
 }
 
-void Statusbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void Navigatorbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }

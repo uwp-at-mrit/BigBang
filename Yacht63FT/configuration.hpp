@@ -14,6 +14,8 @@ static Platform::String^ remote_test_server = remote_host_at_19;
 
 /*************************************************************************************************/
 static unsigned int frame_per_second = 4;
+static unsigned int screen_status_label_color = 0xB0B0B0;
+static unsigned int screen_status_parameter_color = 0xFEFEFE;
 
 static float screen_width = 1920.0F;
 static float screen_height = 1080.0F;

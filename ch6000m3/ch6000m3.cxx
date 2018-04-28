@@ -48,20 +48,20 @@ private:
 	PLCMaster* device;
 };
 
-private ref class Yacht63FT sealed : public SplitView {
+private ref class CH6000m3 sealed : public SplitView {
 public:
-	Yacht63FT() : SplitView() {
+	CH6000m3() : SplitView() {
 		this->Margin = ThicknessHelper::FromUniformLength(0.0);
 		this->PanePlacement = SplitViewPanePlacement::Left;
 		this->DisplayMode = SplitViewDisplayMode::Overlay;
 		this->IsPaneOpen = false;
 
-		this->PointerMoved += ref new PointerEventHandler(this, &Yacht63FT::on_pointer_moved);
+		this->PointerMoved += ref new PointerEventHandler(this, &CH6000m3::on_pointer_moved);
 	}
 
 public:
 	void initialize_component(Size region) {
-		this->universe = ref new Universe("Yacht63FT");
+		this->universe = ref new Universe("CH6000m3");
 		this->Content = this->universe->canvas;
 		this->Pane = this->universe->navigator;
 
@@ -90,5 +90,5 @@ private:
 };
 
 int main(Platform::Array<Platform::String^>^ args) {
-	return launch_universal_windows_application<Yacht63FT, true>(remote_test_server);
+	return launch_universal_windows_application<CH6000m3, true>(remote_test_server);
 }

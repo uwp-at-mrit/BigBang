@@ -1,4 +1,6 @@
-﻿#include "page/homepage.hpp"
+﻿#include <map>
+
+#include "page/homepage.hpp"
 #include "decorator/background.hpp"
 #include "configuration.hpp"
 
@@ -18,9 +20,9 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class DefaultPage final : public WarGrey::SCADA::MRConfirmation {
+private class HomeBoard final {
 public:
-	DefaultPage(Homepage* master) : master(master) {
+	HomeBoard(Homepage* master) : master(master) {
 		this->fonts[0] = make_bold_text_format("Microsoft YaHei", application_fit_size(45.0F));
 		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(26.25F));
 		this->fonts[2] = this->fonts[1];
@@ -61,21 +63,26 @@ private:
 };
 
 /*************************************************************************************************/
+std::map<Homepage*, HomeBoard*> dashboards;
+
 Homepage::Homepage() : Planet(":homepage:") {
-	this->dashboard = new DefaultPage(this);
 	this->set_decorator(new BackgroundDecorator(0x1E1E1E, 0.0F, 0.0F, 1.0F, 0.0F));
 }
 
 Homepage::~Homepage() {
-	if (this->dashboard != nullptr) {
-		delete this->dashboard;
+	auto maybe_dashboard = dashboards.find(this);
+
+	if (maybe_dashboard != dashboards.end()) {
+		delete maybe_dashboard->second;
+		dashboards.erase(maybe_dashboard);
 	}
 }
 
 void Homepage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto dashboard = dynamic_cast<DefaultPage*>(this->dashboard);
-	
-	if (dashboard != nullptr) {
+	if (dashboards.find(this) == dashboards.end()) {
+		HomeBoard* dashboard = new HomeBoard(this);
+
+		dashboards.insert(std::pair<Homepage*, HomeBoard*>(this, dashboard));
 		dashboard->load_and_flow(width, height);
 	}
 }

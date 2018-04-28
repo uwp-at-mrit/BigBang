@@ -49,7 +49,7 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final : public WarGrey::SCADA::MRConfirmation, public WarGrey::SCADA::DashBoard<HydraulicSystem, HS> {
+private class Hydraulics final : public MRConfirmation, public DashBoard<HydraulicSystem, HS> {
 public:
 	Hydraulics(HydraulicSystem* master) : DashBoard(master, "HS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
