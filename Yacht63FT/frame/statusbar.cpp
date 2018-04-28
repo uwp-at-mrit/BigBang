@@ -138,7 +138,7 @@ private:
 };
 
 /*************************************************************************************************/
-Statusbar::Statusbar() : Planet(":statusbar:") {}
+Statusbar::Statusbar(IMRMaster* device) : Planet(":statusbar:"), device(device) {}
 
 Statusbar::~Statusbar() {
 	if (this->dashboard != nullptr) {
@@ -157,7 +157,7 @@ void Statusbar::load(CanvasCreateResourcesReason reason, float width, float heig
 
 		this->dashboard = status;
 		this->set_decorator(new CompositeDecorator(bg, cells));
-
+		this->device->append_confirmation_receiver(status);
 	}
 }
 

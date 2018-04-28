@@ -22,11 +22,14 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+
+static PLCMaster* device = nullptr;
+
 template<class Bar>
 private ref class BarUniverse sealed : public UniverseDisplay {
-public:
-	BarUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
-		this->bar = new Bar();
+internal:
+	BarUniverse(Bar* bar, Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		this->bar = bar;
 		this->add_planet(this->bar);
 	}
 
@@ -40,19 +43,8 @@ private:
 };
 
 private ref class Universe sealed : public UniverseDisplay {
-public:
-	virtual ~Universe() {
-		// NOTE: the `navigator` is managed by its own `Display`.
-		if (this->device != nullptr) {
-			delete this->device;
-		}
-	}
-
 internal:
 	Universe(Navigatorbar* navigator, Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
-		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
-		//this->device = new PLCMaster(alarm);
-
 		this->navigator = navigator;
 		this->navigator->set_workspace(this);
 	}
@@ -62,13 +54,11 @@ protected:
 		this->add_planet(new Homepage());
 	}
 
-private:
+private: // this Planet should not be deleted manually
 	Navigatorbar* navigator;
-	PLCMaster* device;
 };
 
 private ref class Yacht63FT sealed : public StackPanel {
-	friend ref class Universe;
 public:
 	Yacht63FT() : StackPanel() {
 		this->Margin = ThicknessHelper::FromUniformLength(0.0);
@@ -79,16 +69,19 @@ public:
 
 public:
 	void initialize_component(Size region) {
-		Platform::String^ logger_name = "Yacht63FT";
+		Platform::String^ name = "Yacht63FT";
 		float fit_width = application_fit_size(screen_width);
 		float fit_height = application_fit_size(screen_height);
 		float fit_nav_height = application_fit_size(screen_navigator_height);
 		float fit_bar_height = application_fit_size(screen_statusbar_height);
-		
+
+
+		device = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
+
 		this->timeline = ref new CompositeTimerAction();
-		this->navigatorbar = ref new BarUniverse<Navigatorbar>(logger_name);
-		this->statusbar = ref new BarUniverse<Statusbar>(logger_name);
-		this->workspace = ref new Universe(this->navigatorbar->get_universe(), logger_name);
+		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(), name);
+		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(device), name);
+		this->workspace = ref new Universe(this->navigatorbar->get_universe(), name);
 
 		this->timeline->append_timer_action(this->workspace);
 		this->timeline->append_timer_action(this->statusbar);
