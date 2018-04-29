@@ -134,7 +134,7 @@ private:
 /*************************************************************************************************/
 std::map<Navigatorbar*, NavigatorBoard*> dashboards;
 
-Navigatorbar::Navigatorbar() : Planet(":statusbar:") {}
+Navigatorbar::Navigatorbar() : Planet(":navigatorbar:") {}
 
 Navigatorbar::~Navigatorbar() {
 	auto maybe_dashboard = dashboards.find(this);

@@ -4,7 +4,6 @@
 #include "graphlet/bitmaplet.hpp"
 #include "planet.hpp"
 
-#include "colorspace.hpp"
 #include "path.hpp"
 #include "draw.hpp"
 
@@ -41,16 +40,19 @@ Bitmaplet::~Bitmaplet() {
 
 		lazy_tasks.erase(t);
 	}
+
+	this->unload(this->ms_appx_bmp);
 }
 
 void Bitmaplet::construct() {
 	int uuid = this->ms_appx_bmp->GetHashCode();
 	cancellation_token_source bmp_task;
-
+	
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, bmp_task));
-	this->load_async(this->ms_appx_bmp, bmp_task.get_token());
+	this->load(this->ms_appx_bmp, bmp_task.get_token());
 }
 
+#include "syslog.hpp"
 void Bitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
 	this->graph_bmp = doc_bmp;
 
@@ -103,11 +105,11 @@ BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f
 }
 
 BitmapBooleanlet::~BitmapBooleanlet() {
-	int uuids[] = { this->ms_appx_tmp->GetHashCode(), this->ms_appx_fmp->GetHashCode() };
+	Uri^ appxes[] = { this->ms_appx_tmp, this->ms_appx_fmp };
 	CanvasBitmap^ bmps[] = { this->graph_tmp, this->graph_fmp };
 
 	for (int i = 0; i < 2; i++) {
-		auto t = lazy_tasks.find(uuids[i]);
+		auto t = lazy_tasks.find(appxes[i]->GetHashCode());
 
 		if (t != lazy_tasks.end()) {
 			if (bmps[i] == nullptr) {
@@ -116,6 +118,8 @@ BitmapBooleanlet::~BitmapBooleanlet() {
 
 			lazy_tasks.erase(t);
 		}
+
+		this->unload(appxes[i]);
 	}
 }
 
@@ -127,8 +131,8 @@ void BitmapBooleanlet::construct() {
 
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(t_uuid, tmp_task));
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(f_uuid, fmp_task));
-	this->load_async(this->ms_appx_tmp, tmp_task.get_token());
-	this->load_async(this->ms_appx_fmp, fmp_task.get_token());
+	this->load(this->ms_appx_tmp, tmp_task.get_token());
+	this->load(this->ms_appx_fmp, fmp_task.get_token());
 }
 
 void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {

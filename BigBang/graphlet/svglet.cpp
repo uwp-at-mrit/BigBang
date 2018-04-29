@@ -43,6 +43,8 @@ Svglet::~Svglet() {
 
 		lazy_tasks.erase(t);
 	}
+
+	this->unload(this->ms_appx_svg);
 }
 
 void Svglet::construct() {
@@ -50,7 +52,7 @@ void Svglet::construct() {
 	cancellation_token_source svg_task;
 
 	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, svg_task));
-	this->load_async(this->ms_appx_svg, svg_task.get_token());
+	this->load(this->ms_appx_svg, svg_task.get_token());
 }
 
 void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg) {

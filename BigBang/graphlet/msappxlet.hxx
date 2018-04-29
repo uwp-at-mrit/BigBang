@@ -1,24 +1,68 @@
 #pragma once
 
 #include <ppltasks.h>
+#include <mutex>
+#include <queue>
+#include <map>
 
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	template<class Instance>
+	template<class FileType>
 	private class IMsAppxlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	protected:
-		virtual void on_appx(Windows::Foundation::Uri^ ms_appx, Instance^ instance) = 0;
+		virtual void on_appx(Windows::Foundation::Uri^ ms_appx, FileType^ instance) = 0;
 
 	protected:
-		void load_async(Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type = "graphlet source") {
+		void load(Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type = "graphlet source") {
+			auto uuid = ms_appx->ToString()->GetHashCode();
+
+			IMsAppxlet<FileType>::critical_section.lock();
+			auto reference = IMsAppxlet<FileType>::refcounts.find(uuid);
+
+			if (reference == IMsAppxlet<FileType>::refcounts.end()) {
+				IMsAppxlet<FileType>::refcounts[uuid] = 0;
+				IMsAppxlet<FileType>::queues[uuid].push(this);
+				this->load_async(uuid, ms_appx, token, file_type);
+			} else if (reference->second > 0) {
+				reference->second += 1;
+				this->on_appx(ms_appx, IMsAppxlet<FileType>::filesystem[uuid]);
+
+				this->get_logger()->log_message(Log::Info, L"reused the %s: %s with reference count %d",
+					file_type->Data(), ms_appx->ToString()->Data(),
+					IMsAppxlet<FileType>::refcounts[uuid]);
+			} else {
+				IMsAppxlet<FileType>::queues[uuid].push(this);
+				this->get_logger()->log_message(Log::Info, L"waiting for the %s: %s",
+					file_type->Data(), ms_appx->ToString()->Data());
+			}
+			IMsAppxlet<FileType>::critical_section.unlock();
+		}
+
+		void unload(Windows::Foundation::Uri^ ms_appx) {
+			auto uuid = ms_appx->ToString()->GetHashCode();
+
+			IMsAppxlet<FileType>::critical_section.lock();
+			auto reference = IMsAppxlet<FileType>::refcounts.find(uuid);
+
+			if (reference != IMsAppxlet<FileType>::refcounts.end()) {
+				if (reference->second <= 1) {
+					IMsAppxlet<FileType>::refcounts.erase(uuid);
+					IMsAppxlet<FileType>::filesystem.erase(uuid);
+				} else {
+					reference->second -= 1;
+				}
+			}
+			IMsAppxlet<FileType>::critical_section.unlock();
+		}
+
+	private:
+		void load_async(int uuid, Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type) {
 			auto get_file = Concurrency::create_task(Windows::Storage::StorageFile::GetFileFromApplicationUriAsync(ms_appx), token);
 
 			get_file.then([=](Concurrency::task<Windows::Storage::StorageFile^> file) {
-				this->get_logger()->log_message(Log::Debug,
-					L"Found the %s: %s",
-					file_type->Data(),
-					ms_appx->ToString()->Data());
+				this->get_logger()->log_message(Log::Debug, L"found the %s: %s",
+					file_type->Data(), ms_appx->ToString()->Data());
 
 				return Concurrency::create_task(file.get()->OpenAsync(Windows::Storage::FileAccessMode::Read,
 					Windows::Storage::StorageOpenOptions::AllowOnlyReaders),
@@ -26,22 +70,62 @@ namespace WarGrey::SCADA {
 			}).then([=](Concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> stream) {
 				auto ds = Microsoft::Graphics::Canvas::CanvasDevice::GetSharedDevice();
 
-				return Concurrency::create_task(Instance::LoadAsync(ds, stream.get()), token);
-			}).then([=](Concurrency::task<Instance^> doc) {
+				return Concurrency::create_task(FileType::LoadAsync(ds, stream.get()), token);
+			}).then([=](Concurrency::task<FileType^> doc) {
+				IMsAppxlet<FileType>::critical_section.lock();
 				try {
-					this->on_appx(ms_appx, doc.get());
-					this->info->master->notify_graphlet_ready(this);
+					FileType^ fsobject = doc.get();
+					std::queue<IMsAppxlet<FileType>*> q = IMsAppxlet<FileType>::queues[uuid];
+
+					IMsAppxlet<FileType>::refcounts[uuid] = q.size();
+					IMsAppxlet<FileType>::filesystem[uuid] = fsobject;
+
+					while (!q.empty()) {
+						auto self = q.front();
+
+						self->on_appx(ms_appx, fsobject);
+						self->info->master->notify_graphlet_ready(self);
+						q.pop();
+					}
+
+					this->get_logger()->log_message(Log::Info, L"loaded the %s: %s with reference count %d",
+						file_type->Data(), ms_appx->ToString()->Data(),
+						IMsAppxlet<FileType>::refcounts[uuid]);
+					IMsAppxlet<FileType>::queues.erase(uuid);
 				} catch (Platform::Exception^ e) {
-					this->get_logger()->log_message(WarGrey::SCADA::Log::Error,
-						L"Failed to	load %s: %s",
-						ms_appx->ToString()->Data(),
-						e->Message->Data());
+					IMsAppxlet<FileType>::clear(uuid);
+					this->get_logger()->log_message(WarGrey::SCADA::Log::Error, L"failed to	load %s: %s",
+						ms_appx->ToString()->Data(), e->Message->Data());
 				} catch (Concurrency::task_canceled&) {
+					IMsAppxlet<FileType>::clear(uuid);
 					this->get_logger()->log_message(WarGrey::SCADA::Log::Debug,
-						L"Cancelled loading	%s",
-						ms_appx->ToString()->Data());
+						L"cancelled loading	%s", ms_appx->ToString()->Data());
 				}
+				IMsAppxlet<FileType>::critical_section.unlock();
 			});
 		}
+
+	private:
+		static void clear(int uuid) {
+			std::queue<IMsAppxlet<FileType>*> q = IMsAppxlet<FileType>::queues[uuid];
+
+			while (!q.empty()) {
+				q.pop();
+			}
+
+			IMsAppxlet<FileType>::refcounts.erase(uuid);
+			IMsAppxlet<FileType>::queues.erase(uuid);
+		}
+
+	private:
+		static std::map<int, size_t> refcounts;
+		static std::map<int, FileType^> filesystem;
+		static std::map<int, std::queue<IMsAppxlet<FileType>*>> queues;
+		static std::mutex critical_section;
 	};
+
+	template<class FileType> std::map<int, size_t> IMsAppxlet<FileType>::refcounts;
+	template<class FileType> std::map<int, FileType^> IMsAppxlet<FileType>::filesystem;
+	template<class FileType> std::map<int, std::queue<IMsAppxlet<FileType>*>> IMsAppxlet<FileType>::queues;
+	template<class FileType> std::mutex IMsAppxlet<FileType>::critical_section;
 }
