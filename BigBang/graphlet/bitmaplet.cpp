@@ -52,7 +52,6 @@ void Bitmaplet::construct() {
 	this->load(this->ms_appx_bmp, bmp_task.get_token());
 }
 
-#include "syslog.hpp"
 void Bitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
 	this->graph_bmp = doc_bmp;
 

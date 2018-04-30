@@ -19,7 +19,7 @@ using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
-static bool valid_address(Syslog* logger, uint16 db, uint16 addr0, uint16 addrn, uint16 count, size_t unit_size, uint16 total) {
+static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn, size_t count, size_t unit_size, size_t total) {
 	bool valid = ((addr0 + count * unit_size) <= total);
 	
 	if (((addrn - addr0 + 1) != (count * unit_size))) {
@@ -113,8 +113,8 @@ Syslog* IMRMaster::get_logger() {
 	return this->logger;
 }
 
-void IMRMaster::set_message_alignment_size(uint16 size) {
-	this->alignment_size = size;
+void IMRMaster::set_message_preference(WarGrey::SCADA::MrMessageConfiguration& config) {
+	this->preference = config;
 }
 
 void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
@@ -178,12 +178,10 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 	this->wait_process_confirm_loop();
 }
 
-void IMRMaster::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+void IMRMaster::request(size_t fcode, size_t data_block, size_t addr0, size_t addrn, uint8* data, size_t size) {
 	if (this->mrout != nullptr) {
-		uint16 foldsum;
-		
-		foldsum = mr_write_header(this->mrout, fcode, data_block, addr0, addrn);
-		foldsum = mr_write_tail(this->mrout, data, size, foldsum, this->alignment_size);
+		this->preference.write_header(this->mrout, fcode, data_block, addr0, addrn);
+		this->preference.write_aligned_tail(this->mrout, data, size);
 
 		create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
 			try {
@@ -202,50 +200,52 @@ void IMRMaster::request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 add
 }
 
 void IMRMaster::wait_process_confirm_loop() {
-	create_task(this->mrin->LoadAsync(MR_PROTOCOL_HEADER_LENGTH)).then([=](unsigned int size) {
-		uint8 leading_head, fcode;
-		uint16 data_block, start_address, end_address;
-		uint16 data_size;
+	unsigned int predata_size = (unsigned int)this->preference.predata_size();
+	unsigned int postdata_size = (unsigned int)this->preference.postdata_size();
 
-		if (size < MR_PROTOCOL_HEADER_LENGTH) {
+	create_task(this->mrin->LoadAsync(predata_size)).then([=](unsigned int size) {
+		size_t leading_head, fcode, data_block, start_address, end_address, data_size;
+		
+		if (size < predata_size) {
 			if (size == 0) {
 				modbus_protocol_fatal(this->logger, L"device[%s] has lost", this->device_description()->Data());
 			} else {
 				modbus_protocol_fatal(this->logger,
-					L"message header comes from device[%s] is too short(%u < %hu)",
-					this->device_description()->Data(), size, MR_PROTOCOL_HEADER_LENGTH);
+					L"message header comes from device[%s] is too short(%u < %u)",
+					this->device_description()->Data(), size, predata_size);
 			}
 		}
 
-		uint16 tail_size = mr_read_header(mrin, &leading_head, &fcode, &data_block, &start_address, &end_address, &data_size);
+		size_t tail_size = this->preference.read_header(mrin, &leading_head, &fcode, &data_block, &start_address, &end_address, &data_size);
 
-		if (leading_head != MR_PROTOCOL_HEAD) {
+		if (!this->preference.header_match(leading_head)) {
 			modbus_discard_current_adu(this->logger,
-				L"<discarded non-mrit-tcp message(%hhu, %hhu, %hu, %hu, %hu, %hu) comes from device[%s]>",
-				leading_head, fcode, data_block, start_address, end_address, data_size, this->device_description()->Data());
+				L"<discarded non-mrit-tcp message(%u, %u, %u, %u, %u, %u) comes from device[%s]>",
+				leading_head, fcode, data_block, start_address, end_address, data_size,
+				this->device_description()->Data());
 		}
 
-		return create_task(this->mrin->LoadAsync(tail_size)).then([=](unsigned int size) {
-			uint16 unused_checksum, end_of_message;
+		return create_task(this->mrin->LoadAsync((unsigned int)tail_size)).then([=](unsigned int size) {
+			size_t unused_checksum, end_of_message, expected_tail;
 
 			if (size < tail_size) {
 				modbus_protocol_fatal(this->logger,
-					L"message comes from server device[%s] has been truncated(%u < %hu)",
+					L"message comes from server device[%s] has been truncated(%u < %u)",
 					this->device_description()->Data(), size, tail_size);
 			}
 
 			uint8* data_pool = new uint8[data_size];
-			mr_read_tail(this->mrin, data_size, data_pool, &unused_checksum, &end_of_message);
+			this->preference.read_tail(this->mrin, data_size, data_pool, &unused_checksum, &end_of_message);
 
-			if (end_of_message != MR_PROTOCOL_END) {
+			if (!this->preference.tail_match(end_of_message, &expected_tail)) {
 				delete[] data_pool;
 
 				modbus_protocol_fatal(this->logger,
-					L"message comes from devce[%s] has an malformed end(expected %hu, received %hu)",
-					this->device_description()->Data(), MR_PROTOCOL_END, end_of_message);
+					L"message comes from devce[%s] has an malformed end(expected %u, received %u)",
+					this->device_description()->Data(), expected_tail, end_of_message);
 			} else {
 				this->logger->log_message(Log::Info,
-					L"<received confirmation(%hu, %hu, %hu) comes for command '%c' from device[%s]>",
+					L"<received confirmation(%u, %u, %u) comes for command '%c' from device[%s]>",
 					data_block, start_address, end_address, fcode, this->device_description()->Data());
 
 				if (!this->confirmations.empty()) {
@@ -282,7 +282,7 @@ void IMRMaster::wait_process_confirm_loop() {
 	});
 }
 
-void IMRMaster::apply_confirmation(uint8 fcode, uint16 db, uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+void IMRMaster::apply_confirmation(size_t fcode, size_t db, size_t addr0, size_t addrn, uint8* data, size_t size) {
 	if (fcode == MR_READ_SIGNAL) {
 		if (db == MRDB_FOR_ALL) {
 			this->on_all_signals(addr0, addrn, data, size);
@@ -321,7 +321,7 @@ void MRMaster::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 ad
 
 }
 
-void MRMaster::on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 size) {
+void MRMaster::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size) {
 	uint16 count, subaddr0, subaddrn;
 	uint16 analog_dbs[]  = { 3, 203, 5, 204, 20, 2 };
 	uint16 digital_dbs[] = { 4, 6, 205 };

@@ -14,6 +14,11 @@ namespace WarGrey::SCADA {
 		virtual void on_appx(Windows::Foundation::Uri^ ms_appx, FileType^ instance) = 0;
 
 	protected:
+		virtual Windows::Foundation::IAsyncOperation<FileType^>^ read(Windows::Storage::Streams::IRandomAccessStream^ stream) {
+			return FileType::LoadAsync(Microsoft::Graphics::Canvas::CanvasDevice::GetSharedDevice(), stream);
+		}
+
+	protected:
 		void load(Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type = "graphlet source") {
 			auto uuid = ms_appx->ToString()->GetHashCode();
 
@@ -68,9 +73,7 @@ namespace WarGrey::SCADA {
 					Windows::Storage::StorageOpenOptions::AllowOnlyReaders),
 					token);
 			}).then([=](Concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> stream) {
-				auto ds = Microsoft::Graphics::Canvas::CanvasDevice::GetSharedDevice();
-
-				return Concurrency::create_task(FileType::LoadAsync(ds, stream.get()), token);
+				return Concurrency::create_task(this->read(stream.get()), token);
 			}).then([=](Concurrency::task<FileType^> doc) {
 				IMsAppxlet<FileType>::critical_section.lock();
 				try {
@@ -99,7 +102,11 @@ namespace WarGrey::SCADA {
 				} catch (Concurrency::task_canceled&) {
 					IMsAppxlet<FileType>::clear(uuid);
 					this->get_logger()->log_message(WarGrey::SCADA::Log::Debug,
-						L"cancelled loading	%s", ms_appx->ToString()->Data());
+						L"cancelled loading %s", ms_appx->ToString()->Data());
+				} catch (std::exception& e) {
+					IMsAppxlet<FileType>::clear(uuid);
+					this->get_logger()->log_message(WarGrey::SCADA::Log::Debug,
+						L"unexcepted exception: %s", e.what());
 				}
 				IMsAppxlet<FileType>::critical_section.unlock();
 			});

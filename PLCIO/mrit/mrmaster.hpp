@@ -3,6 +3,7 @@
 #include <list>
 
 #include "mrit/magic.hpp"
+#include "mrit/message.hpp"
 #include "shared/stream.hpp"
 
 #include "IPLCMaster.hpp"
@@ -53,18 +54,18 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual bool fill_signal_preferences(uint16 type, uint16* count, uint16* addr0, uint16* addrn) = 0;
-		virtual void on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 size) = 0;
+		virtual void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size) = 0;
 
 	protected:
-		void request(uint8 fcode, uint16 data_block, uint16 addr0, uint16 addrn, uint8* data, uint16 size);
-		void set_message_alignment_size(uint16 size);
+		void request(size_t fcode, size_t data_block, size_t addr0, size_t addrn, uint8* data, size_t size);
+		void set_message_preference(WarGrey::SCADA::MrMessageConfiguration& config);
 
 	private:
 		void connect();
 		void listen();
 		void clear();
 		void wait_process_confirm_loop();
-		void apply_confirmation(uint8 code, uint16 db, uint16 addr0, uint16 addrn, uint8* data, uint16 size);
+		void apply_confirmation(size_t code, size_t db, size_t addr0, size_t addrn, uint8* data, size_t size);
 
 	protected:
 		std::list<WarGrey::SCADA::IMRConfirmation*> confirmations;
@@ -82,7 +83,7 @@ namespace WarGrey::SCADA {
 		Windows::Storage::Streams::DataWriter^ mrout;
 
 	private:
-		uint16 alignment_size;
+		WarGrey::SCADA::MrMessageConfiguration preference;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
@@ -104,7 +105,7 @@ namespace WarGrey::SCADA {
 		void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
 
 	protected:
-		void on_all_signals(uint16 addr0, uint16 addrn, uint8* data, uint16 size) override;
+		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size) override;
 	};
 
 	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {

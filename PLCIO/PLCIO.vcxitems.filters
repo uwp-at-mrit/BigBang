@@ -28,8 +28,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)modbus\mbtest.cpp">
       <Filter>modbus</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrmaster.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)shared\stream.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrmaster.cpp">
+      <Filter>mrit</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)shared\stream.cpp">
+      <Filter>shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
@@ -71,8 +75,12 @@
       <Filter>modbus</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)IPLCMaster.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrmaster.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)shared\stream.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrmaster.hpp">
+      <Filter>mrit</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)shared\stream.hpp">
+      <Filter>shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="modbus">

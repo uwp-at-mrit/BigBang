@@ -4,11 +4,11 @@
 using namespace WarGrey::SCADA;
 
 PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm), tidemark(0.0F) {
-	this->set_message_alignment_size(40);
 	this->append_confirmation_receiver(this);
 }
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
+	// TODO: why the initial tidemark has a negative float value?
 	this->read_all_signal(98, 0, 0x11DB, this->tidemark);
 }
 
