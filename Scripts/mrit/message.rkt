@@ -31,9 +31,10 @@
       (define padding-size (- alignment-size header-size data-size tail-size))
       (read-bytes padding-size /dev/tcpin))
 
-    (printf "[received message signature: ~a ~a]~n"
+    (printf "[received message signature: ~a{~a}~a]~n"
             (string-append (~hex head 2) (~hex code 2)
                            (~hex block 4) (~hex addr0 4) (~hex addrn 4) (~hex data-size 4))
+            (~r (floating-point-bytes->real data #true 0 4) #:precision '(= 3))
             (string-append (~hex checksum 4) (~hex EOM 4)))
     
     (values (mrmsg head code block addr0 addrn data-size checksum EOM) data)))

@@ -10,7 +10,7 @@
 (define refresh-memory
   (lambda []
     ;;; DB2
-    (for ([i (in-range 176)])
+    (for ([i (in-range 1 176)]) ;; don't change the tidemark
       (define fl (round (* (random) 1000)))
       (real->floating-point-bytes (* fl 0.1) 4 #true memory (+ 3283 (* i 4))))
     
@@ -37,7 +37,6 @@
                   (let wait-read-response-loop ()
                     (define-values (signature tidemark) (read-mrmsg /dev/tcpin 40))
                     (define-values (addr0 addrn) (values (mrmsg-addr0 signature) (mrmsg-addrn signature)))
-                    (printf "<tidemark: ~a>~n" (~r (floating-point-bytes->real tidemark #true 0 4) #:precision '(= 3)))
                     
                     (refresh-memory)
                     
