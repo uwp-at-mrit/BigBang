@@ -1,5 +1,7 @@
 #pragma once
 
+#include <shared_mutex>
+
 #include "graphlet/primitive.hpp"
 #include "IPLCMaster.hpp"
 
@@ -39,5 +41,8 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
+
+	private:
+		std::shared_mutex section;
 	};
 }

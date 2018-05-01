@@ -1,6 +1,7 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
 #include "dashboard.hpp"
+#include "plc.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"
@@ -49,18 +50,18 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final : public MRConfirmation, public DashBoard<HydraulicSystem, HS> {
+private class Hydraulics final : public PLCConfirmation, public DashBoard<HydraulicSystem, HS> {
 public:
 	Hydraulics(HydraulicSystem* master) : DashBoard(master, "HS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
 public:
-	void on_analog_input_data(float* AI_DB203_RealData, uint16 count, Syslog* logger) override {
+	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->master->enter_critical_section();
 
-		this->temperatures[HS::Heater]->set_scale(AI_DB203_RealData[18]);
-		this->temperatures[HS::VisorTank]->set_scale(AI_DB203_RealData[19]);
+		this->temperatures[HS::Heater]->set_scale(RealData(AI_DB203, 18U));
+		this->temperatures[HS::VisorTank]->set_scale(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
 			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
@@ -75,7 +76,7 @@ public:
 					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAlignment::RB);
 				}
 
-				target->set_scale(AI_DB203_RealData[8 + i]);
+				target->set_scale(RealData(AI_DB203, 8 + i));
 
 				if (need_adjust_position) {
 					this->master->move_to(target, anchor_x, anchor_y, GraphletAlignment::RB);
@@ -86,7 +87,7 @@ public:
 		this->master->leave_critical_section();
 	}
 
-	void on_digital_input(uint8* DI_db205_X, uint16 count, Syslog* logger) {
+	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
 		this->master->enter_critical_section();
 
 		{ // pump states

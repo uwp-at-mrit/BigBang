@@ -214,13 +214,9 @@ void Statuslinelet::set_message(Platform::String^ message, Log level) {
 	auto lcolor = status_colors[static_cast<unsigned int>(level)]; 
 	this->color = ((lcolor == nullptr) ? status_nolog_color : lcolor);
 
-	if (this->info == nullptr) {
-		this->status = make_text_layout(message, status_font);
-	} else {
-		this->info->master->enter_critical_section();
-		this->status = make_text_layout(message, status_font);
-		this->info->master->leave_critical_section();
-	}
+	this->section.lock();
+	this->status = make_text_layout(message, status_font);
+	this->section.unlock();
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
@@ -238,7 +234,10 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	float content_y = y + (status_height - this->status->LayoutBounds.Height) * 0.5F;
 
 	ds->FillRectangle(x, y, Width, Height, Colours::Background);
+
+	this->section.lock_shared();
 	ds->DrawTextLayout(this->status, x, content_y, this->color);
+	this->section.unlock_shared();
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {

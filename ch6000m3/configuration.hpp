@@ -12,7 +12,7 @@ static Platform::String^ remote_host_at_Factory = "192.168.0.64";
 static Platform::String^ remote_host_at_05 = "192.168.1.133";
 static Platform::String^ remote_host_at_19 = "192.168.8.106";
 
-static Platform::String^ remote_test_server = remote_host_at_19;
+static Platform::String^ remote_test_server = nullptr;
 
 /*************************************************************************************************/
 static unsigned int frame_per_second = 4;

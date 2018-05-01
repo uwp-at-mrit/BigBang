@@ -67,9 +67,9 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count);
 
 /*************************************************************************************************/
 // These APIs are designed for MRIT
-void read_bigendian_floats(uint8* src, uint16 address, uint16 quantity, float* dest);
+void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest);
 
-float get_bigendian_float(const uint8* src, uint16 idx);
-void set_bigendian_float(uint8* dest, uint16 idx, float x);
+float get_bigendian_float(const uint8* src, size_t idx);
+void set_bigendian_float(uint8* dest, size_t idx, float x);
 
-bool get_quantity_bit(const uint8* src, uint16 idx, uint8 bit);
+bool get_quantity_bit(const uint8* src, size_t idx, uint8 bit);
