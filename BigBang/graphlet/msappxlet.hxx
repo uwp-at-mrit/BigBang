@@ -10,6 +10,11 @@
 namespace WarGrey::SCADA {
 	template<class FileType>
 	private class IMsAppxlet abstract : public virtual WarGrey::SCADA::IGraphlet {
+	public:
+		virtual ~IMsAppxlet() noexcept {
+			this->shared_task.cancel();
+		}
+
 	protected:
 		virtual void on_appx(Windows::Foundation::Uri^ ms_appx, FileType^ instance) = 0;
 
@@ -19,7 +24,7 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		void load(Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type = "graphlet source") {
+		void load(Windows::Foundation::Uri^ ms_appx, Platform::String^ file_type = "graphlet source") {
 			auto uuid = ms_appx->ToString()->GetHashCode();
 
 			IMsAppxlet<FileType>::critical_section.lock();
@@ -28,7 +33,7 @@ namespace WarGrey::SCADA {
 			if (reference == IMsAppxlet<FileType>::refcounts.end()) {
 				IMsAppxlet<FileType>::refcounts[uuid] = 0;
 				IMsAppxlet<FileType>::queues[uuid].push(this);
-				this->load_async(uuid, ms_appx, token, file_type);
+				this->load_async(uuid, ms_appx, file_type);
 			} else if (reference->second > 0) {
 				reference->second += 1;
 				this->on_appx(ms_appx, IMsAppxlet<FileType>::filesystem[uuid]);
@@ -62,7 +67,8 @@ namespace WarGrey::SCADA {
 		}
 
 	private:
-		void load_async(int uuid, Windows::Foundation::Uri^ ms_appx, Concurrency::cancellation_token& token, Platform::String^ file_type) {
+		void load_async(int uuid, Windows::Foundation::Uri^ ms_appx, Platform::String^ file_type) {
+			auto token = this->shared_task.get_token();
 			auto get_file = Concurrency::create_task(Windows::Storage::StorageFile::GetFileFromApplicationUriAsync(ms_appx), token);
 
 			get_file.then([=](Concurrency::task<Windows::Storage::StorageFile^> file) {
@@ -123,6 +129,9 @@ namespace WarGrey::SCADA {
 			IMsAppxlet<FileType>::refcounts.erase(uuid);
 			IMsAppxlet<FileType>::queues.erase(uuid);
 		}
+
+	private:
+		Concurrency::cancellation_token_source shared_task;
 
 	private:
 		static std::map<int, size_t> refcounts;

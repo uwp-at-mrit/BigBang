@@ -212,6 +212,8 @@
     <Image Include="usr\share\graphlet\alarm_false.png" />
     <Image Include="usr\share\graphlet\gps.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
+    <Image Include="usr\share\graphlet\tapped_false.png" />
+    <Image Include="usr\share\graphlet\tapped_true.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
   </ItemGroup>
   <ItemGroup>

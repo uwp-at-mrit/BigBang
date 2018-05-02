@@ -43,13 +43,14 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	if (next_interval < 0) {
 		this->target->get_logger()->log_message(Log::Notice,
 			L"it took %fms to update planets, but the expected interval is %fms",
-			float(elapsed) / 10000.0F,
-			float(interval) / 10000.0F);
+			float(elapsed) / 10000.0F, float(interval) / 10000.0F);
 	} else {
 		this->timer->Interval = TimeSpan{ next_interval };
+		/* 
 		this->target->get_logger()->log_message(Log::Debug,
 			L"it took %fms to update planets",
 			float(elapsed) / 10000.0F);
+		//*/
 	}
 }
 

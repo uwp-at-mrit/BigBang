@@ -226,6 +226,12 @@
     <Image Include="usr\share\graphlet\alarm_false.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="usr\share\graphlet\tapped_false.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\tapped_true.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

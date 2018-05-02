@@ -32,17 +32,17 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
+		float wc_width = application_fit_size(288.0F);
+		float button_height = application_fit_size(84.0F);
+
+		this->working_condition = new BitmapBooleanlet("tapped", wc_width, button_height);
+
+		this->master->insert(this->working_condition, 0.0F, height * 0.5F, GraphletAlignment::LC);
 	}
 
 // never deletes these graphlets mannually
 private:
-	BitmapBooleanlet* alarm;
-	Bitmaplet* yacht;
-	Bitmaplet* gps;
-	FuelTanklet* oiltank;
-	Batterylet* battery;
-	Labellet* labels[3];
-	Labellet* parameters[4];
+	BitmapBooleanlet* working_condition;
 		
 private:
 	CanvasTextFormat^ caption_font;

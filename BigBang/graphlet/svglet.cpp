@@ -21,8 +21,6 @@ using namespace Windows::Storage::Streams;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
-static std::map<int, cancellation_token_source> lazy_tasks;
-
 /*************************************************************************************************/
 Svglet::Svglet(Platform::String^ file, Platform::String^ rootdir) : Svglet(file, 0.0F, 0.0F, rootdir) {}
 
@@ -33,26 +31,11 @@ Svglet::Svglet(Platform::String^ file, float width, float height, Platform::Stri
 }
 
 Svglet::~Svglet() {
-	int uuid = this->ms_appx_svg->GetHashCode();
-	auto t = lazy_tasks.find(uuid);
-
-	if (t != lazy_tasks.end()) {
-		if (this->graph_svg == nullptr) {
-			t->second.cancel();
-		}
-
-		lazy_tasks.erase(t);
-	}
-
 	this->unload(this->ms_appx_svg);
 }
 
 void Svglet::construct() {
-	int uuid = this->ms_appx_svg->GetHashCode();
-	cancellation_token_source svg_task;
-
-	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, svg_task));
-	this->load(this->ms_appx_svg, svg_task.get_token());
+	this->load(this->ms_appx_svg);
 }
 
 void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg) {

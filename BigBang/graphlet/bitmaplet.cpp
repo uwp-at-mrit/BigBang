@@ -18,8 +18,6 @@ using namespace Windows::Storage::Streams;
 
 using namespace Microsoft::Graphics::Canvas;
 
-static std::map<int, cancellation_token_source> lazy_tasks;
-
 /*************************************************************************************************/
 Bitmaplet::Bitmaplet(Platform::String^ file, Platform::String^ rootdir) : Bitmaplet(file, 0.0F, 0.0F, rootdir) {}
 
@@ -30,26 +28,11 @@ Bitmaplet::Bitmaplet(Platform::String^ file, float width, float height, Platform
 }
 
 Bitmaplet::~Bitmaplet() {
-	int uuid = this->ms_appx_bmp->GetHashCode();
-	auto t = lazy_tasks.find(uuid);
-
-	if (t != lazy_tasks.end()) {
-		if (this->graph_bmp == nullptr) {
-			t->second.cancel();
-		}
-
-		lazy_tasks.erase(t);
-	}
-
 	this->unload(this->ms_appx_bmp);
 }
 
 void Bitmaplet::construct() {
-	int uuid = this->ms_appx_bmp->GetHashCode();
-	cancellation_token_source bmp_task;
-	
-	lazy_tasks.insert(std::pair<int, cancellation_token_source>(uuid, bmp_task));
-	this->load(this->ms_appx_bmp, bmp_task.get_token());
+	this->load(this->ms_appx_bmp);
 }
 
 void Bitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
@@ -104,34 +87,13 @@ BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f
 }
 
 BitmapBooleanlet::~BitmapBooleanlet() {
-	Uri^ appxes[] = { this->ms_appx_tmp, this->ms_appx_fmp };
-	CanvasBitmap^ bmps[] = { this->graph_tmp, this->graph_fmp };
-
-	for (int i = 0; i < 2; i++) {
-		auto t = lazy_tasks.find(appxes[i]->GetHashCode());
-
-		if (t != lazy_tasks.end()) {
-			if (bmps[i] == nullptr) {
-				t->second.cancel();
-			}
-
-			lazy_tasks.erase(t);
-		}
-
-		this->unload(appxes[i]);
-	}
+	this->unload(this->ms_appx_tmp);
+	this->unload(this->ms_appx_fmp);
 }
 
 void BitmapBooleanlet::construct() {
-	int t_uuid = this->ms_appx_tmp->GetHashCode();
-	int f_uuid = this->ms_appx_tmp->GetHashCode();
-	cancellation_token_source tmp_task;
-	cancellation_token_source fmp_task;
-
-	lazy_tasks.insert(std::pair<int, cancellation_token_source>(t_uuid, tmp_task));
-	lazy_tasks.insert(std::pair<int, cancellation_token_source>(f_uuid, fmp_task));
-	this->load(this->ms_appx_tmp, tmp_task.get_token());
-	this->load(this->ms_appx_fmp, fmp_task.get_token());
+	this->load(this->ms_appx_tmp);
+	this->load(this->ms_appx_fmp);
 }
 
 void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
