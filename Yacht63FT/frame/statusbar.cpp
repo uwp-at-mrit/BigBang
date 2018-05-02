@@ -35,8 +35,10 @@ static Rect boxes[] = {
 	Rect(yacht_cell_x, cell_y, screen_width - cell_gapsize - yacht_cell_x, cell_height)
 };
 
+private enum Status { OilTank, Battery, GPS_E, GPS_N };
+
 /*************************************************************************************************/
-private class StatusBoard final : public MRConfirmation, public ISystemStatusListener {
+private class StatusBoard final : public PLCConfirmation, public ISystemStatusListener {
 public:
 	~StatusBoard() noexcept {
 		if (this->decorator != nullptr) {
@@ -53,7 +55,7 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		Platform::String^ captions[] = { ":oiltank:", ":power:", ":gps:" };
+		Platform::String^ captions[] = { ":oiltank:", ":battery:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
 		float icon_width = application_fit_size(110.0F) * 0.618F;
@@ -61,7 +63,7 @@ public:
 		float label_yoffset = application_fit_size(screen_status_label_yoff);
 		float parameter_yoffset = application_fit_size(screen_status_parameter_yoff);
 
-		for (unsigned int i = 0; i < 3; i++) {
+		for (unsigned int i = Status::OilTank; i <= Status::GPS_E; i++) {
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
 
 			{ // load label
@@ -75,12 +77,12 @@ public:
 				px = cell_x + label_xoffset;
 				py = cell_y + parameter_yoffset;
 
-				if (i < 2) {
+				if (i < Status::GPS_E) {
 					this->parameters[i] = new Labellet("%", this->fonts[1], screen_status_parameter_color);
 					this->master->insert(this->parameters[i], px, py, GraphletAlignment::LT);
 				} else {
-					this->parameters[2] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
-					this->parameters[3] = new Labellet("N:", this->fonts[1], screen_status_parameter_color);
+					this->parameters[Status::GPS_E] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
+					this->parameters[Status::GPS_N] = new Labellet("N:", this->fonts[1], screen_status_parameter_color);
 					this->master->insert(this->parameters[2], px, py, GraphletAlignment::LB);
 					this->master->insert(this->parameters[3], px, py, GraphletAlignment::LT);
 				}
@@ -91,9 +93,9 @@ public:
 				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAlignment::LB);
 
 				switch (i) {
-				case 0: this->fueltank = new FuelTanklet(icon_width, -1.5714F); target = this->fueltank; break;
-				case 1: this->battery = new Batterylet(icon_width, -1.5714F); target = this->battery; break;
-				case 2: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
+				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
+				case Status::Battery: this->battery = new Batterylet(icon_width, -1.5714F); target = this->battery; break;
+				case Status::GPS_E: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
 				}
 
 				px = cell_x + label_xoffset * 0.5F;
@@ -118,7 +120,12 @@ public:
 	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
 		float percentage = std::roundf(flcapacity * 100.0F);
 		
-		this->parameters[1]->set_text(percentage.ToString() + "%");
+		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
+
+		{
+			this->oiltank->set_scale(flcapacity);
+			this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
+		}
 	}
 
 // never deletes these graphlets mannually
@@ -126,10 +133,10 @@ private:
 	BitmapBooleanlet* alarm;
 	Bitmaplet* yacht;
 	Bitmaplet* gps;
-	FuelTanklet* fueltank;
+	FuelTanklet* oiltank;
 	Batterylet* battery;
-	Labellet* labels[3];
-	Labellet* parameters[4];
+	Labellet* labels[Status::GPS_E + 1];
+	Labellet* parameters[Status::GPS_N + 1];
 		
 private:
 	CanvasTextFormat^ fonts[2];

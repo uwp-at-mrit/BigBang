@@ -91,11 +91,11 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
 /*************************************************************************************************/
 void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest) {
 	for (size_t i = 0; i < quantity; i++) {
-		dest[i] = get_bigendian_float(src, address + i * sizeof(float));
+		dest[i] = bigendian_float_ref(src, address + i * sizeof(float));
 	}
 }
 
-float get_bigendian_float(const uint8* src, size_t idx) {
+float bigendian_float_ref(const uint8* src, size_t idx) {
 	uint8 flbytes[4];
 	float dest = 0.0F;
 
@@ -109,7 +109,7 @@ float get_bigendian_float(const uint8* src, size_t idx) {
 	return dest;
 }
 
-void set_bigendian_float(uint8* dest, size_t idx, float src) {
+void bigendian_float_set(uint8* dest, size_t idx, float src) {
 	uint8 flbytes[4];
 
 	memcpy((void*)flbytes, (void*)&src, 4);
@@ -120,6 +120,6 @@ void set_bigendian_float(uint8* dest, size_t idx, float src) {
 	dest[idx + 0] = flbytes[3];
 }
 
-bool get_quantity_bit(const uint8* src, size_t idx, uint8 bit) {
+bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit) {
 	return ((src[idx] && (0x1 << bit)) != 0);
 }

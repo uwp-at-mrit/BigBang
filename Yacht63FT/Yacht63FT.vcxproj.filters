@@ -68,7 +68,7 @@
     <ClInclude Include="frame\statusbar.hpp">
       <Filter>frame</Filter>
     </ClInclude>
-    <ClInclude Include="frame\navigatorbar.hpp">
+    <ClInclude Include="frame\navigatorbar.hxx">
       <Filter>frame</Filter>
     </ClInclude>
   </ItemGroup>

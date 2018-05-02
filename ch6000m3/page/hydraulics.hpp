@@ -1,7 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
-#include "mrit.hpp"
+#include "plc.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IMRMaster* device;
-		WarGrey::SCADA::IMRConfirmation* dashboard;
+		WarGrey::SCADA::PLCConfirmation* dashboard;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

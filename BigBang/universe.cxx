@@ -324,7 +324,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 		if ((nwidth > 0.0F) && (nheight > 0.0F) && ((nwidth != pwidth) || (nheight != pheight))) {
 			IPlanet* child = this->head_planet;
 			
-			this->logger->log_message(Log::Info, L"resize(%f, %f)", nwidth, nheight);
+			this->logger->log_message(Log::Debug, L"resize(%f, %f)", nwidth, nheight);
 			
 			do {
 				PlanetInfo* info = PLANET_INFO(child);

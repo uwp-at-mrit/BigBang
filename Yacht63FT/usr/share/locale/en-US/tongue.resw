@@ -120,6 +120,9 @@
   <data name=":author:" xml:space="preserve">
     <value>中船重工 719 研究所</value>
   </data>
+  <data name=":battery:" xml:space="preserve">
+    <value>Battery Capacity</value>
+  </data>
   <data name=":gps:" xml:space="preserve">
     <value>GPS</value>
   </data>
@@ -128,9 +131,6 @@
   </data>
   <data name=":oiltank:" xml:space="preserve">
     <value>Oil Tank</value>
-  </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power</value>
   </data>
   <data name=":system:" xml:space="preserve">
     <value>四海风行游艇监控系统</value>

@@ -1,7 +1,6 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
 #include "dashboard.hpp"
-#include "plc.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"

@@ -8,12 +8,13 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Debug;
 static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 #endif
 
-static Platform::String^ remote_host_at_19 = "192.168.8.106";
+static Platform::String^ remote_host_at_19 = "192.168.8.104";
 
 static Platform::String^ remote_test_server = remote_host_at_19;
 
 /*************************************************************************************************/
 static unsigned int frame_per_second = 4;
+static unsigned int screen_navigator_foreground = 0xFEFEFE;
 static unsigned int screen_status_label_color = 0xB0B0B0;
 static unsigned int screen_status_parameter_color = 0xFEFEFE;
 

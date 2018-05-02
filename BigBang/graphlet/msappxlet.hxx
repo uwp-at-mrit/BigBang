@@ -33,12 +33,12 @@ namespace WarGrey::SCADA {
 				reference->second += 1;
 				this->on_appx(ms_appx, IMsAppxlet<FileType>::filesystem[uuid]);
 
-				this->get_logger()->log_message(Log::Info, L"reused the %s: %s with reference count %d",
+				this->get_logger()->log_message(Log::Debug, L"reused the %s: %s with reference count %d",
 					file_type->Data(), ms_appx->ToString()->Data(),
 					IMsAppxlet<FileType>::refcounts[uuid]);
 			} else {
 				IMsAppxlet<FileType>::queues[uuid].push(this);
-				this->get_logger()->log_message(Log::Info, L"waiting for the %s: %s",
+				this->get_logger()->log_message(Log::Debug, L"waiting for the %s: %s",
 					file_type->Data(), ms_appx->ToString()->Data());
 			}
 			IMsAppxlet<FileType>::critical_section.unlock();
@@ -91,7 +91,7 @@ namespace WarGrey::SCADA {
 						q.pop();
 					}
 
-					this->get_logger()->log_message(Log::Info, L"loaded the %s: %s with reference count %d",
+					this->get_logger()->log_message(Log::Debug, L"loaded the %s: %s with reference count %d",
 						file_type->Data(), ms_appx->ToString()->Data(),
 						IMsAppxlet<FileType>::refcounts[uuid]);
 					IMsAppxlet<FileType>::queues.erase(uuid);

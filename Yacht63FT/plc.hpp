@@ -4,20 +4,16 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-	private class PLCMaster : public WarGrey::SCADA::MRMaster, WarGrey::SCADA::MRConfirmation {
+	private class PLCConfirmation : public WarGrey::SCADA::MRConfirmation {
+	public:
+		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;
+	};
+
+	private class PLCMaster : public WarGrey::SCADA::MRMaster, WarGrey::SCADA::PLCConfirmation {
 	public:
 		PLCMaster(Syslog* alarm);
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);
-
-	public:
-		void on_realtime_data(float* db2, uint16 count, Syslog* logger) override;
-
-	protected:
-		bool fill_signal_preferences(uint16 type, uint16* count, uint16* addr0, uint16* addrn) override;
-
-	private:
-		float tidemark;
 	};
 }

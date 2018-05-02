@@ -63,7 +63,7 @@ static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn,
 
 /*************************************************************************************************/
 float WarGrey::SCADA::RealData(const uint8* src, size_t idx) {
-	return get_bigendian_float(src, idx * 4U);
+	return bigendian_float_ref(src, idx * 4U);
 }
 
 /*************************************************************************************************/
@@ -77,7 +77,7 @@ void PLCMaster::send_scheduled_request(long long count, long long interval, long
 }
 
 void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger) {
-	this->tidemark = get_bigendian_float(db2, 0);
+	this->tidemark = bigendian_float_ref(db2, 0);
 }
 
 /*************************************************************************************************/

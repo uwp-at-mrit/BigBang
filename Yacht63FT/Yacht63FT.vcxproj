@@ -228,7 +228,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\background.hpp" />
     <ClInclude Include="decorator\cell.hpp" />
-    <ClInclude Include="frame\navigatorbar.hpp" />
+    <ClInclude Include="frame\navigatorbar.hxx" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="plc.hpp" />

@@ -273,7 +273,7 @@ void IMRMaster::clear() {
 void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) {
 	uint8 flbytes[] = { 0, 0, 0, 0 };
 
-	set_bigendian_float(flbytes, 0, tidemark);
+	bigendian_float_set(flbytes, 0, tidemark);
 
 	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, flbytes, 4);
 }

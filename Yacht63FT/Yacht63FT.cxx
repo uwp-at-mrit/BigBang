@@ -6,7 +6,7 @@
 #include "timer.hxx"
 #include "brushes.hxx"
 
-#include "frame/navigatorbar.hpp"
+#include "frame/navigatorbar.hxx"
 #include "frame/statusbar.hpp"
 #include "page/homepage.hpp"
 
@@ -42,20 +42,19 @@ private:
 	Bar* bar;
 };
 
-private ref class Universe sealed : public UniverseDisplay {
-internal:
-	Universe(Navigatorbar* navigator, Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
-		this->navigator = navigator;
-		this->navigator->set_workspace(this);
+private ref class PageUniverse sealed : public UniverseDisplay, public INavigatorAction {
+public:
+	PageUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
+
+public:
+	virtual void on_navigate() {
+
 	}
 
 protected:
 	void construct() override {
 		this->add_planet(new Homepage());
 	}
-
-private: // this Planet should not be deleted manually
-	Navigatorbar* navigator;
 };
 
 private ref class Yacht63FT sealed : public StackPanel {
@@ -75,29 +74,29 @@ public:
 		float fit_nav_height = application_fit_size(screen_navigator_height);
 		float fit_bar_height = application_fit_size(screen_statusbar_height);
 
-
 		device = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
 
 		this->timeline = ref new CompositeTimerAction();
-		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(), name);
+		this->workspace = ref new PageUniverse(name);
+		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(this->workspace), name);
 		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(device), name);
-		this->workspace = ref new Universe(this->navigatorbar->get_universe(), name);
 
-		this->timeline->append_timer_action(this->workspace);
-		this->timeline->append_timer_action(this->statusbar);
+		this->load_display(this->navigatorbar, fit_width, fit_nav_height, false);
+		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height, true);
+		this->load_display(this->statusbar, fit_width, fit_bar_height, true);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
-
-		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
-		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
-		this->load_display(this->statusbar, fit_width, fit_bar_height);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 	}
 
 private:
-	void load_display(UniverseDisplay^ display, float width, float height) {
+	void load_display(UniverseDisplay^ display, float width, float height, bool timelined) {
 		display->width = width;
 		display->height = height;
+
+		if (timelined) {
+			this->timeline->append_timer_action(display);
+		}
 
 		this->Children->Append(display->canvas);
 	}
@@ -108,7 +107,7 @@ private:
 
 private:
 	BarUniverse<Navigatorbar>^ navigatorbar;
-	UniverseDisplay^ workspace;
+	PageUniverse^ workspace;
 	BarUniverse<Statusbar>^ statusbar;
 };
 

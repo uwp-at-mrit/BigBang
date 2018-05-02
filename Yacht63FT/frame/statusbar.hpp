@@ -1,7 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
-#include "mrit.hpp"
+#include "plc.hpp"
 
 namespace WarGrey::SCADA {
 	private class Statusbar : public WarGrey::SCADA::Planet {
@@ -15,6 +15,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::IMRMaster* device;
-		WarGrey::SCADA::IMRConfirmation* dashboard;
+		WarGrey::SCADA::PLCConfirmation* dashboard;
 	};
 }
