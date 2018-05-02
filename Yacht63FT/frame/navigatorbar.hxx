@@ -8,6 +8,12 @@ namespace WarGrey::SCADA {
 		void on_navigate();
 	};
 
+	private enum class Yacht {
+		HomePage, Generator, Propeller, Diagram,
+		AirConditioning, Illuminating, Inferno, Alert,
+		Video, _
+	};
+
 	private class Navigatorbar : public WarGrey::SCADA::Planet {
 	public:
 		~Navigatorbar() noexcept;

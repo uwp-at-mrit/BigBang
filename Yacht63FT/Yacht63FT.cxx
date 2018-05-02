@@ -1,4 +1,6 @@
-﻿#include "application.hxx"
+﻿#include <map>
+
+#include "application.hxx"
 #include "configuration.hpp"
 #include "plc.hpp"
 
@@ -53,7 +55,11 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new Homepage());
+		for (Yacht page = Yacht::HomePage; page < Yacht::_; page++) {
+			switch (page) {
+			default: this->add_planet(new Homepage()); break;
+			}
+		}
 	}
 };
 
@@ -81,23 +87,20 @@ public:
 		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(this->workspace), name);
 		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(device), name);
 
-		this->load_display(this->navigatorbar, fit_width, fit_nav_height, false);
-		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height, true);
-		this->load_display(this->statusbar, fit_width, fit_bar_height, true);
+		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
+		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
+		this->load_display(this->statusbar, fit_width, fit_bar_height);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 	}
 
 private:
-	void load_display(UniverseDisplay^ display, float width, float height, bool timelined) {
+	void load_display(UniverseDisplay^ display, float width, float height) {
 		display->width = width;
 		display->height = height;
 
-		if (timelined) {
-			this->timeline->append_timer_action(display);
-		}
-
+		this->timeline->append_timer_action(display);
 		this->Children->Append(display->canvas);
 	}
 
