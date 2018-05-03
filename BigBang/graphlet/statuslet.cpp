@@ -203,7 +203,7 @@ void Statuslinelet::construct() {
 		status_colors[static_cast<unsigned int>(Log::Warning)] = Colours::Yellow;
 		status_colors[static_cast<unsigned int>(Log::Error)] = Colours::Red;
 		status_colors[static_cast<unsigned int>(Log::Critical)] = Colours::Crimson;
-		status_colors[static_cast<unsigned int>(Log::Alert)] = Colours::Firebrick;
+		status_colors[static_cast<unsigned int>(Log::Alarm)] = Colours::Firebrick;
 		status_colors[static_cast<unsigned int>(Log::Panic)] = Colours::Firebrick;
 	}
 

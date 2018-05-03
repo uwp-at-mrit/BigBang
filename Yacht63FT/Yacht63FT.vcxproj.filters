@@ -232,6 +232,51 @@
     <Image Include="usr\share\graphlet\tapped_true.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
+    <Image Include="usr\share\graphlet\Generator_alert.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller_alert.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm_alert.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Generator.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Generator_off.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm_off.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller_off.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner_alert.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner_off.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Fire.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Fire_alert.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Fire_off.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

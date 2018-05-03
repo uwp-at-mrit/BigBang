@@ -60,7 +60,7 @@ Platform::String^ file_extension_from_path(Platform::String^ path) {
 	return ext;
 }
 
-Uri^ ms_appx_path(Platform::String^ file, Platform::String^ rootdir, Platform::String^ ext) {
+Uri^ ms_appx_path(Platform::String^ file, Platform::String^ ext, Platform::String^ rootdir) {
 	Platform::String^ file_ext = (file_extension_from_path(file) == nullptr) ? (file + ext) : file;
 	Platform::String^ path_ext = ((rootdir == nullptr) ? file_ext : (rootdir + "/" + file_ext));
 

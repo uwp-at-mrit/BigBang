@@ -113,6 +113,8 @@ public:
 
 			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
 			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
+
+			this->alarm->set_scale(true);
 		}
 	}
 

@@ -4,14 +4,14 @@
 #include "mrit.hpp"
 
 namespace WarGrey::SCADA {
-	private interface class INavigatorAction {
-		void on_navigate();
-	};
-
 	private enum class Yacht {
 		HomePage, Generator, Propeller, Diagram,
-		AirConditioning, Illuminating, Inferno, Alert,
+		AirConditioner, Lamp, Fire, Alarm,
 		Video, _
+	};
+
+	private interface class INavigatorAction {
+		void on_navigate(Yacht page);
 	};
 
 	private class Navigatorbar : public WarGrey::SCADA::Planet {

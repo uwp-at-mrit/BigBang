@@ -34,7 +34,7 @@ void ISprite::save(Platform::String^ path, float dpi) {
 		try {
 			saving.get();
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Alert, "failed to save graphlet as bitmap:" + e->Message);
+			syslog(Log::Alarm, "failed to save graphlet as bitmap:" + e->Message);
 		}
 	});
 }

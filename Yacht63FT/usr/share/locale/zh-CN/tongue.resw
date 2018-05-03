@@ -126,9 +126,6 @@
   <data name=":gps:" xml:space="preserve">
     <value>GPS</value>
   </data>
-  <data name=":homepage:" xml:space="preserve">
-    <value>主页</value>
-  </data>
   <data name=":oiltank:" xml:space="preserve">
     <value>油箱</value>
   </data>
@@ -137,5 +134,32 @@
   </data>
   <data name=":version:" xml:space="preserve">
     <value>ver: 2017.6.18</value>
+  </data>
+  <data name="AirConditioner" xml:space="preserve">
+    <value>空调系统</value>
+  </data>
+  <data name="Alarm" xml:space="preserve">
+    <value>PMS 警报</value>
+  </data>
+  <data name="Diagram" xml:space="preserve">
+    <value>PMS 流程</value>
+  </data>
+  <data name="Fire" xml:space="preserve">
+    <value>火灾警报</value>
+  </data>
+  <data name="Generator" xml:space="preserve">
+    <value>发电机</value>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>主页</value>
+  </data>
+  <data name="Lamp" xml:space="preserve">
+    <value>照明</value>
+  </data>
+  <data name="Propeller" xml:space="preserve">
+    <value>推进器</value>
+  </data>
+  <data name="Video" xml:space="preserve">
+    <value>视频监控</value>
   </data>
 </root>

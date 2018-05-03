@@ -49,15 +49,15 @@ public:
 	PageUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
 
 public:
-	virtual void on_navigate() {
-
+	virtual void on_navigate(Yacht page) {
+		this->transfer_to(static_cast<int>(page));
 	}
 
 protected:
 	void construct() override {
 		for (Yacht page = Yacht::HomePage; page < Yacht::_; page++) {
 			switch (page) {
-			default: this->add_planet(new Homepage()); break;
+			default: this->add_planet(new Homepage(page.ToString())); break;
 			}
 		}
 	}

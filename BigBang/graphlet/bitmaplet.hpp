@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void on_appx(Windows::Foundation::Uri^ ms_appx_bmp, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp) override;
+		void on_appx_not_found(Windows::Foundation::Uri^ ms_appx_bmp) override {}
 
 	protected:
 		Microsoft::Graphics::Canvas::CanvasBitmap^ graph_bmp;
@@ -52,7 +53,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void on_appx(Windows::Foundation::Uri^ ms_appx_bmp, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp) override;
-
+		
 	protected:
 		Microsoft::Graphics::Canvas::CanvasBitmap^ graph_tmp;
 		Microsoft::Graphics::Canvas::CanvasBitmap^ graph_fmp;

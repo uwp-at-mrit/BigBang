@@ -17,6 +17,11 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual void on_appx(Windows::Foundation::Uri^ ms_appx, FileType^ instance) = 0;
+		virtual void on_appx_not_found(Windows::Foundation::Uri^ ms_appx) {
+			this->get_logger()->log_message(WarGrey::SCADA::Log::Error,
+				L"failed to	load %s: file does not exist",
+				ms_appx->ToString()->Data());
+		}
 
 	protected:
 		virtual Windows::Foundation::IAsyncOperation<FileType^>^ read(Windows::Storage::Streams::IRandomAccessStream^ stream) {
@@ -27,7 +32,7 @@ namespace WarGrey::SCADA {
 		void load(Windows::Foundation::Uri^ ms_appx, Platform::String^ file_type = "graphlet source") {
 			auto uuid = ms_appx->ToString()->GetHashCode();
 
-			IMsAppxlet<FileType>::critical_section.lock();
+			IMsAppxlet<FileType>::critical_sections[uuid].lock();
 			auto reference = IMsAppxlet<FileType>::refcounts.find(uuid);
 
 			if (reference == IMsAppxlet<FileType>::refcounts.end()) {
@@ -46,13 +51,13 @@ namespace WarGrey::SCADA {
 				this->get_logger()->log_message(Log::Debug, L"waiting for the %s: %s",
 					file_type->Data(), ms_appx->ToString()->Data());
 			}
-			IMsAppxlet<FileType>::critical_section.unlock();
+			IMsAppxlet<FileType>::critical_sections[uuid].unlock();
 		}
 
 		void unload(Windows::Foundation::Uri^ ms_appx) {
 			auto uuid = ms_appx->ToString()->GetHashCode();
 
-			IMsAppxlet<FileType>::critical_section.lock();
+			IMsAppxlet<FileType>::critical_sections[uuid].lock();
 			auto reference = IMsAppxlet<FileType>::refcounts.find(uuid);
 
 			if (reference != IMsAppxlet<FileType>::refcounts.end()) {
@@ -63,7 +68,7 @@ namespace WarGrey::SCADA {
 					reference->second -= 1;
 				}
 			}
-			IMsAppxlet<FileType>::critical_section.unlock();
+			IMsAppxlet<FileType>::critical_sections[uuid].unlock();
 		}
 
 	private:
@@ -72,21 +77,20 @@ namespace WarGrey::SCADA {
 			auto get_file = Concurrency::create_task(Windows::Storage::StorageFile::GetFileFromApplicationUriAsync(ms_appx), token);
 
 			get_file.then([=](Concurrency::task<Windows::Storage::StorageFile^> file) {
-				this->get_logger()->log_message(Log::Debug, L"found the %s: %s",
-					file_type->Data(), ms_appx->ToString()->Data());
-
 				return Concurrency::create_task(file.get()->OpenAsync(Windows::Storage::FileAccessMode::Read,
 					Windows::Storage::StorageOpenOptions::AllowOnlyReaders),
 					token);
 			}).then([=](Concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> stream) {
+				this->get_logger()->log_message(Log::Debug, L"found the %s: %s",
+					file_type->Data(), ms_appx->ToString()->Data());
+
 				return Concurrency::create_task(this->read(stream.get()), token);
 			}).then([=](Concurrency::task<FileType^> doc) {
-				IMsAppxlet<FileType>::critical_section.lock();
+				IMsAppxlet<FileType>::critical_sections[uuid].lock();
 				try {
 					FileType^ fsobject = doc.get();
 					std::queue<IMsAppxlet<FileType>*> q = IMsAppxlet<FileType>::queues[uuid];
 
-					IMsAppxlet<FileType>::refcounts[uuid] = q.size();
 					IMsAppxlet<FileType>::filesystem[uuid] = fsobject;
 
 					while (!q.empty()) {
@@ -94,6 +98,7 @@ namespace WarGrey::SCADA {
 
 						self->on_appx(ms_appx, fsobject);
 						self->info->master->notify_graphlet_ready(self);
+						IMsAppxlet<FileType>::refcounts[uuid] += 1;
 						q.pop();
 					}
 
@@ -103,8 +108,13 @@ namespace WarGrey::SCADA {
 					IMsAppxlet<FileType>::queues.erase(uuid);
 				} catch (Platform::Exception^ e) {
 					IMsAppxlet<FileType>::clear(uuid);
-					this->get_logger()->log_message(WarGrey::SCADA::Log::Error, L"failed to	load %s: %s",
-						ms_appx->ToString()->Data(), e->Message->Data());
+
+					if (e->HResult == 0x80070002) {
+						this->on_appx_not_found(ms_appx);
+					} else {
+						this->get_logger()->log_message(WarGrey::SCADA::Log::Error, L"failed to	load %s: %s",
+							ms_appx->ToString()->Data(), e->Message->Data());
+					}
 				} catch (Concurrency::task_canceled&) {
 					IMsAppxlet<FileType>::clear(uuid);
 					this->get_logger()->log_message(WarGrey::SCADA::Log::Debug,
@@ -114,7 +124,7 @@ namespace WarGrey::SCADA {
 					this->get_logger()->log_message(WarGrey::SCADA::Log::Debug,
 						L"unexcepted exception: %s", e.what());
 				}
-				IMsAppxlet<FileType>::critical_section.unlock();
+				IMsAppxlet<FileType>::critical_sections[uuid].unlock();
 			});
 		}
 
@@ -137,11 +147,11 @@ namespace WarGrey::SCADA {
 		static std::map<int, size_t> refcounts;
 		static std::map<int, FileType^> filesystem;
 		static std::map<int, std::queue<IMsAppxlet<FileType>*>> queues;
-		static std::mutex critical_section;
+		static std::map<int, std::mutex> critical_sections;
 	};
 
 	template<class FileType> std::map<int, size_t> IMsAppxlet<FileType>::refcounts;
 	template<class FileType> std::map<int, FileType^> IMsAppxlet<FileType>::filesystem;
 	template<class FileType> std::map<int, std::queue<IMsAppxlet<FileType>*>> IMsAppxlet<FileType>::queues;
-	template<class FileType> std::mutex IMsAppxlet<FileType>::critical_section;
+	template<class FileType> std::map<int, std::mutex> IMsAppxlet<FileType>::critical_sections;
 }

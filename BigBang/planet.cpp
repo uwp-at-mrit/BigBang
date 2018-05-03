@@ -213,10 +213,9 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAlignment align) {
         info->next = this->head_graphlet;
 
 		g->construct();
-		if (g->ready()) {
-			unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
-			this->size_cache_invalid();
-		} else {
+		unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
+		this->size_cache_invalid();
+		if (!g->ready()) {
 			info->inserted_to_x = x;
 			info->inserted_to_y = y;
 			info->inserted_with_align = align;
@@ -228,6 +227,8 @@ void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAlignment talign, G
 	GraphletInfo* tinfo = planet_graphlet_info(this, target);
 	float x = 0.0F;
 	float y = 0.0F;
+
+	// TODO: what if the target graphlet is not ready?
 
 	if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
 		float sx, sy, sw, sh, xoff, yoff;
@@ -840,7 +841,7 @@ void IPlanet::save(Platform::String^ path, float width, float height, float dpi)
 		try {
 			saving.get();
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Alert, "failed to save universe as bitmap:" + e->Message);
+			syslog(Log::Alarm, "failed to save universe as bitmap:" + e->Message);
 		}
 	});
 }

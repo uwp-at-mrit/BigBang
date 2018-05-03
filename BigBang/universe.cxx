@@ -274,6 +274,16 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 	}
 }
 
+void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) {
+	int from_idx = this->navigator_view->SelectedIndex;
+	int delta_idx = idx - from_idx;
+
+	if (delta_idx != 0) {
+		this->from_planet = this->current_planet;
+		this->transfer(delta_idx, 0U);
+	}
+}
+
 void UniverseDisplay::transfer_previous(unsigned int ms, unsigned int count) {
 	this->transfer(-1, ms, count);
 }
@@ -415,7 +425,7 @@ void UniverseDisplay::do_transfer(Platform::Object^ sender, ItemClickEventArgs^ 
 	delta_idx = this->navigator_view->SelectedIndex - from_idx;
 	if (delta_idx != 0) {
 		this->from_planet = this->current_planet;
-		this->transfer(this->navigator_view->SelectedIndex - from_idx, 0U);
+		this->transfer(delta_idx, 0U);
 	}
 }
 

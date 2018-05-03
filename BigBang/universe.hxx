@@ -67,6 +67,7 @@ namespace WarGrey::SCADA {
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
+		void transfer_to(int idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_previous(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 

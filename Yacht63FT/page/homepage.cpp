@@ -65,7 +65,7 @@ private:
 /*************************************************************************************************/
 std::map<Homepage*, HomeBoard*> dashboards;
 
-Homepage::Homepage() : Planet(":homepage:") {
+Homepage::Homepage(Platform::String^ name) : Planet(name) {
 	this->set_decorator(new BackgroundDecorator(0x1E1E1E, 1.0F, 0.0F, 1.0F, 0.0F));
 }
 

@@ -24,7 +24,7 @@ Bitmaplet::Bitmaplet(Platform::String^ file, Platform::String^ rootdir) : Bitmap
 Bitmaplet::Bitmaplet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
 	this->window.Width = width;
 	this->window.Height = height;
-	this->ms_appx_bmp = ms_appx_path(file, rootdir, ".png");
+	this->ms_appx_bmp = ms_appx_path(file, ".png", rootdir);
 }
 
 Bitmaplet::~Bitmaplet() {
@@ -82,8 +82,8 @@ BitmapBooleanlet::BitmapBooleanlet(Platform::String^ file_prefix, float width, f
 BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f_file, float width, float height, Platform::String^ rootdir) {
 	this->window.Width = width;
 	this->window.Height = height;
-	this->ms_appx_tmp = ms_appx_path(t_file, rootdir, ".png");
-	this->ms_appx_fmp = ms_appx_path(f_file, rootdir, ".png");
+	this->ms_appx_tmp = ms_appx_path(t_file, ".png", rootdir);
+	this->ms_appx_fmp = ms_appx_path(f_file, ".png", rootdir);
 }
 
 BitmapBooleanlet::~BitmapBooleanlet() {
@@ -115,7 +115,7 @@ void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
 }
 
 bool BitmapBooleanlet::ready() {
-	if (this->get_scale()) {
+	if (this->get_scale() == true) {
 		return (this->graph_tmp != nullptr);
 	} else {
 		return (this->graph_fmp != nullptr);

@@ -69,7 +69,7 @@ implement_syslog(notice,   Log::Notice)
 implement_syslog(warning,  Log::Warning)
 implement_syslog(error,    Log::Error)
 implement_syslog(critical, Log::Critical)
-implement_syslog(alert,    Log::Alert)
+implement_syslog(alert,    Log::Alarm)
 implement_syslog(panic,    Log::Panic)
 
 #undef implement_syslog

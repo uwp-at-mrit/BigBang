@@ -126,9 +126,6 @@
   <data name=":gps:" xml:space="preserve">
     <value>GPS</value>
   </data>
-  <data name=":homepage:" xml:space="preserve">
-    <value>HomePage</value>
-  </data>
   <data name=":oiltank:" xml:space="preserve">
     <value>Oil Tank</value>
   </data>
@@ -137,5 +134,32 @@
   </data>
   <data name=":version:" xml:space="preserve">
     <value>ver: 2017.6.18</value>
+  </data>
+  <data name="AirConditioner" xml:space="preserve">
+    <value>AirConditioner</value>
+  </data>
+  <data name="Alarm" xml:space="preserve">
+    <value>Alarm</value>
+  </data>
+  <data name="Diagram" xml:space="preserve">
+    <value>PMS</value>
+  </data>
+  <data name="Fire" xml:space="preserve">
+    <value>Fire</value>
+  </data>
+  <data name="Generator" xml:space="preserve">
+    <value>Generator</value>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>HomePage</value>
+  </data>
+  <data name="Lamp" xml:space="preserve">
+    <value>Lamp</value>
+  </data>
+  <data name="Propeller" xml:space="preserve">
+    <value>Propeller</value>
+  </data>
+  <data name="Video" xml:space="preserve">
+    <value>Video</value>
   </data>
 </root>

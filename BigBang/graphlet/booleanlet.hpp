@@ -20,6 +20,5 @@ namespace WarGrey::SCADA {
 
 	private:
 		float size;
-		float gapsize;
 	};
 }
