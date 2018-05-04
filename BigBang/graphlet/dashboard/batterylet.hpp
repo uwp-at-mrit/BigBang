@@ -4,7 +4,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Batterylet : public WarGrey::SCADA::IScalelet<float> {
+	private class Batterylet : public WarGrey::SCADA::IValuelet<float> {
 	public:
 		Batterylet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),

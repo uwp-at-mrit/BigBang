@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 
 	private class BitmapBooleanlet
 		: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap>
-		, public virtual WarGrey::SCADA::IScalelet<bool> {
+		, public virtual WarGrey::SCADA::IValuelet<bool> {
 	public:
 		virtual ~BitmapBooleanlet() noexcept;
 

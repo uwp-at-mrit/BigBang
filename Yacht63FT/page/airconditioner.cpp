@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum Status { OilTank, Battery, GPS_E, GPS_N };
+private enum class AC { Bridge, VIP, Kitchen, Central, Salon, Host, Guest, _ };
 
 /*************************************************************************************************/
 private class ACBoard final : public PLCConfirmation {
@@ -34,8 +34,10 @@ public:
 	}
 
 	ACBoard(AirConditioner* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(30.0F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(41.27F));
+		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(37.50F));
+		this->fonts[2] = make_text_format("Microsoft YaHei", application_fit_size(30.00F));
+		this->fonts[3] = make_text_format("Microsoft YaHei", application_fit_size(24.79F));
 
 		this->decorator->reference();
 	}
@@ -50,58 +52,16 @@ public:
 		float label_yoffset = application_fit_size(screen_status_label_yoff);
 		float parameter_yoffset = application_fit_size(screen_status_parameter_yoff);
 
-		for (unsigned int i = Status::OilTank; i <= Status::GPS_E; i++) {
+		for (AC room = AC::Bridge; room <= AC::_; room++) {
+			unsigned int i = static_cast<unsigned int>(room);
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
 
 			{ // load label
-				this->labels[i] = new Labellet(speak(captions[i]), this->fonts[0], screen_status_label_color);
+				this->labels[i] = new Labellet(speak(room.ToString()), this->fonts[0], screen_status_label_color);
 				this->master->insert(this->labels[i],
 					cell_x + label_xoffset, cell_y + label_yoffset,
 					GraphletAlignment::LT);
 			}
-
-			{ // load parameters
-				px = cell_x + label_xoffset;
-				py = cell_y + parameter_yoffset;
-
-				if (i < Status::GPS_E) {
-					this->parameters[i] = new Labellet("%", this->fonts[1], screen_status_parameter_color);
-					this->master->insert(this->parameters[i], px, py, GraphletAlignment::LT);
-				} else {
-					this->parameters[Status::GPS_E] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
-					this->parameters[Status::GPS_N] = new Labellet("N:", this->fonts[1], screen_status_parameter_color);
-					this->master->insert(this->parameters[2], px, py, GraphletAlignment::LB);
-					this->master->insert(this->parameters[3], px, py, GraphletAlignment::LT);
-				}
-			}
-
-			{ // load icon
-				TextExtent ts = get_text_extent("%", this->fonts[1]);
-				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAlignment::LB);
-
-				switch (i) {
-				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
-				case Status::Battery: this->battery = new Batterylet(icon_width, -1.5714F); target = this->battery; break;
-				case Status::GPS_E: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
-				}
-
-				px = cell_x + label_xoffset * 0.5F;
-				py = icon_bottom - ts.bspace;
-				this->master->insert(target, px, py, GraphletAlignment::CB);
-			}
-		}
-
-		{ // load alarm status and yacht
-			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
-			py = cell_y + cell_height * 0.5F;
-
-			this->alarm = new BitmapBooleanlet("alarm", application_fit_size(screen_status_alarm_width));
-			this->yacht = new Bitmaplet("skeleton", application_fit_size(screen_status_yacht_width));
-
-			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
-			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
-
-			this->alarm->set_scale(true);
 		}
 	}
 
@@ -112,11 +72,10 @@ private:
 	Bitmaplet* gps;
 	FuelTanklet* oiltank;
 	Batterylet* battery;
-	Labellet* labels[Status::GPS_E + 1];
-	Labellet* parameters[Status::GPS_N + 1];
+	Labellet* labels[static_cast<unsigned int>(AC::_)];
 		
 private:
-	CanvasTextFormat^ fonts[2];
+	CanvasTextFormat^ fonts[4];
 	AirConditioner* master;
 	CellDecorator* decorator;
 };

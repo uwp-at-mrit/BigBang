@@ -38,24 +38,24 @@ namespace WarGrey::SCADA {
 	};
 
 	template<typename T>
-	private class IScalelet abstract : public virtual WarGrey::SCADA::IGraphlet {
+	private class IValuelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		T get_scale() {
-			return this->scale;
+		T get_value() {
+			return this->value;
 		}
 		
-		void set_scale(T scale, bool force_update = false) {
-			if ((this->scale != scale) || force_update) {
-				this->scale = scale;
-				this->on_scale_change(scale);
+		void set_value(T value, bool force_update = false) {
+			if ((this->value != value) || force_update) {
+				this->value = value;
+				this->on_value_change(value);
 			}
 		}
 		
 	protected:
-		virtual void on_scale_change(float scale) {}
+		virtual void on_value_change(float value) {}
 
 	private:
-		T scale;
+		T value;
 	};
 
 	template<typename State, typename Style>

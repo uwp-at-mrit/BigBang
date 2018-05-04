@@ -91,11 +91,11 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Batterylet::update(long long count, long long interval, long long uptime) {
-	this->set_scale(battery_status->capacity);
+	this->set_value(battery_status->capacity);
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float capacity = this->get_scale();
+	float capacity = this->get_value();
 
 	if (capacity > 0.0F) {
 		float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);

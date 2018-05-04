@@ -31,7 +31,7 @@ void IGaugelet::fill_extent(float x, float y, float* w, float* h) {
 
 void IGaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float range = this->max_value - this->min_value;
-	float value_height = this->get_scale() - this->min_value;
+	float value_height = this->get_value() - this->min_value;
 	float scale_height = fminf(value_height * this->body_height / range, this->body_height);
 	float empty_height = this->body_height - scale_height;
 

@@ -81,7 +81,7 @@ void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float capacity = this->get_scale();
+	float capacity = this->get_value();
 
 	if (capacity > 0.0F) {
 		float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);

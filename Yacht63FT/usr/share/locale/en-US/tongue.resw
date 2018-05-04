@@ -141,8 +141,17 @@
   <data name="Alarm" xml:space="preserve">
     <value>Alarm</value>
   </data>
+  <data name="Bridge" xml:space="preserve">
+    <value>Bridge</value>
+  </data>
+  <data name="Central" xml:space="preserve">
+    <value>Central Control</value>
+  </data>
   <data name="Diagram" xml:space="preserve">
     <value>PMS</value>
+  </data>
+  <data name="Kitchen" xml:space="preserve">
+    <value>Dining Room</value>
   </data>
   <data name="Fire" xml:space="preserve">
     <value>Fire</value>
@@ -150,8 +159,14 @@
   <data name="Generator" xml:space="preserve">
     <value>Generator</value>
   </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Guest Room</value>
+  </data>
   <data name="HomePage" xml:space="preserve">
     <value>HomePage</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>Host Room</value>
   </data>
   <data name="Lamp" xml:space="preserve">
     <value>Lamp</value>
@@ -159,7 +174,13 @@
   <data name="Propeller" xml:space="preserve">
     <value>Propeller</value>
   </data>
+  <data name="Salon" xml:space="preserve">
+    <value>Salon Room</value>
+  </data>
   <data name="Video" xml:space="preserve">
     <value>Video</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP Room</value>
   </data>
 </root>

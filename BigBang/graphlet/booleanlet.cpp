@@ -15,7 +15,7 @@ void Booleanlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Booleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	auto color = (this->get_scale() ? this->true_color : this->false_color);
+	auto color = (this->get_value() ? this->true_color : this->false_color);
 
 	ds->FillRectangle(x, y, this->size, this->size, color);
 }

@@ -101,7 +101,7 @@ public:
 			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
 			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
 
-			this->alarm->set_scale(true);
+			this->alarm->set_value(true);
 		}
 	}
 
@@ -112,7 +112,7 @@ public:
 		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
 
 		{
-			this->oiltank->set_scale(flcapacity);
+			this->oiltank->set_value(flcapacity);
 			this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
 		}
 	}

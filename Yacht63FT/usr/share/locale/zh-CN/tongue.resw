@@ -141,8 +141,17 @@
   <data name="Alarm" xml:space="preserve">
     <value>PMS 警报</value>
   </data>
+  <data name="Bridge" xml:space="preserve">
+    <value>驾驶室</value>
+  </data>
+  <data name="Central" xml:space="preserve">
+    <value>总控</value>
+  </data>
   <data name="Diagram" xml:space="preserve">
     <value>PMS 流程</value>
+  </data>
+  <data name="Kitchen" xml:space="preserve">
+    <value>餐厅</value>
   </data>
   <data name="Fire" xml:space="preserve">
     <value>火灾警报</value>
@@ -150,8 +159,14 @@
   <data name="Generator" xml:space="preserve">
     <value>发电机</value>
   </data>
+  <data name="Guest" xml:space="preserve">
+    <value>客房</value>
+  </data>
   <data name="HomePage" xml:space="preserve">
     <value>主页</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>主人房</value>
   </data>
   <data name="Lamp" xml:space="preserve">
     <value>照明</value>
@@ -159,7 +174,13 @@
   <data name="Propeller" xml:space="preserve">
     <value>推进器</value>
   </data>
+  <data name="Salon" xml:space="preserve">
+    <value>沙龙</value>
+  </data>
   <data name="Video" xml:space="preserve">
     <value>视频监控</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP 客房</value>
   </data>
 </root>

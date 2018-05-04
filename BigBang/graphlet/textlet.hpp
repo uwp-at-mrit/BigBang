@@ -47,7 +47,7 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ caption, unsigned int color_hex, double alpha = 1.0);
 	};
 
-	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IScalelet<float> {
+	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
 	public:
 		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U),
@@ -59,7 +59,7 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	protected:
-		void on_scale_change(float scale) override;
+		void on_value_change(float value) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scale_layout;

@@ -158,7 +158,7 @@ public:
 		this->menu_background = new BitmapBooleanlet("tapped", menu_width, button_height);
 		this->menu_caption = new Labellet("工况", this->caption_font);
 
-		this->menu_background->set_scale(true);
+		this->menu_background->set_value(true);
 
 		this->master->insert(this->menu_background, 0.0F, button_y);
 		this->master->insert(this->menu_caption, this->menu_background, GraphletAlignment::CC, GraphletAlignment::CC);
@@ -168,7 +168,7 @@ public:
 			this->master->insert(this->items[id], button_x, button_y);
 
 			if (id == Yacht::HomePage) {
-				this->items[id]->set_scale(true);
+				this->items[id]->set_value(true);
 				this->selected_id = id;
 			}
 
@@ -177,8 +177,8 @@ public:
 	}
 
 	void on_click(Yacht id) {
-		this->items[this->selected_id]->set_scale(false);
-		this->items[id]->set_scale(true);
+		this->items[this->selected_id]->set_value(false);
+		this->items[id]->set_value(true);
 		this->selected_id = id;
 	}
 
@@ -224,7 +224,7 @@ void Navigatorbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shift
 	auto credit_item = dynamic_cast<CreditItemlet*>(g);
 
 	if (credit_item != nullptr) {
-		if (!credit_item->get_scale()) {
+		if (!credit_item->get_value()) {
 			auto maybe_dashboard = dashboards.find(this);
 
 			if (maybe_dashboard != dashboards.end()) {

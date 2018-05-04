@@ -59,8 +59,8 @@ public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->master->enter_critical_section();
 
-		this->temperatures[HS::Heater]->set_scale(RealData(AI_DB203, 18U));
-		this->temperatures[HS::VisorTank]->set_scale(RealData(AI_DB203, 19U));
+		this->temperatures[HS::Heater]->set_value(RealData(AI_DB203, 18U));
+		this->temperatures[HS::VisorTank]->set_value(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
 			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
@@ -75,7 +75,7 @@ public:
 					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAlignment::RB);
 				}
 
-				target->set_scale(RealData(AI_DB203, 8 + i));
+				target->set_value(RealData(AI_DB203, 8 + i));
 
 				if (need_adjust_position) {
 					this->master->move_to(target, anchor_x, anchor_y, GraphletAlignment::RB);

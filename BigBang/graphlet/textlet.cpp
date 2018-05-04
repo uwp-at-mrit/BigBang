@@ -136,7 +136,7 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 }
 
 void ScaleTextlet::construct() {
-	this->set_scale(0.0F, true);
+	this->set_value(0.0F, true);
 }
 
 void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
@@ -151,8 +151,8 @@ void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
-void ScaleTextlet::on_scale_change(float scale) {
-	Platform::String^ s = scale.ToString();
+void ScaleTextlet::on_value_change(float value) {
+	Platform::String^ s = value.ToString();
 	
 	if (this->text_layout != nullptr) {
 		s = " " + s;

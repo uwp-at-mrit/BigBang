@@ -4,7 +4,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class IGaugelet abstract : public WarGrey::SCADA::IScalelet<float> {
+	private class IGaugelet abstract : public WarGrey::SCADA::IValuelet<float> {
 	public:
 		IGaugelet(float width, float height, float vmin, float vmax, unsigned int step,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,

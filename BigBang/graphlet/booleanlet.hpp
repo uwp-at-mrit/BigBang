@@ -5,7 +5,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Booleanlet : public virtual WarGrey::SCADA::IScalelet<bool> {
+	private class Booleanlet : public virtual WarGrey::SCADA::IValuelet<bool> {
 	public:
 		Booleanlet(float size, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ true_color,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ false_color = WarGrey::SCADA::Colours::WhiteSmoke);

@@ -115,7 +115,7 @@ void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
 }
 
 bool BitmapBooleanlet::ready() {
-	if (this->get_scale() == true) {
+	if (this->get_value() == true) {
 		return (this->graph_tmp != nullptr);
 	} else {
 		return (this->graph_fmp != nullptr);
@@ -127,7 +127,7 @@ void BitmapBooleanlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void BitmapBooleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	auto target = (this->get_scale() ? this->graph_tmp : this->graph_fmp);
+	auto target = (this->get_value() ? this->graph_tmp : this->graph_fmp);
 	this->window.X = x;
 	this->window.Y = y;
 
@@ -135,7 +135,7 @@ void BitmapBooleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Wi
 }
 
 void BitmapBooleanlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	Uri^ target = (this->get_scale() ? this->ms_appx_tmp : this->ms_appx_fmp);
+	Uri^ target = (this->get_value() ? this->ms_appx_tmp : this->ms_appx_fmp);
 	Platform::String^ hint = file_name_from_path(target);
 
 	draw_invalid_bitmap(hint, ds, x, y, this->window.Width, this->window.Height);
