@@ -183,4 +183,16 @@
   <data name="VIP" xml:space="preserve">
     <value>VIP Room</value>
   </data>
+  <data name=":aux:" xml:space="preserve">
+    <value>Auxilliary Info</value>
+  </data>
+  <data name=":mode:" xml:space="preserve">
+    <value>Working Mode</value>
+  </data>
+  <data name=":t_pipe:" xml:space="preserve">
+    <value>Coil Pipe Temperature</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>Sea Temperature</value>
+  </data>
 </root>

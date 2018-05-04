@@ -146,6 +146,7 @@ namespace WarGrey::SCADA {
 		void change_mode(unsigned int mode);
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
 		void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
+		WarGrey::SCADA::IPlanetDecorator* get_decorator();
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;

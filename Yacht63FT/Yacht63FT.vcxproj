@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}</ProjectGuid>
@@ -208,27 +208,27 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
-    <Image Include="usr\share\graphlet\AirConditioner.png" />
-    <Image Include="usr\share\graphlet\AirConditioner_alert.png" />
-    <Image Include="usr\share\graphlet\AirConditioner_off.png" />
-    <Image Include="usr\share\graphlet\Alarm.png" />
-    <Image Include="usr\share\graphlet\Alarm_alert.png" />
-    <Image Include="usr\share\graphlet\Alarm_off.png" />
-    <Image Include="usr\share\graphlet\alarm_true.png" />
-    <Image Include="usr\share\graphlet\alarm_false.png" />
-    <Image Include="usr\share\graphlet\Generator.png" />
-    <Image Include="usr\share\graphlet\Generator_alert.png" />
-    <Image Include="usr\share\graphlet\Generator_off.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Alerting.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Running.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Stopped.png" />
+    <Image Include="usr\share\graphlet\Alarm\Stopped.png" />
+    <Image Include="usr\share\graphlet\Alarm\false.png" />
+    <Image Include="usr\share\graphlet\Fire\Alerting.png" />
+    <Image Include="usr\share\graphlet\Fire\Running.png" />
+    <Image Include="usr\share\graphlet\Fire\Stopped.png" />
+    <Image Include="usr\share\graphlet\Alarm\Running.png" />
+    <Image Include="usr\share\graphlet\Alarm\Alerting.png" />
+    <Image Include="usr\share\graphlet\Alarm\true.png" />
+    <Image Include="usr\share\graphlet\Generator\Running.png" />
+    <Image Include="usr\share\graphlet\Generator\Alerting.png" />
+    <Image Include="usr\share\graphlet\Generator\Stopped.png" />
     <Image Include="usr\share\graphlet\gps.png" />
-    <Image Include="usr\share\graphlet\Fire.png" />
-    <Image Include="usr\share\graphlet\Fire_alert.png" />
-    <Image Include="usr\share\graphlet\Fire_off.png" />
-    <Image Include="usr\share\graphlet\Propeller.png" />
-    <Image Include="usr\share\graphlet\Propeller_alert.png" />
-    <Image Include="usr\share\graphlet\Propeller_off.png" />
+    <Image Include="usr\share\graphlet\Propeller\Running.png" />
+    <Image Include="usr\share\graphlet\Propeller\Alerting.png" />
+    <Image Include="usr\share\graphlet\Propeller\Stopped.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
-    <Image Include="usr\share\graphlet\tapped_false.png" />
-    <Image Include="usr\share\graphlet\tapped_true.png" />
+    <Image Include="usr\share\graphlet\inactive.png" />
+    <Image Include="usr\share\graphlet\active.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
   </ItemGroup>
   <ItemGroup>

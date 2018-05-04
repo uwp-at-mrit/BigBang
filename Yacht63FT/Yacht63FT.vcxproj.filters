@@ -29,6 +29,21 @@
     <Filter Include="frame">
       <UniqueIdentifier>{659d284d-a719-45df-9bd0-ce4d6905a508}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\Fire">
+      <UniqueIdentifier>{f45b3390-df89-4707-afce-4dcef3b24e4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Alarm">
+      <UniqueIdentifier>{4786e998-bc7a-43e6-ac20-28b9df34da6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Generator">
+      <UniqueIdentifier>{e1af6de8-065c-4300-a6fc-78cab6abc5bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner">
+      <UniqueIdentifier>{97964683-b580-42b8-9d18-d87566de359b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Propeller">
+      <UniqueIdentifier>{6f34fcae-9b88-42ad-95d8-b666fd59a8a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -211,61 +226,61 @@
     <Image Include="usr\share\graphlet\gps.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\alarm_true.png">
-      <Filter>Assets</Filter>
+    <Image Include="usr\share\graphlet\Fire\Alerting.png">
+      <Filter>usr\share\graphlet\Fire</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\alarm_false.png">
-      <Filter>Assets</Filter>
+    <Image Include="usr\share\graphlet\Fire\Running.png">
+      <Filter>usr\share\graphlet\Fire</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\tapped_false.png">
+    <Image Include="usr\share\graphlet\Fire\Stopped.png">
+      <Filter>usr\share\graphlet\Fire</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm\Running.png">
+      <Filter>usr\share\graphlet\Alarm</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm\Alerting.png">
+      <Filter>usr\share\graphlet\Alarm</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Generator\Running.png">
+      <Filter>usr\share\graphlet\Generator</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Generator\Stopped.png">
+      <Filter>usr\share\graphlet\Generator</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Generator\Alerting.png">
+      <Filter>usr\share\graphlet\Generator</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Alerting.png">
+      <Filter>usr\share\graphlet\AirConditioner</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Stopped.png">
+      <Filter>usr\share\graphlet\AirConditioner</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Running.png">
+      <Filter>usr\share\graphlet\AirConditioner</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller\Running.png">
+      <Filter>usr\share\graphlet\Propeller</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller\Alerting.png">
+      <Filter>usr\share\graphlet\Propeller</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propeller\Stopped.png">
+      <Filter>usr\share\graphlet\Propeller</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm\Stopped.png">
+      <Filter>usr\share\graphlet\Alarm</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm\false.png">
+      <Filter>usr\share\graphlet\Alarm</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Alarm\true.png">
+      <Filter>usr\share\graphlet\Alarm</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\inactive.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\tapped_true.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Generator_alert.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Propeller_alert.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm_alert.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Generator.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Generator_off.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Propeller.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm_off.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Propeller_off.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\AirConditioner.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\AirConditioner_alert.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\AirConditioner_off.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire_alert.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire_off.png">
+    <Image Include="usr\share\graphlet\active.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
   </ItemGroup>

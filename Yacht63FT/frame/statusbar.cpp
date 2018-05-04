@@ -95,7 +95,7 @@ public:
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
 			py = cell_y + cell_height * 0.5F;
 
-			this->alarm = new BitmapBooleanlet("alarm", application_fit_size(screen_status_alarm_width));
+			this->alarm = new BitmapBooleanlet("Alarm", application_fit_size(screen_status_alarm_width));
 			this->yacht = new Bitmaplet("skeleton", application_fit_size(screen_status_yacht_width));
 
 			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);

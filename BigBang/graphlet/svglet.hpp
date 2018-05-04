@@ -5,7 +5,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Svglet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument> {
+	private class Svglet : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument, int> {
 	public:
 		virtual ~Svglet() noexcept;
 
@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 		bool ready();
 
 	protected:
-		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg) override;
+		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg, int hint) override;
 		
 	protected:
 		Windows::UI::Color get_fill_color(Platform::String^ id, Windows::UI::Color& default_color = Windows::UI::Colors::Transparent);

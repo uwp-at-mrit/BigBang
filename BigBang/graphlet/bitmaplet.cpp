@@ -5,7 +5,6 @@
 #include "planet.hpp"
 
 #include "path.hpp"
-#include "draw.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -17,6 +16,17 @@ using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 
 using namespace Microsoft::Graphics::Canvas;
+
+void WarGrey::SCADA::adjust_window_size(Rect& window, CanvasBitmap^ doc_bmp) {
+	if (window.Width <= 0.0F) {
+		if (window.Height <= 0.0F) {
+			window.Height = doc_bmp->Size.Height;
+		}
+		window.Width = doc_bmp->Size.Width * (window.Height / doc_bmp->Size.Height);
+	} else if (window.Height <= 0.0F) {
+		window.Height = doc_bmp->Size.Height * (window.Width / doc_bmp->Size.Width);
+	}
+}
 
 /*************************************************************************************************/
 Bitmaplet::Bitmaplet(Platform::String^ file, Platform::String^ rootdir) : Bitmaplet(file, 0.0F, 0.0F, rootdir) {}
@@ -32,20 +42,12 @@ Bitmaplet::~Bitmaplet() {
 }
 
 void Bitmaplet::construct() {
-	this->load(this->ms_appx_bmp);
+	this->load(this->ms_appx_bmp, 0);
 }
 
-void Bitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
+void Bitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, int hint) {
 	this->graph_bmp = doc_bmp;
-
-	if (this->window.Width <= 0.0F) {
-		if (this->window.Height <= 0.0F) {
-			this->window.Height = this->graph_bmp->Size.Height;
-		}
-		this->window.Width = this->graph_bmp->Size.Width * (this->window.Height / this->graph_bmp->Size.Height);
-	} else if (this->window.Height <= 0.0F) {
-		this->window.Height = this->graph_bmp->Size.Height * (this->window.Width / this->graph_bmp->Size.Width);
-	}
+	adjust_window_size(this->window, doc_bmp);
 }
 
 bool Bitmaplet::ready() {
@@ -73,11 +75,11 @@ void Bitmaplet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float 
 BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f_file, Platform::String^ rootdir)
 	: BitmapBooleanlet(t_file, f_file, 0.0F, 0.0F, rootdir) {}
 
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ file_prefix, Platform::String^ rootdir)
-	: BitmapBooleanlet(file_prefix, 0.0F, 0.0F, rootdir) {}
+BitmapBooleanlet::BitmapBooleanlet(Platform::String^ subdir, Platform::String^ rootdir)
+	: BitmapBooleanlet(subdir, 0.0F, 0.0F, rootdir) {}
 
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ file_prefix, float width, float height, Platform::String^ rootdir)
-	: BitmapBooleanlet(file_prefix + "_true", file_prefix + "_false", width, height, rootdir) {}
+BitmapBooleanlet::BitmapBooleanlet(Platform::String^ subdir, float width, float height, Platform::String^ rootdir)
+	: BitmapBooleanlet(subdir + "/true", subdir + "/false", width, height, rootdir) {}
 
 BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f_file, float width, float height, Platform::String^ rootdir) {
 	this->window.Width = width;
@@ -92,26 +94,19 @@ BitmapBooleanlet::~BitmapBooleanlet() {
 }
 
 void BitmapBooleanlet::construct() {
-	this->load(this->ms_appx_tmp);
-	this->load(this->ms_appx_fmp);
+	this->load(this->ms_appx_tmp, true);
+	this->load(this->ms_appx_fmp, false);
 }
 
-void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp) {
-	if (ms_appx == this->ms_appx_tmp) {
+void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, bool hint) {
+	if (hint) {
 		this->graph_tmp = doc_bmp;
 	} else {
 		this->graph_fmp = doc_bmp;
 	}
 
 	// NOTE: The client application should guarantee that source bitmaps have the same size
-	if (this->window.Width <= 0.0F) {
-		if (this->window.Height <= 0.0F) {
-			this->window.Height = doc_bmp->Size.Height;
-		}
-		this->window.Width = doc_bmp->Size.Width * (this->window.Height / doc_bmp->Size.Height);
-	} else if (this->window.Height <= 0.0F) {
-		this->window.Height = doc_bmp->Size.Height * (this->window.Width / doc_bmp->Size.Width);
-	}
+	adjust_window_size(this->window, doc_bmp);
 }
 
 bool BitmapBooleanlet::ready() {

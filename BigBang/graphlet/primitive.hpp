@@ -52,7 +52,7 @@ namespace WarGrey::SCADA {
 		}
 		
 	protected:
-		virtual void on_value_change(float value) {}
+		virtual void on_value_change(T value) {}
 
 	private:
 		T value;

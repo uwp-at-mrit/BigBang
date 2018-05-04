@@ -8,6 +8,7 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
+#include "credit.hpp"
 #include "tongue.hpp"
 #include "system.hpp"
 #include "text.hpp"
@@ -23,6 +24,60 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class AC { Bridge, VIP, Kitchen, Central, Salon, Host, Guest, _ };
+private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
+
+static size_t cell_count = 7;
+static unsigned int decorator_text_color = 0x666666;
+
+private class ACDecorator final : public CellDecorator {
+public:
+	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 4, application_fit_size(2.0F)) {
+		auto font = make_text_format("Microsoft YaHei", application_fit_size(24.79F));
+
+		this->color = Colours::make(decorator_text_color);
+
+		for (ACInfo id = ACInfo::mode; id < ACInfo::_; id++) {
+			this->infos[id] = make_text_layout(speak(":" + id.ToString() + ":"), font);
+		}
+	}
+
+public:
+	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
+		for (unsigned int i = 0; i < cell_count; i++) {
+			this->draw_text_ct(ds, i, ACInfo::mode);
+			this->draw_text_ct(ds, i, ACInfo::t_sea);
+			this->draw_text_ct(ds, i, ACInfo::t_pipe);
+			this->draw_text_ct(ds, i, ACInfo::aux);
+		}
+	}
+
+public:
+	void fill_info_anchor(unsigned int idx, ACInfo id, float* anchor_x, float* anchor_y) {
+		float x, y, width, height;
+
+		this->fill_cell_extent(idx, &x, &y, &width, &height);
+	
+		switch (id) {
+		case ACInfo::mode:   SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.64F); break;
+		case ACInfo::t_sea:  SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.64F); break;
+		case ACInfo::t_pipe: SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.84F); break;
+		case ACInfo::aux:    SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.84F); break;
+		}
+	}
+
+private:
+	void draw_text_ct(CanvasDrawingSession^ ds, unsigned int idx, ACInfo id) {
+		float x, y;
+		float width = this->infos[id]->LayoutBounds.Width;
+
+		this->fill_info_anchor(idx, id, &x, &y);
+		ds->DrawTextLayout(this->infos[id], x - width * 0.5F, y, this->color);
+	}
+
+private:
+	ICanvasBrush^ color;
+	std::map<ACInfo, CanvasTextLayout^> infos;
+};
 
 /*************************************************************************************************/
 private class ACBoard final : public PLCConfirmation {
@@ -33,51 +88,43 @@ public:
 		}
 	}
 
-	ACBoard(AirConditioner* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+	ACBoard(AirConditioner* master, ACDecorator* decorator) : master(master), decorator(decorator) {
 		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
 		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(37.50F));
 		this->fonts[2] = make_text_format("Microsoft YaHei", application_fit_size(30.00F));
-		this->fonts[3] = make_text_format("Microsoft YaHei", application_fit_size(24.79F));
 
 		this->decorator->reference();
 	}
 
 public:
 	void load_and_flow(float width, float height) {
-		Platform::String^ captions[] = { ":oiltank:", ":battery:", ":gps:" };
-		IGraphlet* target = nullptr;
-		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
-		float icon_width = application_fit_size(110.0F) * 0.618F;
-		float label_xoffset = application_fit_size(screen_status_label_xoff);
-		float label_yoffset = application_fit_size(screen_status_label_yoff);
-		float parameter_yoffset = application_fit_size(screen_status_parameter_yoff);
+		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
+		float label_yoffset = application_fit_size(25.0);
+		float icon_yoffset = application_fit_size(81.0);
+		float icon_width = application_fit_size(80.0F);
 
 		for (AC room = AC::Bridge; room <= AC::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
-			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
 
-			{ // load label
-				this->labels[i] = new Labellet(speak(room.ToString()), this->fonts[0], screen_status_label_color);
-				this->master->insert(this->labels[i],
-					cell_x + label_xoffset, cell_y + label_yoffset,
-					GraphletAlignment::LT);
-			}
+			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
+
+			cell_whalf = cell_x + cell_width * 0.5F;
+			this->thermometers[room] = new Credit<FuelTanklet, AC>(icon_width);
+			this->captions[room] = new Credit<Labellet, AC>(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
+			this->master->insert(this->thermometers[room], cell_whalf, cell_y + icon_yoffset, GraphletAlignment::CT);
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
-	BitmapBooleanlet* alarm;
-	Bitmaplet* yacht;
-	Bitmaplet* gps;
-	FuelTanklet* oiltank;
-	Batterylet* battery;
-	Labellet* labels[static_cast<unsigned int>(AC::_)];
+	std::map<AC, Credit<FuelTanklet, AC>*> thermometers;
+	std::map<AC, Credit<Labellet, AC>*> captions;
 		
 private:
-	CanvasTextFormat^ fonts[4];
+	CanvasTextFormat^ fonts[3];
 	AirConditioner* master;
-	CellDecorator* decorator;
+	ACDecorator* decorator;
 };
 
 /*************************************************************************************************/
@@ -91,7 +138,7 @@ AirConditioner::~AirConditioner() {
 
 void AirConditioner::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, 7, 4, application_fit_size(2.0F));
+		ACDecorator* cells = new ACDecorator(width, height);
 		ACBoard* ac = new ACBoard(this, cells);
 
 		ac->load_and_flow(width, height);

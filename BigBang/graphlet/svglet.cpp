@@ -35,10 +35,10 @@ Svglet::~Svglet() {
 }
 
 void Svglet::construct() {
-	this->load(this->ms_appx_svg);
+	this->load(this->ms_appx_svg, 0);
 }
 
-void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg) {
+void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 	this->graph_svg = doc_svg;
 	this->root = this->graph_svg->Root;
 

@@ -486,15 +486,17 @@ bool Planet::on_char(VirtualKey key) {
 }
 
 void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
-	GraphletInfo* info = GRAPHLET_INFO(g);
+	if (g != nullptr) {
+		GraphletInfo* info = GRAPHLET_INFO(g);
 
-	if ((!info->selected) && this->can_select(g)) {
-		if (shifted) {
-			if (this->rubberband_allowed) {
-				unsafe_add_selected(this, g, info);
+		if ((!info->selected) && this->can_select(g)) {
+			if (shifted) {
+				if (this->rubberband_allowed) {
+					unsafe_add_selected(this, g, info);
+				}
+			} else {
+				unsafe_set_selected(this, g, info);
 			}
-		} else {
-			unsafe_set_selected(this, g, info);
 		}
 	}
 }
@@ -626,6 +628,18 @@ bool Planet::on_pointer_released(float x, float y, PointerUpdateKind puk, bool s
 			} break;
 			}
 		}
+
+		{ // Planet itself also has an opportunity to handle events directly.
+			switch (puk) {
+			case PointerUpdateKind::LeftButtonPressed: {
+				this->on_tap(nullptr, x, y, shifted, ctrled);
+			} break;
+			case PointerUpdateKind::RightButtonPressed: {
+				// NOTE: In macOS, Control + clicking produces a right clicking
+				this->on_right_tap(nullptr, x, y, shifted, ctrled);
+			} break;
+			}
+		}
 	}
 
 	return true;
@@ -652,6 +666,10 @@ void Planet::set_decorator(IPlanetDecorator* decorator) {
 
 	this->decorator = ((decorator == nullptr) ? new PlaceHolderDecorator() : decorator);
     this->decorator->reference();
+}
+
+IPlanetDecorator* Planet::get_decorator() {
+	return this->decorator;
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {

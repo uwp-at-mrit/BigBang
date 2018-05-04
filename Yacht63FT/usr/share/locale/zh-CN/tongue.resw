@@ -183,4 +183,16 @@
   <data name="VIP" xml:space="preserve">
     <value>VIP 客房</value>
   </data>
+  <data name=":aux:" xml:space="preserve">
+    <value>辅助信息</value>
+  </data>
+  <data name=":mode:" xml:space="preserve">
+    <value>工作状态</value>
+  </data>
+  <data name=":t_pipe:" xml:space="preserve">
+    <value>盘管温度</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>海水温度</value>
+  </data>
 </root>
