@@ -208,6 +208,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
+    <Image Include="usr\share\graphlet\ACMode\Breakdown.png" />
+    <Image Include="usr\share\graphlet\ACMode\Heating.png" />
+    <Image Include="usr\share\graphlet\ACMode\Refrigeration.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Alerting.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Running.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Stopped.png" />

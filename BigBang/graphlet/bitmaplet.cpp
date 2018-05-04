@@ -4,8 +4,6 @@
 #include "graphlet/bitmaplet.hpp"
 #include "planet.hpp"
 
-#include "path.hpp"
-
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;

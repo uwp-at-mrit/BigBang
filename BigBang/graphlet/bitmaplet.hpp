@@ -6,6 +6,7 @@
 
 #include "brushes.hxx"
 #include "draw.hpp"
+#include "path.hpp"
 
 namespace WarGrey::SCADA {
 	void adjust_window_size(Windows::Foundation::Rect& window, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp);

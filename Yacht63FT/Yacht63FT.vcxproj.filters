@@ -44,6 +44,9 @@
     <Filter Include="usr\share\graphlet\Propeller">
       <UniqueIdentifier>{6f34fcae-9b88-42ad-95d8-b666fd59a8a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\ACMode">
+      <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -282,6 +285,15 @@
     </Image>
     <Image Include="usr\share\graphlet\active.png">
       <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\ACMode\Refrigeration.png">
+      <Filter>usr\share\graphlet\ACMode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\ACMode\Breakdown.png">
+      <Filter>usr\share\graphlet\ACMode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\ACMode\Heating.png">
+      <Filter>usr\share\graphlet\ACMode</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

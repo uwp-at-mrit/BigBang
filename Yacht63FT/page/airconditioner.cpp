@@ -8,7 +8,6 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
-#include "credit.hpp"
 #include "tongue.hpp"
 #include "system.hpp"
 #include "text.hpp"
@@ -25,6 +24,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class AC { Bridge, VIP, Kitchen, Central, Salon, Host, Guest, _ };
 private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
+private enum class ACMode { Breakdown, Heating, Refrigeration, _ };
 
 static size_t cell_count = 7;
 static unsigned int decorator_text_color = 0x666666;
@@ -102,6 +102,7 @@ public:
 		float label_yoffset = application_fit_size(25.0);
 		float icon_yoffset = application_fit_size(81.0);
 		float icon_width = application_fit_size(80.0F);
+		float mode_width = application_fit_size(46.0F);
 
 		for (AC room = AC::Bridge; room <= AC::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -109,17 +110,39 @@ public:
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
-			this->thermometers[room] = new Credit<FuelTanklet, AC>(icon_width);
-			this->captions[room] = new Credit<Labellet, AC>(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
+			this->thermometers[room] = new FuelTanklet(icon_width);
+			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
+			this->modes[room] = new BitmapStatelet<ACMode>("ACMode", mode_width);
+			this->Tseas[room] = new Labellet("30.0", this->fonts[1], Colours::GhostWhite);
+			this->Tpipes[room] = new Labellet("30.0", this->fonts[1], Colours::GhostWhite);
+			this->auxes[room] = new Labellet("Normal", this->fonts[1], Colours::GhostWhite);
+
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
 			this->master->insert(this->thermometers[room], cell_whalf, cell_y + icon_yoffset, GraphletAlignment::CT);
+
+			this->load_info(this->modes[room], i, ACInfo::mode);
+			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
+			this->load_info(this->Tpipes[room], i, ACInfo::t_pipe);
+			this->load_info(this->auxes[room], i, ACInfo::aux);
 		}
+	}
+
+private:
+	void load_info(IGraphlet* g, unsigned int i, ACInfo type) {
+		float anchor_x, anchor_y;
+
+		this->decorator->fill_info_anchor(i, type, &anchor_x, &anchor_y);
+		this->master->insert(g, anchor_x, anchor_y, GraphletAlignment::CB);
 	}
 
 // never deletes these graphlets mannually
 private:
-	std::map<AC, Credit<FuelTanklet, AC>*> thermometers;
-	std::map<AC, Credit<Labellet, AC>*> captions;
+	std::map<AC, FuelTanklet*> thermometers;
+	std::map<AC, Labellet*> captions;
+	std::map<AC, BitmapStatelet<ACMode>*> modes;
+	std::map<AC, Labellet*> Tseas;
+	std::map<AC, Labellet*> Tpipes;
+	std::map<AC, Labellet*> auxes;
 		
 private:
 	CanvasTextFormat^ fonts[3];
