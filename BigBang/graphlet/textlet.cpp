@@ -14,6 +14,11 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
+
+static inline void draw_layout_lb(CanvasDrawingSession^ ds, CanvasTextLayout^ content, float x, float by, ICanvasBrush^ color) {
+	ds->DrawTextLayout(content, x, by - content->LayoutBounds.Height, color);
+}
+
 /*************************************************************************************************/
 void Textlet::set_color(ICanvasBrush^ color) {
 	this->text_color = color;
@@ -110,11 +115,15 @@ Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned i
 }
 
 /*************************************************************************************************/
-ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript, Colour^ lcolor, Colour^ scolor)
+ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
+	, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, Colour^ scolor, Colour^ lcolor)
 	: scale_color(scolor) {
+	auto scale_font = ((sfont == nullptr) ? make_bold_text_format() : sfont);
+	auto label_font = ((lfont == nullptr) ? scale_font : lfont);
+
 	this->set_color(lcolor);
-	this->set_font(make_bold_text_format());
-	this->unit_layout = make_text_layout(speak(unit), this->text_font);
+	this->set_font(scale_font);
+	this->unit_layout = make_text_layout(speak(unit), label_font);
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
@@ -124,7 +133,7 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 			this->set_text(symbol + suffix);
 		} else {
 			Platform::String^ subsymbol = speak(subscript);
-			float subsize = this->text_font->FontSize * 0.618F;
+			float subsize = label_font->FontSize * 0.618F;
 			unsigned int symcount = symbol->Length();
 			unsigned int subcount = subsymbol->Length();
 
@@ -162,13 +171,25 @@ void ScaleTextlet::on_value_change(float value) {
 }
 
 void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float start_x = x;
+	float lx = x;
+	float by, height;
 
-	if (this->text_layout != nullptr) {
-		ds->DrawTextLayout(this->text_layout, x, y, this->text_color);
-		start_x += this->text_layout->LayoutBounds.Width;
+	if (this->text_color == nullptr) {
+		this->set_color();
 	}
 
-	ds->DrawTextLayout(this->scale_layout, start_x, y, this->scale_color);
-	ds->DrawTextLayout(this->unit_layout, start_x + this->scale_layout->LayoutBounds.Width, y, this->text_color);
+	if (this->scale_color == nullptr) {
+		this->scale_color = this->text_color;
+	}
+
+	this->fill_extent(x, y, nullptr, &height);
+	by = y + height;
+
+	if (this->text_layout != nullptr) {
+		draw_layout_lb(ds, this->text_layout, x, by, this->text_color);
+		lx += this->text_layout->LayoutBounds.Width;
+	}
+
+	draw_layout_lb(ds, this->scale_layout, lx, by, this->scale_color);
+	draw_layout_lb(ds, this->unit_layout, lx + this->scale_layout->LayoutBounds.Width, by, this->text_color);
 }

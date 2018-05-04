@@ -98,6 +98,7 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
+		Platform::String^ T = speak("celsius");
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
 		float label_yoffset = application_fit_size(25.0);
 		float icon_yoffset = application_fit_size(81.0);
@@ -113,8 +114,8 @@ public:
 			this->thermometers[room] = new FuelTanklet(icon_width);
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new BitmapStatelet<ACMode>("ACMode", mode_width);
-			this->Tseas[room] = new Labellet("30.0", this->fonts[1], Colours::GhostWhite);
-			this->Tpipes[room] = new Labellet("30.0", this->fonts[1], Colours::GhostWhite);
+			this->Tseas[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
+			this->Tpipes[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
 			this->auxes[room] = new Labellet("Normal", this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
@@ -140,8 +141,8 @@ private:
 	std::map<AC, FuelTanklet*> thermometers;
 	std::map<AC, Labellet*> captions;
 	std::map<AC, BitmapStatelet<ACMode>*> modes;
-	std::map<AC, Labellet*> Tseas;
-	std::map<AC, Labellet*> Tpipes;
+	std::map<AC, ScaleTextlet*> Tseas;
+	std::map<AC, ScaleTextlet*> Tpipes;
 	std::map<AC, Labellet*> auxes;
 		
 private:

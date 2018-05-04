@@ -195,4 +195,7 @@
   <data name=":t_sea:" xml:space="preserve">
     <value>海水温度</value>
   </data>
+  <data name="celsius" xml:space="preserve">
+    <value>°C</value>
+  </data>
 </root>

@@ -50,8 +50,10 @@ namespace WarGrey::SCADA {
 	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
 	public:
 		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
-			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U),
-			WarGrey::SCADA::Colour^ scale_color = WarGrey::SCADA::Colours::Yellow);
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font = nullptr,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
+			WarGrey::SCADA::Colour^ scale_color = WarGrey::SCADA::Colours::Yellow,
+			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
 
 	public:
 		void construct() override;
