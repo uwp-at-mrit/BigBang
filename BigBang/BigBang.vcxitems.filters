@@ -72,6 +72,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\cell.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -148,6 +154,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
       <Filter>graphlet</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\cell.hpp">
+      <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp">
+      <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -233,9 +233,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="configuration.cpp" />
-    <ClCompile Include="decorator\background.cpp" />
-    <ClCompile Include="decorator\cell.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
+    <ClCompile Include="page\airconditioner.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="frame\statusbar.cpp" />
     <ClCompile Include="plc.cpp" />
@@ -243,9 +242,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
-    <ClInclude Include="decorator\background.hpp" />
-    <ClInclude Include="decorator\cell.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
+    <ClInclude Include="page\airconditioner.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="plc.hpp" />

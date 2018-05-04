@@ -1,4 +1,4 @@
-﻿#include "frame/statusbar.hpp"
+﻿#include "page/airconditioner.hpp"
 #include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
@@ -25,15 +25,15 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum Status { OilTank, Battery, GPS_E, GPS_N };
 
 /*************************************************************************************************/
-private class StatusBoard final : public PLCConfirmation, public ISystemStatusListener {
+private class ACBoard final : public PLCConfirmation {
 public:
-	~StatusBoard() noexcept {
+	~ACBoard() noexcept {
 		if (this->decorator != nullptr) {
 			this->decorator->destroy();
 		}
 	}
 
-	StatusBoard(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+	ACBoard(AirConditioner* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(30.0F));
 		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(41.27F));
 
@@ -105,18 +105,6 @@ public:
 		}
 	}
 
-public:
-	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
-		float percentage = std::roundf(flcapacity * 100.0F);
-		
-		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
-
-		{
-			this->oiltank->set_scale(flcapacity);
-			this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
-		}
-	}
-
 // never deletes these graphlets mannually
 private:
 	BitmapBooleanlet* alarm;
@@ -129,47 +117,32 @@ private:
 		
 private:
 	CanvasTextFormat^ fonts[2];
-	Statusbar* master;
+	AirConditioner* master;
 	CellDecorator* decorator;
 };
 
 /*************************************************************************************************/
-Statusbar::Statusbar(IMRMaster* device) : Planet(":statusbar:"), device(device) {}
+AirConditioner::AirConditioner(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-Statusbar::~Statusbar() {
+AirConditioner::~AirConditioner() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void Statusbar::load(CanvasCreateResourcesReason reason, float width, float height) {
+void AirConditioner::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float cell_width = application_fit_size(385.0F);
-		float cell_height = application_fit_size(200.0F);
-		float cell_gapsize = application_fit_size(10.0F);
-		float cell_y = cell_gapsize;
-		float yacht_cell_x = application_fit_size(1388.0F);
+		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, 7, 4, application_fit_size(2.0F));
+		ACBoard* ac = new ACBoard(this, cells);
 
-		Rect boxes[] = {
-			Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),
-			Rect((cell_width + cell_gapsize) * 1.0F + cell_gapsize, cell_y, cell_width, cell_height),
-			Rect((cell_width + cell_gapsize) * 2.0F + cell_gapsize, cell_y, cell_width, cell_height),
-			Rect(yacht_cell_x, cell_y, width - cell_gapsize - yacht_cell_x, cell_height)
-		};
+		ac->load_and_flow(width, height);
 
-		BackgroundDecorator* bg = new BackgroundDecorator(0x1E1E1E);
-		CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
-		StatusBoard* status = new StatusBoard(this, cells);
-		
-		status->load_and_flow(width, height);
-		register_system_status_listener(status);
-
-		this->dashboard = status;
-		this->set_decorator(new CompositeDecorator(bg, cells));
-		this->device->append_confirmation_receiver(status);
+		this->dashboard = ac;
+		this->set_decorator(cells);
+		this->device->append_confirmation_receiver(ac);
 	}
 }
 
-void Statusbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void AirConditioner::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }
