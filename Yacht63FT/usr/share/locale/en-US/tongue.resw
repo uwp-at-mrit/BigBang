@@ -210,4 +210,22 @@
   <data name="UpperDeck" xml:space="preserve">
     <value>Upper Deck</value>
   </data>
+  <data name="BowCabin" xml:space="preserve">
+    <value>Bow Cabin</value>
+  </data>
+  <data name="BowDeck" xml:space="preserve">
+    <value>Bow Deck</value>
+  </data>
+  <data name="Engine" xml:space="preserve">
+    <value>Engine Room</value>
+  </data>
+  <data name="Passage" xml:space="preserve">
+    <value>Passage</value>
+  </data>
+  <data name="Staircase" xml:space="preserve">
+    <value>Staircase</value>
+  </data>
+  <data name="SternDeck" xml:space="preserve">
+    <value>Stern Deck</value>
+  </data>
 </root>

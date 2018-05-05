@@ -210,4 +210,22 @@
   <data name="UpperDeck" xml:space="preserve">
     <value>上层甲板</value>
   </data>
+  <data name="BowCabin" xml:space="preserve">
+    <value>艏尖舱</value>
+  </data>
+  <data name="BowDeck" xml:space="preserve">
+    <value>艏甲板</value>
+  </data>
+  <data name="Engine" xml:space="preserve">
+    <value>机舱</value>
+  </data>
+  <data name="Passage" xml:space="preserve">
+    <value>住舱过道</value>
+  </data>
+  <data name="Staircase" xml:space="preserve">
+    <value>梯道</value>
+  </data>
+  <data name="SternDeck" xml:space="preserve">
+    <value>艉甲板</value>
+  </data>
 </root>

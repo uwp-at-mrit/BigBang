@@ -22,15 +22,15 @@ private enum class L { Bridge, VIP, Salon, Host, Guest, Kitchen, _ };
 static size_t cell_count = static_cast<size_t>(L::_);
 
 /*************************************************************************************************/
-private class LampBoard final : public PLCConfirmation {
+private class LightBoard final : public PLCConfirmation {
 public:
-	~LampBoard() noexcept {
+	~LightBoard() noexcept {
 		if (this->decorator != nullptr) {
 			this->decorator->destroy();
 		}
 	}
 
-	LampBoard(Light* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+	LightBoard(Light* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->font = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
 
 		this->decorator->reference();
@@ -86,7 +86,7 @@ Light::~Light() {
 void Light::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
 		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 3, application_fit_size(2.0F));
-		LampBoard* lb = new LampBoard(this, cells);
+		LightBoard* lb = new LightBoard(this, cells);
 
 		lb->load_and_flow(width, height);
 

@@ -247,6 +247,7 @@
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
+    <ClCompile Include="page\fire.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="frame\statusbar.cpp" />
     <ClCompile Include="page\light.cpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
     <ClInclude Include="page\airconditioner.hpp" />
+    <ClInclude Include="page\fire.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="page\light.hpp" />

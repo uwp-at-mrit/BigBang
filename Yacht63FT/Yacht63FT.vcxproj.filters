@@ -79,7 +79,12 @@
     <ClCompile Include="page\light.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\camera.cpp" />
+    <ClCompile Include="page\camera.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\fire.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -99,7 +104,12 @@
     <ClInclude Include="page\light.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\camera.hpp" />
+    <ClInclude Include="page\camera.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\fire.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
