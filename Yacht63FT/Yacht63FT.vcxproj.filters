@@ -47,6 +47,18 @@
     <Filter Include="usr\share\graphlet\ACMode">
       <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\Video">
+      <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Diagram">
+      <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Light">
+      <UniqueIdentifier>{847b99b9-9798-4b31-95e9-36f3ed0cec92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Curtain">
+      <UniqueIdentifier>{f2a7bc8b-0cab-4a9c-8c71-1bc06048a49e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -64,6 +76,9 @@
     <ClCompile Include="page\airconditioner.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\light.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -78,6 +93,9 @@
       <Filter>frame</Filter>
     </ClInclude>
     <ClInclude Include="page\airconditioner.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\light.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -294,6 +312,33 @@
     </Image>
     <Image Include="usr\share\graphlet\ACMode\Heating.png">
       <Filter>usr\share\graphlet\ACMode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Video\Stopped.png">
+      <Filter>usr\share\graphlet\Video</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Diagram\Alerting.png">
+      <Filter>usr\share\graphlet\Diagram</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Diagram\Running.png">
+      <Filter>usr\share\graphlet\Diagram</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Diagram\Stopped.png">
+      <Filter>usr\share\graphlet\Diagram</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Light\Stopped.png">
+      <Filter>usr\share\graphlet\Light</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Light\false.png">
+      <Filter>usr\share\graphlet\Light</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Light\true.png">
+      <Filter>usr\share\graphlet\Light</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Curtain\false.png">
+      <Filter>usr\share\graphlet\Curtain</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Curtain\true.png">
+      <Filter>usr\share\graphlet\Curtain</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

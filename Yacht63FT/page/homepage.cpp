@@ -8,10 +8,7 @@
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
-#include "system.hpp"
-
 #include "text.hpp"
-#include "math.hpp"
 
 using namespace WarGrey::SCADA;
 

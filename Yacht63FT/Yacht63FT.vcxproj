@@ -216,6 +216,11 @@
     <Image Include="usr\share\graphlet\AirConditioner\Stopped.png" />
     <Image Include="usr\share\graphlet\Alarm\Stopped.png" />
     <Image Include="usr\share\graphlet\Alarm\false.png" />
+    <Image Include="usr\share\graphlet\Curtain\false.png" />
+    <Image Include="usr\share\graphlet\Curtain\true.png" />
+    <Image Include="usr\share\graphlet\Diagram\Alerting.png" />
+    <Image Include="usr\share\graphlet\Diagram\Running.png" />
+    <Image Include="usr\share\graphlet\Diagram\Stopped.png" />
     <Image Include="usr\share\graphlet\Fire\Alerting.png" />
     <Image Include="usr\share\graphlet\Fire\Running.png" />
     <Image Include="usr\share\graphlet\Fire\Stopped.png" />
@@ -226,12 +231,16 @@
     <Image Include="usr\share\graphlet\Generator\Alerting.png" />
     <Image Include="usr\share\graphlet\Generator\Stopped.png" />
     <Image Include="usr\share\graphlet\gps.png" />
+    <Image Include="usr\share\graphlet\Light\false.png" />
+    <Image Include="usr\share\graphlet\Light\Stopped.png" />
+    <Image Include="usr\share\graphlet\Light\true.png" />
     <Image Include="usr\share\graphlet\Propeller\Running.png" />
     <Image Include="usr\share\graphlet\Propeller\Alerting.png" />
     <Image Include="usr\share\graphlet\Propeller\Stopped.png" />
     <Image Include="usr\share\graphlet\skeleton.png" />
     <Image Include="usr\share\graphlet\inactive.png" />
     <Image Include="usr\share\graphlet\active.png" />
+    <Image Include="usr\share\graphlet\Video\Stopped.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +249,7 @@
     <ClCompile Include="page\airconditioner.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="frame\statusbar.cpp" />
+    <ClCompile Include="page\light.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
@@ -249,6 +259,7 @@
     <ClInclude Include="page\airconditioner.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
+    <ClInclude Include="page\light.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <ItemGroup>

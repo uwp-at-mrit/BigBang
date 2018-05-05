@@ -8,9 +8,7 @@
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
-#include "system.hpp"
 #include "text.hpp"
-#include "math.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -21,17 +19,17 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class AC { Bridge, VIP, Kitchen, Central, Salon, Host, Guest, _ };
+private enum class AC { Bridge, VIP, Central, Salon, Host, Guest, _ };
 private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
 private enum class ACMode { Breakdown, Heating, Refrigeration, _ };
 private enum class ACStatus { Normal };
 
-static size_t cell_count = 7;
+static size_t cell_count = static_cast<size_t>(AC::_);
 static unsigned int decorator_text_color = 0x666666;
 
 private class ACDecorator final : public CellDecorator {
 public:
-	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 4, application_fit_size(2.0F)) {
+	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 3, application_fit_size(2.0F)) {
 		auto font = make_text_format("Microsoft YaHei", application_fit_size(24.79F));
 
 		this->color = Colours::make(decorator_text_color);
@@ -100,12 +98,12 @@ public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ T = speak("celsius");
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
-		float label_yoffset = application_fit_size(25.0);
-		float icon_yoffset = application_fit_size(80.0);
+		float label_yoffset = application_fit_size(16.0);
+		float icon_yoffset = application_fit_size(70.0);
 		float icon_width = application_fit_size(64.0F);
 		float mode_width = application_fit_size(46.0F);
 
-		for (AC room = AC::Bridge; room <= AC::_; room++) {
+		for (AC room = AC::Bridge; room < AC::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
 
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
