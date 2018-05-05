@@ -47,9 +47,6 @@
     <Filter Include="usr\share\graphlet\ACMode">
       <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\graphlet\Video">
-      <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
-    </Filter>
     <Filter Include="usr\share\graphlet\Diagram">
       <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
     </Filter>
@@ -58,6 +55,9 @@
     </Filter>
     <Filter Include="usr\share\graphlet\Curtain">
       <UniqueIdentifier>{f2a7bc8b-0cab-4a9c-8c71-1bc06048a49e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Camera">
+      <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +79,7 @@
     <ClCompile Include="page\light.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="page\light.hpp">
       <Filter>page</Filter>
     </ClInclude>
+    <ClInclude Include="page\camera.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -313,9 +315,6 @@
     <Image Include="usr\share\graphlet\ACMode\Heating.png">
       <Filter>usr\share\graphlet\ACMode</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\Video\Stopped.png">
-      <Filter>usr\share\graphlet\Video</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Diagram\Alerting.png">
       <Filter>usr\share\graphlet\Diagram</Filter>
     </Image>
@@ -339,6 +338,9 @@
     </Image>
     <Image Include="usr\share\graphlet\Curtain\true.png">
       <Filter>usr\share\graphlet\Curtain</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Camera\Stopped.png">
+      <Filter>usr\share\graphlet\Camera</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

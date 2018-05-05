@@ -201,4 +201,13 @@
   <data name="Normal" xml:space="preserve">
     <value>Normal</value>
   </data>
+  <data name="CabinBack" xml:space="preserve">
+    <value>Cabin Back</value>
+  </data>
+  <data name="CabinFront" xml:space="preserve">
+    <value>Cabin Front</value>
+  </data>
+  <data name="UpperDeck" xml:space="preserve">
+    <value>Upper Deck</value>
+  </data>
 </root>

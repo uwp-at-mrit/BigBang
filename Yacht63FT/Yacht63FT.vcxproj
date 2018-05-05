@@ -240,7 +240,7 @@
     <Image Include="usr\share\graphlet\skeleton.png" />
     <Image Include="usr\share\graphlet\inactive.png" />
     <Image Include="usr\share\graphlet\active.png" />
-    <Image Include="usr\share\graphlet\Video\Stopped.png" />
+    <Image Include="usr\share\graphlet\Camera\Stopped.png" />
     <Image Include="usr\share\graphlet\yacht.png" />
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +250,7 @@
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="frame\statusbar.cpp" />
     <ClCompile Include="page\light.cpp" />
+    <ClCompile Include="page\camera.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
@@ -260,6 +261,7 @@
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="page\light.hpp" />
+    <ClInclude Include="page\camera.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <ItemGroup>

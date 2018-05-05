@@ -201,4 +201,13 @@
   <data name="Normal" xml:space="preserve">
     <value>正常</value>
   </data>
+  <data name="CabinBack" xml:space="preserve">
+    <value>机舱后</value>
+  </data>
+  <data name="CabinFront" xml:space="preserve">
+    <value>机舱前</value>
+  </data>
+  <data name="UpperDeck" xml:space="preserve">
+    <value>上层甲板</value>
+  </data>
 </root>

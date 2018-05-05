@@ -13,6 +13,7 @@
 #include "page/homepage.hpp"
 #include "page/airconditioner.hpp"
 #include "page/light.hpp"
+#include "page/camera.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -62,6 +63,7 @@ protected:
 			switch (page) {
 			case Yacht::AirConditioner: this->add_planet(new AirConditioner(plc_master, name)); break;
 			case Yacht::Light: this->add_planet(new Light(plc_master, name)); break;
+			case Yacht::Camera: this->add_planet(new Camera(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
 		}
