@@ -21,7 +21,11 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 	float x, float y, float length, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float radiusX, float radiusY);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);

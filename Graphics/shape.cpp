@@ -76,8 +76,16 @@ CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
 }
 
+CanvasGeometry^ circle(float r) {
+	return circle(r * 0.5F, r * 0.5F, r);
+}
+
 CanvasGeometry^ circle(float cx, float cy, float r) {
     return CanvasGeometry::CreateCircle(CanvasDevice::GetSharedDevice(), cx, cy, r);
+}
+
+CanvasGeometry^ ellipse(float rx, float ry) {
+	return ellipse(rx * 0.5F, ry * 0.5F, rx, ry);
 }
 
 CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {

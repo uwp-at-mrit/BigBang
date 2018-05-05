@@ -198,4 +198,7 @@
   <data name="celsius" xml:space="preserve">
     <value>°C</value>
   </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
 </root>

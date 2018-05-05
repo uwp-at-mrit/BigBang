@@ -24,6 +24,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum class AC { Bridge, VIP, Kitchen, Central, Salon, Host, Guest, _ };
 private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
 private enum class ACMode { Breakdown, Heating, Refrigeration, _ };
+private enum class ACStatus { Normal };
 
 static size_t cell_count = 7;
 static unsigned int decorator_text_color = 0x666666;
@@ -100,8 +101,8 @@ public:
 		Platform::String^ T = speak("celsius");
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
 		float label_yoffset = application_fit_size(25.0);
-		float icon_yoffset = application_fit_size(81.0);
-		float icon_width = application_fit_size(80.0F);
+		float icon_yoffset = application_fit_size(80.0);
+		float icon_width = application_fit_size(64.0F);
 		float mode_width = application_fit_size(46.0F);
 
 		for (AC room = AC::Bridge; room <= AC::_; room++) {
@@ -110,12 +111,12 @@ public:
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
-			this->thermometers[room] = new Thermometerlet(icon_width);
+			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, Colours::make(decorator_text_color));
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new BitmapStatelet<ACMode>("ACMode", mode_width);
 			this->Tseas[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
 			this->Tpipes[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
-			this->auxes[room] = new Labellet("Normal", this->fonts[1], Colours::GhostWhite);
+			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
 			this->master->insert(this->thermometers[room], cell_whalf, cell_y + icon_yoffset, GraphletAlignment::CT);
