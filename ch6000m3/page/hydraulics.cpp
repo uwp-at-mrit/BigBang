@@ -96,14 +96,14 @@ public:
 				Pumplet* target = this->pumps[pump_seq[i]];
 
 				switch (DI_db205_X[i]) {
-				case 0b00000001: target->set_state(PumpState::Starting); break;
-				case 0b00000010: target->set_state(PumpState::Stopping); break;
-				case 0b00000100: target->set_state(PumpState::Unstartable); break;
-				case 0b00001000: target->set_state(PumpState::Unstoppable); break;
-				case 0b00010000: target->set_state(PumpState::Running); break;
-				case 0b00100000: target->set_state(PumpState::Stopped); break;
-				case 0b01000000: target->set_state(PumpState::Remote); break;
-				case 0b10000000: target->set_state(PumpState::Ready); break;
+				case 0b00000001: target->set_state(PumpStatus::Starting); break;
+				case 0b00000010: target->set_state(PumpStatus::Stopping); break;
+				case 0b00000100: target->set_state(PumpStatus::Unstartable); break;
+				case 0b00001000: target->set_state(PumpStatus::Unstoppable); break;
+				case 0b00010000: target->set_state(PumpStatus::Running); break;
+				case 0b00100000: target->set_state(PumpStatus::Stopped); break;
+				case 0b01000000: target->set_state(PumpStatus::Remote); break;
+				case 0b10000000: target->set_state(PumpStatus::Ready); break;
 				}
 			}
 		}

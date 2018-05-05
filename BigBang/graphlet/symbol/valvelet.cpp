@@ -13,26 +13,26 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static ValveState default_valve_state = ValveState::Manual;
+static ValveStatus default_valve_state = ValveStatus::Manual;
 static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
 
-ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
+ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus state) {
 	ValveStyle s;
 
 	s.skeleton_color = default_sketeton_color;
 
 	switch (state) {
-	case ValveState::Manual: s.mask_color = Colours::Teal; break;
-	case ValveState::Open: s.body_color = Colours::Green; break;
-	case ValveState::Opening: s.mask_color = Colours::Green; break;
-	case ValveState::OpenReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
-	case ValveState::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
-	case ValveState::Closed: s.body_color = Colours::LightGray; break;
-	case ValveState::Closing: s.mask_color = Colours::DarkGray; break;
-	case ValveState::CloseReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
-	case ValveState::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
-	case ValveState::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
-	case ValveState::FalseClosed: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
+	case ValveStatus::Manual: s.mask_color = Colours::Teal; break;
+	case ValveStatus::Open: s.body_color = Colours::Green; break;
+	case ValveStatus::Opening: s.mask_color = Colours::Green; break;
+	case ValveStatus::OpenReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::ForestGreen; break;
+	case ValveStatus::Unopenable: s.skeleton_color = Colours::Red; s.mask_color = Colours::Green; break;
+	case ValveStatus::Closed: s.body_color = Colours::LightGray; break;
+	case ValveStatus::Closing: s.mask_color = Colours::DarkGray; break;
+	case ValveStatus::CloseReady: s.skeleton_color = Colours::Cyan; s.mask_color = Colours::DimGray; break;
+	case ValveStatus::Unclosable: s.skeleton_color = Colours::Red; s.mask_color = Colours::DarkGray; break;
+	case ValveStatus::FalseOpen: s.border_color = Colours::Red; s.body_color = Colours::ForestGreen; break;
+	case ValveStatus::FalseClosed: s.border_color = Colours::Red; s.body_color = Colours::DimGray; break;
 	}
 
 	return s;
@@ -41,8 +41,8 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveState state) {
 /*************************************************************************************************/
 Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_state, radius, degrees) {}
 
-Valvelet::Valvelet(ValveState default_state, float radius, double degrees)
-	: IStatelet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
+Valvelet::Valvelet(ValveStatus default_state, float radius, double degrees)
+	: IStatuslet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_state_change(default_state);
@@ -61,7 +61,7 @@ void Valvelet::construct() {
 
 void Valvelet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_state()) {
-	case ValveState::Opening: {
+	case ValveStatus::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -69,7 +69,7 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
 	} break;
-	case ValveState::Closing: {
+	case ValveStatus::Closing: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -80,27 +80,27 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 	}
 }
 
-void Valvelet::on_state_change(ValveState state) {
+void Valvelet::on_state_change(ValveStatus state) {
 	switch (state) {
-	case ValveState::Unopenable: {
+	case ValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case ValveState::Unclosable: case ValveState::Manual: {
+	case ValveStatus::Unclosable: case ValveStatus::Manual: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case ValveState::OpenReady: {
+	case ValveStatus::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case ValveState::CloseReady: {
+	case ValveStatus::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
 		}

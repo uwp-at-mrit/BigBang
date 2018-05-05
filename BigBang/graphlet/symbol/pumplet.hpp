@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class PumpState { Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _ };
+	private enum class PumpStatus { Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _ };
 
 	private struct PumpStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
@@ -12,11 +12,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
-	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpState state);
+	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpStatus state);
 
-	private class Pumplet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::PumpState, WarGrey::SCADA::PumpStyle> {
+	private class Pumplet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
 	public:
-		Pumplet(WarGrey::SCADA::PumpState default_state, float radius, double degrees = -90.0);
+		Pumplet(WarGrey::SCADA::PumpStatus default_state, float radius, double degrees = -90.0);
 		Pumplet(float radius, double degrees = -90.0);
 
 	public:
@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 		double get_direction_degrees();
 
 	protected:
-		void on_state_change(PumpState state) override;
+		void on_state_change(PumpStatus state) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

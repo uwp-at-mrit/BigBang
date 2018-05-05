@@ -78,6 +78,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\cell.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp">
       <Filter>decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp">
+      <Filter>graphlet\dashboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

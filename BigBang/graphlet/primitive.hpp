@@ -58,14 +58,14 @@ namespace WarGrey::SCADA {
 		T value;
 	};
 
-	template<typename State, typename Style>
-	private class IStatelet abstract : public virtual WarGrey::SCADA::IGraphlet {
+	template<typename Status, typename Style>
+	private class IStatuslet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IStatelet(State default_state, Style (*make_default_style)(State)) {
-			this->default_state = ((default_state == State::_) ? 0 : static_cast<unsigned int>(default_state));
+		IStatuslet(Status default_state, Style (*make_default_style)(Status)) {
+			this->default_state = ((default_state == Status::_) ? 0 : static_cast<unsigned int>(default_state));
 			this->current_state = this->default_state;
 
-			for (State s = static_cast<State>(0); s < State::_; s++) {
+			for (Status s = static_cast<Status>(0); s < Status::_; s++) {
 				this->set_style(s, make_default_style(s));
 			}
 
@@ -76,34 +76,34 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		void set_state(State state) {
-			unsigned int new_state = ((state == State::_) ? this->default_state : static_cast<unsigned int>(state));
+		void set_state(Status state) {
+			unsigned int new_state = ((state == Status::_) ? this->default_state : static_cast<unsigned int>(state));
 			
 			if (this->current_state != new_state) {
 				this->current_state = new_state;
-				this->on_state_change(static_cast<State>(new_state));
+				this->on_state_change(static_cast<Status>(new_state));
 			}
 		}
 
-		State get_state() {
-			return static_cast<State>(this->current_state);
+		Status get_state() {
+			return static_cast<Status>(this->current_state);
 		}
 
-		void set_style(State state, Style& style) {
-			this->styles[(state == State::_) ? this->current_state : static_cast<unsigned int>(state)] = style;
+		void set_style(Status state, Style& style) {
+			this->styles[(state == Status::_) ? this->current_state : static_cast<unsigned int>(state)] = style;
 		}
 
-		const Style& get_style(State state = State::_) {			
-			return this->styles[(state == State::_) ? this->current_state : static_cast<unsigned int>(state)];
+		const Style& get_style(Status state = Status::_) {			
+			return this->styles[(state == Status::_) ? this->current_state : static_cast<unsigned int>(state)];
 		}
 
 	protected:
-		virtual void on_state_change(State state) {}
+		virtual void on_state_change(Status state) {}
 
 	private:
 		unsigned int default_state;
 		unsigned int current_state;
-		Style styles[static_cast<unsigned int>(State::_)];
+		Style styles[static_cast<unsigned int>(Status::_)];
 	};
 
 	/************************************************************************************************/

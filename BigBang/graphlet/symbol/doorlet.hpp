@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 
 	WarGrey::SCADA::DoorStyle make_default_door_style(WarGrey::SCADA::DoorState state);
 
-	private class DumpDoorlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
+	private class DumpDoorlet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
 	public:
 		DumpDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
 		DumpDoorlet(float radius, double degrees = -90.0);

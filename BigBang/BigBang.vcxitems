@@ -22,6 +22,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
@@ -54,6 +55,7 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.hpp" />

@@ -71,13 +71,13 @@ namespace WarGrey::SCADA {
 	};
 }
 
-template <typename State>
+template <typename Status>
 private class BitmapStatelet
-	: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, State>
-	, public virtual WarGrey::SCADA::IValuelet<State>{
+	: public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::CanvasBitmap, Status>
+	, public virtual WarGrey::SCADA::IValuelet<Status>{
 public:
 	virtual ~BitmapStatelet() noexcept {
-		for (State s = static_cast<State>(0); s < State::_; s++) {
+		for (Status s = static_cast<Status>(0); s < Status::_; s++) {
 			this->unload(this->ms_appx_bmps[s]);
 		}
 	}
@@ -89,7 +89,7 @@ public:
 		this->window.Width = width;
 		this->window.Height = height;
 
-		for (State s = static_cast<State>(0); s < State::_; s++) {
+		for (Status s = static_cast<Status>(0); s < Status::_; s++) {
 			Platform::String^ file_bmp = ((subdir == nullptr) ? s.ToString() : subdir + "/" + s.ToString());
 			
 			this->ms_appx_bmps[s] = ms_appx_path(file_bmp, ".png", rootdir);
@@ -98,7 +98,7 @@ public:
 
 public:
 	void construct() override {
-		for (State s = static_cast<State>(0); s < State::_; s++) {
+		for (Status s = static_cast<Status>(0); s < Status::_; s++) {
 			this->load(this->ms_appx_bmps[s], s);
 		}
 	}
@@ -125,7 +125,7 @@ public:
 	}
 
 public:
-	void on_appx(Windows::Foundation::Uri^ ms_appx, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp, State hint) override {
+	void on_appx(Windows::Foundation::Uri^ ms_appx, Microsoft::Graphics::Canvas::CanvasBitmap^ doc_bmp, Status hint) override {
 		this->graph_bmps[hint] = doc_bmp;
 
 		// NOTE: The client application should guarantee that source bitmaps have the same size
@@ -134,7 +134,7 @@ public:
 
 protected:
 	Windows::Foundation::Rect window;
-	std::map<State, Windows::Foundation::Uri^> ms_appx_bmps;
-	std::map<State, Microsoft::Graphics::Canvas::CanvasBitmap^> graph_bmps;
+	std::map<Status, Windows::Foundation::Uri^> ms_appx_bmps;
+	std::map<Status, Microsoft::Graphics::Canvas::CanvasBitmap^> graph_bmps;
 };
 	

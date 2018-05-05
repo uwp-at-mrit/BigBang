@@ -35,7 +35,7 @@ DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
 DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
 
 DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
-	: IStatelet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
+	: IStatuslet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_state_change(default_state);

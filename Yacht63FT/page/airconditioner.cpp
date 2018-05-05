@@ -3,8 +3,7 @@
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/dashboard/fueltanklet.hpp"
-#include "graphlet/dashboard/batterylet.hpp"
+#include "graphlet/dashboard/thermometerlet.hpp"
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
@@ -60,8 +59,8 @@ public:
 		switch (id) {
 		case ACInfo::mode:   SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.64F); break;
 		case ACInfo::t_sea:  SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.64F); break;
-		case ACInfo::t_pipe: SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.84F); break;
-		case ACInfo::aux:    SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.84F); break;
+		case ACInfo::t_pipe: SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.86F); break;
+		case ACInfo::aux:    SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.86F); break;
 		}
 	}
 
@@ -111,7 +110,7 @@ public:
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
-			this->thermometers[room] = new FuelTanklet(icon_width);
+			this->thermometers[room] = new Thermometerlet(icon_width);
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new BitmapStatelet<ACMode>("ACMode", mode_width);
 			this->Tseas[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
@@ -138,7 +137,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	std::map<AC, FuelTanklet*> thermometers;
+	std::map<AC, Thermometerlet*> thermometers;
 	std::map<AC, Labellet*> captions;
 	std::map<AC, BitmapStatelet<ACMode>*> modes;
 	std::map<AC, ScaleTextlet*> Tseas;
