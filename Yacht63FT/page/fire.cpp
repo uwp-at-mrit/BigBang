@@ -42,8 +42,10 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
-		float label_yoffset = application_fit_size(16.0);
+		float cell_x, cell_y, cell_width, cell_height, cell_whalf, cell_top;
+		float face_width, face_height;
+		float hmargin = application_fit_size(screen_caption_yoff);
+		float vmargin = application_fit_size(screen_caption_yoff);
 		
 		for (F room = F::Bridge; room < F::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -52,13 +54,25 @@ public:
 			cell_whalf = cell_x + cell_width * 0.5F;
 
 			this->captions[room] = new Labellet(speak(room.ToString()), this->font, Colours::GhostWhite);
-			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + vmargin, GraphletAlignment::CT);
+
+			this->master->fill_graphlet_location(this->captions[room], nullptr, &cell_top, GraphletAlignment::LB);
+			cell_top += vmargin;
+			face_width = cell_width - hmargin * 2.0F;
+			face_height = cell_y + cell_height - cell_top - vmargin;
+
+			this->status[room] = new OptionBitmaplet("Fire", face_width, face_height);
+			this->status[room]->set_value(true);
+			
+			this->master->insert(this->status[room], cell_whalf, cell_top, GraphletAlignment::CT);
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
 	std::map<F, Labellet*> captions;
+	std::map<F, Bitmaplet*> faces;
+	std::map<F, OptionBitmaplet*> status;
 		
 private:
 	CanvasTextFormat^ font;

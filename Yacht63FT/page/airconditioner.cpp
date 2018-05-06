@@ -97,9 +97,8 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ T = speak("celsius");
-		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
-		float label_yoffset = application_fit_size(16.0);
-		float icon_yoffset = application_fit_size(70.0);
+		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
+		float label_yoffset = application_fit_size(screen_caption_yoff);
 		float icon_width = application_fit_size(64.0F);
 		float mode_width = application_fit_size(46.0F);
 
@@ -111,13 +110,15 @@ public:
 			cell_whalf = cell_x + cell_width * 0.5F;
 			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, Colours::make(decorator_text_color));
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
-			this->modes[room] = new BitmapStatelet<ACMode>("ACMode", mode_width);
+			this->modes[room] = new UnionBitmaplet<ACMode>("ACMode", mode_width);
 			this->Tseas[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
 			this->Tpipes[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
-			this->master->insert(this->thermometers[room], cell_whalf, cell_y + icon_yoffset, GraphletAlignment::CT);
+
+			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAlignment::CB);
+			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_yoffset, GraphletAlignment::CT);
 
 			this->load_info(this->modes[room], i, ACInfo::mode);
 			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
@@ -138,7 +139,7 @@ private:
 private:
 	std::map<AC, Thermometerlet*> thermometers;
 	std::map<AC, Labellet*> captions;
-	std::map<AC, BitmapStatelet<ACMode>*> modes;
+	std::map<AC, UnionBitmaplet<ACMode>*> modes;
 	std::map<AC, ScaleTextlet*> Tseas;
 	std::map<AC, ScaleTextlet*> Tpipes;
 	std::map<AC, Labellet*> auxes;

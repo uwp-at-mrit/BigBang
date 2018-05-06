@@ -35,4 +35,6 @@ static float screen_status_alarm_width = 160.0F;
 static float screen_status_yacht_x = 1447.0F;
 static float screen_status_yacht_width = 409.0F;
 
+static float screen_caption_yoff = 24.0F;
+
 float application_fit_size(float src);

@@ -227,6 +227,7 @@
     <Image Include="usr\share\graphlet\Alarm\Running.png" />
     <Image Include="usr\share\graphlet\Alarm\Alerting.png" />
     <Image Include="usr\share\graphlet\Alarm\true.png" />
+    <Image Include="usr\share\graphlet\Fire\true.png" />
     <Image Include="usr\share\graphlet\Generator\Running.png" />
     <Image Include="usr\share\graphlet\Generator\Alerting.png" />
     <Image Include="usr\share\graphlet\Generator\Stopped.png" />

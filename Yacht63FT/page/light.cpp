@@ -39,7 +39,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, cell_top;
-		float label_yoffset = application_fit_size(16.0);
+		float label_yoffset = application_fit_size(screen_caption_yoff);
 		
 		for (L room = L::Bridge; room < L::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -51,22 +51,24 @@ public:
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
 
 			this->master->fill_graphlet_location(this->captions[room], nullptr, &cell_top, GraphletAlignment::LB);
-			this->lights[room] = new BitmapBooleanlet("Light", cell_width, cell_height - label_yoffset);
+			cell_top += label_yoffset;
+
+			this->lights[room] = new OptionBitmaplet("Light", cell_width);
 
 			if ((room != L::Bridge) && (room != L::Salon)) {
-				this->curtains[room] = new BitmapBooleanlet("Curtain", cell_width);
-				this->master->insert(this->curtains[room], cell_whalf, cell_top + label_yoffset, GraphletAlignment::CT);
+				this->curtains[room] = new OptionBitmaplet("Curtain", cell_width, cell_y + cell_height - cell_top);
+				this->master->insert(this->curtains[room], cell_whalf, cell_top, GraphletAlignment::CT);
 			}
 
-			this->master->insert(this->lights[room], cell_whalf, cell_top + label_yoffset, GraphletAlignment::CT);
+			this->master->insert(this->lights[room], cell_whalf, cell_top, GraphletAlignment::CT);
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
 	std::map<L, Labellet*> captions;
-	std::map<L, BitmapBooleanlet*> lights;
-	std::map<L, BitmapBooleanlet*> curtains;
+	std::map<L, OptionBitmaplet*> lights;
+	std::map<L, OptionBitmaplet*> curtains;
 		
 private:
 	CanvasTextFormat^ font;

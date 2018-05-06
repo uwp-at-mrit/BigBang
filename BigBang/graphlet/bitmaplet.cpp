@@ -70,33 +70,33 @@ void Bitmaplet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float 
 }
 
 /*************************************************************************************************/
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f_file, Platform::String^ rootdir)
-	: BitmapBooleanlet(t_file, f_file, 0.0F, 0.0F, rootdir) {}
+OptionBitmaplet::OptionBitmaplet(Platform::String^ t_file, Platform::String^ f_file, Platform::String^ rootdir)
+	: OptionBitmaplet(t_file, f_file, 0.0F, 0.0F, rootdir) {}
 
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ subdir, Platform::String^ rootdir)
-	: BitmapBooleanlet(subdir, 0.0F, 0.0F, rootdir) {}
+OptionBitmaplet::OptionBitmaplet(Platform::String^ subdir, Platform::String^ rootdir)
+	: OptionBitmaplet(subdir, 0.0F, 0.0F, rootdir) {}
 
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ subdir, float width, float height, Platform::String^ rootdir)
-	: BitmapBooleanlet(subdir + "/true", subdir + "/false", width, height, rootdir) {}
+OptionBitmaplet::OptionBitmaplet(Platform::String^ subdir, float width, float height, Platform::String^ rootdir)
+	: OptionBitmaplet(subdir + "/true", subdir + "/false", width, height, rootdir) {}
 
-BitmapBooleanlet::BitmapBooleanlet(Platform::String^ t_file, Platform::String^ f_file, float width, float height, Platform::String^ rootdir) {
+OptionBitmaplet::OptionBitmaplet(Platform::String^ t_file, Platform::String^ f_file, float width, float height, Platform::String^ rootdir) {
 	this->window.Width = width;
 	this->window.Height = height;
 	this->ms_appx_tmp = ms_appx_path(t_file, ".png", rootdir);
 	this->ms_appx_fmp = ms_appx_path(f_file, ".png", rootdir);
 }
 
-BitmapBooleanlet::~BitmapBooleanlet() {
+OptionBitmaplet::~OptionBitmaplet() {
 	this->unload(this->ms_appx_tmp);
 	this->unload(this->ms_appx_fmp);
 }
 
-void BitmapBooleanlet::construct() {
+void OptionBitmaplet::construct() {
 	this->load(this->ms_appx_tmp, true);
 	this->load(this->ms_appx_fmp, false);
 }
 
-void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, bool hint) {
+void OptionBitmaplet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, bool hint) {
 	if (hint) {
 		this->graph_tmp = doc_bmp;
 	} else {
@@ -107,29 +107,31 @@ void BitmapBooleanlet::on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, bool hint) {
 	adjust_window_size(this->window, doc_bmp);
 }
 
-bool BitmapBooleanlet::ready() {
-	if (this->get_value() == true) {
-		return (this->graph_tmp != nullptr);
-	} else {
-		return (this->graph_fmp != nullptr);
-	}
+bool OptionBitmaplet::ready() {
+	/** NOTE
+	 * By design, the absence of `false bitmap` indicates that the false status is meaningless.
+	 * If the client applications do care about the false status, they should use the `UnionBitmaplet` instead. 
+	 */
+	return (this->graph_tmp != nullptr);
 }
 
-void BitmapBooleanlet::fill_extent(float x, float y, float* w, float* h) {
+void OptionBitmaplet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->window.Width, h, this->window.Height);
 }
 
-void BitmapBooleanlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void OptionBitmaplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	auto target = (this->get_value() ? this->graph_tmp : this->graph_fmp);
-	this->window.X = x;
-	this->window.Y = y;
 
-	ds->DrawImage(target, this->window);
+	if (target != nullptr) {
+		this->window.X = x;
+		this->window.Y = y;
+
+		ds->DrawImage(target, this->window);
+	}
 }
 
-void BitmapBooleanlet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	Uri^ target = (this->get_value() ? this->ms_appx_tmp : this->ms_appx_fmp);
-	Platform::String^ hint = file_name_from_path(target);
+void OptionBitmaplet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	Platform::String^ hint = file_name_from_path(this->ms_appx_tmp);
 
 	draw_invalid_bitmap(hint, ds, x, y, this->window.Width, this->window.Height);
 }

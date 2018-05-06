@@ -25,9 +25,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class YachtStatus { Stopped, Running, Alerting, _ };
 
-private class Backgroundlet : public BitmapBooleanlet {
+private class Backgroundlet : public OptionBitmaplet {
 public:
-	Backgroundlet(float width, float height) : BitmapBooleanlet("active", "inactive", width, height) {}
+	Backgroundlet(float width, float height) : OptionBitmaplet("active", "inactive", width, height) {}
 
 public:
 	void draw_progress(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
@@ -35,9 +35,9 @@ public:
 	}
 };
 
-private class CreditItemlet : public virtual BitmapStatelet<YachtStatus> {
+private class CreditItemlet : public virtual UnionBitmaplet<YachtStatus> {
 public:
-	CreditItemlet(Yacht id, float width, float height, CanvasTextFormat^ font) : BitmapStatelet<YachtStatus>(id.ToString(), width, height), id(id) {
+	CreditItemlet(Yacht id, float width, float height, CanvasTextFormat^ font) : UnionBitmaplet<YachtStatus>(id.ToString(), width, height), id(id) {
 		this->caption = make_text_layout(speak(id.ToString()), font);
 		this->cpt_xoff = (this->window.Width - this->caption->LayoutBounds.Width) * 0.5F;
 		this->cpt_yoff = (this->window.Height - this->caption->LayoutBounds.Height) * 0.5F;
@@ -66,7 +66,7 @@ public:
 
 protected:
 	void on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, YachtStatus hint) override {
-		BitmapStatelet<YachtStatus>::on_appx(ms_appx, doc_bmp, hint);
+		UnionBitmaplet<YachtStatus>::on_appx(ms_appx, doc_bmp, hint);
 
 		if (this->icon_window.Width == 0.0F) {
 			float icon_size = application_fit_size(std::fmin(doc_bmp->Size.Width, doc_bmp->Size.Height));

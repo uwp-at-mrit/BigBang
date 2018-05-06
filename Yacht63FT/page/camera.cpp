@@ -39,7 +39,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
-		float label_yoffset = application_fit_size(16.0);
+		float label_yoffset = application_fit_size(screen_caption_yoff);
 		
 		for (C room = C::UpperDeck; room < C::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);

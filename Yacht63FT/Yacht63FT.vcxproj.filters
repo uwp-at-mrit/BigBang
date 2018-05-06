@@ -352,6 +352,9 @@
     <Image Include="usr\share\graphlet\Camera\Stopped.png">
       <Filter>usr\share\graphlet\Camera</Filter>
     </Image>
+    <Image Include="usr\share\graphlet\Fire\true.png">
+      <Filter>usr\share\graphlet\Fire</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
