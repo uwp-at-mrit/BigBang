@@ -34,8 +34,8 @@ public:
 		}
 	}
 
-	FireBoard(Fire* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->font = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
+	FireBoard(FirePage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 
 		this->decorator->reference();
 	}
@@ -44,8 +44,8 @@ public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, cell_top;
 		float face_width, face_height;
-		float hmargin = application_fit_size(screen_caption_yoff);
-		float vmargin = application_fit_size(screen_caption_yoff);
+		float hmargin = design_to_application_width(screen_caption_yoff);
+		float vmargin = design_to_application_height(screen_caption_yoff);
 		
 		for (F room = F::Bridge; room < F::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -77,21 +77,21 @@ private:
 private:
 	CanvasTextFormat^ font;
 	CellDecorator* decorator;
-	Fire* master;
+	FirePage* master;
 };
 
 /*************************************************************************************************/
-Fire::Fire(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
+FirePage::FirePage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-Fire::~Fire() {
+FirePage::~FirePage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void Fire::load(CanvasCreateResourcesReason reason, float width, float height) {
+void FirePage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 6, application_fit_size(2.0F));
+		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 6, design_to_application_width(2.0F));
 		FireBoard* fb = new FireBoard(this, cells);
 
 		fb->load_and_flow(width, height);
@@ -102,6 +102,6 @@ void Fire::load(CanvasCreateResourcesReason reason, float width, float height) {
 	}
 }
 
-void Fire::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void FirePage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }

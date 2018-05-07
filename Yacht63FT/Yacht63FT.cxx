@@ -11,6 +11,7 @@
 #include "frame/navigatorbar.hxx"
 #include "frame/statusbar.hpp"
 #include "page/homepage.hpp"
+#include "page/generator.hpp"
 #include "page/airconditioner.hpp"
 #include "page/light.hpp"
 #include "page/camera.hpp"
@@ -62,10 +63,11 @@ protected:
 			Platform::String^ name = page.ToString();
 
 			switch (page) {
-			case Yacht::AirConditioner: this->add_planet(new AirConditioner(plc_master, name)); break;
-			case Yacht::Light: this->add_planet(new Light(plc_master, name)); break;
-			case Yacht::Fire: this->add_planet(new Fire(plc_master, name)); break;
-			case Yacht::Camera: this->add_planet(new Camera(plc_master, name)); break;
+			case Yacht::Generator: this->add_planet(new GeneratorPage(plc_master, name)); break;
+			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
+			case Yacht::Light: this->add_planet(new LightPage(plc_master, name)); break;
+			case Yacht::Fire: this->add_planet(new FirePage(plc_master, name)); break;
+			case Yacht::Camera: this->add_planet(new CameraPage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
 		}
@@ -84,10 +86,10 @@ public:
 public:
 	void initialize_component(Size region) {
 		Platform::String^ name = "Yacht63FT";
-		float fit_width = application_fit_size(screen_width);
-		float fit_height = application_fit_size(screen_height);
-		float fit_nav_height = application_fit_size(screen_navigator_height);
-		float fit_bar_height = application_fit_size(screen_statusbar_height);
+		float fit_width = screen_to_application_size(screen_width);
+		float fit_height = screen_to_application_size(screen_height);
+		float fit_nav_height = design_to_application_height(screen_navigator_height);
+		float fit_bar_height = design_to_application_height(screen_statusbar_height);
 
 		plc_master = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
 

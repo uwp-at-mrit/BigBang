@@ -30,8 +30,8 @@ public:
 		}
 	}
 
-	LightBoard(Light* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->font = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
+	LightBoard(LightPage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 
 		this->decorator->reference();
 	}
@@ -39,7 +39,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, cell_top;
-		float label_yoffset = application_fit_size(screen_caption_yoff);
+		float label_yoffset = design_to_application_height(screen_caption_yoff);
 		
 		for (L room = L::Bridge; room < L::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -73,21 +73,21 @@ private:
 private:
 	CanvasTextFormat^ font;
 	CellDecorator* decorator;
-	Light* master;
+	LightPage* master;
 };
 
 /*************************************************************************************************/
-Light::Light(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
+LightPage::LightPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-Light::~Light() {
+LightPage::~LightPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void Light::load(CanvasCreateResourcesReason reason, float width, float height) {
+void LightPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 3, application_fit_size(2.0F));
+		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 3, design_to_application_width(2.0F));
 		LightBoard* lb = new LightBoard(this, cells);
 
 		lb->load_and_flow(width, height);
@@ -98,6 +98,6 @@ void Light::load(CanvasCreateResourcesReason reason, float width, float height) 
 	}
 }
 
-void Light::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void LightPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }

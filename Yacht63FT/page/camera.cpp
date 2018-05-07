@@ -30,8 +30,8 @@ public:
 		}
 	}
 
-	CameraBoard(Camera* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->font = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
+	CameraBoard(CameraPage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 
 		this->decorator->reference();
 	}
@@ -39,7 +39,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf;
-		float label_yoffset = application_fit_size(screen_caption_yoff);
+		float label_yoffset = design_to_application_height(screen_caption_yoff);
 		
 		for (C room = C::UpperDeck; room < C::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -59,21 +59,21 @@ private:
 private:
 	CanvasTextFormat^ font;
 	CellDecorator* decorator;
-	Camera* master;
+	CameraPage* master;
 };
 
 /*************************************************************************************************/
-Camera::Camera(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
+CameraPage::CameraPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-Camera::~Camera() {
+CameraPage::~CameraPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void Camera::load(CanvasCreateResourcesReason reason, float width, float height) {
+void CameraPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 3, application_fit_size(2.0F));
+		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 3, design_to_application_width(2.0F));
 		CameraBoard* cb = new CameraBoard(this, cells);
 
 		cb->load_and_flow(width, height);
@@ -84,6 +84,6 @@ void Camera::load(CanvasCreateResourcesReason reason, float width, float height)
 	}
 }
 
-void Camera::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void CameraPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }

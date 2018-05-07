@@ -4,10 +4,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class LightPage : public WarGrey::SCADA::Planet {
+	private class GeneratorPage : public WarGrey::SCADA::Planet {
 	public:
-		~LightPage() noexcept;
-		LightPage(PLCMaster* device, Platform::String^ name);
+		~GeneratorPage() noexcept;
+		GeneratorPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

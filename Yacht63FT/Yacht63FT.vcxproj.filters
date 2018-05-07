@@ -85,6 +85,9 @@
     <ClCompile Include="page\fire.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\generator.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -108,6 +111,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\fire.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\generator.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>

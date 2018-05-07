@@ -69,7 +69,9 @@ protected:
 		UnionBitmaplet<YachtStatus>::on_appx(ms_appx, doc_bmp, hint);
 
 		if (this->icon_window.Width == 0.0F) {
-			float icon_size = application_fit_size(std::fmin(doc_bmp->Size.Width, doc_bmp->Size.Height));
+			float icon_width = design_to_application_width(doc_bmp->Size.Width);
+			float icon_height = design_to_application_height(doc_bmp->Size.Height);
+			float icon_size = std::fmin(icon_width, icon_height);
 
 			this->icon_window.Width = icon_size;
 			this->icon_window.Height = icon_size;
@@ -93,15 +95,15 @@ private:
 private class NavigatorBoard final {
 public:
 	NavigatorBoard(Navigatorbar* master) : master(master) {
-		this->caption_font = make_text_format("Microsoft YaHei", application_fit_size(28.13F));
-		this->menu_font = make_text_format("Microsoft YaHei", application_fit_size(26.51F));
+		this->caption_font = make_text_format("Microsoft YaHei", design_to_application_height(28.13F));
+		this->menu_font = make_text_format("Microsoft YaHei", design_to_application_height(26.51F));
 	}
 
 public:
 	void load_and_flow(float width, float height) {
-		float menu_width = application_fit_size(screen_menu_width);
+		float menu_width = design_to_application_width(screen_menu_width);
 		float button_width = (width - menu_width) / float(static_cast<unsigned int>(Yacht::_));
-		float button_height = application_fit_size(84.0F);
+		float button_height = design_to_application_height(84.0F);
 		float button_x = menu_width;
 		float button_y = (height - button_height) * 0.5F;
 		

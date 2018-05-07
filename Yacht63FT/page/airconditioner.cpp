@@ -1,5 +1,4 @@
 ﻿#include "page/airconditioner.hpp"
-#include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
 
@@ -29,8 +28,8 @@ static unsigned int decorator_text_color = 0x666666;
 
 private class ACDecorator final : public CellDecorator {
 public:
-	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 3, application_fit_size(2.0F)) {
-		auto font = make_text_format("Microsoft YaHei", application_fit_size(24.79F));
+	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 3, design_to_application_width(2.0F)) {
+		auto font = make_text_format("Microsoft YaHei", design_to_application_height(24.79F));
 
 		this->color = Colours::make(decorator_text_color);
 
@@ -86,10 +85,10 @@ public:
 		}
 	}
 
-	ACBoard(AirConditioner* master, ACDecorator* decorator) : master(master), decorator(decorator) {
-		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(33.75F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(37.50F));
-		this->fonts[2] = make_text_format("Microsoft YaHei", application_fit_size(30.00F));
+	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) {
+		this->fonts[0] = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", design_to_application_height(37.50F));
+		this->fonts[2] = make_text_format("Microsoft YaHei", design_to_application_height(30.00F));
 
 		this->decorator->reference();
 	}
@@ -98,9 +97,9 @@ public:
 	void load_and_flow(float width, float height) {
 		Platform::String^ T = speak("celsius");
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
-		float label_yoffset = application_fit_size(screen_caption_yoff);
-		float icon_width = application_fit_size(64.0F);
-		float mode_width = application_fit_size(46.0F);
+		float label_yoffset = design_to_application_height(screen_caption_yoff);
+		float icon_width = design_to_application_width(64.0F);
+		float mode_width = design_to_application_width(46.0F);
 
 		for (AC room = AC::Bridge; room < AC::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
@@ -146,20 +145,20 @@ private:
 		
 private:
 	CanvasTextFormat^ fonts[3];
-	AirConditioner* master;
+	ACPage* master;
 	ACDecorator* decorator;
 };
 
 /*************************************************************************************************/
-AirConditioner::AirConditioner(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
+ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-AirConditioner::~AirConditioner() {
+ACPage::~ACPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void AirConditioner::load(CanvasCreateResourcesReason reason, float width, float height) {
+void ACPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
 		ACDecorator* cells = new ACDecorator(width, height);
 		ACBoard* ac = new ACBoard(this, cells);
@@ -172,6 +171,6 @@ void AirConditioner::load(CanvasCreateResourcesReason reason, float width, float
 	}
 }
 
-void AirConditioner::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	// this override does nothing but disabling the default behaviours
 }

@@ -4,10 +4,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class AirConditioner : public WarGrey::SCADA::Planet {
+	private class ACPage : public WarGrey::SCADA::Planet {
 	public:
-		~AirConditioner() noexcept;
-		AirConditioner(PLCMaster* device, Platform::String^ name);
+		~ACPage() noexcept;
+		ACPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

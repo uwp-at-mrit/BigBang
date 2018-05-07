@@ -34,8 +34,8 @@ public:
 	}
 
 	StatusBoard(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->fonts[0] = make_text_format("Microsoft YaHei", application_fit_size(30.0F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", application_fit_size(41.27F));
+		this->fonts[0] = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", design_to_application_height(41.27F));
 
 		this->decorator->reference();
 	}
@@ -45,10 +45,10 @@ public:
 		Platform::String^ captions[] = { ":oiltank:", ":battery:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
-		float icon_width = application_fit_size(110.0F) * 0.618F;
-		float label_xoffset = application_fit_size(screen_status_label_xoff);
-		float label_yoffset = application_fit_size(screen_status_label_yoff);
-		float parameter_yoffset = application_fit_size(screen_status_parameter_yoff);
+		float icon_width = screen_to_application_size(110.0F) * 0.618F;
+		float label_xoffset = screen_to_application_size(screen_status_label_xoff);
+		float label_yoffset = screen_to_application_size(screen_status_label_yoff);
+		float parameter_yoffset = screen_to_application_size(screen_status_parameter_yoff);
 
 		for (unsigned int i = Status::OilTank; i <= Status::GPS_E; i++) {
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
@@ -95,11 +95,11 @@ public:
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
 			py = cell_y + cell_height * 0.5F;
 
-			this->alarm = new OptionBitmaplet("Alarm", application_fit_size(screen_status_alarm_width));
-			this->yacht = new Bitmaplet("skeleton", application_fit_size(screen_status_yacht_width));
+			this->alarm = new OptionBitmaplet("Alarm", screen_to_application_size(screen_status_alarm_width));
+			this->yacht = new Bitmaplet("skeleton", screen_to_application_size(screen_status_yacht_width));
 
-			this->master->insert(this->alarm, application_fit_size(screen_status_alarm_x), py, GraphletAlignment::LC);
-			this->master->insert(this->yacht, application_fit_size(screen_status_yacht_x), py, GraphletAlignment::LC);
+			this->master->insert(this->alarm, screen_to_application_size(screen_status_alarm_x), py, GraphletAlignment::LC);
+			this->master->insert(this->yacht, screen_to_application_size(screen_status_yacht_x), py, GraphletAlignment::LC);
 
 			this->alarm->set_value(true);
 		}
@@ -144,11 +144,11 @@ Statusbar::~Statusbar() {
 
 void Statusbar::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float cell_width = application_fit_size(385.0F);
-		float cell_height = application_fit_size(200.0F);
-		float cell_gapsize = application_fit_size(10.0F);
+		float cell_width = design_to_application_width(385.0F);
+		float cell_height = design_to_application_height(200.0F);
+		float cell_gapsize = design_to_application_width(10.0F);
 		float cell_y = cell_gapsize;
-		float yacht_cell_x = application_fit_size(1388.0F);
+		float yacht_cell_x = design_to_application_width(1388.0F);
 
 		Rect boxes[] = {
 			Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),
