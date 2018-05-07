@@ -228,4 +228,16 @@
   <data name="SternDeck" xml:space="preserve">
     <value>艉甲板</value>
   </data>
+  <data name="ampere" xml:space="preserve">
+    <value>电流</value>
+  </data>
+  <data name="frequency" xml:space="preserve">
+    <value>频率</value>
+  </data>
+  <data name="rpm" xml:space="preserve">
+    <value>转速</value>
+  </data>
+  <data name="voltage" xml:space="preserve">
+    <value>电压</value>
+  </data>
 </root>

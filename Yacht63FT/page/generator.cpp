@@ -18,8 +18,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class GInfo { mode, t_sea, t_pipe, aux, _ };
-private enum class GMode { Breakdown, Heating, Refrigeration, _ };
+private enum class G { RPM, Power, Gauges, Alert, _ };
 private enum class GStatus { Normal };
 
 static const unsigned int region_count = 2U;
@@ -30,13 +29,39 @@ private class GDecorator final : public IPlanetDecorator {
 public:
 	GDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
 		this->region_width = (width - padding) / float(region_count) - padding;
-		
-		this->bgcolor = Colours::make(decorator_text_color);
+
 		this->rpm_bgcolors[0] = Colours::make(0x101410U);
 		this->rpm_bgcolors[1] = Colours::make(0x151915U);
 		this->power_cell_color = Colours::make(0x131615U);
-		this->power_bgcolor = Colours::make(0x313131U);
-		this->gauges_bgcolor = Colours::make(0x1E1E1EU);
+		this->fgcolors[G::Power] = Colours::make(0x878787U);
+		this->fgcolors[G::Gauges] = Colours::make(0x919191U);
+		this->bgcolors[G::Power] = Colours::make(0x313131U);
+		this->bgcolors[G::Gauges] = Colours::make(0x1E1E1EU);
+		this->bgcolors[G::Alert] = Colours::make(0x131615U);
+
+		this->heights[G::RPM] = design_to_application_height(180.0F);
+		this->heights[G::Power] = design_to_application_height(125.0F);
+		this->heights[G::Alert] = design_to_application_height(70.0F);
+		this->heights[G::Gauges] = height
+			- (this->heights[G::RPM] + this->heights[G::Power] + this->heights[G::Alert])
+			- this->region_padding * float(static_cast<unsigned int>(G::_) + 1);
+
+		this->ys[G::RPM] = this->region_padding;
+		for (unsigned int region = 1; region < static_cast<unsigned int>(G::_); region++) {
+			G prev = static_cast<G>(region - 1);
+
+			this->ys[static_cast<G>(region)] = this->ys[prev] + this->heights[prev] + this->region_padding;
+		}
+
+		{ // initialize labels
+			CanvasTextFormat^ rpm_font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+			CanvasTextFormat^ power_font = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
+
+			this->rpm = make_text_layout(speak("rpm"), rpm_font);
+			this->voltage = make_text_layout(speak("voltage"), power_font);
+			this->ampere = make_text_layout(speak("ampere"), power_font);
+			this->frequency = make_text_layout(speak("frequncy"), power_font);
+		}
 	}
 
 public:
@@ -47,58 +72,65 @@ public:
 	}
 
 public:
-	void fill_info_anchor(unsigned int idx, GInfo id, float* anchor_x, float* anchor_y) {
-		float x, y, width, height;
+	void fill_power_cell_extent(unsigned int g_idx, unsigned int c_idx, float* x, float* y, float* width, float* height) {
+		static float cell_gapsize = design_to_application_width(8.0F);
+		static float cell_height = design_to_application_height(102.0F);
+		static float cell_margin = (this->heights[G::Power] - cell_height) * 0.5F;
+		static float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
 
-		switch (id) {
-		case GInfo::mode:   SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.64F); break;
-		case GInfo::t_sea:  SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.64F); break;
-		case GInfo::t_pipe: SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.86F); break;
-		case GInfo::aux:    SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.86F); break;
-		}
+		float left_x = (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
+		float cell_x = left_x + cell_margin + (cell_width + cell_gapsize) * float(c_idx);
+		float cell_y = this->ys[G::Power] + cell_margin;
+
+		SET_VALUES(x, cell_x, y, cell_y);
+		SET_VALUES(width, cell_width, height, cell_height);
 	}
 
 private:
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
 		float x = (this->region_width + this->region_padding) * float(idx) + this->region_padding;
-		float rpm_height = design_to_application_height(182.0F);
-		float power_y = this->region_padding + rpm_height;
-		float power_height = design_to_application_height(125.0F);
-		float gauges_y = power_y + power_height + this->region_padding;
-		float gauges_height = design_to_application_height(514.0F);
 
-		ds->FillRectangle(x, this->region_padding, this->region_width, rpm_height, this->rpm_bgcolors[idx]);
-		ds->FillRectangle(x, gauges_y, this->region_width, gauges_height, this->gauges_bgcolor);
-		
+		ds->FillRectangle(x, this->ys[G::RPM], this->region_width, this->heights[G::RPM], this->rpm_bgcolors[idx]);
+
+		for (G region = static_cast<G>(1); region < G::_; region++) {
+			float y = this->ys[region];
+			float height = this->heights[region];
+
+			if (region != G::Alert) {
+				ds->FillRectangle(x, y, this->region_width, height, this->bgcolors[region]);
+			} else {
+				ds->FillRoundedRectangle(x, y, this->region_width, height, 8.0F, 8.0F, this->bgcolors[region]);
+			}
+		}
+
 		{ // draw power subregions
-			float cell_gapsize = design_to_application_width(8.0F);
-			float cell_height = design_to_application_height(102.0F);
-			float cell_margin = (power_height - cell_height) * 0.5F;
-			float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
-			float cell_x = x + cell_margin;
-			float cell_y = power_y + cell_margin;
+			float cell_x, cell_y, cell_width, cell_height;
 
-			ds->FillRectangle(x, power_y, this->region_width, power_height, this->power_bgcolor);
 			for (unsigned int i = 0; i < 3; i++) {
-				ds->FillRoundedRectangle(
-					cell_x + (cell_width + cell_gapsize) * float(i), cell_y,
-					cell_width, cell_height, cell_gapsize, cell_gapsize,
-					this->power_cell_color);
+				this->fill_power_cell_extent(idx, i, &cell_x, &cell_y, &cell_width, &cell_height);
+				ds->FillRoundedRectangle(cell_x, cell_y, cell_width, cell_height, 8.0F, 8.0F, this->power_cell_color);
 			}
 		}
 	}
 
 private:
-	ICanvasBrush^ bgcolor;
+	CanvasTextLayout^ rpm;
+	CanvasTextLayout^ voltage;
+	CanvasTextLayout^ ampere;
+	CanvasTextLayout^ frequency;
+
+private:
 	ICanvasBrush^ rpm_bgcolors[region_count];
 	ICanvasBrush^ power_cell_color;
-	ICanvasBrush^ power_bgcolor;
-	ICanvasBrush^ gauges_bgcolor;
+	std::map<G, ICanvasBrush^> fgcolors;
+	std::map<G, ICanvasBrush^> bgcolors;
 
 private:
 	float region_width;
 	float region_height;
 	float region_padding;
+	std::map<G, float> ys;
+	std::map<G, float> heights;
 };
 
 /*************************************************************************************************/
@@ -125,14 +157,6 @@ public:
 		float label_yoffset = screen_to_application_size(screen_caption_yoff);
 		float icon_width = screen_to_application_size(64.0F);
 		float mode_width = screen_to_application_size(46.0F);
-	}
-
-private:
-	void load_info(IGraphlet* g, unsigned int i, GInfo type) {
-		float anchor_x, anchor_y;
-
-		this->decorator->fill_info_anchor(i, type, &anchor_x, &anchor_y);
-		this->master->insert(g, anchor_x, anchor_y, GraphletAlignment::CB);
 	}
 
 // never deletes these graphlets mannually

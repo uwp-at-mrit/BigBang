@@ -98,6 +98,7 @@ public:
 		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(this->workspace), name);
 		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(plc_master), name);
 
+		syslog(Log::Info, L"%f, %f", fit_height - fit_nav_height - fit_bar_height, design_to_application_height(939.0F));
 		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
 		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
 		this->load_display(this->statusbar, fit_width, fit_bar_height);

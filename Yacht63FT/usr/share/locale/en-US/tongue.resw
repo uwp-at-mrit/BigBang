@@ -228,4 +228,16 @@
   <data name="SternDeck" xml:space="preserve">
     <value>Stern Deck</value>
   </data>
+  <data name="ampere" xml:space="preserve">
+    <value>Ampere</value>
+  </data>
+  <data name="frequency" xml:space="preserve">
+    <value>Frequency</value>
+  </data>
+  <data name="rpm" xml:space="preserve">
+    <value>RPM</value>
+  </data>
+  <data name="voltage" xml:space="preserve">
+    <value>Voltage</value>
+  </data>
 </root>
