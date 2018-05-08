@@ -68,13 +68,16 @@ TextExtent get_text_extent(Platform::String^ message, CanvasTextFormat^ font, bo
 }
 
 TextExtent get_text_extent(ICanvasResourceCreator^ ds, Platform::String^ message, CanvasTextFormat^ font, bool trim) {
-    auto layout = ref new CanvasTextLayout(ds, message, font, 0.0F, 0.0F);
-    Rect logical = trim ? layout->LayoutBounds : layout->LayoutBoundsIncludingTrailingWhitespace;
-    Rect ink = layout->DrawBounds;
-    float top = ink.Y - logical.Y;
-    float bottom = logical.Height - ink.Height - top;
-    float left = ink.X - logical.X;
-    float right = logical.Width - ink.Width - left;
+    return get_text_extent(ref new CanvasTextLayout(ds, message, font, 0.0F, 0.0F), trim);    
+}
 
-    return { logical.Width, logical.Height, top, right, bottom, left };
+TextExtent get_text_extent(CanvasTextLayout^ layout, bool trim) {
+	Rect logical = trim ? layout->LayoutBounds : layout->LayoutBoundsIncludingTrailingWhitespace;
+	Rect ink = layout->DrawBounds;
+	float top = ink.Y - logical.Y;
+	float bottom = logical.Height - ink.Height - top;
+	float left = ink.X - logical.X;
+	float right = logical.Width - ink.Width - left;
+
+	return { logical.Width, logical.Height, top, right, bottom, left };
 }

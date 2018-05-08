@@ -2,6 +2,7 @@
 
 #include "graphlet/primitive.hpp"
 #include "brushes.hxx"
+#include "text.hpp"
 
 namespace WarGrey::SCADA {
 	private class Textlet abstract : public virtual WarGrey::SCADA::IGraphlet {
@@ -18,6 +19,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
@@ -52,16 +54,25 @@ namespace WarGrey::SCADA {
 		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font = nullptr,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			WarGrey::SCADA::Colour^ scale_color = WarGrey::SCADA::Colours::Yellow,
-			WarGrey::SCADA::Colour^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ scale_color = WarGrey::SCADA::Colours::Yellow,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
+
+		ScaleTextlet(Platform::String^ unit,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	public:
 		void construct() override;
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
 		void on_value_change(float value) override;
+
+	protected:
+		void fill_vmetrics(WarGrey::SCADA::TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr);
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scale_layout;
@@ -69,5 +80,9 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ scale_color;
+
+	private:
+		WarGrey::SCADA::TextExtent scale_box;
+		WarGrey::SCADA::TextExtent unit_box;
 	};
 }

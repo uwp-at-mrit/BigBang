@@ -1,12 +1,12 @@
 #include "graphlet/textlet.hpp"
 
-#include "text.hpp"
 #include "paint.hpp"
 #include "tongue.hpp"
 #include "string.hpp"
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
 using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -15,9 +15,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
 
-static inline void draw_layout_lb(CanvasDrawingSession^ ds, CanvasTextLayout^ content, float x, float by, ICanvasBrush^ color) {
-	ds->DrawTextLayout(content, x, by - content->LayoutBounds.Height, color);
+static inline float layout_y(TextExtent& te, float by) {
+	return by - (te.height - te.bspace);
 }
+
 
 /*************************************************************************************************/
 void Textlet::set_color(ICanvasBrush^ color) {
@@ -73,6 +74,17 @@ void Textlet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
+void Textlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	if (this->text_layout != nullptr) {
+		TextExtent te = get_text_extent(this->text_layout);
+
+		SET_VALUES(t, te.tspace, b, te.bspace);
+		SET_VALUES(l, te.lspace, r, te.rspace);
+	} else {
+		IGraphlet::fill_margin(x, y, t, r, b, l);
+	}
+}
+
 void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	if (this->text_layout != nullptr) {
 		if (this->text_color == nullptr) {
@@ -115,15 +127,19 @@ Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned i
 }
 
 /*************************************************************************************************/
+ScaleTextlet::ScaleTextlet(Platform::String^ unit, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
+	: ScaleTextlet(unit, "", "", sfont, lfont, color, color) {}
+	
 ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
-	, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, Colour^ scolor, Colour^ lcolor)
+	, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ scolor, ICanvasBrush^ lcolor)
 	: scale_color(scolor) {
 	auto scale_font = ((sfont == nullptr) ? make_bold_text_format() : sfont);
 	auto label_font = ((lfont == nullptr) ? scale_font : lfont);
 
-	this->set_color(lcolor);
+	this->set_color((lcolor == nullptr) ? scolor : lcolor);
 	this->set_font(scale_font);
 	this->unit_layout = make_text_layout(speak(unit), label_font);
+	this->unit_box = get_text_extent(this->unit_layout);
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
@@ -149,15 +165,30 @@ void ScaleTextlet::construct() {
 }
 
 void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
-	Textlet::fill_extent(x, y, w, h);
-
 	if (w != nullptr) {
-		(*w) += (this->scale_layout->LayoutBounds.Width + this->unit_layout->LayoutBounds.Width);
+		(*w) = this->scale_box.width + this->unit_box.width;
+
+		if (this->text_layout != nullptr) {
+			(*w) += this->text_layout->LayoutBounds.Width;
+		}
 	}
 
 	if (h != nullptr) {
-		(*h) = fmax((*h), fmax(this->scale_layout->LayoutBounds.Height, this->unit_layout->LayoutBounds.Height));
+		TextExtent label_box;
+		float tspace, bspace;
+		
+		this->fill_vmetrics(&label_box, &tspace, &bspace, h);
 	}
+}
+
+void ScaleTextlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	TextExtent label_box;
+	float tspace, bspace;
+
+	this->fill_vmetrics(&label_box, &tspace, &bspace);
+
+	SET_VALUES(l, label_box.lspace, r, this->unit_box.rspace);
+	SET_VALUES(t, tspace, b, bspace);
 }
 
 void ScaleTextlet::on_value_change(float value) {
@@ -168,11 +199,13 @@ void ScaleTextlet::on_value_change(float value) {
 	}
 		
 	this->scale_layout = make_text_layout(s, this->text_font);
+	this->scale_box = get_text_extent(this->scale_layout);
 }
 
 void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	TextExtent label_box;
+	float tspace, bspace, height, by;
 	float lx = x;
-	float by, height;
 
 	if (this->text_color == nullptr) {
 		this->set_color();
@@ -182,14 +215,32 @@ void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		this->scale_color = this->text_color;
 	}
 
-	this->fill_extent(x, y, nullptr, &height);
-	by = y + height;
+	this->fill_vmetrics(&label_box, &tspace, &bspace, &height);
+	by = y + height - bspace;
 
 	if (this->text_layout != nullptr) {
-		draw_layout_lb(ds, this->text_layout, x, by, this->text_color);
-		lx += this->text_layout->LayoutBounds.Width;
+		ds->DrawTextLayout(this->text_layout, x, layout_y(label_box, by), this->text_color);
+		lx += label_box.width;
 	}
 
-	draw_layout_lb(ds, this->scale_layout, lx, by, this->scale_color);
-	draw_layout_lb(ds, this->unit_layout, lx + this->scale_layout->LayoutBounds.Width, by, this->text_color);
+	ds->DrawTextLayout(this->scale_layout, lx, layout_y(this->scale_box, by), this->scale_color);
+	ds->DrawTextLayout(this->unit_layout, lx + this->scale_box.width, layout_y(this->unit_box, by), this->text_color);
+}
+
+void ScaleTextlet::fill_vmetrics(TextExtent* label_box, float* tspace, float* bspace, float* height) {
+	(*label_box) = ((this->text_layout == nullptr) ? this->scale_box : get_text_extent(this->text_layout));
+	(*tspace) = fmin(label_box->tspace, fmin(this->scale_box.tspace, this->unit_box.tspace));
+	(*bspace) = fmin(label_box->bspace, fmin(this->scale_box.bspace, this->unit_box.bspace));
+
+	if (height != nullptr) {
+		float hsink = this->scale_box.height - this->scale_box.tspace - this->scale_box.bspace;
+		float huink = this->unit_box.height - this->unit_box.tspace - this->unit_box.bspace;
+		float ink_height = fmax(hsink, huink);
+
+		if (this->text_layout != nullptr) {
+			ink_height = fmax(ink_height, label_box->height - label_box->tspace - label_box->bspace);
+		}
+
+		(*height) = (*tspace) + ink_height + (*bspace);
+	}
 }

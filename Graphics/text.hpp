@@ -42,6 +42,10 @@ Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ make_bold_text_format(
 	Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment align = Microsoft::Graphics::Canvas::Text::CanvasHorizontalAlignment::Left);
 
 WarGrey::SCADA::TextExtent get_text_extent(
+	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ font,
+	bool is_trim = false);
+
+WarGrey::SCADA::TextExtent get_text_extent(
     Platform::String^ message,
     Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
     bool is_trim = false);

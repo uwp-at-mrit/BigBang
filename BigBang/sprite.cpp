@@ -1,5 +1,6 @@
 #include <ppltasks.h>
 
+#include "box.hpp"
 #include "sprite.hpp"
 #include "syslog.hpp"
 
@@ -9,6 +10,11 @@ using namespace Concurrency;
 
 using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
+
+void ISprite::fill_margin(float x, float y, float* top, float* right, float* bottom, float* left) {
+	SET_BOXES(top, bottom, 0.0F);
+	SET_BOXES(right, left, 0.0F);
+}
 
 CanvasRenderTarget^ ISprite::take_snapshot(float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();

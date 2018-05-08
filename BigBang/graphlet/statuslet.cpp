@@ -101,9 +101,9 @@ static void initialize_status_font() {
 	if (status_font == nullptr) {
 		status_font = make_bold_text_format("Microsoft YaHei", 12.0F);
 		
-		TextExtent ts = get_text_extent(speak(":plc:"), status_font);
-		status_height = ts.height * 1.2F;
-		status_prefix_width = ts.width;
+		TextExtent te = get_text_extent(speak(":plc:"), status_font);
+		status_height = te.height * 1.2F;
+		status_prefix_width = te.width;
 	}
 }
 

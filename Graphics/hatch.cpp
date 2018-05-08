@@ -52,9 +52,9 @@ CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, 
 	Platform::String^ max_mark = vmax.ToString();
 	unsigned int span = std::max(max_mark->Length(), min_mark->Length());
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_scale_font : ft);
-	TextExtent ts = get_text_extent(max_mark, font);
-	float ch = ts.width / span;
-	float em = ts.height - ts.tspace - ts.bspace;
+	TextExtent te = get_text_extent(max_mark, font);
+	float ch = te.width / span;
+	float em = te.height - te.tspace - te.bspace;
 	float mark_width = ch * scale_lmark_ratio;
 	float mark_x = float(span) * ch + scale_space_ratio * ch;
 	float mark_y = em * 0.5F;
@@ -66,7 +66,7 @@ CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, 
 	for (unsigned int i = 0; i <= step; i += 2) {
 		Platform::String^ scale = make_scale_string(vmax - delta * float(i), span, &scale_xoff);
 
-		auto translation = make_translation_matrix(scale_xoff * ch, interval * float(i) - ts.tspace);
+		auto translation = make_translation_matrix(scale_xoff * ch, interval * float(i) - te.tspace);
 		marks = geometry_union(marks, paragraph(make_text_layout(scale, font)), translation);
 	}
 

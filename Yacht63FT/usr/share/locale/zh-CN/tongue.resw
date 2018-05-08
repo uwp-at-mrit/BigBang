@@ -195,7 +195,7 @@
   <data name=":t_sea:" xml:space="preserve">
     <value>海水温度</value>
   </data>
-  <data name="celsius" xml:space="preserve">
+  <data name="&lt;celsius&gt;" xml:space="preserve">
     <value>°C</value>
   </data>
   <data name="Normal" xml:space="preserve">
@@ -254,5 +254,8 @@
   </data>
   <data name=":t_water:" xml:space="preserve">
     <value>冷却水温度</value>
+  </data>
+  <data name="&lt;rpm&gt;" xml:space="preserve">
+    <value>rpm</value>
   </data>
 </root>

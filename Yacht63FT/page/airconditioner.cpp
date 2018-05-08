@@ -95,7 +95,6 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		Platform::String^ T = speak("celsius");
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
 		float label_yoffset = design_to_application_height(screen_caption_yoff);
 		float icon_width = design_to_application_width(64.0F);
@@ -110,8 +109,8 @@ public:
 			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, Colours::make(decorator_text_color));
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new UnionBitmaplet<ACMode>("ACMode", mode_width);
-			this->Tseas[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
-			this->Tpipes[room] = new ScaleTextlet(T, "", "", this->fonts[1], this->fonts[2], Colours::GhostWhite, Colours::GhostWhite);
+			this->Tseas[room] = new ScaleTextlet("<celsius>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
+			this->Tpipes[room] = new ScaleTextlet("<celsius>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
@@ -172,5 +171,7 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 }
 
 void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
-	// this override does nothing but disabling the default behaviours
+#ifdef _DEBUG
+	Planet::on_tap(g, local_x, local_y, shifted, controlled);
+#endif
 }

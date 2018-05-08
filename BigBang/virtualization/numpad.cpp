@@ -35,7 +35,7 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 }
 
 void Numpad::create() {
-	TextExtent ts = get_text_extent("0", this->label_font);
+	TextExtent te = get_text_extent("0", this->label_font);
 	Color fg = Colours::Foreground->Color;
 	Color bg = Colours::Background->Color;
 	
@@ -45,7 +45,7 @@ void Numpad::create() {
 	this->highlight = make_solid_brush(rgba(fg, 0.382));
 	this->taplight = make_solid_brush(rgba(bg, 0.618));
 
-	this->em = ts.height;
+	this->em = te.height;
 	this->gapsize = this->em * 0.382F;
 	this->cellsize = this->em * 1.618F;
 	this->radius = this->gapsize * 0.5F;

@@ -21,11 +21,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum class G { RPM, Power, Metrics, Alert, _ };
 private enum class GPower { voltage, ampere, frequency, _ };
 private enum class GMetrics { sea, oil, water, _ };
-private enum class GStatus { Normal };
 
 static const unsigned int gcount = 2U;
 
 static const float corner_radius = 8.0F;
+static const float rpm_label_fx = 0.089F;
 static const float label_fy = 0.25F;
 
 private class GDecorator final : public IPlanetDecorator {
@@ -107,6 +107,13 @@ public:
 		SET_VALUES(width, cell_width, height, cell_height);
 	}
 
+	void fill_rpm_anchor(unsigned int g_idx, float fw, float fh, float* x, float* y) {
+		float anchor_x = this->region_x(g_idx) + this->region_width * fw;
+		float anchor_y = this->ys[G::RPM] + this->heights[G::RPM] * fh;
+
+		SET_VALUES(x, anchor_x, y, anchor_y);
+	}
+
 	void fill_power_anchor(unsigned int g_idx, GPower p, float fw, float fh, float* x, float* y) {
 		float cell_x, cell_y, cell_width, cell_height;
 
@@ -116,11 +123,11 @@ public:
 		SET_BOX(y, (cell_y + cell_height * fh));
 	}
 
-	void fill_metrics_anchor(unsigned int g_idx, GMetrics m, float fy, float* x, float* y) {
+	void fill_metrics_anchor(unsigned int g_idx, GMetrics m, float fh, float* x, float* y) {
 		static float mflcount = static_cast<float>(GMetrics::_);
 		static float subwidth = this->region_width / mflcount;
 		float metrics_x = this->region_x(g_idx) +  subwidth * (static_cast<float>(m) + 0.5F);
-		float metrics_y = this->ys[G::Metrics] + this->heights[G::Metrics] * fy;
+		float metrics_y = this->ys[G::Metrics] + this->heights[G::Metrics] * fh;
 
 		SET_VALUES(x, metrics_x, y, metrics_y);
 	}
@@ -155,11 +162,10 @@ private:
 	}
 
 	void draw_region_label(CanvasDrawingSession^ ds, unsigned int idx) {
-		float region_x = this->region_x(idx);
 		float offset = this->rpm->LayoutBounds.Height * 0.5F;
-		float anchor_x = region_x + design_to_application_width(86.0F);
-		float anchor_y = this->ys[G::RPM] + this->heights[G::RPM] * label_fy;
+		float anchor_x, anchor_y;
 
+		this->fill_rpm_anchor(idx, rpm_label_fx, label_fy, &anchor_x, &anchor_y);
 		ds->DrawTextLayout(this->rpm, anchor_x, anchor_y - offset, this->fgcolors[G::RPM]);
 
 		{ // draw power labels
@@ -217,27 +223,43 @@ public:
 	}
 
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
-		this->fonts[0] = make_text_format("Microsoft YaHei", screen_to_application_size(33.75F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", screen_to_application_size(37.50F));
-		this->fonts[2] = make_text_format("Microsoft YaHei", screen_to_application_size(30.00F));
+		Platform::String^ scale_face = "Microsoft YaHei";
+		this->rpm_fonts[0] = make_text_format(scale_face, design_to_application_height(125.0F));
+		this->rpm_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
+		this->power_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
+		this->power_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
+		this->metrics_fonts[0] = make_text_format(scale_face, design_to_application_height(24.0F));
+		this->metrics_fonts[1] = make_text_format(scale_face, design_to_application_height(20.00F));
+
+		this->fgcolor = Colours::GhostWhite;
 
 		this->decorator->reference();
 	}
 
 public:
-	void load_and_flow(float width, float height) {
-		Platform::String^ T = speak("celsius");
-		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
-		float label_yoffset = screen_to_application_size(screen_caption_yoff);
-		float icon_width = screen_to_application_size(64.0F);
-		float mode_width = screen_to_application_size(46.0F);
+	void load_and_flow() {
+		Platform::String^ T = "<celsius>";
+		float anchor_x, anchor_y;
+
+		for (unsigned int idx = 0; idx < gcount; idx++) {
+			this->decorator->fill_rpm_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
+			this->rpms[idx] = new ScaleTextlet("<rpm>", this->rpm_fonts[0], this->rpm_fonts[1], this->fgcolor);
+			this->master->insert(this->rpms[idx], anchor_x, anchor_y, GraphletAlignment::CC);
+		}
 	}
 
 // never deletes these graphlets mannually
 private:
+	ScaleTextlet* rpms[gcount];
+	std::map<GPower, ScaleTextlet*> powers;
+	std::map<GMetrics, ScaleTextlet*> pressures;
+	std::map<GMetrics, ScaleTextlet*> temperatures;
 		
 private:
-	CanvasTextFormat^ fonts[3];
+	CanvasTextFormat^ rpm_fonts[2];
+	CanvasTextFormat^ power_fonts[2];
+	CanvasTextFormat^ metrics_fonts[2];
+	ICanvasBrush^ fgcolor;
 	GeneratorPage* master;
 	GDecorator* decorator;
 };
@@ -256,7 +278,7 @@ void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float 
 		GDecorator* regions = new GDecorator(width, height, design_to_application_height(2.0F));
 		GBoard* gb = new GBoard(this, regions);
 
-		//gb->load_and_flow(width, height);
+		gb->load_and_flow();
 
 		this->dashboard = gb;
 		this->set_decorator(regions);
@@ -265,5 +287,7 @@ void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float 
 }
 
 void GeneratorPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
-	// this override does nothing but disabling the default behaviours
+#ifdef _DEBUG
+	Planet::on_tap(g, local_x, local_y, shifted, controlled);
+#endif
 }

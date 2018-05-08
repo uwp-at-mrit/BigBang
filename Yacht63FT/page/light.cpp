@@ -99,5 +99,7 @@ void LightPage::load(CanvasCreateResourcesReason reason, float width, float heig
 }
 
 void LightPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
-	// this override does nothing but disabling the default behaviours
+#ifdef _DEBUG
+	Planet::on_tap(g, local_x, local_y, shifted, controlled);
+#endif
 }
