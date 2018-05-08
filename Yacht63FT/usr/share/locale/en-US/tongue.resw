@@ -193,7 +193,7 @@
     <value>Coil Pipe Temperature</value>
   </data>
   <data name=":t_sea:" xml:space="preserve">
-    <value>Sea Temperature</value>
+    <value>Sea Water Temperature</value>
   </data>
   <data name="celsius" xml:space="preserve">
     <value>°C</value>
@@ -228,16 +228,31 @@
   <data name="SternDeck" xml:space="preserve">
     <value>Stern Deck</value>
   </data>
-  <data name="ampere" xml:space="preserve">
+  <data name=":ampere:" xml:space="preserve">
     <value>Ampere</value>
   </data>
-  <data name="frequency" xml:space="preserve">
+  <data name=":frequency:" xml:space="preserve">
     <value>Frequency</value>
   </data>
-  <data name="rpm" xml:space="preserve">
+  <data name=":rpm:" xml:space="preserve">
     <value>RPM</value>
   </data>
-  <data name="voltage" xml:space="preserve">
+  <data name=":voltage:" xml:space="preserve">
     <value>Voltage</value>
+  </data>
+  <data name=":p_oil:" xml:space="preserve">
+    <value>Lubricating Oil Pressure</value>
+  </data>
+  <data name=":p_sea:" xml:space="preserve">
+    <value>Sea Water Pressure</value>
+  </data>
+  <data name=":P_water:" xml:space="preserve">
+    <value>Cooling Water Pressure</value>
+  </data>
+  <data name=":t_oil:" xml:space="preserve">
+    <value>Lubricating Oil Temperature</value>
+  </data>
+  <data name=":t_water:" xml:space="preserve">
+    <value>Cooling Water Temperature</value>
   </data>
 </root>

@@ -45,10 +45,10 @@ public:
 		Platform::String^ captions[] = { ":oiltank:", ":battery:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
-		float icon_width = screen_to_application_size(110.0F) * 0.618F;
-		float label_xoffset = screen_to_application_size(screen_status_label_xoff);
-		float label_yoffset = screen_to_application_size(screen_status_label_yoff);
-		float parameter_yoffset = screen_to_application_size(screen_status_parameter_yoff);
+		float icon_width = design_to_application_width(110.0F) * 0.618F;
+		float label_xoffset = design_to_application_width(screen_status_label_xoff);
+		float label_yoffset = design_to_application_height(screen_status_label_yoff);
+		float parameter_yoffset = design_to_application_height(screen_status_parameter_yoff);
 
 		for (unsigned int i = Status::OilTank; i <= Status::GPS_E; i++) {
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
@@ -95,11 +95,11 @@ public:
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
 			py = cell_y + cell_height * 0.5F;
 
-			this->alarm = new OptionBitmaplet("Alarm", screen_to_application_size(screen_status_alarm_width));
-			this->yacht = new Bitmaplet("skeleton", screen_to_application_size(screen_status_yacht_width));
+			this->alarm = new OptionBitmaplet("Alarm", design_to_application_width(screen_status_alarm_width));
+			this->yacht = new Bitmaplet("skeleton", design_to_application_width(screen_status_yacht_width));
 
-			this->master->insert(this->alarm, screen_to_application_size(screen_status_alarm_x), py, GraphletAlignment::LC);
-			this->master->insert(this->yacht, screen_to_application_size(screen_status_yacht_x), py, GraphletAlignment::LC);
+			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAlignment::LC);
+			this->master->insert(this->yacht, design_to_application_width(screen_status_yacht_x), py, GraphletAlignment::LC);
 
 			this->alarm->set_value(true);
 		}

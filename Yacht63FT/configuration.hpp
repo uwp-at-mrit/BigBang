@@ -8,7 +8,7 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Debug;
 static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 #endif
 
-static Platform::String^ remote_host_at_19 = "192.168.8.102";
+static Platform::String^ remote_host_at_19 = "192.168.8.124";
 
 static Platform::String^ remote_test_server = remote_host_at_19;
 

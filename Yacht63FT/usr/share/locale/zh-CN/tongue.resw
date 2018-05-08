@@ -228,16 +228,31 @@
   <data name="SternDeck" xml:space="preserve">
     <value>艉甲板</value>
   </data>
-  <data name="ampere" xml:space="preserve">
+  <data name=":ampere:" xml:space="preserve">
     <value>电流</value>
   </data>
-  <data name="frequency" xml:space="preserve">
+  <data name=":frequency:" xml:space="preserve">
     <value>频率</value>
   </data>
-  <data name="rpm" xml:space="preserve">
+  <data name=":rpm:" xml:space="preserve">
     <value>转速</value>
   </data>
-  <data name="voltage" xml:space="preserve">
+  <data name=":voltage:" xml:space="preserve">
     <value>电压</value>
+  </data>
+  <data name=":p_oil:" xml:space="preserve">
+    <value>滑油压力</value>
+  </data>
+  <data name=":p_sea:" xml:space="preserve">
+    <value>海水压力</value>
+  </data>
+  <data name=":p_water:" xml:space="preserve">
+    <value>冷却水压力</value>
+  </data>
+  <data name=":t_oil:" xml:space="preserve">
+    <value>滑油温度</value>
+  </data>
+  <data name=":t_water:" xml:space="preserve">
+    <value>冷却水温度</value>
   </data>
 </root>
