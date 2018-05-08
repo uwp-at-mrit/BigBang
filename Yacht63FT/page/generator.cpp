@@ -2,7 +2,7 @@
 #include "decorator/decorator.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/dashboard/thermometerlet.hpp"
+#include "graphlet/dashboard/indicatorlet.hpp"
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
@@ -18,9 +18,9 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class G { RPM, Power, Metrics, Alert, _ };
+private enum class G { RPM, Power, Gauge, Alert, _ };
 private enum class GPower { voltage, ampere, frequency, _ };
-private enum class GMetrics { sea, oil, water, _ };
+private enum class GGauge { sea, oil, water, _ };
 
 static const unsigned int gcount = 2U;
 
@@ -38,15 +38,15 @@ public:
 		this->power_cell_color = Colours::make(0x131615U);
 		this->fgcolors[G::RPM] = Colours::GhostWhite;
 		this->fgcolors[G::Power] = Colours::make(0x878787U);
-		this->fgcolors[G::Metrics] = Colours::make(0x919191U);
+		this->fgcolors[G::Gauge] = Colours::make(0x919191U);
 		this->bgcolors[G::Power] = Colours::make(0x313131U);
-		this->bgcolors[G::Metrics] = Colours::make(0x1E1E1EU);
+		this->bgcolors[G::Gauge] = Colours::make(0x1E1E1EU);
 		this->bgcolors[G::Alert] = Colours::make(0x131615U);
 
 		this->heights[G::RPM] = design_to_application_height(180.0F);
 		this->heights[G::Power] = design_to_application_height(125.0F);
 		this->heights[G::Alert] = design_to_application_height(70.0F);
-		this->heights[G::Metrics] = height
+		this->heights[G::Gauge] = height
 			- (this->heights[G::RPM] + this->heights[G::Power] + this->heights[G::Alert])
 			- this->region_padding * float(static_cast<unsigned int>(G::_) + 1);
 
@@ -68,7 +68,7 @@ public:
 				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
 			}
 
-			for (GMetrics m = static_cast<GMetrics>(0); m < GMetrics::_; m++) {
+			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
 				this->pressures[m] = make_text_layout(speak(":p_" + m.ToString() + ":"), mfont);
 				this->temperatures[m] = make_text_layout(speak(":t_" + m.ToString() + ":"), mfont);
 			}
@@ -123,11 +123,11 @@ public:
 		SET_BOX(y, (cell_y + cell_height * fh));
 	}
 
-	void fill_metrics_anchor(unsigned int g_idx, GMetrics m, float fh, float* x, float* y) {
-		static float mflcount = static_cast<float>(GMetrics::_);
+	void fill_gauges_anchor(unsigned int g_idx, GGauge m, float fh, float* x, float* y) {
+		static float mflcount = static_cast<float>(GGauge::_);
 		static float subwidth = this->region_width / mflcount;
 		float metrics_x = this->region_x(g_idx) +  subwidth * (static_cast<float>(m) + 0.5F);
-		float metrics_y = this->ys[G::Metrics] + this->heights[G::Metrics] * fh;
+		float metrics_y = this->ys[G::Gauge] + this->heights[G::Gauge] * fh;
 
 		SET_VALUES(x, metrics_x, y, metrics_y);
 	}
@@ -170,25 +170,21 @@ private:
 
 		{ // draw power labels
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
-				Rect box = this->powers[p]->LayoutBounds;
-
-				this->fill_power_anchor(idx, p, 0.25F, label_fy, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->powers[p],
-					anchor_x - box.Width,
-					anchor_y - box.Height * 0.5F,
-					this->fgcolors[G::Power]);
+				offset = this->powers[p]->LayoutBounds.Height * 0.5F;
+				this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
+				ds->DrawTextLayout(this->powers[p], anchor_x, anchor_y - offset, this->fgcolors[G::Power]);
 			}
 		}
 
 		{ // draw metrics labels
-			for (GMetrics m = static_cast<GMetrics>(0); m < GMetrics::_; m++) {
+			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
 				offset = this->temperatures[m]->LayoutBounds.Width * 0.5F;
-				this->fill_metrics_anchor(idx, m, 0.25F, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->temperatures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Metrics]);
+				this->fill_gauges_anchor(idx, m, 0.26F, &anchor_x, &anchor_y);
+				ds->DrawTextLayout(this->temperatures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
 
 				offset = this->pressures[m]->LayoutBounds.Width * 0.5F;
-				this->fill_metrics_anchor(idx, m, 0.75F, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->pressures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Metrics]);
+				this->fill_gauges_anchor(idx, m, 0.76F, &anchor_x, &anchor_y);
+				ds->DrawTextLayout(this->pressures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
 			}
 		}
 	}
@@ -196,8 +192,8 @@ private:
 private:
 	CanvasTextLayout^ rpm;
 	std::map<GPower, CanvasTextLayout^> powers;
-	std::map<GMetrics, CanvasTextLayout^> pressures;
-	std::map<GMetrics, CanvasTextLayout^> temperatures;
+	std::map<GGauge, CanvasTextLayout^> pressures;
+	std::map<GGauge, CanvasTextLayout^> temperatures;
 
 private:
 	ICanvasBrush^ rpm_bgcolors[gcount];
@@ -223,28 +219,50 @@ public:
 	}
 
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
-		Platform::String^ scale_face = "Microsoft YaHei";
+		Platform::String^ scale_face = "Arial";
 		this->rpm_fonts[0] = make_text_format(scale_face, design_to_application_height(125.0F));
 		this->rpm_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
 		this->power_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
 		this->power_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
-		this->metrics_fonts[0] = make_text_format(scale_face, design_to_application_height(24.0F));
-		this->metrics_fonts[1] = make_text_format(scale_face, design_to_application_height(20.00F));
+		this->metrics_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
+		this->metrics_fonts[1] = make_text_format(scale_face, design_to_application_height(28.00F));
 
-		this->fgcolor = Colours::GhostWhite;
+		this->fgcolor = Colours::make(0xD2D2D2);
 
 		this->decorator->reference();
 	}
 
 public:
 	void load_and_flow() {
-		Platform::String^ T = "<celsius>";
 		float anchor_x, anchor_y;
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
 			this->decorator->fill_rpm_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
 			this->rpms[idx] = new ScaleTextlet("<rpm>", this->rpm_fonts[0], this->rpm_fonts[1], this->fgcolor);
 			this->master->insert(this->rpms[idx], anchor_x, anchor_y, GraphletAlignment::CC);
+
+			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
+				Platform::String^ unit = "<" + p.ToString() + ">";
+
+				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
+				this->powers[p] = new ScaleTextlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
+				this->master->insert(this->powers[p], anchor_x, anchor_y, GraphletAlignment::RC);
+			}
+
+			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
+				this->temperatures[m] = new ScaleTextlet("<celsius>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+				this->pressures[m] = new ScaleTextlet("<pressure>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+				this->thermometers[m] = new Indicatorlet(128.0F);
+				this->manometers[m] = new Indicatorlet(128.0F);
+				
+				this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y);
+				this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+				this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
+
+				this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y);
+				this->master->insert(this->pressures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+				this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
+			}
 		}
 	}
 
@@ -252,8 +270,10 @@ public:
 private:
 	ScaleTextlet* rpms[gcount];
 	std::map<GPower, ScaleTextlet*> powers;
-	std::map<GMetrics, ScaleTextlet*> pressures;
-	std::map<GMetrics, ScaleTextlet*> temperatures;
+	std::map<GGauge, ScaleTextlet*> pressures;
+	std::map<GGauge, ScaleTextlet*> temperatures;
+	std::map<GGauge, Indicatorlet*> manometers;
+	std::map<GGauge, Indicatorlet*> thermometers;
 		
 private:
 	CanvasTextFormat^ rpm_fonts[2];

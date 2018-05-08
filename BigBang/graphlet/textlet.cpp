@@ -15,7 +15,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
 
-static inline float layout_y(TextExtent& te, float by) {
+static inline float aligned_y(TextExtent& te, float by) {
 	return by - (te.height - te.bspace);
 }
 
@@ -219,12 +219,12 @@ void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	by = y + height - bspace;
 
 	if (this->text_layout != nullptr) {
-		ds->DrawTextLayout(this->text_layout, x, layout_y(label_box, by), this->text_color);
+		ds->DrawTextLayout(this->text_layout, x, aligned_y(label_box, by), this->text_color);
 		lx += label_box.width;
 	}
 
-	ds->DrawTextLayout(this->scale_layout, lx, layout_y(this->scale_box, by), this->scale_color);
-	ds->DrawTextLayout(this->unit_layout, lx + this->scale_box.width, layout_y(this->unit_box, by), this->text_color);
+	ds->DrawTextLayout(this->scale_layout, lx, aligned_y(this->scale_box, by), this->scale_color);
+	ds->DrawTextLayout(this->unit_layout, lx + this->scale_box.width, aligned_y(this->unit_box, by), this->text_color);
 }
 
 void ScaleTextlet::fill_vmetrics(TextExtent* label_box, float* tspace, float* bspace, float* height) {

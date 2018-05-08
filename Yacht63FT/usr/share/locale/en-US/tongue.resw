@@ -258,4 +258,16 @@
   <data name="&lt;rpm&gt;" xml:space="preserve">
     <value>rpm</value>
   </data>
+  <data name="&lt;ampere&gt;" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="&lt;frequency&gt;" xml:space="preserve">
+    <value>Hz</value>
+  </data>
+  <data name="&lt;pressure&gt;" xml:space="preserve">
+    <value>MPa</value>
+  </data>
+  <data name="&lt;voltage&gt;" xml:space="preserve">
+    <value>V</value>
+  </data>
 </root>
