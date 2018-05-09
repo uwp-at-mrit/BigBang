@@ -127,10 +127,10 @@ Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned i
 }
 
 /*************************************************************************************************/
-ScaleTextlet::ScaleTextlet(Platform::String^ unit, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: ScaleTextlet(unit, "", "", sfont, lfont, color, color) {}
+Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
+	: Dimensionlet(unit, "", "", sfont, lfont, color, color) {}
 	
-ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ scolor, ICanvasBrush^ lcolor)
 	: scale_color(scolor) {
 	auto scale_font = ((sfont == nullptr) ? make_bold_text_format() : sfont);
@@ -160,11 +160,11 @@ ScaleTextlet::ScaleTextlet(Platform::String^ unit, Platform::String^ label, Plat
 	}
 }
 
-void ScaleTextlet::construct() {
+void Dimensionlet::construct() {
 	this->set_value(0.0F, true);
 }
 
-void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
+void Dimensionlet::fill_extent(float x, float y, float* w, float* h) {
 	if (w != nullptr) {
 		(*w) = this->scale_box.width + this->unit_box.width;
 
@@ -181,7 +181,7 @@ void ScaleTextlet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
-void ScaleTextlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+void Dimensionlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
 	TextExtent label_box;
 	float tspace, bspace;
 
@@ -191,7 +191,7 @@ void ScaleTextlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 	SET_VALUES(t, tspace, b, bspace);
 }
 
-void ScaleTextlet::on_value_change(float value) {
+void Dimensionlet::on_value_change(float value) {
 	Platform::String^ s = value.ToString();
 	
 	if (this->text_layout != nullptr) {
@@ -202,7 +202,7 @@ void ScaleTextlet::on_value_change(float value) {
 	this->scale_box = get_text_extent(this->scale_layout);
 }
 
-void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Dimensionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	TextExtent label_box;
 	float tspace, bspace, height, by;
 	float lx = x;
@@ -227,7 +227,7 @@ void ScaleTextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(this->unit_layout, lx + this->scale_box.width, aligned_y(this->unit_box, by), this->text_color);
 }
 
-void ScaleTextlet::fill_vmetrics(TextExtent* label_box, float* tspace, float* bspace, float* height) {
+void Dimensionlet::fill_vmetrics(TextExtent* label_box, float* tspace, float* bspace, float* height) {
 	(*label_box) = ((this->text_layout == nullptr) ? this->scale_box : get_text_extent(this->text_layout));
 	(*tspace) = fmin(label_box->tspace, fmin(this->scale_box.tspace, this->unit_box.tspace));
 	(*bspace) = fmin(label_box->bspace, fmin(this->scale_box.bspace, this->unit_box.bspace));

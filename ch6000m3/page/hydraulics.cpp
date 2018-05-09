@@ -67,7 +67,7 @@ public:
 
 			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
 				HS id = bar_seq[i];
-				ScaleTextlet* target = this->bars[id];
+				Dimensionlet* target = this->bars[id];
 				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
 				float anchor_x, anchor_y;
 
@@ -327,8 +327,8 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
 	std::map<HS, Credit<Valvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
-	std::map<HS, Credit<ScaleTextlet, HS>*> bars;
-	std::map<HS, Credit<ScaleTextlet, HS>*> temperatures;
+	std::map<HS, Credit<Dimensionlet, HS>*> bars;
+	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Booleanlet, HS>*> heater_states;
 	std::map<HS, Credit<Labellet, HS>*> hslabels;
 	std::map<HS, Credit<Booleanlet, HS>*> visor_states;

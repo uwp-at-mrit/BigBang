@@ -49,15 +49,15 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ caption, unsigned int color_hex, double alpha = 1.0);
 	};
 
-	private class ScaleTextlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
+	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
 	public:
-		ScaleTextlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
+		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font = nullptr,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ scale_color = WarGrey::SCADA::Colours::Yellow,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
 
-		ScaleTextlet(Platform::String^ unit,
+		Dimensionlet(Platform::String^ unit,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);

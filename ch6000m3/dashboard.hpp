@@ -37,10 +37,10 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		void load_scales(std::map<E, Credit<WarGrey::SCADA::ScaleTextlet, E>*>& sts, E id0, E idn
+		void load_scales(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& sts, E id0, E idn
 			, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
 			for(E id = id0; id <= idn; id++) {
-				sts[id] = this->master->insert_one(new Credit<ScaleTextlet, HS>(unit, label, subscript));
+				sts[id] = this->master->insert_one(new Credit<Dimensionlet, HS>(unit, label, subscript));
 				sts[id]->id = id;
 			}
 		}

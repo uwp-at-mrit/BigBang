@@ -238,20 +238,20 @@ public:
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
 			this->decorator->fill_rpm_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
-			this->rpms[idx] = new ScaleTextlet("<rpm>", this->rpm_fonts[0], this->rpm_fonts[1], this->fgcolor);
+			this->rpms[idx] = new Dimensionlet("<rpm>", this->rpm_fonts[0], this->rpm_fonts[1], this->fgcolor);
 			this->master->insert(this->rpms[idx], anchor_x, anchor_y, GraphletAlignment::CC);
 
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
 				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
-				this->powers[p] = new ScaleTextlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
+				this->powers[p] = new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
 				this->master->insert(this->powers[p], anchor_x, anchor_y, GraphletAlignment::RC);
 			}
 
 			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
-				this->temperatures[m] = new ScaleTextlet("<celsius>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
-				this->pressures[m] = new ScaleTextlet("<pressure>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+				this->temperatures[m] = new Dimensionlet("<celsius>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+				this->pressures[m] = new Dimensionlet("<pressure>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
 				this->thermometers[m] = new Indicatorlet(128.0F);
 				this->manometers[m] = new Indicatorlet(128.0F);
 				
@@ -268,10 +268,10 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	ScaleTextlet* rpms[gcount];
-	std::map<GPower, ScaleTextlet*> powers;
-	std::map<GGauge, ScaleTextlet*> pressures;
-	std::map<GGauge, ScaleTextlet*> temperatures;
+	Dimensionlet* rpms[gcount];
+	std::map<GPower, Dimensionlet*> powers;
+	std::map<GGauge, Dimensionlet*> pressures;
+	std::map<GGauge, Dimensionlet*> temperatures;
 	std::map<GGauge, Indicatorlet*> manometers;
 	std::map<GGauge, Indicatorlet*> thermometers;
 		
