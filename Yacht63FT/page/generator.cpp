@@ -6,6 +6,7 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
+#include "msappx.hxx"
 #include "tongue.hpp"
 #include "text.hpp"
 
@@ -28,7 +29,7 @@ static const float corner_radius = 8.0F;
 static const float rpm_label_fx = 0.089F;
 static const float label_fy = 0.25F;
 
-private class GDecorator final : public IPlanetDecorator {
+private class GDecorator final : public IPlanetDecorator, public IMsAppx<CanvasBitmap, int> {
 public:
 	GDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
 		this->region_width = (width - padding) / float(gcount) - padding;
@@ -73,6 +74,12 @@ public:
 				this->temperatures[m] = make_text_layout(speak(":t_" + m.ToString() + ":"), mfont);
 			}
 		}
+
+		{ // load icon
+			this->flag_window.Height = design_to_application_height(50.0F);
+			this->flag_window.Width = this->flag_window.Height;
+			this->load(ms_appx_path("flag", ".png", "graphlet"), 0);
+		}
 	}
 
 public:
@@ -89,10 +96,6 @@ public:
 	}
 
 public:
-	float region_x(unsigned int g_idx) {
-		return (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
-	}
-
 	void fill_power_cell_extent(unsigned int g_idx, GPower p, float* x, float* y, float* width, float* height) {
 		static float cell_gapsize = design_to_application_width(8.0F);
 		static float cell_height = design_to_application_height(102.0F);
@@ -136,7 +139,16 @@ public:
 		}
 	}
 
+protected:
+	void on_appx(Windows::Foundation::Uri^ ms_appx, CanvasBitmap^ doc_png, int hint) override {
+		this->flag_png = doc_png;
+	}
+
 private:
+	float region_x(unsigned int g_idx) {
+		return (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
+	}
+
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
 		float x = this->region_x(idx);
 
@@ -172,6 +184,15 @@ private:
 		this->fill_speed_anchor(idx, rpm_label_fx, label_fy, &anchor_x, &anchor_y);
 		ds->DrawTextLayout(this->speed, anchor_x, anchor_y - offset, this->fgcolors[G::Speed]);
 
+		if (this->flag_png != nullptr) {
+			static float xoff = -design_to_application_width(10.0F);
+
+			this->flag_window.X = anchor_x - this->flag_window.Width + xoff;
+			this->flag_window.Y = anchor_y - this->flag_window.Height * 0.5F;
+
+			ds->DrawImage(this->flag_png, this->flag_window);
+		}
+
 		{ // draw power labels
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 				offset = this->powers[p]->LayoutBounds.Height * 0.5F;
@@ -192,6 +213,10 @@ private:
 			}
 		}
 	}
+
+private:
+	Rect flag_window;
+	CanvasBitmap ^ flag_png;
 
 private:
 	CanvasTextLayout^ speed;

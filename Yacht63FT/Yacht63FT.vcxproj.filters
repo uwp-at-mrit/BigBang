@@ -361,6 +361,9 @@
     <Image Include="usr\share\graphlet\Fire\true.png">
       <Filter>usr\share\graphlet\Fire</Filter>
     </Image>
+    <Image Include="usr\share\graphlet\flag.png">
+      <Filter>usr\share\graphlet</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

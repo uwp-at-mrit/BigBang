@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)application.hxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)path.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)string.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)system.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)tongue.cpp" />
@@ -23,6 +24,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)box.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)credit.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)msappx.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)path.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string.hpp" />

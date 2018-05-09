@@ -32,8 +32,4 @@ Platform::String^ retval; { \
     if (pool != wpool) delete[] pool; \
 }
 
-Platform::String^ file_name_from_path(Windows::Foundation::Uri^ uri);
-Platform::String^ file_name_from_path(Platform::String^ path);
-
-Platform::String^ file_extension_from_path(Windows::Foundation::Uri^ uri);
-Platform::String^ file_extension_from_path(Platform::String^ path);
+Platform::String^ make_string(const wchar_t* fmt, ...);
