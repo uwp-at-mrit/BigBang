@@ -2,7 +2,6 @@
 
 #include "shape.hpp"
 #include "geometry.hpp"
-#include "system.hpp"
 #include "transformation.hpp"
 
 using namespace WarGrey::SCADA;

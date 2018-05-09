@@ -21,7 +21,6 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 	float x, float y, float length, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
-
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 
@@ -32,9 +31,21 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, fl
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(Windows::Foundation::Rect& region);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arc(
+	double start_degrees, double sweep_degrees, float radiusX, float radiusY,
+	float thickness = 1.0F);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
+	double start_degrees, double end_degrees, float radiusX, float radiusY,
+	float thickness = 1.0F);
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
     float sx, float sy, float ex, float ey, float radiusX, float radiusY,
-    float thickness = 1.0F);
+	float thickness = 1.0F);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
+	double start_degrees, double end_degrees, float radiusX, float radiusY,
+	float thickness = 1.0F);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
     float sx, float sy, float ex, float ey, float radiusX, float radiusY,

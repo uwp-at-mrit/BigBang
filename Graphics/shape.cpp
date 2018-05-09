@@ -1,4 +1,5 @@
 #include "shape.hpp"
+#include "math.hpp"
 #include "transformation.hpp"
 
 using namespace Windows::Foundation;
@@ -56,6 +57,30 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
+CanvasGeometry^ arc(double start, double end, float radiusX, float radiusY, float th) {
+	auto arc_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float rstart = degrees_to_radians(start);
+	float rsweep = degrees_to_radians(end - start);
+	float startx, starty;
+
+	ellipse_point(radiusX, radiusY, start, &startx, &starty);
+
+	arc_path->BeginFigure(startx, starty);
+	arc_path->AddArc(float2(0.0F, 0.0F), radiusX, radiusY, rstart, rsweep);
+	arc_path->EndFigure(CanvasFigureLoop::Open);
+
+	return geometry_stroke(CanvasGeometry::CreatePath(arc_path), th);
+}
+
+CanvasGeometry^ short_arc(double start, double end, float radiusX, float radiusY, float th) {
+	float sx, sy, ex, ey;
+
+	ellipse_point(radiusX, radiusY, start, &sx, &sy);
+	ellipse_point(radiusX, radiusY, end, &ex, &ey);
+
+	return short_arc(sx, sy, ex, ey, radiusX, radiusY, th);
+}
+
 CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     
@@ -64,6 +89,15 @@ CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, floa
     arc->EndFigure(CanvasFigureLoop::Open);
 
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
+}
+
+CanvasGeometry^ long_arc(double start, double end, float radiusX, float radiusY, float th) {
+	float sx, sy, ex, ey;
+
+	ellipse_point(radiusX, radiusY, start, &sx, &sy);
+	ellipse_point(radiusX, radiusY, end, &ex, &ey);
+
+	return long_arc(sx, sy, ex, ey, radiusX, radiusY, th);
 }
 
 CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
