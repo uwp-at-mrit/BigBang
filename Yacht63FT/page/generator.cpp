@@ -20,13 +20,13 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class G { Speed, Power, Gauge, Alert, _ };
-private enum class GPower { voltage, ampere, frequency, _ };
+private enum class GPower { voltage, current, frequency, _ };
 private enum class GGauge { sea, oil, water, _ };
 
 static const unsigned int gcount = 2U;
 
 static const float corner_radius = 8.0F;
-static const float rpm_label_fx = 0.089F;
+static const float speed_label_fx = 0.089F;
 static const float label_fy = 0.25F;
 
 private class GDecorator final : public IPlanetDecorator, public IMsAppx<CanvasBitmap, int> {
@@ -59,19 +59,19 @@ public:
 		}
 
 		{ // initialize labels
-			CanvasTextFormat^ rfont = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+			CanvasTextFormat^ sfont = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
 			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 
-			this->speed = make_text_layout(speak(":speed:"), rfont);
+			this->speed = make_text_layout(speak(":speed:"), sfont);
 
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
 			}
 
-			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
-				this->pressures[m] = make_text_layout(speak(":p_" + m.ToString() + ":"), mfont);
-				this->temperatures[m] = make_text_layout(speak(":t_" + m.ToString() + ":"), mfont);
+			for (GGauge g = static_cast<GGauge>(0); g < GGauge::_; g++) {
+				this->pressures[g] = make_text_layout(speak(":p_" + g.ToString() + ":"), mfont);
+				this->temperatures[g] = make_text_layout(speak(":t_" + g.ToString() + ":"), mfont);
 			}
 		}
 
@@ -126,13 +126,13 @@ public:
 		SET_BOX(y, (cell_y + cell_height * fh));
 	}
 
-	void fill_gauges_anchor(unsigned int g_idx, GGauge m, float fh, float* x, float* y, float* cell_size = nullptr) {
+	void fill_gauges_anchor(unsigned int g_idx, GGauge g, float fh, float* x, float* y, float* cell_size = nullptr) {
 		static float mflcount = static_cast<float>(GGauge::_);
 		static float subwidth = this->region_width / mflcount;
-		float metrics_x = this->region_x(g_idx) +  subwidth * (static_cast<float>(m) + 0.5F);
-		float metrics_y = this->ys[G::Gauge] + this->heights[G::Gauge] * fh;
+		float gauge_x = this->region_x(g_idx) +  subwidth * (static_cast<float>(g) + 0.5F);
+		float gauge_y = this->ys[G::Gauge] + this->heights[G::Gauge] * fh;
 
-		SET_VALUES(x, metrics_x, y, metrics_y);
+		SET_VALUES(x, gauge_x, y, gauge_y);
 
 		if (cell_size != nullptr) {
 			(*cell_size) = fmin(subwidth, this->heights[G::Gauge] * 0.5F) * 0.8F;
@@ -181,7 +181,7 @@ private:
 		float offset = this->speed->LayoutBounds.Height * 0.5F;
 		float anchor_x, anchor_y;
 
-		this->fill_speed_anchor(idx, rpm_label_fx, label_fy, &anchor_x, &anchor_y);
+		this->fill_speed_anchor(idx, speed_label_fx, label_fy, &anchor_x, &anchor_y);
 		ds->DrawTextLayout(this->speed, anchor_x, anchor_y - offset, this->fgcolors[G::Speed]);
 
 		if (this->flag_png != nullptr) {
@@ -193,24 +193,20 @@ private:
 			ds->DrawImage(this->flag_png, this->flag_window);
 		}
 
-		{ // draw power labels
-			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
-				offset = this->powers[p]->LayoutBounds.Height * 0.5F;
-				this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->powers[p], anchor_x, anchor_y - offset, this->fgcolors[G::Power]);
-			}
+		for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
+			offset = this->powers[p]->LayoutBounds.Height * 0.5F;
+			this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
+			ds->DrawTextLayout(this->powers[p], anchor_x, anchor_y - offset, this->fgcolors[G::Power]);
 		}
 
-		{ // draw metrics labels
-			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
-				offset = this->temperatures[m]->LayoutBounds.Width * 0.5F;
-				this->fill_gauges_anchor(idx, m, 0.26F, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->temperatures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
+		for (GGauge g = static_cast<GGauge>(0); g < GGauge::_; g++) {
+			offset = this->temperatures[g]->LayoutBounds.Width * 0.5F;
+			this->fill_gauges_anchor(idx, g, 0.26F, &anchor_x, &anchor_y);
+			ds->DrawTextLayout(this->temperatures[g], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
 
-				offset = this->pressures[m]->LayoutBounds.Width * 0.5F;
-				this->fill_gauges_anchor(idx, m, 0.76F, &anchor_x, &anchor_y);
-				ds->DrawTextLayout(this->pressures[m], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
-			}
+			offset = this->pressures[g]->LayoutBounds.Width * 0.5F;
+			this->fill_gauges_anchor(idx, g, 0.76F, &anchor_x, &anchor_y);
+			ds->DrawTextLayout(this->pressures[g], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
 		}
 	}
 
@@ -253,8 +249,8 @@ public:
 		this->speed_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
 		this->power_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
 		this->power_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
-		this->metrics_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
-		this->metrics_fonts[1] = make_text_format(scale_face, design_to_application_height(28.00F));
+		this->gauge_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
+		this->gauge_fonts[1] = make_text_format(scale_face, design_to_application_height(28.00F));
 
 		this->fgcolor = Colours::make(0xD2D2D2);
 
@@ -279,8 +275,8 @@ public:
 			}
 
 			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
-				this->temperatures[m] = new Dimensionlet("<celsius>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
-				this->pressures[m] = new Dimensionlet("<pressure>", this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+				this->temperatures[m] = new Dimensionlet("<celsius>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+				this->pressures[m] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 				
 				this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
 				this->thermometers[m] = new Indicatorlet(gauge_size);
@@ -313,7 +309,7 @@ private:
 private:
 	CanvasTextFormat^ speed_fonts[2];
 	CanvasTextFormat^ power_fonts[2];
-	CanvasTextFormat^ metrics_fonts[2];
+	CanvasTextFormat^ gauge_fonts[2];
 	ICanvasBrush^ fgcolor;
 	GeneratorPage* master;
 	GDecorator* decorator;

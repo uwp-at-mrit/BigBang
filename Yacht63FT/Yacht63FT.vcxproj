@@ -255,6 +255,7 @@
     <ClCompile Include="frame\statusbar.cpp" />
     <ClCompile Include="page\light.cpp" />
     <ClCompile Include="page\camera.cpp" />
+    <ClCompile Include="page\propeller.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
@@ -268,6 +269,7 @@
     <ClInclude Include="frame\statusbar.hpp" />
     <ClInclude Include="page\light.hpp" />
     <ClInclude Include="page\camera.hpp" />
+    <ClInclude Include="page\propeller.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <ItemGroup>

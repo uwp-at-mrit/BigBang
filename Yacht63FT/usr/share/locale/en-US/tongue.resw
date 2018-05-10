@@ -228,8 +228,8 @@
   <data name="SternDeck" xml:space="preserve">
     <value>Stern Deck</value>
   </data>
-  <data name=":ampere:" xml:space="preserve">
-    <value>Ampere</value>
+  <data name=":current:" xml:space="preserve">
+    <value>Current</value>
   </data>
   <data name=":frequency:" xml:space="preserve">
     <value>Frequency</value>
@@ -258,7 +258,7 @@
   <data name="&lt;rpm&gt;" xml:space="preserve">
     <value>rpm</value>
   </data>
-  <data name="&lt;ampere&gt;" xml:space="preserve">
+  <data name="&lt;current&gt;" xml:space="preserve">
     <value>A</value>
   </data>
   <data name="&lt;frequency&gt;" xml:space="preserve">
@@ -269,5 +269,38 @@
   </data>
   <data name="&lt;voltage&gt;" xml:space="preserve">
     <value>V</value>
+  </data>
+  <data name=":power:" xml:space="preserve">
+    <value>Power</value>
+  </data>
+  <data name="&lt;power&gt;" xml:space="preserve">
+    <value>kW</value>
+  </data>
+  <data name="&lt;speed&gt;" xml:space="preserve">
+    <value>r/min</value>
+  </data>
+  <data name="deb_C" xml:space="preserve">
+    <value>Driven-End Temperature</value>
+  </data>
+  <data name="ndeb_C" xml:space="preserve">
+    <value>Non-Driven-End Temperature</value>
+  </data>
+  <data name="stern_C" xml:space="preserve">
+    <value>Stern Temperature</value>
+  </data>
+  <data name="Upw_C" xml:space="preserve">
+    <value>U Phase Winding Temperature</value>
+  </data>
+  <data name="cnvt_C" xml:space="preserve">
+    <value>Converter Temperature</value>
+  </data>
+  <data name="cnvt_V" xml:space="preserve">
+    <value>Converter Voltage</value>
+  </data>
+  <data name="Vpw_C" xml:space="preserve">
+    <value>V Phase Winding Temperature</value>
+  </data>
+  <data name="Wpw_C" xml:space="preserve">
+    <value>W Phase Winding Temperature </value>
   </data>
 </root>
