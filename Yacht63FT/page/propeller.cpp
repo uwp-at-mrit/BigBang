@@ -25,6 +25,7 @@ private enum class PGauge { cnvt_V, cnvt_C, Upw_C, Vpw_C, Wpw_C, deb_C, ndeb_C, 
 
 static const unsigned int pcount = 2U;
 
+static const float indicator_thickness = 12.0F;
 static const float corner_radius = 8.0F;
 static const float label_fy = 0.25F;
 
@@ -244,7 +245,7 @@ public:
 				}
 				
 				this->decorator->fill_gauges_anchor(idx, g, 0.5F, &anchor_x, &anchor_y);
-				this->gauges[g] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F);
+				this->gauges[g] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness);
 				
 				this->master->insert(this->gauges[g], anchor_x, anchor_y, GraphletAlignment::CC);
 				this->master->insert(this->metrics[g], anchor_x, anchor_y, GraphletAlignment::CB);
@@ -279,7 +280,7 @@ PropellerPage::~PropellerPage() {
 
 void PropellerPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		PDecorator* regions = new PDecorator(width, height, design_to_application_height(2.0F));
+		PDecorator* regions = new PDecorator(width, height, design_to_application_height(4.0F));
 		PBoard* gb = new PBoard(this, regions);
 
 		gb->load_and_flow();

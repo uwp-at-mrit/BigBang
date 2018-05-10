@@ -25,6 +25,7 @@ private enum class GGauge { sea, oil, water, _ };
 
 static const unsigned int gcount = 2U;
 
+static const float indicator_thickness = 12.0F;
 static const float corner_radius = 8.0F;
 static const float speed_label_fx = 0.089F;
 static const float label_fy = 0.25F;
@@ -279,7 +280,7 @@ public:
 				this->pressures[m] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 				
 				this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
-				this->thermometers[m] = new Indicatorlet(gauge_size);
+				this->thermometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
 				
 				this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
 				this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAlignment::CB);
@@ -287,7 +288,7 @@ public:
 				this->thermometers[m]->set_value(0.1F);
 
 				this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
-				this->manometers[m] = new Indicatorlet(gauge_size);
+				this->manometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
 				
 				this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
 				this->master->insert(this->pressures[m], anchor_x, anchor_y, GraphletAlignment::CB);
@@ -326,7 +327,7 @@ GeneratorPage::~GeneratorPage() {
 
 void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		GDecorator* regions = new GDecorator(width, height, design_to_application_height(2.0F));
+		GDecorator* regions = new GDecorator(width, height, design_to_application_height(4.0F));
 		GBoard* gb = new GBoard(this, regions);
 
 		gb->load_and_flow();
