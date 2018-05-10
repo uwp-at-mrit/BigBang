@@ -30,7 +30,7 @@ namespace WarGrey::SCADA {
 		double get_direction_degrees();
 
 	protected:
-		void on_state_change(DoorState state) override;
+		void on_status_change(DoorState state) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

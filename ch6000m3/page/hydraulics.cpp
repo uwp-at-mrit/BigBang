@@ -96,14 +96,14 @@ public:
 				Pumplet* target = this->pumps[pump_seq[i]];
 
 				switch (DI_db205_X[i]) {
-				case 0b00000001: target->set_state(PumpStatus::Starting); break;
-				case 0b00000010: target->set_state(PumpStatus::Stopping); break;
-				case 0b00000100: target->set_state(PumpStatus::Unstartable); break;
-				case 0b00001000: target->set_state(PumpStatus::Unstoppable); break;
-				case 0b00010000: target->set_state(PumpStatus::Running); break;
-				case 0b00100000: target->set_state(PumpStatus::Stopped); break;
-				case 0b01000000: target->set_state(PumpStatus::Remote); break;
-				case 0b10000000: target->set_state(PumpStatus::Ready); break;
+				case 0b00000001: target->set_status(PumpStatus::Starting); break;
+				case 0b00000010: target->set_status(PumpStatus::Stopping); break;
+				case 0b00000100: target->set_status(PumpStatus::Unstartable); break;
+				case 0b00001000: target->set_status(PumpStatus::Unstoppable); break;
+				case 0b00010000: target->set_status(PumpStatus::Running); break;
+				case 0b00100000: target->set_status(PumpStatus::Stopped); break;
+				case 0b01000000: target->set_status(PumpStatus::Remote); break;
+				case 0b10000000: target->set_status(PumpStatus::Ready); break;
 				}
 			}
 		}
@@ -180,7 +180,7 @@ public:
 			this->load_graphlets(this->pumps, this->plabels, HS::Y, HS::K, gridsize, -90.0, this->pcaptions);
 			this->load_graphlets(this->pumps, this->plabels, HS::J, HS::I, gridsize, 90.00, this->pcaptions);
 
-			this->load_scales(this->bars, HS::A, HS::I, "bar");
+			this->load_dimensions(this->bars, HS::A, HS::I, "bar");
 		}
 
 		{ // load valves
@@ -202,7 +202,7 @@ public:
 		this->load_state_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
 		this->load_state_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
 
-		this->load_scales(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
+		this->load_dimensions(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {

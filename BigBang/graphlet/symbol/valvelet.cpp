@@ -13,15 +13,15 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static ValveStatus default_valve_state = ValveStatus::Manual;
+static ValveStatus default_valve_status = ValveStatus::Manual;
 static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
 
-ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus state) {
+ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus status) {
 	ValveStyle s;
 
 	s.skeleton_color = default_sketeton_color;
 
-	switch (state) {
+	switch (status) {
 	case ValveStatus::Manual: s.mask_color = Colours::Teal; break;
 	case ValveStatus::Open: s.body_color = Colours::Green; break;
 	case ValveStatus::Opening: s.mask_color = Colours::Green; break;
@@ -39,13 +39,13 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus state) {
 }
 
 /*************************************************************************************************/
-Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_state, radius, degrees) {}
+Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_status, radius, degrees) {}
 
-Valvelet::Valvelet(ValveStatus default_state, float radius, double degrees)
-	: IStatuslet(default_state, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
+Valvelet::Valvelet(ValveStatus default_status, float radius, double degrees)
+	: IStatuslet(default_status, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
-	this->on_state_change(default_state);
+	this->on_status_change(default_status);
 }
 
 void Valvelet::construct() {
@@ -60,7 +60,7 @@ void Valvelet::construct() {
 }
 
 void Valvelet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_state()) {
+	switch (this->get_status()) {
 	case ValveStatus::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
@@ -80,8 +80,8 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 	}
 }
 
-void Valvelet::on_state_change(ValveStatus state) {
-	switch (state) {
+void Valvelet::on_status_change(ValveStatus status) {
+	switch (status) {
 	case ValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);

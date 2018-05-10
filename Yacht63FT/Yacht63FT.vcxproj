@@ -218,9 +218,9 @@
     <Image Include="usr\share\graphlet\Alarm\false.png" />
     <Image Include="usr\share\graphlet\Curtain\false.png" />
     <Image Include="usr\share\graphlet\Curtain\true.png" />
-    <Image Include="usr\share\graphlet\Diagram\Alerting.png" />
-    <Image Include="usr\share\graphlet\Diagram\Running.png" />
-    <Image Include="usr\share\graphlet\Diagram\Stopped.png" />
+    <Image Include="usr\share\graphlet\Propulsion\Alerting.png" />
+    <Image Include="usr\share\graphlet\Propulsion\Running.png" />
+    <Image Include="usr\share\graphlet\Propulsion\Stopped.png" />
     <Image Include="usr\share\graphlet\Fire\Alerting.png" />
     <Image Include="usr\share\graphlet\Fire\Running.png" />
     <Image Include="usr\share\graphlet\Fire\Stopped.png" />
@@ -256,6 +256,7 @@
     <ClCompile Include="page\light.cpp" />
     <ClCompile Include="page\camera.cpp" />
     <ClCompile Include="page\propeller.cpp" />
+    <ClCompile Include="page\propulsion.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
@@ -270,6 +271,7 @@
     <ClInclude Include="page\light.hpp" />
     <ClInclude Include="page\camera.hpp" />
     <ClInclude Include="page\propeller.hpp" />
+    <ClInclude Include="page\propulsion.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <ItemGroup>

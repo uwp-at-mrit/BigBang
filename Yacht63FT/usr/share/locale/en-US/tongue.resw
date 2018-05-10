@@ -294,13 +294,13 @@
   <data name="cnvt_C" xml:space="preserve">
     <value>Converter Temperature</value>
   </data>
-  <data name="cnvt_V" xml:space="preserve">
-    <value>Converter Voltage</value>
-  </data>
   <data name="Vpw_C" xml:space="preserve">
     <value>V Phase Winding Temperature</value>
   </data>
   <data name="Wpw_C" xml:space="preserve">
     <value>W Phase Winding Temperature </value>
+  </data>
+  <data name="cnvt_V" xml:space="preserve">
+    <value>Converter Alternating Voltage</value>
   </data>
 </root>

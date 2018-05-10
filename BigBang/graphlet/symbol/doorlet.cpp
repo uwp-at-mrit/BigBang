@@ -38,7 +38,7 @@ DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
 	: IStatuslet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
-	this->on_state_change(default_state);
+	this->on_status_change(default_state);
 }
 
 void DumpDoorlet::construct() {
@@ -53,7 +53,7 @@ void DumpDoorlet::construct() {
 }
 
 void DumpDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_state()) {
+	switch (this->get_status()) {
 	case DoorState::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
@@ -73,7 +73,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DumpDoorlet::on_state_change(DoorState state) {
+void DumpDoorlet::on_status_change(DoorState state) {
 	switch (state) {
 	default: {
 		this->mask = nullptr;

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="usr">
+      <UniqueIdentifier>{f4cebb68-688d-473b-be1f-0d6129218bc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share">
+      <UniqueIdentifier>{fc8e6c1d-3363-400c-a68b-1f6a064cc5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet">
+      <UniqueIdentifier>{610427b2-7f7e-4284-95cf-2ce13d23c285}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\CoolPump.svg">
+      <Filter>usr\share\graphlet</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Generator.svg">
+      <Filter>usr\share\graphlet</Filter>
+    </None>
+  </ItemGroup>
+</Project>

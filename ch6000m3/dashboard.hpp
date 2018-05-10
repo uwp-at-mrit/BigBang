@@ -18,12 +18,20 @@ namespace WarGrey::SCADA {
 
 	public:
 		template<class G>
+		void load_graphlets(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
+			for (E id = id0; id <= idn; id++) {
+				gs[id] = this->master->insert_one(new G(radius, line_thickness, degrees));
+				gs[id]->id = id;
+			}
+		}
+
+		template<class G>
 		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, E id0, E idn, float radius, double degrees) {
-		    for(E id = id0; id <= idn; id++) {
-			    gs[id] = this->master->insert_one(new G(radius, degrees));
-				gs[id]->id = id;
-				ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
+			this->load_graphlets(gs, id0, idn, radius, degrees);
+			
+			for(E id = id0; id <= idn; id++) {
+			    ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
 		    }
 	    }
 
@@ -37,10 +45,10 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		void load_scales(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& sts, E id0, E idn
+		void load_dimensions(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& sts, E id0, E idn
 			, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
 			for(E id = id0; id <= idn; id++) {
-				sts[id] = this->master->insert_one(new Credit<Dimensionlet, HS>(unit, label, subscript));
+				sts[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, subscript));
 				sts[id]->id = id;
 			}
 		}

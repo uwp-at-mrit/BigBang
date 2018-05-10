@@ -295,7 +295,7 @@
     <value>变频器温度</value>
   </data>
   <data name="cnvt_V" xml:space="preserve">
-    <value>变频器电压</value>
+    <value>变频器交流侧电压</value>
   </data>
   <data name="Vpw_C" xml:space="preserve">
     <value>V相绕组温度</value>

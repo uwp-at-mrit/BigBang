@@ -13,6 +13,7 @@
 #include "page/homepage.hpp"
 #include "page/generator.hpp"
 #include "page/propeller.hpp"
+#include "page/propulsion.hpp"
 #include "page/airconditioner.hpp"
 #include "page/light.hpp"
 #include "page/camera.hpp"
@@ -66,6 +67,7 @@ protected:
 			switch (page) {
 			case Yacht::Generator: this->add_planet(new GeneratorPage(plc_master, name)); break;
 			case Yacht::Propeller: this->add_planet(new PropellerPage(plc_master, name)); break;
+			case Yacht::Propulsion: this->add_planet(new PropulsionPage(plc_master, name)); break;
 			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
 			case Yacht::Light: this->add_planet(new LightPage(plc_master, name)); break;
 			case Yacht::Fire: this->add_planet(new FirePage(plc_master, name)); break;

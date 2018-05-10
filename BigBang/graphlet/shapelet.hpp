@@ -71,12 +71,12 @@ namespace WarGrey::SCADA {
 
 	public:
 		template<class G>
-		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, float dx = 0.0F, float dy = 0.0F, GraphletAlignment align = GraphletAlignment::CC) {
-			this->map_graphlet_at_anchor(g, g->id, dx, dy, align);
+		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, GraphletAlignment align = GraphletAlignment::CC, float dx = 0.0F, float dy = 0.0F) {
+			this->map_graphlet_at_anchor(g, g->id, align, dx, dy);
 		}
 
 		template<class G>
-		void map_graphlet_at_anchor(G* g, Anchor a, float dx = 0.0F, float dy = 0.0F, GraphletAlignment align = GraphletAlignment::CC) {
+		void map_graphlet_at_anchor(G* g, Anchor a, GraphletAlignment align = GraphletAlignment::CC, float dx = 0.0F, float dy = 0.0F) {
 			if (this->info != nullptr) {
 				float anchor_x, anchor_y;
 
@@ -87,6 +87,5 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::Turtle<Anchor>* turtle;
-		float thickness;
 	};
 }

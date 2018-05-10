@@ -13,17 +13,17 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static PumpStatus default_pump_state = PumpStatus::Stopped;
+static PumpStatus default_pump_status = PumpStatus::Stopped;
 static CanvasSolidColorBrush^ default_body_color = Colours::DarkGray;
 static CanvasSolidColorBrush^ default_border_color = Colours::WhiteSmoke;
 
-PumpStyle WarGrey::SCADA::make_default_pump_style(PumpStatus state) {
+PumpStyle WarGrey::SCADA::make_default_pump_style(PumpStatus status) {
 	PumpStyle s;
 
 	s.border_color = default_border_color;
 	s.body_color = default_body_color;
 
-	switch (state) {
+	switch (status) {
 	case PumpStatus::Running: s.body_color = Colours::Green; break;
 	case PumpStatus::Starting: s.body_color = Colours::DimGray; s.mask_color = Colours::Green; break;
 	case PumpStatus::Unstartable: s.body_color = Colours::DimGray; s.mask_color = Colours::Green; break;
@@ -38,12 +38,12 @@ PumpStyle WarGrey::SCADA::make_default_pump_style(PumpStatus state) {
 }
 
 /*************************************************************************************************/
-Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_state, radius, degrees) {}
+Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_status, radius, degrees) {}
 
-Pumplet::Pumplet(PumpStatus default_state, float radius, double degrees)
-	: IStatuslet(default_state, &make_default_pump_style), size(radius * 2.0F), degrees(degrees) {
+Pumplet::Pumplet(PumpStatus default_status, float radius, double degrees)
+	: IStatuslet(default_status, &make_default_pump_style), size(radius * 2.0F), degrees(degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
-	this->on_state_change(default_state);
+	this->on_status_change(default_status);
 }
 
 void Pumplet::construct() {
@@ -52,7 +52,7 @@ void Pumplet::construct() {
 }
 
 void Pumplet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_state()) {
+	switch (this->get_status()) {
 	case PumpStatus::Starting: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
@@ -72,8 +72,8 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 	}
 }
 
-void Pumplet::on_state_change(PumpStatus state) {
-	switch (state) {
+void Pumplet::on_status_change(PumpStatus status) {
+	switch (status) {
 	case PumpStatus::Unstartable: {
 		if (this->unstartable_mask == nullptr) {
 			this->unstartable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);

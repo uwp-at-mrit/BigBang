@@ -47,9 +47,6 @@
     <Filter Include="usr\share\graphlet\ACMode">
       <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\graphlet\Diagram">
-      <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="usr\share\graphlet\Light">
       <UniqueIdentifier>{847b99b9-9798-4b31-95e9-36f3ed0cec92}</UniqueIdentifier>
     </Filter>
@@ -58,6 +55,9 @@
     </Filter>
     <Filter Include="usr\share\graphlet\Camera">
       <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Propulsion">
+      <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +91,9 @@
     <ClCompile Include="page\propeller.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\propulsion.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -120,6 +123,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\propeller.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\propulsion.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -337,15 +343,6 @@
     <Image Include="usr\share\graphlet\ACMode\Heating.png">
       <Filter>usr\share\graphlet\ACMode</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\Diagram\Alerting.png">
-      <Filter>usr\share\graphlet\Diagram</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Diagram\Running.png">
-      <Filter>usr\share\graphlet\Diagram</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Diagram\Stopped.png">
-      <Filter>usr\share\graphlet\Diagram</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Light\Stopped.png">
       <Filter>usr\share\graphlet\Light</Filter>
     </Image>
@@ -369,6 +366,15 @@
     </Image>
     <Image Include="usr\share\graphlet\flag.png">
       <Filter>usr\share\graphlet</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propulsion\Alerting.png">
+      <Filter>usr\share\graphlet\Propulsion</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propulsion\Running.png">
+      <Filter>usr\share\graphlet\Propulsion</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Propulsion\Stopped.png">
+      <Filter>usr\share\graphlet\Propulsion</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

@@ -12,11 +12,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
-	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpStatus state);
+	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpStatus status);
 
 	private class Pumplet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
 	public:
-		Pumplet(WarGrey::SCADA::PumpStatus default_state, float radius, double degrees = -90.0);
+		Pumplet(WarGrey::SCADA::PumpStatus default_status, float radius, double degrees = -90.0);
 		Pumplet(float radius, double degrees = -90.0);
 
 	public:
@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 		double get_direction_degrees();
 
 	protected:
-		void on_state_change(PumpStatus state) override;
+		void on_status_change(PumpStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

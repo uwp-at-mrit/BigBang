@@ -14,8 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Cool pump.svg">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\CoolPump.svg" />
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Generator.svg" />
   </ItemGroup>
 </Project>
