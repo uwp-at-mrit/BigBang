@@ -7,6 +7,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/switchlet.hpp"
 #include "graphlet/symbol/machinelet.hpp"
+#include "graphlet/symbol/powerstationlet.hpp"
 
 #include "tongue.hpp"
 #include "brushes.hxx"
@@ -50,8 +51,8 @@ public:
 		Turtle<PD>* turtle = new Turtle<PD>(gridsize, true, PD::Generator1);
 
 		turtle->move_down(2, PD::Sgg1)->move_down(2, PD::g1);
-		turtle->move_right(5, PD::Ssp)->move_right(2)->move_down(2)->move_right(3)->move_up(4, PD::SP);
-		turtle->move_up(2, PD::SP)->move_left(3)->jump_right(3)->move_right(3)->jump_back();
+		turtle->move_right(5, PD::Ssp)->move_right(2)->move_down(2)->move_right(3)->move_up(3.5F, PD::ShorePower);
+		turtle->move_up(2.5F, PD::SP)->move_left(3)->jump_right(3)->move_right(3)->jump_back();
 
 		turtle->move_down(2, PD::G1)->move_down(3, PD::m1);
 		turtle->move_down(3, PD::M1)->move_down(3, PD::Smp1)->move_down(2, PD::Propeller1)->jump_back();
@@ -84,6 +85,7 @@ public:
 
 		this->load_graphlets(this->switches, PD::Ssp,  PD::Stt, gridsize, 0.0);
 		this->load_graphlets(this->switches, PD::Sgg1, PD::Sbs, gridsize, -90.0);
+		this->load_graphlets(this->powers, PD::ShorePower, PD::PowerStation2, gridsize, 0.0);
 	}
 
 	void reflow(float width, float height) {
@@ -107,6 +109,10 @@ public:
 		for (auto lt = this->switches.begin(); lt != this->switches.end(); lt++) {
 			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CC);
 		}
+
+		for (auto lt = this->powers.begin(); lt != this->powers.end(); lt++) {
+			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CT);
+		}
 	}
 
 private:
@@ -114,25 +120,6 @@ private:
 	void load_graphlets(std::map<PD, G*>& gs, PD id0, PD idn, float radius, double degrees) {
 		for (PD id = id0; id <= idn; id++) {
 			gs[id] = this->master->insert_one(new G(radius, line_thickness, degrees));
-		}
-	}
-
-	template<class G>
-	void load_graphlets(std::map<PD, G*>& gs, std::map<PD, Labellet*>& ls, PD id0, PD idn, float radius, double degrees) {
-		this->load_graphlets(gs, id0, idn, radius, degrees);
-
-		for (PD id = id0; id <= idn; id++) {
-			ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
-		}
-	}
-
-	template<class G>
-	void load_graphlets(std::map<PD, G*>& gs, std::map<PD, Labellet*>& ls
-		, PD id0, PD idn, float radius, double degrees, std::map<PD, Labellet*>& cs) {
-		this->load_graphlets(gs, ls, id0, idn, radius, degrees);
-
-		for (PD id = id0; id <= idn; id++) {
-			cs[id] = this->make_label(id, Colours::Silver);
 		}
 	}
 
@@ -171,9 +158,7 @@ private:
 	}
 
 	Labellet* make_label(Platform::String^ caption, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
-		Labellet* label = new Labellet(caption, font, color);
-
-		return this->master->insert_one(label);
+		return this->master->insert_one(new Labellet(caption, font, color));
 	}
 
 	Labellet* make_label(PD id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
@@ -186,6 +171,7 @@ private:
 	std::map<PD, Labellet*> captions;
 	std::map<PD, Switchlet*> switches;
 	std::map<PD, Machinelet*> machines;
+	std::map<PD, PowerStationlet*> powers;
 
 private:
 	PropulsionPage* master;

@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 		, public WarGrey::SCADA::IValuelet<bool> {
 	public:
 		Switchlet(WarGrey::SCADA::SwitchStatus default_status, float radius, float thickness = 1.5F, double degrees = 0.0);
-		Switchlet(float radius, float thickness = 1.5F, double degrees = -90.0);
+		Switchlet(float radius, float thickness = 1.5F, double degrees = 0.0);
 
 	public:
 		void construct() override;

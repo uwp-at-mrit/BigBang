@@ -90,6 +90,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\powerstationlet.cpp">
+      <Filter>graphlet\symbol</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -183,6 +186,9 @@
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.hpp">
+      <Filter>graphlet\symbol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\powerstationlet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
   </ItemGroup>
