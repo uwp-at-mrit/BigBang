@@ -106,6 +106,19 @@ namespace WarGrey::SCADA {
 		Style styles[static_cast<unsigned int>(Status::_)];
 	};
 
+	template<typename Status, typename Style>
+	private class ISymbollet abstract : public WarGrey::SCADA::IStatuslet<Status, Style> {
+	public:
+		ISymbollet(Status default_status, Style(*make_default_style)(Status), double degrees)
+			: IStatuslet<Status, Style>(default_status, make_default_style), degrees(degrees) {}
+
+	public:
+		double get_direction_degrees() { return this->degrees; }
+
+	protected:
+		double degrees;
+	};
+
 	/************************************************************************************************/
 	Windows::Foundation::Rect graphlet_enclosing_box(
 		WarGrey::SCADA::IGraphlet* g, float x, float y,

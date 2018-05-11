@@ -42,7 +42,7 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus status) {
 Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_status, radius, degrees) {}
 
 Valvelet::Valvelet(ValveStatus default_status, float radius, double degrees)
-	: IStatuslet(default_status, &make_default_valve_style), size(radius * 2.0F), degrees(degrees) {
+	: ISymbollet(default_status, &make_default_valve_style, degrees), size(radius * 2.0F) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_status_change(default_status);
@@ -54,7 +54,7 @@ void Valvelet::construct() {
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
 
 	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
-	this->handler = geometry_union(handler_axis, handler_pole);
+	this->handle = geometry_union(handler_axis, handler_pole);
 	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
@@ -117,10 +117,6 @@ void Valvelet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, size);
 }
 
-double Valvelet::get_direction_degrees() {
-	return this->degrees;
-}
-
 void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const ValveStyle style = this->get_style();
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
@@ -146,6 +142,6 @@ void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
 
 	if (style.handler_color != nullptr) {
-		ds->DrawGeometry(this->handler, cx, cy, style.handler_color, default_thickness);
+		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);
 	}
 }

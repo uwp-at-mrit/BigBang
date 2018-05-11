@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 
 	WarGrey::SCADA::DoorStyle make_default_door_style(WarGrey::SCADA::DoorState state);
 
-	private class DumpDoorlet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
+	private class DumpDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
 	public:
 		DumpDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
 		DumpDoorlet(float radius, double degrees = -90.0);
@@ -25,9 +25,6 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		double get_direction_degrees();
 
 	protected:
 		void on_status_change(DoorState state) override;
@@ -40,11 +37,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ top_down_ready_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ frame;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ handler;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ handle;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
-		double degrees;
 		float sgradius;
 		float fradius;
 		float size;

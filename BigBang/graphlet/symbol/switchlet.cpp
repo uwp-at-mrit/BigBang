@@ -31,8 +31,8 @@ Switchlet::Switchlet(float radius, float thickness, double degrees)
 }
 
 Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness, double degrees)
-	: IStatuslet(default_status, &make_default_switch_style)
-	, thickness(thickness), size(radius * 2.0F), degrees(degrees) {}
+	: ISymbollet(default_status, &make_default_switch_style, degrees)
+	, thickness(thickness), size(radius * 2.0F) {}
 
 void Switchlet::construct() {
 	float epradius = this->thickness;
@@ -49,10 +49,6 @@ void Switchlet::construct() {
 
 void Switchlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, size);
-}
-
-double Switchlet::get_direction_degrees() {
-	return this->degrees;
 }
 
 void Switchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

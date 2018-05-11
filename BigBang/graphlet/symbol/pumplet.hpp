@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
 
 	WarGrey::SCADA::PumpStyle make_default_pump_style(WarGrey::SCADA::PumpStatus status);
 
-	private class Pumplet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
+	private class Pumplet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
 	public:
 		Pumplet(WarGrey::SCADA::PumpStatus default_status, float radius, double degrees = -90.0);
 		Pumplet(float radius, double degrees = -90.0);
@@ -24,9 +24,6 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		double get_direction_degrees();
 
 	protected:
 		void on_status_change(PumpStatus status) override;
@@ -39,7 +36,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
-		double degrees;
 		float tradius;
 		float size;
 

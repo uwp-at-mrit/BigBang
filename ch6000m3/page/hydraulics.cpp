@@ -216,12 +216,12 @@ public:
 		this->master->move_to(this->stations[0], sx, sy);
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
-		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, 0.0F, 0.0F, GraphletAlignment::LC);
+		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAlignment::LC);
 		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
 		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
 
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], -gridsize * 10.0F, 0.0F, GraphletAlignment::CB);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], GraphletAlignment::CB, -gridsize * 10.0F);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], GraphletAlignment::CB, -gridsize * 10.0F);
 		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
 		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
 		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAlignment::CT, GraphletAlignment::CB, gridsize * 0.5F);
@@ -259,12 +259,12 @@ public:
 			}
 			}
 
-			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
-			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_dx, lbl_dy, lbl_align);
-			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_dx, cpt_dy, cpt_align);
+			this->stations[0]->map_credit_graphlet(it->second, GraphletAlignment::CC, x0, y0);
+			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_align, lbl_dx, lbl_dy);
+			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_align, cpt_dx, cpt_dy);
 
 			if (this->bars.find(it->first) != this->bars.end()) {
-				this->stations[0]->map_credit_graphlet(this->bars[it->first], bar_dx, bar_dy, bar_align);
+				this->stations[0]->map_credit_graphlet(this->bars[it->first], bar_align, bar_dx, bar_dy);
 			}
 		}
 
@@ -282,8 +282,8 @@ public:
 				lbl_dx = x0; lbl_dy = y0 - valve_adjust_gridsize; lbl_align = GraphletAlignment::CB;
 			}
 
-			this->stations[0]->map_credit_graphlet(it->second, x0, y0, GraphletAlignment::CC);
-			this->stations[0]->map_credit_graphlet(this->vlabels[it->first], lbl_dx, lbl_dy, lbl_align);
+			this->stations[0]->map_credit_graphlet(it->second, GraphletAlignment::CC, x0, y0);
+			this->stations[0]->map_credit_graphlet(this->vlabels[it->first], lbl_align, lbl_dx, lbl_dy);
 		}
 	}
 
@@ -293,7 +293,7 @@ public:
 		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
-		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], 0.0F, 0.0F, GraphletAlignment::CC);
+		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAlignment::CC);
 
 		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAlignment::RT, GraphletAlignment::LT, gridsize * 2.0F, 0.0F);
 		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);

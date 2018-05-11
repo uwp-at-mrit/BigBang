@@ -2,7 +2,7 @@
 
 namespace WarGrey::SCADA {
 	template<class Base, typename IDEnum>
-	private class Credit final : public virtual Base {
+	private class Credit final : public Base {
 		using Base::Base;
 
 	public:

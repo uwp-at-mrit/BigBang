@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 
 	WarGrey::SCADA::ValveStyle make_default_valve_style(WarGrey::SCADA::ValveStatus statuss);
 
-	private class Valvelet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::ValveStatus, WarGrey::SCADA::ValveStyle> {
+	private class Valvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ValveStatus, WarGrey::SCADA::ValveStyle> {
 	public:
 		Valvelet(WarGrey::SCADA::ValveStatus default_status, float radius, double degrees = -90.0);
 		Valvelet(float radius, double degrees = -90.0);
@@ -30,9 +30,6 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		double get_direction_degrees();
 
 	protected:
 		void on_status_change(ValveStatus status) override;
@@ -45,11 +42,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ top_down_ready_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ frame;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ handler;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ handle;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
-		double degrees;
 		float sgradius;
 		float fradius;
 		float size;

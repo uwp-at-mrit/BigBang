@@ -12,8 +12,8 @@ namespace WarGrey::SCADA {
 	WarGrey::SCADA::SwitchStyle make_default_switch_style(WarGrey::SCADA::SwitchStatus status);
 
 	private class Switchlet
-		: public virtual WarGrey::SCADA::IStatuslet<WarGrey::SCADA::SwitchStatus, WarGrey::SCADA::SwitchStyle>
-		, public virtual WarGrey::SCADA::IValuelet<bool> {
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::SwitchStatus, WarGrey::SCADA::SwitchStyle>
+		, public WarGrey::SCADA::IValuelet<bool> {
 	public:
 		Switchlet(WarGrey::SCADA::SwitchStatus default_status, float radius, float thickness = 1.5F, double degrees = 0.0);
 		Switchlet(float radius, float thickness = 1.5F, double degrees = -90.0);
@@ -23,16 +23,11 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
-	public:
-		double get_direction_degrees();
-
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoints;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ handler;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
-		double degrees;
 		float thickness;
 		float size;
 

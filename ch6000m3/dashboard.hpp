@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 		template<class G>
 		void load_graphlets(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
 			for (E id = id0; id <= idn; id++) {
-				gs[id] = this->master->insert_one(new G(radius, line_thickness, degrees));
+				gs[id] = this->master->insert_one(new G(radius, degrees));
 				gs[id]->id = id;
 			}
 		}

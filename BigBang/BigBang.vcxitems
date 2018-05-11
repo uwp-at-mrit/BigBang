@@ -25,6 +25,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\switchlet.cpp" />
@@ -61,6 +62,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\switchlet.hpp" />

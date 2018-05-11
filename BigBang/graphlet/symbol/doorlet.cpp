@@ -35,7 +35,7 @@ DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
 DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
 
 DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
-	: IStatuslet(default_state, &make_default_door_style), size(radius * 2.0F), degrees(degrees) {
+	: ISymbollet(default_state, &make_default_door_style, degrees), size(radius * 2.0F) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_status_change(default_state);
@@ -47,7 +47,7 @@ void DumpDoorlet::construct() {
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
 
 	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
-	this->handler = geometry_union(handler_axis, handler_pole);
+	this->handle = geometry_union(handler_axis, handler_pole);
 	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
@@ -86,10 +86,6 @@ void DumpDoorlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, size);
 }
 
-double DumpDoorlet::get_direction_degrees() {
-	return this->degrees;
-}
-
 void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
@@ -115,6 +111,6 @@ void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
 
 	if (style.handler_color != nullptr) {
-		ds->DrawGeometry(this->handler, cx, cy, style.handler_color, default_thickness);
+		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);
 	}
 }
