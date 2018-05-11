@@ -8,9 +8,7 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Debug;
 static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 #endif
 
-static Platform::String^ remote_host_at_19 = "192.168.8.124";
-
-static Platform::String^ remote_test_server = remote_host_at_19;
+static Platform::String^ remote_test_server = "192.168.8.105";
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 4;

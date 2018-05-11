@@ -21,6 +21,14 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hline(
 	float x, float y, float length, float thickness = 1.0F,
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ line(
+	float ex, float ey, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ line(
+	float sx, float sy, float ex, float ey, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float radius);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy, float radius);
 

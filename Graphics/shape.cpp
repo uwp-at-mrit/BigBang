@@ -29,14 +29,22 @@ CanvasGeometry^ paragraph(CanvasTextLayout^ tl, bool adjust) {
 	return layout;
 }
 
+CanvasGeometry^ line(float sx, float sy, float ex, float ey, float th, CanvasStrokeStyle^ style) {
+	auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+
+	line->BeginFigure(sx, sy);
+	line->AddLine(ex, ey);
+	line->EndFigure(CanvasFigureLoop::Open);
+
+	return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
+}
+
+CanvasGeometry^ line(float ex, float ey, float th, CanvasStrokeStyle^ style) {
+	return line(0.0F, 0.0F, ex, ey, th, style);
+}
+
 CanvasGeometry^ hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
-    auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-
-    line->BeginFigure(x, y);
-    line->AddLine(x + l, y);
-    line->EndFigure(CanvasFigureLoop::Open);
-
-    return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
+	return line(x, y, x + l, y, th, style);
 }
 
 CanvasGeometry^ hline(float l, float th, CanvasStrokeStyle^ style) {
@@ -44,13 +52,7 @@ CanvasGeometry^ hline(float l, float th, CanvasStrokeStyle^ style) {
 }
 
 CanvasGeometry^ vline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
-    auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-
-    line->BeginFigure(x, y);
-    line->AddLine(x, y + l);
-    line->EndFigure(CanvasFigureLoop::Open);
-
-    return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
+	return line(x, y, x, y + l, th, style);
 }
 
 CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {

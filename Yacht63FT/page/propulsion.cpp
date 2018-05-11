@@ -6,6 +6,7 @@
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/switchlet.hpp"
+#include "graphlet/symbol/machinelet.hpp"
 
 #include "tongue.hpp"
 #include "brushes.hxx"
@@ -25,8 +26,9 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class PD { // order matters
-	// captions
-	Generator1, SP, G1, M1, P1, T1, T2, G2, Generator2, M2, Propeller2, G3, SolarInverter, B1, StorageBattery,
+	// stuffs
+	Generator1, Generator2, Propeller1, Propeller2, SP, SolarInverter, StorageBattery,
+	G1, G2, G3, M1, T1, T2, M2, B1,
 	// power providers
 	ShorePower, PowerStation1, PowerStation2,
 	// switches
@@ -36,6 +38,7 @@ private enum class PD { // order matters
 };
 
 static float line_thickness = 3.0F;
+static MachineStyle vdc_style = { Colours::GhostWhite, Colours::GhostWhite };
 
 /*************************************************************************************************/
 private class LineDiagram final : public PLCConfirmation {
@@ -51,7 +54,7 @@ public:
 		turtle->move_up(2, PD::SP)->move_left(3)->jump_right(3)->move_right(3)->jump_back();
 
 		turtle->move_down(2, PD::G1)->move_down(3, PD::m1);
-		turtle->move_down(3, PD::M1)->move_down(3, PD::Smp1)->move_down(2, PD::P1)->jump_back();
+		turtle->move_down(3, PD::M1)->move_down(3, PD::Smp1)->move_down(2, PD::Propeller1)->jump_back();
 		
 		turtle->move_right(10, PD::t1);
 		turtle->move_down(3, PD::T1)->move_down(3, PD::Stp1)->move_down(2, PD::PowerStation1)->jump_back();
@@ -63,7 +66,7 @@ public:
 		turtle->move_up(3, PD::G2)->move_up(3, PD::Sgg2)->move_up(3, PD::Generator2)->jump_back();
 
 		turtle->move_right(5, PD::m2);
-		turtle->move_down(3, PD::M2)->move_down(3, PD::Smp2)->move_down(2, PD::Generator2)->jump_back();
+		turtle->move_down(3, PD::M2)->move_down(3, PD::Smp2)->move_down(2, PD::Propeller2)->jump_back();
 
 		turtle->move_right(5, PD::g3);
 		turtle->move_up(3, PD::G3)->move_up(3, PD::Sgs)->move_up(3, PD::SolarInverter)->jump_back();
@@ -72,8 +75,12 @@ public:
 		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::StorageBattery)->jump_back();
 
 		this->diagram = new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite);
-
+		
 		this->master->insert(this->diagram);
+
+		this->load_graphlets(this->machines, MachineShape::Circle, PD::Generator1, PD::Propeller2, gridsize, 0.0);
+		this->load_graphlets(this->machines, MachineShape::Box, PD::G1, PD::G3, gridsize, 0.0);
+		this->load_graphlets(this->machines, MachineShape::Box, PD::M1, PD::B1, gridsize, 180.0);
 
 		this->load_graphlets(this->switches, PD::Ssp,  PD::Stt, gridsize, 0.0);
 		this->load_graphlets(this->switches, PD::Sgg1, PD::Sbs, gridsize, -90.0);
@@ -84,6 +91,17 @@ public:
 		
 		for (auto lt = this->captions.begin(); lt != this->captions.end(); lt++) {
 			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CB);
+		}
+
+		for (auto lt = this->machines.begin(); lt != this->machines.end(); lt++) {
+			GraphletAlignment align = GraphletAlignment::CC;
+
+			switch (lt->first) {
+			case PD::Generator1: case PD::Generator2: align = GraphletAlignment::CB; break;
+			case PD::Propeller1: case PD::Propeller2: align = GraphletAlignment::CT; break;
+			}
+
+			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, align);
 		}
 
 		for (auto lt = this->switches.begin(); lt != this->switches.end(); lt++) {
@@ -118,10 +136,34 @@ private:
 		}
 	}
 
+	void load_graphlets(std::map<PD, Machinelet*>& ms, MachineShape shape, PD id0, PD idn, float radius, double degrees) {
+		for (PD m = id0; m <= idn; m++) {
+			this->load_machine(ms, shape, m, radius, degrees);
+		}
+	}
+
 	void load_dimensions(std::map<PD, Dimensionlet*>& sts, PD id0, PD idn, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
 		for (PD id = id0; id <= idn; id++) {
 			sts[id] = this->master->insert_one(new Dimensionlet(unit, label, subscript));
 		}
+	}
+
+	void load_machine(std::map<PD, Machinelet*>& ms, MachineShape shape, PD id, float radius, double degrees) {
+		Platform::String^ sign = L"~"; // default for G1, G2, G3, M1, M2, T1, T2
+
+		switch (id) {
+		case PD::B1: sign = L"="; break;
+		case PD::Generator1: case PD::Generator2: sign = L"G"; break;
+		case PD::Propeller1: case PD::Propeller2: sign = L"M"; break;
+		}
+
+		ms[id] = new Machinelet(shape, sign, radius, line_thickness, degrees);
+
+		if (shape == MachineShape::Box) {
+			ms[id]->set_style(MachineStatus::Normal, vdc_style);
+		}
+
+		this->master->insert(ms[id]);
 	}
 
 	void load_label(std::map<PD, Labellet*>& ls, PD id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
@@ -143,6 +185,7 @@ private:
 	Tracklet<PD>* diagram;
 	std::map<PD, Labellet*> captions;
 	std::map<PD, Switchlet*> switches;
+	std::map<PD, Machinelet*> machines;
 
 private:
 	PropulsionPage* master;
