@@ -41,7 +41,7 @@ PumpStyle WarGrey::SCADA::make_default_pump_style(PumpStatus status) {
 Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_status, radius, degrees) {}
 
 Pumplet::Pumplet(PumpStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, &make_default_pump_style, degrees), size(radius * 2.0F) {
+	: ISymbollet(default_status, &make_default_pump_style, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
 	this->on_status_change(default_status);
 }
@@ -91,10 +91,6 @@ void Pumplet::on_status_change(PumpStatus status) {
 		this->mask_percentage = -1.0;
 	}
 	}
-}
-
-void Pumplet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOXES(w, h, size);
 }
 
 void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

@@ -109,14 +109,21 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class ISymbollet abstract : public WarGrey::SCADA::IStatuslet<Status, Style> {
 	public:
-		ISymbollet(Status default_status, Style(*make_default_style)(Status), double degrees)
-			: IStatuslet<Status, Style>(default_status, make_default_style), degrees(degrees) {}
+		ISymbollet(Status default_status, Style(*make_default_style)(Status), float radius, double degrees)
+			: IStatuslet<Status, Style>(default_status, make_default_style)
+			, size(radius * 2.0F), degrees(degrees) {}
+
+	public:
+		void ISymbollet::fill_extent(float x, float y, float* w, float* h) override {
+			SET_BOXES(w, h, this->size);
+		}
 
 	public:
 		double get_direction_degrees() { return this->degrees; }
 
 	protected:
 		double degrees;
+		float size;
 	};
 
 	/************************************************************************************************/

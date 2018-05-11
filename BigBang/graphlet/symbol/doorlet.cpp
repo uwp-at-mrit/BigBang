@@ -35,7 +35,7 @@ DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
 DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
 
 DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
-	: ISymbollet(default_state, &make_default_door_style, degrees), size(radius * 2.0F) {
+	: ISymbollet(default_state, &make_default_door_style, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_status_change(default_state);
@@ -80,10 +80,6 @@ void DumpDoorlet::on_status_change(DoorState state) {
 		this->mask_percentage = -1.0;
 	}
 	}
-}
-
-void DumpDoorlet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOXES(w, h, size);
 }
 
 void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

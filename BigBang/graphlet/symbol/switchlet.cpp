@@ -31,8 +31,8 @@ Switchlet::Switchlet(float radius, float thickness, double degrees)
 }
 
 Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, &make_default_switch_style, degrees)
-	, thickness(thickness), size(radius * 2.0F) {}
+	: ISymbollet(default_status, &make_default_switch_style, radius, degrees)
+	, thickness(thickness) {}
 
 void Switchlet::construct() {
 	float epradius = this->thickness;
@@ -47,9 +47,12 @@ void Switchlet::construct() {
 		circle(this->right_x, this->right_y, epradius)));
 }
 
+/*
 void Switchlet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOXES(w, h, size);
+	// suppress the warning: `ISymbollet::fill_extent` is inherited via dominance
+	ISymbollet::fill_extent(x, y, w, h);
 }
+*/
 
 void Switchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const SwitchStyle style = this->get_style();

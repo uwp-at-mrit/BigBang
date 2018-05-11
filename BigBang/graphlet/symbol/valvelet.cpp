@@ -42,7 +42,7 @@ ValveStyle WarGrey::SCADA::make_default_valve_style(ValveStatus status) {
 Valvelet::Valvelet(float radius, double degrees) : Valvelet(default_valve_status, radius, degrees) {}
 
 Valvelet::Valvelet(ValveStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, &make_default_valve_style, degrees), size(radius * 2.0F) {
+	: ISymbollet(default_status, &make_default_valve_style, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->on_status_change(default_status);
@@ -111,10 +111,6 @@ void Valvelet::on_status_change(ValveStatus status) {
 		this->mask_percentage = -1.0;
 	}
 	}
-}
-
-void Valvelet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOXES(w, h, size);
 }
 
 void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

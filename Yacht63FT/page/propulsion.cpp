@@ -75,7 +75,7 @@ public:
 
 		this->master->insert(this->diagram);
 
-		this->load_graphlets(this->switches, PD::Ssp, PD::Stt, gridsize, 0.0);
+		this->load_graphlets(this->switches, PD::Ssp,  PD::Stt, gridsize, 0.0);
 		this->load_graphlets(this->switches, PD::Sgg1, PD::Sbs, gridsize, -90.0);
 	}
 

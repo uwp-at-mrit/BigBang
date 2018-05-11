@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning (disable: 4250)
 
 #include "graphlet/primitive.hpp"
 
@@ -20,7 +21,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
-		void fill_extent(float x, float y, float* width = nullptr, float* height = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	private:
@@ -29,7 +29,6 @@ namespace WarGrey::SCADA {
 		
 	private:
 		float thickness;
-		float size;
 
 	private:
 		float left_x;

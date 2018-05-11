@@ -26,28 +26,20 @@ MachineStyle WarGrey::SCADA::make_default_machine_style(MachineStatus status) {
 }
 
 /*************************************************************************************************/
-Machinelet::Machinelet(float radius, float thickness, double degrees)
-	: Machinelet(default_switch_status, radius, thickness, degrees) {
+IMachinelet::IMachinelet(unsigned char label, float radius, float thickness, double degrees)
+	: IMachinelet(default_switch_status, label, radius, thickness, degrees) {
 }
 
-Machinelet::Machinelet(MachineStatus default_status, float radius, float thickness, double degrees)
-	: IStatuslet(default_status, &make_default_machine_style)
-	, thickness(thickness), size(radius * 2.0F), degrees(degrees) {}
+IMachinelet::IMachinelet(MachineStatus default_status, unsigned char label, float radius, float thickness, double degrees)
+	: ISymbollet(default_status, &make_default_machine_style, radius, degrees)
+	, thickness(thickness) {}
 
-void Machinelet::construct() {
+void IMachinelet::construct() {
 	float epradius = this->thickness;
 	float hradius = this->size * 0.5F - epradius;
 }
 
-void Machinelet::fill_extent(float x, float y, float* w, float* h) {
-	SET_BOXES(w, h, size);
-}
-
-double Machinelet::get_direction_degrees() {
-	return this->degrees;
-}
-
-void Machinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void IMachinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const MachineStyle style = this->get_style();
 	auto color = (style.border_color != nullptr) ? style.border_color : default_color;
 	float cx = x + this->size * 0.5F;
