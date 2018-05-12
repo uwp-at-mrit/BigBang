@@ -303,4 +303,31 @@
   <data name="Wpw_C" xml:space="preserve">
     <value>W相绕组温度</value>
   </data>
+  <data name="Generator1" xml:space="preserve">
+    <value>发电机组1</value>
+  </data>
+  <data name="Generator2" xml:space="preserve">
+    <value>发电机组2</value>
+  </data>
+  <data name="Propeller1" xml:space="preserve">
+    <value>推进器1</value>
+  </data>
+  <data name="Propeller2" xml:space="preserve">
+    <value>推进器2</value>
+  </data>
+  <data name="PowerStation1" xml:space="preserve">
+    <value>日用电站1</value>
+  </data>
+  <data name="PowerStation2" xml:space="preserve">
+    <value>日用电站2</value>
+  </data>
+  <data name="ShorePower" xml:space="preserve">
+    <value>岸电电源</value>
+  </data>
+  <data name="SolarInverter" xml:space="preserve">
+    <value>光伏逆变器</value>
+  </data>
+  <data name="Accumulator" xml:space="preserve">
+    <value>蓄电池</value>
+  </data>
 </root>

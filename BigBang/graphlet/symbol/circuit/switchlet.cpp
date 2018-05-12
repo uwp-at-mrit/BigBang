@@ -1,4 +1,4 @@
-#include "graphlet/symbol/switchlet.hpp"
+#include "graphlet/symbol/circuit/switchlet.hpp"
 
 #include "math.hpp"
 #include "shape.hpp"
@@ -26,8 +26,7 @@ SwitchStyle WarGrey::SCADA::make_default_switch_style(SwitchStatus status) {
 
 /*************************************************************************************************/
 Switchlet::Switchlet(float radius, float thickness, double degrees)
-	: Switchlet(default_switch_status, radius, thickness, degrees) {
-}
+	: Switchlet(default_switch_status, radius, thickness, degrees) {}
 
 Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness, double degrees)
 	: ISymbollet(default_status, &make_default_switch_style, radius, degrees), thickness(thickness) {}

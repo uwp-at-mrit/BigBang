@@ -15,5 +15,5 @@ float design_to_application_width(float size) {
 }
 
 float design_to_application_height(float size) {
-	return screen_to_application_size(size / 1239.0F * screen_height);
+	return screen_to_application_size(size / 1200.0F * screen_height);
 }

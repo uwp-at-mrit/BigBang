@@ -1,4 +1,4 @@
-#include "graphlet/symbol/machinelet.hpp"
+#include "graphlet/symbol/circuit/machinelet.hpp"
 
 #include "math.hpp"
 #include "text.hpp"

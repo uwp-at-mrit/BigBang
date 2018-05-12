@@ -84,14 +84,17 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\switchlet.cpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\machinelet.cpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.cpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\powerstationlet.cpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\powerstationlet.cpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.cpp">
+      <Filter>graphlet\symbol\circuit</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.cpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -182,14 +185,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\switchlet.hpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\machinelet.hpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\machinelet.hpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\powerstationlet.hpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\powerstationlet.hpp">
-      <Filter>graphlet\symbol</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.hpp">
+      <Filter>graphlet\symbol\circuit</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.hpp">
+      <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -207,6 +213,9 @@
     </Filter>
     <Filter Include="graphlet\dashboard">
       <UniqueIdentifier>{1ec69507-da52-4431-86ae-c8d178d78e4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\symbol\circuit">
+      <UniqueIdentifier>{31f950b3-c7ae-469f-ba1b-0ca6d84df122}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

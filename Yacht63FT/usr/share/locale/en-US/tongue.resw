@@ -303,4 +303,31 @@
   <data name="cnvt_V" xml:space="preserve">
     <value>Converter Alternating Voltage</value>
   </data>
+  <data name="Generator1" xml:space="preserve">
+    <value>Generator Group#1</value>
+  </data>
+  <data name="Generator2" xml:space="preserve">
+    <value>Generator Group#2</value>
+  </data>
+  <data name="Propeller1" xml:space="preserve">
+    <value>Propeller#1</value>
+  </data>
+  <data name="Propeller2" xml:space="preserve">
+    <value>Propeller#2</value>
+  </data>
+  <data name="PowerStation1" xml:space="preserve">
+    <value>Power Station#1</value>
+  </data>
+  <data name="PowerStation2" xml:space="preserve">
+    <value>Power Station#2</value>
+  </data>
+  <data name="ShorePower" xml:space="preserve">
+    <value>Shore Power</value>
+  </data>
+  <data name="SolarInverter" xml:space="preserve">
+    <value>Solar Inverter</value>
+  </data>
+  <data name="Accumulator" xml:space="preserve">
+    <value>Accumulator</value>
+  </data>
 </root>

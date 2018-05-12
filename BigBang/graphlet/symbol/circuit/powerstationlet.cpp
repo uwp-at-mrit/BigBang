@@ -1,4 +1,4 @@
-#include "graphlet/symbol/powerstationlet.hpp"
+#include "graphlet/symbol/circuit/powerstationlet.hpp"
 
 #include "math.hpp"
 #include "shape.hpp"

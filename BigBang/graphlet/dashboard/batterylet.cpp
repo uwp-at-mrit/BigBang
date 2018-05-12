@@ -37,6 +37,11 @@ Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasB
 	} else if (this->height == 0.0F) {
 		this->height = this->width * 1.618F;
 	}
+
+	if (battery_status == nullptr) {
+		battery_status = new BatteryStatus();
+		register_system_status_listener(battery_status);
+	}
 }
 
 void Batterylet::construct() {
@@ -79,11 +84,6 @@ void Batterylet::construct() {
 	};
 
 	this->skeleton = geometry_freeze(geometry_union(battery_parts)); // don't mind, it's Visual Studio's fault
-
-	if (battery_status == nullptr) {
-		battery_status = new BatteryStatus();
-		register_system_status_listener(battery_status);
-	}
 }
 
 void Batterylet::fill_extent(float x, float y, float* w, float* h) {
