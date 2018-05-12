@@ -96,6 +96,9 @@
     <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
+      <Filter>graphlet\symbol\circuit</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -195,6 +198,9 @@
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
     <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.hpp">
+      <Filter>graphlet\symbol\circuit</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
   </ItemGroup>

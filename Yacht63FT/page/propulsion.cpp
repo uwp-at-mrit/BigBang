@@ -7,6 +7,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/circuit/switchlet.hpp"
 #include "graphlet/symbol/circuit/machinelet.hpp"
+#include "graphlet/symbol/circuit/converterlet.hpp"
 #include "graphlet/symbol/circuit/accumulatorlet.hpp"
 #include "graphlet/symbol/circuit/powerstationlet.hpp"
 
@@ -31,7 +32,8 @@ private enum class PD { // order matters
 	// labelled stuffs
 	G1, G2, G3, M1, T1, T2, M2, B1,
 	ShorePower, PowerStation1, PowerStation2,
-	Generator1, Generator2, Propeller1, Propeller2, SolarInverter, Accumulator,
+	Generator1, Generator2, Propeller1, Propeller2,
+	SolarInverter, Accumulator,
 	// switches
 	Ssp, Stt, Sgg1, Sgg2, Smp1, Smp2, Stp1, Stp2, Sgs, Sbs,
 	SP, _,
@@ -39,7 +41,6 @@ private enum class PD { // order matters
 };
 
 static float line_thickness = 3.0F;
-static MachineStyle vdc_style = { Colours::GhostWhite, Colours::GhostWhite };
 
 /*************************************************************************************************/
 private class LineDiagram final : public PLCConfirmation {
@@ -85,9 +86,9 @@ public:
 		this->master->insert(this->diagram);
 		this->master->insert(this->accumulator);
 
-		this->load_graphlets(this->machines, MachineShape::Circle, PD::Generator1, PD::Propeller2, this->gridsize, 0.0);
-		this->load_graphlets(this->machines, MachineShape::Box, PD::G1, PD::G3, this->gridsize, 0.0);
-		this->load_graphlets(this->machines, MachineShape::Box, PD::M1, PD::B1, this->gridsize, 180.0);
+		this->load_graphlets(this->machines, PD::Generator1, PD::Propeller2, this->gridsize, line_thickness, 0.0);
+		this->load_graphlets(this->vfds, PD::G1, PD::G3, this->gridsize, line_thickness, 0.0);
+		this->load_graphlets(this->vfds, PD::M1, PD::B1, this->gridsize, line_thickness, 180.0);
 
 		this->load_graphlets(this->switches, PD::Ssp,  PD::Stt, this->gridsize, 0.0);
 		this->load_graphlets(this->switches, PD::Sgg1, PD::Sbs, this->gridsize, -90.0);
@@ -98,54 +99,29 @@ public:
 	}
 
 	void reflow(float width, float height) {
+		float vfds_xoff = -this->gridsize * 0.5F;
+
 		this->master->move_to(this->diagram, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
-		this->diagram->map_graphlet_at_anchor(this->accumulator, PD::Accumulator, GraphletAlignment::CT);
 		
-		for (auto lt = this->machines.begin(); lt != this->machines.end(); lt++) {
-			GraphletAlignment align = GraphletAlignment::CC;
+		this->map_graphlets(this->vfds, GraphletAlignment::CC);
+		this->map_graphlets(this->switches, GraphletAlignment::CC);
+		this->map_graphlets(this->powers, GraphletAlignment::CT);
+		this->map_graphlets(this->machines, PD::Generator1, PD::Generator2, GraphletAlignment::CB);
+		this->map_graphlets(this->machines, PD::Propeller1, PD::Propeller2, GraphletAlignment::CT);
 
-			switch (lt->first) {
-			case PD::Generator1: case PD::Generator2: align = GraphletAlignment::CB; break;
-			case PD::Propeller1: case PD::Propeller2: align = GraphletAlignment::CT; break;
-			}
+		this->map_graphlets(this->captions, this->machines, PD::Generator1, PD::Generator2, GraphletAlignment::CT, GraphletAlignment::CB);
+		this->map_graphlets(this->captions, this->machines, PD::Propeller1, PD::Propeller2, GraphletAlignment::CB, GraphletAlignment::CT);
+		this->map_graphlets(this->captions, this->powers, PD::PowerStation1, PD::PowerStation2, GraphletAlignment::CB, GraphletAlignment::CT);
+		
+		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAlignment::CB);
+		
+		this->diagram->map_graphlet_at_anchor(this->accumulator, PD::Accumulator, GraphletAlignment::CT);
+		this->master->move_to(this->captions[PD::Accumulator], this->accumulator, GraphletAlignment::CB, GraphletAlignment::CT);
 
-			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, align);
-		}
-
-		for (auto lt = this->switches.begin(); lt != this->switches.end(); lt++) {
-			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CC);
-		}
-
-		for (auto lt = this->powers.begin(); lt != this->powers.end(); lt++) {
-			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CT);
-		}
+		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAlignment::CC);
 
 		for (auto lt = this->labels.begin(); lt != this->labels.end(); lt++) {
-			this->master->move_to(lt->second, this->machines[lt->first], GraphletAlignment::LC,
-				GraphletAlignment::RC, -this->gridsize * 0.5F);
-		}
-
-		for (auto lt = this->captions.begin(); lt != this->captions.end(); lt++) {
-			switch (lt->first) {
-			case PD::Generator1: case PD::Generator2: {
-				this->master->move_to(lt->second, this->machines[lt->first], GraphletAlignment::CT, GraphletAlignment::CB);
-			}; break;
-			case PD::Propeller1: case PD::Propeller2: {
-				this->master->move_to(lt->second, this->machines[lt->first], GraphletAlignment::CB, GraphletAlignment::CT);
-			}; break;
-			case PD::PowerStation1: case PD::PowerStation2: {
-				this->master->move_to(lt->second, this->powers[lt->first], GraphletAlignment::CB, GraphletAlignment::CT);
-			}; break;
-			case PD::ShorePower: {
-				this->diagram->map_graphlet_at_anchor(lt->second, PD::SP, GraphletAlignment::CB);
-			}; break;
-			case PD::Accumulator: {
-				this->master->move_to(lt->second, this->accumulator, GraphletAlignment::CB, GraphletAlignment::CT);
-			}; break;
-			default: {
-				this->diagram->map_graphlet_at_anchor(lt->second, lt->first, GraphletAlignment::CC);
-			}
-			}
+			this->master->move_to(lt->second, this->vfds[lt->first], GraphletAlignment::LC, GraphletAlignment::RC, vfds_xoff);
 		}
 	}
 
@@ -157,7 +133,8 @@ private:
 		}
 	}
 
-	void load_graphlets(std::map<PD, Machinelet*>& ms, MachineShape shape, PD id0, PD idn, float radius, double degrees) {
+	template<class G>
+	void load_graphlets(std::map<PD, G*>& ms, PD id0, PD idn, float radius, float thickness, double degrees) {
 		for (PD m = id0; m <= idn; m++) {
 			Platform::String^ sign = L"~"; // default for G1, G2, G3, M1, M2, T1, T2
 
@@ -167,11 +144,7 @@ private:
 			case PD::Propeller1: case PD::Propeller2: sign = L"M"; break;
 			}
 
-			ms[m] = this->master->insert_one(new Machinelet(shape, sign, radius, line_thickness, degrees));
-
-			if (shape == MachineShape::Box) {
-				ms[m]->set_style(MachineStatus::Normal, vdc_style);
-			}
+			ms[m] = this->master->insert_one(new G(sign, radius, thickness, degrees));
 		}
 	}
 
@@ -181,9 +154,25 @@ private:
 		}
 	}
 
-	void load_dimensions(std::map<PD, Dimensionlet*>& sts, PD id0, PD idn, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
+private:
+	template<class G>
+	void map_graphlets(std::map<PD, G*>& gs, GraphletAlignment align) {
+		for (auto lt = gs.begin(); lt != gs.end(); lt++) {
+			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, align);
+		}
+	}
+
+	template<class G>
+	void map_graphlets(std::map<PD, G*>& gs, PD id0, PD idn, GraphletAlignment align) {
 		for (PD id = id0; id <= idn; id++) {
-			sts[id] = this->master->insert_one(new Dimensionlet(unit, label, subscript));
+			this->diagram->map_graphlet_at_anchor(gs[id], id, align);
+		}
+	}
+
+	template<class G, class T>
+	void map_graphlets(std::map<PD, G*>& gs, std::map<PD, T*>& ts, PD id0, PD idn, GraphletAlignment talign, GraphletAlignment align) {
+		for (PD id = id0; id <= idn; id++) {
+			this->master->move_to(gs[id], ts[id], talign, align);
 		}
 	}
 
@@ -194,6 +183,7 @@ private:
 	std::map<PD, Labellet*> captions;
 	std::map<PD, Switchlet*> switches;
 	std::map<PD, Machinelet*> machines;
+	std::map<PD, Converterlet*> vfds;
 	std::map<PD, PowerStationlet*> powers;
 	Accumulatorlet* accumulator;
 
