@@ -10,6 +10,7 @@
 #include "graphlet/symbol/circuit/converterlet.hpp"
 #include "graphlet/symbol/circuit/accumulatorlet.hpp"
 #include "graphlet/symbol/circuit/powerstationlet.hpp"
+#include "graphlet/symbol/circuit/solarpanellet.hpp"
 
 #include "tongue.hpp"
 #include "brushes.hxx"
@@ -82,9 +83,11 @@ public:
 
 		this->diagram = new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite);
 		this->accumulator = new Accumulatorlet(gridsize, line_thickness);
+		this->solarpanel = new SolarPanellet(gridsize, line_thickness);
 		
 		this->master->insert(this->diagram);
 		this->master->insert(this->accumulator);
+		this->master->insert(this->solarpanel);
 
 		this->load_graphlets(this->machines, PD::Generator1, PD::Propeller2, this->gridsize, line_thickness, 0.0);
 		this->load_graphlets(this->vfds, PD::G1, PD::G3, this->gridsize, line_thickness, 0.0);
@@ -114,11 +117,10 @@ public:
 		this->map_graphlets(this->captions, this->powers, PD::PowerStation1, PD::PowerStation2, GraphletAlignment::CB, GraphletAlignment::CT);
 		
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAlignment::CB);
-		
+		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAlignment::CB);
 		this->diagram->map_graphlet_at_anchor(this->accumulator, PD::Accumulator, GraphletAlignment::CT);
+		this->master->move_to(this->captions[PD::SolarInverter], this->solarpanel, GraphletAlignment::CT, GraphletAlignment::CB);
 		this->master->move_to(this->captions[PD::Accumulator], this->accumulator, GraphletAlignment::CB, GraphletAlignment::CT);
-
-		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAlignment::CC);
 
 		for (auto lt = this->labels.begin(); lt != this->labels.end(); lt++) {
 			this->master->move_to(lt->second, this->vfds[lt->first], GraphletAlignment::LC, GraphletAlignment::RC, vfds_xoff);
@@ -186,6 +188,7 @@ private:
 	std::map<PD, Converterlet*> vfds;
 	std::map<PD, PowerStationlet*> powers;
 	Accumulatorlet* accumulator;
+	SolarPanellet* solarpanel;
 
 private:
 	CanvasTextFormat^ label_font;

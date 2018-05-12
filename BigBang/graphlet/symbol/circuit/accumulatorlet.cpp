@@ -15,11 +15,13 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static AccumulatorStatus default_accumulator_status = AccumulatorStatus::Normal;
 static CanvasSolidColorBrush^ default_color = Colours::GhostWhite;
+static CanvasSolidColorBrush^ default_background_color = Colours::DimGray;
 
 AccumulatorStyle WarGrey::SCADA::make_default_accumulator_style(AccumulatorStatus status) {
 	AccumulatorStyle s;
 
 	s.color = default_color;
+	s.bgcolor = default_background_color;
 
 	switch (status) {
 	case AccumulatorStatus::Breakdown: s.color = Colours::Firebrick; break;
@@ -78,9 +80,10 @@ void Accumulatorlet::construct() {
 void Accumulatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const AccumulatorStyle style = this->get_style();
 	auto color = (style.color != nullptr) ? style.color : default_color;
+	auto bgcolor = (style.bgcolor != nullptr) ? style.bgcolor : default_background_color;
 	float ex = this->electricity.X + x;
 	float ey = this->electricity.Y + y;
 	
-	ds->FillRectangle(ex, ey, this->electricity.Width, this->electricity.Height, Colours::Background);
+	ds->FillRectangle(ex, ey, this->electricity.Width, this->electricity.Height, bgcolor);
 	ds->DrawCachedGeometry(this->skeleton, x, y, color);
 }

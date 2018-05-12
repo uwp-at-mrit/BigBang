@@ -8,6 +8,7 @@ namespace WarGrey::SCADA {
 
 	private struct AccumulatorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor;
 	};
 
 	WarGrey::SCADA::AccumulatorStyle make_default_accumulator_style(WarGrey::SCADA::AccumulatorStatus status);
