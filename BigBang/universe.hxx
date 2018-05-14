@@ -58,7 +58,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
-		read_only_property(Windows::UI::Xaml::UIElement^, navigator);
+		read_only_property(Windows::UI::Xaml::Controls::Primitives::Selector^, navigator);
+		read_only_property(unsigned int, current_planet_index);
 		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		override_read_only_property(float, actual_width);
@@ -74,7 +75,7 @@ namespace WarGrey::SCADA {
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
 		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
-
+		
 	protected private:
 		virtual void construct() {};
 		void add_planet(IPlanet* planet);

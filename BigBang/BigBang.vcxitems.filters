@@ -93,15 +93,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.cpp">
-      <Filter>graphlet\symbol\circuit</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\solarpanellet.cpp">
-      <Filter>graphlet\symbol\circuit</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -200,15 +196,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\accumulatorlet.hpp">
-      <Filter>graphlet\symbol\circuit</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\circuit\solarpanellet.hpp">
-      <Filter>graphlet\symbol\circuit</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

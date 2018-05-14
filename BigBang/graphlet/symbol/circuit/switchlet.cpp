@@ -32,7 +32,7 @@ Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness,
 	: ISymbollet(default_status, &make_default_switch_style, radius, degrees), thickness(thickness) {}
 
 void Switchlet::construct() {
-	float epradius = this->thickness;
+	float epradius = this->thickness * 1.618F;
 	float hradius = this->size * 0.5F - epradius;
 	
 	circle_point(hradius, this->degrees, &this->right_x, &this->right_y);

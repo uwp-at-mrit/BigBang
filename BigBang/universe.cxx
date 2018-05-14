@@ -16,6 +16,7 @@ using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::ViewManagement;
 
@@ -167,8 +168,12 @@ Syslog* UniverseDisplay::get_logger() {
 	return this->logger;
 }
 
-UIElement^ UniverseDisplay::navigator::get() {
+Selector^ UniverseDisplay::navigator::get() {
 	return this->navigator_view;
+}
+
+unsigned int UniverseDisplay::current_planet_index::get() {
+	return (unsigned int)this->navigator_view->SelectedIndex;
 }
 
 UserControl^ UniverseDisplay::canvas::get() {

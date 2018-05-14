@@ -177,16 +177,19 @@ void Navigatorbar::load(CanvasCreateResourcesReason reason, float width, float h
 	}
 }
 
+void Navigatorbar::on_navigated_to(Yacht page) {
+	auto maybe_dashboard = dashboards.find(this);
+
+	if (maybe_dashboard != dashboards.end()) {
+		maybe_dashboard->second->on_click(page);
+	}
+}
+
 void Navigatorbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	auto credit_item = dynamic_cast<CreditItemlet*>(g);
 
 	if (credit_item != nullptr) {
-		auto maybe_dashboard = dashboards.find(this);
-
-		if (maybe_dashboard != dashboards.end()) {
-			maybe_dashboard->second->on_click(credit_item->id);
-		}
-
+		this->on_navigated_to(credit_item->id);
 		this->action->on_navigate(credit_item->id);
 	}
 }

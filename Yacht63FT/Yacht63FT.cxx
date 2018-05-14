@@ -108,6 +108,7 @@ public:
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
+		this->workspace->navigator->SelectionChanged += ref new SelectionChangedEventHandler(this, &Yacht63FT::do_notify);
 	}
 
 private:
@@ -117,6 +118,13 @@ private:
 
 		this->timeline->append_timer_action(display);
 		this->Children->Append(display->canvas);
+	}
+
+	void do_notify(Platform::Object^ sender, SelectionChangedEventArgs^ args) {
+		if (this->navigatorbar != nullptr) {
+			Yacht page = static_cast<Yacht>(this->workspace->current_planet_index);
+			this->navigatorbar->get_universe()->on_navigated_to(page);
+		}
 	}
 
 private:
@@ -129,6 +137,7 @@ private:
 	BarUniverse<Statusbar>^ statusbar;
 };
 
+/*************************************************************************************************/
 int main(Platform::Array<Platform::String^>^ args) {
 	return launch_universal_windows_application<Yacht63FT, true>(remote_test_server);
 }
