@@ -234,8 +234,8 @@
   <data name=":frequency:" xml:space="preserve">
     <value>Frequency</value>
   </data>
-  <data name=":speed:" xml:space="preserve">
-    <value>Speed</value>
+  <data name=":rspeed:" xml:space="preserve">
+    <value>Rotational Speed</value>
   </data>
   <data name=":voltage:" xml:space="preserve">
     <value>Voltage</value>

@@ -181,6 +181,12 @@ private:
 // never deletes these graphlets mannually
 private:
 	Tracklet<PD>* diagram;
+	std::map<PD, Dimensionlet*> Ps;
+	std::map<PD, Dimensionlet*> Ss;
+	std::map<PD, Dimensionlet*> Cs;
+	std::map<PD, Dimensionlet*> Vs;
+	std::map<PD, Dimensionlet*> Ts;
+	std::map<PD, Dimensionlet*> fs;
 	std::map<PD, Labellet*> labels;
 	std::map<PD, Labellet*> captions;
 	std::map<PD, Switchlet*> switches;

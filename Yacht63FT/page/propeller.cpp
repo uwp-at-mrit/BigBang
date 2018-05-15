@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class P { Power, Gauge, _ };
-private enum class PPower { power, speed, current, _ };
+private enum class PPower { power, rspeed, current, _ };
 private enum class PGauge { cnvt_V, cnvt_C, Upw_C, Vpw_C, Wpw_C, deb_C, ndeb_C, stern_C, _ };
 
 static const unsigned int pcount = 2U;

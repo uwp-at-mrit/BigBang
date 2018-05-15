@@ -19,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class G { Speed, Power, Gauge, Alert, _ };
+private enum class G { RSpeed, Power, Gauge, Alert, _ };
 private enum class GPower { voltage, current, frequency, _ };
 private enum class GGauge { sea, oil, water, _ };
 
@@ -27,7 +27,7 @@ static const unsigned int gcount = 2U;
 
 static const float indicator_thickness = 12.0F;
 static const float corner_radius = 8.0F;
-static const float speed_label_fx = 0.089F;
+static const float rspeed_label_fx = 0.089F;
 static const float label_fy = 0.25F;
 
 private class GDecorator final : public IPlanetDecorator, public IMsAppx<CanvasBitmap, int> {
@@ -35,24 +35,24 @@ public:
 	GDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
 		this->region_width = (width - padding) / float(gcount) - padding;
 
-		this->speed_bgcolors[0] = Colours::make(0x101410U);
-		this->speed_bgcolors[1] = Colours::make(0x151915U);
+		this->rspeed_bgcolors[0] = Colours::make(0x101410U);
+		this->rspeed_bgcolors[1] = Colours::make(0x151915U);
 		this->power_cell_color = Colours::make(0x131615U);
-		this->fgcolors[G::Speed] = Colours::GhostWhite;
+		this->fgcolors[G::RSpeed] = Colours::GhostWhite;
 		this->fgcolors[G::Power] = Colours::make(0x878787U);
 		this->fgcolors[G::Gauge] = Colours::make(0x919191U);
 		this->bgcolors[G::Power] = Colours::make(0x313131U);
 		this->bgcolors[G::Gauge] = Colours::make(0x1E1E1EU);
 		this->bgcolors[G::Alert] = Colours::make(0x131615U);
 
-		this->heights[G::Speed] = design_to_application_height(180.0F);
+		this->heights[G::RSpeed] = design_to_application_height(180.0F);
 		this->heights[G::Power] = design_to_application_height(125.0F);
 		this->heights[G::Alert] = design_to_application_height(70.0F);
 		this->heights[G::Gauge] = height
-			- (this->heights[G::Speed] + this->heights[G::Power] + this->heights[G::Alert])
+			- (this->heights[G::RSpeed] + this->heights[G::Power] + this->heights[G::Alert])
 			- this->region_padding * float(static_cast<unsigned int>(G::_) + 1);
 
-		this->ys[G::Speed] = this->region_padding;
+		this->ys[G::RSpeed] = this->region_padding;
 		for (unsigned int region = 1; region < static_cast<unsigned int>(G::_); region++) {
 			G prev = static_cast<G>(region - 1);
 
@@ -64,7 +64,7 @@ public:
 			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
 			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 
-			this->speed = make_text_layout(speak(":speed:"), sfont);
+			this->rspeed = make_text_layout(speak(":rspeed:"), sfont);
 
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
@@ -111,9 +111,9 @@ public:
 		SET_VALUES(width, cell_width, height, cell_height);
 	}
 
-	void fill_speed_anchor(unsigned int g_idx, float fw, float fh, float* x, float* y) {
+	void fill_rspeed_anchor(unsigned int g_idx, float fw, float fh, float* x, float* y) {
 		float anchor_x = this->region_x(g_idx) + this->region_width * fw;
-		float anchor_y = this->ys[G::Speed] + this->heights[G::Speed] * fh;
+		float anchor_y = this->ys[G::RSpeed] + this->heights[G::RSpeed] * fh;
 
 		SET_VALUES(x, anchor_x, y, anchor_y);
 	}
@@ -153,7 +153,7 @@ private:
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
 		float x = this->region_x(idx);
 
-		ds->FillRectangle(x, this->ys[G::Speed], this->region_width, this->heights[G::Speed], this->speed_bgcolors[idx]);
+		ds->FillRectangle(x, this->ys[G::RSpeed], this->region_width, this->heights[G::RSpeed], this->rspeed_bgcolors[idx]);
 
 		for (G region = static_cast<G>(1); region < G::_; region++) {
 			float y = this->ys[region];
@@ -179,11 +179,11 @@ private:
 	}
 
 	void draw_region_label(CanvasDrawingSession^ ds, unsigned int idx) {
-		float offset = this->speed->LayoutBounds.Height * 0.5F;
+		float offset = this->rspeed->LayoutBounds.Height * 0.5F;
 		float anchor_x, anchor_y;
 
-		this->fill_speed_anchor(idx, speed_label_fx, label_fy, &anchor_x, &anchor_y);
-		ds->DrawTextLayout(this->speed, anchor_x, anchor_y - offset, this->fgcolors[G::Speed]);
+		this->fill_rspeed_anchor(idx, rspeed_label_fx, label_fy, &anchor_x, &anchor_y);
+		ds->DrawTextLayout(this->rspeed, anchor_x, anchor_y - offset, this->fgcolors[G::RSpeed]);
 
 		if (this->flag_png != nullptr) {
 			static float xoff = -design_to_application_width(10.0F);
@@ -216,13 +216,13 @@ private:
 	CanvasBitmap ^ flag_png;
 
 private:
-	CanvasTextLayout^ speed;
+	CanvasTextLayout^ rspeed;
 	std::map<GPower, CanvasTextLayout^> powers;
 	std::map<GGauge, CanvasTextLayout^> pressures;
 	std::map<GGauge, CanvasTextLayout^> temperatures;
 
 private:
-	ICanvasBrush^ speed_bgcolors[gcount];
+	ICanvasBrush^ rspeed_bgcolors[gcount];
 	ICanvasBrush^ power_cell_color;
 	std::map<G, ICanvasBrush^> fgcolors;
 	std::map<G, ICanvasBrush^> bgcolors;
@@ -246,8 +246,8 @@ public:
 
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
-		this->speed_fonts[0] = make_text_format(scale_face, design_to_application_height(125.0F));
-		this->speed_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
+		this->rspeed_fonts[0] = make_text_format(scale_face, design_to_application_height(125.0F));
+		this->rspeed_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
 		this->power_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
 		this->power_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
 		this->gauge_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
@@ -263,8 +263,8 @@ public:
 		float anchor_x, anchor_y, gauge_size;
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
-			this->decorator->fill_speed_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
-			this->speeds[idx] = new Dimensionlet("<rpm>", this->speed_fonts[0], this->speed_fonts[1], this->fgcolor);
+			this->decorator->fill_rspeed_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
+			this->speeds[idx] = new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor);
 			this->master->insert(this->speeds[idx], anchor_x, anchor_y, GraphletAlignment::CC);
 
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
@@ -308,7 +308,7 @@ private:
 	std::map<GGauge, Indicatorlet*> thermometers;
 		
 private:
-	CanvasTextFormat^ speed_fonts[2];
+	CanvasTextFormat^ rspeed_fonts[2];
 	CanvasTextFormat^ power_fonts[2];
 	CanvasTextFormat^ gauge_fonts[2];
 	ICanvasBrush^ fgcolor;

@@ -234,7 +234,7 @@
   <data name=":frequency:" xml:space="preserve">
     <value>频率</value>
   </data>
-  <data name=":speed:" xml:space="preserve">
+  <data name=":rspeed:" xml:space="preserve">
     <value>转速</value>
   </data>
   <data name=":voltage:" xml:space="preserve">
