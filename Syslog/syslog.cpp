@@ -5,9 +5,13 @@ using namespace WarGrey::SCADA;
 
 static Platform::String^ default_racket_receiver_host = nullptr;
 static Platform::String^ default_logger_topic = "WinSCADA";
+static Log default_logger_level = Log::Debug;
 
+void set_default_logging_level(Log level) {
+	default_logger_level = level;
+}
 
-void set_default_logger_topic(Platform::String^ topic) {
+void set_default_logging_topic(Platform::String^ topic) {
 	default_logger_topic = topic;
 }
 
@@ -33,7 +37,7 @@ Syslog* default_logger() {
 	if (winlog == nullptr) {
 		RacketReceiver* racket = default_racket_receiver();
 
-		winlog = make_logger(Log::Debug, default_logger_topic, nullptr);
+		winlog = make_logger(default_logger_level, default_logger_topic, nullptr);
 		winlog->append_log_receiver(new VisualStudioReceiver());
 
 		if (racket != nullptr) {

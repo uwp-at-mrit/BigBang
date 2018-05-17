@@ -18,6 +18,44 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="libmodbus\client.rkt" />
+    <None Include="libmodbus\constants.rkt" />
+    <None Include="libmodbus\hpc.rkt" />
+    <None Include="libmodbus\server.rkt" />
+    <None Include="libmodbus\test.rkt" />
+    <None Include="libmodbus\unsafe.rkt" />
+    <None Include="mrit\ch6000m3.rkt" />
+    <None Include="mrit\message.rkt" />
+    <None Include="mrit\tcpclient.rkt" />
+    <None Include="mrit\tcpserver.rkt" />
+    <None Include="mrit\yacht.rkt" />
+    <None Include="Prototype\bezier.rkt" />
+    <None Include="Prototype\cabin_rt.rktl" />
+    <None Include="Prototype\deck_bottom.rktl" />
+    <None Include="Prototype\deck_top.rktl" />
+    <None Include="Prototype\flashplayer.rkt" />
+    <None Include="Prototype\plc.rkt" />
+    <None Include="Prototype\tcpclient.rkt" />
+    <None Include="Prototype\tcpserver.rkt" />
+    <None Include="Prototype\udpclient.rkt" />
+    <None Include="Prototype\yacht.rkt" />
+    <None Include="Prototype\yacht.rktl" />
+    <None Include="Prototype\yacht_psd.rkt" />
+    <None Include="rsyslog.rkt" />
+    <None Include="tamer\echo.rkt" />
+    <None Include="tamer\emoji.rkt" />
+    <None Include="tamer\format.rkt" />
+    <None Include="tamer\monad.rkt" />
+    <None Include="tamer\tamer.rkt" />
+    <None Include="Utilities\caddatabase.rkt" />
+    <None Include="Utilities\caddataextract.rkt" />
+    <None Include="Utilities\caddatatransform.rkt" />
+    <None Include="Utilities\fixpng.rkt" />
+    <None Include="Utilities\fonts.rkt" />
+    <None Include="Utilities\gb2unicode.rkt" />
+    <None Include="Utilities\gen_brushes.rkt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{B07735E3-F0D8-4175-B39F-B68915555CBF}</ProjectGuid>

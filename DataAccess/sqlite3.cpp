@@ -7,6 +7,7 @@ typedef int(*_fun__wchar__sqlite3__int)(const wchar_t*, sqlite3_t*);
 typedef wchar_t* (*_fun__sqlite3__wchar)(sqlite3_t);
 typedef int (*_fun__sqlite3__int)(sqlite3_t);
 
+static Platform::String^ dbname = "SQLite3";
 static HMODULE sqlite3 = nullptr;
 static int references = 0;
 
@@ -43,13 +44,18 @@ static void unload_sqlite3(Syslog* logger) {
 }
 
 /*************************************************************************************************/
-SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger) : DBSystem(logger) {
+SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger)
+	: DBSystem((logger == nullptr) ? make_system_logger(Log::Debug, dbname) : logger) {
 	const wchar_t* target = ((dbfile == L"") ? L":memory:" : dbfile);
 
 	load_sqlite3(this->get_logger());
 	
 	if (sqlite3_open16(target, &this->master) != SQLITE_OK) {
-		this->get_logger()->log_message(Log::Error, L"%s", sqlite3_errmsg16(this->master));
+		this->get_logger()->log_message(Log::Error,
+			L"failed to connect to [%s]: %s",
+			target, sqlite3_errmsg16(this->master));
+	} else {
+		this->get_logger()->log_message(Log::Debug, L"connected to [%s]", target);
 	}
 }
 
@@ -62,7 +68,7 @@ SQLite3::~SQLite3() {
 }
 
 Platform::String^ SQLite3::get_name() {
-	return "SQLite3";
+	return dbname;
 }
 
 int SQLite3::get_version() {

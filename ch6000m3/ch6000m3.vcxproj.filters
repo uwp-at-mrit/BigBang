@@ -87,6 +87,11 @@
     <None Include="Assets\ch6000m3.rkt">
       <Filter>Assets</Filter>
     </None>
+    <None Include="Reference\M50268-282-010 吸排管系原理图-Model.pdf" />
+    <None Include="Reference\M50268-282-015 高压冲水原理图-Model.pdf" />
+    <None Include="Reference\M50268-494-001_O_泥泵封水及闸阀冲水管系2017.09.15.dwg" />
+    <None Include="Reference\MRIT1611-126-017 数据字典180418.xls" />
+    <None Include="Reference\长航6000方杷吸船疏浚控制系统功能说明书170921，初版.doc" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\en-US\tongue.resw">

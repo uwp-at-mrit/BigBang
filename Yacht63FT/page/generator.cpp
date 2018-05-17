@@ -213,7 +213,8 @@ private:
 
 private:
 	Rect flag_window;
-	CanvasBitmap ^ flag_png;
+	CanvasBitmap^ flag_png;
+	Syslog* logger;
 
 private:
 	CanvasTextLayout^ rspeed;

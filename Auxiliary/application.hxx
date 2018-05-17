@@ -83,11 +83,12 @@ namespace WarGrey::SCADA {
 	};
 
 	template<class UniversalWindowsScreen, bool fullscreen>
-	int launch_universal_windows_application(Platform::String^ remote_rsyslog_server = nullptr) {
+	int launch_universal_windows_application(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug, Platform::String^ remote_rsyslog_server = nullptr) {
 		auto lazy_main = [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
 			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen, fullscreen>();
 		};
 
+		set_default_logging_level(level);
 		set_default_racket_receiver_host(remote_rsyslog_server);
 		Windows::UI::Xaml::Application::Start(ref new Windows::UI::Xaml::ApplicationInitializationCallback(lazy_main));
 		

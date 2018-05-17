@@ -142,5 +142,5 @@ private:
 
 /*************************************************************************************************/
 int main(Platform::Array<Platform::String^>^ args) {
-	return launch_universal_windows_application<Yacht63FT, true>(remote_test_server);
+	return launch_universal_windows_application<Yacht63FT, true>(default_logging_level, remote_test_server);
 }
