@@ -59,6 +59,9 @@
     <Filter Include="usr\share\graphlet\Propulsion">
       <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\lib">
+      <UniqueIdentifier>{551521a6-7c21-451b-969a-174157a97341}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -383,6 +386,9 @@
   <ItemGroup>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="usr\share\lib\sqlite3.dll">
+      <Filter>usr\share\lib</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">

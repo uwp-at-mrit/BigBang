@@ -83,7 +83,6 @@
     <Import Project="..\Graphics\graphics.vcxitems" Label="Shared" />
     <Import Project="..\PLCIO\PLCIO.vcxitems" Label="Shared" />
     <Import Project="..\Syslog\Syslog.vcxitems" Label="Shared" />
-    <Import Project="..\DataAccess\DataAccess.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -184,6 +183,9 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="packages.config" />
+    <None Include="usr\share\lib\sqlite3.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
