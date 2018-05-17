@@ -2,6 +2,14 @@
 
 #include <Windows.h>
 
-HMODULE win32_load_package_library(Platform::String^ dllname);
+#include "syslog.hpp"
+
+#define win32_fetch(m, fobj, type_t, logger) fobj = (type_t)win32_fetch_foreign_object(m, #fobj, logger)
+
+typedef int(*_fun__int)();
+
+HMODULE win32_load_foreign_library(Platform::String^ dllname, WarGrey::SCADA::Syslog* logger = nullptr);
+bool win32_unload_foreign_library(HMODULE m, WarGrey::SCADA::Syslog* logger = nullptr);
+FARPROC win32_fetch_foreign_object(HMODULE m, LPCSTR name, WarGrey::SCADA::Syslog* logger = nullptr);
 
 Platform::String^ win32_last_strerror();

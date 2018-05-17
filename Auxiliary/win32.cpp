@@ -2,13 +2,65 @@
 
 #include "path.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::Foundation;
 
-HMODULE win32_load_package_library(Platform::String^ dllname, Platform::String^ rootdir) {
+HMODULE win32_load_foreign_library(Platform::String^ dllname, Syslog* logger) {
+	HMODULE m = nullptr;
 	Platform::String^ bslash = L"\\";
 	Platform::String^ dll = "usr" + bslash + "share" + bslash + "lib" + bslash + dllname;
 
-	return LoadPackagedLibrary(dll->Data(), 0);
+	m = LoadPackagedLibrary(dll->Data(), 0);
+
+	if (m == nullptr) {
+		if (logger != nullptr) {
+			logger->log_message(Log::Error,
+				L"unable to load library %s: %s",
+				dllname->Data(),
+				win32_last_strerror()->Data());
+		}
+	}
+
+	return m;
+}
+
+bool win32_unload_foreign_library(HMODULE m, Syslog* logger) {
+	int okay = FreeLibrary(m);
+
+	if (okay == 0) {
+		if (logger != nullptr) {
+			logger->log_message(Log::Error,
+				L"unable to unload library: %s",
+				win32_last_strerror()->Data());
+		}
+	}
+
+	return (okay > 0);
+}
+
+FARPROC win32_fetch_foreign_object(HMODULE m, LPCSTR name, Syslog* logger) {
+	FARPROC fobj = GetProcAddress(m, name);
+
+	if (fobj == nullptr) {
+		if (logger != nullptr) {
+			size_t size = strlen(name);
+			wchar_t* wname = new wchar_t[size];
+
+			for (size_t i = 0; i <= size; i++) {
+				wname[i] = name[i];
+			}
+
+			logger->log_message(Log::Error,
+				L"unable to fetch object %s: %s",
+				wname,
+				win32_last_strerror()->Data());
+
+			delete [] wname;
+		}
+	}
+
+	return fobj;
 }
 
 Platform::String^ win32_last_strerror() {

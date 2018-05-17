@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScalableVectorGraphlet", "S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yacht63FT", "Yacht63FT\Yacht63FT.vcxproj", "{7D6E8D5A-984E-4737-BD65-FA09F5614AD7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataAccess", "DataAccess\DataAccess.vcxitems", "{E3EC1920-8383-4717-8D15-46FC7AC41916}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Syslog\Syslog.vcxitems*{01974307-edb2-486f-a3f2-2f4e8eb07d20}*SharedItemsImports = 9
@@ -31,6 +33,7 @@ Global
 		Graphics\graphics.vcxitems*{73bfe193-7352-40ab-99c0-717f6ebee2d8}*SharedItemsImports = 9
 		Auxiliary\Auxiliary.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		BigBang\BigBang.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
+		DataAccess\DataAccess.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		PLCIO\PLCIO.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
@@ -42,6 +45,7 @@ Global
 		PLCIO\PLCIO.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 		ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{a48fbec3-58b7-44ff-b428-4b63cd1c0f23}*SharedItemsImports = 4
+		DataAccess\DataAccess.vcxitems*{e3ec1920-8383-4717-8d15-46fc7ac41916}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

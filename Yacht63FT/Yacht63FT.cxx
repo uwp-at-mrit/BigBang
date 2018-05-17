@@ -7,6 +7,7 @@
 #include "planet.hpp"
 #include "timer.hxx"
 #include "brushes.hxx"
+#include "sqlite3.hpp"
 
 #include "frame/navigatorbar.hxx"
 #include "frame/statusbar.hpp"
@@ -50,7 +51,6 @@ private:
 	Bar* bar;
 };
 
-#include "win32.hpp"
 private ref class PageUniverse sealed : public UniverseDisplay, public INavigatorAction {
 public:
 	PageUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
@@ -75,13 +75,6 @@ protected:
 			case Yacht::Camera: this->add_planet(new CameraPage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
-		}
-
-		auto sqlite3 = win32_load_package_library("sqlite3");
-		if (sqlite3 == nullptr) {
-			this->get_logger()->log_message(Log::Info, L"%s", win32_last_strerror()->Data());
-		} else {
-			this->get_logger()->log_message(Log::Info, L"%06X", sqlite3);
 		}
 	}
 };
@@ -117,6 +110,8 @@ public:
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 		this->workspace->navigator->SelectionChanged += ref new SelectionChangedEventHandler(this, &Yacht63FT::do_notify);
+
+		SQLite3* sqlite3 = new SQLite3();
 	}
 
 private:
