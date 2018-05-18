@@ -3,11 +3,14 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-	private class DBSystem {
-	public:
-		virtual ~DBSystem() noexcept;
+	private class IPreparedStatement {
+	};
 
-		DBSystem(WarGrey::SCADA::Syslog* logger);
+	private class IDBSystem {
+	public:
+		virtual ~IDBSystem() noexcept;
+
+		IDBSystem(WarGrey::SCADA::Syslog* logger);
 
 	public:
 		WarGrey::SCADA::Syslog* get_logger();

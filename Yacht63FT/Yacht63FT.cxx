@@ -112,6 +112,20 @@ public:
 		this->workspace->navigator->SelectionChanged += ref new SelectionChangedEventHandler(this, &Yacht63FT::do_notify);
 
 		SQLite3* sqlite3 = new SQLite3();
+		SQLiteStatement* stmt = sqlite3->prepare("SELECT * FROM sqlite_master;");
+		//stmt->bind_parameter(0, L"table");
+		
+		int dc;
+		while (stmt->step(&dc)) {
+			for (int i = 0; i < dc; i++) {
+				syslog(Log::Info, L"%s:%s:%s: %s[%s]",
+					stmt->column_database_name(i),
+					stmt->column_table_name(i),
+					stmt->column_name(i),
+					stmt->column_decltype(i),
+					stmt->column_type(i).ToString()->Data());
+			}
+		}
 	}
 
 private:

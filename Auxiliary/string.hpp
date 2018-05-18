@@ -33,3 +33,4 @@ Platform::String^ retval; { \
 }
 
 Platform::String^ make_string(const wchar_t* fmt, ...);
+size_t wstrlen(const wchar_t* content);

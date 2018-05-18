@@ -10,6 +10,7 @@ void set_default_racket_receiver_host(Platform::String^ ipv4);
 
 WarGrey::SCADA::Syslog* default_logger();
 WarGrey::SCADA::Syslog* make_silent_logger(Platform::String^ topic);
+WarGrey::SCADA::Syslog* make_system_logger(Platform::String^ topic);
 WarGrey::SCADA::Syslog* make_system_logger(WarGrey::SCADA::Log level, Platform::String^ topic);
 WarGrey::SCADA::Syslog* make_logger(WarGrey::SCADA::Log level, Platform::String^ topic, WarGrey::SCADA::Syslog* parent = nullptr);
 
