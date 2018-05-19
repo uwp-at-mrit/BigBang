@@ -3,9 +3,33 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\dll.hpp">
+      <Filter>sqlite3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp">
+      <Filter>sqlite3</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="sqlite3">
+      <UniqueIdentifier>{76843741-ff5f-4112-80a3-3c25a323e140}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr">
+      <UniqueIdentifier>{516a0e99-938c-4578-919e-2f2fb37cdfd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share">
+      <UniqueIdentifier>{4184ff24-2334-42b7-9deb-37a17d8c2b63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\lib">
+      <UniqueIdentifier>{0cc5af20-8380-46f0-94be-338eeac1bdb4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
+      <Filter>usr\share\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -16,9 +16,15 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\dll.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
 </Project>

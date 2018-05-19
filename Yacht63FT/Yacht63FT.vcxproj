@@ -184,9 +184,6 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="packages.config" />
-    <None Include="usr\share\lib\sqlite3.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

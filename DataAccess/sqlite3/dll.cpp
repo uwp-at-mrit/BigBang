@@ -1,4 +1,4 @@
-#include "sqlite3.hpp"
+#include "sqlite3/dll.hpp"
 #include "win32.hpp"
 
 #include "box.hpp"
@@ -17,8 +17,8 @@ typedef int (*_fun__stmt__int__int)(sqlite3_stmt_t*, int);
 typedef int (*_fun__stmt__int__int32__int)(sqlite3_stmt_t*, int, int32);
 typedef int (*_fun__stmt__int__int64__int)(sqlite3_stmt_t*, int, int64);
 typedef int (*_fun__stmt__int__real__int)(sqlite3_stmt_t*, int, double);
-typedef int (*_fun__stmt__int__blob__fptr__int)(sqlite3_stmt_t*, int, char*, size_t, _fun_destructor);
-typedef int (*_fun__stmt__int__wchar__fptr__int)(sqlite3_stmt_t*, int, wchar_t*, size_t, _fun_destructor);
+typedef int (*_fun__stmt__int__blob__fptr__int)(sqlite3_stmt_t*, int, const char*, size_t, _fun_destructor);
+typedef int (*_fun__stmt__int__wchar__fptr__int)(sqlite3_stmt_t*, int, const wchar_t*, size_t, _fun_destructor);
 
 typedef const char* (*_fun__stmt__int__char)(sqlite3_stmt_t*, int);
 typedef const wchar_t* (*_fun__stmt__int__wchar)(sqlite3_stmt_t*, int);
@@ -72,7 +72,7 @@ static const int SQLITE_OK   = 0;
 static const int SQLITE_ROW  = 100;
 static const int SQLITE_DONE = 101;
 
-static const _fun_destructor SQLITE_STATIC = ((_fun_destructor)0);
+static const _fun_destructor SQLITE_STATIC    = ((_fun_destructor)0);
 static const _fun_destructor SQLITE_TRANSIENT = ((_fun_destructor)-1);
 
 static void load_sqlite3(Syslog* logger) {
@@ -137,7 +137,7 @@ static void unload_sqlite3(Syslog* logger) {
 /*************************************************************************************************/
 SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger)
 	: IDBSystem((logger == nullptr) ? make_system_logger(dbname) : logger) {
-	const wchar_t* database = ((dbfile == L"") ? L":memory:" : dbfile);
+	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
 
 	load_sqlite3(this->get_logger());
 	
@@ -176,6 +176,39 @@ SQLiteStatement* SQLite3::prepare(Platform::String^ raw) {
 	}
 
 	return stmt;
+}
+
+SQLiteStatement* SQLite3::prepare(const wchar_t* sql, ...) {
+	VSWPRINT(raw, sql);
+	
+	return this->prepare(raw);
+}
+
+std::list<SQliteColumnInfo> SQLite3::table_info(const wchar_t* name) {
+	SQLiteStatement* pragma = this->prepare(L"PRAGMA table_info = %s", name);
+	std::list<SQliteColumnInfo> infos;
+	
+	while (pragma->step()) {
+		SQliteColumnInfo info;
+
+		info.cid = pragma->column_int32(0);
+		info.name = pragma->column_text(1);
+		info.type = pragma->column_text(2);
+		info.notnull = (pragma->column_int32(3) != 0);
+		info.dflt_value = pragma->column_text(4);
+		info.pk = pragma->column_int32(5);
+		
+		this->get_logger()->log_message(Log::Debug, L"Column[%d] %s: %s, %s, %d; %s",
+			info.cid, info.name->Data(), info.type->Data(),
+			info.notnull.ToString()->Data(), info.pk,
+			info.dflt_value->Data());
+
+		infos.push_back(info);
+	}
+
+	delete pragma;
+
+	return infos;
 }
 
 int SQLite3::changes(bool total) {
@@ -261,32 +294,32 @@ int SQLiteStatement::column_data_count() {
 	return sqlite3_data_count(this->stmt);
 }
 
-const wchar_t* SQLiteStatement::column_database_name(int cid) {
-	return sqlite3_column_database_name16(this->stmt, cid);
+Platform::String^ SQLiteStatement::column_database_name(int cid) {
+	return ref new Platform::String(sqlite3_column_database_name16(this->stmt, cid));
 }
 
-const wchar_t* SQLiteStatement::column_table_name(int cid) {
-	return sqlite3_column_table_name16(this->stmt, cid);
+Platform::String^ SQLiteStatement::column_table_name(int cid) {
+	return ref new Platform::String(sqlite3_column_table_name16(this->stmt, cid));
 }
 
-const wchar_t* SQLiteStatement::column_name(int cid) {
-	return sqlite3_column_origin_name16(this->stmt, cid);
+Platform::String^ SQLiteStatement::column_name(int cid) {
+	return ref new Platform::String(sqlite3_column_origin_name16(this->stmt, cid));
 }
 
-const wchar_t* SQLiteStatement::column_decltype(int cid) {
-	return sqlite3_column_decltype16(this->stmt, cid);
+Platform::String^ SQLiteStatement::column_decltype(int cid) {
+	return ref new Platform::String(sqlite3_column_decltype16(this->stmt, cid));
 }
 
 SQLiteDataType SQLiteStatement::column_type(int cid) {
 	return static_cast<SQLiteDataType>(sqlite3_column_type(this->stmt, cid));
 }
 
-const char* SQLiteStatement::column_blob(int cid) {
-	return sqlite3_column_blob(this->stmt, cid);
+std::string SQLiteStatement::column_blob(int cid) {
+	return std::string(sqlite3_column_blob(this->stmt, cid));
 }
 
-const wchar_t* SQLiteStatement::column_text(int cid) {
-	return sqlite3_column_text16(this->stmt, cid);
+Platform::String^ SQLiteStatement::column_text(int cid) {
+	return ref new Platform::String(sqlite3_column_text16(this->stmt, cid));
 }
 
 int32 SQLiteStatement::column_int32(int cid) {
@@ -339,14 +372,22 @@ void SQLiteStatement::bind_parameter(int pid, double v) {
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, char* v) {
+void SQLiteStatement::bind_parameter(int pid, const char* v) {
 	if (sqlite3_bind_blob(this->stmt, pid + 1, v, strlen(v), SQLITE_STATIC) != SQLITE_OK) {
 		this->master->report_error("bind_blob");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, wchar_t* v) {
+void SQLiteStatement::bind_parameter(int pid, std::string v) {
+	this->bind_parameter(pid, (char*)(v.c_str()));
+}
+
+void SQLiteStatement::bind_parameter(int pid, const wchar_t* v) {
 	if (sqlite3_bind_text16(this->stmt, pid + 1, v, wstrlen(v), SQLITE_STATIC) != SQLITE_OK) {
 		this->master->report_error("bind_text");
 	}
+}
+
+void SQLiteStatement::bind_parameter(int pid, Platform::String^ v) {
+	this->bind_parameter(pid, (wchar_t*)(v->Data()));
 }
