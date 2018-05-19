@@ -94,6 +94,9 @@
     <ClCompile Include="page\propulsion.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\alarm.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -126,6 +129,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\propulsion.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\alarm.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>

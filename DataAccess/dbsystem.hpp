@@ -6,6 +6,15 @@ namespace WarGrey::SCADA {
 	private class IPreparedStatement {
 	};
 
+	private struct TableColumnInfo {
+		Platform::String^ name;
+		Platform::String^ type;
+		bool notnull;
+		bool unique;
+		bool primary;
+		Platform::String^ dflt_value;
+	};
+
 	private class IDBSystem {
 	public:
 		virtual ~IDBSystem() noexcept;

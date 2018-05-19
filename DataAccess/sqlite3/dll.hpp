@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 
 	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Blob = 4, Null = 5 };
 
-	private struct SQliteColumnInfo {
+	private struct SQliteTableInfo { // for pragma.table_info
 		int cid;
 		Platform::String^ name;
 		Platform::String^ type;
@@ -79,8 +79,24 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::SQLiteStatement* prepare(Platform::String^ sql);
 		WarGrey::SCADA::SQLiteStatement* prepare(const wchar_t* sql, ...);
 
+		void exec(WarGrey::SCADA::SQLiteStatement* stmt);
+		void exec(Platform::String^ sql);
+		void exec(const wchar_t* sql, ...);
+
 	public:
-		std::list<WarGrey::SCADA::SQliteColumnInfo> table_info(const wchar_t* name);
+		void create_table(const wchar_t* tablename,
+			WarGrey::SCADA::TableColumnInfo* columns, size_t count,
+			bool silent = false, bool without_rowid = false);
+
+		template<size_t N>
+		void create_table(const wchar_t* tablename
+			, WarGrey::SCADA::TableColumnInfo (&columns)[N]
+			, bool silent = false, bool without_rowid = false) {
+			this->create_table(tablename, columns, N, silent, without_rowid);
+		}
+
+	public:
+		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const wchar_t* name);
 
 	public:
 		int changes(bool total = false);

@@ -184,12 +184,71 @@ SQLiteStatement* SQLite3::prepare(const wchar_t* sql, ...) {
 	return this->prepare(raw);
 }
 
-std::list<SQliteColumnInfo> SQLite3::table_info(const wchar_t* name) {
+void SQLite3::exec(Platform::String^ sql) {
+	SQLiteStatement* stmt = this->prepare(sql);
+	this->get_logger()->log_message(Log::Debug, "EXEC: " + sql);
+	this->exec(stmt);
+	delete stmt;
+}
+
+void SQLite3::exec(SQLiteStatement* stmt) {
+	if (stmt->step() != SQLITE_OK) {
+		this->report_error("exec");
+	}
+}
+
+void SQLite3::exec(const wchar_t* sql, ...) {
+	VSWPRINT(raw, sql);
+
+	this->exec(raw);
+}
+
+void SQLite3::create_table(const wchar_t* tablename, TableColumnInfo* columns, size_t count, bool silent, bool without_rowid) {
+	Platform::String^ sql = make_string(L"CREATE %s %s(", (silent ? L"TABLE IF NOT EXISTS" : L"TABLE"), tablename);
+	size_t pk_count = 0;
+
+	for (size_t i = 0; i < count; i++) {
+		pk_count += ((columns[i].primary) ? 1 : 0);
+	}
+
+	for (size_t i = 0; i < count; i++) {
+		Platform::String^ column = columns[i].name + " " + columns[i].type;
+		bool nnil = columns[i].notnull;
+		bool uniq = columns[i].unique;
+
+		if (columns[i].primary) {
+			if (pk_count == 1) { column += " PRIMARY KEY"; }
+		} else if (nnil || uniq) {
+			if (uniq) { column += " UNIQUE"; }
+			if (nnil) { column += " NOT NULL"; }
+		}
+
+		sql += (column + ((i < count - 1) ? ", " : ""));
+	}
+
+	if (pk_count > 0) {
+		sql += ", PRIMARY KEY(";
+
+		for (size_t i = 0; i < count; i++) {
+			if (columns[i].primary) {
+				sql += (columns[i].name + ((pk_count == 1) ? ")" : ", "));
+				pk_count -= 1;
+			}
+		}
+	}
+
+	sql += ")" + ((without_rowid && (sqlite3_libversion_number() >= 3008002)) ? " WITHOUT ROWID;" : ";");
+	this->exec(sql);
+}
+
+
+std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
 	SQLiteStatement* pragma = this->prepare(L"PRAGMA table_info = %s", name);
-	std::list<SQliteColumnInfo> infos;
+	std::list<SQliteTableInfo> infos;
 	
 	while (pragma->step()) {
-		SQliteColumnInfo info;
+		SQliteTableInfo info;
+		SQLiteDataType type = pragma->column_type(2);
 
 		info.cid = pragma->column_int32(0);
 		info.name = pragma->column_text(1);
@@ -198,10 +257,9 @@ std::list<SQliteColumnInfo> SQLite3::table_info(const wchar_t* name) {
 		info.dflt_value = pragma->column_text(4);
 		info.pk = pragma->column_int32(5);
 		
-		this->get_logger()->log_message(Log::Debug, L"Column[%d] %s: %s, %s, %d; %s",
-			info.cid, info.name->Data(), info.type->Data(),
-			info.notnull.ToString()->Data(), info.pk,
-			info.dflt_value->Data());
+		this->get_logger()->log_message(Log::Debug, L"Column[%d] %s[%s]: %s, %s, %d; %s",
+			info.cid, info.name->Data(), type.ToString()->Data(), info.type->Data(),
+			info.notnull.ToString()->Data(), info.pk, info.dflt_value->Data());
 
 		infos.push_back(info);
 	}

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "planet.hpp"
+#include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class Homepage : public WarGrey::SCADA::Planet {
+	private class AlarmPage : public WarGrey::SCADA::Planet {
 	public:
-		~Homepage() noexcept;
-		Homepage(Platform::String^ name);
+		~AlarmPage() noexcept;
+		AlarmPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

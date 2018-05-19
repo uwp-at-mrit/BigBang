@@ -7,7 +7,6 @@
 #include "planet.hpp"
 #include "timer.hxx"
 #include "brushes.hxx"
-#include "sqlite3.hpp"
 
 #include "frame/navigatorbar.hxx"
 #include "frame/statusbar.hpp"
@@ -17,8 +16,9 @@
 #include "page/propulsion.hpp"
 #include "page/airconditioner.hpp"
 #include "page/light.hpp"
-#include "page/camera.hpp"
 #include "page/fire.hpp"
+#include "page/alarm.hpp"
+#include "page/camera.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -72,6 +72,7 @@ protected:
 			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
 			case Yacht::Light: this->add_planet(new LightPage(plc_master, name)); break;
 			case Yacht::Fire: this->add_planet(new FirePage(plc_master, name)); break;
+			case Yacht::Alarm: this->add_planet(new AlarmPage(plc_master, name)); break;
 			case Yacht::Camera: this->add_planet(new CameraPage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
@@ -110,9 +111,6 @@ public:
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
 		this->workspace->navigator->SelectionChanged += ref new SelectionChangedEventHandler(this, &Yacht63FT::do_notify);
-
-		SQLite3* sqlite3 = new SQLite3();
-		sqlite3->table_info(L"sqlite_master");		
 	}
 
 private:
