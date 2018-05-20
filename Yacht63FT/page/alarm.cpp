@@ -2,9 +2,11 @@
 
 #include "page/alarm.hpp"
 #include "configuration.hpp"
+#include <optional>
 
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
+#include "graphlet/statuslet.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -30,7 +32,11 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
+		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
+
 		SQLite3* sqlite3 = new SQLite3();
+		sqlite3->get_logger()->append_log_receiver(xterm);
+
 		sqlite3->create_table(L"yacht63ft", yacht63ft_columns);
 		sqlite3->table_info(L"sqlite_master");
 		sqlite3->table_info(L"yacht63ft");
@@ -38,6 +44,7 @@ public:
 
 // never deletes these graphlets mannually
 private:
+	Statuslinelet* xterm;
 		
 private:
 	AlarmPage* master;

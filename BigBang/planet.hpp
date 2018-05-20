@@ -109,8 +109,8 @@ namespace WarGrey::SCADA {
 		}
 
 		template<class G>
-		G* insert_one(G* g, double degrees = 0.0, float x = 0.0F, float y = 0.0F) {
-			this->insert(g);
+		G* insert_one(G* g, float x = 0.0F, float y = 0.0F, GraphletAlignment align = GraphletAlignment::LT) {
+			this->insert(g, x, y, align);
 
 			return g;
 		}

@@ -129,10 +129,8 @@ void Statusbarlet::construct() {
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 	if ((this->info != nullptr) && (width != nullptr)) {
-		float actual_width;
-
-		this->info->master->fill_actual_extent(&actual_width, nullptr);
-		(*width) = actual_width - x;
+		this->info->master->fill_actual_extent(width, nullptr);
+		(*width) -= x;
 	}
 
 	SET_BOX(height, status_height);
@@ -192,6 +190,8 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
 static ICanvasBrush^ status_nolog_color = nullptr;
 
+Statuslinelet::Statuslinelet(Log level, unsigned int lines) : ISyslogReceiver(level), lines(lines) {}
+
 void Statuslinelet::construct() {
 	initialize_status_font();
 
@@ -206,40 +206,78 @@ void Statuslinelet::construct() {
 		status_colors[static_cast<unsigned int>(Log::Alarm)] = Colours::Firebrick;
 		status_colors[static_cast<unsigned int>(Log::Panic)] = Colours::Firebrick;
 	}
-
-	this->set_message("");
-}
-
-void Statuslinelet::set_message(Platform::String^ message, Log level) {
-	auto lcolor = status_colors[static_cast<unsigned int>(level)]; 
-	this->color = ((lcolor == nullptr) ? status_nolog_color : lcolor);
-
-	this->section.lock();
-	this->status = make_text_layout(message, status_font);
-	this->section.unlock();
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
 	if ((this->info != nullptr) && (width != nullptr)) {
-		float actual_width;
-
-		this->info->master->fill_actual_extent(&actual_width, nullptr);
-		(*width) = actual_width - x;
+		this->info->master->fill_actual_extent(width, nullptr);
+		(*width) -= x;
 	}
 
-	SET_BOX(height, status_height);
+	if (this->lines == 0) {
+		if ((this->info != nullptr) && (height != nullptr)) {
+			this->info->master->fill_actual_extent(nullptr, height);
+			(*height) -= y;
+		}
+	} else {
+		SET_BOX(height, status_height * float(this->lines));
+	}
 }
 
 void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float content_y = y + (status_height - this->status->LayoutBounds.Height) * 0.5F;
+	size_t total = this->messages.size();
 
-	ds->FillRectangle(x, y, Width, Height, Colours::Background);
+	if (total > 0) {
+		ds->FillRectangle(x, y, Width, Height, Colours::Background);
 
-	this->section.lock_shared();
-	ds->DrawTextLayout(this->status, x, content_y, this->color);
-	this->section.unlock_shared();
+		this->section.lock_shared();
+		
+		auto mlt = this->messages.begin();
+		auto clt = this->colors.begin();
+
+		if (this->lines == 0) {
+			float flcount = Height / status_height;
+			size_t alines = (size_t)(std::ceilf(flcount));
+
+			if (total > alines) {
+				for (size_t i = alines; i < total; i++) {
+					mlt++;
+					clt++;
+				}
+
+				total = alines;
+				y -= (status_height * (float(alines) - flcount));
+			}
+		}
+
+		for (size_t idx = 0; idx < total; idx++, mlt++, clt++) {
+			float content_y = y + status_height * float(idx) + (status_height - (*mlt)->LayoutBounds.Height) * 0.5F;
+
+			ds->DrawTextLayout((*mlt), x, content_y, (*clt));
+		}
+
+		this->section.unlock_shared();
+	}
+}
+
+void Statuslinelet::append_message(Platform::String^ message, Log level) {
+	auto lcolor = status_colors[static_cast<unsigned int>(level)];
+
+	this->section.lock();
+	
+	if (this->lines > 0) {
+		if (this->messages.size() == this->lines) {
+			this->colors.pop_front();
+			this->messages.pop_front();
+		}
+	}
+
+	this->colors.push_back((lcolor == nullptr) ? status_nolog_color : lcolor);
+	this->messages.push_back(make_text_layout(message, status_font));
+	
+	this->section.unlock();
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
-	this->set_message("[" + level.ToString() + "] " + message, level);
+	this->append_message("[" + level.ToString() + "] " + message, level);
 }

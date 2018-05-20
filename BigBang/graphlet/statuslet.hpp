@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shared_mutex>
+#include <list>
 
 #include "graphlet/primitive.hpp"
 #include "IPLCMaster.hpp"
@@ -26,7 +27,7 @@ namespace WarGrey::SCADA {
 
 	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {
 	public:
-		Statuslinelet(WarGrey::SCADA::Log level) : ISyslogReceiver(level) {}
+		Statuslinelet(WarGrey::SCADA::Log level, unsigned int lines = 1);
 
 	public:
 		void construct() override;
@@ -34,15 +35,16 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
-		void set_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::None);
+		void append_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::None);
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ status;
+		std::list<Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^> colors;
+		std::list<Microsoft::Graphics::Canvas::Text::CanvasTextLayout^> messages;
 
 	private:
 		std::shared_mutex section;
+		unsigned int lines;
 	};
 }
