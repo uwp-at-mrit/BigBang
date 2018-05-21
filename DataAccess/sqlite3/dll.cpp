@@ -26,7 +26,6 @@ typedef int32 (*_fun__stmt__int__int32)(sqlite3_stmt_t*, int);
 typedef int64 (*_fun__stmt__int__int64)(sqlite3_stmt_t*, int);
 typedef double (*_fun__stmt__int__real)(sqlite3_stmt_t*, int);
 
-static Platform::String^ dbname = "SQLite3";
 static HMODULE sqlite3 = nullptr;
 static int references = 0;
 
@@ -136,7 +135,7 @@ static void unload_sqlite3(Syslog* logger) {
 
 /*************************************************************************************************/
 SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger)
-	: IDBSystem((logger == nullptr) ? make_system_logger(dbname) : logger) {
+	: IDBSystem((logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger) {
 	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
 
 	load_sqlite3(this->get_logger());
@@ -156,8 +155,8 @@ SQLite3::~SQLite3() {
 	}
 }
 
-Platform::String^ SQLite3::get_name() {
-	return dbname;
+DBMS SQLite3::system() {
+	return DBMS::SQLite3;
 }
 
 int SQLite3::libversion() {
@@ -202,45 +201,6 @@ void SQLite3::exec(const wchar_t* sql, ...) {
 
 	this->exec(raw);
 }
-
-void SQLite3::create_table(const wchar_t* tablename, TableColumnInfo* columns, size_t count, bool silent, bool without_rowid) {
-	Platform::String^ sql = make_string(L"CREATE %s %s(", (silent ? L"TABLE IF NOT EXISTS" : L"TABLE"), tablename);
-	size_t pk_count = 0;
-
-	for (size_t i = 0; i < count; i++) {
-		pk_count += ((columns[i].primary) ? 1 : 0);
-	}
-
-	for (size_t i = 0; i < count; i++) {
-		Platform::String^ column = columns[i].name + " " + columns[i].type;
-		bool nnil = columns[i].notnull;
-		bool uniq = columns[i].unique;
-
-		if (columns[i].primary) {
-			if (pk_count == 1) { column += " PRIMARY KEY"; }
-		} else if (nnil || uniq) {
-			if (uniq) { column += " UNIQUE"; }
-			if (nnil) { column += " NOT NULL"; }
-		}
-
-		sql += (column + ((i < count - 1) ? ", " : ""));
-	}
-
-	if (pk_count > 0) {
-		sql += ", PRIMARY KEY(";
-
-		for (size_t i = 0; i < count; i++) {
-			if (columns[i].primary) {
-				sql += (columns[i].name + ((pk_count == 1) ? ")" : ", "));
-				pk_count -= 1;
-			}
-		}
-	}
-
-	sql += ")" + ((without_rowid && (sqlite3_libversion_number() >= 3008002)) ? " WITHOUT ROWID;" : ";");
-	this->exec(sql);
-}
-
 
 std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
 	SQLiteStatement* pragma = this->prepare(L"PRAGMA table_info = %s", name);

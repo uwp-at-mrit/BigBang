@@ -15,12 +15,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\dll.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vsql.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">

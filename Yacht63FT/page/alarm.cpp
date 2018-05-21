@@ -20,10 +20,10 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static TableColumnInfo yacht63ft_columns[] = {
-	{ "timestamp", "Integer", true, true, false, nullptr },
-    { "event", "Integer", true, false, false, nullptr }
-};
+//static TableColumnInfo yacht63ft_columns[] = {
+//	{ "timestamp", "Integer", true, true, false, nullptr },
+//  { "event", "Integer", true, false, false, nullptr }
+//};
 
 private class AlarmBoard final {
 public:
@@ -37,9 +37,9 @@ public:
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
 
-		sqlite3->create_table(L"yacht63ft", yacht63ft_columns);
-		sqlite3->table_info(L"sqlite_master");
-		sqlite3->table_info(L"yacht63ft");
+		//sqlite3->create_table(L"yacht63ft", yacht63ft_columns);
+		//sqlite3->table_info(L"sqlite_master");
+		//sqlite3->table_info(L"yacht63ft");
 	}
 
 // never deletes these graphlets mannually
