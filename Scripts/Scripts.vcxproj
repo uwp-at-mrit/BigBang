@@ -30,6 +30,12 @@
     <None Include="mrit\tcpclient.rkt" />
     <None Include="mrit\tcpserver.rkt" />
     <None Include="mrit\yacht.rkt" />
+    <None Include="ORM\cpp.rkt" />
+    <None Include="ORM\normalize.rkt" />
+    <None Include="ORM\schema.rkt" />
+    <None Include="ORM\shadow.rkt" />
+    <None Include="ORM\syntax.rkt" />
+    <None Include="ORM\virtual-sql.rkt" />
     <None Include="Prototype\bezier.rkt" />
     <None Include="Prototype\cabin_rt.rktl" />
     <None Include="Prototype\deck_bottom.rktl" />

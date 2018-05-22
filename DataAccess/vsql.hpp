@@ -3,14 +3,20 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
+	static const unsigned int DB_PRIMARY_KEY = 0b0001;
+	static const unsigned int DB_UNIQUE      = 0b0010;
+	static const unsigned int DB_NOT_NULL    = 0b0100;
+
 	private struct TableColumnInfo {
 		Platform::String^ name;
 		Platform::String^ type;
-		bool notnull;
-		bool unique;
-		bool primary;
 		Platform::String^ dflt_value;
+		unsigned int flags;
 	};
+
+	bool db_column_primary(TableColumnInfo& info);
+	bool db_column_notnull(TableColumnInfo& info);
+	bool db_column_unique(TableColumnInfo& info);
 
 	private class IVirtualSQL abstract {
 	public:

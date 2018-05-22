@@ -7,9 +7,7 @@
       <Filter>sqlite3</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
-    <ClInclude Include="D:\WinSCADA\DataAccess\sqlite3\vsqlite3.hpp">
-      <Filter>sqlite3</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
@@ -17,9 +15,7 @@
       <Filter>sqlite3</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)vsql.cpp" />
-    <ClCompile Include="D:\WinSCADA\DataAccess\sqlite3\vsqlite3.cpp">
-      <Filter>sqlite3</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sqlite3">

@@ -12,7 +12,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 	bool rowid_is_defined = false;
 
 	for (size_t i = 0; i < this->count; i++) {
-		pk_count += ((this->columns[i].primary) ? 1 : 0);
+		pk_count += (db_column_primary(this->columns[i]) ? 1 : 0);
 
 		if (rowid_is_defined) {
 			for (size_t ridx = 0; ridx < ric; ridx++) {
@@ -25,10 +25,10 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 
 	for (size_t i = 0; i < count; i++) {
 		Platform::String^ column = this->columns[i].name + " " + this->columns[i].type;
-		bool nnil = this->columns[i].notnull;
-		bool uniq = this->columns[i].unique;
+		bool nnil = db_column_notnull(this->columns[i]);
+		bool uniq = db_column_unique(this->columns[i]);
 
-		if (this->columns[i].primary) {
+		if (db_column_primary(this->columns[i])) {
 			if (pk_count == 1) { column += " PRIMARY KEY"; }
 		} else if (nnil || uniq) {
 			if (uniq) { column += " UNIQUE"; }
@@ -42,7 +42,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 		sql += ", PRIMARY KEY(";
 
 		for (size_t i = 0; i < this->count; i++) {
-			if (this->columns[i].primary) {
+			if (db_column_primary(this->columns[i])) {
 				sql += (this->columns[i].name + ((pk_count == 1) ? ")" : ", "));
 				pk_count -= 1;
 			}
