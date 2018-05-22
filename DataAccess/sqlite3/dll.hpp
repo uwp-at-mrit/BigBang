@@ -72,7 +72,7 @@ namespace WarGrey::SCADA {
 		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr);
 
 	public:
-		Platform::String^ get_name() override;
+		WarGrey::SCADA::DBMS system() override;
 		int libversion();
 
 	public:
@@ -82,18 +82,6 @@ namespace WarGrey::SCADA {
 		void exec(WarGrey::SCADA::SQLiteStatement* stmt);
 		void exec(Platform::String^ sql);
 		void exec(const wchar_t* sql, ...);
-
-	public:
-		void create_table(const wchar_t* tablename,
-			WarGrey::SCADA::TableColumnInfo* columns, size_t count,
-			bool silent = false, bool without_rowid = false);
-
-		template<size_t N>
-		void create_table(const wchar_t* tablename
-			, WarGrey::SCADA::TableColumnInfo (&columns)[N]
-			, bool silent = false, bool without_rowid = false) {
-			this->create_table(tablename, columns, N, silent, without_rowid);
-		}
 
 	public:
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const wchar_t* name);

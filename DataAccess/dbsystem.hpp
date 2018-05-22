@@ -1,18 +1,10 @@
 #pragma once
 
 #include "syslog.hpp"
-
 namespace WarGrey::SCADA {
-	private class IPreparedStatement {
-	};
+	private enum class DBMS { SQLite3 };
 
-	private struct TableColumnInfo {
-		Platform::String^ name;
-		Platform::String^ type;
-		bool notnull;
-		bool unique;
-		bool primary;
-		Platform::String^ dflt_value;
+	private class IPreparedStatement {
 	};
 
 	private class IDBSystem {
@@ -25,7 +17,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger();
 
 	public:
-		virtual Platform::String^ get_name() = 0;
+		virtual WarGrey::SCADA::DBMS system() = 0;
 
 	private:
 		WarGrey::SCADA::Syslog* logger;
