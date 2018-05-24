@@ -14,12 +14,11 @@
 
 (define-syntax (define-table stx)
   (syntax-parse stx #:datum-literals [:]
-    [(_ tbl #:as Table #:with primary-key ([field : DataType constraints ...] ...))
-     (with-syntax* ([([table dbtable] #%Table) (list (parse-table-name #'tbl) (format-id #'Table "#%~a" #'Table))]
-                    [([rowid dbrowid] ...) (parse-primary-key #'primary-key)]
+    [(_ table #:as Table #:with primary-key ([field : DataType constraints ...] ...))
+     (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
                     [([view? table-rowid ...]
-                      [(:field table-field FieldType MaybeNull on-update [defval ...] field-examples dbfield DBType field-guard not-null unique) ...]
-                      [touch-table.hpp touch-table.cpp table.hpp table.cpp force-create force-insert check-record]
+                      [(:field table-field MaybeNull on-update [defval ...] field-examples field-guard not-null unique) ...]
+                      [cat-table.hpp cat-table.cpp table.hpp table.cpp table-columns force-create force-insert check-record]
                       [unsafe-table make-table remake-table create-table insert-table delete-table update-table in-table select-table seek-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
                            [tablename (syntax-e #'table)])
@@ -30,11 +29,11 @@
                            (values (cons field-info sdleif) (if maybe-pkref (cons maybe-pkref sdiwor) sdiwor))))
                        (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
                              (reverse sdleif)
-                             (for/list ([fmt (in-list (list "touch-~a.hpp" "touch-~a.cpp" "~a.hpp" "~a.cpp"
+                             (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_columns"
                                                             "create-~a-if-not-exists" "insert-~a-or-replace" "check-~a-rowid"))])
                                (format-id #'table fmt tablename))
                              (for/list ([prefix (in-list (list 'unsafe 'make 'remake 'create 'insert 'delete 'update 'in 'select 'seek))])
-                               (format-id #'table "~a-~a" prefix tablename))))]
+                               (format-id #'table "~a_~a" prefix tablename))))]
                     [([mkargs ...] [reargs ...])
                      (for/fold ([syns (list null null)])
                                ([:fld (in-syntax #'(:field ...))]
@@ -45,34 +44,40 @@
                     [table-rowid-body (if (syntax-e #'view?)
                                           #'(throw exn:fail:unsupported '#%table "temporary view has no primary keys")
                                           #'(vector (racket->sql-pk (table-rowid self)) ...))])
-       #'(begin (define touch-table.hpp
+       #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
-                      (&include "sqlite3.hpp")
+                      (&include "dbsystem.hpp")
 
                       (&namespace 'WarGrey::SCADA
                                   (λ [indent]
-                                    (&struct 'Table '(field ...) '(DBType ...) indent))))))
+                                    (&struct 'Table '(field ...) '(DataType ...) indent)
+                                    (&create-table.hpp 'create-table 'table indent))))))
 
-                (define touch-table.cpp
+                (define cat-table.cpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
                       (&include (symbol->string 'table.hpp))
-                      (&using-namespace 'WarGrey::SCADA))))))]))
+                      (&include "dbsystem.hpp" "dbinfo.hpp")
+                      (&using-namespace 'WarGrey::SCADA)
+                      (&table-column-info 'table-columns
+                                          '(rowid ...) '(field ...) '(DataType ...)
+                                          '(not-null ...) '(unique ...))
+                      (&create-table.cpp 'create-table 'table-columns '(rowid ...)))))))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (module+ main
-  (define-table master #:as Master #:with [uuid name]
-    ([uuid     : Integer       #:default (pk64:timestamp launch-time)]
-     [type     : Symbol        #:default 'table #:not-null #:% 'table]
-     [name     : String        #:not-null #:unique]
-     [ctime    : Fixnum        #:default (current-milliseconds)]
-     [mtime    : Fixnum        #:auto (current-milliseconds)]))
+  (define-table event #:as AlarmEvent #:with [uuid name]
+    ([uuid     : Integer           #:default (pk64:timestamp launch-time)]
+     [type     : Text              #:default 'table #:not-null #:% 'table]
+     [name     : Text              #:not-null #:unique]
+     [ctime    : Integer           #:default (current-milliseconds)]
+     [mtime    : Integer           #:auto (current-milliseconds)]))
 
-  (printf "> cat master.hpp~n")
-  (touch-master.hpp)
+  (printf "> cat ~a~n" 'event.hpp)
+  (cat-event.hpp)
   
   (&linebreak 3)
   
-  (printf "> cat master.cpp~n")
-  (touch-master.cpp))
+  (printf "> cat ~a~n" 'event.cpp)
+  (cat-event.cpp))
