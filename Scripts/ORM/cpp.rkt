@@ -29,6 +29,12 @@
       (display #\;))
     (&linebreak)))
 
+(define &pragma
+  (lambda pragmas
+    (for ([pragma (in-list pragmas)])
+      (printf "#pragma ~a~n" pragma))
+    (&linebreak 1)))
+
 (define &include
   (lambda headers
     (for ([header (in-list headers)])

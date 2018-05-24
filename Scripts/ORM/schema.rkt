@@ -47,6 +47,7 @@
        #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
+                      (&pragma 'once)
                       (&include "dbsystem.hpp")
 
                       (&namespace 'WarGrey::SCADA
