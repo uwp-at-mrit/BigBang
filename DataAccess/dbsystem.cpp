@@ -4,7 +4,7 @@
 
 using namespace WarGrey::SCADA;
 
-IDBSystem::IDBSystem(Syslog* logger) : logger(logger) {
+IDBSystem::IDBSystem(Syslog* logger, DBMS dbms) : IDBObject(dbms), logger(logger) {
 	if (this->logger == nullptr) {
 		this->logger = make_system_logger("DBSystem");
 	}
@@ -32,6 +32,30 @@ IVirtualSQL* IDBSystem::make_sql_factory(TableColumnInfo* columns, size_t count)
 	}
 
 	return vsql;
+}
+
+IPreparedStatement* IDBSystem::prepare(const wchar_t* sql, ...) {
+	VSWPRINT(raw, sql);
+
+	return this->prepare(raw);
+}
+
+void IDBSystem::exec(IPreparedStatement* stmt) {
+	if (this->dbsystem() == stmt->dbsystem()) {
+		stmt->step(nullptr, L"exec");
+	} else {
+		this->get_logger()->log_message(Log::Warning, "incompatible dbsystem and statement");
+	}
+}
+
+void IDBSystem::exec(Platform::String^ sql) {
+	this->get_logger()->log_message(Log::Debug, "EXEC: " + sql);
+	IPreparedStatement* stmt = this->prepare(sql);
+
+	if (stmt != nullptr) {
+		this->exec(stmt);
+		delete stmt;
+	}
 }
 
 void IDBSystem::exec(const wchar_t* sql, ...) {
@@ -70,4 +94,21 @@ void IDBSystem::log(Platform::String^ message_prefix, Log level) {
 
 Syslog* IDBSystem::get_logger() {
 	return this->logger;
+}
+
+/*************************************************************************************************/
+void IPreparedStatement::bind_parameter(unsigned int pid, float v) {
+	this->bind_parameter(pid, double(v));
+}
+
+void IPreparedStatement::bind_parameter(unsigned int pid, std::string v) {
+	this->bind_parameter(pid, (char*)(v.c_str()));
+}
+
+void IPreparedStatement::bind_parameter(unsigned int pid, Platform::String^ v) {
+	this->bind_parameter(pid, (wchar_t*)(v->Data()));
+}
+
+float IPreparedStatement::column_float(unsigned int cid) {
+	return float(this->column_double(cid));
 }

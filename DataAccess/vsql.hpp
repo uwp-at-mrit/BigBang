@@ -29,6 +29,7 @@ namespace WarGrey::SCADA {
 			Platform::String^ primary_keys[], size_t pk_count,
 			bool if_not_exists) = 0;
 
+		virtual Platform::String^ insert_into(Platform::String^ tablename, bool replace) = 0;
 		virtual Platform::String^ drop_table(Platform::String^ tablename) = 0;
 
 	protected:

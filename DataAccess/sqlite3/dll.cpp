@@ -138,7 +138,7 @@ static void unload_sqlite3(Syslog* logger) {
 
 /*************************************************************************************************/
 SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger)
-	: IDBSystem((logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger) {
+	: IDBSystem((logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger, DBMS::SQLite3) {
 	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
 
 	load_sqlite3(this->get_logger());
@@ -162,15 +162,11 @@ IVirtualSQL* SQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {
 	return new VirtualSQLite3(columns, count, this->libversion());
 }
 
-DBMS SQLite3::system() {
-	return DBMS::SQLite3;
-}
-
 int SQLite3::libversion() {
 	return sqlite3_libversion_number();
 }
 
-SQLiteStatement* SQLite3::prepare(Platform::String^ raw) {
+IPreparedStatement* SQLite3::prepare(Platform::String^ raw) {
 	const wchar_t* sql = raw->Data();
 	sqlite3_stmt_t* prepared_stmt;
 	SQLiteStatement* stmt = nullptr;
@@ -184,28 +180,8 @@ SQLiteStatement* SQLite3::prepare(Platform::String^ raw) {
 	return stmt;
 }
 
-SQLiteStatement* SQLite3::prepare(const wchar_t* sql, ...) {
-	VSWPRINT(raw, sql);
-	
-	return this->prepare(raw);
-}
-
-void SQLite3::exec(Platform::String^ sql) {
-	this->get_logger()->log_message(Log::Debug, "EXEC: " + sql);
-	SQLiteStatement* stmt = this->prepare(sql);
-
-	if (stmt != nullptr) {
-		this->exec(stmt);
-		delete stmt;
-	}
-}
-
-void SQLite3::exec(SQLiteStatement* stmt) {
-	stmt->step(nullptr, L"exec");
-}
-
 std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
-	SQLiteStatement* pragma = this->prepare(L"PRAGMA table_info = %s", name);
+	SQLiteStatement* pragma = static_cast<SQLiteStatement*>(IDBSystem::prepare(L"PRAGMA table_info = %s", name));
 	std::list<SQliteTableInfo> infos;
 	
 	while (pragma->step()) {
@@ -252,7 +228,8 @@ const wchar_t* SQLite3::get_last_error_message() {
 }
 
 /*************************************************************************************************/
-SQLiteStatement::SQLiteStatement(SQLite3* db, sqlite3_stmt_t* stmt) : stmt(stmt), master(db) {}
+SQLiteStatement::SQLiteStatement(SQLite3* db, sqlite3_stmt_t* stmt)
+	: IPreparedStatement(DBMS::SQLite3), stmt(stmt), master(db) {}
 
 SQLiteStatement::~SQLiteStatement() {
 	// sqlite3_finalize() returns error code of last statement execution, not of the finalization.
@@ -290,100 +267,82 @@ int SQLiteStatement::column_data_count() {
 	return sqlite3_data_count(this->stmt);
 }
 
-Platform::String^ SQLiteStatement::column_database_name(int cid) {
+Platform::String^ SQLiteStatement::column_database_name(unsigned int cid) {
 	return ref new Platform::String(sqlite3_column_database_name16(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_table_name(int cid) {
+Platform::String^ SQLiteStatement::column_table_name(unsigned int cid) {
 	return ref new Platform::String(sqlite3_column_table_name16(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_name(int cid) {
+Platform::String^ SQLiteStatement::column_name(unsigned int cid) {
 	return ref new Platform::String(sqlite3_column_origin_name16(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_decltype(int cid) {
+Platform::String^ SQLiteStatement::column_decltype(unsigned int cid) {
 	return ref new Platform::String(sqlite3_column_decltype16(this->stmt, cid));
 }
 
-SQLiteDataType SQLiteStatement::column_type(int cid) {
+SQLiteDataType SQLiteStatement::column_type(unsigned int cid) {
 	return static_cast<SQLiteDataType>(sqlite3_column_type(this->stmt, cid));
 }
 
-std::string SQLiteStatement::column_blob(int cid) {
+std::string SQLiteStatement::column_blob(unsigned int cid) {
 	return std::string(sqlite3_column_blob(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_text(int cid) {
+Platform::String^ SQLiteStatement::column_text(unsigned int cid) {
 	return ref new Platform::String(sqlite3_column_text16(this->stmt, cid));
 }
 
-int32 SQLiteStatement::column_int32(int cid) {
+int32 SQLiteStatement::column_int32(unsigned int cid) {
 	return sqlite3_column_int(this->stmt, cid);
 }
 
-int64 SQLiteStatement::column_int64(int cid) {
+int64 SQLiteStatement::column_int64(unsigned int cid) {
 	return sqlite3_column_int64(this->stmt, cid);
 }
 
-double SQLiteStatement::column_double(int cid) {
+double SQLiteStatement::column_double(unsigned int cid) {
 	return sqlite3_column_double(this->stmt, cid);
-}
-
-float SQLiteStatement::column_float(int cid) {
-	return float(this->column_double(cid));
 }
 
 unsigned int SQLiteStatement::parameter_count() {
 	return sqlite3_bind_parameter_count(this->stmt);
 }
 
-void SQLiteStatement::bind_parameter(int pid) {
+void SQLiteStatement::bind_parameter(unsigned int pid) {
 	if (sqlite3_bind_null(this->stmt, pid + 1) != SQLITE_OK) {
 		this->master->report_error("bind_null");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, int32 v) {
+void SQLiteStatement::bind_parameter(unsigned int pid, int32 v) {
 	if (sqlite3_bind_int(this->stmt, pid + 1, v) != SQLITE_OK) {
 		this->master->report_error("bind_int32");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, int64 v) {
+void SQLiteStatement::bind_parameter(unsigned int pid, int64 v) {
 	if (sqlite3_bind_int64(this->stmt, pid + 1, v) != SQLITE_OK) {
 		this->master->report_error("bind_int64");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, float v) {
-	if (sqlite3_bind_double(this->stmt, pid + 1, double(v)) != SQLITE_OK) {
-		this->master->report_error("bind_float");
-	}
-}
-
-void SQLiteStatement::bind_parameter(int pid, double v) {
+void SQLiteStatement::bind_parameter(unsigned int pid, double v) {
 	if (sqlite3_bind_double(this->stmt, pid + 1, v) != SQLITE_OK) {
 		this->master->report_error("bind_double");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, const char* v) {
+void SQLiteStatement::bind_parameter(unsigned int pid, const char* v) {
 	if (sqlite3_bind_blob(this->stmt, pid + 1, v, strlen(v), SQLITE_STATIC) != SQLITE_OK) {
 		this->master->report_error("bind_blob");
 	}
 }
 
-void SQLiteStatement::bind_parameter(int pid, std::string v) {
-	this->bind_parameter(pid, (char*)(v.c_str()));
-}
-
-void SQLiteStatement::bind_parameter(int pid, const wchar_t* v) {
+void SQLiteStatement::bind_parameter(unsigned int pid, const wchar_t* v) {
 	if (sqlite3_bind_text16(this->stmt, pid + 1, v, wstrlen(v), SQLITE_STATIC) != SQLITE_OK) {
 		this->master->report_error("bind_text");
 	}
-}
-
-void SQLiteStatement::bind_parameter(int pid, Platform::String^ v) {
-	this->bind_parameter(pid, (wchar_t*)(v->Data()));
 }

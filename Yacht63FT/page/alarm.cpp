@@ -28,6 +28,13 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
+		AlarmEvent ae;
+
+		ae.name = "AlarmEvent";
+		ae.type = "Test";
+		ae.uuid = 42;
+		ae.ctime = 2017;
+		ae.mtime = 2018;
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
@@ -36,6 +43,7 @@ public:
 		sqlite3->table_info(L"sqlite_master");
 		sqlite3->table_info(L"event");
 
+		insert_event(sqlite3, &ae);
 		drop_event(sqlite3);
 		sqlite3->table_info(L"event");
 	}

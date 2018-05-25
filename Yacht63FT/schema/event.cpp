@@ -39,7 +39,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
             stmt->bind_parameter(3, selves[i].ctime);
             stmt->bind_parameter(4, selves[i].mtime);
 
-            dbc->exec(sql);
+            dbc->exec(stmt);
             stmt->clear_bindings();
         }
 

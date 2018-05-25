@@ -45,7 +45,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 		sql += (column + ((i < count - 1) ? ", " : ""));
 	}
 
-	if (pk_count > 0) {
+	if (pk_count > 1) {
 		sql += ", PRIMARY KEY(";
 
 		for (size_t i = 0; i < this->count; i++) {
@@ -57,6 +57,20 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 	}
 
 	sql += ")" + (((!rowid_is_defined) && (this->version >= 3008002)) ? " WITHOUT ROWID;" : ";");
+
+	return sql;
+}
+
+Platform::String^ VirtualSQLite3::insert_into(Platform::String^ tablename, bool replace) {
+	Platform::String^ sql = make_string(L"INSERT %s %s (", (replace ? L"OR REPLACE INTO" : L"INTO"), tablename->Data());
+	Platform::String^ parameters = "";
+
+	for (size_t i = 1; i <= this->count; i++) {
+		sql += (this->columns[i - 1].name + ((i < this->count) ? ", " : ") VALUES("));
+		parameters += ("?" + ((i < this->count) ? ", " : ");"));
+	}
+
+	sql += parameters;
 
 	return sql;
 }
