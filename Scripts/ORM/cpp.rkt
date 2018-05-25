@@ -96,8 +96,7 @@
 (define &create-table
   (case-lambda
     [(λname indent)
-     (&htab indent)
-     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);~n" λname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);~n" λname)]
     [(λname tablename column_infos table_rowids)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists) {~n" λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
@@ -111,9 +110,8 @@
 (define &insert-table
   (case-lambda
     [(λname classname indent)
-     (&htab indent)
-     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
-     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname classname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname classname)]
     [(λname classname tablename fields column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* self, bool replace) {~n" λname classname)
      (&htab 1) (printf "~a(dbc, self, 1, replace);~n" λname)
@@ -142,8 +140,7 @@
 (define &drop-table
   (case-lambda
     [(λname indent)
-     (&htab indent)
-     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc);~n" λname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc);~n" λname)]
     [(λname tablename column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc) {~n" λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)

@@ -5,12 +5,12 @@
 
 using namespace WarGrey::SCADA;
 
-static Platform::String^ event_rowids[] = { "uuid", "name" };
+static Platform::String^ event_rowids[] = { "uuid" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Text, nullptr, DB_PRIMARY_KEY | DB_NOT_NULL | DB_UNIQUE },
+    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
     { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
