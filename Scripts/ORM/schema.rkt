@@ -18,8 +18,8 @@
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
                     [([view? table-rowid ...]
                       [(:field table-field MaybeType on-update [defval ...] field-examples field-guard not-null unique) ...]
-                      [cat-table.hpp cat-table.cpp table.hpp table.cpp table-columns force-create force-insert check-record]
-                      [create-table insert-table delete-table update-table in-table select-table seek-table])
+                      [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns force-create force-insert check-record]
+                      [create-table insert-table delete-table update-table in-table select-table seek-table drop-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
                            [tablename (syntax-e #'table)])
                        (define-values (sdleif sdiwor)
@@ -29,10 +29,10 @@
                            (values (cons field-info sdleif) (if maybe-pkref (cons maybe-pkref sdiwor) sdiwor))))
                        (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
                              (reverse sdleif)
-                             (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_columns"
+                             (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_rowids" "~a_columns"
                                                             "create-~a-if-not-exists" "insert-~a-or-replace" "check-~a-rowid"))])
                                (format-id #'table fmt tablename))
-                             (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'in 'select 'seek))])
+                             (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'in 'select 'seek 'drop))])
                                (format-id #'table "~a_~a" prefix tablename))))])
        #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
@@ -44,7 +44,8 @@
                       (&namespace 'WarGrey::SCADA
                                   (λ [indent]
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
-                                    (&create-table.hpp 'create-table 'table indent))))))
+                                    (&create-table 'create-table indent)
+                                    (&drop-table 'drop-table indent))))))
 
                 (define cat-table.cpp
                   (lambda [[/dev/stdout (current-output-port)]]
@@ -52,8 +53,9 @@
                       (&include (symbol->string 'table.hpp))
                       (&include "dbsystem.hpp" "dbtypes.hpp")
                       (&using-namespace 'WarGrey::SCADA)
-                      (&table-column-info 'table-columns '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
-                      (&create-table.cpp 'create-table 'table-columns '(rowid ...)))))))]))
+                      (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
+                      (&create-table 'create-table 'table 'table-columns 'table-rowids)
+                      (&drop-table 'drop-table 'table 'table-columns))))))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (module+ main

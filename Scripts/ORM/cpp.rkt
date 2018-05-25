@@ -68,8 +68,16 @@
     (&linebreak 1)))
 
 (define &table-column-info
-  (lambda [var rowids cols dbtypes not-nulls uniques]
-    (printf "static TableColumnInfo ~a[] = {~n" var)
+  (lambda [var_columns var_rowids rowids cols dbtypes not-nulls uniques]
+    (printf "static Platform::String^ ~a[] = { ~a };~n" var_rowids
+            (let strcat ([s (format "~s" (symbol->string (car rowids)))]
+                         [r (cdr rowids)])
+              (cond [(null? r) s]
+                    [else (strcat (format "~a, ~s" s (symbol->string (car r)))
+                                  (cdr r))])))
+    (&linebreak 1)
+    
+    (printf "static TableColumnInfo ~a[] = {~n" var_columns)
     (for ([col (in-list cols)]
           [type (in-list dbtypes)]
           [nnil (in-list not-nulls)]
@@ -84,25 +92,38 @@
     (&brace 0 #:semicolon? #true)
     (&linebreak 1)))
 
-(define &create-table.hpp
-  (lambda [λname tablename indent]
-    (&htab indent)
-    (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true, Platform::String^ tablename = ~s);~n"
-            λname (symbol->string tablename))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define &create-table
+  (case-lambda
+    [(λname indent)
+     (&htab indent)
+     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);~n" λname)]
+    [(λname tablename column_infos table_rowids)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists) {~n" λname)
+     (&htab 1)
+     (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1)
+     (printf "Platform::String^ sql = vsql->create_table(~s, ~a, sizeof(~a)/sizeof(Platform::String^), if_not_exists);~n"
+             (symbol->string tablename) table_rowids table_rowids)
+     (&linebreak)
+     (&htab 1)
+     (printf "dbc->exec(sql);~n")
+     (&brace 0)
+     (&linebreak 1)]))
 
-(define &create-table.cpp
-  (lambda [λname column_infos rowids]
-    (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists, Platform::String^ tablename) {~n" λname)
-    (&htab 1)
-    (printf "Platform::String^ rowids[] = { \"~a\"~a };~n"
-            (car rowids)
-            (let strcat ([s ""] [r (cdr rowids)]) (if (null? r) s (strcat (format "~a, \"~a\"" s (car r)) (cdr r)))))
-    (&htab 1)
-    (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
-    (&htab 1)
-    (printf "Platform::String^ sql = vsql->create_table(tablename, rowids, sizeof(rowids)/sizeof(Platform::String^), if_not_exists);~n")
-    (&linebreak)
-    (&htab 1)
-    (printf "dbc->exec(sql);~n")
-    (&brace 0)
-    (&linebreak 1)))
+(define &drop-table
+  (case-lambda
+    [(λname indent)
+     (&htab indent)
+     (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc);~n" λname)]
+    [(λname tablename column_infos)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc) {~n" λname)
+     (&htab 1)
+     (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1)
+     (printf "Platform::String^ sql = vsql->drop_table(~s);~n" (symbol->string tablename))
+     (&linebreak)
+     (&htab 1)
+     (printf "dbc->exec(sql);~n")
+     (&brace 0)
+     (&linebreak 1)]))

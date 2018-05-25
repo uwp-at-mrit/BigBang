@@ -13,5 +13,6 @@ namespace WarGrey::SCADA {
         std::optional<Integer> mtime;
     };
 
-    void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true, Platform::String^ tablename = "event");
+    void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
+    void drop_event(WarGrey::SCADA::IDBSystem* dbc);
 }
