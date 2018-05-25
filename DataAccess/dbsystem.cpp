@@ -14,6 +14,24 @@ IDBSystem::IDBSystem(Syslog* logger) : logger(logger) {
 
 IDBSystem::~IDBSystem() {
 	this->logger->destroy();
+
+	for (auto lt = this->factories.begin(); lt != this->factories.end(); lt++) {
+		delete lt->second;
+	}
+}
+
+IVirtualSQL* IDBSystem::make_sql_factory(TableColumnInfo* columns, size_t count) {
+	IVirtualSQL* vsql = nullptr;
+	auto lt = factories.find(columns);
+
+	if (lt == factories.end()) {
+		vsql = this->new_sql_factory(columns, count);
+		factories.insert(std::pair<TableColumnInfo*, IVirtualSQL*>(columns, vsql));
+	} else {
+		vsql = lt->second;
+	}
+
+	return vsql;
 }
 
 void IDBSystem::exec(const wchar_t* sql, ...) {

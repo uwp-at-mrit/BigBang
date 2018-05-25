@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "syslog.hpp"
 #include "vsql.hpp"
 
@@ -17,11 +19,11 @@ namespace WarGrey::SCADA {
 
 	public:
 		WarGrey::SCADA::Syslog* get_logger();
+		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
 	public:
 		virtual WarGrey::SCADA::DBMS system() = 0;
 		virtual const wchar_t* get_last_error_message() = 0;
-		virtual WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) = 0;
 		virtual void exec(Platform::String^ stmt) = 0;
 
 	public:
@@ -34,10 +36,14 @@ namespace WarGrey::SCADA {
 		void report_warning(Platform::String^ msg_prefix = nullptr);
 		void report_warning(const wchar_t* format, ...);
 
+	protected:
+		virtual WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) = 0;
+
 	private:
 		void log(Platform::String^ msg_prefix = nullptr, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
 
 	private:
 		WarGrey::SCADA::Syslog* logger;
+		std::map<WarGrey::SCADA::TableColumnInfo*, WarGrey::SCADA::IVirtualSQL*> factories;
 	};
 }

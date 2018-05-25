@@ -9,6 +9,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		Platform::String^ create_table(Platform::String^ tablename, Platform::String^ pks[], size_t pkc, bool if_not_exists) override;
+		Platform::String^ drop_table(Platform::String^ tablename) override;
 
 	private:
 		int version;

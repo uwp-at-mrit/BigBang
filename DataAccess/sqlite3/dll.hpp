@@ -74,7 +74,6 @@ namespace WarGrey::SCADA {
 	public:
 		WarGrey::SCADA::DBMS system() override;
 		const wchar_t* get_last_error_message() override;
-		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 		
 	public:
 		WarGrey::SCADA::SQLiteStatement* prepare(Platform::String^ sql);
@@ -91,6 +90,9 @@ namespace WarGrey::SCADA {
 		int changes(bool total = false);
 		long last_insert_rowid();
 		int libversion();
+
+	protected:
+	WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 
 	private:
 		WarGrey::SCADA::sqlite3_t* db;

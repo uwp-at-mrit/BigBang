@@ -35,6 +35,9 @@ public:
 		create_event(sqlite3);
 		sqlite3->table_info(L"sqlite_master");
 		sqlite3->table_info(L"event");
+
+		drop_event(sqlite3);
+		sqlite3->table_info(L"event");
 	}
 
 // never deletes these graphlets mannually

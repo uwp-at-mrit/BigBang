@@ -60,3 +60,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 
 	return sql;
 }
+
+Platform::String^ VirtualSQLite3::drop_table(Platform::String^ tablename) {
+	return "DROP TABLE " + tablename + ";";
+}

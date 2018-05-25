@@ -1,3 +1,5 @@
+#include <map>
+
 #include "sqlite3/dll.hpp"
 #include "sqlite3/vsqlite3.hpp"
 #include "win32.hpp"
@@ -156,7 +158,7 @@ SQLite3::~SQLite3() {
 	}
 }
 
-IVirtualSQL* SQLite3::make_sql_factory(TableColumnInfo* columns, size_t count) {
+IVirtualSQL* SQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {
 	return new VirtualSQLite3(columns, count, this->libversion());
 }
 
