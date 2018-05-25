@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbtypes.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\dll.hpp" />

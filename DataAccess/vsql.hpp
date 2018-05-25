@@ -1,15 +1,16 @@
 #pragma once
 
 #include "object.hpp"
+#include "dbtypes.hpp"
 
 namespace WarGrey::SCADA {
 	static const unsigned int DB_PRIMARY_KEY = 0b0001;
-	static const unsigned int DB_UNIQUE      = 0b0010;
-	static const unsigned int DB_NOT_NULL    = 0b0100;
+	static const unsigned int DB_UNIQUE = 0b0010;
+	static const unsigned int DB_NOT_NULL = 0b0100;
 
 	private struct TableColumnInfo {
 		Platform::String^ name;
-		Platform::String^ type;
+		WarGrey::SCADA::SDT type;
 		Platform::String^ dflt_value;
 		unsigned int flags;
 	};

@@ -42,7 +42,7 @@ namespace WarGrey::SCADA {
 		void bind_parameter(int pid_starts_with_0, Platform::String^ text);
 
 	public:
-		bool step(int* data_count = nullptr);
+		bool step(int* data_count = nullptr, const wchar_t* error_src = L"step");
 		int column_data_count();
 		Platform::String^ column_database_name(int cid_starts_with_0);
 		Platform::String^ column_table_name(int cid_starts_with_0);
@@ -73,15 +73,16 @@ namespace WarGrey::SCADA {
 
 	public:
 		WarGrey::SCADA::DBMS system() override;
-		int libversion();
-
+		const wchar_t* get_last_error_message() override;
+		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
+		
 	public:
 		WarGrey::SCADA::SQLiteStatement* prepare(Platform::String^ sql);
 		WarGrey::SCADA::SQLiteStatement* prepare(const wchar_t* sql, ...);
-
 		void exec(WarGrey::SCADA::SQLiteStatement* stmt);
-		void exec(Platform::String^ sql);
-		void exec(const wchar_t* sql, ...);
+
+	public:
+		void exec(Platform::String^ sql) override;
 
 	public:
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const wchar_t* name);
@@ -89,16 +90,7 @@ namespace WarGrey::SCADA {
 	public:
 		int changes(bool total = false);
 		long last_insert_rowid();
-
-	public:
-		void report_error(Platform::String^ msg_prefix = nullptr);
-		void report_error(const wchar_t* format, ...);
-
-		void report_warning(Platform::String^ msg_prefix = nullptr);
-		void report_warning(const wchar_t* format, ...);
-
-	private:
-		void log(Platform::String^ msg_prefix = nullptr, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
+		int libversion();
 
 	private:
 		WarGrey::SCADA::sqlite3_t* db;

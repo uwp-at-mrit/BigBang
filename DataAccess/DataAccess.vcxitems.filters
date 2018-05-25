@@ -8,6 +8,7 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbtypes.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />

@@ -6,8 +6,15 @@
 
 using namespace WarGrey::SCADA;
 
+static Platform::String^ sqlite_type_map(SDT dt) {
+	return dt.ToString();
+}
+
+VirtualSQLite3::VirtualSQLite3(TableColumnInfo* columns, size_t count, int version) :
+	IVirtualSQL(columns, count), version(version) {}
+
 Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Platform::String^ rowids[], size_t ric, bool silent) {
-	Platform::String^ sql = make_string(L"CREATE %s %s(", (silent ? L"TABLE IF NOT EXISTS" : L"TABLE"), tablename);
+	Platform::String^ sql = make_string(L"CREATE %s %s(", (silent ? L"TABLE IF NOT EXISTS" : L"TABLE"), tablename->Data());
 	size_t pk_count = 0;
 	bool rowid_is_defined = false;
 
@@ -24,7 +31,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 	}
 
 	for (size_t i = 0; i < count; i++) {
-		Platform::String^ column = this->columns[i].name + " " + this->columns[i].type;
+		Platform::String^ column = this->columns[i].name + " " + sqlite_type_map(this->columns[i].type);
 		bool nnil = db_column_notnull(this->columns[i]);
 		bool uniq = db_column_unique(this->columns[i]);
 

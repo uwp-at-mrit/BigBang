@@ -59,6 +59,9 @@
     <Filter Include="usr\share\graphlet\Propulsion">
       <UniqueIdentifier>{2d9f71a5-5407-47fa-975f-4f28c1f216e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="schema">
+      <UniqueIdentifier>{7b9efd4a-273d-41b4-becf-45cdc03d50f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -97,6 +100,9 @@
     <ClCompile Include="page\alarm.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="schema\event.cpp">
+      <Filter>schema</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -133,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="page\alarm.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\event.hpp">
+      <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

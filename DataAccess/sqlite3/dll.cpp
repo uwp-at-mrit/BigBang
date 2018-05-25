@@ -1,4 +1,5 @@
 #include "sqlite3/dll.hpp"
+#include "sqlite3/vsqlite3.hpp"
 #include "win32.hpp"
 
 #include "box.hpp"
@@ -151,8 +152,12 @@ SQLite3::~SQLite3() {
 	unload_sqlite3(this->get_logger());
 
 	if (sqlite3_close(this->db) != SQLITE_OK) {
-		this->log(nullptr, Log::Warning);
+		this->report_warning("");
 	}
+}
+
+IVirtualSQL* SQLite3::make_sql_factory(TableColumnInfo* columns, size_t count) {
+	return new VirtualSQLite3(columns, count, this->libversion());
 }
 
 DBMS SQLite3::system() {
@@ -184,22 +189,17 @@ SQLiteStatement* SQLite3::prepare(const wchar_t* sql, ...) {
 }
 
 void SQLite3::exec(Platform::String^ sql) {
-	SQLiteStatement* stmt = this->prepare(sql);
 	this->get_logger()->log_message(Log::Debug, "EXEC: " + sql);
-	this->exec(stmt);
-	delete stmt;
-}
+	SQLiteStatement* stmt = this->prepare(sql);
 
-void SQLite3::exec(SQLiteStatement* stmt) {
-	if (stmt->step() != SQLITE_OK) {
-		this->report_error("exec");
+	if (stmt != nullptr) {
+		this->exec(stmt);
+		delete stmt;
 	}
 }
 
-void SQLite3::exec(const wchar_t* sql, ...) {
-	VSWPRINT(raw, sql);
-
-	this->exec(raw);
+void SQLite3::exec(SQLiteStatement* stmt) {
+	stmt->step(nullptr, L"exec");
 }
 
 std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
@@ -245,32 +245,8 @@ long SQLite3::last_insert_rowid() {
 	return sqlite3_last_insert_rowid(this->db);
 }
 
-void SQLite3::report_error(Platform::String^ msg_prefix) {
-	this->log(msg_prefix, Log::Error);
-}
-
-void SQLite3::report_error(const wchar_t* format, ...) {
-	VSWPRINT(message, format);
-	this->log(message, Log::Error);
-}
-
-void SQLite3::report_warning(Platform::String^ msg_prefix) {
-	this->log(msg_prefix, Log::Warning);
-}
-
-void SQLite3::report_warning(const wchar_t* format, ...) {
-	VSWPRINT(message, format);
-	this->log(message, Log::Warning);
-}
-
-void SQLite3::log(Platform::String^ message_prefix, Log level) {
-	const wchar_t* message = sqlite3_errmsg16(this->db);
-	
-	if (message_prefix == nullptr) {
-		this->get_logger()->log_message(level, L"%s", message);
-	} else {
-		this->get_logger()->log_message(level, L"%s: %s", message_prefix->Data(), message);
-	}
+const wchar_t* SQLite3::get_last_error_message() {
+	return sqlite3_errmsg16(this->db);
 }
 
 /*************************************************************************************************/
@@ -296,13 +272,13 @@ void SQLiteStatement::clear_bindings() {
 	sqlite3_clear_bindings(this->stmt);
 }
 
-bool SQLiteStatement::step(int* data_count) {
+bool SQLiteStatement::step(int* data_count, const wchar_t* error_src) {
 	bool notdone = true;
 	
 	switch (sqlite3_step(this->stmt)) {
 	case SQLITE_DONE: SET_BOX(data_count, 0); notdone = false; break;
 	case SQLITE_ROW: SET_BOX(data_count, this->column_data_count()); break;
-	default: this->master->report_error("step");
+	default: this->master->report_error(error_src);
 	}
 
 	return notdone;

@@ -125,6 +125,9 @@
     <None Include="Prototype\udpclient.rkt">
       <Filter>Prototype</Filter>
     </None>
+    <None Include="ORM\mkdao.rkt">
+      <Filter>ORM</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="mrit">

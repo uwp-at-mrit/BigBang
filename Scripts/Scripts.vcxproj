@@ -31,6 +31,7 @@
     <None Include="mrit\tcpserver.rkt" />
     <None Include="mrit\yacht.rkt" />
     <None Include="ORM\cpp.rkt" />
+    <None Include="ORM\mkdao.rkt" />
     <None Include="ORM\normalize.rkt" />
     <None Include="ORM\schema.rkt" />
     <None Include="ORM\shadow.rkt" />

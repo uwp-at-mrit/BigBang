@@ -284,6 +284,7 @@
     <ClCompile Include="page\propeller.cpp" />
     <ClCompile Include="page\propulsion.cpp" />
     <ClCompile Include="plc.cpp" />
+    <ClCompile Include="schema\event.cpp" />
     <ClCompile Include="Yacht63FT.cxx" />
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +301,7 @@
     <ClInclude Include="page\propeller.hpp" />
     <ClInclude Include="page\propulsion.hpp" />
     <ClInclude Include="plc.hpp" />
+    <ClInclude Include="schema\event.hpp" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\en-US\tongue.resw" />

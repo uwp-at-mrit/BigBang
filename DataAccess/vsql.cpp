@@ -2,18 +2,21 @@
 
 using namespace WarGrey::SCADA;
 
-IVirtualSQL::IVirtualSQL(TableColumnInfo* columns, size_t count) {
+IVirtualSQL::IVirtualSQL(TableColumnInfo* src, size_t count) : count(count) {
 	this->columns = new TableColumnInfo[count];
 
 	for (size_t idx = 0; idx < count; idx++) {
-		this->columns[idx] = columns[idx];
+		this->columns[idx] = src[idx];
 	}
 }
 
 IVirtualSQL::~IVirtualSQL() {
-	delete[] this->columns;
+	if (this->columns != nullptr) {
+		delete[] this->columns;
+	}
 }
 
+/*************************************************************************************************/
 bool WarGrey::SCADA::db_column_primary(TableColumnInfo& info) {
 	return ((info.flags & DB_PRIMARY_KEY) == DB_PRIMARY_KEY);
 }
