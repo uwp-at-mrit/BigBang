@@ -1,4 +1,4 @@
-#lang racket
+﻿#lang racket
 
 (provide (all-defined-out))
 
@@ -103,8 +103,8 @@
      (&htab 1)
      (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
      (&htab 1)
-     (printf "Platform::String^ sql = vsql->create_table(~s, rowids, sizeof(~a)/sizeof(Platform::String^), if_not_exists);~n"
-             (symbol->string tablename) table_rowids)
+     (printf "Platform::String^ sql = vsql->create_table(~s, ~a, sizeof(~a)/sizeof(Platform::String^), if_not_exists);~n"
+             (symbol->string tablename) table_rowids table_rowids)
      (&linebreak)
      (&htab 1)
      (printf "dbc->exec(sql);~n")
