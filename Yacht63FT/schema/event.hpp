@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "dbsystem.hpp"
 
 namespace WarGrey::SCADA {
@@ -7,8 +9,8 @@ namespace WarGrey::SCADA {
         Integer uuid;
         Text type;
         Text name;
-        Integer ctime;
-        Integer mtime;
+        std::optional<Integer> ctime;
+        std::optional<Integer> mtime;
     };
 
     void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true, Platform::String^ tablename = "event");

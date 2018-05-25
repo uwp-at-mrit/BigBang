@@ -22,7 +22,7 @@
        (values (and primary? table-field)
                (list (datum->syntax #'field (string->keyword (symbol->string (syntax-e #'field))))
                      table-field
-                     (if (or primary? (attribute not-null)) #'Type #'False)
+                     (if (or primary? (attribute not-null)) #'Type (format-id #'Type "std::optional<~a>" (syntax-e #'Type)))
                      (or (attribute generate) #'(void))
                      (cond [(attribute defval) #'(defval)]
                            [(attribute generate) #'(generate)]
