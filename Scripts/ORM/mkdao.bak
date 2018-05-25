@@ -23,7 +23,7 @@
 
 (define make-daos
   (lambda [schema.sql.rktl]
-    (define schema (cadr (regexp-match #px"(.+)[.]sql[.]rktl$" (file-name-from-path schema.sql.rktl))))
+    (define schema (cadr (regexp-match #px".*[/](.+)[.]sql[.]rktl$" schema.sql.rktl)))
     (define schema.hpp (build-path (path-only schema.sql.rktl) (path-add-extension schema #".hpp")))
     (define schema.cpp (build-path (path-only schema.sql.rktl) (path-add-extension schema #".cpp")))
 
