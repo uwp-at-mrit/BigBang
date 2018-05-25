@@ -31,18 +31,20 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     Platform::String^ sql = vsql->insert_into("event", replace);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
-    for (size_t i = 0; i < count; i ++) {
-        stmt->bind_parameter(0, selves[i].uuid);
-        stmt->bind_parameter(1, selves[i].type);
-        stmt->bind_parameter(2, selves[i].name);
-        stmt->bind_parameter(3, selves[i].ctime);
-        stmt->bind_parameter(4, selves[i].mtime);
+    if (stmt != nullptr) {
+        for (size_t i = 0; i < count; i ++) {
+            stmt->bind_parameter(0, selves[i].uuid);
+            stmt->bind_parameter(1, selves[i].type);
+            stmt->bind_parameter(2, selves[i].name);
+            stmt->bind_parameter(3, selves[i].ctime);
+            stmt->bind_parameter(4, selves[i].mtime);
 
-        dbc->exec(sql);
-        stmt->clear_bindings();
+            dbc->exec(sql);
+            stmt->clear_bindings();
+        }
+
+        delete stmt;
     }
-
-    delete stmt;
 }
 
 void WarGrey::SCADA::drop_event(IDBSystem* dbc) {
