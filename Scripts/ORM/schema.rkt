@@ -45,6 +45,7 @@
                                   (λ [indent]
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
                                     (&create-table 'create-table indent)
+                                    (&insert-table 'insert-table 'Table indent)
                                     (&drop-table 'drop-table indent))))))
 
                 (define cat-table.cpp
@@ -55,6 +56,7 @@
                       (&using-namespace 'WarGrey::SCADA)
                       (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
+                      (&insert-table 'insert-table 'Table 'table '(field ...) 'table-columns)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
