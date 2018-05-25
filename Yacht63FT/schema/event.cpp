@@ -29,14 +29,14 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* self, bool replace
 void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t count, bool replace) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
     Platform::String^ sql = vsql->insert_into("event", replace);
-    IPreparedStatement* stmt = vsql->prepare(sql);
+    IPreparedStatement* stmt = dbc->prepare(sql);
 
     for (size_t i = 0; i < count; i ++) {
-        stmt->bind_parameter(0, selves[i]->uuid);
-        stmt->bind_parameter(1, selves[i]->type);
-        stmt->bind_parameter(2, selves[i]->name);
-        stmt->bind_parameter(3, selves[i]->ctime);
-        stmt->bind_parameter(4, selves[i]->mtime);
+        stmt->bind_parameter(0, selves[i].uuid);
+        stmt->bind_parameter(1, selves[i].type);
+        stmt->bind_parameter(2, selves[i].name);
+        stmt->bind_parameter(3, selves[i].ctime);
+        stmt->bind_parameter(4, selves[i].mtime);
 
         dbc->exec(sql);
         stmt->clear_bindings();
