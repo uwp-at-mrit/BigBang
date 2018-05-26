@@ -75,6 +75,19 @@ Platform::String^ VirtualSQLite3::insert_into(Platform::String^ tablename, bool 
 	return sql;
 }
 
+
+Platform::String^ VirtualSQLite3::select_from(Platform::String^ tablename, unsigned int limit, unsigned int offset) {
+	Platform::String^ sql = "SELECT ";
+
+	for (size_t i = 0; i < this->count; i++) {
+		sql += (this->columns[i].name + ((i < this->count - 1) ? ", " : " "));
+	}
+
+	sql += make_string(L"FROM %s LIMIT %d OFFSET %d;", tablename->Data(), ((limit == 0) ? -1 : limit), offset);
+
+	return sql;
+}
+
 Platform::String^ VirtualSQLite3::drop_table(Platform::String^ tablename) {
 	return "DROP TABLE " + tablename + ";";
 }

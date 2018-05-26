@@ -30,6 +30,7 @@ namespace WarGrey::SCADA {
 			bool if_not_exists) = 0;
 
 		virtual Platform::String^ insert_into(Platform::String^ tablename, bool replace) = 0;
+		virtual Platform::String^ select_from(Platform::String^ tablename, unsigned int limit = 0, unsigned int offset = 0) = 0;
 		virtual Platform::String^ drop_table(Platform::String^ tablename) = 0;
 
 	protected:

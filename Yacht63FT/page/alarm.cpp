@@ -42,6 +42,7 @@ public:
 		sqlite3->table_info(L"event");
 
 		insert_event(sqlite3, &ae);
+		select_event(sqlite3, 0U, 1U);
 		drop_event(sqlite3);
 		sqlite3->table_info(L"event");
 	}
