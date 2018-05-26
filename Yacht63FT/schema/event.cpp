@@ -15,6 +15,14 @@ static TableColumnInfo event_columns[] = {
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
+void WarGrey::SCADA::restore_event(IPreparedStatement* stmt, AlarmEvent& self) {
+    self.uuid = stmt->column_int64(0U);
+    self.type = stmt->column_text(1U);
+    self.name = stmt->column_text(2U);
+    self.ctime = stmt->column_int64(3U);
+    self.mtime = stmt->column_int64(4U);
+}
+
 void WarGrey::SCADA::create_event(IDBSystem* dbc, bool if_not_exists) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
     Platform::String^ sql = vsql->create_table("event", event_rowids, sizeof(event_rowids)/sizeof(Platform::String^), if_not_exists);
@@ -48,22 +56,23 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
 }
 
 std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
-	std::list<AlarmEvent> queries;
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
     Platform::String^ sql = vsql->select_from("event", limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
+    std::list<AlarmEvent> queries;
 
     if (stmt != nullptr) {
-		int data_count;
+        AlarmEvent self;
 
-		while (stmt->step(&data_count)) {
-			dbc->get_logger()->log_message(Log::Info, L"%d", data_count);
-		}
+        while(stmt->step()) {
+            restore_event(stmt, self);
+            queries.push_back(self);
+        }
 
-		delete stmt;
+        delete stmt;
     }
 
-	return queries;
+    return queries;
 }
 
 void WarGrey::SCADA::drop_event(IDBSystem* dbc) {

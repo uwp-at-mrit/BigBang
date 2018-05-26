@@ -99,6 +99,25 @@
     (&brace 0 #:semicolon? #true)
     (&linebreak 1)))
 
+(define &restore-table
+  (case-lambda
+    [(λname classname indent)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IPreparedStatement* stmt, WarGrey::SCADA::~a& self);~n" λname classname)]
+    [(λname classname fields types)
+     (printf "void WarGrey::SCADA::~a(IPreparedStatement* stmt, ~a& self) {~n" λname classname)
+     (for ([field (in-list fields)]
+           [type (in-list types)]
+           [idx (in-naturals)])
+       (define sqlite-types
+         (case type
+           [(Integer) 'int64]
+           [(Float) 'double]
+           [(Text) 'text]
+           [else 'blob]))
+       (&htab 1) (printf "self.~a = stmt->column_~a(~aU);~n" field sqlite-types idx))
+     (&brace 0)
+     (&linebreak 1)]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define &create-table
   (case-lambda
@@ -148,15 +167,25 @@
   (case-lambda
     [(λname classname indent)
      (&htab indent) (printf "std::list<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" classname λname)]
-    [(λname classname tablename fields column_infos)
+    [(λname classname tablename restore column_infos)
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" classname λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
      (&htab 1) (printf "Platform::String^ sql = vsql->select_from(~s, limit, offset);~n" (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
+     (&htab 1) (printf "std::list<~a> queries;~n" classname)
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
+     (&htab 2) (printf "~a self;~n" classname)
+     (&linebreak 1)
+     (&htab 2) (printf "while(stmt->step()) {~n")
+     (&htab 3) (printf "~a(stmt, self);~n" restore)
+     (&htab 3) (printf "queries.push_back(self);~n")
+     (&brace 2)
+     (&linebreak 1)
      (&htab 2) (printf "delete stmt;~n")
      (&brace 1)
+     (&linebreak 1)
+     (&htab 1) (printf "return queries;~n")
      (&brace 0)
      (&linebreak 1)]))
 
