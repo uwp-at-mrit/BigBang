@@ -151,7 +151,7 @@
     [(λname classname tablename fields column_infos)
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" classname λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
-     (&htab 1) (printf "Platform::String^ sql = vsql->select_from(~s, pk_only, limit, offset);~n" (symbol->string tablename))
+     (&htab 1) (printf "Platform::String^ sql = vsql->select_from(~s, limit, offset);~n" (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
