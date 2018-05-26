@@ -48,7 +48,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, int count,
             stmt->bind_parameter(4, selves[i].mtime);
 
             dbc->exec(stmt);
-            stmt->clear_bindings();
+			stmt->reset(true);
         }
 
         delete stmt;
