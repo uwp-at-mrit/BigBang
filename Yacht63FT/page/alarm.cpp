@@ -33,8 +33,6 @@ public:
 		ae.name = "AlarmEvent";
 		ae.type = "Test";
 		ae.uuid = 42;
-		ae.ctime = 2017;
-		ae.mtime = 2018;
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);

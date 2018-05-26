@@ -10,6 +10,13 @@ namespace WarGrey::SCADA {
 	typedef void sqlite3_t;
 	typedef void sqlite3_stmt_t;
 
+#define SQLITE_TRACE_STMT    0x01
+#define SQLITE_TRACE_PROFILE 0x02
+#define SQLITE_TRACE_ROW     0x04
+#define SQLITE_TRACE_CLOSE   0x08
+
+	typedef int (*sqlite3_trace_t)(unsigned int, void*, void*, void*);
+
 	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Blob = 4, Null = 5 };
 
 	private struct SQliteTableInfo { // for pragma.table_info
@@ -22,6 +29,8 @@ namespace WarGrey::SCADA {
 	};
 
 	class SQLite3;
+
+	int sqlite3_default_trace_callback(unsigned int reason, void* pCxt, void* P, void* X);
 
 	private class SQLiteStatement : public WarGrey::SCADA::IPreparedStatement {
 	public:
@@ -54,6 +63,7 @@ namespace WarGrey::SCADA {
 	public:
 		void reset(bool reset_bindings = true) override;
 		void clear_bindings() override;
+		Platform::String^ description() override;
 
 	public:
 		SQLiteDataType column_type(unsigned int cid_starts_with_0);
@@ -67,7 +77,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~SQLite3() noexcept;
 
-		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr);
+		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr,
+			sqlite3_trace_t xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
 
 	public:
 		const wchar_t* get_last_error_message() override;
@@ -82,7 +93,7 @@ namespace WarGrey::SCADA {
 		int libversion();
 
 	protected:
-	WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
+		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 
 	private:
 		WarGrey::SCADA::sqlite3_t* db;

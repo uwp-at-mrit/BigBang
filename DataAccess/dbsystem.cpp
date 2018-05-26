@@ -49,7 +49,6 @@ void IDBSystem::exec(IPreparedStatement* stmt) {
 }
 
 void IDBSystem::exec(Platform::String^ sql) {
-	this->get_logger()->log_message(Log::Debug, "EXEC: " + sql);
 	IPreparedStatement* stmt = this->prepare(sql);
 
 	if (stmt != nullptr) {

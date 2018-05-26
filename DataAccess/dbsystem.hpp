@@ -53,6 +53,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void reset(bool reset_bindings = true) = 0;
 		virtual void clear_bindings() = 0;
+		virtual Platform::String^ description() = 0;
 
 	public:
 		void bind_parameter(unsigned int pid_starts_with_0, float v);
