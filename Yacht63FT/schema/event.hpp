@@ -1,10 +1,13 @@
 #pragma once
 
+#include <list>
 #include <optional>
 
 #include "dbsystem.hpp"
 
 namespace WarGrey::SCADA {
+    typedef Integer AlarmEvent_pk;
+
     private struct AlarmEvent {
         Integer uuid;
         Text type;
@@ -16,5 +19,6 @@ namespace WarGrey::SCADA {
     void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent* self, bool replace = false);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent* selves, size_t count, bool replace = false);
+    std::list<AlarmEvent> select_event(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);
     void drop_event(WarGrey::SCADA::IDBSystem* dbc);
 }

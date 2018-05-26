@@ -54,6 +54,13 @@
       (printf "using namespace ~a;~n" ns))
     (&linebreak 1)))
 
+(define &primary-key
+  (lambda [Table_pk rowids idtypes indent]
+    (cond [(> (length rowids) 1) (&struct Table_pk rowids idtypes indent)]
+          [else (&htab indent)
+                (printf "typedef ~a ~a;~n" (car idtypes) Table_pk)
+                (&linebreak 1)])))
+
 (define &struct
   (lambda [name fields types indent]
     (&htab indent)
@@ -128,10 +135,26 @@
            [idx (in-naturals)])
        (&htab 3) (printf "stmt->bind_parameter(~a, selves[i].~a);~n" idx field))
      (&linebreak 1)
-     (&htab 3) (printf "dbc->exec(sql);~n")
+     (&htab 3) (printf "dbc->exec(stmt);~n")
      (&htab 3) (printf "stmt->clear_bindings();~n")
      (&brace 2)
      (&linebreak 1)
+     (&htab 2) (printf "delete stmt;~n")
+     (&brace 1)
+     (&brace 0)
+     (&linebreak 1)]))
+
+(define &select-table
+  (case-lambda
+    [(λname classname indent)
+     (&htab indent) (printf "std::list<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" classname λname)]
+    [(λname classname tablename fields column_infos)
+     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" classname λname)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1) (printf "Platform::String^ sql = vsql->select_from(~s, pk_only, limit, offset);~n" (symbol->string tablename))
+     (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
+     (&linebreak 1)
+     (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "delete stmt;~n")
      (&brace 1)
      (&brace 0)
