@@ -28,11 +28,11 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
-		AlarmEvent ae;
-
-		ae.name = "AlarmEvent";
-		ae.type = "Test";
-		ae.uuid = 42;
+		
+		AlarmEvent events[] = {
+			{ 42, "Error", "Fire", 1 , 2 },
+	    	{ 43, "Fatal", "Propeller", false, false },
+		};
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
@@ -41,8 +41,16 @@ public:
 		sqlite3->table_info(L"sqlite_master");
 		sqlite3->table_info(L"event");
 
-		insert_event(sqlite3, &ae);
-		select_event(sqlite3, 0U, 1U);
+		insert_event(sqlite3, events, 2);
+		
+		auto aes = select_event(sqlite3);
+		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
+			AlarmEvent e = (*lt);
+
+			sqlite3->get_logger()->log_message(Log::Info, L"%d, %s, %s, %d, %d",
+				e.uuid, e.name->Data(), e.type->Data(), e.mtime, e.ctime);
+		}
+
 		drop_event(sqlite3);
 		sqlite3->table_info(L"event");
 	}

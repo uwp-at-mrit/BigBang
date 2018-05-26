@@ -63,7 +63,7 @@ namespace WarGrey::SCADA {
 	public:
 		void reset(bool reset_bindings = true) override;
 		void clear_bindings() override;
-		Platform::String^ description() override;
+		Platform::String^ description(bool expand = true) override;
 
 	public:
 		SQLiteDataType column_type(unsigned int cid_starts_with_0);

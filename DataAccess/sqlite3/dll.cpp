@@ -31,6 +31,7 @@ typedef int64 (*_fun__stmt__int__int64)(sqlite3_stmt_t*, int);
 typedef double (*_fun__stmt__int__real)(sqlite3_stmt_t*, int);
 
 typedef const char* (*_fun__stmt__char)(sqlite3_stmt_t*);
+typedef char* (*_fun__stmt__malloc)(sqlite3_stmt_t*);
 
 static HMODULE sqlite3 = nullptr;
 static int references = 0;
@@ -38,6 +39,7 @@ static int references = 0;
 static _fun__int sqlite3_libversion_number;
 static _fun__wchar__sqlite3__int sqlite3_open16;
 static _fun__sqlite3__int sqlite3_close;
+static _fun_destructor sqlite3_free;
 static _fun__sqlite3__wchar sqlite3_errmsg16;
 static _fun__sqlite3__uint__trace__void__int sqlite3_trace_v2;
 
@@ -69,7 +71,9 @@ static _fun__stmt__int__wchar sqlite3_column_text16;
 static _fun__stmt__int__int32 sqlite3_column_int;
 static _fun__stmt__int__int64 sqlite3_column_int64;
 static _fun__stmt__int__real sqlite3_column_double;
+
 static _fun__stmt__char sqlite3_sql;
+static _fun__stmt__malloc sqlite3_expanded_sql;
 
 static _fun__sqlite3__int sqlite3_changes;
 static _fun__sqlite3__int sqlite3_total_changes;
@@ -90,6 +94,7 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_libversion_number, _fun__int, logger);
 			win32_fetch(sqlite3, sqlite3_open16, _fun__wchar__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_close, _fun__sqlite3__int, logger);
+			win32_fetch(sqlite3, sqlite3_free, _fun_destructor, logger);
 			win32_fetch(sqlite3, sqlite3_errmsg16, _fun__sqlite3__wchar, logger);
 			win32_fetch(sqlite3, sqlite3_trace_v2, _fun__sqlite3__uint__trace__void__int, logger);
 
@@ -121,7 +126,9 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_column_int, _fun__stmt__int__int32, logger);
 			win32_fetch(sqlite3, sqlite3_column_int64, _fun__stmt__int__int64, logger);
 			win32_fetch(sqlite3, sqlite3_column_double, _fun__stmt__int__real, logger);
+
 			win32_fetch(sqlite3, sqlite3_sql, _fun__stmt__char, logger);
+			win32_fetch(sqlite3, sqlite3_expanded_sql, _fun__stmt__malloc, logger);
 
 			win32_fetch(sqlite3, sqlite3_changes, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_total_changes, _fun__sqlite3__int, logger);
@@ -143,10 +150,10 @@ static void unload_sqlite3(Syslog* logger) {
 	}
 }
 
-static const wchar_t* sqlite3_statement_description(sqlite3_stmt_t* stmt) {
+static const wchar_t* sqlite3_statement_description(sqlite3_stmt_t* stmt, bool expand) {
 	static size_t buffer_size = 64;
 	static wchar_t* sql = new wchar_t[buffer_size];
-	const char* raw = sqlite3_sql(stmt);
+	char* raw = (expand ? sqlite3_expanded_sql(stmt) : (char *)(sqlite3_sql(stmt)));
 	Platform::String^ desc = nullptr;
 	size_t len = strlen(raw);
 
@@ -161,6 +168,10 @@ static const wchar_t* sqlite3_statement_description(sqlite3_stmt_t* stmt) {
 		sql[i] = raw[i];
 	}
 
+	if (expand) {
+		sqlite3_free(raw);
+	}
+
 	return sql;
 }
 
@@ -170,7 +181,7 @@ int WarGrey::SCADA::sqlite3_default_trace_callback(unsigned int type, void* pCxt
 
 	switch (type) {
 	case SQLITE_TRACE_STMT: {
-		self->get_logger()->log_message(Log::Debug, L"EXEC: %s", sqlite3_statement_description(P));
+		self->get_logger()->log_message(Log::Debug, L"EXEC: %s", sqlite3_statement_description(P, true));
 	}; break;
 	case SQLITE_TRACE_PROFILE: { /* TODO */ }; break;
 	default: /* no useful information */;
@@ -297,8 +308,8 @@ void SQLiteStatement::clear_bindings() {
 	sqlite3_clear_bindings(this->stmt);
 }
 
-Platform::String^ SQLiteStatement::description() {
-	return ref new Platform::String(sqlite3_statement_description(this->stmt));
+Platform::String^ SQLiteStatement::description(bool expand) {
+	return ref new Platform::String(sqlite3_statement_description(this->stmt, expand));
 }
 
 bool SQLiteStatement::step(int* data_count, const wchar_t* error_src) {
