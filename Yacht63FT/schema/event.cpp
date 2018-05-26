@@ -49,7 +49,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
 
 std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
-    Platform::String^ sql = vsql->select_from("event", pk_only, limit, offset);
+    Platform::String^ sql = vsql->select_from("event", limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
