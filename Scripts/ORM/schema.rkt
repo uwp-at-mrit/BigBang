@@ -58,7 +58,7 @@
                       (&include "dbsystem.hpp" "dbtypes.hpp")
                       (&using-namespace 'WarGrey::SCADA)
                       (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
-                      (&restore-table 'restore-table 'Table '(field ...) '(DataType ...))
+                      (&restore-table 'restore-table 'Table '(field ...) '(DataType ...) '(not-null ...) '(rowid ...))
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table '(field ...) 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)

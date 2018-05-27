@@ -103,10 +103,11 @@
   (case-lambda
     [(λname classname indent)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IPreparedStatement* stmt, WarGrey::SCADA::~a& self);~n" λname classname)]
-    [(λname classname fields types)
+    [(λname classname fields types not-nulls rowids)
      (printf "void WarGrey::SCADA::~a(IPreparedStatement* stmt, ~a& self) {~n" λname classname)
      (for ([field (in-list fields)]
            [type (in-list types)]
+           [n-nil (in-list not-nulls)]
            [idx (in-naturals)])
        (define sqlite-types
          (case type
@@ -114,7 +115,7 @@
            [(Float) 'double]
            [(Text) 'text]
            [else 'blob]))
-       (&htab 1) (printf "self.~a = stmt->column_~a(~aU);~n" field sqlite-types idx))
+       (&htab 1) (printf "self.~a = stmt->column~a~a(~aU);~n" field (if (or (memq field rowids) n-nil) "_" "_maybe_") sqlite-types idx))
      (&brace 0)
      (&linebreak 1)]))
 
@@ -137,25 +138,25 @@
   (case-lambda
     [(λname classname indent)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname classname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, int count, bool replace = false);~n" λname classname)]
     [(λname classname tablename fields column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* self, bool replace) {~n" λname classname)
      (&htab 1) (printf "~a(dbc, self, 1, replace);~n" λname)
      (&brace 0)
      (&linebreak 1)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, size_t count, bool replace) {~n" λname classname)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, int count, bool replace) {~n" λname classname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
      (&htab 1) (printf "Platform::String^ sql = vsql->insert_into(~s, replace);~n" (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
-     (&htab 2) (printf "for (size_t i = 0; i < count; i ++) {~n")
+     (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
      (for ([field (in-list fields)]
            [idx (in-naturals)])
        (&htab 3) (printf "stmt->bind_parameter(~a, selves[i].~a);~n" idx field))
      (&linebreak 1)
      (&htab 3) (printf "dbc->exec(stmt);~n")
-     (&htab 3) (printf "stmt->clear_bindings();~n")
+     (&htab 3) (printf "stmt->reset(true);~n")
      (&brace 2)
      (&linebreak 1)
      (&htab 2) (printf "delete stmt;~n")

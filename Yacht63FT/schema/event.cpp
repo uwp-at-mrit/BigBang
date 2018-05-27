@@ -19,8 +19,8 @@ void WarGrey::SCADA::restore_event(IPreparedStatement* stmt, AlarmEvent& self) {
     self.uuid = stmt->column_int64(0U);
     self.type = stmt->column_text(1U);
     self.name = stmt->column_text(2U);
-    self.ctime = stmt->column_int64(3U);
-    self.mtime = stmt->column_int64(4U);
+    self.ctime = stmt->column_maybe_int64(3U);
+    self.mtime = stmt->column_maybe_int64(4U);
 }
 
 void WarGrey::SCADA::create_event(IDBSystem* dbc, bool if_not_exists) {
@@ -48,7 +48,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, int count,
             stmt->bind_parameter(4, selves[i].mtime);
 
             dbc->exec(stmt);
-			stmt->reset(true);
+            stmt->reset(true);
         }
 
         delete stmt;
