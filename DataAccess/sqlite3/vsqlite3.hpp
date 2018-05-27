@@ -8,10 +8,10 @@ namespace WarGrey::SCADA {
 		VirtualSQLite3(WarGrey::SCADA::TableColumnInfo* columns, size_t count, int libversion);
 
 	public:
-		Platform::String^ create_table(Platform::String^ tablename, Platform::String^ pks[], size_t pkc, bool if_not_exists) override;
-		Platform::String^ insert_into(Platform::String^ tablename, bool replace) override;
-		Platform::String^ select_from(Platform::String^ tablename, unsigned int limit, unsigned int offset) override;
-		Platform::String^ drop_table(Platform::String^ tablename) override;
+		std::string create_table(const char* tablename, const char* pks[], size_t pkc, bool if_not_exists) override;
+		std::string insert_into(const char* tablename, bool replace) override;
+		std::string select_from(const char* tablename, unsigned int limit, unsigned int offset) override;
+		std::string drop_table(const char* tablename) override;
 
 	private:
 		int version;

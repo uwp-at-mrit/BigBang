@@ -9,9 +9,9 @@ namespace WarGrey::SCADA {
 	static const unsigned int DB_NOT_NULL = 0b0100;
 
 	private struct TableColumnInfo {
-		Platform::String^ name;
+		const char* name;
 		WarGrey::SCADA::SDT type;
-		Platform::String^ dflt_value;
+		const char* dflt_value;
 		unsigned int flags;
 	};
 
@@ -25,13 +25,13 @@ namespace WarGrey::SCADA {
 		IVirtualSQL(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
 	public:
-		virtual Platform::String^ create_table(Platform::String^ tablename,
-			Platform::String^ primary_keys[], size_t pk_count,
+		virtual std::string create_table(const char* tablename,
+			const char* primary_keys[], size_t pk_count,
 			bool if_not_exists) = 0;
 
-		virtual Platform::String^ insert_into(Platform::String^ tablename, bool replace) = 0;
-		virtual Platform::String^ select_from(Platform::String^ tablename, unsigned int limit = 0, unsigned int offset = 0) = 0;
-		virtual Platform::String^ drop_table(Platform::String^ tablename) = 0;
+		virtual std::string insert_into(const char* tablename, bool replace) = 0;
+		virtual std::string select_from(const char* tablename, unsigned int limit = 0, unsigned int offset = 0) = 0;
+		virtual std::string drop_table(const char* tablename) = 0;
 
 	protected:
 		WarGrey::SCADA::TableColumnInfo* columns;

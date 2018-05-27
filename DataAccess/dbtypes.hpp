@@ -4,10 +4,9 @@
 #include <string>
 
 namespace WarGrey::SCADA {
-	private enum class SDT { Integer, Float, Text, Blob };
+	private enum class SDT { Integer, Float, Text, Bytes };
 
 	typedef int64 Integer;
 	typedef double Float;
-	typedef Platform::String^ Text;
-	typedef std::string Blob;
+	typedef std::string Text;
 }

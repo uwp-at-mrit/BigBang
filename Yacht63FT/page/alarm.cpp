@@ -38,8 +38,8 @@ public:
 		sqlite3->get_logger()->append_log_receiver(xterm);
 
 		create_event(sqlite3);
-		sqlite3->table_info(L"sqlite_master");
-		sqlite3->table_info(L"event");
+		sqlite3->table_info("sqlite_master");
+		sqlite3->table_info("event");
 
 		insert_event(sqlite3, events, 2);
 		
@@ -47,12 +47,13 @@ public:
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
 			AlarmEvent e = (*lt);
 
-			sqlite3->get_logger()->log_message(Log::Info, L"%d, %s, %s, %d, %d",
-				e.uuid, e.name->Data(), e.type->Data(), e.mtime, e.ctime);
+			sqlite3->get_logger()->log_message(Log::Info, L"%d, %S, %S, %d, %d",
+				e.uuid, e.name.c_str(), e.type.c_str(),
+				e.mtime.value_or(false), e.ctime.value_or(false));
 		}
 
 		drop_event(sqlite3);
-		sqlite3->table_info(L"event");
+		sqlite3->table_info("event");
 	}
 
 // never deletes these graphlets mannually

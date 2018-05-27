@@ -17,14 +17,14 @@ namespace WarGrey::SCADA {
 
 	typedef int (*sqlite3_trace_t)(unsigned int, void*, void*, void*);
 
-	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Blob = 4, Null = 5 };
+	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Bytes = 4, Null = 5 };
 
 	private struct SQliteTableInfo { // for pragma.table_info
 		int cid;
-		Platform::String^ name;
-		Platform::String^ type;
+		std::string name;
+		std::string type;
 		bool notnull;
-		Platform::String^ dflt_value;
+		std::string dflt_value;
 		int pk;
 	};
 
@@ -44,29 +44,28 @@ namespace WarGrey::SCADA {
 		void bind_parameter(unsigned int pid_starts_with_0, int32 v) override;
 		void bind_parameter(unsigned int pid_starts_with_0, int64 v) override;
 		void bind_parameter(unsigned int pid_starts_with_0, double v) override;
-		void bind_parameter(unsigned int pid_starts_with_0, const char* blob) override;
-		void bind_parameter(unsigned int pid_starts_with_0, const wchar_t* text) override;
+		void bind_parameter(unsigned int pid_starts_with_0, const char* text) override;
 
 	public:
-		bool step(int* data_count = nullptr, const wchar_t* error_src = L"step") override;
-		int column_data_count() override;
-		Platform::String^ column_database_name(unsigned int cid_starts_with_0) override;
-		Platform::String^ column_table_name(unsigned int cid_starts_with_0) override;
-		Platform::String^ column_name(unsigned int cid_starts_with_0) override;
-		Platform::String^ column_decltype(unsigned int cid_starts_with_0) override;
-		std::string column_blob(unsigned int cid_starts_with_0) override;
-		Platform::String^ column_text(unsigned int cid_starts_with_0) override;
+		std::string column_text(unsigned int cid_starts_with_0) override;
 		int32 column_int32(unsigned int cid_starts_with_0) override;
 		int64 column_int64(unsigned int cid_starts_with_0) override;
 		double column_double(unsigned int cid_starts_with_0) override;
 
 	public:
-		void reset(bool reset_bindings = true) override;
-		void clear_bindings() override;
-		Platform::String^ description(bool expand = true) override;
+		int column_data_count() override;
+		bool column_is_null(unsigned int cid_starts_with_0) override;
+		std::string column_database_name(unsigned int cid_starts_with_0) override;
+		std::string column_table_name(unsigned int cid_starts_with_0) override;
+		std::string column_name(unsigned int cid_starts_with_0) override;
+		std::string column_decltype(unsigned int cid_starts_with_0) override;
+		SQLiteDataType column_type(unsigned int cid_starts_with_0);
 
 	public:
-		SQLiteDataType column_type(unsigned int cid_starts_with_0);
+		std::string description(bool expand = true) override;
+		bool step(int* data_count = nullptr, const char* error_src = "step") override;
+		void reset(bool reset_bindings = true) override;
+		void clear_bindings() override;
 
 	private:
 		WarGrey::SCADA::SQLite3* master;
@@ -81,11 +80,11 @@ namespace WarGrey::SCADA {
 			sqlite3_trace_t xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
 
 	public:
-		const wchar_t* get_last_error_message() override;
-		WarGrey::SCADA::IPreparedStatement* prepare(Platform::String^ sql) override;
+		std::string get_last_error_message() override;
+		WarGrey::SCADA::IPreparedStatement* prepare(std::string sql) override;
 
 	public:
-		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const wchar_t* name);
+		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name);
 
 	public:
 		int changes(bool total = false);

@@ -10,22 +10,22 @@
 using namespace WarGrey::SCADA;
 
 typedef int (*_fun__wchar__sqlite3__int)(const wchar_t*, sqlite3_t**);
-typedef const wchar_t* (*_fun__sqlite3__wchar)(sqlite3_t*);
+typedef const char* (*_fun__sqlite3__char)(sqlite3_t*);
 typedef int (*_fun__sqlite3__int)(sqlite3_t*);
 typedef long (*_fun__sqlite3__long)(sqlite3_t*);
 typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_t, void*);
 
-typedef int (*_fun__sqlite3__wchar__stmt__void__int)(sqlite3_t*, const wchar_t*, size_t, sqlite3_stmt_t**, const void**);
+typedef int (*_fun__sqlite3__char__stmt__void__int)(sqlite3_t*, const char*, size_t, sqlite3_stmt_t**, const void**);
 typedef int (*_fun__stmt__int)(sqlite3_stmt_t*);
 typedef int (*_fun__stmt__int__int)(sqlite3_stmt_t*, int);
 typedef int (*_fun__stmt__int__int32__int)(sqlite3_stmt_t*, int, int32);
 typedef int (*_fun__stmt__int__int64__int)(sqlite3_stmt_t*, int, int64);
 typedef int (*_fun__stmt__int__real__int)(sqlite3_stmt_t*, int, double);
-typedef int (*_fun__stmt__int__blob__fptr__int)(sqlite3_stmt_t*, int, const char*, size_t, _fun_destructor);
-typedef int (*_fun__stmt__int__wchar__fptr__int)(sqlite3_stmt_t*, int, const wchar_t*, size_t, _fun_destructor);
+typedef int (*_fun__stmt__int__blob__fptr__int)(sqlite3_stmt_t*, int, const void*, size_t, _fun_destructor);
+typedef int (*_fun__stmt__int__char__fptr__int)(sqlite3_stmt_t*, int, const char*, size_t, _fun_destructor);
 
+typedef const void* (*_fun__stmt__int__blob)(sqlite3_stmt_t*, int);
 typedef const char* (*_fun__stmt__int__char)(sqlite3_stmt_t*, int);
-typedef const wchar_t* (*_fun__stmt__int__wchar)(sqlite3_stmt_t*, int);
 typedef int32 (*_fun__stmt__int__int32)(sqlite3_stmt_t*, int);
 typedef int64 (*_fun__stmt__int__int64)(sqlite3_stmt_t*, int);
 typedef double (*_fun__stmt__int__real)(sqlite3_stmt_t*, int);
@@ -40,10 +40,10 @@ static _fun__int sqlite3_libversion_number;
 static _fun__wchar__sqlite3__int sqlite3_open16;
 static _fun__sqlite3__int sqlite3_close;
 static _fun_destructor sqlite3_free;
-static _fun__sqlite3__wchar sqlite3_errmsg16;
+static _fun__sqlite3__char sqlite3_errmsg;
 static _fun__sqlite3__uint__trace__void__int sqlite3_trace_v2;
 
-static _fun__sqlite3__wchar__stmt__void__int sqlite3_prepare16_v2;
+static _fun__sqlite3__char__stmt__void__int sqlite3_prepare_v2;
 static _fun__stmt__int sqlite3_reset;
 static _fun__stmt__int sqlite3_step;
 static _fun__stmt__int sqlite3_finalize;
@@ -55,19 +55,18 @@ static _fun__stmt__int__int32__int sqlite3_bind_int;
 static _fun__stmt__int__int64__int sqlite3_bind_int64;
 static _fun__stmt__int__real__int sqlite3_bind_double;
 static _fun__stmt__int__blob__fptr__int sqlite3_bind_blob;
-static _fun__stmt__int__wchar__fptr__int sqlite3_bind_text16;
+static _fun__stmt__int__char__fptr__int sqlite3_bind_text;
 
 static _fun__stmt__int sqlite3_data_count;
 static _fun__stmt__int sqlite3_column_count;
-static _fun__stmt__int__wchar sqlite3_column_database_name16;
-static _fun__stmt__int__wchar sqlite3_column_table_name16;
-static _fun__stmt__int__wchar sqlite3_column_origin_name16;
-static _fun__stmt__int__wchar sqlite3_column_decltype16;
+static _fun__stmt__int__char sqlite3_column_database_name;
+static _fun__stmt__int__char sqlite3_column_table_name;
+static _fun__stmt__int__char sqlite3_column_origin_name;
+static _fun__stmt__int__char sqlite3_column_decltype;
 static _fun__stmt__int__int sqlite3_column_bytes;
-static _fun__stmt__int__int sqlite3_column_bytes16;
 static _fun__stmt__int__int sqlite3_column_type;
-static _fun__stmt__int__char sqlite3_column_blob;
-static _fun__stmt__int__wchar sqlite3_column_text16;
+static _fun__stmt__int__blob sqlite3_column_blob;
+static _fun__stmt__int__char sqlite3_column_text;
 static _fun__stmt__int__int32 sqlite3_column_int;
 static _fun__stmt__int__int64 sqlite3_column_int64;
 static _fun__stmt__int__real sqlite3_column_double;
@@ -95,10 +94,10 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_open16, _fun__wchar__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_close, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_free, _fun_destructor, logger);
-			win32_fetch(sqlite3, sqlite3_errmsg16, _fun__sqlite3__wchar, logger);
+			win32_fetch(sqlite3, sqlite3_errmsg, _fun__sqlite3__char, logger);
 			win32_fetch(sqlite3, sqlite3_trace_v2, _fun__sqlite3__uint__trace__void__int, logger);
 
-			win32_fetch(sqlite3, sqlite3_prepare16_v2, _fun__sqlite3__wchar__stmt__void__int, logger);
+			win32_fetch(sqlite3, sqlite3_prepare_v2, _fun__sqlite3__char__stmt__void__int, logger);
 			win32_fetch(sqlite3, sqlite3_reset, _fun__stmt__int, logger);
 			win32_fetch(sqlite3, sqlite3_step, _fun__stmt__int, logger);
 			win32_fetch(sqlite3, sqlite3_finalize, _fun__stmt__int, logger);
@@ -110,19 +109,18 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_bind_int64, _fun__stmt__int__int64__int, logger);
 			win32_fetch(sqlite3, sqlite3_bind_double, _fun__stmt__int__real__int, logger);
 			win32_fetch(sqlite3, sqlite3_bind_blob, _fun__stmt__int__blob__fptr__int, logger);
-			win32_fetch(sqlite3, sqlite3_bind_text16, _fun__stmt__int__wchar__fptr__int, logger);
+			win32_fetch(sqlite3, sqlite3_bind_text, _fun__stmt__int__char__fptr__int, logger);
 
 			win32_fetch(sqlite3, sqlite3_data_count, _fun__stmt__int, logger);
 			win32_fetch(sqlite3, sqlite3_column_count, _fun__stmt__int, logger);
-			win32_fetch(sqlite3, sqlite3_column_database_name16, _fun__stmt__int__wchar, logger);
-			win32_fetch(sqlite3, sqlite3_column_table_name16, _fun__stmt__int__wchar, logger);
-			win32_fetch(sqlite3, sqlite3_column_origin_name16, _fun__stmt__int__wchar, logger);
-			win32_fetch(sqlite3, sqlite3_column_decltype16, _fun__stmt__int__wchar, logger);
+			win32_fetch(sqlite3, sqlite3_column_database_name, _fun__stmt__int__char, logger);
+			win32_fetch(sqlite3, sqlite3_column_table_name, _fun__stmt__int__char, logger);
+			win32_fetch(sqlite3, sqlite3_column_origin_name, _fun__stmt__int__char, logger);
+			win32_fetch(sqlite3, sqlite3_column_decltype, _fun__stmt__int__char, logger);
 			win32_fetch(sqlite3, sqlite3_column_bytes, _fun__stmt__int__int, logger);
-			win32_fetch(sqlite3, sqlite3_column_bytes16, _fun__stmt__int__int, logger);
 			win32_fetch(sqlite3, sqlite3_column_type, _fun__stmt__int__int, logger);
-			win32_fetch(sqlite3, sqlite3_column_blob, _fun__stmt__int__char, logger);
-			win32_fetch(sqlite3, sqlite3_column_text16, _fun__stmt__int__wchar, logger);
+			win32_fetch(sqlite3, sqlite3_column_blob, _fun__stmt__int__blob, logger);
+			win32_fetch(sqlite3, sqlite3_column_text, _fun__stmt__int__char, logger);
 			win32_fetch(sqlite3, sqlite3_column_int, _fun__stmt__int__int32, logger);
 			win32_fetch(sqlite3, sqlite3_column_int64, _fun__stmt__int__int64, logger);
 			win32_fetch(sqlite3, sqlite3_column_double, _fun__stmt__int__real, logger);
@@ -150,29 +148,24 @@ static void unload_sqlite3(Syslog* logger) {
 	}
 }
 
-static const wchar_t* sqlite3_statement_description(sqlite3_stmt_t* stmt, bool expand) {
+static std::string sqlite3_statement_description(sqlite3_stmt_t* stmt, bool expand) {
 	static size_t buffer_size = 64;
-	static wchar_t* sql = new wchar_t[buffer_size];
 	char* raw = (expand ? sqlite3_expanded_sql(stmt) : (char *)(sqlite3_sql(stmt)));
-	Platform::String^ desc = nullptr;
-	size_t len = strlen(raw);
-
-	if (len >= buffer_size) {
-		delete[] sql;
-		buffer_size = len + 1;
-		sql = new wchar_t[buffer_size];
-	}
-
-	sql[len] = '\0';
-	for (size_t i = 0; i < strlen(raw); i++) {
-		sql[i] = raw[i];
-	}
-
+	std::string desc(raw);
+	
 	if (expand) {
 		sqlite3_free(raw);
 	}
 
-	return sql;
+	return desc;
+}
+
+static inline std::string make_safe_bytes(const char* blob) {
+	return ((blob == nullptr) ? std::string() : std::string(blob));
+}
+
+static inline std::wstring make_safe_wstring(const wchar_t* text) {
+	return ((text == nullptr) ? std::wstring() : std::wstring(text));
 }
 
 /*************************************************************************************************/
@@ -181,7 +174,7 @@ int WarGrey::SCADA::sqlite3_default_trace_callback(unsigned int type, void* pCxt
 
 	switch (type) {
 	case SQLITE_TRACE_STMT: {
-		self->get_logger()->log_message(Log::Debug, L"EXEC: %s", sqlite3_statement_description(P, true));
+		self->get_logger()->log_message(Log::Debug, L"EXEC: %S", sqlite3_statement_description(P, true).c_str());
 	}; break;
 	case SQLITE_TRACE_PROFILE: { /* TODO */ }; break;
 	default: /* no useful information */;
@@ -197,7 +190,7 @@ SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_t xCallbac
 	load_sqlite3(this->get_logger());
 
 	if (sqlite3_open16(database, &this->db) != SQLITE_OK) {
-		this->report_error(L"failed to connect to [%s]", database);
+		this->report_error("failed to connect to [%S]", database);
 	} else {
 		unsigned int uMask = SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE | SQLITE_TRACE_ROW | SQLITE_TRACE_CLOSE;
 
@@ -223,12 +216,12 @@ int SQLite3::libversion() {
 	return sqlite3_libversion_number();
 }
 
-IPreparedStatement* SQLite3::prepare(Platform::String^ raw) {
-	const wchar_t* sql = raw->Data();
+IPreparedStatement* SQLite3::prepare(std::string raw) {
+	const char* sql = raw.c_str();
 	sqlite3_stmt_t* prepared_stmt;
 	SQLiteStatement* stmt = nullptr;
 
-	if (sqlite3_prepare16_v2(this->db, sql, wstrlen(sql), &prepared_stmt, nullptr) == SQLITE_OK) {
+	if (sqlite3_prepare_v2(this->db, sql, strlen(sql), &prepared_stmt, nullptr) == SQLITE_OK) {
 		stmt = new SQLiteStatement(this, prepared_stmt);
 	} else {
 		this->report_error("prepare");
@@ -237,8 +230,8 @@ IPreparedStatement* SQLite3::prepare(Platform::String^ raw) {
 	return stmt;
 }
 
-std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
-	SQLiteStatement* pragma = static_cast<SQLiteStatement*>(IDBSystem::prepare(L"PRAGMA table_info = %s;", name));
+std::list<SQliteTableInfo> SQLite3::table_info(const char* name) {
+	SQLiteStatement* pragma = static_cast<SQLiteStatement*>(IDBSystem::prepare("PRAGMA table_info = %s;", name));
 	std::list<SQliteTableInfo> infos;
 	
 	while (pragma->step()) {
@@ -252,9 +245,9 @@ std::list<SQliteTableInfo> SQLite3::table_info(const wchar_t* name) {
 		info.dflt_value = pragma->column_text(4);
 		info.pk = pragma->column_int32(5);
 		
-		this->get_logger()->log_message(Log::Debug, L"Column[%d] %s[%s]: %s, %s, %d; %s",
-			info.cid, info.name->Data(), type.ToString()->Data(), info.type->Data(),
-			info.notnull.ToString()->Data(), info.pk, info.dflt_value->Data());
+		this->get_logger()->log_message(Log::Debug, L"Column[%d] %S[%s]: %S, %s, %d; %S",
+			info.cid, info.name.c_str(), type.ToString()->Data(), info.type.c_str(),
+			info.notnull.ToString()->Data(), info.pk, info.dflt_value.c_str());
 
 		infos.push_back(info);
 	}
@@ -280,8 +273,8 @@ long SQLite3::last_insert_rowid() {
 	return sqlite3_last_insert_rowid(this->db);
 }
 
-const wchar_t* SQLite3::get_last_error_message() {
-	return sqlite3_errmsg16(this->db);
+std::string SQLite3::get_last_error_message() {
+	return make_safe_bytes(sqlite3_errmsg(this->db));
 }
 
 /*************************************************************************************************/
@@ -308,11 +301,11 @@ void SQLiteStatement::clear_bindings() {
 	sqlite3_clear_bindings(this->stmt);
 }
 
-Platform::String^ SQLiteStatement::description(bool expand) {
-	return ref new Platform::String(sqlite3_statement_description(this->stmt, expand));
+std::string SQLiteStatement::description(bool expand) {
+	return sqlite3_statement_description(this->stmt, expand);
 }
 
-bool SQLiteStatement::step(int* data_count, const wchar_t* error_src) {
+bool SQLiteStatement::step(int* data_count, const char* error_src) {
 	bool notdone = true;
 	
 	switch (sqlite3_step(this->stmt)) {
@@ -328,32 +321,32 @@ int SQLiteStatement::column_data_count() {
 	return sqlite3_data_count(this->stmt);
 }
 
-Platform::String^ SQLiteStatement::column_database_name(unsigned int cid) {
-	return ref new Platform::String(sqlite3_column_database_name16(this->stmt, cid));
+bool SQLiteStatement::column_is_null(unsigned int cid) {
+	return this->column_type(cid) == SQLiteDataType::Null;
 }
 
-Platform::String^ SQLiteStatement::column_table_name(unsigned int cid) {
-	return ref new Platform::String(sqlite3_column_table_name16(this->stmt, cid));
+std::string SQLiteStatement::column_database_name(unsigned int cid) {
+	return make_safe_bytes(sqlite3_column_database_name(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_name(unsigned int cid) {
-	return ref new Platform::String(sqlite3_column_origin_name16(this->stmt, cid));
+std::string SQLiteStatement::column_table_name(unsigned int cid) {
+	return make_safe_bytes(sqlite3_column_table_name(this->stmt, cid));
 }
 
-Platform::String^ SQLiteStatement::column_decltype(unsigned int cid) {
-	return ref new Platform::String(sqlite3_column_decltype16(this->stmt, cid));
+std::string SQLiteStatement::column_name(unsigned int cid) {
+	return make_safe_bytes(sqlite3_column_origin_name(this->stmt, cid));
+}
+
+std::string SQLiteStatement::column_decltype(unsigned int cid) {
+	return make_safe_bytes(sqlite3_column_decltype(this->stmt, cid));
 }
 
 SQLiteDataType SQLiteStatement::column_type(unsigned int cid) {
 	return static_cast<SQLiteDataType>(sqlite3_column_type(this->stmt, cid));
 }
 
-std::string SQLiteStatement::column_blob(unsigned int cid) {
-	return std::string(sqlite3_column_blob(this->stmt, cid));
-}
-
-Platform::String^ SQLiteStatement::column_text(unsigned int cid) {
-	return ref new Platform::String(sqlite3_column_text16(this->stmt, cid));
+std::string SQLiteStatement::column_text(unsigned int cid) {
+	return make_safe_bytes(sqlite3_column_text(this->stmt, cid));
 }
 
 int32 SQLiteStatement::column_int32(unsigned int cid) {
@@ -397,13 +390,7 @@ void SQLiteStatement::bind_parameter(unsigned int pid, double v) {
 }
 
 void SQLiteStatement::bind_parameter(unsigned int pid, const char* v) {
-	if (sqlite3_bind_blob(this->stmt, pid + 1, v, strlen(v), SQLITE_STATIC) != SQLITE_OK) {
-		this->master->report_error("bind_blob");
-	}
-}
-
-void SQLiteStatement::bind_parameter(unsigned int pid, const wchar_t* v) {
-	if (sqlite3_bind_text16(this->stmt, pid + 1, v, wstrlen(v), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(this->stmt, pid + 1, v, strlen(v), SQLITE_STATIC) != SQLITE_OK) {
 		this->master->report_error("bind_text");
 	}
 }
