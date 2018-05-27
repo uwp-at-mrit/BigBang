@@ -113,8 +113,7 @@
          (case type
            [(Integer) 'int64]
            [(Float) 'double]
-           [(Text) 'text]
-           [else 'blob]))
+           [else 'text]))
        (&htab 1) (printf "self.~a = stmt->column~a~a(~aU);~n" field (if (or (memq field rowids) n-nil) "_" "_maybe_") sqlite-types idx))
      (&brace 0)
      (&linebreak 1)]))
