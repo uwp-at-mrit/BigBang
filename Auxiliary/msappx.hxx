@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		
 		virtual void on_appx_not_found(Windows::Foundation::Uri^ ms_appx, Hint hint) {
 			this->log_message(WarGrey::SCADA::Log::Error,
-				make_string(L"failed to load %s: file does not exist",
+				make_wstring(L"failed to load %s: file does not exist",
 					ms_appx->ToString()->Data()));
 		}
 
@@ -52,13 +52,13 @@ namespace WarGrey::SCADA {
 				this->on_appx(ms_appx, IMsAppx<FileType, Hint>::filesystem[uuid], hint);
 
 				this->log_message(Log::Debug, 
-					make_string(L"reused the %s: %s with reference count %d",
+					make_wstring(L"reused the %s: %s with reference count %d",
 						file_type->Data(), ms_appx->ToString()->Data(),
 						IMsAppx<FileType, Hint>::refcounts[uuid]));
 			} else {
 				IMsAppx<FileType, Hint>::queues[uuid].push(this);
 				this->log_message(Log::Debug,
-					make_string(L"waiting for the %s: %s",
+					make_wstring(L"waiting for the %s: %s",
 						file_type->Data(), ms_appx->ToString()->Data()));
 			}
 			IMsAppx<FileType, Hint>::critical_sections[uuid].unlock();
@@ -92,7 +92,7 @@ namespace WarGrey::SCADA {
 					token);
 			}).then([=](Concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> stream) {
 				this->log_message(Log::Debug,
-					make_string(L"found the %s: %s",
+					make_wstring(L"found the %s: %s",
 						file_type->Data(), ms_appx->ToString()->Data()));
 
 				return Concurrency::create_task(this->read(stream.get()), token);
@@ -114,7 +114,7 @@ namespace WarGrey::SCADA {
 					}
 
 					this->log_message(Log::Debug,
-						make_string(L"loaded the %s: %s with reference count %d",
+						make_wstring(L"loaded the %s: %s with reference count %d",
 							file_type->Data(), ms_appx->ToString()->Data(),
 							IMsAppx<FileType, Hint>::refcounts[uuid]));
 					IMsAppx<FileType, Hint>::queues.erase(uuid);
@@ -125,17 +125,17 @@ namespace WarGrey::SCADA {
 						this->on_appx_not_found(ms_appx, hint);
 					} else {
 						this->log_message(WarGrey::SCADA::Log::Error,
-							make_string(L"failed to load %s: %s",
+							make_wstring(L"failed to load %s: %s",
 								ms_appx->ToString()->Data(), e->Message->Data()));
 					}
 				} catch (Concurrency::task_canceled&) {
 					IMsAppx<FileType, Hint>::clear(uuid);
 					this->log_message(WarGrey::SCADA::Log::Debug,
-						make_string(L"cancelled loading %s", ms_appx->ToString()->Data()));
+						make_wstring(L"cancelled loading %s", ms_appx->ToString()->Data()));
 				} catch (std::exception& e) {
 					IMsAppx<FileType, Hint>::clear(uuid);
 					this->log_message(WarGrey::SCADA::Log::Debug,
-						make_string(L"unexcepted exception: %s", e.what()));
+						make_wstring(L"unexcepted exception: %s", e.what()));
 				}
 				IMsAppx<FileType, Hint>::critical_sections[uuid].unlock();
 			});

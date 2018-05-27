@@ -35,45 +35,50 @@ namespace WarGrey::SCADA {
 		virtual void bind_parameter(unsigned int pid_starts_with_0, int64 v) = 0;
 		virtual void bind_parameter(unsigned int pid_starts_with_0, double v) = 0;
 		virtual void bind_parameter(unsigned int pid_starts_with_0, const char* blob) = 0;
-		virtual void bind_parameter(unsigned int pid_starts_with_0, const wchar_t* text) = 0;
 
 	public:
-		virtual bool step(int* data_count = nullptr, const wchar_t* error_src = L"step") = 0;
-		virtual int column_data_count() = 0;
-		virtual Platform::String^ column_database_name(unsigned int cid_starts_with_0) = 0;
-		virtual Platform::String^ column_table_name(unsigned int cid_starts_with_0) = 0;
-		virtual Platform::String^ column_name(unsigned int cid_starts_with_0) = 0;
-		virtual Platform::String^ column_decltype(unsigned int cid_starts_with_0) = 0;
-		virtual std::string column_blob(unsigned int cid_starts_with_0) = 0;
-		virtual Platform::String^ column_text(unsigned int cid_starts_with_0) = 0;
+		virtual std::string column_text(unsigned int cid_starts_with_0) = 0;
 		virtual int32 column_int32(unsigned int cid_starts_with_0) = 0;
 		virtual int64 column_int64(unsigned int cid_starts_with_0) = 0;
 		virtual double column_double(unsigned int cid_starts_with_0) = 0;
 
 	public:
+		virtual int column_data_count() = 0;
+		virtual bool column_is_null(unsigned int cid_starts_with_0) = 0;
+		virtual std::string column_database_name(unsigned int cid_starts_with_0) = 0;
+		virtual std::string column_table_name(unsigned int cid_starts_with_0) = 0;
+		virtual std::string column_name(unsigned int cid_starts_with_0) = 0;
+		virtual std::string column_decltype(unsigned int cid_starts_with_0) = 0;
+
+	public:
+		virtual std::string description(bool expand = true) = 0;
+		virtual bool step(int* data_count = nullptr, const char* error_src = "step") = 0;
 		virtual void reset(bool reset_bindings = true) = 0;
 		virtual void clear_bindings() = 0;
-		virtual Platform::String^ description(bool expand = true) = 0;
-
+		
 	public:
 		void bind_parameter(unsigned int pid_starts_with_0, float v);
 		void bind_parameter(unsigned int pid_starts_with_0, std::string blob);
 		void bind_parameter(unsigned int pid_starts_with_0, Platform::String^ text);
 
 	public:
+		float column_float(unsigned int cid_starts_with_0);
+		std::optional<std::string> column_maybe_text(unsigned int cid_starts_with_0);
+		std::optional<int32> column_maybe_int32(unsigned int cid_starts_with_0);
+		std::optional<int64> column_maybe_int64(unsigned int cid_starts_with_0);
+		std::optional<double> column_maybe_double(unsigned int cid_starts_with_0);
+
+	public:
 		template <typename T>
 		void bind_parameter(unsigned int pid_starts_with_0, std::optional<T> v) {
-			if (bool(v)) {
+			if (v.has_value()) {
 				this->bind_parameter(pid_starts_with_0, v.value());
 			} else {
 				this->bind_parameter(pid_starts_with_0);
 			}
 		}
-
-	public:
-		float column_float(unsigned int cid_starts_with_0);
 	};
-
+	
 	private class IDBSystem : public WarGrey::SCADA::IDBObject {
 	public:
 		virtual ~IDBSystem() noexcept;
@@ -85,27 +90,30 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
 	public:
-		virtual const wchar_t* get_last_error_message() = 0;
-		virtual WarGrey::SCADA::IPreparedStatement* prepare(Platform::String^ sql) = 0;
+		virtual std::string get_last_error_message() = 0;
+		virtual WarGrey::SCADA::IPreparedStatement* prepare(std::string sql) = 0;
 		
 	public:
-		WarGrey::SCADA::IPreparedStatement* prepare(const wchar_t* sql, ...);
+		WarGrey::SCADA::IPreparedStatement* prepare(const char* sql, ...);
 		void exec(WarGrey::SCADA::IPreparedStatement* stmt);
-		void exec(Platform::String^ stmt);
-		void exec(const wchar_t* sql, ...);
+		void exec(std::string stmt);
+		void exec(const char* sql, ...);
 
 	public:
-		void report_error(Platform::String^ msg_prefix = nullptr);
-		void report_error(const wchar_t* format, ...);
+		void report_error();
+		void report_error(std::string msg_prefix);
+		void report_error(const char* format, ...);
 
-		void report_warning(Platform::String^ msg_prefix = nullptr);
-		void report_warning(const wchar_t* format, ...);
+		void report_warning();
+		void report_warning(std::string msg_prefix);
+		void report_warning(const char* format, ...);
 
 	protected:
 		virtual WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) = 0;
 
 	private:
-		void log(Platform::String^ msg_prefix = nullptr, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
+		void log(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
+		void log(std::string msg_prefix, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
 
 	private:
 		WarGrey::SCADA::Syslog* logger;

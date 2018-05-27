@@ -6,15 +6,15 @@
 
 using namespace WarGrey::SCADA;
 
-static Platform::String^ sqlite_type_map(SDT dt) {
-	return dt.ToString();
+static inline const wchar_t* sqlite_type_map(SDT dt) {
+	return dt.ToString()->Data();
 }
 
 VirtualSQLite3::VirtualSQLite3(TableColumnInfo* columns, size_t count, int version) :
 	IVirtualSQL(columns, count), version(version) {}
 
-Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Platform::String^ rowids[], size_t ric, bool silent) {
-	Platform::String^ sql = make_string(L"CREATE %s %s(", (silent ? L"TABLE IF NOT EXISTS" : L"TABLE"), tablename->Data());
+std::string VirtualSQLite3::create_table(const char* tablename, const char* rowids[], size_t ric, bool silent) {
+	std::string sql = make_nstring("CREATE %s %s(", (silent ? "TABLE IF NOT EXISTS" : "TABLE"), tablename);
 	size_t pk_count = 0;
 	bool rowid_is_defined = false;
 
@@ -23,7 +23,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 
 		if (rowid_is_defined) {
 			for (size_t ridx = 0; ridx < ric; ridx++) {
-				if (this->columns[i].name->Equals(rowids[ridx++])) {
+				if (strcmp(this->columns[i].name, rowids[ridx++]) == 0) {
 					rowid_is_defined = true;
 				}
 			}
@@ -31,7 +31,7 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 	}
 
 	for (size_t i = 0; i < count; i++) {
-		Platform::String^ column = this->columns[i].name + " " + sqlite_type_map(this->columns[i].type);
+		std::string column = make_nstring("%s %S", this->columns[i].name, sqlite_type_map(this->columns[i].type));
 		bool nnil = db_column_notnull(this->columns[i]);
 		bool uniq = db_column_unique(this->columns[i]);
 
@@ -50,24 +50,28 @@ Platform::String^ VirtualSQLite3::create_table(Platform::String^ tablename, Plat
 
 		for (size_t i = 0; i < this->count; i++) {
 			if (db_column_primary(this->columns[i])) {
-				sql += (this->columns[i].name + ((pk_count == 1) ? ")" : ", "));
+				sql += this->columns[i].name;
+				sql += ((pk_count == 1) ? ")" : ", ");
 				pk_count -= 1;
 			}
 		}
 	}
 
-	sql += ")" + (((!rowid_is_defined) && (this->version >= 3008002)) ? " WITHOUT ROWID;" : ";");
+	sql += ")";
+	sql += (((!rowid_is_defined) && (this->version >= 3008002)) ? " WITHOUT ROWID;" : ";");
 
 	return sql;
 }
 
-Platform::String^ VirtualSQLite3::insert_into(Platform::String^ tablename, bool replace) {
-	Platform::String^ sql = make_string(L"INSERT %s %s (", (replace ? L"OR REPLACE INTO" : L"INTO"), tablename->Data());
-	Platform::String^ parameters = "";
+std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
+	std::string sql = make_nstring("INSERT %s %s (", (replace ? "OR REPLACE INTO" : "INTO"), tablename);
+	std::string parameters = "";
 
 	for (size_t i = 1; i <= this->count; i++) {
-		sql += (this->columns[i - 1].name + ((i < this->count) ? ", " : ") VALUES("));
-		parameters += ("?" + ((i < this->count) ? ", " : ");"));
+		sql += this->columns[i - 1].name;
+		sql += ((i < this->count) ? ", " : ") VALUES(");
+		parameters += "?";
+		parameters += ((i < this->count) ? ", " : ");");
 	}
 
 	sql += parameters;
@@ -76,18 +80,19 @@ Platform::String^ VirtualSQLite3::insert_into(Platform::String^ tablename, bool 
 }
 
 
-Platform::String^ VirtualSQLite3::select_from(Platform::String^ tablename, unsigned int limit, unsigned int offset) {
-	Platform::String^ sql = "SELECT ";
+std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limit, unsigned int offset) {
+	std::string sql = "SELECT ";
 
 	for (size_t i = 0; i < this->count; i++) {
-		sql += (this->columns[i].name + ((i < this->count - 1) ? ", " : " "));
+		sql += this->columns[i].name;
+		sql += ((i < this->count - 1) ? ", " : " ");
 	}
 
-	sql += make_string(L"FROM %s LIMIT %d OFFSET %d;", tablename->Data(), ((limit == 0) ? -1 : limit), offset);
+	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
 }
 
-Platform::String^ VirtualSQLite3::drop_table(Platform::String^ tablename) {
-	return "DROP TABLE " + tablename + ";";
+std::string VirtualSQLite3::drop_table(const char* tablename) {
+	return make_nstring("DROP TABLE %s;", tablename);
 }

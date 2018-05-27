@@ -4,6 +4,9 @@
 
 using namespace WarGrey::SCADA;
 
+#define DBMaybe(Type, stmt, column_value, cid) \
+    (stmt->column_is_null(cid) ? std::nullopt : std::optional<Type>(stmt->column_value(cid)))
+
 IDBSystem::IDBSystem(Syslog* logger, DBMS dbms) : IDBObject(dbms), logger(logger) {
 	if (this->logger == nullptr) {
 		this->logger = make_system_logger("DBSystem");
@@ -34,21 +37,21 @@ IVirtualSQL* IDBSystem::make_sql_factory(TableColumnInfo* columns, size_t count)
 	return vsql;
 }
 
-IPreparedStatement* IDBSystem::prepare(const wchar_t* sql, ...) {
-	VSWPRINT(raw, sql);
+IPreparedStatement* IDBSystem::prepare(const char* sql, ...) {
+	VSNPRINT(raw, sql);
 
 	return this->prepare(raw);
 }
 
 void IDBSystem::exec(IPreparedStatement* stmt) {
 	if (this->dbsystem() == stmt->dbsystem()) {
-		stmt->step(nullptr, L"exec");
+		stmt->step(nullptr, "exec");
 	} else {
 		this->get_logger()->log_message(Log::Warning, "incompatible dbsystem and statement");
 	}
 }
 
-void IDBSystem::exec(Platform::String^ sql) {
+void IDBSystem::exec(std::string sql) {
 	IPreparedStatement* stmt = this->prepare(sql);
 
 	if (stmt != nullptr) {
@@ -57,38 +60,46 @@ void IDBSystem::exec(Platform::String^ sql) {
 	}
 }
 
-void IDBSystem::exec(const wchar_t* sql, ...) {
-	VSWPRINT(raw, sql);
+void IDBSystem::exec(const char* sql, ...) {
+	VSNPRINT(raw, sql);
 
 	this->exec(raw);
 }
 
-void IDBSystem::report_error(Platform::String^ msg_prefix) {
+void IDBSystem::report_error() {
+	this->log(Log::Error);
+}
+
+void IDBSystem::report_error(std::string msg_prefix) {
 	this->log(msg_prefix, Log::Error);
 }
 
-void IDBSystem::report_error(const wchar_t* format, ...) {
-	VSWPRINT(message, format);
+void IDBSystem::report_error(const char* format, ...) {
+	VSNPRINT(message, format);
 	this->log(message, Log::Error);
 }
 
-void IDBSystem::report_warning(Platform::String^ msg_prefix) {
+void IDBSystem::report_warning() {
+	this->log(Log::Warning);
+}
+
+void IDBSystem::report_warning(std::string msg_prefix) {
 	this->log(msg_prefix, Log::Warning);
 }
 
-void IDBSystem::report_warning(const wchar_t* format, ...) {
-	VSWPRINT(message, format);
+void IDBSystem::report_warning(const char* format, ...) {
+	VSNPRINT(message, format);
 	this->log(message, Log::Warning);
 }
 
-void IDBSystem::log(Platform::String^ message_prefix, Log level) {
-	const wchar_t* message = this->get_last_error_message();
+void IDBSystem::log(Log level) {
+	this->get_logger()->log_message(level, L"%S", this->get_last_error_message().c_str());
+}
 
-	if (message_prefix == nullptr) {
-		this->get_logger()->log_message(level, L"%s", message);
-	} else {
-		this->get_logger()->log_message(level, L"%s: %s", message_prefix->Data(), message);
-	}
+void IDBSystem::log(std::string message_prefix, Log level) {
+	this->get_logger()->log_message(level, L"%S: %S",
+		message_prefix.c_str(),
+		this->get_last_error_message().c_str());
 }
 
 Syslog* IDBSystem::get_logger() {
@@ -101,13 +112,29 @@ void IPreparedStatement::bind_parameter(unsigned int pid, float v) {
 }
 
 void IPreparedStatement::bind_parameter(unsigned int pid, std::string v) {
-	this->bind_parameter(pid, (char*)(v.c_str()));
+	this->bind_parameter(pid, v.c_str());
 }
 
 void IPreparedStatement::bind_parameter(unsigned int pid, Platform::String^ v) {
-	this->bind_parameter(pid, (wchar_t*)(v->Data()));
+	this->bind_parameter(pid, make_nstring(v).c_str());
 }
 
 float IPreparedStatement::column_float(unsigned int cid) {
 	return float(this->column_double(cid));
+}
+
+std::optional<std::string> IPreparedStatement::column_maybe_text(unsigned int cid) {
+	return DBMaybe(std::string, this, column_text, cid);
+}
+
+std::optional<int32> IPreparedStatement::column_maybe_int32(unsigned int cid) {
+	return DBMaybe(int32, this, column_int32, cid);
+}
+
+std::optional<int64> IPreparedStatement::column_maybe_int64(unsigned int cid) {
+	return DBMaybe(int64, this, column_int64, cid);
+}
+
+std::optional<double> IPreparedStatement::column_maybe_double(unsigned int cid) {
+	return DBMaybe(double, this, column_double, cid);
 }
