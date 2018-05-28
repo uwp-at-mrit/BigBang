@@ -19,13 +19,10 @@
        (define-values (primary? not-null?) (values (and (member (syntax-e #'field) rowids) #true) (attribute not-null)))
        (values (and primary? #'Type)
                (list (if (or primary? (attribute not-null)) #'Type (format-id #'Type "std::optional<~a>" (syntax-e #'Type)))
-                     (or (attribute generate) #'(void))
-                     (cond [(attribute defval) #'(defval)]
-                           [(attribute generate) #'(generate)]
-                           [(or primary? not-null?) #'()]
-                           [else (syntax-case #'Type [Listof]
-                                   [(Listof _) #'(null)]
-                                   [_ #'(#false)])])
+                     (cond [(attribute defval) #'defval]
+                           [(attribute generate) #'generate]
+                           [else #'#false])
+                     (or (attribute generate) #'#false)
                      (and not-null? #'#true)
                      (and (attribute unique) #'#true)))]))
   

@@ -15,7 +15,34 @@ static TableColumnInfo event_columns[] = {
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
-void WarGrey::SCADA::restore_event(IPreparedStatement* stmt, AlarmEvent& self) {
+AlarmEvent WarGrey::SCADA::make_event() {
+    AlarmEvent self;
+
+    default_event(self);
+
+    return self;
+}
+
+void WarGrey::SCADA::default_event(AlarmEvent& self) {
+    self.uuid = timestamp_pk64();
+    self.type = "table";
+    self.ctime = current_milliseconds();
+    self.mtime = current_milliseconds();
+}
+
+void WarGrey::SCADA::refresh_event(AlarmEvent& self) {
+    self.mtime = current_milliseconds();
+}
+
+void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {
+    stmt->bind_parameter(0, self.uuid);
+    stmt->bind_parameter(1, self.type);
+    stmt->bind_parameter(2, self.name);
+    stmt->bind_parameter(3, self.ctime);
+    stmt->bind_parameter(4, self.mtime);
+}
+
+void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
     self.uuid = stmt->column_int64(0U);
     self.type = stmt->column_text(1U);
     self.name = stmt->column_text(2U);
@@ -41,12 +68,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, int count,
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0, selves[i].uuid);
-            stmt->bind_parameter(1, selves[i].type);
-            stmt->bind_parameter(2, selves[i].name);
-            stmt->bind_parameter(3, selves[i].ctime);
-            stmt->bind_parameter(4, selves[i].mtime);
-
+            store_event(selves[i], stmt);
             dbc->exec(stmt);
             stmt->reset(true);
         }
@@ -65,7 +87,7 @@ std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int 
         AlarmEvent self;
 
         while(stmt->step()) {
-            restore_event(stmt, self);
+            restore_event(self, stmt);
             queries.push_back(self);
         }
 

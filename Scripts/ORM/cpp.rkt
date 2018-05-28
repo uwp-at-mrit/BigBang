@@ -103,12 +103,65 @@
     (&brace 0 #:semicolon? #true)
     (&linebreak 1)))
 
+(define &make-table
+  (lambda [λname classname indent/default]
+    (cond [(number? indent/default)
+           (&htab indent/default) (printf "WarGrey::SCADA::~a ~a();~n" classname λname)]
+          [else (printf "~a WarGrey::SCADA::~a() {~n" classname λname)
+                (&htab 1) (printf "~a self;~n" classname)
+                (&linebreak 1)
+                (&htab 1) (printf "~a(self);~n" indent/default)
+                (&linebreak 1)
+                (&htab 1) (printf "return self;~n")
+                (&brace 0)
+                (&linebreak 1)])))
+
+(define &default-table
+  (case-lambda
+    [(λname classname indent)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self);~n" λname classname)]
+    [(λname classname fields defvals)
+     (printf "void WarGrey::SCADA::~a(~a& self) {~n" λname classname)
+     (for ([field (in-list fields)]
+           [val (in-list defvals)])
+       (when (and val)
+         (&htab 1) (printf "self.~a = " field)
+         (cond [(symbol? val) (printf "~a();~n" val)]
+               [(string? val) (printf "~s;~n" val)]
+               [else (printf "~a;~n" val)])))
+     (&brace 0)
+     (&linebreak 1)]))
+
+(define &refresh-table
+  (case-lambda
+    [(λname classname indent)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self);~n" λname classname)]
+    [(λname classname fields autovals)
+     (printf "void WarGrey::SCADA::~a(~a& self) {~n" λname classname)
+     (for ([field (in-list fields)]
+           [val (in-list autovals)])
+       (when (and val)
+         (&htab 1) (printf "self.~a = ~a();~n" field val)))
+     (&brace 0)
+     (&linebreak 1)]))
+
+(define &store-table
+  (lambda [λname classname indent/fields]
+    (cond [(number? indent/fields)
+           (&htab indent/fields) (printf "void ~a(WarGrey::SCADA::~a& self, WarGrey::SCADA::IPreparedStatement* stmt);~n" λname classname)]
+          [else (printf "void WarGrey::SCADA::~a(~a& self, IPreparedStatement* stmt) {~n" λname classname)
+                (for ([field (in-list indent/fields)]
+                      [idx (in-naturals)])
+                  (&htab 1) (printf "stmt->bind_parameter(~a, self.~a);~n" idx field))
+                (&brace 0)
+                (&linebreak 1)])))
+
 (define &restore-table
   (case-lambda
     [(λname classname indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IPreparedStatement* stmt, WarGrey::SCADA::~a& self);~n" λname classname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self, WarGrey::SCADA::IPreparedStatement* stmt);~n" λname classname)]
     [(λname classname fields types not-nulls rowids)
-     (printf "void WarGrey::SCADA::~a(IPreparedStatement* stmt, ~a& self) {~n" λname classname)
+     (printf "void WarGrey::SCADA::~a(~a& self, IPreparedStatement* stmt) {~n" λname classname)
      (for ([field (in-list fields)]
            [type (in-list types)]
            [n-nil (in-list not-nulls)]
@@ -142,7 +195,7 @@
     [(λname classname indent)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, int count, bool replace = false);~n" λname classname)]
-    [(λname classname tablename fields column_infos)
+    [(λname classname tablename store column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* self, bool replace) {~n" λname classname)
      (&htab 1) (printf "~a(dbc, self, 1, replace);~n" λname)
      (&brace 0)
@@ -154,10 +207,7 @@
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
-     (for ([field (in-list fields)]
-           [idx (in-naturals)])
-       (&htab 3) (printf "stmt->bind_parameter(~a, selves[i].~a);~n" idx field))
-     (&linebreak 1)
+     (&htab 3) (printf "~a(selves[i], stmt);~n" store)
      (&htab 3) (printf "dbc->exec(stmt);~n")
      (&htab 3) (printf "stmt->reset(true);~n")
      (&brace 2)
@@ -182,7 +232,7 @@
      (&htab 2) (printf "~a self;~n" classname)
      (&linebreak 1)
      (&htab 2) (printf "while(stmt->step()) {~n")
-     (&htab 3) (printf "~a(stmt, self);~n" restore)
+     (&htab 3) (printf "~a(self, stmt);~n" restore)
      (&htab 3) (printf "queries.push_back(self);~n")
      (&brace 2)
      (&linebreak 1)

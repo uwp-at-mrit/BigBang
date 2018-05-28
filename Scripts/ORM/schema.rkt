@@ -19,9 +19,10 @@
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
                     [Table_pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
                     [([view? RowidType ...]
-                      [(MaybeType on-update [defval ...] not-null unique) ...]
+                      [(MaybeType defval autoval not-null unique) ...]
                       [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns]
-                      [create-table insert-table delete-table update-table select-table seek-table drop-table restore-table])
+                      [create-table insert-table delete-table update-table select-table seek-table drop-table
+                                    make-table default-table refresh-table store-table restore-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
                            [tablename (syntax-e #'table)])
                        (define-values (sdleif sdiwor)
@@ -33,7 +34,8 @@
                              (reverse sdleif)
                              (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_rowids" "~a_columns"))])
                                (format-id #'table fmt tablename))
-                             (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop 'restore))])
+                             (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop
+                                                               'make 'default 'refresh 'store 'restore))])
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps])
        #'(begin (define cat-table.hpp
@@ -48,7 +50,13 @@
                                   (λ [indent]
                                     (&primary-key 'Table_pk '(rowid ...) '(RowidType ...) indent)
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
+
+                                    (&make-table 'make-table 'Table indent)
+                                    (&default-table 'default-table 'Table indent)
+                                    (&refresh-table 'refresh-table 'Table indent)
+                                    (&store-table 'store-table 'Table indent)
                                     (&restore-table 'restore-table 'Table indent)
+                                    
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
                                     (&select-table 'select-table 'Table indent)
@@ -61,9 +69,15 @@
                       (&include "dbsystem.hpp" "dbtypes.hpp")
                       (&using-namespace 'WarGrey::SCADA)
                       (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
+
+                      (&make-table 'make-table 'Table 'default-table)
+                      (&default-table 'default-table 'Table '(field ...) '(defval ...))
+                      (&refresh-table 'refresh-table 'Table '(field ...) '(autoval ...))
+                      (&store-table 'store-table 'Table '(field ...))
                       (&restore-table 'restore-table 'Table '(field ...) '(DataType ...) '(not-null ...) '(rowid ...))
+
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
-                      (&insert-table 'insert-table 'Table 'table '(field ...) 'table-columns)
+                      (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
 

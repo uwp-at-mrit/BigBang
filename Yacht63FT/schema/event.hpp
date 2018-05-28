@@ -16,7 +16,11 @@ namespace WarGrey::SCADA {
         std::optional<Integer> mtime;
     };
 
-    void restore_event(WarGrey::SCADA::IPreparedStatement* stmt, WarGrey::SCADA::AlarmEvent& self);
+    WarGrey::SCADA::AlarmEvent make_event();
+    void default_event(WarGrey::SCADA::AlarmEvent& self);
+    void refresh_event(WarGrey::SCADA::AlarmEvent& self);
+    void store_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);
+    void restore_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent* self, bool replace = false);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent* selves, int count, bool replace = false);
