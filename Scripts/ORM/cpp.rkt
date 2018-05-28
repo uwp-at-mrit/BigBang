@@ -107,6 +107,18 @@
     (&brace 0 #:semicolon? #true)
     (&linebreak 1)))
 
+(define &#%table
+  (lambda [λname classname pk_t indent/rowids]
+    (cond [(number? indent/rowids)
+           (&htab indent/rowids) (printf "WarGrey::SCADA::~a ~a(WarGrey::SCADA::~a& self);~n" pk_t λname classname)]
+          [else (printf "~a ~a(~a& self) {~n" pk_t λname classname)
+                (&htab 1)
+                (if (= (length indent/rowids) 1)
+                    (printf "return self.~a;~n" (car indent/rowids))
+                    (printf "return { ~a };~n" (string-join (map (curry format "self.~a") indent/rowids) ", ")))
+                (&brace 0)
+                (&linebreak 1)])))
+
 (define &make-table
   (lambda [λname classname indent/default]
     (cond [(number? indent/default)
@@ -186,10 +198,9 @@
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);~n" λname)]
     [(λname tablename column_infos table_rowids)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists) {~n" λname)
-     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
-     (&htab 1) (printf "~a sql = vsql->create_table(~s, ~a, sizeof(~a)/sizeof(~a), if_not_exists);~n" cstring
-                       (symbol->string tablename) table_rowids table_rowids cstring)
-     (&linebreak)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
+     (&htab 1) (printf "~a sql = vsql->create_table(~s, ~a, if_not_exists);~n" cstring (symbol->string tablename) table_rowids)
+     (&linebreak 1)
      (&htab 1) (printf "dbc->exec(sql);~n")
      (&brace 0)
      (&linebreak 1)]))
@@ -197,15 +208,15 @@
 (define &insert-table
   (case-lambda
     [(λname classname indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a& self, bool replace = false);~n" λname classname)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname classname)]
     [(λname classname tablename store column_infos)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* self, bool replace) {~n" λname classname)
-     (&htab 1) (printf "~a(dbc, self, 1, replace);~n" λname)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a& self, bool replace) {~n" λname classname)
+     (&htab 1) (printf "~a(dbc, &self, 1, replace);~n" λname)
      (&brace 0)
      (&linebreak 1)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, size_t count, bool replace) {~n" λname classname)
-     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->insert_into(~s, replace);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&linebreak 1)
@@ -227,7 +238,7 @@
      (&htab indent) (printf "std::list<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" classname λname)]
     [(λname classname tablename restore column_infos)
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" classname λname)
-     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->select_from(~s, limit, offset);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&htab 1) (printf "std::list<~a> queries;~n" classname)
@@ -247,13 +258,43 @@
      (&brace 0)
      (&linebreak 1)]))
 
+(define &seek-table
+  (case-lambda
+    [(λname classname pk_t indent)
+     (&htab indent) (printf "std::optional<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a& where);~n" classname λname pk_t)]
+    [(λname classname tablename restore column_infos pk_t rowids table-rowids)
+     (printf "std::optional<~a> WarGrey::SCADA::~a(IDBSystem* dbc, ~a& where) {~n" classname λname pk_t)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
+     (&htab 1) (printf "~a sql = vsql->seek_from(~s, ~a);~n" cstring (symbol->string tablename) table-rowids)
+     (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
+     (&htab 1) (printf "std::optional<~a> query;~n" classname)
+     (&linebreak 1)
+     (&htab 1) (printf "if (stmt != nullptr) {~n")
+     (&htab 2) (printf "~a self;~n" classname)
+     (&linebreak 1)
+     (for ([rowid (in-list rowids)]
+           [idx (in-naturals)])
+       (&htab 2) (printf "stmt->bind_parameter(~a, where.~a);~n" idx rowid))
+     (&linebreak 1)
+     (&htab 2) (printf "if (stmt->step()) {~n")
+     (&htab 3) (printf "~a(self, stmt);~n" restore)
+     (&htab 3) (printf "query = std::optional<~a>(self);~n" classname)
+     (&brace 2)
+     (&linebreak 1)
+     (&htab 2) (printf "delete stmt;~n")
+     (&brace 1)
+     (&linebreak 1)
+     (&htab 1) (printf "return query;~n")
+     (&brace 0)
+     (&linebreak 1)]))
+
 (define &drop-table
   (case-lambda
     [(λname indent)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc);~n" λname)]
     [(λname tablename column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc) {~n" λname)
-     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->drop_table(~s);~n" cstring (symbol->string tablename))
      (&linebreak)
      (&htab 1) (printf "dbc->exec(sql);~n")

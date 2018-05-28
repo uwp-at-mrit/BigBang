@@ -17,10 +17,10 @@
         (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
              (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
-                    [Table_pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
+                    [Table-pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
                     [([view? RowidType ...]
                       [(MaybeType defval autoval not-null unique) ...]
-                      [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns]
+                      [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns table-id]
                       [create-table insert-table delete-table update-table select-table seek-table drop-table
                                     make-table default-table refresh-table store-table restore-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
@@ -32,7 +32,8 @@
                            (values (cons field-info sdleif) (if maybe-pktype (cons maybe-pktype sdiwor) sdiwor))))
                        (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
                              (reverse sdleif)
-                             (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_rowids" "~a_columns"))])
+                             (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp"
+                                                            "~a_rowids" "~a_columns" "~a_identity"))])
                                (format-id #'table fmt tablename))
                              (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop
                                                                'make 'default 'refresh 'store 'restore))])
@@ -48,9 +49,12 @@
                       
                       (&namespace 'WarGrey::SCADA
                                   (λ [indent]
-                                    (&primary-key 'Table_pk '(rowid ...) '(RowidType ...) indent)
+                                    (&primary-key 'Table-pk '(rowid ...) '(RowidType ...) indent)
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
 
+                                    (&#%table 'table-id 'Table 'Table-pk indent)
+
+                                    (&linebreak 1)
                                     (&make-table 'make-table 'Table indent)
                                     (&default-table 'default-table 'Table indent)
                                     (&refresh-table 'refresh-table 'Table indent)
@@ -61,6 +65,7 @@
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
                                     (&select-table 'select-table 'Table indent)
+                                    (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
 
                                     (&linebreak 1)
@@ -77,6 +82,7 @@
                       (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
 
                       (&separator)
+                      (&#%table 'table-id 'Table 'Table-pk '(rowid ...))
                       (&make-table 'make-table 'Table 'default-table)
                       (&default-table 'default-table 'Table '(field ...) '(defval ...))
                       (&refresh-table 'refresh-table 'Table '(field ...) '(autoval ...))
@@ -87,6 +93,7 @@
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
+                      (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

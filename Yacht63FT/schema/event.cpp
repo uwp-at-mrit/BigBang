@@ -7,17 +7,21 @@
 
 using namespace WarGrey::SCADA;
 
-static const char* event_rowids[] = { "uuid" };
+static const char* event_rowids[] = { "uuid", "name" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
+    { "name", SDT::Text, nullptr, DB_PRIMARY_KEY | DB_NOT_NULL | DB_UNIQUE },
     { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
 /**************************************************************************************************/
+AlarmEvent_pk event_identity(AlarmEvent& self) {
+    return { self.uuid, self.name };
+}
+
 AlarmEvent WarGrey::SCADA::make_event() {
     AlarmEvent self;
 
@@ -55,18 +59,18 @@ void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
 
 /**************************************************************************************************/
 void WarGrey::SCADA::create_event(IDBSystem* dbc, bool if_not_exists) {
-    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
-    std::string sql = vsql->create_table("event", event_rowids, sizeof(event_rowids)/sizeof(std::string), if_not_exists);
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
+    std::string sql = vsql->create_table("event", event_rowids, if_not_exists);
 
     dbc->exec(sql);
 }
 
-void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* self, bool replace) {
-    insert_event(dbc, self, 1, replace);
+void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent& self, bool replace) {
+    insert_event(dbc, &self, 1, replace);
 }
 
 void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t count, bool replace) {
-    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->insert_into("event", replace);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
@@ -82,7 +86,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
 }
 
 std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
-    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->select_from("event", limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::list<AlarmEvent> queries;
@@ -101,8 +105,31 @@ std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int 
     return queries;
 }
 
+std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_pk& where) {
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
+    std::string sql = vsql->seek_from("event", event_rowids);
+    IPreparedStatement* stmt = dbc->prepare(sql);
+    std::optional<AlarmEvent> query;
+
+    if (stmt != nullptr) {
+        AlarmEvent self;
+
+        stmt->bind_parameter(0, where.uuid);
+        stmt->bind_parameter(1, where.name);
+
+        if (stmt->step()) {
+            restore_event(self, stmt);
+            query = std::optional<AlarmEvent>(self);
+        }
+
+        delete stmt;
+    }
+
+    return query;
+}
+
 void WarGrey::SCADA::drop_event(IDBSystem* dbc) {
-    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->drop_table("event");
 
     dbc->exec(sql);
