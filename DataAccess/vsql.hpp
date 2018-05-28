@@ -1,6 +1,5 @@
 #pragma once
 
-#include "object.hpp"
 #include "dbtypes.hpp"
 
 namespace WarGrey::SCADA {

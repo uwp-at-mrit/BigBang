@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbmisc.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbtypes.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
@@ -22,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)dbmisc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.cpp" />

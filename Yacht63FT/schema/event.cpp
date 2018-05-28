@@ -3,6 +3,8 @@
 #include "dbsystem.hpp"
 #include "dbtypes.hpp"
 
+#include "dbmisc.hpp"
+
 using namespace WarGrey::SCADA;
 
 static const char* event_rowids[] = { "uuid" };
@@ -24,14 +26,14 @@ AlarmEvent WarGrey::SCADA::make_event() {
 }
 
 void WarGrey::SCADA::default_event(AlarmEvent& self) {
-    self.uuid = timestamp_pk64();
+	self.uuid = pk64_timestamp();
     self.type = "table";
     self.ctime = current_milliseconds();
     self.mtime = current_milliseconds();
 }
 
 void WarGrey::SCADA::refresh_event(AlarmEvent& self) {
-    self.mtime = current_milliseconds();
+    //self.mtime = current_milliseconds();
 }
 
 void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {

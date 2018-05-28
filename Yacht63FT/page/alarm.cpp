@@ -20,6 +20,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+
 private class AlarmBoard final {
 public:
 	AlarmBoard(AlarmPage* master) : master(master) {
@@ -29,10 +30,16 @@ public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
 		
-		AlarmEvent events[] = {
-			{ 42, "Error", "Fire", 1 , 2 },
-	    	{ 43, "Fatal", "Propeller", false, false },
-		};
+		AlarmEvent events[2];
+
+		default_event(events[0]);
+		default_event(events[1]);
+
+		events[0].name = "Fire";
+		events[0].type = "Error";
+
+		events[1].name = "Propeller";
+		events[1].type = "Fatal";
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
@@ -41,13 +48,13 @@ public:
 		sqlite3->table_info("sqlite_master");
 		sqlite3->table_info("event");
 
-		insert_event(sqlite3, events, 2);
+		insert_event(sqlite3, events, int(sizeof(events)/sizeof(AlarmEvent)));
 		
 		auto aes = select_event(sqlite3);
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
 			AlarmEvent e = (*lt);
 
-			sqlite3->get_logger()->log_message(Log::Info, L"%d, %S, %S, %d, %d",
+			sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
 				e.uuid, e.name.c_str(), e.type.c_str(),
 				e.mtime.value_or(false), e.ctime.value_or(false));
 		}
