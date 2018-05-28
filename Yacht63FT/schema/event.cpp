@@ -9,8 +9,8 @@ static const char* event_rowids[] = { "uuid" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
-    { "type", SDT::Bytes, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Bytes, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
+    { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
     { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
@@ -81,3 +81,4 @@ void WarGrey::SCADA::drop_event(IDBSystem* dbc) {
 
     dbc->exec(sql);
 }
+

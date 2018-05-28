@@ -35,14 +35,16 @@
   (lambda pragmas
     (for ([pragma (in-list pragmas)])
       (printf "#pragma ~a~n" pragma))
-    (&linebreak 1)))
+    (when (> (length pragmas) 0)
+      (&linebreak 1))))
 
 (define &include
   (lambda headers
     (for ([header (in-list headers)])
       (cond [(string? header) (printf "#include ~s~n" header)]
             [else (printf "#include <~a>~n" header)]))
-    (&linebreak 1)))
+    (when (> (length headers) 0)
+      (&linebreak 1))))
 
 (define &namespace
   (lambda [ns λbody]

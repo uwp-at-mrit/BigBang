@@ -14,7 +14,8 @@
 
 (define-syntax (define-table stx)
   (syntax-parse stx #:datum-literals [:]
-    [(_ table #:as Table #:with primary-key ([field : DataType constraints ...] ...))
+    [(_ table #:as Table #:with primary-key ([field : DataType constraints ...] ...)
+        (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))) ...)
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
                     [Table_pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
                     [([view? RowidType ...]
@@ -33,13 +34,15 @@
                              (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp" "~a_rowids" "~a_columns"))])
                                (format-id #'table fmt tablename))
                              (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop 'restore))])
-                               (format-id #'table "~a_~a" prefix tablename))))])
+                               (format-id #'table "~a_~a" prefix tablename))))]
+                    [([header ...] ...) #'addition-hpps])
        #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
                       (&pragma 'once)
                       (&include 'list 'optional)
                       (&include "dbsystem.hpp")
+                      (&include 'header ...) ...
 
                       (&namespace 'WarGrey::SCADA
                                   (λ [indent]

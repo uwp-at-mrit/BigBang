@@ -11,7 +11,7 @@ namespace WarGrey::SCADA {
     private struct AlarmEvent {
         Integer uuid;
         Text type;
-		Text name;
+        Text name;
         std::optional<Integer> ctime;
         std::optional<Integer> mtime;
     };
