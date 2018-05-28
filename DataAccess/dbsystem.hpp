@@ -89,6 +89,11 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger();
 		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
+		template<size_t N>
+		WarGrey::SCADA::IVirtualSQL* make_sql_factory(WarGrey::SCADA::TableColumnInfo (&columns)[N]) {
+			return this->make_sql_factory(columns, N);
+		}
+
 	public:
 		virtual std::string get_last_error_message() = 0;
 		virtual WarGrey::SCADA::IPreparedStatement* prepare(std::string sql) = 0;

@@ -24,13 +24,21 @@ namespace WarGrey::SCADA {
 		IVirtualSQL(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
 	public:
-		virtual std::string create_table(const char* tablename,
-			const char* primary_keys[], size_t pk_count,
-			bool if_not_exists) = 0;
-
+		virtual std::string create_table(const char* tablename, const char* primary_keys[], size_t pk_count, bool if_not_exists) = 0;
 		virtual std::string insert_into(const char* tablename, bool replace) = 0;
 		virtual std::string select_from(const char* tablename, unsigned int limit = 0, unsigned int offset = 0) = 0;
+		virtual std::string seek_from(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string drop_table(const char* tablename) = 0;
+
+		template<size_t N>
+		std::string create_table(const char* tablename, const char* (&primary_keys)[N], bool if_not_exists) {
+			return this->create_table(tablename, primary_keys, N, if_not_exists);
+		}
+
+		template<size_t N>
+		std::string seek_from(const char* tablename, const char* (&primary_keys)[N]) {
+			return this->seek_from(tablename, primary_keys, N);
+		}
 
 	protected:
 		WarGrey::SCADA::TableColumnInfo* columns;

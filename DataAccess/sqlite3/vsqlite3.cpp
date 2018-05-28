@@ -79,7 +79,6 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 	return sql;
 }
 
-
 std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limit, unsigned int offset) {
 	std::string sql = "SELECT ";
 
@@ -89,6 +88,25 @@ std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limi
 	}
 
 	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
+
+	return sql;
+}
+
+std::string VirtualSQLite3::seek_from(const char* tablename, const char* rowids[], size_t ric) {
+	std::string sql = "SELECT ";
+
+	for (size_t i = 0; i < this->count; i++) {
+		sql += this->columns[i].name;
+		sql += ((i < this->count - 1) ? ", " : " ");
+	}
+
+	sql += make_nstring("FROM %s WHERE ", tablename);
+	
+	for (size_t i = 0; i < ric; i++) {
+		sql += rowids[i];
+		sql += " = ?";
+		sql += ((i < ric - 1) ? " AND " : ";");
+	}
 
 	return sql;
 }

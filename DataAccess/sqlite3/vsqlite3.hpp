@@ -11,6 +11,7 @@ namespace WarGrey::SCADA {
 		std::string create_table(const char* tablename, const char* pks[], size_t pkc, bool if_not_exists) override;
 		std::string insert_into(const char* tablename, bool replace) override;
 		std::string select_from(const char* tablename, unsigned int limit, unsigned int offset) override;
+		std::string seek_from(const char* tablename, const char* pks[], size_t pkc) override;
 		std::string drop_table(const char* tablename) override;
 
 	private:

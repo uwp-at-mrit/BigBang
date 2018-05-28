@@ -30,7 +30,9 @@ public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
 		
+		AlarmEvent fevent = make_event();
 		AlarmEvent events[2];
+		AlarmEvent_pk id = event_identity(fevent);
 
 		default_event(events[0]);
 		default_event(events[1]);
@@ -48,7 +50,8 @@ public:
 		sqlite3->table_info("sqlite_master");
 		sqlite3->table_info("event");
 
-		insert_event(sqlite3, events, int(sizeof(events)/sizeof(AlarmEvent)));
+		insert_event(sqlite3, fevent);
+		insert_event(sqlite3, events);
 		
 		auto aes = select_event(sqlite3);
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
@@ -57,6 +60,15 @@ public:
 			sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
 				e.uuid, e.name.c_str(), e.type.c_str(),
 				e.mtime.value_or(false), e.ctime.value_or(false));
+		}
+
+		if (seek_event(sqlite3, id).has_value()) {
+			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for existed record");
+		}
+
+		id.name = "ghost";
+		if (!seek_event(sqlite3, id).has_value()) {
+			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
 
 		drop_event(sqlite3);

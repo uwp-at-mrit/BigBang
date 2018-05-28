@@ -18,7 +18,7 @@ static TableColumnInfo event_columns[] = {
 };
 
 /**************************************************************************************************/
-AlarmEvent_pk event_identity(AlarmEvent& self) {
+AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
     return { self.uuid, self.name };
 }
 
