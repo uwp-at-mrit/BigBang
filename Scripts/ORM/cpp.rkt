@@ -4,6 +4,10 @@
 
 (define cstring 'std::string)
 
+(define &separator
+  (lambda []
+    (printf "/~a/~n" (make-string 98 #\*))))
+
 (define &linebreak
   (lambda [[count 1]]
     (let nbsp ([c count])
@@ -194,13 +198,13 @@
   (case-lambda
     [(λname classname indent)
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* self, bool replace = false);~n" λname classname)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, int count, bool replace = false);~n" λname classname)]
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname classname)]
     [(λname classname tablename store column_infos)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* self, bool replace) {~n" λname classname)
      (&htab 1) (printf "~a(dbc, self, 1, replace);~n" λname)
      (&brace 0)
      (&linebreak 1)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, int count, bool replace) {~n" λname classname)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, size_t count, bool replace) {~n" λname classname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a, sizeof(~a)/sizeof(TableColumnInfo));~n" column_infos column_infos)
      (&htab 1) (printf "~a sql = vsql->insert_into(~s, replace);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -254,4 +258,13 @@
      (&linebreak)
      (&htab 1) (printf "dbc->exec(sql);~n")
      (&brace 0)
+     (&linebreak 1)]))
+
+(define &template-insert
+  (case-lambda
+    [(λname classname indent)
+     (&htab indent) (printf "template<size_t N>~n")
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&selves)[N], bool replace = false) {~n" λname classname)
+     (&htab (+ indent 1)) (printf "~a(dbc, selves, N, replace);~n" λname)
+     (&brace 1)
      (&linebreak 1)]))

@@ -17,6 +17,7 @@ static TableColumnInfo event_columns[] = {
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
+/**************************************************************************************************/
 AlarmEvent WarGrey::SCADA::make_event() {
     AlarmEvent self;
 
@@ -26,14 +27,14 @@ AlarmEvent WarGrey::SCADA::make_event() {
 }
 
 void WarGrey::SCADA::default_event(AlarmEvent& self) {
-	self.uuid = pk64_timestamp();
+    self.uuid = pk64_timestamp();
     self.type = "table";
     self.ctime = current_milliseconds();
     self.mtime = current_milliseconds();
 }
 
 void WarGrey::SCADA::refresh_event(AlarmEvent& self) {
-    //self.mtime = current_milliseconds();
+    self.mtime = current_milliseconds();
 }
 
 void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {
@@ -52,6 +53,7 @@ void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
     self.mtime = stmt->column_maybe_int64(4U);
 }
 
+/**************************************************************************************************/
 void WarGrey::SCADA::create_event(IDBSystem* dbc, bool if_not_exists) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
     std::string sql = vsql->create_table("event", event_rowids, sizeof(event_rowids)/sizeof(std::string), if_not_exists);
@@ -63,7 +65,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* self, bool replace
     insert_event(dbc, self, 1, replace);
 }
 
-void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, int count, bool replace) {
+void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t count, bool replace) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns, sizeof(event_columns)/sizeof(TableColumnInfo));
     std::string sql = vsql->insert_into("event", replace);
     IPreparedStatement* stmt = dbc->prepare(sql);
