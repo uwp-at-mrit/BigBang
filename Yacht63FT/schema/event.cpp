@@ -43,11 +43,11 @@ void WarGrey::SCADA::refresh_event(AlarmEvent& self) {
 }
 
 void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {
-    stmt->bind_parameter(0, self.uuid);
-    stmt->bind_parameter(1, self.type);
-    stmt->bind_parameter(2, self.name);
-    stmt->bind_parameter(3, self.ctime);
-    stmt->bind_parameter(4, self.mtime);
+    stmt->bind_parameter(0U, self.uuid);
+    stmt->bind_parameter(1U, self.type);
+    stmt->bind_parameter(2U, self.name);
+    stmt->bind_parameter(3U, self.ctime);
+    stmt->bind_parameter(4U, self.mtime);
 }
 
 void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
@@ -137,7 +137,7 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
 
         if (stmt->step()) {
             restore_event(self, stmt);
-            query = std::optional<AlarmEvent>(self);
+            query = self;
         }
 
         delete stmt;
@@ -146,18 +146,44 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     return query;
 }
 
+void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent& self) {
+    update_event(dbc, &self, 1);
+}
+
+void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t count) {
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
+    std::string sql = vsql->update_set("event", event_rowids);
+    IPreparedStatement* stmt = dbc->prepare(sql);
+
+    if (stmt != nullptr) {
+        for (int i = 0; i < count; i ++) {
+            stmt->bind_parameter(0U, selves[i]);
+
+            stmt->bind_parameter(1U, selves[i].type);
+            stmt->bind_parameter(2U, selves[i].name);
+            stmt->bind_parameter(3U, selves[i].ctime);
+            stmt->bind_parameter(4U, selves[i].mtime);
+
+            dbc->exec(stmt);
+            stmt->reset(true);
+        }
+
+        delete stmt;
+    }
+}
+
 void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk& where) {
     delete_event(dbc, &where, 1);
 }
 
-void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* where, size_t count) {
+void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* wheres, size_t count) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->delete_from("event", event_rowids);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0U, where[i]);
+            stmt->bind_parameter(0U, wheres[i]);
 
             dbc->exec(stmt);
             stmt->reset(true);
