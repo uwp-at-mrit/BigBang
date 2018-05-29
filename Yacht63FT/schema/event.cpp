@@ -157,7 +157,7 @@ void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* where, size_t c
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0U, where);
+            stmt->bind_parameter(0U, where[i]);
 
             dbc->exec(stmt);
             stmt->reset(true);

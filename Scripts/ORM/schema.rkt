@@ -71,7 +71,8 @@
                                     (&drop-table 'drop-table indent)
 
                                     (&linebreak 1)
-                                    (&template-insert 'insert-table 'Table indent))))))
+                                    (&template-insert 'insert-table 'Table indent)
+                                    (&template-delete 'delete-table 'Table-pk indent))))))
                 
                 (define cat-table.cpp
                   (lambda [[/dev/stdout (current-output-port)]]

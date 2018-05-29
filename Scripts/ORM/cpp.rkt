@@ -334,7 +334,7 @@
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
-     (bind-rowids 'stmt 'where rowids 3)
+     (bind-rowids 'stmt "where[i]" rowids 3)
      (&linebreak 1)
      (&htab 3) (printf "dbc->exec(stmt);~n")
      (&htab 3) (printf "stmt->reset(true);~n")
@@ -364,9 +364,19 @@
     [(λname Table indent)
      (&htab indent) (printf "template<size_t N>~n")
      (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&selves)[N], bool replace = false) {~n" λname Table)
-     (&htab (+ indent 1)) (printf "~a(dbc, selves, N, replace);~n" λname)
+     (&htab (+ indent 1)) (printf "WarGrey::SCADA::~a(dbc, selves, N, replace);~n" λname)
      (&brace 1)
      (&linebreak 1)]))
+
+(define &template-delete
+  (case-lambda
+    [(λname Table_pk indent)
+     (&htab indent) (printf "template<size_t N>~n")
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&wheres)[N]) {~n" λname Table_pk)
+     (&htab (+ indent 1)) (printf "WarGrey::SCADA::~a(dbc, wheres, N);~n" λname)
+     (&brace 1)
+     (&linebreak 1)]))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define bind-rowids

@@ -36,7 +36,12 @@ namespace WarGrey::SCADA {
 
     template<size_t N>
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent (&selves)[N], bool replace = false) {
-        insert_event(dbc, selves, N, replace);
+        WarGrey::SCADA::insert_event(dbc, selves, N, replace);
+    }
+
+    template<size_t N>
+    void delete_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent_pk (&wheres)[N]) {
+        WarGrey::SCADA::delete_event(dbc, wheres, N);
     }
 
 }
