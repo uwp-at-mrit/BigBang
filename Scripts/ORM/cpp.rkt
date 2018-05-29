@@ -111,7 +111,7 @@
   (lambda [λname classname pk_t indent/rowids]
     (cond [(number? indent/rowids)
            (&htab indent/rowids) (printf "WarGrey::SCADA::~a ~a(WarGrey::SCADA::~a& self);~n" pk_t λname classname)]
-          [else (printf "~a ~a(~a& self) {~n" pk_t λname classname)
+          [else (printf "~a WarGrey::SCADA::~a(~a& self) {~n" pk_t λname classname)
                 (&htab 1)
                 (if (= (length indent/rowids) 1)
                     (printf "return self.~a;~n" (car indent/rowids))
@@ -120,13 +120,13 @@
                 (&linebreak 1)])))
 
 (define &make-table
-  (lambda [λname classname indent/default]
+  (lambda [λname classname fields types defvals indent/default]
     (cond [(number? indent/default)
-           (&htab indent/default) (printf "WarGrey::SCADA::~a ~a();~n" classname λname)]
-          [else (printf "~a WarGrey::SCADA::~a() {~n" classname λname)
+           (&htab indent/default) (printf "WarGrey::SCADA::~a ~a(~a);~n" classname λname (make-arguments fields types defvals 'declare))]
+          [else (printf "~a WarGrey::SCADA::~a(~a) {~n" classname λname (make-arguments fields types defvals 'define))
                 (&htab 1) (printf "~a self;~n" classname)
                 (&linebreak 1)
-                (&htab 1) (printf "~a(self);~n" indent/default)
+                (&htab 1) (printf "~a(self, ~a);~n" indent/default (make-arguments fields types defvals 'call))
                 (&linebreak 1)
                 (&htab 1) (printf "return self;~n")
                 (&brace 0)
@@ -134,17 +134,16 @@
 
 (define &default-table
   (case-lambda
-    [(λname classname indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self);~n" λname classname)]
-    [(λname classname fields defvals)
-     (printf "void WarGrey::SCADA::~a(~a& self) {~n" λname classname)
+    [(λname classname fields types defvals indent)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self, ~a);~n" λname classname (make-arguments fields types defvals 'declare))]
+    [(λname classname fields types defvals)
+     (printf "void WarGrey::SCADA::~a(~a& self, ~a) {~n" λname classname (make-arguments fields types defvals 'define))
      (for ([field (in-list fields)]
            [val (in-list defvals)])
-       (when (and val)
-         (&htab 1) (printf "self.~a = " field)
-         (cond [(symbol? val) (printf "~a();~n" val)]
-               [(string? val) (printf "~s;~n" val)]
-               [else (printf "~a;~n" val)])))
+       (cond [(not val) (&htab 1) (printf "if (~a.has_value()) { self.~a = ~a.value(); }~n" field field field)]
+             [else (&htab 1) (printf "self.~a = " field)
+                   (cond [(symbol? val) (printf "~a();~n" val)]
+                         [else (printf "((~a.has_value()) ? ~a.value() : ~s);~n" field field val)])]))
      (&brace 0)
      (&linebreak 1)]))
 
@@ -309,3 +308,16 @@
      (&htab (+ indent 1)) (printf "~a(dbc, selves, N, replace);~n" λname)
      (&brace 1)
      (&linebreak 1)]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define make-arguments
+  (lambda [fields types defvals hint]
+    (string-join 
+     (filter-map (λ [field type defval]
+                   (and (not (symbol? defval))
+                        (case hint
+                          [(call) (symbol->string field)]
+                          [(declare) (format "std::optional<~a> ~a = std::nullopt" type field)]
+                          [else (format "std::optional<~a> ~a" type field)])))
+                 fields types defvals)
+     ", ")))

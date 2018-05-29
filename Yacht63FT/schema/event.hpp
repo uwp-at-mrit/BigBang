@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
     WarGrey::SCADA::AlarmEvent_pk event_identity(WarGrey::SCADA::AlarmEvent& self);
 
     WarGrey::SCADA::AlarmEvent make_event(std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt);
-    void default_event(WarGrey::SCADA::AlarmEvent& self);
+    void default_event(WarGrey::SCADA::AlarmEvent& self, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt);
     void refresh_event(WarGrey::SCADA::AlarmEvent& self);
     void store_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);

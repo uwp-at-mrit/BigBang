@@ -25,17 +25,15 @@ AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
 AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Text> name) {
     AlarmEvent self;
 
-    default_event(self);
-
-	if (type.has_value()) { self.type = type.value(); }
-	if (name.has_value()) { self.name = name.value(); }
+    default_event(self, type, name);
 
     return self;
 }
 
-void WarGrey::SCADA::default_event(AlarmEvent& self) {
+void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Text> type, std::optional<Text> name) {
     self.uuid = pk64_timestamp();
-    self.type = "table";
+    self.type = ((type.has_value()) ? type.value() : "table");
+    if (name.has_value()) { self.name = name.value(); }
     self.ctime = current_milliseconds();
     self.mtime = current_milliseconds();
 }
@@ -122,7 +120,7 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
 
         if (stmt->step()) {
             restore_event(self, stmt);
-            query = self;
+            query = std::optional<AlarmEvent>(self);
         }
 
         delete stmt;

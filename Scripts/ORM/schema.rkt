@@ -27,8 +27,8 @@
                            [tablename (syntax-e #'table)])
                        (define-values (sdleif sdiwor)
                          (for/fold ([sdleif null] [sdiwor null])
-                                   ([stx (in-syntax #'([field DataType constraints ...] ...))])
-                           (define-values (maybe-pktype field-info) (parse-field-definition tablename pkids stx))
+                                   ([<stx> (in-syntax #'([field DataType constraints ...] ...))])
+                           (define-values (maybe-pktype field-info) (parse-field-definition tablename pkids <stx>))
                            (values (cons field-info sdleif) (if maybe-pktype (cons maybe-pktype sdiwor) sdiwor))))
                        (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
                              (reverse sdleif)
@@ -55,8 +55,8 @@
                                     (&#%table 'table-id 'Table 'Table-pk indent)
 
                                     (&linebreak 1)
-                                    (&make-table 'make-table 'Table indent)
-                                    (&default-table 'default-table 'Table indent)
+                                    (&make-table 'make-table 'Table '(field ...) '(DataType ...) '(defval ...) indent)
+                                    (&default-table 'default-table 'Table '(field ...) '(DataType ...) '(defval ...) indent)
                                     (&refresh-table 'refresh-table 'Table indent)
                                     (&store-table 'store-table 'Table indent)
                                     (&restore-table 'restore-table 'Table indent)
@@ -70,7 +70,7 @@
 
                                     (&linebreak 1)
                                     (&template-insert 'insert-table 'Table indent))))))
-
+                
                 (define cat-table.cpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
@@ -83,8 +83,8 @@
 
                       (&separator)
                       (&#%table 'table-id 'Table 'Table-pk '(rowid ...))
-                      (&make-table 'make-table 'Table 'default-table)
-                      (&default-table 'default-table 'Table '(field ...) '(defval ...))
+                      (&make-table 'make-table 'Table '(field ...) '(DataType ...) '(defval ...) 'default-table)
+                      (&default-table 'default-table 'Table '(field ...) '(DataType ...) '(defval ...))
                       (&refresh-table 'refresh-table 'Table '(field ...) '(autoval ...))
                       (&store-table 'store-table 'Table '(field ...))
                       (&restore-table 'restore-table 'Table '(field ...) '(DataType ...) '(not-null ...) '(rowid ...))
