@@ -13,6 +13,7 @@ namespace WarGrey::SCADA {
 		std::string select_from(const char* tablename, unsigned int limit = 0, unsigned int offset = 0) override;
 		std::string select_from(const char* tablename, const char* cols[], size_t count, unsigned int limit = 0, unsigned int offset = 0) override;
 		std::string seek_from(const char* tablename, const char* pks[], size_t pkc) override;
+		std::string delete_from(const char* tablename, const char* primary_keys[], size_t pk_count) override;
 		std::string drop_table(const char* tablename) override;
 
 	private:

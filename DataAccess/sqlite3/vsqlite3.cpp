@@ -103,7 +103,6 @@ std::string VirtualSQLite3::select_from(const char* tablename, const char* cols[
 	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
-
 }
 
 std::string VirtualSQLite3::seek_from(const char* tablename, const char* rowids[], size_t ric) {
@@ -116,6 +115,18 @@ std::string VirtualSQLite3::seek_from(const char* tablename, const char* rowids[
 
 	sql += make_nstring("FROM %s WHERE ", tablename);
 	
+	for (size_t i = 0; i < ric; i++) {
+		sql += rowids[i];
+		sql += " = ?";
+		sql += ((i < ric - 1) ? " AND " : ";");
+	}
+
+	return sql;
+}
+
+std::string VirtualSQLite3::delete_from(const char* tablename, const char* rowids[], size_t ric) {
+	std::string sql = make_nstring("DELETE FROM %s WHERE ", tablename);
+
 	for (size_t i = 0; i < ric; i++) {
 		sql += rowids[i];
 		sql += " = ?";

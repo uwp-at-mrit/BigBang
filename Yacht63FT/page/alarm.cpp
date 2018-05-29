@@ -61,8 +61,8 @@ public:
 			}
 		}
 
-		//id.name = "ghost";
-		if (!seek_event(sqlite3, 0).has_value()) {
+		delete_event(sqlite3, id);
+		if (!seek_event(sqlite3, id).has_value()) {
 			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
 
