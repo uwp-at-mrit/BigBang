@@ -6,10 +6,7 @@
 #include "dbsystem.hpp"
 
 namespace WarGrey::SCADA {
-    private struct AlarmEvent_pk {
-        Integer uuid;
-        Text name;
-    };
+    typedef Integer AlarmEvent_pk;
 
     private struct AlarmEvent {
         Integer uuid;
