@@ -16,10 +16,8 @@
 (define do-make-dao
   (lambda [cat schema]
     (printf "> cat ~a~n" (file-name-from-path schema))
-    (call-with-output-file* schema #:exists 'truncate/replace
-      (λ [/dev/schout]
-        (cat (current-output-port))
-        (cat /dev/schout)))))
+    (call-with-output-file* schema #:exists 'truncate/replace cat)
+    (call-with-input-file* schema (curryr copy-port (current-output-port)))))
 
 (define make-daos
   (lambda [schema.sql.rktl]

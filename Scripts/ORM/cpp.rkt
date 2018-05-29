@@ -315,7 +315,6 @@
      (&brace 0)
      (&linebreak 1)]))
 
-
 (define &update-table
   (case-lambda
     [(λname Table indent)
