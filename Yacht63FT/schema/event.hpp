@@ -27,8 +27,8 @@ namespace WarGrey::SCADA {
     void create_event(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent& self, bool replace = false);
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent* selves, size_t count, bool replace = false);
-    std::list<WarGrey::SCADA::AlarmEvent_pk> list_event(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);
-    std::list<WarGrey::SCADA::AlarmEvent> select_event(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);
+    std::list<WarGrey::SCADA::AlarmEvent_pk> list_event(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);
+    std::list<WarGrey::SCADA::AlarmEvent> select_event(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);
     std::optional<WarGrey::SCADA::AlarmEvent> seek_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk where);
     void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent& self, bool refresh = true);
     void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent* selves, size_t count, bool refresh = true);

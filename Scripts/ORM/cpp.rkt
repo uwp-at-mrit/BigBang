@@ -231,12 +231,12 @@
 (define &list-table
   (case-lambda
     [(λname Table_pk indent)
-     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table_pk λname)]
+     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);~n" Table_pk λname)]
     [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
      (define rowcount (length rowids))
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" Table_pk λname)
+     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {~n" Table_pk λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
-     (&htab 1) (printf "~a sql = vsql->select_from(~s, ~a, limit, offset);~n" cstring (symbol->string tablename) table-rowids)
+     (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, ~a, limit, offset);~n" cstring (symbol->string tablename) table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&htab 1) (printf "std::list<~a> queries;~n" Table_pk)
      (&linebreak 1)
@@ -264,11 +264,11 @@
 (define &select-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table λname)]
+     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);~n" Table λname)]
     [(λname Table tablename restore column_infos)
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" Table λname)
+     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {~n" Table λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
-     (&htab 1) (printf "~a sql = vsql->select_from(~s, limit, offset);~n" cstring (symbol->string tablename))
+     (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, limit, offset);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&htab 1) (printf "std::list<~a> queries;~n" Table)
      (&linebreak 1)

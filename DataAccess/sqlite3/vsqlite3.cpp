@@ -101,18 +101,20 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 	return sql;
 }
 
-std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limit, unsigned int offset) {
+std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, unsigned int limit, unsigned int offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", this->columns, this->count);
 
-	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
+	sql += make_nstring("FROM %s ORDER BY %s LIMIT %d OFFSET %d;",
+		tablename, order_by, ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
 }
 
-std::string VirtualSQLite3::select_from(const char* tablename, const char* cols[], size_t count, unsigned int limit, unsigned int offset) {
+std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, const char* cols[], size_t count, unsigned int limit, unsigned int offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", cols, count);
 
-	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
+	sql += make_nstring("FROM %s ORDER BY %s LIMIT %d OFFSET %d;",
+		tablename, order_by, ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
 }

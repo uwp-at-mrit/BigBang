@@ -87,9 +87,9 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     }
 }
 
-std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
+std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->select_from("event", event_rowids, limit, offset);
+    std::string sql = vsql->select_from("event", order_by, event_rowids, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::list<AlarmEvent_pk> queries;
 
@@ -104,9 +104,9 @@ std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, unsigned int
     return queries;
 }
 
-std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
+std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->select_from("event", limit, offset);
+    std::string sql = vsql->select_from("event", order_by, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::list<AlarmEvent> queries;
 

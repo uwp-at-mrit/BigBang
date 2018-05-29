@@ -47,7 +47,7 @@ public:
 		insert_event(sqlite3, fevent);
 		insert_event(sqlite3, events);
 		
-		auto aes = list_event(sqlite3);
+		auto aes = list_event(sqlite3, "mtime");
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
 			AlarmEvent_pk pk = (*lt);
 			std::optional<AlarmEvent> maybe_e = seek_event(sqlite3, pk);
@@ -62,6 +62,7 @@ public:
 		}
 
 		events[0].type = "Fatal";
+		events[0].uuid = 42;
 		update_event(sqlite3, events[0]);
 
 		delete_event(sqlite3, id);
