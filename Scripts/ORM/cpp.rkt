@@ -333,7 +333,7 @@
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
-     (bind-rowids 'stmt "selves[i]" rowids 3)
+     (bind-parameters 'stmt "selves[i]" rowids 0 3)
      (&linebreak 1)
      (bind-parameters 'stmt "selves[i]" (remove* rowids fields) (length rowids) 3)
      (&linebreak 1)

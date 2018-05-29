@@ -157,7 +157,7 @@ void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0U, selves[i]);
+            stmt->bind_parameter(0U, selves[i].uuid);
 
             stmt->bind_parameter(1U, selves[i].type);
             stmt->bind_parameter(2U, selves[i].name);
