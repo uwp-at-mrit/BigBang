@@ -67,6 +67,7 @@
                                     (&list-table 'list-table 'Table-pk indent)
                                     (&select-table 'select-table 'Table indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
+                                    (&delete-table 'delete-table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
 
                                     (&linebreak 1)
@@ -96,21 +97,5 @@
                       (&list-table 'list-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
+                      (&delete-table 'delete-table 'Table-pk 'table '(rowid ...) 'table-rowids 'table-columns)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(module+ main
-  (define-table event #:as AlarmEvent #:with [uuid name]
-    ([uuid     : Integer           #:default (pk64:timestamp launch-time)]
-     [type     : Text              #:default 'table #:not-null #:% 'table]
-     [name     : Text              #:not-null #:unique]
-     [ctime    : Integer           #:default (current-milliseconds)]
-     [mtime    : Integer           #:auto (current-milliseconds)]))
-
-  (printf "> cat ~a~n" 'event.hpp)
-  (cat-event.hpp)
-  
-  (&linebreak 3)
-  
-  (printf "> cat ~a~n" 'event.cpp)
-  (cat-event.cpp))

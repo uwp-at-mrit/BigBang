@@ -220,6 +220,7 @@
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
      (&htab 3) (printf "~a(selves[i], stmt);~n" store)
+     (&linebreak 1)
      (&htab 3) (printf "dbc->exec(stmt);~n")
      (&htab 3) (printf "stmt->reset(true);~n")
      (&brace 2)
@@ -302,10 +303,7 @@
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "~a self;~n" Table)
      (&linebreak 1)
-     (cond [(= (length rowids) 1) (&htab 2) (printf "stmt->bind_parameter(0, where);~n")]
-           [else (for ([rowid (in-list rowids)]
-                       [idx (in-naturals)])
-                   (&htab 2) (printf "stmt->bind_parameter(~a, where.~a);~n" idx rowid))])
+     (bind-rowids 'stmt 'where rowids 2)
      (&linebreak 1)
      (&htab 2) (printf "if (stmt->step()) {~n")
      (&htab 3) (printf "~a(self, stmt);~n" restore)
@@ -316,6 +314,34 @@
      (&brace 1)
      (&linebreak 1)
      (&htab 1) (printf "return query;~n")
+     (&brace 0)
+     (&linebreak 1)]))
+
+(define &delete-table
+  (case-lambda
+    [(λname Table_pk indent)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a& where);~n" λname Table_pk)
+     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a* where, size_t count);~n" λname Table_pk)]
+    [(λname Table_pk tablename rowids table-rowids column_infos)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a& where) {~n" λname Table_pk)
+     (&htab 1) (printf "~a(dbc, &where, 1);~n" λname)
+     (&brace 0)
+     (&linebreak 1)
+     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* where, size_t count) {~n" λname Table_pk)
+     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
+     (&htab 1) (printf "~a sql = vsql->delete_from(~s, ~a);~n" cstring (symbol->string tablename) table-rowids)
+     (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
+     (&linebreak 1)
+     (&htab 1) (printf "if (stmt != nullptr) {~n")
+     (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
+     (bind-rowids 'stmt 'where rowids 3)
+     (&linebreak 1)
+     (&htab 3) (printf "dbc->exec(stmt);~n")
+     (&htab 3) (printf "stmt->reset(true);~n")
+     (&brace 2)
+     (&linebreak 1)
+     (&htab 2) (printf "delete stmt;~n")
+     (&brace 1)
      (&brace 0)
      (&linebreak 1)]))
 
@@ -332,6 +358,7 @@
      (&brace 0)
      (&linebreak 1)]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define &template-insert
   (case-lambda
     [(λname Table indent)
@@ -342,6 +369,13 @@
      (&linebreak 1)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define bind-rowids
+  (lambda [stmt name rowids htab]
+    (cond [(= (length rowids) 1) (&htab htab) (printf "~a->bind_parameter(0U, ~a);~n" stmt name)]
+           [else (for ([rowid (in-list rowids)]
+                       [idx (in-naturals)])
+                   (&htab htab) (printf "~a->bind_parameter(~a, ~a.~a);~n" stmt idx name rowid))])))
+
 (define make-arguments
   (lambda [fields types defvals hint]
     (string-join 
