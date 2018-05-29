@@ -93,7 +93,7 @@
                       (&separator)
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
-                      (&list-table 'select-table 'Table_pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
+                      (&list-table 'select-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))

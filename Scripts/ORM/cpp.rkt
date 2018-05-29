@@ -291,9 +291,9 @@
 (define &seek-table
   (case-lambda
     [(λname Table Table_pk indent)
-     (&htab indent) (printf "std::optional<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a& where);~n" Table λname Table_pk)]
+     (&htab indent) (printf "std::optional<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a where);~n" Table λname Table_pk)]
     [(λname Table tablename restore column_infos Table_pk rowids table-rowids)
-     (printf "std::optional<~a> WarGrey::SCADA::~a(IDBSystem* dbc, ~a& where) {~n" Table λname Table_pk)
+     (printf "std::optional<~a> WarGrey::SCADA::~a(IDBSystem* dbc, ~a where) {~n" Table λname Table_pk)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->seek_from(~s, ~a);~n" cstring (symbol->string tablename) table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
