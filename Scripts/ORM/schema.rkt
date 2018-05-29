@@ -99,6 +99,6 @@
                       (&list-table 'list-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
-                      (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns)
+                      (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns 'refresh-table)
                       (&delete-table 'delete-table 'Table-pk 'table '(rowid ...) 'table-rowids 'table-columns)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))

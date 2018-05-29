@@ -6,7 +6,10 @@
 #include "dbsystem.hpp"
 
 namespace WarGrey::SCADA {
-    typedef Integer AlarmEvent_pk;
+    private struct AlarmEvent_pk {
+        Integer uuid;
+        Text name;
+    };
 
     private struct AlarmEvent {
         Integer uuid;
@@ -30,8 +33,8 @@ namespace WarGrey::SCADA {
     std::list<WarGrey::SCADA::AlarmEvent_pk> list_event(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);
     std::list<WarGrey::SCADA::AlarmEvent> select_event(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);
     std::optional<WarGrey::SCADA::AlarmEvent> seek_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk where);
-    void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent& self);
-    void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent* selves, size_t count);
+    void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent& self, bool refresh = true);
+    void update_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent* selves, size_t count, bool refresh = true);
     void delete_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk& where);
     void delete_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk* wheres, size_t count);
     void drop_event(WarGrey::SCADA::IDBSystem* dbc);
@@ -42,8 +45,8 @@ namespace WarGrey::SCADA {
     }
 
     template<size_t N>
-    void update_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent (&selves)[N]) {
-        WarGrey::SCADA::update_event(dbc, selves, N);
+    void update_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent (&selves)[N], bool refresh = true) {
+        WarGrey::SCADA::update_event(dbc, selves, N, refresh);
     }
 
     template<size_t N>

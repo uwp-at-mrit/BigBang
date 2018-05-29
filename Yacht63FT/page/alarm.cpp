@@ -30,12 +30,12 @@ public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
 		
-		AlarmEvent fevent = make_event("Yacht", "Info");
+		AlarmEvent fevent = make_event("Info", "Yacht");
 		AlarmEvent events[2];
 		AlarmEvent_pk id = event_identity(fevent);
 
-		default_event(events[0], "Fire", "Error");
-		default_event(events[1], "Propeller", "Fatal");
+		default_event(events[0], "Error", "Fire");
+		default_event(events[1], "Fatal", "Propeller");
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
@@ -57,9 +57,12 @@ public:
 
 				sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
 					e.uuid, e.name.c_str(), e.type.c_str(),
-					e.mtime.value_or(false), e.ctime.value_or(false));
+					e.ctime.value_or(false), e.mtime.value_or(false));
 			}
 		}
+
+		events[0].type = "Fatal";
+		update_event(sqlite3, events[0]);
 
 		delete_event(sqlite3, id);
 		if (!seek_event(sqlite3, id).has_value()) {

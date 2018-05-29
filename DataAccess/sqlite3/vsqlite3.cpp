@@ -10,6 +10,28 @@ static inline const wchar_t* sqlite_type_map(SDT dt) {
 	return dt.ToString()->Data();
 }
 
+static std::string columns_join(const char* prefix, const char* separator, const char* suffix, TableColumnInfo cols[], size_t c) {
+	std::string sql = prefix;
+
+	for (size_t i = 0; i < c; i++) {
+		sql += cols[i].name;
+		sql += ((i < c - 1) ? separator : suffix);
+	}
+
+	return sql;
+}
+
+static std::string columns_join(const char* prefix, const char* separator, const char* suffix, const char* cols[], size_t c) {
+	std::string sql = prefix;
+
+	for (size_t i = 0; i < c; i++) {
+		sql += cols[i];
+		sql += ((i < c - 1) ? separator : suffix);
+	}
+
+	return sql;
+}
+
 VirtualSQLite3::VirtualSQLite3(TableColumnInfo* columns, size_t count, int version) :
 	IVirtualSQL(columns, count), version(version) {}
 
@@ -80,12 +102,7 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 }
 
 std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limit, unsigned int offset) {
-	std::string sql = "SELECT ";
-
-	for (size_t i = 0; i < this->count; i++) {
-		sql += this->columns[i].name;
-		sql += ((i < this->count - 1) ? ", " : " ");
-	}
+	std::string sql = columns_join("SELECT ", ", ", " ", this->columns, this->count);
 
 	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
 
@@ -93,12 +110,7 @@ std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limi
 }
 
 std::string VirtualSQLite3::select_from(const char* tablename, const char* cols[], size_t count, unsigned int limit, unsigned int offset) {
-	std::string sql = "SELECT ";
-
-	for (size_t i = 0; i < count; i++) {
-		sql += cols[i];
-		sql += ((i < count - 1) ? ", " : " ");
-	}
+	std::string sql = columns_join("SELECT ", ", ", " ", cols, count);
 
 	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
 
@@ -106,32 +118,33 @@ std::string VirtualSQLite3::select_from(const char* tablename, const char* cols[
 }
 
 std::string VirtualSQLite3::seek_from(const char* tablename, const char* rowids[], size_t ric) {
-	std::string sql = "SELECT ";
+	std::string sql = columns_join("SELECT ", ", ", " ", this->columns, this->count);
+
+	sql += make_nstring("FROM %s ", tablename);
+	sql += columns_join("WHERE ", " = ? AND ", " = ?;", rowids, ric);
+	
+	return sql;
+}
+
+std::string VirtualSQLite3::update_set(const char* tablename, const char* rowids[], size_t ric) {
+	std::string sql = make_nstring("UPDATE %s SET ", tablename);
 
 	for (size_t i = 0; i < this->count; i++) {
-		sql += this->columns[i].name;
-		sql += ((i < this->count - 1) ? ", " : " ");
+		if (!db_column_primary(this->columns[i])) {
+			sql += this->columns[i].name;
+			sql += ((i < this->count - 1) ? " = ?, " : " = ? ");
+		}
 	}
 
-	sql += make_nstring("FROM %s WHERE ", tablename);
-	
-	for (size_t i = 0; i < ric; i++) {
-		sql += rowids[i];
-		sql += " = ?";
-		sql += ((i < ric - 1) ? " AND " : ";");
-	}
+	sql += columns_join("WHERE ", " = ? AND ", " = ?;", rowids, ric);
 
 	return sql;
 }
 
 std::string VirtualSQLite3::delete_from(const char* tablename, const char* rowids[], size_t ric) {
-	std::string sql = make_nstring("DELETE FROM %s WHERE ", tablename);
+	std::string sql = make_nstring("DELETE FROM %s ", tablename);
 
-	for (size_t i = 0; i < ric; i++) {
-		sql += rowids[i];
-		sql += " = ?";
-		sql += ((i < ric - 1) ? " AND " : ";");
-	}
+	sql += columns_join("WHERE ", " = ? AND ", " = ?;", rowids, ric);
 
 	return sql;
 }

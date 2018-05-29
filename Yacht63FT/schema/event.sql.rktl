@@ -2,7 +2,7 @@
 
 (require "../../Scripts/ORM/schema.rkt")
 
-(define-table event #:as AlarmEvent #:with [uuid]
+(define-table event #:as AlarmEvent #:with [uuid name]
   ([uuid     : Integer           #:default pk64_timestamp]
    [type     : Text              #:default "table" #:not-null]
    [name     : Text              #:not-null #:unique]

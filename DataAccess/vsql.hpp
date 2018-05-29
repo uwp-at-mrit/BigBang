@@ -29,6 +29,7 @@ namespace WarGrey::SCADA {
 		virtual std::string select_from(const char* tablename, unsigned int limit = 0, unsigned int offset = 0) = 0;
 		virtual std::string select_from(const char* tablename, const char* cols[], size_t count, unsigned int limit = 0, unsigned int offset = 0) = 0;
 		virtual std::string seek_from(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
+		virtual std::string update_set(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string delete_from(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string drop_table(const char* tablename) = 0;
 
@@ -45,6 +46,11 @@ namespace WarGrey::SCADA {
 		template<size_t N>
 		std::string seek_from(const char* tablename, const char* (&primary_keys)[N]) {
 			return this->seek_from(tablename, primary_keys, N);
+		}
+
+		template<size_t N>
+		std::string update_set(const char* tablename, const char* (&primary_keys)[N]) {
+			return this->update_set(tablename, primary_keys, N);
 		}
 
 		template<size_t N>

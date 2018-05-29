@@ -7,19 +7,19 @@
 
 using namespace WarGrey::SCADA;
 
-static const char* event_rowids[] = { "uuid" };
+static const char* event_rowids[] = { "uuid", "name" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
+    { "name", SDT::Text, nullptr, DB_PRIMARY_KEY | DB_NOT_NULL | DB_UNIQUE },
     { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
 /**************************************************************************************************/
 AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
-    return self.uuid;
+    return { self.uuid, self.name };
 }
 
 AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Text> name) {
@@ -94,8 +94,13 @@ std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, unsigned int
     std::list<AlarmEvent_pk> queries;
 
     if (stmt != nullptr) {
+        AlarmEvent_pk self;
+
         while(stmt->step()) {
-            queries.push_back(stmt->column_int64(0U));
+            self.uuid = stmt->column_int64(0U);
+            self.name = stmt->column_text(1U);
+
+            queries.push_back(self);
         }
 
         delete stmt;
@@ -133,7 +138,8 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     if (stmt != nullptr) {
         AlarmEvent self;
 
-        stmt->bind_parameter(0U, where);
+        stmt->bind_parameter(0U, where.uuid);
+        stmt->bind_parameter(1U, where.name);
 
         if (stmt->step()) {
             restore_event(self, stmt);
@@ -146,23 +152,25 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     return query;
 }
 
-void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent& self) {
+void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent& self, bool refresh) {
     update_event(dbc, &self, 1);
 }
 
-void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t count) {
+void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t count, bool refresh) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->update_set("event", event_rowids);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0U, selves[i].uuid);
+            if (refresh) { refresh_event(selves[i]); }
 
-            stmt->bind_parameter(1U, selves[i].type);
-            stmt->bind_parameter(2U, selves[i].name);
-            stmt->bind_parameter(3U, selves[i].ctime);
-            stmt->bind_parameter(4U, selves[i].mtime);
+            stmt->bind_parameter(3U, selves[i].uuid);
+            stmt->bind_parameter(4U, selves[i].name);
+
+            stmt->bind_parameter(0U, selves[i].type);
+            stmt->bind_parameter(1U, selves[i].ctime);
+            stmt->bind_parameter(2U, selves[i].mtime);
 
             dbc->exec(stmt);
             stmt->reset(true);
@@ -183,7 +191,8 @@ void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* wheres, size_t 
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            stmt->bind_parameter(0U, wheres[i]);
+            stmt->bind_parameter(0U, wheres[i].uuid);
+            stmt->bind_parameter(1U, wheres[i].name);
 
             dbc->exec(stmt);
             stmt->reset(true);
