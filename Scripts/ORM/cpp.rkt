@@ -246,13 +246,13 @@
        (&htab 2) (printf "~a self;~n" Table_pk)
        (&linebreak 1))
      (&htab 2) (printf "while(stmt->step()) {~n")
-     (cond [(> rowcount 1)
-            (for ([id (in-list rowids)]
-                  [type (in-list rowidtypes)]
-                  [idx (in-naturals)])
-              (&htab 3) (printf "self.~a = stmt->column_~a(~aU);~n" id (sql-type type) idx))
-            (&htab 3) (printf "queries.push_back(self);~n")]
-           [else (&htab 3) (printf "queries.push_back(stmt->column_~a(0U));~n" (sql-type (car rowidtypes)))])
+     (cond [(= rowcount 1) (&htab 3) (printf "queries.push_back(stmt->column_~a(0U));~n" (sql-type (car rowidtypes)))]
+           [else (for ([id (in-list rowids)]
+                       [type (in-list rowidtypes)]
+                       [idx (in-naturals)])
+                   (&htab 3) (printf "self.~a = stmt->column_~a(~aU);~n" id (sql-type type) idx))
+                 (&linebreak 1)
+                 (&htab 3) (printf "queries.push_back(self);~n")])
      (&brace 2)
      (&linebreak 1)
      (&htab 2) (printf "delete stmt;~n")
@@ -302,9 +302,10 @@
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "~a self;~n" Table)
      (&linebreak 1)
-     (for ([rowid (in-list rowids)]
-           [idx (in-naturals)])
-       (&htab 2) (printf "stmt->bind_parameter(~a, where.~a);~n" idx rowid))
+     (cond [(= (length rowids) 1) (&htab 2) (printf "stmt->bind_parameter(0, ~a);~n" (car rowids))]
+           [else (for ([rowid (in-list rowids)]
+                       [idx (in-naturals)])
+                   (&htab 2) (printf "stmt->bind_parameter(~a, where.~a);~n" idx rowid))])
      (&linebreak 1)
      (&htab 2) (printf "if (stmt->step()) {~n")
      (&htab 3) (printf "~a(self, stmt);~n" restore)
