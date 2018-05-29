@@ -92,6 +92,20 @@ std::string VirtualSQLite3::select_from(const char* tablename, unsigned int limi
 	return sql;
 }
 
+std::string VirtualSQLite3::select_from(const char* tablename, const char* cols[], size_t count, unsigned int limit, unsigned int offset) {
+	std::string sql = "SELECT ";
+
+	for (size_t i = 0; i < count; i++) {
+		sql += cols[i];
+		sql += ((i < count - 1) ? ", " : " ");
+	}
+
+	sql += make_nstring("FROM %s LIMIT %d OFFSET %d;", tablename, ((limit == 0) ? -1 : limit), offset);
+
+	return sql;
+
+}
+
 std::string VirtualSQLite3::seek_from(const char* tablename, const char* rowids[], size_t ric) {
 	std::string sql = "SELECT ";
 

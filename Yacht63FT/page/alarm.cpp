@@ -30,18 +30,12 @@ public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
 		
-		AlarmEvent fevent = make_event("view", "option");
+		AlarmEvent fevent = make_event("Yacht", "Info");
 		AlarmEvent events[2];
 		AlarmEvent_pk id = event_identity(fevent);
 
-		default_event(events[0]);
-		default_event(events[1]);
-
-		events[0].name = "Fire";
-		events[0].type = "Error";
-
-		events[1].name = "Propeller";
-		events[1].type = "Fatal";
+		default_event(events[0], "Fire", "Error");
+		default_event(events[1], "Propeller", "Fatal");
 
 		SQLite3* sqlite3 = new SQLite3();
 		sqlite3->get_logger()->append_log_receiver(xterm);
@@ -53,21 +47,22 @@ public:
 		insert_event(sqlite3, fevent);
 		insert_event(sqlite3, events);
 		
-		auto aes = select_event(sqlite3);
+		auto aes = list_event(sqlite3);
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
-			AlarmEvent e = (*lt);
+			AlarmEvent_pk pk = (*lt);
+			std::optional<AlarmEvent> maybe_e = seek_event(sqlite3, pk);
+			
+			if (maybe_e.has_value()) {
+				AlarmEvent e = maybe_e.value();
 
-			sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
-				e.uuid, e.name.c_str(), e.type.c_str(),
-				e.mtime.value_or(false), e.ctime.value_or(false));
+				sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
+					e.uuid, e.name.c_str(), e.type.c_str(),
+					e.mtime.value_or(false), e.ctime.value_or(false));
+			}
 		}
 
-		if (seek_event(sqlite3, id).has_value()) {
-			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for existed record");
-		}
-
-		id.name = "ghost";
-		if (!seek_event(sqlite3, id).has_value()) {
+		//id.name = "ghost";
+		if (!seek_event(sqlite3, 0).has_value()) {
 			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
 
