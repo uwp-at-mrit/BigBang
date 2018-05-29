@@ -7,19 +7,19 @@
 
 using namespace WarGrey::SCADA;
 
-static const char* event_rowids[] = { "uuid", "name" };
+static const char* event_rowids[] = { "uuid" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Text, nullptr, DB_PRIMARY_KEY | DB_NOT_NULL | DB_UNIQUE },
+    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
     { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
 };
 
 /**************************************************************************************************/
 AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
-    return { self.uuid, self.name };
+    return self.uuid;
 }
 
 AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Text> name) {
@@ -86,6 +86,23 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     }
 }
 
+std::list<Table_pk> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
+    std::string sql = vsql->select_from("event", event_rowids, limit, offset);
+    IPreparedStatement* stmt = dbc->prepare(sql);
+    std::list<Table_pk> queries;
+
+    if (stmt != nullptr) {
+        while(stmt->step()) {
+            queries.push_back(stmt->column_int64(0U));
+        }
+
+        delete stmt;
+    }
+
+    return queries;
+}
+
 std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->select_from("event", limit, offset);
@@ -116,7 +133,6 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
         AlarmEvent self;
 
         stmt->bind_parameter(0, where.uuid);
-        stmt->bind_parameter(1, where.name);
 
         if (stmt->step()) {
             restore_event(self, stmt);

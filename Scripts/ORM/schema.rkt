@@ -22,7 +22,7 @@
                       [(MaybeType defval autoval not-null unique) ...]
                       [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns table-id]
                       [create-table insert-table delete-table update-table select-table seek-table drop-table
-                                    make-table default-table refresh-table store-table restore-table])
+                                    make-table default-table refresh-table store-table restore-table list-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
                            [tablename (syntax-e #'table)])
                        (define-values (sdleif sdiwor)
@@ -36,7 +36,7 @@
                                                             "~a_rowids" "~a_columns" "~a_identity"))])
                                (format-id #'table fmt tablename))
                              (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop
-                                                               'make 'default 'refresh 'store 'restore))])
+                                                               'make 'default 'refresh 'store 'restore 'list))])
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps]
                     [([ns ...] ...) #'addition-nses])
@@ -64,6 +64,7 @@
                                     (&linebreak 1)
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
+                                    (&list-table 'list-table 'Table_pk indent)
                                     (&select-table 'select-table 'Table indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
@@ -92,6 +93,7 @@
                       (&separator)
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
+                      (&list-table 'select-table 'Table_pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
