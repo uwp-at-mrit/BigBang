@@ -64,7 +64,7 @@
                                     (&linebreak 1)
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
-                                    (&list-table 'list-table 'Table_pk indent)
+                                    (&list-table 'list-table 'Table-pk indent)
                                     (&select-table 'select-table 'Table indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
