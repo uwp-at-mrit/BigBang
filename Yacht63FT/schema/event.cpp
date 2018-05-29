@@ -132,7 +132,7 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     if (stmt != nullptr) {
         AlarmEvent self;
 
-        stmt->bind_parameter(0, uuid);
+        stmt->bind_parameter(0, where);
 
         if (stmt->step()) {
             restore_event(self, stmt);

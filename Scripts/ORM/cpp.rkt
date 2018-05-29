@@ -302,7 +302,7 @@
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "~a self;~n" Table)
      (&linebreak 1)
-     (cond [(= (length rowids) 1) (&htab 2) (printf "stmt->bind_parameter(0, ~a);~n" (car rowids))]
+     (cond [(= (length rowids) 1) (&htab 2) (printf "stmt->bind_parameter(0, where);~n")]
            [else (for ([rowid (in-list rowids)]
                        [idx (in-naturals)])
                    (&htab 2) (printf "stmt->bind_parameter(~a, where.~a);~n" idx rowid))])
