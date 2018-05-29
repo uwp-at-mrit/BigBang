@@ -232,7 +232,7 @@
 (define &list-table
   (case-lambda
     [(λname Table_pk indent)
-     (&htab indent) (printf "std::list<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table_pk λname)]
+     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table_pk λname)]
     [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
      (define rowcount (length rowids))
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" Table_pk λname)
@@ -265,7 +265,7 @@
 (define &select-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "std::list<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table λname)]
+     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0);~n" Table λname)]
     [(λname Table tablename restore column_infos)
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset) {~n" Table λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
@@ -291,7 +291,7 @@
 (define &seek-table
   (case-lambda
     [(λname Table Table_pk indent)
-     (&htab indent) (printf "std::optional<~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a where);~n" Table λname Table_pk)]
+     (&htab indent) (printf "std::optional<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a where);~n" Table λname Table_pk)]
     [(λname Table tablename restore column_infos Table_pk rowids table-rowids)
      (printf "std::optional<~a> WarGrey::SCADA::~a(IDBSystem* dbc, ~a where) {~n" Table λname Table_pk)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
