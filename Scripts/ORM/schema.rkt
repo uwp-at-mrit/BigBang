@@ -2,7 +2,6 @@
 
 (provide (all-defined-out))
 
-(require "virtual-sql.rkt")
 (require "syntax.rkt")
 (require "cpp.rkt")
 
@@ -67,11 +66,13 @@
                                     (&list-table 'list-table 'Table-pk indent)
                                     (&select-table 'select-table 'Table indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
+                                    (&update-table 'update-table 'Table indent)
                                     (&delete-table 'delete-table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
 
                                     (&linebreak 1)
                                     (&template-insert 'insert-table 'Table indent)
+                                    (&template-update 'update-table 'Table indent)
                                     (&template-delete 'delete-table 'Table-pk indent))))))
                 
                 (define cat-table.cpp
@@ -98,5 +99,6 @@
                       (&list-table 'list-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
+                      (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns)
                       (&delete-table 'delete-table 'Table-pk 'table '(rowid ...) 'table-rowids 'table-columns)
                       (&drop-table 'drop-table 'table 'table-columns))))))]))
