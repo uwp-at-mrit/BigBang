@@ -22,10 +22,13 @@ AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
     return { self.uuid, self.name };
 }
 
-AlarmEvent WarGrey::SCADA::make_event() {
+AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Text> name) {
     AlarmEvent self;
 
     default_event(self);
+
+	if (type.has_value()) { self.type = type.value(); }
+	if (name.has_value()) { self.name = name.value(); }
 
     return self;
 }
@@ -119,7 +122,7 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
 
         if (stmt->step()) {
             restore_event(self, stmt);
-            query = std::optional<AlarmEvent>(self);
+            query = self;
         }
 
         delete stmt;

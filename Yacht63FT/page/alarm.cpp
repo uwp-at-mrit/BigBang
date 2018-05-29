@@ -30,7 +30,7 @@ public:
 	void load_and_flow(float width, float height) {
 		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
 		
-		AlarmEvent fevent = make_event();
+		AlarmEvent fevent = make_event("view", "option");
 		AlarmEvent events[2];
 		AlarmEvent_pk id = event_identity(fevent);
 
