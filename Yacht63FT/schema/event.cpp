@@ -78,6 +78,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
             store_event(selves[i], stmt);
+
             dbc->exec(stmt);
             stmt->reset(true);
         }
@@ -132,7 +133,7 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     if (stmt != nullptr) {
         AlarmEvent self;
 
-        stmt->bind_parameter(0, where);
+        stmt->bind_parameter(0U, where);
 
         if (stmt->step()) {
             restore_event(self, stmt);
@@ -143,6 +144,27 @@ std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_
     }
 
     return query;
+}
+
+void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk& where) {
+    delete_event(dbc, &where, 1);
+}
+
+void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* where, size_t count) {
+    IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
+    std::string sql = vsql->delete_from("event", event_rowids);
+    IPreparedStatement* stmt = dbc->prepare(sql);
+
+    if (stmt != nullptr) {
+        for (int i = 0; i < count; i ++) {
+            stmt->bind_parameter(0U, where);
+
+            dbc->exec(stmt);
+            stmt->reset(true);
+        }
+
+        delete stmt;
+    }
 }
 
 void WarGrey::SCADA::drop_event(IDBSystem* dbc) {
