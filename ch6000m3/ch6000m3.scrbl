@@ -21,10 +21,10 @@
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
  #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities")
  #(C++      #xF34B7D #px"[.]([ch](pp|xx)?)$")
- #(SVG      #xC34C26 #px"[.]svg$")
  #(Racket   #x89E051 #px"[.]rkt$")
  #(Scribble #x1E4AEC #px"[.](scrbl|css)$")
- #(ResX     #xEDEDED #px"[.]resw$")]
+ #(ResX     #xEDEDED #px"[.]resw$")
+ #(SVG      #xC34C26 #px"[.]svg$")]
 
 @handbook-table[]
 
