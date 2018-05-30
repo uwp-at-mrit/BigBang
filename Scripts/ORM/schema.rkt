@@ -42,7 +42,10 @@
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps]
                     [([ns ...] ...) #'addition-nses])
-       #'(begin (define cat-table.hpp
+       #'(begin (when (and view?)
+                  (raise-user-error 'table "primary keys must be defined explicitly"))
+
+                (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
                       (&pragma 'once)
