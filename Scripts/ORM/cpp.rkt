@@ -230,11 +230,13 @@
 
 (define &list-table
   (case-lambda
-    [(λname Table_pk indent)
-     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);~n" Table_pk λname)]
+    [(λname Table_pk order_by indent)
+     (&htab indent)
+     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0, const char* order_by = ~s);~n"
+             Table_pk λname (or order_by 'nullptr))]
     [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
      (define rowcount (length rowids))
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {~n" Table_pk λname)
+     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {~n" Table_pk λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, ~a, limit, offset);~n" cstring (symbol->string tablename) table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -263,10 +265,12 @@
 
 (define &select-table
   (case-lambda
-    [(λname Table indent)
-     (&htab indent) (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, const char* order_by, unsigned int limit = 0, unsigned int offset = 0);~n" Table λname)]
+    [(λname Table order_by indent)
+     (&htab indent)
+     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, unsigned int limit = 0, unsigned int offset = 0, const char* order_by = ~s);~n"
+             Table λname (or order_by 'nullptr))]
     [(λname Table tablename restore column_infos)
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {~n" Table λname)
+     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {~n" Table λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, limit, offset);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -333,7 +337,9 @@
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
      (&htab 2) (printf "for (int i = 0; i < count; i ++) {~n")
-     (&htab 3) (printf "if (refresh) { ~a(selves[i]); }~n" refresh)
+     (&htab 3) (printf "if (refresh) {~n")
+     (&htab 4) (printf "~a(selves[i]);~n" refresh)
+     (&brace 3)
      (&linebreak 1)
      (bind-parameters 'stmt "selves[i]" rowids (length nonrowids) 3)
      (&linebreak 1)

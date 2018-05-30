@@ -32,7 +32,7 @@ AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Te
 
 void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Text> type, std::optional<Text> name) {
     self.uuid = pk64_timestamp();
-    self.type = ((type.has_value()) ? type.value() : "table");
+    self.type = ((type.has_value()) ? type.value() : "ERROR");
     if (name.has_value()) { self.name = name.value(); }
     self.ctime = current_milliseconds();
     self.mtime = current_milliseconds();
@@ -87,7 +87,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     }
 }
 
-std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {
+std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->select_from("event", order_by, event_rowids, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
@@ -104,7 +104,7 @@ std::list<AlarmEvent_pk> WarGrey::SCADA::list_event(IDBSystem* dbc, const char* 
     return queries;
 }
 
-std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, const char* order_by, unsigned int limit, unsigned int offset) {
+std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     std::string sql = vsql->select_from("event", order_by, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
@@ -157,7 +157,9 @@ void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
 
     if (stmt != nullptr) {
         for (int i = 0; i < count; i ++) {
-            if (refresh) { refresh_event(selves[i]); }
+            if (refresh) {
+                refresh_event(selves[i]);
+            }
 
             stmt->bind_parameter(4U, selves[i].uuid);
 

@@ -30,4 +30,10 @@
     ; NOTE: primary keys may not contained in the defining struct in which case the struct is treated as a temporary view
     (syntax-parse stx
       [id:id (list #'id)]
-      [(id0 id ...) stx])))
+      [(id0 id ...) stx]))
+
+  (define (parse-order-by stx)
+    (syntax-parse stx
+      [id:id (datum->syntax stx (symbol->string (syntax-e #'id)))]
+      [(order:id by:id) (datum->syntax stx (format "~a ~a" (syntax-e #'order) (syntax-e #'by)))]
+      [sexp #'#false])))

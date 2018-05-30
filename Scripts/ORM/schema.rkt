@@ -12,10 +12,13 @@
 
 (define-syntax (define-table stx)
   (syntax-parse stx #:datum-literals [:]
-    [(_ table #:as Table #:with primary-key ([field : DataType constraints ...] ...)
+    [(_ table #:as Table #:with primary-key
+        (~optional (~seq #:order-by order-by) #:defaults ([order-by #'#false]))
+        ([field : DataType constraints ...] ...)
         (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
              (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
+                    [order_by (parse-order-by #'order-by)]
                     [Table-pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
                     [([view? RowidType ...]
                       [(MaybeType defval autoval not-null unique) ...]
@@ -63,8 +66,8 @@
                                     (&linebreak 1)
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
-                                    (&list-table 'list-table 'Table-pk indent)
-                                    (&select-table 'select-table 'Table indent)
+                                    (&list-table 'list-table 'Table-pk 'order_by indent)
+                                    (&select-table 'select-table 'Table 'order_by indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&update-table 'update-table 'Table indent)
                                     (&delete-table 'delete-table 'Table-pk indent)
