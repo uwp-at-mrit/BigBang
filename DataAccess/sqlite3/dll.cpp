@@ -2,8 +2,9 @@
 
 #include "sqlite3/dll.hpp"
 #include "sqlite3/vsqlite3.hpp"
-#include "win32.hpp"
+#include "sqlite3/sqlite_master.hpp"
 
+#include "win32.hpp"
 #include "box.hpp"
 #include "string.hpp"
 
@@ -12,7 +13,7 @@ using namespace WarGrey::SCADA;
 typedef int (*_fun__wchar__sqlite3__int)(const wchar_t*, sqlite3_t**);
 typedef const char* (*_fun__sqlite3__char)(sqlite3_t*);
 typedef int (*_fun__sqlite3__int)(sqlite3_t*);
-typedef long (*_fun__sqlite3__long)(sqlite3_t*);
+typedef int64 (*_fun__sqlite3__int64)(sqlite3_t*);
 typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_t, void*);
 
 typedef int (*_fun__sqlite3__char__stmt__void__int)(sqlite3_t*, const char*, size_t, sqlite3_stmt_t**, const void**);
@@ -76,7 +77,7 @@ static _fun__stmt__malloc sqlite3_expanded_sql;
 
 static _fun__sqlite3__int sqlite3_changes;
 static _fun__sqlite3__int sqlite3_total_changes;
-static _fun__sqlite3__long sqlite3_last_insert_rowid;
+static _fun__sqlite3__int64 sqlite3_last_insert_rowid;
 
 static const int SQLITE_OK   = 0;
 static const int SQLITE_ROW  = 100;
@@ -130,7 +131,7 @@ static void load_sqlite3(Syslog* logger) {
 
 			win32_fetch(sqlite3, sqlite3_changes, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_total_changes, _fun__sqlite3__int, logger);
-			win32_fetch(sqlite3, sqlite3_last_insert_rowid, _fun__sqlite3__long, logger);
+			win32_fetch(sqlite3, sqlite3_last_insert_rowid, _fun__sqlite3__int64, logger);
 
 			references += 1;
 		}
@@ -216,7 +217,7 @@ int SQLite3::libversion() {
 	return sqlite3_libversion_number();
 }
 
-IPreparedStatement* SQLite3::prepare(std::string raw) {
+IPreparedStatement* SQLite3::prepare(const std::string& raw) {
 	const char* sql = raw.c_str();
 	sqlite3_stmt_t* prepared_stmt;
 	SQLiteStatement* stmt = nullptr;
@@ -228,6 +229,37 @@ IPreparedStatement* SQLite3::prepare(std::string raw) {
 	}
 
 	return stmt;
+}
+
+std::list<std::string> SQLite3::list_tables() {
+	std::list<std::string> tables;
+	std::list<SQLiteMaster> all = select_sqlite_master(this);
+
+	for (auto lt = all.begin(); lt != all.end(); lt++) {
+		SQLiteMaster m = (*lt);
+
+		if (m.type.compare("table") == 0) {
+			tables.push_back(m.name);
+
+			this->get_logger()->log_message(Log::Debug, L"found table '%S'", m.name.c_str());
+		}
+	}
+
+	return tables;
+}
+
+bool SQLite3::table_exists(const std::string& tablename) {
+	std::list<std::string> all = this->list_tables();
+	bool found = false;
+
+	for (auto lt = all.begin(); lt != all.end(); lt++) {
+		if ((*lt).compare(tablename) == 0) {
+			found = true;
+			break;
+		}
+	}
+
+	return found;
 }
 
 std::list<SQliteTableInfo> SQLite3::table_info(const char* name) {
@@ -269,7 +301,7 @@ int SQLite3::changes(bool total) {
 	return changes;
 }
 
-long SQLite3::last_insert_rowid() {
+int64 SQLite3::last_insert_rowid() {
 	return sqlite3_last_insert_rowid(this->db);
 }
 

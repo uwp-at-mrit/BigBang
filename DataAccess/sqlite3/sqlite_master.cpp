@@ -11,7 +11,7 @@ static TableColumnInfo sqlite_master_columns[] = {
     { "rowid", SDT::Integer, nullptr, DB_PRIMARY_KEY | DB_NOT_NULL | 0 },
     { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
     { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "tbl-name", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "tbl_name", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
     { "rootpage", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "sql", SDT::Text, nullptr, 0 | 0 | 0 },
 };
@@ -21,19 +21,19 @@ SQLiteMaster_pk WarGrey::SCADA::sqlite_master_identity(SQLiteMaster& self) {
     return self.rowid;
 }
 
-SQLiteMaster WarGrey::SCADA::make_sqlite_master(std::optional<Integer> rowid, std::optional<Text> type, std::optional<Text> name, std::optional<Text> tbl-name, std::optional<Integer> rootpage, std::optional<Text> sql) {
+SQLiteMaster WarGrey::SCADA::make_sqlite_master(std::optional<Integer> rowid, std::optional<Text> type, std::optional<Text> name, std::optional<Text> tbl_name, std::optional<Integer> rootpage, std::optional<Text> sql) {
     SQLiteMaster self;
 
-    default_sqlite_master(self, rowid, type, name, tbl-name, rootpage, sql);
+    default_sqlite_master(self, rowid, type, name, tbl_name, rootpage, sql);
 
     return self;
 }
 
-void WarGrey::SCADA::default_sqlite_master(SQLiteMaster& self, std::optional<Integer> rowid, std::optional<Text> type, std::optional<Text> name, std::optional<Text> tbl-name, std::optional<Integer> rootpage, std::optional<Text> sql) {
+void WarGrey::SCADA::default_sqlite_master(SQLiteMaster& self, std::optional<Integer> rowid, std::optional<Text> type, std::optional<Text> name, std::optional<Text> tbl_name, std::optional<Integer> rootpage, std::optional<Text> sql) {
     if (rowid.has_value()) { self.rowid = rowid.value(); }
     if (type.has_value()) { self.type = type.value(); }
     if (name.has_value()) { self.name = name.value(); }
-    if (tbl-name.has_value()) { self.tbl-name = tbl-name.value(); }
+    if (tbl_name.has_value()) { self.tbl_name = tbl_name.value(); }
     if (rootpage.has_value()) { self.rootpage = rootpage.value(); }
     if (sql.has_value()) { self.sql = sql.value(); }
 }
@@ -45,7 +45,7 @@ void WarGrey::SCADA::store_sqlite_master(SQLiteMaster& self, IPreparedStatement*
     stmt->bind_parameter(0U, self.rowid);
     stmt->bind_parameter(1U, self.type);
     stmt->bind_parameter(2U, self.name);
-    stmt->bind_parameter(3U, self.tbl-name);
+    stmt->bind_parameter(3U, self.tbl_name);
     stmt->bind_parameter(4U, self.rootpage);
     stmt->bind_parameter(5U, self.sql);
 }
@@ -54,7 +54,7 @@ void WarGrey::SCADA::restore_sqlite_master(SQLiteMaster& self, IPreparedStatemen
     self.rowid = stmt->column_int64(0U);
     self.type = stmt->column_text(1U);
     self.name = stmt->column_text(2U);
-    self.tbl-name = stmt->column_text(3U);
+    self.tbl_name = stmt->column_text(3U);
     self.rootpage = stmt->column_int64(4U);
     self.sql = stmt->column_maybe_text(5U);
 }
@@ -166,7 +166,7 @@ void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, 
 
             stmt->bind_parameter(0U, selves[i].type);
             stmt->bind_parameter(1U, selves[i].name);
-            stmt->bind_parameter(2U, selves[i].tbl-name);
+            stmt->bind_parameter(2U, selves[i].tbl_name);
             stmt->bind_parameter(3U, selves[i].rootpage);
             stmt->bind_parameter(4U, selves[i].sql);
 

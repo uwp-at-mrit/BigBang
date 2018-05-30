@@ -103,18 +103,20 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 
 std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, unsigned int limit, unsigned int offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", this->columns, this->count);
+	std::string maybe_order_by = ((order_by == nullptr)? " " : make_nstring(" ORDER BY %s ", order_by));
 
-	sql += make_nstring("FROM %s ORDER BY %s LIMIT %d OFFSET %d;",
-		tablename, order_by, ((limit == 0) ? -1 : limit), offset);
+	sql += make_nstring("FROM %s%sLIMIT %d OFFSET %d;",
+		tablename, maybe_order_by.c_str(), ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
 }
 
 std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, const char* cols[], size_t count, unsigned int limit, unsigned int offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", cols, count);
+	std::string maybe_order_by = ((order_by == nullptr) ? " " : make_nstring(" ORDER BY %s ", order_by));
 
-	sql += make_nstring("FROM %s ORDER BY %s LIMIT %d OFFSET %d;",
-		tablename, order_by, ((limit == 0) ? -1 : limit), offset);
+	sql += make_nstring("FROM %s%sLIMIT %d OFFSET %d;",
+		tablename, maybe_order_by.c_str(), ((limit == 0) ? -1 : limit), offset);
 
 	return sql;
 }

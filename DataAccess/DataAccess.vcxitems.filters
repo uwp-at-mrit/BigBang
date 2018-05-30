@@ -12,6 +12,9 @@
       <Filter>sqlite3</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)dbmisc.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.hpp">
+      <Filter>sqlite3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
@@ -23,6 +26,9 @@
       <Filter>sqlite3</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbmisc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.cpp">
+      <Filter>sqlite3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sqlite3">
@@ -41,6 +47,9 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
       <Filter>usr\share\lib</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.sql.rktl">
+      <Filter>sqlite3</Filter>
     </None>
   </ItemGroup>
 </Project>

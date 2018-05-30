@@ -80,17 +80,19 @@ namespace WarGrey::SCADA {
 			sqlite3_trace_t xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
 
 	public:
+		std::list<std::string> list_tables() override;
+		bool table_exists(const std::string& tablename) override;
 		std::string get_last_error_message() override;
-		WarGrey::SCADA::IPreparedStatement* prepare(std::string sql) override;
+		WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) override;
 
 	public:
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name);
 
 	public:
-		int changes(bool total = false);
-		long last_insert_rowid();
 		int libversion();
-
+		int changes(bool total = false);
+		int64 last_insert_rowid();
+		
 	protected:
 		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 

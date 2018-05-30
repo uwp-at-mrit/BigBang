@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <list>
 #include <optional>
 
 #include "syslog.hpp"
@@ -58,7 +59,7 @@ namespace WarGrey::SCADA {
 		
 	public:
 		void bind_parameter(unsigned int pid_starts_with_0, float v);
-		void bind_parameter(unsigned int pid_starts_with_0, std::string blob);
+		void bind_parameter(unsigned int pid_starts_with_0, const std::string& blob);
 		void bind_parameter(unsigned int pid_starts_with_0, Platform::String^ text);
 
 	public:
@@ -95,22 +96,24 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
+		virtual std::list<std::string> list_tables() = 0;
+		virtual bool table_exists(const std::string& tablename) = 0;
 		virtual std::string get_last_error_message() = 0;
-		virtual WarGrey::SCADA::IPreparedStatement* prepare(std::string sql) = 0;
+		virtual WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) = 0;
 		
 	public:
 		WarGrey::SCADA::IPreparedStatement* prepare(const char* sql, ...);
 		void exec(WarGrey::SCADA::IPreparedStatement* stmt);
-		void exec(std::string stmt);
+		void exec(const std::string& stmt);
 		void exec(const char* sql, ...);
 
 	public:
 		void report_error();
-		void report_error(std::string msg_prefix);
+		void report_error(const std::string& msg_prefix);
 		void report_error(const char* format, ...);
 
 		void report_warning();
-		void report_warning(std::string msg_prefix);
+		void report_warning(const std::string& msg_prefix);
 		void report_warning(const char* format, ...);
 
 	protected:
@@ -118,7 +121,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		void log(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
-		void log(std::string msg_prefix, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
+		void log(const std::string& msg_prefix, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
 
 	private:
 		WarGrey::SCADA::Syslog* logger;

@@ -6,7 +6,7 @@
   ([rowid    : Integer #:not-null]
    [type     : Text    #:not-null]
    [name     : Text    #:not-null]
-   [tbl-name : Text    #:not-null]
+   [tbl_name : Text    #:not-null]
    [rootpage : Integer #:not-null]
    [sql      : Text]))
 

@@ -51,7 +51,7 @@ void IDBSystem::exec(IPreparedStatement* stmt) {
 	}
 }
 
-void IDBSystem::exec(std::string sql) {
+void IDBSystem::exec(const std::string& sql) {
 	IPreparedStatement* stmt = this->prepare(sql);
 
 	if (stmt != nullptr) {
@@ -70,7 +70,7 @@ void IDBSystem::report_error() {
 	this->log(Log::Error);
 }
 
-void IDBSystem::report_error(std::string msg_prefix) {
+void IDBSystem::report_error(const std::string& msg_prefix) {
 	this->log(msg_prefix, Log::Error);
 }
 
@@ -83,7 +83,7 @@ void IDBSystem::report_warning() {
 	this->log(Log::Warning);
 }
 
-void IDBSystem::report_warning(std::string msg_prefix) {
+void IDBSystem::report_warning(const std::string& msg_prefix) {
 	this->log(msg_prefix, Log::Warning);
 }
 
@@ -96,7 +96,7 @@ void IDBSystem::log(Log level) {
 	this->get_logger()->log_message(level, L"%S", this->get_last_error_message().c_str());
 }
 
-void IDBSystem::log(std::string message_prefix, Log level) {
+void IDBSystem::log(const std::string& message_prefix, Log level) {
 	this->get_logger()->log_message(level, L"%S: %S",
 		message_prefix.c_str(),
 		this->get_last_error_message().c_str());
@@ -111,7 +111,7 @@ void IPreparedStatement::bind_parameter(unsigned int pid, float v) {
 	this->bind_parameter(pid, double(v));
 }
 
-void IPreparedStatement::bind_parameter(unsigned int pid, std::string v) {
+void IPreparedStatement::bind_parameter(unsigned int pid, const std::string& v) {
 	this->bind_parameter(pid, v.c_str());
 }
 

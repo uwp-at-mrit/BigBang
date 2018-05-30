@@ -20,7 +20,6 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-
 private class AlarmBoard final {
 public:
 	AlarmBoard(AlarmPage* master) : master(master) {
@@ -47,7 +46,7 @@ public:
 		insert_event(sqlite3, fevent);
 		insert_event(sqlite3, events);
 		
-		auto aes = list_event(sqlite3, "mtime");
+		auto aes = list_event(sqlite3);
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
 			AlarmEvent_pk pk = (*lt);
 			std::optional<AlarmEvent> maybe_e = seek_event(sqlite3, pk);
@@ -70,6 +69,7 @@ public:
 			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
 
+		sqlite3->list_tables();
 		drop_event(sqlite3);
 		sqlite3->table_info("event");
 	}

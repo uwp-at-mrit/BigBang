@@ -12,15 +12,15 @@ namespace WarGrey::SCADA {
         Integer rowid;
         Text type;
         Text name;
-        Text tbl-name;
+        Text tbl_name;
         Integer rootpage;
         std::optional<Text> sql;
     };
 
     WarGrey::SCADA::SQLiteMaster_pk sqlite_master_identity(WarGrey::SCADA::SQLiteMaster& self);
 
-    WarGrey::SCADA::SQLiteMaster make_sqlite_master(std::optional<Integer> rowid = std::nullopt, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt, std::optional<Text> tbl-name = std::nullopt, std::optional<Integer> rootpage = std::nullopt, std::optional<Text> sql = std::nullopt);
-    void default_sqlite_master(WarGrey::SCADA::SQLiteMaster& self, std::optional<Integer> rowid = std::nullopt, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt, std::optional<Text> tbl-name = std::nullopt, std::optional<Integer> rootpage = std::nullopt, std::optional<Text> sql = std::nullopt);
+    WarGrey::SCADA::SQLiteMaster make_sqlite_master(std::optional<Integer> rowid = std::nullopt, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt, std::optional<Text> tbl_name = std::nullopt, std::optional<Integer> rootpage = std::nullopt, std::optional<Text> sql = std::nullopt);
+    void default_sqlite_master(WarGrey::SCADA::SQLiteMaster& self, std::optional<Integer> rowid = std::nullopt, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt, std::optional<Text> tbl_name = std::nullopt, std::optional<Integer> rootpage = std::nullopt, std::optional<Text> sql = std::nullopt);
     void refresh_sqlite_master(WarGrey::SCADA::SQLiteMaster& self);
     void store_sqlite_master(WarGrey::SCADA::SQLiteMaster& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_sqlite_master(WarGrey::SCADA::SQLiteMaster& self, WarGrey::SCADA::IPreparedStatement* stmt);
