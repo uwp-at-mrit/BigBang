@@ -95,29 +95,21 @@ private:
 private class NavigatorBoard final {
 public:
 	NavigatorBoard(Navigatorbar* master) : master(master) {
-		this->caption_font = make_text_format("Microsoft YaHei", design_to_application_height(28.13F));
-		this->menu_font = make_text_format("Microsoft YaHei", design_to_application_height(26.51F));
+		this->font = make_text_format("Microsoft YaHei", design_to_application_height(28.13F));
 	}
 
 public:
 	void load_and_flow(float width, float height) {
-		float menu_width = design_to_application_width(screen_menu_width);
-		float button_width = (width - menu_width) / float(static_cast<unsigned int>(Yacht::_));
+		float button_gapsize = design_to_application_width(1.0F);
+		float button_cell_width = width / float(static_cast<unsigned int>(Yacht::_));
+		float button_width = button_cell_width - button_gapsize;
 		float button_height = design_to_application_height(84.0F);
-		float button_x = menu_width;
+		float button_x = button_gapsize * 0.5F;
 		float button_y = (height - button_height) * 0.5F;
-		
-		this->menu_background = new Backgroundlet(menu_width, button_height);
-		this->menu_caption = new Labellet("工况", this->caption_font);
-
-		this->menu_background->set_value(true);
-
-		this->master->insert(this->menu_background, 0.0F, button_y);
-		this->master->insert(this->menu_caption, this->menu_background, GraphletAlignment::CC, GraphletAlignment::CC);
 
 		for (Yacht id = Yacht::HomePage; id < Yacht::_; id++) {
 			this->backgrounds[id] = new Backgroundlet(button_width, button_height);
-			this->items[id] = new CreditItemlet(id, button_width, button_height, this->caption_font);
+			this->items[id] = new CreditItemlet(id, button_width, button_height, this->font);
 			this->master->insert(this->backgrounds[id], button_x, button_y);
 			this->master->insert(this->items[id], button_x, button_y);
 
@@ -126,7 +118,7 @@ public:
 				this->selected_id = id;
 			}
 
-			button_x += button_width;
+			button_x += button_cell_width;
 		}
 	}
 
@@ -140,14 +132,11 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	Backgroundlet* menu_background;
-	Labellet* menu_caption;
 	std::map<Yacht, Backgroundlet*> backgrounds;
 	std::map<Yacht, CreditItemlet*> items;
 		
 private:
-	CanvasTextFormat^ caption_font;
-	CanvasTextFormat^ menu_font;
+	CanvasTextFormat^ font;
 	Navigatorbar* master;
 	Yacht selected_id;
 };
