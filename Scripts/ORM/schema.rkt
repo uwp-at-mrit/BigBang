@@ -57,6 +57,7 @@
                                     (&primary-key 'Table-pk '(rowid ...) '(RowidType ...) indent)
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
 
+                                    (&enum 'table '(field ...) indent)
                                     (&#%table 'table-id 'Table 'Table-pk indent)
 
                                     (&linebreak 1)
@@ -75,6 +76,13 @@
                                     (&update-table 'update-table 'Table indent)
                                     (&delete-table 'delete-table 'Table-pk indent)
                                     (&drop-table 'drop-table indent)
+
+                                    (&linebreak 1)
+                                    (&table-aggregate 'table 'average 'double indent)
+                                    (&table-aggregate 'table 'count 'int64 indent)
+                                    (&table-aggregate 'table 'max 'std::optional<double> indent)
+                                    (&table-aggregate 'table 'min 'std::optional<double> indent)
+                                    (&table-aggregate 'table 'sum 'std::optional<double> indent)
 
                                     (&linebreak 1)
                                     (&template-insert 'insert-table 'Table indent)
@@ -107,4 +115,11 @@
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns 'refresh-table)
                       (&delete-table 'delete-table 'Table-pk 'table '(rowid ...) 'table-rowids 'table-columns)
-                      (&drop-table 'drop-table 'table 'table-columns))))))]))
+                      (&drop-table 'drop-table 'table 'table-columns)
+
+                      (&separator)
+                      (&table-aggregate 'table 'average 'double 'query_double 'table-columns)
+                      (&table-aggregate 'table 'count 'int64 'query_int64 'table-columns)
+                      (&table-aggregate 'table 'max 'std::optional<double> 'query_maybe_double 'table-columns)
+                      (&table-aggregate 'table 'min 'std::optional<double> 'query_maybe_double 'table-columns)
+                      (&table-aggregate 'table 'sum 'std::optional<double> 'query_maybe_double 'table-columns))))))]))

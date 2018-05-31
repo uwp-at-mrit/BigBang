@@ -69,6 +69,12 @@
                 (printf "typedef ~a ~a;~n" (car idtypes) Table_pk)
                 (&linebreak 1)])))
 
+(define &enum
+  (lambda [name fields indent]
+    (&htab indent)
+    (printf "private enum class ~a { ~a, _ };~n" name (string-join (map symbol->string fields) ", "))
+    (&linebreak 1)))
+
 (define &struct
   (lambda [name fields types indent]
     (&htab indent)
@@ -97,13 +103,12 @@
           [type (in-list dbtypes)]
           [nnil (in-list not-nulls)]
           [uniq (in-list uniques)])
-      (&hspace 4)
-      (printf "{ ~s, SDT::~a, nullptr, ~a | ~a | ~a },~n"
-              (symbol->string col)
-              (symbol->string type)
-              (if (memq col rowids) 'DB_PRIMARY_KEY 0)
-              (if (and nnil) 'DB_NOT_NULL 0)
-              (if (and uniq) 'DB_UNIQUE 0)))
+      (&hspace 4) (printf "{ ~s, SDT::~a, nullptr, ~a | ~a | ~a },~n"
+                          (symbol->string col)
+                          (symbol->string type)
+                          (if (memq col rowids) 'DB_PRIMARY_KEY 0)
+                          (if (and nnil) 'DB_NOT_NULL 0)
+                          (if (and uniq) 'DB_UNIQUE 0)))
     (&brace 0 #:semicolon? #true)
     (&linebreak 1)))
 
@@ -185,6 +190,19 @@
                          idx))
      (&brace 0)
      (&linebreak 1)]))
+
+(define &table-aggregate
+ (case-lambda
+   [(table λname type indent)
+    (&htab indent) (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a column, bool distinct = false);~n" type table λname table)]
+   [(table λname type query_value columns_infos)
+    (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)
+    (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" columns_infos)
+    (&htab 1) (printf "const char* colname = ~a[static_cast<unsigned int>(column)].name;~n" columns_infos)
+    (&linebreak 1)
+    (&htab 1) (printf "return dbc->~a(vsql->table_~a(~s, colname, distinct));~n" query_value λname (symbol->string table))
+    (&brace 0)
+    (&linebreak 1)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define &create-table

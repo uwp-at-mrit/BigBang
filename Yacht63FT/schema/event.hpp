@@ -16,6 +16,8 @@ namespace WarGrey::SCADA {
         std::optional<Integer> mtime;
     };
 
+    private enum class event { uuid, type, name, ctime, mtime, _ };
+
     WarGrey::SCADA::AlarmEvent_pk event_identity(WarGrey::SCADA::AlarmEvent& self);
 
     WarGrey::SCADA::AlarmEvent make_event(std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt);
@@ -35,6 +37,12 @@ namespace WarGrey::SCADA {
     void delete_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk& where);
     void delete_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk* wheres, size_t count);
     void drop_event(WarGrey::SCADA::IDBSystem* dbc);
+
+    double event_average(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column, bool distinct = false);
+    int64 event_count(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column, bool distinct = false);
+    std::optional<double> event_max(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column, bool distinct = false);
+    std::optional<double> event_min(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column, bool distinct = false);
+    std::optional<double> event_sum(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column, bool distinct = false);
 
     template<size_t N>
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent (&selves)[N], bool replace = false) {
