@@ -98,6 +98,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datalet.cpp">
+      <Filter>graphlet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -201,6 +204,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datalet.hpp">
+      <Filter>graphlet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

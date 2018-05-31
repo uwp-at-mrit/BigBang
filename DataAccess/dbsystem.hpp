@@ -8,6 +8,12 @@
 #include "vsql.hpp"
 
 namespace WarGrey::SCADA {
+#define DeclareQueryValue(type, value) \
+        std::optional<type> query_maybe_##value(const std::string& sql); \
+        std::optional<type> query_maybe_##value(const char* sql, ...); \
+        type query_##value(const std::string& sql); \
+        type query_##value(const char* sql, ...)
+
 	private enum class DBMS { SQLite3 };
 
 	private class IDBObject {
@@ -63,7 +69,6 @@ namespace WarGrey::SCADA {
 		void bind_parameter(unsigned int pid_starts_with_0, Platform::String^ text);
 
 	public:
-		float column_float(unsigned int cid_starts_with_0);
 		std::optional<std::string> column_maybe_text(unsigned int cid_starts_with_0);
 		std::optional<int32> column_maybe_int32(unsigned int cid_starts_with_0);
 		std::optional<int64> column_maybe_int64(unsigned int cid_starts_with_0);
@@ -103,9 +108,15 @@ namespace WarGrey::SCADA {
 		
 	public:
 		WarGrey::SCADA::IPreparedStatement* prepare(const char* sql, ...);
+		
 		void exec(WarGrey::SCADA::IPreparedStatement* stmt);
-		void exec(const std::string& stmt);
+		void exec(const std::string& sql);
 		void exec(const char* sql, ...);
+
+		DeclareQueryValue(std::string, text);
+		DeclareQueryValue(int32, int32);
+		DeclareQueryValue(int64, int64);
+		DeclareQueryValue(double, double);
 
 	public:
 		void report_error();

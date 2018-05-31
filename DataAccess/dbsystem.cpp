@@ -7,6 +7,40 @@ using namespace WarGrey::SCADA;
 #define DBMaybe(Type, stmt, column_value, cid) \
     (stmt->column_is_null(cid) ? std::nullopt : std::optional<Type>(stmt->column_value(cid)))
 
+#define QueryValue(sql, type, column_maybe_value) \
+    IPreparedStatement* stmt = this->prepare(sql); \
+    type maybe_v; \
+\
+    if (stmt != nullptr) { \
+	    this->exec(stmt); \
+	    maybe_v = stmt->column_maybe_value(0); \
+\
+	    delete stmt; \
+    } \
+\
+    return maybe_v;
+
+#define ImplementQueryValue(type, value) \
+std::optional<type> IDBSystem::query_maybe_##value(const std::string& sql) { \
+	QueryValue(sql, std::optional<type>, column_maybe_##value); \
+} \
+\
+std::optional<type> IDBSystem::query_maybe_##value(const char* sql, ...) { \
+	VSNPRINT(stmt, sql); \
+\
+	return this->query_maybe_##value(stmt); \
+} \
+\
+type IDBSystem::query_##value(const std::string& sql) { \
+	QueryValue(sql, type, column_##value); \
+} \
+\
+type IDBSystem::query_##value(const char* sql, ...) { \
+	VSNPRINT(stmt, sql); \
+\
+	return this->query_##value(stmt); \
+}
+
 IDBSystem::IDBSystem(Syslog* logger, DBMS dbms) : IDBObject(dbms), logger(logger) {
 	if (this->logger == nullptr) {
 		this->logger = make_system_logger("DBSystem");
@@ -66,6 +100,11 @@ void IDBSystem::exec(const char* sql, ...) {
 	this->exec(raw);
 }
 
+ImplementQueryValue(std::string, text)
+ImplementQueryValue(int32, int32)
+ImplementQueryValue(int64, int64)
+ImplementQueryValue(double, double)
+
 void IDBSystem::report_error() {
 	this->log(Log::Error);
 }
@@ -117,10 +156,6 @@ void IPreparedStatement::bind_parameter(unsigned int pid, const std::string& v) 
 
 void IPreparedStatement::bind_parameter(unsigned int pid, Platform::String^ v) {
 	this->bind_parameter(pid, make_nstring(v).c_str());
-}
-
-float IPreparedStatement::column_float(unsigned int cid) {
-	return float(this->column_double(cid));
 }
 
 std::optional<std::string> IPreparedStatement::column_maybe_text(unsigned int cid) {

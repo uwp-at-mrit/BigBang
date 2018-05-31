@@ -5,7 +5,7 @@
 
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
+#include "graphlet/datalet.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -20,15 +20,16 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class AlarmBoard final {
+private class AlarmProvider : public IDataProvider {
 public:
-	AlarmBoard(AlarmPage* master) : master(master) {
+	AlarmProvider() {
+		this->sqlite3 = new SQLite3();
+
+		create_event(this->sqlite3, true);
 	}
 
 public:
-	void load_and_flow(float width, float height) {
-		this->xterm = this->master->insert_one(new Statuslinelet(Log::Debug, 0));
-		
+	void test_sqlite3() {
 		AlarmEvent fevent = make_event("Info", "Yacht");
 		AlarmEvent events[2];
 		AlarmEvent_pk id = event_identity(fevent);
@@ -36,25 +37,22 @@ public:
 		default_event(events[0], "Error", "Fire");
 		default_event(events[1], "Fatal", "Propeller");
 
-		SQLite3* sqlite3 = new SQLite3();
-		sqlite3->get_logger()->append_log_receiver(xterm);
+		this->sqlite3->table_info("sqlite_master");
+		this->sqlite3->table_info("event");
 
-		create_event(sqlite3);
-		sqlite3->table_info("sqlite_master");
-		sqlite3->table_info("event");
+		insert_event(this->sqlite3, fevent);
+		insert_event(this->sqlite3, events);
 
-		insert_event(sqlite3, fevent);
-		insert_event(sqlite3, events);
-		
-		auto aes = list_event(sqlite3);
+		auto aes = list_event(this->sqlite3);
 		for (auto lt = aes.begin(); lt != aes.end(); lt++) {
 			AlarmEvent_pk pk = (*lt);
-			std::optional<AlarmEvent> maybe_e = seek_event(sqlite3, pk);
-			
+			std::optional<AlarmEvent> maybe_e = seek_event(this->sqlite3, pk);
+
 			if (maybe_e.has_value()) {
 				AlarmEvent e = maybe_e.value();
 
-				sqlite3->get_logger()->log_message(Log::Info, L"%lld, %S, %S, %lld, %lld",
+				this->sqlite3->get_logger()->log_message(Log::Info,
+					L"%lld, %S, %S, %lld, %lld",
 					e.uuid, e.name.c_str(), e.type.c_str(),
 					e.ctime.value_or(false), e.mtime.value_or(false));
 			}
@@ -62,23 +60,44 @@ public:
 
 		events[0].type = "Fatal";
 		events[0].uuid = 42;
-		update_event(sqlite3, events[0]);
+		update_event(this->sqlite3, events[0]);
 
-		delete_event(sqlite3, id);
-		if (!seek_event(sqlite3, id).has_value()) {
-			sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
+		delete_event(this->sqlite3, id);
+		if (!seek_event(this->sqlite3, id).has_value()) {
+			this->sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
 
-		sqlite3->list_tables();
-		drop_event(sqlite3);
-		sqlite3->table_info("event");
+		this->sqlite3->get_logger()->log_message(Log::Warning,
+			L"Names: %S",
+			this->sqlite3->query_maybe_text("SELECT group_concat(name) FROM event;").value_or("").c_str());
+
+		this->sqlite3->list_tables();
+		drop_event(this->sqlite3);
+		this->sqlite3->table_info("event");
+	}
+
+private:
+	SQLite3* sqlite3;
+};
+
+private class AlarmBoard final {
+public:
+	AlarmBoard(AlarmPage* master) : master(master) {}
+
+public:
+	void load_and_flow(float width, float height) {
+		this->datasource = new AlarmProvider();
+		this->view = this->master->insert_one(new ListViewlet(this->datasource));
+
+		this->datasource->test_sqlite3();
 	}
 
 // never deletes these graphlets mannually
 private:
-	Statuslinelet* xterm;
+	IDataViewlet* view;
 		
 private:
+	AlarmProvider* datasource;
 	AlarmPage* master;
 };
 
