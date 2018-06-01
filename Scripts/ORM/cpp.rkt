@@ -251,7 +251,7 @@
   (case-lambda
     [(λname Table_pk order_by indent)
      (&htab indent)
-     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0, uint64 offset = 0, const char* order_by = ~s);~n"
+     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = ~s);~n"
              Table_pk λname (or order_by 'nullptr))]
     [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
      (define rowcount (length rowids))
@@ -286,7 +286,7 @@
   (case-lambda
     [(λname Table order_by indent)
      (&htab indent)
-     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0, uint64 offset = 0, const char* order_by = ~s);~n"
+     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = ~s);~n"
              Table λname (or order_by 'nullptr))]
     [(λname Table tablename restore column_infos)
      (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, uint64 limit, uint64 offset, const char* order_by) {~n" Table λname)
