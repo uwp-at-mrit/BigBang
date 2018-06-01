@@ -103,6 +103,7 @@
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
+    <ClCompile Include="schema\dbtest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
+    <ClInclude Include="schema\dbtest.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
