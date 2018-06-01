@@ -88,7 +88,7 @@ void WarGrey::SCADA::insert_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, 
     }
 }
 
-std::list<SQLiteMaster_pk> WarGrey::SCADA::list_sqlite_master(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {
+std::list<SQLiteMaster_pk> WarGrey::SCADA::list_sqlite_master(IDBSystem* dbc, uint64 limit, uint64 offset, const char* order_by) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
     std::string sql = vsql->select_from("sqlite_master", order_by, sqlite_master_rowids, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
@@ -105,7 +105,7 @@ std::list<SQLiteMaster_pk> WarGrey::SCADA::list_sqlite_master(IDBSystem* dbc, un
     return queries;
 }
 
-std::list<SQLiteMaster> WarGrey::SCADA::select_sqlite_master(IDBSystem* dbc, unsigned int limit, unsigned int offset, const char* order_by) {
+std::list<SQLiteMaster> WarGrey::SCADA::select_sqlite_master(IDBSystem* dbc, uint64 limit, uint64 offset, const char* order_by) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
     std::string sql = vsql->select_from("sqlite_master", order_by, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
