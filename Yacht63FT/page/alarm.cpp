@@ -5,7 +5,6 @@
 
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
-#include "graphlet/datalet.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -20,59 +19,53 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class AlarmProvider : public IDataProvider {
+private class WarGrey::SCADA::AlarmBoard final {
 public:
-	AlarmProvider() {
-		this->sqlite3 = new SQLite3();
-
-		create_event(this->sqlite3, true);
+	virtual ~AlarmBoard() noexcept {
+		delete this->sqlite3;
 	}
 
-private:
-	SQLite3* sqlite3;
-};
-
-private class AlarmBoard final {
-public:
-	AlarmBoard(AlarmPage* master) : master(master) {}
+	AlarmBoard(AlarmPage* master) : master(master), displayed_record_count(0) {
+		this->sqlite3 = new SQLite3();
+	}
 
 public:
 	void load_and_flow(float width, float height) {
-		this->datasource = new AlarmProvider();
-		this->view = this->master->insert_one(new ListViewlet(this->datasource));
 	}
 
-// never deletes these graphlets mannually
+	void update(long long count, long long interval, long long uptime) {
+		this->sqlite3->get_logger()->log_message(Log::Info,
+			L"count: %lld, interval: %lld, uptime: %lld",
+			count, interval, uptime);
+	}
+
 private:
-	IDataViewlet* view;
+	long long displayed_record_count;
 		
 private:
-	AlarmProvider* datasource;
+	SQLite3* sqlite3;
 	AlarmPage* master;
 };
 
 /*************************************************************************************************/
-std::map<AlarmPage*, AlarmBoard*> dashboards;
-
-AlarmPage::AlarmPage(PLCMaster* device, Platform::String^ name) : Planet(name) {
-}
+AlarmPage::AlarmPage(PLCMaster* device, Platform::String^ name) : Planet(name) {}
 
 AlarmPage::~AlarmPage() {
-	auto maybe_dashboard = dashboards.find(this);
-
-	if (maybe_dashboard != dashboards.end()) {
-		delete maybe_dashboard->second;
-		dashboards.erase(maybe_dashboard);
+	if (this->dashboard != nullptr) {
+		delete this->dashboard;
 	}
 }
 
 void AlarmPage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	if (dashboards.find(this) == dashboards.end()) {
-		AlarmBoard* dashboard = new AlarmBoard(this);
-
-		dashboards.insert(std::pair<AlarmPage*, AlarmBoard*>(this, dashboard));
-		dashboard->load_and_flow(width, height);
+	if (this->dashboard == nullptr) {
+		this->dashboard = new AlarmBoard(this);
+		this->dashboard->load_and_flow(width, height);
 	}
+}
+
+void AlarmPage::update(long long count, long long interval, long long uptime) {
+	this->dashboard->update(count, interval, uptime);
+	Planet::update(count, interval, uptime);
 }
 
 void AlarmPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {

@@ -96,10 +96,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\datalet.cpp">
-      <Filter>graphlet</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.cpp">
+      <Filter>graphlet\dashboard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,10 +203,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\datalet.hpp">
-      <Filter>graphlet</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\accumulatorlet.hpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\solarpanellet.hpp">
+      <Filter>graphlet\dashboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

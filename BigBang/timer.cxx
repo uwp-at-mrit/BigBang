@@ -25,7 +25,7 @@ Timer::~Timer() {
 }
 
 void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
-	// TODO: meanwhile the next round will be elapse after this one finishes. 
+	// TODO: meanwhile the next round will elapse after this one finished. 
 	long long elapsed0, elapsed, next_interval;
 
 	this->calendar->SetToNow();
@@ -37,7 +37,7 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	elapsed = this->calendar->GetDateTime().UniversalTime - elapsed0;
 	next_interval = this->interval - elapsed;
 	
-	this->count += count;
+	this->count += 1;
 	this->uptime += this->interval;
 
 	if (next_interval < 0) {
@@ -46,19 +46,20 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 			float(elapsed) / 10000.0F, float(interval) / 10000.0F);
 	} else {
 		this->timer->Interval = TimeSpan{ next_interval };
+		
 		/* 
 		this->target->get_logger()->log_message(Log::Debug,
 			L"it took %fms to update planets",
 			float(elapsed) / 10000.0F);
-		//*/
+		*/
 	}
 }
 
 void Timer::start() {
 	this->timer->Start();
 
-	this->count = 0;
-	this->uptime = 0;
+	this->count = 1;
+	this->uptime = this->interval;
 }
 
 void Timer::stop() {
