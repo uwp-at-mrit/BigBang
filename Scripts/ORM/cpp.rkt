@@ -196,7 +196,7 @@
    [(table λname type indent)
     (&htab indent) (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a column, bool distinct = false);~n" type table λname table)]
    [(table λname type query_value columns_infos)
-    (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)
+    (printf "~a WarGrey::SCADA::~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)
     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" columns_infos)
     (&htab 1) (printf "const char* colname = ~a[static_cast<unsigned int>(column)].name;~n" columns_infos)
     (&linebreak 1)

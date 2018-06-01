@@ -205,35 +205,35 @@ void WarGrey::SCADA::drop_event(IDBSystem* dbc) {
 }
 
 /**************************************************************************************************/
-double event_average(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
+double WarGrey::SCADA::event_average(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     const char* colname = event_columns[static_cast<unsigned int>(column)].name;
 
     return dbc->query_double(vsql->table_average("event", colname, distinct));
 }
 
-int64 event_count(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
+int64 WarGrey::SCADA::event_count(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     const char* colname = event_columns[static_cast<unsigned int>(column)].name;
 
     return dbc->query_int64(vsql->table_count("event", colname, distinct));
 }
 
-std::optional<double> event_max(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
+std::optional<double> WarGrey::SCADA::event_max(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     const char* colname = event_columns[static_cast<unsigned int>(column)].name;
 
     return dbc->query_maybe_double(vsql->table_max("event", colname, distinct));
 }
 
-std::optional<double> event_min(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
+std::optional<double> WarGrey::SCADA::event_min(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     const char* colname = event_columns[static_cast<unsigned int>(column)].name;
 
     return dbc->query_maybe_double(vsql->table_min("event", colname, distinct));
 }
 
-std::optional<double> event_sum(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
+std::optional<double> WarGrey::SCADA::event_sum(WarGrey::SCADA::IDBSystem* dbc, event column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
     const char* colname = event_columns[static_cast<unsigned int>(column)].name;
 
