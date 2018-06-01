@@ -4,11 +4,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	class AlarmBoard;
-
 	private class AlarmPage : public WarGrey::SCADA::Planet {
 	public:
-		~AlarmPage() noexcept;
+		virtual ~AlarmPage() noexcept;
+
 		AlarmPage(PLCMaster* device, Platform::String^ name);
 
 	public:
@@ -17,6 +16,6 @@ namespace WarGrey::SCADA {
 		void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override;
 
 	private:
-		WarGrey::SCADA::AlarmBoard* dashboard;
+		WarGrey::SCADA::PLCConfirmation* dashboard;
 	};
 }

@@ -26,8 +26,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual std::string create_table(const char* table, const char* primary_keys[], size_t pk_count, bool if_not_exists = true) = 0;
 		virtual std::string insert_into(const char* table, bool replace = false) = 0;
-		virtual std::string select_from(const char* table, const char* order_by, unsigned int limit = 0, unsigned int offset = 0) = 0;
-		virtual std::string select_from(const char* table, const char* order_by, const char* cols[], size_t count, unsigned int limit = 0, unsigned int offset = 0) = 0;
+		virtual std::string select_from(const char* table, const char* order_by, uint64 limit = 0U, uint64 offset = 0U) = 0;
+		virtual std::string select_from(const char* table, const char* order_by, const char* cols[], size_t count, uint64 limit = 0U, uint64 offset = 0U) = 0;
 		virtual std::string seek_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string update_set(const char* table, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string delete_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
@@ -47,7 +47,7 @@ namespace WarGrey::SCADA {
 		}
 
 		template<size_t N>
-		std::string select_from(const char* table, const char* order_by, const char* (&cols)[N], unsigned int limit = 0, unsigned int offset = 0) {
+		std::string select_from(const char* table, const char* order_by, const char* (&cols)[N], uint64 limit = 0U, uint64 offset = 0U) {
 			return this->select_from(table, order_by, cols, N, limit, offset);
 		}
 

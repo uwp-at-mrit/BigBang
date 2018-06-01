@@ -276,7 +276,7 @@
   <data name="&lt;power&gt;" xml:space="preserve">
     <value>kW</value>
   </data>
-  <data name="&lt;speed&gt;" xml:space="preserve">
+  <data name="&lt;rspeed&gt;" xml:space="preserve">
     <value>r/min</value>
   </data>
   <data name="deb_C" xml:space="preserve">
