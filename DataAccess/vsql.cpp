@@ -16,6 +16,19 @@ IVirtualSQL::~IVirtualSQL() {
 	}
 }
 
+const char* IVirtualSQL::identity_column_name() {
+	const char* idcolname = this->columns[0].name;
+
+	for (size_t idx = 0; idx < count; idx++) {
+		if (db_column_primary(this->columns[idx])) {
+			idcolname = this->columns[idx].name;
+			break;
+		}
+	}
+	
+	return idcolname;
+}
+
 /*************************************************************************************************/
 bool WarGrey::SCADA::db_column_primary(TableColumnInfo& info) {
 	return ((info.flags & DB_PRIMARY_KEY) == DB_PRIMARY_KEY);

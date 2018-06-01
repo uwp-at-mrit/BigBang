@@ -184,7 +184,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="packages.config" />
-    <None Include="schema\event.sql.rktl" />
+    <None Include="schema\event.dao.rktl" />
     <None Include="Yacht63FT_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

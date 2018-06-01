@@ -398,9 +398,7 @@
   <ItemGroup>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
     <None Include="packages.config" />
-    <None Include="schema\event.sql.rktl">
-      <Filter>schema</Filter>
-    </None>
+    <None Include="schema\event.dao.rktl" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">

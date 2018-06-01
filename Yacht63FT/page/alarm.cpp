@@ -62,14 +62,16 @@ public:
 		events[0].uuid = 42;
 		update_event(this->sqlite3, events[0]);
 
+		this->sqlite3->get_logger()->log_message(Log::Warning,
+			L"alarm count: %lld, average: %lf, earliest: %lld, lastest: %lld",
+			event_count(sqlite3), event_average(sqlite3),
+			(int64)(event_min(sqlite3, event::mtime).value_or(0.0)),
+			(int64)(event_max(sqlite3, event::mtime).value_or(0.0)));
+
 		delete_event(this->sqlite3, id);
 		if (!seek_event(this->sqlite3, id).has_value()) {
 			this->sqlite3->get_logger()->log_message(Log::Info, "`seek_table` works for absent record");
 		}
-
-		this->sqlite3->get_logger()->log_message(Log::Warning,
-			L"Names: %S",
-			this->sqlite3->query_maybe_text("SELECT group_concat(name) FROM event;").value_or("").c_str());
 
 		this->sqlite3->list_tables();
 		drop_event(this->sqlite3);

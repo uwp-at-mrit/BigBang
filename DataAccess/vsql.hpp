@@ -24,39 +24,50 @@ namespace WarGrey::SCADA {
 		IVirtualSQL(WarGrey::SCADA::TableColumnInfo* columns, size_t count);
 
 	public:
-		virtual std::string create_table(const char* tablename, const char* primary_keys[], size_t pk_count, bool if_not_exists = true) = 0;
-		virtual std::string insert_into(const char* tablename, bool replace = false) = 0;
-		virtual std::string select_from(const char* tablename, const char* order_by, unsigned int limit = 0, unsigned int offset = 0) = 0;
-		virtual std::string select_from(const char* tablename, const char* order_by, const char* cols[], size_t count, unsigned int limit = 0, unsigned int offset = 0) = 0;
-		virtual std::string seek_from(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
-		virtual std::string update_set(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
-		virtual std::string delete_from(const char* tablename, const char* primary_keys[], size_t pk_count) = 0;
-		virtual std::string drop_table(const char* tablename) = 0;
+		virtual std::string create_table(const char* table, const char* primary_keys[], size_t pk_count, bool if_not_exists = true) = 0;
+		virtual std::string insert_into(const char* table, bool replace = false) = 0;
+		virtual std::string select_from(const char* table, const char* order_by, unsigned int limit = 0, unsigned int offset = 0) = 0;
+		virtual std::string select_from(const char* table, const char* order_by, const char* cols[], size_t count, unsigned int limit = 0, unsigned int offset = 0) = 0;
+		virtual std::string seek_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
+		virtual std::string update_set(const char* table, const char* primary_keys[], size_t pk_count) = 0;
+		virtual std::string delete_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
+		virtual std::string drop_table(const char* table) = 0;
 
+	public:
+		virtual std::string table_average(const char* table, const char* column, bool distinct = false) = 0;
+		virtual std::string table_count(const char* table, const char* column, bool distinct = false) = 0;
+		virtual std::string table_max(const char* table, const char* column, bool distinct = false) = 0;
+		virtual std::string table_min(const char* table, const char* column, bool distinct = false) = 0;
+		virtual std::string table_sum(const char* table, const char* column, bool distinct = false) = 0;
+
+	public:
 		template<size_t N>
-		std::string create_table(const char* tablename, const char* (&primary_keys)[N], bool if_not_exists) {
-			return this->create_table(tablename, primary_keys, N, if_not_exists);
+		std::string create_table(const char* table, const char* (&primary_keys)[N], bool if_not_exists) {
+			return this->create_table(table, primary_keys, N, if_not_exists);
 		}
 
 		template<size_t N>
-		std::string select_from(const char* tablename, const char* order_by, const char* (&cols)[N], unsigned int limit = 0, unsigned int offset = 0) {
-			return this->select_from(tablename, order_by, cols, N, limit, offset);
+		std::string select_from(const char* table, const char* order_by, const char* (&cols)[N], unsigned int limit = 0, unsigned int offset = 0) {
+			return this->select_from(table, order_by, cols, N, limit, offset);
 		}
 
 		template<size_t N>
-		std::string seek_from(const char* tablename, const char* (&primary_keys)[N]) {
-			return this->seek_from(tablename, primary_keys, N);
+		std::string seek_from(const char* table, const char* (&primary_keys)[N]) {
+			return this->seek_from(table, primary_keys, N);
 		}
 
 		template<size_t N>
-		std::string update_set(const char* tablename, const char* (&primary_keys)[N]) {
-			return this->update_set(tablename, primary_keys, N);
+		std::string update_set(const char* table, const char* (&primary_keys)[N]) {
+			return this->update_set(table, primary_keys, N);
 		}
 
 		template<size_t N>
-		std::string delete_from(const char* tablename, const char* (&primary_keys)[N]) {
-			return this->delete_from(tablename, primary_keys, N);
+		std::string delete_from(const char* table, const char* (&primary_keys)[N]) {
+			return this->delete_from(table, primary_keys, N);
 		}
+
+	protected:
+		const char* identity_column_name();
 
 	protected:
 		WarGrey::SCADA::TableColumnInfo* columns;

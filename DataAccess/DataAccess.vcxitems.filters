@@ -48,7 +48,7 @@
     <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
       <Filter>usr\share\lib</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.sql.rktl">
+    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl">
       <Filter>sqlite3</Filter>
     </None>
   </ItemGroup>

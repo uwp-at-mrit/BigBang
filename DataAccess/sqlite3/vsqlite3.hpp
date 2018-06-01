@@ -17,6 +17,16 @@ namespace WarGrey::SCADA {
 		std::string delete_from(const char* tablename, const char* primary_keys[], size_t pk_count) override;
 		std::string drop_table(const char* tablename) override;
 
+	public:
+		std::string table_average(const char* table, const char* column, bool distinct = false) override;
+		std::string table_count(const char* table, const char* column, bool distinct = false) override;
+		std::string table_max(const char* table, const char* column, bool distinct = false) override;
+		std::string table_min(const char* table, const char* column, bool distinct = false) override;
+		std::string table_sum(const char* table, const char* column, bool distinct = false) override;
+
+	private:
+		std::string table_aggregate(const char* table, const char* function, const char* column, bool distinct);
+
 	private:
 		int version;
 	};

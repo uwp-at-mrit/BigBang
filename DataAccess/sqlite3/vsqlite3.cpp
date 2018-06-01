@@ -32,6 +32,7 @@ static std::string columns_join(const char* prefix, const char* separator, const
 	return sql;
 }
 
+/*************************************************************************************************/
 VirtualSQLite3::VirtualSQLite3(TableColumnInfo* columns, size_t count, int version) :
 	IVirtualSQL(columns, count), version(version) {}
 
@@ -155,4 +156,36 @@ std::string VirtualSQLite3::delete_from(const char* tablename, const char* rowid
 
 std::string VirtualSQLite3::drop_table(const char* tablename) {
 	return make_nstring("DROP TABLE %s;", tablename);
+}
+
+/*************************************************************************************************/
+std::string VirtualSQLite3::table_aggregate(const char* table, const char* function, const char* column, bool distinct) {
+	const char* colname = (column == nullptr) ? this->identity_column_name() : column;
+	const char* sql = (distinct ? "SELECT %s(DISTINCT %s) FROM %s;" : "SELECT %s(%s) FROM %s;");
+	
+	return make_nstring(sql, function, colname, table);
+}
+
+std::string VirtualSQLite3::table_average(const char* table, const char* column, bool distinct) {
+	return this->table_aggregate(table, "avg", column, distinct);
+}
+
+std::string VirtualSQLite3::table_count(const char* table, const char* column, bool distinct) {
+	if (column == nullptr) {
+		return make_nstring("SELECT count(*) FROM %s;", table);
+	} else {
+		return this->table_aggregate(table, "count", column, distinct);
+	}
+}
+
+std::string VirtualSQLite3::table_max(const char* table, const char* column, bool distinct) {
+	return this->table_aggregate(table, "max", column, distinct);
+}
+
+std::string VirtualSQLite3::table_min(const char* table, const char* column, bool distinct) {
+	return this->table_aggregate(table, "min", column, distinct);
+}
+
+std::string VirtualSQLite3::table_sum(const char* table, const char* column, bool distinct) {
+	return this->table_aggregate(table, "sum", column, distinct);
 }
