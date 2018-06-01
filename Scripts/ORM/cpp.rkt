@@ -194,7 +194,7 @@
 (define &table-aggregate
  (case-lambda
    [(table λname type indent)
-    (&htab indent) (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a column = ~a::_, bool distinct = false);~n"
+    (&htab indent) (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a column = WarGrey::SCADA::~a::_, bool distinct = false);~n"
                            type table λname table table)]
    [(table λname type query_value columns_infos)
     (printf "~a WarGrey::SCADA::~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)

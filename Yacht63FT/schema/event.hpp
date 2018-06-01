@@ -38,11 +38,11 @@ namespace WarGrey::SCADA {
     void delete_event(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::AlarmEvent_pk* wheres, size_t count);
     void drop_event(WarGrey::SCADA::IDBSystem* dbc);
 
-    double event_average(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = event::_, bool distinct = false);
-    int64 event_count(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = event::_, bool distinct = false);
-    std::optional<double> event_max(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = event::_, bool distinct = false);
-    std::optional<double> event_min(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = event::_, bool distinct = false);
-    std::optional<double> event_sum(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = event::_, bool distinct = false);
+    double event_average(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = WarGrey::SCADA::event::_, bool distinct = false);
+    int64 event_count(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = WarGrey::SCADA::event::_, bool distinct = false);
+    std::optional<double> event_max(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = WarGrey::SCADA::event::_, bool distinct = false);
+    std::optional<double> event_min(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = WarGrey::SCADA::event::_, bool distinct = false);
+    std::optional<double> event_sum(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::event column = WarGrey::SCADA::event::_, bool distinct = false);
 
     template<size_t N>
     void insert_event(WarGrey::SCADA::IDBSystem* dbc, AlarmEvent (&selves)[N], bool replace = false) {
