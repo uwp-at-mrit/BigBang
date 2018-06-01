@@ -209,35 +209,35 @@ void WarGrey::SCADA::drop_sqlite_master(IDBSystem* dbc) {
 /**************************************************************************************************/
 double WarGrey::SCADA::sqlite_master_average(WarGrey::SCADA::IDBSystem* dbc, sqlite_master column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = sqlite_master_columns[static_cast<unsigned int>(column)].name;
+    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
 
     return dbc->query_double(vsql->table_average("sqlite_master", colname, distinct));
 }
 
 int64 WarGrey::SCADA::sqlite_master_count(WarGrey::SCADA::IDBSystem* dbc, sqlite_master column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = sqlite_master_columns[static_cast<unsigned int>(column)].name;
+    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
 
     return dbc->query_int64(vsql->table_count("sqlite_master", colname, distinct));
 }
 
 std::optional<double> WarGrey::SCADA::sqlite_master_max(WarGrey::SCADA::IDBSystem* dbc, sqlite_master column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = sqlite_master_columns[static_cast<unsigned int>(column)].name;
+    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
 
     return dbc->query_maybe_double(vsql->table_max("sqlite_master", colname, distinct));
 }
 
 std::optional<double> WarGrey::SCADA::sqlite_master_min(WarGrey::SCADA::IDBSystem* dbc, sqlite_master column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = sqlite_master_columns[static_cast<unsigned int>(column)].name;
+    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
 
     return dbc->query_maybe_double(vsql->table_min("sqlite_master", colname, distinct));
 }
 
 std::optional<double> WarGrey::SCADA::sqlite_master_sum(WarGrey::SCADA::IDBSystem* dbc, sqlite_master column, bool distinct) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = sqlite_master_columns[static_cast<unsigned int>(column)].name;
+    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
 
     return dbc->query_maybe_double(vsql->table_sum("sqlite_master", colname, distinct));
 }

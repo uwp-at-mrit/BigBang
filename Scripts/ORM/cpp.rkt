@@ -198,7 +198,7 @@
    [(table λname type query_value columns_infos)
     (printf "~a WarGrey::SCADA::~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)
     (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" columns_infos)
-    (&htab 1) (printf "const char* colname = ~a[static_cast<unsigned int>(column)].name;~n" columns_infos)
+    (&htab 1) (printf "const char* colname = ((column == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(column)].name);~n" table columns_infos)
     (&linebreak 1)
     (&htab 1) (printf "return dbc->~a(vsql->table_~a(~s, colname, distinct));~n" query_value λname (symbol->string table))
     (&brace 0)
