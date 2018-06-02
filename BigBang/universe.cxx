@@ -192,16 +192,24 @@ float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
 }
 
+void UniverseDisplay::refresh(IPlanet* which) {
+	if (this->current_planet == which) {
+		this->display->Invalidate();
+	}
+}
+
 void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long uptime) {
 	if (this->head_planet != nullptr) {
-		IPlanet* child = this->head_planet;
+		IPlanet* child = PLANET_INFO(this->current_planet)->next;
+		
+		this->current_planet->begin_update_sequence();
+		this->current_planet->update(count, elapsed, uptime);
+		this->current_planet->end_update_sequence();
 
-		do {
+		while (child != this->current_planet) {
 			child->update(count, elapsed, uptime);
 			child = PLANET_INFO(child)->next;
-		} while (child != this->head_planet);
-
-		this->display->Invalidate();
+		}
 	}
 }
 
@@ -275,6 +283,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 				this->from_planet->name()->Data(),
 				this->current_planet->name()->Data());
 			this->from_planet = nullptr;
+			this->refresh(this->current_planet);
 		}
 	}
 }
@@ -366,8 +375,10 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 			PlanetInfo* info = PLANET_INFO(child);
 
 			child->construct(args->Reason, region.Width, region.Height);
+			child->begin_update_sequence();
 			child->load(args->Reason, region.Width, region.Height);
 			child->reflow(region.Width, region.Height);
+			child->end_update_sequence();
 			this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 
 			child = info->next;

@@ -1,6 +1,7 @@
 #include "win32.hpp"
 
 #include "path.hpp"
+#include "string.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -45,18 +46,12 @@ FARPROC win32_fetch_foreign_object(HMODULE m, LPCSTR name, Syslog* logger) {
 	if (fobj == nullptr) {
 		if (logger != nullptr) {
 			size_t size = strlen(name);
-			wchar_t* wname = new wchar_t[size];
-
-			for (size_t i = 0; i <= size; i++) {
-				wname[i] = name[i];
-			}
+			Platform::String^ wname = make_wstring(name);
 
 			logger->log_message(Log::Error,
-				L"unable to fetch object %s: %s",
-				wname,
+				L"unable to fetch object '%s': %s",
+				wname->Data(),
 				win32_last_strerror()->Data());
-
-			delete [] wname;
 		}
 	}
 

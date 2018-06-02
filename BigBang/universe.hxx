@@ -45,6 +45,9 @@ namespace WarGrey::SCADA {
 		void enter_critical_section();
 		void leave_critical_section();
 
+	internal:
+		virtual void refresh(WarGrey::SCADA::IPlanet* universe) = 0;
+
 	private:
 		std::mutex section;
     };
@@ -56,6 +59,7 @@ namespace WarGrey::SCADA {
 	internal:
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr, Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 		WarGrey::SCADA::Syslog* get_logger() override;
+		void refresh(WarGrey::SCADA::IPlanet* universe) override;
 
 	public:
 		read_only_property(Windows::UI::Xaml::Controls::Primitives::Selector^, navigator);
@@ -78,7 +82,7 @@ namespace WarGrey::SCADA {
 		
 	protected private:
 		virtual void construct() {};
-		void add_planet(IPlanet* planet);
+		void add_planet(WarGrey::SCADA::IPlanet* planet);
 		void collapse();
 		
 	private:

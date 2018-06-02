@@ -57,6 +57,7 @@ void Keyboard::update(long long count, long long interval, long long uptime) {
 
 	if (this->tapped) {
 		if (uptime - this->taptime > numpad_tap_duration) {
+			this->master->notify_graphlet_updated(this);
 			this->tapped = false;
 		}
 	}
@@ -90,6 +91,7 @@ void Keyboard::on_tap(float local_x, float local_y, bool shifted, bool controled
 	this->current_key = this->find_tapped_key(local_x, local_y);
 	this->taptime = this->uptime;
 	this->tapped = true;
+	this->master->notify_graphlet_updated(this);
 }
 
 void Keyboard::on_goodbye(float local_x, float local_y, bool shifted, bool controled) {

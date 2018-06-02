@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 	private class IMsAppxlet abstract : public virtual WarGrey::SCADA::IMsAppx<FileType, Hint>, public virtual WarGrey::SCADA::IGraphlet {
 	protected:
 		void on_appx_notify(Windows::Foundation::Uri^ ms_appx, FileType^ instance, Hint hint) override {
-			this->info->master->notify_graphlet_ready(this);
+			this->notify_ready();
 		}
 
 	protected:

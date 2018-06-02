@@ -146,7 +146,9 @@ static void graphlet_alignment_offset(IGraphlet* g, float width, float height, G
 	(*yoff) = dy;
 }
 
-static void unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
+static bool unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
+	bool moved = false;
+	
 	if (!absolute) {
 		x += info->x;
 		y += info->y;
@@ -157,19 +159,24 @@ static void unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, fl
 		info->y = y;
 
 		master->size_cache_invalid();
+		moved = true;
 	}
+
+	return moved;
 }
 
-static void unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info, float x, float y, GraphletAlignment align, bool absolute) {
+static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info, float x, float y, GraphletAlignment align, bool absolute) {
 	float sx, sy, sw, sh, dx, dy;
 
 	unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
 	graphlet_alignment_offset(g, sw, sh, align, &dx, &dy);
-	unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
+	
+	return unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
 }
 
 /*************************************************************************************************/
-Planet::Planet(Platform::String^ name, unsigned int initial_mode) : IPlanet(name), mode(initial_mode) {
+Planet::Planet(Platform::String^ name, unsigned int initial_mode)
+	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
     this->set_decorator(nullptr);
 	this->numpad = new Numpad(this);
 }
@@ -186,6 +193,7 @@ void Planet::change_mode(unsigned int mode) {
 		this->numpad->show(false);
 		this->mode = mode;
 		this->size_cache_invalid();
+		this->notify_graphlet_updated(nullptr);
 	}
 }
 
@@ -193,6 +201,45 @@ bool Planet::graphlet_unmasked(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	return ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode));
+}
+
+void Planet::notify_graphlet_ready(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+
+	if (info != nullptr) {
+		unsafe_move_graphlet_via_info(this, g, info, info->inserted_to_x, info->inserted_to_y, info->inserted_with_align, true);
+		this->notify_graphlet_updated(g);
+	}
+}
+
+void Planet::notify_graphlet_updated(ISprite* g) {
+	if (this->in_update_sequence()) {
+		this->needs_update = true;
+	} else if (this->info != nullptr) {
+		this->info->master->refresh(this);
+		this->needs_update = false;
+	}
+}
+
+void Planet::begin_update_sequence() {
+	this->update_sequence_depth += 1;
+}
+
+bool Planet::in_update_sequence() {
+	return (this->update_sequence_depth > 0);
+}
+
+void Planet::end_update_sequence() {
+	this->update_sequence_depth -= 1;
+
+	if (this->update_sequence_depth < 1) {
+		this->update_sequence_depth = 0;
+
+		if ((this->needs_update) && (this->info != nullptr)) {
+			this->info->master->refresh(this);
+			this->needs_update = false;
+		}
+	}
 }
 
 void Planet::insert(IGraphlet* g, float x, float y, GraphletAlignment align) {
@@ -214,7 +261,7 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAlignment align) {
 
 		g->construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
-		this->size_cache_invalid();
+		this->notify_graphlet_updated(g);
 		if (!g->ready()) {
 			info->inserted_to_x = x;
 			info->inserted_to_y = y;
@@ -242,20 +289,13 @@ void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAlignment talign, G
 	this->insert(g, x, y, align);
 }
 
-void Planet::notify_graphlet_ready(IGraphlet* g) {
-	GraphletInfo* info = planet_graphlet_info(this, g);
-
-	if (info != nullptr) {
-		unsafe_move_graphlet_via_info(this, g, info, info->inserted_to_x, info->inserted_to_y, info->inserted_with_align, true);
-		this->size_cache_invalid();
-	}
-}
-
 void Planet::move_to(IGraphlet* g, float x, float y, GraphletAlignment align) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		unsafe_move_graphlet_via_info(this, g, info, x, y, align, true);
+		if (unsafe_move_graphlet_via_info(this, g, info, x, y, align, true)) {
+			this->notify_graphlet_updated(g);
+		}
 	}
 }
 
@@ -269,7 +309,10 @@ void Planet::move_to(IGraphlet* g, IGraphlet* target, GraphletAlignment talign, 
 
 		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
 		graphlet_alignment_offset(target, sw, sh, talign, &xoff, &yoff);
-		unsafe_move_graphlet_via_info(this, g, info, sx + xoff + dx, sy + yoff + dy, align, true);
+		
+		if (unsafe_move_graphlet_via_info(this, g, info, sx + xoff + dx, sy + yoff + dy, align, true)) {
+			this->notify_graphlet_updated(g);
+		}
 	}
 }
 
@@ -278,7 +321,9 @@ void Planet::move(IGraphlet* g, float x, float y) {
 
     if (info != nullptr) {
 		if (unsafe_graphlet_unmasked(info, this->mode)) {
-			unsafe_move_graphlet_via_info(this, info, x, y, false);
+			if (unsafe_move_graphlet_via_info(this, info, x, y, false)) {
+				this->notify_graphlet_updated(g);
+			}
 		}
     } else if (this->head_graphlet != nullptr) {
         IGraphlet* child = this->head_graphlet;
@@ -292,6 +337,8 @@ void Planet::move(IGraphlet* g, float x, float y) {
 
             child = info->next;
         } while (child != this->head_graphlet);
+
+		this->notify_graphlet_updated(nullptr);
     }
 }
 
@@ -797,6 +844,8 @@ void Planet::collapse() {
 }
 
 /*************************************************************************************************/
+IPlanet::IPlanet(Platform::String^ name) : caption(name) {}
+
 IPlanet::~IPlanet() {
 	if (this->info != nullptr) {
 		delete this->info;

@@ -67,4 +67,5 @@ bool Togglet::checked() {
 
 void Togglet::toggle() {
 	this->state = !this->state;
+	this->notify_updated();
 }

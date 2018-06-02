@@ -26,6 +26,7 @@ public:
 	void on_timestamp_changed(Platform::String^ timestamp) override {
 		this->enter_critical_section();
 		this->clock = make_text_layout(timestamp, status_font);
+		this->updated = true;
 		this->leave_critical_section();
     }
 
@@ -35,6 +36,7 @@ public:
 
 		this->enter_critical_section();
 		this->battery = make_text_layout(label + percentage, status_font);
+		this->updated = true;
 		this->leave_critical_section();
 	}
 
@@ -45,6 +47,7 @@ public:
 
 		this->enter_critical_section();
         this->wifi = make_text_layout(label + signal, status_font);
+		this->updated = true;
 		this->leave_critical_section();
 	}
 
@@ -54,6 +57,7 @@ public:
 
 		this->enter_critical_section();
         this->storage = make_text_layout(label + size, status_font);
+		this->updated = true;
 		this->leave_critical_section();
 	}
 
@@ -63,6 +67,7 @@ public:
 
 		this->enter_critical_section();
 		this->ipv4 = make_text_layout(label + ip, status_font);
+		this->updated = true;
 		this->leave_critical_section();
     }
 
@@ -83,6 +88,18 @@ public:
 		this->section.unlock_shared();
 	}
 
+public:
+	bool needs_update() {
+		bool has_new_info = false;
+
+		this->enter_shared_section();
+		has_new_info = this->updated;
+		this->updated = false;
+		this->leave_shared_section();
+
+		return has_new_info;
+	}
+
 private:
     CanvasTextLayout^ clock;
 	CanvasTextLayout^ battery;
@@ -92,6 +109,7 @@ private:
     
 private:
 	std::shared_mutex section;
+	bool updated;
 };
 
 /*************************************************************************************************/
@@ -139,6 +157,10 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 void Statusbarlet::update(long long count, long long interval, long long uptime) {
 	if ((this->device != nullptr) && (this->device->connected())) {
 		this->device->send_scheduled_request(count, interval, uptime);
+	}
+
+	if (statusbar->needs_update()) {
+		this->notify_updated();
 	}
 }
 
@@ -274,6 +296,7 @@ void Statuslinelet::append_message(Platform::String^ message, Log level) {
 
 	this->colors.push_back((lcolor == nullptr) ? status_nolog_color : lcolor);
 	this->messages.push_back(make_text_layout(message, status_font));
+	this->notify_updated();
 	
 	this->section.unlock();
 }

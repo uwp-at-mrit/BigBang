@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 	private class IPlanet abstract {
 	public:
 		virtual ~IPlanet() noexcept;
-		IPlanet(Platform::String^ name) : caption(name) {}
+		IPlanet(Platform::String^ name);
 
 	public:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
@@ -43,6 +43,13 @@ namespace WarGrey::SCADA {
 		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAlignment talign, GraphletAlignment align, float dx = 0.0F, float dy = 0.0F) = 0;
 
 	public:
+		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
+		virtual void notify_graphlet_updated(ISprite* g) = 0;
+		virtual void begin_update_sequence() = 0;
+		virtual bool in_update_sequence() = 0;
+		virtual void end_update_sequence() = 0;
+
+	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
@@ -59,10 +66,7 @@ namespace WarGrey::SCADA {
 		virtual bool can_select_multiple() { return false; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
-
-	public:
-		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
-
+		
 	public:
 		virtual WarGrey::SCADA::IGraphlet* get_focus_graphlet() = 0;
 		virtual void set_caret_owner(IGraphlet* g) = 0;
@@ -93,7 +97,17 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 		void fill_actual_extent(float* width, float* height);
-		
+
+	public:
+		void enter_critical_section();
+		void enter_shared_section();
+		void leave_critical_section();
+		void leave_shared_section();
+
+	public:
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
+		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
+
 	public:
 		template<class G, unsigned int N>
 		void insert_all(G* (&gs)[N], bool reversed = false) {
@@ -114,16 +128,6 @@ namespace WarGrey::SCADA {
 
 			return g;
 		}
-
-	public:
-		void enter_critical_section();
-		void enter_shared_section();
-		void leave_critical_section();
-		void leave_shared_section();
-
-	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
-		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
 	public:
 		IPlanetInfo* info;
@@ -167,6 +171,13 @@ namespace WarGrey::SCADA {
 		void size_cache_invalid();
 
 	public:
+		void notify_graphlet_ready(IGraphlet* g) override;
+		void notify_graphlet_updated(ISprite* g) override;
+		void begin_update_sequence() override;
+		bool in_update_sequence() override;
+		void end_update_sequence() override;
+
+	public:
 		bool on_char(Windows::System::VirtualKey key) override;
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
 
@@ -175,9 +186,6 @@ namespace WarGrey::SCADA {
         void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;
-
-	public:
-		void notify_graphlet_ready(IGraphlet* g) override;
 
 	public:
 		WarGrey::SCADA::IGraphlet* get_focus_graphlet() override;
@@ -219,5 +227,9 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Numpad* numpad;
 		float keyboard_x;
 		float keyboard_y;
+
+	private:
+		int update_sequence_depth;
+		bool needs_update;
     };
 }

@@ -14,10 +14,6 @@ namespace WarGrey::SCADA {
 		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Silver);
 
 	public:
-		void set_layout_font_size(int char_idx, int char_count, float size);
-		void set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style);
-
-	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
@@ -25,6 +21,10 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual void on_font_change() {}
 
+	protected:
+		void set_layout_font_size(int char_idx, int char_count, float size);
+		void set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style);
+	
 	protected:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ text_font;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ text_color;

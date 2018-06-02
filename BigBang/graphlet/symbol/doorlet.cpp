@@ -61,6 +61,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 			: this->mask_percentage + dynamic_mask_interval;
 
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->notify_updated();
 	} break;
 	case DoorState::Closing: {
 		this->mask_percentage
@@ -69,6 +70,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 			: this->mask_percentage - dynamic_mask_interval;
 
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, -this->mask_percentage);
+		this->notify_updated();
 	} break;
 	}
 }

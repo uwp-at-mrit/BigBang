@@ -54,3 +54,15 @@ Syslog* IGraphlet::get_logger() {
 
 	return logger;
 }
+
+void IGraphlet::notify_ready() {
+	if (this->info != nullptr) {
+		this->info->master->notify_graphlet_ready(this);
+	}
+}
+
+void IGraphlet::notify_updated() {
+	if (this->info != nullptr) {
+		this->info->master->notify_graphlet_updated(this);
+	}
+}

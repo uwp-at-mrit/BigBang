@@ -24,7 +24,6 @@ private:
 	float capacity;
 };
 
-
 static BatteryStatus* battery_status = nullptr;
 
 /*************************************************************************************************/

@@ -127,6 +127,7 @@ void Motorlet::fill_extent(float x, float y, float* w, float* h) {
 
 void Motorlet::update(long long count, long long interval, long long uptime) {
     brush_translate(this->serew_brush, float(count), 0.0F);
+	this->notify_updated();
 }
 
 void Motorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

@@ -62,9 +62,11 @@ public:
 	}
 
 	void update(long long count, long long interval, long long uptime) {
-		Labellet* record = new Labellet(L"count: %lld, interval: %lld, uptime: %lld", count, interval, uptime);
-		float height, Height;
+		float x, y, width, height, Height;
 		
+		this->master->fill_graphlets_bounds(&x, &y, &width, &height);
+
+		Labellet* record = new Labellet(L"[%f, %f]@(%f, %f)", width, height, x, y);
 		record->set_font(this->font);
 		this->master->fill_actual_extent(nullptr, &Height);
 		record->fill_extent(0.0F, 0.0F, nullptr, &height);

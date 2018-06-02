@@ -25,6 +25,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
+		void notify_ready();
+		void notify_updated();
+
+	public:
 		virtual void own_caret(bool is_own) {}
 
 	public:
@@ -48,6 +52,7 @@ namespace WarGrey::SCADA {
 			if ((this->value != value) || force_update) {
 				this->value = value;
 				this->on_value_change(value);
+				this->notify_updated();
 			}
 		}
 		
@@ -82,6 +87,7 @@ namespace WarGrey::SCADA {
 			if (this->current_status != new_status) {
 				this->current_status = new_status;
 				this->on_status_change(static_cast<Status>(new_status));
+				this->notify_updated();
 			}
 		}
 
@@ -114,7 +120,7 @@ namespace WarGrey::SCADA {
 			, size(radius * 2.0F), degrees(degrees) {}
 
 	public:
-		void ISymbollet::fill_extent(float x, float y, float* w, float* h) override {
+		void ISymbollet::fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
 			SET_BOXES(w, h, this->size);
 		}
 

@@ -60,6 +60,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			: this->mask_percentage + dynamic_mask_interval;
 
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->notify_updated();
 	} break;
 	case PumpStatus::Stopping: {
 		this->mask_percentage
@@ -68,6 +69,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 			: this->mask_percentage - dynamic_mask_interval;
 
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->notify_updated();
 	} break;
 	}
 }

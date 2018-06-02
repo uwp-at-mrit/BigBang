@@ -23,6 +23,7 @@ static inline float aligned_y(TextExtent& te, float by) {
 /*************************************************************************************************/
 void Textlet::set_color(ICanvasBrush^ color) {
 	this->text_color = color;
+	this->notify_updated();
 }
 
 void Textlet::set_color(unsigned int color_hex, double alpha) {
@@ -33,6 +34,7 @@ void Textlet::set_font(CanvasTextFormat^ font) {
 	this->text_font = font;
 	this->set_text(this->raw);
 	this->on_font_change();
+	this->notify_updated();
 }
 
 void Textlet::set_text(Platform::String^ content) {
@@ -45,6 +47,8 @@ void Textlet::set_text(Platform::String^ content) {
 	} else {
 		this->text_layout = make_text_layout(this->raw, this->text_font);
 	}
+
+	this->notify_updated();
 }
 
 void Textlet::set_text(const wchar_t *fmt, ...) {
