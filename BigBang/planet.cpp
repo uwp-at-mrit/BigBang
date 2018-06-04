@@ -88,7 +88,7 @@ static inline GraphletInfo* planet_graphlet_info(IPlanet* master, IGraphlet* g) 
 }
 
 static inline bool unsafe_graphlet_unmasked(GraphletInfo* info, unsigned int mode) {
-	return ((info->mode == 0) || (info->mode == mode));
+	return ((info->mode & mode) == info->mode);
 }
 
 static void unsafe_fill_graphlet_bound(IGraphlet* g, GraphletInfo* info, float* x, float* y, float* width, float* height) {
