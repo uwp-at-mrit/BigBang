@@ -6,6 +6,8 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
+#include "hv/hcnet.hpp"
+
 #include "tongue.hpp"
 #include "text.hpp"
 
@@ -50,6 +52,12 @@ public:
 			this->captions[room] = new Labellet(speak(room.ToString()), this->font, Colours::GhostWhite);
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
 		}
+
+		auto hc = new HikVisionNet();
+
+		hc->initialize();
+
+		delete hc;
 	}
 
 // never deletes these graphlets mannually

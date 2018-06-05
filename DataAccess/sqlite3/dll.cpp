@@ -202,11 +202,11 @@ SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_t xCallbac
 }
 
 SQLite3::~SQLite3() {
-	unload_sqlite3(this->get_logger());
-
 	if (sqlite3_close(this->db) != SQLITE_OK) {
 		this->report_warning("");
 	}
+
+	unload_sqlite3(this->get_logger());
 }
 
 IVirtualSQL* SQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {

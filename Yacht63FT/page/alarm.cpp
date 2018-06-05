@@ -107,7 +107,7 @@ void AlarmPage::update(long long count, long long interval, long long uptime) {
 	auto alarmboard = static_cast<AlarmBoard*>(this->dashboard);
 
 	if (alarmboard != nullptr) {
-		alarmboard->update(count, interval, uptime);
+		//alarmboard->update(count, interval, uptime);
 	}
 }
 

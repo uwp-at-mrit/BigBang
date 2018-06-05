@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{920d7c8a-973d-4a47-976e-9e75ba0339fd}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)hv\hcnet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)hv\hikvision.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)hv\playctrl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)usr\share\include\HCNetSDK.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)hv\hcnet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)hv\hikvision.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)hv\playctrl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\GdiPlus.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\HCAlarm.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\HCCore.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\HCGeneralCfgMgr.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\HCNetSDK.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\HCPreview.lib" />
+    <Library Include="$(MSBuildThisFileDirectory)usr\share\lib\PlayCtrl.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)AudioRender.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)D3DCompiler_43.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)d3dx9_43.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)EagleEyeRender.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)GdiPlus.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)HCCore.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)HCNetSDK.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)HWDecode.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)libmmd.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MP_Render.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)PlayCtrl.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)SuperRender.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)YUVProcess.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+</Project>

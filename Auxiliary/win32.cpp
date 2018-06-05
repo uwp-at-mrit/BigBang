@@ -18,7 +18,7 @@ HMODULE win32_load_foreign_library(Platform::String^ dllname, Syslog* logger) {
 		if (logger != nullptr) {
 			logger->log_message(Log::Error,
 				L"unable to load library %s: %s",
-				dllname->Data(),
+				dll->Data(),
 				win32_last_strerror()->Data());
 		}
 	}
