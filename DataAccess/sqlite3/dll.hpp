@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 #define SQLITE_TRACE_ROW     0x04
 #define SQLITE_TRACE_CLOSE   0x08
 
-	typedef int (*sqlite3_trace_t)(unsigned int, void*, void*, void*);
+	typedef int (*sqlite3_trace_f)(unsigned int, void*, void*, void*);
 
 	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Bytes = 4, Null = 5 };
 
@@ -77,7 +77,7 @@ namespace WarGrey::SCADA {
 		virtual ~SQLite3() noexcept;
 
 		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr,
-			sqlite3_trace_t xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
+			sqlite3_trace_f xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
 
 	public:
 		std::list<std::string> list_tables() override;

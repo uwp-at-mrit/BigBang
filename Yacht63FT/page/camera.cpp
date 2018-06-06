@@ -54,8 +54,12 @@ public:
 		}
 
 		auto hc = new HikVisionNet();
+		unsigned short pmin, pmax;
 
-		hc->initialize();
+		hc->tcp_port_cfg(&pmin, &pmax);
+		this->master->get_logger()->log_message(Log::Info, L"tcp port <- [%u, %u]", pmin, pmax);
+		hc->tcp_port_cfg(&pmin, &pmax);
+		this->master->get_logger()->log_message(Log::Info, L"tcp port <- [%u, %u]", pmin, pmax);
 
 		delete hc;
 	}

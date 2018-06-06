@@ -14,7 +14,7 @@ typedef int (*_fun__wchar__sqlite3__int)(const wchar_t*, sqlite3_t**);
 typedef const char* (*_fun__sqlite3__char)(sqlite3_t*);
 typedef int (*_fun__sqlite3__int)(sqlite3_t*);
 typedef int64 (*_fun__sqlite3__int64)(sqlite3_t*);
-typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_t, void*);
+typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_f, void*);
 
 typedef int (*_fun__sqlite3__char__stmt__void__int)(sqlite3_t*, const char*, size_t, sqlite3_stmt_t**, const void**);
 typedef int (*_fun__stmt__int)(sqlite3_stmt_t*);
@@ -184,7 +184,7 @@ int WarGrey::SCADA::sqlite3_default_trace_callback(unsigned int type, void* pCxt
 	return 0;
 }
 
-SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_t xCallback)
+SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallback)
 	: IDBSystem((logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger, DBMS::SQLite3) {
 	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
 
