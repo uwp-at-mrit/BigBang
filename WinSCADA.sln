@@ -37,7 +37,6 @@ Global
 		BigBang\BigBang.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		DataAccess\DataAccess.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
-		HikVision\HikVision.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		PLCIO\PLCIO.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		HikVision\HikVision.vcxitems*{920d7c8a-973d-4a47-976e-9e75ba0339fd}*SharedItemsImports = 9

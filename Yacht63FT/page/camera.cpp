@@ -6,7 +6,7 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
-#include "hv/hcnet.hpp"
+//#include "hv/hcnet.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -53,15 +53,17 @@ public:
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
 		}
 
-		auto hc = new HikVisionNet();
-		unsigned short pmin, pmax;
+		/*
+		auto hc = HikVisionNet::instace();
+		HikVisionMatrics stats = hc->abilities();
 
-		hc->tcp_port_cfg(&pmin, &pmax);
-		this->master->get_logger()->log_message(Log::Info, L"tcp port <- [%u, %u]", pmin, pmax);
-		hc->tcp_port_cfg(&pmin, &pmax);
-		this->master->get_logger()->log_message(Log::Info, L"tcp port <- [%u, %u]", pmin, pmax);
+		this->master->get_logger()->log_message(Log::Info, L"%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld",
+			stats.login, stats.real_play, stats.playback, stats.alarm_chan,
+			stats.format, stats.file_search, stats.serial, stats.upgrade,
+			stats.voice_com, stats.broadcast);
 
-		delete hc;
+		HikVisionNet::cleanup();
+		*/
 	}
 
 // never deletes these graphlets mannually

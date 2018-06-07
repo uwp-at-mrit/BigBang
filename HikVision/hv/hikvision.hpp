@@ -21,6 +21,10 @@ namespace WarGrey::SCADA {
 		void report_warning(const std::string& msg_prefix);
 		void report_warning(const char* format, ...);
 
+	protected:
+		bool report_on_error(bool okay, const std::string& msg_prefix);
+		bool report_on_warning(bool okay, const std::string& msg_prefix);
+
 	private:
 		void log(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);
 		void log(const std::string& msg_prefix, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Error);

@@ -77,7 +77,7 @@ void WarGrey::SCADA::insert_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, 
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             store_sqlite_master(selves[i], stmt);
 
             dbc->exec(stmt);
@@ -157,7 +157,7 @@ void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, 
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             if (refresh) {
                 refresh_sqlite_master(selves[i]);
             }
@@ -188,7 +188,7 @@ void WarGrey::SCADA::delete_sqlite_master(IDBSystem* dbc, SQLiteMaster_pk* where
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             stmt->bind_parameter(0U, wheres[i]);
 
             dbc->exec(stmt);

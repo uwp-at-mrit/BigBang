@@ -76,7 +76,7 @@ void WarGrey::SCADA::insert_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             store_event(selves[i], stmt);
 
             dbc->exec(stmt);
@@ -156,7 +156,7 @@ void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             if (refresh) {
                 refresh_event(selves[i]);
             }
@@ -186,7 +186,7 @@ void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* wheres, size_t 
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
-        for (int i = 0; i < count; i ++) {
+        for (size_t i = 0; i < count; i ++) {
             stmt->bind_parameter(0U, wheres[i]);
 
             dbc->exec(stmt);

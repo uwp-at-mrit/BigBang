@@ -193,9 +193,10 @@ SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallbac
 	if (sqlite3_open16(database, &this->db) != SQLITE_OK) {
 		this->report_error("failed to connect to [%S]", database);
 	} else {
+		sqlite3_trace_f cb = ((xCallback == nullptr) ? sqlite3_default_trace_callback : xCallback);
 		unsigned int uMask = SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE | SQLITE_TRACE_ROW | SQLITE_TRACE_CLOSE;
 
-		sqlite3_trace_v2(this->db, uMask, xCallback, this);
+		sqlite3_trace_v2(this->db, uMask, cb, this);
 
 		this->get_logger()->log_message(Log::Debug, L"connected to [%s]", database);
 	}

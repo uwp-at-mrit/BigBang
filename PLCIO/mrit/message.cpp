@@ -29,8 +29,8 @@ inline static unsigned int foldsum(size_t value, size_t size) {
 	return foldsum(data, size);
 }
 
-inline static size_t read_integer(IDataReader^ mrin, size_t size) {
-	size_t v = 0;
+inline static unsigned long long read_integer(IDataReader^ mrin, size_t size) {
+	unsigned long long v = 0;
 
 	switch (size) {
 	case 1: v = mrin->ReadByte(); break;
@@ -81,20 +81,20 @@ size_t MrMessageConfiguration::postdata_size() {
 }
 
 size_t MrMessageConfiguration::read_header(IDataReader^ mrin, size_t* head, size_t* fcode, size_t* db_id, size_t* addr0, size_t* addrn, size_t* size) {
-	(*head)  = read_integer(mrin, this->header_size);
-	(*fcode) = read_integer(mrin, this->fcode_size);
-	(*db_id) = read_integer(mrin, this->dbid_size);
-	(*addr0) = read_integer(mrin, this->addr0_size);
-	(*addrn) = read_integer(mrin, this->addrn_size);
-	(*size)  = read_integer(mrin, this->datasize_size);
+	(*head)  = (size_t)read_integer(mrin, this->header_size);
+	(*fcode) = (size_t)read_integer(mrin, this->fcode_size);
+	(*db_id) = (size_t)read_integer(mrin, this->dbid_size);
+	(*addr0) = (size_t)read_integer(mrin, this->addr0_size);
+	(*addrn) = (size_t)read_integer(mrin, this->addrn_size);
+	(*size)  = (size_t)read_integer(mrin, this->datasize_size);
 
 	return (*size) + this->postdata_size();
 }
 
 void MrMessageConfiguration::read_tail(IDataReader^ mrin, size_t size, uint8* data, size_t* checksum, size_t* eom) {
 	READ_BYTES(mrin, data, size);
-	(*checksum) = read_integer(mrin, this->checksum_size);
-	(*eom) = read_integer(mrin, this->tail_size);
+	(*checksum) = (size_t)read_integer(mrin, this->checksum_size);
+	(*eom) = (size_t)read_integer(mrin, this->tail_size);
 }
 
 void MrMessageConfiguration::write_header(IDataWriter^ mrout, size_t fcode, size_t db_id, size_t addr0, size_t addrn) {

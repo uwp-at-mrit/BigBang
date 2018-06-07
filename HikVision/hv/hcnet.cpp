@@ -27,13 +27,69 @@ static inline bool configure_local_cfg(HikVision* master, const char* prefix, NE
 }
 
 /*************************************************************************************************/
-HikVisionNet::HikVisionNet(Syslog* syslog, HikVisionCfg malarm, HikVisionCfg muser) : HikVision(syslog) {
+static void hv_exception_callback(unsigned long type, long user, long handle, void* urgent) {
+	if (urgent != nullptr) {
+		IHikVisionExceptionHandler* e = static_cast<IHikVisionExceptionHandler*>(urgent);
+
+		switch (type) {
+		case EXCEPTION_EXCHANGE: e->on_user_exchange_exception(user, handle); break;
+		case EXCEPTION_AUDIOEXCHANGE: e->on_audio_exchange_exception(user, handle); break;
+		case EXCEPTION_ALARM: e->on_alarm_message(user, handle, HikVisionAlarmMsg::Exception); break;
+		case EXCEPTION_PREVIEW: e->on_preview_message(user, handle, HikVisionMsg::Exception); break;
+		case EXCEPTION_SERIAL: e->on_channel_message(user, handle, HikVisionMsg::Exception); break;
+		case EXCEPTION_RECONNECT: e->on_preview_message(user, handle, HikVisionMsg::Reconnection); break;
+		case EXCEPTION_ALARMRECONNECT: e->on_alarm_message(user, handle, HikVisionAlarmMsg::Reconnection); break;
+		case EXCEPTION_SERIALRECONNECT: e->on_channel_message(user, handle, HikVisionMsg::Reconnection); break;
+		case SERIAL_RECONNECTSUCCESS: e->on_channel_message(user, handle, HikVisionMsg::Success); break;
+		case EXCEPTION_PLAYBACK: e->on_playback_exception(user, handle); break;
+		case EXCEPTION_DISKFMT: e->on_disk_format_exception(user, handle); break;
+		case EXCEPTION_PASSIVEDECODE: e->on_passive_decoding_exception(user, handle); break;
+		case EXCEPTION_EMAILTEST: e->on_email_test_exception(user, handle); break;
+		case EXCEPTION_BACKUP: e->on_backup_exception(user, handle); break;
+		case PREVIEW_RECONNECTSUCCESS: e->on_preview_message(user, handle, HikVisionMsg::Success);
+		case ALARM_RECONNECTSUCCESS: e->on_alarm_message(user, handle, HikVisionAlarmMsg::Success);
+		case RESUME_EXCHANGE: e->on_user_exchange_resume(user, handle); break;
+		case NETWORK_FLOWTEST_EXCEPTION: e->on_network_flow_test_exception(user, handle); break;
+		}
+	}
+}
+
+/*************************************************************************************************/
+static Syslog* hv_logger = nullptr;
+static HikVisionNet* self = nullptr;
+static bool hv_configure_okay = true;
+
+void HikVisionNet::configure(Syslog* logger) {
+	hv_logger = logger;
+}
+
+void HikVisionNet::configure(HikVisionCfg malarm, HikVisionCfg muser) {
 	static NET_DVR_INIT_CFG_ABILITY cfg;
 
-	cfg.enumMaxAlarmNum      = INIT_CFG_MAX_NUM(static_cast<unsigned int>(malarm));
+	cfg.enumMaxAlarmNum = INIT_CFG_MAX_NUM(static_cast<unsigned int>(malarm));
 	cfg.enumMaxLoginUsersNum = INIT_CFG_MAX_NUM(static_cast<unsigned int>(muser));
 
-	if (!NET_DVR_SetSDKInitCfg(NET_SDK_INIT_CFG_ABILITY, &cfg)) {
+	hv_configure_okay = NET_DVR_SetSDKInitCfg(NET_SDK_INIT_CFG_ABILITY, &cfg);
+}
+
+HikVisionNet* HikVisionNet::instace() {
+	if (self == nullptr) {
+		self = new HikVisionNet();
+	}
+
+	return self;
+}
+
+void HikVisionNet::cleanup() {
+	delete self;
+
+	self = nullptr;
+	hv_configure_okay = true;
+}
+
+/*************************************************************************************************/
+HikVisionNet::HikVisionNet() : HikVision(hv_logger) {
+	if (!hv_configure_okay) {
 		this->report_warning("configure");
 	}
 
@@ -46,6 +102,102 @@ HikVisionNet::~HikVisionNet() {
 	if (!NET_DVR_Cleanup()) {
 		this->report_warning("cleanup");
 	}
+}
+
+unsigned long HikVisionNet::version(bool needs_build_number) {
+	if (needs_build_number) {
+		return NET_DVR_GetSDKBuildVersion();
+	} else {
+		return NET_DVR_GetSDKVersion();
+	}
+}
+
+HikVisionMatrics HikVisionNet::statistics() {
+	HikVisionMatrics stats;
+	NET_DVR_SDKSTATE src;
+
+	if (this->report_on_warning(NET_DVR_GetSDKState(&src), "GetSDKState")) {
+		memcpy(&stats, &src, sizeof(stats));
+		//stats.login = src.dwTotalLoginNum;
+		//stats.real_play = src.dwTotalRealPlayNum;
+		//stats.playback = src.dwTotalPlayBackNum;
+		//stats.alarm_chan = src.dwTotalAlarmChanNum;
+		//stats.format = src.dwTotalFormatNum;
+		//stats.file_search = src.dwTotalFileSearchNum;
+		//stats.log_search = src.dwTotalLogSearchNum;
+		//stats.serial = src.dwTotalSerialNum;
+		//stats.upgrade = src.dwTotalUpgradeNum;
+		//stats.voice_com = src.dwTotalVoiceComNum;
+		//stats.broadcast = src.dwTotalBroadCastNum;
+	}
+
+	return stats;
+}
+
+HikVisionMatrics HikVisionNet::abilities() {
+	HikVisionMatrics stats;
+	NET_DVR_SDKABL src;
+
+	if (this->report_on_warning(NET_DVR_GetSDKAbility(&src), "GetSDKAbility")) {
+		memcpy(&stats, &src, sizeof(stats));
+		//stats.login = src.dwMaxLoginNum;
+		//stats.real_play = src.dwMaxRealPlayNum;
+		//stats.playback = src.dwMaxPlayBackNum;
+		//stats.alarm_chan = src.dwMaxAlarmChanNum;
+		//stats.format = src.dwMaxFormatNum;
+		//stats.file_search = src.dwMaxFileSearchNum;
+		//stats.log_search = src.dwMaxLogSearchNum;
+		//stats.serial = src.dwMaxSerialNum;
+		//stats.upgrade = src.dwMaxUpgradeNum;
+		//stats.voice_com = src.dwMaxVoiceComNum;
+		//stats.broadcast = src.dwMaxBroadCastNum;
+	}
+
+	return stats;
+}
+
+std::list<std::string> HikVisionNet::get_local_ips(bool* enable_bind) {
+	std::list<std::string> ips;
+	char pools[16][16];
+	unsigned long count;
+	BOOL enabled;
+
+	if (this->report_on_warning(NET_DVR_GetLocalIP(pools, &count, &enabled), "GetLocalIP")) {
+		for (unsigned long idx = 0; idx < count; idx++) {
+			ips.push_back(std::string(pools[idx]));
+		}
+
+		SET_BOX(enable_bind, enabled != 0);
+	}
+
+	return ips;
+}
+
+bool HikVisionNet::set_valid_ip(unsigned long index, bool enable_bind) {
+	return this->report_on_error(NET_DVR_SetValidIP(index, enable_bind), "SetValidIP");
+}
+
+bool HikVisionNet::set_connection_time(unsigned long wait_time, unsigned long try_times) {
+	return this->report_on_warning(NET_DVR_SetConnectTime(wait_time, try_times), "SetConnectTime");
+}
+
+bool HikVisionNet::set_receive_timeout(unsigned long timeout) {
+	return this->report_on_warning(NET_DVR_SetRecvTimeOut(timeout), "SetRecvTimeout");
+}
+
+bool HikVisionNet::set_reconnect_time(unsigned long interval, bool enable) {
+	return this->report_on_warning(NET_DVR_SetReconnect(interval, (enable ? 1 : 0)), "SetReconnectTime");
+}
+
+bool HikVisionNet::set_exception_handler(IHikVisionExceptionHandler* exn_callback) {
+	//bool okay = NET_DVR_SetExceptionCallBack_V30(WM_NULL, nullptr, hv_exception_callback, exn_callback);
+
+	//if (!okay) {
+	//	this->report_warning("SetExceptionCallback");
+	//}
+
+	//return okay;
+	return false;
 }
 
 bool HikVisionNet::tcp_port_cfg(unsigned short* min_port, unsigned short* max_port) {
@@ -163,7 +315,6 @@ bool HikVisionNet::talk_mode_cfg(bool enabled) {
 
 	return configure_local_cfg(this, "talk mode", NET_SDK_LOCAL_CFG_TYPE_TALK_MODE, &cfg);
 }
-
 
 bool HikVisionNet::check_device_cfg(unsigned long* timeout, unsigned long* max_failures) {
 	static NET_DVR_LOCAL_CHECK_DEV cfg;

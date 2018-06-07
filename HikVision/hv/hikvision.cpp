@@ -35,6 +35,14 @@ void HikVision::report_error(const char* format, ...) {
 	this->log(message, Log::Error);
 }
 
+bool HikVision::report_on_error(bool okay, const std::string& msg_prefix) {
+	if (!okay) {
+		this->report_error(msg_prefix);
+	}
+
+	return okay;
+}
+
 void HikVision::report_warning() {
 	this->log(Log::Warning);
 }
@@ -46,6 +54,14 @@ void HikVision::report_warning(const std::string& msg_prefix) {
 void HikVision::report_warning(const char* format, ...) {
 	VSNPRINT(message, format);
 	this->log(message, Log::Warning);
+}
+
+bool HikVision::report_on_warning(bool okay, const std::string& msg_prefix) {
+	if (!okay) {
+		report_warning(msg_prefix);
+	}
+
+	return okay;
 }
 
 void HikVision::log(Log level) {
