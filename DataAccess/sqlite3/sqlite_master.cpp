@@ -127,7 +127,7 @@ std::list<SQLiteMaster> WarGrey::SCADA::select_sqlite_master(IDBSystem* dbc, uin
 
 std::optional<SQLiteMaster> WarGrey::SCADA::seek_sqlite_master(IDBSystem* dbc, SQLiteMaster_pk where) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    std::string sql = vsql->seek_from("sqlite_master", sqlite_master_rowids);
+    std::string sql = vsql->seek_from("sqlite_master", sqlite_master_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::optional<SQLiteMaster> query;
 
@@ -153,7 +153,7 @@ void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster& self, bo
 
 void WarGrey::SCADA::update_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, size_t count, bool refresh) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    std::string sql = vsql->update_set("sqlite_master", sqlite_master_rowids);
+    std::string sql = vsql->update_set("sqlite_master", sqlite_master_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
@@ -184,7 +184,7 @@ void WarGrey::SCADA::delete_sqlite_master(IDBSystem* dbc, SQLiteMaster_pk& where
 
 void WarGrey::SCADA::delete_sqlite_master(IDBSystem* dbc, SQLiteMaster_pk* wheres, size_t count) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    std::string sql = vsql->delete_from("sqlite_master", sqlite_master_rowids);
+    std::string sql = vsql->delete_from("sqlite_master", sqlite_master_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {

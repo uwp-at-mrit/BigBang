@@ -40,32 +40,6 @@ namespace WarGrey::SCADA {
 		virtual std::string table_min(const char* table, const char* column, bool distinct = false) = 0;
 		virtual std::string table_sum(const char* table, const char* column, bool distinct = false) = 0;
 
-	public:
-		template<size_t N>
-		std::string create_table(const char* table, const char* (&primary_keys)[N], bool if_not_exists) {
-			return this->create_table(table, primary_keys, N, if_not_exists);
-		}
-
-		template<size_t N>
-		std::string select_from(const char* table, const char* order_by, const char* (&cols)[N], uint64 limit = 0U, uint64 offset = 0U) {
-			return this->select_from(table, order_by, cols, N, limit, offset);
-		}
-
-		template<size_t N>
-		std::string seek_from(const char* table, const char* (&primary_keys)[N]) {
-			return this->seek_from(table, primary_keys, N);
-		}
-
-		template<size_t N>
-		std::string update_set(const char* table, const char* (&primary_keys)[N]) {
-			return this->update_set(table, primary_keys, N);
-		}
-
-		template<size_t N>
-		std::string delete_from(const char* table, const char* (&primary_keys)[N]) {
-			return this->delete_from(table, primary_keys, N);
-		}
-
 	protected:
 		const char* identity_column_name();
 

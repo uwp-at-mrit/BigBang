@@ -126,7 +126,7 @@ std::list<AlarmEvent> WarGrey::SCADA::select_event(IDBSystem* dbc, uint64 limit,
 
 std::optional<AlarmEvent> WarGrey::SCADA::seek_event(IDBSystem* dbc, AlarmEvent_pk where) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->seek_from("event", event_rowids);
+    std::string sql = vsql->seek_from("event", event_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::optional<AlarmEvent> query;
 
@@ -152,7 +152,7 @@ void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent& self, bool refresh
 
 void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t count, bool refresh) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->update_set("event", event_rowids);
+    std::string sql = vsql->update_set("event", event_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {
@@ -182,7 +182,7 @@ void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk& where) {
 
 void WarGrey::SCADA::delete_event(IDBSystem* dbc, AlarmEvent_pk* wheres, size_t count) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->delete_from("event", event_rowids);
+    std::string sql = vsql->delete_from("event", event_rowids, 1);
     IPreparedStatement* stmt = dbc->prepare(sql);
 
     if (stmt != nullptr) {

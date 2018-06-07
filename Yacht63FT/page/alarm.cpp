@@ -12,6 +12,8 @@
 
 #include "sqlite3.hpp"
 #include "schema/event.hpp"
+#include "graphlet/statuslet.hpp"
+#include "schema/dbtest.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -53,12 +55,17 @@ public:
 	}
 
 	AlarmBoard(AlarmPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
-		this->sqlite3 = new SQLite3();
+		this->sqlite3 = new SQLite3(L"");
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 	}
 
 public:
 	void load_and_flow(float width, float height) {
+		this->term = this->master->insert_one(new Statuslinelet(Log::Debug, 0U));
+
+		this->sqlite3->get_logger()->append_log_receiver(this->term);
+
+		dbtest(this->sqlite3);
 	}
 
 	void update(long long count, long long interval, long long uptime) {
@@ -81,6 +88,7 @@ private:
 		
 private:
 	CanvasTextFormat^ font;
+	Statuslinelet* term;
 	SQLite3* sqlite3;
 	AlarmPage* master;
 };
