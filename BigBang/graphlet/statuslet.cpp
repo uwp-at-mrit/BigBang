@@ -209,7 +209,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 }
 
 /*************************************************************************************************/
-static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::None) + 1];
+static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::_) + 1];
 static ICanvasBrush^ status_nolog_color = nullptr;
 
 Statuslinelet::Statuslinelet(Log level, unsigned int lines) : ISyslogReceiver(level), lines(lines) {}

@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
-		void append_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::None);
+		void append_message(Platform::String^ message, WarGrey::SCADA::Log level = WarGrey::SCADA::Log::_);
 		void on_log_message(WarGrey::SCADA::Log level, Platform::String^ message,
 			WarGrey::SCADA::SyslogMetainfo& data, Platform::String^ topic) override;
 

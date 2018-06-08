@@ -112,8 +112,8 @@ std::string VirtualSQLite3::select_from(const char* tablename, const char* order
 	return sql;
 }
 
-std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, const char* cols[], size_t count, uint64 limit, uint64 offset) {
-	std::string sql = columns_join("SELECT ", ", ", " ", cols, count);
+std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, const char* primary_keys[], size_t pk_count, uint64 limit, uint64 offset) {
+	std::string sql = columns_join("SELECT ", ", ", " ", primary_keys, pk_count);
 	std::string maybe_order_by = ((order_by == nullptr) ? " " : make_nstring(" ORDER BY %s ", order_by));
 
 	sql += make_nstring("FROM %s%sLIMIT %d OFFSET %d;",

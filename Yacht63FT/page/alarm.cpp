@@ -1,4 +1,5 @@
 ﻿#include <map>
+#include <ppltasks.h>
 
 #include "page/alarm.hpp"
 #include "configuration.hpp"
@@ -9,6 +10,7 @@
 #include "tongue.hpp"
 #include "text.hpp"
 #include "string.hpp"
+#include "path.hpp"
 
 #include "sqlite3.hpp"
 #include "schema/event.hpp"
@@ -16,6 +18,10 @@
 #include "schema/dbtest.hpp"
 
 using namespace WarGrey::SCADA;
+
+using namespace Concurrency;
+
+using namespace Windows::Storage;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -51,21 +57,25 @@ private:
 private class AlarmBoard final : public WarGrey::SCADA::PLCConfirmation {
 public:
 	virtual ~AlarmBoard() noexcept {
-		delete this->sqlite3;
+		if (this->sqlite3 != nullptr) {
+			delete this->sqlite3;
+		}
 	}
 
 	AlarmBoard(AlarmPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
-		this->sqlite3 = new SQLite3(L"");
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 	}
 
 public:
 	void load_and_flow(float width, float height) {
+		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
 		this->term = this->master->insert_one(new Statuslinelet(Log::Debug, 0U));
 
-		this->sqlite3->get_logger()->append_log_receiver(this->term);
-
-		dbtest(this->sqlite3);
+		create_task(ApplicationData::Current->LocalFolder->CreateFileAsync("log.db", cco)).then([=](StorageFile^ file) {
+			this->sqlite3 = new SQLite3(file->Path->Data());
+			this->sqlite3->get_logger()->append_log_receiver(this->term);
+			dbtest(this->sqlite3);
+		});
 	}
 
 	void update(long long count, long long interval, long long uptime) {

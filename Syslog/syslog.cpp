@@ -84,7 +84,7 @@ Syslog* make_logger(Log level, Platform::String^ topic, Syslog* parent) {
 }
 
 Syslog* make_silent_logger(Platform::String^ topic) {
-	return make_logger(Log::None, topic);
+	return make_logger(Log::_, topic);
 }
 
 Syslog* make_system_logger(Log level, Platform::String^ topic) {

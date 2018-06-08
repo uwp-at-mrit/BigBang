@@ -5,7 +5,7 @@
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class Log { Debug, Info, Notice, Warning, Error, Critical, Alarm, Panic, None };
+	private enum class Log { Debug, Info, Notice, Warning, Error, Critical, Alarm, Panic, _ };
 
 	private struct SyslogMetainfo {
 		Platform::String^ timestamp;

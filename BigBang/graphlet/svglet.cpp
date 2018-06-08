@@ -27,7 +27,7 @@ Svglet::Svglet(Platform::String^ file, Platform::String^ rootdir) : Svglet(file,
 Svglet::Svglet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
-	this->ms_appx_svg = ms_appx_path(file, ".svg", rootdir);
+	this->ms_appx_svg = ms_appx_file(file, ".svg", rootdir);
 }
 
 Svglet::~Svglet() {

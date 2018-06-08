@@ -91,7 +91,7 @@ namespace WarGrey::SCADA {
 			for (U s = static_cast<U>(0); s < U::_; s++) {
 				Platform::String^ file_bmp = ((subdir == nullptr) ? s.ToString() : subdir + "/" + s.ToString());
 
-				this->ms_appx_bmps[s] = ms_appx_path(file_bmp, ".png", rootdir);
+				this->ms_appx_bmps[s] = ms_appx_file(file_bmp, ".png", rootdir);
 			}
 		}
 

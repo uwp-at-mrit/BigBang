@@ -79,7 +79,7 @@ public:
 		{ // load icon
 			this->flag_window.Height = design_to_application_height(50.0F);
 			this->flag_window.Width = this->flag_window.Height;
-			this->load(ms_appx_path("flag", ".png", "graphlet"), 0);
+			this->load(ms_appx_file("flag", ".png", "graphlet"), 0);
 		}
 	}
 

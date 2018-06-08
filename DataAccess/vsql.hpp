@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
 		virtual std::string create_table(const char* table, const char* primary_keys[], size_t pk_count, bool if_not_exists = true) = 0;
 		virtual std::string insert_into(const char* table, bool replace = false) = 0;
 		virtual std::string select_from(const char* table, const char* order_by, uint64 limit = 0U, uint64 offset = 0U) = 0;
-		virtual std::string select_from(const char* table, const char* order_by, const char* cols[], size_t count, uint64 limit = 0U, uint64 offset = 0U) = 0;
+		virtual std::string select_from(const char* table, const char* order_by, const char* primary_keys[], size_t pk_count, uint64 limit = 0U, uint64 offset = 0U) = 0;
 		virtual std::string seek_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string update_set(const char* table, const char* primary_keys[], size_t pk_count) = 0;
 		virtual std::string delete_from(const char* table, const char* primary_keys[], size_t pk_count) = 0;
