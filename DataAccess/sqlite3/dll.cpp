@@ -267,25 +267,27 @@ std::list<SQliteTableInfo> SQLite3::table_info(const char* name) {
 	SQLiteStatement* pragma = static_cast<SQLiteStatement*>(IDBSystem::prepare("PRAGMA table_info = %s;", name));
 	std::list<SQliteTableInfo> infos;
 	
-	while (pragma->step()) {
-		SQliteTableInfo info;
-		SQLiteDataType type = pragma->column_type(2);
+	if (pragma != nullptr) {
+		while (pragma->step()) {
+			SQliteTableInfo info;
+			SQLiteDataType type = pragma->column_type(2);
 
-		info.cid = pragma->column_int32(0);
-		info.name = pragma->column_text(1);
-		info.type = pragma->column_text(2);
-		info.notnull = (pragma->column_int32(3) != 0);
-		info.dflt_value = pragma->column_text(4);
-		info.pk = pragma->column_int32(5);
-		
-		this->get_logger()->log_message(Log::Debug, L"Column[%d] %S[%s]: %S, %s, %d; %S",
-			info.cid, info.name.c_str(), type.ToString()->Data(), info.type.c_str(),
-			info.notnull.ToString()->Data(), info.pk, info.dflt_value.c_str());
+			info.cid = pragma->column_int32(0);
+			info.name = pragma->column_text(1);
+			info.type = pragma->column_text(2);
+			info.notnull = (pragma->column_int32(3) != 0);
+			info.dflt_value = pragma->column_text(4);
+			info.pk = pragma->column_int32(5);
 
-		infos.push_back(info);
+			this->get_logger()->log_message(Log::Debug, L"Column[%d] %S[%s]: %S, %s, %d; %S",
+				info.cid, info.name.c_str(), type.ToString()->Data(), info.type.c_str(),
+				info.notnull.ToString()->Data(), info.pk, info.dflt_value.c_str());
+
+			infos.push_back(info);
+		}
+
+		delete pragma;
 	}
-
-	delete pragma;
 
 	return infos;
 }

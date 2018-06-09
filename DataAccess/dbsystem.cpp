@@ -7,9 +7,9 @@ using namespace WarGrey::SCADA;
 #define DBMaybe(Type, stmt, column_value, cid) \
     (stmt->column_is_null(cid) ? std::nullopt : std::optional<Type>(stmt->column_value(cid)))
 
-#define QueryValue(sql, type, column_maybe_value) \
+#define QueryValue(sql, type, column_maybe_value, defval) \
     IPreparedStatement* stmt = this->prepare(sql); \
-    type maybe_v; \
+    type maybe_v = defval; \
 \
     if (stmt != nullptr) { \
 	    this->exec(stmt); \
@@ -20,9 +20,9 @@ using namespace WarGrey::SCADA;
 \
     return maybe_v;
 
-#define ImplementQueryValue(type, value) \
+#define ImplementQueryValue(type, value, defval) \
 std::optional<type> IDBSystem::query_maybe_##value(const std::string& sql) { \
-	QueryValue(sql, std::optional<type>, column_maybe_##value); \
+	QueryValue(sql, std::optional<type>, column_maybe_##value, defval); \
 } \
 \
 std::optional<type> IDBSystem::query_maybe_##value(const char* sql, ...) { \
@@ -32,7 +32,7 @@ std::optional<type> IDBSystem::query_maybe_##value(const char* sql, ...) { \
 } \
 \
 type IDBSystem::query_##value(const std::string& sql) { \
-	QueryValue(sql, type, column_##value); \
+	QueryValue(sql, type, column_##value, defval); \
 } \
 \
 type IDBSystem::query_##value(const char* sql, ...) { \
@@ -100,10 +100,10 @@ void IDBSystem::exec(const char* sql, ...) {
 	this->exec(raw);
 }
 
-ImplementQueryValue(std::string, text)
-ImplementQueryValue(int32, int32)
-ImplementQueryValue(int64, int64)
-ImplementQueryValue(double, double)
+ImplementQueryValue(std::string, text, "")
+ImplementQueryValue(int32, int32, 0)
+ImplementQueryValue(int64, int64, 0)
+ImplementQueryValue(double, double, 0.0)
 
 void IDBSystem::report_error() {
 	this->log(Log::Error);

@@ -61,7 +61,7 @@ void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
 /**************************************************************************************************/
 void WarGrey::SCADA::create_event(IDBSystem* dbc, bool if_not_exists) {
     IVirtualSQL* vsql = dbc->make_sql_factory(event_columns);
-    std::string sql = vsql->create_table("event", event_rowids, if_not_exists);
+    std::string sql = vsql->create_table("event", event_rowids, sizeof(event_rowids)/sizeof(char*), if_not_exists);
 
     dbc->exec(sql);
 }

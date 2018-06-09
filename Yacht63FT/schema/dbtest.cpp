@@ -12,8 +12,7 @@ void WarGrey::SCADA::dbtest(SQLite3* target) {
 	default_event(events[0], "Error", "Fire");
 	default_event(events[1], "Fatal", "Propeller");
 
-	create_event(sqlite3, true);
-	sqlite3->table_info("sqlite_master");
+	create_event(sqlite3, false);
 	sqlite3->table_info("event");
 
 	insert_event(sqlite3, fevent);
@@ -52,4 +51,5 @@ void WarGrey::SCADA::dbtest(SQLite3* target) {
 	sqlite3->list_tables();
 	drop_event(sqlite3);
 	sqlite3->table_info("event");
+	create_event(sqlite3, true);
 }

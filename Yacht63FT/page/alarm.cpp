@@ -71,7 +71,7 @@ public:
 		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
 		this->term = this->master->insert_one(new Statuslinelet(Log::Debug, 0U));
 
-		create_task(ApplicationData::Current->LocalFolder->CreateFileAsync("log.db", cco)).then([=](StorageFile^ file) {
+		create_task(ApplicationData::Current->LocalFolder->CreateFileAsync("log.ams", cco)).then([=](StorageFile^ file) {
 			this->sqlite3 = new SQLite3(file->Path->Data());
 			this->sqlite3->get_logger()->append_log_receiver(this->term);
 			dbtest(this->sqlite3);
