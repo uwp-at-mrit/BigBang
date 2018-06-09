@@ -213,7 +213,7 @@
     [(λname tablename column_infos table_rowids)
      (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists) {~n" λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
-     (&htab 1) (printf "~a sql = vsql->create_table(~s, ~a, if_not_exists);~n" cstring (symbol->string tablename) table_rowids)
+     (&htab 1) (printf "~a sql = vsql->create_table(~s, ~a, sizeof(~a)/sizeof(char*), if_not_exists);~n" cstring (symbol->string tablename) table_rowids table_rowids)
      (&linebreak 1)
      (&htab 1) (printf "dbc->exec(sql);~n")
      (&brace 0)

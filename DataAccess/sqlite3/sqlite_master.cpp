@@ -62,7 +62,7 @@ void WarGrey::SCADA::restore_sqlite_master(SQLiteMaster& self, IPreparedStatemen
 /**************************************************************************************************/
 void WarGrey::SCADA::create_sqlite_master(IDBSystem* dbc, bool if_not_exists) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    std::string sql = vsql->create_table("sqlite_master", sqlite_master_rowids, if_not_exists);
+    std::string sql = vsql->create_table("sqlite_master", sqlite_master_rowids, sizeof(sqlite_master_rowids)/sizeof(char*), if_not_exists);
 
     dbc->exec(sql);
 }
