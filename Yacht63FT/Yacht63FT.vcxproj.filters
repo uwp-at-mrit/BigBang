@@ -103,7 +103,6 @@
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="schema\dbtest.cpp" />
     <ClCompile Include="page\alarm.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -112,6 +111,9 @@
     </ClCompile>
     <ClCompile Include="page\operation.cpp">
       <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\dbtest.cpp">
+      <Filter>schema</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -144,7 +146,6 @@
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="schema\dbtest.hpp" />
     <ClInclude Include="page\alarm.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -153,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="page\operation.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\dbtest.hpp">
+      <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -169,9 +173,6 @@
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\SmallTile.scale-100.png">
@@ -199,15 +200,6 @@
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\Square150x150Logo.scale-400.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-100.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-125.png">
-      <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Assets\Wide310x150Logo.scale-150.png">
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\Wide310x150Logo.scale-400.png">
@@ -451,7 +443,9 @@
   <ItemGroup>
     <None Include="Yacht63FT_TemporaryKey.pfx" />
     <None Include="packages.config" />
-    <None Include="schema\event.dao.rktl" />
+    <None Include="schema\event.dao.rktl">
+      <Filter>schema</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">
