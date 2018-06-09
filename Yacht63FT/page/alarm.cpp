@@ -1,9 +1,12 @@
-﻿#include "page/alarm.hpp"
+﻿#include <map>
+
+#include "page/alarm.hpp"
 #include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/bitmaplet.hpp"
+#include "graphlet/symbol/alarmlet.hpp"
+#include "graphlet/symbol/gaugelet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
@@ -52,23 +55,12 @@ public:
 
 			this->master->fill_graphlet_location(this->captions[room], nullptr, &cell_top, GraphletAlignment::LB);
 			cell_top += label_yoffset;
-
-			this->lights[room] = new OptionBitmaplet("Light", cell_width);
-
-			if ((room != A::Bridge) && (room != A::Salon)) {
-				this->curtains[room] = new OptionBitmaplet("Curtain", cell_width, cell_y + cell_height - cell_top);
-				this->master->insert(this->curtains[room], cell_whalf, cell_top, GraphletAlignment::CT);
-			}
-
-			this->master->insert(this->lights[room], cell_whalf, cell_top, GraphletAlignment::CT);
 		}
 	}
 
 // never deletes these graphlets mannually
 private:
 	std::map<A, Labellet*> captions;
-	std::map<A, OptionBitmaplet*> lights;
-	std::map<A, OptionBitmaplet*> curtains;
 		
 private:
 	CanvasTextFormat^ font;

@@ -102,9 +102,9 @@ std::string VirtualSQLite3::insert_into(const char* tablename, bool replace) {
 	return sql;
 }
 
-std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, uint64 limit, uint64 offset) {
+std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, bool asc, uint64 limit, uint64 offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", this->columns, this->count);
-	std::string maybe_order_by = ((order_by == nullptr)? " " : make_nstring(" ORDER BY %s ", order_by));
+	std::string maybe_order_by = ((order_by == nullptr)? " " : make_nstring(" ORDER BY %s %s ", order_by, (asc ? "ASC" : "DESC")));
 
 	sql += make_nstring("FROM %s%sLIMIT %d OFFSET %d;",
 		tablename, maybe_order_by.c_str(), ((limit == 0) ? -1 : limit), offset);
@@ -112,9 +112,9 @@ std::string VirtualSQLite3::select_from(const char* tablename, const char* order
 	return sql;
 }
 
-std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, const char* primary_keys[], size_t pk_count, uint64 limit, uint64 offset) {
+std::string VirtualSQLite3::select_from(const char* tablename, const char* order_by, bool asc, const char* primary_keys[], size_t pk_count, uint64 limit, uint64 offset) {
 	std::string sql = columns_join("SELECT ", ", ", " ", primary_keys, pk_count);
-	std::string maybe_order_by = ((order_by == nullptr) ? " " : make_nstring(" ORDER BY %s ", order_by));
+	std::string maybe_order_by = ((order_by == nullptr) ? " " : make_nstring(" ORDER BY %s %s ", order_by, (asc ? "ASC" : "DESC")));
 
 	sql += make_nstring("FROM %s%sLIMIT %d OFFSET %d;",
 		tablename, maybe_order_by.c_str(), ((limit == 0) ? -1 : limit), offset);
