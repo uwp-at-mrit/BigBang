@@ -90,7 +90,7 @@ void WarGrey::SCADA::insert_sqlite_master(IDBSystem* dbc, SQLiteMaster* selves, 
 
 std::list<SQLiteMaster_pk> WarGrey::SCADA::list_sqlite_master(IDBSystem* dbc, uint64 limit, uint64 offset, sqlite_master order_by, bool asc) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(column)].name);
+    const char* colname = ((order_by == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(order_by)].name);
     std::string sql = vsql->select_from("sqlite_master", colname, asc, sqlite_master_rowids, sizeof(sqlite_master_rowids)/sizeof(char*), limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::list<SQLiteMaster_pk> queries;
@@ -108,7 +108,7 @@ std::list<SQLiteMaster_pk> WarGrey::SCADA::list_sqlite_master(IDBSystem* dbc, ui
 
 std::list<SQLiteMaster> WarGrey::SCADA::select_sqlite_master(IDBSystem* dbc, uint64 limit, uint64 offset, sqlite_master order_by, bool asc) {
     IVirtualSQL* vsql = dbc->make_sql_factory(sqlite_master_columns);
-    const char* colname = ((column == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(order_by)].name);
+    const char* colname = ((order_by == sqlite_master::_) ? nullptr : sqlite_master_columns[static_cast<unsigned int>(order_by)].name);
     std::string sql = vsql->select_from("sqlite_master", colname, asc, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
     std::list<SQLiteMaster> queries;
