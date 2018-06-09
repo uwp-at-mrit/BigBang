@@ -12,15 +12,16 @@
 
 (define-syntax (define-table stx)
   (syntax-parse stx #:datum-literals [:]
-    [(_ table #:as Table #:with primary-key
-        (~optional (~seq #:order-by order-by) #:defaults ([order-by #'#false]))
-        ([field : DataType constraints ...] ...)
-        (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
-             (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
+    [(define-table
+       table #:as Table #:with primary-key
+       (~optional (~seq #:order-by order-by) #:defaults ([order-by #'#false]))
+       ([field : DataType constraints ...] ...)
+       (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
+            (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
-                    [order_by (parse-order-by #'order-by)]
+                    [order_by (parse-order-by #'order-by (map syntax-e (syntax->list #'(field ...))))]
                     [Table-pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
-                    [([view? RowidType ...]
+                    [([RowidType ...]
                       [(MaybeType defval autoval not-null unique) ...]
                       [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns table-id]
                       [create-table insert-table delete-table update-table select-table seek-table drop-table
@@ -32,7 +33,9 @@
                                    ([<stx> (in-syntax #'([field DataType constraints ...] ...))])
                            (define-values (maybe-pktype field-info) (parse-field-definition tablename pkids <stx>))
                            (values (cons field-info sdleif) (if maybe-pktype (cons maybe-pktype sdiwor) sdiwor))))
-                       (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
+                       (unless (= (length sdiwor) (length pkids))
+                         (raise-syntax-error (syntax-e #'define-table) "primary keys must be defined explicitly" #'primary-key))
+                       (list (reverse sdiwor)
                              (reverse sdleif)
                              (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp"
                                                             "~a_rowids" "~a_columns" "~a_identity"))])
@@ -42,10 +45,7 @@
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps]
                     [([ns ...] ...) #'addition-nses])
-       #'(begin (when (and view?)
-                  (raise-user-error 'table "primary keys must be defined explicitly"))
-
-                (define cat-table.hpp
+       #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
                       (&pragma 'once)
@@ -70,8 +70,8 @@
                                     (&linebreak 1)
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
-                                    (&list-table 'list-table 'Table-pk 'order_by indent)
-                                    (&select-table 'select-table 'Table 'order_by indent)
+                                    (&list-table 'list-table 'Table-pk 'table 'order_by indent)
+                                    (&select-table 'select-table 'Table 'table 'order_by indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&update-table 'update-table 'Table indent)
                                     (&delete-table 'delete-table 'Table-pk indent)
@@ -100,18 +100,18 @@
                       (&table-column-info 'table-columns 'table-rowids '(rowid ...) '(field ...) '(DataType ...) '(not-null ...) '(unique ...))
 
                       (&separator)
-                      (&#%table 'table-id 'Table 'Table-pk '(rowid ...))
-                      (&make-table 'make-table 'Table '(field ...) '(DataType ...) '(defval ...) 'default-table)
+                      (&#%table 'table-id 'Table 'Table-pk '(rowid ...) '_)
+                      (&make-table 'make-table 'Table '(field ...) '(DataType ...) '(defval ...) 'default-table '_)
                       (&default-table 'default-table 'Table '(field ...) '(DataType ...) '(defval ...))
                       (&refresh-table 'refresh-table 'Table '(field ...) '(autoval ...))
-                      (&store-table 'store-table 'Table '(field ...))
+                      (&store-table 'store-table 'Table '(field ...) '_)
                       (&restore-table 'restore-table 'Table '(field ...) '(DataType ...) '(not-null ...) '(rowid ...))
 
                       (&separator)
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
                       (&list-table 'list-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
-                      (&select-table 'select-table 'Table 'table 'restore-table 'table-columns)
+                      (&select-table 'select-table 'Table 'table 'restore-table 'table-columns '_)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns 'refresh-table)
                       (&delete-table 'delete-table 'Table-pk 'table '(rowid ...) 'table-rowids 'table-columns)

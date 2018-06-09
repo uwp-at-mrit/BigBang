@@ -32,8 +32,11 @@
       [id:id (list #'id)]
       [(id0 id ...) stx]))
 
-  (define (parse-order-by stx)
+  (define (parse-order-by stx fields)
+    (define (order-id <order> fields)
+      (define order (syntax-e <order>))
+      (cond [(memq order fields) order]
+            [else (raise-syntax-error 'parse-order-by "#:order-by column is not defined" <order>)]))
     (syntax-parse stx
-      [id:id (datum->syntax stx (symbol->string (syntax-e #'id)))]
-      [(order:id by:id) (datum->syntax stx (format "~a ~a" (syntax-e #'order) (syntax-e #'by)))]
+      [id:id (datum->syntax stx (symbol->string (order-id #'id fields)))]
       [sexp #'#false])))
