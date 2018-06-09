@@ -10,18 +10,19 @@ namespace WarGrey::SCADA {
 
     private struct AlarmEvent {
         Integer uuid;
-        Text type;
         Text name;
-        std::optional<Integer> ctime;
-        std::optional<Integer> mtime;
+        Integer timestamp;
+        Integer status;
+        std::optional<Integer> code;
+        std::optional<Text> note;
     };
 
-    private enum class event { uuid, type, name, ctime, mtime, _ };
+    private enum class event { uuid, name, timestamp, status, code, note, _ };
 
     WarGrey::SCADA::AlarmEvent_pk event_identity(WarGrey::SCADA::AlarmEvent& self);
 
-    WarGrey::SCADA::AlarmEvent make_event(std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt);
-    void default_event(WarGrey::SCADA::AlarmEvent& self, std::optional<Text> type = std::nullopt, std::optional<Text> name = std::nullopt);
+    WarGrey::SCADA::AlarmEvent make_event(std::optional<Text> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
+    void default_event(WarGrey::SCADA::AlarmEvent& self, std::optional<Text> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
     void refresh_event(WarGrey::SCADA::AlarmEvent& self);
     void store_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);

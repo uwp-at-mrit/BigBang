@@ -11,10 +11,11 @@ static const char* event_rowids[] = { "uuid" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
-    { "type", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
-    { "ctime", SDT::Integer, nullptr, 0 | 0 | 0 },
-    { "mtime", SDT::Integer, nullptr, 0 | 0 | 0 },
+    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "timestamp", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "status", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "code", SDT::Integer, nullptr, 0 | 0 | 0 },
+    { "note", SDT::Text, nullptr, 0 | 0 | 0 },
 };
 
 /**************************************************************************************************/
@@ -22,40 +23,42 @@ AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
     return self.uuid;
 }
 
-AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> type, std::optional<Text> name) {
+AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
     AlarmEvent self;
 
-    default_event(self, type, name);
+    default_event(self, name, status, code, note);
 
     return self;
 }
 
-void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Text> type, std::optional<Text> name) {
+void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Text> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
     self.uuid = pk64_timestamp();
-    self.type = ((type.has_value()) ? type.value() : "ERROR");
     if (name.has_value()) { self.name = name.value(); }
-    self.ctime = current_milliseconds();
-    self.mtime = current_milliseconds();
+    self.timestamp = current_milliseconds();
+    if (status.has_value()) { self.status = status.value(); }
+    if (code.has_value()) { self.code = code.value(); }
+    if (note.has_value()) { self.note = note.value(); }
 }
 
 void WarGrey::SCADA::refresh_event(AlarmEvent& self) {
-    self.mtime = current_milliseconds();
 }
 
 void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {
     stmt->bind_parameter(0U, self.uuid);
-    stmt->bind_parameter(1U, self.type);
-    stmt->bind_parameter(2U, self.name);
-    stmt->bind_parameter(3U, self.ctime);
-    stmt->bind_parameter(4U, self.mtime);
+    stmt->bind_parameter(1U, self.name);
+    stmt->bind_parameter(2U, self.timestamp);
+    stmt->bind_parameter(3U, self.status);
+    stmt->bind_parameter(4U, self.code);
+    stmt->bind_parameter(5U, self.note);
 }
 
 void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
     self.uuid = stmt->column_int64(0U);
-    self.type = stmt->column_text(1U);
-    self.name = stmt->column_text(2U);
-    self.ctime = stmt->column_maybe_int64(3U);
-    self.mtime = stmt->column_maybe_int64(4U);
+    self.name = stmt->column_text(1U);
+    self.timestamp = stmt->column_int64(2U);
+    self.status = stmt->column_int64(3U);
+    self.code = stmt->column_maybe_int64(4U);
+    self.note = stmt->column_maybe_text(5U);
 }
 
 /**************************************************************************************************/
@@ -161,12 +164,13 @@ void WarGrey::SCADA::update_event(IDBSystem* dbc, AlarmEvent* selves, size_t cou
                 refresh_event(selves[i]);
             }
 
-            stmt->bind_parameter(4U, selves[i].uuid);
+            stmt->bind_parameter(5U, selves[i].uuid);
 
-            stmt->bind_parameter(0U, selves[i].type);
-            stmt->bind_parameter(1U, selves[i].name);
-            stmt->bind_parameter(2U, selves[i].ctime);
-            stmt->bind_parameter(3U, selves[i].mtime);
+            stmt->bind_parameter(0U, selves[i].name);
+            stmt->bind_parameter(1U, selves[i].timestamp);
+            stmt->bind_parameter(2U, selves[i].status);
+            stmt->bind_parameter(3U, selves[i].code);
+            stmt->bind_parameter(4U, selves[i].note);
 
             dbc->exec(stmt);
             stmt->reset(true);
