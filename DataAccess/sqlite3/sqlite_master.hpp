@@ -30,8 +30,8 @@ namespace WarGrey::SCADA {
     void create_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, SQLiteMaster& self, bool replace = false);
     void insert_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, SQLiteMaster* selves, size_t count, bool replace = false);
-    std::list<WarGrey::SCADA::SQLiteMaster_pk> list_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = "rowid");
-    std::list<WarGrey::SCADA::SQLiteMaster> select_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = "rowid");
+    std::list<WarGrey::SCADA::SQLiteMaster_pk> list_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::sqlite_master order_by = sqlite_master::rowid, bool asc = true);
+    std::list<WarGrey::SCADA::SQLiteMaster> select_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::sqlite_master order_by = sqlite_master::rowid, bool asc = true);
     std::optional<WarGrey::SCADA::SQLiteMaster> seek_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster_pk where);
     void update_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster& self, bool refresh = true);
     void update_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster* selves, size_t count, bool refresh = true);
@@ -39,11 +39,11 @@ namespace WarGrey::SCADA {
     void delete_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster_pk* wheres, size_t count);
     void drop_sqlite_master(WarGrey::SCADA::IDBSystem* dbc);
 
-    double sqlite_master_average(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = WarGrey::SCADA::sqlite_master::_, bool distinct = false);
-    int64 sqlite_master_count(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = WarGrey::SCADA::sqlite_master::_, bool distinct = false);
-    std::optional<double> sqlite_master_max(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = WarGrey::SCADA::sqlite_master::_, bool distinct = false);
-    std::optional<double> sqlite_master_min(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = WarGrey::SCADA::sqlite_master::_, bool distinct = false);
-    std::optional<double> sqlite_master_sum(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = WarGrey::SCADA::sqlite_master::_, bool distinct = false);
+    double sqlite_master_average(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = sqlite_master::_, bool distinct = false);
+    int64 sqlite_master_count(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = sqlite_master::_, bool distinct = false);
+    std::optional<double> sqlite_master_max(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = sqlite_master::_, bool distinct = false);
+    std::optional<double> sqlite_master_min(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = sqlite_master::_, bool distinct = false);
+    std::optional<double> sqlite_master_sum(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::sqlite_master column = sqlite_master::_, bool distinct = false);
 
     template<size_t N>
     void insert_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, SQLiteMaster (&selves)[N], bool replace = false) {

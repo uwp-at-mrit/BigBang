@@ -39,5 +39,4 @@
             [else (raise-syntax-error 'parse-order-by "#:order-by column is not defined" <order>)]))
     (syntax-parse stx
       [id:id (datum->syntax stx (symbol->string (order-id #'id fields)))]
-      [(order:id by:id) (datum->syntax stx (format "~a ~a" (order-id #'order fields) (syntax-e #'by)))]
       [sexp #'#false])))

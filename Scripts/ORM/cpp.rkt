@@ -3,6 +3,7 @@
 (provide (all-defined-out))
 
 (define cstring 'std::string)
+(define ns:: 'WarGrey::SCADA)
 
 (define &separator
   (lambda []
@@ -113,36 +114,38 @@
     (&linebreak 1)))
 
 (define &#%table
-  (lambda [λname Table Table_pk indent/rowids]
-    (cond [(number? indent/rowids)
-           (&htab indent/rowids) (printf "WarGrey::SCADA::~a ~a(WarGrey::SCADA::~a& self);~n" Table_pk λname Table)]
-          [else (printf "~a WarGrey::SCADA::~a(~a& self) {~n" Table_pk λname Table)
-                (&htab 1)
-                (if (= (length indent/rowids) 1)
-                    (printf "return self.~a;~n" (car indent/rowids))
-                    (printf "return { ~a };~n" (string-join (map (curry format "self.~a") indent/rowids) ", ")))
-                (&brace 0)
-                (&linebreak 1)])))
+  (case-lambda
+    [(λname Table Table_pk indent)
+     (&htab indent) (printf "~a::~a ~a(~a::~a& self);~n" ns:: Table_pk λname ns:: Table)]
+    [(λname Table Table_pk rowids _)
+     (printf "~a ~a::~a(~a& self) {~n" Table_pk ns:: λname Table)
+     (&htab 1)
+     (if (= (length rowids) 1)
+         (printf "return self.~a;~n" (car rowids))
+         (printf "return { ~a };~n" (string-join (map (curry format "self.~a") rowids) ", ")))
+     (&brace 0)
+     (&linebreak 1)]))
 
 (define &make-table
-  (lambda [λname Table fields types defvals indent/default]
-    (cond [(number? indent/default)
-           (&htab indent/default) (printf "WarGrey::SCADA::~a ~a(~a);~n" Table λname (make-arguments fields types defvals 'declare))]
-          [else (printf "~a WarGrey::SCADA::~a(~a) {~n" Table λname (make-arguments fields types defvals 'define))
-                (&htab 1) (printf "~a self;~n" Table)
-                (&linebreak 1)
-                (&htab 1) (printf "~a(self, ~a);~n" indent/default (make-arguments fields types defvals 'call))
-                (&linebreak 1)
-                (&htab 1) (printf "return self;~n")
-                (&brace 0)
-                (&linebreak 1)])))
+  (case-lambda
+    [(λname Table fields types defvals indent)
+     (&htab indent) (printf "~a::~a ~a(~a);~n" ns:: Table λname (make-arguments fields types defvals 'declare))]
+    [(λname Table fields types defvals default-table _)
+     (printf "~a ~a::~a(~a) {~n" Table ns:: λname (make-arguments fields types defvals 'define))
+     (&htab 1) (printf "~a self;~n" Table)
+     (&linebreak 1)
+     (&htab 1) (printf "~a(self, ~a);~n" default-table (make-arguments fields types defvals 'call))
+     (&linebreak 1)
+     (&htab 1) (printf "return self;~n")
+     (&brace 0)
+     (&linebreak 1)]))
 
 (define &default-table
   (case-lambda
     [(λname Table fields types defvals indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self, ~a);~n" λname Table (make-arguments fields types defvals 'declare))]
+     (&htab indent) (printf "void ~a(~a::~a& self, ~a);~n" λname ns:: Table (make-arguments fields types defvals 'declare))]
     [(λname Table fields types defvals)
-     (printf "void WarGrey::SCADA::~a(~a& self, ~a) {~n" λname Table (make-arguments fields types defvals 'define))
+     (printf "void ~a::~a(~a& self, ~a) {~n" ns:: λname Table (make-arguments fields types defvals 'define))
      (for ([field (in-list fields)]
            [val (in-list defvals)])
        (cond [(not val) (&htab 1) (printf "if (~a.has_value()) { self.~a = ~a.value(); }~n" field field field)]
@@ -155,9 +158,9 @@
 (define &refresh-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self);~n" λname Table)]
+     (&htab indent) (printf "void ~a(~a::~a& self);~n" λname ns:: Table)]
     [(λname Table fields autovals)
-     (printf "void WarGrey::SCADA::~a(~a& self) {~n" λname Table)
+     (printf "void ~a::~a(~a& self) {~n" ns:: λname Table)
      (for ([field (in-list fields)]
            [val (in-list autovals)])
        (when (and val)
@@ -166,20 +169,21 @@
      (&linebreak 1)]))
 
 (define &store-table
-  (lambda [λname Table indent/fields]
-    (cond [(number? indent/fields)
-           (&htab indent/fields) (printf "void ~a(WarGrey::SCADA::~a& self, WarGrey::SCADA::IPreparedStatement* stmt);~n" λname Table)]
-          [else (printf "void WarGrey::SCADA::~a(~a& self, IPreparedStatement* stmt) {~n" λname Table)
-                (bind-parameters 'stmt 'self indent/fields 0 1)
-                (&brace 0)
-                (&linebreak 1)])))
+  (case-lambda
+    [(λname Table indent)
+     (&htab indent) (printf "void ~a(~a::~a& self, ~a::IPreparedStatement* stmt);~n" λname ns:: Table ns::)]
+    [(λname Table fields _)
+     (printf "void ~a::~a(~a& self, IPreparedStatement* stmt) {~n" ns:: λname Table)
+     (bind-parameters 'stmt 'self fields 0 1)
+     (&brace 0)
+     (&linebreak 1)]))
 
 (define &restore-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::~a& self, WarGrey::SCADA::IPreparedStatement* stmt);~n" λname Table)]
+     (&htab indent) (printf "void ~a(~a::~a& self, ~a::IPreparedStatement* stmt);~n" λname ns:: Table ns::)]
     [(λname Table fields types not-nulls rowids)
-     (printf "void WarGrey::SCADA::~a(~a& self, IPreparedStatement* stmt) {~n" λname Table)
+     (printf "void ~a::~a(~a& self, IPreparedStatement* stmt) {~n" ns:: λname Table)
      (for ([field (in-list fields)]
            [type (in-list types)]
            [n-nil (in-list not-nulls)]
@@ -194,12 +198,12 @@
 (define &table-aggregate
  (case-lambda
    [(table λname type indent)
-    (&htab indent) (printf "~a ~a_~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a column = WarGrey::SCADA::~a::_, bool distinct = false);~n"
-                           type table λname table table)]
-   [(table λname type query_value columns_infos)
-    (printf "~a WarGrey::SCADA::~a_~a(WarGrey::SCADA::IDBSystem* dbc, ~a column, bool distinct) {~n" type table λname table)
-    (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" columns_infos)
-    (&htab 1) (printf "const char* colname = ((column == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(column)].name);~n" table columns_infos)
+    (&htab indent) (printf "~a ~a_~a(~a::IDBSystem* dbc, ~a::~a column = ~a::_, bool distinct = false);~n"
+                           type table λname ns:: ns:: table table)]
+   [(table λname type query_value column_infos)
+    (printf "~a ~a::~a_~a(~a::IDBSystem* dbc, ~a column, bool distinct) {~n" type ns:: table λname ns:: table)
+    (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
+    (&htab 1) (printf "const char* colname = ((column == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(column)].name);~n" table column_infos)
     (&linebreak 1)
     (&htab 1) (printf "return dbc->~a(vsql->table_~a(~s, colname, distinct));~n" query_value λname (symbol->string table))
     (&brace 0)
@@ -209,9 +213,9 @@
 (define &create-table
   (case-lambda
     [(λname indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);~n" λname)]
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, bool if_not_exists = true);~n" λname ns::)]
     [(λname tablename column_infos table_rowids)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, bool if_not_exists) {~n" λname)
+     (printf "void ~a::~a(IDBSystem* dbc, bool if_not_exists) {~n" ns:: λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->create_table(~s, ~a, sizeof(~a)/sizeof(char*), if_not_exists);~n" cstring (symbol->string tablename) table_rowids table_rowids)
      (&linebreak 1)
@@ -222,14 +226,14 @@
 (define &insert-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a& self, bool replace = false);~n" λname Table)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname Table)]
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a& self, bool replace = false);~n" λname ns:: Table)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a* selves, size_t count, bool replace = false);~n" λname ns:: Table)]
     [(λname Table tablename store column_infos)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a& self, bool replace) {~n" λname Table)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a& self, bool replace) {~n" ns:: λname Table)
      (&htab 1) (printf "~a(dbc, &self, 1, replace);~n" λname)
      (&brace 0)
      (&linebreak 1)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, size_t count, bool replace) {~n" λname Table)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a* selves, size_t count, bool replace) {~n" ns:: λname Table)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->insert_into(~s, replace);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -249,15 +253,16 @@
 
 (define &list-table
   (case-lambda
-    [(λname Table_pk order_by indent)
+    [(λname Table_pk tablename order_by indent)
      (&htab indent)
-     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = ~s);~n"
-             Table_pk λname (or order_by 'nullptr))]
+     (printf "std::list<~a::~a> ~a(~a::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, ~a::~a order_by = ~a::~a, bool asc = true);~n"
+             ns:: Table_pk λname ns:: ns:: tablename tablename (or order_by '_))]
     [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
      (define rowcount (length rowids))
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, uint64 limit, uint64 offset, const char* order_by) {~n" Table_pk λname)
+     (printf "std::list<~a> ~a::~a(IDBSystem* dbc, uint64 limit, uint64 offset, ~a order_by, bool asc) {~n" Table_pk ns:: λname tablename)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
-     (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, ~a, sizeof(~a)/sizeof(char*), limit, offset);~n" cstring (symbol->string tablename) table-rowids table-rowids)
+     (&htab 1) (printf "const char* colname = ((column == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(column)].name);~n" tablename column_infos)
+     (&htab 1) (printf "~a sql = vsql->select_from(~s, colname, asc, ~a, sizeof(~a)/sizeof(char*), limit, offset);~n" cstring (symbol->string tablename) table-rowids table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&htab 1) (printf "std::list<~a> queries;~n" Table_pk)
      (&linebreak 1)
@@ -284,14 +289,15 @@
 
 (define &select-table
   (case-lambda
-    [(λname Table order_by indent)
+    [(λname Table tablename order_by indent)
      (&htab indent)
-     (printf "std::list<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, const char* order_by = ~s);~n"
-             Table λname (or order_by 'nullptr))]
-    [(λname Table tablename restore column_infos)
-     (printf "std::list<~a> WarGrey::SCADA::~a(IDBSystem* dbc, uint64 limit, uint64 offset, const char* order_by) {~n" Table λname)
+     (printf "std::list<~a::~a> ~a(~a::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, ~a::~a order_by = ~a::~a, bool asc = true);~n"
+             ns:: Table λname ns:: ns:: tablename tablename (or order_by '_))]
+    [(λname Table tablename restore column_infos _)
+     (printf "std::list<~a> ~a::~a(IDBSystem* dbc, uint64 limit, uint64 offset, ~a order_by, bool asc) {~n" Table ns:: λname tablename)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
-     (&htab 1) (printf "~a sql = vsql->select_from(~s, order_by, limit, offset);~n" cstring (symbol->string tablename))
+     (&htab 1) (printf "const char* colname = ((column == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(order_by)].name);~n" tablename column_infos)
+     (&htab 1) (printf "~a sql = vsql->select_from(~s, colname, asc, limit, offset);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
      (&htab 1) (printf "std::list<~a> queries;~n" Table)
      (&linebreak 1)
@@ -313,9 +319,9 @@
 (define &seek-table
   (case-lambda
     [(λname Table Table_pk indent)
-     (&htab indent) (printf "std::optional<WarGrey::SCADA::~a> ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a where);~n" Table λname Table_pk)]
+     (&htab indent) (printf "std::optional<~a::~a> ~a(~a::IDBSystem* dbc, ~a::~a where);~n" ns:: Table λname ns:: ns:: Table_pk)]
     [(λname Table tablename restore column_infos Table_pk rowids table-rowids)
-     (printf "std::optional<~a> WarGrey::SCADA::~a(IDBSystem* dbc, ~a where) {~n" Table λname Table_pk)
+     (printf "std::optional<~a> ~a::~a(IDBSystem* dbc, ~a where) {~n" Table ns:: λname Table_pk)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->seek_from(~s, ~a, sizeof(~a)/sizeof(char*));~n" cstring (symbol->string tablename) table-rowids table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -341,15 +347,15 @@
 (define &update-table
   (case-lambda
     [(λname Table indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a& self, bool refresh = true);~n" λname Table)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a* selves, size_t count, bool refresh = true);~n" λname Table)]
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a::~a& self, bool refresh = true);~n" λname ns:: ns:: Table)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a::~a* selves, size_t count, bool refresh = true);~n" λname ns:: ns:: Table)]
     [(λname Table tablename rowids fields table-rowids column_infos refresh)
      (define nonrowids (remove* rowids fields))
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a& self, bool refresh) {~n" λname Table)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a& self, bool refresh) {~n" ns:: λname Table)
      (&htab 1) (printf "~a(dbc, &self, 1);~n" λname)
      (&brace 0)
      (&linebreak 1)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* selves, size_t count, bool refresh) {~n" λname Table)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a* selves, size_t count, bool refresh) {~n" ns:: λname Table)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->update_set(~s, ~a, sizeof(~a)/sizeof(char*));~n" cstring (symbol->string tablename) table-rowids table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -376,14 +382,14 @@
 (define &delete-table
   (case-lambda
     [(λname Table_pk indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a& where);~n" λname Table_pk)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::~a* wheres, size_t count);~n" λname Table_pk)]
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a::~a& where);~n" λname ns:: ns:: Table_pk)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a::~a* wheres, size_t count);~n" λname ns:: ns:: Table_pk)]
     [(λname Table_pk tablename rowids table-rowids column_infos)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a& where) {~n" λname Table_pk)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a& where) {~n" ns:: λname Table_pk)
      (&htab 1) (printf "~a(dbc, &where, 1);~n" λname)
      (&brace 0)
      (&linebreak 1)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc, ~a* wheres, size_t count) {~n" λname Table_pk)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a* wheres, size_t count) {~n" ns:: λname Table_pk)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->delete_from(~s, ~a, sizeof(~a)/sizeof(char*));~n" cstring (symbol->string tablename) table-rowids table-rowids)
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
@@ -404,9 +410,9 @@
 (define &drop-table
   (case-lambda
     [(λname indent)
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc);~n" λname)]
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc);~n" λname ns::)]
     [(λname tablename column_infos)
-     (printf "void WarGrey::SCADA::~a(IDBSystem* dbc) {~n" λname)
+     (printf "void ~a::~a(IDBSystem* dbc) {~n" ns:: λname)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "~a sql = vsql->drop_table(~s);~n" cstring (symbol->string tablename))
      (&linebreak)
@@ -419,8 +425,8 @@
   (case-lambda
     [(λname Table indent)
      (&htab indent) (printf "template<size_t N>~n")
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&selves)[N], bool replace = false) {~n" λname Table)
-     (&htab (+ indent 1)) (printf "WarGrey::SCADA::~a(dbc, selves, N, replace);~n" λname)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a (&selves)[N], bool replace = false) {~n" λname ns:: Table)
+     (&htab (+ indent 1)) (printf "~a::~a(dbc, selves, N, replace);~n" ns:: λname)
      (&brace 1)
      (&linebreak 1)]))
 
@@ -428,8 +434,8 @@
   (case-lambda
     [(λname Table_pk indent)
      (&htab indent) (printf "template<size_t N>~n")
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&wheres)[N]) {~n" λname Table_pk)
-     (&htab (+ indent 1)) (printf "WarGrey::SCADA::~a(dbc, wheres, N);~n" λname)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a (&wheres)[N]) {~n" λname ns:: Table_pk)
+     (&htab (+ indent 1)) (printf "~a::~a(dbc, wheres, N);~n" ns:: λname)
      (&brace 1)
      (&linebreak 1)]))
 
@@ -437,8 +443,8 @@
   (case-lambda
     [(λname Table indent)
      (&htab indent) (printf "template<size_t N>~n")
-     (&htab indent) (printf "void ~a(WarGrey::SCADA::IDBSystem* dbc, ~a (&selves)[N], bool refresh = true) {~n" λname Table)
-     (&htab (+ indent 1)) (printf "WarGrey::SCADA::~a(dbc, selves, N, refresh);~n" λname)
+     (&htab indent) (printf "void ~a(~a::IDBSystem* dbc, ~a (&selves)[N], bool refresh = true) {~n" λname ns:: Table)
+     (&htab (+ indent 1)) (printf "~a::~a(dbc, selves, N, refresh);~n" ns:: λname)
      (&brace 1)
      (&linebreak 1)]))
 
