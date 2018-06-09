@@ -3,9 +3,10 @@
 (require "../../Scripts/ORM/schema.rkt")
 
 (define-table event #:as AlarmEvent #:with [uuid] #:order-by ctime
-  ([uuid     : Integer           #:default pk64_timestamp]
-   [type     : Text              #:default "ERROR" #:not-null]
-   [name     : Text              #:not-null #:unique]
-   [ctime    : Integer           #:default current_milliseconds]
-   [mtime    : Integer           #:auto current_milliseconds])
+  ([uuid      : Integer       #:default pk64_timestamp]
+   [name      : Text          #:not-null]
+   [timestamp : Integer       #:not-null #:default current_milliseconds]
+   [status    : Integer       #:not-null]
+   [code      : Integer]
+   [note      : Text])
   #:include [["dbmisc.hpp"]])
