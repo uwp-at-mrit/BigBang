@@ -2,7 +2,7 @@
 
 (require "../../Scripts/ORM/schema.rkt")
 
-(define-table event #:as AlarmEvent #:with [uuid] #:order-by ctime
+(define-table event #:as AlarmEvent #:with [uuid] #:order-by timestamp
   ([uuid      : Integer       #:default pk64_timestamp]
    [name      : Text          #:not-null]
    [timestamp : Integer       #:not-null #:default current_milliseconds]

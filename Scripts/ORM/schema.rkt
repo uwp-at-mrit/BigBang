@@ -12,15 +12,16 @@
 
 (define-syntax (define-table stx)
   (syntax-parse stx #:datum-literals [:]
-    [(_ table #:as Table #:with primary-key
-        (~optional (~seq #:order-by order-by) #:defaults ([order-by #'#false]))
-        ([field : DataType constraints ...] ...)
-        (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
-             (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
+    [(define-table
+       table #:as Table #:with primary-key
+       (~optional (~seq #:order-by order-by) #:defaults ([order-by #'#false]))
+       ([field : DataType constraints ...] ...)
+       (~or (~optional (~seq #:include addition-hpps) #:name "#:include" #:defaults ([addition-hpps #'[]]))
+            (~optional (~seq #:namespace addition-nses) #:name "#:namespace" #:defaults ([addition-nses #'[]]))) ...)
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
-                    [order_by (parse-order-by #'order-by)]
+                    [order_by (parse-order-by #'order-by (map syntax-e (syntax->list #'(field ...))))]
                     [Table-pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
-                    [([view? RowidType ...]
+                    [([RowidType ...]
                       [(MaybeType defval autoval not-null unique) ...]
                       [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns table-id]
                       [create-table insert-table delete-table update-table select-table seek-table drop-table
@@ -32,7 +33,9 @@
                                    ([<stx> (in-syntax #'([field DataType constraints ...] ...))])
                            (define-values (maybe-pktype field-info) (parse-field-definition tablename pkids <stx>))
                            (values (cons field-info sdleif) (if maybe-pktype (cons maybe-pktype sdiwor) sdiwor))))
-                       (list (cons (< (length sdiwor) (length pkids)) (reverse sdiwor))
+                       (unless (= (length sdiwor) (length pkids))
+                         (raise-syntax-error (syntax-e #'define-table) "primary keys must be defined explicitly" #'primary-key))
+                       (list (reverse sdiwor)
                              (reverse sdleif)
                              (for/list ([fmt (in-list (list "cat-~a.hpp" "cat-~a.cpp" "~a.hpp" "~a.cpp"
                                                             "~a_rowids" "~a_columns" "~a_identity"))])
@@ -42,10 +45,7 @@
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps]
                     [([ns ...] ...) #'addition-nses])
-       #'(begin (when (and view?)
-                  (raise-user-error 'table "primary keys must be defined explicitly"))
-
-                (define cat-table.hpp
+       #'(begin (define cat-table.hpp
                   (lambda [[/dev/stdout (current-output-port)]]
                     (parameterize ([current-output-port /dev/stdout])
                       (&pragma 'once)
