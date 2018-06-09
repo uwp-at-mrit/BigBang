@@ -8,7 +8,7 @@
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
     <WindowsTargetPlatformVersion Condition=" '$(WindowsTargetPlatformVersion)' == '' ">10.0.17134.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformMinVersion>10.0.17134.0</WindowsTargetPlatformMinVersion>
+    <WindowsTargetPlatformMinVersion>10.0.16299.0</WindowsTargetPlatformMinVersion>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -112,7 +112,7 @@
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <AppxPackageDir>D:\Packages\</AppxPackageDir>
+    <AppxPackageDir>D:\Exchange\Packages\</AppxPackageDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -241,6 +241,11 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
+    <Image Include="Assets\WideTile.scale-100.png" />
+    <Image Include="Assets\WideTile.scale-125.png" />
+    <Image Include="Assets\WideTile.scale-150.png" />
+    <Image Include="Assets\WideTile.scale-200.png" />
+    <Image Include="Assets\WideTile.scale-400.png" />
     <Image Include="usr\share\graphlet\ACMode\Breakdown.png" />
     <Image Include="usr\share\graphlet\ACMode\Heating.png" />
     <Image Include="usr\share\graphlet\ACMode\Refrigeration.png" />
@@ -251,6 +256,15 @@
     <Image Include="usr\share\graphlet\Alarm\false.png" />
     <Image Include="usr\share\graphlet\Curtain\false.png" />
     <Image Include="usr\share\graphlet\Curtain\true.png" />
+    <Image Include="usr\share\graphlet\Event\Alerting.png" />
+    <Image Include="usr\share\graphlet\Event\Running.png" />
+    <Image Include="usr\share\graphlet\Event\Stopped.png" />
+    <Image Include="usr\share\graphlet\HomePage\Alerting.png" />
+    <Image Include="usr\share\graphlet\HomePage\Running.png" />
+    <Image Include="usr\share\graphlet\HomePage\Stopped.png" />
+    <Image Include="usr\share\graphlet\Operation\Alerting.png" />
+    <Image Include="usr\share\graphlet\Operation\Running.png" />
+    <Image Include="usr\share\graphlet\Operation\Stopped.png" />
     <Image Include="usr\share\graphlet\Propulsion\Alerting.png" />
     <Image Include="usr\share\graphlet\Propulsion\Running.png" />
     <Image Include="usr\share\graphlet\Propulsion\Stopped.png" />
@@ -282,12 +296,12 @@
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
-    <ClCompile Include="page\alarm.cpp" />
-    <ClCompile Include="page\fire.cpp" />
+    <ClCompile Include="page\log.cpp" />
+    <ClCompile Include="page\operation.cpp" />
     <ClCompile Include="page\generator.cpp" />
     <ClCompile Include="page\homepage.cpp" />
     <ClCompile Include="frame\statusbar.cpp" />
-    <ClCompile Include="page\light.cpp" />
+    <ClCompile Include="page\alarm.cpp" />
     <ClCompile Include="page\camera.cpp" />
     <ClCompile Include="page\propeller.cpp" />
     <ClCompile Include="page\propulsion.cpp" />
@@ -300,12 +314,12 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
     <ClInclude Include="page\airconditioner.hpp" />
-    <ClInclude Include="page\alarm.hpp" />
-    <ClInclude Include="page\fire.hpp" />
+    <ClInclude Include="page\log.hpp" />
+    <ClInclude Include="page\operation.hpp" />
     <ClInclude Include="page\generator.hpp" />
     <ClInclude Include="page\homepage.hpp" />
     <ClInclude Include="frame\statusbar.hpp" />
-    <ClInclude Include="page\light.hpp" />
+    <ClInclude Include="page\alarm.hpp" />
     <ClInclude Include="page\camera.hpp" />
     <ClInclude Include="page\propeller.hpp" />
     <ClInclude Include="page\propulsion.hpp" />

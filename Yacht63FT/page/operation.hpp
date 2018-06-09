@@ -4,10 +4,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class FirePage : public WarGrey::SCADA::Planet {
+	private class OperationPage : public WarGrey::SCADA::Planet {
 	public:
-		~FirePage() noexcept;
-		FirePage(PLCMaster* device, Platform::String^ name);
+		~OperationPage() noexcept;
+		OperationPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

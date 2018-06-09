@@ -4,17 +4,18 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class LightPage : public WarGrey::SCADA::Planet {
+	private class EventPage : public WarGrey::SCADA::Planet {
 	public:
-		~LightPage() noexcept;
-		LightPage(PLCMaster* device, Platform::String^ name);
+		virtual ~EventPage() noexcept;
+
+		EventPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
+		void update(long long count, long long interval, long long uptime) override;
 		void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override;
 
 	private:
-		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 	};
 }

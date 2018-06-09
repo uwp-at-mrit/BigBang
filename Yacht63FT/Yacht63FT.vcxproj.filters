@@ -62,6 +62,15 @@
     <Filter Include="schema">
       <UniqueIdentifier>{7b9efd4a-273d-41b4-becf-45cdc03d50f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\HomePage">
+      <UniqueIdentifier>{5acfa95b-4fa3-49fa-a405-7436ab413385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Operation">
+      <UniqueIdentifier>{a5f1878c-1670-404d-ad78-565185e7b464}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Event">
+      <UniqueIdentifier>{caf8b2f7-bed2-484e-87c7-ddb5b8cd112f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -79,13 +88,7 @@
     <ClCompile Include="page\airconditioner.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\light.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\camera.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
-    <ClCompile Include="page\fire.cpp">
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="page\generator.cpp">
@@ -97,13 +100,19 @@
     <ClCompile Include="page\propulsion.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\alarm.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
     <ClCompile Include="schema\dbtest.cpp" />
+    <ClCompile Include="page\alarm.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\log.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\operation.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -120,13 +129,7 @@
     <ClInclude Include="page\airconditioner.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\light.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\camera.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
-    <ClInclude Include="page\fire.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\generator.hpp">
@@ -138,13 +141,19 @@
     <ClInclude Include="page\propulsion.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\alarm.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
     <ClInclude Include="schema\dbtest.hpp" />
+    <ClInclude Include="page\alarm.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\log.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\operation.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -392,6 +401,48 @@
     </Image>
     <Image Include="usr\share\graphlet\Propulsion\Stopped.png">
       <Filter>usr\share\graphlet\Propulsion</Filter>
+    </Image>
+    <Image Include="Assets\WideTile.scale-100.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideTile.scale-125.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideTile.scale-150.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideTile.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\WideTile.scale-400.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\HomePage\Alerting.png">
+      <Filter>usr\share\graphlet\HomePage</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\HomePage\Running.png">
+      <Filter>usr\share\graphlet\HomePage</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\HomePage\Stopped.png">
+      <Filter>usr\share\graphlet\HomePage</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Operation\Alerting.png">
+      <Filter>usr\share\graphlet\Operation</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Operation\Running.png">
+      <Filter>usr\share\graphlet\Operation</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Operation\Stopped.png">
+      <Filter>usr\share\graphlet\Operation</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Event\Alerting.png">
+      <Filter>usr\share\graphlet\Event</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Event\Running.png">
+      <Filter>usr\share\graphlet\Event</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Event\Stopped.png">
+      <Filter>usr\share\graphlet\Event</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

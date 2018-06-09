@@ -6,8 +6,9 @@
 namespace WarGrey::SCADA {
 	private enum class Yacht {
 		HomePage, Generator, Propeller,
-		AirConditioner, Light, Propulsion, Fire, Alarm,
-		Camera, _
+		AirConditioner, Operation, Propulsion,
+		Event, Alarm,
+		_
 	};
 
 	private interface class INavigatorAction {

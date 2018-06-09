@@ -1,4 +1,4 @@
-﻿#include "page/fire.hpp"
+﻿#include "page/operation.hpp"
 #include "decorator/background.hpp"
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
@@ -17,24 +17,24 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-private enum class F {
+private enum class O {
 	Bridge, BowDeck, SternDeck, Kitchen, Salon, Host,
 	Guest, Passage, Staircase, VIP, Engine, BowCabin,
 	_
 };
 
-static size_t cell_count = static_cast<size_t>(F::_);
+static size_t cell_count = static_cast<size_t>(O::_);
 
 /*************************************************************************************************/
-private class FireBoard final : public PLCConfirmation {
+private class OpBoard final : public PLCConfirmation {
 public:
-	~FireBoard() noexcept {
+	~OpBoard() noexcept {
 		if (this->decorator != nullptr) {
 			this->decorator->destroy();
 		}
 	}
 
-	FireBoard(FirePage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
+	OpBoard(OperationPage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 
 		this->decorator->reference();
@@ -47,7 +47,7 @@ public:
 		float hmargin = design_to_application_width(screen_caption_yoff);
 		float vmargin = design_to_application_height(screen_caption_yoff);
 		
-		for (F room = F::Bridge; room < F::_; room++) {
+		for (O room = O::Bridge; room < O::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
 
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
@@ -70,29 +70,29 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	std::map<F, Labellet*> captions;
-	std::map<F, Bitmaplet*> faces;
-	std::map<F, OptionBitmaplet*> status;
+	std::map<O, Labellet*> captions;
+	std::map<O, Bitmaplet*> faces;
+	std::map<O, OptionBitmaplet*> status;
 		
 private:
 	CanvasTextFormat^ font;
 	CellDecorator* decorator;
-	FirePage* master;
+	OperationPage* master;
 };
 
 /*************************************************************************************************/
-FirePage::FirePage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
+OperationPage::OperationPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
-FirePage::~FirePage() {
+OperationPage::~OperationPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void FirePage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void OperationPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
 		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 6, design_to_application_width(2.0F));
-		FireBoard* fb = new FireBoard(this, cells);
+		OpBoard* fb = new OpBoard(this, cells);
 
 		fb->load_and_flow(width, height);
 
@@ -102,7 +102,7 @@ void FirePage::load(CanvasCreateResourcesReason reason, float width, float heigh
 	}
 }
 
-void FirePage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void OperationPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

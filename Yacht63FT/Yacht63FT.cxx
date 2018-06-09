@@ -15,10 +15,9 @@
 #include "page/propeller.hpp"
 #include "page/propulsion.hpp"
 #include "page/airconditioner.hpp"
-#include "page/light.hpp"
-#include "page/fire.hpp"
+#include "page/log.hpp"
+#include "page/operation.hpp"
 #include "page/alarm.hpp"
-#include "page/camera.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -70,10 +69,9 @@ protected:
 			case Yacht::Propeller: this->add_planet(new PropellerPage(plc_master, name)); break;
 			case Yacht::Propulsion: this->add_planet(new PropulsionPage(plc_master, name)); break;
 			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
-			case Yacht::Light: this->add_planet(new LightPage(plc_master, name)); break;
-			case Yacht::Fire: this->add_planet(new FirePage(plc_master, name)); break;
+			case Yacht::Operation: this->add_planet(new AlarmPage(plc_master, name)); break;
+			case Yacht::Event: this->add_planet(new EventPage(plc_master, name)); break;
 			case Yacht::Alarm: this->add_planet(new AlarmPage(plc_master, name)); break;
-			case Yacht::Camera: this->add_planet(new CameraPage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
 		}
