@@ -91,17 +91,20 @@ public:
 			}
 		}
 
-		{ // load alarm status and yacht
+		{ // load alarm and system status
 			this->decorator->fill_cell_extent(3, &cell_x, &cell_y, &cell_width, &cell_height);
+			px = cell_x + cell_width * 0.5F;
 			py = cell_y + cell_height * 0.5F;
 
 			this->alarm = new OptionBitmaplet("Alarm", design_to_application_width(screen_status_alarm_width));
-			this->yacht = new Bitmaplet("skeleton", design_to_application_width(screen_status_yacht_width));
+			this->alarm->set_value(true);
+
+			this->clock = new Labellet(speak(":clock:") + ": 0000-00-00 00:00:00", this->fonts[1], screen_status_parameter_color);
+			this->ipv4 = new Labellet(speak(":ipv4:") + ": 0.0.0.0", this->fonts[1], screen_status_parameter_color);
 
 			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAlignment::LC);
-			this->master->insert(this->yacht, design_to_application_width(screen_status_yacht_x), py, GraphletAlignment::LC);
-
-			this->alarm->set_value(true);
+			this->master->insert(this->clock, px, py, GraphletAlignment::CB);
+			this->master->insert(this->ipv4, this->clock, GraphletAlignment::LB, GraphletAlignment::LT);
 		}
 	}
 
@@ -117,15 +120,24 @@ public:
 		}
 	}
 
+	void on_timestamp_changed(Platform::String^ timestamp) override {
+		this->clock->set_text(speak(":clock:") + ": " + timestamp);
+	}
+
+	void on_ipv4_address_changed(Platform::String^ ipv4) override {
+		this->ipv4->set_text(speak(":ipv4:") + ": " + ipv4);
+	}
+
 // never deletes these graphlets mannually
 private:
 	OptionBitmaplet* alarm;
-	Bitmaplet* yacht;
 	Bitmaplet* gps;
 	FuelTanklet* oiltank;
 	Batterylet* battery;
 	Labellet* labels[Status::GPS_E + 1];
 	Labellet* parameters[Status::GPS_N + 1];
+	Labellet* clock;
+	Labellet* ipv4;
 		
 private:
 	CanvasTextFormat^ fonts[2];

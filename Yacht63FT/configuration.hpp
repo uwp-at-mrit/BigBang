@@ -21,8 +21,7 @@ static const float screen_height = 1080.0F;
 static const float screen_navigator_height = 90.0F;
 static const float screen_statusbar_height = 215.0F;
 
-static const float screen_menu_width = 288.0F;
-static const float screen_copyright_xoff = screen_menu_width + 34.0F;
+static const float screen_copyright_xoff = 288.0F;
 static const float screen_copyright_yoff = 24.0F;
 
 static const float screen_status_label_xoff = 148.0F;
@@ -30,8 +29,6 @@ static const float screen_status_label_yoff = 24.0F;
 static const float screen_status_parameter_yoff = 120.0F;
 static const float screen_status_alarm_x = 1206.0F;
 static const float screen_status_alarm_width = 160.0F;
-static const float screen_status_yacht_x = 1447.0F;
-static const float screen_status_yacht_width = 409.0F;
 
 static const float screen_caption_yoff = 24.0F;
 

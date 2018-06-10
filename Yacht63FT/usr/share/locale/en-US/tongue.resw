@@ -130,10 +130,10 @@
     <value>Oil Tank</value>
   </data>
   <data name=":system:" xml:space="preserve">
-    <value>四海风行游艇监控系统</value>
+    <value>四海风行 63ft 游艇自动化系统</value>
   </data>
   <data name=":version:" xml:space="preserve">
-    <value>ver: 2017.6.18</value>
+    <value>var: 2017.6.18</value>
   </data>
   <data name="AirConditioner" xml:space="preserve">
     <value>AirConditioner</value>
@@ -329,5 +329,11 @@
   </data>
   <data name="Accumulator" xml:space="preserve">
     <value>Accumulator</value>
+  </data>
+  <data name=":ipv4:" xml:space="preserve">
+    <value>Local IPv4</value>
+  </data>
+  <data name=":clock:" xml:space="preserve">
+    <value>Clock</value>
   </data>
 </root>

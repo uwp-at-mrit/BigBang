@@ -36,17 +36,14 @@ public:
 			this->copyright[i] = new Labellet(speak(copyright_items[i]));
 			this->copyright[i]->set_font(this->fonts[i]);
 			this->copyright[i]->set_color(Colours::GhostWhite);
-
-			if (i == 0) {
-				this->master->insert(this->copyright[i],
-					design_to_application_width(screen_copyright_xoff),
-					design_to_application_height(screen_copyright_yoff));
-			} else {
-				this->master->insert(this->copyright[i],
-					this->copyright[i - 1], GraphletAlignment::LB,
-					GraphletAlignment::LT);
-			}
 		}
+
+		this->master->insert(this->copyright[0],
+			design_to_application_width(screen_copyright_xoff),
+			design_to_application_height(screen_copyright_yoff));
+
+		this->master->insert(this->copyright[1], this->copyright[0], GraphletAlignment::CB, GraphletAlignment::CT);
+		this->master->insert(this->copyright[2], this->copyright[1], GraphletAlignment::LB, GraphletAlignment::LT);
 	}
 
 // never deletes these graphlets mannually
