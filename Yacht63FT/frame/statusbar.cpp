@@ -99,8 +99,8 @@ public:
 			this->alarm = new OptionBitmaplet("Alarm", design_to_application_width(screen_status_alarm_width));
 			this->alarm->set_value(true);
 
-			this->clock = new Labellet(speak(":clock:") + ": 0000-00-00 00:00:00", this->fonts[1], screen_status_parameter_color);
-			this->ipv4 = new Labellet(speak(":ipv4:") + ": 0.0.0.0", this->fonts[1], screen_status_parameter_color);
+			this->clock = new Labellet(this->make_timestamp("0000-00-00 00:00:00"), this->fonts[1], screen_status_parameter_color);
+			this->ipv4 = new Labellet(this->make_ipv4("0.0.0.0"), this->fonts[1], screen_status_parameter_color);
 
 			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAlignment::LC);
 			this->master->insert(this->clock, px, py, GraphletAlignment::CB);
@@ -121,11 +121,20 @@ public:
 	}
 
 	void on_timestamp_changed(Platform::String^ timestamp) override {
-		this->clock->set_text(speak(":clock:") + ": " + timestamp);
+		this->clock->set_text(this->make_timestamp(timestamp));
 	}
 
 	void on_ipv4_address_changed(Platform::String^ ipv4) override {
-		this->ipv4->set_text(speak(":ipv4:") + ": " + ipv4);
+		this->ipv4->set_text(this->make_ipv4(ipv4));
+	}
+
+private:
+	Platform::String^ make_timestamp(Platform::String^ ts) {
+		return speak(":clock:") + ": " + ts;
+	}
+
+	Platform::String^ make_ipv4(Platform::String^ ip) {
+		return speak(":ipv4:") + ": " + ip;
 	}
 
 // never deletes these graphlets mannually
