@@ -192,8 +192,8 @@
   <data name=":t_pipe:" xml:space="preserve">
     <value>Coil Pipe Temperature</value>
   </data>
-  <data name=":t_sea:" xml:space="preserve">
-    <value>Sea Water Temperature</value>
+  <data name=":pd_filter:" xml:space="preserve">
+    <value>Lubricating Oil Filter Pressure Drops</value>
   </data>
   <data name="&lt;celsius&gt;" xml:space="preserve">
     <value>°C</value>
@@ -247,13 +247,13 @@
     <value>Sea Water Pressure</value>
   </data>
   <data name=":P_water:" xml:space="preserve">
-    <value>Cooling Water Pressure</value>
+    <value>Coolant Pressure</value>
   </data>
   <data name=":t_oil:" xml:space="preserve">
     <value>Lubricating Oil Temperature</value>
   </data>
   <data name=":t_water:" xml:space="preserve">
-    <value>Cooling Water Temperature</value>
+    <value>Coolant Temperature</value>
   </data>
   <data name="&lt;rpm&gt;" xml:space="preserve">
     <value>rpm</value>
@@ -264,7 +264,7 @@
   <data name="&lt;frequency&gt;" xml:space="preserve">
     <value>Hz</value>
   </data>
-  <data name="&lt;pressure&gt;" xml:space="preserve">
+  <data name="&lt;mpa&gt;" xml:space="preserve">
     <value>MPa</value>
   </data>
   <data name="&lt;voltage&gt;" xml:space="preserve">
@@ -335,5 +335,11 @@
   </data>
   <data name=":clock:" xml:space="preserve">
     <value>Clock</value>
+  </data>
+  <data name="&lt;kpa&gt;" xml:space="preserve">
+    <value>kPa</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>Sea Water Temperature</value>
   </data>
 </root>

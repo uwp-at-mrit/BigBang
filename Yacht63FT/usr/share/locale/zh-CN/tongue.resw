@@ -192,8 +192,8 @@
   <data name=":t_pipe:" xml:space="preserve">
     <value>盘管温度</value>
   </data>
-  <data name=":t_sea:" xml:space="preserve">
-    <value>海水温度</value>
+  <data name=":pd_filter:" xml:space="preserve">
+    <value>滑油滤器压差</value>
   </data>
   <data name="&lt;celsius&gt;" xml:space="preserve">
     <value>°C</value>
@@ -264,7 +264,7 @@
   <data name="&lt;frequency&gt;" xml:space="preserve">
     <value>Hz</value>
   </data>
-  <data name="&lt;pressure&gt;" xml:space="preserve">
+  <data name="&lt;mpa&gt;" xml:space="preserve">
     <value>MPa</value>
   </data>
   <data name="&lt;voltage&gt;" xml:space="preserve">
@@ -335,5 +335,11 @@
   </data>
   <data name=":clock:" xml:space="preserve">
     <value>时间</value>
+  </data>
+  <data name="&lt;kpa&gt;" xml:space="preserve">
+    <value>kPa</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>海水温度</value>
   </data>
 </root>

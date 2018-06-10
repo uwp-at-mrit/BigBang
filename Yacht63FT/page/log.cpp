@@ -74,7 +74,7 @@ public:
 		create_task(ApplicationData::Current->LocalFolder->CreateFileAsync("log.ams", cco)).then([=](StorageFile^ file) {
 			this->sqlite3 = new SQLite3(file->Path->Data());
 			this->sqlite3->get_logger()->append_log_receiver(this->term);
-			dbtest(this->sqlite3);
+			//dbtest(this->sqlite3);
 		});
 	}
 

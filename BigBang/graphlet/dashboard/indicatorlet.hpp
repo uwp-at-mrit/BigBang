@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ low_color = WarGrey::SCADA::Colours::make(0x30A1F6),
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color = WarGrey::SCADA::Colours::make(0xAEEE00),
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ high_color = WarGrey::SCADA::Colours::make(0xFFB43D),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Black);
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::make(0x505050));
 
 	public:
 		void construct() override;

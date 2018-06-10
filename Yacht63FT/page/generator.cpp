@@ -30,7 +30,7 @@ static const float corner_radius = 8.0F;
 static const float rspeed_label_fx = 0.089F;
 static const float label_fy = 0.25F;
 
-private class GDecorator final : public IPlanetDecorator, public IMsAppx<CanvasBitmap, int> {
+private class GDecorator final : public IPlanetDecorator {
 public:
 	GDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
 		this->region_width = (width - padding) / float(gcount) - padding;
@@ -62,7 +62,7 @@ public:
 		{ // initialize labels
 			CanvasTextFormat^ sfont = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
 			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
-			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
+			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(20.0F));
 
 			this->rspeed = make_text_layout(speak(":rspeed:"), sfont);
 
@@ -71,15 +71,14 @@ public:
 			}
 
 			for (GGauge g = static_cast<GGauge>(0); g < GGauge::_; g++) {
-				this->pressures[g] = make_text_layout(speak(":p_" + g.ToString() + ":"), mfont);
-				this->temperatures[g] = make_text_layout(speak(":t_" + g.ToString() + ":"), mfont);
-			}
-		}
+				if (g == GGauge::sea) {
+					this->fo_filter_pdrop = make_text_layout(speak(":pd_filter:"), mfont);
+				} else {
+					this->temperatures[g] = make_text_layout(speak(":t_" + g.ToString() + ":"), mfont);
+				}
 
-		{ // load icon
-			this->flag_window.Height = design_to_application_height(50.0F);
-			this->flag_window.Width = this->flag_window.Height;
-			this->load(ms_appx_file("flag", ".png", "graphlet"), 0);
+				this->pressures[g] = make_text_layout(speak(":p_" + g.ToString() + ":"), mfont);
+			}
 		}
 	}
 
@@ -140,11 +139,6 @@ public:
 		}
 	}
 
-protected:
-	void on_appx(Windows::Foundation::Uri^ ms_appx, CanvasBitmap^ doc_png, int hint) override {
-		this->flag_png = doc_png;
-	}
-
 private:
 	float region_x(unsigned int g_idx) {
 		return (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
@@ -185,15 +179,6 @@ private:
 		this->fill_rspeed_anchor(idx, rspeed_label_fx, label_fy, &anchor_x, &anchor_y);
 		ds->DrawTextLayout(this->rspeed, anchor_x, anchor_y - offset, this->fgcolors[G::RSpeed]);
 
-		if (this->flag_png != nullptr) {
-			static float xoff = -design_to_application_width(10.0F);
-
-			this->flag_window.X = anchor_x - this->flag_window.Width + xoff;
-			this->flag_window.Y = anchor_y - this->flag_window.Height * 0.5F;
-
-			ds->DrawImage(this->flag_png, this->flag_window);
-		}
-
 		for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 			offset = this->powers[p]->LayoutBounds.Height * 0.5F;
 			this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
@@ -201,9 +186,10 @@ private:
 		}
 
 		for (GGauge g = static_cast<GGauge>(0); g < GGauge::_; g++) {
-			offset = this->temperatures[g]->LayoutBounds.Width * 0.5F;
+			CanvasTextLayout^ upper_target = ((g == GGauge::sea) ? this->fo_filter_pdrop : this->temperatures[g]);
+			offset = upper_target->LayoutBounds.Width * 0.5F;
 			this->fill_gauges_anchor(idx, g, 0.26F, &anchor_x, &anchor_y);
-			ds->DrawTextLayout(this->temperatures[g], anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
+			ds->DrawTextLayout(upper_target, anchor_x - offset, anchor_y, this->fgcolors[G::Gauge]);
 
 			offset = this->pressures[g]->LayoutBounds.Width * 0.5F;
 			this->fill_gauges_anchor(idx, g, 0.76F, &anchor_x, &anchor_y);
@@ -212,15 +198,11 @@ private:
 	}
 
 private:
-	Rect flag_window;
-	CanvasBitmap^ flag_png;
-	Syslog* logger;
-
-private:
 	CanvasTextLayout^ rspeed;
+	CanvasTextLayout^ fo_filter_pdrop;
 	std::map<GPower, CanvasTextLayout^> powers;
-	std::map<GGauge, CanvasTextLayout^> pressures;
 	std::map<GGauge, CanvasTextLayout^> temperatures;
+	std::map<GGauge, CanvasTextLayout^> pressures;
 
 private:
 	ICanvasBrush^ rspeed_bgcolors[gcount];
@@ -277,24 +259,39 @@ public:
 			}
 
 			for (GGauge m = static_cast<GGauge>(0); m < GGauge::_; m++) {
-				this->temperatures[m] = new Dimensionlet("<celsius>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
-				this->pressures[m] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
-				
-				this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
-				this->thermometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-				
-				this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
-				this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+				{ // load upper indicators
+					this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
+					
+					if (m == GGauge::sea) {
+						this->fo_filter_pdmeter = new Indicatorlet(gauge_size, indicator_thickness);
+						this->fo_filter_pdrop = new Dimensionlet("<kpa>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+						
+						this->master->insert(this->fo_filter_pdmeter, anchor_x, anchor_y, GraphletAlignment::CC);
+						this->master->insert(this->fo_filter_pdrop, anchor_x, anchor_y, GraphletAlignment::CB);
 
-				this->thermometers[m]->set_value(0.1F);
+						this->fo_filter_pdmeter->set_value(0.1F);
+					} else {
+						this->thermometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
+						this->temperatures[m] = new Dimensionlet("<celsius>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 
-				this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
-				this->manometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-				
-				this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
-				this->master->insert(this->pressures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+						this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
+						this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+						
+						this->thermometers[m]->set_value(0.5F);
 
-				this->manometers[m]->set_value(0.9F);
+					}
+				}
+
+				{ // load bottom indicators
+					this->manometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
+					this->pressures[m] = new Dimensionlet("<mpa>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+
+					this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
+					this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
+					this->master->insert(this->pressures[m], anchor_x, anchor_y, GraphletAlignment::CB);
+
+					this->manometers[m]->set_value(0.9F);
+				}
 			}
 		}
 	}
@@ -302,6 +299,8 @@ public:
 // never deletes these graphlets mannually
 private:
 	Dimensionlet* speeds[gcount];
+	Dimensionlet* fo_filter_pdrop;
+	Indicatorlet* fo_filter_pdmeter;
 	std::map<GPower, Dimensionlet*> powers;
 	std::map<GGauge, Dimensionlet*> pressures;
 	std::map<GGauge, Dimensionlet*> temperatures;

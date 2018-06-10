@@ -374,12 +374,21 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
-			child->construct(args->Reason, region.Width, region.Height);
-			child->begin_update_sequence();
-			child->load(args->Reason, region.Width, region.Height);
-			child->reflow(region.Width, region.Height);
-			child->end_update_sequence();
-			this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
+			try {
+				child->construct(args->Reason, region.Width, region.Height);
+				child->begin_update_sequence();
+				child->load(args->Reason, region.Width, region.Height);
+				child->reflow(region.Width, region.Height);
+				child->end_update_sequence();
+				this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
+			} catch (Platform::Exception^ e) {
+				if (child->in_update_sequence()) {
+					child->end_update_sequence();
+				}
+
+				this->logger->log_message(Log::Critical, L"constructing planet[%s] failed: %s",
+					child->name()->Data(), e->Message->Data());
+			}
 
 			child = info->next;
 		} while (child != this->head_planet);
