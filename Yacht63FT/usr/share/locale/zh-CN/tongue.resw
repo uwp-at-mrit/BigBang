@@ -133,7 +133,7 @@
     <value>四海风行 63ft 游艇自动化系统</value>
   </data>
   <data name=":version:" xml:space="preserve">
-    <value>var: 2017.6.18</value>
+    <value>ver: 2017.6.18</value>
   </data>
   <data name="AirConditioner" xml:space="preserve">
     <value>空调系统</value>
@@ -147,14 +147,11 @@
   <data name="Central" xml:space="preserve">
     <value>总控</value>
   </data>
-  <data name="Diagram" xml:space="preserve">
+  <data name="Prepulsion" xml:space="preserve">
     <value>PMS 流程</value>
   </data>
   <data name="Kitchen" xml:space="preserve">
     <value>餐厅</value>
-  </data>
-  <data name="Fire" xml:space="preserve">
-    <value>火灾警报</value>
   </data>
   <data name="Generator" xml:space="preserve">
     <value>发电机</value>
@@ -195,7 +192,7 @@
   <data name=":pd_filter:" xml:space="preserve">
     <value>滑油滤器压差</value>
   </data>
-  <data name="&lt;celsius&gt;" xml:space="preserve">
+  <data name="&lt;temperature&gt;" xml:space="preserve">
     <value>°C</value>
   </data>
   <data name="Normal" xml:space="preserve">
@@ -234,8 +231,8 @@
   <data name=":frequency:" xml:space="preserve">
     <value>频率</value>
   </data>
-  <data name=":rspeed:" xml:space="preserve">
-    <value>转速</value>
+  <data name=":pm_rspeed:" xml:space="preserve">
+    <value>推进电机转速</value>
   </data>
   <data name=":cnvt_voltage:" xml:space="preserve">
     <value>变频器交流侧电压</value>
@@ -270,8 +267,8 @@
   <data name="&lt;voltage&gt;" xml:space="preserve">
     <value>V</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>功率</value>
+  <data name=":pm_power:" xml:space="preserve">
+    <value>推进电机功率</value>
   </data>
   <data name="&lt;power&gt;" xml:space="preserve">
     <value>kW</value>
@@ -279,28 +276,28 @@
   <data name="&lt;rspeed&gt;" xml:space="preserve">
     <value>r/min</value>
   </data>
-  <data name="deb_C" xml:space="preserve">
-    <value>驱动端轴承</value>
+  <data name="drive_C" xml:space="preserve">
+    <value>驱动轴承温度</value>
   </data>
-  <data name="ndeb_C" xml:space="preserve">
-    <value>非驱动端轴承</value>
+  <data name="nondrive_C" xml:space="preserve">
+    <value>非驱动轴承温度</value>
   </data>
-  <data name="stern_C" xml:space="preserve">
-    <value>艉温度</value>
+  <data name="thrust_C" xml:space="preserve">
+    <value>推力轴承温度</value>
   </data>
-  <data name="Upw_C" xml:space="preserve">
+  <data name="Up_C" xml:space="preserve">
     <value>U相绕组温度</value>
   </data>
-  <data name="cnvt_C" xml:space="preserve">
-    <value>变频器温度</value>
+  <data name="dc_V" xml:space="preserve">
+    <value>直流母线电压</value>
   </data>
-  <data name="cnvt_V" xml:space="preserve">
-    <value>变频器交流侧电压</value>
+  <data name="storage_V" xml:space="preserve">
+    <value>蓄电池电压</value>
   </data>
-  <data name="Vpw_C" xml:space="preserve">
+  <data name="Vp_C" xml:space="preserve">
     <value>V相绕组温度</value>
   </data>
-  <data name="Wpw_C" xml:space="preserve">
+  <data name="Wp_C" xml:space="preserve">
     <value>W相绕组温度</value>
   </data>
   <data name="Generator1" xml:space="preserve">
@@ -350,5 +347,11 @@
   </data>
   <data name=":voltage:" xml:space="preserve">
     <value>电压</value>
+  </data>
+  <data name="coolant_C" xml:space="preserve">
+    <value>冷却水温度</value>
+  </data>
+  <data name=":rspeed:" xml:space="preserve">
+    <value>转速</value>
   </data>
 </root>

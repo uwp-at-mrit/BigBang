@@ -133,7 +133,7 @@
     <value>四海风行 63ft 游艇自动化系统</value>
   </data>
   <data name=":version:" xml:space="preserve">
-    <value>var: 2017.6.18</value>
+    <value>ver: 2017.6.18</value>
   </data>
   <data name="AirConditioner" xml:space="preserve">
     <value>AirConditioner</value>
@@ -147,14 +147,11 @@
   <data name="Central" xml:space="preserve">
     <value>Central Control</value>
   </data>
-  <data name="Diagram" xml:space="preserve">
+  <data name="Prepulsion" xml:space="preserve">
     <value>PMS</value>
   </data>
   <data name="Kitchen" xml:space="preserve">
     <value>Dining Room</value>
-  </data>
-  <data name="Fire" xml:space="preserve">
-    <value>Fire</value>
   </data>
   <data name="Generator" xml:space="preserve">
     <value>Generator</value>
@@ -237,7 +234,7 @@
   <data name=":rspeed:" xml:space="preserve">
     <value>Rotational Speed</value>
   </data>
-  <data name=":converter_voltage:" xml:space="preserve">
+  <data name=":cnvt_voltage:" xml:space="preserve">
     <value>Converter Alternating Voltage</value>
   </data>
   <data name=":p_oil:" xml:space="preserve">
@@ -270,7 +267,7 @@
   <data name="&lt;voltage&gt;" xml:space="preserve">
     <value>V</value>
   </data>
-  <data name=":power:" xml:space="preserve">
+  <data name=":pm_power:" xml:space="preserve">
     <value>Power</value>
   </data>
   <data name="&lt;power&gt;" xml:space="preserve">
@@ -279,29 +276,29 @@
   <data name="&lt;rspeed&gt;" xml:space="preserve">
     <value>r/min</value>
   </data>
-  <data name="deb_C" xml:space="preserve">
+  <data name="drive_C" xml:space="preserve">
     <value>Driven-End Temperature</value>
   </data>
-  <data name="ndeb_C" xml:space="preserve">
+  <data name="nondrive_C" xml:space="preserve">
     <value>Non-Driven-End Temperature</value>
   </data>
-  <data name="stern_C" xml:space="preserve">
-    <value>Stern Temperature</value>
+  <data name="thrust_C" xml:space="preserve">
+    <value>Thrust Winding Temperature</value>
   </data>
-  <data name="Upw_C" xml:space="preserve">
+  <data name="Up_C" xml:space="preserve">
     <value>U Phase Winding Temperature</value>
   </data>
-  <data name="cnvt_C" xml:space="preserve">
-    <value>Converter Temperature</value>
+  <data name="coolant_C" xml:space="preserve">
+    <value>Coolant Temperature</value>
   </data>
-  <data name="Vpw_C" xml:space="preserve">
+  <data name="Vp_C" xml:space="preserve">
     <value>V Phase Winding Temperature</value>
   </data>
-  <data name="Wpw_C" xml:space="preserve">
+  <data name="Wp_C" xml:space="preserve">
     <value>W Phase Winding Temperature </value>
   </data>
-  <data name="cnvt_V" xml:space="preserve">
-    <value>Converter Alternating Voltage</value>
+  <data name="storage_V" xml:space="preserve">
+    <value>Storage Voltage</value>
   </data>
   <data name="Generator1" xml:space="preserve">
     <value>Generator Group#1</value>
@@ -350,5 +347,11 @@
   </data>
   <data name=":voltage:" xml:space="preserve">
     <value>Voltage</value>
+  </data>
+  <data name=":pm_rspeed:" xml:space="preserve">
+    <value>Propeller Motor Rational Speed</value>
+  </data>
+  <data name="dc_V" xml:space="preserve">
+    <value>DC Bus Voltage</value>
   </data>
 </root>

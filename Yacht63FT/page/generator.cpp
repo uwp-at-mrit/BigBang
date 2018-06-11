@@ -6,7 +6,6 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
-#include "msappx.hxx"
 #include "tongue.hpp"
 #include "text.hpp"
 
