@@ -48,14 +48,15 @@ static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet
 }
 
 static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, float height, Syslog* logger) {
+	planet->enter_shared_section();
+	
 	try {
-		planet->enter_shared_section();
 		planet->draw(ds, width, height);
-		planet->leave_shared_section();
 	} catch (Platform::Exception^ wte) {
-		planet->leave_shared_section();
 		logger->log_message(Log::Warning, L"%s: rendering: %s", planet->name()->Data(), wte->Message->Data());
 	}
+
+	planet->leave_shared_section();
 }
 
 /*************************************************************************************************/
@@ -374,21 +375,19 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
 
+			child->begin_update_sequence();
+
 			try {
 				child->construct(args->Reason, region.Width, region.Height);
-				child->begin_update_sequence();
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
-				child->end_update_sequence();
 				this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 			} catch (Platform::Exception^ e) {
-				if (child->in_update_sequence()) {
-					child->end_update_sequence();
-				}
-
-				this->logger->log_message(Log::Critical, L"constructing planet[%s] failed: %s",
+				this->logger->log_message(Log::Critical, L"%s: constructing: %s",
 					child->name()->Data(), e->Message->Data());
 			}
+
+			child->end_update_sequence();
 
 			child = info->next;
 		} while (child != this->head_planet);

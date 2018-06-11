@@ -745,7 +745,7 @@ void Planet::update(long long count, long long interval, long long uptime) {
 
 void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	CanvasActiveLayer^ layer = nullptr;
-    float3x2 transform = ds->Transform;
+	float3x2 transform = ds->Transform;
 	float transformX = transform.m31;
 	float transformY = transform.m32;
 	float dsX = abs(min(0.0F, transformX));
@@ -753,7 +753,15 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	float dsWidth = Width - max(transformX, 0.0F);
 	float dsHeight = Height - max(transformY, 0.0F);
 
-    this->decorator->draw_before(this, ds, Width, Height);
+#ifdef _DEBUG
+	try {
+#endif
+		this->decorator->draw_before(this, ds, Width, Height);
+#ifdef _DEBUG
+	} catch (Platform::Exception^ e) {
+		this->get_logger()->log_message(Log::Critical, L"%s: predecorating: %s", this->name()->Data(), e->Message->Data());
+	}
+#endif
 
     if (this->head_graphlet != nullptr) {
         IGraphlet* child = this->head_graphlet;
@@ -775,13 +783,42 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					}
 
-					this->decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
-					if (child->ready()) {
-						child->draw(ds, info->x, info->y, width, height);
-					} else {
-						child->draw_progress(ds, info->x, info->y, width, height);
+#ifdef _DEBUG
+					try {
+#endif
+						this->decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+#ifdef _DEBUG
+					} catch (Platform::Exception^ e) {
+						this->get_logger()->log_message(Log::Critical, L"%s: predecorating graphlet: %s",
+							this->name()->Data(), e->Message->Data());
 					}
-					this->decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+#endif
+
+#ifdef _DEBUG
+					try {
+#endif
+						if (child->ready()) {
+							child->draw(ds, info->x, info->y, width, height);
+						} else {
+							child->draw_progress(ds, info->x, info->y, width, height);
+						}
+#ifdef _DEBUG
+					} catch (Platform::Exception^ e) {
+						this->get_logger()->log_message(Log::Critical, L"%s: rendering graphlet: %s",
+							this->name()->Data(), e->Message->Data());
+					}
+#endif	
+
+#ifdef _DEBUG
+					try {
+#endif
+						this->decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+#ifdef _DEBUG
+					} catch (Platform::Exception^ e) {
+						this->get_logger()->log_message(Log::Critical, L"%s: postdecorating graphlet: %s",
+							this->name()->Data(), e->Message->Data());
+					}
+#endif
 
 					if (info->selected) {
 						this->draw_visible_selection(ds, info->x, info->y, width, height);
@@ -810,7 +847,15 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
         ds->DrawRectangle(left, top, width, height, rubberband_color);
     }
 
-    this->decorator->draw_after(this, ds, Width, Height);
+#ifdef _DEBUG
+	try {
+#endif
+		this->decorator->draw_after(this, ds, Width, Height);
+#ifdef _DEBUG
+	} catch (Platform::Exception^ e) {
+		this->get_logger()->log_message(Log::Critical, L"%s: postdecorating: %s", this->name()->Data(), e->Message->Data());
+	}
+#endif
 
 	if (this->numpad->shown()) {
 		float width, height;

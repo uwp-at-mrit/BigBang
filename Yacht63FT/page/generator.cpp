@@ -264,7 +264,7 @@ public:
 					
 					if (m == GGauge::sea) {
 						this->fo_filter_pdmeter = new Indicatorlet(gauge_size, indicator_thickness);
-						this->fo_filter_pdrop = new Dimensionlet("<kpa>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+						this->fo_filter_pdrop = new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 						
 						this->master->insert(this->fo_filter_pdmeter, anchor_x, anchor_y, GraphletAlignment::CC);
 						this->master->insert(this->fo_filter_pdrop, anchor_x, anchor_y, GraphletAlignment::CB);
@@ -272,7 +272,7 @@ public:
 						this->fo_filter_pdmeter->set_value(0.1F);
 					} else {
 						this->thermometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-						this->temperatures[m] = new Dimensionlet("<celsius>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+						this->temperatures[m] = new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 
 						this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAlignment::CC);
 						this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAlignment::CB);
@@ -284,7 +284,7 @@ public:
 
 				{ // load bottom indicators
 					this->manometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-					this->pressures[m] = new Dimensionlet("<mpa>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+					this->pressures[m] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 
 					this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
 					this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAlignment::CC);

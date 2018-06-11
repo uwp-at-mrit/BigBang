@@ -109,8 +109,8 @@ public:
 			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, Colours::make(decorator_text_color));
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new UnionBitmaplet<ACMode>("ACMode", mode_width);
-			this->Tseas[room] = new Dimensionlet("<celsius>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
-			this->Tpipes[room] = new Dimensionlet("<celsius>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
+			this->Tseas[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
+			this->Tpipes[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);

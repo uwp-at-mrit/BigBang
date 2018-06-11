@@ -228,7 +228,7 @@
   <data name="SternDeck" xml:space="preserve">
     <value>艉甲板</value>
   </data>
-  <data name=":current:" xml:space="preserve">
+  <data name=":cnvt_current:" xml:space="preserve">
     <value>电流</value>
   </data>
   <data name=":frequency:" xml:space="preserve">
@@ -237,8 +237,8 @@
   <data name=":rspeed:" xml:space="preserve">
     <value>转速</value>
   </data>
-  <data name=":voltage:" xml:space="preserve">
-    <value>电压</value>
+  <data name=":cnvt_voltage:" xml:space="preserve">
+    <value>变频器交流侧电压</value>
   </data>
   <data name=":p_oil:" xml:space="preserve">
     <value>滑油压力</value>
@@ -264,7 +264,7 @@
   <data name="&lt;frequency&gt;" xml:space="preserve">
     <value>Hz</value>
   </data>
-  <data name="&lt;mpa&gt;" xml:space="preserve">
+  <data name="&lt;pressure&gt;" xml:space="preserve">
     <value>MPa</value>
   </data>
   <data name="&lt;voltage&gt;" xml:space="preserve">
@@ -336,10 +336,19 @@
   <data name=":clock:" xml:space="preserve">
     <value>时间</value>
   </data>
-  <data name="&lt;kpa&gt;" xml:space="preserve">
+  <data name="&lt;pdrop&gt;" xml:space="preserve">
     <value>kPa</value>
   </data>
   <data name=":t_sea:" xml:space="preserve">
     <value>海水温度</value>
+  </data>
+  <data name=":cnvt_temperature:" xml:space="preserve">
+    <value>变频器温度</value>
+  </data>
+  <data name=":current:" xml:space="preserve">
+    <value>电流</value>
+  </data>
+  <data name=":voltage:" xml:space="preserve">
+    <value>电压</value>
   </data>
 </root>

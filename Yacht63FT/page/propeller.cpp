@@ -19,8 +19,8 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class P { Power, Gauge, _ };
-private enum class PPower { power, rspeed, current, _ };
+private enum class P { Metrics0, Gauge, Metrics1, Metrics2, Metrics3, _ };
+private enum class PConverter { temperature, voltage, current, _ };
 private enum class PGauge { cnvt_V, cnvt_C, Upw_C, Vpw_C, Wpw_C, deb_C, ndeb_C, stern_C, _ };
 
 static const unsigned int pcount = 2U;
@@ -36,15 +36,15 @@ public:
 		this->cell_gapsize = design_to_application_width(8.0F);
 
 		this->cell_color = Colours::make(0x131615U);
-		this->fgcolors[P::Power] = Colours::make(0x878787U);
+		this->fgcolors[P::Metrics0] = Colours::make(0x878787U);
 		this->fgcolors[P::Gauge] = Colours::make(0x919191U);
-		this->bgcolors[P::Power] = Colours::make(0x313131U);
+		this->bgcolors[P::Metrics0] = Colours::make(0x313131U);
 		this->bgcolors[P::Gauge] = Colours::make(0x313131U);
 		
-		this->heights[P::Power] = design_to_application_height(125.0F);
-		this->heights[P::Gauge] = height - this->heights[P::Power] - this->region_padding * (static_cast<float>(P::_) + 1.0F);
+		this->heights[P::Metrics0] = design_to_application_height(125.0F);
+		this->heights[P::Gauge] = height - this->heights[P::Metrics0] - this->region_padding * (static_cast<float>(P::_) + 1.0F);
 
-		this->ys[P::Power] = this->region_padding;
+		this->ys[P::Metrics0] = this->region_padding;
 		for (unsigned int region = 1; region < static_cast<unsigned int>(P::_); region++) {
 			P prev = static_cast<P>(region - 1);
 
@@ -55,8 +55,12 @@ public:
 			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
 			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 
-			for (PPower p = static_cast<PPower>(0); p < PPower::_; p++) {
-				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
+			for (unsigned int id = 1; id <= pcount; id++) {
+				this->converter_ids[id - 1] = make_text_layout("M" + id.ToString(), pfont);
+			}
+
+			for (PConverter p = static_cast<PConverter>(0); p < PConverter::_; p++) {
+				this->converters[p] = make_text_layout(speak(":cnvt_" + p.ToString() + ":"), pfont);
 			}
 
 			for (PGauge m = static_cast<PGauge>(0); m < PGauge::_; m++) {
@@ -79,14 +83,14 @@ public:
 	}
 
 public:
-	void fill_power_cell_extent(unsigned int g_idx, PPower p, float* x, float* y, float* width, float* height) {
+	void fill_power_cell_extent(unsigned int g_idx, PConverter p, float* x, float* y, float* width, float* height) {
 		static float cell_height = design_to_application_height(102.0F);
-		static float cell_margin = (this->heights[P::Power] - cell_height) * 0.5F;
+		static float cell_margin = (this->heights[P::Metrics0] - cell_height) * 0.5F;
 		static float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
 
 		float left_x = (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
 		float cell_x = left_x + cell_margin + (cell_width + cell_gapsize) * static_cast<float>(p);
-		float cell_y = this->ys[P::Power] + cell_margin;
+		float cell_y = this->ys[P::Metrics0] + cell_margin;
 
 		SET_VALUES(x, cell_x, y, cell_y);
 		SET_VALUES(width, cell_width, height, cell_height);
@@ -119,7 +123,7 @@ public:
 		SET_VALUES(width, cell_width, height, cell_height);
 	}
 
-	void fill_power_anchor(unsigned int g_idx, PPower p, float fw, float fh, float* x, float* y) {
+	void fill_converter_anchor(unsigned int g_idx, PConverter p, float fw, float fh, float* x, float* y) {
 		float cell_x, cell_y, cell_width, cell_height;
 
 		this->fill_power_cell_extent(g_idx, p, &cell_x, &cell_y, &cell_width, &cell_height);
@@ -154,7 +158,7 @@ private:
 			ds->FillRectangle(x, y, this->region_width, height, color);
 		}
 
-		for (PPower p = static_cast<PPower>(0); p < PPower::_; p++) {
+		for (PConverter p = static_cast<PConverter>(0); p < PConverter::_; p++) {
 			this->fill_power_cell_extent(idx, p, &cell_x, &cell_y, &cell_width, &cell_height);
 			ds->FillRoundedRectangle(cell_x, cell_y, cell_width, cell_height,
 				corner_radius, corner_radius, this->cell_color);
@@ -168,23 +172,33 @@ private:
 	}
 
 	void draw_region_label(CanvasDrawingSession^ ds, unsigned int idx) {
-		float anchor_x, anchor_y, offset;
+		float anchor_x, anchor_y;
 
-		for (PPower p = static_cast<PPower>(0); p < PPower::_; p++) {
-			offset = this->powers[p]->LayoutBounds.Height * 0.5F;
-			this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
-			ds->DrawTextLayout(this->powers[p], anchor_x, anchor_y - offset, this->fgcolors[P::Power]);
+		for (PConverter p = static_cast<PConverter>(0); p < PConverter::_; p++) {
+			this->fill_converter_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
+			anchor_y -= this->converters[p]->LayoutBounds.Height * 0.5F;
+
+			if (static_cast<int>(p) == 0) {
+				CanvasTextLayout^ id = this->converter_ids[idx];
+
+				ds->DrawTextLayout(id, anchor_x, anchor_y, this->fgcolors[P::Metrics0]);
+				ds->DrawTextLayout(this->converters[p], anchor_x + id->LayoutBounds.Width, anchor_y, this->fgcolors[P::Metrics0]);
+			} else {
+				ds->DrawTextLayout(this->converters[p], anchor_x, anchor_y, this->fgcolors[P::Metrics0]);
+			}
 		}
 
 		for (PGauge g = static_cast<PGauge>(0); g < PGauge::_; g++) {
-			offset = this->gauges[g]->LayoutBounds.Width * 0.5F;
 			this->fill_gauges_anchor(idx, g, 0.51F, &anchor_x, &anchor_y);
-			ds->DrawTextLayout(this->gauges[g], anchor_x - offset, anchor_y, this->fgcolors[P::Gauge]);
+
+			anchor_x -= this->gauges[g]->LayoutBounds.Width * 0.5F;
+			ds->DrawTextLayout(this->gauges[g], anchor_x, anchor_y, this->fgcolors[P::Gauge]);
 		}
 	}
 
 private:
-	std::map<PPower, CanvasTextLayout^> powers;
+	CanvasTextLayout^ converter_ids[pcount];
+	std::map<PConverter, CanvasTextLayout^> converters;
 	std::map<PGauge, CanvasTextLayout^> gauges;
 
 private:
@@ -229,10 +243,10 @@ public:
 		for (unsigned int idx = 0; idx < pcount; idx++) {
 			this->decorator->fill_gauge_cell_extent(idx, PGauge::stern_C, nullptr, nullptr, &cell_width, &cell_height);
 
-			for (PPower p = static_cast<PPower>(0); p < PPower::_; p++) {
+			for (PConverter p = static_cast<PConverter>(0); p < PConverter::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
-				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
+				this->decorator->fill_converter_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
 				this->powers[p] = new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
 				this->master->insert(this->powers[p], anchor_x, anchor_y, GraphletAlignment::RC);
 			}
@@ -241,7 +255,7 @@ public:
 				if (g == PGauge::cnvt_V) {
 					this->metrics[g] = new Dimensionlet("<power>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 				} else {
-					this->metrics[g] = new Dimensionlet("<celsius>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+					this->metrics[g] = new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 				}
 				
 				this->decorator->fill_gauges_anchor(idx, g, 0.5F, &anchor_x, &anchor_y);
@@ -257,7 +271,7 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	std::map<PPower, Dimensionlet*> powers;
+	std::map<PConverter, Dimensionlet*> powers;
 	std::map<PGauge, Dimensionlet*> metrics;
 	std::map<PGauge, Indicatorlet*> gauges;
 		
