@@ -5,7 +5,18 @@
 namespace WarGrey::SCADA {
 	private class MrMessageConfiguration final {
 	public:
-		MrMessageConfiguration(size_t alignment_size = 40U);
+		MrMessageConfiguration(size_t dball = 98, size_t alignment_size = 40U, size_t old_protocol_data_size = 0);
+
+	public:
+		bool is_old_protocol();
+
+	public:
+		void set_fcode(char read_signal = 'A', char write_analog_quantity = 'B', char write_digital_quantity = 'C');
+		char read_signal_fcode();
+		char write_analog_quantity_fcode();
+		char write_digital_quantity_fcode();
+
+		size_t read_all_dbcode();
 
 	public:
 		void set_header(size_t value, size_t size);
@@ -32,11 +43,11 @@ namespace WarGrey::SCADA {
 		size_t read_header(Windows::Storage::Streams::IDataReader^ mrin,
 			size_t* head, size_t* fcode, size_t* db_id, size_t* addr0, size_t* addrn, size_t* size);
 		
-		void read_tail(Windows::Storage::Streams::IDataReader^ mrin,
+		void read_body_tail(Windows::Storage::Streams::IDataReader^ mrin,
 			size_t size, uint8* data, size_t* checksum, size_t* eom);
 
 		void write_header(Windows::Storage::Streams::IDataWriter^ mrout, size_t fcode, size_t db_id, size_t addr0, size_t addrn);
-		void write_tail(Windows::Storage::Streams::IDataWriter^ mrout, uint8* data, size_t size);
+		void write_body_tail(Windows::Storage::Streams::IDataWriter^ mrout, uint8* data, size_t size);
 		void write_aligned_tail(Windows::Storage::Streams::IDataWriter^ mrout, uint8* data, size_t size);
 
 	private:
@@ -53,6 +64,15 @@ namespace WarGrey::SCADA {
 		size_t datasize_size;
 		size_t checksum_size;
 		size_t tail_size;
+
+	private:
+		size_t db_read_all;
+		char read_signal;
+		char write_analog_quantity;
+		char write_digital_quantity;
+
+	private:
+		size_t old_protocol_data_size;
 
 	private:
 		unsigned int header_checksum;

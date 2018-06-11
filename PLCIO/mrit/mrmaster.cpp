@@ -198,7 +198,7 @@ void IMRMaster::wait_process_confirm_loop() {
 			}
 
 			uint8* data_pool = new uint8[datasize];
-			this->preference.read_tail(this->mrin, datasize, data_pool, &unused_checksum, &end_of_message);
+			this->preference.read_body_tail(this->mrin, datasize, data_pool, &unused_checksum, &end_of_message);
 
 			if (!this->preference.tail_match(end_of_message, &expected_tail)) {
 				delete[] data_pool;
@@ -208,7 +208,7 @@ void IMRMaster::wait_process_confirm_loop() {
 					this->device_description()->Data(), expected_tail, end_of_message);
 			} else {
 				this->logger->log_message(Log::Debug,
-					L"<received confirmation(%u, %u, %u) comes for command '%c' from device[%s]>",
+					L"<received confirmation(%u, %u, %u) for command '%c' comes from device[%s]>",
 					datablock, addr0, addrn, fcode, this->device_description()->Data());
 
 				if (!this->confirmations.empty()) {
@@ -246,8 +246,8 @@ void IMRMaster::wait_process_confirm_loop() {
 }
 
 void IMRMaster::apply_confirmation(size_t fcode, size_t db, size_t addr0, size_t addrn, uint8* data, size_t size) {
-	if (fcode == MR_READ_SIGNAL) {
-		if (db == MRDB_FOR_ALL) {
+	if (fcode == this->preference.read_signal_fcode()) {
+		if (db == this->preference.read_all_dbcode()) {
 			for (auto confirmation : this->confirmations) {
 				confirmation->on_all_signals(addr0, addrn, data, size, this->get_logger());
 			}
@@ -275,7 +275,7 @@ void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, fl
 
 	bigendian_float_set(flbytes, 0, tidemark);
 
-	this->request(MR_READ_SIGNAL, data_block, addr0, addrn, flbytes, 4);
+	this->request(this->preference.read_signal_fcode(), data_block, addr0, addrn, flbytes, 4);
 }
 
 void MRMaster::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {

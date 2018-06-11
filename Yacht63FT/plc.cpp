@@ -4,11 +4,15 @@
 using namespace WarGrey::SCADA;
 
 PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm) {
-	this->append_confirmation_receiver(this);
+	MrMessageConfiguration config(98, 40L, 1000);
+
+	config.set_fcode(char(0x31));
+
+	this->set_message_preference(config);
 }
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
-	this->read_all_signal(98, 0, 0x11DB, 0.0F);
+	// do nothing, just waiting.
 }
 
 /*************************************************************************************************/

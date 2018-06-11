@@ -59,6 +59,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		std::list<WarGrey::SCADA::IMRConfirmation*> confirmations;
+		WarGrey::SCADA::MrMessageConfiguration preference;
 		WarGrey::SCADA::Syslog* logger;
 
     private:
@@ -71,9 +72,6 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mrin;
 		Windows::Storage::Streams::DataWriter^ mrout;
-
-	private:
-		WarGrey::SCADA::MrMessageConfiguration preference;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
