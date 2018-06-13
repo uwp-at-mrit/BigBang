@@ -11,12 +11,18 @@ PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm) {
 	this->set_message_preference(config);
 }
 
-void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
-	// do nothing, just waiting.
-}
-
 /*************************************************************************************************/
 void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
-	
+	size_t digital_quantity_size = 200U;
+	size_t analog_quantity_size = 800U;
+	size_t total = digital_quantity_size + analog_quantity_size;
+	uint8* analog_data = data + digital_quantity_size;
+
+	if (size == total) {
+		this->on_digital_input_data(data, digital_quantity_size, logger);
+		this->on_analog_input_data(analog_data, size - digital_quantity_size, logger);
+	} else {
+		logger->log_message(Log::Warning, L"data size contract is broken, expected %d, given %d!", total, size);
+	}
 }
 

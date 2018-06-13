@@ -267,8 +267,8 @@ public:
 				this->decorator->fill_cell_anchor(idx, P::Motor, g, 0.5F, 0.5F, &anchor_x, &anchor_y, &cell_width, &cell_height);
 				this->gauges[g] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness);
 
-				this->master->insert(this->gauges[g], anchor_x, anchor_y, GraphletAlignment::CC);
-				this->master->insert(this->motors[g], anchor_x, anchor_y, GraphletAlignment::CB);
+				this->master->insert(this->gauges[g], anchor_x, anchor_y, GraphletAnchor::CC);
+				this->master->insert(this->motors[g], anchor_x, anchor_y, GraphletAnchor::CB);
 
 				this->gauges[g]->set_value(0.5F);
 			}
@@ -295,7 +295,7 @@ private:
 
 			this->decorator->fill_cell_anchor(idx, region, m, 0.9F, 0.75F, &anchor_x, &anchor_y);
 			dest[m] = new Dimensionlet(unit, this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
-			this->master->insert(dest[m], anchor_x, anchor_y, GraphletAlignment::RC);
+			this->master->insert(dest[m], anchor_x, anchor_y, GraphletAnchor::RC);
 		}
 	}
 

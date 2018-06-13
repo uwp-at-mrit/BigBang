@@ -17,7 +17,7 @@
 #include "page/airconditioner.hpp"
 #include "page/log.hpp"
 #include "page/operation.hpp"
-#include "page/alarm.hpp"
+#include "page/gauge.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -69,9 +69,9 @@ protected:
 			case Yacht::Propeller: this->add_planet(new PropellerPage(plc_master, name)); break;
 			case Yacht::Propulsion: this->add_planet(new PropulsionPage(plc_master, name)); break;
 			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
-			case Yacht::Operation: this->add_planet(new AlarmPage(plc_master, name)); break;
+			case Yacht::Operation: this->add_planet(new OperationPage(plc_master, name)); break;
 			case Yacht::Event: this->add_planet(new EventPage(plc_master, name)); break;
-			case Yacht::Alarm: this->add_planet(new AlarmPage(plc_master, name)); break;
+			case Yacht::Gauge: this->add_planet(new GaugePage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}
 		}

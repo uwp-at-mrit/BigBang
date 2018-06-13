@@ -113,10 +113,10 @@ public:
 			this->Tpipes[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
-			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAnchor::CT);
 
-			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAlignment::CB);
-			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_yoffset, GraphletAlignment::CT);
+			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAnchor::CB);
+			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_yoffset, GraphletAnchor::CT);
 
 			this->load_info(this->modes[room], i, ACInfo::mode);
 			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
@@ -130,7 +130,7 @@ private:
 		float anchor_x, anchor_y;
 
 		this->decorator->fill_info_anchor(i, type, &anchor_x, &anchor_y);
-		this->master->insert(g, anchor_x, anchor_y, GraphletAlignment::CB);
+		this->master->insert(g, anchor_x, anchor_y, GraphletAnchor::CB);
 	}
 
 // never deletes these graphlets mannually

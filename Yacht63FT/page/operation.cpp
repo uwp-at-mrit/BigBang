@@ -54,9 +54,9 @@ public:
 			cell_whalf = cell_x + cell_width * 0.5F;
 
 			this->captions[room] = new Labellet(speak(room.ToString()), this->font, Colours::GhostWhite);
-			this->master->insert(this->captions[room], cell_whalf, cell_y + vmargin, GraphletAlignment::CT);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + vmargin, GraphletAnchor::CT);
 
-			this->master->fill_graphlet_location(this->captions[room], nullptr, &cell_top, GraphletAlignment::LB);
+			this->master->fill_graphlet_location(this->captions[room], nullptr, &cell_top, GraphletAnchor::LB);
 			cell_top += vmargin;
 			face_width = cell_width - hmargin * 2.0F;
 			face_height = cell_y + cell_height - cell_top - vmargin;
@@ -64,7 +64,7 @@ public:
 			this->status[room] = new OptionBitmaplet("Fire", face_width, face_height);
 			this->status[room]->set_value(true);
 			
-			this->master->insert(this->status[room], cell_whalf, cell_top, GraphletAlignment::CT);
+			this->master->insert(this->status[room], cell_whalf, cell_top, GraphletAnchor::CT);
 		}
 	}
 

@@ -57,7 +57,7 @@ public:
 				this->labels[i] = new Labellet(speak(captions[i]), this->fonts[0], screen_status_label_color);
 				this->master->insert(this->labels[i],
 					cell_x + label_xoffset, cell_y + label_yoffset,
-					GraphletAlignment::LT);
+					GraphletAnchor::LT);
 			}
 
 			{ // load parameters
@@ -66,18 +66,18 @@ public:
 
 				if (i < Status::GPS_E) {
 					this->parameters[i] = new Labellet("%", this->fonts[1], screen_status_parameter_color);
-					this->master->insert(this->parameters[i], px, py, GraphletAlignment::LT);
+					this->master->insert(this->parameters[i], px, py, GraphletAnchor::LT);
 				} else {
 					this->parameters[Status::GPS_E] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
 					this->parameters[Status::GPS_N] = new Labellet("N:", this->fonts[1], screen_status_parameter_color);
-					this->master->insert(this->parameters[2], px, py, GraphletAlignment::LB);
-					this->master->insert(this->parameters[3], px, py, GraphletAlignment::LT);
+					this->master->insert(this->parameters[2], px, py, GraphletAnchor::LB);
+					this->master->insert(this->parameters[3], px, py, GraphletAnchor::LT);
 				}
 			}
 
 			{ // load icon
 				TextExtent ts = get_text_extent("%", this->fonts[1]);
-				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAlignment::LB);
+				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAnchor::LB);
 
 				switch (i) {
 				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
@@ -87,7 +87,7 @@ public:
 
 				px = cell_x + label_xoffset * 0.5F;
 				py = icon_bottom - ts.bspace;
-				this->master->insert(target, px, py, GraphletAlignment::CB);
+				this->master->insert(target, px, py, GraphletAnchor::CB);
 			}
 		}
 
@@ -102,9 +102,9 @@ public:
 			this->clock = new Labellet(this->make_timestamp("0000-00-00 00:00:00"), this->fonts[1], screen_status_parameter_color);
 			this->ipv4 = new Labellet(this->make_ipv4("0.0.0.0"), this->fonts[1], screen_status_parameter_color);
 
-			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAlignment::LC);
-			this->master->insert(this->clock, px, py, GraphletAlignment::CB);
-			this->master->insert(this->ipv4, this->clock, GraphletAlignment::LB, GraphletAlignment::LT);
+			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAnchor::LC);
+			this->master->insert(this->clock, px, py, GraphletAnchor::CB);
+			this->master->insert(this->ipv4, this->clock, GraphletAnchor::LB, GraphletAnchor::LT);
 		}
 	}
 
@@ -112,20 +112,29 @@ public:
 	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
 		float percentage = std::roundf(flcapacity * 100.0F);
 		
+		this->master->enter_critical_section();
 		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
-
-		{
-			this->oiltank->set_value(flcapacity);
-			this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
-		}
+		this->master->leave_critical_section();
 	}
 
 	void on_timestamp_changed(Platform::String^ timestamp) override {
+		this->master->enter_critical_section();
 		this->clock->set_text(this->make_timestamp(timestamp));
+		this->master->leave_critical_section();
 	}
 
 	void on_ipv4_address_changed(Platform::String^ ipv4) override {
+		this->master->enter_critical_section();
 		this->ipv4->set_text(this->make_ipv4(ipv4));
+		this->master->leave_critical_section();
+	}
+
+public:
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		this->master->enter_critical_section();
+		//this->oiltank->set_value(flcapacity);
+		//this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
+		this->master->leave_critical_section();
 	}
 
 private:

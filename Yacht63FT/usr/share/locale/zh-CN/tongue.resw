@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name=":author:" xml:space="preserve">
-    <value>中船重工 719 研究所</value>
+    <value>中船重工七一九研究所</value>
   </data>
   <data name=":battery:" xml:space="preserve">
     <value>电量</value>
@@ -353,5 +353,38 @@
   </data>
   <data name=":rspeed:" xml:space="preserve">
     <value>转速</value>
+  </data>
+  <data name="BlackTank" xml:space="preserve">
+    <value>黑水柜液位</value>
+  </data>
+  <data name="FreshTank" xml:space="preserve">
+    <value>淡水柜液位</value>
+  </data>
+  <data name="FuelTank" xml:space="preserve">
+    <value>燃油柜液位</value>
+  </data>
+  <data name="WasteTank" xml:space="preserve">
+    <value>油污水柜液位</value>
+  </data>
+  <data name="BowLevel" xml:space="preserve">
+    <value>艏尖舱舱底水位</value>
+  </data>
+  <data name="CabinLevel" xml:space="preserve">
+    <value>住舱舱底水位</value>
+  </data>
+  <data name="FreshPump" xml:space="preserve">
+    <value>冷却海水泵</value>
+  </data>
+  <data name="HoldLevel" xml:space="preserve">
+    <value>机舱舱底水位</value>
+  </data>
+  <data name="SternLevel" xml:space="preserve">
+    <value>艉尖舱舱底水位</value>
+  </data>
+  <data name="StorageLevel" xml:space="preserve">
+    <value>蓄电池舱底水位</value>
+  </data>
+  <data name="WaterPump" xml:space="preserve">
+    <value>淡水泵</value>
   </data>
 </root>

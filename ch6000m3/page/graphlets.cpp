@@ -65,7 +65,7 @@ public:
 			if (this->captions[i] != nullptr) {
 				float y = y0 + halfunit + float(i) * cellsize;
 
-				this->master->move_to(this->captions[i], x0 + label_max_width, y, GraphletAlignment::RC);
+				this->master->move_to(this->captions[i], x0 + label_max_width, y, GraphletAnchor::RC);
 			}
 		}
 
@@ -108,8 +108,8 @@ private:
 		for (size_t i = 0; i < static_cast<unsigned int>(S::_); i++) {
 			float x = x0 + float(i) * cellsize;
 
-			this->master->move_to(gs[i], x, y, GraphletAlignment::CB);
-			this->master->move_to(ls[i], x, y, GraphletAlignment::CT);
+			this->master->move_to(gs[i], x, y, GraphletAnchor::CB);
+			this->master->move_to(ls[i], x, y, GraphletAnchor::CT);
 		}
 	}
 
@@ -170,7 +170,7 @@ void GraphletOverview::reflow(float width, float height) {
 		Stage* stage = maybe_stage->second;
 		float vinset = statusbar_height();
 
-		this->move_to(this->statusline, 0.0F, height, GraphletAlignment::LB);
+		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 		
 		stage->reflow(width, height, vinset);
 		stage->reflow(width, height, vinset);

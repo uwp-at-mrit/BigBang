@@ -50,7 +50,7 @@ public:
 			cell_whalf = cell_x + cell_width * 0.5F;
 
 			this->captions[room] = new Labellet(speak(room.ToString()), this->font, Colours::GhostWhite);
-			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAlignment::CT);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAnchor::CT);
 		}
 
 		/*

@@ -30,7 +30,7 @@ public:
 		Platform::String^ copyright_items[] = { ":system:", ":author:", ":version:" };
 		
 		this->yacht = new Bitmaplet("yacht", 0.0F, height * 0.9F);
-		this->master->insert(this->yacht, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
+		this->master->insert(this->yacht, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 		
 		for (size_t i = 0; i < sizeof(this->copyright) / sizeof(Labellet*); i++) {
 			this->copyright[i] = new Labellet(speak(copyright_items[i]));
@@ -42,8 +42,8 @@ public:
 			design_to_application_width(screen_copyright_xoff),
 			design_to_application_height(screen_copyright_yoff));
 
-		this->master->insert(this->copyright[1], this->copyright[0], GraphletAlignment::CB, GraphletAlignment::CT);
-		this->master->insert(this->copyright[2], this->copyright[1], GraphletAlignment::LB, GraphletAlignment::LT);
+		this->master->insert(this->copyright[1], this->copyright[0], GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->insert(this->copyright[2], this->copyright[1], GraphletAnchor::LB, GraphletAnchor::LT);
 	}
 
 // never deletes these graphlets mannually

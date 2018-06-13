@@ -71,17 +71,17 @@ namespace WarGrey::SCADA {
 
 	public:
 		template<class G>
-		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, GraphletAlignment align = GraphletAlignment::CC, float dx = 0.0F, float dy = 0.0F) {
-			this->map_graphlet_at_anchor(g, g->id, align, dx, dy);
+		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, GraphletAnchor a = GraphletAnchor::CC, float dx = 0.0F, float dy = 0.0F) {
+			this->map_graphlet_at_anchor(g, g->id, a, dx, dy);
 		}
 
 		template<class G>
-		void map_graphlet_at_anchor(G* g, Anchor a, GraphletAlignment align = GraphletAlignment::CC, float dx = 0.0F, float dy = 0.0F) {
+		void map_graphlet_at_anchor(G* g, Anchor a, GraphletAnchor ga = GraphletAnchor::CC, float dx = 0.0F, float dy = 0.0F) {
 			if (this->info != nullptr) {
 				float anchor_x, anchor_y;
 
 				this->fill_anchor_location(a, &anchor_x, &anchor_y, true);
-				this->info->master->move_to(g, anchor_x + dx, anchor_y + dy, align);
+				this->info->master->move_to(g, anchor_x + dx, anchor_y + dy, ga);
 			}
 		}
 

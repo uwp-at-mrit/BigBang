@@ -71,6 +71,9 @@
     <Filter Include="usr\share\graphlet\Event">
       <UniqueIdentifier>{caf8b2f7-bed2-484e-87c7-ddb5b8cd112f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\Gauge">
+      <UniqueIdentifier>{4e7108a7-5e35-41a9-95df-c1e8bb006ed8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -103,9 +106,6 @@
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="page\alarm.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\log.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -114,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="schema\dbtest.cpp">
       <Filter>schema</Filter>
+    </ClCompile>
+    <ClCompile Include="page\gauge.cpp">
+      <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,9 +149,6 @@
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="page\alarm.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\log.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -157,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="schema\dbtest.hpp">
       <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\gauge.hpp">
+      <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -304,12 +307,6 @@
     <Image Include="usr\share\graphlet\Fire\Stopped.png">
       <Filter>usr\share\graphlet\Fire</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\Alarm\Running.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm\Alerting.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Generator\Running.png">
       <Filter>usr\share\graphlet\Generator</Filter>
     </Image>
@@ -336,9 +333,6 @@
     </Image>
     <Image Include="usr\share\graphlet\Propeller\Stopped.png">
       <Filter>usr\share\graphlet\Propeller</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm\Stopped.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
     </Image>
     <Image Include="usr\share\graphlet\Alarm\false.png">
       <Filter>usr\share\graphlet\Alarm</Filter>
@@ -435,6 +429,15 @@
     </Image>
     <Image Include="usr\share\graphlet\Event\Stopped.png">
       <Filter>usr\share\graphlet\Event</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Alerting.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Running.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Stopped.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

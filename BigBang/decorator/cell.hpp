@@ -28,6 +28,8 @@ namespace WarGrey::SCADA {
 			float* x = nullptr, float* y = nullptr,
 			float* width = nullptr, float* height = nullptr);
 
+		void fill_cell_anchor(unsigned int idx, float fx, float fy, float* x = nullptr, float* y = nullptr);
+
 	protected:
 		~CellDecorator() noexcept;
 
