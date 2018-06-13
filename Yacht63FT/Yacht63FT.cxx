@@ -99,7 +99,7 @@ public:
 
 		this->timeline = ref new CompositeTimerAction();
 		this->workspace = ref new PageUniverse(name);
-		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(this->workspace), name);
+		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(plc_master, this->workspace), name);
 		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(plc_master), name);
 
 		this->load_display(this->navigatorbar, fit_width, fit_nav_height);

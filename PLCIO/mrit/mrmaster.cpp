@@ -86,6 +86,12 @@ void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
 	}
 }
 
+void IMRMaster::append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener) {
+	if (listener != nullptr) {
+		this->listeners.push_back(listener);
+	}
+}
+
 void IMRMaster::shake_hands() {
 	if (this->listener != nullptr) {
 		this->listen();
@@ -111,6 +117,7 @@ void IMRMaster::connect() {
 
             this->logger->log_message(Log::Debug, L">> connected to device[%s]", this->device_description()->Data());
 
+			this->notify_connectivity_changed();
 			this->wait_process_confirm_loop();
         } catch (Platform::Exception^ e) {
 			this->logger->log_message(Log::Warning, socket_strerror(e));
@@ -137,7 +144,8 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 	this->mrout = make_socket_writer(plc);
 
 	this->logger->log_message(Log::Debug, L"# device[%s] is accepted", this->device_description()->Data());
-
+	
+	this->notify_connectivity_changed();
 	this->wait_process_confirm_loop();
 }
 
@@ -266,6 +274,15 @@ void IMRMaster::clear() {
 		delete this->mrout;
 
 		this->mrout = nullptr;
+		this->notify_connectivity_changed();
+	}
+}
+
+void IMRMaster::notify_connectivity_changed() {
+	bool connected = this->connected();
+
+	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
+		(*lt)->on_plc_connectivity_changed(this, connected);
 	}
 }
 

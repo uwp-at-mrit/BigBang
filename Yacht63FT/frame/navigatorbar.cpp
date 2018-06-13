@@ -92,7 +92,7 @@ private:
 };
 
 /*************************************************************************************************/
-private class NavigatorBoard final {
+private class NavigatorBoard final : public WarGrey::SCADA::IPLCStatusListener {
 public:
 	NavigatorBoard(Navigatorbar* master) : master(master) {
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(28.13F));
@@ -130,6 +130,19 @@ public:
 		}
 	}
 
+public:
+	void on_plc_connectivity_changed(IPLCMaster* device, bool connected) override {
+		YachtStatus s = (connected ? YachtStatus::Running : YachtStatus::Stopped);
+		
+		this->master->begin_update_sequence();
+
+		for (auto it = items.begin(); it != items.end(); it++) {
+			it->second->set_value(s, true);
+		}
+
+		this->master->end_update_sequence();
+	}
+
 // never deletes these graphlets mannually
 private:
 	std::map<Yacht, Backgroundlet*> backgrounds;
@@ -144,7 +157,8 @@ private:
 /*************************************************************************************************/
 std::map<Navigatorbar*, NavigatorBoard*> dashboards;
 
-Navigatorbar::Navigatorbar(INavigatorAction^ action) : Planet(":navigatorbar:"), action(action) {}
+Navigatorbar::Navigatorbar(IMRMaster* device, INavigatorAction^ action)
+	: Planet(":navigatorbar:"), device(device), action(action) {}
 
 Navigatorbar::~Navigatorbar() {
 	auto maybe_dashboard = dashboards.find(this);
@@ -163,6 +177,8 @@ void Navigatorbar::load(CanvasCreateResourcesReason reason, float width, float h
 		dashboard->load_and_flow(width, height);
 
 		this->set_decorator(new BackgroundDecorator(0x1E1E1E));
+
+		this->device->append_plc_status_listener(dashboard);
 	}
 }
 

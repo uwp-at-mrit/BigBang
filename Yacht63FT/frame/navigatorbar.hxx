@@ -18,7 +18,7 @@ namespace WarGrey::SCADA {
 	private class Navigatorbar : public WarGrey::SCADA::Planet {
 	public:
 		~Navigatorbar() noexcept;
-		Navigatorbar(WarGrey::SCADA::INavigatorAction^ action);
+		Navigatorbar(WarGrey::SCADA::IMRMaster* device, WarGrey::SCADA::INavigatorAction^ action);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -28,6 +28,7 @@ namespace WarGrey::SCADA {
 		void on_navigated_to(WarGrey::SCADA::Yacht page);
 
 	private:
+		WarGrey::SCADA::IMRMaster* device;
 		WarGrey::SCADA::INavigatorAction^ action;
 	};
 }
