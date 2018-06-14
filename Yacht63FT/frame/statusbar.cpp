@@ -110,7 +110,7 @@ public:
 
 public:
 	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
-		float percentage = std::roundf(flcapacity * 100.0F);
+		float percentage = this->make_percentage(flcapacity);
 		
 		this->master->enter_critical_section();
 		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
@@ -132,8 +132,13 @@ public:
 public:
 	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
 		this->master->enter_critical_section();
-		//this->oiltank->set_value(flcapacity);
-		//this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
+		float Vfuel = DI_flref(db4, 117U);
+		float flcapacity = Vfuel / float(0xFFFF);
+		float percentage = this->make_percentage(flcapacity);
+
+		this->oiltank->set_value(flcapacity);
+		this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
+
 		this->master->leave_critical_section();
 	}
 
@@ -144,6 +149,10 @@ private:
 
 	Platform::String^ make_ipv4(Platform::String^ ip) {
 		return speak(":ipv4:") + ": " + ip;
+	}
+
+	float make_percentage(float flcapacity) {
+		return std::roundf(flcapacity * 100.0F);
 	}
 
 // never deletes these graphlets mannually

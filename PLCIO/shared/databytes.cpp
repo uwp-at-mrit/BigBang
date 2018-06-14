@@ -95,6 +95,52 @@ void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* d
 	}
 }
 
+uint8 bigendian_uint8_ref(const uint8* src, size_t idx) {
+	return src[idx];
+}
+
+void bigendian_uint8_set(uint8* dest, size_t idx, uint8 x) {
+	dest[idx] = x;
+}
+
+uint16 bigendian_uint16_ref(const uint8* src, size_t idx) {
+	return GET_INT16_FROM_INT8(src, idx);
+}
+
+void bigendian_uint16_set(uint8* dest, size_t idx, uint16 x) {
+	SET_INT16_TO_INT8(dest, idx, x);
+}
+
+uint32 bigendian_uint32_ref(const uint8* src, size_t idx) {
+	uint32 msb16 = GET_INT16_FROM_INT8(src, idx);
+	uint32 lsb16 = GET_INT16_FROM_INT8(src, idx + 2);
+
+	return (msb16 << 16) + lsb16;
+}
+
+void bigendian_uint32_set(uint8* dest, size_t idx, uint32 x) {
+	uint16 msb16 = x >> 16;
+	uint16 lsb16 = x & 0xFFFF;
+
+	SET_INT16_TO_INT8(dest, idx + 0, msb16);
+	SET_INT16_TO_INT8(dest, idx + 2, lsb16);
+}
+
+uint64 bigendian_uint64_ref(const uint8* src, size_t idx) {
+	uint64 msb32 = bigendian_uint32_ref(src, idx);
+	uint64 lsb32 = bigendian_uint32_ref(src, idx + 4);
+
+	return (msb32 << 32) + lsb32;
+}
+
+void bigendian_uint64_set(uint8* dest, size_t idx, uint64 x) {
+	uint32 msb32 = x >> 32;
+	uint32 lsb32 = x & 0xFFFFFFFF;
+
+	bigendian_uint32_set(dest, idx, msb32);
+	bigendian_uint32_set(dest, idx + 4, lsb32);
+}
+
 float bigendian_float_ref(const uint8* src, size_t idx) {
 	uint8 flbytes[4];
 	float dest = 0.0F;
@@ -118,6 +164,18 @@ void bigendian_float_set(uint8* dest, size_t idx, float src) {
 	dest[idx + 2] = flbytes[1];
 	dest[idx + 1] = flbytes[2];
 	dest[idx + 0] = flbytes[3];
+}
+
+float bigendian_flword_ref(const uint8* src, size_t idx, float scale) {
+	uint16 u16 = bigendian_uint16_ref(src, idx);
+
+	return float(u16) / scale;
+}
+
+void bigendian_flword_set(uint8* dest, size_t idx, float x, float scale) {
+	uint16 u16 = (uint16)(roundf(x * scale));
+
+	bigendian_uint16_set(dest, idx, u16);
 }
 
 bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit) {

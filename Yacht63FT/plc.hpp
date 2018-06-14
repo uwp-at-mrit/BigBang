@@ -4,6 +4,8 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
+	float DI_flref(const uint8* db, size_t idx, float scale = 1.0F);
+
 	private class PLCConfirmation : public WarGrey::SCADA::MRConfirmation {
 	public:
 		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;

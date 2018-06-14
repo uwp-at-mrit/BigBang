@@ -3,6 +3,11 @@
 
 using namespace WarGrey::SCADA;
 
+float WarGrey::SCADA::DI_flref(const uint8* db, size_t idx, float scale) {
+	return bigendian_flword_ref(db, (idx - 1) * 2, scale);
+}
+
+/*************************************************************************************************/
 PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm) {
 	MrMessageConfiguration config(98, 40L, 1000);
 

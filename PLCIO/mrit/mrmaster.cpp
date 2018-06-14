@@ -14,6 +14,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Concurrency;
+
 using namespace Windows::Foundation;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
