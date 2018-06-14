@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class G { RSpeed, Power, Gauge, Alert, _ };
 private enum class GPower { voltage, current, frequency, _ };
-private enum class GMeter { sea, oil, water, _ };
+private enum class GMeter { sea, oil, coolant, _ };
 
 static const unsigned int gcount = 2U;
 
@@ -245,16 +245,16 @@ public:
 		float anchor_x, anchor_y, gauge_size;
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
-			this->decorator->fill_rspeed_anchor(idx, 0.5F, 0.5F, &anchor_x, &anchor_y);
-			this->speeds[idx] = new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor);
-			this->master->insert(this->speeds[idx], anchor_x, anchor_y, GraphletAnchor::CC);
+			this->decorator->fill_rspeed_anchor(idx, 0.64F, 0.5F, &anchor_x, &anchor_y);
+			this->rspeeds[idx] = new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor);
+			this->master->insert(this->rspeeds[idx], anchor_x, anchor_y, GraphletAnchor::CC);
 
 			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
 				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
-				this->powers[p] = new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
-				this->master->insert(this->powers[p], anchor_x, anchor_y, GraphletAnchor::RC);
+				this->powers[p][idx] = new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
+				this->master->insert(this->powers[p][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
 			for (GMeter m = static_cast<GMeter>(0); m < GMeter::_; m++) {
@@ -262,53 +262,106 @@ public:
 					this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
 					
 					if (m == GMeter::sea) {
-						this->foil_filter_pdmeter = new Indicatorlet(gauge_size, indicator_thickness);
-						this->foil_filter_pdrop = new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+						this->foil_filter_pdmeter[idx] = new Indicatorlet(gauge_size, indicator_thickness);
+						this->foil_filter_pdrop[idx] = new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 						
-						this->master->insert(this->foil_filter_pdmeter, anchor_x, anchor_y, GraphletAnchor::CC);
-						this->master->insert(this->foil_filter_pdrop, anchor_x, anchor_y, GraphletAnchor::CB);
-
-						this->foil_filter_pdmeter->set_value(0.1F);
+						this->master->insert(this->foil_filter_pdmeter[idx], anchor_x, anchor_y, GraphletAnchor::CC);
+						this->master->insert(this->foil_filter_pdrop[idx], anchor_x, anchor_y, GraphletAnchor::CB);
 					} else {
-						this->thermometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-						this->temperatures[m] = new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+						this->thermometers[m][idx] = new Indicatorlet(gauge_size, indicator_thickness);
+						this->temperatures[m][idx] = new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 
-						this->master->insert(this->thermometers[m], anchor_x, anchor_y, GraphletAnchor::CC);
-						this->master->insert(this->temperatures[m], anchor_x, anchor_y, GraphletAnchor::CB);
-						
-						this->thermometers[m]->set_value(0.5F);
-
+						this->master->insert(this->thermometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+						this->master->insert(this->temperatures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 					}
 				}
 
 				{ // load bottom indicators
-					this->manometers[m] = new Indicatorlet(gauge_size, indicator_thickness);
-					this->pressures[m] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+					this->manometers[m][idx] = new Indicatorlet(gauge_size, indicator_thickness);
+					this->pressures[m][idx] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
 
 					this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
-					this->master->insert(this->manometers[m], anchor_x, anchor_y, GraphletAnchor::CC);
-					this->master->insert(this->pressures[m], anchor_x, anchor_y, GraphletAnchor::CB);
-
-					this->manometers[m]->set_value(0.9F);
+					this->master->insert(this->manometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+					this->master->insert(this->pressures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 				}
 			}
 		}
 	}
 
 public:
-	void on_analog_input_data(uint8* data, size_t size, Syslog* logger) override {
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		{ // metrics in PMS section
+			size_t db_idx_acc = 11;
+
+			this->set_values(this->powers[GPower::frequency], db4, 3U, db_idx_acc, GraphletAnchor::RB);
+			this->set_values(this->powers[GPower::voltage],   db4, 4U, db_idx_acc, GraphletAnchor::RB);
+			this->set_values(this->powers[GPower::current],   db4, 5U, db_idx_acc, GraphletAnchor::RB);
+		}
+
+		{ // metrics in generator section
+			size_t db_idx_acc = 10;
+
+			this->set_temperature_meter(GMeter::coolant, db4, 76U, db_idx_acc);
+			this->set_pressure_meter(   GMeter::oil,     db4, 77U, db_idx_acc);
+			this->set_temperature_meter(GMeter::oil,     db4, 78U, db_idx_acc);
+			this->set_pressure_meter(GMeter::sea,        db4, 80U, db_idx_acc);
+			this->set_pressure_meter(GMeter::coolant,    db4, 84U, db_idx_acc);
+
+			this->set_values(this->rspeeds, db4, 79U, db_idx_acc, GraphletAnchor::RB);
+			this->set_meters(this->foil_filter_pdrop, this->foil_filter_pdmeter,
+				db4, 83U, db_idx_acc, GraphletAnchor::CC);
+		}
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
+private:
+	void set_meters(Dimensionlet* dims[], Indicatorlet* idts[], uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
+		for (unsigned int idx = 0; idx < gcount; idx++) {
+			float v = AI_flref(db, idx0 + acc * idx);
+
+			dims[idx]->set_value(v, anchor);
+			idts[idx]->set_value(v);
+		}
+	}
+
+	void set_pressure_meter(GMeter m, uint8* db, size_t idx0, size_t acc) {
+		this->set_meters(this->pressures[m], this->manometers[m], db, idx0, acc);
+	}
+
+	void set_temperature_meter(GMeter m, uint8* db, size_t idx0, size_t acc) {
+		this->set_meters(this->temperatures[m], this->thermometers[m], db, idx0, acc);
+	}
+
+private:
+	template<class G>
+	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc) {
+		for (size_t idx = 0; idx < gcount; idx++) {
+			gs[idx]->set_value(AI_flref(db, idx0 + acc * idx));
+		}
+	}
+
+	template<class G>
+	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc, GraphletAnchor a) {
+		for (size_t idx = 0; idx < gcount; idx++) {
+			gs[idx]->set_value(AI_flref(db, idx0 + acc * idx), a);
+		}
 	}
 
 // never deletes these graphlets mannually
 private:
-	Dimensionlet* speeds[gcount];
-	Dimensionlet* foil_filter_pdrop;
-	Indicatorlet* foil_filter_pdmeter;
-	std::map<GPower, Dimensionlet*> powers;
-	std::map<GMeter, Dimensionlet*> pressures;
-	std::map<GMeter, Dimensionlet*> temperatures;
-	std::map<GMeter, Indicatorlet*> manometers;
-	std::map<GMeter, Indicatorlet*> thermometers;
+	Dimensionlet* rspeeds[gcount];
+	Dimensionlet* foil_filter_pdrop[gcount];
+	Indicatorlet* foil_filter_pdmeter[gcount];
+	std::map<GPower, Dimensionlet*[gcount]> powers;
+	std::map<GMeter, Dimensionlet*[gcount]> pressures;
+	std::map<GMeter, Dimensionlet*[gcount]> temperatures;
+	std::map<GMeter, Indicatorlet*[gcount]> manometers;
+	std::map<GMeter, Indicatorlet*[gcount]> thermometers;
 		
 private:
 	CanvasTextFormat^ rspeed_fonts[2];

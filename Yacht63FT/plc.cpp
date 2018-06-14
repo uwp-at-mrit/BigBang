@@ -3,7 +3,7 @@
 
 using namespace WarGrey::SCADA;
 
-float WarGrey::SCADA::DI_flref(const uint8* db, size_t idx, float scale) {
+float WarGrey::SCADA::AI_flref(const uint8* db, size_t idx, float scale) {
 	return bigendian_flword_ref(db, (idx - 1) * 2, scale);
 }
 

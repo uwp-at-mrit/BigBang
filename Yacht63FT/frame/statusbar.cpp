@@ -131,14 +131,16 @@ public:
 
 public:
 	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
-		this->master->enter_critical_section();
-		float Vfuel = DI_flref(db4, 117U);
-		float flcapacity = Vfuel / float(0xFFFF);
+		float flcapacity = AI_flref(db4, 117U, 100.0F);
 		float percentage = this->make_percentage(flcapacity);
+
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
 
 		this->oiltank->set_value(flcapacity);
 		this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
 
+		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
 

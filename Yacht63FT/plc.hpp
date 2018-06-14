@@ -4,7 +4,7 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-	float DI_flref(const uint8* db, size_t idx, float scale = 1.0F);
+	float AI_flref(const uint8* db, size_t idx, float scale = 1.0F);
 
 	private class PLCConfirmation : public WarGrey::SCADA::MRConfirmation {
 	public:

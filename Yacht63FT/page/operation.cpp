@@ -94,7 +94,7 @@ void OperationPage::load(CanvasCreateResourcesReason reason, float width, float 
 		CellDecorator* cells = new CellDecorator(0x1E1E1E, width, height, cell_count, 6, design_to_application_width(2.0F));
 		OpBoard* fb = new OpBoard(this, cells);
 
-		fb->load_and_flow(width, height);
+		// fb->load_and_flow(width, height);
 
 		this->dashboard = fb;
 		this->set_decorator(cells);

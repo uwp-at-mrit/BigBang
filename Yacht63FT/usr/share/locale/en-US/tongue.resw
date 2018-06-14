@@ -243,13 +243,13 @@
   <data name=":p_sea:" xml:space="preserve">
     <value>Sea Water Pressure</value>
   </data>
-  <data name=":P_water:" xml:space="preserve">
+  <data name=":P_coolant:" xml:space="preserve">
     <value>Coolant Pressure</value>
   </data>
   <data name=":t_oil:" xml:space="preserve">
     <value>Lubricating Oil Temperature</value>
   </data>
-  <data name=":t_water:" xml:space="preserve">
+  <data name=":t_coolant:" xml:space="preserve">
     <value>Coolant Temperature</value>
   </data>
   <data name="&lt;rpm&gt;" xml:space="preserve">

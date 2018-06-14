@@ -55,6 +55,23 @@ namespace WarGrey::SCADA {
 				this->notify_updated();
 			}
 		}
+
+		void set_value(T value, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
+			if (this->info == nullptr) {
+				this->set_value(value, force_update);
+			} else if ((this->value != value) || force_update) {
+				float anchor_x, anchor_y;
+
+				this->info->master->fill_graphlet_location(this, &anchor_x, &anchor_y, anchor);
+				this->value = value;
+				this->on_value_change(value);
+
+				this->info->master->begin_update_sequence();
+				this->notify_updated();
+				this->info->master->move_to(this, anchor_x, anchor_y, anchor);
+				this->info->master->end_update_sequence();
+			}
+		}
 		
 	protected:
 		virtual void on_value_change(T value) {}

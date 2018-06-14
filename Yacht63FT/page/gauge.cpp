@@ -81,6 +81,20 @@ public:
 		}
 	}
 
+public:
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->gauges[GGauge::FuelTank]->set_value(AI_flref(db4,  117U));
+		this->gauges[GGauge::FreshTank]->set_value(AI_flref(db4, 119U));
+		this->gauges[GGauge::BlackTank]->set_value(AI_flref(db4, 121U));
+		this->gauges[GGauge::WasteTank]->set_value(AI_flref(db4, 123U));
+		
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
 private:
 	void load_gauge(GGauge id, float fx, float fy, float gwidth, float gheight, float gapsize) {
 		float anchor_x, anchor_y;

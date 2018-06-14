@@ -243,13 +243,13 @@
   <data name=":p_sea:" xml:space="preserve">
     <value>海水压力</value>
   </data>
-  <data name=":p_water:" xml:space="preserve">
+  <data name=":p_coolant:" xml:space="preserve">
     <value>冷却水压力</value>
   </data>
   <data name=":t_oil:" xml:space="preserve">
     <value>滑油温度</value>
   </data>
-  <data name=":t_water:" xml:space="preserve">
+  <data name=":t_coolant:" xml:space="preserve">
     <value>冷却水温度</value>
   </data>
   <data name="&lt;rpm&gt;" xml:space="preserve">
