@@ -131,7 +131,7 @@ public:
 
 public:
 	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
-		float flcapacity = AI_flref(db4, 117U, 100.0F);
+		float flcapacity = AI_ref(db4, 117U, 100.0F);
 		float percentage = this->make_percentage(flcapacity);
 
 		this->master->enter_critical_section();

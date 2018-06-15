@@ -21,7 +21,7 @@ int read_bits(uint8 *src, uint16 address, uint16 quantity, uint8 *dest) {
 	uint8 d_idx = 0;
 
     for (uint16 i = address; i < address + quantity; i++) {
-        byte |= src[i] << shift;
+        byte |= (src[i] << shift);
         if (shift < 7) {
             shift += 1;
         } else {
@@ -68,7 +68,7 @@ void set_bits_from_bytes(uint8 *dest, uint16 idx, uint16 count, const uint8 *src
     uint8 shift = 0;
 
     for (unsigned short i = idx; i < idx + count; i++) {
-        dest[i] = src[(i - idx) / 8] & (1 << shift) ? 1 : 0;
+        dest[i] = ((src[(i - idx) / 8] & (1 << shift)) ? 1 : 0);
         shift = (shift + 1) % 8;
     }
 }
@@ -89,10 +89,12 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count) {
 }
 
 /*************************************************************************************************/
-void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest) {
-	for (size_t i = 0; i < quantity; i++) {
-		dest[i] = bigendian_float_ref(src, address + i * sizeof(float));
-	}
+bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit_idx) {
+	return ((src[idx] & (0b1U << bit_idx)) != 0);
+}
+
+void quantity_bit_set(uint8* src, size_t idx, uint8 bit_idx) {
+	src[idx] = src[idx] | (0b1U << bit_idx);
 }
 
 uint8 bigendian_uint8_ref(const uint8* src, size_t idx) {
@@ -178,6 +180,8 @@ void bigendian_flword_set(uint8* dest, size_t idx, float x, float scale) {
 	bigendian_uint16_set(dest, idx, u16);
 }
 
-bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit) {
-	return ((src[idx] && (0x1 << bit)) != 0);
+void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest) {
+	for (size_t i = 0; i < quantity; i++) {
+		dest[i] = bigendian_float_ref(src, address + i * sizeof(float));
+	}
 }

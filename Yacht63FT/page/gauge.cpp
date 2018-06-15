@@ -86,10 +86,10 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->gauges[GGauge::FuelTank]->set_value(AI_flref(db4,  117U));
-		this->gauges[GGauge::FreshTank]->set_value(AI_flref(db4, 119U));
-		this->gauges[GGauge::BlackTank]->set_value(AI_flref(db4, 121U));
-		this->gauges[GGauge::WasteTank]->set_value(AI_flref(db4, 123U));
+		this->gauges[GGauge::FuelTank]->set_value(AI_ref(db4,  117U));
+		this->gauges[GGauge::FreshTank]->set_value(AI_ref(db4, 119U));
+		this->gauges[GGauge::BlackTank]->set_value(AI_ref(db4, 121U));
+		this->gauges[GGauge::WasteTank]->set_value(AI_ref(db4, 123U));
 		
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();

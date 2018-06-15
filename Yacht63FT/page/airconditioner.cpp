@@ -7,6 +7,7 @@
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
+#include "string.hpp"
 #include "text.hpp"
 
 using namespace WarGrey::SCADA;
@@ -18,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class AC { Bridge, VIP, Central, Salon, Host, Guest, _ };
+private enum class AC { Bridge, VIP, Salon, Host, Guest, _ };
 private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
 private enum class ACMode { Breakdown, Heating, Refrigeration, _ };
 private enum class ACStatus { Normal };
@@ -40,11 +41,11 @@ public:
 
 public:
 	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
-		for (unsigned int i = 0; i < cell_count; i++) {
-			this->draw_text_ct(ds, i, ACInfo::mode);
-			this->draw_text_ct(ds, i, ACInfo::t_sea);
-			this->draw_text_ct(ds, i, ACInfo::t_pipe);
-			this->draw_text_ct(ds, i, ACInfo::aux);
+		for (unsigned int idx = 0; idx < cell_count; idx++) {
+			this->draw_text_ct(ds, idx, ACInfo::mode);
+			this->draw_text_ct(ds, idx, ACInfo::t_sea);
+			this->draw_text_ct(ds, idx, ACInfo::t_pipe);
+			this->draw_text_ct(ds, idx, ACInfo::aux);
 		}
 	}
 
@@ -96,33 +97,73 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
-		float label_yoffset = design_to_application_height(screen_caption_yoff);
+		float label_offset = design_to_application_height(24.0F);
 		float icon_width = design_to_application_width(64.0F);
 		float mode_width = design_to_application_width(46.0F);
 
-		for (AC room = AC::Bridge; room < AC::_; room++) {
+		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
 			unsigned int i = static_cast<unsigned int>(room);
 
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
 			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, Colours::make(decorator_text_color));
+			this->temperatures[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->captions[room] = new Labellet(speak(room.ToString()), this->fonts[0], Colours::GhostWhite);
 			this->modes[room] = new UnionBitmaplet<ACMode>("ACMode", mode_width);
 			this->Tseas[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->Tpipes[room] = new Dimensionlet("<temperature>", this->fonts[1], this->fonts[2], Colours::GhostWhite);
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
-			this->master->insert(this->captions[room], cell_whalf, cell_y + label_yoffset, GraphletAnchor::CT);
+			this->master->insert(this->captions[room], cell_whalf, cell_y + label_offset, GraphletAnchor::CT);
 
 			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAnchor::CB);
-			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_yoffset, GraphletAnchor::CT);
+			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_offset, GraphletAnchor::CT);
+			this->master->insert(this->temperatures[room], this->thermometers[room], GraphletAnchor::RC, GraphletAnchor::LC, label_offset);
 
 			this->load_info(this->modes[room], i, ACInfo::mode);
 			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
 			this->load_info(this->Tpipes[room], i, ACInfo::t_pipe);
 			this->load_info(this->auxes[room], i, ACInfo::aux);
 		}
+	}
+
+public:
+	void on_digital_input_data(uint8* db28, size_t size, Syslog* logger) override {
+		size_t db_idx0 = 433;
+		size_t db_idx_acc = 8;
+
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
+			size_t idx = db_idx0 + db_idx_acc * static_cast<size_t>(room);
+			unsigned int mask = DI_ref(db28, idx, idx + 6);
+			
+			switch (mask) {
+			case 0b000000: this->modes[room]->set_value(ACMode::Breakdown); break;
+			case 0b000001: case 0b000011: this->modes[room]->set_value(ACMode::Refrigeration); break;
+			case 0b000100: case 0b001100: this->modes[room]->set_value(ACMode::Heating); break;
+			default: logger->log_message(Log::Warning, L"incorrect AI@%d: 0b%S", idx, binumber(mask).c_str());
+			}
+		}
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+	
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		size_t db_idx_acc = 3;
+		
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->set_values(this->temperatures, db4, 101U, db_idx_acc, GraphletAnchor::LC);
+		this->set_values(this->Tpipes,       db4, 102U, db_idx_acc, GraphletAnchor::CC);
+		this->set_values(this->Tseas,        db4, 103U, db_idx_acc, GraphletAnchor::CC);
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
 	}
 
 private:
@@ -133,10 +174,17 @@ private:
 		this->master->insert(g, anchor_x, anchor_y, GraphletAnchor::CB);
 	}
 
+	void set_values(std::map<AC, Dimensionlet*> dims, uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
+		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
+			dims[room]->set_value(AI_ref(db, idx0 + acc * static_cast<size_t>(room)), anchor);
+		}
+	}
+
 // never deletes these graphlets mannually
 private:
-	std::map<AC, Thermometerlet*> thermometers;
 	std::map<AC, Labellet*> captions;
+	std::map<AC, Thermometerlet*> thermometers;
+	std::map<AC, Dimensionlet*> temperatures;
 	std::map<AC, UnionBitmaplet<ACMode>*> modes;
 	std::map<AC, Dimensionlet*> Tseas;
 	std::map<AC, Dimensionlet*> Tpipes;

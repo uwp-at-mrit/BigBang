@@ -63,3 +63,5 @@ size_t wstrlen(const wchar_t* content);
 std::string make_nstring(const char* fmt, ...);
 std::string make_nstring(const wchar_t* wbytes);
 std::string make_nstring(Platform::String^ wstr);
+
+std::string binumber(unsigned int n, size_t bitsize = 0);

@@ -144,9 +144,6 @@
   <data name="Bridge" xml:space="preserve">
     <value>驾驶室</value>
   </data>
-  <data name="Central" xml:space="preserve">
-    <value>总控</value>
-  </data>
   <data name="Prepulsion" xml:space="preserve">
     <value>PMS 流程</value>
   </data>

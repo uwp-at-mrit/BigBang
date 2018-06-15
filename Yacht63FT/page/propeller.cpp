@@ -325,14 +325,14 @@ private:
 	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc, GraphletAnchor a) {
 		for (unsigned int idx = 0; idx < pcount; idx++) {
 			if (gs[idx] != nullptr) {
-				gs[idx]->set_value(AI_flref(db, idx0 + acc * idx), a);
+				gs[idx]->set_value(AI_ref(db, idx0 + acc * idx), a);
 			}
 		}
 	}
 
 	void set_motor_meters(PMoter m, uint8* db, size_t idx0, size_t acc) {
 		for (unsigned int idx = 0; idx < pcount; idx++) {
-			float v = AI_flref(db, idx0 + acc * idx);
+			float v = AI_ref(db, idx0 + acc * idx);
 
 			this->ms[m][idx]->set_value(v, GraphletAnchor::CC);
 			this->gs[m][idx]->set_value(v);

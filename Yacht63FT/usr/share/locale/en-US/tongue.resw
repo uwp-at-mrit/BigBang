@@ -144,9 +144,6 @@
   <data name="Bridge" xml:space="preserve">
     <value>Bridge</value>
   </data>
-  <data name="Central" xml:space="preserve">
-    <value>Central Control</value>
-  </data>
   <data name="Prepulsion" xml:space="preserve">
     <value>PMS</value>
   </data>

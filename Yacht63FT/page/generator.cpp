@@ -322,7 +322,7 @@ public:
 private:
 	void set_meters(Dimensionlet* dims[], Indicatorlet* idts[], uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
 		for (unsigned int idx = 0; idx < gcount; idx++) {
-			float v = AI_flref(db, idx0 + acc * idx);
+			float v = AI_ref(db, idx0 + acc * idx);
 
 			dims[idx]->set_value(v, anchor);
 			idts[idx]->set_value(v);
@@ -341,14 +341,14 @@ private:
 	template<class G>
 	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc) {
 		for (size_t idx = 0; idx < gcount; idx++) {
-			gs[idx]->set_value(AI_flref(db, idx0 + acc * idx));
+			gs[idx]->set_value(AI_ref(db, idx0 + acc * idx));
 		}
 	}
 
 	template<class G>
 	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc, GraphletAnchor a) {
 		for (size_t idx = 0; idx < gcount; idx++) {
-			gs[idx]->set_value(AI_flref(db, idx0 + acc * idx), a);
+			gs[idx]->set_value(AI_ref(db, idx0 + acc * idx), a);
 		}
 	}
 
