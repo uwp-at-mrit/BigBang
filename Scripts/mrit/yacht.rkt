@@ -4,48 +4,38 @@
 
 (require racket/tcp)
 
-(define memory (make-bytes #x11DC))
+(define memory (make-bytes 1000))
 (define master-ipv4 (vector-ref (current-command-line-arguments) 0))
 
 (define refresh-memory
   (lambda []
-    ;;; DB2
-    (for ([i (in-range 176)])
-      (define fl (round (* (random) 1000)))
-      (real->floating-point-bytes (* fl 0.1) 4 #true memory (+ 3283 (* i 4))))
-    
-    ;;; DB203
-    (for ([i (in-range 280)])
-      (define fl (round (* (random) 1000)))
-      (real->floating-point-bytes (* fl 0.01) 4 #true memory (+ 1121 (* i 4))))
-
-    ;;; DB205
-    (for ([i (in-range 385)])
+    ;;; DB28
+    (for ([i (in-range 200)])
       (define state (arithmetic-shift #x1 (random 8)))
-      (bytes-set! memory (+ 4187 i) state))))
+      (bytes-set! memory i state))
+    
+    ;;; DB4
+    (for ([i (in-range 400)])
+      (define fx (random 0 (add1 #xFFFF)))
+      (integer->integer-bytes fx 2 #false #true memory (+ 200 (* i 2))))))
 
 (with-handlers ([exn:break? void])
   (let connect-send-wait-loop ()
-    (with-handlers ([exn:fail? (λ [e] (fprintf (current-error-port) "~a~n" (exn-message e)))])
-      (parameterize ([current-custodian (make-custodian)])
-        (dynamic-wind
-         (thunk (void))
-         (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break master-ipv4 2000)])
-                  (define-values (local lport remote rport) (tcp-addresses /dev/tcpout #true))
-                  (printf "[connected to ~a:~a]~n" remote rport)
-
-                  (let wait-read-response-loop ()
-                    (define-values (signature tidemark) (read-mrmsg /dev/tcpin 40))
-                    (define-values (addr0 addrn) (values (mrmsg-addr0 signature) (mrmsg-addrn signature)))
-                    (printf "<tidemark: ~a>~n" (~r (floating-point-bytes->real tidemark #true 0 4) #:precision '(= 3)))
-                    
-                    (refresh-memory)
-                    
-                    (printf ">> [sent ~a bytes to ~a:~a]~n"
-                            (write-mrmsg /dev/tcpout (mrmsg-code signature) (mrmsg-block signature) addr0 addrn memory)
-                            remote rport)
-                    (wait-read-response-loop))))
-         (thunk (custodian-shutdown-all (current-custodian))))))
-    
+    (parameterize ([current-custodian (make-custodian)])
+      (dynamic-wind
+       (thunk (void))
+       (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break master-ipv4 2000)])
+                (define-values (local lport remote rport) (tcp-addresses /dev/tcpout #true))
+                (printf "[connected to ~a:~a]~n" remote rport)
+                
+                (let sleep-push-loop ()
+                  (refresh-memory)
+                  
+                  (printf ">> [sent ~a bytes to ~a:~a]~n" (write-old-mrmsg /dev/tcpout #x31 memory) remote rport)
+                  
+                  (sleep 1)
+                  (sleep-push-loop))))
+       (thunk (custodian-shutdown-all (current-custodian)))))
+  
     (sleep 1)
     (connect-send-wait-loop)))

@@ -65,3 +65,24 @@
     (printf "[sending message signature: ~a ~a]~n" (bytes->hex-string header) (bytes->hex-string tail))
     
     (+ hsize msize tsize)))
+
+(define write-old-mrmsg
+  (lambda [/dev/tcpout code [memory #false]]
+    (define header (make-bytes 2))
+    (define tail (make-bytes 2))
+    (define dsize (if (bytes? memory) (bytes-length memory) 0))
+
+    (bytes-set! header 0 (char->integer #\$))
+    (bytes-set! header 1 code)
+    
+    (integer->integer-bytes #x0D0A 2 #false #true tail 0)
+    
+    (define hsize (write-bytes header /dev/tcpout 0))
+    (define msize (if (bytes? memory) (write-bytes memory /dev/tcpout) 0))
+    (define tsize (write-bytes tail /dev/tcpout 0))
+
+    (flush-output /dev/tcpout)
+
+    (printf "[sending message signature: ~a ~a]~n" (bytes->hex-string header) (bytes->hex-string tail))
+    
+    (+ hsize msize tsize)))
