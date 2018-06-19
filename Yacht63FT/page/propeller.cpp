@@ -21,7 +21,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum class P { Converter, Motor, Bus, Winding, Bearing, _ };
 private enum class PConverter { temperature, voltage, current, _ };
 private enum class PMoter { power, rspeed, _ };
-private enum class PBus { dc_V, _ };
+private enum class PBus { dc_V, storage_V, coolant_C, _ };
 private enum class PWinding { Up_C, Vp_C, Wp_C, _ };
 private enum class PBearing { drive_C, nondrive_C, thrust_C, _ };
 

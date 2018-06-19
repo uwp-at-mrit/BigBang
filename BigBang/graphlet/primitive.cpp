@@ -8,6 +8,9 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
+using namespace Microsoft::Graphics::Canvas::Brushes;
+
+/*************************************************************************************************/
 Rect graphlet_enclosing_box(IGraphlet* g, float x, float y, float3x2 transform) {
 	float width, height;
 
@@ -33,7 +36,7 @@ float2 WarGrey::SCADA::pipe_connecting_position(IPipelet* prev, IPipelet* pipe, 
 
 	pipe_connecting_position(prev, pipe, &x, &y, fx, fy);
 
-	return float2{ x, y };
+	return float2(x, y);
 }
 
 /*************************************************************************************************/
