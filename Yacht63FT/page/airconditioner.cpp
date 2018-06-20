@@ -97,6 +97,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
+		float thermomenter_rx, thermomenter_y, mercury_center_y;
 		float label_offset = design_to_application_height(24.0F);
 		float icon_width = design_to_application_width(64.0F);
 		float mode_width = design_to_application_width(46.0F);
@@ -116,10 +117,12 @@ public:
 			this->auxes[room] = new Labellet(speak(ACStatus::Normal.ToString()), this->fonts[1], Colours::GhostWhite);
 
 			this->master->insert(this->captions[room], cell_whalf, cell_y + label_offset, GraphletAnchor::CT);
-
 			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAnchor::CB);
+
+			this->thermometers[room]->fill_mercury_extent(0.5F, nullptr, &mercury_center_y);
 			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_offset, GraphletAnchor::CT);
-			this->master->insert(this->temperatures[room], this->thermometers[room], GraphletAnchor::RC, GraphletAnchor::LC, label_offset);
+			this->master->fill_graphlet_location(this->thermometers[room], &thermomenter_rx, &thermomenter_y, GraphletAnchor::RT);
+			this->master->insert(this->temperatures[room], thermomenter_rx + label_offset, thermomenter_y + mercury_center_y, GraphletAnchor::LC);
 
 			this->load_info(this->modes[room], i, ACInfo::mode);
 			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
@@ -182,7 +185,7 @@ private:
 
 	void set_temperatures(uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::LC) {
 		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
-			float t = AI_ref(db, idx0 + acc * static_cast<size_t>(room));
+			float t = AI_ref(db, idx0 + acc * static_cast<size_t>(room)) - 30.0F;
 
 			this->temperatures[room]->set_value(t, anchor);
 			this->thermometers[room]->set_value(t);

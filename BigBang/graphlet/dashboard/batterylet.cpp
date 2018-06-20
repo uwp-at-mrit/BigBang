@@ -13,6 +13,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static unsigned int default_colors[] = {
+	0xF00D0D,
+	0xFFB33C,
+	0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100
+};
+
 private class BatteryStatus final : public ISystemStatusListener {
 	friend class WarGrey::SCADA::Batterylet;
 public:
@@ -27,10 +33,11 @@ private:
 static BatteryStatus* battery_status = nullptr;
 
 /*************************************************************************************************/
-Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush^ ncolor, ICanvasBrush^ wcolor, ICanvasBrush^ ecolor)
-	: width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor)
-	, normal_color(ncolor), warning_color(wcolor), emergency_color(ecolor) {
+Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(0.0F, 1.0F, width, height, bcolor, stops) {}
 
+Batterylet::Batterylet(float emin, float emax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(emin, emax), width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
@@ -41,6 +48,8 @@ Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, ICanvasB
 		battery_status = new BatteryStatus();
 		register_system_status_listener(battery_status);
 	}
+
+	this->color_stops = ((stops == nullptr) ? make_gradient_stops(default_colors) : stops);
 }
 
 void Batterylet::construct() {
@@ -69,6 +78,10 @@ void Batterylet::construct() {
 	this->electricity.Width = this->width - this->electricity.X * 2.0F;
 	this->electricity.Height = battery_height - (this->electricity.Y - battery_y) * 2.0F;
 
+	float start_y = this->electricity.Y + this->electricity.Height;
+	float stop_y = this->electricity.Y;
+	this->electricity_color = make_linear_gradient_brush(0.0F, start_y, 0.0F, stop_y, this->color_stops);
+
 	auto battery_region = rounded_rectangle(0.0F, battery_y, this->width, battery_height, corner_radius, corner_radius);
 	auto electricity_region = rectangle(this->electricity);
 	
@@ -94,24 +107,16 @@ void Batterylet::update(long long count, long long interval, long long uptime) {
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float capacity = this->get_value();
+	float capacity = this->get_percentage();
+	float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
+	float capacity_x = x + this->electricity.X;
+	float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
 
-	if (capacity > 0.0F) {
-		float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
-		float capacity_x = x + this->electricity.X;
-		float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
-		ICanvasBrush^ capacity_color = this->normal_color;
+	brush_translate(this->electricity_color, x, y);
 
-		if (capacity < 0.1F) {
-			capacity_color = this->emergency_color;
-		} else if (capacity < 0.2F) {
-			capacity_color = warning_color;
-		}
-
-		ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
-			this->electricity.Width + 2.0F, capacity_height + 2.0F,
-			capacity_color);
-	}
+	ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
+		this->electricity.Width + 2.0F, capacity_height + 2.0F,
+		this->electricity_color);
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }

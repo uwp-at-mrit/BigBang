@@ -21,8 +21,17 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		void fill_mercury_extent(float* x = nullptr, float* y = nullptr, float* width = nullptr, float* height = nullptr);
+		void fill_mercury_extent(float percentage, float* x = nullptr, float* y = nullptr, float* width = nullptr, float* height = nullptr);
+
+	protected:
+		void on_value_change(float t) override;
+
 	private:
+		GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ mercury_color;
 
@@ -31,5 +40,7 @@ namespace WarGrey::SCADA {
 		float width;
 		float height;
 		float thickness;
+		float mercury_x;
+		float mercury_y;
 	};
 }

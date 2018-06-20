@@ -92,30 +92,34 @@ namespace WarGrey::SCADA {
 	template<typename T>
 	private class IRangelet abstract : public virtual WarGrey::SCADA::IValuelet<T> {
 	public:
-		IRangelet(T vmin, T vmax) : vmin(vmin), vmax(vmax) {}
+		IRangelet(T vmin, T vmax) {
+			if (vmin <= vmax) {
+				this->vmin = vmin;
+				this->vmax = vmax;
+			} else {
+				this->vmin = vmax;
+				this->vmax = vmin;
+			}
+		}
 
 	public:
 		float get_percentage() {
-			static float flmin = static_cast<float>(this->vmin);
-			static float flmax = static_cast<float>(this->vmax);
+			float flmin = static_cast<float>(this->vmin);
+			float flmax = static_cast<float>(this->vmax);
 			float v = static_cast<float>(this->get_value());
 
-			return (v - flmin) / (flmax - flmin);
+			return ((this->vmin == this->vmax) ? 1.0F : ((v - flmin) / (flmax - flmin)));
 		}
 
 	protected:
 		T adjusted_value(T v) override {
-			T value = v;
-
-			if (this->vmax > this->vmin) {
-				if (value > this->vmax) {
-					value = this->vmax;
-				} else if (value < this->vmin) {
-					value = this->vmin;
-				}
+			if (v > this->vmax) {
+				v = this->vmax;
+			} else if (v < this->vmin) {
+				v = this->vmin;
 			}
 
-			return value;
+			return v;
 		}
 
 	private:
