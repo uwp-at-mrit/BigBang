@@ -48,9 +48,9 @@
 #define SET_INT64_TO_INT16(tab_int16, index, value) \
     do { \
         tab_int16[(index)    ] = (value) >> 48; \
-        tab_int16[(index) + 1] = (value) >> 32; \
-        tab_int16[(index) + 2] = (value) >> 16; \
-        tab_int16[(index) + 3] = (value); \
+        tab_int16[(index) + 1] = ((value) >> 32) & 0xFFFF; \
+        tab_int16[(index) + 2] = ((value) >> 16) & 0xFFFF; \
+        tab_int16[(index) + 3] = (value) & 0xFFFF; \
     } while (0)
 
 unsigned int discard_dirty_bytes(Windows::Storage::Streams::DataReader^ din);
@@ -67,9 +67,25 @@ uint8 get_byte_from_bits(const uint8 *src, uint16 idx, uint16 count);
 
 /*************************************************************************************************/
 // These APIs are designed for MRIT
-void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest);
+bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit_idx);
+void quantity_bit_set(uint8* src, size_t idx, uint8 bit_idx);
+
+uint8 bigendian_uint8_ref(const uint8* src, size_t idx);
+void bigendian_uint8_set(uint8* dest, size_t idx, uint8 x);
+
+uint16 bigendian_uint16_ref(const uint8* src, size_t idx);
+void bigendian_uint16_set(uint8* dest, size_t idx, uint16 x);
+
+uint32 bigendian_uint32_ref(const uint8* src, size_t idx);
+void bigendian_uint32_set(uint8* dest, size_t idx, uint32 x);
+
+uint64 bigendian_uint64_ref(const uint8* src, size_t idx);
+void bigendian_uint64_set(uint8* dest, size_t idx, uint64 x);
 
 float bigendian_float_ref(const uint8* src, size_t idx);
 void bigendian_float_set(uint8* dest, size_t idx, float x);
 
-bool quantity_bit_ref(const uint8* src, size_t idx, uint8 bit);
+float bigendian_flword_ref(const uint8* src, size_t idx, float scale = 1.0F);
+void bigendian_flword_set(uint8* dest, size_t idx, float x, float scale = 1.0F);
+
+void read_bigendian_floats(uint8* src, size_t address, size_t quantity, float* dest);

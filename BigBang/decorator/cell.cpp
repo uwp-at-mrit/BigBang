@@ -57,6 +57,15 @@ void CellDecorator::fill_cell_extent(unsigned int idx, float* x, float* y, float
 	}
 }
 
+void CellDecorator::fill_cell_anchor(unsigned int idx, float fx, float fy, float* x, float* y) {
+	float x0, y0, width, height;
+
+	this->fill_cell_extent(idx, &x0, &y0, &width, &height);
+
+	SET_BOX(x, x0 + width * fx);
+	SET_BOX(y, y0 + height * fy);
+}
+
 void CellDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
 	for (size_t i = 0; i < count; i++) {
 		ds->FillRoundedRectangle(this->boxes[i].X, this->boxes[i].Y,

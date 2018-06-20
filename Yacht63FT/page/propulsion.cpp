@@ -104,26 +104,26 @@ public:
 	void reflow(float width, float height) {
 		float vfds_xoff = -this->gridsize * 0.5F;
 
-		this->master->move_to(this->diagram, width * 0.5F, height * 0.5F, GraphletAlignment::CC);
+		this->master->move_to(this->diagram, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 		
-		this->map_graphlets(this->vfds, GraphletAlignment::CC);
-		this->map_graphlets(this->switches, GraphletAlignment::CC);
-		this->map_graphlets(this->powers, GraphletAlignment::CT);
-		this->map_graphlets(this->machines, PD::Generator1, PD::Generator2, GraphletAlignment::CB);
-		this->map_graphlets(this->machines, PD::Propeller1, PD::Propeller2, GraphletAlignment::CT);
+		this->map_graphlets(this->vfds, GraphletAnchor::CC);
+		this->map_graphlets(this->switches, GraphletAnchor::CC);
+		this->map_graphlets(this->powers, GraphletAnchor::CT);
+		this->map_graphlets(this->machines, PD::Generator1, PD::Generator2, GraphletAnchor::CB);
+		this->map_graphlets(this->machines, PD::Propeller1, PD::Propeller2, GraphletAnchor::CT);
 
-		this->map_graphlets(this->captions, this->machines, PD::Generator1, PD::Generator2, GraphletAlignment::CT, GraphletAlignment::CB);
-		this->map_graphlets(this->captions, this->machines, PD::Propeller1, PD::Propeller2, GraphletAlignment::CB, GraphletAlignment::CT);
-		this->map_graphlets(this->captions, this->powers, PD::PowerStation1, PD::PowerStation2, GraphletAlignment::CB, GraphletAlignment::CT);
+		this->map_graphlets(this->captions, this->machines, PD::Generator1, PD::Generator2, GraphletAnchor::CT, GraphletAnchor::CB);
+		this->map_graphlets(this->captions, this->machines, PD::Propeller1, PD::Propeller2, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->map_graphlets(this->captions, this->powers, PD::PowerStation1, PD::PowerStation2, GraphletAnchor::CB, GraphletAnchor::CT);
 		
-		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAlignment::CB);
-		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAlignment::CB);
-		this->diagram->map_graphlet_at_anchor(this->accumulator, PD::Accumulator, GraphletAlignment::CT);
-		this->master->move_to(this->captions[PD::SolarInverter], this->solarpanel, GraphletAlignment::CT, GraphletAlignment::CB);
-		this->master->move_to(this->captions[PD::Accumulator], this->accumulator, GraphletAlignment::CB, GraphletAlignment::CT);
+		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAnchor::CB);
+		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAnchor::CB);
+		this->diagram->map_graphlet_at_anchor(this->accumulator, PD::Accumulator, GraphletAnchor::CT);
+		this->master->move_to(this->captions[PD::SolarInverter], this->solarpanel, GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->captions[PD::Accumulator], this->accumulator, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		for (auto lt = this->labels.begin(); lt != this->labels.end(); lt++) {
-			this->master->move_to(lt->second, this->vfds[lt->first], GraphletAlignment::LC, GraphletAlignment::RC, vfds_xoff);
+			this->master->move_to(lt->second, this->vfds[lt->first], GraphletAnchor::LC, GraphletAnchor::RC, vfds_xoff);
 		}
 	}
 
@@ -158,23 +158,23 @@ private:
 
 private:
 	template<class G>
-	void map_graphlets(std::map<PD, G*>& gs, GraphletAlignment align) {
+	void map_graphlets(std::map<PD, G*>& gs, GraphletAnchor a) {
 		for (auto lt = gs.begin(); lt != gs.end(); lt++) {
-			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, align);
+			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, a);
 		}
 	}
 
 	template<class G>
-	void map_graphlets(std::map<PD, G*>& gs, PD id0, PD idn, GraphletAlignment align) {
+	void map_graphlets(std::map<PD, G*>& gs, PD id0, PD idn, GraphletAnchor a) {
 		for (PD id = id0; id <= idn; id++) {
-			this->diagram->map_graphlet_at_anchor(gs[id], id, align);
+			this->diagram->map_graphlet_at_anchor(gs[id], id, a);
 		}
 	}
 
 	template<class G, class T>
-	void map_graphlets(std::map<PD, G*>& gs, std::map<PD, T*>& ts, PD id0, PD idn, GraphletAlignment talign, GraphletAlignment align) {
+	void map_graphlets(std::map<PD, G*>& gs, std::map<PD, T*>& ts, PD id0, PD idn, GraphletAnchor ta, GraphletAnchor a) {
 		for (PD id = id0; id <= idn; id++) {
-			this->master->move_to(gs[id], ts[id], talign, align);
+			this->master->move_to(gs[id], ts[id], ta, a);
 		}
 	}
 

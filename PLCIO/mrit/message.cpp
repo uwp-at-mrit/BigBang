@@ -56,7 +56,7 @@ inline static unsigned int write_integer(IDataWriter^ mrout, size_t value, size_
 }
 
 /*************************************************************************************************/
-MrMessageConfiguration::MrMessageConfiguration(size_t alignment_size) {
+MrMessageConfiguration::MrMessageConfiguration(size_t dball, size_t alignment_size, size_t old_protocol_data_size) {
 	this->set_header(0x24U, 1U); // '$'
 
 	this->set_command_size(1U);
@@ -68,32 +68,85 @@ MrMessageConfiguration::MrMessageConfiguration(size_t alignment_size) {
 
 	this->set_tail(0x0D0AU, 2U); // Carriage Return + Line Feed
 
+	this->set_fcode();
 	this->set_alignment_size(alignment_size);
+
+	this->db_read_all = dball;
+	this->old_protocol_data_size = old_protocol_data_size;
+}
+
+bool MrMessageConfiguration::is_old_protocol() {
+	return (this->old_protocol_data_size > 0);
+}
+
+void MrMessageConfiguration::set_fcode(char read_signal, char write_analog_quantity, char write_digital_quantity) {
+	this->read_signal = read_signal;
+	this->write_analog_quantity = write_analog_quantity;
+	this->write_digital_quantity = write_digital_quantity;
+}
+
+char MrMessageConfiguration::read_signal_fcode() {
+	return this->read_signal;
+}
+
+char MrMessageConfiguration::write_analog_quantity_fcode() {
+	return this->write_analog_quantity;
+}
+
+char MrMessageConfiguration::write_digital_quantity_fcode() {
+	return this->write_digital_quantity;
+}
+
+size_t MrMessageConfiguration::read_all_dbcode() {
+	return this->db_read_all;
 }
 
 size_t MrMessageConfiguration::predata_size() {
-	return this->header_size + this->fcode_size + this->dbid_size
-		+ this->addr0_size + this->addrn_size + this->datasize_size;
+	size_t total = this->header_size + this->fcode_size;
+
+	if (!this->is_old_protocol()) {
+		total += (this->dbid_size + this->addr0_size + this->addrn_size + this->datasize_size);
+	}
+
+	return total;
 }
 
 size_t MrMessageConfiguration::postdata_size() {
-	return this->checksum_size + this->tail_size;
+	size_t total = this->tail_size;
+
+	if (!this->is_old_protocol()) {
+		total += this->checksum_size;
+	}
+
+	return total;
 }
 
 size_t MrMessageConfiguration::read_header(IDataReader^ mrin, size_t* head, size_t* fcode, size_t* db_id, size_t* addr0, size_t* addrn, size_t* size) {
 	(*head)  = (size_t)read_integer(mrin, this->header_size);
 	(*fcode) = (size_t)read_integer(mrin, this->fcode_size);
-	(*db_id) = (size_t)read_integer(mrin, this->dbid_size);
-	(*addr0) = (size_t)read_integer(mrin, this->addr0_size);
-	(*addrn) = (size_t)read_integer(mrin, this->addrn_size);
-	(*size)  = (size_t)read_integer(mrin, this->datasize_size);
+
+	if (this->is_old_protocol()) {
+		(*db_id) = this->db_read_all;
+		(*addr0) = 0;
+		(*addrn) = this->old_protocol_data_size;
+		(*size) = this->old_protocol_data_size;
+	} else {
+		(*db_id) = (size_t)read_integer(mrin, this->dbid_size);
+		(*addr0) = (size_t)read_integer(mrin, this->addr0_size);
+		(*addrn) = (size_t)read_integer(mrin, this->addrn_size);
+		(*size) = (size_t)read_integer(mrin, this->datasize_size);
+	}
 
 	return (*size) + this->postdata_size();
 }
 
-void MrMessageConfiguration::read_tail(IDataReader^ mrin, size_t size, uint8* data, size_t* checksum, size_t* eom) {
+void MrMessageConfiguration::read_body_tail(IDataReader^ mrin, size_t size, uint8* data, size_t* checksum, size_t* eom) {
 	READ_BYTES(mrin, data, size);
-	(*checksum) = (size_t)read_integer(mrin, this->checksum_size);
+
+	if (!this->is_old_protocol()) {
+		(*checksum) = (size_t)read_integer(mrin, this->checksum_size);
+	}
+
 	(*eom) = (size_t)read_integer(mrin, this->tail_size);
 }
 
@@ -106,7 +159,7 @@ void MrMessageConfiguration::write_header(IDataWriter^ mrout, size_t fcode, size
 		+ write_integer(mrout, addrn, this->addrn_size);
 }
 
-void MrMessageConfiguration::write_tail(IDataWriter^ mrout, uint8* data, size_t size) {
+void MrMessageConfiguration::write_body_tail(IDataWriter^ mrout, uint8* data, size_t size) {
 	uint16 checksum = ((this->header_checksum + foldsum(size, this->datasize_size) + foldsum(data, size)) & 0xFFFF);
 
 	write_integer(mrout, size, this->datasize_size);
@@ -118,7 +171,7 @@ void MrMessageConfiguration::write_tail(IDataWriter^ mrout, uint8* data, size_t 
 void MrMessageConfiguration::write_aligned_tail(IDataWriter^ mrout, uint8* data, size_t size) {
 	size_t padding_start = this->predata_size() + size + this->postdata_size();
 	
-	this->write_tail(mrout, data, size);
+	this->write_body_tail(mrout, data, size);
 	for (size_t i = padding_start; i < this->alignment_size; i++) {
 		mrout->WriteByte(0xFF);
 	}

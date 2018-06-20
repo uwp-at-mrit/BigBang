@@ -4,10 +4,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class CameraPage : public WarGrey::SCADA::Planet {
+	private class GaugePage : public WarGrey::SCADA::Planet {
 	public:
-		~CameraPage() noexcept;
-		CameraPage(PLCMaster* device, Platform::String^ name);
+		~GaugePage() noexcept;
+		GaugePage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

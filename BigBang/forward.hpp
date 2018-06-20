@@ -7,5 +7,5 @@ namespace WarGrey::SCADA {
     class IGraphlet;
 	class Numpadlet;
 
-    enum GraphletAlignment { LT, CT, RT, LC, CC, RC, LB, CB, RB };
+    enum GraphletAnchor { LT, CT, RT, LC, CC, RC, LB, CB, RB };
 }

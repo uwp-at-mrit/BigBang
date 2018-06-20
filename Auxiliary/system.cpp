@@ -2,6 +2,7 @@
 #include <list>
 
 #include "system.hpp"
+#include "syslog.hpp"
 #include "time.hpp"
 
 using namespace WarGrey::SCADA;
@@ -39,10 +40,12 @@ Size WarGrey::SCADA::adjusted_workspace_size(Rect region, FrameworkElement^ work
 }
 
 Size WarGrey::SCADA::system_screen_size() {
-    auto master = DisplayInformation::GetForCurrentView();
-    auto scaling = float(master->RawPixelsPerViewPixel);
+	DisplayInformation^ master = DisplayInformation::GetForCurrentView();
+    double scaling = master->RawPixelsPerViewPixel;
+	unsigned int fxwidth = master->ScreenWidthInRawPixels;
+	unsigned int fxheight = master->ScreenHeightInRawPixels;
 
-    return { float(master->ScreenWidthInRawPixels) / scaling, float(master->ScreenHeightInRawPixels) / scaling };
+    return { float(fxwidth / scaling), float(fxheight / scaling) };
 }
 
 Color WarGrey::SCADA::system_color(UIColorType type) {
@@ -99,7 +102,7 @@ char WarGrey::SCADA::system_wifi_signal_strength(char defval_if_no_wifi) {
 Platform::String^ WarGrey::SCADA::system_ipv4_address(Platform::String^ defval_if_no_nic) {
 	auto names = NetworkInformation::GetHostNames();
 	Platform::String^ ipv4 = defval_if_no_nic;
-
+	
 	for (unsigned int i = 0; i < names->Size; ++i) {
 		auto host = names->GetAt(i);
 		if (host->Type == HostNameType::Ipv4) {
@@ -107,7 +110,7 @@ Platform::String^ WarGrey::SCADA::system_ipv4_address(Platform::String^ defval_i
 			break;
 		}
 	}
-
+	
 	return ipv4;
 }
 

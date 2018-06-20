@@ -1,6 +1,7 @@
 ﻿#include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "shape.hpp"
+#include "paint.hpp"
 #include "geometry.hpp"
 #include "transformation.hpp"
 
@@ -13,7 +14,13 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasGeometry^ make_thermometer_glass(float width, float height, float thickness, float* glass_height = nullptr) {
+static unsigned int default_colors[] = {
+	0x385BFE, 0x385BFE, 0x385BFE, 0x385BFE, 0x385BFE, 0x385BFE,
+    0xB3F000, 0xB3F000,
+	0xFFB03A, 0xFFB03A
+};
+
+static CanvasGeometry^ make_thermometer_glass(float width, float height, float thickness) {
 	CanvasPathBuilder^ glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float offset = thickness * 0.5F;
 	float bradius = (width - thickness) * 0.5F;
@@ -31,8 +38,6 @@ static CanvasGeometry^ make_thermometer_glass(float width, float height, float t
 	glass->AddArc(float2(tube_rx, tube_by), bradius, bradius, 0.0F, CanvasSweepDirection::CounterClockwise, CanvasArcSize::Large);
 	glass->AddLine(tube_rx, tube_ty);
 	glass->EndFigure(CanvasFigureLoop::Closed);
-
-	SET_BOX(glass_height, tube_by - tube_ty);
 
 	return geometry_stroke(CanvasGeometry::CreatePath(glass), thickness);
 }
@@ -76,57 +81,74 @@ static CanvasGeometry^ make_thermometer_mercury(float bulb_width, float height) 
 }
 
 /*************************************************************************************************/
-Thermometerlet::Thermometerlet(float width, float height, ICanvasBrush^ bcolor, ICanvasBrush^ lcolor, ICanvasBrush^ ncolor, ICanvasBrush^ hcolor)
-	: width(width), height(height), thickness(width * 0.0618F), bulb_width(width * 0.618F)
-	, border_color(bcolor), normal_color(ncolor), low_color(lcolor), high_color(hcolor) {
+Thermometerlet::Thermometerlet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(-30.0F, 50.0F, width, height, bcolor, stops) {}
 
+Thermometerlet::Thermometerlet(float tmin, float tmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(tmin,tmax), width(width), height(height), thickness(width * 0.0618F), bulb_size(width * 0.618F), border_color(bcolor) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
-		this->height = this->bulb_width * 3.2F;
+		this->height = this->bulb_size * 3.2F;
 	}
+
+	this->color_stops = ((stops == nullptr) ? make_gradient_stops(default_colors) : stops);
 }
 
 void Thermometerlet::construct() {
-	float hatch_ratio = 0.85F;
-	float glass_height;
-	CanvasGeometry^ glass = make_thermometer_glass(this->bulb_width, this->height, this->thickness, &glass_height);
-	CanvasGeometry^ hatch = make_thermometer_hatch(this->width - this->bulb_width, glass_height * hatch_ratio, this->thickness);
+	float mercury_highest, mercury_height, mercury_lowest;
 
-	glass = glass->Transform(make_translation_matrix(this->width - this->bulb_width, 0.0F));
-	hatch = hatch->Transform(make_translation_matrix(0.0F, (this->height - glass_height) * 0.5F));
-	this->skeleton = geometry_freeze(geometry_union(glass, hatch));
+	this->fill_mercury_extent(0.0F, nullptr, &mercury_lowest);
+	this->fill_mercury_extent(nullptr, &mercury_highest, nullptr, &mercury_height); 
+	
+	float hatch_width = this->width - this->bulb_size;
+	float hatch_height = mercury_lowest - mercury_highest;
+	CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness);
+	CanvasGeometry^ hatch = make_thermometer_hatch(hatch_width, hatch_height, this->thickness);
+
+	glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
+	this->skeleton = geometry_freeze(geometry_union(glass, hatch, 0.0F, mercury_highest));
+	this->mercury_color = make_linear_gradient_brush(0.0F, mercury_highest + mercury_height, 0.0F, mercury_highest, this->color_stops);
 }
 
 void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
+void Thermometerlet::fill_mercury_extent(float percentage, float* x, float* y, float *width, float* height) {
+	float mercury_width = this->bulb_size * 0.5F;
+	float bulb_cx = this->width - mercury_width;
+	float bulb_cy = this->height - mercury_width;
+	float mercury_radius = mercury_width * 0.5F;
+	float mercury_bulb_bottom = bulb_cy + mercury_radius;
+	float mercury_highest = mercury_radius;
+	float mercury_lowest = this->height - this->bulb_size;
+	float mercury_tube_height = mercury_lowest - mercury_highest;
+	float mercury_height = (mercury_bulb_bottom - mercury_lowest) + mercury_tube_height * percentage;
+	float mercury_x = bulb_cx - mercury_radius;
+	float mercury_y = mercury_bulb_bottom - mercury_height;
+
+	SET_VALUES(x, mercury_x, y, mercury_y);
+	SET_VALUES(width, mercury_width, height, mercury_height);
+}
+
+void Thermometerlet::fill_mercury_extent(float* x, float* y, float *width, float* height) {
+	this->fill_mercury_extent(1.0F, x, y, width, height);
+}
+
+void Thermometerlet::on_value_change(float v) {
+	float mercury_width, mercury_height;
+	
+	this->fill_mercury_extent(this->get_percentage(), &this->mercury_x, &this->mercury_y, &mercury_width, &mercury_height);
+	this->mercury = geometry_freeze(make_thermometer_mercury(mercury_width, mercury_height));
+}
+
 void Thermometerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float Tpercentage = this->get_value();
-
-	if (Tpercentage >= 0.0F) {
-		float bulb_cx = x + (this->width - this->bulb_width * 0.5F);
-		float bulb_cy = y + (this->height - this->bulb_width * 0.5F);
-		float mercury_width = this->bulb_width * 0.5F;
-		float mercury_min_height = bulb_width;
-		float mercury_max_height = this->height - (this->bulb_width - mercury_width);
-		float mercury_work_height = (mercury_max_height - mercury_min_height) * Tpercentage;
-		float mercury_height = mercury_min_height + mercury_work_height;
-		CanvasGeometry^ mercury = make_thermometer_mercury(mercury_width, mercury_height);
-		ICanvasBrush^ mercury_color = this->normal_color;
-
-		if (Tpercentage < 0.3F) {
-			mercury_color = this->low_color;
-		} else if (Tpercentage > 0.7F) {
-			mercury_color = high_color;
-		}
-
-		ds->FillGeometry(mercury,
-			bulb_cx - mercury_width * 0.5F,
-			bulb_cy - mercury_height + mercury_width * 0.5F,
-			mercury_color);
+	if (this->mercury == nullptr) {
+		this->on_value_change(0.0F);
 	}
-
+		
+	brush_translate(this->mercury_color, x, y);
+	ds->DrawCachedGeometry(this->mercury, x + this->mercury_x, y + this->mercury_y, this->mercury_color);
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }

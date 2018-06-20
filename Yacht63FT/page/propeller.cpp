@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class P { Converter, Motor, Bus, Winding, Bearing, _ };
 private enum class PConverter { temperature, voltage, current, _ };
-private enum class PMotor { power, rspeed, _ };
+private enum class PMoter { power, rspeed, _ };
 private enum class PBus { dc_V, storage_V, coolant_C, _ };
 private enum class PWinding { Up_C, Vp_C, Wp_C, _ };
 private enum class PBearing { drive_C, nondrive_C, thrust_C, _ };
@@ -75,27 +75,27 @@ public:
 			CanvasTextFormat^ gfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 
 			for (unsigned int id = 1; id <= pcount; id++) {
-				this->converter_ids[id - 1] = make_text_layout("M" + id.ToString(), pfont);
+				this->cids[id - 1] = make_text_layout("M" + id.ToString(), pfont);
 			}
 
 			for (PConverter m = static_cast<PConverter>(0); m < PConverter::_; m++) {
-				this->converters[m] = make_text_layout(speak(":cnvt_" + m.ToString() + ":"), pfont);
+				this->cs[m] = make_text_layout(speak(":cnvt_" + m.ToString() + ":"), pfont);
 			}
 
-			for (PMotor m = static_cast<PMotor>(0); m < PMotor::_; m++) {
-				this->motors[m] = make_text_layout(speak(":pm_" + m.ToString() + ":"), gfont);
+			for (PMoter m = static_cast<PMoter>(0); m < PMoter::_; m++) {
+				this->ms[m] = make_text_layout(speak(":pm_" + m.ToString() + ":"), gfont);
 			}
 
 			for (PBus m = static_cast<PBus>(0); m < PBus::_; m++) {
-				this->buses[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->dcbs[m] = make_text_layout(speak(m.ToString()), pfont);
 			}
 
 			for (PWinding m = static_cast<PWinding>(0); m < PWinding::_; m++) {
-				this->windings[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->ws[m] = make_text_layout(speak(m.ToString()), pfont);
 			}
 
 			for (PBearing m = static_cast<PBearing>(0); m < PBearing::_; m++) {
-				this->bearings[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->bs[m] = make_text_layout(speak(m.ToString()), pfont);
 			}
 		}
 	}
@@ -156,7 +156,7 @@ private:
 
 			switch (region) {
 			case P::Converter: this->draw_cells(ds, idx, region, PConverter::_); break;
-			case P::Motor: this->draw_cells(ds, idx, region, PMotor::_); break;
+			case P::Motor: this->draw_cells(ds, idx, region, PMoter::_); break;
 			case P::Bus: this->draw_cells(ds, idx, region, PBus::_); break;
 			case P::Winding: this->draw_cells(ds, idx, region, PWinding::_); break;
 			case P::Bearing: this->draw_cells(ds, idx, region, PBearing::_); break;
@@ -167,18 +167,18 @@ private:
 	void draw_region_label(CanvasDrawingSession^ ds, unsigned int idx) {
 		float anchor_x, anchor_y;
 
-		this->draw_labels(ds, idx, P::Converter, this->converters, this->fgcolors[P::Converter], this->converter_ids[idx]);
+		this->draw_labels(ds, idx, P::Converter, this->cs, this->fgcolors[P::Converter], this->cids[idx]);
 		
-		for (PMotor g = static_cast<PMotor>(0); g < PMotor::_; g++) {
+		for (PMoter g = static_cast<PMoter>(0); g < PMoter::_; g++) {
 			this->fill_cell_anchor(idx, P::Motor, g, 0.5F, 0.51F, &anchor_x, &anchor_y);
 
-			anchor_x -= this->motors[g]->LayoutBounds.Width * 0.5F;
-			ds->DrawTextLayout(this->motors[g], anchor_x, anchor_y, this->fgcolors[P::Motor]);
+			anchor_x -= this->ms[g]->LayoutBounds.Width * 0.5F;
+			ds->DrawTextLayout(this->ms[g], anchor_x, anchor_y, this->fgcolors[P::Motor]);
 		}
 
-		this->draw_labels(ds, idx, P::Bus, this->buses, this->fgcolors[P::Bus]);
-		this->draw_labels(ds, idx, P::Winding, this->windings, this->fgcolors[P::Winding]);
-		this->draw_labels(ds, idx, P::Bearing, this->bearings, this->fgcolors[P::Bearing]);
+		this->draw_labels(ds, idx, P::Bus, this->dcbs, this->fgcolors[P::Bus]);
+		this->draw_labels(ds, idx, P::Winding, this->ws, this->fgcolors[P::Winding]);
+		this->draw_labels(ds, idx, P::Bearing, this->bs, this->fgcolors[P::Bearing]);
 	}
 
 	template<typename M_>
@@ -209,12 +209,12 @@ private:
 	}
 
 private:
-	CanvasTextLayout^ converter_ids[pcount];
-	std::map<PConverter, CanvasTextLayout^> converters;
-	std::map<PMotor, CanvasTextLayout^> motors;
-	std::map<PBus, CanvasTextLayout^> buses;
-	std::map<PWinding, CanvasTextLayout^> windings;
-	std::map<PBearing, CanvasTextLayout^> bearings;
+	CanvasTextLayout^ cids[pcount];
+	std::map<PConverter, CanvasTextLayout^> cs;
+	std::map<PMoter, CanvasTextLayout^> ms;
+	std::map<PBus, CanvasTextLayout^> dcbs;
+	std::map<PWinding, CanvasTextLayout^> ws;
+	std::map<PBearing, CanvasTextLayout^> bs;
 
 private:
 	ICanvasBrush^ cell_color;
@@ -255,58 +255,110 @@ public:
 public:
 	void load_and_flow() {
 		float anchor_x, anchor_y, cell_width, cell_height;
+		float dim_fx = 0.90F;
+		float dim_fy = 0.75F;
 
-		for (unsigned int idx = 0; idx < pcount; idx++) {
-			this->load_dimensions(idx, P::Converter, this->converters);
-			
-			for (PMotor g = static_cast<PMotor>(0); g < PMotor::_; g++) {
-				Platform::String^ unit = "<" + g.ToString() + ">";
-
-				this->motors[g] = new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
-
-				this->decorator->fill_cell_anchor(idx, P::Motor, g, 0.5F, 0.5F, &anchor_x, &anchor_y, &cell_width, &cell_height);
-				this->gauges[g] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness);
-
-				this->master->insert(this->gauges[g], anchor_x, anchor_y, GraphletAlignment::CC);
-				this->master->insert(this->motors[g], anchor_x, anchor_y, GraphletAlignment::CB);
-
-				this->gauges[g]->set_value(0.5F);
+		for (unsigned int idx = 0; idx < pcount; idx++) {	
+			for (PConverter c = static_cast<PConverter>(0); c < PConverter::_; c++) {
+				this->decorator->fill_cell_anchor(idx, P::Converter, c, dim_fx, dim_fy, &anchor_x, &anchor_y);
+				this->cs[c][idx] = this->master->insert_one(make_dimension(c.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
-			this->load_dimensions(idx, P::Bus, this->buses);
-			this->load_dimensions(idx, P::Winding, this->windings);
-			this->load_dimensions(idx, P::Bearing, this->bearings);
+			for (PMoter m = static_cast<PMoter>(0); m < PMoter::_; m++) {
+				Platform::String^ unit = "<" + m.ToString() + ">";
+
+				this->ms[m][idx] = new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+
+				this->decorator->fill_cell_anchor(idx, P::Motor, m, 0.5F, 0.5F, &anchor_x, &anchor_y, &cell_width, &cell_height);
+				this->gs[m][idx] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness);
+
+				this->master->insert(this->gs[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+				this->master->insert(this->ms[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
+			}
+
+			for (PBus b = static_cast<PBus>(0); b < PBus::_; b++) {
+				this->decorator->fill_cell_anchor(idx, P::Bus, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
+				this->dcbs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+			}
+
+			for (PWinding w = static_cast<PWinding>(0); w < PWinding::_; w++) {
+				this->decorator->fill_cell_anchor(idx, P::Winding, w, dim_fx, dim_fy, &anchor_x, &anchor_y);
+				this->ws[w][idx] = this->master->insert_one(make_dimension(w.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+			}
+
+			for (PBearing b = static_cast<PBearing>(0); b < PBearing::_; b++) {
+				this->decorator->fill_cell_anchor(idx, P::Bearing, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
+				this->bs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+			}
+		}
+	}
+
+public:
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		GraphletAnchor rb = GraphletAnchor::RB;
+		size_t db_idx_acc = 11;
+		
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->set_motor_meters(PMoter::power,  db4, 24, db_idx_acc);
+		this->set_motor_meters(PMoter::rspeed, db4, 25, db_idx_acc);
+
+		this->set_values(this->cs[PConverter::voltage],     db4, 6U,  db_idx_acc, rb);
+		this->set_values(this->cs[PConverter::temperature], db4, 7U,  db_idx_acc, rb);
+		this->set_values(this->cs[PConverter::current],     db4, 37U, db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Up_C],          db4, 8U,  db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Vp_C],          db4, 9U,  db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Wp_C],          db4, 10U, db_idx_acc, rb);
+		this->set_values(this->bs[PBearing::drive_C],       db4, 11U, db_idx_acc, rb);
+		this->set_values(this->bs[PBearing::nondrive_C],    db4, 12U, db_idx_acc, rb);
+	
+		this->set_values(this->bs[PBearing::thrust_C],      db4, 34U, 11, rb);
+		this->set_values(this->dcbs[PBus::dc_V],            db4, 73U, 1,  rb);
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
+private:
+	template<class G>
+	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc, GraphletAnchor a) {
+		for (unsigned int idx = 0; idx < pcount; idx++) {
+			if (gs[idx] != nullptr) {
+				gs[idx]->set_value(AI_ref(db, idx0 + acc * idx), a);
+			}
+		}
+	}
+
+	void set_motor_meters(PMoter m, uint8* db, size_t idx0, size_t acc) {
+		for (unsigned int idx = 0; idx < pcount; idx++) {
+			float v = AI_ref(db, idx0 + acc * idx);
+
+			this->ms[m][idx]->set_value(v, GraphletAnchor::CC);
+			this->gs[m][idx]->set_value(v);
 		}
 	}
 
 private:
-	template<typename M>
-	void load_dimensions(unsigned int idx, P region, std::map<M, Dimensionlet*> dest) {
-		float anchor_x, anchor_y;
+	Dimensionlet* make_dimension(Platform::String^ dimension) {
+		Platform::String^ unit = "<" + dimension + ">";
 
-		for (M m = static_cast<M>(0); m < M::_; m++) {
-			Platform::String^ dimension = m.ToString();
-			Platform::String^ unit = "<" + dimension + ">";
-			
-			switch ((dimension->Data())[dimension->Length() - 1]) {
-			case L'V': unit = "<voltage>"; break;
-			case L'C': unit = "<temperature>"; break;
-			}
-
-			this->decorator->fill_cell_anchor(idx, region, m, 0.9F, 0.75F, &anchor_x, &anchor_y);
-			dest[m] = new Dimensionlet(unit, this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
-			this->master->insert(dest[m], anchor_x, anchor_y, GraphletAlignment::RC);
+		switch ((dimension->Data())[dimension->Length() - 1]) {
+		case L'V': unit = "<voltage>"; break;
+		case L'C': unit = "<temperature>"; break;
 		}
+
+		return new Dimensionlet(unit, this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
 	}
 
 // never deletes these graphlets mannually
 private:
-	std::map<PConverter, Dimensionlet*> converters;
-	std::map<PBus, Dimensionlet*> buses;
-	std::map<PWinding, Dimensionlet*> windings;
-	std::map<PBearing, Dimensionlet*> bearings;
-	std::map<PMotor, Dimensionlet*> motors;
-	std::map<PMotor, Indicatorlet*> gauges;
+	std::map<PConverter, Dimensionlet*[pcount]> cs;
+	std::map<PBus, Dimensionlet*[pcount]> dcbs;
+	std::map<PWinding, Dimensionlet*[pcount]> ws;
+	std::map<PBearing, Dimensionlet*[pcount]> bs;
+	std::map<PMoter, Dimensionlet*[pcount]> ms;
+	std::map<PMoter, Indicatorlet*[pcount]> gs;
 		
 private:
 	CanvasTextFormat^ metrics_fonts[2];

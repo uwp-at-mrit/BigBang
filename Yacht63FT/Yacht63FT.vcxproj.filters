@@ -29,9 +29,6 @@
     <Filter Include="frame">
       <UniqueIdentifier>{659d284d-a719-45df-9bd0-ce4d6905a508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\graphlet\Fire">
-      <UniqueIdentifier>{f45b3390-df89-4707-afce-4dcef3b24e4f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="usr\share\graphlet\Alarm">
       <UniqueIdentifier>{4786e998-bc7a-43e6-ac20-28b9df34da6e}</UniqueIdentifier>
     </Filter>
@@ -46,12 +43,6 @@
     </Filter>
     <Filter Include="usr\share\graphlet\ACMode">
       <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="usr\share\graphlet\Light">
-      <UniqueIdentifier>{847b99b9-9798-4b31-95e9-36f3ed0cec92}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="usr\share\graphlet\Curtain">
-      <UniqueIdentifier>{f2a7bc8b-0cab-4a9c-8c71-1bc06048a49e}</UniqueIdentifier>
     </Filter>
     <Filter Include="usr\share\graphlet\Camera">
       <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
@@ -71,6 +62,12 @@
     <Filter Include="usr\share\graphlet\Event">
       <UniqueIdentifier>{caf8b2f7-bed2-484e-87c7-ddb5b8cd112f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="usr\share\graphlet\Gauge">
+      <UniqueIdentifier>{4e7108a7-5e35-41a9-95df-c1e8bb006ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\Yacht">
+      <UniqueIdentifier>{143519bd-f301-446a-b348-6d522887137f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -88,9 +85,6 @@
     <ClCompile Include="page\airconditioner.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\camera.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\generator.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -103,9 +97,6 @@
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="page\alarm.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\log.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -114,6 +105,9 @@
     </ClCompile>
     <ClCompile Include="schema\dbtest.cpp">
       <Filter>schema</Filter>
+    </ClCompile>
+    <ClCompile Include="page\gauge.cpp">
+      <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,9 +125,6 @@
     <ClInclude Include="page\airconditioner.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\camera.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\generator.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -146,9 +137,6 @@
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="page\alarm.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\log.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -157,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="schema\dbtest.hpp">
       <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\gauge.hpp">
+      <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -289,26 +280,8 @@
     <Image Include="usr\share\graphlet\yacht.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\skeleton.png">
-      <Filter>usr\share\graphlet</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\gps.png">
       <Filter>usr\share\graphlet</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire\Alerting.png">
-      <Filter>usr\share\graphlet\Fire</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire\Running.png">
-      <Filter>usr\share\graphlet\Fire</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire\Stopped.png">
-      <Filter>usr\share\graphlet\Fire</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm\Running.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Alarm\Alerting.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
     </Image>
     <Image Include="usr\share\graphlet\Generator\Running.png">
       <Filter>usr\share\graphlet\Generator</Filter>
@@ -337,9 +310,6 @@
     <Image Include="usr\share\graphlet\Propeller\Stopped.png">
       <Filter>usr\share\graphlet\Propeller</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\Alarm\Stopped.png">
-      <Filter>usr\share\graphlet\Alarm</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Alarm\false.png">
       <Filter>usr\share\graphlet\Alarm</Filter>
     </Image>
@@ -361,29 +331,8 @@
     <Image Include="usr\share\graphlet\ACMode\Heating.png">
       <Filter>usr\share\graphlet\ACMode</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\Light\Stopped.png">
-      <Filter>usr\share\graphlet\Light</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Light\false.png">
-      <Filter>usr\share\graphlet\Light</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Light\true.png">
-      <Filter>usr\share\graphlet\Light</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Curtain\false.png">
-      <Filter>usr\share\graphlet\Curtain</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Curtain\true.png">
-      <Filter>usr\share\graphlet\Curtain</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Camera\Stopped.png">
       <Filter>usr\share\graphlet\Camera</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\Fire\true.png">
-      <Filter>usr\share\graphlet\Fire</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\flag.png">
-      <Filter>usr\share\graphlet</Filter>
     </Image>
     <Image Include="usr\share\graphlet\Propulsion\Alerting.png">
       <Filter>usr\share\graphlet\Propulsion</Filter>
@@ -435,6 +384,21 @@
     </Image>
     <Image Include="usr\share\graphlet\Event\Stopped.png">
       <Filter>usr\share\graphlet\Event</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Alerting.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Running.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Gauge\Stopped.png">
+      <Filter>usr\share\graphlet\Gauge</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Yacht\Bottom.png">
+      <Filter>usr\share\graphlet\Yacht</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\Yacht\Upper.png">
+      <Filter>usr\share\graphlet\Yacht</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

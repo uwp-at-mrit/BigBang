@@ -72,13 +72,13 @@ public:
 				float anchor_x, anchor_y;
 
 				if (need_adjust_position) {
-					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAlignment::RB);
+					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAnchor::RB);
 				}
 
 				target->set_value(RealData(AI_DB203, 8 + i));
 
 				if (need_adjust_position) {
-					this->master->move_to(target, anchor_x, anchor_y, GraphletAlignment::RB);
+					this->master->move_to(target, anchor_x, anchor_y, GraphletAnchor::RB);
 				}
 			}
 		}
@@ -215,20 +215,20 @@ public:
 		sy = (height - sh) * 0.5F - vinset * 0.5F;
 		this->master->move_to(this->stations[0], sx, sy);
 
-		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAlignment::RB);
-		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAlignment::LC);
-		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAlignment::CB);
-		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAlignment::CB);
+		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAnchor::RB);
+		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAnchor::LC);
+		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
+		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
 
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], GraphletAlignment::CB, -gridsize * 10.0F);
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], GraphletAlignment::CB, -gridsize * 10.0F);
-		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAlignment::CB, GraphletAlignment::CT);
-		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAlignment::LB, GraphletAlignment::LT, gridsize);
-		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAlignment::CT, GraphletAlignment::CB, gridsize * 0.5F);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
+		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
+		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
+		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
-		GraphletAlignment lbl_align, cpt_align, bar_align;
+		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy;
 		float valve_adjust_gridsize = gridsize * 0.618F;
 		float text_hspace = vinset * 0.125F;
@@ -238,33 +238,33 @@ public:
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (int(it->second->get_direction_degrees())) {
 			case -90: { // for Y, L, M, K
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RB;
-				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_align = GraphletAlignment::LB;
-				bar_dx = x0; bar_dy = y0; bar_align = GraphletAlignment::CC; // these devices have no scales
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
+				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no scales
 			} break;
 			case 90: {  // for J, I
-				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LT;
-				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_align = GraphletAlignment::CT;
-				bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_align = GraphletAlignment::LT;
+				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
+				bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
 			} break;
 			case 180: { // for A, B, G, H
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RT;
-				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_align = GraphletAlignment::LT;
-				bar_dx = x0 + gridsize; bar_dy = y0; bar_align = GraphletAlignment::LB;
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
+				bar_dx = x0 + gridsize; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
 			default: {  // for F, C, D, E
-				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LT;
-				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_align = GraphletAlignment::RT;
-				bar_dx = x0 - gridsize; bar_dy = y0; bar_align = GraphletAlignment::RB;
+				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
+				bar_dx = x0 - gridsize; bar_dy = y0; bar_a = GraphletAnchor::RB;
 			}
 			}
 
-			this->stations[0]->map_credit_graphlet(it->second, GraphletAlignment::CC, x0, y0);
-			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_align, lbl_dx, lbl_dy);
-			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_align, cpt_dx, cpt_dy);
+			this->stations[0]->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
+			this->stations[0]->map_credit_graphlet(this->plabels[it->first], lbl_a, lbl_dx, lbl_dy);
+			this->stations[0]->map_credit_graphlet(this->pcaptions[it->first], cpt_a, cpt_dx, cpt_dy);
 
 			if (this->bars.find(it->first) != this->bars.end()) {
-				this->stations[0]->map_credit_graphlet(this->bars[it->first], bar_align, bar_dx, bar_dy);
+				this->stations[0]->map_credit_graphlet(this->bars[it->first], bar_a, bar_dx, bar_dy);
 			}
 		}
 
@@ -272,45 +272,45 @@ public:
 			if (it->second->get_direction_degrees() == 0.0) {
 				switch (it->first) {
 				case HS::SQ2: case HS::SQy: {
-					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::RC;
+					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				} break;
 				default: {
-					lbl_dx = x0 + valve_adjust_gridsize; lbl_dy = y0; lbl_align = GraphletAlignment::LC;
+					lbl_dx = x0 + valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
 				}
 				}
 			} else {
-				lbl_dx = x0; lbl_dy = y0 - valve_adjust_gridsize; lbl_align = GraphletAlignment::CB;
+				lbl_dx = x0; lbl_dy = y0 - valve_adjust_gridsize; lbl_a = GraphletAnchor::CB;
 			}
 
-			this->stations[0]->map_credit_graphlet(it->second, GraphletAlignment::CC, x0, y0);
-			this->stations[0]->map_credit_graphlet(this->vlabels[it->first], lbl_align, lbl_dx, lbl_dy);
+			this->stations[0]->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
+			this->stations[0]->map_credit_graphlet(this->vlabels[it->first], lbl_a, lbl_dx, lbl_dy);
 		}
 	}
 
 	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
-		this->master->move_to(this->captions[HS::MasterTank], this->stations[0], GraphletAlignment::LT, GraphletAlignment::CB, gridsize * 12.0F, gridsize * 4.0F);
-		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::MasterTank], GraphletAlignment::LB, GraphletAlignment::LT, -gridsize, gridsize);
-		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
-		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAlignment::CC);
+		this->master->move_to(this->captions[HS::MasterTank], this->stations[0], GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
+		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::MasterTank], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
+		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
+		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAnchor::CC);
 
-		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAlignment::RT, GraphletAlignment::LT, gridsize * 2.0F, 0.0F);
-		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::VisorTank], this->visor_states[HS::FilterBlocked], GraphletAlignment::LB, GraphletAlignment::LT, 0.0F, gridsize);
+		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
+		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[HS::VisorTank], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
 
 			for (auto lt = this->heater_states.begin(); lt != this->heater_states.end(); lt++) {
 				this->master->move_to(this->hslabels[lt->first], this->heater_states[lt->first],
-					GraphletAlignment::RC, GraphletAlignment::LC, gapsize);
+					GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 			}
 
 			for (auto lt = this->visor_states.begin(); lt != this->visor_states.end(); lt++) {
 				this->master->move_to(this->vslabels[lt->first], this->visor_states[lt->first],
-					GraphletAlignment::RC, GraphletAlignment::LC, gapsize);
+					GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 			}
 		}
 	}
@@ -396,7 +396,7 @@ void HydraulicSystem::reflow(float width, float height) {
 		float vinset = statusbar_height();
 
 		this->change_mode(HSMode::WindowUI);
-		this->move_to(this->statusline, 0.0F, height, GraphletAlignment::LB);
+		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
 		this->change_mode(HSMode::View);
 		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
