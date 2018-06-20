@@ -13,7 +13,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static unsigned int default_colors[] = {
+static unsigned int battery_default_colors[] = {
 	0xF00D0D,
 	0xFFB33C,
 	0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100, 0xB4F100
@@ -49,7 +49,7 @@ Batterylet::Batterylet(float emin, float emax, float width, float height, ICanva
 		register_system_status_listener(battery_status);
 	}
 
-	this->color_stops = ((stops == nullptr) ? make_gradient_stops(default_colors) : stops);
+	this->color_stops = ((stops == nullptr) ? make_gradient_stops(battery_default_colors) : stops);
 }
 
 void Batterylet::construct() {
@@ -78,9 +78,10 @@ void Batterylet::construct() {
 	this->electricity.Width = this->width - this->electricity.X * 2.0F;
 	this->electricity.Height = battery_height - (this->electricity.Y - battery_y) * 2.0F;
 
-	float start_y = this->electricity.Y + this->electricity.Height;
-	float stop_y = this->electricity.Y;
-	this->electricity_color = make_linear_gradient_brush(0.0F, start_y, 0.0F, stop_y, this->color_stops);
+	this->electricity_color = make_linear_gradient_brush(
+		0.0F, this->electricity.Y + this->electricity.Height,
+		0.0F, this->electricity.Height,
+		this->color_stops);
 
 	auto battery_region = rounded_rectangle(0.0F, battery_y, this->width, battery_height, corner_radius, corner_radius);
 	auto electricity_region = rectangle(this->electricity);

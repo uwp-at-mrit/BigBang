@@ -1,16 +1,19 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
+#include "paint.hpp"
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class FuelTanklet : public WarGrey::SCADA::IValuelet<float> {
+	private class FuelTanklet : public WarGrey::SCADA::IRangelet<float> {
 	public:
 		FuelTanklet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color = WarGrey::SCADA::Colours::make(0xB4F100),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ warning_color = WarGrey::SCADA::Colours::make(0xFFB33C),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ emergency_color = WarGrey::SCADA::Colours::make(0xF00D0D));
+			GradientStops^ stops = nullptr);
+
+		FuelTanklet(float vmin, float vmax, float width, float height = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
+			GradientStops^ stops = nullptr);
 
 	public:
 		void construct() override;
@@ -18,11 +21,10 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	private:
+		GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ warning_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ emergency_color;
+		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ fuel_color;
 
 	private:
 		Windows::Foundation::Rect fuel;

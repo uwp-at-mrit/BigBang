@@ -32,7 +32,9 @@ namespace WarGrey::SCADA {
 		GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury_bulb;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bulb_color;
 		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ mercury_color;
 
 	private:
@@ -42,5 +44,7 @@ namespace WarGrey::SCADA {
 		float thickness;
 		float mercury_x;
 		float mercury_y;
+		float bulb_x;
+		float bulb_y;
 	};
 }
