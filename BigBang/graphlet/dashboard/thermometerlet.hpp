@@ -6,7 +6,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Thermometerlet : public WarGrey::SCADA::IValuelet<float> {
+	private class Thermometerlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
 		Thermometerlet(float tmin, float tmax, float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0x666666),
@@ -27,9 +27,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ mercury_color;
 
 	private:
-		float vmin;
-		float vmax;
-		float bulb_width;
+		float bulb_size;
 		float width;
 		float height;
 		float thickness;

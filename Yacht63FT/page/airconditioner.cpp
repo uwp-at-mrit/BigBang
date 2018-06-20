@@ -158,9 +158,9 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->set_values(this->temperatures, db4, 101U, db_idx_acc, GraphletAnchor::LC);
-		this->set_values(this->Tpipes,       db4, 102U, db_idx_acc, GraphletAnchor::CC);
-		this->set_values(this->Tseas,        db4, 103U, db_idx_acc, GraphletAnchor::CC);
+		this->set_temperatures(        db4, 101U, db_idx_acc, GraphletAnchor::LC);
+		this->set_values(this->Tpipes, db4, 102U, db_idx_acc, GraphletAnchor::CC);
+		this->set_values(this->Tseas,  db4, 103U, db_idx_acc, GraphletAnchor::CC);
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -177,6 +177,15 @@ private:
 	void set_values(std::map<AC, Dimensionlet*> dims, uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
 		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
 			dims[room]->set_value(AI_ref(db, idx0 + acc * static_cast<size_t>(room)), anchor);
+		}
+	}
+
+	void set_temperatures(uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::LC) {
+		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
+			float t = AI_ref(db, idx0 + acc * static_cast<size_t>(room));
+
+			this->temperatures[room]->set_value(t, anchor);
+			this->thermometers[room]->set_value(t);
 		}
 	}
 

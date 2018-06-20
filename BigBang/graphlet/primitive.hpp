@@ -48,7 +48,9 @@ namespace WarGrey::SCADA {
 			return this->value;
 		}
 		
-		void set_value(T value, bool force_update = false) {
+		void set_value(T value0, bool force_update = false) {
+			T value = this->adjusted_value(value0);
+
 			if ((this->value != value) || force_update) {
 				this->value = value;
 				this->on_value_change(value);
@@ -56,28 +58,69 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		void set_value(T value, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
+		void set_value(T value0, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
 			if (this->info == nullptr) {
-				this->set_value(value, force_update);
-			} else if ((this->value != value) || force_update) {
-				float anchor_x, anchor_y;
+				this->set_value(value0, force_update);
+			} else {
+				T value = this->adjusted_value(value0);
 
-				this->info->master->fill_graphlet_location(this, &anchor_x, &anchor_y, anchor);
-				this->value = value;
-				this->on_value_change(value);
+				if ((this->value != value) || force_update) {
+					float anchor_x, anchor_y;
 
-				this->info->master->begin_update_sequence();
-				this->notify_updated();
-				this->info->master->move_to(this, anchor_x, anchor_y, anchor);
-				this->info->master->end_update_sequence();
+					this->info->master->fill_graphlet_location(this, &anchor_x, &anchor_y, anchor);
+					this->value = value;
+					this->on_value_change(value);
+
+					this->info->master->begin_update_sequence();
+					this->notify_updated();
+					this->info->master->move_to(this, anchor_x, anchor_y, anchor);
+					this->info->master->end_update_sequence();
+				}
 			}
 		}
 		
 	protected:
 		virtual void on_value_change(T value) {}
 
+	protected:
+		virtual T adjusted_value(T value) { return value; }
+
 	private:
 		T value;
+	};
+
+	template<typename T>
+	private class IRangelet abstract : public virtual WarGrey::SCADA::IValuelet<T> {
+	public:
+		IRangelet(T vmin, T vmax) : vmin(vmin), vmax(vmax) {}
+
+	public:
+		float get_percentage() {
+			static float flmin = static_cast<float>(this->vmin);
+			static float flmax = static_cast<float>(this->vmax);
+			float v = static_cast<float>(this->get_value());
+
+			return (v - flmin) / (flmax - flmin);
+		}
+
+	protected:
+		T adjusted_value(T v) override {
+			T value = v;
+
+			if (this->vmax > this->vmin) {
+				if (value > this->vmax) {
+					value = this->vmax;
+				} else if (value < this->vmin) {
+					value = this->vmin;
+				}
+			}
+
+			return value;
+		}
+
+	private:
+		T vmin;
+		T vmax;
 	};
 
 	template<typename Status, typename Style>

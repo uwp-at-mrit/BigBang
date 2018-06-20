@@ -88,14 +88,14 @@ Thermometerlet::Thermometerlet(float width, float height, ICanvasBrush^ bcolor, 
 	: Thermometerlet(-30.0F, 50.0F, width, height, bcolor, stops) {}
 
 Thermometerlet::Thermometerlet(float tmin, float tmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: vmin(tmin), vmax(tmax), width(width), height(height), thickness(width * 0.0618F)
-	, bulb_width(width * 0.618F), border_color(bcolor) {
+	: IRangelet(tmin,tmax), width(width), height(height), thickness(width * 0.0618F)
+	, bulb_size(width * 0.618F), border_color(bcolor) {
 	GradientStops^ cs = ((stops == nullptr) ? make_gradient_stops(default_colors) : stops);
 
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
-		this->height = this->bulb_width * 3.2F;
+		this->height = this->bulb_size * 3.2F;
 	}
 
 	this->mercury_color = make_linear_gradient_brush(0.0F, -this->height, 0.0F, 0.0F, cs);
@@ -104,10 +104,10 @@ Thermometerlet::Thermometerlet(float tmin, float tmax, float width, float height
 void Thermometerlet::construct() {
 	float tube_ty, tube_by;
 	float hatch_ratio = 0.85F;
-	CanvasGeometry^ glass = make_thermometer_glass(this->bulb_width, this->height, this->thickness, &tube_ty, &tube_by);
-	CanvasGeometry^ hatch = make_thermometer_hatch(this->width - this->bulb_width, (tube_by - tube_ty) * hatch_ratio, this->thickness);
+	CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness, &tube_ty, &tube_by);
+	CanvasGeometry^ hatch = make_thermometer_hatch(this->width - this->bulb_size, (tube_by - tube_ty) * hatch_ratio, this->thickness);
 
-	glass = glass->Transform(make_translation_matrix(this->width - this->bulb_width, 0.0F));
+	glass = glass->Transform(make_translation_matrix(this->width - this->bulb_size, 0.0F));
 	hatch = hatch->Transform(make_translation_matrix(0.0F, tube_ty + (tube_by - tube_ty) * (1.0F - hatch_ratio) * 0.5F));
 	this->skeleton = geometry_freeze(geometry_union(glass, hatch));
 }
@@ -117,18 +117,18 @@ void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Thermometerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float Tpercentage = (this->get_value() - this->vmin) / (this->vmax - this->vmin);
+	float Tpercentage = this->get_percentage();
 
 	if (Tpercentage >= 0.0F) {
-		float bulb_cx = x + (this->width - this->bulb_width * 0.5F);
-		float bulb_cy = y + (this->height - this->bulb_width * 0.5F);
-		float mercury_width = this->bulb_width * 0.5F;
-		float mercury_min_height = bulb_width;
-		float mercury_max_height = this->height - (this->bulb_width - mercury_width);
-		float mercury_work_height = (mercury_max_height - mercury_min_height) * Tpercentage;
-		float mercury_height = mercury_min_height + mercury_work_height;
+		float bulb_cx = x + (this->width - this->bulb_size * 0.5F);
+		float bulb_cy = y + (this->height - this->bulb_size * 0.5F);
+		float mercury_width = this->bulb_size * 0.5F;
+		float mercury_tube_height = this->height - this->bulb_size - mercury_width;
+		float mercury_height = bulb_size + mercury_tube_height * Tpercentage;
 		CanvasGeometry^ mercury = make_thermometer_mercury(mercury_width, mercury_height);
 		
+		brush_translate(this->mercury_color, x, y);
+
 		ds->FillGeometry(mercury,
 			bulb_cx - mercury_width * 0.5F,
 			bulb_cy - mercury_height + mercury_width * 0.5F,
