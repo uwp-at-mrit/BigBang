@@ -16,7 +16,10 @@
     
     ;;; DB4
     (for ([i (in-range 400)])
-      (define fx (random 0 (add1 #xFFFF)))
+      (define-values (fx0 fxn)
+        (cond [(<= 101 (add1 i) 115) (values 0 80)] ;;; air conditioner
+              [else (values 0 #xFFFF)]))
+      (define fx (random fx0 (add1 fxn)))
       (integer->integer-bytes fx 2 #false #true memory (+ 200 (* i 2))))))
 
 (with-handlers ([exn:break? void])
