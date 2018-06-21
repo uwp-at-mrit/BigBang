@@ -78,11 +78,6 @@ void Batterylet::construct() {
 	this->electricity.Width = this->width - this->electricity.X * 2.0F;
 	this->electricity.Height = battery_height - (this->electricity.Y - battery_y) * 2.0F;
 
-	this->electricity_color = make_linear_gradient_brush(
-		0.0F, this->electricity.Y + this->electricity.Height,
-		0.0F, this->electricity.Height,
-		this->color_stops);
-
 	auto battery_region = rounded_rectangle(0.0F, battery_y, this->width, battery_height, corner_radius, corner_radius);
 	auto electricity_region = rectangle(this->electricity);
 	
@@ -97,6 +92,7 @@ void Batterylet::construct() {
 	};
 
 	this->skeleton = geometry_freeze(geometry_union(battery_parts)); // don't mind, it's Visual Studio's fault
+	this->on_value_change(0.0F);
 }
 
 void Batterylet::fill_extent(float x, float y, float* w, float* h) {
@@ -107,13 +103,15 @@ void Batterylet::update(long long count, long long interval, long long uptime) {
 	this->set_value(battery_status->capacity);
 }
 
+void Batterylet::on_value_change(float v) {
+	this->electricity_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
+}
+
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_percentage();
 	float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
 	float capacity_x = x + this->electricity.X;
 	float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
-
-	brush_translate(this->electricity_color, x, y);
 
 	ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
 		this->electricity.Width + 2.0F, capacity_height + 2.0F,

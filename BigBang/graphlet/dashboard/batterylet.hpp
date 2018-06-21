@@ -9,11 +9,11 @@ namespace WarGrey::SCADA {
 	public:
 		Batterylet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
-			GradientStops^ stops = nullptr);
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
 		Batterylet(float emin, float emax, float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
-			GradientStops^ stops = nullptr);
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
 	public:
 		void construct() override;
@@ -21,11 +21,14 @@ namespace WarGrey::SCADA {
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	protected:
+		void on_value_change(float v) override;
+
 	private:
-		GradientStops^ color_stops;
+		WarGrey::SCADA::GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ electricity_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ electricity_color;
 
 	private:
 		Windows::Foundation::Rect electricity;

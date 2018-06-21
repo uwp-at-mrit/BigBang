@@ -53,11 +53,6 @@ void FuelTanklet::construct() {
 	this->fuel.Width = tank_width - this->fuel.X * 2.0F;
 	this->fuel.Height = tank_height - this->fuel.Y * 2.0F;
 
-	this->fuel_color = make_linear_gradient_brush(
-		0.0F, this->fuel.Y + this->fuel.Height,
-		0.0F, this->fuel.Height,
-		this->color_stops);
-
 	auto tank_region = rounded_rectangle(0.0F, 0.0F, tank_width, tank_height, corner_radius, corner_radius);
 	auto fuel_region = rectangle(this->fuel);
 	
@@ -89,10 +84,15 @@ void FuelTanklet::construct() {
 
 	this->skeleton = geometry_freeze(geometry_union(geometry_union(tank_parts), // don't mind, it's Visual Studio's fault
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
+	this->on_value_change(0.0F);
 }
 
 void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
+}
+
+void FuelTanklet::on_value_change(float v) {
+	this->fuel_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
 
 void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -100,8 +100,6 @@ void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);
 	float fuel_x = x + this->fuel.X;
 	float fuel_y = y + this->fuel.Y + this->fuel.Height - fuel_height;
-
-	brush_translate(this->fuel_color, x, y);
 
 	ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F,
 		this->fuel.Width + 2.0F, fuel_height + 2.0F,

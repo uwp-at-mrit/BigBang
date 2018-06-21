@@ -10,11 +10,11 @@ namespace WarGrey::SCADA {
 	public:
 		Thermometerlet(float tmin, float tmax, float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0x666666),
-			GradientStops^ colors = nullptr);
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
 		Thermometerlet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0x666666),
-			GradientStops^ colors = nullptr);
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
 	public:
 		void construct() override;
@@ -29,13 +29,11 @@ namespace WarGrey::SCADA {
 		void on_value_change(float t) override;
 
 	private:
-		GradientStops^ color_stops;
+		WarGrey::SCADA::GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury_bulb;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bulb_color;
-		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ mercury_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mercury_color;
 
 	private:
 		float bulb_size;
@@ -44,7 +42,5 @@ namespace WarGrey::SCADA {
 		float thickness;
 		float mercury_x;
 		float mercury_y;
-		float bulb_x;
-		float bulb_y;
 	};
 }

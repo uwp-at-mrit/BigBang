@@ -20,11 +20,14 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	protected:
+		void on_value_change(float v) override;
+
 	private:
 		GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ fuel_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ fuel_color;
 
 	private:
 		Windows::Foundation::Rect fuel;
