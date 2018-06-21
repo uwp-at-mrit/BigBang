@@ -97,13 +97,16 @@ void FuelTanklet::on_value_change(float v) {
 
 void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_percentage();
-	float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);
-	float fuel_x = x + this->fuel.X;
-	float fuel_y = y + this->fuel.Y + this->fuel.Height - fuel_height;
+	
+	if (capacity > 0.0F) {
+		float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);
+		float fuel_x = x + this->fuel.X;
+		float fuel_y = y + this->fuel.Y + this->fuel.Height - fuel_height;
 
-	ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F,
-		this->fuel.Width + 2.0F, fuel_height + 2.0F,
-		this->fuel_color);
+		ds->FillRectangle(fuel_x - 1.0F, fuel_y - 1.0F,
+			this->fuel.Width + 2.0F, fuel_height + 2.0F,
+			this->fuel_color);
+	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }

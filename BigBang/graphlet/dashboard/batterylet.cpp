@@ -92,7 +92,6 @@ void Batterylet::construct() {
 	};
 
 	this->skeleton = geometry_freeze(geometry_union(battery_parts)); // don't mind, it's Visual Studio's fault
-	this->on_value_change(0.0F);
 }
 
 void Batterylet::fill_extent(float x, float y, float* w, float* h) {
@@ -109,13 +108,16 @@ void Batterylet::on_value_change(float v) {
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_percentage();
-	float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
-	float capacity_x = x + this->electricity.X;
-	float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
 
-	ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
-		this->electricity.Width + 2.0F, capacity_height + 2.0F,
-		this->electricity_color);
+	if (capacity > 0.0F) {
+		float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
+		float capacity_x = x + this->electricity.X;
+		float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
+
+		ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
+			this->electricity.Width + 2.0F, capacity_height + 2.0F,
+			this->electricity_color);
+	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }

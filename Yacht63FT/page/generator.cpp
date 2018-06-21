@@ -297,8 +297,8 @@ public:
 			size_t db_idx_acc = 11;
 
 			this->set_values(this->powers[GPower::frequency], db4, 3U, db_idx_acc, GraphletAnchor::RB);
-			this->set_values(this->powers[GPower::voltage],   db4, 4U, db_idx_acc, GraphletAnchor::RB);
 			this->set_values(this->powers[GPower::current],   db4, 5U, db_idx_acc, GraphletAnchor::RB);
+			this->set_values(this->powers[GPower::voltage],   db4, 6U, db_idx_acc, GraphletAnchor::RB);
 		}
 
 		{ // metrics in generator section
@@ -307,8 +307,8 @@ public:
 			this->set_temperature_meter(GMeter::coolant, db4, 76U, db_idx_acc);
 			this->set_pressure_meter(   GMeter::oil,     db4, 77U, db_idx_acc);
 			this->set_temperature_meter(GMeter::oil,     db4, 78U, db_idx_acc);
-			this->set_pressure_meter(GMeter::sea,        db4, 80U, db_idx_acc);
-			this->set_pressure_meter(GMeter::coolant,    db4, 84U, db_idx_acc);
+			this->set_pressure_meter(   GMeter::sea,     db4, 80U, db_idx_acc);
+			this->set_pressure_meter(   GMeter::coolant, db4, 84U, db_idx_acc);
 
 			this->set_values(this->rspeeds, db4, 79U, db_idx_acc, GraphletAnchor::RB);
 			this->set_meters(this->foil_filter_pdrop, this->foil_filter_pdmeter,

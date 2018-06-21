@@ -1,16 +1,19 @@
 #pragma once
 
 #include "graphlet/primitive.hpp"
+#include "paint.hpp"
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Indicatorlet : public WarGrey::SCADA::IValuelet<float> {
+	private class Indicatorlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
 		Indicatorlet(float size, float thickness = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ low_color = WarGrey::SCADA::Colours::make(0x30A1F6),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color = WarGrey::SCADA::Colours::make(0xAEEE00),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ high_color = WarGrey::SCADA::Colours::make(0xFFB43D),
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::make(0x505050));
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = WarGrey::SCADA::Colours::make(0x505050),
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
+
+		Indicatorlet(float vmin, float vmax, float size, float thickness = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = WarGrey::SCADA::Colours::make(0x505050),
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
 	public:
 		void construct() override;
@@ -18,12 +21,14 @@ namespace WarGrey::SCADA {
 		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	protected:
+		void on_value_change(float v) override;
+
 	private:
+		WarGrey::SCADA::GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body_ring;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ normal_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ low_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ high_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ fgcolor;
 
 	private:
 		float bspace;

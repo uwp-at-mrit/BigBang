@@ -301,19 +301,18 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->set_motor_meters(PMoter::power,  db4, 24, db_idx_acc);
-		this->set_motor_meters(PMoter::rspeed, db4, 25, db_idx_acc);
+		this->set_motor_meters(PMoter::power,  db4, 24U, db_idx_acc);
+		this->set_motor_meters(PMoter::rspeed, db4, 25U, db_idx_acc);
 
-		this->set_values(this->cs[PConverter::voltage],     db4, 6U,  db_idx_acc, rb);
-		this->set_values(this->cs[PConverter::temperature], db4, 7U,  db_idx_acc, rb);
-		this->set_values(this->cs[PConverter::current],     db4, 37U, db_idx_acc, rb);
-		this->set_values(this->ws[PWinding::Up_C],          db4, 8U,  db_idx_acc, rb);
-		this->set_values(this->ws[PWinding::Vp_C],          db4, 9U,  db_idx_acc, rb);
-		this->set_values(this->ws[PWinding::Wp_C],          db4, 10U, db_idx_acc, rb);
-		this->set_values(this->bs[PBearing::drive_C],       db4, 11U, db_idx_acc, rb);
-		this->set_values(this->bs[PBearing::nondrive_C],    db4, 12U, db_idx_acc, rb);
-	
-		this->set_values(this->bs[PBearing::thrust_C],      db4, 34U, 11, rb);
+		this->set_values(this->cs[PConverter::current],     db4, 26U, db_idx_acc, rb);
+		this->set_values(this->cs[PConverter::voltage],     db4, 27U, db_idx_acc, rb);
+		this->set_values(this->cs[PConverter::temperature], db4, 28U, db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Up_C],          db4, 29U, db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Vp_C],          db4, 30U, db_idx_acc, rb);
+		this->set_values(this->ws[PWinding::Wp_C],          db4, 31U, db_idx_acc, rb);
+		this->set_values(this->bs[PBearing::drive_C],       db4, 32U, db_idx_acc, rb);
+		this->set_values(this->bs[PBearing::nondrive_C],    db4, 33U, db_idx_acc, rb);
+		this->set_values(this->bs[PBearing::thrust_C],      db4, 34U, db_idx_acc, rb);
 		this->set_values(this->dcbs[PBus::dc_V],            db4, 73U, 1,  rb);
 
 		this->master->end_update_sequence();
