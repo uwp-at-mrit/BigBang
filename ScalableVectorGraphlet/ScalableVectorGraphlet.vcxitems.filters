@@ -10,6 +10,12 @@
     <Filter Include="usr\share\graphlet">
       <UniqueIdentifier>{610427b2-7f7e-4284-95cf-2ce13d23c285}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphlet">
+      <UniqueIdentifier>{0b041fa7-97bb-432f-a9c1-43ea7dada541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\svg">
+      <UniqueIdentifier>{89e6088e-5b51-430b-aeb4-8cb7755d02d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\CoolPump.svg">
@@ -21,7 +27,7 @@
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\SolarPowerPanel.svg">
       <Filter>usr\share\graphlet</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Battery.svg">
+    <None Include="D:\WinSCADA\ScalableVectorGraphlet\usr\share\graphlet\StorageCell.svg">
       <Filter>usr\share\graphlet</Filter>
     </None>
   </ItemGroup>

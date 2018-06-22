@@ -130,8 +130,11 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class IStatuslet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IStatuslet(Status default_status, Style (*make_default_style)(Status)) {
-			this->default_status = ((default_status == Status::_) ? 0 : static_cast<unsigned int>(default_status));
+		IStatuslet(Style(*make_default_style)(Status))
+			: WarGrey::SCADA::IStatuslet<Status, Style>(Status::_, make_default_style) {}
+
+		IStatuslet(Status status0, Style(*make_default_style)(Status)) {
+			this->default_status = ((status0 == Status::_) ? 0 : static_cast<unsigned int>(status0));
 			this->current_status = this->default_status;
 
 			for (Status s = static_cast<Status>(0); s < Status::_; s++) {
@@ -139,9 +142,11 @@ namespace WarGrey::SCADA {
 			}
 
 			/** WARNING
-			 * invoking `on_status_change` here has no effect
-			 * since its virtual and here is inside the constructor
-			 */
+			* invoking `apply_style` and `on_status_change` here has no effect
+			* since they are virtual and here is inside the constructor
+			*
+			* `update_status` is designed for children to achieve the goal.
+			*/
 		}
 
 	public:
@@ -150,7 +155,7 @@ namespace WarGrey::SCADA {
 			
 			if (this->current_status != new_status) {
 				this->current_status = new_status;
-				this->on_status_change(static_cast<Status>(new_status));
+				this->update_status();
 				this->notify_updated();
 			}
 		}
@@ -168,7 +173,14 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
+		void update_status() {
+			this->apply_style(this->styles[this->current_status]);
+			this->on_status_change(static_cast<Status>(this->current_status));
+		}
+
+	protected:
 		virtual void on_status_change(Status status) {}
+		virtual void apply_style(Style& style) {}
 
 	private:
 		unsigned int default_status;

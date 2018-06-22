@@ -38,7 +38,7 @@ DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
 	: ISymbollet(default_state, &make_default_door_style, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
-	this->on_status_change(default_state);
+	this->update_status();
 }
 
 void DumpDoorlet::construct() {

@@ -40,23 +40,19 @@ private enum class PD { // order matters
 	g1, m1, t1, t2, g2, m2, g3, b1
 };
 
+private enum class PS { Normal, Breakdown };
+
 static float line_thickness = 3.0F;
 
 /*************************************************************************************************/
-private class YachtBatterylet : public Svglet {
+private class YachtBatterylet : public Svgmaplet {
 public:
-	YachtBatterylet(float width, float height) : Svglet("Battery", width, height) {}
-
-public:
-	void on_ready() {}
+	YachtBatterylet(float width, float height) : Svgmaplet("StorageCell", width, height) {}
 };
 
-private class SolarPanellet : public Svglet {
+private class SolarPanellet : public Svgmaplet {
 public:
-	SolarPanellet(float width, float height) : Svglet("SolarPowerPanel", width, height) {}
-
-public:
-	void on_ready() {}
+	SolarPanellet(float width, float height) : Svgmaplet("SolarPowerPanel", width, height) {}
 };
 
 /*************************************************************************************************/

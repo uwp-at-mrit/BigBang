@@ -43,7 +43,7 @@ Pumplet::Pumplet(float radius, double degrees) : Pumplet(default_pump_status, ra
 Pumplet::Pumplet(PumpStatus default_status, float radius, double degrees)
 	: ISymbollet(default_status, &make_default_pump_style, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
-	this->on_status_change(default_status);
+	this->update_status();
 }
 
 void Pumplet::construct() {
