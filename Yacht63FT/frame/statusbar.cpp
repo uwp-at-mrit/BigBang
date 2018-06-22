@@ -42,7 +42,7 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		Platform::String^ captions[] = { ":oiltank:", ":battery:", ":gps:" };
+		Platform::String^ captions[] = { ":oiltank:", ":storage:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
 		float icon_width = design_to_application_width(110.0F) * 0.618F;
@@ -55,9 +55,7 @@ public:
 
 			{ // load label
 				this->labels[i] = new Labellet(speak(captions[i]), this->fonts[0], screen_status_label_color);
-				this->master->insert(this->labels[i],
-					cell_x + label_xoffset, cell_y + label_yoffset,
-					GraphletAnchor::LT);
+				this->master->insert(this->labels[i], cell_x + label_xoffset, cell_y + label_yoffset, GraphletAnchor::LT);
 			}
 
 			{ // load parameters
@@ -65,7 +63,7 @@ public:
 				py = cell_y + parameter_yoffset;
 
 				if (i < Status::GPS_E) {
-					this->parameters[i] = new Labellet("%", this->fonts[1], screen_status_parameter_color);
+					this->parameters[i] = new Labellet("0.0%", this->fonts[1], screen_status_parameter_color);
 					this->master->insert(this->parameters[i], px, py, GraphletAnchor::LT);
 				} else {
 					this->parameters[Status::GPS_E] = new Labellet("E:", this->fonts[1], screen_status_parameter_color);
@@ -81,7 +79,7 @@ public:
 
 				switch (i) {
 				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
-				case Status::Battery: this->battery = new Batterylet(icon_width, -1.5714F); target = this->battery; break;
+				case Status::Battery: this->storage = new Batterylet(icon_width, -1.5714F); target = this->storage; break;
 				case Status::GPS_E: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
 				}
 
@@ -109,14 +107,6 @@ public:
 	}
 
 public:
-	void on_battery_capacity_changed(float flcapacity) override { // NOTE: Batterylet manages capacity own its own.
-		float percentage = this->make_percentage(flcapacity);
-		
-		this->master->enter_critical_section();
-		this->parameters[Status::Battery]->set_text(percentage.ToString() + "%");
-		this->master->leave_critical_section();
-	}
-
 	void on_timestamp_changed(Platform::String^ timestamp) override {
 		this->master->enter_critical_section();
 		this->clock->set_text(this->make_timestamp(timestamp));
@@ -131,14 +121,13 @@ public:
 
 public:
 	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
-		float flcapacity = AI_ref(db4, 117U, 100.0F);
-		float percentage = this->make_percentage(flcapacity);
-
+		float oil_capacity = AI_ref(db4, 117U, 100.0F);
+		
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->oiltank->set_value(flcapacity);
-		this->parameters[Status::OilTank]->set_text(percentage.ToString() + "%");
+		this->oiltank->set_value(oil_capacity);
+		this->parameters[Status::OilTank]->set_text(this->make_percentage(oil_capacity).ToString() + "%");
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -162,7 +151,7 @@ private:
 	OptionBitmaplet* alarm;
 	Bitmaplet* gps;
 	FuelTanklet* oiltank;
-	Batterylet* battery;
+	Batterylet* storage;
 	Labellet* labels[Status::GPS_E + 1];
 	Labellet* parameters[Status::GPS_N + 1];
 	Labellet* clock;
@@ -212,5 +201,7 @@ void Statusbar::load(CanvasCreateResourcesReason reason, float width, float heig
 }
 
 void Statusbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
-	// this override does nothing but disabling the default behaviours
+#ifdef  _DEBUG
+	Planet::on_tap(g, local_x, local_y, shifted, controlled);
+#endif
 }

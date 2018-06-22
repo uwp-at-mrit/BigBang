@@ -120,7 +120,7 @@
   <data name=":author:" xml:space="preserve">
     <value>中船重工七一九研究所</value>
   </data>
-  <data name=":battery:" xml:space="preserve">
+  <data name=":storage:" xml:space="preserve">
     <value>电量</value>
   </data>
   <data name=":gps:" xml:space="preserve">

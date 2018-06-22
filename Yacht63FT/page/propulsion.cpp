@@ -5,12 +5,12 @@
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
+#include "graphlet/svglet.hpp"
 #include "graphlet/symbol/circuit/switchlet.hpp"
 #include "graphlet/symbol/circuit/machinelet.hpp"
 #include "graphlet/symbol/circuit/converterlet.hpp"
 #include "graphlet/symbol/circuit/accumulatorlet.hpp"
 #include "graphlet/symbol/circuit/powerstationlet.hpp"
-#include "graphlet/symbol/circuit/solarpanellet.hpp"
 
 #include "tongue.hpp"
 #include "brushes.hxx"
@@ -82,8 +82,8 @@ public:
 		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::Accumulator)->move_down();
 
 		this->diagram = new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite);
-		this->accumulator = new Accumulatorlet(gridsize, line_thickness);
-		this->solarpanel = new SolarPanellet(gridsize, line_thickness);
+		this->accumulator = new Accumulatorlet(this->gridsize, line_thickness);
+		this->solarpanel = new Svglet("SolarPowerPanel", this->gridsize * 2.0F, this->gridsize * 2.0F);
 		
 		this->master->insert(this->diagram);
 		this->master->insert(this->accumulator);
@@ -194,7 +194,7 @@ private:
 	std::map<PD, Converterlet*> vfds;
 	std::map<PD, PowerStationlet*> powers;
 	Accumulatorlet* accumulator;
-	SolarPanellet* solarpanel;
+	Svglet* solarpanel;
 
 private:
 	CanvasTextFormat^ label_font;

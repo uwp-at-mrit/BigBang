@@ -20,7 +20,7 @@ static unsigned int battery_default_colors[] = {
 };
 
 private class BatteryStatus final : public ISystemStatusListener {
-	friend class WarGrey::SCADA::Batterylet;
+	friend class WarGrey::SCADA::SystemBatterylet;
 public:
 	void on_battery_capacity_changed(float capacity) {
 		this->capacity = capacity;
@@ -42,11 +42,6 @@ Batterylet::Batterylet(float emin, float emax, float width, float height, ICanva
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
 		this->height = this->width * 1.618F;
-	}
-
-	if (battery_status == nullptr) {
-		battery_status = new BatteryStatus();
-		register_system_status_listener(battery_status);
 	}
 
 	this->color_stops = ((stops == nullptr) ? make_gradient_stops(battery_default_colors) : stops);
@@ -98,10 +93,6 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Batterylet::update(long long count, long long interval, long long uptime) {
-	this->set_value(battery_status->capacity);
-}
-
 void Batterylet::on_value_change(float v) {
 	this->electricity_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
@@ -120,4 +111,17 @@ void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
+}
+
+/*************************************************************************************************/
+SystemBatterylet::SystemBatterylet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(0.0F, 1.0F, width, height, bcolor, stops) {
+	if (battery_status == nullptr) {
+		battery_status = new BatteryStatus();
+		register_system_status_listener(battery_status);
+	}
+}
+
+void SystemBatterylet::update(long long count, long long interval, long long uptime) {
+	this->set_value(battery_status->capacity);
 }

@@ -1,6 +1,3 @@
-#include <ppltasks.h>
-#include <map>
-
 #include "graphlet/svglet.hpp"
 #include "planet.hpp"
 
@@ -9,8 +6,6 @@
 #include "draw.hpp"
 
 using namespace WarGrey::SCADA;
-
-using namespace Concurrency;
 
 using namespace Windows::UI;
 using namespace Windows::Foundation;

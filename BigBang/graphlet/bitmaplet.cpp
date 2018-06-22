@@ -1,12 +1,7 @@
-#include <ppltasks.h>
-#include <map>
-
 #include "graphlet/bitmaplet.hpp"
 #include "planet.hpp"
 
 using namespace WarGrey::SCADA;
-
-using namespace Concurrency;
 
 using namespace Windows::Foundation;
 

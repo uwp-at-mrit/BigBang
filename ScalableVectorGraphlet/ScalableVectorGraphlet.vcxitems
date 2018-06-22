@@ -16,5 +16,8 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\CoolPump.svg" />
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Generator.svg" />
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\SolarPowerPanel.svg">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
 </Project>

@@ -36,6 +36,7 @@ Global
 		DataAccess\DataAccess.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Graphics\graphics.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		PLCIO\PLCIO.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
+		ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Syslog\Syslog.vcxitems*{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}*SharedItemsImports = 4
 		Auxiliary\Auxiliary.vcxitems*{9d38ad51-fee8-4303-8b0d-833bbcc93b58}*SharedItemsImports = 9
 		PLCIO\PLCIO.vcxitems*{a218bf46-1f55-4b99-b000-62f2de40576c}*SharedItemsImports = 9

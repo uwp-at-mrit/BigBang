@@ -18,7 +18,6 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
@@ -35,5 +34,15 @@ namespace WarGrey::SCADA {
 		float width;
 		float height;
 		float thickness;
+	};
+
+	private class SystemBatterylet : public WarGrey::SCADA::Batterylet {
+	public:
+		SystemBatterylet(float width, float height = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
+
+	public:
+		void update(long long count, long long interval, long long uptime) override;
 	};
 }

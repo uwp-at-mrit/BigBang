@@ -42,8 +42,7 @@ class PlaceHolderDecorator : public IPlanetDecorator {};
 
 class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
-    GraphletInfo(IPlanet* master, unsigned int mode)
-		: IGraphletInfo(master), mode(mode) {};
+    GraphletInfo(IPlanet* master, unsigned int mode) : IGraphletInfo(master), mode(mode) {};
 
 public:
     float x;
@@ -54,10 +53,8 @@ public:
 public:
 	unsigned int mode;
 
-public:
-	float inserting_x;
-	float inserting_y;
-	GraphletAnchor inserting_anchor;
+public: // for asynchronously loaded graphlets
+	GraphletAnchor anchor0;
 
 public:
 	IGraphlet* next;
@@ -115,11 +112,14 @@ static inline void unsafe_add_selected(IPlanet* master, IGraphlet* g, GraphletIn
 	master->before_select(g, true);
 	info->selected = true;
 	master->after_select(g, true);
+	master->notify_graphlet_updated(g);
 }
 
 static inline void unsafe_set_selected(IPlanet* master, IGraphlet* g, GraphletInfo* info) {
+	master->begin_update_sequence();
 	master->no_selected();
 	unsafe_add_selected(master, g, info);
+	master->end_update_sequence();
 }
 
 static void graphlet_anchor_offset(IGraphlet* g, float width, float height, GraphletAnchor& a, float* xoff, float* yoff) {
@@ -170,6 +170,7 @@ static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, Graphlet
 
 	unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
 	graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
+	info->anchor0 = a;
 	
 	return unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
 }
@@ -207,7 +208,7 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	if (info != nullptr) {
-		unsafe_move_graphlet_via_info(this, g, info, info->inserting_x, info->inserting_y, info->inserting_anchor, true);
+		unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, info->anchor0, true);
 		this->notify_graphlet_updated(g);
 	}
 }
@@ -260,13 +261,16 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
         info->next = this->head_graphlet;
 
 		g->construct();
-		unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
-		this->notify_graphlet_updated(g);
-		if (!g->ready()) {
-			info->inserting_x = x;
-			info->inserting_y = y;
-			info->inserting_anchor = a;
+
+		if (g->ready()) {
+			unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
+		} else {
+			unsafe_move_graphlet_via_info(this, info, x, y, true);
+			info->anchor0 = a;
 		}
+
+		this->notify_graphlet_updated(g);
+		
 	}
 }
 
@@ -479,6 +483,8 @@ void Planet::no_selected() {
 	if (this->head_graphlet != nullptr) {
 		IGraphlet* child = this->head_graphlet;
 
+		this->begin_update_sequence();
+
 		do {
 			GraphletInfo* info = GRAPHLET_INFO(child);
 
@@ -486,10 +492,13 @@ void Planet::no_selected() {
 				this->before_select(child, false);
 				info->selected = false;
 				this->after_select(child, false);
+				this->notify_graphlet_updated(child);
 			}
 
 			child = info->next;
 		} while (child != this->head_graphlet);
+
+		this->end_update_sequence();
 	}
 }
 
