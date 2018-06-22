@@ -61,13 +61,14 @@ public:
 	IGraphlet* prev;
 };
 
-static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, double degrees) {
+static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, GraphletAnchor a, double degrees) {
     auto info = new GraphletInfo(master, mode);
     g->info = info;
 
     while (degrees <  0.000) degrees += 360.0;
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
+	info->anchor0 = a;
 
     return info;
 }
@@ -208,7 +209,12 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	if (info != nullptr) {
-		unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, info->anchor0, true);
+		if (info->anchor0 != GraphletAnchor::LT) {
+			unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, info->anchor0, true);
+			info->anchor0 = GraphletAnchor::LT;
+		}
+
+		this->size_cache_invalid();
 		this->notify_graphlet_updated(g);
 	}
 }
@@ -245,7 +251,7 @@ void Planet::end_update_sequence() {
 
 void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
 	if (g->info == nullptr) {
-		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, 0.0);
+		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, a, 0.0);
 		
 		if (this->head_graphlet == nullptr) {
             this->head_graphlet = g;
@@ -266,11 +272,10 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
 			unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
 		} else {
 			unsafe_move_graphlet_via_info(this, info, x, y, true);
-			info->anchor0 = a;
+			
 		}
 
 		this->notify_graphlet_updated(g);
-		
 	}
 }
 

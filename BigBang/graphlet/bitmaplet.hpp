@@ -81,8 +81,7 @@ namespace WarGrey::SCADA {
 		}
 
 		UnionBitmaplet(float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet")
-			: UnionBitmaplet(nullptr, widht, height, rootdir) {
-		}
+			: UnionBitmaplet(nullptr, widht, height, rootdir) {}
 
 		UnionBitmaplet(Platform::String^ subdir, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet") {
 			this->window.Width = width;
