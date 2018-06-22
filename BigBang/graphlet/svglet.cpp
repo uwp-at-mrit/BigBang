@@ -37,11 +37,8 @@ void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 	this->graph_svg = doc_svg;
 	this->root = this->graph_svg->Root;
 
-	if ((this->viewport.Width > 0.0F) && (this->viewport.Height > 0.0F)) {
-		root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
-		root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
-	} else {
-		CanvasSvgLengthUnits width_units, height_units;
+	if ((this->viewport.Width <= 0.0F) || (this->viewport.Height <= 0.0F)) {
+		CanvasSvgLengthUnits width_units, height_units;		
 		float width = this->get_length_attribute("width", &width_units, false);
 		float height = this->get_length_attribute("height", &height_units, false);
 
@@ -55,6 +52,11 @@ void Svglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 			this->viewport.Height = height * (this->viewport.Width / width);
 		}
 	}
+
+	root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
+	root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
+
+	this->on_ready();
 }
 
 bool Svglet::ready() {

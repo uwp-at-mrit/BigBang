@@ -167,11 +167,16 @@ static bool unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, fl
 }
 
 static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info, float x, float y, GraphletAnchor a, bool absolute) {
-	float sx, sy, sw, sh, dx, dy;
+	float sx, sy, sw, sh;
+	float dx = 0.0F;
+	float dy = 0.0F;
 
-	unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-	graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
-	info->anchor0 = a;
+	if (g->ready()) {
+		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
+		graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
+	} else {
+		info->anchor0 = a;
+	}
 	
 	return unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
 }
@@ -215,7 +220,10 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 		}
 
 		this->size_cache_invalid();
+		this->begin_update_sequence();
 		this->notify_graphlet_updated(g);
+		this->on_graphlet_ready(g);
+		this->end_update_sequence();
 	}
 }
 

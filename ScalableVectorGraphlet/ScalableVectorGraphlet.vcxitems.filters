@@ -21,5 +21,8 @@
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\SolarPowerPanel.svg">
       <Filter>usr\share\graphlet</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Battery.svg">
+      <Filter>usr\share\graphlet</Filter>
+    </None>
   </ItemGroup>
 </Project>

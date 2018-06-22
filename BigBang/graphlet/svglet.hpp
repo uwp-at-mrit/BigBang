@@ -23,6 +23,8 @@ namespace WarGrey::SCADA {
 		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg, int hint) override;
 		
 	protected:
+		virtual void on_ready() {}
+
 		Windows::UI::Color get_fill_color(Platform::String^ id, Windows::UI::Color& default_color = Windows::UI::Colors::Transparent);
 		void set_fill_color(Platform::String^ id, Windows::UI::Color& c);
 		void set_fill_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);

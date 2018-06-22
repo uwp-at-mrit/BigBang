@@ -43,8 +43,9 @@ namespace WarGrey::SCADA {
 		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) = 0;
 
 	public:
-		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
 		virtual void notify_graphlet_updated(ISprite* g) = 0;
+		virtual void notify_graphlet_ready(IGraphlet* g) = 0;
+		virtual void on_graphlet_ready(IGraphlet* g) = 0;
 		virtual void begin_update_sequence() = 0;
 		virtual bool in_update_sequence() = 0;
 		virtual void end_update_sequence() = 0;
@@ -171,8 +172,9 @@ namespace WarGrey::SCADA {
 		void size_cache_invalid();
 
 	public:
-		void notify_graphlet_ready(IGraphlet* g) override;
 		void notify_graphlet_updated(ISprite* g) override;
+		void notify_graphlet_ready(IGraphlet* g) override;
+		void on_graphlet_ready(IGraphlet* g) override {}
 		void begin_update_sequence() override;
 		bool in_update_sequence() override;
 		void end_update_sequence() override;
