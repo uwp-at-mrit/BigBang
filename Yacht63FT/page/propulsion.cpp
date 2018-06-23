@@ -34,7 +34,7 @@ private enum class PD { // order matters
 	G1, G2, G3, M1, T1, T2, M2, B1,
 	ShorePower, PowerStation1, PowerStation2,
 	Generator1, Generator2, Propeller1, Propeller2,
-	SolarInverter, Battery,
+	SolarInverter, StorageCell,
 	// switches
 	Ssp, Stt, Sgg1, Sgg2, Smp1, Smp2, Stp1, Stp2, Sgs, Sbs,
 	SP, _,
@@ -81,7 +81,7 @@ public:
 		turtle->move_up(3, PD::G3)->move_up(3, PD::Sgs)->move_up(3, PD::SolarInverter)->move_up()->jump_back();
 
 		turtle->move_right(5, PD::b1);
-		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::Battery)->move_down();
+		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::StorageCell)->move_down();
 
 		this->diagram = this->master->insert_one(new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite));
 		this->storagecell = this->master->insert_one(new StorageCelletv(0.0F, this->gridsize * 2.0F));
@@ -96,7 +96,7 @@ public:
 		this->load_graphlets(this->powers, PD::ShorePower, PD::PowerStation2, this->gridsize, 0.0);
 
 		this->load_graphlets(this->labels, PD::G1, PD::B1);
-		this->load_graphlets(this->captions, PD::ShorePower, PD::Battery);
+		this->load_graphlets(this->captions, PD::ShorePower, PD::StorageCell);
 	}
 
 	void reflow(float width, float height) {
@@ -117,9 +117,9 @@ public:
 		
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAnchor::CB);
 		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAnchor::CB);
-		this->diagram->map_graphlet_at_anchor(this->storagecell, PD::Battery, GraphletAnchor::CT);
+		this->diagram->map_graphlet_at_anchor(this->storagecell, PD::StorageCell, GraphletAnchor::CT);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAnchor::CB, 0.0F, -scap_yoff);
-		this->diagram->map_graphlet_at_anchor(this->captions[PD::Battery], PD::Battery, GraphletAnchor::CT, 0.0F, scap_yoff);
+		this->diagram->map_graphlet_at_anchor(this->captions[PD::StorageCell], PD::StorageCell, GraphletAnchor::CT, 0.0F, scap_yoff);
 		
 		for (auto lt = this->labels.begin(); lt != this->labels.end(); lt++) {
 			this->master->move_to(lt->second, this->vfds[lt->first], GraphletAnchor::LC, GraphletAnchor::RC, vfds_xoff);

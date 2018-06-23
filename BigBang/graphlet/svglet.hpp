@@ -28,6 +28,10 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual void on_ready() = 0;
 
+		void set_shape_color(Platform::String^ id, Windows::UI::Color& c);
+		void set_shape_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);
+		void set_shape_color(Platform::String^ id, WarGrey::SCADA::Colour^ brush);
+
 		Windows::UI::Color get_fill_color(Platform::String^ id, Windows::UI::Color& default_color = Windows::UI::Colors::Transparent);
 		void set_fill_color(Platform::String^ id, Windows::UI::Color& c);
 		void set_fill_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);
@@ -38,14 +42,20 @@ namespace WarGrey::SCADA {
 		void set_stroke_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);
 		void set_stroke_color(Platform::String^ id, WarGrey::SCADA::Colour^ brush);
 
+	protected:
+		float get_child_length_attribute(Platform::String^ id, Platform::String^ attribute, bool* relative, float default_value, bool inherited = true);
+		float get_child_number_attribute(Platform::String^ id, Platform::String^ attribute, float default_value, bool inherited = true);
+		void set_child_percentage_attribute(Platform::String^ id, Platform::String^ attribute, float length);
+		void set_child_number_attribute(Platform::String^ id, Platform::String^ attribute, float length);
+
 	private:
-		Windows::UI::Color get_child_color_attribute(Platform::String^ id, Platform::String^ attribute_name, Windows::UI::Color& default_color);
-		void set_child_color_attribute(Platform::String^ id, Platform::String^ attribute_name, Windows::UI::Color& c);
+		float get_length_attribute(Platform::String^ attribute, bool* relative, float default_value = 100.0F, bool inherited = false);
+		void set_percentage_attribute(Platform::String^ attribute, float length);
+		void set_number_attribute(Platform::String^ attribute, float length);
 
-		float get_length_attribute(Platform::String^ attribute_name,
-			Microsoft::Graphics::Canvas::Svg::CanvasSvgLengthUnits* units,
-			bool inherited = false);
-
+		Windows::UI::Color get_child_color_attribute(Platform::String^ id, Platform::String^ attribute, Windows::UI::Color& default_color, bool inherited = true);
+		void set_child_color_attribute(Platform::String^ id, Platform::String^ attribute, Windows::UI::Color& c);
+		
 	protected:
 		Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ graph_svg;
 		Microsoft::Graphics::Canvas::Svg::CanvasSvgNamedElement^ root;

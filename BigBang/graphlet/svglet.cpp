@@ -16,6 +16,19 @@ using namespace Windows::Storage::Streams;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
+static float svg_length_attribute(CanvasSvgNamedElement^ target, Platform::String^ name, bool* relative, float default_value, bool inherited) {
+	CanvasSvgLengthUnits units = CanvasSvgLengthUnits::Percentage;
+	float value = default_value;
+
+	if (target->IsAttributeSpecified(name, inherited)) {
+		value = target->GetLengthAttribute(name, &units);
+	}
+
+	SET_BOX(relative, units == CanvasSvgLengthUnits::Percentage);
+
+	return value;
+}
+
 /*************************************************************************************************/
 ISvglet::ISvglet(float width, float height) {
 	this->viewport.Width = width;
@@ -38,9 +51,9 @@ void ISvglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 	this->root = this->graph_svg->Root;
 
 	if ((this->viewport.Width <= 0.0F) || (this->viewport.Height <= 0.0F)) {
-		CanvasSvgLengthUnits width_units, height_units;		
-		float width = this->get_length_attribute("width", &width_units, false);
-		float height = this->get_length_attribute("height", &height_units, false);
+		bool relative_width, relative_height;		
+		float width = this->get_length_attribute("width", &relative_width, 100.0F, false);
+		float height = this->get_length_attribute("height", &relative_height, 100.0F, false);
 
 		// TODO: what if one of the lengths is measured in percentage
 		if (this->viewport.Width <= 0.0F) {
@@ -53,8 +66,8 @@ void ISvglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 		}
 	}
 
-	root->SetLengthAttribute("width", 100.0F, CanvasSvgLengthUnits::Percentage);
-	root->SetLengthAttribute("height", 100.0F, CanvasSvgLengthUnits::Percentage);
+	this->set_percentage_attribute("width", 100.0F);
+	this->set_percentage_attribute("height", 100.0F);
 
 	this->on_ready();
 }
@@ -78,6 +91,19 @@ void ISvglet::draw_progress(CanvasDrawingSession^ ds, float x, float y, float Wi
 }
 
 /*************************************************************************************************/
+void ISvglet::set_shape_color(Platform::String^ id, Windows::UI::Color& c) {
+	this->set_fill_color(id, c);
+	this->set_stroke_color(id, c);
+}
+
+void ISvglet::set_shape_color(Platform::String^ id, unsigned int hex, double alpha) {
+	this->set_shape_color(id, rgba(hex, alpha));
+}
+
+void ISvglet::set_shape_color(Platform::String^ id, WarGrey::SCADA::Colour^ brush) {
+	this->set_shape_color(id, brush->Color);
+}
+
 Color ISvglet::get_fill_color(Platform::String^ id, Color& default_color) {
 	return this->get_child_color_attribute(id, "fill", default_color);
 }
@@ -111,34 +137,62 @@ void ISvglet::set_stroke_color(Platform::String^ id, WarGrey::SCADA::Colour^ bru
 }
 
 /*************************************************************************************************/
-float ISvglet::get_length_attribute(Platform::String^ name, CanvasSvgLengthUnits* units, bool inherited) {
-	float value = 100.0F; // This value is also the default length if both the client program and the SVG itself do not specific the size.
-	(*units) = CanvasSvgLengthUnits::Percentage;
+void ISvglet::set_number_attribute(Platform::String^ name, float v) {
+	this->root->SetLengthAttribute(name, v, CanvasSvgLengthUnits::Number);
+}
+
+void ISvglet::set_percentage_attribute(Platform::String^ name, float v) {
+	this->root->SetLengthAttribute(name, v, CanvasSvgLengthUnits::Percentage);
+}
+
+float ISvglet::get_length_attribute(Platform::String^ name, bool* relative, float default_value, bool inherited) {
+	float value = default_value;
 
 	if (this->root != nullptr) {
-		if (this->root->IsAttributeSpecified(name, inherited)) {
-			value = this->root->GetLengthAttribute(name, units);
-		}
+		value = svg_length_attribute(this->root, name, relative, default_value, inherited);
 	}
 
 	return value;
 }
 
-Color ISvglet::get_child_color_attribute(Platform::String^ id, Platform::String^ attribute_name, Color& default_color) {
-	/** WARNING
-	* This method is intended to be invoked correctly, so itself does not check the input.
-	* That means the `id` should be defined in the SVG document, or the application will crash in development stage.
-	*/
+/** WARNING
+ * These methods are intended to be invoked correctly, so itself does not check the input.
+ * That means the `id` should be defined in the SVG document, or the application will crash in development stage.
+ */
+float ISvglet::get_child_length_attribute(Platform::String^ id, Platform::String^ attribute, bool* relative, float default_value, bool inherited) {
 	CanvasSvgNamedElement^ child = this->graph_svg->FindElementById(id);
 
-	return child->IsAttributeSpecified(attribute_name) ? child->GetColorAttribute(attribute_name) : default_color;
+	return svg_length_attribute(child, attribute, relative, default_value, inherited);
 }
 
-void ISvglet::set_child_color_attribute(Platform::String^ id, Platform::String^ attribute_name, Windows::UI::Color& c) {
-	// Warnings see `ISvglet::get_child_color_attribute`
+float ISvglet::get_child_number_attribute(Platform::String^ id, Platform::String^ attribute, float default_value, bool inherited) {
+	bool who_cares = true;
+
+	return this->get_child_length_attribute(id, attribute, &who_cares, default_value, inherited);
+}
+
+void ISvglet::set_child_number_attribute(Platform::String^ id, Platform::String^ attribute, float v) {
+	CanvasSvgNamedElement^ child = this->graph_svg->FindElementById(id);
+	
+	child->SetLengthAttribute(attribute, v, CanvasSvgLengthUnits::Number);
+}
+
+void ISvglet::set_child_percentage_attribute(Platform::String^ id, Platform::String^ attribute, float v) {
+	CanvasSvgNamedElement^ child = this->graph_svg->FindElementById(id);
+	
+	child->SetLengthAttribute(attribute, v, CanvasSvgLengthUnits::Percentage);
+}
+
+Color ISvglet::get_child_color_attribute(Platform::String^ id, Platform::String^ attribute, Color& default_color, bool inherited) {
 	CanvasSvgNamedElement^ child = this->graph_svg->FindElementById(id);
 
-	child->SetColorAttribute(attribute_name, c);
+	return child->IsAttributeSpecified(attribute, inherited) ? child->GetColorAttribute(attribute) : default_color;
+}
+
+void ISvglet::set_child_color_attribute(Platform::String^ id, Platform::String^ attribute, Windows::UI::Color& c) {
+	CanvasSvgNamedElement^ child = this->graph_svg->FindElementById(id);
+
+	child->SetColorAttribute(attribute, c);
 }
 
 /*************************************************************************************************/

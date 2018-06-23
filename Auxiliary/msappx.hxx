@@ -106,9 +106,10 @@ namespace WarGrey::SCADA {
 
 					while (!q.empty()) {
 						auto self = q.front();
-
+						
 						self->on_appx(ms_appx, ftobject, hint);
 						self->on_appx_notify(ms_appx, ftobject, hint);
+						
 						IMsAppx<FileType, Hint>::refcounts[uuid] += 1;
 						q.pop();
 					}
@@ -155,7 +156,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Concurrency::cancellation_token_source shared_task;
-
+		
 	private:
 		static std::map<int, size_t> refcounts;
 		static std::map<int, FileType^> filesystem;

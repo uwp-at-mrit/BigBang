@@ -120,7 +120,7 @@
   <data name=":author:" xml:space="preserve">
     <value>中船重工七一九研究所</value>
   </data>
-  <data name=":storage:" xml:space="preserve">
+  <data name=":storagecell:" xml:space="preserve">
     <value>电量</value>
   </data>
   <data name=":gps:" xml:space="preserve">
@@ -321,7 +321,7 @@
   <data name="SolarInverter" xml:space="preserve">
     <value>光伏逆变器</value>
   </data>
-  <data name="Accumulator" xml:space="preserve">
+  <data name="StorageCell" xml:space="preserve">
     <value>蓄电池</value>
   </data>
   <data name=":ipv4:" xml:space="preserve">

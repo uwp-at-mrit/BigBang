@@ -22,7 +22,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum Status { OilTank, Battery, GPS_E, GPS_N };
+private enum Status { OilTank, StorageCell, GPS_E, GPS_N };
 
 /*************************************************************************************************/
 private class StatusBoard final : public PLCConfirmation, public ISystemStatusListener {
@@ -42,7 +42,7 @@ public:
 
 public:
 	void load_and_flow(float width, float height) {
-		Platform::String^ captions[] = { ":oiltank:", ":storage:", ":gps:" };
+		Platform::String^ captions[] = { ":oiltank:", ":storagecell:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
 		float icon_width = design_to_application_width(110.0F) * 0.618F;
@@ -79,7 +79,7 @@ public:
 
 				switch (i) {
 				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
-				case Status::Battery: this->storage = new Batterylet(icon_width, -1.5714F); target = this->storage; break;
+				case Status::StorageCell: this->storage = new Batterylet(icon_width, -1.5714F); target = this->storage; break;
 				case Status::GPS_E: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
 				}
 

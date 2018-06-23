@@ -11,6 +11,7 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct StorageCellVStyle {
+		WarGrey::SCADA::Colour^ border_color;
 		WarGrey::SCADA::Colour^ body_color;
 	};
 
@@ -26,5 +27,11 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void apply_style(StorageCellVStyle& style) override;
+
+	private:
+		void set_body_color(WarGrey::SCADA::Colour^ color, WarGrey::SCADA::Colour^ shadow = nullptr);
+		void set_seal_color(WarGrey::SCADA::Colour^ color);
+		void set_anode_color(WarGrey::SCADA::Colour^ color);
+		void set_cathode_color(WarGrey::SCADA::Colour^ color);
 	};
 }
