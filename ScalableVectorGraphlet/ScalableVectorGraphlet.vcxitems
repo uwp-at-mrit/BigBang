@@ -28,4 +28,12 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.hpp" />
+  </ItemGroup>
 </Project>

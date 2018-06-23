@@ -31,4 +31,20 @@
       <Filter>usr\share\graphlet</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\storagecelletv.hpp">
+      <Filter>graphlet\svg</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarpowerletv.hpp">
+      <Filter>graphlet\svg</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\storagecelletv.cpp">
+      <Filter>graphlet\svg</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarpowerletv.cpp">
+      <Filter>graphlet\svg</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>

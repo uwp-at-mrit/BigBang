@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable : 4250) 
 
 #include "graphlet/msappxlet.hxx"
 
@@ -8,8 +9,7 @@ namespace WarGrey::SCADA {
 	private class ISvglet abstract : public virtual WarGrey::SCADA::IMsAppxlet<Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument, int> {
 	public:
 		virtual ~ISvglet() noexcept;
-
-		ISvglet(Platform::String^ file_svg, float width, float height, Platform::String^ rootdir = "graphlet");
+		ISvglet(float width, float height);
 
 	public:
 		void construct() override;
@@ -17,6 +17,10 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void draw_progress(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool ready();
+
+	public:
+		virtual Platform::String^ name() = 0;
+		virtual Platform::String^ rootdir() = 0;
 
 	protected:
 		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg, int hint) override;
@@ -57,20 +61,30 @@ namespace WarGrey::SCADA {
 		Svgmaplet(Platform::String^ file_svg, Platform::String^ rootdir);
 
 	public:
-		void on_ready() override;
+		Platform::String^ name() override;
+		Platform::String^ rootdir() override;
+
+	protected:
+		void on_ready() override {}
+
+	private:
+		Platform::String^ file_svg;
+		Platform::String^ usr_share_subdir;
 	};
 
 	template<typename Status, typename Style>
-	private class Svglet : public WarGrey::SCADA::ISvglet, public WarGrey::SCADA::IStatuslet<Status, Style> {
+	private class Svglet abstract : public WarGrey::SCADA::ISvglet, public WarGrey::SCADA::IStatuslet<Status, Style> {
 	public:
-		Svglet(Status status0, Style(*make_default_style)(Status), Platform::String^ file_svg, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet")
-			: WarGrey::SCADA::ISvglet(file_svg, width, height, rootdir)
-			, IStatuslet<Status, Style>(status0, make_default_style) {}
-
-		Svglet(Status status0, Style(*make_default_style)(Status), Platform::String^ file_svg, Platform::String^ rootdir)
-			: WarGrey::SCADA::Svglet<Status>(status0, make_default_style, file, 0.0F, 0.0F, rootdir) {}
+		Svglet(Status status0, Style(*make_default_style)(Status), float width, float height)
+			: WarGrey::SCADA::ISvglet(width, height)
+			, WarGrey::SCADA::IStatuslet<Status, Style>(status0, make_default_style) {}
 
 	public:
+		Platform::String^ rootdir() override {
+			return "graphlet";
+		}
+
+	protected:
 		void on_ready() override {
 			this->update_status();
 		}

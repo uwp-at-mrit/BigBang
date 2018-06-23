@@ -5,7 +5,8 @@
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
-#include "graphlet/svglet.hpp"
+#include "graphlet/svg/storagecelletv.hpp"
+#include "graphlet/svg/solarpowerletv.hpp"
 #include "graphlet/symbol/circuit/switchlet.hpp"
 #include "graphlet/symbol/circuit/machinelet.hpp"
 #include "graphlet/symbol/circuit/converterlet.hpp"
@@ -43,17 +44,6 @@ private enum class PD { // order matters
 private enum class PS { Normal, Breakdown };
 
 static float line_thickness = 3.0F;
-
-/*************************************************************************************************/
-private class YachtBatterylet : public Svgmaplet {
-public:
-	YachtBatterylet(float width, float height) : Svgmaplet("StorageCell", width, height) {}
-};
-
-private class SolarPanellet : public Svgmaplet {
-public:
-	SolarPanellet(float width, float height) : Svgmaplet("SolarPowerPanel", width, height) {}
-};
 
 /*************************************************************************************************/
 private class LineDiagram final : public PLCConfirmation {
@@ -94,8 +84,8 @@ public:
 		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::Battery)->move_down();
 
 		this->diagram = this->master->insert_one(new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite));
-		this->battery = this->master->insert_one(new YachtBatterylet(0.0F, this->gridsize * 2.0F));
-		this->solarpanel = this->master->insert_one(new SolarPanellet(0.0F, this->gridsize * 2.0F));
+		this->storagecell = this->master->insert_one(new StorageCelletv(0.0F, this->gridsize * 2.0F));
+		this->solarpanel = this->master->insert_one(new SolarPowerletv(0.0F, this->gridsize * 2.0F));
 		
 		this->load_graphlets(this->machines, PD::Generator1, PD::Propeller2, this->gridsize, line_thickness, 0.0);
 		this->load_graphlets(this->vfds, PD::G1, PD::G3, this->gridsize, line_thickness, 0.0);
@@ -127,7 +117,7 @@ public:
 		
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAnchor::CB);
 		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAnchor::CB);
-		this->diagram->map_graphlet_at_anchor(this->battery, PD::Battery, GraphletAnchor::CT);
+		this->diagram->map_graphlet_at_anchor(this->storagecell, PD::Battery, GraphletAnchor::CT);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAnchor::CB, 0.0F, -scap_yoff);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::Battery], PD::Battery, GraphletAnchor::CT, 0.0F, scap_yoff);
 		
@@ -202,8 +192,8 @@ private:
 	std::map<PD, Machinelet*> machines;
 	std::map<PD, Converterlet*> vfds;
 	std::map<PD, PowerStationlet*> powers;
-	YachtBatterylet* battery;
-	SolarPanellet* solarpanel;
+	StorageCelletv* storagecell;
+	SolarPowerletv* solarpanel;
 
 private:
 	CanvasTextFormat^ label_font;

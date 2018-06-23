@@ -142,11 +142,11 @@ namespace WarGrey::SCADA {
 			}
 
 			/** WARNING
-			* invoking `apply_style` and `on_status_change` here has no effect
-			* since they are virtual and here is inside the constructor
-			*
-			* `update_status` is designed for children to achieve the goal.
-			*/
+			 * invoking `apply_style` and `on_status_change` here has no effect
+			 * since they are virtual and here is inside the constructor
+			 *
+			 * `update_status` is designed for children to achieve the goal.
+			 */
 		}
 
 	public:

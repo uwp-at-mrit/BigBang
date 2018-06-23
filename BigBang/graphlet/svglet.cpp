@@ -17,17 +17,19 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Svg;
 
 /*************************************************************************************************/
-ISvglet::ISvglet(Platform::String^ file, float width, float height, Platform::String^ rootdir) {
+ISvglet::ISvglet(float width, float height) {
 	this->viewport.Width = width;
 	this->viewport.Height = height;
-	this->ms_appx_svg = ms_appx_file(file, ".svg", rootdir);
 }
 
 ISvglet::~ISvglet() {
-	this->unload(this->ms_appx_svg);
+	if (this->ms_appx_svg != nullptr) {
+		this->unload(this->ms_appx_svg);
+	}
 }
 
 void ISvglet::construct() {
+	this->ms_appx_svg = ms_appx_file(this->name(), ".svg", this->rootdir());
 	this->load(this->ms_appx_svg, 0);
 }
 
@@ -144,6 +146,12 @@ Svgmaplet::Svgmaplet(Platform::String^ file, Platform::String^ rootdir)
 	: Svgmaplet(file, 0.0F, 0.0F, rootdir) {}
 
 Svgmaplet::Svgmaplet(Platform::String^ file, float width, float height, Platform::String^ rootdir)
-	: ISvglet(file, width, height, rootdir) {}
+	: ISvglet(width, height), file_svg(file), usr_share_subdir(rootdir) {}
 
-void Svgmaplet::on_ready() {}
+Platform::String^ Svgmaplet::name() {
+	return this->file_svg;
+}
+
+Platform::String^ Svgmaplet::rootdir() {
+	return this->usr_share_subdir;
+}
