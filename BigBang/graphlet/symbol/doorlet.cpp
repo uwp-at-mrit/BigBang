@@ -13,29 +13,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static DoorState default_door_state = DoorState::Closed;
-static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
-
-DoorStyle WarGrey::SCADA::make_default_door_style(DoorState state) {
-	DoorStyle s;
-
-	s.skeleton_color = default_sketeton_color;
-
-	switch (state) {
-	case DoorState::Open: s.body_color = Colours::Green; break;
-	case DoorState::Opening: s.mask_color = Colours::Green; break;
-	case DoorState::Closed: s.body_color = Colours::LightGray; break;
-	case DoorState::Closing: s.mask_color = Colours::DarkGray; break;
-	}
-
-	return s;
-}
-
 /*************************************************************************************************/
-DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(default_door_state, radius, degrees) {}
+DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(DoorStatus::Closed, radius, degrees) {}
 
-DumpDoorlet::DumpDoorlet(DoorState default_state, float radius, double degrees)
-	: ISymbollet(default_state, &make_default_door_style, radius, degrees) {
+DumpDoorlet::DumpDoorlet(DoorStatus default_state, float radius, double degrees) : ISymbollet(default_state, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->update_status();
@@ -54,7 +35,7 @@ void DumpDoorlet::construct() {
 
 void DumpDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
-	case DoorState::Opening: {
+	case DoorStatus::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -63,7 +44,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
-	case DoorState::Closing: {
+	case DoorStatus::Closing: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -75,7 +56,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DumpDoorlet::on_status_change(DoorState state) {
+void DumpDoorlet::on_status_change(DoorStatus state) {
 	switch (state) {
 	default: {
 		this->mask = nullptr;
@@ -84,11 +65,23 @@ void DumpDoorlet::on_status_change(DoorState state) {
 	}
 }
 
+void DumpDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
+	switch (state) {
+	case DoorStatus::Open: CAS_SLOT(s.body_color, Colours::Green); break;
+	case DoorStatus::Opening: CAS_SLOT(s.mask_color, Colours::Green); break;
+	case DoorStatus::Closed: CAS_SLOT(s.body_color, Colours::LightGray); break;
+	case DoorStatus::Closing: CAS_SLOT(s.mask_color, Colours::DarkGray); break;
+	}
+
+	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
+	CAS_SLOT(s.body_color, Colours::Background);
+
+	// NOTE: The others can be nullptr;
+}
+
 void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
-	auto skeleton_color = (style.skeleton_color != nullptr) ? style.skeleton_color : default_sketeton_color;
-	auto body_color = (style.body_color != nullptr) ? style.body_color : Colours::Background;
-
+	
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
@@ -97,7 +90,7 @@ void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 		ds->DrawGeometry(this->frame, cx, cy, style.border_color, default_thickness);
 	}
 
-	ds->DrawCachedGeometry(this->body, cx, cy, body_color);
+	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
@@ -106,7 +99,7 @@ void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 		ds->DrawGeometry(mask, cx, cy, style.mask_color, default_thickness);
 	}
 
-	ds->DrawGeometry(this->skeleton, cx, cy, skeleton_color, default_thickness);
+	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
 
 	if (style.handler_color != nullptr) {
 		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);

@@ -18,8 +18,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handler_color;
 	};
 
-	WarGrey::SCADA::ValveStyle make_default_valve_style(WarGrey::SCADA::ValveStatus statuss);
-
 	private class Valvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ValveStatus, WarGrey::SCADA::ValveStyle> {
 	public:
 		Valvelet(WarGrey::SCADA::ValveStatus default_status, float radius, double degrees = -90.0);
@@ -31,7 +29,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_status_change(ValveStatus status) override;
+		void prepare_style(WarGrey::SCADA::ValveStatus status, WarGrey::SCADA::ValveStyle& style) override;
+		void on_status_change(WarGrey::SCADA::ValveStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

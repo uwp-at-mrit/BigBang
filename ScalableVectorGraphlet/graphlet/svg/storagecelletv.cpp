@@ -1,5 +1,7 @@
 #include "graphlet/svg/storagecelletv.hpp"
 
+#include "paint.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
@@ -7,31 +9,14 @@ using namespace Windows::UI;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static StorageCellVStatus default_storagecellv_status = StorageCellVStatus::Normal;
-static CanvasSolidColorBrush^ default_sign_color = Colours::LightSlateGray;
-static CanvasSolidColorBrush^ default_body_color = Colours::SlateGray;
-
-StorageCellVStyle WarGrey::SCADA::make_default_storagecellv_style(StorageCellVStatus status) {
-	StorageCellVStyle s;
-
-	s.sign_color = default_sign_color;
-	s.body_color = default_body_color;
-
-	switch (status) {
-	case StorageCellVStatus::Breakdown: s.body_color = Colours::Firebrick; break;
-	case StorageCellVStatus::Charge:    s.sign_color = Colours::Orange; break;
-	case StorageCellVStatus::Discharge: s.sign_color = Colours::Green; break;
-	}
-
-	return s;
-}
+static CanvasSolidColorBrush^ default_sign_color = nullptr;
 
 /*************************************************************************************************/
 StorageCelletv::StorageCelletv(float width, float height)
-	: StorageCelletv(default_storagecellv_status, width, height) {}
+	: StorageCelletv(StorageCellVStatus::Normal, width, height) {}
 
 StorageCelletv::StorageCelletv(StorageCellVStatus default_status, float width, float height)
-	: Svglet(default_status, &make_default_storagecellv_style, width, height) {}
+	: Svglet(default_status, width, height) {}
 
 Platform::String^ StorageCelletv::name() {
 	return "StorageCell";
@@ -42,28 +27,26 @@ void StorageCelletv::update(long long count, long long interval, long long uptim
 		switch (this->get_status()) {
 		case StorageCellVStatus::Charge: {
 			StorageCellVStyle style = this->get_style();
-			Colour^ sign_color = ((style.sign_color == nullptr) ? default_sign_color : style.sign_color);
 			
 			if (count % 2 == 0) {	
-				this->set_anode_color(sign_color);
-				this->set_cathode_color(default_body_color);
+				this->set_anode_color(style.sign_color);
+				this->set_cathode_color(default_sign_color);
 			} else {
 				this->set_anode_color(default_sign_color);
-				this->set_cathode_color(sign_color);
+				this->set_cathode_color(style.sign_color);
 			}
 
 			this->notify_updated();
 		}; break;
 		case StorageCellVStatus::Discharge: {
 			StorageCellVStyle style = this->get_style();
-			Colour^ sign_color = ((style.sign_color == nullptr) ? default_sign_color : style.sign_color);
 
 			if (count % 2 != 0) {
-				this->set_anode_color(sign_color);
-				this->set_cathode_color(default_body_color);
+				this->set_anode_color(style.sign_color);
+				this->set_cathode_color(default_sign_color);
 			} else {
 				this->set_anode_color(default_sign_color);
-				this->set_cathode_color(sign_color);
+				this->set_cathode_color(style.sign_color);
 			}
 
 			this->notify_updated();
@@ -72,12 +55,32 @@ void StorageCelletv::update(long long count, long long interval, long long uptim
 	}
 }
 
-void StorageCelletv::apply_style(StorageCellVStyle& style) {
-	CanvasSolidColorBrush^ sign_color = ((style.sign_color == nullptr) ? default_sign_color : style.sign_color);
-	CanvasSolidColorBrush^ body_color = ((style.body_color == nullptr) ? default_body_color : style.body_color);
+void StorageCelletv::on_ready() {
+	if (default_sign_color == nullptr) {
+		default_sign_color = make_solid_brush(this->get_fill_color("seal"));
+	}
 
-	this->set_body_color(body_color);
-	this->set_seal_color(sign_color, body_color);
+	Svglet::on_ready();
+}
+
+void StorageCelletv::prepare_style(StorageCellVStatus status, StorageCellVStyle& style) {
+	switch (status) {
+	case StorageCellVStatus::Normal: CAS_SLOT(style.sign_color, Colours::WhiteSmoke); break;
+	case StorageCellVStatus::Breakdown: CAS_SLOT(style.body_color, Colours::Firebrick); break;
+	case StorageCellVStatus::Charge: CAS_SLOT(style.sign_color, Colours::Orange); break;
+	case StorageCellVStatus::Discharge: CAS_SLOT(style.sign_color, Colours::Green); break;
+	}
+
+	CAS_SLOT(style.body_color, Colours::SlateGray);
+	CAS_SLOT(style.sign_color, default_sign_color);
+}
+
+void StorageCelletv::apply_style(StorageCellVStyle& style) {
+	this->set_body_color(style.body_color);
+
+	this->set_anode_color(style.sign_color);
+	this->set_cathode_color(style.sign_color);
+	this->set_seal_color(style.sign_color, style.body_color);
 }
 
 void StorageCelletv::set_body_color(Colour^ color) {

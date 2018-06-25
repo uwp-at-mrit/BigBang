@@ -10,8 +10,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	};
 
-	WarGrey::SCADA::SwitchStyle make_default_switch_style(WarGrey::SCADA::SwitchStatus status);
-
 	private class Switchlet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::SwitchStatus, WarGrey::SCADA::SwitchStyle>
 		, public WarGrey::SCADA::IValuelet<bool> {
@@ -22,6 +20,9 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void prepare_style(WarGrey::SCADA::SwitchStatus status, WarGrey::SCADA::SwitchStyle& style) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoints;

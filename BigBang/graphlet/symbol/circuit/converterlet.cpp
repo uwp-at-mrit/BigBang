@@ -14,27 +14,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static ConverterStatus default_converter_status = ConverterStatus::Normal;
-static CanvasSolidColorBrush^ default_color = Colours::GhostWhite;
-
-ConverterStyle WarGrey::SCADA::make_default_converter_style(ConverterStatus status) {
-	ConverterStyle s;
-
-	s.color = default_color;
-
-	switch (status) {
-	case ConverterStatus::Breakdown: s.color = Colours::Firebrick; break;
-	}
-
-	return s;
-}
-
 /*************************************************************************************************/
 Converterlet::Converterlet(Platform::String^ sign, float radius, float thickness, double degrees)
-	: Converterlet(default_converter_status, sign, radius, thickness, degrees) {}
+	: Converterlet(ConverterStatus::Normal, sign, radius, thickness, degrees) {}
 
 Converterlet::Converterlet(ConverterStatus default_status, Platform::String^ sign, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, &make_default_converter_style, radius, degrees), thickness(thickness) {
+	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
 	auto l_sign = make_text_layout(sign, make_bold_text_format("Cambria Math", radius * 1.2F));
 	auto l_pair = make_text_layout(L"=", make_bold_text_format("Cambria Math", radius * 1.2F));
 	Rect s_box = l_sign->DrawBounds;
@@ -56,11 +41,18 @@ Converterlet::Converterlet(ConverterStatus default_status, Platform::String^ sig
 	this->sign = geometry_freeze(geometry_rotate(geometry_union(g_sign, g_pair), degrees, radius, radius));
 }
 
+void Converterlet::prepare_style(ConverterStatus status, ConverterStyle& s) {
+	switch (status) {
+	case ConverterStatus::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
+	}
+
+	CAS_SLOT(s.color, Colours::GhostWhite);
+}
+
 void Converterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const ConverterStyle style = this->get_style();
-	ICanvasBrush^ color = (style.color != nullptr) ? style.color : default_color;
-
+	
 	ds->FillRectangle(x, y, this->size, this->size, Colours::Background);
-	ds->DrawCachedGeometry(this->body, x, y, color);
-	ds->DrawCachedGeometry(this->sign, x, y, color);
+	ds->DrawCachedGeometry(this->body, x, y, style.color);
+	ds->DrawCachedGeometry(this->sign, x, y, style.color);
 }

@@ -60,11 +60,11 @@ namespace WarGrey::SCADA {
 		void set_child_color_attribute(Platform::String^ id, Platform::String^ attribute, Windows::UI::Color& c);
 		
 	protected:
+		Windows::Foundation::Size viewport;
+
+	private:
 		Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ graph_svg;
 		Microsoft::Graphics::Canvas::Svg::CanvasSvgNamedElement^ root;
-
-	protected:
-		Windows::Foundation::Size viewport;
 		Windows::Foundation::Uri^ ms_appx_svg;
 	};
 
@@ -88,9 +88,9 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class Svglet abstract : public WarGrey::SCADA::ISvglet, public WarGrey::SCADA::IStatuslet<Status, Style> {
 	public:
-		Svglet(Status status0, Style(*make_default_style)(Status), float width, float height)
+		Svglet(Status status0, float width, float height)
 			: WarGrey::SCADA::ISvglet(width, height)
-			, WarGrey::SCADA::IStatuslet<Status, Style>(status0, make_default_style) {}
+			, WarGrey::SCADA::IStatuslet<Status, Style>(status0) {}
 
 	public:
 		Platform::String^ rootdir() override {

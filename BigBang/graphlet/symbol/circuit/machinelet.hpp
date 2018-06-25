@@ -10,8 +10,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ sign_color;
 	};
 
-	WarGrey::SCADA::MachineStyle make_default_machine_style(WarGrey::SCADA::MachineStatus status);
-
 	private class Machinelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::MachineStatus, WarGrey::SCADA::MachineStyle> {
 	public:
 		Machinelet(WarGrey::SCADA::MachineStatus default_status, Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
@@ -19,6 +17,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void prepare_style(WarGrey::SCADA::MachineStatus status, WarGrey::SCADA::MachineStyle& style) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;

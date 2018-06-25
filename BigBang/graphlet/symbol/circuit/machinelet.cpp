@@ -14,29 +14,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static MachineStatus default_machine_status = MachineStatus::Normal;
-static CanvasSolidColorBrush^ default_border_color = Colours::GhostWhite;
-static CanvasSolidColorBrush^ default_sign_color = Colours::DimGray;
-
-MachineStyle WarGrey::SCADA::make_default_machine_style(MachineStatus status) {
-	MachineStyle s;
-
-	s.border_color = default_border_color;
-	s.sign_color = default_sign_color;
-
-	switch (status) {
-	case MachineStatus::Breakdown: s.border_color = Colours::Firebrick; s.sign_color = s.border_color; break;
-	}
-
-	return s;
-}
-
 /*************************************************************************************************/
 Machinelet::Machinelet(Platform::String^ sign, float radius, float thickness, double degrees)
-	: Machinelet(default_machine_status, sign, radius, thickness, degrees) {}
+	: Machinelet(MachineStatus::Normal, sign, radius, thickness, degrees) {}
 
 Machinelet::Machinelet(MachineStatus default_status, Platform::String^ sign, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, &make_default_machine_style, radius, degrees), thickness(thickness) {
+	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
 	auto l_sign = make_text_layout(sign, make_bold_text_format("Monospace", radius));
 	auto l_pair = make_text_layout(L"~", make_bold_text_format("Cambria Math", radius * 2.0F));
 	Rect s_box = l_sign->DrawBounds;
@@ -54,14 +37,22 @@ Machinelet::Machinelet(MachineStatus default_status, Platform::String^ sign, flo
 	this->sign = geometry_freeze(geometry_rotate(geometry_union(g_sign, g_pair), degrees, radius, radius));
 }
 
+void Machinelet::prepare_style(MachineStatus status, MachineStyle& s) {
+	switch (status) {
+	case MachineStatus::Breakdown: CAS_VALUES(s.border_color, Colours::Firebrick, s.sign_color, s.border_color); break;
+	}
+
+	CAS_SLOT(s.border_color, Colours::GhostWhite);
+	CAS_SLOT(s.sign_color, Colours::DimGray);
+}
+
+
 void Machinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const MachineStyle style = this->get_style();
-	ICanvasBrush^ bcolor = (style.border_color != nullptr) ? style.border_color : default_border_color;
-	ICanvasBrush^ scolor = (style.sign_color != nullptr) ? style.sign_color : default_sign_color;
 	float cx = x + this->size * 0.5F;
 	float cy = y + this->size * 0.5F;
 	
 	ds->FillCircle(cx, cy, this->size * 0.5F, Colours::Background);
-	ds->DrawCachedGeometry(this->body, x, y, bcolor);
-	ds->DrawCachedGeometry(this->sign, x, y, scolor);
+	ds->DrawCachedGeometry(this->body, x, y, style.border_color);
+	ds->DrawCachedGeometry(this->sign, x, y, style.sign_color);
 }

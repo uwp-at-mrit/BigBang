@@ -9,8 +9,6 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	};
 
-	WarGrey::SCADA::ConverterStyle make_default_converter_style(WarGrey::SCADA::ConverterStatus status);
-
 	private class Converterlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ConverterStatus, WarGrey::SCADA::ConverterStyle> {
 	public:
 		Converterlet(WarGrey::SCADA::ConverterStatus default_status, Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
@@ -18,6 +16,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void prepare_style(WarGrey::SCADA::ConverterStatus status, ConverterStyle& style) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;

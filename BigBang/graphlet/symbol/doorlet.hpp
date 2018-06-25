@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class DoorState { Open, Opening, Closed, Closing, Disabled, _ };
+	private enum class DoorStatus { Open, Opening, Closed, Closing, Disabled, _ };
 
 	private struct DoorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
@@ -13,11 +13,9 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handler_color;
 	};
 
-	WarGrey::SCADA::DoorStyle make_default_door_style(WarGrey::SCADA::DoorState state);
-
-	private class DumpDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle> {
+	private class DumpDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
 	public:
-		DumpDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = -90.0);
+		DumpDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = -90.0);
 		DumpDoorlet(float radius, double degrees = -90.0);
 
 	public:
@@ -26,7 +24,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_status_change(DoorState state) override;
+		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
+		void on_status_change(WarGrey::SCADA::DoorStatus state) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

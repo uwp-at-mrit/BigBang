@@ -4,9 +4,10 @@
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "box.hpp"
+#include "slot.hpp"
 
 namespace WarGrey::SCADA {
-    #define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))
+#define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))
 
     private class IGraphletInfo abstract {
     public:
@@ -130,16 +131,11 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class IStatuslet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IStatuslet(Style(*make_default_style)(Status))
-			: WarGrey::SCADA::IStatuslet<Status, Style>(Status::_, make_default_style) {}
+		IStatuslet() : WarGrey::SCADA::IStatuslet<Status, Style>(Status::_) {}
 
-		IStatuslet(Status status0, Style(*make_default_style)(Status)) {
+		IStatuslet(Status status0) {
 			this->default_status = ((status0 == Status::_) ? 0 : static_cast<unsigned int>(status0));
 			this->current_status = this->default_status;
-
-			for (Status s = static_cast<Status>(0); s < Status::_; s++) {
-				this->set_style(s, make_default_style(s));
-			}
 
 			/** WARNING
 			 * invoking `apply_style` and `on_status_change` here has no effect
@@ -152,7 +148,7 @@ namespace WarGrey::SCADA {
 	public:
 		void set_status(Status status) {
 			unsigned int new_status = ((status == Status::_) ? this->default_status : static_cast<unsigned int>(status));
-			
+
 			if (this->current_status != new_status) {
 				this->current_status = new_status;
 				this->update_status();
@@ -165,20 +161,35 @@ namespace WarGrey::SCADA {
 		}
 
 		void set_style(Status status, Style& style) {
-			this->styles[(status == Status::_) ? this->current_status : static_cast<unsigned int>(status)] = style;
+			unsigned int idx = (status == Status::_) ? this->current_status : static_cast<unsigned int>(status);
+
+			this->styles[idx] = style;
+			this->style_ready[idx] = false;
+
+			if (idx == this->current_status) {
+				this->notify_updated();
+			}
 		}
 
-		const Style& get_style(Status status = Status::_) {			
-			return this->styles[(status == Status::_) ? this->current_status : static_cast<unsigned int>(status)];
+		Style& get_style(Status status = Status::_) {
+			unsigned int idx = (status == Status::_) ? this->current_status : static_cast<unsigned int>(status);
+
+			if (!this->style_ready[idx]) {
+				this->prepare_style(static_cast<Status>(idx), this->styles[idx]);
+				this->style_ready[idx] = true;
+			}
+
+			return this->styles[idx];
 		}
 
 	protected:
 		void update_status() {
-			this->apply_style(this->styles[this->current_status]);
+			this->apply_style(this->get_style());
 			this->on_status_change(static_cast<Status>(this->current_status));
 		}
 
 	protected:
+		virtual void prepare_style(Status status, Style& style) {}
 		virtual void on_status_change(Status status) {}
 		virtual void apply_style(Style& style) {}
 
@@ -186,14 +197,16 @@ namespace WarGrey::SCADA {
 		unsigned int default_status;
 		unsigned int current_status;
 		Style styles[static_cast<unsigned int>(Status::_)];
+		bool style_ready[static_cast<unsigned int>(Status::_)];
 	};
 
 	template<typename Status, typename Style>
 	private class ISymbollet abstract : public WarGrey::SCADA::IStatuslet<Status, Style> {
 	public:
-		ISymbollet(Status default_status, Style(*make_default_style)(Status), float radius, double degrees)
-			: IStatuslet<Status, Style>(default_status, make_default_style)
-			, size(radius * 2.0F), degrees(degrees) {}
+		ISymbollet(float radius, double degrees) : size(radius * 2.0F), degrees(degrees) {}
+
+		ISymbollet(Status default_status, float radius, double degrees)
+			: IStatuslet<Status, Style>(default_status), size(radius * 2.0F), degrees(degrees) {}
 
 	public:
 		void ISymbollet::fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {

@@ -28,6 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)msappx.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)path.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)slot.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sugar.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)system.hpp" />

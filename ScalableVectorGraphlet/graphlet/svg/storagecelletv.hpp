@@ -5,17 +5,12 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private enum class StorageCellVStatus {
-		Normal, Breakdown, Charge, Discharge,
-		_
-	};
+	private enum class StorageCellVStatus { Normal, Breakdown, Charge, Discharge, _ };
 
 	private struct StorageCellVStyle {
 		WarGrey::SCADA::Colour^ body_color;
 		WarGrey::SCADA::Colour^ sign_color;
 	};
-
-	WarGrey::SCADA::StorageCellVStyle make_default_storagecellv_style(WarGrey::SCADA::StorageCellVStatus statuss);
 
 	private class StorageCelletv : public WarGrey::SCADA::Svglet<WarGrey::SCADA::StorageCellVStatus, WarGrey::SCADA::StorageCellVStyle> {
 	public:
@@ -29,6 +24,8 @@ namespace WarGrey::SCADA {
 		void update(long long count, long long interval, long long uptime) override;
 
 	protected:
+		void on_ready() override;
+		void prepare_style(WarGrey::SCADA::StorageCellVStatus status, WarGrey::SCADA::StorageCellVStyle& style) override;
 		void apply_style(WarGrey::SCADA::StorageCellVStyle& style) override;
 
 	private:
