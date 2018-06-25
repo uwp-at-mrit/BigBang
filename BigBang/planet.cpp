@@ -214,9 +214,20 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	if (info != nullptr) {
-		if (info->anchor0 != GraphletAnchor::LT) {
-			unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, info->anchor0, true);
-			info->anchor0 = GraphletAnchor::LT;
+		/**
+		 * This event will be triggered more than once when an asynchronously loaded graphlet
+		 *  has to load multiple resources.
+		 * 
+		 * TODO:
+		 *  This solution seems fragile,
+		 *   however it *does* work whereas the one based on std::mutex *does not*.
+		 */
+		GraphletAnchor request_anchor = info->anchor0;
+		
+		info->anchor0 = GraphletAnchor::LT;
+		
+		if (request_anchor != GraphletAnchor::LT) {
+			unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, request_anchor, true);
 		}
 
 		this->size_cache_invalid();
