@@ -22,9 +22,9 @@
  #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities" #px"/usr/share/include/")
  #(C++      #xF34B7D #px"[.]([ch](pp|xx)?)$")
  #(Racket   #x89E051 #px"[.]rkt$")
+ #(SVG      #xC34C26 #px"[.]svg$")
  #(Scribble #x1E4AEC #px"[.](scrbl|css)$")
- #(ResX     #xEDEDED #px"[.]resw$")
- #(SVG      #xC34C26 #px"[.]svg$")]
+ #(ResX     #xEDEDED #px"[.]resw$")]
 
 @handbook-table[]
 

@@ -19,8 +19,10 @@
   (lambda []
     ;;; DB28
     (for ([i (in-range 200)])
-      (define state (arithmetic-shift #x1 (random 8)))
-      (bytes-set! memory i state))
+      (define hint (random 16))
+      (when (< hint 8)
+        (define state (arithmetic-shift #b1 hint))
+        (bytes-set! memory i state)))
     
     ;;; DB4
     (for ([i (in-range 400)])
