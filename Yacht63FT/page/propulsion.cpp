@@ -6,7 +6,7 @@
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
 #include "graphlet/svg/storagecelletv.hpp"
-#include "graphlet/svg/solarpowerletv.hpp"
+#include "graphlet/svg/solarinverterletv.hpp"
 #include "graphlet/symbol/circuit/switchlet.hpp"
 #include "graphlet/symbol/circuit/machinelet.hpp"
 #include "graphlet/symbol/circuit/converterlet.hpp"
@@ -85,7 +85,7 @@ public:
 
 		this->diagram = this->master->insert_one(new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite));
 		this->storagecell = this->master->insert_one(new StorageCelletv(StorageCellVStatus::Charge, 0.0F, this->gridsize * 2.0F));
-		this->solarpanel = this->master->insert_one(new SolarPowerletv(0.0F, this->gridsize * 2.0F));
+		this->inverter = this->master->insert_one(new SolarInverterletv(SolarInverterVStatus::Breakdown, 0.0F, this->gridsize * 2.0F));
 		
 		this->load_graphlets(this->machines, PD::Generator1, PD::Propeller2, this->gridsize, line_thickness, 0.0);
 		this->load_graphlets(this->vfds, PD::G1, PD::G3, this->gridsize, line_thickness, 0.0);
@@ -116,7 +116,7 @@ public:
 		this->map_graphlets(this->captions, this->powers, PD::PowerStation1, PD::PowerStation2, GraphletAnchor::CB, GraphletAnchor::CT);
 		
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::ShorePower], PD::SP, GraphletAnchor::CB);
-		this->diagram->map_graphlet_at_anchor(this->solarpanel, PD::SolarInverter, GraphletAnchor::CB);
+		this->diagram->map_graphlet_at_anchor(this->inverter, PD::SolarInverter, GraphletAnchor::CB);
 		this->diagram->map_graphlet_at_anchor(this->storagecell, PD::StorageCell, GraphletAnchor::CT);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAnchor::CB, 0.0F, -scap_yoff);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::StorageCell], PD::StorageCell, GraphletAnchor::CT, 0.0F, scap_yoff);
@@ -193,7 +193,7 @@ private:
 	std::map<PD, Converterlet*> vfds;
 	std::map<PD, PowerStationlet*> powers;
 	StorageCelletv* storagecell;
-	SolarPowerletv* solarpanel;
+	SolarInverterletv* inverter;
 
 private:
 	CanvasTextFormat^ label_font;

@@ -32,18 +32,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.hpp">
       <Filter>graphlet\svg</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.hpp">
+    <ClInclude Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarinverterletv.hpp">
       <Filter>graphlet\svg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.cpp">
       <Filter>graphlet\svg</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.cpp">
+    <ClCompile Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarinverterletv.cpp">
       <Filter>graphlet\svg</Filter>
     </ClCompile>
   </ItemGroup>

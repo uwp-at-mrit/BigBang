@@ -90,20 +90,20 @@ void StorageCelletv::set_body_color(Colour^ color) {
 
 void StorageCelletv::set_seal_color(Colour^ color, Colour^ shadow) {
 	this->set_shape_color("seal", color);
-	this->set_shape_color("seal_left", color);
-	this->set_shape_color("seal_right", color);
+	this->set_shape_color("seal-left", color);
+	this->set_shape_color("seal-right", color);
 
 	if (shadow != nullptr) {
-		this->set_shape_color("seal_shadow", shadow);
+		this->set_shape_color("seal-shadow", shadow);
 	}
 }
 
 void StorageCelletv::set_anode_color(Colour^ color) {
 	this->set_shape_color("anode", color);
-	this->set_shape_color("anode_base", color);
+	this->set_shape_color("anode-base", color);
 }
 
 void StorageCelletv::set_cathode_color(Colour^ color) {
 	this->set_shape_color("cathode", color);
-	this->set_shape_color("cathode_base", color);
+	this->set_shape_color("cathode-base", color);
 }
