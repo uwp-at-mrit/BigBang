@@ -27,10 +27,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::GradientStops^ color_stops;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ electricity_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ charge_color;
 
 	private:
-		Windows::Foundation::Rect electricity;
+		Windows::Foundation::Rect charge;
 		float width;
 		float height;
 		float thickness;

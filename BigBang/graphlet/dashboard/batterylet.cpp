@@ -68,13 +68,13 @@ void Batterylet::construct() {
 	float cathode_symbol_x = cathode_center_x - cathode_sidesize * 0.5F;
 	float cathode_symbol_y = electrode_center_y - this->thickness * 0.5F;
 	
-	this->electricity.X = this->thickness;
-	this->electricity.Y = battery_y + this->thickness;
-	this->electricity.Width = this->width - this->electricity.X * 2.0F;
-	this->electricity.Height = battery_height - (this->electricity.Y - battery_y) * 2.0F;
+	this->charge.X = this->thickness;
+	this->charge.Y = battery_y + this->thickness;
+	this->charge.Width = this->width - this->charge.X * 2.0F;
+	this->charge.Height = battery_height - (this->charge.Y - battery_y) * 2.0F;
 
 	auto battery_region = rounded_rectangle(0.0F, battery_y, this->width, battery_height, corner_radius, corner_radius);
-	auto electricity_region = rectangle(this->electricity);
+	auto electricity_region = rectangle(this->charge);
 	
 	CanvasGeometry^ battery_parts[] = {
 		geometry_subtract(battery_region, electricity_region),
@@ -94,20 +94,20 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Batterylet::on_value_change(float v) {
-	this->electricity_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
+	this->charge_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float capacity = this->get_percentage();
 
 	if (capacity > 0.0F) {
-		float capacity_height = fmin(this->electricity.Height * capacity, this->electricity.Height);
-		float capacity_x = x + this->electricity.X;
-		float capacity_y = y + this->electricity.Y + this->electricity.Height - capacity_height;
+		float capacity_height = fmin(this->charge.Height * capacity, this->charge.Height);
+		float capacity_x = x + this->charge.X;
+		float capacity_y = y + this->charge.Y + this->charge.Height - capacity_height;
 
 		ds->FillRectangle(capacity_x - 1.0F, capacity_y - 1.0F,
-			this->electricity.Width + 2.0F, capacity_height + 2.0F,
-			this->electricity_color);
+			this->charge.Width + 2.0F, capacity_height + 2.0F,
+			this->charge_color);
 	}
 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);

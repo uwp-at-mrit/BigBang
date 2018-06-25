@@ -136,6 +136,14 @@ void ISvglet::set_stroke_color(Platform::String^ id, WarGrey::SCADA::Colour^ bru
 	this->set_stroke_color(id, brush->Color);
 }
 
+float ISvglet::get_stroke_width(Platform::String^ id, float default_width) {
+	return this->get_child_number_attribute(id, "stroke-width", default_width);
+}
+
+void ISvglet::set_stroke_width(Platform::String^ id, float width) {
+	this->set_child_number_attribute(id, "stroke-width", width);
+}
+
 /*************************************************************************************************/
 void ISvglet::set_number_attribute(Platform::String^ name, float v) {
 	this->root->SetLengthAttribute(name, v, CanvasSvgLengthUnits::Number);

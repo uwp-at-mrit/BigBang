@@ -84,7 +84,7 @@ public:
 		turtle->move_down(3, PD::B1)->move_down(3, PD::Sbs)->move_down(2, PD::StorageCell)->move_down();
 
 		this->diagram = this->master->insert_one(new Tracklet<PD>(turtle, line_thickness, Colours::GhostWhite));
-		this->storagecell = this->master->insert_one(new StorageCelletv(0.0F, this->gridsize * 2.0F));
+		this->storagecell = this->master->insert_one(new StorageCelletv(StorageCellVStatus::Charge, 0.0F, this->gridsize * 2.0F));
 		this->solarpanel = this->master->insert_one(new SolarPowerletv(0.0F, this->gridsize * 2.0F));
 		
 		this->load_graphlets(this->machines, PD::Generator1, PD::Propeller2, this->gridsize, line_thickness, 0.0);

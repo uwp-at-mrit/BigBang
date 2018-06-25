@@ -27,23 +27,23 @@
     <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\SolarPowerPanel.svg">
       <Filter>usr\share\graphlet</Filter>
     </None>
-    <None Include="D:\WinSCADA\ScalableVectorGraphlet\usr\share\graphlet\StorageCell.svg">
+    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\StorageCell.svg">
       <Filter>usr\share\graphlet</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\storagecelletv.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.hpp">
       <Filter>graphlet\svg</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarpowerletv.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.hpp">
       <Filter>graphlet\svg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\storagecelletv.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\solarpowerletv.cpp">
       <Filter>graphlet\svg</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\ScalableVectorGraphlet\graphlet\svg\solarpowerletv.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.cpp">
       <Filter>graphlet\svg</Filter>
     </ClCompile>
   </ItemGroup>

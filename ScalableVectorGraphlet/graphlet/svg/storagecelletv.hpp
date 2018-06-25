@@ -6,13 +6,13 @@
 
 namespace WarGrey::SCADA {
 	private enum class StorageCellVStatus {
-		Normal, Breakdown,
+		Normal, Breakdown, Charge, Discharge,
 		_
 	};
 
 	private struct StorageCellVStyle {
-		WarGrey::SCADA::Colour^ border_color;
 		WarGrey::SCADA::Colour^ body_color;
+		WarGrey::SCADA::Colour^ sign_color;
 	};
 
 	WarGrey::SCADA::StorageCellVStyle make_default_storagecellv_style(WarGrey::SCADA::StorageCellVStatus statuss);
@@ -25,12 +25,15 @@ namespace WarGrey::SCADA {
 	public:
 		Platform::String^ name() override;
 
+	public:
+		void update(long long count, long long interval, long long uptime) override;
+
 	protected:
-		void apply_style(StorageCellVStyle& style) override;
+		void apply_style(WarGrey::SCADA::StorageCellVStyle& style) override;
 
 	private:
-		void set_body_color(WarGrey::SCADA::Colour^ color, WarGrey::SCADA::Colour^ shadow = nullptr);
-		void set_seal_color(WarGrey::SCADA::Colour^ color);
+		void set_body_color(WarGrey::SCADA::Colour^ color);
+		void set_seal_color(WarGrey::SCADA::Colour^ color, WarGrey::SCADA::Colour^ shadow = nullptr);
 		void set_anode_color(WarGrey::SCADA::Colour^ color);
 		void set_cathode_color(WarGrey::SCADA::Colour^ color);
 	};

@@ -41,6 +41,9 @@ namespace WarGrey::SCADA {
 		void set_stroke_color(Platform::String^ id, Windows::UI::Color& c);
 		void set_stroke_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);
 		void set_stroke_color(Platform::String^ id, WarGrey::SCADA::Colour^ brush);
+		
+		float get_stroke_width(Platform::String^ id, float default_width = 1.0F);
+		void set_stroke_width(Platform::String^ id, float width);
 
 	protected:
 		float get_child_length_attribute(Platform::String^ id, Platform::String^ attribute, bool* relative, float default_value, bool inherited = true);
