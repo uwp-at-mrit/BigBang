@@ -240,7 +240,7 @@
   <data name=":p_sea:" xml:space="preserve">
     <value>Sea Water Pressure</value>
   </data>
-  <data name=":P_coolant:" xml:space="preserve">
+  <data name=":p_coolant:" xml:space="preserve">
     <value>Coolant Pressure</value>
   </data>
   <data name=":t_oil:" xml:space="preserve">
@@ -265,7 +265,7 @@
     <value>V</value>
   </data>
   <data name=":pm_power:" xml:space="preserve">
-    <value>Power</value>
+    <value>Propeller Motor Power</value>
   </data>
   <data name="&lt;power&gt;" xml:space="preserve">
     <value>kW</value>
@@ -383,5 +383,11 @@
   </data>
   <data name="WaterPump" xml:space="preserve">
     <value>Coolant Pump</value>
+  </data>
+  <data name=":power:" xml:space="preserve">
+    <value>Power</value>
+  </data>
+  <data name=":temperature:" xml:space="preserve">
+    <value>Temperature</value>
   </data>
 </root>

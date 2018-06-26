@@ -54,21 +54,23 @@ public:
 	unsigned int mode;
 
 public: // for asynchronously loaded graphlets
+	float x0;
+	float y0;
 	GraphletAnchor anchor0;
+	
 
 public:
 	IGraphlet* next;
 	IGraphlet* prev;
 };
 
-static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, GraphletAnchor a, double degrees) {
+static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, double degrees) {
     auto info = new GraphletInfo(master, mode);
     g->info = info;
 
     while (degrees <  0.000) degrees += 360.0;
     while (degrees >= 360.0) degrees -= 360.0;
     info->rotation = float(degrees * M_PI / 180.0);
-	info->anchor0 = a;
 
     return info;
 }
@@ -175,6 +177,8 @@ static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, Graphlet
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
 		graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
 	} else {
+		info->x0 = x;
+		info->y0 = y;
 		info->anchor0 = a;
 	}
 	
@@ -214,24 +218,15 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
 	if (info != nullptr) {
-		/**
-		 * This event will be triggered more than once when an asynchronously loaded graphlet
-		 *  has to load multiple resources.
-		 * 
-		 * TODO:
-		 *  This solution seems fragile,
-		 *   however it *does* work whereas the one based on std::mutex *does not*.
-		 */
-		GraphletAnchor request_anchor = info->anchor0;
-		
-		info->anchor0 = GraphletAnchor::LT;
-		
-		if (request_anchor != GraphletAnchor::LT) {
-			unsafe_move_graphlet_via_info(this, g, info, info->x, info->y, request_anchor, true);
-		}
-
 		this->size_cache_invalid();
 		this->begin_update_sequence();
+
+		/** TODO
+		 * The moving may occur more than once in or not in the same thread,
+		 *  do we need a mechanism to avoid the redundant ones?
+		 */
+		unsafe_move_graphlet_via_info(this, g, info, info->x0, info->y0, info->anchor0, true);
+		
 		this->notify_graphlet_updated(g);
 		this->on_graphlet_ready(g);
 		this->end_update_sequence();
@@ -270,8 +265,8 @@ void Planet::end_update_sequence() {
 
 void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
 	if (g->info == nullptr) {
-		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, a, 0.0);
-		
+		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, 0.0);
+
 		if (this->head_graphlet == nullptr) {
             this->head_graphlet = g;
             info->prev = this->head_graphlet;
@@ -286,13 +281,7 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
         info->next = this->head_graphlet;
 
 		g->construct();
-
-		if (g->ready()) {
-			unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
-		} else {
-			unsafe_move_graphlet_via_info(this, info, x, y, true);
-			
-		}
+		unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
 
 		this->notify_graphlet_updated(g);
 	}

@@ -52,14 +52,19 @@ namespace WarGrey::SCADA {
 	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
 	public:
 		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font = nullptr,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ scale_color = WarGrey::SCADA::Colours::Yellow,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = WarGrey::SCADA::Colours::Yellow,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
 
+		Dimensionlet(Platform::String^ unit, Platform::String^ label,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
+
 		Dimensionlet(Platform::String^ unit,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ scale_font,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	public:
@@ -75,14 +80,14 @@ namespace WarGrey::SCADA {
 		void fill_vmetrics(WarGrey::SCADA::TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr);
 
 	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ scale_layout;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ num_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ unit_layout;
 
 	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ scale_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color;
 
 	private:
-		WarGrey::SCADA::TextExtent scale_box;
+		WarGrey::SCADA::TextExtent num_box;
 		WarGrey::SCADA::TextExtent unit_box;
 	};
 }

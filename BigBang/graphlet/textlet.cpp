@@ -131,17 +131,20 @@ Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned i
 }
 
 /*************************************************************************************************/
-Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Dimensionlet(unit, "", "", sfont, lfont, color, color) {}
-	
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
-	, CanvasTextFormat^ sfont, CanvasTextFormat^ lfont, ICanvasBrush^ scolor, ICanvasBrush^ lcolor)
-	: scale_color(scolor) {
-	auto scale_font = ((sfont == nullptr) ? make_bold_text_format() : sfont);
-	auto label_font = ((lfont == nullptr) ? scale_font : lfont);
+Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
+	: Dimensionlet(unit, "", "", nfont, lfont, color, color) {}
 
-	this->set_color((lcolor == nullptr) ? scolor : lcolor);
-	this->set_font(scale_font);
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Dimensionlet(unit, label, "", font, font, ncolor, lcolor) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
+	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: num_color(ncolor) {
+	auto num_font = ((nfont == nullptr) ? make_bold_text_format() : nfont);
+	auto label_font = ((lfont == nullptr) ? num_font : lfont);
+
+	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
+	this->set_font(num_font);
 	this->unit_layout = make_text_layout(speak(unit), label_font);
 	this->unit_box = get_text_extent(this->unit_layout);
 
@@ -170,7 +173,7 @@ void Dimensionlet::construct() {
 
 void Dimensionlet::fill_extent(float x, float y, float* w, float* h) {
 	if (w != nullptr) {
-		(*w) = this->scale_box.width + this->unit_box.width;
+		(*w) = this->num_box.width + this->unit_box.width;
 
 		if (this->text_layout != nullptr) {
 			(*w) += this->text_layout->LayoutBounds.Width;
@@ -202,8 +205,8 @@ void Dimensionlet::on_value_change(float value) {
 		s = " " + s;
 	}
 		
-	this->scale_layout = make_text_layout(s, this->text_font);
-	this->scale_box = get_text_extent(this->scale_layout);
+	this->num_layout = make_text_layout(s, this->text_font);
+	this->num_box = get_text_extent(this->num_layout);
 }
 
 void Dimensionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -215,8 +218,8 @@ void Dimensionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		this->set_color();
 	}
 
-	if (this->scale_color == nullptr) {
-		this->scale_color = this->text_color;
+	if (this->num_color == nullptr) {
+		this->num_color = this->text_color;
 	}
 
 	this->fill_vmetrics(&label_box, &tspace, &bspace, &height);
@@ -227,17 +230,17 @@ void Dimensionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		lx += label_box.width;
 	}
 
-	ds->DrawTextLayout(this->scale_layout, lx, aligned_y(this->scale_box, by), this->scale_color);
-	ds->DrawTextLayout(this->unit_layout, lx + this->scale_box.width, aligned_y(this->unit_box, by), this->text_color);
+	ds->DrawTextLayout(this->num_layout, lx, aligned_y(this->num_box, by), this->num_color);
+	ds->DrawTextLayout(this->unit_layout, lx + this->num_box.width, aligned_y(this->unit_box, by), this->text_color);
 }
 
 void Dimensionlet::fill_vmetrics(TextExtent* label_box, float* tspace, float* bspace, float* height) {
-	(*label_box) = ((this->text_layout == nullptr) ? this->scale_box : get_text_extent(this->text_layout));
-	(*tspace) = fmin(label_box->tspace, fmin(this->scale_box.tspace, this->unit_box.tspace));
-	(*bspace) = fmin(label_box->bspace, fmin(this->scale_box.bspace, this->unit_box.bspace));
+	(*label_box) = ((this->text_layout == nullptr) ? this->num_box : get_text_extent(this->text_layout));
+	(*tspace) = fmin(label_box->tspace, fmin(this->num_box.tspace, this->unit_box.tspace));
+	(*bspace) = fmin(label_box->bspace, fmin(this->num_box.bspace, this->unit_box.bspace));
 
 	if (height != nullptr) {
-		float hsink = this->scale_box.height - this->scale_box.tspace - this->scale_box.bspace;
+		float hsink = this->num_box.height - this->num_box.tspace - this->num_box.bspace;
 		float huink = this->unit_box.height - this->unit_box.tspace - this->unit_box.bspace;
 		float ink_height = fmax(hsink, huink);
 

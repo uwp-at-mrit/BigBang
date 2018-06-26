@@ -384,4 +384,10 @@
   <data name="WaterPump" xml:space="preserve">
     <value>淡水泵</value>
   </data>
+  <data name=":power:" xml:space="preserve">
+    <value>功率</value>
+  </data>
+  <data name=":temperature:" xml:space="preserve">
+    <value>温度</value>
+  </data>
 </root>
