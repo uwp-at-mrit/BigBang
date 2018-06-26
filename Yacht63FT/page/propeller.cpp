@@ -323,9 +323,7 @@ private:
 	template<class G>
 	void set_values(G* gs[], uint8* db, size_t idx0, size_t acc, GraphletAnchor a) {
 		for (unsigned int idx = 0; idx < pcount; idx++) {
-			if (gs[idx] != nullptr) {
-				gs[idx]->set_value(AI_ref(db, idx0 + acc * idx), a);
-			}
+			gs[idx]->set_value(AI_ref(db, idx0 + acc * idx), a);
 		}
 	}
 

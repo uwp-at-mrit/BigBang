@@ -154,6 +154,36 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
+		this->set_values(this->powers,   PD::Generator1, PD::Generator2, db4, 3, 11);
+		this->set_values(this->rspeeds,  PD::Generator1, PD::Generator2, db4, 4, 11);
+		this->set_values(this->currents, PD::Generator1, PD::Generator2, db4, 5, 11);
+
+		this->set_values(this->powers,       PD::M1, PD::M2, db4, 24, 11);
+		this->set_values(this->rspeeds,      PD::M1, PD::M2, db4, 25, 11);
+		this->set_values(this->currents,     PD::M1, PD::M2, db4, 26, 11);
+		this->set_values(this->voltages,     PD::M1, PD::M2, db4, 27, 11);
+		this->set_values(this->temperatures, PD::M1, PD::M2, db4, 28, 11);
+
+		this->set_values(this->powers,       PD::T1, PD::T2, db4, 46, 6);
+		this->set_values(this->frequencies,  PD::T1, PD::T2, db4, 48, 6);
+		this->set_values(this->currents,     PD::T1, PD::T2, db4, 49, 6);
+		this->set_values(this->voltages,     PD::T1, PD::T2, db4, 50, 6);
+		this->set_values(this->temperatures, PD::T1, PD::T2, db4, 51, 6);
+
+		this->set_values(this->powers,       PD::B1, db4, 58);
+		this->set_values(this->currents,     PD::B1, db4, 59);
+		this->set_values(this->voltages,     PD::B1, db4, 60);
+		this->set_values(this->temperatures, PD::B1, db4, 61);
+
+		this->set_values(this->voltages,     PD::G1, PD::G2, db4, 6, 11);
+		this->set_values(this->temperatures, PD::G1, PD::G2, db4, 7, 11);
+
+		this->set_values(this->powers,       PD::G3, db4, 68);
+		this->set_values(this->frequencies,  PD::G3, db4, 69);
+		this->set_values(this->currents,     PD::G3, db4, 70);
+		this->set_values(this->voltages,     PD::G3, db4, 71);
+		this->set_values(this->temperatures, PD::G3, db4, 72);
+
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -249,6 +279,18 @@ private:
 					this->master->move_to(this->temperatures[id], this->powers[id], GraphletAnchor::LB, GraphletAnchor::LT);
 				}
 			}
+		}
+	}
+
+private:
+	void set_values(std::map<PD, Dimensionlet*>& ms, PD id, uint8* db, size_t idx) {
+		this->set_values(ms, id, id, db, idx, 0);
+	}
+	
+	void set_values(std::map<PD, Dimensionlet*>& ms, PD id0, PD idn, uint8* db, size_t idx, size_t acc) {
+		for (PD id = id0; id <= idn; id++) {
+			ms[id]->set_value(AI_ref(db, idx));
+			idx += acc;
 		}
 	}
 	
