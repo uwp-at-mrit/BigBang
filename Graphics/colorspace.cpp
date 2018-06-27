@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <algorithm>
+#include <cmath>
 
 #include "colorspace.hpp"
 
@@ -31,6 +32,33 @@ static Color hue_to_rgba(double hue, double chroma, double m, double a) {
     return rgba(r, g, b, a);
 }
 
+static double color_to_hue(Color color, double* M, double* m, double *chroma) {
+	double hue = std::nan("zero chroma");
+	char r = color.R;
+	char g = color.G;
+	char b = color.B;
+	char fxM = std::max(r, std::max(g, b));
+	char fxm = std::min(r, std::min(g, b));
+	
+	if (fxM > fxm) { // the same as: chroma == 0.0
+		if (fxM == g) {
+			hue = 60.0 * (2.0 + (double(b - r) / (*chroma)));
+		} else if (fxM == b) {
+			hue = 60.0 * (4.0 + (double(r - g) / (*chroma)));
+		} else if (g < b) {
+			hue = 60.0 * (6.0 + (double(g - b) / (*chroma)));
+		} else {
+			hue = 60.0 * (double(g - b) / (*chroma));
+		}
+	}
+
+	(*M) = double(fxM);
+	(*m) = double(fxm);
+	(*chroma) = (*M) - (*m);
+
+	return hue;
+}
+
 static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, char color_component, double alpha) {
     double cosH_60H = 2.0; // if hue == 0.0 or hue == 120.0;
 
@@ -50,6 +78,18 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
         default:  return rgba(minor, midor, major, alpha); break;
         }
     }
+}
+
+static inline char scale_color(char src, float s) {
+	char dest = src;
+
+	if (s > 1) {
+		dest = 255 - char(std::floor(float(255 - src) / s));
+	} else {
+		dest = std::min(char(255), char(std::floor(src * s)));
+	}
+
+	return dest;
 }
 
 /*************************************************************************************************/
@@ -78,6 +118,7 @@ Color rgba(double r, double g, double b, double a) {
     return ColorHelper::FromArgb(UCHAR(a), UCHAR(r), UCHAR(g), UCHAR(b));
 }
 
+/*************************************************************************************************/
 Color hsva(double hue, double saturation, double value, double alpha) {
     double chroma = saturation * value;
     double m = value - chroma;
@@ -85,6 +126,19 @@ Color hsva(double hue, double saturation, double value, double alpha) {
     return hue_to_rgba(hue, chroma, m, alpha);
 }
 
+void fill_hsv_color(Color& color, double* hue, double* saturation, double* value) {
+	double M, m, chroma;
+	
+	(*hue) = color_to_hue(color, &M, &m, &chroma);
+	(*saturation) = ((M == 0.0) ? 0.0 : (chroma / M));
+	(*value) = M;
+}
+
+void fill_hsv_color(unsigned int hex, double* hue, double* saturation, double* value) {
+	fill_hsv_color(rgba(hex), hue, saturation, value);
+}
+
+/*************************************************************************************************/
 Color hsla(double hue, double saturation, double lightness, double alpha) {
     double chroma = saturation * (1.0 - std::abs(lightness * 2.0 - 1.0));
     double m = lightness - chroma * 0.5;
@@ -92,6 +146,20 @@ Color hsla(double hue, double saturation, double lightness, double alpha) {
     return hue_to_rgba(hue, chroma, m, alpha);
 }
 
+void fill_hsl_color(Color& color, double* hue, double* saturation, double* lightness) {
+	double M, m, chroma;
+	double L = (M + m) * 0.5;
+
+	(*hue) = color_to_hue(color, &M, &m, &chroma);
+	(*saturation) = ((L == 1.0) ? 0.0 : (chroma / (1.0 - std::abs(2.0 * L - 1.0))));
+	(*lightness) = L;
+}
+
+void fill_hsl_color(unsigned int hex, double* hue, double* saturation, double* lightness) {
+	fill_hsl_color(rgba(hex), hue, saturation, lightness);
+}
+
+/*************************************************************************************************/
 Color hsia(double hue, double saturation, double intensity, double alpha) {
     if ((saturation == 0.0) || std::isnan(saturation)) {
         return rgba(intensity, intensity, intensity, alpha);
@@ -104,6 +172,24 @@ Color hsia(double hue, double saturation, double intensity, double alpha) {
     }
 }
 
+void fill_hsi_color(Color& color, double* hue, double* saturation, double* intensity) {
+	double r = double(color.R);
+	double g = double(color.G);
+	double b = double(color.B);
+	double alpha = (r - (g + b) * 0.5);
+	double beta = std::sqrt(((r - g) * (r - g)) + ((r - b) * (g - b)));
+	double h = std::acos(alpha / beta) * 180.0 / M_PI;
+	double I = (r + g + b) / 3.0;
+
+	(*hue) = ((b > g) ? (360 - h) : h);
+	(*saturation) = ((I == 0.0) ? 0.0 : (1.0 - (std::min(r, std::min(g, b)) / I)));
+	(*intensity) = I;
+}
+
+void fill_hsi_color(unsigned int hex, double* hue, double* saturation, double* intensity) {
+	fill_hsl_color(rgba(hex), hue, saturation, intensity);
+}
+
 /*************************************************************************************************/
 Color contrast_color(Color& src) {
 	// NOTE: human eye favors green color... 
@@ -114,4 +200,11 @@ Color contrast_color(Color& src) {
 	} else {
 		return Colors::White;
 	}
+}
+
+Color scale_color(Color& src, float scale) {
+	return ColorHelper::FromArgb(src.A,
+		scale_color(src.R, scale),
+		scale_color(src.G, scale),
+		scale_color(src.B, scale));
 }

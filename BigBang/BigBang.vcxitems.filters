@@ -60,9 +60,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
@@ -95,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.cpp">
+      <Filter>graphlet\symbol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -158,9 +158,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\alarmlet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
@@ -196,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.hpp">
+      <Filter>graphlet\symbol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

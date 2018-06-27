@@ -1,37 +1,39 @@
-#define _USE_MATH_DEFINES
-#include <WindowsNumerics.h>
-#include <cmath>
-
 #include "graphlet/symbol/alarmlet.hpp"
+
+#include "paint.hpp"
+#include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI;
+
 using namespace Microsoft::Graphics::Canvas;
-using namespace Microsoft::Graphics::Canvas::Geometry;
-using namespace Windows::Foundation::Numerics;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 
-Alarmlet::Alarmlet(float size) : size(size) {}
-
-Alarmlet::~Alarmlet() {}
+Alarmlet::Alarmlet(float size) : width(size), height(size) {}
 
 void Alarmlet::fill_extent(float x, float y, float* w, float* h) {
-    SET_BOXES(w, h, this->size);
+    SET_BOX(w, this->width);
+	SET_BOX(h, this->height);
 };
 
 void Alarmlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    auto alarm = ref new CanvasPathBuilder(ds);
-    float base_width = this->size;
-    float base_height = this->size / 8.0F;
-    float base_y = this->size - base_height;
-    float radius = this->size * 0.75F * 0.5F;
+	float base_width = this->width * 0.9F;
+	float base_height = this->height * 0.15F;
+	float body_width = base_width * 0.618F;
+	float base_radius = (base_width - body_width) * 0.25F;
+	float base_x = x + (this->width - base_width) * 0.5F;
+	float base_y = y + this->height - base_height;
+	float body_x = x + (this->width - body_width) * 0.5F;
+	float body_bottom = base_y - base_radius;
+	float body_y = body_bottom - body_width;
 
-    alarm->BeginFigure(x + base_height, y + base_y);
-    alarm->AddLine(x + base_height, y + radius);
-    alarm->AddArc(float2(x + this->size / 2.0F, y + radius), radius, radius, float(M_PI), float(M_PI));
-    alarm->AddLine(x + this->size - base_height, y + base_y);
-    alarm->EndFigure(CanvasFigureLoop::Closed);
 
-    ds->FillGeometry(CanvasGeometry::CreatePath(alarm), Colors::Purple);
-    ds->FillRectangle(x, y + base_y, size, base_height, Colors::Black);
+	Colour^ colors[] = { Colours::Gray, Colours::DarkGray };
+	auto stops = make_gradient_stops(colors);
+
+	ICanvasBrush^ color = make_linear_gradient_brush(body_y, y + this->height, stops);
+
+	ds->FillRectangle(body_x, body_y, body_width, body_width, color);
+	ds->FillRoundedRectangle(base_x, base_y, base_width, base_height * 2.0F, base_radius, base_radius, color);
 }

@@ -189,7 +189,7 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		virtual void prepare_style(Status status, Style& style) {}
+		virtual void prepare_style(Status status, Style& style) = 0;
 		virtual void on_status_change(Status status) {}
 		virtual void apply_style(Style& style) {}
 
