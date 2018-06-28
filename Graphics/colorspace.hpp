@@ -20,4 +20,6 @@ void fill_hsi_color(unsigned int hex, double* hue, double* saturation, double* i
 void fill_hsi_color(Windows::UI::Color& c, double* hue, double* saturation, double* intensity);
 
 Windows::UI::Color contrast_color(Windows::UI::Color& src);
-Windows::UI::Color scale_color(Windows::UI::Color& src, float scale);
+Windows::UI::Color scale_color(Windows::UI::Color& src, double scale);
+Windows::UI::Color darken_color(Windows::UI::Color& src);
+Windows::UI::Color lighten_color(Windows::UI::Color& src);

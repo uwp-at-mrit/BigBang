@@ -80,13 +80,13 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
     }
 }
 
-static inline char scale_color(char src, float s) {
-	char dest = src;
+static inline char scale_color(unsigned char src, double s) {
+	unsigned char dest = src;
 
-	if (s > 1) {
-		dest = 255 - char(std::floor(float(255 - src) / s));
+	if (s > 1.0) {
+		dest = 255 - (unsigned char)(std::floor(double(255 - src) / s));
 	} else {
-		dest = std::min(char(255), char(std::floor(src * s)));
+		dest = std::min((unsigned char)(255), (unsigned char)(std::floor(double(src) * s)));
 	}
 
 	return dest;
@@ -148,9 +148,10 @@ Color hsla(double hue, double saturation, double lightness, double alpha) {
 
 void fill_hsl_color(Color& color, double* hue, double* saturation, double* lightness) {
 	double M, m, chroma;
+	double h = color_to_hue(color, &M, &m, &chroma);
 	double L = (M + m) * 0.5;
 
-	(*hue) = color_to_hue(color, &M, &m, &chroma);
+	(*hue) = h;
 	(*saturation) = ((L == 1.0) ? 0.0 : (chroma / (1.0 - std::abs(2.0 * L - 1.0))));
 	(*lightness) = L;
 }
@@ -202,9 +203,16 @@ Color contrast_color(Color& src) {
 	}
 }
 
-Color scale_color(Color& src, float scale) {
-	return ColorHelper::FromArgb(src.A,
-		scale_color(src.R, scale),
-		scale_color(src.G, scale),
-		scale_color(src.B, scale));
+Color scale_color(Color& src, double scale) {
+	double s = std::max(scale, 0.0);
+
+	return ColorHelper::FromArgb(src.A, scale_color(src.R, s), scale_color(src.G, s), scale_color(src.B, s));
+}
+
+Color darken_color(Windows::UI::Color& src) {
+	return scale_color(src, 0.5);
+}
+
+Color lighten_color(Windows::UI::Color& src) {
+	return scale_color(src, 2.0);
 }

@@ -48,12 +48,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\gaugelet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\motorlet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.cpp">
       <Filter>graphlet\symbol</Filter>
     </ClCompile>
@@ -93,9 +87,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -146,12 +140,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\doorlet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\gaugelet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\motorlet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pumplet.hpp">
       <Filter>graphlet\symbol</Filter>
     </ClInclude>
@@ -194,9 +182,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\alarmlet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -216,6 +204,9 @@
     </Filter>
     <Filter Include="graphlet\symbol\circuit">
       <UniqueIdentifier>{31f950b3-c7ae-469f-ba1b-0ca6d84df122}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphlet\device">
+      <UniqueIdentifier>{71e1271c-6732-44d7-bf10-1ff4fea770d1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

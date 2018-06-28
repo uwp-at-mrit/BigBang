@@ -35,29 +35,36 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ circle(float cx, float cy
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float radiusX, float radiusY);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float cy, float radiusX, float radiusY);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sector(double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sector(float cx, float cy, double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(Windows::Foundation::Rect& region);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arc(
-	double start_degrees, double sweep_degrees, float radiusX, float radiusY,
-	float thickness = 1.0F);
+	double start_degrees, double end_degrees, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ arc(
+	float cx, float cy, double start_degrees, double end_degrees, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
-	double start_degrees, double end_degrees, float radiusX, float radiusY,
-	float thickness = 1.0F);
+	double start_degrees, double end_degrees, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ short_arc(
-    float sx, float sy, float ex, float ey, float radiusX, float radiusY,
-	float thickness = 1.0F);
+    float sx, float sy, float ex, float ey, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
-	double start_degrees, double end_degrees, float radiusX, float radiusY,
-	float thickness = 1.0F);
+	double start_degrees, double end_degrees, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ long_arc(
-    float sx, float sy, float ex, float ey, float radiusX, float radiusY,
-    float thickness = 1.0F);
+    float sx, float sy, float ex, float ey, float radiusX, float radiusY, float thickness = 1.0F,
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rounded_rectangle(
     float x, float y, float width, float height, float radiusX = -0.25F, float radiusY = -0.25F);

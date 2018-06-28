@@ -5,8 +5,8 @@
 #include "decorator/cell.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/symbol/alarmlet.hpp"
-#include "graphlet/symbol/gaugelet.hpp"
+#include "graphlet/device/alarmlet.hpp"
+#include "graphlet/device/gaugelet.hpp"
 #include "graphlet/textlet.hpp"
 
 #include "tongue.hpp"
@@ -55,28 +55,23 @@ public:
 		this->load_gauge(GGauge::FuelTank,  0.75F, 0.70F, gwidth, gheight, gapsize);
 
 		{ // load alarms
-			float alarm_x, alarm_y, alarm_width;
-			float offset = ts.height;
+			float alarm_x, alarm_y, alarm_width, label_x;
+			float vgapsize = ts.height;
+			float hgapsize = ts.height * 2.0F;
 
 			this->decorator->fill_cell_extent(1, &alarm_x, &alarm_y, &alarm_width, nullptr);
+			label_x = alarm_x + alarm_width * 0.618F - hgapsize * 0.5F;
 			for (unsigned int idx = 0; idx < static_cast<unsigned int>(GAlarm::_); idx++) {
+				float label_y = alarm_y + (ts.height + vgapsize) * float(idx) + vgapsize;
 				GAlarm id = static_cast<GAlarm>(idx);
 
-				this->alarms[id] = new Alarmlet(ts.height);
 				this->lblalarms[id] = new Labellet(speak(id.ToString()), this->font, this->fgcolor);
+				this->alarms[id] = new Alarmlet(ts.height);
 
-				if (idx == 0) {
-					float base_x = alarm_x + alarm_width * 0.618F;
-					float base_y = alarm_y + offset;
-
-					this->master->insert(this->alarms[id], base_x + offset, base_y);
-					this->master->insert(this->lblalarms[id], base_x - offset, base_y, GraphletAnchor::RT);
-				} else {
-					GAlarm pid = static_cast<GAlarm>(idx - 1);
-
-					this->master->insert(this->alarms[id], this->alarms[pid], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, offset);
-					this->master->insert(this->lblalarms[id], this->lblalarms[pid], GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, offset);
-				}
+				this->master->insert(this->lblalarms[id], label_x, label_y, GraphletAnchor::RT);
+				this->master->insert(this->alarms[id],
+					this->lblalarms[id], GraphletAnchor::RC,
+					GraphletAnchor::LC, hgapsize);
 			}
 		}
 	}

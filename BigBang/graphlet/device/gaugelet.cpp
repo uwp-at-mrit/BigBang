@@ -1,4 +1,4 @@
-﻿#include "graphlet/symbol/gaugelet.hpp"
+﻿#include "graphlet/device/gaugelet.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"

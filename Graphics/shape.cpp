@@ -59,7 +59,11 @@ CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ arc(double start, double end, float radiusX, float radiusY, float th) {
+CanvasGeometry^ arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+	return arc(0.0F, 0.0F, start, end, radiusX, radiusY, th, style);
+}
+
+CanvasGeometry^ arc(float cx, float cy, double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	auto arc_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float rstart = degrees_to_radians(start);
 	float rsweep = degrees_to_radians(end - start);
@@ -67,49 +71,49 @@ CanvasGeometry^ arc(double start, double end, float radiusX, float radiusY, floa
 
 	ellipse_point(radiusX, radiusY, start, &startx, &starty);
 
-	arc_path->BeginFigure(startx, starty);
-	arc_path->AddArc(float2(0.0F, 0.0F), radiusX, radiusY, rstart, rsweep);
+	arc_path->BeginFigure(cx + startx, cy + starty);
+	arc_path->AddArc(float2(cx, cy), radiusX, radiusY, rstart, rsweep);
 	arc_path->EndFigure(CanvasFigureLoop::Open);
 
-	return geometry_stroke(CanvasGeometry::CreatePath(arc_path), th);
+	return geometry_stroke(CanvasGeometry::CreatePath(arc_path), th, style);
 }
 
-CanvasGeometry^ short_arc(double start, double end, float radiusX, float radiusY, float th) {
+CanvasGeometry^ short_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	float sx, sy, ex, ey;
 
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
 	ellipse_point(radiusX, radiusY, end, &ex, &ey);
 
-	return short_arc(sx, sy, ex, ey, radiusX, radiusY, th);
+	return short_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
+CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
     arc->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
+    return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
-CanvasGeometry^ long_arc(double start, double end, float radiusX, float radiusY, float th) {
+CanvasGeometry^ long_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	float sx, sy, ex, ey;
 
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
 	ellipse_point(radiusX, radiusY, end, &ex, &ey);
 
-	return long_arc(sx, sy, ex, ey, radiusX, radiusY, th);
+	return long_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th) {
+CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Large);
     arc->EndFigure(CanvasFigureLoop::Open);
 
-    return geometry_stroke(CanvasGeometry::CreatePath(arc), th);
+    return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
 CanvasGeometry^ circle(float r) {
@@ -126,6 +130,27 @@ CanvasGeometry^ ellipse(float rx, float ry) {
 
 CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
     return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), cx, cy, rx, ry);
+}
+
+CanvasGeometry^ sector(double start, double end, float radiusX, float radiusY) {
+	return sector(0.0F, 0.0F, start, end, radiusX, radiusY);
+}
+
+CanvasGeometry^ sector(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
+	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
+	float rstart = degrees_to_radians(start);
+	float rsweep = degrees_to_radians(end - start);
+	float startx, starty;
+
+	ellipse_point(radiusX, radiusY, start, &startx, &starty);
+
+	sector_path->BeginFigure(cx + startx, cy + starty);
+	sector_path->AddArc(float2(cx, cy), radiusX, radiusY, rstart, rsweep);
+	sector_path->AddLine(cx + startx, cy + starty);
+	sector_path->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(sector_path);
 }
 
 CanvasGeometry^ rectangle(Rect& region) {

@@ -1,6 +1,6 @@
 ﻿#include <algorithm>
 
-#include "graphlet/symbol/motorlet.hpp"
+#include "graphlet/device/motorlet.hpp"
 
 #include "shape.hpp"
 #include "paint.hpp"
