@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 
 	private class Navigatorbar : public WarGrey::SCADA::Planet {
 	public:
-		~Navigatorbar() noexcept;
+		virtual ~Navigatorbar() noexcept;
 		Navigatorbar(WarGrey::SCADA::IMRMaster* device, WarGrey::SCADA::INavigatorAction^ action);
 
 	public:

@@ -105,10 +105,6 @@ Labellet::Labellet(const wchar_t *fmt, ...) {
     this->set_text(label);
 }
 
-Labellet::Labellet(Platform::String^ content, unsigned int color_hex, double alpha)
-	: Labellet(content, nullptr, color_hex, alpha) {
-}
-
 Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, ICanvasBrush^ color) {
 	if (font != nullptr) {
 		this->set_font(font);

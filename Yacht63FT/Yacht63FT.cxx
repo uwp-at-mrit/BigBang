@@ -1,6 +1,4 @@
-﻿#include <map>
-
-#include "application.hxx"
+﻿#include "application.hxx"
 #include "configuration.hpp"
 #include "plc.hpp"
 
@@ -32,23 +30,6 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static PLCMaster* plc_master = nullptr;
-
-template<class Bar>
-private ref class BarUniverse sealed : public UniverseDisplay {
-internal:
-	BarUniverse(Bar* bar, Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
-		this->bar = bar;
-		this->add_planet(this->bar);
-	}
-
-internal:
-	Bar* get_universe() {
-		return this->bar;
-	}
-
-private:
-	Bar* bar;
-};
 
 private ref class PageUniverse sealed : public UniverseDisplay, public INavigatorAction {
 public:
@@ -90,6 +71,7 @@ public:
 public:
 	void initialize_component(Size region) {
 		Platform::String^ name = "Yacht63FT";
+		Syslog* default_logger = make_system_logger(default_logging_level, name);
 		float fit_width = screen_to_application_size(screen_width);
 		float fit_height = screen_to_application_size(screen_height);
 		float fit_nav_height = design_to_application_height(screen_navigator_height);
@@ -99,8 +81,8 @@ public:
 
 		this->timeline = ref new CompositeTimerAction();
 		this->workspace = ref new PageUniverse(name);
-		this->navigatorbar = ref new BarUniverse<Navigatorbar>(new Navigatorbar(plc_master, this->workspace), name);
-		this->statusbar = ref new BarUniverse<Statusbar>(new Statusbar(plc_master), name);
+		this->navigatorbar = ref new UniverseDisplay(default_logger, new Navigatorbar(plc_master, this->workspace));
+		this->statusbar = ref new UniverseDisplay(default_logger, new Statusbar(plc_master));
 
 		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
 		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
@@ -123,7 +105,9 @@ private:
 	void do_notify(Platform::Object^ sender, SelectionChangedEventArgs^ args) {
 		if (this->navigatorbar != nullptr) {
 			Yacht page = static_cast<Yacht>(this->workspace->current_planet_index);
-			this->navigatorbar->get_universe()->on_navigated_to(page);
+			Navigatorbar* bar = static_cast<Navigatorbar*>(this->navigatorbar->current_planet);
+			
+			bar->on_navigated_to(page);
 		}
 	}
 
@@ -132,9 +116,9 @@ private:
 	WarGrey::SCADA::CompositeTimerAction^ timeline;
 
 private:
-	BarUniverse<Navigatorbar>^ navigatorbar;
+	UniverseDisplay^ navigatorbar;
 	PageUniverse^ workspace;
-	BarUniverse<Statusbar>^ statusbar;
+	UniverseDisplay^ statusbar;
 };
 
 /*************************************************************************************************/

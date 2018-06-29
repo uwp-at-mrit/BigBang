@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private class Statusbar : public WarGrey::SCADA::Planet {
 	public:
-		~Statusbar() noexcept;
+		virtual ~Statusbar() noexcept;
 		Statusbar(WarGrey::SCADA::IMRMaster* device);
 
 	public:

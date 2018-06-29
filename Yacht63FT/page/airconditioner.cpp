@@ -208,6 +208,40 @@ private:
 	ACDecorator* decorator;
 };
 
+private class ACSatellite final : public ISatellite, public PLCConfirmation {
+public:
+	ACSatellite(Platform::String^ caption) : ISatellite(caption) {}
+
+public:
+	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
+		this->caption = this->insert_one(new Labellet(L"(%f, %f)", width, height));
+	}
+
+public:
+	void switch_room(AC room) {
+		if (room != this->room) {
+			this->room = room;
+
+			if (this->caption != nullptr) {
+				this->caption->set_text(this->room.ToString());
+			} else {
+				this->get_logger()->log_message(Log::Warning, "Has not initialized");
+			}
+		}
+	}
+
+public:
+	bool on_satellite_closing() {
+	}
+
+	// never deletes these graphlets mannually
+private:
+	Labellet* caption;
+
+private:
+	AC room;
+};
+
 /*************************************************************************************************/
 ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
@@ -221,17 +255,43 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 	if (this->dashboard == nullptr) {
 		ACDecorator* cells = new ACDecorator(width, height);
 		ACBoard* ac = new ACBoard(this, cells);
-
+		
 		ac->load_and_flow(width, height);
 
 		this->dashboard = ac;
+		this->decorator = cells;
+		
 		this->set_decorator(cells);
 		this->device->append_confirmation_receiver(ac);
 	}
 }
 
 void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+	if (g != nullptr) {
 #ifdef _DEBUG
-	Planet::on_tap(g, local_x, local_y, shifted, controlled);
+		Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif
+	} else {
+		int cell_idx = this->decorator->find_cell(local_x, local_y);
+
+		if (cell_idx >= 0) {
+			if (this->satellite == nullptr) {
+				ACSatellite* entity = new ACSatellite(this->name() + "#Satellite");
+				float width = design_to_application_width(400.0F);
+				float height = design_to_application_height(300.0F);
+
+				this->satellite = ref new SatelliteDisplay(width, height, entity, default_logging_level);
+			}
+
+			{
+				AC room = static_cast<AC>(cell_idx);
+				ACSatellite* planet = static_cast<ACSatellite*>(this->satellite->get_satellite());
+
+				this->satellite->get_logger()->log_message(Log::Info, L"tapped [%s]", room.ToString()->Data());
+
+				this->satellite->ShowAt(this->info->master->canvas);
+				planet->switch_room(static_cast<AC>(cell_idx));
+			}
+		}
+	}
 }

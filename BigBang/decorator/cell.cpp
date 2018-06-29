@@ -66,8 +66,24 @@ void CellDecorator::fill_cell_anchor(unsigned int idx, float fx, float fy, float
 	SET_BOX(y, y0 + height * fy);
 }
 
+int CellDecorator::find_cell(float mx, float my) {
+	float x, y, width, height;
+	int cell_idx = -1;
+
+	for (size_t i = 0; i < this->count; i++) {
+		this->fill_cell_extent((unsigned int)i, &x, &y, &width, &height);
+
+		if ((x <= mx) && (mx <= (x + width)) && (y <= my) && (my <= (y + height))) {
+			cell_idx = int(i);
+			break;
+		}
+	}
+
+	return cell_idx;
+}
+
 void CellDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
-	for (size_t i = 0; i < count; i++) {
+	for (size_t i = 0; i < this->count; i++) {
 		ds->FillRoundedRectangle(this->boxes[i].X, this->boxes[i].Y,
 			this->boxes[i].Width, this->boxes[i].Height,
 			this->radius, this->radius,

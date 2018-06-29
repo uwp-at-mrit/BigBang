@@ -26,6 +26,12 @@ namespace WarGrey::SCADA {
 
 	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerAction {
 	public:
+		virtual ~IDisplay();
+
+	internal:
+		IDisplay(WarGrey::SCADA::Syslog* logger);
+
+	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 
@@ -46,9 +52,13 @@ namespace WarGrey::SCADA {
 		void leave_critical_section();
 
 	internal:
-		virtual void refresh(WarGrey::SCADA::IPlanet* universe) = 0;
+		virtual void refresh(WarGrey::SCADA::IPlanet* target) = 0;
+
+	internal:
+		WarGrey::SCADA::Syslog* get_logger() override;
 
 	private:
+		WarGrey::SCADA::Syslog* logger;
 		std::mutex section;
     };
 
@@ -57,9 +67,13 @@ namespace WarGrey::SCADA {
 		virtual ~UniverseDisplay();
 
 	internal:
-		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr, Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
-		WarGrey::SCADA::Syslog* get_logger() override;
-		void refresh(WarGrey::SCADA::IPlanet* universe) override;
+		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr,
+			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+		
+	internal:
+		void refresh(WarGrey::SCADA::IPlanet* target) override;
+		read_only_property(WarGrey::SCADA::IPlanet*, current_planet);
 
 	public:
 		read_only_property(Windows::UI::Xaml::Controls::Primitives::Selector^, navigator);
@@ -108,9 +122,8 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		Windows::UI::Xaml::Controls::ListView^ navigator_view;
-		WarGrey::SCADA::Syslog* logger;
 		WarGrey::SCADA::IPlanet* head_planet;
-		WarGrey::SCADA::IPlanet* current_planet;
+		WarGrey::SCADA::IPlanet* recent_planet;
 
 	private:
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;

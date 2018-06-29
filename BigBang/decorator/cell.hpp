@@ -24,11 +24,13 @@ namespace WarGrey::SCADA {
             float Width, float Height) override;
 
 	public:
+		void fill_cell_anchor(unsigned int idx, float fx, float fy, float* x = nullptr, float* y = nullptr);
 		void fill_cell_extent(unsigned int idx,
 			float* x = nullptr, float* y = nullptr,
 			float* width = nullptr, float* height = nullptr);
 
-		void fill_cell_anchor(unsigned int idx, float fx, float fy, float* x = nullptr, float* y = nullptr);
+	public:
+		int find_cell(float mouse_x, float mouse_y);
 
 	protected:
 		~CellDecorator() noexcept;

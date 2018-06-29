@@ -1,7 +1,10 @@
 #pragma once
 
 #include "planet.hpp"
+#include "satellite.hxx"
 #include "plc.hpp"
+
+#include "decorator/cell.hpp"
 
 namespace WarGrey::SCADA {
 	private class ACPage : public WarGrey::SCADA::Planet {
@@ -16,5 +19,9 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
+		WarGrey::SCADA::CellDecorator* decorator;
+
+	private:
+		WarGrey::SCADA::SatelliteDisplay^ satellite;
 	};
 }

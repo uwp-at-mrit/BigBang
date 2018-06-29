@@ -60,6 +60,14 @@ static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, 
 }
 
 /*************************************************************************************************/
+IDisplay::IDisplay(Syslog* logger) : logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger) {
+	this->logger->reference();
+}
+
+IDisplay::~IDisplay() {
+	this->logger->destroy();
+}
+
 float IDisplay::actual_width::get() {
 	return float(this->canvas->ActualWidth);
 }
@@ -124,11 +132,13 @@ void IDisplay::leave_critical_section() {
 	this->section.unlock();
 }
 
-/*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger, ListView^ navigator) {
-	this->logger = ((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger);
-	this->logger->reference();
+Syslog* IDisplay::get_logger() {
+	return this->logger;
+}
 
+/*************************************************************************************************/
+UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView^ navigator)
+	: IDisplay((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger) {
 	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
 	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
 	this->navigator_view->IsItemClickEnabled = true;
@@ -138,10 +148,14 @@ UniverseDisplay::UniverseDisplay(Syslog* logger, ListView^ navigator) {
 	this->transfer_clock->Tick += ref new EventHandler<Object^>(this, &UniverseDisplay::do_refresh);
 
 	this->display = ref new CanvasControl();
-	this->display->Name = this->logger->get_name();
+	this->display->Name = this->get_logger()->get_name();
 	
 	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
 	// this->display->UseSharedDevice = true;
+
+	if (first_planet != nullptr) {
+		this->add_planet(first_planet);
+	}
 
 	/** TODO
 	 * All these events should be unloaded,
@@ -162,15 +176,14 @@ UniverseDisplay::UniverseDisplay(Syslog* logger, ListView^ navigator) {
 UniverseDisplay::~UniverseDisplay() {
 	this->collapse();
 	this->transfer_clock->Stop();
-	this->logger->destroy();
-}
-
-Syslog* UniverseDisplay::get_logger() {
-	return this->logger;
 }
 
 Selector^ UniverseDisplay::navigator::get() {
 	return this->navigator_view;
+}
+
+IPlanet* UniverseDisplay::current_planet::get() {
+	return this->recent_planet;
 }
 
 unsigned int UniverseDisplay::current_planet_index::get() {
@@ -194,20 +207,20 @@ float UniverseDisplay::actual_height::get() {
 }
 
 void UniverseDisplay::refresh(IPlanet* which) {
-	if (this->current_planet == which) {
+	if (this->recent_planet == which) {
 		this->display->Invalidate();
 	}
 }
 
 void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long uptime) {
 	if (this->head_planet != nullptr) {
-		IPlanet* child = PLANET_INFO(this->current_planet)->next;
+		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 		
-		this->current_planet->begin_update_sequence();
-		this->current_planet->update(count, elapsed, uptime);
-		this->current_planet->end_update_sequence();
+		this->recent_planet->begin_update_sequence();
+		this->recent_planet->update(count, elapsed, uptime);
+		this->recent_planet->end_update_sequence();
 
-		while (child != this->current_planet) {
+		while (child != this->recent_planet) {
 			child->update(count, elapsed, uptime);
 			child = PLANET_INFO(child)->next;
 		}
@@ -223,13 +236,13 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;
-			this->current_planet = planet;
+			this->recent_planet = planet;
 			info->prev = this->head_planet;
 			
 			this->navigator_view->Items->Append(label);
 			this->navigator_view->SelectedValue = label;
 
-			this->logger->log_message(Log::Debug, L"found the first planet[%s]", planet->name()->Data());
+			this->get_logger()->log_message(Log::Debug, L"found the first planet[%s]", planet->name()->Data());
 		} else { 
 			PlanetInfo* head_info = PLANET_INFO(this->head_planet);
 			PlanetInfo* prev_info = PLANET_INFO(head_info->prev);
@@ -240,7 +253,7 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 
 			this->navigator_view->Items->Append(label);
 
-			this->logger->log_message(Log::Debug, L"found another planet[%s]", planet->name()->Data());
+			this->get_logger()->log_message(Log::Debug, L"found another planet[%s]", planet->name()->Data());
 		}
 
 		info->next = this->head_planet;
@@ -248,27 +261,27 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 }
 
 void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int count) {
-	if ((this->current_planet != nullptr) && (delta_idx != 0)) {
+	if ((this->recent_planet != nullptr) && (delta_idx != 0)) {
 		bool is_animated = ((!this->transfer_clock->IsEnabled) && ((ms * count) > 0));
 
 		if (is_animated && (this->from_planet == nullptr)) {
 			// thread-safe is granteed for `from_planet`
-			this->from_planet = this->current_planet;
+			this->from_planet = this->recent_planet;
 		}
 
 		this->enter_critical_section();
 		if (delta_idx > 0) {
 			for (int i = 0; i < delta_idx; i++) {
-				this->current_planet = PLANET_INFO(this->current_planet)->next;
+				this->recent_planet = PLANET_INFO(this->recent_planet)->next;
 			}
 		} else {
 			for (int i = 0; i > delta_idx; i--) {
-				this->current_planet = PLANET_INFO(this->current_planet)->prev;
+				this->recent_planet = PLANET_INFO(this->recent_planet)->prev;
 			}
 		}
 		this->leave_critical_section();
 
-		this->navigator_view->SelectedValue = this->current_planet->navigation_label();
+		this->navigator_view->SelectedValue = this->recent_planet->navigation_label();
 
 		if (is_animated) {
 			TimeSpan ts = make_timespan_from_ms(ms);
@@ -280,11 +293,11 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 			this->transferX = this->transfer_delta;
 			this->transfer_clock->Start();
 		} else if (this->from_planet != nullptr) {
-			this->logger->log_message(Log::Debug, L"transferred immediately: %s ==> %s",
+			this->get_logger()->log_message(Log::Debug, L"transferred immediately: %s ==> %s",
 				this->from_planet->name()->Data(),
-				this->current_planet->name()->Data());
+				this->recent_planet->name()->Data());
 			this->from_planet = nullptr;
-			this->refresh(this->current_planet);
+			this->refresh(this->recent_planet);
 		}
 	}
 }
@@ -294,7 +307,7 @@ void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) 
 	int delta_idx = idx - from_idx;
 
 	if (delta_idx != 0) {
-		this->from_planet = this->current_planet;
+		this->from_planet = this->recent_planet;
 		this->transfer(delta_idx, 0U);
 	}
 }
@@ -310,10 +323,10 @@ void UniverseDisplay::transfer_next(unsigned int ms, unsigned int count) {
 CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 	CanvasRenderTarget^ snapshot = nullptr;
 
-	if (this->current_planet != nullptr) {
+	if (this->recent_planet != nullptr) {
 		Size region = this->display->Size;
 
-		snapshot = this->current_planet->take_snapshot(region.Width, region.Height, dpi);
+		snapshot = this->recent_planet->take_snapshot(region.Width, region.Height, dpi);
 	}
 
 	return snapshot;
@@ -326,7 +339,7 @@ void UniverseDisplay::collapse() {
 		PlanetInfo* prev_info = PLANET_INFO(temp_info->prev);
 
 		this->head_planet = nullptr;
-		this->current_planet = nullptr;
+		this->recent_planet = nullptr;
 		prev_info->next = nullptr;
 
 		do {
@@ -349,7 +362,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 		if ((nwidth > 0.0F) && (nheight > 0.0F) && ((nwidth != pwidth) || (nheight != pheight))) {
 			IPlanet* child = this->head_planet;
 			
-			this->logger->log_message(Log::Debug, L"resize(%f, %f)", nwidth, nheight);
+			this->get_logger()->log_message(Log::Debug, L"resize(%f, %f)", nwidth, nheight);
 			
 			do {
 				PlanetInfo* info = PLANET_INFO(child);
@@ -365,7 +378,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 }
 
 void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesEventArgs^ args) {
-	this->logger->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
+	this->get_logger()->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
 	if (this->head_planet != nullptr) {
@@ -381,9 +394,9 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 				child->construct(args->Reason, region.Width, region.Height);
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
-				this->logger->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
+				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 			} catch (Platform::Exception^ e) {
-				this->logger->log_message(Log::Critical, L"%s: constructing: %s",
+				this->get_logger()->log_message(Log::Critical, L"%s: constructing: %s",
 					child->name()->Data(), e->Message->Data());
 			}
 
@@ -399,22 +412,22 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 
 	this->enter_critical_section();
 
-	if (this->current_planet != nullptr) {
+	if (this->recent_planet != nullptr) {
 		CanvasDrawingSession^ ds = args->DrawingSession;
 		Size region = this->display->Size;
 		float width = region.Width;
 		float height = region.Height;
 
 		if (this->from_planet == nullptr) {
-			draw_planet(ds, this->current_planet, width, height, this->logger);
+			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
 		} else {
 			float deltaX = ((this->transferX < 0.0F) ? width : -width);
 
 			ds->Transform = make_translation_matrix(this->transferX);
-			draw_planet(ds, this->from_planet, width, height, this->logger);
+			draw_planet(ds, this->from_planet, width, height, this->get_logger());
 
 			ds->Transform = make_translation_matrix(this->transferX + deltaX);
-			draw_planet(ds, this->current_planet, width, height, this->logger);
+			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
 		}
 	}
 
@@ -423,16 +436,16 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 
 void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ args) {
 	const wchar_t* from = this->from_planet->name()->Data();
-	const wchar_t* to = this->current_planet->name()->Data();
+	const wchar_t* to = this->recent_planet->name()->Data();
 	float width = this->display->Size.Width;
 	float percentage = abs(this->transferX) / width;
 
 	if (percentage < 1.0F) {
-		this->logger->log_message(Log::Debug, L"transferring[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
+		this->get_logger()->log_message(Log::Debug, L"transferring[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
 		this->display->Invalidate();
 		this->transferX += this->transfer_delta;
 	} else {
-		this->logger->log_message(Log::Debug, L"transferred[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
+		this->get_logger()->log_message(Log::Debug, L"transferred[%.2f%%]: %s ==> %s", percentage * 100.0F, from, to);
 		this->transfer_delta = 0.0F;
 		this->transferX = 0.0F;
 		this->from_planet = nullptr;
@@ -448,7 +461,7 @@ void UniverseDisplay::do_transfer(Platform::Object^ sender, ItemClickEventArgs^ 
 
 	delta_idx = this->navigator_view->SelectedIndex - from_idx;
 	if (delta_idx != 0) {
-		this->from_planet = this->current_planet;
+		this->from_planet = this->recent_planet;
 		this->transfer(delta_idx, 0U);
 	}
 }
@@ -457,12 +470,12 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 	if (this->canvas->CapturePointer(args->Pointer)) {
 		this->enter_critical_section();
 
-		if (this->current_planet != nullptr) {
+		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerPointProperties^ ppp = pp->Properties;
 
 			this->saved_pressed_ppp = ppp;
-			args->Handled = this->current_planet->on_pointer_pressed(
+			args->Handled = this->recent_planet->on_pointer_pressed(
 				pp->Position.X, pp->Position.Y, ppp->PointerUpdateKind,
 				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 		}
@@ -475,10 +488,10 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
-	if (this->current_planet != nullptr) {
+	if (this->recent_planet != nullptr) {
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 		
-		args->Handled = this->current_planet->on_pointer_moved(
+		args->Handled = this->recent_planet->on_pointer_moved(
 			pp->Position.X, pp->Position.Y, args->GetIntermediatePoints(this->canvas),
 			pp->Properties->PointerUpdateKind, SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 	}
@@ -507,12 +520,12 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 		this->enter_critical_section();
 
-		if (this->current_planet != nullptr) {
+		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerUpdateKind puk = this->saved_pressed_ppp->PointerUpdateKind;
 
 			this->saved_pressed_ppp = nullptr;
-			args->Handled = this->current_planet->on_pointer_released(
+			args->Handled = this->recent_planet->on_pointer_released(
 				pp->Position.X, pp->Position.Y, puk,
 				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 			
@@ -525,10 +538,10 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
-	if (this->current_planet != nullptr) {
+	if (this->recent_planet != nullptr) {
 		VirtualKey vkey = args->Key;
 
-		args->Handled = this->current_planet->on_char(args->Key);
+		args->Handled = this->recent_planet->on_char(args->Key);
 	}
 
 	this->leave_critical_section();

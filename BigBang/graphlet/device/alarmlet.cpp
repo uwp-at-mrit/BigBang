@@ -35,9 +35,9 @@ static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius,
 }
 
 /*************************************************************************************************/
-Alarmlet::Alarmlet(float width) : Alarmlet(AlarmStatus::Normal, width) {}
+Alarmlet::Alarmlet(float size) : Alarmlet(AlarmStatus::Normal, size) {}
 
-Alarmlet::Alarmlet(AlarmStatus dstatus, float width) : IStatuslet(dstatus), width(width), height(width * 1.2F) {
+Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width(size), height(size) {
 	this->update_status();
 }
 
@@ -57,7 +57,7 @@ void Alarmlet::construct() {
 	float hat_radius = body_width * 0.5F;
 	float shadow_radius = hat_radius * 0.618F;
 	float light_lradius = cx / std::cos(degrees_to_radians(theta)) - light_thickness;
-	float light_sradius = hat_radius + light_thickness * 1.5F;
+	float light_sradius = hat_radius + light_thickness;
 	float body_y = light_lradius + light_thickness;
 	
 	light_style->StartCap = CanvasCapStyle::Round;

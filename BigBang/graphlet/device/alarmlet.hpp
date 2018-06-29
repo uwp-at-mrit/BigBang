@@ -11,8 +11,8 @@ namespace WarGrey::SCADA {
 
 	private class Alarmlet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::AlarmStatus, WarGrey::SCADA::AlarmStyle> {
     public:
-        Alarmlet(float width);
-		Alarmlet(WarGrey::SCADA::AlarmStatus default_status, float width);
+        Alarmlet(float size);
+		Alarmlet(WarGrey::SCADA::AlarmStatus default_status, float size);
 
     public:
 		void construct() override;

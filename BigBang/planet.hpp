@@ -146,7 +146,6 @@ namespace WarGrey::SCADA {
 	public:
 		/** NOTE
 		 * mode 0 is designed for UI graphlets which will be unmasked in all modes;
-		 * however, only UI graphlets are unmasked in mode 0.
 		 */
 		void change_mode(unsigned int mode);
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);

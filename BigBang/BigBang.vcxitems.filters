@@ -87,9 +87,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -182,9 +189,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp">
       <Filter>graphlet\symbol\circuit</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
