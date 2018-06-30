@@ -213,7 +213,14 @@ public:
 	ACSatellite(Platform::String^ caption) : ISatellite(caption) {}
 
 public:
+	void fill_satellite_extent(float* width, float* height) override {
+		(*width) = 400.0F;
+		(*height) = 256.0F;
+	}
+
+public:
 	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
+		this->get_logger()->log_message(Log::Info, "Loading");
 		this->caption = this->insert_one(new Labellet(L"(%f, %f)", width, height));
 	}
 
@@ -231,7 +238,21 @@ public:
 	}
 
 public:
-	bool on_satellite_closing() {
+	void on_satellite_showing() {
+		this->get_logger()->log_message(Log::Info, "showing");
+	}
+
+	void on_satellite_shown() {
+		this->get_logger()->log_message(Log::Info, "shown");
+	}
+	
+	bool can_satellite_hiding() {
+		this->get_logger()->log_message(Log::Info, "Hiding");
+		return true;
+	}
+
+	void on_satellite_hiden() {
+		this->get_logger()->log_message(Log::Info, "Hiden");
 	}
 
 	// never deletes these graphlets mannually
@@ -266,6 +287,7 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 	}
 }
 
+#include "time.hpp"
 void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	if (g != nullptr) {
 #ifdef _DEBUG
@@ -276,11 +298,7 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 
 		if (cell_idx >= 0) {
 			if (this->satellite == nullptr) {
-				ACSatellite* entity = new ACSatellite(this->name() + "#Satellite");
-				float width = design_to_application_width(400.0F);
-				float height = design_to_application_height(300.0F);
-
-				this->satellite = ref new SatelliteDisplay(width, height, entity, default_logging_level);
+				this->satellite = ref new SatelliteOrbit(new ACSatellite(this->name() + "#Satellite"), default_logging_level);
 			}
 
 			{
@@ -289,8 +307,11 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 
 				this->satellite->get_logger()->log_message(Log::Info, L"tapped [%s]", room.ToString()->Data());
 
+				this->get_logger()->log_message(Log::Notice, "showing");
 				this->satellite->ShowAt(this->info->master->canvas);
+				this->get_logger()->log_message(Log::Notice, "switching");
 				planet->switch_room(static_cast<AC>(cell_idx));
+				this->get_logger()->log_message(Log::Notice, "done");
 			}
 		}
 	}

@@ -42,6 +42,7 @@ public:
 static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet) {
 	auto info = new PlanetInfo(master);
 	
+	planet->info = false;
 	planet->info = info;
 
 	return info;
@@ -394,6 +395,8 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 				child->construct(args->Reason, region.Width, region.Height);
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
+				child->notify_ready();
+				
 				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 			} catch (Platform::Exception^ e) {
 				this->get_logger()->log_message(Log::Critical, L"%s: constructing: %s",
