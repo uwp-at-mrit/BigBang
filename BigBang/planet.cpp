@@ -928,6 +928,36 @@ Platform::Object^ IPlanet::navigation_label() {
 	return speak(this->caption);
 }
 
+bool IPlanet::ready() {
+	bool ready = false;
+
+	if (this->info != nullptr) {
+		ready = this->info->master->ready;
+	}
+
+	return ready;
+}
+
+float IPlanet::actual_width() {
+	float width = 0.0F;
+
+	if (this->info != nullptr) {
+		width = this->info->master->actual_width;
+	}
+
+	return width;
+}
+
+float IPlanet::actual_height() {
+	float height = 0.0F;
+
+	if (this->info != nullptr) {
+		height = this->info->master->actual_height;
+	}
+
+	return height;
+}
+
 Syslog* IPlanet::get_logger() {
 	Syslog* logger = default_logger();
 
@@ -978,11 +1008,6 @@ void IPlanet::save(Platform::String^ path, float width, float height, float dpi)
 			syslog(Log::Alarm, "failed to save universe as bitmap:" + e->Message);
 		}
 	});
-}
-
-void IPlanet::fill_actual_extent(float* width, float* height) {
-	SET_BOX(width, this->info->master->actual_width);
-	SET_BOX(height, this->info->master->actual_height);
 }
 
 Point IPlanet::global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff, float yoff) {

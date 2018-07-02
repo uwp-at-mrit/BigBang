@@ -22,6 +22,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::CellDecorator* decorator;
 
 	private:
-		WarGrey::SCADA::SatelliteOrbit^ satellite;
+		WarGrey::SCADA::SatelliteOrbit^ orbit;
 	};
 }

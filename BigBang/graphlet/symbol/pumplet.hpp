@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::PumpStatus status, WarGrey::SCADA::PumpStyle& style) override;
-		void on_status_change(PumpStatus status) override;
+		void on_status_changed(PumpStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

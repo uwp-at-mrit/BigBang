@@ -93,7 +93,7 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Batterylet::on_value_change(float v) {
+void Batterylet::on_value_changed(float v) {
 	this->charge_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
 

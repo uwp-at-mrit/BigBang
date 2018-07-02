@@ -17,9 +17,15 @@ namespace WarGrey::SCADA {
 		virtual void on_satellite_shown() {}
 		virtual bool can_satellite_hiding() { return true; }
 		virtual void on_satellite_hiden() {}
+
+	protected:
+		void hide();
 	};
 
 	private ref class SatelliteOrbit sealed : public Windows::UI::Xaml::Controls::Flyout {
+	public:
+		virtual ~SatelliteOrbit() {}
+
 	internal:
 		SatelliteOrbit(WarGrey::SCADA::ISatellite* entity, WarGrey::SCADA::Syslog* logger);
 		SatelliteOrbit(WarGrey::SCADA::ISatellite* entity, WarGrey::SCADA::Log level, Platform::String^ topic = nullptr);
@@ -48,11 +54,14 @@ namespace WarGrey::SCADA {
 	private class CreditSatellite : public ISatellite {
 	public:
 		CreditSatellite(Platform::String^ caption, unsigned int initial_mode = 0U)
-			: ISatellite(caption, initial_mode) {}
+			: ISatellite(caption, initial_mode), pending(true) {}
 
 	public:
-		void notify_ready() override {
-
+		void notify_ready_to_draw() override {
+			if (this->pending) {
+				this->pending = false;
+				this->on_channel_changed(this->channel);
+			}
 		}
 
 	public:
@@ -63,7 +72,12 @@ namespace WarGrey::SCADA {
 		void switch_channel(ID id) {
 			if (id != channel) {
 				this->channel = id;
-				this->on_channel_changed(this->channel);
+
+				if (this->ready()) {
+					this->on_channel_changed(this->channel);
+				} else {
+					this->pending = true;
+				}
 			}
 		}
 
@@ -72,5 +86,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		ID channel;
+		bool pending;
 	};
 }

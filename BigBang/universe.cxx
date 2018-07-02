@@ -42,7 +42,6 @@ public:
 static inline PlanetInfo* bind_planet_owership(IDisplay^ master, IPlanet* planet) {
 	auto info = new PlanetInfo(master);
 	
-	planet->info = false;
 	planet->info = info;
 
 	return info;
@@ -175,6 +174,8 @@ UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView
 }
 
 UniverseDisplay::~UniverseDisplay() {
+	this->get_logger()->log_message(Log::Info, "destructor");
+
 	this->collapse();
 	this->transfer_clock->Stop();
 }
@@ -205,6 +206,10 @@ float UniverseDisplay::actual_width::get() {
 
 float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
+}
+
+bool UniverseDisplay::ready::get() {
+	return this->display->ReadyToDraw;
 }
 
 void UniverseDisplay::refresh(IPlanet* which) {
@@ -395,7 +400,7 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 				child->construct(args->Reason, region.Width, region.Height);
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
-				child->notify_ready();
+				child->notify_ready_to_draw();
 				
 				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 			} catch (Platform::Exception^ e) {

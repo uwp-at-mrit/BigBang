@@ -43,7 +43,7 @@ void Indicatorlet::construct() {
 	this->bspace = this->size - box.Height;
 	this->body_ring = geometry_freeze(ring);
 
-	this->on_value_change(0.0F);
+	this->on_value_changed(0.0F);
 }
 
 void Indicatorlet::fill_extent(float x, float y, float* w, float* h) {
@@ -55,7 +55,7 @@ void Indicatorlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 	SET_VALUES(t, 0.0F, b, this->bspace);
 }
 
-void Indicatorlet::on_value_change(float v) {
+void Indicatorlet::on_value_changed(float v) {
 	this->fgcolor = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
 

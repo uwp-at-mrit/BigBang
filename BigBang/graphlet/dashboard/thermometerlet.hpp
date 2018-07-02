@@ -26,7 +26,7 @@ namespace WarGrey::SCADA {
 		void fill_mercury_extent(float percentage, float* x = nullptr, float* y = nullptr, float* width = nullptr, float* height = nullptr);
 
 	protected:
-		void on_value_change(float t) override;
+		void on_value_changed(float t) override;
 
 	private:
 		WarGrey::SCADA::GradientStops^ color_stops;

@@ -49,7 +49,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 	}
 }
 
-void Pumplet::on_status_change(PumpStatus status) {
+void Pumplet::on_status_changed(PumpStatus status) {
 	switch (status) {
 	case PumpStatus::Unstartable: {
 		if (this->unstartable_mask == nullptr) {

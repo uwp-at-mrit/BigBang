@@ -84,14 +84,14 @@ void FuelTanklet::construct() {
 
 	this->skeleton = geometry_freeze(geometry_union(geometry_union(tank_parts), // don't mind, it's Visual Studio's fault
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
-	this->on_value_change(0.0F);
+	this->on_value_changed(0.0F);
 }
 
 void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void FuelTanklet::on_value_change(float v) {
+void FuelTanklet::on_value_changed(float v) {
 	this->fuel_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
 }
 

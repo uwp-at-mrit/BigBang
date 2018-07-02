@@ -19,7 +19,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		virtual void on_font_change() {}
+		virtual void on_font_changed() {}
 
 	protected:
 		void set_layout_font_size(int char_idx, int char_count, float size);
@@ -72,7 +72,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_change(float value) override;
+		void on_value_changed(float value) override;
 
 	protected:
 		void fill_vmetrics(WarGrey::SCADA::TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr);

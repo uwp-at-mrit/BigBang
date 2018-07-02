@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sugar.hpp"
+#include "class.hpp"
 
 namespace WarGrey::SCADA {
 	typedef Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush Colour;

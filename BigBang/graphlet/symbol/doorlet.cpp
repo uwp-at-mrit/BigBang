@@ -56,7 +56,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DumpDoorlet::on_status_change(DoorStatus state) {
+void DumpDoorlet::on_status_changed(DoorStatus state) {
 	switch (state) {
 	default: {
 		this->mask = nullptr;

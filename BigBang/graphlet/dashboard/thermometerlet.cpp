@@ -105,7 +105,7 @@ void Thermometerlet::construct() {
 
 	glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
 	this->skeleton = geometry_freeze(geometry_union(glass, hatch, 0.0F, mercury_highest));
-	this->on_value_change(0.0F);
+	this->on_value_changed(0.0F);
 }
 
 void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {
@@ -133,7 +133,7 @@ void Thermometerlet::fill_mercury_extent(float* x, float* y, float *width, float
 	this->fill_mercury_extent(1.0F, x, y, width, height);
 }
 
-void Thermometerlet::on_value_change(float v) {
+void Thermometerlet::on_value_changed(float v) {
 	float mercury_width, mercury_height;
 	float p = this->get_percentage();
 	

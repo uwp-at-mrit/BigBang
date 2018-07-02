@@ -208,9 +208,13 @@ private:
 	ACDecorator* decorator;
 };
 
-private class ACSatellite final : public ISatellite, public PLCConfirmation {
+private class ACSatellite final : public CreditSatellite<AC>, public PLCConfirmation {
 public:
-	ACSatellite(Platform::String^ caption) : ISatellite(caption) {}
+	~ACSatellite() noexcept {
+		this->get_logger()->log_message(Log::Info, "Here");
+	}
+
+	ACSatellite(Platform::String^ caption) : CreditSatellite(caption) {}
 
 public:
 	void fill_satellite_extent(float* width, float* height) override {
@@ -220,47 +224,23 @@ public:
 
 public:
 	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
-		this->get_logger()->log_message(Log::Info, "Loading");
 		this->caption = this->insert_one(new Labellet(L"(%f, %f)", width, height));
 	}
 
-public:
-	void switch_room(AC room) {
-		if (room != this->room) {
-			this->room = room;
+	void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
+		this->get_logger()->log_message(Log::Info, "hiding");
 
-			if (this->caption != nullptr) {
-				this->caption->set_text(this->room.ToString());
-			} else {
-				this->get_logger()->log_message(Log::Warning, "Has not initialized");
-			}
-		}
+		this->hide();
 	}
 
-public:
-	void on_satellite_showing() {
-		this->get_logger()->log_message(Log::Info, "showing");
-	}
-
-	void on_satellite_shown() {
-		this->get_logger()->log_message(Log::Info, "shown");
-	}
-	
-	bool can_satellite_hiding() {
-		this->get_logger()->log_message(Log::Info, "Hiding");
-		return true;
-	}
-
-	void on_satellite_hiden() {
-		this->get_logger()->log_message(Log::Info, "Hiden");
+protected:
+	void on_channel_changed(AC room) override {
+		this->caption->set_text(room.ToString());
 	}
 
 	// never deletes these graphlets mannually
 private:
 	Labellet* caption;
-
-private:
-	AC room;
 };
 
 /*************************************************************************************************/
@@ -285,9 +265,15 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 		this->set_decorator(cells);
 		this->device->append_confirmation_receiver(ac);
 	}
+
+	if (this->orbit == nullptr) {
+		// NOTE: the lifetime of `satellite` is maintained by the `SatelliteOrbit`
+		ACSatellite* satellite = new ACSatellite(this->name() + "#Satellite");
+
+		this->orbit = ref new SatelliteOrbit(satellite, default_logging_level);
+	}
 }
 
-#include "time.hpp"
 void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 	if (g != nullptr) {
 #ifdef _DEBUG
@@ -296,23 +282,15 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 	} else {
 		int cell_idx = this->decorator->find_cell(local_x, local_y);
 
-		if (cell_idx >= 0) {
-			if (this->satellite == nullptr) {
-				this->satellite = ref new SatelliteOrbit(new ACSatellite(this->name() + "#Satellite"), default_logging_level);
-			}
+		if (cell_idx >= 1) {
+			ACSatellite* satellite = static_cast<ACSatellite*>(this->orbit->get_satellite());
 
-			{
-				AC room = static_cast<AC>(cell_idx);
-				ACSatellite* planet = static_cast<ACSatellite*>(this->satellite->get_satellite());
+			satellite->switch_channel(static_cast<AC>(cell_idx));
+			this->orbit->ShowAt(this->info->master->canvas);
+		} else if (cell_idx == 0) {
+			this->get_logger()->log_message(Log::Info, "deleting");
 
-				this->satellite->get_logger()->log_message(Log::Info, L"tapped [%s]", room.ToString()->Data());
-
-				this->get_logger()->log_message(Log::Notice, "showing");
-				this->satellite->ShowAt(this->info->master->canvas);
-				this->get_logger()->log_message(Log::Notice, "switching");
-				planet->switch_room(static_cast<AC>(cell_idx));
-				this->get_logger()->log_message(Log::Notice, "done");
-			}
+			delete this->orbit;
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::ValveStatus status, WarGrey::SCADA::ValveStyle& style) override;
-		void on_status_change(WarGrey::SCADA::ValveStatus status) override;
+		void on_status_changed(WarGrey::SCADA::ValveStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

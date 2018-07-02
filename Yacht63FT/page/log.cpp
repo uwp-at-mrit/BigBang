@@ -38,10 +38,7 @@ public:
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
-		if (this->info != nullptr) {
-			this->info->master->fill_actual_extent(w, nullptr);
-
-		}
+		SET_BOX(w, this->info->master->actual_width());
 	}
 
 	void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
@@ -79,13 +76,13 @@ public:
 	}
 
 	void update(long long count, long long interval, long long uptime) {
-		float x, y, width, height, Height;
+		float x, y, width, height;
+		float Height = this->master->actual_height();
 		
 		this->master->fill_graphlets_bounds(&x, &y, &width, &height);
 
 		Labellet* record = new Labellet(L"[%f, %f]@(%f, %f)", width, height, x, y);
 		record->set_font(this->font);
-		this->master->fill_actual_extent(nullptr, &Height);
 		record->fill_extent(0.0F, 0.0F, nullptr, &height);
 		this->master->enter_critical_section();
 		this->master->insert(record, 0.0F, Height - height * float(count));

@@ -33,7 +33,7 @@ void Textlet::set_color(unsigned int color_hex, double alpha) {
 void Textlet::set_font(CanvasTextFormat^ font) {
 	this->text_font = font;
 	this->set_text(this->raw);
-	this->on_font_change();
+	this->on_font_changed();
 	this->notify_updated();
 }
 
@@ -194,7 +194,7 @@ void Dimensionlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 	SET_VALUES(t, tspace, b, bspace);
 }
 
-void Dimensionlet::on_value_change(float value) {
+void Dimensionlet::on_value_changed(float value) {
 	Platform::String^ s = value.ToString();
 	
 	if (this->text_layout != nullptr) {

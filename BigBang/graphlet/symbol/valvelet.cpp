@@ -79,7 +79,7 @@ void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void Valvelet::on_status_change(ValveStatus status) {
+void Valvelet::on_status_changed(ValveStatus status) {
 	switch (status) {
 	case ValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {

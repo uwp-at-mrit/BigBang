@@ -9,6 +9,18 @@ using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 
+void ISatellite::hide() {
+	if (this->info != nullptr) {
+		auto orbit = FlyoutBase::GetAttachedFlyout(this->info->master->canvas);
+
+		if (orbit != nullptr) {
+			orbit->Hide();
+		}
+	}
+}
+
+/*************************************************************************************************/
+
 /** TODO
  * Why it complains "<Dispose> is not a member of `Satellite`"
  *  and "`IDisplay` does not have a user-defined copy constructor"
@@ -23,9 +35,11 @@ SatelliteOrbit::SatelliteOrbit(ISatellite* entity, Syslog* logger) {
 }
 
 void SatelliteOrbit::construct(ISatellite* entity, Syslog* logger) {
-	this->display = ref new UniverseDisplay(logger, entity);	
+	this->display = ref new UniverseDisplay(logger, entity);
 	this->Content = this->display->canvas;
 	this->Placement = FlyoutPlacementMode::Full;
+
+	FlyoutBase::SetAttachedFlyout(this->display->canvas, this);
 
 	this->Opening += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opening);
 	this->Opened += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opened);

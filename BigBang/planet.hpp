@@ -24,10 +24,15 @@ namespace WarGrey::SCADA {
 		IPlanet(Platform::String^ name);
 
 	public:
+		bool ready();
+		float actual_width();
+		float actual_height();
+
+	public:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void reflow(float width, float height) {}
-		virtual void notify_ready() {}
+		virtual void notify_ready_to_draw() {}
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
 		virtual void collapse() {}
@@ -98,7 +103,6 @@ namespace WarGrey::SCADA {
 	public:
 		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
-		void fill_actual_extent(float* width, float* height);
 
 	public:
 		void enter_critical_section();

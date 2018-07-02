@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
-		void on_status_change(WarGrey::SCADA::DoorStatus state) override;
+		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

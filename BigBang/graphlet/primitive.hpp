@@ -54,7 +54,7 @@ namespace WarGrey::SCADA {
 
 			if ((this->value != value) || force_update) {
 				this->value = value;
-				this->on_value_change(value);
+				this->on_value_changed(value);
 				this->notify_updated();
 			}
 		}
@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 
 					this->info->master->fill_graphlet_location(this, &anchor_x, &anchor_y, anchor);
 					this->value = value;
-					this->on_value_change(value);
+					this->on_value_changed(value);
 
 					this->info->master->begin_update_sequence();
 					this->notify_updated();
@@ -81,7 +81,7 @@ namespace WarGrey::SCADA {
 		}
 		
 	protected:
-		virtual void on_value_change(T value) {}
+		virtual void on_value_changed(T value) {}
 
 	protected:
 		virtual T adjusted_value(T value) { return value; }
@@ -138,7 +138,7 @@ namespace WarGrey::SCADA {
 			this->current_status = this->default_status;
 
 			/** WARNING
-			 * invoking `apply_style` and `on_status_change` here has no effect
+			 * invoking `apply_style` and `on_status_changed` here has no effect
 			 * since they are virtual and here is inside the constructor
 			 *
 			 * `update_status` is designed for children to achieve the goal.
@@ -185,12 +185,12 @@ namespace WarGrey::SCADA {
 	protected:
 		void update_status() {
 			this->apply_style(this->get_style());
-			this->on_status_change(static_cast<Status>(this->current_status));
+			this->on_status_changed(static_cast<Status>(this->current_status));
 		}
 
 	protected:
 		virtual void prepare_style(Status status, Style& style) = 0;
-		virtual void on_status_change(Status status) {}
+		virtual void on_status_changed(Status status) {}
 		virtual void apply_style(Style& style) {}
 
 	private:

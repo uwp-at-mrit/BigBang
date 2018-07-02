@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_change(float v) override;
+		void on_value_changed(float v) override;
 
 	private:
 		WarGrey::SCADA::GradientStops^ color_stops;
