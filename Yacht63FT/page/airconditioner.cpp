@@ -210,27 +210,32 @@ private:
 
 private class ACSatellite final : public CreditSatellite<AC>, public PLCConfirmation {
 public:
-	~ACSatellite() noexcept {
-		this->get_logger()->log_message(Log::Info, "Here");
+	ACSatellite(Platform::String^ caption) : CreditSatellite(caption) {
+		this->caption_font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+		this->label_font = make_text_format("Microsoft YaHei", design_to_application_height(24.79F));
 	}
-
-	ACSatellite(Platform::String^ caption) : CreditSatellite(caption) {}
 
 public:
 	void fill_satellite_extent(float* width, float* height) override {
+		TextExtent tc = get_text_extent("x", this->caption_font);
+		TextExtent tl = get_text_extent("x", this->label_font);
+
 		(*width) = 400.0F;
-		(*height) = 256.0F;
+		(*height) = tc.height + tl.height;
 	}
 
 public:
 	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
-		this->caption = this->insert_one(new Labellet(L"(%f, %f)", width, height));
+		this->caption = this->insert_one(new Labellet(AC::_.ToString(), this->caption_font));
+		this->label = this->insert_one(new Labellet(make_wstring(L"(%f, %f)", width, height), this->label_font));
+
+		this->move_to(this->label, this->caption, GraphletAnchor::LB, GraphletAnchor::LT);
 	}
 
 	void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
-		this->get_logger()->log_message(Log::Info, "hiding");
-
-		this->hide();
+#ifdef _DEBUG
+		Planet::on_tap(g, local_x, local_y, shifted, controlled);
+#endif
 	}
 
 protected:
@@ -241,6 +246,11 @@ protected:
 	// never deletes these graphlets mannually
 private:
 	Labellet* caption;
+	Labellet* label;
+
+private:
+	CanvasTextFormat^ caption_font;
+	CanvasTextFormat^ label_font;
 };
 
 /*************************************************************************************************/

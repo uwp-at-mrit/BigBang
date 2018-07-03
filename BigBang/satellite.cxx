@@ -9,6 +9,22 @@ using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 
+void ISatellite::fill_satellite_border(Thickness& border) {
+	border.Top = 1.0;
+	border.Right = 1.0;
+	border.Bottom = 1.0;
+	border.Left = 1.0;
+}
+
+void ISatellite::fill_satellite_padding(Thickness& padding) {
+	double margin = 8.0;
+
+	padding.Top = margin;
+	padding.Right = margin;
+	padding.Bottom = margin;
+	padding.Left = margin;
+}
+
 void ISatellite::hide() {
 	if (this->info != nullptr) {
 		auto orbit = FlyoutBase::GetAttachedFlyout(this->info->master->canvas);
@@ -40,7 +56,7 @@ SatelliteOrbit::~SatelliteOrbit() {
 	 * Does this destructor really do what it is expected to do?
 	 */
 
-	// delete this->display;
+	delete this->display;
 }
 
 void SatelliteOrbit::construct(ISatellite* entity, Syslog* logger) {
@@ -72,13 +88,23 @@ void SatelliteOrbit::on_opening(Platform::Object^ target, Platform::Object^ args
 		 * When the style is applied to the Flyout object, it cannot be modified.
 		 */
 		Style^ style = ref new Style(FlyoutPresenter::typeid);
+		ISatellite* entity = this->get_satellite();
+		Thickness border, padding;
+		double wspread, hspread;
 		float width, height;
 		
-		this->get_satellite()->fill_satellite_extent(&width, &height);
+		entity->fill_satellite_extent(&width, &height);
+		entity->fill_satellite_border(border);
+		entity->fill_satellite_padding(padding);
 
-		style->Setters->Append(ref new Setter(FrameworkElement::MaxWidthProperty, double(width)));
-		style->Setters->Append(ref new Setter(FrameworkElement::MaxHeightProperty, double(height)));
+		wspread = (border.Left + border.Right + padding.Left + padding.Right);
+		hspread = (border.Top + border.Bottom + padding.Top + padding.Bottom);
 
+		style->Setters->Append(ref new Setter(FlyoutPresenter::BorderThicknessProperty, border));
+		style->Setters->Append(ref new Setter(FlyoutPresenter::PaddingProperty, padding));
+		style->Setters->Append(ref new Setter(FlyoutPresenter::MaxWidthProperty, double(width) + wspread));
+		style->Setters->Append(ref new Setter(FlyoutPresenter::MaxHeightProperty, double(height) + hspread));
+		
 		this->FlyoutPresenterStyle = style; // apply the style
 
 		FlyoutBase::SetAttachedFlyout(this->display->canvas, this);

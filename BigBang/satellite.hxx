@@ -11,6 +11,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void fill_satellite_extent(float* width, float* height) = 0;
+		virtual void fill_satellite_border(Windows::UI::Xaml::Thickness& border);
+		virtual void fill_satellite_padding(Windows::UI::Xaml::Thickness& padding);
 
 	public:
 		virtual void on_satellite_showing() {}
