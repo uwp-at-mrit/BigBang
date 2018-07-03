@@ -34,12 +34,19 @@ SatelliteOrbit::SatelliteOrbit(ISatellite* entity, Syslog* logger) {
 	this->construct(entity, logger);
 }
 
+SatelliteOrbit::~SatelliteOrbit() {
+	/** TODO
+ 	 * Why deleting a `SatelliteOrbit` object does not destory its `UniverseDisplay` object automatically.
+	 * Does this destructor really do what it is expected to do?
+	 */
+
+	// delete this->display;
+}
+
 void SatelliteOrbit::construct(ISatellite* entity, Syslog* logger) {
 	this->display = ref new UniverseDisplay(logger, entity);
 	this->Content = this->display->canvas;
 	this->Placement = FlyoutPlacementMode::Full;
-
-	FlyoutBase::SetAttachedFlyout(this->display->canvas, this);
 
 	this->Opening += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opening);
 	this->Opened += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opened);
@@ -73,6 +80,8 @@ void SatelliteOrbit::on_opening(Platform::Object^ target, Platform::Object^ args
 		style->Setters->Append(ref new Setter(FrameworkElement::MaxHeightProperty, double(height)));
 
 		this->FlyoutPresenterStyle = style; // apply the style
+
+		FlyoutBase::SetAttachedFlyout(this->display->canvas, this);
 	}
 
 	this->get_satellite()->on_satellite_showing();

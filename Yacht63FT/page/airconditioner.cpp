@@ -282,15 +282,11 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 	} else {
 		int cell_idx = this->decorator->find_cell(local_x, local_y);
 
-		if (cell_idx >= 1) {
+		if (cell_idx >= 0) {
 			ACSatellite* satellite = static_cast<ACSatellite*>(this->orbit->get_satellite());
 
 			satellite->switch_channel(static_cast<AC>(cell_idx));
-			this->orbit->ShowAt(this->info->master->canvas);
-		} else if (cell_idx == 0) {
-			this->get_logger()->log_message(Log::Info, "deleting");
-
-			delete this->orbit;
+			this->orbit->show(this);
 		}
 	}
 }

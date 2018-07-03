@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 
 	private ref class SatelliteOrbit sealed : public Windows::UI::Xaml::Controls::Flyout {
 	public:
-		virtual ~SatelliteOrbit() {}
+		virtual ~SatelliteOrbit();
 
 	internal:
 		SatelliteOrbit(WarGrey::SCADA::ISatellite* entity, WarGrey::SCADA::Syslog* logger);
