@@ -11,7 +11,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/svglet.hpp"
 
-#include "graphlet/symbol/gaugelet.hpp"
+#include "graphlet/device/gaugelet.hpp"
 #include "graphlet/symbol/pumplet.hpp"
 #include "graphlet/symbol/valvelet.hpp"
 
@@ -69,16 +69,11 @@ public:
 				HS id = bar_seq[i];
 				Dimensionlet* target = this->bars[id];
 				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
-				float anchor_x, anchor_y;
-
+				
 				if (need_adjust_position) {
-					this->master->fill_graphlet_location(target, &anchor_x, &anchor_y, GraphletAnchor::RB);
-				}
-
-				target->set_value(RealData(AI_DB203, 8 + i));
-
-				if (need_adjust_position) {
-					this->master->move_to(target, anchor_x, anchor_y, GraphletAnchor::RB);
+					target->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
+				} else {
+					target->set_value(RealData(AI_DB203, 8 + i));
 				}
 			}
 		}

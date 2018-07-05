@@ -38,7 +38,7 @@ public:
 private class CreditItemlet : public virtual UnionBitmaplet<YachtStatus> {
 public:
 	CreditItemlet(Yacht id, float width, float height, CanvasTextFormat^ font) : UnionBitmaplet<YachtStatus>(id.ToString(), width, height), id(id) {
-		this->caption = make_text_layout(speak(id.ToString()), font);
+		this->caption = make_text_layout(speak(id), font);
 		this->cpt_xoff = (this->window.Width - this->caption->LayoutBounds.Width) * 0.5F;
 		this->cpt_yoff = (this->window.Height - this->caption->LayoutBounds.Height) * 0.5F;
 	}

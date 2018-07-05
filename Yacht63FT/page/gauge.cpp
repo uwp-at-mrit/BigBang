@@ -65,7 +65,7 @@ public:
 				float label_y = alarm_y + (ts.height + vgapsize) * float(idx) + vgapsize;
 				GAlarm id = static_cast<GAlarm>(idx);
 
-				this->lblalarms[id] = new Labellet(speak(id.ToString()), this->font, this->fgcolor);
+				this->lblalarms[id] = new Labellet(speak(id), this->font, this->fgcolor);
 				this->alarms[id] = new Alarmlet(ts.height);
 
 				this->master->insert(this->lblalarms[id], label_x, label_y, GraphletAnchor::RT);
@@ -97,7 +97,7 @@ private:
 		this->decorator->fill_cell_anchor(0, fx, fy, &anchor_x, &anchor_y);
 
 		this->gauges[id] = new LevelGaugelet(gwidth, gheight, 3000.0F, 0U, Colours::Yellow);
-		this->lblgauges[id] = new Labellet(speak(id.ToString()), this->font, this->fgcolor);
+		this->lblgauges[id] = new Labellet(speak(id), this->font, this->fgcolor);
 		
 		this->master->insert(this->gauges[id], anchor_x, anchor_y, GraphletAnchor::CC);
 		this->master->insert(this->lblgauges[id], this->gauges[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);

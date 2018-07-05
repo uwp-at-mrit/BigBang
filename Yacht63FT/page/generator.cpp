@@ -24,7 +24,6 @@ private enum class GMeter { sea, oil, coolant, _ };
 
 static const unsigned int gcount = 2U;
 
-static const float indicator_thickness = 12.0F;
 static const float corner_radius = 8.0F;
 static const float rspeed_label_fx = 0.089F;
 static const float label_fy = 0.25F;

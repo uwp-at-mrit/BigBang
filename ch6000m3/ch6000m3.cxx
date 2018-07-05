@@ -8,7 +8,6 @@
 #include "page/hydraulics.hpp"
 #include "page/graphlets.hpp"
 
-
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;

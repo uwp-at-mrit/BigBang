@@ -27,7 +27,6 @@ private enum class PBearing { drive_C, nondrive_C, thrust_C, _ };
 
 static const unsigned int pcount = 2U;
 
-static const float indicator_thickness = 12.0F;
 static const float corner_radius = 8.0F;
 static const float label_fy = 0.25F;
 
@@ -87,15 +86,15 @@ public:
 			}
 
 			for (PBus m = static_cast<PBus>(0); m < PBus::_; m++) {
-				this->dcbs[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->dcbs[m] = make_text_layout(speak(m), pfont);
 			}
 
 			for (PWinding m = static_cast<PWinding>(0); m < PWinding::_; m++) {
-				this->ws[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->ws[m] = make_text_layout(speak(m), pfont);
 			}
 
 			for (PBearing m = static_cast<PBearing>(0); m < PBearing::_; m++) {
-				this->bs[m] = make_text_layout(speak(m.ToString()), pfont);
+				this->bs[m] = make_text_layout(speak(m), pfont);
 			}
 		}
 	}

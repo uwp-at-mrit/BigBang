@@ -66,6 +66,20 @@ void IGraphlet::notify_ready() {
 
 void IGraphlet::notify_updated() {
 	if (this->info != nullptr) {
+		if (this->anchor != GraphletAnchor::LT) {
+			this->info->master->move_to(this, this->anchor_x, this->anchor_y, this->anchor);
+			this->anchor = GraphletAnchor::LT;
+		}
+
 		this->info->master->notify_graphlet_updated(this);
+	}
+}
+
+void IGraphlet::moor(GraphletAnchor anchor) {
+	if (anchor != GraphletAnchor::LT) {
+		if (this->info != nullptr) {
+			this->anchor = anchor;
+			this->info->master->fill_graphlet_location(this, &this->anchor_x, &this->anchor_y, anchor);
+		}
 	}
 }

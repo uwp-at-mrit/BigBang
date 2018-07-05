@@ -213,7 +213,7 @@ private:
 
 	void load_graphlets(std::map<PD, Labellet*>& ls, PD id0, PD idn) {
 		for (PD l = id0; l <= idn; l++) {
-			ls[l] = this->master->insert_one(new Labellet(speak(l.ToString()), this->label_font, this->label_color));
+			ls[l] = this->master->insert_one(new Labellet(speak(l), this->label_font, this->label_color));
 		}
 	}
 

@@ -41,9 +41,6 @@
     <Filter Include="usr\share\graphlet\Propeller">
       <UniqueIdentifier>{6f34fcae-9b88-42ad-95d8-b666fd59a8a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\graphlet\ACMode">
-      <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
-    </Filter>
     <Filter Include="usr\share\graphlet\Camera">
       <UniqueIdentifier>{3fa3e73c-7bfd-47d1-853e-218bb915c815}</UniqueIdentifier>
     </Filter>
@@ -67,6 +64,30 @@
     </Filter>
     <Filter Include="usr\share\graphlet\Yacht">
       <UniqueIdentifier>{143519bd-f301-446a-b348-6d522887137f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\mode">
+      <UniqueIdentifier>{00bf4ffb-0cf4-42f3-8d86-d03208df3f68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Heat">
+      <UniqueIdentifier>{46fe8a6a-d211-4708-9a05-931a0998a65f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Cool">
+      <UniqueIdentifier>{587e1515-ee58-4a73-ae6e-2acd20cde3c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Heater">
+      <UniqueIdentifier>{edb01d8f-edc5-4284-a7f3-0dd8762bf983}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Cooler">
+      <UniqueIdentifier>{fb0b336a-fb88-4036-a54e-48c4534b290f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Power">
+      <UniqueIdentifier>{de49bf0a-8b83-44f7-b376-b5efc9a3743a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\Refresh">
+      <UniqueIdentifier>{a026b86c-dd1a-4419-a908-1942854b46e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\graphlet\AirConditioner\PlaceHolder">
+      <UniqueIdentifier>{36048b1a-78b4-4ead-be3c-b13003920c8c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -322,15 +343,6 @@
     <Image Include="usr\share\graphlet\active.png">
       <Filter>usr\share\graphlet</Filter>
     </Image>
-    <Image Include="usr\share\graphlet\ACMode\Refrigeration.png">
-      <Filter>usr\share\graphlet\ACMode</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\ACMode\Breakdown.png">
-      <Filter>usr\share\graphlet\ACMode</Filter>
-    </Image>
-    <Image Include="usr\share\graphlet\ACMode\Heating.png">
-      <Filter>usr\share\graphlet\ACMode</Filter>
-    </Image>
     <Image Include="usr\share\graphlet\Camera\Stopped.png">
       <Filter>usr\share\graphlet\Camera</Filter>
     </Image>
@@ -399,6 +411,57 @@
     </Image>
     <Image Include="usr\share\graphlet\Yacht\Upper.png">
       <Filter>usr\share\graphlet\Yacht</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Breakdown.png">
+      <Filter>usr\share\graphlet\AirConditioner\mode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Heating.png">
+      <Filter>usr\share\graphlet\AirConditioner\mode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Cooling.png">
+      <Filter>usr\share\graphlet\AirConditioner\mode</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Cool\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Cool</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Cool\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Cool</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Heat\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Heat</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Heat\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Heat</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Heater\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Heater</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Heater\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Heater</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Cooler\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Cooler</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Cooler\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Cooler</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Power\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Power</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Power\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Power</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Refresh\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\Refresh</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\Refresh\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\Refresh</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\PlaceHolder\false.png">
+      <Filter>usr\share\graphlet\AirConditioner\PlaceHolder</Filter>
+    </Image>
+    <Image Include="usr\share\graphlet\AirConditioner\PlaceHolder\true.png">
+      <Filter>usr\share\graphlet\AirConditioner\PlaceHolder</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

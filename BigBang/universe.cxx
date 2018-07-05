@@ -9,6 +9,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
+using namespace Windows::Devices::Input;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
@@ -373,9 +374,11 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 			do {
 				PlanetInfo* info = PLANET_INFO(child);
 
-				child->enter_critical_section();
-				child->reflow(nwidth, nheight);
-				child->leave_critical_section();
+				if (child->ready()) {
+					child->enter_critical_section();
+					child->reflow(nwidth, nheight);
+					child->leave_critical_section();
+				}
 
 				child = info->next;
 			} while (child != this->head_planet);
@@ -480,11 +483,12 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 
 		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 			PointerPointProperties^ ppp = pp->Properties;
 
 			this->saved_pressed_ppp = ppp;
 			args->Handled = this->recent_planet->on_pointer_pressed(
-				pp->Position.X, pp->Position.Y, ppp->PointerUpdateKind,
+				pp->Position.X, pp->Position.Y, pdt, ppp->PointerUpdateKind,
 				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 		}
 
@@ -498,10 +502,13 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 
 	if (this->recent_planet != nullptr) {
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 		
 		args->Handled = this->recent_planet->on_pointer_moved(
-			pp->Position.X, pp->Position.Y, args->GetIntermediatePoints(this->canvas),
-			pp->Properties->PointerUpdateKind, SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+			pp->Position.X, pp->Position.Y,
+			args->GetIntermediatePoints(this->canvas),
+			pdt, pp->Properties->PointerUpdateKind,
+			SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 	}
 
 	this->leave_critical_section();
@@ -530,11 +537,12 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 			PointerUpdateKind puk = this->saved_pressed_ppp->PointerUpdateKind;
 
 			this->saved_pressed_ppp = nullptr;
 			args->Handled = this->recent_planet->on_pointer_released(
-				pp->Position.X, pp->Position.Y, puk,
+				pp->Position.X, pp->Position.Y, pdt, puk,
 				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
 			
 		}

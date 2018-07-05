@@ -1,5 +1,6 @@
 #include "graphlet/textlet.hpp"
 
+#include "planet.hpp"
 #include "paint.hpp"
 #include "tongue.hpp"
 #include "string.hpp"
@@ -30,15 +31,20 @@ void Textlet::set_color(unsigned int color_hex, double alpha) {
 	this->set_color(Colours::make(color_hex, alpha));
 }
 
-void Textlet::set_font(CanvasTextFormat^ font) {
+void Textlet::set_font(CanvasTextFormat^ font, GraphletAnchor anchor) {
+	this->moor(anchor);
+
 	this->text_font = font;
 	this->set_text(this->raw);
 	this->on_font_changed();
+	
 	this->notify_updated();
 }
 
-void Textlet::set_text(Platform::String^ content) {
+void Textlet::set_text(Platform::String^ content, GraphletAnchor anchor) {
 	this->raw = content;
+
+	this->moor(anchor);
 
 	if (this->text_font == nullptr) {
 		this->set_font(default_text_font);

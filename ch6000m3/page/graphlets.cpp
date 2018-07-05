@@ -99,7 +99,7 @@ private:
 			gs[idx] = new T(s, unitsize);
 			this->master->insert(gs[idx]);
 
-			ls[idx] = make_label(speak(s.ToString()));
+			ls[idx] = make_label(speak(s));
 		}
 	}
 

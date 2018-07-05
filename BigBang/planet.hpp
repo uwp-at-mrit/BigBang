@@ -58,6 +58,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
+		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 
@@ -79,18 +81,20 @@ namespace WarGrey::SCADA {
 		virtual void set_caret_owner(IGraphlet* g) = 0;
 
 	public:
-		virtual bool on_pointer_moved(float x, float y,
-			WarGrey::SCADA::VectorOfPointerPoint^ pts,
+		virtual bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
+			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk,
 			bool shifted, bool ctrled)
 		{ return false; }
 
 		virtual bool on_pointer_pressed(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk,
 			bool shifted, bool ctrled)
 		{ return false; }
 
 		virtual bool on_pointer_released(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk,
 			bool shifted, bool ctrled)
 		{ return false; }
@@ -200,9 +204,20 @@ namespace WarGrey::SCADA {
 		void show_virtual_keyboard(ScreenKeyboard type, float x, float y);
 
 	public:
-		bool on_pointer_pressed(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
-		bool on_pointer_moved(float x, float y, VectorOfPointerPoint^ pts, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
-		bool on_pointer_released(float x, float y, Windows::UI::Input::PointerUpdateKind puk, bool shifted, bool ctrled) override;
+		bool on_pointer_pressed(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk,
+			bool shifted, bool ctrled) override;
+
+		bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk,
+			bool shifted, bool ctrled) override;
+
+		bool on_pointer_released(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk,
+			bool shifted, bool ctrled) override;
 
     private:
         void recalculate_graphlets_extent_when_invalid();
@@ -225,8 +240,8 @@ namespace WarGrey::SCADA {
     private:
         WarGrey::SCADA::IPlanetDecorator* decorator;
         WarGrey::SCADA::IGraphlet* head_graphlet;
-		WarGrey::SCADA::IGraphlet* focus_graphlet;
-		WarGrey::SCADA::IGraphlet* hover_graphlet;
+		WarGrey::SCADA::IGraphlet* focused_graphlet;
+		WarGrey::SCADA::IGraphlet* hovering_graphlet; // not used when PointerDeviceType::Touch
 		unsigned int mode;
 
 	private:

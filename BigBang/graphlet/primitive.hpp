@@ -26,14 +26,20 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:
-		void notify_ready();
-		void notify_updated();
-
-	public:
 		virtual void own_caret(bool is_own) {}
 
 	public:
+		void notify_ready();
+		void notify_updated();
+		void moor(WarGrey::SCADA::GraphletAnchor anchor);
+
+	public:
 		IGraphletInfo * info;
+
+	private:
+		float anchor_x;
+		float anchor_y;
+		WarGrey::SCADA::GraphletAnchor anchor;
 	};
 
 	private class IPipelet abstract : public virtual WarGrey::SCADA::IGraphlet {
@@ -50,33 +56,17 @@ namespace WarGrey::SCADA {
 		}
 		
 		void set_value(T value0, bool force_update = false) {
-			T value = this->adjusted_value(value0);
-
-			if ((this->value != value) || force_update) {
-				this->value = value;
-				this->on_value_changed(value);
-				this->notify_updated();
-			}
+			this->set_value(value0, WarGrey::SCADA::GraphletAnchor::LT, force_update);
 		}
 
 		void set_value(T value0, WarGrey::SCADA::GraphletAnchor anchor, bool force_update = false) {
-			if (this->info == nullptr) {
-				this->set_value(value0, force_update);
-			} else {
-				T value = this->adjusted_value(value0);
+			T value = this->adjusted_value(value0);
 
-				if ((this->value != value) || force_update) {
-					float anchor_x, anchor_y;
-
-					this->info->master->fill_graphlet_location(this, &anchor_x, &anchor_y, anchor);
-					this->value = value;
-					this->on_value_changed(value);
-
-					this->info->master->begin_update_sequence();
-					this->notify_updated();
-					this->info->master->move_to(this, anchor_x, anchor_y, anchor);
-					this->info->master->end_update_sequence();
-				}
+			if ((this->value != value) || force_update) {
+				this->moor(anchor);
+				this->value = value;
+				this->on_value_changed(value);
+				this->notify_updated();
 			}
 		}
 		

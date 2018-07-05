@@ -247,10 +247,24 @@
     <Image Include="Assets\WideTile.scale-400.png">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="usr\share\graphlet\ACMode\Breakdown.png" />
-    <Image Include="usr\share\graphlet\ACMode\Heating.png" />
-    <Image Include="usr\share\graphlet\ACMode\Refrigeration.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Cooler\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Cooler\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Cool\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Cool\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Heater\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Heater\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Heat\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Heat\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Breakdown.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Heating.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\mode\Cooling.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Alerting.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\PlaceHolder\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\PlaceHolder\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Power\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Power\true.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Refresh\false.png" />
+    <Image Include="usr\share\graphlet\AirConditioner\Refresh\true.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Running.png" />
     <Image Include="usr\share\graphlet\AirConditioner\Stopped.png" />
     <Image Include="usr\share\graphlet\Alarm\false.png" />

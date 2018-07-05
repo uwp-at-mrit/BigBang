@@ -8,8 +8,8 @@ namespace WarGrey::SCADA {
 	private class Textlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		void set_text(const wchar_t* fmt, ...);
-		void set_text(Platform::String^ content);
-		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
+		void set_text(Platform::String^ content, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
+		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
 		void set_color(unsigned int color_hex, double alpha = 1.0);
 		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Silver);
 

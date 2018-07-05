@@ -31,6 +31,8 @@ static const float screen_status_parameter_yoff = 120.0F;
 static const float screen_status_alarm_x = 1206.0F;
 static const float screen_status_alarm_width = 160.0F;
 
+static const float indicator_thickness = 16.0F;
+
 float screen_to_application_size(float src);
 float design_to_application_width(float src);
 float design_to_application_height(float src);

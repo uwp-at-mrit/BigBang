@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 			this->load_graphlets(gs, id0, idn, radius, degrees);
 			
 			for(E id = id0; id <= idn; id++) {
-			    ls[id] = this->make_label(speak(id.ToString()), id, Colours::Silver);
+			    ls[id] = this->make_label(speak(id), id, Colours::Silver);
 		    }
 	    }
 
@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 		void load_state_indicator(E id, float size
 			, std::map<E, Credit<WarGrey::SCADA::Booleanlet, E>*>& bs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			ls[id] = this->make_label(speak(id.ToString()), id, WarGrey::SCADA::Colours::Silver);
+			ls[id] = this->make_label(speak(id), id, WarGrey::SCADA::Colours::Silver);
 			bs[id] = this->master->insert_one(new Credit<WarGrey::SCADA::Booleanlet, E>(size, color));
 			bs[id]->id = id;
 		}
