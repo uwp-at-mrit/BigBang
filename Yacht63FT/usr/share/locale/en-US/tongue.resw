@@ -390,4 +390,10 @@
   <data name=":temperature:" xml:space="preserve">
     <value>Temperature</value>
   </data>
+  <data name=":t_setting:" xml:space="preserve">
+    <value>Setting Temperature</value>
+  </data>
+  <data name=":t_room:" xml:space="preserve">
+    <value>Room Temperature</value>
+  </data>
 </root>

@@ -47,11 +47,15 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 
 		if (function_code == MODBUS_READ_COILS) {
 			for (auto cf : cfs) {
-				cf->on_coils(transaction, maybe_address, status, count, logger);
+				if (cf->available()) {
+					cf->on_coils(transaction, maybe_address, status, count, logger);
+				}
 			}
 		} else {
 			for (auto cf : cfs) {
-				cf->on_discrete_inputs(transaction, maybe_address, status, count, logger);
+				if (cf->available()) {
+					cf->on_discrete_inputs(transaction, maybe_address, status, count, logger);
+				}
 			}
 		}
 	} break;
@@ -63,11 +67,15 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 
 		if (function_code == MODBUS_READ_INPUT_REGISTERS) {
 			for (auto cf : cfs) {
-				cf->on_input_registers(transaction, maybe_address, registers, count, logger);
+				if (cf->available()) {
+					cf->on_input_registers(transaction, maybe_address, registers, count, logger);
+				}
 			}
 		} else {
 			for (auto cf : cfs) {
-				cf->on_holding_registers(transaction, maybe_address, registers, count, logger);
+				if (cf->available()) {
+					cf->on_holding_registers(transaction, maybe_address, registers, count, logger);
+				}
 			}
 		}
 	} break;
@@ -77,7 +85,9 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 		uint16 value = mbin->ReadUInt16();
 
 		for (auto cf : cfs) {
-			cf->on_echo_response(transaction, function_code, address, value, logger);
+			if (cf->available()) {
+				cf->on_echo_response(transaction, function_code, address, value, logger);
+			}
 		}
 	} break;
 	case MODBUS_MASK_WRITE_REGISTER: {                                        // MAP: Page 36
@@ -86,7 +96,9 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 		uint16 or_mask = mbin->ReadUInt16();
 
 		for (auto cf : cfs) {
-			cf->on_echo_response(transaction, function_code, address, and_mask, or_mask, logger);
+			if (cf->available()) {
+				cf->on_echo_response(transaction, function_code, address, and_mask, or_mask, logger);
+			}
 		}
 	} break;
 	case MODBUS_READ_FIFO_QUEUES: {                                           // MAP: Page 40
@@ -95,7 +107,9 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 		uint16 count = mbin->ReadUInt16();
 
 		for (auto cf : cfs) {
-			cf->on_queue_registers(transaction, maybe_address, queues, count, logger);
+			if (cf->available()) {
+				cf->on_queue_registers(transaction, maybe_address, queues, count, logger);
+			}
 		}
 	} break;
 	default: {
@@ -105,7 +119,9 @@ static void modbus_apply_positive_confirmation(std::list<IModbusConfirmation*> c
 		READ_BYTES(mbin, raw_data, count);
 		
 		for (auto cf : cfs) {
-			cf->on_private_response(transaction, function_code, raw_data, count, logger);
+			if (cf->available()) {
+				cf->on_private_response(transaction, function_code, raw_data, count, logger);
+			}
 		}
 	}
 	}
@@ -322,7 +338,9 @@ void IModbusClient::wait_process_confirm_loop() {
 			if (!this->confirmations.empty()) {
 				if (function_code != raw_code) {
 					for (auto c : this->confirmations) {
-						c->on_exception(transaction, function_code, address0, this->mbin->ReadByte(), this->logger);
+						if (c->available()) {
+							c->on_exception(transaction, function_code, address0, this->mbin->ReadByte(), this->logger);
+						}
 					}
 				} else {
 					modbus_apply_positive_confirmation(this->confirmations, this->logger, this->mbin, transaction, function_code, address0);

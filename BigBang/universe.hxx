@@ -34,7 +34,8 @@ namespace WarGrey::SCADA {
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
-		vpure_read_only_property(bool, ready);
+		vpure_read_only_property(bool, surface_ready);
+		vpure_read_only_property(bool, ui_thread_ready);
 
     public:
         virtual_read_only_property(float, actual_width);
@@ -83,7 +84,8 @@ namespace WarGrey::SCADA {
 	public:
 		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
-		override_read_only_property(bool, ready);
+		override_read_only_property(bool, surface_ready);
+		override_read_only_property(bool, ui_thread_ready);
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
 		

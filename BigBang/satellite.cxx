@@ -10,19 +10,21 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 
 void ISatellite::fill_satellite_border(Thickness& border) {
-	border.Top = 1.0;
-	border.Right = 1.0;
-	border.Bottom = 1.0;
-	border.Left = 1.0;
+	double thickness = 1.0;
+	
+	border.Top = thickness;
+	border.Right = thickness;
+	border.Bottom = thickness;
+	border.Left = thickness;
 }
 
 void ISatellite::fill_satellite_padding(Thickness& padding) {
-	double margin = 8.0;
+	double space = 0.0;
 
-	padding.Top = margin;
-	padding.Right = margin;
-	padding.Bottom = margin;
-	padding.Left = margin;
+	padding.Top = space;
+	padding.Right = space;
+	padding.Bottom = space;
+	padding.Left = space;
 }
 
 void ISatellite::hide() {
@@ -33,6 +35,29 @@ void ISatellite::hide() {
 			orbit->Hide();
 		}
 	}
+}
+
+bool ISatellite::shown() {
+	bool showing = false;
+
+	if (this->info != nullptr) {
+		auto orbit = dynamic_cast<SatelliteOrbit^>(FlyoutBase::GetAttachedFlyout(this->info->master->canvas));
+
+		if (orbit != nullptr) {
+			showing = orbit->shown();
+		}
+	}
+
+	return showing;
+}
+
+void ISatellite::notify_surface_ready() {
+	this->ready = true;
+	this->on_surface_ready();
+}
+
+bool ISatellite::surface_ready() {
+	return this->ready && this->shown();
 }
 
 /*************************************************************************************************/
@@ -63,6 +88,7 @@ void SatelliteOrbit::construct(ISatellite* entity, Syslog* logger) {
 	this->display = ref new UniverseDisplay(logger, entity);
 	this->Content = this->display->canvas;
 	this->Placement = FlyoutPlacementMode::Full;
+	this->showing = false;
 
 	this->Opening += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opening);
 	this->Opened += ref new EventHandler<Platform::Object^>(this, &SatelliteOrbit::on_opened);
@@ -80,6 +106,10 @@ Syslog* SatelliteOrbit::get_logger() {
 
 void SatelliteOrbit::show(IPlanet* master) {
 	this->ShowAt(master->info->master->canvas);
+}
+
+bool SatelliteOrbit::shown() {
+	return this->showing;
 }
 
 void SatelliteOrbit::on_opening(Platform::Object^ target, Platform::Object^ args) {
@@ -115,6 +145,7 @@ void SatelliteOrbit::on_opening(Platform::Object^ target, Platform::Object^ args
 
 void SatelliteOrbit::on_opened(Platform::Object^ target, Platform::Object^ args) {
 	this->get_satellite()->on_satellite_shown();
+	this->showing = true;
 }
 
 void SatelliteOrbit::on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
@@ -123,4 +154,5 @@ void SatelliteOrbit::on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ 
 
 void SatelliteOrbit::on_closed(Platform::Object^ target, Platform::Object^ args) {
 	this->get_satellite()->on_satellite_hiden();
+	this->showing = false;
 }

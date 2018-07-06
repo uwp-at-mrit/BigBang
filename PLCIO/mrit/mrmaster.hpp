@@ -15,6 +15,9 @@ namespace WarGrey::SCADA {
 
 	private class IMRConfirmation abstract {
 	public:
+		virtual bool available() { return true; }
+
+	public:
 		virtual void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) = 0;
 	};
 

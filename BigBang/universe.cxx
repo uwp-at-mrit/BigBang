@@ -209,7 +209,11 @@ float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
 }
 
-bool UniverseDisplay::ready::get() {
+bool UniverseDisplay::ui_thread_ready::get() {
+	return this->display->Dispatcher->HasThreadAccess;
+}
+
+bool UniverseDisplay::surface_ready::get() {
 	return this->display->ReadyToDraw;
 }
 
@@ -374,7 +378,7 @@ void UniverseDisplay::do_resize(Platform::Object^ sender, SizeChangedEventArgs^ 
 			do {
 				PlanetInfo* info = PLANET_INFO(child);
 
-				if (child->ready()) {
+				if (child->surface_ready()) {
 					child->enter_critical_section();
 					child->reflow(nwidth, nheight);
 					child->leave_critical_section();
@@ -403,7 +407,7 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 				child->construct(args->Reason, region.Width, region.Height);
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
-				child->notify_ready_to_draw();
+				child->notify_surface_ready();
 				
 				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
 			} catch (Platform::Exception^ e) {

@@ -8,6 +8,7 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
+#include "credit.hpp"
 #include "tongue.hpp"
 #include "string.hpp"
 #include "text.hpp"
@@ -15,6 +16,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::UI::Xaml;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -22,7 +24,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum class AC { Bridge, VIP, Salon, Host, Guest, _ };
-private enum class ACInfo { mode, t_sea, t_pipe, aux, _ };
+private enum class ACInfo { mode, t_sea, t_pipe, aux, _, t_room, t_setting };
 private enum class ACMode { Breakdown, Heating, Cooling, _ };
 private enum class ACStatus { Normal };
 
@@ -48,8 +50,8 @@ static void prepare_text_formats() {
 
 private class ACDecorator final : public CellDecorator {
 public:
-	ACDecorator(float width, float height) : CellDecorator(0x1E1E1E, width, height, cell_count, 3, design_to_application_width(2.0F)) {
-		for (ACInfo id = ACInfo::mode; id < ACInfo::_; id++) {
+	ACDecorator(float width, float height) : CellDecorator(0x262626, width, height, cell_count, 3, design_to_application_width(2.0F)) {
+		for (ACInfo id = static_cast<ACInfo>(0); id < ACInfo::_; id++) {
 			this->infos[id] = make_text_layout(speak(":" + id.ToString() + ":"), label_font);
 		}
 	}
@@ -57,10 +59,9 @@ public:
 public:
 	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
 		for (unsigned int idx = 0; idx < cell_count; idx++) {
-			this->draw_text_ct(ds, idx, ACInfo::mode);
-			this->draw_text_ct(ds, idx, ACInfo::t_sea);
-			this->draw_text_ct(ds, idx, ACInfo::t_pipe);
-			this->draw_text_ct(ds, idx, ACInfo::aux);
+			for (ACInfo id = static_cast<ACInfo>(0); id < ACInfo::_; id++) {
+				this->draw_text_ct(ds, idx, id);
+			}
 		}
 	}
 
@@ -142,6 +143,13 @@ public:
 	}
 
 public:
+	void fill_metrics(AC room, float* temperature, float* t_sea, float* t_pipe) {
+		SET_BOX(temperature, this->temperatures[room]->get_value());
+		SET_BOX(t_sea, this->Tseas[room]->get_value());
+		SET_BOX(t_pipe, this->Tpipes[room]->get_value());
+	}
+
+public:
 	void on_digital_input_data(uint8* db28, size_t size, Syslog* logger) override {
 		size_t db_idx0 = 433;
 		size_t db_idx_acc = 8;
@@ -218,54 +226,85 @@ private:
 };
 
 /*************************************************************************************************/
-private class ACSatellite final : public CreditSatellite<AC>, public PLCConfirmation {
+private class ACSatellite final : public ICreditSatellite<ACBoard, AC>, public PLCConfirmation {
 public:
-	ACSatellite(Platform::String^ caption) : CreditSatellite(caption), bar_height(64.0F) {}
+	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F) : ICreditSatellite(board, caption) {
+		float width = bar_height * static_cast<float>(ACOP::_);
+		float height = width * 0.80F;
+
+		this->decorator = new CellDecorator(0x383838, width, height, 1, 1, 0.0F, bar_height, 0.0F);
+		this->set_decorator(this->decorator);
+	}
 
 public:
 	void fill_satellite_extent(float* width, float* height) override {
-		(*width) = bar_height * static_cast<float>(ACOP::_);
-		(*height) = bar_height * 2.0F + (*width) * 0.618F;
+		float y, cell_height;
+
+		this->decorator->fill_cell_extent(0, nullptr, &y, width, &cell_height);
+		(*height) = cell_height + y * 2.0F;
 	}
 
 public:
 	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
-		float iconsize = this->bar_height * 0.85F;
-		float indicator_size = width * 0.382F;
+		ACInfo infos[] = { ACInfo::t_setting, ACInfo::t_room, ACInfo::t_pipe, ACInfo::t_sea };
+		ICanvasBrush^ style_color = make_solid_brush(0xB3ED00);
+		float indicator_scale = 0.75F;
+		float icon_scale = 0.80F;
+		float bar_height, cell_height;
 
-		this->caption = this->insert_one(new Labellet(AC::_.ToString(), caption_font, make_solid_brush(0xB3ED00)));
-		this->lbl_sea = this->insert_one(new Labellet(speak(":" + ACInfo::t_sea.ToString() + ":"), label_font, label_color));
-		this->lbl_pipe = this->insert_one(new Labellet(speak(":" + ACInfo::t_pipe.ToString() + ":"), label_font, label_color));
-		this->indicator = this->insert_one(new Indicatorlet(indicator_size, indicator_thickness));
+		this->decorator->fill_cell_extent(0, nullptr, &bar_height, nullptr, &cell_height);
+
+		this->caption = this->insert_one(new Labellet(AC::_.ToString(), caption_font, style_color));
+		this->indicator = this->insert_one(new Indicatorlet(cell_height * indicator_scale, indicator_thickness));
+		
+		for (unsigned idx = 0; idx < sizeof(infos) / sizeof(ACInfo); idx++) {
+			ACInfo id = infos[idx];
+			Platform::String^ label = speak(":" + id.ToString() + ":");
+
+			if (id == ACInfo::t_setting) {
+				this->temperatures[id] = this->insert_one(new Dimensionlet("<temperature>", label, unit_font, style_color));
+			} else {
+				this->labels[id] = this->insert_one(new Labellet(label, label_font, label_color));
+				this->temperatures[id] = this->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			}
+		}
 
 		for (ACOP id = static_cast<ACOP>(0); id < ACOP::_; id++) {
-			this->handlers[id] = this->insert_one(new OptionBitmaplet("AirConditioner/" + id.ToString(), iconsize));
+			this->handlers[id] = new Credit<OptionBitmaplet, ACOP>("AirConditioner/" + id.ToString(), bar_height * icon_scale);
+			this->handlers[id]->id = id;
+			
+			this->insert(this->handlers[id]);
 		}
 	}
 
 	void reflow(float width, float height) override {
-		float cx = width * 0.5F;
-		float cy = height * 0.5F;
-		float lx = width * 0.30F;
-		float ly = height * 0.40F;
-		float ux = width * 0.8F;
-		float uy = height - ly;
-		float iy = height - this->bar_height * 0.5F;
-		float iw = width / static_cast<float>(ACOP::_);
+		float cell_y, icon_grid_y, caption_x;
+		float indicator_x, indicator_y, metrics_x, sea_y, pipe_y;
+		float icon_grid_width = width / static_cast<float>(ACOP::_);
 
-		this->move_to(this->caption, cx, this->bar_height * 0.5F, GraphletAnchor::CC);
-		this->move_to(this->indicator, lx, cy, GraphletAnchor::CC);
-		this->move_to(this->lbl_sea, ux, ly, GraphletAnchor::CT);
-		this->move_to(this->lbl_pipe, ux, uy, GraphletAnchor::CB);
+		this->decorator->fill_cell_anchor(0, 0.50F, 0.00F, &caption_x, &cell_y);
+		this->decorator->fill_cell_anchor(0, 0.30F, 0.50F, &indicator_x, &indicator_y);
+		this->decorator->fill_cell_anchor(0, 0.80F, 0.40F, &metrics_x, &sea_y);
+		this->decorator->fill_cell_anchor(0, 0.80F, 0.70F, nullptr, &pipe_y);
+		icon_grid_y = height - cell_y * 0.5F;
+
+		this->move_to(this->caption, caption_x, height - icon_grid_y, GraphletAnchor::CC);
+		this->move_to(this->indicator, indicator_x, indicator_y, GraphletAnchor::CC);
+		this->move_to(this->temperatures[ACInfo::t_setting], this->indicator, GraphletAnchor::CB, GraphletAnchor::CC);
+		this->move_labels(ACInfo::t_room, indicator_x, indicator_y);
+		this->move_labels(ACInfo::t_sea, metrics_x, sea_y);
+		this->move_labels(ACInfo::t_pipe, metrics_x, pipe_y);
 
 		for (ACOP id = static_cast<ACOP>(0); id < ACOP::_; id++) {
-			this->move_to(this->handlers[id], (static_cast<float>(id) + 0.5F) * iw, iy, GraphletAnchor::CC);
+			this->move_to(this->handlers[id],
+				(static_cast<float>(id) + 0.5F) * icon_grid_width, icon_grid_y,
+				GraphletAnchor::CC);
 		}
 	}
 
 public:
 	void on_hover(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
-		OptionBitmaplet* button = dynamic_cast<OptionBitmaplet*>(g);
+		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
 		
 		if (button != nullptr) {
 			button->set_value(true);
@@ -273,39 +312,68 @@ public:
 	}
 
 	void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
-#ifdef _DEBUG
-		Planet::on_tap(g, local_x, local_y, shifted, controlled);
-#endif
+		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
+
+		if (button != nullptr) {
+			this->get_logger()->log_message(Log::Info, button->id.ToString());
+		}
 	}
 
 	void on_goodbye(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
-		OptionBitmaplet* button = dynamic_cast<OptionBitmaplet*>(g);
+		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
 
 		if (button != nullptr) {
 			button->set_value(false);
 		}
 	}
 
+public:
+	bool available() override {
+		return this->surface_ready();
+	}
+
+	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+		this->enter_critical_section();
+		this->begin_update_sequence();
+
+		this->pull_metrics();
+
+		this->end_update_sequence();
+		this->leave_critical_section();
+	}
+
 protected:
 	void on_channel_changed(AC room) override {
 		this->caption->set_text(speak(room), GraphletAnchor::CC);
+		this->pull_metrics();
+	}
+
+private:
+	void move_labels(ACInfo id, float x, float y) {
+		this->move_to(this->labels[id], x, y, GraphletAnchor::CT);
+		this->move_to(this->temperatures[id], x, y, GraphletAnchor::CB);
+	}
+
+	void pull_metrics() {
+		float t, t_sea, t_pipe;
+
+		this->master->fill_metrics(this->channel, &t, &t_sea, &t_pipe);
+
+		this->temperatures[ACInfo::t_room]->set_value(t);
+		this->temperatures[ACInfo::t_sea]->set_value(t_sea);
+		this->temperatures[ACInfo::t_pipe]->set_value(t_pipe);
 	}
 
 	// never deletes these graphlets mannually
 private:
 	Labellet* caption;
-	Labellet* lbl_sea;
-	Labellet* lbl_pipe;
-	Labellet* lbl_temperature;
 	Indicatorlet* indicator;
-	Dimensionlet* t_sea;
-	Dimensionlet* t_pipe;
-	Dimensionlet* t_setting;
+	std::map<ACInfo, Labellet*> labels;
 	std::map<ACInfo, Dimensionlet*> temperatures;
-	std::map<ACOP, OptionBitmaplet*> handlers;
+	std::map<ACOP, Credit<OptionBitmaplet, ACOP>*> handlers;
 
 private:
-	float bar_height;
+	CellDecorator* decorator;
 };
 
 /*************************************************************************************************/
@@ -323,6 +391,7 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 	if (this->dashboard == nullptr) {
 		ACDecorator* cells = new ACDecorator(width, height);
 		ACBoard* ac = new ACBoard(this, cells);
+		ACSatellite* satellite = new ACSatellite(ac, this->name() + "#Satellite");
 		
 		ac->load_and_flow(width, height);
 
@@ -331,12 +400,9 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 		
 		this->set_decorator(cells);
 		this->device->append_confirmation_receiver(ac);
-	}
+		this->device->append_confirmation_receiver(satellite);
 
-	if (this->orbit == nullptr) {
 		// NOTE: the lifetime of `satellite` is maintained by the `SatelliteOrbit`
-		ACSatellite* satellite = new ACSatellite(this->name() + "#Satellite");
-
 		this->orbit = ref new SatelliteOrbit(satellite, default_logging_level);
 	}
 }

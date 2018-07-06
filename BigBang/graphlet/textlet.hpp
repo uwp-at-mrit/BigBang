@@ -55,6 +55,11 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = WarGrey::SCADA::Colours::Yellow,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
 
+		Dimensionlet(Platform::String^ unit,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
+
 		Dimensionlet(Platform::String^ unit, Platform::String^ label,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
@@ -63,6 +68,19 @@ namespace WarGrey::SCADA {
 		Dimensionlet(Platform::String^ unit,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
+		Dimensionlet(Platform::String^ unit, Platform::String^ label,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
+		Dimensionlet(Platform::String^ unit,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
+		Dimensionlet(Platform::String^ unit, Platform::String^ label,
+			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	public:

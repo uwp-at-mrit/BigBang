@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		IPlanet(Platform::String^ name);
 
 	public:
-		bool ready();
+		bool ui_thread_ready();
 		float actual_width();
 		float actual_height();
 
@@ -32,7 +32,8 @@ namespace WarGrey::SCADA {
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void reflow(float width, float height) {}
-		virtual void notify_ready_to_draw() {}
+		virtual bool surface_ready();
+		virtual void notify_surface_ready() {}
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
 		virtual void collapse() {}

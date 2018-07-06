@@ -134,10 +134,22 @@ Labellet::Labellet(Platform::String^ content, CanvasTextFormat^ font, unsigned i
 
 /*************************************************************************************************/
 Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Dimensionlet(unit, "", "", nfont, lfont, color, color) {}
+	: Dimensionlet(unit, "", nfont, lfont, color) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
+	: Dimensionlet(unit, label, "", nfont, lfont, color, color) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Dimensionlet(unit, "", font, ncolor, lcolor) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Dimensionlet(unit, label, "", font, font, ncolor, lcolor) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ color)
+	: Dimensionlet(unit, "", font, color) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ color)
+	: Dimensionlet(unit, label, "", font, font, color, color) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)

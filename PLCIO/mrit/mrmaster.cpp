@@ -259,7 +259,9 @@ void IMRMaster::apply_confirmation(size_t fcode, size_t db, size_t addr0, size_t
 	if (fcode == this->preference.read_signal_fcode()) {
 		if (db == this->preference.read_all_dbcode()) {
 			for (auto confirmation : this->confirmations) {
-				confirmation->on_all_signals(addr0, addrn, data, size, this->get_logger());
+				if (confirmation->available()) {
+					confirmation->on_all_signals(addr0, addrn, data, size, this->get_logger());
+				}
 			}
 		}
 	}

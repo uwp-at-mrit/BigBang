@@ -390,4 +390,10 @@
   <data name=":temperature:" xml:space="preserve">
     <value>温度</value>
   </data>
+  <data name=":t_setting:" xml:space="preserve">
+    <value>设定温度</value>
+  </data>
+  <data name=":t_room:" xml:space="preserve">
+    <value>当前室温</value>
+  </data>
 </root>

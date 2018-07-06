@@ -23,20 +23,21 @@ CellDecorator::CellDecorator(ICanvasBrush^ color, const Rect* src, size_t count,
 	memcpy(this->boxes, src, sizeof(Rect) * count);
 }
 
-CellDecorator::CellDecorator(unsigned int color, float width, float height, size_t count, size_t col, float gapsize, float radius)
-	: CellDecorator(Colours::make(color), width, height, count, col, gapsize, radius) {
-}
+CellDecorator::CellDecorator(unsigned int color, float width, float height, size_t count, size_t col, float hgap, float vgap, float radius)
+	: CellDecorator(Colours::make(color), width, height, count, col, hgap, vgap, radius) {}
 
-CellDecorator::CellDecorator(ICanvasBrush^ color, float width, float height, size_t count, size_t col, float gapsize, float radius)
+CellDecorator::CellDecorator(ICanvasBrush^ color, float width, float height, size_t count, size_t col, float hgap, float vgap, float radius)
 	: color(color), count(count), radius(radius) {
 	size_t row = count / col + ((count % col == 0) ? 0 : 1);
-	float cell_width = (width - gapsize) / float(col) - gapsize;
-	float cell_height = (height - gapsize) / float(row) - gapsize;
+	float hgapsize = (hgap < 0.0F) ? 2.0F : hgap;
+	float vgapsize = (vgap < 0.0F) ? hgapsize : vgap;
+	float cell_width = (width - hgapsize) / float(col) - hgapsize;
+	float cell_height = (height - vgapsize) / float(row) - vgapsize;
 
 	this->boxes = new Rect[count];
 	for (unsigned int i = 0; i < count; i++) {
-		this->boxes[i].X = (gapsize + cell_width) * float(i % col) + gapsize;
-		this->boxes[i].Y = (gapsize + cell_height) * float(i / col) + gapsize;
+		this->boxes[i].X = (hgapsize + cell_width) * float(i % col) + hgapsize;
+		this->boxes[i].Y = (vgapsize + cell_height) * float(i / col) + vgapsize;
 		this->boxes[i].Width = cell_width;
 		this->boxes[i].Height = cell_height;
 	}

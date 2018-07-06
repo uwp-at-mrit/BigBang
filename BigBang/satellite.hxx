@@ -7,7 +7,12 @@ namespace WarGrey::SCADA {
 	private class ISatellite abstract : public WarGrey::SCADA::Planet {
 	public:
 		ISatellite(Platform::String^ caption, unsigned int initial_mode = 0U)
-			: Planet(caption, initial_mode) {}
+			: Planet(caption, initial_mode), ready(false) {}
+
+	public:
+		void notify_surface_ready() override;
+		bool surface_ready() override;
+		bool shown();
 
 	public:
 		virtual void fill_satellite_extent(float* width, float* height) = 0;
@@ -22,6 +27,12 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void hide();
+
+	protected:
+		virtual void on_surface_ready() {}
+
+	private:
+		bool ready;
 	};
 
 	private ref class SatelliteOrbit sealed : public Windows::UI::Xaml::Controls::Flyout {
@@ -39,6 +50,9 @@ namespace WarGrey::SCADA {
 	internal:
 		void show(WarGrey::SCADA::IPlanet* master);
 
+	public:
+		bool shown();
+
 	private:
 		void construct(WarGrey::SCADA::ISatellite* entity, WarGrey::SCADA::Syslog* logger);
 
@@ -50,21 +64,14 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::UniverseDisplay^ display;
+		bool showing;
 	};
 
-	template<typename ID>
-	private class CreditSatellite : public ISatellite {
+	template<class Master, typename ID>
+	private class ICreditSatellite abstract : public ISatellite {
 	public:
-		CreditSatellite(Platform::String^ caption, unsigned int initial_mode = 0U)
-			: ISatellite(caption, initial_mode), pending(true) {}
-
-	public:
-		void notify_ready_to_draw() override {
-			if (this->pending) {
-				this->pending = false;
-				this->on_channel_changed(this->channel);
-			}
-		}
+		ICreditSatellite(Master* master, Platform::String^ caption, unsigned int initial_mode = 0U)
+			: ISatellite(caption, initial_mode), pending(true), master(master) {}
 
 	public:
 		ID get_channel() {
@@ -75,7 +82,7 @@ namespace WarGrey::SCADA {
 			if (id != channel) {
 				this->channel = id;
 
-				if (this->ready()) {
+				if (this->surface_ready()) {
 					this->on_channel_changed(this->channel);
 				} else {
 					this->pending = true;
@@ -84,10 +91,21 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		virtual void on_channel_changed(ID id) {}
+		void on_surface_ready() override {
+			if (this->pending) {
+				this->pending = false;
+				this->on_channel_changed(this->channel);
+			}
+		}
+
+	protected:
+		virtual void on_channel_changed(ID channel) = 0;
+
+	protected:
+		Master* master;
+		ID channel;
 
 	private:
-		ID channel;
 		bool pending;
 	};
 }
