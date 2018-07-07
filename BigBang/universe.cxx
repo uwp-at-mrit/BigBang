@@ -69,6 +69,11 @@ IDisplay::~IDisplay() {
 	this->logger->destroy();
 }
 
+bool IDisplay::shown() {
+	// TODO: The VisualTree should get involved
+	return true;
+}
+
 float IDisplay::actual_width::get() {
 	return float(this->canvas->ActualWidth);
 }
@@ -209,12 +214,12 @@ float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
 }
 
-bool UniverseDisplay::ui_thread_ready::get() {
+bool UniverseDisplay::ui_thread_ready() {
 	return this->display->Dispatcher->HasThreadAccess;
 }
 
-bool UniverseDisplay::surface_ready::get() {
-	return this->display->ReadyToDraw;
+bool UniverseDisplay::surface_ready() {
+	return (this->shown() && this->display->ReadyToDraw);
 }
 
 void UniverseDisplay::refresh(IPlanet* which) {

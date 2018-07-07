@@ -24,6 +24,7 @@ namespace WarGrey::SCADA {
 		IPlanet(Platform::String^ name);
 
 	public:
+		bool shown();
 		bool ui_thread_ready();
 		float actual_width();
 		float actual_height();

@@ -34,11 +34,9 @@ namespace WarGrey::SCADA {
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		vpure_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
-		vpure_read_only_property(bool, surface_ready);
-		vpure_read_only_property(bool, ui_thread_ready);
 
     public:
-        virtual_read_only_property(float, actual_width);
+		virtual_read_only_property(float, actual_width);
         virtual_read_only_property(float, actual_height);
 
 	public:
@@ -48,6 +46,11 @@ namespace WarGrey::SCADA {
         read_write_property(float, min_height);
         read_write_property(float, max_width);
         read_write_property(float, max_height);
+
+	public:
+		virtual bool surface_ready() = 0;
+		virtual bool ui_thread_ready() = 0;
+		virtual bool shown();
 
 	public:
 		void enter_critical_section();
@@ -84,11 +87,11 @@ namespace WarGrey::SCADA {
 	public:
 		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
-		override_read_only_property(bool, surface_ready);
-		override_read_only_property(bool, ui_thread_ready);
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
-		
+		bool surface_ready() override;
+		bool ui_thread_ready() override;
+
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
@@ -103,7 +106,7 @@ namespace WarGrey::SCADA {
 	protected private:
 		virtual void construct() {};
 		void add_planet(WarGrey::SCADA::IPlanet* planet);
-		void collapse();
+		virtual void collapse();
 		
 	private:
 		void do_refresh(Platform::Object^ sender, Platform::Object^ args);

@@ -77,7 +77,7 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
     </ClInclude>

@@ -983,11 +983,15 @@ Platform::Object^ IPlanet::navigation_label() {
 	return speak(this->caption);
 }
 
+bool IPlanet::shown() {
+	return (this->info != nullptr) && (this->info->master->shown());
+}
+
 bool IPlanet::surface_ready() {
 	bool ready = false;
 
 	if (this->info != nullptr) {
-		ready = this->info->master->surface_ready;
+		ready = this->info->master->surface_ready();
 	}
 
 	return ready;
@@ -997,7 +1001,7 @@ bool IPlanet::ui_thread_ready() {
 	bool ready = false;
 
 	if (this->info != nullptr) {
-		ready = this->info->master->ui_thread_ready;
+		ready = this->info->master->ui_thread_ready();
 	}
 
 	return ready;

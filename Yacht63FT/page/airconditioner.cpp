@@ -8,6 +8,7 @@
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
+#include "satellite.hpp"
 #include "credit.hpp"
 #include "tongue.hpp"
 #include "string.hpp"
@@ -31,6 +32,8 @@ private enum class ACStatus { Normal };
 private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refresh, _ };
 
 static size_t cell_count = static_cast<size_t>(AC::_);
+static float t_min = -30.0F;
+static float t_max = 50.0F;
 
 static CanvasTextFormat^ caption_font = nullptr;
 static CanvasTextFormat^ fore_font = nullptr;
@@ -108,7 +111,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
-		float thermomenter_rx, thermomenter_y, mercury_center_y;
+		float thermometer_rx, thermometer_y, mercury_center_y;
 		float label_offset = design_to_application_height(24.0F);
 		float icon_width = design_to_application_width(64.0F);
 		float mode_width = design_to_application_width(46.0F);
@@ -119,7 +122,7 @@ public:
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
-			this->thermometers[room] = new Thermometerlet(icon_width, 0.0F, label_color);
+			this->thermometers[room] = new Thermometerlet(t_min, t_max, icon_width, 0.0F, label_color);
 			this->temperatures[room] = new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite);
 			this->captions[room] = new Labellet(speak(room), caption_font, Colours::GhostWhite);
 			this->modes[room] = new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width);
@@ -132,8 +135,8 @@ public:
 
 			this->thermometers[room]->fill_mercury_extent(0.5F, nullptr, &mercury_center_y);
 			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_offset, GraphletAnchor::CT);
-			this->master->fill_graphlet_location(this->thermometers[room], &thermomenter_rx, &thermomenter_y, GraphletAnchor::RT);
-			this->master->insert(this->temperatures[room], thermomenter_rx + label_offset, thermomenter_y + mercury_center_y, GraphletAnchor::LC);
+			this->master->fill_graphlet_location(this->thermometers[room], &thermometer_rx, &thermometer_y, GraphletAnchor::RT);
+			this->master->insert(this->temperatures[room], thermometer_rx + label_offset, thermometer_y + mercury_center_y, GraphletAnchor::LC);
 
 			this->load_info(this->modes[room], i, ACInfo::mode);
 			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
@@ -228,7 +231,8 @@ private:
 /*************************************************************************************************/
 private class ACSatellite final : public ICreditSatellite<ACBoard, AC>, public PLCConfirmation {
 public:
-	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F) : ICreditSatellite(board, caption) {
+	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F)
+		: ICreditSatellite(default_logging_level, board, caption) {
 		float width = bar_height * static_cast<float>(ACOP::_);
 		float height = width * 0.80F;
 
@@ -255,7 +259,7 @@ public:
 		this->decorator->fill_cell_extent(0, nullptr, &bar_height, nullptr, &cell_height);
 
 		this->caption = this->insert_one(new Labellet(AC::_.ToString(), caption_font, style_color));
-		this->indicator = this->insert_one(new Indicatorlet(cell_height * indicator_scale, indicator_thickness));
+		this->indicator = this->insert_one(new Indicatorlet(t_min, t_max, cell_height * indicator_scale, indicator_thickness));
 		
 		for (unsigned idx = 0; idx < sizeof(infos) / sizeof(ACInfo); idx++) {
 			ACInfo id = infos[idx];
@@ -329,7 +333,7 @@ public:
 
 public:
 	bool available() override {
-		return this->surface_ready();
+		return (this->surface_ready() && this->shown());
 	}
 
 	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
@@ -358,7 +362,8 @@ private:
 		float t, t_sea, t_pipe;
 
 		this->master->fill_metrics(this->channel, &t, &t_sea, &t_pipe);
-
+		
+		this->indicator->set_value(t);
 		this->temperatures[ACInfo::t_room]->set_value(t);
 		this->temperatures[ACInfo::t_sea]->set_value(t_sea);
 		this->temperatures[ACInfo::t_pipe]->set_value(t_pipe);
@@ -382,6 +387,10 @@ ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device
 }
 
 ACPage::~ACPage() {
+	if (this->satellite != nullptr) {
+		delete this->satellite;
+	}
+
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
@@ -391,19 +400,17 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 	if (this->dashboard == nullptr) {
 		ACDecorator* cells = new ACDecorator(width, height);
 		ACBoard* ac = new ACBoard(this, cells);
-		ACSatellite* satellite = new ACSatellite(ac, this->name() + "#Satellite");
+		ACSatellite* acs = new ACSatellite(ac, this->name() + "#Satellite");
 		
 		ac->load_and_flow(width, height);
 
 		this->dashboard = ac;
+		this->satellite = acs;
 		this->decorator = cells;
 		
 		this->set_decorator(cells);
 		this->device->append_confirmation_receiver(ac);
-		this->device->append_confirmation_receiver(satellite);
-
-		// NOTE: the lifetime of `satellite` is maintained by the `SatelliteOrbit`
-		this->orbit = ref new SatelliteOrbit(satellite, default_logging_level);
+		this->device->append_confirmation_receiver(acs);
 	}
 }
 
@@ -416,10 +423,10 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 		int cell_idx = this->decorator->find_cell(local_x, local_y);
 
 		if (cell_idx >= 0) {
-			ACSatellite* satellite = static_cast<ACSatellite*>(this->orbit->get_satellite());
+			ACSatellite* satellite = static_cast<ACSatellite*>(this->satellite);
 
 			satellite->switch_channel(static_cast<AC>(cell_idx));
-			this->orbit->show(this);
+			satellite->show();
 		}
 	}
 }

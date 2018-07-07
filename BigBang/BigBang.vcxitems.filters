@@ -198,7 +198,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
