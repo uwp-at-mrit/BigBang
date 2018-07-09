@@ -1,7 +1,7 @@
 ﻿#include <map>
 #include <ppltasks.h>
 
-#include "page/log.hpp"
+#include "page/alog.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/bitmaplet.hpp"
@@ -28,9 +28,9 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class Eventlet : public IGraphlet {
+private class AEventlet : public IGraphlet {
 public:
-	Eventlet(AlarmEvent& ae, CanvasTextFormat^ font) : entity(ae), font(font) {}
+	AEventlet(AlarmEvent& ae, CanvasTextFormat^ font) : entity(ae), font(font) {}
 
 public:
 	void construct() override {
@@ -51,15 +51,15 @@ private:
 	AlarmEvent entity;
 };
 
-private class LogBoard final : public WarGrey::SCADA::PLCConfirmation {
+private class ALogBoard final : public WarGrey::SCADA::PLCConfirmation {
 public:
-	virtual ~LogBoard() noexcept {
+	virtual ~ALogBoard() noexcept {
 		if (this->sqlite3 != nullptr) {
 			delete this->sqlite3;
 		}
 	}
 
-	LogBoard(EventPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
+	ALogBoard(ALogPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 	}
 
@@ -97,36 +97,36 @@ private:
 	CanvasTextFormat^ font;
 	Statuslinelet* term;
 	SQLite3* sqlite3;
-	EventPage* master;
+	ALogPage* master;
 };
 
 /*************************************************************************************************/
-EventPage::EventPage(PLCMaster* device, Platform::String^ name) : Planet(name) {}
+ALogPage::ALogPage(PLCMaster* device, Platform::String^ name) : Planet(name) {}
 
-EventPage::~EventPage() {
+ALogPage::~ALogPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void EventPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void ALogPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		LogBoard* alarmboard = new LogBoard(this, 16);
+		ALogBoard* alarmboard = new ALogBoard(this, 16);
 
 		alarmboard->load_and_flow(width, height);
 		this->dashboard = alarmboard;
 	}
 }
 
-void EventPage::update(long long count, long long interval, long long uptime) {
-	auto alarmboard = static_cast<LogBoard*>(this->dashboard);
+void ALogPage::update(long long count, long long interval, long long uptime) {
+	auto alarmboard = static_cast<ALogBoard*>(this->dashboard);
 
 	if (alarmboard != nullptr) {
 		//alarmboard->update(count, interval, uptime);
 	}
 }
 
-void EventPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void ALogPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

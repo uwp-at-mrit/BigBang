@@ -654,19 +654,7 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 			IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 			if (unmasked_graphlet != this->hovering_graphlet) {
-				if (this->hovering_graphlet != nullptr) {
-					GraphletInfo* info = GRAPHLET_INFO(this->hovering_graphlet);
-					float local_x = x - info->x;
-					float local_y = y - info->y;
-
-					if (this->hovering_graphlet->handles_events()) {
-						this->hovering_graphlet->on_goodbye(local_x, local_y, shifted, ctrled);
-					}
-
-					this->on_goodbye(this->hovering_graphlet, local_x, local_y, shifted, ctrled);
-
-					this->hovering_graphlet = nullptr;
-				}
+				this->say_goodbye_to_the_hovering_graphlet(x, y, shifted, ctrled);
 			}
 
 			if (unmasked_graphlet != nullptr) {
@@ -689,7 +677,8 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 
 				/** NOTE
 				 * For PointerDeviceType other than ::Touch,
-				 *  clients have the responsibility to produce the `on_goodbye` event on their own. 
+				 *  clients may have to produce the `on_goodbye` event on their own
+				 *  if the PointerExited event handler is too rough.
 				 */
 				this->on_hover(nullptr, x, y, shifted, ctrled);
 			}
@@ -769,6 +758,31 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	return true;
 }
 
+bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk, bool shifted, bool ctrled) {
+	return this->say_goodbye_to_the_hovering_graphlet(x, y, shifted, ctrled);
+}
+
+bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted, bool ctrled) {
+	bool done = false;
+
+	if (this->hovering_graphlet != nullptr) {
+		GraphletInfo* info = GRAPHLET_INFO(this->hovering_graphlet);
+		float local_x = x - info->x;
+		float local_y = y - info->y;
+
+		if (this->hovering_graphlet->handles_events()) {
+			this->hovering_graphlet->on_goodbye(local_x, local_y, shifted, ctrled);
+		}
+
+		this->on_goodbye(this->hovering_graphlet, local_x, local_y, shifted, ctrled);
+
+		this->hovering_graphlet = nullptr;
+	}
+
+	return done;
+}
+
+/*************************************************************************************************/
 void Planet::show_virtual_keyboard(ScreenKeyboard type) {
 	float auto_x, auto_y;
 

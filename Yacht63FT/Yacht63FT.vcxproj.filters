@@ -118,9 +118,6 @@
     <ClCompile Include="schema\event.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="page\log.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\operation.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -128,6 +125,9 @@
       <Filter>schema</Filter>
     </ClCompile>
     <ClCompile Include="page\gauge.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\alog.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -158,9 +158,6 @@
     <ClInclude Include="schema\event.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="page\log.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\operation.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -168,6 +165,9 @@
       <Filter>schema</Filter>
     </ClInclude>
     <ClInclude Include="page\gauge.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\alog.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>

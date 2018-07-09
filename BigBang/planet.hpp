@@ -101,6 +101,12 @@ namespace WarGrey::SCADA {
 			bool shifted, bool ctrled)
 		{ return false; }
 
+		virtual bool on_pointer_moveout(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk,
+			bool shifted, bool ctrled)
+		{ return false; }
+
 	public:
 		Platform::String^ name();
 		Platform::Object^ navigation_label();
@@ -221,8 +227,14 @@ namespace WarGrey::SCADA {
 			Windows::UI::Input::PointerUpdateKind puk,
 			bool shifted, bool ctrled) override;
 
+		bool on_pointer_moveout(float x, float y,
+			Windows::Devices::Input::PointerDeviceType type,
+			Windows::UI::Input::PointerUpdateKind puk,
+			bool shifted, bool ctrled) override;
+
     private:
         void recalculate_graphlets_extent_when_invalid();
+		bool say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted, bool ctrled);
 
     private:
         float last_pointer_x;

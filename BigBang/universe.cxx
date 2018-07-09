@@ -177,6 +177,7 @@ UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView
 	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
 	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
+	this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -558,6 +559,22 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 		this->leave_critical_section();
 	}
+}
+
+void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	this->enter_critical_section();
+
+	if (this->recent_planet != nullptr) {
+		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
+		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
+
+		args->Handled = this->recent_planet->on_pointer_moveout(
+			pp->Position.X, pp->Position.Y,
+			pdt, pp->Properties->PointerUpdateKind,
+			SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+	}
+
+	this->leave_critical_section();
 }
 
 void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args) {

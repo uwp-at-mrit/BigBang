@@ -64,11 +64,11 @@ public:
 protected:
 	void collapse() override {
 		/** NOTE
-		* By design, `ISatellite` is the only interface that client applications would use,
-		*  and therefore they should take responsibility to manage the lifecycle of the instance.
-		*
-		* Here the method `collapse` is overriden to avoid deleting the instance twice.
-		*/
+		 * By design, `ISatellite` is the only interface that client applications would use,
+		 *  and therefore they should take responsibility to manage the lifecycle of the instance.
+		 *
+		 * Here the method `collapse` is overriden to avoid deleting the instance twice.
+		 */
 	}
 
 private:

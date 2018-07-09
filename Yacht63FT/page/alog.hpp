@@ -4,11 +4,11 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private class EventPage : public WarGrey::SCADA::Planet {
+	private class ALogPage : public WarGrey::SCADA::Planet {
 	public:
-		virtual ~EventPage() noexcept;
+		virtual ~ALogPage() noexcept;
 
-		EventPage(PLCMaster* device, Platform::String^ name);
+		ALogPage(PLCMaster* device, Platform::String^ name);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

@@ -302,7 +302,7 @@
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
-    <ClCompile Include="page\log.cpp" />
+    <ClCompile Include="page\alog.cpp" />
     <ClCompile Include="page\operation.cpp" />
     <ClCompile Include="page\generator.cpp" />
     <ClCompile Include="page\homepage.cpp" />
@@ -319,7 +319,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
     <ClInclude Include="page\airconditioner.hpp" />
-    <ClInclude Include="page\log.hpp" />
+    <ClInclude Include="page\alog.hpp" />
     <ClInclude Include="page\operation.hpp" />
     <ClInclude Include="page\generator.hpp" />
     <ClInclude Include="page\homepage.hpp" />
