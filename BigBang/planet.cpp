@@ -832,6 +832,8 @@ void Planet::update(long long count, long long interval, long long uptime) {
 			child = info->next;
 		} while (child != this->head_graphlet);
     }
+
+	this->on_elapse(count, interval, uptime);
 }
 
 void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {

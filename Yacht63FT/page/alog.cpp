@@ -30,24 +30,45 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private class AEventlet : public IGraphlet {
 public:
+	AEventlet(CanvasTextFormat^ font) : font(font) {}
 	AEventlet(AlarmEvent& ae, CanvasTextFormat^ font) : entity(ae), font(font) {}
 
 public:
 	void construct() override {
-		
+		this->width = this->info->master->actual_width();
+
+		this->layouts[0] = make_text_layout(db_speak(event::uuid), this->font);
+		this->layouts[1] = make_text_layout(db_speak(event::name), this->font);
+		this->layouts[2] = make_text_layout(db_speak(event::timestamp), this->font);
+		this->layouts[3] = make_text_layout(db_speak(event::status), this->font);
+		this->layouts[4] = make_text_layout(db_speak(event::code), this->font);
+		this->layouts[5] = make_text_layout(db_speak(event::note), this->font);
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
-		SET_BOX(w, this->info->master->actual_width());
+		SET_BOX(w, this->width);
+		SET_BOX(h, this->layouts[0]->LayoutBounds.Height);
 	}
 
 	void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
+		float grid_fractions[] = { 0.0F, 0.1F, 0.5F, 0.7F, 0.8F, 0.9F };
+		size_t count = sizeof(grid_fractions)/sizeof(float);
+		float gapsize = this->width * 0.01F;
+		float grid_total = this->width - gapsize * float(count + 1);
+		
+		for (size_t idx = 0; idx < count; idx++) {
+			float column_x = x + gapsize * float(idx + 1) + grid_total * grid_fractions[idx];
 
+			ds->DrawTextLayout(this->layouts[idx], column_x, y, Colours::GhostWhite);
+		}
 	}
 
 private:
+	float width;
+
+private:
 	CanvasTextFormat^ font;
-	CanvasTextLayout^ layout;
+	CanvasTextLayout^ layouts[static_cast<unsigned int>(event::_)];
 	AlarmEvent entity;
 };
 
@@ -76,16 +97,18 @@ public:
 	}
 
 	void update(long long count, long long interval, long long uptime) {
+		AlarmEvent record;
 		float x, y, width, height;
 		float Height = this->master->actual_height();
 		
 		this->master->fill_graphlets_bounds(&x, &y, &width, &height);
 
-		Labellet* record = new Labellet(L"[%f, %f]@(%f, %f)", width, height, x, y);
-		record->set_font(this->font);
-		record->fill_extent(0.0F, 0.0F, nullptr, &height);
+		default_event(record, make_nstring(uptime.ToString()), std::nullopt, count, make_nstring(interval.ToString()));
+
+		this->master->get_logger()->log_message(Log::Info, L"update [%ld, %ld, %ld]", count, interval, uptime);
+
 		this->master->enter_critical_section();
-		this->master->insert(record, 0.0F, Height - height * float(count));
+		this->master->insert(new AEventlet(record, this->font), 0.0F, Height - height * float(count));
 		this->master->leave_critical_section();
 	}
 
@@ -118,11 +141,11 @@ void ALogPage::load(CanvasCreateResourcesReason reason, float width, float heigh
 	}
 }
 
-void ALogPage::update(long long count, long long interval, long long uptime) {
+void ALogPage::on_elapse(long long count, long long interval, long long uptime) {
 	auto alarmboard = static_cast<ALogBoard*>(this->dashboard);
 
 	if (alarmboard != nullptr) {
-		//alarmboard->update(count, interval, uptime);
+		alarmboard->update(count, interval, uptime);
 	}
 }
 

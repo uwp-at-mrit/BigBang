@@ -60,6 +60,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key) { return false; }
+		virtual void on_elapse(long long count, long long interval, long long uptime) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
