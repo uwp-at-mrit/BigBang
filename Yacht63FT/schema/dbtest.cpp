@@ -1,7 +1,7 @@
 ﻿#include "schema/dbtest.hpp"
 #include "schema/event.hpp"
 
-#include "cast.hpp"
+#include "enum.hpp"
 
 using namespace WarGrey::SCADA;
 

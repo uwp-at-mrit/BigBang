@@ -25,7 +25,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)box.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)credit.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)cast.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)enum.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)msappx.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)path.hpp" />

@@ -128,6 +128,9 @@
     <None Include="ORM\mkdao.rkt">
       <Filter>ORM</Filter>
     </None>
+    <None Include="data\yacht.rkt">
+      <Filter>data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="mrit">
@@ -147,6 +150,9 @@
     </Filter>
     <Filter Include="ORM">
       <UniqueIdentifier>{77718b08-bfe9-4271-a26b-1ca98afc52c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{9a32b061-c9de-4925-b38a-a95d236528c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

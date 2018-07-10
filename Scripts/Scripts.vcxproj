@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\yacht.rkt" />
     <None Include="libmodbus\client.rkt" />
     <None Include="libmodbus\constants.rkt" />
     <None Include="libmodbus\hpc.rkt" />

@@ -3,7 +3,7 @@
 #include "universe.hxx"
 #include "forward.hpp"
 #include "sprite.hpp"
-#include "cast.hpp"
+#include "enum.hpp"
 #include "box.hpp"
 #include "slot.hpp"
 
