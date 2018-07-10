@@ -37,7 +37,7 @@ public:
 
 public:
 	virtual void on_navigate(Yacht page) {
-		this->transfer_to(static_cast<int>(page));
+		this->transfer_to(_I(page));
 	}
 
 protected:
@@ -104,7 +104,7 @@ private:
 
 	void do_notify(Platform::Object^ sender, SelectionChangedEventArgs^ args) {
 		if (this->navigatorbar != nullptr) {
-			Yacht page = static_cast<Yacht>(this->workspace->current_planet_index);
+			Yacht page = _E(Yacht, this->workspace->current_planet_index);
 			Navigatorbar* bar = static_cast<Navigatorbar*>(this->navigatorbar->current_planet);
 			
 			bar->on_navigated_to(page);

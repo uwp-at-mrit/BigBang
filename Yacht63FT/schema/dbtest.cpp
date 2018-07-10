@@ -1,16 +1,20 @@
 ﻿#include "schema/dbtest.hpp"
 #include "schema/event.hpp"
 
+#include "cast.hpp"
+
 using namespace WarGrey::SCADA;
+
+private enum class dbevent { Yacht, Propulsion, Propeller };
 
 void WarGrey::SCADA::dbtest(SQLite3* target) {
 	auto sqlite3 = ((target == nullptr) ? new SQLite3() : target);
-	AlarmEvent fevent = make_event("Yacht", 1);
+	AlarmEvent fevent = make_event(_I(dbevent::Yacht), 1);
 	AlarmEvent events[2];
 	AlarmEvent_pk id = event_identity(fevent);
 
-	default_event(events[0], "Propulsion", 0);
-	default_event(events[1], "Propeller", 2);
+	default_event(events[0], _I(dbevent::Propulsion), 0);
+	default_event(events[1], _I(dbevent::Propeller), 2);
 
 	create_event(sqlite3, false);
 	sqlite3->table_info("event");
@@ -28,8 +32,8 @@ void WarGrey::SCADA::dbtest(SQLite3* target) {
 
 			sqlite3->get_logger()->log_message(Log::Info,
 				L"%X, %S, %s, %lld, %d, %S",
-				e.uuid, e.name.c_str(),
-				static_cast<Log>(e.status).ToString()->Data(),
+				e.uuid, _E(dbevent, e.name).ToString()->Data(),
+				_E(Log, e.status).ToString()->Data(),
 				e.timestamp, e.code.value_or(0),
 				e.note.value_or("Undefined").c_str());
 		}

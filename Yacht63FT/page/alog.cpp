@@ -37,12 +37,12 @@ public:
 	void construct() override {
 		this->width = this->info->master->actual_width();
 
-		this->layouts[0] = make_text_layout(db_speak(event::uuid), this->font);
-		this->layouts[1] = make_text_layout(db_speak(event::name), this->font);
-		this->layouts[2] = make_text_layout(db_speak(event::timestamp), this->font);
-		this->layouts[3] = make_text_layout(db_speak(event::status), this->font);
-		this->layouts[4] = make_text_layout(db_speak(event::code), this->font);
-		this->layouts[5] = make_text_layout(db_speak(event::note), this->font);
+		this->layouts[0] = make_text_layout(dbspeak(event::uuid), this->font);
+		this->layouts[1] = make_text_layout(dbspeak(event::name), this->font);
+		this->layouts[2] = make_text_layout(dbspeak(event::timestamp), this->font);
+		this->layouts[3] = make_text_layout(dbspeak(event::status), this->font);
+		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
+		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
@@ -51,15 +51,18 @@ public:
 	}
 
 	void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
-		float grid_fractions[] = { 0.0F, 0.1F, 0.5F, 0.7F, 0.8F, 0.9F };
-		size_t count = sizeof(grid_fractions)/sizeof(float);
+		float grid_xs[] = { 0.0F, 0.06F, 0.5F, 0.7F, 0.8F, 0.9F };
+		float grid_fs[] = { 1.0F, 0.0F,  0.5F, 0.5F, 0.5F, 0.5F };
+		size_t count = sizeof(grid_xs)/sizeof(float);
 		float gapsize = this->width * 0.01F;
 		float grid_total = this->width - gapsize * float(count + 1);
 		
 		for (size_t idx = 0; idx < count; idx++) {
-			float column_x = x + gapsize * float(idx + 1) + grid_total * grid_fractions[idx];
+			float column_x = x + gapsize * float(idx + 1) + grid_total * grid_xs[idx];
+			float column_width = (((idx == count - 1) ? 1.0F : grid_xs[idx + 1]) - grid_xs[idx]) * grid_total;
+			float layout_x = column_x + (column_width - this->layouts[idx]->LayoutBounds.Width) * grid_fs[idx];
 
-			ds->DrawTextLayout(this->layouts[idx], column_x, y, Colours::GhostWhite);
+			ds->DrawTextLayout(this->layouts[idx], layout_x, y, Colours::GhostWhite);
 		}
 	}
 
@@ -68,7 +71,7 @@ private:
 
 private:
 	CanvasTextFormat^ font;
-	CanvasTextLayout^ layouts[static_cast<unsigned int>(event::_)];
+	CanvasTextLayout^ layouts[_N(event)];
 	AlarmEvent entity;
 };
 
@@ -103,9 +106,7 @@ public:
 		
 		this->master->fill_graphlets_bounds(&x, &y, &width, &height);
 
-		default_event(record, make_nstring(uptime.ToString()), std::nullopt, count, make_nstring(interval.ToString()));
-
-		this->master->get_logger()->log_message(Log::Info, L"update [%ld, %ld, %ld]", count, interval, uptime);
+		default_event(record, count, std::nullopt, uptime, make_nstring(interval.ToString()));
 
 		this->master->enter_critical_section();
 		this->master->insert(new AEventlet(record, this->font), 0.0F, Height - height * float(count));

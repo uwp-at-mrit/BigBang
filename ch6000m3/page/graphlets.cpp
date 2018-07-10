@@ -35,10 +35,10 @@ public:
 		float unitsize = 32.0F;
 
 		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
-		this->load_primitives<Pumplet, PumpStatus>(this->pumps, this->plabels, unitsize);
-		this->load_primitives<Valvelet, ValveStatus>(this->valves, this->vlabels, unitsize);
-		this->load_primitives<DumpDoorlet, DoorStatus>(this->hoppers, this->hlabels, unitsize);
-		this->load_primitives<UpperHopperDoorlet, DoorStatus>(this->doors, this->dlabels, unitsize);
+		this->load_primitives(this->pumps, this->plabels, unitsize);
+		this->load_primitives(this->valves, this->vlabels, unitsize);
+		this->load_primitives(this->hoppers, this->hlabels, unitsize);
+		this->load_primitives(this->doors, this->dlabels, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -57,7 +57,7 @@ public:
 			}
 		}
 
-		this->pumps[0]->fill_extent(0.0F, 0.0F, &unitsize);
+		this->pumps[_E0(PumpStatus)]->fill_extent(0.0F, 0.0F, &unitsize);
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 
@@ -71,10 +71,10 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		y0 += unitsize;
-		this->reflow_primitives<Pumplet, PumpStatus>(this->pumps, this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
-		this->reflow_primitives<Valvelet, ValveStatus>(this->valves, this->vlabels, x0, y0 + cellsize * 2.0F, cellsize);
-		this->reflow_primitives<DumpDoorlet, DoorStatus>(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
-		this->reflow_primitives<UpperHopperDoorlet, DoorStatus>(this->doors, this->dlabels, x0, y0 + cellsize * 4.0F, cellsize);
+		this->reflow_primitives(this->pumps, this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
+		this->reflow_primitives(this->valves, this->vlabels,  x0, y0 + cellsize * 2.0F, cellsize);
+		this->reflow_primitives(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
+		this->reflow_primitives(this->doors, this->dlabels,   x0, y0 + cellsize * 4.0F, cellsize);
 	}
 
 private:
@@ -92,21 +92,19 @@ private:
 	}
 
 	template<typename T, typename S>
-	void load_primitives(T* gs[], Labellet* ls[], float unitsize) {
-		for (S s = static_cast<S>(0); s < S::_; s++) {
-			unsigned int idx = static_cast<unsigned int>(s);
+	void load_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float unitsize) {
+		for (S s = _E0(S); s < S::_; s++) {
+			gs[s] = new T(s, unitsize);
+			this->master->insert(gs[s]);
 
-			gs[idx] = new T(s, unitsize);
-			this->master->insert(gs[idx]);
-
-			ls[idx] = make_label(speak(s));
+			ls[s] = make_label(speak(s));
 		}
 	}
 
 	template<typename T, typename S>
-	void reflow_primitives(T* gs[], Labellet* ls[], float x0, float y, float cellsize) {
-		for (size_t i = 0; i < static_cast<unsigned int>(S::_); i++) {
-			float x = x0 + float(i) * cellsize;
+	void reflow_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float x0, float y, float cellsize) {
+		for (S i = _E0(S); i < S::_; i++) {
+			float x = x0 + _F(i) * cellsize;
 
 			this->master->move_to(gs[i], x, y, GraphletAnchor::CB);
 			this->master->move_to(ls[i], x, y, GraphletAnchor::CT);
@@ -115,14 +113,14 @@ private:
 
 private: // never delete these graphlets manually.
 	Labellet* captions[5];
-	Pumplet* pumps[static_cast<unsigned long long>(PumpStatus::_)];
-	Labellet* plabels[static_cast<unsigned long long>(PumpStatus::_)];
-	Valvelet* valves[static_cast<unsigned long long>(ValveStatus::_)];
-	Labellet* vlabels[static_cast<unsigned long long>(ValveStatus::_)];
-	DumpDoorlet* hoppers[static_cast<unsigned long long>(DoorStatus::_)];
-	Labellet* hlabels[static_cast<unsigned long long>(DoorStatus::_)];
-	UpperHopperDoorlet* doors[static_cast<unsigned long long>(DoorStatus::_)];
-	Labellet* dlabels[static_cast<unsigned long long>(DoorStatus::_)];
+	std::unordered_map<PumpStatus, Pumplet*> pumps;
+	std::unordered_map<PumpStatus, Labellet*> plabels;
+	std::unordered_map<ValveStatus, Valvelet*> valves;
+	std::unordered_map<ValveStatus, Labellet*> vlabels;
+	std::unordered_map<DoorStatus, DumpDoorlet*> hoppers;
+	std::unordered_map<DoorStatus, Labellet*> hlabels;
+	std::unordered_map<DoorStatus, UpperHopperDoorlet*> doors;
+	std::unordered_map<DoorStatus, Labellet*> dlabels;
 
 private:
 	GraphletOverview* master;

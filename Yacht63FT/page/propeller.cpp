@@ -52,9 +52,9 @@ public:
 		this->bgcolors[P::Winding] = Colours::make(0x252525U);
 		this->bgcolors[P::Bearing] = Colours::make(0x232323U);
 		
-		for (P region = static_cast<P>(0); region < P::_; region++) {
+		for (P region = _E0(P); region < P::_; region++) {
 			if (region == P::Motor) {
-				float rc = static_cast<float>(P::_);
+				float rc = _F(P::_);
 
 				this->heights[region] = height - metrics_height * (rc - 1.0F) - this->region_padding * (rc + 1.0F);
 			} else {
@@ -63,10 +63,10 @@ public:
 		}
 
 		this->ys[P::Converter] = this->region_padding;
-		for (unsigned int region = 1; region < static_cast<unsigned int>(P::_); region++) {
-			P prev = static_cast<P>(region - 1);
+		for (unsigned int region = 1; region < _N(P); region++) {
+			P prev = _E(P, region - 1);
 
-			this->ys[static_cast<P>(region)] = this->ys[prev] + this->heights[prev] + this->region_padding;
+			this->ys[_E(P, region)] = this->ys[prev] + this->heights[prev] + this->region_padding;
 		}
 
 		{ // initialize labels
@@ -77,23 +77,23 @@ public:
 				this->cids[id - 1] = make_text_layout("M" + id.ToString(), pfont);
 			}
 
-			for (PConverter m = static_cast<PConverter>(0); m < PConverter::_; m++) {
-				this->cs[m] = make_text_layout(speak(":cnvt_" + m.ToString() + ":"), pfont);
+			for (PConverter m = _E0(PConverter); m < PConverter::_; m++) {
+				this->cs[m] = make_text_layout(speak(m, "cnvt"), pfont);
 			}
 
-			for (PMoter m = static_cast<PMoter>(0); m < PMoter::_; m++) {
-				this->ms[m] = make_text_layout(speak(":pm_" + m.ToString() + ":"), gfont);
+			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
+				this->ms[m] = make_text_layout(speak(m, "pm"), gfont);
 			}
 
-			for (PBus m = static_cast<PBus>(0); m < PBus::_; m++) {
+			for (PBus m = _E0(PBus); m < PBus::_; m++) {
 				this->dcbs[m] = make_text_layout(speak(m), pfont);
 			}
 
-			for (PWinding m = static_cast<PWinding>(0); m < PWinding::_; m++) {
+			for (PWinding m = _E0(PWinding); m < PWinding::_; m++) {
 				this->ws[m] = make_text_layout(speak(m), pfont);
 			}
 
-			for (PBearing m = static_cast<PBearing>(0); m < PBearing::_; m++) {
+			for (PBearing m = _E0(PBearing); m < PBearing::_; m++) {
 				this->bs[m] = make_text_layout(speak(m), pfont);
 			}
 		}
@@ -115,11 +115,11 @@ public:
 public:
 	template<typename M>
 	void fill_metrics_cell_extent(unsigned int p_idx, P p, M m, float* x, float* y, float* width, float* height) {
-		float flcount = static_cast<float>(M::_);
+		float flcount = _F(M::_);
 		float cell_height = (this->heights[p] - this->cell_margin * 2.0F);
 		float cell_width = (this->region_width - this->cell_margin * 2.0F - this->cell_gapsize * (flcount - 1.0F)) / flcount;
 		float left_x = (this->region_width + this->region_padding) * float(p_idx) + this->region_padding;
-		float cell_x = left_x + this->cell_margin + (cell_width + this->cell_gapsize) * static_cast<float>(m);
+		float cell_x = left_x + this->cell_margin + (cell_width + this->cell_gapsize) * _F(m);
 		float cell_y = this->ys[p] + this->cell_margin;
 
 		SET_VALUES(x, cell_x, y, cell_y);
@@ -146,7 +146,7 @@ private:
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
 		float x = this->region_x(idx);
 
-		for (P region = static_cast<P>(0); region < P::_; region++) {
+		for (P region = _E0(P); region < P::_; region++) {
 			float y = this->ys[region];
 			float height = this->heights[region];
 			ICanvasBrush^ color = this->bgcolors[region];
@@ -168,7 +168,7 @@ private:
 
 		this->draw_labels(ds, idx, P::Converter, this->cs, this->fgcolors[P::Converter], this->cids[idx]);
 		
-		for (PMoter g = static_cast<PMoter>(0); g < PMoter::_; g++) {
+		for (PMoter g = _E0(PMoter); g < PMoter::_; g++) {
 			this->fill_cell_anchor(idx, P::Motor, g, 0.5F, 0.51F, &anchor_x, &anchor_y);
 
 			anchor_x -= this->ms[g]->LayoutBounds.Width * 0.5F;
@@ -184,7 +184,7 @@ private:
 	void draw_cells(CanvasDrawingSession^ ds, unsigned int idx, P region, M_ m_) {
 		float cell_x, cell_y, cell_width, cell_height;
 
-		for (M_ m = static_cast<M_>(0); m < m_; m++) {
+		for (M_ m = _E0(M_); m < m_; m++) {
 			this->fill_metrics_cell_extent(idx, region, m, &cell_x, &cell_y, &cell_width, &cell_height);
 			ds->FillRoundedRectangle(cell_x, cell_y, cell_width, cell_height, corner_radius, corner_radius, this->cell_color);
 		}
@@ -194,11 +194,11 @@ private:
 	void draw_labels(CanvasDrawingSession^ ds, unsigned int idx, P region, std::map<M, CanvasTextLayout^> src, ICanvasBrush^ fgcolor, CanvasTextLayout^ id = nullptr) {
 		float anchor_x, anchor_y;
 		
-		for (M m = static_cast<M>(0); m < M::_; m++) {
+		for (M m = _E0(M); m < M::_; m++) {
 			this->fill_cell_anchor(idx, region, m, 0.10F, label_fy, &anchor_x, &anchor_y);
 			anchor_y -= src[m]->LayoutBounds.Height * 0.5F;
 
-			if ((id != nullptr) && (static_cast<int>(m) == 0)) {
+			if ((id != nullptr) && (_I(m) == 0)) {
 				ds->DrawTextLayout(id, anchor_x, anchor_y, fgcolor);
 				ds->DrawTextLayout(src[m], anchor_x + id->LayoutBounds.Width, anchor_y, fgcolor);
 			} else {
@@ -258,12 +258,12 @@ public:
 		float dim_fy = 0.75F;
 
 		for (unsigned int idx = 0; idx < pcount; idx++) {	
-			for (PConverter c = static_cast<PConverter>(0); c < PConverter::_; c++) {
+			for (PConverter c = _E0(PConverter); c < PConverter::_; c++) {
 				this->decorator->fill_cell_anchor(idx, P::Converter, c, dim_fx, dim_fy, &anchor_x, &anchor_y);
 				this->cs[c][idx] = this->master->insert_one(make_dimension(c.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
-			for (PMoter m = static_cast<PMoter>(0); m < PMoter::_; m++) {
+			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
 				Platform::String^ unit = "<" + m.ToString() + ">";
 
 				this->ms[m][idx] = new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
@@ -275,17 +275,17 @@ public:
 				this->master->insert(this->ms[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 			}
 
-			for (PBus b = static_cast<PBus>(0); b < PBus::_; b++) {
+			for (PBus b = _E0(PBus); b < PBus::_; b++) {
 				this->decorator->fill_cell_anchor(idx, P::Bus, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
 				this->dcbs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
-			for (PWinding w = static_cast<PWinding>(0); w < PWinding::_; w++) {
+			for (PWinding w = _E0(PWinding); w < PWinding::_; w++) {
 				this->decorator->fill_cell_anchor(idx, P::Winding, w, dim_fx, dim_fy, &anchor_x, &anchor_y);
 				this->ws[w][idx] = this->master->insert_one(make_dimension(w.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
-			for (PBearing b = static_cast<PBearing>(0); b < PBearing::_; b++) {
+			for (PBearing b = _E0(PBearing); b < PBearing::_; b++) {
 				this->decorator->fill_cell_anchor(idx, P::Bearing, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
 				this->bs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
 			}

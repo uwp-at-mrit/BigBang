@@ -396,22 +396,22 @@
   <data name=":t_room:" xml:space="preserve">
     <value>当前室温</value>
   </data>
-  <data name="db_code" xml:space="preserve">
+  <data name=":db_code:" xml:space="preserve">
     <value>代号</value>
   </data>
-  <data name="db_uuid" xml:space="preserve">
+  <data name=":db_uuid:" xml:space="preserve">
     <value>编号</value>
   </data>
-  <data name="db_name" xml:space="preserve">
+  <data name=":db_name:" xml:space="preserve">
     <value>名称</value>
   </data>
-  <data name="db_note" xml:space="preserve">
+  <data name=":db_note:" xml:space="preserve">
     <value>备注</value>
   </data>
-  <data name="db_status" xml:space="preserve">
+  <data name=":db_status:" xml:space="preserve">
     <value>状态</value>
   </data>
-  <data name="db_timestamp" xml:space="preserve">
+  <data name=":db_timestamp:" xml:space="preserve">
     <value>时间</value>
   </data>
 </root>

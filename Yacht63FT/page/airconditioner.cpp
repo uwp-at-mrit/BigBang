@@ -31,7 +31,7 @@ private enum class ACStatus { Normal };
 
 private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refresh, _ };
 
-static size_t cell_count = static_cast<size_t>(AC::_);
+static size_t cell_count = _N(AC);
 static float t_min = -30.0F;
 static float t_max = 50.0F;
 
@@ -54,7 +54,7 @@ static void prepare_text_formats() {
 private class ACDecorator final : public CellDecorator {
 public:
 	ACDecorator(float width, float height) : CellDecorator(0x262626, width, height, cell_count, 3, design_to_application_width(2.0F)) {
-		for (ACInfo id = static_cast<ACInfo>(0); id < ACInfo::_; id++) {
+		for (ACInfo id = _E0(ACInfo); id < ACInfo::_; id++) {
 			this->infos[id] = make_text_layout(speak(":" + id.ToString() + ":"), label_font);
 		}
 	}
@@ -62,7 +62,7 @@ public:
 public:
 	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
 		for (unsigned int idx = 0; idx < cell_count; idx++) {
-			for (ACInfo id = static_cast<ACInfo>(0); id < ACInfo::_; id++) {
+			for (ACInfo id = _E0(ACInfo); id < ACInfo::_; id++) {
 				this->draw_text_ct(ds, idx, id);
 			}
 		}
@@ -116,8 +116,8 @@ public:
 		float icon_width = design_to_application_width(64.0F);
 		float mode_width = design_to_application_width(46.0F);
 
-		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
-			unsigned int i = static_cast<unsigned int>(room);
+		for (AC room = _E0(AC); room < AC::_; room++) {
+			unsigned int i = _I(room);
 
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
@@ -160,8 +160,8 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
-			size_t idx = db_idx0 + db_idx_acc * static_cast<size_t>(room);
+		for (AC room = _E0(AC); room < AC::_; room++) {
+			size_t idx = db_idx0 + db_idx_acc * _I(room);
 			unsigned int mask = DI_ref(db28, idx, idx + 6);
 			
 			switch (mask) {
@@ -199,14 +199,14 @@ private:
 	}
 
 	void set_values(std::map<AC, Dimensionlet*> dims, uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
-		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
-			dims[room]->set_value(AI_ref(db, idx0 + acc * static_cast<size_t>(room)), anchor);
+		for (AC room = _E0(AC); room < AC::_; room++) {
+			dims[room]->set_value(AI_ref(db, idx0 + acc * _I(room)), anchor);
 		}
 	}
 
 	void set_temperatures(uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::LC) {
-		for (AC room = static_cast<AC>(0); room < AC::_; room++) {
-			float t = AI_ref(db, idx0 + acc * static_cast<size_t>(room)) - 30.0F;
+		for (AC room = _E0(AC); room < AC::_; room++) {
+			float t = AI_ref(db, idx0 + acc * _I(room)) - 30.0F;
 
 			this->temperatures[room]->set_value(t, anchor);
 			this->thermometers[room]->set_value(t);
@@ -233,7 +233,7 @@ private class ACSatellite final : public ICreditSatellite<ACBoard, AC>, public P
 public:
 	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F)
 		: ICreditSatellite(default_logging_level, board, caption) {
-		float width = bar_height * static_cast<float>(ACOP::_);
+		float width = bar_height * _F(ACOP::_);
 		float height = width * 0.80F;
 
 		this->decorator = new CellDecorator(0x383838, width, height, 1, 1, 0.0F, bar_height, 0.0F);
@@ -273,7 +273,7 @@ public:
 			}
 		}
 
-		for (ACOP id = static_cast<ACOP>(0); id < ACOP::_; id++) {
+		for (ACOP id = _E(ACOP, 0); id < ACOP::_; id++) {
 			this->handlers[id] = new Credit<OptionBitmaplet, ACOP>("AirConditioner/" + id.ToString(), bar_height * icon_scale);
 			this->handlers[id]->id = id;
 			
@@ -284,7 +284,7 @@ public:
 	void reflow(float width, float height) override {
 		float cell_y, icon_grid_y, caption_x;
 		float indicator_x, indicator_y, metrics_x, sea_y, pipe_y;
-		float icon_grid_width = width / static_cast<float>(ACOP::_);
+		float icon_grid_width = width / _F(ACOP::_);
 
 		this->decorator->fill_cell_anchor(0, 0.50F, 0.00F, &caption_x, &cell_y);
 		this->decorator->fill_cell_anchor(0, 0.30F, 0.50F, &indicator_x, &indicator_y);
@@ -299,10 +299,8 @@ public:
 		this->move_labels(ACInfo::t_sea, metrics_x, sea_y);
 		this->move_labels(ACInfo::t_pipe, metrics_x, pipe_y);
 
-		for (ACOP id = static_cast<ACOP>(0); id < ACOP::_; id++) {
-			this->move_to(this->handlers[id],
-				(static_cast<float>(id) + 0.5F) * icon_grid_width, icon_grid_y,
-				GraphletAnchor::CC);
+		for (ACOP id = _E(ACOP, 0); id < ACOP::_; id++) {
+			this->move_to(this->handlers[id], (_F(id) + 0.5F) * icon_grid_width, icon_grid_y, GraphletAnchor::CC);
 		}
 	}
 
@@ -425,7 +423,7 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 		if (cell_idx >= 0) {
 			ACSatellite* satellite = static_cast<ACSatellite*>(this->satellite);
 
-			satellite->switch_channel(static_cast<AC>(cell_idx));
+			satellite->switch_channel(_E(AC, cell_idx));
 			satellite->show();
 		}
 	}

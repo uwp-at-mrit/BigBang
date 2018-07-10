@@ -75,7 +75,7 @@ namespace WarGrey::SCADA {
 		, public virtual WarGrey::SCADA::IValuelet<U> {
 	public:
 		virtual ~UnionBitmaplet() noexcept {
-			for (U s = static_cast<U>(0); s < U::_; s++) {
+			for (U s = _E0(U); s < U::_; s++) {
 				this->unload(this->ms_appx_bmps[s]);
 			}
 		}
@@ -87,7 +87,7 @@ namespace WarGrey::SCADA {
 			this->window.Width = width;
 			this->window.Height = height;
 
-			for (U s = static_cast<U>(0); s < U::_; s++) {
+			for (U s = _E0(U); s < U::_; s++) {
 				Platform::String^ file_bmp = ((subdir == nullptr) ? s.ToString() : subdir + "/" + s.ToString());
 
 				this->ms_appx_bmps[s] = ms_appx_file(file_bmp, ".png", rootdir);
@@ -96,7 +96,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override {
-			for (U s = static_cast<U>(0); s < U::_; s++) {
+			for (U s = _E0(U); s < U::_; s++) {
 				this->load(this->ms_appx_bmps[s], s);
 			}
 		}

@@ -396,22 +396,22 @@
   <data name=":t_room:" xml:space="preserve">
     <value>Room Temperature</value>
   </data>
-  <data name="db_code" xml:space="preserve">
+  <data name=":db_code:" xml:space="preserve">
     <value>Code</value>
   </data>
-  <data name="db_uuid" xml:space="preserve">
+  <data name=":db_uuid:" xml:space="preserve">
     <value>ID</value>
   </data>
-  <data name="db_name" xml:space="preserve">
+  <data name=":db_name:" xml:space="preserve">
     <value>Event</value>
   </data>
-  <data name="db_note" xml:space="preserve">
+  <data name=":db_note:" xml:space="preserve">
     <value>Note</value>
   </data>
-  <data name="db_status" xml:space="preserve">
+  <data name=":db_status:" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="db_timestamp" xml:space="preserve">
+  <data name=":db_timestamp:" xml:space="preserve">
     <value>Timestamp</value>
   </data>
 </root>

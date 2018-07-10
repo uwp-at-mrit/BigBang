@@ -101,7 +101,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		float button_gapsize = design_to_application_width(1.0F);
-		float button_cell_width = width / float(static_cast<unsigned int>(Yacht::_));
+		float button_cell_width = width / float(_N(Yacht));
 		float button_width = button_cell_width - button_gapsize;
 		float button_height = design_to_application_height(84.0F);
 		float button_x = button_gapsize * 0.5F;

@@ -61,9 +61,9 @@ public:
 
 			this->decorator->fill_cell_extent(1, &alarm_x, &alarm_y, &alarm_width, nullptr);
 			label_x = alarm_x + alarm_width * 0.618F - hgapsize * 0.5F;
-			for (unsigned int idx = 0; idx < static_cast<unsigned int>(GAlarm::_); idx++) {
+			for (unsigned int idx = 0; idx < _N(GAlarm); idx++) {
 				float label_y = alarm_y + (ts.height + vgapsize) * float(idx) + vgapsize;
-				GAlarm id = static_cast<GAlarm>(idx);
+				GAlarm id = _E(GAlarm, idx);
 
 				this->lblalarms[id] = new Labellet(speak(id), this->font, this->fgcolor);
 				this->alarms[id] = new Alarmlet(ts.height);

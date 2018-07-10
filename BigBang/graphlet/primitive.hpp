@@ -3,6 +3,7 @@
 #include "universe.hxx"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "cast.hpp"
 #include "box.hpp"
 #include "slot.hpp"
 
@@ -95,9 +96,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		float get_percentage() {
-			float flmin = static_cast<float>(this->vmin);
-			float flmax = static_cast<float>(this->vmax);
-			float v = static_cast<float>(this->get_value());
+			float flmin = _F(this->vmin);
+			float flmax = _F(this->vmax);
+			float v = _F(this->get_value());
 
 			return ((this->vmin == this->vmax) ? 1.0F : ((v - flmin) / (flmax - flmin)));
 		}
@@ -124,7 +125,7 @@ namespace WarGrey::SCADA {
 		IStatuslet() : WarGrey::SCADA::IStatuslet<Status, Style>(Status::_) {}
 
 		IStatuslet(Status status0) {
-			this->default_status = ((status0 == Status::_) ? 0 : static_cast<unsigned int>(status0));
+			this->default_status = ((status0 == Status::_) ? 0 : _I(status0));
 			this->current_status = this->default_status;
 
 			/** WARNING
@@ -137,7 +138,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_status(Status status) {
-			unsigned int new_status = ((status == Status::_) ? this->default_status : static_cast<unsigned int>(status));
+			unsigned int new_status = ((status == Status::_) ? this->default_status : _I(status));
 
 			if (this->current_status != new_status) {
 				this->current_status = new_status;
@@ -147,11 +148,11 @@ namespace WarGrey::SCADA {
 		}
 
 		Status get_status() {
-			return static_cast<Status>(this->current_status);
+			return _E(Status, this->current_status);
 		}
 
 		void set_style(Status status, Style& style) {
-			unsigned int idx = (status == Status::_) ? this->current_status : static_cast<unsigned int>(status);
+			unsigned int idx = (status == Status::_) ? this->current_status : _I(status);
 
 			this->styles[idx] = style;
 			this->style_ready[idx] = false;
@@ -162,10 +163,10 @@ namespace WarGrey::SCADA {
 		}
 
 		Style& get_style(Status status = Status::_) {
-			unsigned int idx = (status == Status::_) ? this->current_status : static_cast<unsigned int>(status);
+			unsigned int idx = (status == Status::_) ? this->current_status : _I(status);
 
 			if (!this->style_ready[idx]) {
-				this->prepare_style(static_cast<Status>(idx), this->styles[idx]);
+				this->prepare_style(_E(Status, idx), this->styles[idx]);
 				this->style_ready[idx] = true;
 			}
 
@@ -175,7 +176,7 @@ namespace WarGrey::SCADA {
 	protected:
 		void update_status() {
 			this->apply_style(this->get_style());
-			this->on_status_changed(static_cast<Status>(this->current_status));
+			this->on_status_changed(_E(Status, this->current_status));
 		}
 
 	protected:
@@ -186,8 +187,8 @@ namespace WarGrey::SCADA {
 	private:
 		unsigned int default_status;
 		unsigned int current_status;
-		Style styles[static_cast<unsigned int>(Status::_)];
-		bool style_ready[static_cast<unsigned int>(Status::_)];
+		Style styles[_N(Status)];
+		bool style_ready[_N(Status)];
 	};
 
 	template<typename Status, typename Style>

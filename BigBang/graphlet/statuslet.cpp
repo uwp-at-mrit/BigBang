@@ -1,5 +1,6 @@
 ﻿#include <algorithm>
 #include <shared_mutex>
+#include <map>
 
 #include "graphlet/statuslet.hpp"
 
@@ -205,24 +206,23 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 }
 
 /*************************************************************************************************/
-static ICanvasBrush^ status_colors[static_cast<unsigned int>(Log::_) + 1];
-static ICanvasBrush^ status_nolog_color = nullptr;
+static std::map<Log, ICanvasBrush^> status_colors;
 
 Statuslinelet::Statuslinelet(Log level, unsigned int lines) : ISyslogReceiver(level), lines(lines) {}
 
 void Statuslinelet::construct() {
 	initialize_status_font();
 
-	if (status_nolog_color == nullptr) {
-		status_nolog_color = Colours::GhostWhite;
-		status_colors[static_cast<unsigned int>(Log::Debug)] = Colours::Silver;
-		status_colors[static_cast<unsigned int>(Log::Info)] = Colours::Green;
-		status_colors[static_cast<unsigned int>(Log::Notice)] = Colours::GreenYellow;
-		status_colors[static_cast<unsigned int>(Log::Warning)] = Colours::Yellow;
-		status_colors[static_cast<unsigned int>(Log::Error)] = Colours::Red;
-		status_colors[static_cast<unsigned int>(Log::Critical)] = Colours::Crimson;
-		status_colors[static_cast<unsigned int>(Log::Alarm)] = Colours::Firebrick;
-		status_colors[static_cast<unsigned int>(Log::Panic)] = Colours::Firebrick;
+	if (status_colors.size() == 0) {
+		status_colors[Log::_] = Colours::GhostWhite;
+		status_colors[Log::Debug] = Colours::Silver;
+		status_colors[Log::Info] = Colours::Green;
+		status_colors[Log::Notice] = Colours::GreenYellow;
+		status_colors[Log::Warning] = Colours::Yellow;
+		status_colors[Log::Error] = Colours::Red;
+		status_colors[Log::Critical] = Colours::Crimson;
+		status_colors[Log::Alarm] = Colours::Firebrick;
+		status_colors[Log::Panic] = Colours::Firebrick;
 	}
 }
 
@@ -273,7 +273,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 }
 
 void Statuslinelet::append_message(Platform::String^ message, Log level) {
-	auto lcolor = status_colors[static_cast<unsigned int>(level)];
+	auto lcolor = status_colors[level];
 
 	this->section.lock();
 	
@@ -284,7 +284,7 @@ void Statuslinelet::append_message(Platform::String^ message, Log level) {
 		}
 	}
 
-	this->colors.push_back((lcolor == nullptr) ? status_nolog_color : lcolor);
+	this->colors.push_back((lcolor == nullptr) ? status_colors[Log::_] : lcolor);
 	this->messages.push_back(make_text_layout(message, status_font));
 	this->notify_updated();
 	

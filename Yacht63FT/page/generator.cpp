@@ -48,13 +48,13 @@ public:
 		this->heights[G::Alert] = design_to_application_height(70.0F);
 		this->heights[G::Gauge] = height
 			- (this->heights[G::RSpeed] + this->heights[G::Power] + this->heights[G::Alert])
-			- this->region_padding * float(static_cast<unsigned int>(G::_) + 1);
+			- this->region_padding * float(_N(G) + 1);
 
 		this->ys[G::RSpeed] = this->region_padding;
-		for (unsigned int region = 1; region < static_cast<unsigned int>(G::_); region++) {
-			G prev = static_cast<G>(region - 1);
+		for (unsigned int region = 1; region < _N(G); region++) {
+			G prev = _E(G, region - 1);
 
-			this->ys[static_cast<G>(region)] = this->ys[prev] + this->heights[prev] + this->region_padding;
+			this->ys[_E(G, region)] = this->ys[prev] + this->heights[prev] + this->region_padding;
 		}
 
 		{ // initialize labels
@@ -64,18 +64,18 @@ public:
 
 			this->rspeed = make_text_layout(speak(":rspeed:"), sfont);
 
-			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
-				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
+			for (GPower p = _E0(GPower); p < GPower::_; p++) {
+				this->powers[p] = make_text_layout(speak(p, nullptr), pfont);
 			}
 
-			for (GMeter g = static_cast<GMeter>(0); g < GMeter::_; g++) {
+			for (GMeter g = _E0(GMeter); g < GMeter::_; g++) {
 				if (g == GMeter::sea) {
 					this->foil_filter_pdrop = make_text_layout(speak(":pd_filter:"), mfont);
 				} else {
-					this->temperatures[g] = make_text_layout(speak(":t_" + g.ToString() + ":"), mfont);
+					this->temperatures[g] = make_text_layout(speak(g, "t"), mfont);
 				}
 
-				this->pressures[g] = make_text_layout(speak(":p_" + g.ToString() + ":"), mfont);
+				this->pressures[g] = make_text_layout(speak(g, "p"), mfont);
 			}
 		}
 	}
@@ -101,7 +101,7 @@ public:
 		static float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
 
 		float left_x = (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
-		float cell_x = left_x + cell_margin + (cell_width + cell_gapsize) * static_cast<float>(p);
+		float cell_x = left_x + cell_margin + (cell_width + cell_gapsize) * _F(p);
 		float cell_y = this->ys[G::Power] + cell_margin;
 
 		SET_VALUES(x, cell_x, y, cell_y);
@@ -125,9 +125,9 @@ public:
 	}
 
 	void fill_gauges_anchor(unsigned int g_idx, GMeter g, float fh, float* x, float* y, float* cell_size = nullptr) {
-		static float mflcount = static_cast<float>(GMeter::_);
+		static float mflcount = _F(GMeter::_);
 		static float subwidth = this->region_width / mflcount;
-		float gauge_x = this->region_x(g_idx) +  subwidth * (static_cast<float>(g) + 0.5F);
+		float gauge_x = this->region_x(g_idx) +  subwidth * (_F(g) + 0.5F);
 		float gauge_y = this->ys[G::Gauge] + this->heights[G::Gauge] * fh;
 
 		SET_VALUES(x, gauge_x, y, gauge_y);
@@ -147,7 +147,7 @@ private:
 
 		ds->FillRectangle(x, this->ys[G::RSpeed], this->region_width, this->heights[G::RSpeed], this->rspeed_bgcolors[idx]);
 
-		for (G region = static_cast<G>(1); region < G::_; region++) {
+		for (G region = _E(G, 1); region < G::_; region++) {
 			float y = this->ys[region];
 			float height = this->heights[region];
 			ICanvasBrush^ color = this->bgcolors[region];
@@ -162,7 +162,7 @@ private:
 		{ // draw power subregions
 			float cell_x, cell_y, cell_width, cell_height;
 
-			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
+			for (GPower p = _E0(GPower); p < GPower::_; p++) {
 				this->fill_power_cell_extent(idx, p, &cell_x, &cell_y, &cell_width, &cell_height);
 				ds->FillRoundedRectangle(cell_x, cell_y, cell_width, cell_height,
 					corner_radius, corner_radius, this->power_cell_color);
@@ -177,13 +177,13 @@ private:
 		this->fill_rspeed_anchor(idx, rspeed_label_fx, label_fy, &anchor_x, &anchor_y);
 		ds->DrawTextLayout(this->rspeed, anchor_x, anchor_y - offset, this->fgcolors[G::RSpeed]);
 
-		for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
+		for (GPower p = _E0(GPower); p < GPower::_; p++) {
 			offset = this->powers[p]->LayoutBounds.Height * 0.5F;
 			this->fill_power_anchor(idx, p, 0.10F, label_fy, &anchor_x, &anchor_y);
 			ds->DrawTextLayout(this->powers[p], anchor_x, anchor_y - offset, this->fgcolors[G::Power]);
 		}
 
-		for (GMeter g = static_cast<GMeter>(0); g < GMeter::_; g++) {
+		for (GMeter g = _E0(GMeter); g < GMeter::_; g++) {
 			CanvasTextLayout^ upper_target = ((g == GMeter::sea) ? this->foil_filter_pdrop : this->temperatures[g]);
 			offset = upper_target->LayoutBounds.Width * 0.5F;
 			this->fill_gauges_anchor(idx, g, 0.26F, &anchor_x, &anchor_y);
@@ -248,7 +248,7 @@ public:
 			this->rspeeds[idx] = new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor);
 			this->master->insert(this->rspeeds[idx], anchor_x, anchor_y, GraphletAnchor::CC);
 
-			for (GPower p = static_cast<GPower>(0); p < GPower::_; p++) {
+			for (GPower p = _E0(GPower); p < GPower::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
 				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
@@ -256,7 +256,7 @@ public:
 				this->master->insert(this->powers[p][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
-			for (GMeter m = static_cast<GMeter>(0); m < GMeter::_; m++) {
+			for (GMeter m = _E0(GMeter); m < GMeter::_; m++) {
 				{ // load upper indicators
 					this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
 					
