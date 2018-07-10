@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 
     private struct AlarmEvent {
         Integer uuid;
-        Text name;
+        Integer name;
         Integer timestamp;
         Integer status;
         std::optional<Integer> code;
@@ -21,8 +21,8 @@ namespace WarGrey::SCADA {
 
     WarGrey::SCADA::AlarmEvent_pk event_identity(WarGrey::SCADA::AlarmEvent& self);
 
-    WarGrey::SCADA::AlarmEvent make_event(std::optional<Text> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
-    void default_event(WarGrey::SCADA::AlarmEvent& self, std::optional<Text> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
+    WarGrey::SCADA::AlarmEvent make_event(std::optional<Integer> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
+    void default_event(WarGrey::SCADA::AlarmEvent& self, std::optional<Integer> name = std::nullopt, std::optional<Integer> status = std::nullopt, std::optional<Integer> code = std::nullopt, std::optional<Text> note = std::nullopt);
     void refresh_event(WarGrey::SCADA::AlarmEvent& self);
     void store_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_event(WarGrey::SCADA::AlarmEvent& self, WarGrey::SCADA::IPreparedStatement* stmt);

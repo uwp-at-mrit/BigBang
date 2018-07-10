@@ -11,7 +11,7 @@ static const char* event_rowids[] = { "uuid" };
 
 static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
-    { "name", SDT::Text, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "name", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "timestamp", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "status", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "code", SDT::Integer, nullptr, 0 | 0 | 0 },
@@ -23,7 +23,7 @@ AlarmEvent_pk WarGrey::SCADA::event_identity(AlarmEvent& self) {
     return self.uuid;
 }
 
-AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
+AlarmEvent WarGrey::SCADA::make_event(std::optional<Integer> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
     AlarmEvent self;
 
     default_event(self, name, status, code, note);
@@ -31,7 +31,7 @@ AlarmEvent WarGrey::SCADA::make_event(std::optional<Text> name, std::optional<In
     return self;
 }
 
-void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Text> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
+void WarGrey::SCADA::default_event(AlarmEvent& self, std::optional<Integer> name, std::optional<Integer> status, std::optional<Integer> code, std::optional<Text> note) {
     self.uuid = pk64_timestamp();
     if (name.has_value()) { self.name = name.value(); }
     self.timestamp = current_milliseconds();
@@ -54,7 +54,7 @@ void WarGrey::SCADA::store_event(AlarmEvent& self, IPreparedStatement* stmt) {
 
 void WarGrey::SCADA::restore_event(AlarmEvent& self, IPreparedStatement* stmt) {
     self.uuid = stmt->column_int64(0U);
-    self.name = stmt->column_text(1U);
+    self.name = stmt->column_int64(1U);
     self.timestamp = stmt->column_int64(2U);
     self.status = stmt->column_int64(3U);
     self.code = stmt->column_maybe_int64(4U);

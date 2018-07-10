@@ -4,7 +4,7 @@
 
 (define-table event #:as AlarmEvent #:with [uuid] #:order-by timestamp
   ([uuid      : Integer       #:default pk64_timestamp]
-   [name      : Text          #:not-null]
+   [name      : Integer       #:not-null] ; identities of names for localization
    [timestamp : Integer       #:not-null #:default current_milliseconds]
    [status    : Integer       #:not-null]
    [code      : Integer]
