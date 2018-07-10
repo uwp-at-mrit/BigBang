@@ -128,7 +128,7 @@
     <None Include="ORM\mkdao.rkt">
       <Filter>ORM</Filter>
     </None>
-    <None Include="data\yacht.rkt">
+    <None Include="data\excel.rkt">
       <Filter>data</Filter>
     </None>
   </ItemGroup>
