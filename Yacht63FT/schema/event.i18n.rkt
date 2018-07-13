@@ -1,8 +1,7 @@
 #lang racket/gui
 
 (require "csv.rkt")
-
-(struct aevent (enum map en_US zh_CN) #:transparent)
+(require "translate.rkt")
 
 (define src.csv (build-path (find-system-path 'desk-dir) "data.csv"))
 (define metrics (read-csv src.csv))
@@ -125,7 +124,7 @@
 (define identify
   (let ([&lineno (box 1)])
     (lambda [zh_CN]
-      (define id
+      (define e
         (case zh_CN
           [("1#冷却淡水泵运行") (status-event 'FWCoolant 1 'Running)] ;;; line 1
           [("1#冷却淡水泵故障") (status-event 'FWCoolant 1 'Fault)]  ;;; line 2
@@ -546,9 +545,11 @@
           [else #false]))
 
       (let-values ([(idx) (unbox &lineno)]
-                   [(enum en_US) (if (pair? id) (values (car id) (cdr id)) (values 'Enum "en_US"))])
-        (printf "[(~s) (cons '~s ~s)] ;;; line ~a~n" zh_CN enum en_US idx)
+                   [(id en_US) (if (pair? e) (values (car e) (cdr e)) (values 'ID "en_US"))])
+        (unless (pair? e)
+          (printf "[(~s) (cons '~s ~s)] ;;; line ~a~n" zh_CN id en_US idx))
         (set-box! &lineno (add1 idx))
-        (and (symbol? id) (aevent id idx en_US zh_CN))))))
+        (and (pair? e) (enum id idx en_US zh_CN))))))
 
-(define DIs (filter-map (λ [row] (identify (list-ref row 4))) metrics))
+(define events (filter-map (λ [row] (identify (list-ref row 4))) metrics))
+(make-enum-class 'YachtDI events)
