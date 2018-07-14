@@ -1,26 +1,49 @@
 #pragma once
 
-Platform::String^ speak(Platform::String^ word);
+namespace WarGrey::SCADA {
+	Platform::String^ speak(Platform::String^ word);
 
-template<typename E>
-Platform::String^ speak(E id, Platform::String^ prefix) {
-	Platform::String^ suffix = id.ToString() + ":";
+	template<typename E>
+	Platform::String^ speak(E id, Platform::String^ prefix) {
+		Platform::String^ suffix = id.ToString() + ":";
 
-	if (prefix == nullptr) {
-		suffix = ":" + suffix;
-	} else {
-		suffix = ":" + prefix + "_" + suffix;
+		if (prefix == nullptr) {
+			suffix = ":" + suffix;
+		} else {
+			suffix = ":" + prefix + "_" + suffix;
+		}
+
+		return WarGrey::SCADA::speak(suffix);
 	}
 
-	return speak(suffix);
-}
+	template<typename E>
+	Platform::String^ speak(E id) {
+		return WarGrey::SCADA::speak(id.ToString());
+	}
 
-template<typename E>
-Platform::String^ speak(E id) {
-	return speak(id.ToString());
-}
+	template<typename Field>
+	Platform::String^ dbspeak(Field col) {
+		return WarGrey::SCADA::speak(col, "db");
+	}
 
-template<typename Field>
-Platform::String^ dbspeak(Field col) {
-	return speak(col, "db");
+	private class Tongue abstract {
+	public:
+		Tongue(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN)
+			: value(value), id(id), en_US(en_US), zh_CN(zh_CN) {}
+
+	public:
+		unsigned int ToIndex() {
+			return this->value;
+		}
+
+		Platform::String^ ToString() {
+			return this->id;
+		}
+
+	protected:
+		unsigned int value;
+		Platform::String^ id;
+		Platform::String^ en_US;
+		Platform::String^ zh_CN;
+	};
 }

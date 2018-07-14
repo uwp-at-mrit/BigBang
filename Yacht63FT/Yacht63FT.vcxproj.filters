@@ -17,9 +17,6 @@
     <Filter Include="usr\share\locale">
       <UniqueIdentifier>{7e87823e-6404-459a-b165-f0f304070ce5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\locale\en-US">
-      <UniqueIdentifier>{e5f37081-82a1-4f30-8de8-93ec8270df46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="usr\share\locale\zh-CN">
       <UniqueIdentifier>{ea10d042-1ab3-4a9d-aa9e-cd24f4573d2f}</UniqueIdentifier>
     </Filter>
@@ -88,6 +85,9 @@
     </Filter>
     <Filter Include="usr\share\graphlet\AirConditioner\PlaceHolder">
       <UniqueIdentifier>{36048b1a-78b4-4ead-be3c-b13003920c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="usr\share\locale\en-US">
+      <UniqueIdentifier>{f428404f-9e25-4982-b396-0bbd0f6dabef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -480,6 +480,12 @@
     </PRIResource>
     <PRIResource Include="usr\share\locale\en-US\tongue.resw">
       <Filter>usr\share\locale\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\en-US\data.resw">
+      <Filter>usr\share\locale\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\zh-CN\data.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
 </Project>

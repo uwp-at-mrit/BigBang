@@ -28,6 +28,42 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+private class YachtTongue : public Tongue {
+public:
+	static YachtTongue* One() { return YachtTongue::self(1U, "1", "1", "1"); }
+	static YachtTongue* Two() { return YachtTongue::self(2U, "2", "2", "2"); }
+	static YachtTongue* Four() { return YachtTongue::self(4U, "4", "4", "4"); }
+	static YachtTongue* Eight() { return YachtTongue::self(8U, "8", "8", "8"); }
+
+public:
+	inline friend bool operator<(const YachtTongue& lt, const YachtTongue& rt) { return lt.value < rt.value; }
+	inline friend bool operator>(const YachtTongue& lt, const YachtTongue& rt) { return rt < lt; }
+	inline friend bool operator<=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt > rt); }
+	inline friend bool operator>=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt < rt); }
+	inline friend bool operator==(const YachtTongue& lt, const YachtTongue& rt) { return lt.value == rt.value; }
+	inline friend bool operator!=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt == rt); }
+
+private:
+	YachtTongue(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN)
+		: Tongue(value, id, en_US, zh_CN) {}
+
+private:
+	static YachtTongue* self(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN) {
+		static std::map<int, YachtTongue*> selves;
+		YachtTongue* self = nullptr;
+		auto lt = selves.find(value);
+
+		if (lt != selves.end()) {
+			self = lt->second;
+		} else {
+			self = new YachtTongue(value, id, en_US, zh_CN);
+			selves.insert(std::pair<int, YachtTongue*>(value, self));
+		}
+
+		return self;
+	}
+};
+
 private class AEventlet : public IGraphlet {
 public:
 	AEventlet(CanvasTextFormat^ font) : font(font) {}
@@ -43,6 +79,9 @@ public:
 		this->layouts[3] = make_text_layout(dbspeak(event::status), this->font);
 		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
 		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
+
+		this->get_logger()->log_message(Log::Info, L"%s",
+			(YachtTongue::One() < YachtTongue::Eight()).ToString()->Data());
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {

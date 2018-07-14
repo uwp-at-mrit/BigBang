@@ -8,13 +8,6 @@ namespace WarGrey::SCADA {
 	private ref class UniversalWindowsApplication sealed : public Windows::UI::Xaml::Application {
 	protected:
 		void AppMain(Windows::UI::ViewManagement::ApplicationView^ self, Windows::UI::Xaml::FrameworkElement^ screen) {
-#ifdef _DEBUG
-			Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = Windows::System::UserProfile::GlobalizationPreferences::Languages->GetAt(0);
-#else
-			Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
-#endif
-
-
 			/** NOTE
 			* the Titlebar in Universal Windows Platform is freaky,
 			* it *can* be customized fully, but the caption buttons are always there.
@@ -83,10 +76,19 @@ namespace WarGrey::SCADA {
 	};
 
 	template<class UniversalWindowsScreen, bool fullscreen>
-	int launch_universal_windows_application(WarGrey::SCADA::Log level = WarGrey::SCADA::Log::Debug, Platform::String^ remote_rsyslog_server = nullptr) {
+	int launch_universal_windows_application(WarGrey::SCADA::Log level, Platform::String^ remote_rsyslog_server, Platform::String^ lang = nullptr) {
 		auto lazy_main = [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
 			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen, fullscreen>();
 		};
+
+#ifdef _DEBUG
+		Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride
+			= (lang == nullptr)
+			? Windows::System::UserProfile::GlobalizationPreferences::Languages->GetAt(0)
+			: lang;
+#else
+		Windows::Globalization::ApplicationLanguages::PrimaryLanguageOverride = "zh-CN";
+#endif
 
 		set_default_logging_level(level);
 		set_default_racket_receiver_host(remote_rsyslog_server);
