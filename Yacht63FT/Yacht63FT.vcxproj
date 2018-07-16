@@ -335,8 +335,10 @@
     <PRIResource Include="usr\share\locale\en-US\data.resw">
       <SubType>Designer</SubType>
     </PRIResource>
+    <PRIResource Include="usr\share\locale\en-US\dbtongue.resw" />
     <PRIResource Include="usr\share\locale\en-US\tongue.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\data.resw" />
+    <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

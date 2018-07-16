@@ -487,5 +487,11 @@
     <PRIResource Include="usr\share\locale\zh-CN\data.resw">
       <Filter>usr\share\locale\zh-CN</Filter>
     </PRIResource>
+    <PRIResource Include="usr\share\locale\en-US\dbtongue.resw">
+      <Filter>usr\share\locale\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

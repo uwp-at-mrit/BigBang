@@ -2,6 +2,7 @@
 
 namespace WarGrey::SCADA {
 	Platform::String^ speak(Platform::String^ word);
+	Platform::String^ dbspeak(Platform::String^ field);
 
 	template<typename E>
 	Platform::String^ speak(E id, Platform::String^ prefix) {
@@ -21,9 +22,9 @@ namespace WarGrey::SCADA {
 		return WarGrey::SCADA::speak(id.ToString());
 	}
 
-	template<typename Field>
-	Platform::String^ dbspeak(Field col) {
-		return WarGrey::SCADA::speak(col, "db");
+	template<typename E>
+	Platform::String^ dbspeak(E id) {
+		return WarGrey::SCADA::dbspeak(":" + id.ToString() + ":");
 	}
 
 	private class Tongue abstract {
