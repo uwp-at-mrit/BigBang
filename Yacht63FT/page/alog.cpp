@@ -28,36 +28,32 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class YachtTongue : public Tongue {
+private class YachtTongue sealed : public Tongue<YachtTongue> {
 public:
-	static YachtTongue* One() { return YachtTongue::self(1U, "1", "1", "1"); }
-	static YachtTongue* Two() { return YachtTongue::self(2U, "2", "2", "2"); }
-	static YachtTongue* Four() { return YachtTongue::self(4U, "4", "4", "4"); }
-	static YachtTongue* Eight() { return YachtTongue::self(8U, "8", "8", "8"); }
+	static YachtTongue* One() { return YachtTongue::construct(1U); }
+	static YachtTongue* Two() { return YachtTongue::construct(2U); }
+	static YachtTongue* Four() { return YachtTongue::construct(4U); }
+	static YachtTongue* Eight() { return YachtTongue::construct(8U); }
 
 public:
-	inline friend bool operator<(const YachtTongue& lt, const YachtTongue& rt) { return lt.value < rt.value; }
-	inline friend bool operator>(const YachtTongue& lt, const YachtTongue& rt) { return rt < lt; }
-	inline friend bool operator<=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt > rt); }
-	inline friend bool operator>=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt < rt); }
-	inline friend bool operator==(const YachtTongue& lt, const YachtTongue& rt) { return lt.value == rt.value; }
-	inline friend bool operator!=(const YachtTongue& lt, const YachtTongue& rt) { return !(lt == rt); }
+	Platform::String^ get_type() override {
+		return "Yacht";
+	}
 
 private:
-	YachtTongue(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN)
-		: Tongue(value, id, en_US, zh_CN) {}
+	YachtTongue(unsigned int idx) : Tongue(idx) {}
 
 private:
-	static YachtTongue* self(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN) {
+	static YachtTongue* construct(unsigned int idx) {
 		static std::map<int, YachtTongue*> selves;
 		YachtTongue* self = nullptr;
-		auto lt = selves.find(value);
+		auto lt = selves.find(idx);
 
 		if (lt != selves.end()) {
 			self = lt->second;
 		} else {
-			self = new YachtTongue(value, id, en_US, zh_CN);
-			selves.insert(std::pair<int, YachtTongue*>(value, self));
+			self = new YachtTongue(idx);
+			selves.insert(std::pair<int, YachtTongue*>(idx, self));
 		}
 
 		return self;
@@ -80,8 +76,11 @@ public:
 		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
 		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
 
-		this->get_logger()->log_message(Log::Info, L"%s",
-			(YachtTongue::One() < YachtTongue::Eight()).ToString()->Data());
+		YachtTongue* one = YachtTongue::One();
+		YachtTongue* eight = YachtTongue::Eight();
+		this->get_logger()->log_message(Log::Info, L"(%s < %s): %s",
+			one->ToLocalString()->Data(), eight->ToLocalString()->Data(),
+			(one->lt(eight)).ToString()->Data());
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {

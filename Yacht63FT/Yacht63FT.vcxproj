@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7d6e8d5a-984e-4737-bd65-fa09f5614ad7}</ProjectGuid>
     <RootNamespace>Yacht63FT</RootNamespace>
-    <DefaultLanguage>zh-CN</DefaultLanguage>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
@@ -332,14 +332,12 @@
     <ClInclude Include="schema\dbtest.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="usr\share\locale\en-US\data.resw">
-      <SubType>Designer</SubType>
-    </PRIResource>
     <PRIResource Include="usr\share\locale\en-US\dbtongue.resw" />
     <PRIResource Include="usr\share\locale\en-US\tongue.resw" />
-    <PRIResource Include="usr\share\locale\zh-CN\data.resw" />
+    <PRIResource Include="usr\share\locale\en-US\Yacht.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw" />
+    <PRIResource Include="usr\share\locale\zh-CN\Yacht.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

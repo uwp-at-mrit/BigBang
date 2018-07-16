@@ -481,17 +481,17 @@
     <PRIResource Include="usr\share\locale\en-US\tongue.resw">
       <Filter>usr\share\locale\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="usr\share\locale\en-US\data.resw">
-      <Filter>usr\share\locale\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="usr\share\locale\zh-CN\data.resw">
-      <Filter>usr\share\locale\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="usr\share\locale\en-US\dbtongue.resw">
       <Filter>usr\share\locale\en-US</Filter>
     </PRIResource>
     <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw">
       <Filter>usr\share\locale\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\zh-CN\Yacht.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\en-US\Yacht.resw">
+      <Filter>usr\share\locale\en-US</Filter>
     </PRIResource>
   </ItemGroup>
 </Project>

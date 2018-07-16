@@ -27,24 +27,35 @@ namespace WarGrey::SCADA {
 		return WarGrey::SCADA::dbspeak(":" + id.ToString() + ":");
 	}
 
-	private class Tongue abstract {
+	private class ITongue abstract {
 	public:
-		Tongue(unsigned int value, Platform::String^ id, Platform::String^ en_US, Platform::String^ zh_CN)
-			: value(value), id(id), en_US(en_US), zh_CN(zh_CN) {}
+		ITongue(unsigned int index);
 
 	public:
-		unsigned int ToIndex() {
-			return this->value;
-		}
-
-		Platform::String^ ToString() {
-			return this->id;
-		}
+		unsigned int ToIndex();
+		Platform::String^ ToString(); // return the identity of the instance, analogue to enum.ToString();
+		Platform::String^ ToLocalString();
 
 	protected:
-		unsigned int value;
-		Platform::String^ id;
-		Platform::String^ en_US;
-		Platform::String^ zh_CN;
+		virtual Platform::String^ get_type() = 0;
+
+	protected:
+		int unsafe_compare(ITongue* instance);
+
+	private:
+		unsigned int index;
+	};
+
+	template<typename E>
+	private class Tongue abstract : public WarGrey::SCADA::ITongue {
+	public:
+		Tongue(unsigned int idx) : ITongue(idx) {}
+
+	public:
+		bool eq(E* instance) { return (this->unsafe_compare(instance) == 0); }
+		bool lt(E* instance) { return (this->unsafe_compare(instance) <  0); }
+		bool le(E* instance) { return (this->unsafe_compare(instance) <= 0); }
+		bool gt(E* instance) { return (this->unsafe_compare(instance) >  0); }
+		bool ge(E* instance) { return (this->unsafe_compare(instance) >= 0); }
 	};
 }

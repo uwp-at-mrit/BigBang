@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="qwer" xml:space="preserve">
-    <value>测试</value>
+  <data name="eight" xml:space="preserve">
+    <value>八</value>
+  </data>
+  <data name="one" xml:space="preserve">
+    <value>一</value>
   </data>
 </root>
