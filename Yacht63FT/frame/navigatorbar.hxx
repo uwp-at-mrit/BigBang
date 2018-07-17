@@ -6,7 +6,7 @@
 namespace WarGrey::SCADA {
 	private enum class Yacht {
 		HomePage, Propulsion, Generator, Propeller,
-		Gauge, AirConditioner, Operation, Event,
+		Gauge, AirConditioner, Operation, Logbook,
 		_
 	};
 

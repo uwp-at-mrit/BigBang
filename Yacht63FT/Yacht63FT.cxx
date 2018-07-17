@@ -13,7 +13,7 @@
 #include "page/propeller.hpp"
 #include "page/propulsion.hpp"
 #include "page/airconditioner.hpp"
-#include "page/alog.hpp"
+#include "page/alogbook.hpp"
 #include "page/operation.hpp"
 #include "page/gauge.hpp"
 
@@ -51,7 +51,7 @@ protected:
 			case Yacht::Propulsion: this->add_planet(new PropulsionPage(plc_master, name)); break;
 			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
 			case Yacht::Operation: this->add_planet(new OperationPage(plc_master, name)); break;
-			case Yacht::Event: this->add_planet(new ALogPage(plc_master, name)); break;
+			case Yacht::Logbook: this->add_planet(new LogbookPage(plc_master, name)); break;
 			case Yacht::Gauge: this->add_planet(new GaugePage(plc_master, name)); break;
 			default: this->add_planet(new Homepage(name)); break;
 			}

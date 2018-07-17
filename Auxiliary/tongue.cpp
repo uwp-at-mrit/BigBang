@@ -69,28 +69,23 @@ bool ITongue::exists(Platform::String^ name, int index) {
 	return do_check(name, index);
 }
 
-int ITongue::search_sibling_index(int delta) {
-	unsigned int self = this->ToIndex();
+int ITongue::sibling_index(Platform::String^ name, unsigned int self, int delta, unsigned int boundary) {
 	int sibling = -1;
 	
 	if (delta < 0) {
-		unsigned int midx = this->min_index();
-
-		while ((self + delta) >= midx) {
+		while ((self + delta) >= boundary) {
 			self += delta;
 
-			if (do_check(this->type, self)) {
+			if (do_check(name, self)) {
 				sibling = self;
 				break;
 			}
 		}
 	} else if (delta > 0) {
-		unsigned int midx = this->max_index();
-
-		while ((self + delta) <= midx) {
+		while ((self + delta) <= boundary) {
 			self += delta;
 
-			if (do_check(this->type, self)) {
+			if (do_check(name, self)) {
 				sibling = self;
 				break;
 			}

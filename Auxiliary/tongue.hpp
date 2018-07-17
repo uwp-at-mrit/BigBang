@@ -33,18 +33,14 @@ namespace WarGrey::SCADA {
 		Platform::String^ ToString(); // return the identity of the instance, analogous to enum.ToString();
 		Platform::String^ ToLocalString();
 
-	public:
-		virtual unsigned int min_index() { return 0; }
-		virtual unsigned int max_index() = 0; // Notice: it is `max`, not `max + 1`;
-
 	protected:
 		static bool exists(Platform::String^ name, int index);
+		static int sibling_index(Platform::String^ name, unsigned int current, int delta, unsigned int boundary);
 
 	protected:
 		ITongue(Platform::String^ name, unsigned int index);
 
 	protected:
-		int search_sibling_index(int delta);
 		int unsafe_compare(ITongue* instance);
 
 	private:
@@ -55,8 +51,13 @@ namespace WarGrey::SCADA {
 	template<typename E>
 	private class Tongue abstract : public WarGrey::SCADA::ITongue {
 	public:
-		E* foreward() { return Tongue<E>::SafeSiblingTongue(this->search_sibling_index(1)); }
-		E* backward() { return Tongue<E>::SafeSiblingTongue(this->search_sibling_index(-1)); }
+		static E* first() { return Tongue<E>::SafeSiblingTongue(E::min_index() - 1, 1, E::max_index()); }
+		static E* fromIndex(unsigned int idx) { return Tongue<E>::SafeTongue(idx); }
+		static E* last() { return Tongue<E>::SafeSiblingTongue(E::max_index() + 1, -1, E::min_index()); }
+
+	public:
+		E* foreward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), 1, E::max_index()); }
+		E* backward() { return Tongue<E>::SafeSiblingTongue(this->ToIndex(), -1, E::min_index()); }
 
 	public:
 		bool eq(E* instance) { return (this->unsafe_compare(instance) == 0); }
@@ -89,8 +90,10 @@ namespace WarGrey::SCADA {
 		}
 
 	private:
-		static E* SafeSiblingTongue(int index) {
-			return ((index >= 0) ? Tongue<E>::UnsafeTongue(index) : nullptr);
+		static E* SafeSiblingTongue(unsigned int index, int delta, int boundary) {
+			int sibling_index = ITongue::sibling_index(E::type(), index, delta, boundary);
+
+			return ((sibling_index >= 0) ? Tongue<E>::UnsafeTongue(sibling_index) : nullptr);
 		}
 	};
 }

@@ -89,6 +89,9 @@
     <Filter Include="usr\share\locale\en-US">
       <UniqueIdentifier>{f428404f-9e25-4982-b396-0bbd0f6dabef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tongue">
+      <UniqueIdentifier>{e19d1be6-563d-484f-bf5c-291d7ef7cb35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Yacht63FT.cxx" />
@@ -127,7 +130,7 @@
     <ClCompile Include="page\gauge.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\alog.cpp">
+    <ClCompile Include="page\alogbook.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,8 +170,11 @@
     <ClInclude Include="page\gauge.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\alog.hpp">
+    <ClInclude Include="page\alogbook.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="tongue\logbook.hpp">
+      <Filter>tongue</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -473,6 +479,12 @@
     <None Include="schema\event.dao.rktl">
       <Filter>schema</Filter>
     </None>
+    <None Include="tongue\catalogue.csv">
+      <Filter>tongue</Filter>
+    </None>
+    <None Include="tongue\logbook.resw.rktl">
+      <Filter>tongue</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw">
@@ -487,11 +499,11 @@
     <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw">
       <Filter>usr\share\locale\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="usr\share\locale\zh-CN\Yacht.resw">
-      <Filter>usr\share\locale\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="usr\share\locale\en-US\Yacht.resw">
+    <PRIResource Include="usr\share\locale\en-US\logbook.resw">
       <Filter>usr\share\locale\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="usr\share\locale\zh-CN\logbook.resw">
+      <Filter>usr\share\locale\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
 </Project>

@@ -193,6 +193,8 @@
     </AppxManifest>
     <None Include="packages.config" />
     <None Include="schema\event.dao.rktl" />
+    <None Include="tongue\catalogue.csv" />
+    <None Include="tongue\logbook.resw.rktl" />
     <None Include="Yacht63FT_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -302,7 +304,7 @@
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
-    <ClCompile Include="page\alog.cpp" />
+    <ClCompile Include="page\alogbook.cpp" />
     <ClCompile Include="page\operation.cpp" />
     <ClCompile Include="page\generator.cpp" />
     <ClCompile Include="page\homepage.cpp" />
@@ -319,7 +321,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
     <ClInclude Include="page\airconditioner.hpp" />
-    <ClInclude Include="page\alog.hpp" />
+    <ClInclude Include="page\alogbook.hpp" />
     <ClInclude Include="page\operation.hpp" />
     <ClInclude Include="page\generator.hpp" />
     <ClInclude Include="page\homepage.hpp" />
@@ -330,14 +332,15 @@
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="schema\event.hpp" />
     <ClInclude Include="schema\dbtest.hpp" />
+    <ClInclude Include="tongue\logbook.hpp" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="usr\share\locale\en-US\dbtongue.resw" />
+    <PRIResource Include="usr\share\locale\en-US\logbook.resw" />
     <PRIResource Include="usr\share\locale\en-US\tongue.resw" />
-    <PRIResource Include="usr\share\locale\en-US\Yacht.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw" />
+    <PRIResource Include="usr\share\locale\zh-CN\logbook.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw" />
-    <PRIResource Include="usr\share\locale\zh-CN\Yacht.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

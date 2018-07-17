@@ -1,13 +1,13 @@
 ﻿#include <map>
 #include <ppltasks.h>
 
-#include "page/alog.hpp"
+#include "page/alogbook.hpp"
+#include "tongue/logbook.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/bitmaplet.hpp"
 #include "graphlet/textlet.hpp"
 
-#include "tongue.hpp"
 #include "text.hpp"
 #include "string.hpp"
 #include "path.hpp"
@@ -28,30 +28,10 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private class YachtTongue sealed : public Tongue<YachtTongue> {
-	friend class Tongue<YachtTongue>;
+private class Eventlet : public IGraphlet {
 public:
-	static Platform::String^ YachtTongue::type() { return "Yacht"; }
-	static YachtTongue* fromIndex(unsigned int idx) { return Tongue<YachtTongue>::SafeTongue(idx); }
-
-public:
-	static YachtTongue* One() { return Tongue<YachtTongue>::UnsafeTongue(1U); }
-	static YachtTongue* Two() { return Tongue<YachtTongue>::UnsafeTongue(2U); }
-	static YachtTongue* Four() { return Tongue<YachtTongue>::UnsafeTongue(4U); }
-	static YachtTongue* Eight() { return Tongue<YachtTongue>::UnsafeTongue(8U); }
-
-public:
-	unsigned int min_index() override { return 1U; }
-	unsigned int max_index() override { return 792U; }
-
-private:
-	YachtTongue(unsigned int idx) : Tongue(idx) {}
-};
-
-private class AEventlet : public IGraphlet {
-public:
-	AEventlet(CanvasTextFormat^ font) : font(font) {}
-	AEventlet(AlarmEvent& ae, CanvasTextFormat^ font) : entity(ae), font(font) {}
+	Eventlet(CanvasTextFormat^ font) : font(font) {}
+	Eventlet(AlarmEvent& ae, CanvasTextFormat^ font) : entity(ae), font(font) {}
 
 public:
 	void construct() override {
@@ -63,14 +43,12 @@ public:
 		this->layouts[3] = make_text_layout(dbspeak(event::status), this->font);
 		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
 		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
-
-		YachtTongue* one = YachtTongue::fromIndex(1U);
-		YachtTongue* eight = one->foreward();
-		YachtTongue* ghost = eight->foreward();
-		this->get_logger()->log_message(Log::Info, L"(%s < %s): %s with %x, self identity: %s",
+		
+		Logbook* one = Logbook::last();
+		Logbook* eight = one->backward();
+		this->get_logger()->log_message(Log::Info, L"(%s is after %s): %s",
 			one->ToLocalString()->Data(), eight->ToLocalString()->Data(),
-			(one->lt(eight)).ToString()->Data(), ghost,
-			(eight == YachtTongue::Eight()).ToString()->Data());
+			(one->gt(eight)).ToString()->Data());
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
@@ -103,15 +81,15 @@ private:
 	AlarmEvent entity;
 };
 
-private class ALogBoard final : public WarGrey::SCADA::PLCConfirmation {
+private class LogBoard final : public WarGrey::SCADA::PLCConfirmation {
 public:
-	virtual ~ALogBoard() noexcept {
+	virtual ~LogBoard() noexcept {
 		if (this->sqlite3 != nullptr) {
 			delete this->sqlite3;
 		}
 	}
 
-	ALogBoard(ALogPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
+	LogBoard(LogbookPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
 		this->font = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
 	}
 
@@ -137,7 +115,7 @@ public:
 		default_event(record, count, std::nullopt, uptime, make_nstring(interval.ToString()));
 
 		this->master->enter_critical_section();
-		this->master->insert(new AEventlet(record, this->font), 0.0F, Height - height * float(count));
+		this->master->insert(new Eventlet(record, this->font), 0.0F, Height - height * float(count));
 		this->master->leave_critical_section();
 	}
 
@@ -149,36 +127,36 @@ private:
 	CanvasTextFormat^ font;
 	Statuslinelet* term;
 	SQLite3* sqlite3;
-	ALogPage* master;
+	LogbookPage* master;
 };
 
 /*************************************************************************************************/
-ALogPage::ALogPage(PLCMaster* device, Platform::String^ name) : Planet(name) {}
+LogbookPage::LogbookPage(PLCMaster* device, Platform::String^ name) : Planet(name) {}
 
-ALogPage::~ALogPage() {
+LogbookPage::~LogbookPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void ALogPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void LogbookPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		ALogBoard* alarmboard = new ALogBoard(this, 16);
+		LogBoard* alarmboard = new LogBoard(this, 16);
 
 		alarmboard->load_and_flow(width, height);
 		this->dashboard = alarmboard;
 	}
 }
 
-void ALogPage::on_elapse(long long count, long long interval, long long uptime) {
-	auto alarmboard = static_cast<ALogBoard*>(this->dashboard);
+void LogbookPage::on_elapse(long long count, long long interval, long long uptime) {
+	auto alarmboard = static_cast<LogBoard*>(this->dashboard);
 
 	if (alarmboard != nullptr) {
 		alarmboard->update(count, interval, uptime);
 	}
 }
 
-void ALogPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void LogbookPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif
