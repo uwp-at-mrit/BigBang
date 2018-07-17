@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UFT-8" ?>
+<root>
+    <data name="FWCoolant1Running" xml:space="preserve"> <value>1#冷却淡水泵运行</value> </data>
+    <data name="FWCoolant1Fault" xml:space="preserve"> <value>1#冷却淡水泵故障</value> </data>
+    <data name="FWCoolant2Running" xml:space="preserve"> <value>2#冷却淡水泵运行</value> </data>
+    <data name="FWCoolant2Fault" xml:space="preserve"> <value>2#冷却淡水泵故障</value> </data>
+    <data name="SWCoolant1Running" xml:space="preserve"> <value>1#冷却海水泵运行</value> </data>
+    <data name="SWCoolant1Fault" xml:space="preserve"> <value>1#冷却海水泵故障</value> </data>
+    <data name="SWCoolant2Running" xml:space="preserve"> <value>2#冷却海水泵运行</value> </data>
+    <data name="SWCoolant2Fault" xml:space="preserve"> <value>2#冷却海水泵故障</value> </data>
+    <data name="DC24VBPLowResistance" xml:space="preserve"> <value>DC24V配电板绝缘低</value> </data>
+    <data name="AC220VBPLowResistance" xml:space="preserve"> <value>AC220V配电板绝缘低</value> </data>
+    <data name="WaterWorksRunning" xml:space="preserve"> <value>供水装置运行</value> </data>
+    <data name="WaterWorksFault" xml:space="preserve"> <value>供水装置故障</value> </data>
+    <data name="ACCoolantRunning" xml:space="preserve"> <value>空调冷却水泵运行</value> </data>
+    <data name="ACCoolantFault" xml:space="preserve"> <value>空调冷却水泵故障</value> </data>
+    <data name="CO2PowerFailure" xml:space="preserve"> <value>CO2失电报警</value> </data>
+    <data name="CO2Leak" xml:space="preserve"> <value>CO2泄露报警</value> </data>
+    <data name="CO2Release" xml:space="preserve"> <value>CO2释放报警</value> </data>
+    <data name="M1PMFault" xml:space="preserve"> <value>M1功率模块故障</value> </data>
+    <data name="PSBusOverVoltage" xml:space="preserve"> <value>左舷直流电压超高故障</value> </data>
+    <data name="PSBusUnderVoltage" xml:space="preserve"> <value>左舷直流电压超低故障</value> </data>
+    <data name="M1IOCFault" xml:space="preserve"> <value>M1瞬时过流故障</value> </data>
+    <data name="M1DTOCFault" xml:space="preserve"> <value>M1延时过流故障</value> </data>
+    <data name="M1MotorOverSpeed" xml:space="preserve"> <value>M1超速故障</value> </data>
+    <data name="M1MotorUnderSpeed" xml:space="preserve"> <value>M1电机转速低故障</value> </data>
+    <data name="M1CB1TripOff" xml:space="preserve"> <value>M1主断路器CB1过流脱扣</value> </data>
+    <data name="M1DCFuseBroken" xml:space="preserve"> <value>M1直流熔断器损坏</value> </data>
+    <data name="M1UpwOverTemperature" xml:space="preserve"> <value>M1 U相绕组温度超高故障</value> </data>
+    <data name="M1VpwOverTemperature" xml:space="preserve"> <value>M1 V相绕组温度超高故障</value> </data>
+    <data name="M1WpwOverTemperature" xml:space="preserve"> <value>M1 W相绕组温度超高故障</value> </data>
+    <data name="M1DBOverTemperature" xml:space="preserve"> <value>M1驱动端轴承温度超高故障</value> </data>
+    <data name="M1nDBOverTemperature" xml:space="preserve"> <value>M1非驱动端轴承温度超高故障</value> </data>
+    <data name="M1TBOverTemperature" xml:space="preserve"> <value>M1艉轴温度超高故障</value> </data>
+    <data name="M1PMOverTemperature" xml:space="preserve"> <value>M1功率模块温度超高故障</value> </data>
+    <data name="PSBusHighVoltage" xml:space="preserve"> <value>左舷直流电压高报警</value> </data>
+    <data name="PSBusLowVoltage" xml:space="preserve"> <value>左舷直流电压低报警</value> </data>
+    <data name="M1Overload" xml:space="preserve"> <value>M1过载报警</value> </data>
+    <data name="M1VeryHighCurrent" xml:space="preserve"> <value>M1电流较高报警</value> </data>
+    <data name="M1PMHighTemperature" xml:space="preserve"> <value>M1功率模块温度高报警</value> </data>
+    <data name="M1PMVeryHighTemperature" xml:space="preserve"> <value>M1功率模块温度较高报警</value> </data>
+    <data name="M1MotorLocked" xml:space="preserve"> <value>M1电机处于锁轴状态</value> </data>
+    <data name="M1UpwHighTemperature" xml:space="preserve"> <value>M1 U相绕组温度高报警</value> </data>
+    <data name="M1VpwHighTemperature" xml:space="preserve"> <value>M1 V相绕组温度高报警</value> </data>
+    <data name="M1WpwHighTemperature" xml:space="preserve"> <value>M1 W相绕组温度高报警</value> </data>
+    <data name="M1DBHighTemperature" xml:space="preserve"> <value>M1驱动端轴承温度高报警</value> </data>
+    <data name="M1nDBHighTemperature" xml:space="preserve"> <value>M1非驱动端轴承温度高报警</value> </data>
+    <data name="M1TBHighTemperature" xml:space="preserve"> <value>M1艉轴温度高报警</value> </data>
+    <data name="M1UpwVeryHighTemperature" xml:space="preserve"> <value>M1 U相绕组温度较高报警</value> </data>
+    <data name="M1VpwVeryHighTemperature" xml:space="preserve"> <value>M1 V相绕组温度较高报警</value> </data>
+    <data name="M1WpwVeryHighTemperature" xml:space="preserve"> <value>M1 W相绕组温度较高报警</value> </data>
+    <data name="M1DBVeryHighTemperature" xml:space="preserve"> <value>M1驱动端轴承温度较高报警</value> </data>
+    <data name="M1nDBVeryHighTemperature" xml:space="preserve"> <value>M1非驱动端轴承温度较高报警</value> </data>
+    <data name="M1TBVeryHighTemperature" xml:space="preserve"> <value>M1艉轴温度较高报警</value> </data>
+    <data name="M1Misc" xml:space="preserve"> <value>M1其他综合报警</value> </data>
+    <data name="M2PMFault" xml:space="preserve"> <value>M2功率模块故障</value> </data>
+    <data name="SBBusOverVoltage" xml:space="preserve"> <value>右舷直流电压超高故障</value> </data>
+    <data name="SBBusUnderVoltage" xml:space="preserve"> <value>右舷直流电压超低故障</value> </data>
+    <data name="M2IOCFault" xml:space="preserve"> <value>M2瞬时过流故障</value> </data>
+    <data name="M2DTOCFault" xml:space="preserve"> <value>M2延时过流故障</value> </data>
+    <data name="M2MotorOverSpeed" xml:space="preserve"> <value>M2超速故障</value> </data>
+    <data name="M2MotorUnderSpeed" xml:space="preserve"> <value>M2电机转速低故障</value> </data>
+    <data name="M2CB1TripOff" xml:space="preserve"> <value>M2主断路器CB1过流脱扣</value> </data>
+    <data name="M2DCFuseBroken" xml:space="preserve"> <value>M2直流熔断器损坏</value> </data>
+    <data name="M2UOverTemperature" xml:space="preserve"> <value>M2 U相绕组温度超高故障</value> </data>
+    <data name="M2VOverTemperature" xml:space="preserve"> <value>M2 V相绕组温度超高故障</value> </data>
+    <data name="M2WOverTemperature" xml:space="preserve"> <value>M2 W相绕组温度超高故障</value> </data>
+    <data name="M2DBOverTemperature" xml:space="preserve"> <value>M2驱动端轴承温度超高故障</value> </data>
+    <data name="M2nDBOverTemperature" xml:space="preserve"> <value>M2非驱动端轴承温度超高故障</value> </data>
+    <data name="M2TBOverTemperature" xml:space="preserve"> <value>M2艉轴温度超高故障</value> </data>
+    <data name="M2PMOverTemperature" xml:space="preserve"> <value>M2功率模块温度超高故障</value> </data>
+    <data name="SBBusHighVoltage" xml:space="preserve"> <value>右舷直流电压高报警</value> </data>
+    <data name="SBBusLowVoltage" xml:space="preserve"> <value>右舷直流电压低报警</value> </data>
+    <data name="M2Overload" xml:space="preserve"> <value>M2过载报警</value> </data>
+    <data name="M2VeryHighCurrent" xml:space="preserve"> <value>M2电流较高报警</value> </data>
+    <data name="M2PMHighTemperature" xml:space="preserve"> <value>M2功率模块温度高报警</value> </data>
+    <data name="M2PMVeryHighTemperature" xml:space="preserve"> <value>M2功率模块温度较高报警</value> </data>
+    <data name="M2MotorLocked" xml:space="preserve"> <value>M2电机处于锁轴状态</value> </data>
+    <data name="M2UpwHighTemperature" xml:space="preserve"> <value>M2 U相绕组温度高报警</value> </data>
+    <data name="M2VpwHighTemperature" xml:space="preserve"> <value>M2 V相绕组温度高报警</value> </data>
+    <data name="M2WpwHighTemperature" xml:space="preserve"> <value>M2 W相绕组温度高报警</value> </data>
+    <data name="M2DBHighTemperature" xml:space="preserve"> <value>M2驱动端轴承温度高报警</value> </data>
+    <data name="M2nDBHighTemperature" xml:space="preserve"> <value>M2非驱动端轴承温度高报警</value> </data>
+    <data name="M2TBHighTemperature" xml:space="preserve"> <value>M2艉轴温度高报警</value> </data>
+    <data name="M2UpwVeryHighTemperature" xml:space="preserve"> <value>M2 U相绕组温度较高报警</value> </data>
+    <data name="M2VpwVeryHighTemperature" xml:space="preserve"> <value>M2 V相绕组温度较高报警</value> </data>
+    <data name="M2WpwVeryHighTemperature" xml:space="preserve"> <value>M2 W相绕组温度较高报警</value> </data>
+    <data name="M2DBVeryHighTemperature" xml:space="preserve"> <value>M2驱动端轴承温度较高报警</value> </data>
+    <data name="M2nDBVeryHighTemperature" xml:space="preserve"> <value>M2非驱动端轴承温度较高报警</value> </data>
+    <data name="M2TBVeryHighTemperature" xml:space="preserve"> <value>M2艉轴温度较高报警</value> </data>
+    <data name="M2Misc" xml:space="preserve"> <value>M2其他综合报警</value> </data>
+    <data name="G1PMFault" xml:space="preserve"> <value>G1功率模块故障</value> </data>
+    <data name="G1IOCFault" xml:space="preserve"> <value>G1瞬时过流故障</value> </data>
+    <data name="G1DTOCFault" xml:space="preserve"> <value>G1延时过流故障</value> </data>
+    <data name="G1MotorOverSpeed" xml:space="preserve"> <value>G1超速故障</value> </data>
+    <data name="G1MotorUnderSpeed" xml:space="preserve"> <value>G1电机转速低故障</value> </data>
+    <data name="G1Diesel1CMisc" xml:space="preserve"> <value>G1柴油机一类综合故障</value> </data>
+    <data name="G1CB1TripOff" xml:space="preserve"> <value>G1主断路器CB1过流脱扣</value> </data>
+    <data name="G1DCFuseBroken" xml:space="preserve"> <value>G1直流熔断器损坏</value> </data>
+    <data name="G1UpwOverTemperature" xml:space="preserve"> <value>G1 U相绕组温度超高故障</value> </data>
+    <data name="G1VpwOverTemperature" xml:space="preserve"> <value>G1 V相绕组温度超高故障</value> </data>
+    <data name="G1WpwOverTemperature" xml:space="preserve"> <value>G1 W相绕组温度超高故障</value> </data>
+    <data name="G1DBOverTemperature" xml:space="preserve"> <value>G1驱动端轴承温度超高故障</value> </data>
+    <data name="G1nDBOverTemperature" xml:space="preserve"> <value>G1非驱动端轴承温度超高故障</value> </data>
+    <data name="G1SPTransformerOverTemperature" xml:space="preserve"> <value>G1岸电电源变压器温度超高故障</value> </data>
+    <data name="G1PMOverTemperature" xml:space="preserve"> <value>G1功率模块温度超高故障</value> </data>
+    <data name="G1Overload" xml:space="preserve"> <value>G1过载报警</value> </data>
+    <data name="G1VeryHighCurrent" xml:space="preserve"> <value>G1电流较高报警</value> </data>
+    <data name="G1PMHighTemperature" xml:space="preserve"> <value>G1功率模块温度高报警</value> </data>
+    <data name="G1PMVeryHighTemperature" xml:space="preserve"> <value>G1功率模块温度较高报警</value> </data>
+    <data name="G1Diesel2CMisc" xml:space="preserve"> <value>G1柴油机二类综合故障</value> </data>
+    <data name="G1UpwHighTemperature" xml:space="preserve"> <value>G1 U相绕组温度高报警</value> </data>
+    <data name="G1VpwHighTemperature" xml:space="preserve"> <value>G1 V相绕组温度高报警</value> </data>
+    <data name="G1WpwHighTemperature" xml:space="preserve"> <value>G1 W相绕组温度高报警</value> </data>
+    <data name="G1DBHighTemperature" xml:space="preserve"> <value>G1驱动端轴承温度高报警</value> </data>
+    <data name="G1nDBHighTemperature" xml:space="preserve"> <value>G1非驱动端轴承温度高报警</value> </data>
+    <data name="G1SPTransformerHighTemperature" xml:space="preserve"> <value>G1岸电电源变压器温度高报警</value> </data>
+    <data name="G1UpwVeryHighTemperature" xml:space="preserve"> <value>G1 U相绕组温度较高报警</value> </data>
+    <data name="G1VpwVeryHighTemperature" xml:space="preserve"> <value>G1 V相绕组温度较高报警</value> </data>
+    <data name="G1WpwVeryHighTemperature" xml:space="preserve"> <value>G1 W相绕组温度较高报警</value> </data>
+    <data name="G1DBVeryHighTemperature" xml:space="preserve"> <value>G1驱动端轴承温度较高报警</value> </data>
+    <data name="G1nDBVeryHighTemperature" xml:space="preserve"> <value>G1非驱动端轴承温度较高报警</value> </data>
+    <data name="G1SPTransformerVeryHighTemperature" xml:space="preserve"> <value>G1岸电电源变压器温度较高报警</value> </data>
+    <data name="G1SPCBOFF" xml:space="preserve"> <value>G1岸电主断路器断开</value> </data>
+    <data name="G1Misc" xml:space="preserve"> <value>G1其他综合报警</value> </data>
+    <data name="G1SPTransformerTSwitchFault" xml:space="preserve"> <value>G1岸电变压器温度开关故障</value> </data>
+    <data name="G2PMFault" xml:space="preserve"> <value>G2功率模块故障</value> </data>
+    <data name="G2IOCFault" xml:space="preserve"> <value>G2瞬时过流故障</value> </data>
+    <data name="G2DTOCFault" xml:space="preserve"> <value>G2延时过流故障</value> </data>
+    <data name="G2MotorOverSpeed" xml:space="preserve"> <value>G2超速故障</value> </data>
+    <data name="G2MotorUnderSpeed" xml:space="preserve"> <value>G2电机转速低故障</value> </data>
+    <data name="G2Diesel1CMisc" xml:space="preserve"> <value>G2柴油机一类综合故障</value> </data>
+    <data name="G2CB1TripOff" xml:space="preserve"> <value>G2主断路器CB1过流脱扣</value> </data>
+    <data name="G2DCFuseBroken" xml:space="preserve"> <value>G2直流熔断器损坏</value> </data>
+    <data name="G2UpwOverTemperature" xml:space="preserve"> <value>G2 U相绕组温度超高故障</value> </data>
+    <data name="G2VpwOverTemperature" xml:space="preserve"> <value>G2 V相绕组温度超高故障</value> </data>
+    <data name="G2WpwOverTemperature" xml:space="preserve"> <value>G2 W相绕组温度超高故障</value> </data>
+    <data name="G2DBOverTemperature" xml:space="preserve"> <value>G2驱动端轴承温度超高故障</value> </data>
+    <data name="G2nDBOverTemperature" xml:space="preserve"> <value>G2非驱动端轴承温度超高故障</value> </data>
+    <data name="G2PMOverTemperature" xml:space="preserve"> <value>G2功率模块温度超高故障</value> </data>
+    <data name="G2Overload" xml:space="preserve"> <value>G2过载报警</value> </data>
+    <data name="G2VeryHighCurrent" xml:space="preserve"> <value>G2电流较高报警</value> </data>
+    <data name="G2PMHighTemperature" xml:space="preserve"> <value>G2功率模块温度高报警</value> </data>
+    <data name="G2PMVeryHighTemperature" xml:space="preserve"> <value>G2功率模块温度较高报警</value> </data>
+    <data name="G2Diesel2CMisc" xml:space="preserve"> <value>G2柴油机二类综合故障</value> </data>
+    <data name="G2UpwHighTemperature" xml:space="preserve"> <value>G2 U相绕组温度高报警</value> </data>
+    <data name="G2VpwHighTemperature" xml:space="preserve"> <value>G2 V相绕组温度高报警</value> </data>
+    <data name="G2WpwHighTemperature" xml:space="preserve"> <value>G2 W相绕组温度高报警</value> </data>
+    <data name="G2DBHighTemperature" xml:space="preserve"> <value>G2驱动端轴承温度高报警</value> </data>
+    <data name="G2nDBHighTemperature" xml:space="preserve"> <value>G2非驱动端轴承温度高报警</value> </data>
+    <data name="G2UpwVeryHighTemperature" xml:space="preserve"> <value>G2 U相绕组温度较高报警</value> </data>
+    <data name="G2VpwVeryHighTemperature" xml:space="preserve"> <value>G2 V相绕组温度较高报警</value> </data>
+    <data name="G2WpwVeryHighTemperature" xml:space="preserve"> <value>G2 W相绕组温度较高报警</value> </data>
+    <data name="G2DBVeryHighTemperature" xml:space="preserve"> <value>G2驱动端轴承温度较高报警</value> </data>
+    <data name="G2nDBVeryHighTemperature" xml:space="preserve"> <value>G2非驱动端轴承温度较高报警</value> </data>
+    <data name="G2Misc" xml:space="preserve"> <value>G2其他综合报警</value> </data>
+    <data name="B1PMFault" xml:space="preserve"> <value>B1功率模块故障</value> </data>
+    <data name="B1IOCFault" xml:space="preserve"> <value>B1瞬时过流故障</value> </data>
+    <data name="B1DTOCFault" xml:space="preserve"> <value>B1延时过流故障</value> </data>
+    <data name="B1CB2TripOff" xml:space="preserve"> <value>B1主断路器CB2过流脱扣</value> </data>
+    <data name="B1DCFuseBroken" xml:space="preserve"> <value>B1直流熔断器损坏</value> </data>
+    <data name="B1PMOverTemperature" xml:space="preserve"> <value>B1功率模块温度超高故障</value> </data>
+    <data name="B1Overload" xml:space="preserve"> <value>B1过载报警</value> </data>
+    <data name="B1VeryHighCurrent" xml:space="preserve"> <value>B1电流较高报警</value> </data>
+    <data name="B1PMHighTemperature" xml:space="preserve"> <value>B1功率模块温度高报警</value> </data>
+    <data name="B1PMVeryHighTemperature" xml:space="preserve"> <value>B1功率模块温度较高报警</value> </data>
+    <data name="B1Misc" xml:space="preserve"> <value>B1其他综合报警</value> </data>
+    <data name="B1InductorTSwitchFault" xml:space="preserve"> <value>B1电抗器温度开关故障</value> </data>
+    <data name="T1PMFault" xml:space="preserve"> <value>T1功率模块故障</value> </data>
+    <data name="T1IOCFault" xml:space="preserve"> <value>T1瞬时过流故障</value> </data>
+    <data name="T1DTOCFault" xml:space="preserve"> <value>T1延时过流故障</value> </data>
+    <data name="T1CB1TripOff" xml:space="preserve"> <value>T1主断路器CB1过流脱扣</value> </data>
+    <data name="T1DCFuseBroken" xml:space="preserve"> <value>T1直流熔断器损坏</value> </data>
+    <data name="T1PMOverTemperature" xml:space="preserve"> <value>T1功率模块温度超高故障</value> </data>
+    <data name="T1Overload" xml:space="preserve"> <value>T1过载报警</value> </data>
+    <data name="T1VeryHighCurrent" xml:space="preserve"> <value>T1电流较高报警</value> </data>
+    <data name="T1PMHighTemperature" xml:space="preserve"> <value>T1功率模块温度高报警</value> </data>
+    <data name="T1PMVeryHighTemperature" xml:space="preserve"> <value>T1功率模块温度较高报警</value> </data>
+    <data name="T1Misc" xml:space="preserve"> <value>T1其他综合报警</value> </data>
+    <data name="T2PMFault" xml:space="preserve"> <value>T2功率模块故障</value> </data>
+    <data name="T2IOCFault" xml:space="preserve"> <value>T2瞬时过流故障</value> </data>
+    <data name="T2DTOCFault" xml:space="preserve"> <value>T2延时过流故障</value> </data>
+    <data name="T2CB1TripOff" xml:space="preserve"> <value>T2主断路器CB1过流脱扣</value> </data>
+    <data name="T2DCFuseBroken" xml:space="preserve"> <value>T2直流熔断器损坏</value> </data>
+    <data name="T2PMOverTemperature" xml:space="preserve"> <value>T2功率模块温度超高故障</value> </data>
+    <data name="T2Overload" xml:space="preserve"> <value>T2过载报警</value> </data>
+    <data name="T2VeryHighCurrent" xml:space="preserve"> <value>T2电流较高报警</value> </data>
+    <data name="T2PMHighTemperature" xml:space="preserve"> <value>T2功率模块温度高报警</value> </data>
+    <data name="T2PMVeryHighTemperature" xml:space="preserve"> <value>T2功率模块温度较高报警</value> </data>
+    <data name="T2Misc" xml:space="preserve"> <value>T2其他综合报警</value> </data>
+    <data name="H1Misc" xml:space="preserve"> <value>H1其他综合报警</value> </data>
+    <data name="H1CoolsrcPressureLost" xml:space="preserve"> <value>H1冷源水压力信号已断开</value> </data>
+    <data name="H1CoolsrcTemperatureLost" xml:space="preserve"> <value>H1冷源水温度信号已断开</value> </data>
+    <data name="H1CoolantPressureLost" xml:space="preserve"> <value>H1冷却水压力信号已断开</value> </data>
+    <data name="H1CoolantFlowLost" xml:space="preserve"> <value>H1冷却水流量信号已断开</value> </data>
+    <data name="H1CoolantTemperatureLost" xml:space="preserve"> <value>H1冷却水温度信号已断开</value> </data>
+    <data name="H13WRValveLost" xml:space="preserve"> <value>H1三通阀信号已断开</value> </data>
+    <data name="H1CoolantOverFlow" xml:space="preserve"> <value>H1冷却水流量超高报警</value> </data>
+    <data name="H1CoolantHighFlow" xml:space="preserve"> <value>H1冷却水流量高报警</value> </data>
+    <data name="H1CoolantUnderFlow" xml:space="preserve"> <value>H1冷却水流量超低报警</value> </data>
+    <data name="H1CoolantLowFlow" xml:space="preserve"> <value>H1冷却水流量低报警</value> </data>
+    <data name="H1CoolsrcOverPressure" xml:space="preserve"> <value>H1冷源水压力超高报警</value> </data>
+    <data name="H1CoolsrcHighPressure" xml:space="preserve"> <value>H1冷源水压力高报警</value> </data>
+    <data name="H1CoolsrcUnderPressure" xml:space="preserve"> <value>H1冷源水压力超低报警</value> </data>
+    <data name="H1CoolsrcLowPressure" xml:space="preserve"> <value>H1冷源水压力低报警</value> </data>
+    <data name="H1CoolantOverPressure" xml:space="preserve"> <value>H1冷却水压力超高报警</value> </data>
+    <data name="H1CoolantHighPressure" xml:space="preserve"> <value>H1冷却水压力高报警</value> </data>
+    <data name="H1CoolantUnderPressure" xml:space="preserve"> <value>H1冷却水压力超低报警</value> </data>
+    <data name="H1CoolantLowPressure" xml:space="preserve"> <value>H1冷却水压力低报警</value> </data>
+    <data name="H1CoolsrcOverTemperature" xml:space="preserve"> <value>H1冷源水温度超高报警</value> </data>
+    <data name="H1CoolsrcHighTemperature" xml:space="preserve"> <value>H1冷源水温度高报警</value> </data>
+    <data name="H1CoolsrcUnderTemperature" xml:space="preserve"> <value>H1冷源水温度超低报警</value> </data>
+    <data name="H1CoolsrcLowTemperature" xml:space="preserve"> <value>H1冷源水温度低报警</value> </data>
+    <data name="H1CoolantOverTemperature" xml:space="preserve"> <value>H1冷却水温度超高报警</value> </data>
+    <data name="H1CoolantHighTemperature" xml:space="preserve"> <value>H1冷却水温度高报警</value> </data>
+    <data name="H1CoolantUnderTemperature" xml:space="preserve"> <value>H1冷却水温度超低报警</value> </data>
+    <data name="H1CoolantLowTemperature" xml:space="preserve"> <value>H1冷却水温度低报警</value> </data>
+    <data name="H13WRValveMismatch" xml:space="preserve"> <value>H1三通阀位置给定与反馈不等报警</value> </data>
+    <data name="H1CoolantUnderLoadTemperature" xml:space="preserve"> <value>H1冷却水温度超低且有泵运行报警</value> </data>
+    <data name="H1220VPowerFailure" xml:space="preserve"> <value>H1 220V供电丢失</value> </data>
+    <data name="G3PMFault" xml:space="preserve"> <value>G3功率模块故障</value> </data>
+    <data name="G3IOCFault" xml:space="preserve"> <value>G3瞬时过流故障</value> </data>
+    <data name="G3DTOCFault" xml:space="preserve"> <value>G3延时过流故障</value> </data>
+    <data name="G3DCFuseBroken" xml:space="preserve"> <value>G3直流熔断器损坏</value> </data>
+    <data name="D1DCFuseBroken" xml:space="preserve"> <value>D1直流熔断器损坏</value> </data>
+    <data name="G3PMOverTemperature" xml:space="preserve"> <value>G3功率模块温度超高故障</value> </data>
+    <data name="G3Overload" xml:space="preserve"> <value>G3过载报警</value> </data>
+    <data name="G3VeryHighCurrent" xml:space="preserve"> <value>G3电流较高报警</value> </data>
+    <data name="G3PMHighTemperature" xml:space="preserve"> <value>G3功率模块温度高报警</value> </data>
+    <data name="G3PMVeryHighTemperature" xml:space="preserve"> <value>G3功率模块温度较高报警</value> </data>
+</root>
+

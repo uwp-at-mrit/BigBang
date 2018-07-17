@@ -1,10 +1,11 @@
-#lang racket/gui
+#lang racket
 
-(require "csv.rkt")
-(require "translate.rkt")
+(provide (all-defined-out))
 
-(define src.csv (build-path (find-system-path 'desk-dir) "data.csv"))
-(define metrics (read-csv src.csv))
+(require syntax/location)
+
+(require "../../Scripts/catalogue/csv.rkt")
+(require "../../Scripts/catalogue/tongue.rkt")
 
 (define ~level
   (lambda [level]
@@ -364,192 +365,200 @@
           [("G3功率模块温度高报警") (power-module-fault 'G3 'High)] ;;; line 257
           [("G3功率模块温度较高报警") (power-module-fault 'G3 'VeryHigh)] ;;; line 258
           
-          [("变频柜漏液检测报警") (cons 'reversed "Reversed")] ;;; line 259
-          [("C1看门狗报警来自G1") (cons 'reversed "Reversed")] ;;; line 260
-          [("C1看门狗报警来自G2") (cons 'reversed "Reversed")] ;;; line 261
-          [("C1看门狗报警来自M1") (cons 'reversed "Reversed")] ;;; line 262
-          [("C1看门狗报警来自M2") (cons 'reversed "Reversed")] ;;; line 263
-          [("C1看门狗报警来自T1") (cons 'reversed "Reversed")] ;;; line 264
-          [("C1看门狗报警来自T2") (cons 'reversed "Reversed")] ;;; line 265
-          [("C1看门狗报警来自B1") (cons 'reversed "Reversed")] ;;; line 266
-          [("C1看门狗报警来自H1") (cons 'reversed "Reversed")] ;;; line 267
-          [("C1其他综合报警") (status-event 'C1 'Misc)] ;;; line 268
-          [("C1左舷直流母线电压读取断开") (cons 'reversed "Reversed")] ;;; line 269
-          [("C1右舷直流母线电压读取断开") (cons 'reversed "Reversed")] ;;; line 270
-          [("C1滤波电抗器温控开关故障") (cons 'reversed "Reversed")] ;;; line 271
-          [("G1启动失败") (cons 'reversed "Reversed")] ;;; line 281
-          [("G1主断路器CB1合闸失败") (circuit-breaker-fault 'G1 1 'failure)] ;;; line 282
-          [("G1岸电启动失败") (cons 'reversed "Reversed")] ;;; line 283
-          [("G2启动失败") (cons 'reversed "Reversed")] ;;; line 284
-          [("G2主断路器CB1合闸失败") (circuit-breaker-fault 'G1 1 'failure)] ;;; line 285
-          [("M1启动失败") (cons 'reversed "Reversed")] ;;; line 286
-          [("M2启动失败") (cons 'reversed "Reversed")] ;;; line 287
-          [("T1启动失败") (cons 'reversed "Reversed")] ;;; line 288
-          [("T2启动失败") (cons 'reversed "Reversed")] ;;; line 289
-          [("B1启动失败") (cons 'reversed "Reversed")] ;;; line 290
-          [("H1启动失败") (cons 'reversed "Reversed")] ;;; line 291
-          [("G3启动失败") (cons 'reversed "Reversed")] ;;; line 292
-          [("C1 220V配电板电源故障") (cons 'reversed "Reversed")] ;;; line 293
-          [("C1 24V配电板电源故障") (cons 'reversed "Reversed")] ;;; line 294
-          [("直流母线接地故障") (cons 'reversed "Reversed")] ;;; line 295
-          [("PMS功率分配失败报警") (cons 'reversed "Reversed")] ;;; line 296
-          [("当前状态保持,不做任何动作") (cons 'reversed "Reversed")] ;;; line 297
-          [("当前处于停泊工况模式") (cons 'reversed "Reversed")] ;;; line 298
-          [("当前处于离靠港工况模式") (cons 'reversed "Reversed")] ;;; line 299
-          [("当前处于航行工况模式") (cons 'reversed "Reversed")] ;;; line 300
-          [("当前处于长时间海岛系泊工况模式") (cons 'reversed "Reversed")] ;;; line 301
-          [("当前处于顺水观光工况模式") (cons 'reversed "Reversed")] ;;; line 302
-          [("当前处于短时间海岛系泊工况模式") (cons 'reversed "Reversed")] ;;; line 303
-          [("控制电源电压低报警") (cons 'reversed "Reversed")] ;;; line 313
-          [("冷却水温度高报警") (cons 'reversed "Reversed")] ;;; line 314
-          [("滑油压力低报警") (cons 'reversed "Reversed")] ;;; line 315
-          [("滑油压力高报警") (cons 'reversed "Reversed")] ;;; line 316
-          [("超速报警") (cons 'reversed "Reversed")] ;;; line 317
-          [("燃油泄露报警") (cons 'reversed "Reversed")] ;;; line 318
-          [("海水压力低报警") (cons 'reversed "Reversed")] ;;; line 319
-          [("燃油压力低报警") (cons 'reversed "Reversed")] ;;; line 320
-          [("冷却水液位低报警") (cons 'reversed "Reversed")] ;;; line 321
-          [("冷却水温度过高停车") (cons 'reversed "Reversed")] ;;; line 322
-          [("滑油压力过低停车") (cons 'reversed "Reversed")] ;;; line 323
-          [("超速停机") (cons 'reversed "Reversed")] ;;; line 324
-          [("机旁急停") (cons 'reversed "Reversed")] ;;; line 325
-          [("远程急停") (cons 'reversed "Reversed")] ;;; line 326
-          [("公共报警") (cons 'reversed "Reversed")] ;;; line 327
-          [("发动机运行状态") (cons 'reversed "Reversed")] ;;; line 328
-          [("启动失败") (cons 'reversed "Reversed")] ;;; line 329
-          [("滑油滤器压差高报警") (cons 'reversed "Reversed")] ;;; line 330
-          [("备车完毕") (cons 'reversed "Reversed")] ;;; line 331
-          [("1类故障报警") (cons 'reversed "Reversed")] ;;; line 332
-          [("2类故障报警") (cons 'reversed "Reversed")] ;;; line 333
-          [("冷却水压力低报警") (cons 'reversed "Reversed")] ;;; line 334
-          [("允许合闸") (cons 'reversed "Reversed")] ;;; line 335
-          [("控制电源电压低报警") (cons 'reversed "Reversed")] ;;; line 337
-          [("冷却水温度高报警") (cons 'reversed "Reversed")] ;;; line 338
-          [("滑油压力低报警") (cons 'reversed "Reversed")] ;;; line 339
-          [("滑油压力高报警") (cons 'reversed "Reversed")] ;;; line 340
-          [("超速报警") (cons 'reversed "Reversed")] ;;; line 341
-          [("燃油泄露报警") (cons 'reversed "Reversed")] ;;; line 342
-          [("海水压力低报警") (cons 'reversed "Reversed")] ;;; line 343
-          [("燃油压力低报警") (cons 'reversed "Reversed")] ;;; line 344
-          [("冷却水液位低报警") (cons 'reversed "Reversed")] ;;; line 345
-          [("冷却水温度过高停车") (cons 'reversed "Reversed")] ;;; line 346
-          [("滑油压力过低停车") (cons 'reversed "Reversed")] ;;; line 347
-          [("超速停机") (cons 'reversed "Reversed")] ;;; line 348
-          [("机旁急停") (cons 'reversed "Reversed")] ;;; line 349
-          [("远程急停") (cons 'reversed "Reversed")] ;;; line 350
-          [("公共报警") (cons 'reversed "Reversed")] ;;; line 351
-          [("发动机运行状态") (cons 'reversed "Reversed")] ;;; line 352
-          [("启动失败") (cons 'reversed "Reversed")] ;;; line 353
-          [("滑油滤器压差高报警") (cons 'reversed "Reversed")] ;;; line 354
-          [("备车完毕") (cons 'reversed "Reversed")] ;;; line 355
-          [("1类故障报警") (cons 'reversed "Reversed")] ;;; line 356
-          [("2类故障报警") (cons 'reversed "Reversed")] ;;; line 357
-          [("冷却水压力低报警") (cons 'reversed "Reversed")] ;;; line 358
-          [("允许合闸") (cons 'reversed "Reversed")] ;;; line 359
-          [("驾控台手柄断线报警") (cons 'reversed "Reversed")] ;;; line 361
-          [("直流母线系统通信故障") (cons 'reversed "Reversed")] ;;; line 362
-          [("主电源故障报警") (cons 'reversed "Reversed")] ;;; line 363
-          [("应急电源故障报警") (cons 'reversed "Reversed")] ;;; line 364
-          [("随动控制失败报警") (cons 'reversed "Reversed")] ;;; line 365
-          [("直流母线系统停机预报警") (cons 'reversed "Reversed")] ;;; line 366
-          [("直流母线系统降速预报警") (cons 'reversed "Reversed")] ;;; line 367
-          [("直流母线系统停机报警") (cons 'reversed "Reversed")] ;;; line 368
-          [("直流母线系统降速报警") (cons 'reversed "Reversed")] ;;; line 369
-          [("驾控台紧急停止") (cons 'reversed "Reversed")] ;;; line 370
-          [("机旁紧急停止") (cons 'reversed "Reversed")] ;;; line 371
-          [("直流母线系统紧急停止反馈") (cons 'reversed "Reversed")] ;;; line 372
-          [("驾控台手柄断线报警") (cons 'reversed "Reversed")] ;;; line 373
-          [("直流母线系统通信故障") (cons 'reversed "Reversed")] ;;; line 374
-          [("主电源故障报警") (cons 'reversed "Reversed")] ;;; line 375
-          [("应急电源故障报警") (cons 'reversed "Reversed")] ;;; line 376
-          [("随动控制失败报警") (cons 'reversed "Reversed")] ;;; line 377
-          [("直流母线系统停机预报警") (cons 'reversed "Reversed")] ;;; line 378
-          [("直流母线系统降速预报警") (cons 'reversed "Reversed")] ;;; line 379
-          [("直流母线系统停机报警") (cons 'reversed "Reversed")] ;;; line 380
-          [("直流母线系统降速报警") (cons 'reversed "Reversed")] ;;; line 381
-          [("驾控台紧急停止") (cons 'reversed "Reversed")] ;;; line 382
-          [("机旁紧急停止") (cons 'reversed "Reversed")] ;;; line 383
-          [("直流母线系统紧急停止反馈") (cons 'reversed "Reversed")] ;;; line 384
-          [("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 385
-          [("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 386
-          [("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 387
-          [("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 388
-          [("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 389
-          [("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 390
-          [("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 391
-          [("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 392
-          [("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 393
-          [("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 394
-          [("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 395
-          [("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 396
-          [("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 397
-          [("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 398
-          [("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 399
-          [("驾驶室火灾报警") (cons 'reversed "Reversed")] ;;; line 401
-          [("艏甲板火灾报警") (cons 'reversed "Reversed")] ;;; line 402
-          [("艉甲板火灾报警") (cons 'reversed "Reversed")] ;;; line 403
-          [("餐厅火灾报警") (cons 'reversed "Reversed")] ;;; line 404
-          [("沙龙火灾报警") (cons 'reversed "Reversed")] ;;; line 405
-          [("主人房间火灾报警") (cons 'reversed "Reversed")] ;;; line 406
-          [("客房火灾报警") (cons 'reversed "Reversed")] ;;; line 407
-          [("住舱通道火灾报警") (cons 'reversed "Reversed")] ;;; line 408
-          [("梯道火灾报警") (cons 'reversed "Reversed")] ;;; line 409
-          [("VIP房火灾报警") (cons 'reversed "Reversed")] ;;; line 410
-          [("机舱火灾报警") (cons 'reversed "Reversed")] ;;; line 411
-          [("艏尖舱火灾报警") (cons 'reversed "Reversed")] ;;; line 412
-          [("蓄电池舱水位报警") (cons 'reversed "Reversed")] ;;; line 413
-          [("艉尖舱水位报警") (cons 'reversed "Reversed")] ;;; line 414
-          [("机舱水位报警") (cons 'reversed "Reversed")] ;;; line 415
-          [("住舱水位报警") (cons 'reversed "Reversed")] ;;; line 416
-          [("艏尖舱水位报警") (cons 'reversed "Reversed")] ;;; line 417
-          [("制冷已开启") (cons 'reversed "Reversed")] ;;; line 433
-          [("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 434
-          [("制热已开启") (cons 'reversed "Reversed")] ;;; line 435
-          [("制热已关闭") (cons 'reversed "Reversed")] ;;; line 436
-          [("电加热已开启") (cons 'reversed "Reversed")] ;;; line 437
-          [("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 438
-          [("故障已复位") (cons 'reversed "Reversed")] ;;; line 439
-          [("温度已设置") (cons 'reversed "Reversed")] ;;; line 440
-          [("制冷已开启") (cons 'reversed "Reversed")] ;;; line 441
-          [("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 442
-          [("制热已开启") (cons 'reversed "Reversed")] ;;; line 443
-          [("制热已关闭") (cons 'reversed "Reversed")] ;;; line 444
-          [("电加热已开启") (cons 'reversed "Reversed")] ;;; line 445
-          [("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 446
-          [("故障已复位") (cons 'reversed "Reversed")] ;;; line 447
-          [("温度已设置") (cons 'reversed "Reversed")] ;;; line 448
-          [("制冷已开启") (cons 'reversed "Reversed")] ;;; line 449
-          [("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 450
-          [("制热已开启") (cons 'reversed "Reversed")] ;;; line 451
-          [("制热已关闭") (cons 'reversed "Reversed")] ;;; line 452
-          [("电加热已开启") (cons 'reversed "Reversed")] ;;; line 453
-          [("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 454
-          [("故障已复位") (cons 'reversed "Reversed")] ;;; line 455
-          [("温度已设置") (cons 'reversed "Reversed")] ;;; line 456
-          [("制冷已开启") (cons 'reversed "Reversed")] ;;; line 457
-          [("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 458
-          [("制热已开启") (cons 'reversed "Reversed")] ;;; line 459
-          [("制热已关闭") (cons 'reversed "Reversed")] ;;; line 460
-          [("电加热已开启") (cons 'reversed "Reversed")] ;;; line 461
-          [("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 462
-          [("故障已复位") (cons 'reversed "Reversed")] ;;; line 463
-          [("温度已设置") (cons 'reversed "Reversed")] ;;; line 464
-          [("PMS通信故障") (cons 'reversed "Reversed")] ;;; line 785
-          [("1#发电机通信故障") (cons 'reversed "Reversed")] ;;; line 786
-          [("2#发电机通信故障") (cons 'reversed "Reversed")] ;;; line 787
-          [("左推进通信故障") (cons 'reversed "Reversed")] ;;; line 788
-          [("右推进通信故障") (cons 'reversed "Reversed")] ;;; line 789
-          [("空调通信故障") (cons 'reversed "Reversed")] ;;; line 790
-          [("火灾通信故障") (cons 'reversed "Reversed")] ;;; line 791
-          [("照明通信故障") (cons 'reversed "Reversed")] ;;; line 792
+          ;[("变频柜漏液检测报警") (cons 'reversed "Reversed")] ;;; line 259
+          ;[("C1看门狗报警来自G1") (cons 'reversed "Reversed")] ;;; line 260
+          ;[("C1看门狗报警来自G2") (cons 'reversed "Reversed")] ;;; line 261
+          ;[("C1看门狗报警来自M1") (cons 'reversed "Reversed")] ;;; line 262
+          ;[("C1看门狗报警来自M2") (cons 'reversed "Reversed")] ;;; line 263
+          ;[("C1看门狗报警来自T1") (cons 'reversed "Reversed")] ;;; line 264
+          ;[("C1看门狗报警来自T2") (cons 'reversed "Reversed")] ;;; line 265
+          ;[("C1看门狗报警来自B1") (cons 'reversed "Reversed")] ;;; line 266
+          ;[("C1看门狗报警来自H1") (cons 'reversed "Reversed")] ;;; line 267
+          ;[("C1其他综合报警") (status-event 'C1 'Misc)] ;;; line 268
+          ;[("C1左舷直流母线电压读取断开") (cons 'reversed "Reversed")] ;;; line 269
+          ;[("C1右舷直流母线电压读取断开") (cons 'reversed "Reversed")] ;;; line 270
+          ;[("C1滤波电抗器温控开关故障") (cons 'reversed "Reversed")] ;;; line 271
+          ;[("G1启动失败") (cons 'reversed "Reversed")] ;;; line 281
+          ;[("G1主断路器CB1合闸失败") (circuit-breaker-fault 'G1 1 'failure)] ;;; line 282
+          ;[("G1岸电启动失败") (cons 'reversed "Reversed")] ;;; line 283
+          ;[("G2启动失败") (cons 'reversed "Reversed")] ;;; line 284
+          ;[("G2主断路器CB1合闸失败") (circuit-breaker-fault 'G1 1 'failure)] ;;; line 285
+          ;[("M1启动失败") (cons 'reversed "Reversed")] ;;; line 286
+          ;[("M2启动失败") (cons 'reversed "Reversed")] ;;; line 287
+          ;[("T1启动失败") (cons 'reversed "Reversed")] ;;; line 288
+          ;[("T2启动失败") (cons 'reversed "Reversed")] ;;; line 289
+          ;[("B1启动失败") (cons 'reversed "Reversed")] ;;; line 290
+          ;[("H1启动失败") (cons 'reversed "Reversed")] ;;; line 291
+          ;[("G3启动失败") (cons 'reversed "Reversed")] ;;; line 292
+          ;[("C1 220V配电板电源故障") (cons 'reversed "Reversed")] ;;; line 293
+          ;[("C1 24V配电板电源故障") (cons 'reversed "Reversed")] ;;; line 294
+          ;[("直流母线接地故障") (cons 'reversed "Reversed")] ;;; line 295
+          ;[("PMS功率分配失败报警") (cons 'reversed "Reversed")] ;;; line 296
+          ;[("当前状态保持,不做任何动作") (cons 'reversed "Reversed")] ;;; line 297
+          ;[("当前处于停泊工况模式") (cons 'reversed "Reversed")] ;;; line 298
+          ;[("当前处于离靠港工况模式") (cons 'reversed "Reversed")] ;;; line 299
+          ;[("当前处于航行工况模式") (cons 'reversed "Reversed")] ;;; line 300
+          ;[("当前处于长时间海岛系泊工况模式") (cons 'reversed "Reversed")] ;;; line 301
+          ;[("当前处于顺水观光工况模式") (cons 'reversed "Reversed")] ;;; line 302
+          ;[("当前处于短时间海岛系泊工况模式") (cons 'reversed "Reversed")] ;;; line 303
+          ;[("控制电源电压低报警") (cons 'reversed "Reversed")] ;;; line 313
+          ;[("冷却水温度高报警") (cons 'reversed "Reversed")] ;;; line 314
+          ;[("滑油压力低报警") (cons 'reversed "Reversed")] ;;; line 315
+          ;[("滑油压力高报警") (cons 'reversed "Reversed")] ;;; line 316
+          ;[("超速报警") (cons 'reversed "Reversed")] ;;; line 317
+          ;[("燃油泄露报警") (cons 'reversed "Reversed")] ;;; line 318
+          ;[("海水压力低报警") (cons 'reversed "Reversed")] ;;; line 319
+          ;[("燃油压力低报警") (cons 'reversed "Reversed")] ;;; line 320
+          ;[("冷却水液位低报警") (cons 'reversed "Reversed")] ;;; line 321
+          ;[("冷却水温度过高停车") (cons 'reversed "Reversed")] ;;; line 322
+          ;[("滑油压力过低停车") (cons 'reversed "Reversed")] ;;; line 323
+          ;[("超速停机") (cons 'reversed "Reversed")] ;;; line 324
+          ;[("机旁急停") (cons 'reversed "Reversed")] ;;; line 325
+          ;[("远程急停") (cons 'reversed "Reversed")] ;;; line 326
+          ;[("公共报警") (cons 'reversed "Reversed")] ;;; line 327
+          ;[("发动机运行状态") (cons 'reversed "Reversed")] ;;; line 328
+          ;[("启动失败") (cons 'reversed "Reversed")] ;;; line 329
+          ;[("滑油滤器压差高报警") (cons 'reversed "Reversed")] ;;; line 330
+          ;[("备车完毕") (cons 'reversed "Reversed")] ;;; line 331
+          ;[("1类故障报警") (cons 'reversed "Reversed")] ;;; line 332
+          ;[("2类故障报警") (cons 'reversed "Reversed")] ;;; line 333
+          ;[("冷却水压力低报警") (cons 'reversed "Reversed")] ;;; line 334
+          ;[("允许合闸") (cons 'reversed "Reversed")] ;;; line 335
+          ;[("控制电源电压低报警") (cons 'reversed "Reversed")] ;;; line 337
+          ;[("冷却水温度高报警") (cons 'reversed "Reversed")] ;;; line 338
+          ;[("滑油压力低报警") (cons 'reversed "Reversed")] ;;; line 339
+          ;[("滑油压力高报警") (cons 'reversed "Reversed")] ;;; line 340
+          ;[("超速报警") (cons 'reversed "Reversed")] ;;; line 341
+          ;[("燃油泄露报警") (cons 'reversed "Reversed")] ;;; line 342
+          ;[("海水压力低报警") (cons 'reversed "Reversed")] ;;; line 343
+          ;[("燃油压力低报警") (cons 'reversed "Reversed")] ;;; line 344
+          ;[("冷却水液位低报警") (cons 'reversed "Reversed")] ;;; line 345
+          ;[("冷却水温度过高停车") (cons 'reversed "Reversed")] ;;; line 346
+          ;[("滑油压力过低停车") (cons 'reversed "Reversed")] ;;; line 347
+          ;[("超速停机") (cons 'reversed "Reversed")] ;;; line 348
+          ;[("机旁急停") (cons 'reversed "Reversed")] ;;; line 349
+          ;[("远程急停") (cons 'reversed "Reversed")] ;;; line 350
+          ;[("公共报警") (cons 'reversed "Reversed")] ;;; line 351
+          ;[("发动机运行状态") (cons 'reversed "Reversed")] ;;; line 352
+          ;[("启动失败") (cons 'reversed "Reversed")] ;;; line 353
+          ;[("滑油滤器压差高报警") (cons 'reversed "Reversed")] ;;; line 354
+          ;[("备车完毕") (cons 'reversed "Reversed")] ;;; line 355
+          ;[("1类故障报警") (cons 'reversed "Reversed")] ;;; line 356
+          ;[("2类故障报警") (cons 'reversed "Reversed")] ;;; line 357
+          ;[("冷却水压力低报警") (cons 'reversed "Reversed")] ;;; line 358
+          ;[("允许合闸") (cons 'reversed "Reversed")] ;;; line 359
+          ;[("驾控台手柄断线报警") (cons 'reversed "Reversed")] ;;; line 361
+          ;[("直流母线系统通信故障") (cons 'reversed "Reversed")] ;;; line 362
+          ;[("主电源故障报警") (cons 'reversed "Reversed")] ;;; line 363
+          ;[("应急电源故障报警") (cons 'reversed "Reversed")] ;;; line 364
+          ;[("随动控制失败报警") (cons 'reversed "Reversed")] ;;; line 365
+          ;[("直流母线系统停机预报警") (cons 'reversed "Reversed")] ;;; line 366
+          ;[("直流母线系统降速预报警") (cons 'reversed "Reversed")] ;;; line 367
+          ;[("直流母线系统停机报警") (cons 'reversed "Reversed")] ;;; line 368
+          ;[("直流母线系统降速报警") (cons 'reversed "Reversed")] ;;; line 369
+          ;[("驾控台紧急停止") (cons 'reversed "Reversed")] ;;; line 370
+          ;[("机旁紧急停止") (cons 'reversed "Reversed")] ;;; line 371
+          ;[("直流母线系统紧急停止反馈") (cons 'reversed "Reversed")] ;;; line 372
+          ;[("驾控台手柄断线报警") (cons 'reversed "Reversed")] ;;; line 373
+          ;[("直流母线系统通信故障") (cons 'reversed "Reversed")] ;;; line 374
+          ;[("主电源故障报警") (cons 'reversed "Reversed")] ;;; line 375
+          ;[("应急电源故障报警") (cons 'reversed "Reversed")] ;;; line 376
+          ;[("随动控制失败报警") (cons 'reversed "Reversed")] ;;; line 377
+          ;[("直流母线系统停机预报警") (cons 'reversed "Reversed")] ;;; line 378
+          ;[("直流母线系统降速预报警") (cons 'reversed "Reversed")] ;;; line 379
+          ;[("直流母线系统停机报警") (cons 'reversed "Reversed")] ;;; line 380
+          ;[("直流母线系统降速报警") (cons 'reversed "Reversed")] ;;; line 381
+          ;[("驾控台紧急停止") (cons 'reversed "Reversed")] ;;; line 382
+          ;[("机旁紧急停止") (cons 'reversed "Reversed")] ;;; line 383
+          ;[("直流母线系统紧急停止反馈") (cons 'reversed "Reversed")] ;;; line 384
+          ;[("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 385
+          ;[("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 386
+          ;[("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 387
+          ;[("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 388
+          ;[("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 389
+          ;[("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 390
+          ;[("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 391
+          ;[("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 392
+          ;[("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 393
+          ;[("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 394
+          ;[("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 395
+          ;[("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 396
+          ;[("M100(压缩机高压报警)") (cons 'reversed "Reversed")] ;;; line 397
+          ;[("M101(压缩机低压报警)") (cons 'reversed "Reversed")] ;;; line 398
+          ;[("M102(制热海水温度低,请开电加热报警)") (cons 'reversed "Reversed")] ;;; line 399
+          ;[("驾驶室火灾报警") (cons 'reversed "Reversed")] ;;; line 401
+          ;[("艏甲板火灾报警") (cons 'reversed "Reversed")] ;;; line 402
+          ;[("艉甲板火灾报警") (cons 'reversed "Reversed")] ;;; line 403
+          ;[("餐厅火灾报警") (cons 'reversed "Reversed")] ;;; line 404
+          ;[("沙龙火灾报警") (cons 'reversed "Reversed")] ;;; line 405
+          ;[("主人房间火灾报警") (cons 'reversed "Reversed")] ;;; line 406
+          ;[("客房火灾报警") (cons 'reversed "Reversed")] ;;; line 407
+          ;[("住舱通道火灾报警") (cons 'reversed "Reversed")] ;;; line 408
+          ;[("梯道火灾报警") (cons 'reversed "Reversed")] ;;; line 409
+          ;[("VIP房火灾报警") (cons 'reversed "Reversed")] ;;; line 410
+          ;[("机舱火灾报警") (cons 'reversed "Reversed")] ;;; line 411
+          ;[("艏尖舱火灾报警") (cons 'reversed "Reversed")] ;;; line 412
+          ;[("蓄电池舱水位报警") (cons 'reversed "Reversed")] ;;; line 413
+          ;[("艉尖舱水位报警") (cons 'reversed "Reversed")] ;;; line 414
+          ;[("机舱水位报警") (cons 'reversed "Reversed")] ;;; line 415
+          ;[("住舱水位报警") (cons 'reversed "Reversed")] ;;; line 416
+          ;[("艏尖舱水位报警") (cons 'reversed "Reversed")] ;;; line 417
+          ;[("制冷已开启") (cons 'reversed "Reversed")] ;;; line 433
+          ;[("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 434
+          ;[("制热已开启") (cons 'reversed "Reversed")] ;;; line 435
+          ;[("制热已关闭") (cons 'reversed "Reversed")] ;;; line 436
+          ;[("电加热已开启") (cons 'reversed "Reversed")] ;;; line 437
+          ;[("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 438
+          ;[("故障已复位") (cons 'reversed "Reversed")] ;;; line 439
+          ;[("温度已设置") (cons 'reversed "Reversed")] ;;; line 440
+          ;[("制冷已开启") (cons 'reversed "Reversed")] ;;; line 441
+          ;[("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 442
+          ;[("制热已开启") (cons 'reversed "Reversed")] ;;; line 443
+          ;[("制热已关闭") (cons 'reversed "Reversed")] ;;; line 444
+          ;[("电加热已开启") (cons 'reversed "Reversed")] ;;; line 445
+          ;[("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 446
+          ;[("故障已复位") (cons 'reversed "Reversed")] ;;; line 447
+          ;[("温度已设置") (cons 'reversed "Reversed")] ;;; line 448
+          ;[("制冷已开启") (cons 'reversed "Reversed")] ;;; line 449
+          ;[("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 450
+          ;[("制热已开启") (cons 'reversed "Reversed")] ;;; line 451
+          ;[("制热已关闭") (cons 'reversed "Reversed")] ;;; line 452
+          ;[("电加热已开启") (cons 'reversed "Reversed")] ;;; line 453
+          ;[("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 454
+          ;[("故障已复位") (cons 'reversed "Reversed")] ;;; line 455
+          ;[("温度已设置") (cons 'reversed "Reversed")] ;;; line 456
+          ;[("制冷已开启") (cons 'reversed "Reversed")] ;;; line 457
+          ;[("制冷已关闭") (cons 'reversed "Reversed")] ;;; line 458
+          ;[("制热已开启") (cons 'reversed "Reversed")] ;;; line 459
+          ;[("制热已关闭") (cons 'reversed "Reversed")] ;;; line 460
+          ;[("电加热已开启") (cons 'reversed "Reversed")] ;;; line 461
+          ;[("电加热已关闭") (cons 'reversed "Reversed")] ;;; line 462
+          ;[("故障已复位") (cons 'reversed "Reversed")] ;;; line 463
+          ;[("温度已设置") (cons 'reversed "Reversed")] ;;; line 464
+          ;[("PMS通信故障") (cons 'reversed "Reversed")] ;;; line 785
+          ;[("1#发电机通信故障") (cons 'reversed "Reversed")] ;;; line 786
+          ;[("2#发电机通信故障") (cons 'reversed "Reversed")] ;;; line 787
+          ;[("左推进通信故障") (cons 'reversed "Reversed")] ;;; line 788
+          ;[("右推进通信故障") (cons 'reversed "Reversed")] ;;; line 789
+          ;[("空调通信故障") (cons 'reversed "Reversed")] ;;; line 790
+          ;[("火灾通信故障") (cons 'reversed "Reversed")] ;;; line 791
+          ;[("照明通信故障") (cons 'reversed "Reversed")] ;;; line 792
           [else #false]))
 
       (let-values ([(idx) (unbox &lineno)]
                    [(id en_US) (if (pair? e) (values (car e) (cdr e)) (values 'ID "en_US"))])
         (unless (pair? e)
-          (printf "[(~s) (cons '~s ~s)] ;;; line ~a~n" zh_CN id en_US idx))
+          (printf "; [(~s) (cons '~s ~s)] ;;; line ~a~n" zh_CN id en_US idx))
         (set-box! &lineno (add1 idx))
-        (and (pair? e) (enum id idx en_US zh_CN))))))
+        (and (pair? e) (tongue id idx en_US zh_CN))))))
 
-(define events (filter-map (λ [row] (identify (list-ref row 4))) metrics))
-(make-enum-class 'YachtDI events)
+(define main
+  (lambda []
+    (define src.csv (build-path (path-only (quote-source-file)) "catalogue.csv"))
+    (define metrics (read-csv src.csv))
+    (values 'LogBook
+            (filter-map (λ [row] (identify (list-ref row 4))) metrics)
+            1
+            (length metrics))))
+
+(module+ main (main))

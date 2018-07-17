@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UFT-8" ?>
+<root>
+    <data name="1" xml:space="preserve"> <value>FWCoolant1Running</value> </data>
+    <data name="2" xml:space="preserve"> <value>FWCoolant1Fault</value> </data>
+    <data name="3" xml:space="preserve"> <value>FWCoolant2Running</value> </data>
+    <data name="4" xml:space="preserve"> <value>FWCoolant2Fault</value> </data>
+    <data name="5" xml:space="preserve"> <value>SWCoolant1Running</value> </data>
+    <data name="6" xml:space="preserve"> <value>SWCoolant1Fault</value> </data>
+    <data name="7" xml:space="preserve"> <value>SWCoolant2Running</value> </data>
+    <data name="8" xml:space="preserve"> <value>SWCoolant2Fault</value> </data>
+    <data name="9" xml:space="preserve"> <value>DC24VBPLowResistance</value> </data>
+    <data name="10" xml:space="preserve"> <value>AC220VBPLowResistance</value> </data>
+    <data name="11" xml:space="preserve"> <value>WaterWorksRunning</value> </data>
+    <data name="12" xml:space="preserve"> <value>WaterWorksFault</value> </data>
+    <data name="17" xml:space="preserve"> <value>ACCoolantRunning</value> </data>
+    <data name="18" xml:space="preserve"> <value>ACCoolantFault</value> </data>
+    <data name="19" xml:space="preserve"> <value>CO2PowerFailure</value> </data>
+    <data name="20" xml:space="preserve"> <value>CO2Leak</value> </data>
+    <data name="21" xml:space="preserve"> <value>CO2Release</value> </data>
+    <data name="25" xml:space="preserve"> <value>M1PMFault</value> </data>
+    <data name="26" xml:space="preserve"> <value>PSBusOverVoltage</value> </data>
+    <data name="27" xml:space="preserve"> <value>PSBusUnderVoltage</value> </data>
+    <data name="28" xml:space="preserve"> <value>M1IOCFault</value> </data>
+    <data name="29" xml:space="preserve"> <value>M1DTOCFault</value> </data>
+    <data name="30" xml:space="preserve"> <value>M1MotorOverSpeed</value> </data>
+    <data name="31" xml:space="preserve"> <value>M1MotorUnderSpeed</value> </data>
+    <data name="32" xml:space="preserve"> <value>M1CB1TripOff</value> </data>
+    <data name="33" xml:space="preserve"> <value>M1DCFuseBroken</value> </data>
+    <data name="34" xml:space="preserve"> <value>M1UpwOverTemperature</value> </data>
+    <data name="35" xml:space="preserve"> <value>M1VpwOverTemperature</value> </data>
+    <data name="36" xml:space="preserve"> <value>M1WpwOverTemperature</value> </data>
+    <data name="37" xml:space="preserve"> <value>M1DBOverTemperature</value> </data>
+    <data name="38" xml:space="preserve"> <value>M1nDBOverTemperature</value> </data>
+    <data name="39" xml:space="preserve"> <value>M1TBOverTemperature</value> </data>
+    <data name="40" xml:space="preserve"> <value>M1PMOverTemperature</value> </data>
+    <data name="41" xml:space="preserve"> <value>PSBusHighVoltage</value> </data>
+    <data name="42" xml:space="preserve"> <value>PSBusLowVoltage</value> </data>
+    <data name="43" xml:space="preserve"> <value>M1Overload</value> </data>
+    <data name="44" xml:space="preserve"> <value>M1VeryHighCurrent</value> </data>
+    <data name="45" xml:space="preserve"> <value>M1PMHighTemperature</value> </data>
+    <data name="46" xml:space="preserve"> <value>M1PMVeryHighTemperature</value> </data>
+    <data name="47" xml:space="preserve"> <value>M1MotorLocked</value> </data>
+    <data name="48" xml:space="preserve"> <value>M1UpwHighTemperature</value> </data>
+    <data name="49" xml:space="preserve"> <value>M1VpwHighTemperature</value> </data>
+    <data name="50" xml:space="preserve"> <value>M1WpwHighTemperature</value> </data>
+    <data name="51" xml:space="preserve"> <value>M1DBHighTemperature</value> </data>
+    <data name="52" xml:space="preserve"> <value>M1nDBHighTemperature</value> </data>
+    <data name="53" xml:space="preserve"> <value>M1TBHighTemperature</value> </data>
+    <data name="54" xml:space="preserve"> <value>M1UpwVeryHighTemperature</value> </data>
+    <data name="55" xml:space="preserve"> <value>M1VpwVeryHighTemperature</value> </data>
+    <data name="56" xml:space="preserve"> <value>M1WpwVeryHighTemperature</value> </data>
+    <data name="57" xml:space="preserve"> <value>M1DBVeryHighTemperature</value> </data>
+    <data name="58" xml:space="preserve"> <value>M1nDBVeryHighTemperature</value> </data>
+    <data name="59" xml:space="preserve"> <value>M1TBVeryHighTemperature</value> </data>
+    <data name="60" xml:space="preserve"> <value>M1Misc</value> </data>
+    <data name="61" xml:space="preserve"> <value>M2PMFault</value> </data>
+    <data name="62" xml:space="preserve"> <value>SBBusOverVoltage</value> </data>
+    <data name="63" xml:space="preserve"> <value>SBBusUnderVoltage</value> </data>
+    <data name="64" xml:space="preserve"> <value>M2IOCFault</value> </data>
+    <data name="65" xml:space="preserve"> <value>M2DTOCFault</value> </data>
+    <data name="66" xml:space="preserve"> <value>M2MotorOverSpeed</value> </data>
+    <data name="67" xml:space="preserve"> <value>M2MotorUnderSpeed</value> </data>
+    <data name="68" xml:space="preserve"> <value>M2CB1TripOff</value> </data>
+    <data name="69" xml:space="preserve"> <value>M2DCFuseBroken</value> </data>
+    <data name="70" xml:space="preserve"> <value>M2UOverTemperature</value> </data>
+    <data name="71" xml:space="preserve"> <value>M2VOverTemperature</value> </data>
+    <data name="72" xml:space="preserve"> <value>M2WOverTemperature</value> </data>
+    <data name="73" xml:space="preserve"> <value>M2DBOverTemperature</value> </data>
+    <data name="74" xml:space="preserve"> <value>M2nDBOverTemperature</value> </data>
+    <data name="75" xml:space="preserve"> <value>M2TBOverTemperature</value> </data>
+    <data name="76" xml:space="preserve"> <value>M2PMOverTemperature</value> </data>
+    <data name="77" xml:space="preserve"> <value>SBBusHighVoltage</value> </data>
+    <data name="78" xml:space="preserve"> <value>SBBusLowVoltage</value> </data>
+    <data name="79" xml:space="preserve"> <value>M2Overload</value> </data>
+    <data name="80" xml:space="preserve"> <value>M2VeryHighCurrent</value> </data>
+    <data name="81" xml:space="preserve"> <value>M2PMHighTemperature</value> </data>
+    <data name="82" xml:space="preserve"> <value>M2PMVeryHighTemperature</value> </data>
+    <data name="83" xml:space="preserve"> <value>M2MotorLocked</value> </data>
+    <data name="84" xml:space="preserve"> <value>M2UpwHighTemperature</value> </data>
+    <data name="85" xml:space="preserve"> <value>M2VpwHighTemperature</value> </data>
+    <data name="86" xml:space="preserve"> <value>M2WpwHighTemperature</value> </data>
+    <data name="87" xml:space="preserve"> <value>M2DBHighTemperature</value> </data>
+    <data name="88" xml:space="preserve"> <value>M2nDBHighTemperature</value> </data>
+    <data name="89" xml:space="preserve"> <value>M2TBHighTemperature</value> </data>
+    <data name="90" xml:space="preserve"> <value>M2UpwVeryHighTemperature</value> </data>
+    <data name="91" xml:space="preserve"> <value>M2VpwVeryHighTemperature</value> </data>
+    <data name="92" xml:space="preserve"> <value>M2WpwVeryHighTemperature</value> </data>
+    <data name="93" xml:space="preserve"> <value>M2DBVeryHighTemperature</value> </data>
+    <data name="94" xml:space="preserve"> <value>M2nDBVeryHighTemperature</value> </data>
+    <data name="95" xml:space="preserve"> <value>M2TBVeryHighTemperature</value> </data>
+    <data name="96" xml:space="preserve"> <value>M2Misc</value> </data>
+    <data name="105" xml:space="preserve"> <value>G1PMFault</value> </data>
+    <data name="106" xml:space="preserve"> <value>G1IOCFault</value> </data>
+    <data name="107" xml:space="preserve"> <value>G1DTOCFault</value> </data>
+    <data name="108" xml:space="preserve"> <value>G1MotorOverSpeed</value> </data>
+    <data name="109" xml:space="preserve"> <value>G1MotorUnderSpeed</value> </data>
+    <data name="110" xml:space="preserve"> <value>G1Diesel1CMisc</value> </data>
+    <data name="111" xml:space="preserve"> <value>G1CB1TripOff</value> </data>
+    <data name="112" xml:space="preserve"> <value>G1DCFuseBroken</value> </data>
+    <data name="113" xml:space="preserve"> <value>G1UpwOverTemperature</value> </data>
+    <data name="114" xml:space="preserve"> <value>G1VpwOverTemperature</value> </data>
+    <data name="115" xml:space="preserve"> <value>G1WpwOverTemperature</value> </data>
+    <data name="116" xml:space="preserve"> <value>G1DBOverTemperature</value> </data>
+    <data name="117" xml:space="preserve"> <value>G1nDBOverTemperature</value> </data>
+    <data name="118" xml:space="preserve"> <value>G1SPTransformerOverTemperature</value> </data>
+    <data name="119" xml:space="preserve"> <value>G1PMOverTemperature</value> </data>
+    <data name="120" xml:space="preserve"> <value>G1Overload</value> </data>
+    <data name="121" xml:space="preserve"> <value>G1VeryHighCurrent</value> </data>
+    <data name="122" xml:space="preserve"> <value>G1PMHighTemperature</value> </data>
+    <data name="123" xml:space="preserve"> <value>G1PMVeryHighTemperature</value> </data>
+    <data name="124" xml:space="preserve"> <value>G1Diesel2CMisc</value> </data>
+    <data name="125" xml:space="preserve"> <value>G1UpwHighTemperature</value> </data>
+    <data name="126" xml:space="preserve"> <value>G1VpwHighTemperature</value> </data>
+    <data name="127" xml:space="preserve"> <value>G1WpwHighTemperature</value> </data>
+    <data name="128" xml:space="preserve"> <value>G1DBHighTemperature</value> </data>
+    <data name="129" xml:space="preserve"> <value>G1nDBHighTemperature</value> </data>
+    <data name="130" xml:space="preserve"> <value>G1SPTransformerHighTemperature</value> </data>
+    <data name="131" xml:space="preserve"> <value>G1UpwVeryHighTemperature</value> </data>
+    <data name="132" xml:space="preserve"> <value>G1VpwVeryHighTemperature</value> </data>
+    <data name="133" xml:space="preserve"> <value>G1WpwVeryHighTemperature</value> </data>
+    <data name="134" xml:space="preserve"> <value>G1DBVeryHighTemperature</value> </data>
+    <data name="135" xml:space="preserve"> <value>G1nDBVeryHighTemperature</value> </data>
+    <data name="136" xml:space="preserve"> <value>G1SPTransformerVeryHighTemperature</value> </data>
+    <data name="137" xml:space="preserve"> <value>G1SPCBOFF</value> </data>
+    <data name="138" xml:space="preserve"> <value>G1Misc</value> </data>
+    <data name="139" xml:space="preserve"> <value>G1SPTransformerTSwitchFault</value> </data>
+    <data name="140" xml:space="preserve"> <value>G2PMFault</value> </data>
+    <data name="141" xml:space="preserve"> <value>G2IOCFault</value> </data>
+    <data name="142" xml:space="preserve"> <value>G2DTOCFault</value> </data>
+    <data name="143" xml:space="preserve"> <value>G2MotorOverSpeed</value> </data>
+    <data name="144" xml:space="preserve"> <value>G2MotorUnderSpeed</value> </data>
+    <data name="145" xml:space="preserve"> <value>G2Diesel1CMisc</value> </data>
+    <data name="146" xml:space="preserve"> <value>G2CB1TripOff</value> </data>
+    <data name="147" xml:space="preserve"> <value>G2DCFuseBroken</value> </data>
+    <data name="148" xml:space="preserve"> <value>G2UpwOverTemperature</value> </data>
+    <data name="149" xml:space="preserve"> <value>G2VpwOverTemperature</value> </data>
+    <data name="150" xml:space="preserve"> <value>G2WpwOverTemperature</value> </data>
+    <data name="151" xml:space="preserve"> <value>G2DBOverTemperature</value> </data>
+    <data name="152" xml:space="preserve"> <value>G2nDBOverTemperature</value> </data>
+    <data name="153" xml:space="preserve"> <value>G2PMOverTemperature</value> </data>
+    <data name="154" xml:space="preserve"> <value>G2Overload</value> </data>
+    <data name="155" xml:space="preserve"> <value>G2VeryHighCurrent</value> </data>
+    <data name="156" xml:space="preserve"> <value>G2PMHighTemperature</value> </data>
+    <data name="157" xml:space="preserve"> <value>G2PMVeryHighTemperature</value> </data>
+    <data name="158" xml:space="preserve"> <value>G2Diesel2CMisc</value> </data>
+    <data name="159" xml:space="preserve"> <value>G2UpwHighTemperature</value> </data>
+    <data name="160" xml:space="preserve"> <value>G2VpwHighTemperature</value> </data>
+    <data name="161" xml:space="preserve"> <value>G2WpwHighTemperature</value> </data>
+    <data name="162" xml:space="preserve"> <value>G2DBHighTemperature</value> </data>
+    <data name="163" xml:space="preserve"> <value>G2nDBHighTemperature</value> </data>
+    <data name="164" xml:space="preserve"> <value>G2UpwVeryHighTemperature</value> </data>
+    <data name="165" xml:space="preserve"> <value>G2VpwVeryHighTemperature</value> </data>
+    <data name="166" xml:space="preserve"> <value>G2WpwVeryHighTemperature</value> </data>
+    <data name="167" xml:space="preserve"> <value>G2DBVeryHighTemperature</value> </data>
+    <data name="168" xml:space="preserve"> <value>G2nDBVeryHighTemperature</value> </data>
+    <data name="169" xml:space="preserve"> <value>G2Misc</value> </data>
+    <data name="170" xml:space="preserve"> <value>B1PMFault</value> </data>
+    <data name="171" xml:space="preserve"> <value>B1IOCFault</value> </data>
+    <data name="172" xml:space="preserve"> <value>B1DTOCFault</value> </data>
+    <data name="173" xml:space="preserve"> <value>B1CB2TripOff</value> </data>
+    <data name="174" xml:space="preserve"> <value>B1DCFuseBroken</value> </data>
+    <data name="175" xml:space="preserve"> <value>B1PMOverTemperature</value> </data>
+    <data name="176" xml:space="preserve"> <value>B1Overload</value> </data>
+    <data name="177" xml:space="preserve"> <value>B1VeryHighCurrent</value> </data>
+    <data name="178" xml:space="preserve"> <value>B1PMHighTemperature</value> </data>
+    <data name="179" xml:space="preserve"> <value>B1PMVeryHighTemperature</value> </data>
+    <data name="180" xml:space="preserve"> <value>B1Misc</value> </data>
+    <data name="181" xml:space="preserve"> <value>B1InductorTSwitchFault</value> </data>
+    <data name="185" xml:space="preserve"> <value>T1PMFault</value> </data>
+    <data name="186" xml:space="preserve"> <value>T1IOCFault</value> </data>
+    <data name="187" xml:space="preserve"> <value>T1DTOCFault</value> </data>
+    <data name="188" xml:space="preserve"> <value>T1CB1TripOff</value> </data>
+    <data name="189" xml:space="preserve"> <value>T1DCFuseBroken</value> </data>
+    <data name="190" xml:space="preserve"> <value>T1PMOverTemperature</value> </data>
+    <data name="191" xml:space="preserve"> <value>T1Overload</value> </data>
+    <data name="192" xml:space="preserve"> <value>T1VeryHighCurrent</value> </data>
+    <data name="193" xml:space="preserve"> <value>T1PMHighTemperature</value> </data>
+    <data name="194" xml:space="preserve"> <value>T1PMVeryHighTemperature</value> </data>
+    <data name="195" xml:space="preserve"> <value>T1Misc</value> </data>
+    <data name="196" xml:space="preserve"> <value>T2PMFault</value> </data>
+    <data name="197" xml:space="preserve"> <value>T2IOCFault</value> </data>
+    <data name="198" xml:space="preserve"> <value>T2DTOCFault</value> </data>
+    <data name="199" xml:space="preserve"> <value>T2CB1TripOff</value> </data>
+    <data name="200" xml:space="preserve"> <value>T2DCFuseBroken</value> </data>
+    <data name="201" xml:space="preserve"> <value>T2PMOverTemperature</value> </data>
+    <data name="202" xml:space="preserve"> <value>T2Overload</value> </data>
+    <data name="203" xml:space="preserve"> <value>T2VeryHighCurrent</value> </data>
+    <data name="204" xml:space="preserve"> <value>T2PMHighTemperature</value> </data>
+    <data name="205" xml:space="preserve"> <value>T2PMVeryHighTemperature</value> </data>
+    <data name="206" xml:space="preserve"> <value>T2Misc</value> </data>
+    <data name="217" xml:space="preserve"> <value>H1Misc</value> </data>
+    <data name="218" xml:space="preserve"> <value>H1CoolsrcPressureLost</value> </data>
+    <data name="219" xml:space="preserve"> <value>H1CoolsrcTemperatureLost</value> </data>
+    <data name="220" xml:space="preserve"> <value>H1CoolantPressureLost</value> </data>
+    <data name="221" xml:space="preserve"> <value>H1CoolantFlowLost</value> </data>
+    <data name="222" xml:space="preserve"> <value>H1CoolantTemperatureLost</value> </data>
+    <data name="223" xml:space="preserve"> <value>H13WRValveLost</value> </data>
+    <data name="224" xml:space="preserve"> <value>H1CoolantOverFlow</value> </data>
+    <data name="225" xml:space="preserve"> <value>H1CoolantHighFlow</value> </data>
+    <data name="226" xml:space="preserve"> <value>H1CoolantUnderFlow</value> </data>
+    <data name="227" xml:space="preserve"> <value>H1CoolantLowFlow</value> </data>
+    <data name="228" xml:space="preserve"> <value>H1CoolsrcOverPressure</value> </data>
+    <data name="229" xml:space="preserve"> <value>H1CoolsrcHighPressure</value> </data>
+    <data name="230" xml:space="preserve"> <value>H1CoolsrcUnderPressure</value> </data>
+    <data name="231" xml:space="preserve"> <value>H1CoolsrcLowPressure</value> </data>
+    <data name="232" xml:space="preserve"> <value>H1CoolantOverPressure</value> </data>
+    <data name="233" xml:space="preserve"> <value>H1CoolantHighPressure</value> </data>
+    <data name="234" xml:space="preserve"> <value>H1CoolantUnderPressure</value> </data>
+    <data name="235" xml:space="preserve"> <value>H1CoolantLowPressure</value> </data>
+    <data name="236" xml:space="preserve"> <value>H1CoolsrcOverTemperature</value> </data>
+    <data name="237" xml:space="preserve"> <value>H1CoolsrcHighTemperature</value> </data>
+    <data name="238" xml:space="preserve"> <value>H1CoolsrcUnderTemperature</value> </data>
+    <data name="239" xml:space="preserve"> <value>H1CoolsrcLowTemperature</value> </data>
+    <data name="240" xml:space="preserve"> <value>H1CoolantOverTemperature</value> </data>
+    <data name="241" xml:space="preserve"> <value>H1CoolantHighTemperature</value> </data>
+    <data name="242" xml:space="preserve"> <value>H1CoolantUnderTemperature</value> </data>
+    <data name="243" xml:space="preserve"> <value>H1CoolantLowTemperature</value> </data>
+    <data name="244" xml:space="preserve"> <value>H13WRValveMismatch</value> </data>
+    <data name="245" xml:space="preserve"> <value>H1CoolantUnderLoadTemperature</value> </data>
+    <data name="246" xml:space="preserve"> <value>H1220VPowerFailure</value> </data>
+    <data name="249" xml:space="preserve"> <value>G3PMFault</value> </data>
+    <data name="250" xml:space="preserve"> <value>G3IOCFault</value> </data>
+    <data name="251" xml:space="preserve"> <value>G3DTOCFault</value> </data>
+    <data name="252" xml:space="preserve"> <value>G3DCFuseBroken</value> </data>
+    <data name="253" xml:space="preserve"> <value>D1DCFuseBroken</value> </data>
+    <data name="254" xml:space="preserve"> <value>G3PMOverTemperature</value> </data>
+    <data name="255" xml:space="preserve"> <value>G3Overload</value> </data>
+    <data name="256" xml:space="preserve"> <value>G3VeryHighCurrent</value> </data>
+    <data name="257" xml:space="preserve"> <value>G3PMHighTemperature</value> </data>
+    <data name="258" xml:space="preserve"> <value>G3PMVeryHighTemperature</value> </data>
+    <data name="FWCoolant1Running" xml:space="preserve"> <value>Fresh Water Cooling Pump #1 Running</value> </data>
+    <data name="FWCoolant1Fault" xml:space="preserve"> <value>Fresh Water Cooling Pump #1 Fault</value> </data>
+    <data name="FWCoolant2Running" xml:space="preserve"> <value>Fresh Water Cooling Pump #2 Running</value> </data>
+    <data name="FWCoolant2Fault" xml:space="preserve"> <value>Fresh Water Cooling Pump #2 Fault</value> </data>
+    <data name="SWCoolant1Running" xml:space="preserve"> <value>Sea Water Cooling Pump #1 Running</value> </data>
+    <data name="SWCoolant1Fault" xml:space="preserve"> <value>Sea Water Cooling Pump #1 Fault</value> </data>
+    <data name="SWCoolant2Running" xml:space="preserve"> <value>Sea Water Cooling Pump #2 Running</value> </data>
+    <data name="SWCoolant2Fault" xml:space="preserve"> <value>Sea Water Cooling Pump #2 Fault</value> </data>
+    <data name="DC24VBPLowResistance" xml:space="preserve"> <value>DC24V Breaker Panel Resistance Low</value> </data>
+    <data name="AC220VBPLowResistance" xml:space="preserve"> <value>AC220V Breaker Panel Resistance Low</value> </data>
+    <data name="WaterWorksRunning" xml:space="preserve"> <value>WaterWorks Running</value> </data>
+    <data name="WaterWorksFault" xml:space="preserve"> <value>WaterWorks Fault</value> </data>
+    <data name="ACCoolantRunning" xml:space="preserve"> <value>Air Conditioner Cooling Pump Running</value> </data>
+    <data name="ACCoolantFault" xml:space="preserve"> <value>Air Conditioner Cooling Pump Fault</value> </data>
+    <data name="CO2PowerFailure" xml:space="preserve"> <value>CO2 Power Failure</value> </data>
+    <data name="CO2Leak" xml:space="preserve"> <value>CO2 Leak</value> </data>
+    <data name="CO2Release" xml:space="preserve"> <value>CO2 Release</value> </data>
+    <data name="M1PMFault" xml:space="preserve"> <value>M1 Power Module Fault</value> </data>
+    <data name="PSBusOverVoltage" xml:space="preserve"> <value>Port Station DC Bus Voltage Exceed</value> </data>
+    <data name="PSBusUnderVoltage" xml:space="preserve"> <value>Port Station DC Bus Voltage Beneath</value> </data>
+    <data name="M1IOCFault" xml:space="preserve"> <value>M1 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="M1DTOCFault" xml:space="preserve"> <value>M1 Definite Time Over Current Relay Fault</value> </data>
+    <data name="M1MotorOverSpeed" xml:space="preserve"> <value>M1 Motor Rotational Speed Exceed</value> </data>
+    <data name="M1MotorUnderSpeed" xml:space="preserve"> <value>M1 Motor Rotational Speed Beneath</value> </data>
+    <data name="M1CB1TripOff" xml:space="preserve"> <value>M1 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="M1DCFuseBroken" xml:space="preserve"> <value>M1 DC Fuse Broken</value> </data>
+    <data name="M1UpwOverTemperature" xml:space="preserve"> <value>M1 U Phase Winding Temperature Exceed</value> </data>
+    <data name="M1VpwOverTemperature" xml:space="preserve"> <value>M1 V Phase Winding Temperature Exceed</value> </data>
+    <data name="M1WpwOverTemperature" xml:space="preserve"> <value>M1 W Phase Winding Temperature Exceed</value> </data>
+    <data name="M1DBOverTemperature" xml:space="preserve"> <value>M1 Driven Bearing Temperature Exceed</value> </data>
+    <data name="M1nDBOverTemperature" xml:space="preserve"> <value>M1 non-Driven Bearing Temperature Exceed</value> </data>
+    <data name="M1TBOverTemperature" xml:space="preserve"> <value>M1 Thrust Bearing Temperature Exceed</value> </data>
+    <data name="M1PMOverTemperature" xml:space="preserve"> <value>M1 Power Module Temperature Exceed</value> </data>
+    <data name="PSBusHighVoltage" xml:space="preserve"> <value>Port Station DC Bus Voltage High</value> </data>
+    <data name="PSBusLowVoltage" xml:space="preserve"> <value>Port Station DC Bus Voltage Low</value> </data>
+    <data name="M1Overload" xml:space="preserve"> <value>M1 Overload</value> </data>
+    <data name="M1VeryHighCurrent" xml:space="preserve"> <value>M1 Current Very High</value> </data>
+    <data name="M1PMHighTemperature" xml:space="preserve"> <value>M1 Power Module Temperature High</value> </data>
+    <data name="M1PMVeryHighTemperature" xml:space="preserve"> <value>M1 Power Module Temperature Very High</value> </data>
+    <data name="M1MotorLocked" xml:space="preserve"> <value>M1 Motor Locked</value> </data>
+    <data name="M1UpwHighTemperature" xml:space="preserve"> <value>M1 U Phase Winding Temperature High</value> </data>
+    <data name="M1VpwHighTemperature" xml:space="preserve"> <value>M1 V Phase Winding Temperature High</value> </data>
+    <data name="M1WpwHighTemperature" xml:space="preserve"> <value>M1 W Phase Winding Temperature High</value> </data>
+    <data name="M1DBHighTemperature" xml:space="preserve"> <value>M1 Driven Bearing Temperature High</value> </data>
+    <data name="M1nDBHighTemperature" xml:space="preserve"> <value>M1 non-Driven Bearing Temperature High</value> </data>
+    <data name="M1TBHighTemperature" xml:space="preserve"> <value>M1 Thrust Bearing Temperature High</value> </data>
+    <data name="M1UpwVeryHighTemperature" xml:space="preserve"> <value>M1 U Phase Winding Temperature Very High</value> </data>
+    <data name="M1VpwVeryHighTemperature" xml:space="preserve"> <value>M1 V Phase Winding Temperature Very High</value> </data>
+    <data name="M1WpwVeryHighTemperature" xml:space="preserve"> <value>M1 W Phase Winding Temperature Very High</value> </data>
+    <data name="M1DBVeryHighTemperature" xml:space="preserve"> <value>M1 Driven Bearing Temperature Very High</value> </data>
+    <data name="M1nDBVeryHighTemperature" xml:space="preserve"> <value>M1 non-Driven Bearing Temperature Very High</value> </data>
+    <data name="M1TBVeryHighTemperature" xml:space="preserve"> <value>M1 Thrust Bearing Temperature Very High</value> </data>
+    <data name="M1Misc" xml:space="preserve"> <value>M1 Miscellaneous Alerting</value> </data>
+    <data name="M2PMFault" xml:space="preserve"> <value>M2 Power Module Fault</value> </data>
+    <data name="SBBusOverVoltage" xml:space="preserve"> <value>Starboard DC Bus Voltage Exceed</value> </data>
+    <data name="SBBusUnderVoltage" xml:space="preserve"> <value>Starboard DC Bus Voltage Beneath</value> </data>
+    <data name="M2IOCFault" xml:space="preserve"> <value>M2 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="M2DTOCFault" xml:space="preserve"> <value>M2 Definite Time Over Current Relay Fault</value> </data>
+    <data name="M2MotorOverSpeed" xml:space="preserve"> <value>M2 Motor Rotational Speed Exceed</value> </data>
+    <data name="M2MotorUnderSpeed" xml:space="preserve"> <value>M2 Motor Rotational Speed Beneath</value> </data>
+    <data name="M2CB1TripOff" xml:space="preserve"> <value>M2 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="M2DCFuseBroken" xml:space="preserve"> <value>M2 DC Fuse Broken</value> </data>
+    <data name="M2UOverTemperature" xml:space="preserve"> <value>M2 U Temperature Exceed</value> </data>
+    <data name="M2VOverTemperature" xml:space="preserve"> <value>M2 V Temperature Exceed</value> </data>
+    <data name="M2WOverTemperature" xml:space="preserve"> <value>M2 W Temperature Exceed</value> </data>
+    <data name="M2DBOverTemperature" xml:space="preserve"> <value>M2 Driven Bearing Temperature Exceed</value> </data>
+    <data name="M2nDBOverTemperature" xml:space="preserve"> <value>M2 non-Driven Bearing Temperature Exceed</value> </data>
+    <data name="M2TBOverTemperature" xml:space="preserve"> <value>M2 Thrust Bearing Temperature Exceed</value> </data>
+    <data name="M2PMOverTemperature" xml:space="preserve"> <value>M2 Power Module Temperature Exceed</value> </data>
+    <data name="SBBusHighVoltage" xml:space="preserve"> <value>Starboard DC Bus Voltage High</value> </data>
+    <data name="SBBusLowVoltage" xml:space="preserve"> <value>Starboard DC Bus Voltage Low</value> </data>
+    <data name="M2Overload" xml:space="preserve"> <value>M2 Overload</value> </data>
+    <data name="M2VeryHighCurrent" xml:space="preserve"> <value>M2 Current Very High</value> </data>
+    <data name="M2PMHighTemperature" xml:space="preserve"> <value>M2 Power Module Temperature High</value> </data>
+    <data name="M2PMVeryHighTemperature" xml:space="preserve"> <value>M2 Power Module Temperature Very High</value> </data>
+    <data name="M2MotorLocked" xml:space="preserve"> <value>M2 Motor Locked</value> </data>
+    <data name="M2UpwHighTemperature" xml:space="preserve"> <value>M2 U Phase Winding Temperature High</value> </data>
+    <data name="M2VpwHighTemperature" xml:space="preserve"> <value>M2 V Phase Winding Temperature High</value> </data>
+    <data name="M2WpwHighTemperature" xml:space="preserve"> <value>M2 W Phase Winding Temperature High</value> </data>
+    <data name="M2DBHighTemperature" xml:space="preserve"> <value>M2 Driven Bearing Temperature High</value> </data>
+    <data name="M2nDBHighTemperature" xml:space="preserve"> <value>M2 non-Driven Bearing Temperature High</value> </data>
+    <data name="M2TBHighTemperature" xml:space="preserve"> <value>M2 Thrust Bearing Temperature High</value> </data>
+    <data name="M2UpwVeryHighTemperature" xml:space="preserve"> <value>M2 U Phase Winding Temperature Very High</value> </data>
+    <data name="M2VpwVeryHighTemperature" xml:space="preserve"> <value>M2 V Phase Winding Temperature Very High</value> </data>
+    <data name="M2WpwVeryHighTemperature" xml:space="preserve"> <value>M2 W Phase Winding Temperature Very High</value> </data>
+    <data name="M2DBVeryHighTemperature" xml:space="preserve"> <value>M2 Driven Bearing Temperature Very High</value> </data>
+    <data name="M2nDBVeryHighTemperature" xml:space="preserve"> <value>M2 non-Driven Bearing Temperature Very High</value> </data>
+    <data name="M2TBVeryHighTemperature" xml:space="preserve"> <value>M2 Thrust Bearing Temperature Very High</value> </data>
+    <data name="M2Misc" xml:space="preserve"> <value>M2 Miscellaneous Alerting</value> </data>
+    <data name="G1PMFault" xml:space="preserve"> <value>G1 Power Module Fault</value> </data>
+    <data name="G1IOCFault" xml:space="preserve"> <value>G1 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="G1DTOCFault" xml:space="preserve"> <value>G1 Definite Time Over Current Relay Fault</value> </data>
+    <data name="G1MotorOverSpeed" xml:space="preserve"> <value>G1 Motor Rotational Speed Exceed</value> </data>
+    <data name="G1MotorUnderSpeed" xml:space="preserve"> <value>G1 Motor Rotational Speed Beneath</value> </data>
+    <data name="G1Diesel1CMisc" xml:space="preserve"> <value>G1 Diesel 1st Class Miscellaneous Alerting</value> </data>
+    <data name="G1CB1TripOff" xml:space="preserve"> <value>G1 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="G1DCFuseBroken" xml:space="preserve"> <value>G1 DC Fuse Broken</value> </data>
+    <data name="G1UpwOverTemperature" xml:space="preserve"> <value>G1 U Phase Winding Temperature Exceed</value> </data>
+    <data name="G1VpwOverTemperature" xml:space="preserve"> <value>G1 V Phase Winding Temperature Exceed</value> </data>
+    <data name="G1WpwOverTemperature" xml:space="preserve"> <value>G1 W Phase Winding Temperature Exceed</value> </data>
+    <data name="G1DBOverTemperature" xml:space="preserve"> <value>G1 Driven Bearing Temperature Exceed</value> </data>
+    <data name="G1nDBOverTemperature" xml:space="preserve"> <value>G1 non-Driven Bearing Temperature Exceed</value> </data>
+    <data name="G1SPTransformerOverTemperature" xml:space="preserve"> <value>G1 Shore Power Transformer Temperature Exceed</value> </data>
+    <data name="G1PMOverTemperature" xml:space="preserve"> <value>G1 Power Module Temperature Exceed</value> </data>
+    <data name="G1Overload" xml:space="preserve"> <value>G1 Overload</value> </data>
+    <data name="G1VeryHighCurrent" xml:space="preserve"> <value>G1 Current Very High</value> </data>
+    <data name="G1PMHighTemperature" xml:space="preserve"> <value>G1 Power Module Temperature High</value> </data>
+    <data name="G1PMVeryHighTemperature" xml:space="preserve"> <value>G1 Power Module Temperature Very High</value> </data>
+    <data name="G1Diesel2CMisc" xml:space="preserve"> <value>G1 Diesel 2nd Class Miscellaneous Alerting</value> </data>
+    <data name="G1UpwHighTemperature" xml:space="preserve"> <value>G1 U Phase Winding Temperature High</value> </data>
+    <data name="G1VpwHighTemperature" xml:space="preserve"> <value>G1 V Phase Winding Temperature High</value> </data>
+    <data name="G1WpwHighTemperature" xml:space="preserve"> <value>G1 W Phase Winding Temperature High</value> </data>
+    <data name="G1DBHighTemperature" xml:space="preserve"> <value>G1 Driven Bearing Temperature High</value> </data>
+    <data name="G1nDBHighTemperature" xml:space="preserve"> <value>G1 non-Driven Bearing Temperature High</value> </data>
+    <data name="G1SPTransformerHighTemperature" xml:space="preserve"> <value>G1 Shore Power Transformer Temperature High</value> </data>
+    <data name="G1UpwVeryHighTemperature" xml:space="preserve"> <value>G1 U Phase Winding Temperature Very High</value> </data>
+    <data name="G1VpwVeryHighTemperature" xml:space="preserve"> <value>G1 V Phase Winding Temperature Very High</value> </data>
+    <data name="G1WpwVeryHighTemperature" xml:space="preserve"> <value>G1 W Phase Winding Temperature Very High</value> </data>
+    <data name="G1DBVeryHighTemperature" xml:space="preserve"> <value>G1 Driven Bearing Temperature Very High</value> </data>
+    <data name="G1nDBVeryHighTemperature" xml:space="preserve"> <value>G1 non-Driven Bearing Temperature Very High</value> </data>
+    <data name="G1SPTransformerVeryHighTemperature" xml:space="preserve"> <value>G1 Shore Power Transformer Temperature Very High</value> </data>
+    <data name="G1SPCBOFF" xml:space="preserve"> <value>G1 Shore Power Circuit Breaker OFF</value> </data>
+    <data name="G1Misc" xml:space="preserve"> <value>G1 Miscellaneous Alerting</value> </data>
+    <data name="G1SPTransformerTSwitchFault" xml:space="preserve"> <value>G1 Shore Power Transformer Temperature Switch Fault</value> </data>
+    <data name="G2PMFault" xml:space="preserve"> <value>G2 Power Module Fault</value> </data>
+    <data name="G2IOCFault" xml:space="preserve"> <value>G2 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="G2DTOCFault" xml:space="preserve"> <value>G2 Definite Time Over Current Relay Fault</value> </data>
+    <data name="G2MotorOverSpeed" xml:space="preserve"> <value>G2 Motor Rotational Speed Exceed</value> </data>
+    <data name="G2MotorUnderSpeed" xml:space="preserve"> <value>G2 Motor Rotational Speed Beneath</value> </data>
+    <data name="G2Diesel1CMisc" xml:space="preserve"> <value>G2 Diesel 1st Class Miscellaneous Alerting</value> </data>
+    <data name="G2CB1TripOff" xml:space="preserve"> <value>G2 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="G2DCFuseBroken" xml:space="preserve"> <value>G2 DC Fuse Broken</value> </data>
+    <data name="G2UpwOverTemperature" xml:space="preserve"> <value>G2 U Phase Winding Temperature Exceed</value> </data>
+    <data name="G2VpwOverTemperature" xml:space="preserve"> <value>G2 V Phase Winding Temperature Exceed</value> </data>
+    <data name="G2WpwOverTemperature" xml:space="preserve"> <value>G2 W Phase Winding Temperature Exceed</value> </data>
+    <data name="G2DBOverTemperature" xml:space="preserve"> <value>G2 Driven Bearing Temperature Exceed</value> </data>
+    <data name="G2nDBOverTemperature" xml:space="preserve"> <value>G2 non-Driven Bearing Temperature Exceed</value> </data>
+    <data name="G2PMOverTemperature" xml:space="preserve"> <value>G2 Power Module Temperature Exceed</value> </data>
+    <data name="G2Overload" xml:space="preserve"> <value>G2 Overload</value> </data>
+    <data name="G2VeryHighCurrent" xml:space="preserve"> <value>G2 Current Very High</value> </data>
+    <data name="G2PMHighTemperature" xml:space="preserve"> <value>G2 Power Module Temperature High</value> </data>
+    <data name="G2PMVeryHighTemperature" xml:space="preserve"> <value>G2 Power Module Temperature Very High</value> </data>
+    <data name="G2Diesel2CMisc" xml:space="preserve"> <value>G2 Diesel 2nd Class Miscellaneous Alerting</value> </data>
+    <data name="G2UpwHighTemperature" xml:space="preserve"> <value>G2 U Phase Winding Temperature High</value> </data>
+    <data name="G2VpwHighTemperature" xml:space="preserve"> <value>G2 V Phase Winding Temperature High</value> </data>
+    <data name="G2WpwHighTemperature" xml:space="preserve"> <value>G2 W Phase Winding Temperature High</value> </data>
+    <data name="G2DBHighTemperature" xml:space="preserve"> <value>G2 Driven Bearing Temperature High</value> </data>
+    <data name="G2nDBHighTemperature" xml:space="preserve"> <value>G2 non-Driven Bearing Temperature High</value> </data>
+    <data name="G2UpwVeryHighTemperature" xml:space="preserve"> <value>G2 U Phase Winding Temperature Very High</value> </data>
+    <data name="G2VpwVeryHighTemperature" xml:space="preserve"> <value>G2 V Phase Winding Temperature Very High</value> </data>
+    <data name="G2WpwVeryHighTemperature" xml:space="preserve"> <value>G2 W Phase Winding Temperature Very High</value> </data>
+    <data name="G2DBVeryHighTemperature" xml:space="preserve"> <value>G2 Driven Bearing Temperature Very High</value> </data>
+    <data name="G2nDBVeryHighTemperature" xml:space="preserve"> <value>G2 non-Driven Bearing Temperature Very High</value> </data>
+    <data name="G2Misc" xml:space="preserve"> <value>G2 Miscellaneous Alerting</value> </data>
+    <data name="B1PMFault" xml:space="preserve"> <value>B1 Power Module Fault</value> </data>
+    <data name="B1IOCFault" xml:space="preserve"> <value>B1 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="B1DTOCFault" xml:space="preserve"> <value>B1 Definite Time Over Current Relay Fault</value> </data>
+    <data name="B1CB2TripOff" xml:space="preserve"> <value>B1 CB2 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="B1DCFuseBroken" xml:space="preserve"> <value>B1 DC Fuse Broken</value> </data>
+    <data name="B1PMOverTemperature" xml:space="preserve"> <value>B1 Power Module Temperature Exceed</value> </data>
+    <data name="B1Overload" xml:space="preserve"> <value>B1 Overload</value> </data>
+    <data name="B1VeryHighCurrent" xml:space="preserve"> <value>B1 Current Very High</value> </data>
+    <data name="B1PMHighTemperature" xml:space="preserve"> <value>B1 Power Module Temperature High</value> </data>
+    <data name="B1PMVeryHighTemperature" xml:space="preserve"> <value>B1 Power Module Temperature Very High</value> </data>
+    <data name="B1Misc" xml:space="preserve"> <value>B1 Miscellaneous Alerting</value> </data>
+    <data name="B1InductorTSwitchFault" xml:space="preserve"> <value>B1 Inductor Temperature Switch Fault</value> </data>
+    <data name="T1PMFault" xml:space="preserve"> <value>T1 Power Module Fault</value> </data>
+    <data name="T1IOCFault" xml:space="preserve"> <value>T1 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="T1DTOCFault" xml:space="preserve"> <value>T1 Definite Time Over Current Relay Fault</value> </data>
+    <data name="T1CB1TripOff" xml:space="preserve"> <value>T1 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="T1DCFuseBroken" xml:space="preserve"> <value>T1 DC Fuse Broken</value> </data>
+    <data name="T1PMOverTemperature" xml:space="preserve"> <value>T1 Power Module Temperature Exceed</value> </data>
+    <data name="T1Overload" xml:space="preserve"> <value>T1 Overload</value> </data>
+    <data name="T1VeryHighCurrent" xml:space="preserve"> <value>T1 Current Very High</value> </data>
+    <data name="T1PMHighTemperature" xml:space="preserve"> <value>T1 Power Module Temperature High</value> </data>
+    <data name="T1PMVeryHighTemperature" xml:space="preserve"> <value>T1 Power Module Temperature Very High</value> </data>
+    <data name="T1Misc" xml:space="preserve"> <value>T1 Miscellaneous Alerting</value> </data>
+    <data name="T2PMFault" xml:space="preserve"> <value>T2 Power Module Fault</value> </data>
+    <data name="T2IOCFault" xml:space="preserve"> <value>T2 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="T2DTOCFault" xml:space="preserve"> <value>T2 Definite Time Over Current Relay Fault</value> </data>
+    <data name="T2CB1TripOff" xml:space="preserve"> <value>T2 CB1 Over Current Protective Relay Tripped Off</value> </data>
+    <data name="T2DCFuseBroken" xml:space="preserve"> <value>T2 DC Fuse Broken</value> </data>
+    <data name="T2PMOverTemperature" xml:space="preserve"> <value>T2 Power Module Temperature Exceed</value> </data>
+    <data name="T2Overload" xml:space="preserve"> <value>T2 Overload</value> </data>
+    <data name="T2VeryHighCurrent" xml:space="preserve"> <value>T2 Current Very High</value> </data>
+    <data name="T2PMHighTemperature" xml:space="preserve"> <value>T2 Power Module Temperature High</value> </data>
+    <data name="T2PMVeryHighTemperature" xml:space="preserve"> <value>T2 Power Module Temperature Very High</value> </data>
+    <data name="T2Misc" xml:space="preserve"> <value>T2 Miscellaneous Alerting</value> </data>
+    <data name="H1Misc" xml:space="preserve"> <value>H1 Miscellaneous Alerting</value> </data>
+    <data name="H1CoolsrcPressureLost" xml:space="preserve"> <value>H1 Cooling Source Water Pressure signal lost</value> </data>
+    <data name="H1CoolsrcTemperatureLost" xml:space="preserve"> <value>H1 Cooling Source Water Temperature signal lost</value> </data>
+    <data name="H1CoolantPressureLost" xml:space="preserve"> <value>H1 Cooling Water Pressure signal lost</value> </data>
+    <data name="H1CoolantFlowLost" xml:space="preserve"> <value>H1 Cooling Water Volumetric Flow Rate signal lost</value> </data>
+    <data name="H1CoolantTemperatureLost" xml:space="preserve"> <value>H1 Cooling Water Temperature signal lost</value> </data>
+    <data name="H13WRValveLost" xml:space="preserve"> <value>H1 3-Way Regulating Valve signal lost</value> </data>
+    <data name="H1CoolantOverFlow" xml:space="preserve"> <value>H1 Cooling Water Volumetric Flow Rate Exceed</value> </data>
+    <data name="H1CoolantHighFlow" xml:space="preserve"> <value>H1 Cooling Water Volumetric Flow Rate High</value> </data>
+    <data name="H1CoolantUnderFlow" xml:space="preserve"> <value>H1 Cooling Water Volumetric Flow Rate Beneath</value> </data>
+    <data name="H1CoolantLowFlow" xml:space="preserve"> <value>H1 Cooling Water Volumetric Flow Rate Low</value> </data>
+    <data name="H1CoolsrcOverPressure" xml:space="preserve"> <value>H1 Cooling Source Water Pressure Exceed</value> </data>
+    <data name="H1CoolsrcHighPressure" xml:space="preserve"> <value>H1 Cooling Source Water Pressure High</value> </data>
+    <data name="H1CoolsrcUnderPressure" xml:space="preserve"> <value>H1 Cooling Source Water Pressure Beneath</value> </data>
+    <data name="H1CoolsrcLowPressure" xml:space="preserve"> <value>H1 Cooling Source Water Pressure Low</value> </data>
+    <data name="H1CoolantOverPressure" xml:space="preserve"> <value>H1 Cooling Water Pressure Exceed</value> </data>
+    <data name="H1CoolantHighPressure" xml:space="preserve"> <value>H1 Cooling Water Pressure High</value> </data>
+    <data name="H1CoolantUnderPressure" xml:space="preserve"> <value>H1 Cooling Water Pressure Beneath</value> </data>
+    <data name="H1CoolantLowPressure" xml:space="preserve"> <value>H1 Cooling Water Pressure Low</value> </data>
+    <data name="H1CoolsrcOverTemperature" xml:space="preserve"> <value>H1 Cooling Source Water Temperature Exceed</value> </data>
+    <data name="H1CoolsrcHighTemperature" xml:space="preserve"> <value>H1 Cooling Source Water Temperature High</value> </data>
+    <data name="H1CoolsrcUnderTemperature" xml:space="preserve"> <value>H1 Cooling Source Water Temperature Beneath</value> </data>
+    <data name="H1CoolsrcLowTemperature" xml:space="preserve"> <value>H1 Cooling Source Water Temperature Low</value> </data>
+    <data name="H1CoolantOverTemperature" xml:space="preserve"> <value>H1 Cooling Water Temperature Exceed</value> </data>
+    <data name="H1CoolantHighTemperature" xml:space="preserve"> <value>H1 Cooling Water Temperature High</value> </data>
+    <data name="H1CoolantUnderTemperature" xml:space="preserve"> <value>H1 Cooling Water Temperature Beneath</value> </data>
+    <data name="H1CoolantLowTemperature" xml:space="preserve"> <value>H1 Cooling Water Temperature Low</value> </data>
+    <data name="H13WRValveMismatch" xml:space="preserve"> <value>H1 3-Way Regulating Valve Actual State Mismatches the Feedback</value> </data>
+    <data name="H1CoolantUnderLoadTemperature" xml:space="preserve"> <value>H1 Cooling Water Temperature Beneath and Loading</value> </data>
+    <data name="H1220VPowerFailure" xml:space="preserve"> <value>H1 220V Power Failure</value> </data>
+    <data name="G3PMFault" xml:space="preserve"> <value>G3 Power Module Fault</value> </data>
+    <data name="G3IOCFault" xml:space="preserve"> <value>G3 Instantaneous Over Current Relay Fault</value> </data>
+    <data name="G3DTOCFault" xml:space="preserve"> <value>G3 Definite Time Over Current Relay Fault</value> </data>
+    <data name="G3DCFuseBroken" xml:space="preserve"> <value>G3 DC Fuse Broken</value> </data>
+    <data name="D1DCFuseBroken" xml:space="preserve"> <value>D1 DC Fuse Broken</value> </data>
+    <data name="G3PMOverTemperature" xml:space="preserve"> <value>G3 Power Module Temperature Exceed</value> </data>
+    <data name="G3Overload" xml:space="preserve"> <value>G3 Overload</value> </data>
+    <data name="G3VeryHighCurrent" xml:space="preserve"> <value>G3 Current Very High</value> </data>
+    <data name="G3PMHighTemperature" xml:space="preserve"> <value>G3 Power Module Temperature High</value> </data>
+    <data name="G3PMVeryHighTemperature" xml:space="preserve"> <value>G3 Power Module Temperature Very High</value> </data>
+</root>
+
