@@ -7,7 +7,7 @@
 (define namespace 'WarGrey::SCADA)
 
 (define make-tongue-class
-  (lambda [classname data min-index max-index #:/dev/stdout [/dev/stdout (current-output-port)]]
+  (lambda [classname data min-index max-index select #:/dev/stdout [/dev/stdout (current-output-port)]]
     (define ns::Tongue (format "~a::Tongue" namespace))
     (define ns::class (format "~a::~a" namespace classname))
     (define Tongue<E> (format "~a<~a>" ns::Tongue ns::class))
@@ -21,18 +21,14 @@
     (fprintf /dev/stdout "        friend class ~a;~n" Tongue<E>)
     (fprintf /dev/stdout "    public:~n")
     (fprintf /dev/stdout "        static Platform::String^ type() { return ~s; }~n" (symbol->string classname))
-    (fprintf /dev/stdout "        static ~a* fromIndex(unsigned int idx) { return ~a::SafeTongue(idx);~n" ns::class Tongue<E>)
+    (fprintf /dev/stdout "        static unsigned int min_index() override { return ~aU; }~n" min-index)
+    (fprintf /dev/stdout "        static unsigned int max_index() override { return ~aU; }~n" max-index)
 
     (newline /dev/stdout)
     (fprintf /dev/stdout "    public:~n")
     (for ([datum (in-list data)])
       (fprintf /dev/stdout "        static ~a* ~a() { return ~a::UnsafeTongue(~aU); } // ~a~n"
-               ns::class (tongue-id datum) Tongue<E> (tongue-index datum) (tongue-zh-CN datum)))
-
-    (newline /dev/stdout)
-    (fprintf /dev/stdout "    public:~n")
-    (fprintf /dev/stdout "        unsigned int min_index() override { return ~aU; }~n" min-index)
-    (fprintf /dev/stdout "        unsigned int max_index() override { return ~aU; }~n" max-index)
+               ns::class (tongue-id datum) Tongue<E> (tongue-index datum) (select datum)))
 
     (newline /dev/stdout)
     (fprintf /dev/stdout "    private:~n")

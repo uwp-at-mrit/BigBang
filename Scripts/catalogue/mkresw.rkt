@@ -40,7 +40,7 @@
         (define-values (classname data min-index max-index) (main))
         
         (when (> rkt.mtime hpp.mtime)
-          (do-make-resw (λ [/dev/stdout] (make-tongue-class classname data min-index max-index #:/dev/stdout /dev/stdout)) tongue.hpp))
+          (do-make-resw (λ [/dev/stdout] (make-tongue-class classname data min-index max-index tongue-en-US #:/dev/stdout /dev/stdout)) tongue.hpp))
         
         (newline)
         (newline)
