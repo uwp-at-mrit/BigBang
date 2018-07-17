@@ -42,7 +42,7 @@
       (newline)
       (newline)
 
-      (when (> rkt.mtime hpp.mtime)
+      (when (> rkt.mtime cpp.mtime)
         (do-make-dao cat-schema.cpp schema.cpp)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
