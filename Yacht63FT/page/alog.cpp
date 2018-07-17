@@ -29,35 +29,23 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private class YachtTongue sealed : public Tongue<YachtTongue> {
+	friend class Tongue<YachtTongue>;
 public:
-	static YachtTongue* One() { return YachtTongue::construct(1U); }
-	static YachtTongue* Two() { return YachtTongue::construct(2U); }
-	static YachtTongue* Four() { return YachtTongue::construct(4U); }
-	static YachtTongue* Eight() { return YachtTongue::construct(8U); }
+	static Platform::String^ YachtTongue::type() { return "Yacht"; }
+	static YachtTongue* fromIndex(unsigned int idx) { return Tongue<YachtTongue>::SafeTongue(idx); }
 
 public:
-	Platform::String^ get_type() override {
-		return "Yacht";
-	}
+	static YachtTongue* One() { return Tongue<YachtTongue>::UnsafeTongue(1U); }
+	static YachtTongue* Two() { return Tongue<YachtTongue>::UnsafeTongue(2U); }
+	static YachtTongue* Four() { return Tongue<YachtTongue>::UnsafeTongue(4U); }
+	static YachtTongue* Eight() { return Tongue<YachtTongue>::UnsafeTongue(8U); }
+
+public:
+	unsigned int min_index() override { return 1U; }
+	unsigned int max_index() override { return 792U; }
 
 private:
 	YachtTongue(unsigned int idx) : Tongue(idx) {}
-
-private:
-	static YachtTongue* construct(unsigned int idx) {
-		static std::map<int, YachtTongue*> selves;
-		YachtTongue* self = nullptr;
-		auto lt = selves.find(idx);
-
-		if (lt != selves.end()) {
-			self = lt->second;
-		} else {
-			self = new YachtTongue(idx);
-			selves.insert(std::pair<int, YachtTongue*>(idx, self));
-		}
-
-		return self;
-	}
 };
 
 private class AEventlet : public IGraphlet {
@@ -76,11 +64,13 @@ public:
 		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
 		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
 
-		YachtTongue* one = YachtTongue::One();
-		YachtTongue* eight = YachtTongue::Eight();
-		this->get_logger()->log_message(Log::Info, L"(%s < %s): %s",
+		YachtTongue* one = YachtTongue::fromIndex(1U);
+		YachtTongue* eight = one->foreward();
+		YachtTongue* ghost = eight->foreward();
+		this->get_logger()->log_message(Log::Info, L"(%s < %s): %s with %x, self identity: %s",
 			one->ToLocalString()->Data(), eight->ToLocalString()->Data(),
-			(one->lt(eight)).ToString()->Data());
+			(one->lt(eight)).ToString()->Data(), ghost,
+			(eight == YachtTongue::Eight()).ToString()->Data());
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {

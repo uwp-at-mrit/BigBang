@@ -6,13 +6,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::ApplicationModel::Resources;
 
-Platform::String^ do_speak(ResourceLoader^ tongue, Platform::String^ word) {
-	Platform::String^ dialect = tongue->GetString(word);
-
-	return (dialect == nullptr) ? word : dialect;
-}
-
-Platform::String^ do_speak(Platform::String^ name, Platform::String^ word) {
+static ResourceLoader^ lookup_tongue(Platform::String^ name) {
 	static std::map<Platform::String^, ResourceLoader^> tongues;
 	auto maybe_tongue = tongues.find(name);
 	ResourceLoader^ tongue = nullptr;
@@ -24,7 +18,21 @@ Platform::String^ do_speak(Platform::String^ name, Platform::String^ word) {
 		tongue = maybe_tongue->second;
 	}
 
-	return do_speak(tongue, word);
+	return tongue;
+}
+
+static inline Platform::String^ do_speak(ResourceLoader^ tongue, Platform::String^ word) {
+	Platform::String^ dialect = tongue->GetString(word);
+
+	return (dialect == nullptr) ? word : dialect;
+}
+
+static inline Platform::String^ do_speak(Platform::String^ name, Platform::String^ word) {
+	return do_speak(lookup_tongue(name), word);
+}
+
+static inline bool do_check(Platform::String^ name, unsigned int index) {
+	return (lookup_tongue(name)->GetString(index.ToString()) != nullptr);
 }
 
 /*************************************************************************************************/
@@ -41,7 +49,7 @@ Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
 }
 
 /*************************************************************************************************/
-ITongue::ITongue(unsigned int idx) : index(idx) {}
+ITongue::ITongue(Platform::String^ name, unsigned int idx) : type(name), index(idx) {}
 
 int ITongue::unsafe_compare(ITongue* instance) {
 	unsigned int sidx = this->ToIndex();
@@ -55,6 +63,41 @@ int ITongue::unsafe_compare(ITongue* instance) {
 	}
 
 	return sign;
+}
+
+bool ITongue::exists(Platform::String^ name, int index) {
+	return do_check(name, index);
+}
+
+int ITongue::search_sibling_index(int delta) {
+	unsigned int self = this->ToIndex();
+	int sibling = -1;
+	
+	if (delta < 0) {
+		unsigned int midx = this->min_index();
+
+		while ((self + delta) >= midx) {
+			self += delta;
+
+			if (do_check(this->type, self)) {
+				sibling = self;
+				break;
+			}
+		}
+	} else if (delta > 0) {
+		unsigned int midx = this->max_index();
+
+		while ((self + delta) <= midx) {
+			self += delta;
+
+			if (do_check(this->type, self)) {
+				sibling = self;
+				break;
+			}
+		}
+	}
+
+	return sibling;
 }
 
 unsigned int ITongue::ToIndex() {
@@ -73,9 +116,9 @@ Platform::String^ ITongue::ToString() {
 	 *   such strings have to be stored in the default language context.
 	 */
 
-	return do_speak(this->get_type(), this->index.ToString());
+	return do_speak(this->type, this->index.ToString());
 }
 
 Platform::String^ ITongue::ToLocalString() {
-	return do_speak(this->get_type(), this->ToString());
+	return do_speak(this->type, this->ToString());
 }
