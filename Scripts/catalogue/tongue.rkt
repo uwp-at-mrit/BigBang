@@ -21,8 +21,8 @@
     (fprintf /dev/stdout "        friend class ~a;~n" Tongue<E>)
     (fprintf /dev/stdout "    public:~n")
     (fprintf /dev/stdout "        static Platform::String^ type() { return ~s; }~n" (symbol->string classname))
-    (fprintf /dev/stdout "        static unsigned int min_index() override { return ~aU; }~n" min-index)
-    (fprintf /dev/stdout "        static unsigned int max_index() override { return ~aU; }~n" max-index)
+    (fprintf /dev/stdout "        static unsigned int min_index() { return ~aU; }~n" min-index)
+    (fprintf /dev/stdout "        static unsigned int max_index() { return ~aU; }~n" max-index)
 
     (newline /dev/stdout)
     (fprintf /dev/stdout "    public:~n")

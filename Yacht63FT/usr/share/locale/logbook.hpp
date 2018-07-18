@@ -7,8 +7,8 @@ namespace WarGrey::SCADA {
         friend class WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>;
     public:
         static Platform::String^ type() { return "Logbook"; }
-        static unsigned int min_index() override { return 1U; }
-        static unsigned int max_index() override { return 800U; }
+        static unsigned int min_index() { return 1U; }
+        static unsigned int max_index() { return 800U; }
 
     public:
         static WarGrey::SCADA::Logbook* FWCoolant1Running() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(1U); } // Fresh Water Cooling Pump #1 Running
