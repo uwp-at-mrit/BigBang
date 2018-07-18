@@ -69,7 +69,9 @@
               (let numstat ([stats null])
                 (define +-path (read-line /dev/gitin))
                 (define tokens (if (eof-object? +-path) null (numstat-line-split +-path)))
-                (cond [(= (length tokens) 3)
+                (cond [(= (length tokens) 1) ;;; another timestamp follows closely, rarely happen, is `git filter-branch` the root cause?
+                       (pretty-numstat +-path)]
+                      [(= (length tokens) 3)
                        (let ([insertion (string->number (car tokens))]
                              [deletion (string->number (cadr tokens))])
                          (numstat (if (and insertion deletion) (cons (list insertion deletion (caddr tokens)) stats) stats)))]
