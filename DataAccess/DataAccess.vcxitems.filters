@@ -45,8 +45,6 @@
     <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl">
       <Filter>sqlite3</Filter>
     </None>
-    <None Include="D:\WinSCADA\DataAccess\stone\lib\sqlite3.dll">
-      <Filter>stone\lib</Filter>
-    </None>
+    <None Include="$(MSBuildThisFileDirectory)stone\lib\sqlite3.dll" />
   </ItemGroup>
 </Project>
