@@ -43,7 +43,7 @@ Platform::String^ WarGrey::SCADA::speak(Platform::String^ word) {
 }
 
 Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
-	static ResourceLoader^ tongue = ResourceLoader::GetForViewIndependentUse("dbtongue");
+	static ResourceLoader^ tongue = ResourceLoader::GetForViewIndependentUse("dbfield");
 
 	return do_speak(tongue, word);
 }
@@ -70,13 +70,14 @@ bool ITongue::exists(Platform::String^ name, int index) {
 }
 
 int ITongue::sibling_index(Platform::String^ name, unsigned int self, int delta, unsigned int boundary) {
+	ResourceLoader^ tongue = lookup_tongue(name);
 	int sibling = -1;
 	
 	if (delta < 0) {
 		while ((self + delta) >= boundary) {
 			self += delta;
 
-			if (do_check(name, self)) {
+			if (tongue->GetString(self.ToString()) != nullptr) {
 				sibling = self;
 				break;
 			}
@@ -85,7 +86,7 @@ int ITongue::sibling_index(Platform::String^ name, unsigned int self, int delta,
 		while ((self + delta) <= boundary) {
 			self += delta;
 
-			if (do_check(name, self)) {
+			if (tongue->GetString(self.ToString()) != nullptr) {
 				sibling = self;
 				break;
 			}

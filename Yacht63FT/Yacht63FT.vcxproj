@@ -193,8 +193,8 @@
     </AppxManifest>
     <None Include="packages.config" />
     <None Include="schema\event.dao.rktl" />
-    <None Include="tongue\catalogue.csv" />
-    <None Include="tongue\logbook.resw.rktl" />
+    <None Include="usr\share\locale\catalogue.csv" />
+    <None Include="usr\share\locale\logbook.resw.rkt" />
     <None Include="Yacht63FT_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -332,13 +332,13 @@
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="schema\event.hpp" />
     <ClInclude Include="schema\dbtest.hpp" />
-    <ClInclude Include="tongue\logbook.hpp" />
+    <ClInclude Include="usr\share\locale\logbook.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="usr\share\locale\en-US\dbtongue.resw" />
+    <PRIResource Include="usr\share\locale\en-US\dbfield.resw" />
     <PRIResource Include="usr\share\locale\en-US\logbook.resw" />
     <PRIResource Include="usr\share\locale\en-US\tongue.resw" />
-    <PRIResource Include="usr\share\locale\zh-CN\dbtongue.resw" />
+    <PRIResource Include="usr\share\locale\zh-CN\dbfield.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\logbook.resw" />
     <PRIResource Include="usr\share\locale\zh-CN\tongue.resw" />
   </ItemGroup>
