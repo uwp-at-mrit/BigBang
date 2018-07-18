@@ -2,7 +2,7 @@
 #include <ppltasks.h>
 
 #include "page/alogbook.hpp"
-#include "tongue/logbook.hpp"
+#include "usr/share/locale/logbook.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/bitmaplet.hpp"

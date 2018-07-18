@@ -12,8 +12,8 @@
                   (and parent (find-solution-root-dir parent)))])))
 
 (define resource-exists?
-  (lambda [schema.rktl]
-    (regexp-match? #px"[.]resw[.]rktl$" schema.rktl)))
+  (lambda [tongue.resw.rkt]
+    (regexp-match? #px"[.]resw[.]rkt$" tongue.resw.rkt)))
 
 (define do-make-resw
   (lambda [cat tongue]
@@ -23,19 +23,19 @@
     (call-with-input-file* tongue (curryr copy-port (current-output-port)))))
 
 (define make-resws
-  (lambda [tongue.resw.rktl project-root]  
-    (define tongue (cadr (regexp-match #px"(.+)[.][^.]+[.]rktl$" (file-name-from-path tongue.resw.rktl))))
-    (define tongue.hpp (build-path (path-only tongue.resw.rktl) (path-add-extension tongue #".hpp")))
-    (define tongue.en (build-path project-root "usr" "share" "locale" "en-US" (path-add-extension tongue #".resw")))
-    (define tongue.zh (build-path project-root "usr" "share" "locale" "zh-CN" (path-add-extension tongue #".resw")))
+  (lambda [tongue.resw.rkt tongue-root]
+    (define tongue (cadr (regexp-match #px"(.+)[.][^.]+[.]rkt$" (file-name-from-path tongue.resw.rkt))))
+    (define tongue.hpp (build-path (path-only tongue.resw.rkt) (path-add-extension tongue #".hpp")))
+    (define tongue.en (build-path tongue-root "en-US" (path-add-extension tongue #".resw")))
+    (define tongue.zh (build-path tongue-root "zh-CN" (path-add-extension tongue #".resw")))
 
-    (define rkt.mtime (file-or-directory-modify-seconds tongue.resw.rktl))
+    (define rkt.mtime (file-or-directory-modify-seconds tongue.resw.rkt))
     (define hpp.mtime (if (or (force-remake) (not (file-exists? tongue.hpp))) (- rkt.mtime 1) (file-or-directory-modify-seconds tongue.hpp)))
     (define en.mtime (if (or (force-remake) (not (file-exists? tongue.en))) (- rkt.mtime 1) (file-or-directory-modify-seconds tongue.en)))
     (define zh.mtime (if (or (force-remake) (not (file-exists? tongue.zh))) (- rkt.mtime 1) (file-or-directory-modify-seconds tongue.zh)))
 
     (when (or (> rkt.mtime hpp.mtime) (> rkt.mtime en.mtime) (> rkt.mtime zh.mtime))
-      (define main (dynamic-require tongue.resw.rktl 'main void))
+      (define main (dynamic-require tongue.resw.rkt 'main void))
       (when (procedure? main)
         (define-values (classname data min-index max-index) (main))
         
@@ -68,7 +68,7 @@
        (when (sln-root)
          (define all-projects (filter directory-exists? (directory-list (sln-root) #:build? #true)))
          (for ([project-root (in-list all-projects)])
-           (define tongue-root (build-path project-root "tongue"))
+           (define tongue-root (build-path project-root "usr" "share" "locale"))
            (when (directory-exists? tongue-root)
              (for ([resw (in-list (filter resource-exists? (directory-list tongue-root #:build? #true)))])
-               (make-resws resw project-root)))))))))
+               (make-resws resw tongue-root)))))))))

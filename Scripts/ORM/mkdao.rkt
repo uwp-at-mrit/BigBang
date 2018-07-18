@@ -10,8 +10,8 @@
                   (and parent (find-solution-root-dir parent)))])))
 
 (define schema-exists?
-  (lambda [schema.rktl]
-    (regexp-match? #px"[.]dao[.]rktl$" schema.rktl)))
+  (lambda [schema.rkt]
+    (regexp-match? #px"[.]dao[.]rkt$" schema.rkt)))
 
 (define do-make-dao
   (lambda [cat schema]
@@ -20,18 +20,18 @@
     (call-with-input-file* schema (curryr copy-port (current-output-port)))))
 
 (define make-daos
-  (lambda [schema.dao.rktl]
-    (define schema (cadr (regexp-match #px"(.+)[.][^.]+[.]rktl$" (file-name-from-path schema.dao.rktl))))
-    (define schema.hpp (build-path (path-only schema.dao.rktl) (path-add-extension schema #".hpp")))
-    (define schema.cpp (build-path (path-only schema.dao.rktl) (path-add-extension schema #".cpp")))
+  (lambda [schema.dao.rkt]
+    (define schema (cadr (regexp-match #px"(.+)[.][^.]+[.]rkt$" (file-name-from-path schema.dao.rkt))))
+    (define schema.hpp (build-path (path-only schema.dao.rkt) (path-add-extension schema #".hpp")))
+    (define schema.cpp (build-path (path-only schema.dao.rkt) (path-add-extension schema #".cpp")))
 
-    (define rkt.mtime (file-or-directory-modify-seconds schema.dao.rktl))
+    (define rkt.mtime (file-or-directory-modify-seconds schema.dao.rkt))
     (define hpp.mtime (if (or (force-remake) (not (file-exists? schema.hpp))) (- rkt.mtime 1) (file-or-directory-modify-seconds schema.hpp)))
     (define cpp.mtime (if (or (force-remake) (not (file-exists? schema.cpp))) (- rkt.mtime 1) (file-or-directory-modify-seconds schema.cpp)))
 
     (when (or (> rkt.mtime hpp.mtime) (> rkt.mtime cpp.mtime))
-      (dynamic-require schema.dao.rktl #false)
-      (define schema-zone (module->namespace schema.dao.rktl))
+      (dynamic-require schema.dao.rkt #false)
+      (define schema-zone (module->namespace schema.dao.rkt))
       (define cat-schema.hpp (namespace-variable-value (string->symbol (format "cat-~a.hpp" schema)) #false #false schema-zone))
       (define cat-schema.cpp (namespace-variable-value (string->symbol (format "cat-~a.cpp" schema)) #false #false schema-zone))
 
