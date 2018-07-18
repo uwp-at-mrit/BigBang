@@ -19,7 +19,7 @@
            @item{@tt{SVG} 定义外部图元。}]}
 
 @handbook-statistics[#:gitstat-width 420 #:gitstat-height 180
- #:ignore '(#px"/Generated[ ]Files/?" #px"/Handbook/RebuerEcoFacilities" #px"/stone/include/")
+ #:ignore '(#px"/Generated[ ]Files/?" #px"/stone/include/")
  #(C++      #xF34B7D #px"[.]([ch](pp|xx)?)$")
  #(Racket   #x89E051 #px"[.]rkt$")
  #(SVG      #xC34C26 #px"[.]svg$")

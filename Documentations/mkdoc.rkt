@@ -52,8 +52,9 @@
           (parameterize ([current-directory project-root]
                          [current-custodian (make-custodian)])
             (define /dev/hbout (open-output-string))
-            (parameterize ([current-output-port /dev/hbout])
-              (make-docs handbook.scrbl))
+            (with-handlers ([exn:fail? (λ [e] (displayln e))])
+              (parameterize ([current-output-port /dev/hbout])
+                (make-docs handbook.scrbl)))
 
             (define maybe-output-to (get-output-string /dev/hbout))
             (with-handlers ([exn:fail? (λ [e] (displayln maybe-output-to))])
