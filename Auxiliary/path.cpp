@@ -67,5 +67,5 @@ Uri^ ms_appx_file(Platform::String^ file, Platform::String^ ext, Platform::Strin
 	Platform::String^ file_ext = (file_extension_from_path(file) == nullptr) ? (file + ext) : file;
 	Platform::String^ path_ext = ((rootdir == nullptr) ? file_ext : (rootdir + "/" + file_ext));
 
-	return ref new Uri("ms-appx:///usr/share/" + path_ext);
+	return ref new Uri("ms-appx:///stone/" + path_ext);
 }

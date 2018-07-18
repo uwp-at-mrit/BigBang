@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl" />
-    <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
+    <None Include="$(MSBuildThisFileDirectory)stone\lib\sqlite3.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>

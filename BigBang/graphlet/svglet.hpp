@@ -82,7 +82,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Platform::String^ file_svg;
-		Platform::String^ usr_share_subdir;
+		Platform::String^ stone_subdir;
 	};
 
 	template<typename Status, typename Style>

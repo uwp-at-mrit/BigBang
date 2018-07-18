@@ -129,7 +129,19 @@
       <Filter>ORM</Filter>
     </None>
     <None Include="data\excel.rkt">
-      <Filter>data</Filter>
+      <Filter>catalogue</Filter>
+    </None>
+    <None Include="catalogue\csv.rkt">
+      <Filter>catalogue</Filter>
+    </None>
+    <None Include="catalogue\excel.rkt">
+      <Filter>catalogue</Filter>
+    </None>
+    <None Include="catalogue\mkresw.rkt">
+      <Filter>catalogue</Filter>
+    </None>
+    <None Include="catalogue\tongue.rkt">
+      <Filter>catalogue</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -151,7 +163,7 @@
     <Filter Include="ORM">
       <UniqueIdentifier>{77718b08-bfe9-4271-a26b-1ca98afc52c9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="data">
+    <Filter Include="catalogue">
       <UniqueIdentifier>{9a32b061-c9de-4925-b38a-a95d236528c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

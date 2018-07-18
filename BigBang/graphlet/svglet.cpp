@@ -208,12 +208,12 @@ Svgmaplet::Svgmaplet(Platform::String^ file, Platform::String^ rootdir)
 	: Svgmaplet(file, 0.0F, 0.0F, rootdir) {}
 
 Svgmaplet::Svgmaplet(Platform::String^ file, float width, float height, Platform::String^ rootdir)
-	: ISvglet(width, height), file_svg(file), usr_share_subdir(rootdir) {}
+	: ISvglet(width, height), file_svg(file), stone_subdir(rootdir) {}
 
 Platform::String^ Svgmaplet::name() {
 	return this->file_svg;
 }
 
 Platform::String^ Svgmaplet::rootdir() {
-	return this->usr_share_subdir;
+	return this->stone_subdir;
 }

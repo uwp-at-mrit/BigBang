@@ -34,22 +34,19 @@
     <Filter Include="sqlite3">
       <UniqueIdentifier>{76843741-ff5f-4112-80a3-3c25a323e140}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr">
-      <UniqueIdentifier>{516a0e99-938c-4578-919e-2f2fb37cdfd7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="usr\share">
+    <Filter Include="stone">
       <UniqueIdentifier>{4184ff24-2334-42b7-9deb-37a17d8c2b63}</UniqueIdentifier>
     </Filter>
-    <Filter Include="usr\share\lib">
+    <Filter Include="stone\lib">
       <UniqueIdentifier>{0cc5af20-8380-46f0-94be-338eeac1bdb4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\lib\sqlite3.dll">
-      <Filter>usr\share\lib</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl">
       <Filter>sqlite3</Filter>
+    </None>
+    <None Include="D:\WinSCADA\DataAccess\stone\lib\sqlite3.dll">
+      <Filter>stone\lib</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@ using namespace Windows::Foundation;
 HMODULE win32_load_foreign_library(Platform::String^ dllname, Syslog* logger) {
 	HMODULE m = nullptr;
 	Platform::String^ bslash = L"\\";
-	Platform::String^ dll = "usr" + bslash + "share" + bslash + "lib" + bslash + dllname;
+	Platform::String^ dll = "stone" + bslash + "lib" + bslash + dllname;
 
 	m = LoadPackagedLibrary(dll->Data(), 0);
 

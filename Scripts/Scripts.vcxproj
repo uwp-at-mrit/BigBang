@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="catalogue\csv.rkt" />
+    <None Include="catalogue\excel.rkt" />
+    <None Include="catalogue\mkresw.rkt" />
+    <None Include="catalogue\tongue.rkt" />
     <None Include="data\excel.rkt" />
     <None Include="libmodbus\client.rkt" />
     <None Include="libmodbus\constants.rkt" />

@@ -68,7 +68,7 @@
        (when (sln-root)
          (define all-projects (filter directory-exists? (directory-list (sln-root) #:build? #true)))
          (for ([project-root (in-list all-projects)])
-           (define tongue-root (build-path project-root "usr" "share" "locale"))
+           (define tongue-root (build-path project-root "stone" "tongue"))
            (when (directory-exists? tongue-root)
              (for ([resw (in-list (filter resource-exists? (directory-list tongue-root #:build? #true)))])
                (make-resws resw tongue-root)))))))))

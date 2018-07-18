@@ -14,17 +14,17 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\StorageCell.svg">
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\StorageCell.svg">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\CoolPump.svg">
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\CoolPump.svg">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\Generator.svg">
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\Generator.svg">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)usr\share\graphlet\SolarPowerPanel.svg">
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\SolarPowerPanel.svg">
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>
