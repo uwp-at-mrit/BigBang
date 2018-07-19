@@ -14,7 +14,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static unsigned int thermometer_default_colors[] = { 0x385BFE, 0xB3F000, 0xFFB03A, 0xFFB03A };
+static unsigned int thermometer_default_colors[] = { 0x1E90FF, 0xB3F000, 0xFFB03A, 0xFFB03A };
 static float thermometer_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 static CanvasGeometry^ make_thermometer_glass(float width, float height, float thickness) {
@@ -40,15 +40,12 @@ static CanvasGeometry^ make_thermometer_glass(float width, float height, float t
 }
 
 static CanvasGeometry^ make_thermometer_hatch(float width, float height, float thickness) {
-	CanvasStrokeStyle^ style = ref new CanvasStrokeStyle();
+	CanvasStrokeStyle^ style = make_roundcap_stroke_style(true);
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	unsigned int step = 7;
 	float short_x = width * (1.0F - 0.618F);
 	float interval = height / float(step);
 	
-	style->StartCap = CanvasCapStyle::Round;
-	style->EndCap = CanvasCapStyle::Round;
-
 	hatch->BeginFigure(width, thickness);
 	for (unsigned int i = 0; i < step; i++) {
 		float ythis = interval * float(i) + thickness;
@@ -89,7 +86,7 @@ Thermometerlet::Thermometerlet(float tmin, float tmax, float width, float height
 		this->height = this->bulb_size * 3.2F;
 	}
 
-	this->color_stops = ((stops == nullptr) ? make_gradient_stops(thermometer_default_colors, thermometer_default_color_positions) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(thermometer_default_colors, thermometer_default_color_positions) : stops);
 }
 
 void Thermometerlet::construct() {
@@ -105,6 +102,7 @@ void Thermometerlet::construct() {
 
 	glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
 	this->skeleton = geometry_freeze(geometry_union(glass, hatch, 0.0F, mercury_highest));
+
 	this->on_value_changed(0.0F);
 }
 
@@ -139,7 +137,7 @@ void Thermometerlet::on_value_changed(float v) {
 	
 	this->fill_mercury_extent(p, &this->mercury_x, &this->mercury_y, &mercury_width, &mercury_height);
 	this->mercury = geometry_freeze(make_thermometer_mercury(mercury_width, mercury_height));
-	this->mercury_color = make_solid_brush(gradient_discrete_color(this->color_stops, p));
+	this->mercury_color = make_solid_brush(gradient_discrete_color(this->colors, p));
 }
 
 void Thermometerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

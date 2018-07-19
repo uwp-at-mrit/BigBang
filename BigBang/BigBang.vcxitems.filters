@@ -97,6 +97,9 @@
       <Filter>graphlet\device</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -199,6 +202,9 @@
       <Filter>graphlet\device</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

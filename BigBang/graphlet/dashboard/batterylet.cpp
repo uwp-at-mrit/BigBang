@@ -44,7 +44,7 @@ Batterylet::Batterylet(float emin, float emax, float width, float height, ICanva
 		this->height = this->width * 1.618F;
 	}
 
-	this->color_stops = ((stops == nullptr) ? make_gradient_stops(battery_default_colors) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(battery_default_colors) : stops);
 }
 
 void Batterylet::construct() {
@@ -94,7 +94,7 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Batterylet::on_value_changed(float v) {
-	this->charge_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
+	this->charge_color = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

@@ -5,6 +5,7 @@
 #include "box.hpp"
 #include "text.hpp"
 #include "shape.hpp"
+#include "paint.hpp"
 #include "geometry.hpp"
 #include "transformation.hpp"
 
@@ -27,7 +28,7 @@ inline static Platform::String^ make_scale_string(float scale, unsigned int widt
 	return s;
 }
 
-static CanvasGeometry^ make_vhatch(float width, float interval, unsigned int step, float x = 0.0F, float y = 0.0F) {
+static CanvasGeometry^ make_vhatch(float width, float interval, unsigned int step, float thickness, float x = 0.0F, float y = 0.0F) {
 	CanvasPathBuilder^ mark = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float short_x = x + width * (1.0F - 0.618F);
 	float height = interval * step;
@@ -43,11 +44,11 @@ static CanvasGeometry^ make_vhatch(float width, float interval, unsigned int ste
 	}
 	mark->EndFigure(CanvasFigureLoop::Open);
 
-	return geometry_stroke(CanvasGeometry::CreatePath(mark), 1.0F);
+	return geometry_stroke(CanvasGeometry::CreatePath(mark), thickness, make_roundcap_stroke_style(true));
 }
 
 /*************************************************************************************************/
-CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, CanvasTextFormat^ ft, float* mw, float* my, float* mh) {
+CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, float thickness, CanvasTextFormat^ ft, float* mw, float* my, float* mh) {
 	Platform::String^ min_mark = vmin.ToString(); 
 	Platform::String^ max_mark = vmax.ToString();
 	unsigned int span = std::max(max_mark->Length(), min_mark->Length());
@@ -55,14 +56,14 @@ CanvasGeometry^ vhatch(float height, float vmin, float vmax, unsigned int step, 
 	TextExtent te = get_text_extent(max_mark, font);
 	float ch = te.width / span;
 	float em = te.height - te.tspace - te.bspace;
-	float mark_width = ch * scale_lmark_ratio;
+	float mark_width = ch * scale_lmark_ratio + thickness;
 	float mark_x = float(span) * ch + scale_space_ratio * ch;
 	float mark_y = em * 0.5F;
 	float interval = (height - em) / float(step);
 	float delta = (vmax - vmin) / float(step);
 	float scale_xoff;
 
-	auto marks = make_vhatch(mark_width, interval, step, mark_x, mark_y);
+	auto marks = make_vhatch(mark_width, interval, step, thickness, mark_x, mark_y);
 	for (unsigned int i = 0; i <= step; i += 2) {
 		Platform::String^ scale = make_scale_string(vmax - delta * float(i), span, &scale_xoff);
 

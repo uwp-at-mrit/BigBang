@@ -27,6 +27,12 @@ namespace WarGrey::SCADA {
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make_solid_brush(unsigned int hex, double alpha = 1.0);
 
 	Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ make_linear_gradient_brush(
+		float hextent, float vextent, Windows::UI::Color& src_color,
+		float light_scale = 1.618F, float dark_scale = 0.618F,
+		Microsoft::Graphics::Canvas::CanvasEdgeBehavior shade = Microsoft::Graphics::Canvas::CanvasEdgeBehavior::Mirror,
+		Microsoft::Graphics::Canvas::CanvasAlphaMode alpha = Microsoft::Graphics::Canvas::CanvasAlphaMode::Premultiplied);
+
+	Microsoft::Graphics::Canvas::Brushes::CanvasLinearGradientBrush^ make_linear_gradient_brush(
 		float hextent, float vextent, WarGrey::SCADA::GradientStops^ stops,
 		Microsoft::Graphics::Canvas::CanvasEdgeBehavior shade = Microsoft::Graphics::Canvas::CanvasEdgeBehavior::Mirror,
 		Microsoft::Graphics::Canvas::CanvasAlphaMode alpha = Microsoft::Graphics::Canvas::CanvasAlphaMode::Premultiplied);
@@ -40,4 +46,6 @@ namespace WarGrey::SCADA {
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(
 		Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle style,
 		float offset = 0.0F);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_roundcap_stroke_style(bool shared = true);
 }

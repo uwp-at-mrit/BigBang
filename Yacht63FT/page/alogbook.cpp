@@ -43,12 +43,6 @@ public:
 		this->layouts[3] = make_text_layout(dbspeak(event::status), this->font);
 		this->layouts[4] = make_text_layout(dbspeak(event::code), this->font);
 		this->layouts[5] = make_text_layout(dbspeak(event::note), this->font);
-		
-		Logbook* one = Logbook::last();
-		Logbook* eight = one->backward();
-		this->get_logger()->log_message(Log::Info, L"(%s is after %s): %s",
-			one->ToLocalString()->Data(), eight->ToLocalString()->Data(),
-			(one->gt(eight)).ToString()->Data());
 	}
 
 	void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {

@@ -31,7 +31,7 @@ FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, ICan
 		this->height = this->width * 1.618F;
 	}
 
-	this->color_stops = ((stops == nullptr) ? make_gradient_stops(fueltank_default_colors) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(fueltank_default_colors) : stops);
 }
 
 void FuelTanklet::construct() {
@@ -92,7 +92,7 @@ void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void FuelTanklet::on_value_changed(float v) {
-	this->fuel_color = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
+	this->fuel_color = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

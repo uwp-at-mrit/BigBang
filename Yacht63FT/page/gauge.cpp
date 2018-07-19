@@ -1,13 +1,13 @@
 ﻿#include <map>
 
 #include "page/gauge.hpp"
-#include "decorator/background.hpp"
 #include "decorator/cell.hpp"
+#include "decorator/background.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/device/alarmlet.hpp"
-#include "graphlet/device/gaugelet.hpp"
 #include "graphlet/textlet.hpp"
+#include "graphlet/device/alarmlet.hpp"
+#include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "tongue.hpp"
 #include "text.hpp"
@@ -81,10 +81,10 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->gauges[GGauge::FuelTank]->set_value(AI_ref(db4,  117U));
-		this->gauges[GGauge::FreshTank]->set_value(AI_ref(db4, 119U));
-		this->gauges[GGauge::BlackTank]->set_value(AI_ref(db4, 121U));
-		this->gauges[GGauge::WasteTank]->set_value(AI_ref(db4, 123U));
+		this->mcylinders[GGauge::FuelTank]->set_value(AI_ref(db4,  117U));
+		this->mcylinders[GGauge::FreshTank]->set_value(AI_ref(db4, 119U));
+		this->mcylinders[GGauge::BlackTank]->set_value(AI_ref(db4, 121U));
+		this->mcylinders[GGauge::WasteTank]->set_value(AI_ref(db4, 123U));
 		
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -96,17 +96,19 @@ private:
 
 		this->decorator->fill_cell_anchor(0, fx, fy, &anchor_x, &anchor_y);
 
-		this->gauges[id] = new LevelGaugelet(gwidth, gheight, 3000.0F, 0U, Colours::Yellow);
-		this->lblgauges[id] = new Labellet(speak(id), this->font, this->fgcolor);
-		
-		this->master->insert(this->gauges[id], anchor_x, anchor_y, GraphletAnchor::CC);
-		this->master->insert(this->lblgauges[id], this->gauges[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+		this->mcylinders[id] = new Cylinderlet(0.0F, 3000.0F, gwidth, gheight);
+		this->lblcylinders[id] = new Labellet(speak(id), this->font, this->fgcolor);
+
+		this->master->insert(this->mcylinders[id], anchor_x, anchor_y, GraphletAnchor::CC);
+		this->master->insert(this->lblcylinders[id], this->mcylinders[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+
+		this->mcylinders[id]->set_value(1500.0F);
 	}
 
 // never deletes these graphlets mannually
 private:
-	std::map<GGauge, IGaugelet*> gauges;
-	std::map<GGauge, Labellet*> lblgauges;
+	std::map<GGauge, Cylinderlet*> mcylinders;
+	std::map<GGauge, Labellet*> lblcylinders;
 	std::map<GAlarm, Alarmlet*> alarms;
 	std::map<GAlarm, Labellet*> lblalarms;
 		

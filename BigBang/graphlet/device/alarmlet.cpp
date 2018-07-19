@@ -19,8 +19,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius, float end_radius
 	, double start_degrees, double end_degrees, size_t count, float thickness, CanvasStrokeStyle^ style) {
 	CanvasPathBuilder^ lights = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	float start_x, start_y, end_x, end_y;
 	double step = (end_degrees - start_degrees) / double(count - 1);
+	float start_x, start_y, end_x, end_y;
 
 	for (double degrees = start_degrees; degrees <= end_degrees; degrees += step) {
 		circle_point(start_radius, degrees, &start_x, &start_y);
@@ -42,7 +42,7 @@ Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width
 }
 
 void Alarmlet::construct() {
-	CanvasStrokeStyle^ light_style = ref new CanvasStrokeStyle();
+	CanvasStrokeStyle^ light_style = make_roundcap_stroke_style(true);
 	double theta = 30.0;
 	float cx = this->width * 0.5F;
 	float base_width = this->width * 0.85F;
@@ -59,9 +59,6 @@ void Alarmlet::construct() {
 	float light_lradius = cx / std::cos(degrees_to_radians(theta)) - light_thickness;
 	float light_sradius = hat_radius + light_thickness;
 	float body_y = light_lradius + light_thickness;
-	
-	light_style->StartCap = CanvasCapStyle::Round;
-	light_style->EndCap = CanvasCapStyle::Round;
 
 	CanvasGeometry^ shadow = short_arc(cx, body_y - shadow_radius,
 		cx + shadow_radius, body_y,
@@ -93,12 +90,7 @@ void Alarmlet::prepare_style(AlarmStatus status, AlarmStyle& style) {
 }
 
 void Alarmlet::apply_style(AlarmStyle& style) {
-	Color colors[2];
-
-	colors[0] = scale_color(style.color->Color, 1.618);
-	colors[1] = scale_color(style.color->Color, 0.618);
-
-	this->color = make_linear_gradient_brush(0, this->height, make_gradient_stops(colors)); // Don't mind, it Visual Studio's fault
+	this->color = make_linear_gradient_brush(0.0F, this->height, style.color->Color);
 }
 
 void Alarmlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

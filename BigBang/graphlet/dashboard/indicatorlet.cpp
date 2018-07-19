@@ -32,7 +32,7 @@ Indicatorlet::Indicatorlet(float vmin, float vmax, float size, float thickness, 
 		this->thickness = size * 0.0618F;
 	}
 
-	this->color_stops = ((stops == nullptr) ? make_gradient_stops(indicator_default_colors) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(indicator_default_colors) : stops);
 }
 
 void Indicatorlet::construct() {
@@ -56,7 +56,7 @@ void Indicatorlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 }
 
 void Indicatorlet::on_value_changed(float v) {
-	this->fgcolor = make_solid_brush(gradient_discrete_color(this->color_stops, this->get_percentage()));
+	this->fgcolor = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void Indicatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

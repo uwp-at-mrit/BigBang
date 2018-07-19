@@ -19,7 +19,7 @@ IGaugelet::IGaugelet(float width, float height, float vmin, float vmax, unsigned
 	: height(height), min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {
 	auto step = ((step0 == 0) ? 10 : step0);
 	auto font = make_text_format(8.0F);
-	auto marks = vhatch(height, vmin, vmax, step, font, &this->body_x, &this->body_y, &this->body_height);
+	auto marks = vhatch(height, vmin, vmax, step, 3.0F, font, &this->body_x, &this->body_y, &this->body_height);
 
 	this->scale_marks = geometry_freeze(marks);
 	this->body_width = width - this->body_x;

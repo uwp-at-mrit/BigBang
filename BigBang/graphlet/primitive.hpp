@@ -114,7 +114,7 @@ namespace WarGrey::SCADA {
 			return v;
 		}
 
-	private:
+	protected:
 		T vmin;
 		T vmax;
 	};

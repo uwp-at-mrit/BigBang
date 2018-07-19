@@ -126,6 +126,16 @@ CanvasLinearGradientBrush^ WarGrey::SCADA::make_linear_gradient_brush(float sx, 
     return brush;
 }
 
+CanvasLinearGradientBrush^ WarGrey::SCADA::make_linear_gradient_brush(float hextent, float vextent, Color& src
+	, float light_scale, float dark_scale, CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
+	Color colors[2];
+
+	colors[0] = scale_color(src, 1.618);
+	colors[1] = scale_color(src, 0.618);
+
+	return make_linear_gradient_brush(hextent, vextent, make_gradient_stops(colors), edge, alpha); // Don't mind, it Visual Studio's fault
+}
+
 CanvasLinearGradientBrush^ WarGrey::SCADA::make_linear_gradient_brush(float hextent, float vextent, GradientStops^ stops
     , CanvasEdgeBehavior edge, CanvasAlphaMode alpha) {
     return make_linear_gradient_brush(0.0F, 0.0F, hextent, vextent, stops, edge, alpha);
@@ -146,4 +156,14 @@ CanvasStrokeStyle^ WarGrey::SCADA::make_dash_stroke(CanvasDashStyle style, float
     dash->DashStyle = style;
 
     return dash;
+}
+
+CanvasStrokeStyle^ WarGrey::SCADA::make_roundcap_stroke_style(bool shared) {
+	static auto shared_style = ref new CanvasStrokeStyle();
+	auto s = (shared ? shared_style : ref new CanvasStrokeStyle());
+
+	s->StartCap = CanvasCapStyle::Round;
+	s->EndCap = CanvasCapStyle::Round;
+
+	return s;
 }

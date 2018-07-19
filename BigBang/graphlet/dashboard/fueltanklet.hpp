@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		void on_value_changed(float v) override;
 
 	private:
-		GradientStops^ color_stops;
+		GradientStops^ colors;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ fuel_color;

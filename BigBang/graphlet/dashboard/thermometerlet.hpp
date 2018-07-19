@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 		void on_value_changed(float t) override;
 
 	private:
-		WarGrey::SCADA::GradientStops^ color_stops;
+		WarGrey::SCADA::GradientStops^ colors;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mercury;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
