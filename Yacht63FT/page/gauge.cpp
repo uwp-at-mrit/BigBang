@@ -49,10 +49,10 @@ public:
 		float gheight = height * 0.5F * 0.618F;
 		float gapsize = ts.height * 0.5F;
 
-		this->load_gauge(GGauge::WasteTank, 0.25F, 0.20F, gwidth, gheight, gapsize);
-		this->load_gauge(GGauge::BlackTank, 0.75F, 0.20F, gwidth, gheight, gapsize);
-		this->load_gauge(GGauge::FreshTank, 0.25F, 0.70F, gwidth, gheight, gapsize);
-		this->load_gauge(GGauge::FuelTank,  0.75F, 0.70F, gwidth, gheight, gapsize);
+		this->load_gauge<Cylinderlet>(GGauge::WasteTank,        0.25F, 0.20F, gwidth, gheight, gapsize);
+		this->load_gauge<ConcaveCylinderlet>(GGauge::BlackTank, 0.75F, 0.20F, gwidth, gheight, gapsize);
+		this->load_gauge<ConcaveCylinderlet>(GGauge::FreshTank, 0.25F, 0.70F, gwidth, gheight, gapsize);
+		this->load_gauge<ConvexCylinderlet>(GGauge::FuelTank,   0.75F, 0.70F, gwidth, gheight, gapsize);
 
 		{ // load alarms
 			float alarm_x, alarm_y, alarm_width, label_x;
@@ -91,12 +91,13 @@ public:
 	}
 
 private:
+	template<class Clet>
 	void load_gauge(GGauge id, float fx, float fy, float gwidth, float gheight, float gapsize) {
 		float anchor_x, anchor_y;
 
 		this->decorator->fill_cell_anchor(0, fx, fy, &anchor_x, &anchor_y);
 
-		this->mcylinders[id] = new Cylinderlet(0.0F, 3000.0F, gwidth, gheight);
+		this->mcylinders[id] = new Clet(0.0F, 3000.0F, gwidth, gheight);
 		this->lblcylinders[id] = new Labellet(speak(id), this->font, this->fgcolor);
 
 		this->master->insert(this->mcylinders[id], anchor_x, anchor_y, GraphletAnchor::CC);
@@ -107,7 +108,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	std::map<GGauge, Cylinderlet*> mcylinders;
+	std::map<GGauge, ICylinderlet*> mcylinders;
 	std::map<GGauge, Labellet*> lblcylinders;
 	std::map<GAlarm, Alarmlet*> alarms;
 	std::map<GAlarm, Labellet*> lblalarms;

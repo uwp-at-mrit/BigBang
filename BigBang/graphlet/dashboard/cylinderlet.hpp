@@ -6,20 +6,22 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Cylinderlet : public WarGrey::SCADA::IRangelet<float> {
+	private class ICylinderlet abstract : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
-
-		Cylinderlet(float tmin, float tmax, float width, float height,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+		ICylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+			WarGrey::SCADA::GradientStops^ colors,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color);
 
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		virtual Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(
+			Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body,
+			float percentage,
+			float surface_radius) = 0;
 
 	protected:
 		void on_value_changed(float t) override;
@@ -39,5 +41,56 @@ namespace WarGrey::SCADA {
 		float height;
 		float thickness;
 		float liquid_surface_radius;
+	};
+
+	private class Cylinderlet : public WarGrey::SCADA::ICylinderlet {
+	public:
+		Cylinderlet(float tmin, float tmax, float width, float height,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+		Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+	protected:
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(
+			Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body,
+			float percentage,
+			float surface_radius) override;
+	};
+
+	private class ConvexCylinderlet : public WarGrey::SCADA::ICylinderlet {
+	public:
+		ConvexCylinderlet(float tmin, float tmax, float width, float height,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+		ConvexCylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+	protected:
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(
+			Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body,
+			float percentage,
+			float surface_radius) override;
+	};
+
+	private class ConcaveCylinderlet : public WarGrey::SCADA::ICylinderlet {
+	public:
+		ConcaveCylinderlet(float tmin, float tmax, float width, float height,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+		ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+			WarGrey::SCADA::GradientStops^ colors = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
+
+	protected:
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(
+			Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body,
+			float percentage,
+			float surface_radius) override;
 	};
 }

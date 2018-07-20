@@ -20,10 +20,7 @@ static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 
 static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
-Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: Cylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
-
-Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+ICylinderlet::ICylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
 	: IRangelet(tmin, tmax), width(width), height(height), thickness(width * 0.0618F), step((step == 0) ? 10 : step), border_color(bcolor) {
 	
 	if (this->height < 0.0F) {
@@ -34,7 +31,7 @@ Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, unsi
 	this->colors = ((colors == nullptr) ? make_gradient_stops(cylinder_default_colors, cylinder_default_color_positions) : colors);
 }
 
-void Cylinderlet::construct() {
+void ICylinderlet::construct() {
 	float body_x, body_y, body_height;
 	float hatch_height = this->height * 0.95F;
 	float hatch_y = (this->height - hatch_height) * 0.5F;
@@ -74,23 +71,66 @@ void Cylinderlet::construct() {
 	this->on_value_changed(0.0F);
 }
 
-void Cylinderlet::fill_extent(float x, float y, float* w, float* h) {
+void ICylinderlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Cylinderlet::on_value_changed(float v) {
-	Rect region = this->body->ComputeBounds();
-	float p = this->get_percentage();
-	float hollow_height = region.Height * (1.0F - p) + this->liquid_surface_radius;
-	float hollow_y = region.Y - this->liquid_surface_radius;
-	auto hollow = rounded_rectangle(region.X, hollow_y, region.Width, hollow_height, this->liquid_surface_radius, this->liquid_surface_radius);
-
-	this->color = make_solid_brush(gradient_discrete_color(this->colors, p));
-	this->liquid = geometry_freeze(geometry_subtract(this->body, hollow));
+void ICylinderlet::on_value_changed(float v) {
+	float percentage = this->get_percentage();
+	
+	this->color = make_solid_brush(gradient_discrete_color(this->colors, percentage));
+	this->liquid = geometry_freeze(this->make_liquid_shape(this->body, percentage, this->liquid_surface_radius));
 }
 
-void Cylinderlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void ICylinderlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	ds->DrawCachedGeometry(this->liquid, x, y, this->color);
 	ds->DrawCachedGeometry(this->mark, x, y, this->border_color);
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
+}
+
+/*************************************************************************************************/
+Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: Cylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+
+Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+
+CanvasGeometry^ Cylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
+	Rect region = body->ComputeBounds();
+	float hollow_height = region.Height * (1.0F - percentage);
+	auto hollow = rectangle(region.X, region.Y, region.Width, hollow_height);
+
+	return geometry_subtract(body, hollow);
+}
+
+/*************************************************************************************************/
+ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ConvexCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+
+ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+
+CanvasGeometry^ ConvexCylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
+	Rect region = body->ComputeBounds();
+	float liquid_height = region.Height * percentage + surface_radius;
+	float liquid_y = region.Y + region.Height + surface_radius - liquid_height;
+	auto liquid = rounded_rectangle(region.X, liquid_y, region.Width, liquid_height, surface_radius, surface_radius);
+
+	return geometry_intersect(body, liquid);
+}
+
+/*************************************************************************************************/
+ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ConcaveCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+
+ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+
+CanvasGeometry^ ConcaveCylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
+	Rect region = body->ComputeBounds();
+	float hollow_height = region.Height * (1.0F - percentage) + surface_radius;
+	float hollow_y = region.Y - surface_radius;
+	auto hollow = rounded_rectangle(region.X, hollow_y, region.Width, hollow_height, surface_radius, surface_radius);
+
+	return geometry_subtract(body, hollow);
 }
