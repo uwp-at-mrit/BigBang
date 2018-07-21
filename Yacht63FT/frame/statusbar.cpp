@@ -34,8 +34,8 @@ public:
 	}
 
 	StatusBoard(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->fonts[0] = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", design_to_application_height(41.27F));
+		this->fonts[0] = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(30.0F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(41.27F));
 
 		this->decorator->reference();
 	}
@@ -45,10 +45,10 @@ public:
 		Platform::String^ captions[] = { ":oiltank:", ":storagecell:", ":gps:" };
 		IGraphlet* target = nullptr;
 		float cell_x, cell_y, cell_width, cell_height, icon_bottom, px, py;
-		float icon_width = design_to_application_width(110.0F) * 0.618F;
-		float label_xoffset = design_to_application_width(screen_status_label_xoff);
-		float label_yoffset = design_to_application_height(screen_status_label_yoff);
-		float parameter_yoffset = design_to_application_height(screen_status_parameter_yoff);
+		float icon_width = this->master->sketch_to_application_width(110.0F) * 0.618F;
+		float label_xoffset = this->master->sketch_to_application_width(sketch_status_label_xoff);
+		float label_yoffset = this->master->sketch_to_application_height(sketch_status_label_yoff);
+		float parameter_yoffset = this->master->sketch_to_application_height(sketch_status_parameter_yoff);
 
 		for (unsigned int i = Status::OilTank; i <= Status::GPS_E; i++) {
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y);
@@ -94,13 +94,13 @@ public:
 			px = cell_x + cell_width * 0.5F;
 			py = cell_y + cell_height * 0.5F;
 
-			this->alarm = new OptionBitmaplet("Alarm", design_to_application_width(screen_status_alarm_width));
+			this->alarm = new OptionBitmaplet("Alarm", this->master->sketch_to_application_width(sketch_status_alarm_width));
 			this->alarm->set_value(true);
 
 			this->clock = new Labellet(this->make_timestamp("0000-00-00 00:00:00"), this->fonts[1], screen_status_parameter_color);
 			this->ipv4 = new Labellet(this->make_ipv4("0.0.0.0"), this->fonts[1], screen_status_parameter_color);
 
-			this->master->insert(this->alarm, design_to_application_width(screen_status_alarm_x), py, GraphletAnchor::LC);
+			this->master->insert(this->alarm, this->master->sketch_to_application_width(sketch_status_alarm_x), py, GraphletAnchor::LC);
 			this->master->insert(this->clock, px, py, GraphletAnchor::CB);
 			this->master->insert(this->ipv4, this->clock, GraphletAnchor::LB, GraphletAnchor::LT);
 		}
@@ -174,11 +174,11 @@ Statusbar::~Statusbar() {
 
 void Statusbar::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float cell_width = design_to_application_width(385.0F);
-		float cell_height = design_to_application_height(200.0F);
-		float cell_gapsize = design_to_application_width(10.0F);
+		float cell_width = this->sketch_to_application_width(385.0F);
+		float cell_height = this->sketch_to_application_height(200.0F);
+		float cell_gapsize = this->sketch_to_application_width(10.0F);
 		float cell_y = cell_gapsize;
-		float yacht_cell_x = design_to_application_width(1388.0F);
+		float yacht_cell_x = this->sketch_to_application_width(1388.0F);
 
 		Rect boxes[] = {
 			Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),

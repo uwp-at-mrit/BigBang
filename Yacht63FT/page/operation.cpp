@@ -21,7 +21,7 @@ private enum class YachtSkeleton { Upper, Bottom, _ };
 private class OpBoard final : public PLCConfirmation {
 public:
 	OpBoard(OperationPage* master) : master(master) {
-		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+		this->font = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(33.75F));
 	}
 
 public:

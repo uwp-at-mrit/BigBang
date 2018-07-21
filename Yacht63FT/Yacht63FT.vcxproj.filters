@@ -93,7 +93,6 @@
     <ClCompile Include="page\homepage.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\statusbar.cpp">
       <Filter>frame</Filter>
     </ClCompile>

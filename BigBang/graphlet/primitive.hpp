@@ -35,6 +35,10 @@ namespace WarGrey::SCADA {
 		void moor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
+		float sketch_to_application_width(float sketch_width);
+		float sketch_to_application_height(float sketch_height);
+
+	public:
 		IGraphletInfo * info;
 
 	private:

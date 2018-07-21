@@ -24,12 +24,17 @@ namespace WarGrey::SCADA {
         Platform::Object^>
         UniverseHandler;
 
+	private enum class DisplayFit { Fill, Contain, None };
+
 	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerAction {
 	public:
 		virtual ~IDisplay();
 
 	internal:
-		IDisplay(WarGrey::SCADA::Syslog* logger);
+		IDisplay(WarGrey::SCADA::Syslog* logger,
+			WarGrey::SCADA::DisplayFit mode = DisplayFit::None,
+			float target_width = 0.0F, float target_height = 0.0F,
+			float source_width = 0.0F, float source_height = 0.0F);
 
 	public:
 		vpure_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
@@ -46,6 +51,11 @@ namespace WarGrey::SCADA {
         read_write_property(float, min_height);
         read_write_property(float, max_width);
         read_write_property(float, max_height);
+
+	public:
+		void apply_source_size(float sketch_width, float sketch_height);
+		float sketch_to_application_width(float sketch_width);
+		float sketch_to_application_height(float sketch_height);
 
 	public:
 		virtual bool surface_ready() = 0;
@@ -65,6 +75,13 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::Syslog* logger;
 		std::mutex section;
+
+	private:
+		DisplayFit mode;
+		float target_width;
+		float target_height;
+		float source_width;
+		float source_height;
     };
 
 	private ref class UniverseDisplay : public IDisplay {
@@ -73,6 +90,19 @@ namespace WarGrey::SCADA {
 
 	internal:
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr,
+			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+
+		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
+			float dest_width, float dest_height,
+			WarGrey::SCADA::Syslog* logger = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr,
+			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+
+		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
+			float dest_width, float dest_height,
+			float src_width, float src_height,
+			WarGrey::SCADA::Syslog* logger = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
 			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 		

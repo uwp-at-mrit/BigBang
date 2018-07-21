@@ -20,8 +20,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private class HomeBoard final {
 public:
 	HomeBoard(Homepage* master) : master(master) {
-		this->fonts[0] = make_bold_text_format("Microsoft YaHei", design_to_application_height(45.0F));
-		this->fonts[1] = make_text_format("Microsoft YaHei", design_to_application_height(26.25F));
+		this->fonts[0] = make_bold_text_format("Microsoft YaHei", this->master->sketch_to_application_height(45.0F));
+		this->fonts[1] = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(26.25F));
 		this->fonts[2] = this->fonts[1];
 	}
 
@@ -39,8 +39,8 @@ public:
 		}
 
 		this->master->insert(this->copyright[0],
-			design_to_application_width(screen_copyright_xoff),
-			design_to_application_height(screen_copyright_yoff));
+			this->master->sketch_to_application_width(sketch_copyright_xoff),
+			this->master->sketch_to_application_height(sketch_copyright_yoff));
 
 		this->master->insert(this->copyright[1], this->copyright[0], GraphletAnchor::CB, GraphletAnchor::CT);
 		this->master->insert(this->copyright[2], this->copyright[1], GraphletAnchor::LB, GraphletAnchor::LT);

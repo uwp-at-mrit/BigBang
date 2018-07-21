@@ -31,9 +31,17 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static PLCMaster* plc_master = nullptr;
 
-private ref class PageUniverse sealed : public UniverseDisplay, public INavigatorAction {
+private ref class YachtDisplay : public UniverseDisplay {
+internal:
+	YachtDisplay(Platform::String^ name, IPlanet* first_planet = nullptr)
+		: UniverseDisplay(DisplayFit::Fill, screen_width, screen_height, sketch_width, sketch_height,
+			make_system_logger(default_logging_level, name), first_planet) {
+	}
+};
+
+private ref class PageUniverse sealed : public YachtDisplay, public INavigatorAction {
 public:
-	PageUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {}
+	PageUniverse(Platform::String^ name) : YachtDisplay(name) {}
 
 public:
 	virtual void on_navigate(Yacht page) {
@@ -71,22 +79,18 @@ public:
 public:
 	void initialize_component(Size region) {
 		Platform::String^ name = "Yacht63FT";
-		Syslog* default_logger = make_system_logger(default_logging_level, name);
-		float fit_width = screen_to_application_size(screen_width);
-		float fit_height = screen_to_application_size(screen_height);
-		float fit_nav_height = design_to_application_height(screen_navigator_height);
-		float fit_bar_height = design_to_application_height(screen_statusbar_height);
-
+		float sketch_workspace_height = sketch_height - sketch_navigator_height - sketch_statusbar_height;
+		
 		plc_master = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
 
 		this->timeline = ref new CompositeTimerAction();
-		this->workspace = ref new PageUniverse(name);
-		this->navigatorbar = ref new UniverseDisplay(default_logger, new Navigatorbar(plc_master, this->workspace));
-		this->statusbar = ref new UniverseDisplay(default_logger, new Statusbar(plc_master));
+		this->workspace = ref new PageUniverse(name + "[Workspace]");
+		this->navigatorbar = ref new YachtDisplay(name + "[Navigator]", new Navigatorbar(plc_master, this->workspace));
+		this->statusbar = ref new YachtDisplay(name + "[Statusbar]", new Statusbar(plc_master));
 
-		this->load_display(this->navigatorbar, fit_width, fit_nav_height);
-		this->load_display(this->workspace, fit_width, fit_height - fit_nav_height - fit_bar_height);
-		this->load_display(this->statusbar, fit_width, fit_bar_height);
+		this->load_display(this->navigatorbar, screen_width, sketch_navigator_height);
+		this->load_display(this->workspace, screen_width, sketch_workspace_height);
+		this->load_display(this->statusbar, screen_width, sketch_statusbar_height);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
@@ -95,8 +99,9 @@ public:
 
 private:
 	void load_display(UniverseDisplay^ display, float width, float height) {
-		display->width = width;
-		display->height = height;
+		display->apply_source_size(width, height);
+
+		display->get_logger()->log_message(Log::Info, L"(%f, %f)", display->width, display->height);
 
 		this->timeline->append_timer_action(display);
 		this->Children->Append(display->canvas);

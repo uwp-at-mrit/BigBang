@@ -84,7 +84,7 @@ public:
 	}
 
 	LogBoard(LogbookPage* master, long long limit) : master(master), fetching_limit(limit), fetching_offset(0) {
-		this->font = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
+		this->font = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(24.0F));
 	}
 
 public:

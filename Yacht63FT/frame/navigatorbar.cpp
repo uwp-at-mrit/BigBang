@@ -69,8 +69,8 @@ protected:
 		UnionBitmaplet<YachtStatus>::on_appx(ms_appx, doc_bmp, hint);
 
 		if (this->icon_window.Width == 0.0F) {
-			float icon_width = design_to_application_width(doc_bmp->Size.Width);
-			float icon_height = design_to_application_height(doc_bmp->Size.Height);
+			float icon_width = this->sketch_to_application_width(doc_bmp->Size.Width);
+			float icon_height = this->sketch_to_application_height(doc_bmp->Size.Height);
 			float icon_size = std::fmin(icon_width, icon_height);
 
 			this->icon_window.Width = icon_size;
@@ -95,23 +95,23 @@ private:
 private class NavigatorBoard final : public WarGrey::SCADA::IPLCStatusListener {
 public:
 	NavigatorBoard(Navigatorbar* master) : master(master) {
-		this->font = make_text_format("Microsoft YaHei", design_to_application_height(28.13F));
+		this->font = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(28.13F));
 	}
 
 public:
 	void load_and_flow(float width, float height) {
-		float button_gapsize = design_to_application_width(1.0F);
+		float button_gapsize = this->master->sketch_to_application_width(1.0F);
 		float button_cell_width = width / float(_N(Yacht));
 		float button_width = button_cell_width - button_gapsize;
-		float button_height = design_to_application_height(84.0F);
+		float button_height = this->master->sketch_to_application_height(84.0F);
 		float button_x = button_gapsize * 0.5F;
-		float button_y = (height - button_height) * 0.5F;
+		float cy = height * 0.5F;
 
 		for (Yacht id = Yacht::HomePage; id < Yacht::_; id++) {
 			this->backgrounds[id] = new Backgroundlet(button_width, button_height);
 			this->items[id] = new CreditItemlet(id, button_width, button_height, this->font);
-			this->master->insert(this->backgrounds[id], button_x, button_y);
-			this->master->insert(this->items[id], button_x, button_y);
+			this->master->insert(this->backgrounds[id], button_x, cy, GraphletAnchor::LC);
+			this->master->insert(this->items[id], button_x, cy, GraphletAnchor::LC);
 
 			if (id == Yacht::HomePage) {
 				this->backgrounds[id]->set_value(true);

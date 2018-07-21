@@ -302,7 +302,6 @@
     <Image Include="stone\graphlet\Yacht\Upper.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="configuration.cpp" />
     <ClCompile Include="frame\navigatorbar.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
     <ClCompile Include="page\alogbook.cpp" />

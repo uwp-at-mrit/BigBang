@@ -30,7 +30,8 @@ static const float label_fy = 0.25F;
 
 private class GDecorator final : public IPlanetDecorator {
 public:
-	GDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
+	GDecorator(IPlanet* master, float width, float height, float padding)
+		: master(master), region_height(height), region_padding(padding) {
 		this->region_width = (width - padding) / float(gcount) - padding;
 
 		this->rspeed_bgcolors[0] = Colours::make(0x101410U);
@@ -43,9 +44,9 @@ public:
 		this->bgcolors[G::Gauge] = Colours::make(0x1E1E1EU);
 		this->bgcolors[G::Alert] = Colours::make(0x131615U);
 
-		this->heights[G::RSpeed] = design_to_application_height(180.0F);
-		this->heights[G::Power] = design_to_application_height(125.0F);
-		this->heights[G::Alert] = design_to_application_height(70.0F);
+		this->heights[G::RSpeed] = this->master->sketch_to_application_height(180.0F);
+		this->heights[G::Power] = this->master->sketch_to_application_height(125.0F);
+		this->heights[G::Alert] = this->master->sketch_to_application_height(70.0F);
 		this->heights[G::Gauge] = height
 			- (this->heights[G::RSpeed] + this->heights[G::Power] + this->heights[G::Alert])
 			- this->region_padding * float(_N(G) + 1);
@@ -58,9 +59,9 @@ public:
 		}
 
 		{ // initialize labels
-			CanvasTextFormat^ sfont = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
-			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
-			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", design_to_application_height(20.0F));
+			CanvasTextFormat^ sfont = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(33.75F));
+			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(30.0F));
+			CanvasTextFormat^ mfont = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(20.0F));
 
 			this->rspeed = make_text_layout(speak(":rspeed:"), sfont);
 
@@ -95,8 +96,8 @@ public:
 
 public:
 	void fill_power_cell_extent(unsigned int g_idx, GPower p, float* x, float* y, float* width, float* height) {
-		static float cell_gapsize = design_to_application_width(8.0F);
-		static float cell_height = design_to_application_height(102.0F);
+		static float cell_gapsize = this->master->sketch_to_application_width(8.0F);
+		static float cell_height = this->master->sketch_to_application_height(102.0F);
 		static float cell_margin = (this->heights[G::Power] - cell_height) * 0.5F;
 		static float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
 
@@ -214,6 +215,9 @@ private:
 	float region_padding;
 	std::map<G, float> ys;
 	std::map<G, float> heights;
+
+private:
+	IPlanet* master;
 };
 
 /*************************************************************************************************/
@@ -227,12 +231,12 @@ public:
 
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
-		this->rspeed_fonts[0] = make_text_format(scale_face, design_to_application_height(125.0F));
-		this->rspeed_fonts[1] = make_text_format(scale_face, design_to_application_height(45.00F));
-		this->power_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
-		this->power_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
-		this->gauge_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
-		this->gauge_fonts[1] = make_text_format(scale_face, design_to_application_height(28.00F));
+		this->rspeed_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(125.0F));
+		this->rspeed_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(45.00F));
+		this->power_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
+		this->power_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
+		this->gauge_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
+		this->gauge_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
 
 		this->fgcolor = Colours::make(0xD2D2D2);
 
@@ -382,7 +386,7 @@ GeneratorPage::~GeneratorPage() {
 
 void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		GDecorator* regions = new GDecorator(width, height, design_to_application_height(4.0F));
+		GDecorator* regions = new GDecorator(this, width, height, this->sketch_to_application_height(4.0F));
 		GBoard* gb = new GBoard(this, regions);
 
 		gb->load_and_flow();

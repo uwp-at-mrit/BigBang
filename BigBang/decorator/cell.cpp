@@ -89,5 +89,10 @@ void CellDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float
 			this->boxes[i].Width, this->boxes[i].Height,
 			this->radius, this->radius,
 			this->color);
+
+		ds->DrawRoundedRectangle(this->boxes[i].X, this->boxes[i].Y,
+			this->boxes[i].Width, this->boxes[i].Height,
+			this->radius, this->radius,
+			Colours::Firebrick);
 	}
 }

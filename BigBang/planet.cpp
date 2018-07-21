@@ -1043,6 +1043,26 @@ float IPlanet::actual_height() {
 	return height;
 }
 
+float IPlanet::sketch_to_application_width(float sketch_width) {
+	float width = sketch_width;
+
+	if (this->info != nullptr) {
+		width = this->info->master->sketch_to_application_width(sketch_width);
+	}
+
+	return width;
+}
+
+float IPlanet::sketch_to_application_height(float sketch_height) {
+	float height = sketch_height;
+
+	if (this->info != nullptr) {
+		height = this->info->master->sketch_to_application_height(sketch_height);
+	}
+
+	return height;
+}
+
 Syslog* IPlanet::get_logger() {
 	Syslog* logger = default_logger();
 

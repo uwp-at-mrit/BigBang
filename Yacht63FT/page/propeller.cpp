@@ -32,12 +32,12 @@ static const float label_fy = 0.25F;
 
 private class PDecorator final : public IPlanetDecorator {
 public:
-	PDecorator(float width, float height, float padding) : region_height(height), region_padding(padding) {
-		float metrics_height = design_to_application_height(125.0F);
+	PDecorator(IPlanet* master, float width, float height, float padding) : region_height(height), region_padding(padding) {
+		float metrics_height = master->sketch_to_application_height(125.0F);
 
 		this->region_width = (width - padding) / float(pcount) - padding;
-		this->cell_gapsize = design_to_application_width(8.0F);
-		this->cell_margin = (metrics_height - design_to_application_height(102.0F)) * 0.5F;
+		this->cell_gapsize = master->sketch_to_application_width(8.0F);
+		this->cell_margin = (metrics_height - master->sketch_to_application_height(102.0F)) * 0.5F;
 
 		this->cell_color = Colours::make(0x131615U);
 		this->fgcolors[P::Converter] = Colours::make(0x878787U);
@@ -70,8 +70,8 @@ public:
 		}
 
 		{ // initialize labels
-			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", design_to_application_height(30.0F));
-			CanvasTextFormat^ gfont = make_text_format("Microsoft YaHei", design_to_application_height(24.0F));
+			CanvasTextFormat^ pfont = make_text_format("Microsoft YaHei", master->sketch_to_application_height(30.0F));
+			CanvasTextFormat^ gfont = make_text_format("Microsoft YaHei", master->sketch_to_application_height(24.0F));
 
 			for (unsigned int id = 1; id <= pcount; id++) {
 				this->cids[id - 1] = make_text_layout("M" + id.ToString(), pfont);
@@ -241,10 +241,10 @@ public:
 
 	PBoard(PropellerPage* master, PDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
-		this->metrics_fonts[0] = make_text_format(scale_face, design_to_application_height(42.0F));
-		this->metrics_fonts[1] = make_text_format(scale_face, design_to_application_height(37.5F));
-		this->gauge_fonts[0] = make_text_format(scale_face, design_to_application_height(32.0F));
-		this->gauge_fonts[1] = make_text_format(scale_face, design_to_application_height(28.00F));
+		this->metrics_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
+		this->metrics_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
+		this->gauge_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
+		this->gauge_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
 
 		this->fgcolor = Colours::make(0xD2D2D2);
 
@@ -375,7 +375,7 @@ PropellerPage::~PropellerPage() {
 
 void PropellerPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		PDecorator* regions = new PDecorator(width, height, design_to_application_height(4.0F));
+		PDecorator* regions = new PDecorator(this, width, height, this->sketch_to_application_height(4.0F));
 		PBoard* gb = new PBoard(this, regions);
 
 		gb->load_and_flow();

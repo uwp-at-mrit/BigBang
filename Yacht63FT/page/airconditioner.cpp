@@ -1,6 +1,5 @@
 ﻿#include "page/airconditioner.hpp"
 #include "decorator/cell.hpp"
-#include "decorator/grid.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/indicatorlet.hpp"
@@ -42,18 +41,21 @@ static CanvasTextFormat^ label_font = nullptr;
 
 static CanvasSolidColorBrush^ label_color = nullptr;
 
-static void prepare_text_formats() {
-	caption_font = make_bold_text_format("Microsoft YaHei", design_to_application_height(33.75F));
-	fore_font = make_text_format("Microsoft YaHei", design_to_application_height(37.50F));
-	unit_font = make_text_format("Microsoft YaHei", design_to_application_height(30.00F));
-	label_font = make_text_format("Microsoft YaHei", design_to_application_height(24.79F));
+static void prepare_text_formats(IPlanet* master) {
+	if (label_color == nullptr) {
+		label_color = Colours::make(0x999999);
 
-	label_color = Colours::make(0x999999);
+		caption_font = make_bold_text_format("Microsoft YaHei", master->sketch_to_application_height(33.75F));
+		fore_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(37.50F));
+		unit_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(30.00F));
+		label_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(24.79F));
+	}
 }
 
 private class ACDecorator final : public CellDecorator {
 public:
-	ACDecorator(float width, float height) : CellDecorator(0x262626, width, height, cell_count, 3, design_to_application_width(2.0F)) {
+	ACDecorator(IPlanet* master, float width, float height)
+		: CellDecorator(0x262626, width, height, cell_count, 3, master->sketch_to_application_width(2.0F)) {
 		for (ACInfo id = _E0(ACInfo); id < ACInfo::_; id++) {
 			this->infos[id] = make_text_layout(speak(":" + id.ToString() + ":"), label_font);
 		}
@@ -112,9 +114,9 @@ public:
 	void load_and_flow(float width, float height) {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
 		float thermometer_rx, thermometer_y, mercury_center_y;
-		float label_offset = design_to_application_height(24.0F);
-		float icon_width = design_to_application_width(64.0F);
-		float mode_width = design_to_application_width(46.0F);
+		float label_offset = this->master->sketch_to_application_height(24.0F);
+		float icon_width = this->master->sketch_to_application_width(64.0F);
+		float mode_width = this->master->sketch_to_application_width(46.0F);
 
 		for (AC room = _E0(AC); room < AC::_; room++) {
 			unsigned int i = _I(room);
@@ -380,9 +382,7 @@ private:
 };
 
 /*************************************************************************************************/
-ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {
-	prepare_text_formats();
-}
+ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) { }
 
 ACPage::~ACPage() {
 	if (this->satellite != nullptr) {
@@ -395,11 +395,13 @@ ACPage::~ACPage() {
 }
 
 void ACPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+	prepare_text_formats(this);
+	
 	if (this->dashboard == nullptr) {
-		ACDecorator* cells = new ACDecorator(width, height);
+		ACDecorator* cells = new ACDecorator(this, width, height);
 		ACBoard* ac = new ACBoard(this, cells);
 		ACSatellite* acs = new ACSatellite(ac, this->name() + "#Satellite");
-		
+	
 		ac->load_and_flow(width, height);
 
 		this->dashboard = ac;

@@ -9,9 +9,11 @@ namespace WarGrey::SCADA {
 		CellDecorator(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			const Windows::Foundation::Rect* src, size_t count, float radius = 8.0F);
 
-		CellDecorator(unsigned int color, float width, float height, size_t count, size_t col, float hgap = 2.0F, float vgap = -1.0F, float radius = 8.0F);
+		CellDecorator(unsigned int color, float width, float height, size_t count, size_t col,
+			float hgap = 2.0F, float vgap = -1.0F, float radius = 8.0F);
 		CellDecorator(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
-			float width, float height, size_t count, size_t col, float hgap = 2.0F, float vgap = -1.0F, float radius = 8.0F);
+			float width, float height, size_t count, size_t col,
+			float hgap = 2.0F, float vgap = -1.0F, float radius = 8.0F);
 
 		template<class T, int N>
 		CellDecorator(T color, const Windows::Foundation::Rect (&src)[N], float radius = 8.0F)

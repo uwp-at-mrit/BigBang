@@ -36,7 +36,7 @@ public:
 	}
 
 	GaugeBoard(GaugePage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
-		this->font = make_text_format("Microsoft YaHei", design_to_application_height(33.75F));
+		this->font = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(33.75F));
 		this->fgcolor = Colours::GhostWhite;
 
 		this->decorator->reference();
@@ -45,7 +45,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		TextExtent ts = get_text_extent("Yacht", this->font);
-		float gwidth = design_to_application_width(80.0F);
+		float gwidth = this->master->sketch_to_application_width(80.0F);
 		float gheight = height * 0.5F * 0.618F;
 		float gapsize = ts.height * 0.5F;
 
@@ -102,8 +102,6 @@ private:
 
 		this->master->insert(this->mcylinders[id], anchor_x, anchor_y, GraphletAnchor::CC);
 		this->master->insert(this->lblcylinders[id], this->mcylinders[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
-
-		this->mcylinders[id]->set_value(1500.0F);
 	}
 
 // never deletes these graphlets mannually
@@ -131,7 +129,7 @@ GaugePage::~GaugePage() {
 
 void GaugePage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float padding = design_to_application_height(8.0F);
+		float padding = this->sketch_to_application_height(8.0F);
 		float region_width = (width - padding * 3.0F);
 		float region_y = padding;
 		float region_height = (height - padding * 2.0F);

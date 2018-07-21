@@ -1,6 +1,7 @@
 #include "transformation.hpp"
 #include "universe.hxx"
 #include "planet.hpp"
+#include "system.hpp"
 #include "syslog.hpp"
 #include "time.hpp"
 
@@ -60,9 +61,28 @@ static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, 
 	planet->leave_shared_section();
 }
 
+static inline float display_contain_mode_scale(float to_width, float to_height, float from_width, float from_height) {
+	return std::fminf(std::fminf(to_width / from_width, to_height / from_height), 1.0F);
+}
+
 /*************************************************************************************************/
-IDisplay::IDisplay(Syslog* logger) : logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger) {
+IDisplay::IDisplay(Syslog* logger, DisplayFit mode, float dest_width, float dest_height, float src_width, float src_height)
+	: logger((logger == nullptr) ? make_silent_logger("IDisplay") : logger), mode(mode)
+	, target_width(std::fmaxf(dest_width, 0.0F)), target_height(std::fmaxf(dest_height, 0.0F))
+	, source_width(src_width), source_height(src_height) {
 	this->logger->reference();
+
+	if (this->source_width <= 0.0F) {
+		this->source_width = this->target_width;
+	}
+
+	if (this->source_height <= 0.0F) {
+		this->source_height = this->target_height;
+	}
+
+	if ((this->target_width * this->target_height) == 0.0F) {
+		this->mode = DisplayFit::None;
+	}
 }
 
 IDisplay::~IDisplay() {
@@ -130,6 +150,50 @@ float IDisplay::height::get() {
 	return float(this->canvas->Height);
 }
 
+void IDisplay::apply_source_size(float src_width, float src_height) {
+	this->width = this->sketch_to_application_width(src_width);
+	this->height = this->sketch_to_application_height(src_height);
+
+	this->max_width = this->width;
+	this->max_height = this->height;
+}
+
+float IDisplay::sketch_to_application_width(float sketch_width) {
+	static Size screen = system_screen_size();
+	float width = sketch_width;
+
+	switch (this->mode) {
+	case DisplayFit::Contain: {
+		static float scale = display_contain_mode_scale(screen.Width, screen.Height, target_width, target_height);
+
+		width = (sketch_width / this->source_width * this->target_width) * scale;
+	}; break;
+	case DisplayFit::Fill: {
+		width = sketch_width * screen.Width / this->source_width;
+	}; break;
+	}
+
+	return width;
+}
+
+float IDisplay::sketch_to_application_height(float sketch_height) {
+	static Size screen = system_screen_size();
+	float height = sketch_height;
+
+	switch (this->mode) {
+	case DisplayFit::Contain: {
+		static float scale = display_contain_mode_scale(screen.Width, screen.Height, target_width, target_height);
+
+		height = (sketch_height / this->source_height * this->target_height) * scale;
+	}; break;
+	case DisplayFit::Fill: {
+		height = sketch_height * screen.Height / this->source_height;
+	}; break;
+	}
+
+	return height;
+}
+
 void IDisplay::enter_critical_section() {
 	this->section.lock();
 }
@@ -144,7 +208,13 @@ Syslog* IDisplay::get_logger() {
 
 /*************************************************************************************************/
 UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView^ navigator)
-	: IDisplay((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger) {
+	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, first_planet, navigator) { }
+
+UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, Syslog* logger, IPlanet* first_planet, ListView^ navigator)
+	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, first_planet, navigator) { }
+
+UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight, Syslog* logger, IPlanet* first_planet, ListView^ navigator)
+	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight) {
 	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
 	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
 	this->navigator_view->IsItemClickEnabled = true;
@@ -414,8 +484,9 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 				child->load(args->Reason, region.Width, region.Height);
 				child->reflow(region.Width, region.Height);
 				child->notify_surface_ready();
-				
-				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed", child->name()->Data());
+
+				this->get_logger()->log_message(Log::Debug, L"planet[%s] is constructed in region[%f, %f]",
+					child->name()->Data(), region.Width, region.Height);
 			} catch (Platform::Exception^ e) {
 				this->get_logger()->log_message(Log::Critical, L"%s: constructing: %s",
 					child->name()->Data(), e->Message->Data());

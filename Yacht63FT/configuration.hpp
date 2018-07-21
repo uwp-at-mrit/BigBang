@@ -19,20 +19,19 @@ static const unsigned int screen_status_parameter_color = 0xFEFEFE;
 
 static const float screen_width = 1920.0F;
 static const float screen_height = 1080.0F;
-static const float screen_navigator_height = 90.0F;
-static const float screen_statusbar_height = 215.0F;
 
-static const float screen_copyright_xoff = 288.0F;
-static const float screen_copyright_yoff = 24.0F;
+static const float sketch_width = 1920.0F;
+static const float sketch_height = 1200.0F;
+static const float sketch_navigator_height = 90.0F;
+static const float sketch_statusbar_height = 215.0F;
 
-static const float screen_status_label_xoff = 148.0F;
-static const float screen_status_label_yoff = 24.0F;
-static const float screen_status_parameter_yoff = 120.0F;
-static const float screen_status_alarm_x = 1206.0F;
-static const float screen_status_alarm_width = 160.0F;
+static const float sketch_copyright_xoff = 288.0F;
+static const float sketch_copyright_yoff = 24.0F;
+
+static const float sketch_status_label_xoff = 148.0F;
+static const float sketch_status_label_yoff = 24.0F;
+static const float sketch_status_parameter_yoff = 120.0F;
+static const float sketch_status_alarm_x = 1206.0F;
+static const float sketch_status_alarm_width = 160.0F;
 
 static const float indicator_thickness = 16.0F;
-
-float screen_to_application_size(float src);
-float design_to_application_width(float src);
-float design_to_application_height(float src);

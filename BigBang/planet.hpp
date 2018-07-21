@@ -30,6 +30,10 @@ namespace WarGrey::SCADA {
 		float actual_height();
 
 	public:
+		float sketch_to_application_width(float sketch_width);
+		float sketch_to_application_height(float sketch_height);
+
+	public:
 		virtual void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) {}
 		virtual void reflow(float width, float height) {}
@@ -162,10 +166,7 @@ namespace WarGrey::SCADA {
 		Planet(Platform::String^ caption, unsigned int initial_mode = 0);
 
 	public:
-		/** NOTE
-		 * mode 0 is designed for UI graphlets which will be unmasked in all modes;
-		 */
-		void change_mode(unsigned int mode);
+		void change_mode(unsigned int mode); // NOTE: mode 0 is designed for UI graphlets which will be unmasked in all modes;
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
 		void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 		WarGrey::SCADA::IPlanetDecorator* get_decorator();
