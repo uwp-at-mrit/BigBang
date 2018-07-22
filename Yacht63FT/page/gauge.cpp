@@ -1,7 +1,7 @@
 ﻿#include <map>
 
 #include "page/gauge.hpp"
-#include "decorator/cell.hpp"
+#include "decorator/table.hpp"
 #include "decorator/background.hpp"
 #include "configuration.hpp"
 
@@ -29,17 +29,9 @@ static unsigned int cell_bgcolor = 0x2E2E2EU;
 /*************************************************************************************************/
 private class GaugeBoard final : public PLCConfirmation {
 public:
-	~GaugeBoard() noexcept {
-		if (this->decorator != nullptr) {
-			this->decorator->destroy();
-		}
-	}
-
 	GaugeBoard(GaugePage* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->font = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(33.75F));
 		this->fgcolor = Colours::GhostWhite;
-
-		this->decorator->reference();
 	}
 
 public:
@@ -149,7 +141,7 @@ void GaugePage::load(CanvasCreateResourcesReason reason, float width, float heig
 		lb->load_and_flow(width, height);
 
 		this->dashboard = lb;
-		this->set_decorator(regions);
+		this->append_decorator(regions);
 		this->device->append_confirmation_receiver(lb);
 	}
 }

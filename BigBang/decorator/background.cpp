@@ -23,7 +23,7 @@ BackgroundDecorator::BackgroundDecorator(unsigned int color, float hinset, float
 
 BackgroundDecorator::~BackgroundDecorator() {}
 
-void BackgroundDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void BackgroundDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
 	float width = Width - this->left_inset - this->right_inset;
 	float height = Height - this->top_inset - this->bottom_inset;
 	

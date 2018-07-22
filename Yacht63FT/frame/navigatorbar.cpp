@@ -176,7 +176,7 @@ void Navigatorbar::load(CanvasCreateResourcesReason reason, float width, float h
 		dashboards.insert(std::pair<Navigatorbar*, NavigatorBoard*>(this, dashboard));
 		dashboard->load_and_flow(width, height);
 
-		this->set_decorator(new BackgroundDecorator(0x1E1E1E));
+		this->append_decorator(new BackgroundDecorator(0x1E1E1E));
 
 		this->device->append_plc_status_listener(dashboard);
 	}

@@ -8,10 +8,7 @@ namespace WarGrey::SCADA {
         GridDecorator(float grid_width = 16.0F, float grid_height = 0.0F, float start_x = 0.0F, float start_y = 0.0F);
 
     public:
-        void draw_before(
-            WarGrey::SCADA::IPlanet* master,
-            Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-            float Width, float Height) override;
+        void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
 	protected:
 		~GridDecorator() noexcept {}

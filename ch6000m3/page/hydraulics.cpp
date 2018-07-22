@@ -368,13 +368,10 @@ void HydraulicSystem::load(CanvasCreateResourcesReason reason, float width, floa
 		}
 
 		{ // delayed initializing
-			PageDecorator* page = new PageDecorator(Colours::GrayText);
-#ifdef _DEBUG
-			IPlanetDecorator* decorators[] = { page, new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset) };
+			this->append_decorator(new PageDecorator(Colours::GrayText));
 
-			this->set_decorator(new CompositeDecorator(decorators));
-#else
-			this->set_decorator(page);
+#ifdef _DEBUG
+			this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset));
 #endif
 
 			if (this->device != nullptr) {

@@ -101,8 +101,6 @@ private:
 	void load_display(UniverseDisplay^ display, float width, float height) {
 		display->apply_source_size(width, height);
 
-		display->get_logger()->log_message(Log::Info, L"(%f, %f)", display->width, display->height);
-
 		this->timeline->append_timer_action(display);
 		this->Children->Append(display->canvas);
 	}

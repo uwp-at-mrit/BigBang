@@ -82,13 +82,13 @@ public:
 	}
 
 public:
-	void draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
+	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
 		for (unsigned int idx = 0; idx < gcount; idx++) {
 			this->draw_region(ds, idx);
 		}
 	}
 
-	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
+	void draw_after(CanvasDrawingSession^ ds, float Width, float Height) override {
 		for (unsigned int idx = 0; idx < gcount; idx++) {
 			this->draw_region_label(ds, idx);
 		}
@@ -223,12 +223,6 @@ private:
 /*************************************************************************************************/
 private class GBoard final : public PLCConfirmation {
 public:
-	~GBoard() noexcept {
-		if (this->decorator != nullptr) {
-			this->decorator->destroy();
-		}
-	}
-
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
 		this->rspeed_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(125.0F));
@@ -239,8 +233,6 @@ public:
 		this->gauge_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
 
 		this->fgcolor = Colours::make(0xD2D2D2);
-
-		this->decorator->reference();
 	}
 
 public:
@@ -392,7 +384,7 @@ void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float 
 		gb->load_and_flow();
 
 		this->dashboard = gb;
-		this->set_decorator(regions);
+		this->append_decorator(regions);
 		this->device->append_confirmation_receiver(gb);
 	}
 }

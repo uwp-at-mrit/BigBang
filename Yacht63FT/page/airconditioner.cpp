@@ -1,5 +1,4 @@
 ﻿#include "page/airconditioner.hpp"
-#include "decorator/cell.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/indicatorlet.hpp"
@@ -30,7 +29,7 @@ private enum class ACStatus { Normal };
 
 private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refresh, _ };
 
-static size_t cell_count = _N(AC);
+static size_t ac_count = _N(AC);
 static float t_min = -30.0F;
 static float t_max = 50.0F;
 
@@ -52,18 +51,17 @@ static void prepare_text_formats(IPlanet* master) {
 	}
 }
 
-private class ACDecorator final : public CellDecorator {
+private class ACDecorator final : public TableDecorator {
 public:
-	ACDecorator(IPlanet* master, float width, float height)
-		: CellDecorator(0x262626, width, height, cell_count, 3, master->sketch_to_application_width(2.0F)) {
+	ACDecorator(float width, float height, float gapsize) : TableDecorator(0x262626U, ac_count, 3U, gapsize) {
 		for (ACInfo id = _E0(ACInfo); id < ACInfo::_; id++) {
 			this->infos[id] = make_text_layout(speak(":" + id.ToString() + ":"), label_font);
 		}
 	}
 
 public:
-	void draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) override {
-		for (unsigned int idx = 0; idx < cell_count; idx++) {
+	void draw_after(CanvasDrawingSession^ ds, float Width, float Height) override {
+		for (unsigned int idx = 0; idx < cell_count(); idx++) {
 			for (ACInfo id = _E0(ACInfo); id < ACInfo::_; id++) {
 				this->draw_text_ct(ds, idx, id);
 			}
@@ -72,16 +70,16 @@ public:
 
 public:
 	void fill_info_anchor(unsigned int idx, ACInfo id, float* anchor_x, float* anchor_y) {
-		float x, y, width, height;
+		float fx, fy;
 
-		this->fill_cell_extent(idx, &x, &y, &width, &height);
-	
 		switch (id) {
-		case ACInfo::mode:   SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.64F); break;
-		case ACInfo::t_sea:  SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.64F); break;
-		case ACInfo::t_pipe: SET_VALUES(anchor_x, x + width * 0.25F, anchor_y, y + height * 0.86F); break;
-		case ACInfo::aux:    SET_VALUES(anchor_x, x + width * 0.75F, anchor_y, y + height * 0.86F); break;
+		case ACInfo::mode:   fx = 0.25F; fy = 0.64F; break;
+		case ACInfo::t_sea:  fx = 0.75F; fy = 0.64F; break;
+		case ACInfo::t_pipe: fx = 0.25F; fy = 0.86F; break;
+		case ACInfo::aux:    fx = 0.75F; fy = 0.86F; break;
 		}
+
+		this->fill_cell_anchor(idx, fx, fy, anchor_x, anchor_y);
 	}
 
 private:
@@ -100,15 +98,7 @@ private:
 /*************************************************************************************************/
 private class ACBoard final : public PLCConfirmation {
 public:
-	~ACBoard() noexcept {
-		if (this->decorator != nullptr) {
-			this->decorator->destroy();
-		}
-	}
-
-	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) {
-		this->decorator->reference();
-	}
+	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) { }
 
 public:
 	void load_and_flow(float width, float height) {
@@ -236,10 +226,11 @@ public:
 	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F)
 		: ICreditSatellite(default_logging_level, board, caption) {
 		float width = bar_height * _F(ACOP::_);
-		float height = width * 0.80F;
+		float height = width * 0.8F;
+		Rect bg[] = { Rect(0.0F, bar_height, width, height) };
 
-		this->decorator = new CellDecorator(0x383838, width, height, 1, 1, 0.0F, bar_height, 0.0F);
-		this->set_decorator(this->decorator);
+		this->decorator = new CellDecorator(0x383838, bg, 0.0F); // Don't mind, it's Visual Studio's fault
+		this->append_decorator(this->decorator);
 	}
 
 public:
@@ -289,7 +280,7 @@ public:
 		float icon_grid_width = width / _F(ACOP::_);
 
 		this->decorator->fill_cell_anchor(0, 0.50F, 0.00F, &caption_x, &cell_y);
-		this->decorator->fill_cell_anchor(0, 0.30F, 0.50F, &indicator_x, &indicator_y);
+		this->decorator->fill_cell_anchor(0, 0.32F, 0.50F, &indicator_x, &indicator_y);
 		this->decorator->fill_cell_anchor(0, 0.80F, 0.40F, &metrics_x, &sea_y);
 		this->decorator->fill_cell_anchor(0, 0.80F, 0.70F, nullptr, &pipe_y);
 		icon_grid_y = height - cell_y * 0.5F;
@@ -398,17 +389,17 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 	prepare_text_formats(this);
 	
 	if (this->dashboard == nullptr) {
-		ACDecorator* cells = new ACDecorator(this, width, height);
+		ACDecorator* cells = new ACDecorator(width, height, this->sketch_to_application_width(2.0F));
 		ACBoard* ac = new ACBoard(this, cells);
 		ACSatellite* acs = new ACSatellite(ac, this->name() + "#Satellite");
 	
+		this->append_decorator(cells);
 		ac->load_and_flow(width, height);
 
 		this->dashboard = ac;
 		this->satellite = acs;
 		this->decorator = cells;
 		
-		this->set_decorator(cells);
 		this->device->append_confirmation_receiver(ac);
 		this->device->append_confirmation_receiver(acs);
 	}

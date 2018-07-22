@@ -338,7 +338,7 @@ void PropulsionPage::load(CanvasCreateResourcesReason reason, float width, float
 		diagram->load();
 
 #ifdef _DEBUG
-		this->set_decorator(new GridDecorator(gridsize, gridsize));
+		this->append_decorator(new GridDecorator(gridsize, gridsize));
 #endif
 
 		this->dashboard = diagram;

@@ -10,9 +10,7 @@ namespace WarGrey::SCADA {
 		BackgroundDecorator(unsigned int color, float top_inset, float right_inset, float bottom_inset, float left_inset);
 
 	public:
-		void draw_before(WarGrey::SCADA::IPlanet* master,
-			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			float Width, float Height) override;
+		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
 	protected:
 		~BackgroundDecorator() noexcept;

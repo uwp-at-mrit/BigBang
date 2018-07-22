@@ -1,62 +1,58 @@
 #include <cstdlib>
 
+#include "planet.hpp"
 #include "decorator/decorator.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 
-static IPlanetDecorator** make_decorator_list(IPlanetDecorator** src, unsigned int count) {
-	auto decorators = (IPlanetDecorator**)calloc(count, sizeof(IPlanetDecorator*));
-	
-	if (decorators != nullptr) {
-		for (unsigned int i = 0; i < count; i++) {
-			decorators[i] = src[i];
-			decorators[i]->reference();
-		}
-	}
-
-	return decorators;
+void IPlanetDecorator::set_active_planet(IPlanet* master) {
+	this->master = master;
 }
 
-/*************************************************************************************************/
-CompositeDecorator::CompositeDecorator(IPlanetDecorator* first, IPlanetDecorator* second) : count(2) {
-	IPlanetDecorator* decorators[] = { first, second };
-	this->decorators = make_decorator_list(decorators, 2);
-}
-
-CompositeDecorator::CompositeDecorator(IPlanetDecorator** decorators, unsigned int count) : count(count) {
-	this->decorators = make_decorator_list(decorators, count);
-}
-
-CompositeDecorator::~CompositeDecorator() {
-	for (unsigned int i = 0; i < this->count; i++) {
-		this->decorators[i]->destroy();
-	}
-
-	free(this->decorators);
-}
-
-void CompositeDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
-	for (unsigned int i = 0; i < this->count; i++) {
-		this->decorators[i]->draw_before(master, ds, Width, Height);
+void IPlanetDecorator::fill_graphlets_boundary(float* x, float* y, float* width, float* height) {
+	if (this->master != nullptr) {
+		this->master->fill_graphlets_boundary(x, y, width, height);
 	}
 }
 
-void CompositeDecorator::draw_after(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
-	for (unsigned int i = 0; i < this->count; i++) {
-		this->decorators[i]->draw_after(master, ds, Width, Height);
+float IPlanetDecorator::actual_width() {
+	float width = 0.0F;
+
+	if (this->master != nullptr) {
+		width = this->master->actual_width();
 	}
+
+	return width;
 }
 
-void CompositeDecorator::draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
-	for (unsigned int i = 0; i < this->count; i++) {
-		this->decorators[i]->draw_before_graphlet(g, ds, x, y, width, height, selected);
+float IPlanetDecorator::actual_height() {
+	float height = 0.0F;
+
+	if (this->master != nullptr) {
+		height = this->master->actual_height();
 	}
+
+	return height;
 }
 
-void CompositeDecorator::draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) {
-	for (unsigned int i = 0; i < this->count; i++) {
-		this->decorators[i]->draw_after_graphlet(g, ds, x, y, width, height, selected);
+float IPlanetDecorator::sketch_to_application_width(float sketch_width) {
+	float width = sketch_width;
+
+	if (this->master != nullptr) {
+		this->master->sketch_to_application_width(sketch_width);
 	}
+
+	return width;
+}
+
+float IPlanetDecorator::sketch_to_application_height(float sketch_height) {
+	float height = sketch_height;
+
+	if (this->master != nullptr) {
+		this->master->sketch_to_application_width(sketch_height);
+	}
+
+	return height;
 }

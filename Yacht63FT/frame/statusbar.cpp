@@ -1,6 +1,6 @@
 ﻿#include "frame/statusbar.hpp"
 #include "decorator/background.hpp"
-#include "decorator/cell.hpp"
+#include "decorator/table.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/dashboard/fueltanklet.hpp"
@@ -27,17 +27,9 @@ private enum Status { OilTank, StorageCell, GPS_E, GPS_N };
 /*************************************************************************************************/
 private class StatusBoard final : public PLCConfirmation, public ISystemStatusListener {
 public:
-	~StatusBoard() noexcept {
-		if (this->decorator != nullptr) {
-			this->decorator->destroy();
-		}
-	}
-
 	StatusBoard(Statusbar* master, CellDecorator* decorator) : master(master), decorator(decorator) {
 		this->fonts[0] = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(30.0F));
 		this->fonts[1] = make_text_format("Microsoft YaHei", this->master->sketch_to_application_height(41.27F));
-
-		this->decorator->reference();
 	}
 
 public:
@@ -187,7 +179,6 @@ void Statusbar::load(CanvasCreateResourcesReason reason, float width, float heig
 			Rect(yacht_cell_x, cell_y, width - cell_gapsize - yacht_cell_x, cell_height)
 		};
 
-		BackgroundDecorator* bg = new BackgroundDecorator(0x1E1E1E);
 		CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
 		StatusBoard* status = new StatusBoard(this, cells);
 		
@@ -195,7 +186,8 @@ void Statusbar::load(CanvasCreateResourcesReason reason, float width, float heig
 		register_system_status_listener(status);
 
 		this->dashboard = status;
-		this->set_decorator(new CompositeDecorator(bg, cells));
+		this->append_decorator(new BackgroundDecorator(0x1E1E1E));
+		this->append_decorator(cells);
 		this->device->append_confirmation_receiver(status);
 	}
 }

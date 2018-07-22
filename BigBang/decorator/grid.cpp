@@ -27,7 +27,7 @@ GridDecorator::GridDecorator(float w, float h, float x, float y) : width(w), hei
     }
 }
 
-void GridDecorator::draw_before(IPlanet* master, CanvasDrawingSession^ ds, float Width, float Height) {
+void GridDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
     static auto grid_color = make_solid_brush(system_color(UIElementType::GrayText));
 	static auto font = make_text_format(fmin(this->width, this->height) * 0.42F);
 	size_t idx = 0;

@@ -104,7 +104,7 @@ public:
 		float x, y, width, height;
 		float Height = this->master->actual_height();
 		
-		this->master->fill_graphlets_bounds(&x, &y, &width, &height);
+		this->master->fill_graphlets_boundary(&x, &y, &width, &height);
 
 		default_event(record, count, std::nullopt, uptime, make_nstring(interval.ToString()));
 

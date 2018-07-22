@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\cell.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp" />
@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\cell.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
       <DeploymentContent>false</DeploymentContent>

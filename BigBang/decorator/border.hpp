@@ -8,10 +8,7 @@ namespace WarGrey::SCADA {
         BorderDecorator(bool draw_border = true, bool draw_enclosing = false);
 
 	public:
-		void draw_before(
-			WarGrey::SCADA::IPlanet* master,
-			Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			float Width, float Height) override;
+		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
 	protected:
 		~BorderDecorator() noexcept {}

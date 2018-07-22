@@ -131,7 +131,7 @@ private:
 static std::unordered_map<GraphletOverview*, Stage*> stages;
 
 GraphletOverview::GraphletOverview() : Planet(":gview:") {
-	this->set_decorator(new PageDecorator(Colours::GrayText));
+	this->append_decorator(new PageDecorator(Colours::GrayText));
 }
 
 GraphletOverview::~GraphletOverview() {

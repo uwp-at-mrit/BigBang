@@ -39,8 +39,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 #define GRAPHLET_INFO(g) (static_cast<GraphletInfo*>(g->info))
 
-class PlaceHolderDecorator : public IPlanetDecorator {};
-
 class GraphletInfo : public WarGrey::SCADA::IGraphletInfo {
 public:
     GraphletInfo(IPlanet* master, unsigned int mode) : IGraphletInfo(master), mode(mode) {};
@@ -187,15 +185,17 @@ static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, Graphlet
 }
 
 /*************************************************************************************************/
-Planet::Planet(Platform::String^ name, unsigned int initial_mode)
-	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
-    this->set_decorator(nullptr);
+Planet::Planet(Platform::String^ name, unsigned int initial_mode) : IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
 }
 
 Planet::~Planet() {
 	this->collapse();
-    this->decorator->destroy();
+    
+	for (IPlanetDecorator* decorator : this->decorators) {
+		delete decorator;
+	}
+
 	delete this->numpad;
 }
 
@@ -406,7 +406,7 @@ bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAn
 	return okay;
 }
 
-bool Planet::fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) {
+bool Planet::fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* width, float* height) {
 	bool okay = false;
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
@@ -423,7 +423,7 @@ bool Planet::fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width,
 	return okay;
 }
 
-void Planet::fill_graphlets_bounds(float* x, float* y, float* width, float* height) {
+void Planet::fill_graphlets_boundary(float* x, float* y, float* width, float* height) {
     this->recalculate_graphlets_extent_when_invalid();
     SET_VALUES(x, this->graphlets_left, y, this->graphlets_top);
     SET_BOX(width, this->graphlets_right - this->graphlets_left);
@@ -797,17 +797,11 @@ void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y) {
 }
 
 /*************************************************************************************************/
-void Planet::set_decorator(IPlanetDecorator* decorator) {
-    if (this->decorator != nullptr) {
-        this->decorator->destroy();
-    }
-
-	this->decorator = ((decorator == nullptr) ? new PlaceHolderDecorator() : decorator);
-    this->decorator->reference();
-}
-
-IPlanetDecorator* Planet::get_decorator() {
-	return this->decorator;
+void Planet::append_decorator(IPlanetDecorator* decorator) {
+	if (decorator != nullptr) {
+		this->decorators.push_back(decorator);
+		decorator->set_active_planet(this);
+	}
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
@@ -833,6 +827,10 @@ void Planet::update(long long count, long long interval, long long uptime) {
 		} while (child != this->head_graphlet);
     }
 
+	for (IPlanetDecorator* decorator : this->decorators) {
+		decorator->update(count, interval, uptime);
+	}
+
 	this->on_elapse(count, interval, uptime);
 }
 
@@ -846,22 +844,24 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 	float dsWidth = Width - max(transformX, 0.0F);
 	float dsHeight = Height - max(transformY, 0.0F);
 
+	for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
-	try {
+		try {
 #endif
-		this->decorator->draw_before(this, ds, Width, Height);
+			decorator->draw_before(ds, Width, Height);
 #ifdef _DEBUG
-	} catch (Platform::Exception^ e) {
-		this->get_logger()->log_message(Log::Critical, L"%s: predecorating: %s", this->name()->Data(), e->Message->Data());
+		} catch (Platform::Exception^ e) {
+			this->get_logger()->log_message(Log::Critical, L"%s: predecorating: %s", this->name()->Data(), e->Message->Data());
+		}
+#endif
 	}
-#endif
 
-    if (this->head_graphlet != nullptr) {
-        IGraphlet* child = this->head_graphlet;
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* child = this->head_graphlet;
 		float width, height;
 
-        do {
-            GraphletInfo* info = GRAPHLET_INFO(child);
+		do {
+			GraphletInfo* info = GRAPHLET_INFO(child);
 
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);
@@ -876,16 +876,18 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					}
 
+					for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
-					try {
+						try {
 #endif
-						this->decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+							decorator->draw_before_graphlet(child, ds, info->x, info->y, width, height, info->selected);
 #ifdef _DEBUG
-					} catch (Platform::Exception^ e) {
-						this->get_logger()->log_message(Log::Critical, L"%s: predecorating graphlet: %s",
-							this->name()->Data(), e->Message->Data());
+						} catch (Platform::Exception^ e) {
+							this->get_logger()->log_message(Log::Critical, L"%s: predecorating graphlet: %s",
+								this->name()->Data(), e->Message->Data());
+						}
+#endif
 					}
-#endif
 
 #ifdef _DEBUG
 					try {
@@ -902,16 +904,18 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 					}
 #endif	
 
+					for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
-					try {
+						try {
 #endif
-						this->decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
+							decorator->draw_after_graphlet(child, ds, info->x, info->y, width, height, info->selected);
 #ifdef _DEBUG
-					} catch (Platform::Exception^ e) {
-						this->get_logger()->log_message(Log::Critical, L"%s: postdecorating graphlet: %s",
-							this->name()->Data(), e->Message->Data());
+						} catch (Platform::Exception^ e) {
+							this->get_logger()->log_message(Log::Critical, L"%s: postdecorating graphlet: %s",
+								this->name()->Data(), e->Message->Data());
+						}
+#endif
 					}
-#endif
 
 					if (info->selected) {
 						this->draw_visible_selection(ds, info->x, info->y, width, height);
@@ -922,33 +926,35 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 				}
 			}
 
-            child = info->next;
-        } while (child != this->head_graphlet);
-    }
-
-    if (this->rubberband_y != nullptr) {
-        ICanvasBrush^ rubberband_color = Colours::Highlight;
-
-        float left = min(this->last_pointer_x, (*this->rubberband_x));
-        float top = min(this->last_pointer_y, (*this->rubberband_y));
-        float width = abs((*this->rubberband_x) - this->last_pointer_x);
-        float height = abs((*this->rubberband_y) - this->last_pointer_y);
-
-        rubberband_color->Opacity = 0.32F;
-        ds->FillRectangle(left, top, width, height, rubberband_color);
-        rubberband_color->Opacity = 1.00F;
-        ds->DrawRectangle(left, top, width, height, rubberband_color);
-    }
-
-#ifdef _DEBUG
-	try {
-#endif
-		this->decorator->draw_after(this, ds, Width, Height);
-#ifdef _DEBUG
-	} catch (Platform::Exception^ e) {
-		this->get_logger()->log_message(Log::Critical, L"%s: postdecorating: %s", this->name()->Data(), e->Message->Data());
+			child = info->next;
+		} while (child != this->head_graphlet);
 	}
+
+	if (this->rubberband_y != nullptr) {
+		ICanvasBrush^ rubberband_color = Colours::Highlight;
+
+		float left = min(this->last_pointer_x, (*this->rubberband_x));
+		float top = min(this->last_pointer_y, (*this->rubberband_y));
+		float width = abs((*this->rubberband_x) - this->last_pointer_x);
+		float height = abs((*this->rubberband_y) - this->last_pointer_y);
+
+		rubberband_color->Opacity = 0.32F;
+		ds->FillRectangle(left, top, width, height, rubberband_color);
+		rubberband_color->Opacity = 1.00F;
+		ds->DrawRectangle(left, top, width, height, rubberband_color);
+	}
+
+	for (IPlanetDecorator* decorator : this->decorators) {
+#ifdef _DEBUG
+		try {
 #endif
+			decorator->draw_after(ds, Width, Height);
+#ifdef _DEBUG
+		} catch (Platform::Exception^ e) {
+			this->get_logger()->log_message(Log::Critical, L"%s: postdecorating: %s", this->name()->Data(), e->Message->Data());
+		}
+#endif
+	}
 
 	if (this->numpad->shown()) {
 		float width, height;

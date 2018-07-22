@@ -66,9 +66,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\cell.cpp">
-      <Filter>decorator</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
@@ -99,6 +96,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp">
       <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\decorator\table.cpp">
+      <Filter>decorator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,9 +168,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx">
       <Filter>graphlet</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\cell.hpp">
-      <Filter>decorator</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
@@ -204,6 +201,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp">
       <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\decorator\table.hpp">
+      <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

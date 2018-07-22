@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <shared_mutex>
 
 #include "universe.hxx"
@@ -46,8 +47,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) = 0;
 		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
-		virtual bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
-		virtual void fill_graphlets_bounds(float* x, float* y, float* width, float* height) = 0;
+		virtual bool fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
+		virtual void fill_graphlets_boundary(float* x, float* y, float* width, float* height) = 0;
 		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
 		virtual void insert(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) = 0;
 		virtual void move(IGraphlet* g, float x, float y) = 0;
@@ -168,8 +169,7 @@ namespace WarGrey::SCADA {
 	public:
 		void change_mode(unsigned int mode); // NOTE: mode 0 is designed for UI graphlets which will be unmasked in all modes;
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
-		void set_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
-		WarGrey::SCADA::IPlanetDecorator* get_decorator();
+		void append_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
@@ -180,8 +180,8 @@ namespace WarGrey::SCADA {
     public:
 		WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) override;
         bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
-		bool fill_graphlet_bound(IGraphlet* g, float* x, float* y, float* width, float* height) override;
-		void fill_graphlets_bounds(float* x, float* y, float* width, float* height);
+		bool fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* width, float* height) override;
+		void fill_graphlets_boundary(float* x, float* y, float* width, float* height);
 		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
 		void insert(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) override;
 		void move(IGraphlet* g, float x, float y) override;
@@ -254,7 +254,7 @@ namespace WarGrey::SCADA {
         float preferred_min_height;
 
     private:
-        WarGrey::SCADA::IPlanetDecorator* decorator;
+        std::list<WarGrey::SCADA::IPlanetDecorator*> decorators;
         WarGrey::SCADA::IGraphlet* head_graphlet;
 		WarGrey::SCADA::IGraphlet* focused_graphlet;
 		WarGrey::SCADA::IGraphlet* hovering_graphlet; // not used when PointerDeviceType::Touch

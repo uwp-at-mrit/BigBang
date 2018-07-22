@@ -3,7 +3,7 @@
 #include "planet.hpp"
 #include "plc.hpp"
 
-#include "decorator/cell.hpp"
+#include "decorator/table.hpp"
 
 namespace WarGrey::SCADA {
 	private class ACPage : public WarGrey::SCADA::Planet {
@@ -19,6 +19,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		WarGrey::SCADA::PLCConfirmation* satellite;
-		WarGrey::SCADA::CellDecorator* decorator;
+		WarGrey::SCADA::TableDecorator* decorator;
 	};
 }
