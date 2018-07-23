@@ -98,7 +98,7 @@ private:
 /*************************************************************************************************/
 private class ACBoard final : public PLCConfirmation {
 public:
-	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) { }
+	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) {}
 
 public:
 	void load_and_flow(float width, float height) {
@@ -373,7 +373,7 @@ private:
 };
 
 /*************************************************************************************************/
-ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) { }
+ACPage::ACPage(PLCMaster* device, Platform::String^ name) : Planet(name), device(device) {}
 
 ACPage::~ACPage() {
 	if (this->satellite != nullptr) {

@@ -15,6 +15,7 @@ namespace WarGrey::SCADA {
 			* therefore, the default TitleBar is forced using here,
 			* and instead, the FullScreen mode is preferred.
 			*/
+
 			Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
 			if (fullscreen) {
 				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::FullScreen;

@@ -166,28 +166,29 @@ Statusbar::~Statusbar() {
 
 void Statusbar::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float cell_width = this->sketch_to_application_width(385.0F);
-		float cell_height = this->sketch_to_application_height(200.0F);
-		float cell_gapsize = this->sketch_to_application_width(10.0F);
-		float cell_y = cell_gapsize;
-		float yacht_cell_x = this->sketch_to_application_width(1388.0F);
+		float cell_width = 385.0F / sketch_width;
+		float cell_height = 200.0F / sketch_statusbar_height;
+		float cell_gapsize = 10.0F / sketch_width;
+		float cell_y = 10.0F / sketch_statusbar_height;
+		float yacht_cell_x = 1388.0F / sketch_width;
 
 		Rect boxes[] = {
 			Rect((cell_width + cell_gapsize) * 0.0F + cell_gapsize, cell_y, cell_width, cell_height),
 			Rect((cell_width + cell_gapsize) * 1.0F + cell_gapsize, cell_y, cell_width, cell_height),
 			Rect((cell_width + cell_gapsize) * 2.0F + cell_gapsize, cell_y, cell_width, cell_height),
-			Rect(yacht_cell_x, cell_y, width - cell_gapsize - yacht_cell_x, cell_height)
+			Rect(yacht_cell_x, cell_y, 1.0F - cell_gapsize - yacht_cell_x, cell_height)
 		};
 
 		CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
 		StatusBoard* status = new StatusBoard(this, cells);
 		
+		this->append_decorator(new BackgroundDecorator(0x1E1E1E));
+		this->append_decorator(cells);
+		
 		status->load_and_flow(width, height);
 		register_system_status_listener(status);
 
 		this->dashboard = status;
-		this->append_decorator(new BackgroundDecorator(0x1E1E1E));
-		this->append_decorator(cells);
 		this->device->append_confirmation_receiver(status);
 	}
 }

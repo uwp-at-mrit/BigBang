@@ -20,7 +20,7 @@ static unsigned int fueltank_default_colors[] = {
 
 /*************************************************************************************************/
 FuelTanklet::FuelTanklet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(0.0F, 1.0F, width, height, bcolor, stops) { }
+	: FuelTanklet(0.0F, 1.0F, width, height, bcolor, stops) {}
 
 FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(vmin, vmax), width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor) {

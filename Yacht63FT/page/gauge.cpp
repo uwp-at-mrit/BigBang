@@ -121,10 +121,10 @@ GaugePage::~GaugePage() {
 
 void GaugePage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		float padding = this->sketch_to_application_height(8.0F);
-		float region_width = (width - padding * 3.0F);
+		float padding = 8.0F / sketch_width;
+		float region_width = (1.0F - padding * 3.0F);
 		float region_y = padding;
-		float region_height = (height - padding * 2.0F);
+		float region_height = (1.0F - padding * 2.0F);
 		float rliquid_x = padding;
 		float rliquid_width = region_width * 0.618F;
 		float ralarm_x = padding + rliquid_width + padding;
@@ -138,10 +138,10 @@ void GaugePage::load(CanvasCreateResourcesReason reason, float width, float heig
 		CellDecorator* regions = new CellDecorator(cell_bgcolor, cells); // don't mind, it's Visual Studio's fault
 		GaugeBoard* lb = new GaugeBoard(this, regions);
 
+		this->append_decorator(regions);
 		lb->load_and_flow(width, height);
 
 		this->dashboard = lb;
-		this->append_decorator(regions);
 		this->device->append_confirmation_receiver(lb);
 	}
 }

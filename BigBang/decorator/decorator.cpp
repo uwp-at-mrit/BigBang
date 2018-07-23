@@ -7,6 +7,16 @@ using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 
+Syslog* IPlanetDecorator::get_logger() {
+	Syslog* logger = default_logger();
+
+	if (this->master != nullptr) {
+		logger = this->master->get_logger();
+	}
+
+	return logger;
+}
+
 void IPlanetDecorator::set_active_planet(IPlanet* master) {
 	this->master = master;
 }

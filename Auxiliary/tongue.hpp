@@ -67,7 +67,7 @@ namespace WarGrey::SCADA {
 		bool ge(E* instance) { return (this->unsafe_compare(instance) >= 0); }
 
 	protected:
-		Tongue(unsigned int idx) : ITongue(E::type(), idx) { }
+		Tongue(unsigned int idx) : ITongue(E::type(), idx) {}
 
 	protected:
 		static E* UnsafeTongue(unsigned int idx) {

@@ -88,9 +88,9 @@ public:
 		this->navigatorbar = ref new YachtDisplay(name + "[Navigator]", new Navigatorbar(plc_master, this->workspace));
 		this->statusbar = ref new YachtDisplay(name + "[Statusbar]", new Statusbar(plc_master));
 
-		this->load_display(this->navigatorbar, screen_width, sketch_navigator_height);
-		this->load_display(this->workspace, screen_width, sketch_workspace_height);
-		this->load_display(this->statusbar, screen_width, sketch_statusbar_height);
+		this->load_display(this->navigatorbar, screen_width, sketch_navigator_height, 0.0F);
+		this->load_display(this->workspace, screen_width, sketch_workspace_height, -21.0F);
+		this->load_display(this->statusbar, screen_width, sketch_statusbar_height, 0.0F);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
 		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
@@ -98,8 +98,15 @@ public:
 	}
 
 private:
-	void load_display(UniverseDisplay^ display, float width, float height) {
-		display->apply_source_size(width, height);
+	void load_display(UniverseDisplay^ display, float width, float height, float revise_height) {
+		display->apply_source_size(width, height, 0.0F, revise_height);
+
+		/** TODO
+		* Why the workspace canvas resizes twice?
+		* The second resizing enlarges the ActualHeight by about 20 pixels.
+		*
+		* `this->UseLayoutRounding = false` does not work.
+		*/
 
 		this->timeline->append_timer_action(display);
 		this->Children->Append(display->canvas);

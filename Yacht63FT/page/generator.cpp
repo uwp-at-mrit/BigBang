@@ -30,9 +30,8 @@ static const float label_fy = 0.25F;
 
 private class GDecorator final : public IPlanetDecorator {
 public:
-	GDecorator(IPlanet* master, float width, float height, float padding)
-		: master(master), region_height(height), region_padding(padding) {
-		this->region_width = (width - padding) / float(gcount) - padding;
+	GDecorator(IPlanet* master, float padding) : master(master), region_padding(padding) {
+		this->region_width = (1.0F - padding) / float(gcount) - padding;
 
 		this->rspeed_bgcolors[0] = Colours::make(0x101410U);
 		this->rspeed_bgcolors[1] = Colours::make(0x151915U);
@@ -44,10 +43,10 @@ public:
 		this->bgcolors[G::Gauge] = Colours::make(0x1E1E1EU);
 		this->bgcolors[G::Alert] = Colours::make(0x131615U);
 
-		this->heights[G::RSpeed] = this->master->sketch_to_application_height(180.0F);
-		this->heights[G::Power] = this->master->sketch_to_application_height(125.0F);
-		this->heights[G::Alert] = this->master->sketch_to_application_height(70.0F);
-		this->heights[G::Gauge] = height
+		this->heights[G::RSpeed] = 180.0F / sketch_height;
+		this->heights[G::Power] = 125.0F / sketch_height;
+		this->heights[G::Alert] = 70.0F / sketch_height;
+		this->heights[G::Gauge] = 1.0F
 			- (this->heights[G::RSpeed] + this->heights[G::Power] + this->heights[G::Alert])
 			- this->region_padding * float(_N(G) + 1);
 
@@ -96,24 +95,28 @@ public:
 
 public:
 	void fill_power_cell_extent(unsigned int g_idx, GPower p, float* x, float* y, float* width, float* height) {
-		static float cell_gapsize = this->master->sketch_to_application_width(8.0F);
-		static float cell_height = this->master->sketch_to_application_height(102.0F);
+		static float cell_gapsize = 8.0F / sketch_width;
+		static float cell_height = 102.0F / sketch_height;
 		static float cell_margin = (this->heights[G::Power] - cell_height) * 0.5F;
 		static float cell_width = (this->region_width - cell_margin * 2.0F - cell_gapsize * 2.0F) / 3.0F;
 
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
 		float left_x = (this->region_width + this->region_padding) * float(g_idx) + this->region_padding;
 		float cell_x = left_x + cell_margin + (cell_width + cell_gapsize) * _F(p);
 		float cell_y = this->ys[G::Power] + cell_margin;
 
-		SET_VALUES(x, cell_x, y, cell_y);
-		SET_VALUES(width, cell_width, height, cell_height);
+		SET_VALUES(x, cell_x * awidth, y, cell_y * aheight);
+		SET_VALUES(width, cell_width * awidth, height, cell_height * aheight);
 	}
 
 	void fill_rspeed_anchor(unsigned int g_idx, float fw, float fh, float* x, float* y) {
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
 		float anchor_x = this->region_x(g_idx) + this->region_width * fw;
 		float anchor_y = this->ys[G::RSpeed] + this->heights[G::RSpeed] * fh;
 
-		SET_VALUES(x, anchor_x, y, anchor_y);
+		SET_VALUES(x, anchor_x * awidth, y, anchor_y * aheight);
 	}
 
 	void fill_power_anchor(unsigned int g_idx, GPower p, float fw, float fh, float* x, float* y) {
@@ -128,13 +131,15 @@ public:
 	void fill_gauges_anchor(unsigned int g_idx, GMeter g, float fh, float* x, float* y, float* cell_size = nullptr) {
 		static float mflcount = _F(GMeter::_);
 		static float subwidth = this->region_width / mflcount;
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
 		float gauge_x = this->region_x(g_idx) +  subwidth * (_F(g) + 0.5F);
 		float gauge_y = this->ys[G::Gauge] + this->heights[G::Gauge] * fh;
 
-		SET_VALUES(x, gauge_x, y, gauge_y);
+		SET_VALUES(x, gauge_x * awidth, y, gauge_y * aheight);
 
 		if (cell_size != nullptr) {
-			(*cell_size) = fmin(subwidth, this->heights[G::Gauge] * 0.5F) * 0.8F;
+			(*cell_size) = fmin(subwidth * awidth, this->heights[G::Gauge] * aheight * 0.5F) * 0.8F;
 		}
 	}
 
@@ -144,19 +149,24 @@ private:
 	}
 
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
-		float x = this->region_x(idx);
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
+		float x = this->region_x(idx) * awidth;
+		float rwidth = this->region_width * awidth;
 
-		ds->FillRectangle(x, this->ys[G::RSpeed], this->region_width, this->heights[G::RSpeed], this->rspeed_bgcolors[idx]);
+		ds->FillRectangle(x, this->ys[G::RSpeed] * aheight,
+			rwidth, this->heights[G::RSpeed] * aheight,
+			this->rspeed_bgcolors[idx]);
 
 		for (G region = _E(G, 1); region < G::_; region++) {
-			float y = this->ys[region];
-			float height = this->heights[region];
+			float y = this->ys[region] * aheight;
+			float height = this->heights[region] * aheight;
 			ICanvasBrush^ color = this->bgcolors[region];
 
 			if (region != G::Alert) {
-				ds->FillRectangle(x, y, this->region_width, height, color);
+				ds->FillRectangle(x, y, rwidth, height, color);
 			} else {
-				ds->FillRoundedRectangle(x, y, this->region_width, height, corner_radius, corner_radius, color);
+				ds->FillRoundedRectangle(x, y, rwidth, height, corner_radius, corner_radius, color);
 			}
 		}
 
@@ -378,13 +388,13 @@ GeneratorPage::~GeneratorPage() {
 
 void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		GDecorator* regions = new GDecorator(this, width, height, this->sketch_to_application_height(4.0F));
+		GDecorator* regions = new GDecorator(this, 4.0F / sketch_height);
 		GBoard* gb = new GBoard(this, regions);
 
+		this->append_decorator(regions);
 		gb->load_and_flow();
 
 		this->dashboard = gb;
-		this->append_decorator(regions);
 		this->device->append_confirmation_receiver(gb);
 	}
 }

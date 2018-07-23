@@ -90,10 +90,10 @@ void ICylinderlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 /*************************************************************************************************/
 Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: Cylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+	: Cylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
 
 Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}
 
 CanvasGeometry^ Cylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
 	Rect region = body->ComputeBounds();
@@ -105,10 +105,10 @@ CanvasGeometry^ Cylinderlet::make_liquid_shape(CanvasGeometry^ body, float perce
 
 /*************************************************************************************************/
 ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ConvexCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+	: ConvexCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
 
 ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}
 
 CanvasGeometry^ ConvexCylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
 	Rect region = body->ComputeBounds();
@@ -121,10 +121,10 @@ CanvasGeometry^ ConvexCylinderlet::make_liquid_shape(CanvasGeometry^ body, float
 
 /*************************************************************************************************/
 ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ConcaveCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) { }
+	: ConcaveCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
 
 ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) { }
+	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}
 
 CanvasGeometry^ ConcaveCylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
 	Rect region = body->ComputeBounds();

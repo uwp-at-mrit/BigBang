@@ -97,7 +97,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\decorator\table.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
   </ItemGroup>
@@ -202,7 +202,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\decorator\table.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>

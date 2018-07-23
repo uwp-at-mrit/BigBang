@@ -43,4 +43,4 @@ Rectanglelet::Rectanglelet(float edge_size, ICanvasBrush^ color, CanvasSolidColo
 	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
 
 Rectanglelet::Rectanglelet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: IShapelet(rectangle(width, height), color, border_color, thickness) { }
+	: IShapelet(rectangle(width, height), color, border_color, thickness) {}

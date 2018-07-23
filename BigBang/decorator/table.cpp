@@ -14,7 +14,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 ITableDecorator::ITableDecorator(ICanvasBrush^ color, size_t count, float radius)
-	: count((unsigned int)(count)), radius(radius), color(color) { }
+	: count((unsigned int)(count)), radius(radius), color(color) {}
 
 unsigned int ITableDecorator::cell_count() {
 	return this->count;
@@ -98,9 +98,22 @@ CellDecorator::~CellDecorator() {
 
 void CellDecorator::fill_cell_extent(unsigned int idx, float* x, float* y, float* width, float* height) {
 	if (idx < this->cell_count()) {
-		SET_BOX(x, this->boxes[idx].X);
-		SET_BOX(y, this->boxes[idx].Y);
-		SET_BOX(width, this->boxes[idx].Width);
-		SET_BOX(height, this->boxes[idx].Height);
+		float W = this->actual_width();
+		float H = this->actual_height();
+		float x0 = this->boxes[idx].X;
+		float y0 = this->boxes[idx].Y;
+		float w0 = this->boxes[idx].Width;
+		float h0 = this->boxes[idx].Height;
+
+		/** Note
+		 * This design is not elegant per se, maybe a new ITableDecorator should be involved.
+		 * Meanwhile, it is a tradeoff, since rectangles with size 1x1 or located out of screen
+		 * are almost useless.
+		 */
+
+		SET_BOX(x, ((x0 < 1.0F) ? (x0 * W) : x0));
+		SET_BOX(y, ((y0 < 1.0F) ? (y0 * H) : y0));
+		SET_BOX(width,  ((w0 <= 1.0F) ? (w0 * W) : w0));
+		SET_BOX(height, ((h0 <= 1.0F) ? (h0 * H) : h0));
 	}
 }

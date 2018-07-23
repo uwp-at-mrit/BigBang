@@ -32,12 +32,12 @@ static const float label_fy = 0.25F;
 
 private class PDecorator final : public IPlanetDecorator {
 public:
-	PDecorator(IPlanet* master, float width, float height, float padding) : region_height(height), region_padding(padding) {
-		float metrics_height = master->sketch_to_application_height(125.0F);
+	PDecorator(IPlanet* master, float padding) : region_padding(padding) {
+		float metrics_height = 125.0F / sketch_height;
 
-		this->region_width = (width - padding) / float(pcount) - padding;
-		this->cell_gapsize = master->sketch_to_application_width(8.0F);
-		this->cell_margin = (metrics_height - master->sketch_to_application_height(102.0F)) * 0.5F;
+		this->region_width = (1.0F - padding) / float(pcount) - padding;
+		this->cell_gapsize = 8.0F / sketch_width;
+		this->cell_margin = (metrics_height - 102.0F / sketch_height) * 0.5F;
 
 		this->cell_color = Colours::make(0x131615U);
 		this->fgcolors[P::Converter] = Colours::make(0x878787U);
@@ -56,7 +56,7 @@ public:
 			if (region == P::Motor) {
 				float rc = _F(P::_);
 
-				this->heights[region] = height - metrics_height * (rc - 1.0F) - this->region_padding * (rc + 1.0F);
+				this->heights[region] = 1.0F - metrics_height * (rc - 1.0F) - this->region_padding * (rc + 1.0F);
 			} else {
 				this->heights[region] = metrics_height;
 			}
@@ -121,9 +121,11 @@ public:
 		float left_x = (this->region_width + this->region_padding) * float(p_idx) + this->region_padding;
 		float cell_x = left_x + this->cell_margin + (cell_width + this->cell_gapsize) * _F(m);
 		float cell_y = this->ys[p] + this->cell_margin;
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
 
-		SET_VALUES(x, cell_x, y, cell_y);
-		SET_VALUES(width, cell_width, height, cell_height);
+		SET_VALUES(x, cell_x * awidth, y, cell_y * aheight);
+		SET_VALUES(width, cell_width * awidth, height, cell_height * aheight);
 	}
 
 	template<typename M>
@@ -144,6 +146,8 @@ private:
 	}
 
 	void draw_region(CanvasDrawingSession^ ds, unsigned int idx) {
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
 		float x = this->region_x(idx);
 
 		for (P region = _E0(P); region < P::_; region++) {
@@ -151,7 +155,7 @@ private:
 			float height = this->heights[region];
 			ICanvasBrush^ color = this->bgcolors[region];
 
-			ds->FillRectangle(x, y, this->region_width, height, color);
+			ds->FillRectangle(x * awidth, y * aheight, this->region_width * awidth, height * aheight, color);
 
 			switch (region) {
 			case P::Converter: this->draw_cells(ds, idx, region, PConverter::_); break;
@@ -367,13 +371,13 @@ PropellerPage::~PropellerPage() {
 
 void PropellerPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
-		PDecorator* regions = new PDecorator(this, width, height, this->sketch_to_application_height(4.0F));
+		PDecorator* regions = new PDecorator(this, 4.0F / sketch_height);
 		PBoard* gb = new PBoard(this, regions);
 
+		this->append_decorator(regions);
 		gb->load_and_flow();
 
 		this->dashboard = gb;
-		this->append_decorator(regions);
 		this->device->append_confirmation_receiver(gb);
 	}
 }
