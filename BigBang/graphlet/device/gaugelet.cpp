@@ -15,7 +15,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-IGaugelet::IGaugelet(float width, float height, float vmin, float vmax, unsigned int step0, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
+IGaugelet::IGaugelet(float vmin, float vmax, float width, float height, unsigned int step0, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
 	: height(height), min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {
 	auto step = ((step0 == 0) ? 10 : step0);
 	auto font = make_text_format(8.0F);
@@ -41,5 +41,5 @@ void IGaugelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 }
 
 /*************************************************************************************************/
-LevelGaugelet::LevelGaugelet(float width, float height, float range, unsigned int step, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
-	: IGaugelet(width, height, 0.0F, range, step, color, bcolor, mcolor) {}
+LevelGaugelet::LevelGaugelet(float range, float width, float height, unsigned int step, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
+	: IGaugelet(0.0F, range, width, height, step, color, bcolor, mcolor) {}

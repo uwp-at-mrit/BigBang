@@ -84,8 +84,8 @@ public:
 
 private:
 	void draw_text_ct(CanvasDrawingSession^ ds, unsigned int idx, ACInfo id) {
-		float x, y;
 		float width = this->infos[id]->LayoutBounds.Width;
+		float x, y;
 
 		this->fill_info_anchor(idx, id, &x, &y);
 		ds->DrawTextLayout(this->infos[id], x - width * 0.5F, y, label_color);
@@ -101,12 +101,25 @@ public:
 	ACBoard(ACPage* master, ACDecorator* decorator) : master(master), decorator(decorator) {}
 
 public:
-	void load_and_flow(float width, float height) {
+	void load() {
+		float icon_width = this->master->sketch_to_application_width(64.0F);
+		float mode_width = this->master->sketch_to_application_width(46.0F);
+
+		for (AC room = _E0(AC); room < AC::_; room++) {
+			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, icon_width, 0.0F, label_color));
+			this->temperatures[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			this->captions[room] = this->master->insert_one(new Labellet(speak(room), caption_font, Colours::GhostWhite));
+			this->modes[room] = this->master->insert_one(new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width));
+			this->Tseas[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			this->Tpipes[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			this->auxes[room] = this->master->insert_one(new Labellet(speak(ACStatus::Normal), fore_font, Colours::GhostWhite));
+		}
+	}
+
+	void reflow() {
 		float cell_x, cell_y, cell_width, cell_height, cell_whalf, label_bottom;
 		float thermometer_rx, thermometer_y, mercury_center_y;
 		float label_offset = this->master->sketch_to_application_height(24.0F);
-		float icon_width = this->master->sketch_to_application_width(64.0F);
-		float mode_width = this->master->sketch_to_application_width(46.0F);
 
 		for (AC room = _E0(AC); room < AC::_; room++) {
 			unsigned int i = _I(room);
@@ -114,26 +127,18 @@ public:
 			this->decorator->fill_cell_extent(i, &cell_x, &cell_y, &cell_width, &cell_height);
 
 			cell_whalf = cell_x + cell_width * 0.5F;
-			this->thermometers[room] = new Thermometerlet(t_min, t_max, icon_width, 0.0F, label_color);
-			this->temperatures[room] = new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite);
-			this->captions[room] = new Labellet(speak(room), caption_font, Colours::GhostWhite);
-			this->modes[room] = new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width);
-			this->Tseas[room] = new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite);
-			this->Tpipes[room] = new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite);
-			this->auxes[room] = new Labellet(speak(ACStatus::Normal), fore_font, Colours::GhostWhite);
-
-			this->master->insert(this->captions[room], cell_whalf, cell_y + label_offset, GraphletAnchor::CT);
+			this->master->move_to(this->captions[room], cell_whalf, cell_y + label_offset, GraphletAnchor::CT);
 			this->master->fill_graphlet_location(this->captions[room], nullptr, &label_bottom, GraphletAnchor::CB);
 
 			this->thermometers[room]->fill_mercury_extent(0.5F, nullptr, &mercury_center_y);
-			this->master->insert(this->thermometers[room], cell_whalf, label_bottom + label_offset, GraphletAnchor::CT);
+			this->master->move_to(this->thermometers[room], cell_whalf, label_bottom + label_offset, GraphletAnchor::CT);
 			this->master->fill_graphlet_location(this->thermometers[room], &thermometer_rx, &thermometer_y, GraphletAnchor::RT);
-			this->master->insert(this->temperatures[room], thermometer_rx + label_offset, thermometer_y + mercury_center_y, GraphletAnchor::LC);
+			this->master->move_to(this->temperatures[room], thermometer_rx + label_offset, thermometer_y + mercury_center_y, GraphletAnchor::LC);
 
-			this->load_info(this->modes[room], i, ACInfo::mode);
-			this->load_info(this->Tseas[room], i, ACInfo::t_sea);
-			this->load_info(this->Tpipes[room], i, ACInfo::t_pipe);
-			this->load_info(this->auxes[room], i, ACInfo::aux);
+			this->place_info(this->modes[room], i, ACInfo::mode);
+			this->place_info(this->Tseas[room], i, ACInfo::t_sea);
+			this->place_info(this->Tpipes[room], i, ACInfo::t_pipe);
+			this->place_info(this->auxes[room], i, ACInfo::aux);
 		}
 	}
 
@@ -183,11 +188,11 @@ public:
 	}
 
 private:
-	void load_info(IGraphlet* g, unsigned int i, ACInfo type) {
+	void place_info(IGraphlet* g, unsigned int i, ACInfo type) {
 		float anchor_x, anchor_y;
 
 		this->decorator->fill_info_anchor(i, type, &anchor_x, &anchor_y);
-		this->master->insert(g, anchor_x, anchor_y, GraphletAnchor::CB);
+		this->master->move_to(g, anchor_x, anchor_y, GraphletAnchor::CB);
 	}
 
 	void set_values(std::map<AC, Dimensionlet*> dims, uint8* db, size_t idx0, size_t acc, GraphletAnchor anchor = GraphletAnchor::CC) {
@@ -394,7 +399,7 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 		ACSatellite* acs = new ACSatellite(ac, this->name() + "#Satellite");
 	
 		this->append_decorator(cells);
-		ac->load_and_flow(width, height);
+		ac->load();
 
 		this->dashboard = ac;
 		this->satellite = acs;
@@ -402,6 +407,14 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 		
 		this->device->append_confirmation_receiver(ac);
 		this->device->append_confirmation_receiver(acs);
+	}
+}
+
+void ACPage::reflow(float width, float height) {
+	ACBoard* ac = dynamic_cast<ACBoard*>(this->dashboard);
+
+	if (ac != nullptr) {
+		ac->reflow();
 	}
 }
 

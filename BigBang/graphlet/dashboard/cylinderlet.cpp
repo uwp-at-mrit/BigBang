@@ -20,8 +20,8 @@ static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 
 static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
-ICylinderlet::ICylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: IRangelet(tmin, tmax), width(width), height(height), thickness(width * 0.0618F), step((step == 0) ? 10 : step), border_color(bcolor) {
+ICylinderlet::ICylinderlet(float vmin, float vmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: IRangelet(vmin, vmax), width(width), height(height), thickness(3.0F), step((step == 0) ? 10 : step), border_color(bcolor) {
 	
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
@@ -83,17 +83,18 @@ void ICylinderlet::on_value_changed(float v) {
 }
 
 void ICylinderlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	ds->FillGeometry(this->body, x, y, Colours::Background);
 	ds->DrawCachedGeometry(this->liquid, x, y, this->color);
 	ds->DrawCachedGeometry(this->mark, x, y, this->border_color);
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }
 
 /*************************************************************************************************/
-Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: Cylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
+Cylinderlet::Cylinderlet(float range, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: Cylinderlet(0.0F, range, width, height, step, colors, bcolor) {}
 
-Cylinderlet::Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}
+Cylinderlet::Cylinderlet(float vmin, float vmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ICylinderlet(vmin, vmax, width, height, step, colors, bcolor) {}
 
 CanvasGeometry^ Cylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
 	Rect region = body->ComputeBounds();
@@ -104,11 +105,11 @@ CanvasGeometry^ Cylinderlet::make_liquid_shape(CanvasGeometry^ body, float perce
 }
 
 /*************************************************************************************************/
-ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ConvexCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
+ConvexCylinderlet::ConvexCylinderlet(float range, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ConvexCylinderlet(0.0F, range, width, height, step, colors, bcolor) {}
 
-ConvexCylinderlet::ConvexCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}
+ConvexCylinderlet::ConvexCylinderlet(float vmin, float vmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ICylinderlet(vmin, vmax, width, height, step, colors, bcolor) {}
 
 CanvasGeometry^ ConvexCylinderlet::make_liquid_shape(CanvasGeometry^ body, float percentage, float surface_radius) {
 	Rect region = body->ComputeBounds();

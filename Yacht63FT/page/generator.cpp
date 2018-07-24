@@ -139,7 +139,7 @@ public:
 		SET_VALUES(x, gauge_x * awidth, y, gauge_y * aheight);
 
 		if (cell_size != nullptr) {
-			(*cell_size) = fmin(subwidth * awidth, this->heights[G::Gauge] * aheight * 0.5F) * 0.8F;
+			(*cell_size) = fmin(subwidth * awidth, this->heights[G::Gauge] * aheight * 0.5F) * 0.9F;
 		}
 	}
 
@@ -246,48 +246,75 @@ public:
 	}
 
 public:
-	void load_and_flow() {
-		float anchor_x, anchor_y, gauge_size;
+	void load() {
+		float gauge_size;
+
+		for (unsigned int idx = 0; idx < gcount; idx++) {
+			this->rspeeds[idx] = this->master->insert_one(new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor));
+
+			for (GPower p = _E0(GPower); p < GPower::_; p++) {
+				Platform::String^ unit = "<" + p.ToString() + ">";
+
+				this->powers[p][idx] = this->master->insert_one(new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor));
+			}
+
+			for (GMeter m = _E0(GMeter); m < GMeter::_; m++) {
+				/** NOTE
+				 * Meanwhile, there is no mechanism to change the size of graphlet,
+				 * and due to the unknown reason, the master planet will be enlarged after all graphlets being loaded,
+				 * therefore, the `indicator`s are slightly smaller than expected.
+				 */
+				this->decorator->fill_gauges_anchor(idx, m, 0.25F, nullptr, nullptr, &gauge_size);
+
+				{ // load upper indicators
+					if (m == GMeter::sea) {
+						this->foil_filter_pdmeter[idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
+						this->foil_filter_pdrop[idx] = this->master->insert_one(new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));				
+					} else {
+						this->thermometers[m][idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
+						this->temperatures[m][idx] = this->master->insert_one(new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
+					}
+				}
+
+				{ // load bottom indicators
+					this->manometers[m][idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
+					this->pressures[m][idx] = this->master->insert_one(new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
+				}
+			}
+		}
+	}
+
+	void reflow() {
+		float anchor_x, anchor_y;
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
 			this->decorator->fill_rspeed_anchor(idx, 0.64F, 0.5F, &anchor_x, &anchor_y);
-			this->rspeeds[idx] = new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor);
-			this->master->insert(this->rspeeds[idx], anchor_x, anchor_y, GraphletAnchor::CC);
+			this->master->move_to(this->rspeeds[idx], anchor_x, anchor_y, GraphletAnchor::CC);
 
 			for (GPower p = _E0(GPower); p < GPower::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
 				this->decorator->fill_power_anchor(idx, p, 0.9F, 0.75F, &anchor_x, &anchor_y);
-				this->powers[p][idx] = new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor);
-				this->master->insert(this->powers[p][idx], anchor_x, anchor_y, GraphletAnchor::RC);
+				this->master->move_to(this->powers[p][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
 			for (GMeter m = _E0(GMeter); m < GMeter::_; m++) {
 				{ // load upper indicators
-					this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, &gauge_size);
-					
-					if (m == GMeter::sea) {
-						this->foil_filter_pdmeter[idx] = new Indicatorlet(gauge_size, indicator_thickness);
-						this->foil_filter_pdrop[idx] = new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
-						
-						this->master->insert(this->foil_filter_pdmeter[idx], anchor_x, anchor_y, GraphletAnchor::CC);
-						this->master->insert(this->foil_filter_pdrop[idx], anchor_x, anchor_y, GraphletAnchor::CB);
-					} else {
-						this->thermometers[m][idx] = new Indicatorlet(gauge_size, indicator_thickness);
-						this->temperatures[m][idx] = new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+					this->decorator->fill_gauges_anchor(idx, m, 0.25F, &anchor_x, &anchor_y, nullptr);
 
-						this->master->insert(this->thermometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
-						this->master->insert(this->temperatures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
+					if (m == GMeter::sea) {
+						this->master->move_to(this->foil_filter_pdmeter[idx], anchor_x, anchor_y, GraphletAnchor::CC);
+						this->master->move_to(this->foil_filter_pdrop[idx], anchor_x, anchor_y, GraphletAnchor::CB);
+					} else {
+						this->master->move_to(this->thermometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+						this->master->move_to(this->temperatures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 					}
 				}
 
 				{ // load bottom indicators
-					this->manometers[m][idx] = new Indicatorlet(gauge_size, indicator_thickness);
-					this->pressures[m][idx] = new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
-
-					this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, &gauge_size);
-					this->master->insert(this->manometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
-					this->master->insert(this->pressures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
+					this->decorator->fill_gauges_anchor(idx, m, 0.75F, &anchor_x, &anchor_y, nullptr);
+					this->master->move_to(this->manometers[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+					this->master->move_to(this->pressures[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 				}
 			}
 		}
@@ -392,10 +419,18 @@ void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float 
 		GBoard* gb = new GBoard(this, regions);
 
 		this->append_decorator(regions);
-		gb->load_and_flow();
+		gb->load();
 
 		this->dashboard = gb;
 		this->device->append_confirmation_receiver(gb);
+	}
+}
+
+void GeneratorPage::reflow(float width, float height) {
+	GBoard* gb = dynamic_cast<GBoard*>(this->dashboard);
+
+	if (gb != nullptr) {
+		gb->reflow();
 	}
 }
 

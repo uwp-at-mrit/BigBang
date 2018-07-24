@@ -8,7 +8,7 @@
 namespace WarGrey::SCADA {
 	private class ICylinderlet abstract : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		ICylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+		ICylinderlet(float vmin, float vmax, float width, float height, unsigned int step,
 			WarGrey::SCADA::GradientStops^ colors,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color);
 
@@ -45,11 +45,11 @@ namespace WarGrey::SCADA {
 
 	private class Cylinderlet : public WarGrey::SCADA::ICylinderlet {
 	public:
-		Cylinderlet(float tmin, float tmax, float width, float height,
+		Cylinderlet(float range, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 
-		Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+		Cylinderlet(float tmin, float tmax, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 
@@ -62,11 +62,11 @@ namespace WarGrey::SCADA {
 
 	private class ConvexCylinderlet : public WarGrey::SCADA::ICylinderlet {
 	public:
-		ConvexCylinderlet(float tmin, float tmax, float width, float height,
+		ConvexCylinderlet(float range, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 
-		ConvexCylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+		ConvexCylinderlet(float vmin, float vmax, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 

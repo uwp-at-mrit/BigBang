@@ -159,8 +159,8 @@ public:
 		 * If it happens please try to change the `step` to ensure that `height / step >= 0.1F`,
 		 * the default `step` is 10.
 		 */
-		this->heater = new LevelGaugelet(gridsize * 14.0F, gridsize * 6.0F, 1.5F, 6);
-		this->visor_tank = new LevelGaugelet(gridsize * 12.0F, gridsize * 5.0F, 0.8F, 8);
+		this->heater = new LevelGaugelet(1.5F, gridsize * 14.0F, gridsize * 6.0F, 6U);
+		this->visor_tank = new LevelGaugelet(0.8F, gridsize * 12.0F, gridsize * 5.0F, 8U);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert(this->oil_tank);

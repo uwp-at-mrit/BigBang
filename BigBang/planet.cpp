@@ -595,7 +595,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 			} else {
 				this->rubberband_y = nullptr;
 
-				if (pdt == PointerDeviceType::Touch) {
+				if ((pdt == PointerDeviceType::Touch) && (this->hovering_graphlet != nullptr)) {
 					GraphletInfo* info = GRAPHLET_INFO(this->hovering_graphlet);
 					float local_x = x - info->x;
 					float local_y = y - info->y;

@@ -248,42 +248,68 @@ public:
 	}
 
 public:
-	void load_and_flow() {
-		float anchor_x, anchor_y, cell_width, cell_height;
-		float dim_fx = 0.90F;
-		float dim_fy = 0.75F;
-
+	void load() {
+		float cell_width, cell_height;
+		
 		for (unsigned int idx = 0; idx < pcount; idx++) {	
 			for (PConverter c = _E0(PConverter); c < PConverter::_; c++) {
-				this->decorator->fill_cell_anchor(idx, P::Converter, c, dim_fx, dim_fy, &anchor_x, &anchor_y);
-				this->cs[c][idx] = this->master->insert_one(make_dimension(c.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+				this->cs[c][idx] = this->master->insert_one(make_dimension(c.ToString()));
 			}
 
 			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
 				Platform::String^ unit = "<" + m.ToString() + ">";
 
-				this->ms[m][idx] = new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor);
+				this->ms[m][idx] = this->master->insert_one(new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
 
-				this->decorator->fill_cell_anchor(idx, P::Motor, m, 0.5F, 0.5F, &anchor_x, &anchor_y, &cell_width, &cell_height);
-				this->gs[m][idx] = new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness);
+				this->decorator->fill_cell_anchor(idx, P::Motor, m, 0.5F, 0.5F, nullptr, nullptr, &cell_width, &cell_height);
+				this->gs[m][idx] = this->master->insert_one(new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness));
+			}
 
-				this->master->insert(this->gs[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
-				this->master->insert(this->ms[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
+			for (PBus b = _E0(PBus); b < PBus::_; b++) {
+				this->dcbs[b][idx] = this->master->insert_one(make_dimension(b.ToString()));
+			}
+
+			for (PWinding w = _E0(PWinding); w < PWinding::_; w++) {
+				this->ws[w][idx] = this->master->insert_one(make_dimension(w.ToString()));
+			}
+
+			for (PBearing b = _E0(PBearing); b < PBearing::_; b++) {
+				this->bs[b][idx] = this->master->insert_one(make_dimension(b.ToString()));
+			}
+		}
+	}
+
+	void reflow() {
+		float anchor_x, anchor_y;
+		float dim_fx = 0.90F;
+		float dim_fy = 0.75F;
+
+		for (unsigned int idx = 0; idx < pcount; idx++) {
+			for (PConverter c = _E0(PConverter); c < PConverter::_; c++) {
+				this->decorator->fill_cell_anchor(idx, P::Converter, c, dim_fx, dim_fy, &anchor_x, &anchor_y);
+				this->master->move_to(this->cs[c][idx], anchor_x, anchor_y, GraphletAnchor::RC);
+			}
+
+			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
+				this->decorator->fill_cell_anchor(idx, P::Motor, m, 0.5F, 0.5F, &anchor_x, &anchor_y, nullptr, nullptr);
+				
+				this->master->move_to(this->gs[m][idx], anchor_x, anchor_y, GraphletAnchor::CC);
+				this->master->move_to(this->ms[m][idx], anchor_x, anchor_y, GraphletAnchor::CB);
 			}
 
 			for (PBus b = _E0(PBus); b < PBus::_; b++) {
 				this->decorator->fill_cell_anchor(idx, P::Bus, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
-				this->dcbs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+				this->master->move_to(this->dcbs[b][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
 			for (PWinding w = _E0(PWinding); w < PWinding::_; w++) {
 				this->decorator->fill_cell_anchor(idx, P::Winding, w, dim_fx, dim_fy, &anchor_x, &anchor_y);
-				this->ws[w][idx] = this->master->insert_one(make_dimension(w.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+				this->master->move_to(this->ws[w][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 
 			for (PBearing b = _E0(PBearing); b < PBearing::_; b++) {
 				this->decorator->fill_cell_anchor(idx, P::Bearing, b, dim_fx, dim_fy, &anchor_x, &anchor_y);
-				this->bs[b][idx] = this->master->insert_one(make_dimension(b.ToString()), anchor_x, anchor_y, GraphletAnchor::RC);
+				this->master->move_to(this->bs[b][idx], anchor_x, anchor_y, GraphletAnchor::RC);
 			}
 		}
 	}
@@ -372,13 +398,21 @@ PropellerPage::~PropellerPage() {
 void PropellerPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (this->dashboard == nullptr) {
 		PDecorator* regions = new PDecorator(this, 4.0F / sketch_height);
-		PBoard* gb = new PBoard(this, regions);
+		PBoard* pb = new PBoard(this, regions);
 
 		this->append_decorator(regions);
-		gb->load_and_flow();
+		pb->load();
 
-		this->dashboard = gb;
-		this->device->append_confirmation_receiver(gb);
+		this->dashboard = pb;
+		this->device->append_confirmation_receiver(pb);
+	}
+}
+
+void PropellerPage::reflow(float width, float height) {
+	PBoard* pb = dynamic_cast<PBoard*>(this->dashboard);
+
+	if (pb != nullptr) {
+		pb->reflow();
 	}
 }
 
