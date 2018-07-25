@@ -84,7 +84,7 @@ private:
 		return this->master->insert_one(label);
 	}
 
-	template<unsigned int N>
+	template<size_t N>
 	void load_captions(Platform::String^ (&all_captions)[N]) {
 		for (size_t i = 0; i < N; i++) {
 			this->captions[i] = make_label(speak(all_captions[i]) + ":", this->font);

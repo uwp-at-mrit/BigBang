@@ -29,7 +29,7 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ gs[],
 	size_t count);
 
-template<int N>
+template<size_t N>
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_union(
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ (&gs)[N]) {
 	return geometry_union(gs, N);

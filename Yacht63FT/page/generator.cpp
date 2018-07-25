@@ -259,11 +259,6 @@ public:
 			}
 
 			for (GMeter m = _E0(GMeter); m < GMeter::_; m++) {
-				/** NOTE
-				 * Meanwhile, there is no mechanism to change the size of graphlet,
-				 * and due to the unknown reason, the master planet will be enlarged after all graphlets being loaded,
-				 * therefore, the `indicator`s are slightly smaller than expected.
-				 */
 				this->decorator->fill_gauges_anchor(idx, m, 0.25F, nullptr, nullptr, &gauge_size);
 
 				{ // load upper indicators

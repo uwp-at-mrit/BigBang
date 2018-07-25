@@ -4,19 +4,19 @@ namespace WarGrey::SCADA {
 	typedef Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop> GradientStops;
 
 	Windows::UI::Color gradient_discrete_color(WarGrey::SCADA::GradientStops^ stops, float percentage);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], int total);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], float positions[], int total);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(Windows::UI::Color colors[], int total);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(Windows::UI::Color colors[], float positions[], int total);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brushes[], int total);
-	WarGrey::SCADA::GradientStops^ make_gradient_stops(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brushes[], float positions[], int total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], size_t total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], float positions[], size_t total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(Windows::UI::Color colors[], size_t total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(Windows::UI::Color colors[], float positions[], size_t total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brushes[], size_t total);
+	WarGrey::SCADA::GradientStops^ make_gradient_stops(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ brushes[], float positions[], size_t total);
 
-	template<class T, int N>
+	template<class T, size_t N>
 	WarGrey::SCADA::GradientStops^ make_gradient_stops(T(&hints)[N]) {
 		return make_gradient_stops(hints, N);
 	};
 
-	template<class T, int N>
+	template<class T, size_t N>
 	WarGrey::SCADA::GradientStops^ make_gradient_stops(T(&hints)[N], float(&positions)[N]) {
 		return make_gradient_stops(hints, positions, N);
 	};

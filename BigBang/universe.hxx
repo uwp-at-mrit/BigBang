@@ -53,7 +53,7 @@ namespace WarGrey::SCADA {
         read_write_property(float, max_height);
 
 	public:
-		void apply_source_size(float sketch_width, float sketch_height, float revise_width = 0.0F, float revise_height = 0.0F);
+		void apply_source_size(float sketch_width, float sketch_height);
 		float sketch_to_application_width(float sketch_width);
 		float sketch_to_application_height(float sketch_height);
 

@@ -14,7 +14,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static inline GradientStops^ make_and_clean_gradient_stops(CanvasGradientStop* stops, int total) {
+static inline GradientStops^ make_and_clean_gradient_stops(CanvasGradientStop* stops, size_t total) {
 	GradientStops^ stopa = ref new Platform::Array<CanvasGradientStop>(stops, total);
 	
 	delete[] stops;
@@ -22,7 +22,7 @@ static inline GradientStops^ make_and_clean_gradient_stops(CanvasGradientStop* s
 	return stopa;
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushes[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushes[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	auto flstep = 1.0F / float(total - 1);
 
@@ -34,7 +34,7 @@ GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushe
 	return make_and_clean_gradient_stops(stops, total);
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushes[], float positions[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushes[], float positions[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	
 	for (int i = 0; i < total; i++) {
@@ -45,7 +45,7 @@ GradientStops^ WarGrey::SCADA::make_gradient_stops(CanvasSolidColorBrush^ brushe
 	return make_and_clean_gradient_stops(stops, total);
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	auto flstep = 1.0F / float(total - 1);
 
@@ -57,7 +57,7 @@ GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], int total) {
 	return make_and_clean_gradient_stops(stops, total);
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], float positions[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], float positions[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	
 	for (int i = 0; i < total; i++) {
@@ -68,7 +68,7 @@ GradientStops^ WarGrey::SCADA::make_gradient_stops(Color colors[], float positio
 	return make_and_clean_gradient_stops(stops, total);
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(unsigned int hexes[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(unsigned int hexes[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	auto flstep = 1.0F / float(total - 1);
 
@@ -80,7 +80,7 @@ GradientStops^ WarGrey::SCADA::make_gradient_stops(unsigned int hexes[], int tot
 	return make_and_clean_gradient_stops(stops, total);
 }
 
-GradientStops^ WarGrey::SCADA::make_gradient_stops(unsigned int hexes[], float positions[], int total) {
+GradientStops^ WarGrey::SCADA::make_gradient_stops(unsigned int hexes[], float positions[], size_t total) {
 	CanvasGradientStop* stops = new CanvasGradientStop[total];
 	
 	for (int i = 0; i < total; i++) {

@@ -289,22 +289,24 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
 }
 
 void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, GraphletAnchor a, float dx, float dy) {
-	GraphletInfo* tinfo = planet_graphlet_info(this, target);
-	float x = 0.0F;
-	float y = 0.0F;
+	if (g->info == nullptr) {
+		GraphletInfo* tinfo = planet_graphlet_info(this, target);
+		float x = 0.0F;
+		float y = 0.0F;
 
-	// TODO: what if the target graphlet is not ready?
+		// TODO: what if the target graphlet is not ready?
 
-	if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
-		float sx, sy, sw, sh, xoff, yoff;
+		if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
+			float sx, sy, sw, sh, xoff, yoff;
 
-		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
-		graphlet_anchor_offset(target, sw, sh, ta, &xoff, &yoff);
-		x = sx + xoff + dx;
-		y = sy + yoff + dy;
+			unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
+			graphlet_anchor_offset(target, sw, sh, ta, &xoff, &yoff);
+			x = sx + xoff + dx;
+			y = sy + yoff + dy;
+		}
+
+		this->insert(g, x, y, a);
 	}
-
-	this->insert(g, x, y, a);
 }
 
 void Planet::move_to(IGraphlet* g, float x, float y, GraphletAnchor a) {

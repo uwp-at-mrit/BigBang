@@ -57,7 +57,7 @@ namespace WarGrey::SCADA {
 			const Windows::Foundation::Rect* src, size_t count, float radius = 8.0F);
 
 		template<class T, size_t N>
-		CellDecorator(T color, const Windows::Foundation::Rect (&src)[N], float radius = 8.0F)
+		CellDecorator(T color, Windows::Foundation::Rect (&src)[N], float radius = 8.0F)
 			: CellDecorator(color, src, N, radius) {}
 
 	public:

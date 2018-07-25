@@ -150,9 +150,9 @@ float IDisplay::height::get() {
 	return float(this->canvas->Height);
 }
 
-void IDisplay::apply_source_size(float src_width, float src_height, float revise_width, float revise_height) {
-	this->width = this->sketch_to_application_width(src_width) + revise_width;
-	this->height = this->sketch_to_application_height(src_height) + revise_height;
+void IDisplay::apply_source_size(float src_width, float src_height) {
+	this->width = this->sketch_to_application_width(src_width);
+	this->height = this->sketch_to_application_height(src_height);
 }
 
 float IDisplay::sketch_to_application_width(float sketch_width) {

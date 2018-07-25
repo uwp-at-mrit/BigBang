@@ -231,10 +231,10 @@ public:
 	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F)
 		: ICreditSatellite(default_logging_level, board, caption) {
 		float width = bar_height * _F(ACOP::_);
-		float height = width * 0.8F;
+		float height = width * 0.618F;
 		Rect bg[] = { Rect(0.0F, bar_height, width, height) };
 
-		this->decorator = new CellDecorator(0x383838, bg, 0.0F); // Don't mind, it's Visual Studio's fault
+		this->decorator = new CellDecorator(0x383838, bg, 0.0F);
 		this->append_decorator(this->decorator);
 	}
 

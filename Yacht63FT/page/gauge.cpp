@@ -130,7 +130,7 @@ void GaugePage::load(CanvasCreateResourcesReason reason, float width, float heig
 		float ralarm_x = padding + rliquid_width + padding;
 		float ralarm_width = region_width - rliquid_width;
 
-		Rect cells[2] = {
+		Rect cells[] = {
 			Rect(padding, padding, rliquid_width, region_height),
 			Rect(ralarm_x, padding, ralarm_width, region_height)
 		};

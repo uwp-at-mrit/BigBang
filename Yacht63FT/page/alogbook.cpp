@@ -88,7 +88,7 @@ public:
 	}
 
 public:
-	void load_and_flow(float width, float height) {
+	void load_term() {
 		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
 		this->term = this->master->insert_one(new Statuslinelet(Log::Debug, 0U));
 
@@ -109,7 +109,7 @@ public:
 		default_event(record, count, std::nullopt, uptime, make_nstring(interval.ToString()));
 
 		this->master->enter_critical_section();
-		this->master->insert(new Eventlet(record, this->font), 0.0F, Height - height * float(count));
+		this->master->insert(new Eventlet(record, this->font), 0.0F, y, GraphletAnchor::CB);
 		this->master->leave_critical_section();
 	}
 
@@ -137,7 +137,7 @@ void LogbookPage::load(CanvasCreateResourcesReason reason, float width, float he
 	if (this->dashboard == nullptr) {
 		LogBoard* alarmboard = new LogBoard(this, 16);
 
-		alarmboard->load_and_flow(width, height);
+		alarmboard->load_term();
 		this->dashboard = alarmboard;
 	}
 }
