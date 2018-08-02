@@ -171,7 +171,7 @@ static inline std::wstring make_safe_wstring(const wchar_t* text) {
 
 /*************************************************************************************************/
 int WarGrey::SCADA::sqlite3_default_trace_callback(unsigned int type, void* pCxt, void* P, void* X) {
-	SQLite3* self = static_cast<SQLite3*>(pCxt);
+	ISQLite3* self = static_cast<ISQLite3*>(pCxt);
 
 	switch (type) {
 	case SQLITE_TRACE_STMT: {
@@ -184,8 +184,13 @@ int WarGrey::SCADA::sqlite3_default_trace_callback(unsigned int type, void* pCxt
 	return 0;
 }
 
-SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallback)
-	: IDBSystem((logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger, DBMS::SQLite3) {
+ISQLite3::ISQLite3(Syslog* logger)
+	: IDBSystem(DBMS::SQLite3, (logger == nullptr) ? make_system_logger(DBMS::SQLite3.ToString()) : logger) {}
+
+ISQLite3::~ISQLite3() {}
+
+/*************************************************************************************************/
+SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallback) : ISQLite3(logger) {
 	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
 
 	load_sqlite3(this->get_logger());
@@ -313,7 +318,7 @@ std::string SQLite3::get_last_error_message() {
 }
 
 /*************************************************************************************************/
-SQLiteStatement::SQLiteStatement(SQLite3* db, sqlite3_stmt_t* stmt)
+SQLiteStatement::SQLiteStatement(ISQLite3* db, sqlite3_stmt_t* stmt)
 	: IPreparedStatement(DBMS::SQLite3), stmt(stmt), master(db) {}
 
 SQLiteStatement::~SQLiteStatement() {

@@ -84,6 +84,26 @@ void IGraphlet::moor(GraphletAnchor anchor) {
 	}
 }
 
+float IGraphlet::available_visible_width(float here_x) {
+	float width = here_x;
+
+	if (this->info != nullptr) {
+		width = this->info->master->actual_width();
+	}
+
+	return width - here_x;
+}
+
+float IGraphlet::available_visible_height(float here_y) {
+	float height = here_y;
+
+	if (this->info != nullptr) {
+		height = this->info->master->actual_height();
+	}
+
+	return height - here_y;
+}
+
 float IGraphlet::sketch_to_application_width(float sketch_width) {
 	float width = sketch_width;
 

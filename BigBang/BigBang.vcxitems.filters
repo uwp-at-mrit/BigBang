@@ -100,6 +100,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\test\cyberspace.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -205,6 +208,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\test\cyberspace.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -227,6 +233,9 @@
     </Filter>
     <Filter Include="graphlet\device">
       <UniqueIdentifier>{71e1271c-6732-44d7-bf10-1ff4fea770d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{cf2335ef-226e-4246-b9c3-37b2e8b7a3d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

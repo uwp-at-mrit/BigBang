@@ -35,6 +35,8 @@ namespace WarGrey::SCADA {
 		void moor(WarGrey::SCADA::GraphletAnchor anchor);
 
 	public:
+		float available_visible_width(float here_x = 0.0F);
+		float available_visible_height(float here_y = 0.0F);
 		float sketch_to_application_width(float sketch_width);
 		float sketch_to_application_height(float sketch_height);
 

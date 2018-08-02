@@ -2,6 +2,7 @@
 
 #include "planet.hpp"
 #include "plc.hpp"
+#include "sqlite3.hpp"
 
 namespace WarGrey::SCADA {
 	private class GaugePage : public WarGrey::SCADA::Planet {

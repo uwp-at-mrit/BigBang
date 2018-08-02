@@ -147,7 +147,7 @@ void Statusbarlet::construct() {
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmax(this->info->master->actual_width() - x, 0.0F));
+	SET_BOX(width, fmax(this->available_visible_width(x), 0.0F));
 	SET_BOX(height, status_height);
 }
 
@@ -227,10 +227,10 @@ void Statuslinelet::construct() {
 }
 
 void Statuslinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, fmax(this->info->master->actual_width() - x, 0.0F));
+	SET_BOX(width, fmax(this->available_visible_width(x), 0.0F));
 	
 	if (this->lines == 0) {
-		SET_BOX(height, fmax(this->info->master->actual_height() - y, 0.0F));
+		SET_BOX(height, fmax(this->available_visible_height(y), 0.0F));
 	} else {
 		SET_BOX(height, status_height * float(this->lines));
 	}

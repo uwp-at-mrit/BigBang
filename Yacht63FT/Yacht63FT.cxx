@@ -1,6 +1,10 @@
-﻿#include "application.hxx"
+﻿#include <ppltasks.h>
+
+#include "application.hxx"
 #include "configuration.hpp"
+
 #include "plc.hpp"
+#include "sqlite3.hpp"
 
 #include "planet.hpp"
 #include "timer.hxx"
@@ -8,6 +12,7 @@
 
 #include "frame/navigatorbar.hxx"
 #include "frame/statusbar.hpp"
+
 #include "page/homepage.hpp"
 #include "page/generator.hpp"
 #include "page/propeller.hpp"
@@ -19,7 +24,9 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Concurrency;
 using namespace Windows::Foundation;
+using namespace Windows::Storage;
 
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
@@ -35,8 +42,7 @@ private ref class YachtDisplay : public UniverseDisplay {
 internal:
 	YachtDisplay(Platform::String^ name, IPlanet* first_planet = nullptr)
 		: UniverseDisplay(DisplayFit::Fill, screen_width, screen_height, sketch_width, sketch_height,
-			make_system_logger(default_logging_level, name), first_planet) {
-	}
+			make_system_logger(default_logging_level, name), first_planet) {}
 };
 
 private ref class PageUniverse sealed : public YachtDisplay, public INavigatorAction {
@@ -67,6 +73,8 @@ protected:
 	}
 };
 
+#include "dirotation.hpp"
+
 private ref class Yacht63FT sealed : public StackPanel {
 public:
 	Yacht63FT() : StackPanel() {
@@ -74,13 +82,14 @@ public:
 		this->Orientation = ::Orientation::Vertical;
 		this->HorizontalAlignment = ::HorizontalAlignment::Center;
 		this->VerticalAlignment = ::VerticalAlignment::Center;
+
+		auto test = new IRotativeDirectory("ams");
 	}
 
 public:
-	void initialize_component(Size region) {
-		Platform::String^ name = "Yacht63FT";
+	void construct(Platform::String^ name, Size region) {
 		float sketch_workspace_height = sketch_height - sketch_navigator_height - sketch_statusbar_height;
-		
+
 		plc_master = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
 
 		this->timeline = ref new CompositeTimerAction();
@@ -105,6 +114,7 @@ private:
 		this->Children->Append(display->canvas);
 	}
 
+private:
 	void do_notify(Platform::Object^ sender, SelectionChangedEventArgs^ args) {
 		if (this->navigatorbar != nullptr) {
 			Yacht page = _E(Yacht, this->workspace->current_planet_index);

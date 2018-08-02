@@ -89,7 +89,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~IDBSystem() noexcept;
 
-		IDBSystem(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::DBMS dbms);
+		IDBSystem(WarGrey::SCADA::DBMS dbms, WarGrey::SCADA::Syslog* logger);
 
 	public:
 		WarGrey::SCADA::Syslog* get_logger();

@@ -42,8 +42,8 @@ namespace WarGrey::SCADA {
 		virtual void notify_surface_ready() {}
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float Width, float Height) {}
-		virtual void collapse() {}
-
+		virtual void collapse();
+		
 	public:
 		virtual WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) = 0;
 		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
@@ -54,6 +54,8 @@ namespace WarGrey::SCADA {
 		virtual void move(IGraphlet* g, float x, float y) = 0;
 		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
 		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void remove(IGraphlet* g) = 0;
+		virtual void erase() = 0;
 
 	public:
 		virtual void notify_graphlet_updated(ISprite* g) = 0;
@@ -175,7 +177,6 @@ namespace WarGrey::SCADA {
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
         void update(long long count, long long interval, long long uptime) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
-		void collapse() override;
 
     public:
 		WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) override;
@@ -187,6 +188,8 @@ namespace WarGrey::SCADA {
 		void move(IGraphlet* g, float x, float y) override;
 		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
 		void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) override;
+		void remove(IGraphlet* g) override;
+		void erase() override;
 		void size_cache_invalid();
 
 	public:

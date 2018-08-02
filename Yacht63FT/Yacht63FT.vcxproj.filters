@@ -126,6 +126,7 @@
     <ClCompile Include="page\alogbook.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="metrics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="plc.hpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="stone\tongue\logbook.hpp">
       <Filter>stone\tongue</Filter>
     </ClInclude>
+    <ClInclude Include="metrics.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

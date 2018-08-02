@@ -41,7 +41,7 @@ type IDBSystem::query_##value(const char* sql, ...) { \
 	return this->query_##value(stmt); \
 }
 
-IDBSystem::IDBSystem(Syslog* logger, DBMS dbms) : IDBObject(dbms), logger(logger) {
+IDBSystem::IDBSystem(DBMS dbms, Syslog* logger) : IDBObject(dbms), logger(logger) {
 	if (this->logger == nullptr) {
 		this->logger = make_system_logger("DBSystem");
 	}

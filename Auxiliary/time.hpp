@@ -5,7 +5,9 @@ Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
 
 void sleep(unsigned int ms);
 
-wchar_t* update_wnowstamp(bool need_us = true, int *l00ns = nullptr);
+wchar_t* make_wtimestamp(Windows::Globalization::Calendar^ c, bool need_us = true, int *l00ns = nullptr);
+Platform::String^ make_timestamp(Windows::Globalization::Calendar^ c, bool need_us = true, int* l00ns = nullptr);
+Platform::String^ make_timestamp(Windows::Foundation::DateTime& datetime, bool need_us = true, int* l00ns = nullptr);
 Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
 
 void process_usage(long long* kernel, long long* user);

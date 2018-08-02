@@ -15,6 +15,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.hpp">
       <Filter>sqlite3</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\rotation.hpp">
+      <Filter>sqlite3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
@@ -27,6 +30,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbmisc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.cpp">
+      <Filter>sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\rotation.cpp">
       <Filter>sqlite3</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,9 +48,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl">
+    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rkt">
       <Filter>sqlite3</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)stone\lib\sqlite3.dll" />
+    <None Include="$(MSBuildThisFileDirectory)stone\lib\sqlite3.dll">
+      <Filter>stone\lib</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 
 #include "page/hydraulics.hpp"
 #include "page/graphlets.hpp"
+#include "test/cyberspace.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -38,6 +39,7 @@ protected:
 	void construct() override {
 		this->add_planet(new HydraulicSystem(this->device));
 		this->add_planet(new GraphletOverview());
+		this->add_planet(new CyberSpace());
 	}
 
 private:
@@ -59,8 +61,8 @@ public:
 	}
 
 public:
-	void initialize_component(Size region) {
-		this->universe = ref new Universe("CH6000m3");
+	void construct(Platform::String^ name, Size region) {
+		this->universe = ref new Universe(name);
 		this->Content = this->universe->canvas;
 		this->Pane = this->universe->navigator;
 

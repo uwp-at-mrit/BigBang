@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 	template<class UniversalWindowsScreen, bool fullscreen>
 	private ref class UniversalWindowsApplication sealed : public Windows::UI::Xaml::Application {
 	protected:
-		void AppMain(Windows::UI::ViewManagement::ApplicationView^ self, Windows::UI::Xaml::FrameworkElement^ screen) {
+		void AppMain(Windows::UI::ViewManagement::ApplicationView^ self, UniversalWindowsScreen^ screen) {
 			/** NOTE
 			* the Titlebar in Universal Windows Platform is freaky,
 			* it *can* be customized fully, but the caption buttons are always there.
@@ -17,6 +17,7 @@ namespace WarGrey::SCADA {
 			*/
 
 			Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
+			
 			if (fullscreen) {
 				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::FullScreen;
 			} else {
@@ -37,7 +38,7 @@ namespace WarGrey::SCADA {
 		void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e) override {
 			Windows::UI::ViewManagement::ApplicationView^ self = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
-
+			
 			if (screen == nullptr) {
 				screen = ref new UniversalWindowsScreen();
 				this->AppMain(self, screen);
@@ -51,7 +52,9 @@ namespace WarGrey::SCADA {
 			}
 
 			if (e->PrelaunchActivated == false) {
-				screen->initialize_component(adjusted_workspace_size(self->VisibleBounds, screen));
+				Platform::String^ package_name = Windows::ApplicationModel::Package::Current->DisplayName;
+
+				screen->construct(package_name, adjusted_workspace_size(self->VisibleBounds, screen));
 				Windows::UI::Xaml::Window::Current->Activate();
 			}
 		}

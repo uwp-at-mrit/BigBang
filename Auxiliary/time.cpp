@@ -24,40 +24,59 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
 }
 
 TimeSpan make_timespan_from_ms(unsigned int ms) {
-	long long l00ns = ms * 10000LL;
+	TimeSpan ts;
+	
+	ts.Duration = ms * 10000LL;
 
-	return TimeSpan{ l00ns };
+	return ts;
 }
 
 TimeSpan make_timespan_from_rate(int rate) {
+	TimeSpan ts;
 	long long l00ns = 10000000LL;
-	long long duration = ((rate > 0) ? (l00ns / rate) : (-l00ns * rate));
 	
-	return TimeSpan{ duration };
+	ts.Duration = ((rate > 0) ? (l00ns / rate) : (-l00ns * rate));
+	
+	return ts;
 }
 
 void sleep(unsigned int ms) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-wchar_t* update_wnowstamp(bool need_us, int* l00nanosecond) {
-	static Calendar^ datetime = ref new Calendar();
-    static wchar_t timestamp[32];
+wchar_t* make_wtimestamp(Calendar^ c, bool need_us, int *l00nanosecond) {
+	static wchar_t timestamp[32];
 
-	datetime->SetToNow();
-	int l00ns = datetime->Nanosecond / 100;
+	int l00ns = c->Nanosecond / 100;
 	if (need_us) {
-		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d.%06d", STRFTIME(datetime), l00ns / 10);
+		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d.%06d", STRFTIME(c), l00ns / 10);
 	} else {
-		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d", STRFTIME(datetime));
+		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d", STRFTIME(c));
 	}
 
 	SET_BOX(l00nanosecond, l00ns);
+
 	return timestamp;
 }
 
+Platform::String^ make_timestamp(Calendar^ c, bool need_us, int* l00ns) {
+	return ref new Platform::String(make_wtimestamp(c, need_us, l00ns));
+}
+
+Platform::String^ make_timestamp(Windows::Foundation::DateTime& dt, bool need_us, int* l00ns) {
+	static Calendar^ c = ref new Calendar();
+
+	c->SetDateTime(dt);
+
+	return ref new Platform::String(make_wtimestamp(c, need_us, l00ns));
+}
+
 Platform::String^ update_nowstamp(bool need_us, int* l00ns) {
-    return ref new Platform::String(update_wnowstamp(need_us, l00ns));
+	static Calendar^ c = ref new Calendar();
+
+	c->SetToNow();
+	
+	return ref new Platform::String(make_wtimestamp(c, need_us, l00ns));
 }
 
 void process_usage(long long* kernel, long long* user) {

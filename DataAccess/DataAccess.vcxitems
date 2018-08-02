@@ -17,6 +17,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbmisc.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbsystem.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbtypes.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\rotation.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
@@ -27,12 +28,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)dbmisc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\rotation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vsql.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rktl" />
+    <None Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.dao.rkt" />
     <None Include="$(MSBuildThisFileDirectory)stone\lib\sqlite3.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>

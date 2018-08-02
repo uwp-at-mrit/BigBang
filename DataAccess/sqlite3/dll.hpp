@@ -28,15 +28,28 @@ namespace WarGrey::SCADA {
 		int pk;
 	};
 
-	class SQLite3;
-
 	int sqlite3_default_trace_callback(unsigned int reason, void* pCxt, void* P, void* X);
+
+	private class ISQLite3 abstract : public WarGrey::SCADA::IDBSystem {
+	public:
+		virtual ~ISQLite3() noexcept;
+
+		ISQLite3(WarGrey::SCADA::Syslog* logger);
+
+	public:
+		virtual std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) = 0;
+
+	public:
+		virtual int libversion() = 0;
+		virtual int changes(bool total = false) = 0;
+		virtual int64 last_insert_rowid() = 0;
+	};
 
 	private class SQLiteStatement : public WarGrey::SCADA::IPreparedStatement {
 	public:
 		virtual ~SQLiteStatement() noexcept;
 
-		SQLiteStatement(WarGrey::SCADA::SQLite3* db, sqlite3_stmt_t* stmt);
+		SQLiteStatement(WarGrey::SCADA::ISQLite3* db, sqlite3_stmt_t* stmt);
 
 	public:
 		unsigned int parameter_count() override;
@@ -68,11 +81,11 @@ namespace WarGrey::SCADA {
 		void clear_bindings() override;
 
 	private:
-		WarGrey::SCADA::SQLite3* master;
+		WarGrey::SCADA::ISQLite3* master;
 		WarGrey::SCADA::sqlite3_stmt_t* stmt;
 	};
 
-	private class SQLite3 : public WarGrey::SCADA::IDBSystem {
+	private class SQLite3 : public WarGrey::SCADA::ISQLite3 {
 	public:
 		virtual ~SQLite3() noexcept;
 
@@ -86,12 +99,12 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) override;
 
 	public:
-		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name);
+		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) override;
 
 	public:
-		int libversion();
-		int changes(bool total = false);
-		int64 last_insert_rowid();
+		int libversion() override;
+		int changes(bool total = false) override;
+		int64 last_insert_rowid() override;
 		
 	protected:
 		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;

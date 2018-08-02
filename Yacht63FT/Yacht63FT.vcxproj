@@ -303,6 +303,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="frame\navigatorbar.cpp" />
+    <ClCompile Include="metrics.cpp" />
     <ClCompile Include="page\airconditioner.cpp" />
     <ClCompile Include="page\alogbook.cpp" />
     <ClCompile Include="page\operation.cpp" />
@@ -320,6 +321,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="frame\navigatorbar.hxx" />
+    <ClInclude Include="metrics.hpp" />
     <ClInclude Include="page\airconditioner.hpp" />
     <ClInclude Include="page\alogbook.hpp" />
     <ClInclude Include="page\operation.hpp" />

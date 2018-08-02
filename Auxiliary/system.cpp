@@ -44,8 +44,12 @@ Size WarGrey::SCADA::system_screen_size() {
     double scaling = master->RawPixelsPerViewPixel;
 	unsigned int fxwidth = master->ScreenWidthInRawPixels;
 	unsigned int fxheight = master->ScreenHeightInRawPixels;
+	Size screen;
 
-    return { float(fxwidth / scaling), float(fxheight / scaling) };
+	screen.Width = float(fxwidth / scaling);
+	screen.Height = float(fxheight / scaling);
+
+    return screen;
 }
 
 Color WarGrey::SCADA::system_color(UIColorType type) {
@@ -138,10 +142,12 @@ internal:
 
 private:
 	void report_timestamp(Platform::Object^ sender, Platform::Object^ e) {
+		TimeSpan ts;
 		int l00ns;
 		Platform::String^ timestamp = update_nowstamp(false, &l00ns);
 
-		this->clock->Interval = TimeSpan{ 10000000LL - l00ns };
+		ts.Duration = 10000000LL - l00ns;
+		this->clock->Interval = ts;
 
 		for (auto listener : this->listeners) {
 			listener->on_timestamp_changed(timestamp);

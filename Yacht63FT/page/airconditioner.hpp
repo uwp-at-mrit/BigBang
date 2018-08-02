@@ -2,6 +2,7 @@
 
 #include "planet.hpp"
 #include "plc.hpp"
+#include "sqlite3.hpp"
 
 #include "decorator/table.hpp"
 

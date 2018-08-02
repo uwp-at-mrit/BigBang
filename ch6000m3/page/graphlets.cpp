@@ -3,25 +3,19 @@
 #include "page/graphlets.hpp"
 #include "configuration.hpp"
 
-#include "tongue.hpp"
-#include "syslog.hpp"
-
-#include "text.hpp"
-#include "paint.hpp"
-#include "brushes.hxx"
-
 #include "graphlet/symbol/pumplet.hpp"
 #include "graphlet/symbol/valvelet.hpp"
 #include "graphlet/symbol/doorlet.hpp"
 
 #include "decorator/page.hpp"
 
+#include "tongue.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
-using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private class Stage final {
 public:
@@ -31,9 +25,12 @@ public:
 
 public:
 	void load(float width, float height) {
-		Platform::String^ all_captions[] = { "winch_state", "pump_state", "valve_state", "dumpdoor_state", "upperdoor_state" };
 		float unitsize = 32.0F;
-
+		Platform::String^ all_captions[] = {
+			"winch_state", "pump_state", "valve_state",
+			"dumpdoor_state", "upperdoor_state"
+		};
+		
 		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->valves, this->vlabels, unitsize);

@@ -122,12 +122,15 @@ namespace WarGrey::SCADA {
 				} catch (Platform::Exception^ e) {
 					IMsAppx<FileType, Hint>::clear(uuid);
 
-					if (e->HResult == 0x80070002) {
+					switch (e->HResult) {
+					case HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND): {
 						this->on_appx_not_found(ms_appx, hint);
-					} else {
+					}; break;
+					default: {
 						this->log_message(WarGrey::SCADA::Log::Error,
 							make_wstring(L"failed to load %s: %s",
 								ms_appx->ToString()->Data(), e->Message->Data()));
+					}
 					}
 				} catch (Concurrency::task_canceled&) {
 					IMsAppx<FileType, Hint>::clear(uuid);

@@ -234,7 +234,7 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 	}
 }
 
-void Planet::notify_graphlet_updated(ISprite* g) {
+void Planet::notify_graphlet_updated(ISprite* g) { // NOTE: `g` may be `nullptr`
 	if (this->in_update_sequence()) {
 		this->needs_update = true;
 	} else if (this->info != nullptr) {
@@ -306,6 +306,56 @@ void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, Graphlet
 		}
 
 		this->insert(g, x, y, a);
+	}
+}
+
+void Planet::remove(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
+		GraphletInfo* prev_info = GRAPHLET_INFO(info->prev);
+		GraphletInfo* next_info = GRAPHLET_INFO(info->next);
+
+		prev_info->next = info->next;
+		next_info->prev = info->prev;
+
+		if (this->head_graphlet == g) {
+			if (this->head_graphlet == info->next) {
+				this->head_graphlet = nullptr;
+			} else {
+				this->head_graphlet = info->next;
+			}
+		}
+
+		if (this->hovering_graphlet == g) {
+			this->hovering_graphlet = nullptr;
+		}
+		
+		delete g; // g's destructor will delete the associated info object
+		this->notify_graphlet_updated(nullptr);
+		this->size_cache_invalid();
+	}
+}
+
+void Planet::erase() {
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* temp_head = this->head_graphlet;
+		GraphletInfo* temp_info = GRAPHLET_INFO(temp_head);
+		GraphletInfo* prev_info = GRAPHLET_INFO(temp_info->prev);
+
+		this->head_graphlet = nullptr;
+		prev_info->next = nullptr;
+
+		do {
+			IGraphlet* child = temp_head;
+
+			temp_head = GRAPHLET_INFO(temp_head)->next;
+
+			delete child; // child's destructor will delete the associated info object
+		} while (temp_head != nullptr);
+
+		this->head_graphlet = nullptr;
+		this->size_cache_invalid();
 	}
 }
 
@@ -970,25 +1020,6 @@ void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, 
 	ds->DrawRectangle(x, y, width, height, Colours::Highlight, 1.0F);
 }
 
-void Planet::collapse() {
-	if (this->head_graphlet != nullptr) {
-		IGraphlet* temp_head = this->head_graphlet;
-		GraphletInfo* temp_info = GRAPHLET_INFO(temp_head);
-		GraphletInfo* prev_info = GRAPHLET_INFO(temp_info->prev);
-		
-		this->head_graphlet = nullptr;
-		prev_info->next = nullptr;
-		
-		do {
-			IGraphlet* child = temp_head;
-
-			temp_head = GRAPHLET_INFO(temp_head)->next;
-
-			delete child; // g's destructor will delete the associated info object
-		} while (temp_head != nullptr);
-	}
-}
-
 /*************************************************************************************************/
 IPlanet::IPlanet(Platform::String^ name) : caption(name) {}
 
@@ -1095,6 +1126,10 @@ void IPlanet::leave_critical_section() {
 
 void IPlanet::leave_shared_section() {
 	this->section.unlock_shared();
+}
+
+void IPlanet::collapse() {
+	this->erase();
 }
 
 CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, float dpi) {
