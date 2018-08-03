@@ -42,6 +42,10 @@ Platform::String^ WarGrey::SCADA::speak(Platform::String^ word) {
     return do_speak(tongue, word);
 }
 
+Platform::String^ WarGrey::SCADA::speak(Platform::String^ word, Platform::String^ name) {
+	return do_speak(name, word);
+}
+
 Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
 	static ResourceLoader^ tongue = ResourceLoader::GetForViewIndependentUse("dbfield");
 

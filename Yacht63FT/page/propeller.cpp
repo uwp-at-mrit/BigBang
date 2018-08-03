@@ -78,11 +78,11 @@ public:
 			}
 
 			for (PConverter m = _E0(PConverter); m < PConverter::_; m++) {
-				this->cs[m] = make_text_layout(speak(m, "cnvt"), pfont);
+				this->cs[m] = make_text_layout(speak(m, "converter"), pfont);
 			}
 
 			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
-				this->ms[m] = make_text_layout(speak(m, "pm"), gfont);
+				this->ms[m] = make_text_layout(speak(m, "motor"), gfont);
 			}
 
 			for (PBus m = _E0(PBus); m < PBus::_; m++) {

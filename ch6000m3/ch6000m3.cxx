@@ -7,7 +7,7 @@
 
 #include "page/hydraulics.hpp"
 #include "page/graphlets.hpp"
-#include "test/cyberspace.hpp"
+#include "page/waters.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -37,9 +37,9 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new HydraulicSystem(this->device));
+		this->add_planet(new HydraulicsPage(this->device));
+		this->add_planet(new WaterSystemPage(this->device));
 		this->add_planet(new GraphletOverview());
-		this->add_planet(new CyberSpace());
 	}
 
 private:

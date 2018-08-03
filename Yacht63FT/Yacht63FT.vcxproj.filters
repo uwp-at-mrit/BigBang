@@ -501,5 +501,29 @@
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\pressure.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\temperature.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\pressure.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\temperature.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\converter.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\motor.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\converter.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\motor.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

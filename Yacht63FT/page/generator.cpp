@@ -65,17 +65,17 @@ public:
 			this->rspeed = make_text_layout(speak(":rspeed:"), sfont);
 
 			for (GPower p = _E0(GPower); p < GPower::_; p++) {
-				this->powers[p] = make_text_layout(speak(p, nullptr), pfont);
+				this->powers[p] = make_text_layout(speak(":" + p.ToString() + ":"), pfont);
 			}
 
 			for (GMeter g = _E0(GMeter); g < GMeter::_; g++) {
 				if (g == GMeter::sea) {
 					this->foil_filter_pdrop = make_text_layout(speak(":pd_filter:"), mfont);
 				} else {
-					this->temperatures[g] = make_text_layout(speak(g, "t"), mfont);
+					this->temperatures[g] = make_text_layout(speak(g, "temperature"), mfont);
 				}
 
-				this->pressures[g] = make_text_layout(speak(g, "p"), mfont);
+				this->pressures[g] = make_text_layout(speak(g, "pressure"), mfont);
 			}
 		}
 	}

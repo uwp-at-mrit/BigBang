@@ -349,4 +349,7 @@
   <data name="winch_state" xml:space="preserve">
     <value>Winch</value>
   </data>
+  <data name=":ws:" xml:space="preserve">
+    <value>Water Sealing and Flushing System</value>
+  </data>
 </root>

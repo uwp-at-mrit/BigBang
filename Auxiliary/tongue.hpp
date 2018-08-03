@@ -2,20 +2,8 @@
 
 namespace WarGrey::SCADA {
 	Platform::String^ speak(Platform::String^ word);
+	Platform::String^ speak(Platform::String^ word, Platform::String^ scope);
 	Platform::String^ dbspeak(Platform::String^ field);
-
-	template<typename E>
-	Platform::String^ speak(E id, Platform::String^ prefix) {
-		Platform::String^ suffix = id.ToString() + ":";
-
-		if (prefix == nullptr) {
-			suffix = ":" + suffix;
-		} else {
-			suffix = ":" + prefix + "_" + suffix;
-		}
-
-		return WarGrey::SCADA::speak(suffix);
-	}
 
 	template<typename E>
 	Platform::String^ speak(E id) {
@@ -23,8 +11,13 @@ namespace WarGrey::SCADA {
 	}
 
 	template<typename E>
+	Platform::String^ speak(E id, Platform::String^ scope) {
+		return WarGrey::SCADA::speak(id.ToString(), scope);
+	}
+
+	template<typename E>
 	Platform::String^ dbspeak(E id) {
-		return WarGrey::SCADA::dbspeak(":" + id.ToString() + ":");
+		return WarGrey::SCADA::dbspeak(id.ToString());
 	}
 
 	private class ITongue abstract {

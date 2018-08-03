@@ -337,11 +337,19 @@
     <ClInclude Include="stone\tongue\logbook.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\converter.resw" />
     <PRIResource Include="stone\tongue\en-US\dbfield.resw" />
     <PRIResource Include="stone\tongue\en-US\logbook.resw" />
+    <PRIResource Include="stone\tongue\en-US\motor.resw" />
+    <PRIResource Include="stone\tongue\en-US\pressure.resw" />
+    <PRIResource Include="stone\tongue\en-US\temperature.resw" />
     <PRIResource Include="stone\tongue\en-US\tongue.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\converter.resw" />
     <PRIResource Include="stone\tongue\zh-CN\dbfield.resw" />
     <PRIResource Include="stone\tongue\zh-CN\logbook.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\motor.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\pressure.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\temperature.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -307,4 +307,7 @@
   <data name="winch_state" xml:space="preserve">
     <value>绞车</value>
   </data>
+  <data name=":ws:" xml:space="preserve">
+    <value>泥泵封水及闸阀冲水管系</value>
+  </data>
 </root>

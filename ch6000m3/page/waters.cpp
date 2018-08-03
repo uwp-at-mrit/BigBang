@@ -1,4 +1,4 @@
-﻿#include "page/hydraulics.hpp"
+﻿#include "page/waters.hpp"
 #include "configuration.hpp"
 #include "dashboard.hpp"
 
@@ -27,10 +27,10 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum HSMode { WindowUI = 0, View };
+private enum WSMode { WindowUI = 0, View };
 
 // WARNING: order matters
-private enum class HS : unsigned int {
+private enum class WS : unsigned int {
 	// Pumps
 	A, B, G, H,
 	F, C, D, E,
@@ -49,9 +49,9 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final : public PLCConfirmation, public DashBoard<HydraulicsPage, HS> {
+private class Waters final : public PLCConfirmation, public DashBoard<WaterSystemPage, WS> {
 public:
-	Hydraulics(HydraulicsPage* master) : DashBoard(master, "HS") {
+	Waters(WaterSystemPage* master) : DashBoard(master, "WS") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
@@ -59,16 +59,16 @@ public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->master->enter_critical_section();
 
-		this->temperatures[HS::Heater]->set_value(RealData(AI_DB203, 18U));
-		this->temperatures[HS::VisorTank]->set_value(RealData(AI_DB203, 19U));
+		this->temperatures[WS::Heater]->set_value(RealData(AI_DB203, 18U));
+		this->temperatures[WS::VisorTank]->set_value(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
-			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
+			WS bar_seq[] = { WS::C, WS::F, WS::D, WS::E, WS::A, WS::B, WS::G, WS::H, WS::I, WS::J };
 
-			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
-				HS id = bar_seq[i];
+			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(WS); i++) {
+				WS id = bar_seq[i];
 				Dimensionlet* target = this->bars[id];
-				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
+				bool need_adjust_position = ((id == WS::F) || (id == WS::C) || (id == WS::D) || (id == WS::E));
 				
 				if (need_adjust_position) {
 					target->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
@@ -85,9 +85,9 @@ public:
 		this->master->enter_critical_section();
 
 		{ // pump states
-			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::G, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
+			WS pump_seq[] = { WS::A, WS::B, WS::C, WS::D, WS::E, WS::G, WS::G, WS::H, WS::Y, WS::K, WS::L, WS::M, WS::I, WS::J };
 
-			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
+			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(WS); i++) {
 				Pumplet* target = this->pumps[pump_seq[i]];
 
 				switch (DI_db205_X[i]) {
@@ -108,49 +108,49 @@ public:
 
 public:
 	void load_pump_station(float width, float height, float gridsize) {
-		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
+		Turtle<WS>* pTurtle = new Turtle<WS>(gridsize, true, WS::SQ1);
 
-		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(6);
+		pTurtle->move_down()->turn_down_right()->move_right(13, WS::l)->turn_right_down()->move_down(6);
 		
-		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::c)->move_right(6, HS::SQc)->move_right(8, HS::C)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
+		pTurtle->move_down(3, WS::f)->move_right(6, WS::SQf)->move_right(8, WS::F)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::c)->move_right(6, WS::SQc)->move_right(8, WS::C)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::d)->move_right(6, WS::SQd)->move_right(8, WS::D)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::e)->move_right(6, WS::SQe)->move_right(8, WS::E)->move_right(6);
 		
-		pTurtle->move_up(12, HS::Port)->move_up(20)->turn_up_left()->move_left(35)->turn_left_down()->move_down(4);
+		pTurtle->move_up(12, WS::Port)->move_up(20)->turn_up_left()->move_left(35)->turn_left_down()->move_down(4);
 		pTurtle->jump_left(4)->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
 
-		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::b)->move_right(6, HS::B)->move_right(8, HS::SQb)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
+		pTurtle->move_down(3, WS::a)->move_right(6, WS::A)->move_right(8, WS::SQa)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::b)->move_right(6, WS::B)->move_right(8, WS::SQb)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::g)->move_right(6, WS::G)->move_right(8, WS::SQg)->move_right(6)->jump_back();
+		pTurtle->move_down(3, WS::h)->move_right(6, WS::H)->move_right(8, WS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Starboard)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(12, WS::Starboard)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, WS::SQ2);
 
-		pTurtle->jump_back(HS::l);
-		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
-		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
-		pTurtle->move_right(5, HS::m)->turn_right_up()->move_up(8, HS::M)->move_up(4)->jump_back();
-		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
-		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, HS::F001Blocked)->move_down(2.0F);
+		pTurtle->jump_back(WS::l);
+		pTurtle->jump_left(5, WS::y)->turn_right_up()->move_up(4, WS::SQy)->move_up(4, WS::Y)->move_up(4)->jump_back();
+		pTurtle->move_right(5, WS::l)->turn_right_up()->move_up(8, WS::L)->move_up(4)->jump_back();
+		pTurtle->move_right(5, WS::m)->turn_right_up()->move_up(8, WS::M)->move_up(4)->jump_back();
+		pTurtle->move_right(3, WS::SQk2)->move_right(3, WS::k)->move_up(9, WS::K)->move_up(3)->turn_up_left();
+		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, WS::F001Blocked)->move_down(2.0F);
 
-		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::OilTank);
+		pTurtle->jump_back(WS::k)->move_right(3, WS::SQk1)->move_right(2.5F, WS::OilTank);
 
-		pTurtle->jump_back(HS::SQ1)->jump_down(11.8F)->move_down(2, HS::SQi)->move_down(3, HS::I)->move_down(3);
-		pTurtle->jump_back(HS::SQ2)->jump_down(11.8F)->move_down(2, HS::SQj)->move_down(3, HS::J)->move_down(3);
-		this->stations[0] = new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray);
+		pTurtle->jump_back(WS::SQ1)->jump_down(11.8F)->move_down(2, WS::SQi)->move_down(3, WS::I)->move_down(3);
+		pTurtle->jump_back(WS::SQ2)->jump_down(11.8F)->move_down(2, WS::SQj)->move_down(3, WS::J)->move_down(3);
+		this->stations[0] = new Tracklet<WS>(pTurtle, 1.5F, Colours::Gray);
 
 		pTurtle->wipe();
-		pTurtle->jump_back(HS::SQ1)->move_up(2);
-		pTurtle->jump_back(HS::SQ2)->move_up(2);
-		this->stations[1] = new Tracklet<HS>(pTurtle, 1.5F, Colours::Yellow); 
+		pTurtle->jump_back(WS::SQ1)->move_up(2);
+		pTurtle->jump_back(WS::SQ2)->move_up(2);
+		this->stations[1] = new Tracklet<WS>(pTurtle, 1.5F, Colours::Yellow); 
 
-		this->load_label(this->captions, HS::MasterTank, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
-		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
-		this->load_label(this->captions, HS::Heater, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::VisorTank, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::OilTank, Colours::Silver);
+		this->load_label(this->captions, WS::MasterTank, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, WS::Port, Colours::DarkKhaki, this->caption_font);
+		this->load_label(this->captions, WS::Starboard, Colours::DarkKhaki, this->caption_font);
+		this->load_label(this->captions, WS::Heater, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, WS::VisorTank, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, WS::OilTank, Colours::Silver);
 
 		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
 
@@ -170,56 +170,56 @@ public:
 
 	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_graphlets(this->pumps, this->plabels, HS::A, HS::H, gridsize, 180.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::F, HS::E, gridsize, 0.000, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::Y, HS::K, gridsize, -90.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::J, HS::I, gridsize, 90.00, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, WS::A, WS::H, gridsize, 180.0, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, WS::F, WS::E, gridsize, 0.000, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, WS::Y, WS::K, gridsize, -90.0, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, WS::J, WS::I, gridsize, 90.00, this->pcaptions);
 
-			this->load_dimensions(this->bars, HS::A, HS::I, "bar");
+			this->load_dimensions(this->bars, WS::A, WS::I, "bar");
 		}
 
 		{ // load valves
-			this->load_graphlets(this->valves, this->vlabels, HS::SQ1, HS::SQj, gridsize, 0.000);
-			this->load_graphlets(this->valves, this->vlabels, HS::SQa, HS::SQk1, gridsize, -90.0);
-			this->load_graphlets(this->valves, this->vlabels, HS::SQf, HS::SQe, gridsize, 90.00);
+			this->load_graphlets(this->valves, this->vlabels, WS::SQ1, WS::SQj, gridsize, 0.000);
+			this->load_graphlets(this->valves, this->vlabels, WS::SQa, WS::SQk1, gridsize, -90.0);
+			this->load_graphlets(this->valves, this->vlabels, WS::SQf, WS::SQe, gridsize, 90.00);
 		}
 	}
 
 	void load_state_indicators(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_state_indicator(HS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(WS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(WS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(WS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_state_indicator(WS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
 
-		this->load_state_indicator(HS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_state_indicator(WS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_state_indicator(WS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_state_indicator(WS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
 
-		this->load_dimensions(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
+		this->load_dimensions(this->temperatures, WS::Heater, WS::VisorTank, "celsius", "temperature");
 	}
 
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
 		float sw, sh, sx, sy, s1_x, s1_y;
 
 		this->stations[0]->fill_extent(0.0F, 0.0F, &sw, &sh);
-		this->stations[0]->fill_anchor_location(HS::SQ1, &s1_x, &s1_y);
+		this->stations[0]->fill_anchor_location(WS::SQ1, &s1_x, &s1_y);
 
 		sx = (width - sw) * 0.5F;
 		sy = (height - sh) * 0.5F - vinset * 0.5F;
 		this->master->move_to(this->stations[0], sx, sy);
 
 		this->master->move_to(this->stations[1], sx + s1_x, sy + s1_y, GraphletAnchor::RB);
-		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAnchor::LC);
+		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, WS::OilTank, GraphletAnchor::LC);
 		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
 		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
 
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
-		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
-		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAnchor::CB, GraphletAnchor::CT);
-		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
-		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
+		this->stations[0]->map_credit_graphlet(this->captions[WS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
+		this->stations[0]->map_credit_graphlet(this->captions[WS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
+		this->master->move_to(this->captions[WS::OilTank], this->oil_tank, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->captions[WS::Heater], this->heater, GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
+		this->master->move_to(this->captions[WS::VisorTank], this->visor_tank, GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -266,7 +266,7 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 0.0) {
 				switch (it->first) {
-				case HS::SQ2: case HS::SQy: {
+				case WS::SQ2: case WS::SQy: {
 					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				} break;
 				default: {
@@ -283,17 +283,17 @@ public:
 	}
 
 	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
-		this->master->move_to(this->captions[HS::MasterTank], this->stations[0], GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
-		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::MasterTank], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
-		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
-		this->stations[0]->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAnchor::CC);
+		this->master->move_to(this->captions[WS::MasterTank], this->stations[0], GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
+		this->master->move_to(this->heater_states[WS::LevelLow], this->captions[WS::MasterTank], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
+		this->master->move_to(this->heater_states[WS::LevelLow2], this->heater_states[WS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->heater_states[WS::LevelHigh], this->heater_states[WS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[WS::Heater], this->heater_states[WS::LevelHigh], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
+		this->stations[0]->map_credit_graphlet(this->heater_states[WS::F001Blocked], GraphletAnchor::CC);
 
-		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
-		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::VisorTank], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
+		this->master->move_to(this->visor_states[WS::LevelLow], this->visor_tank, GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
+		this->master->move_to(this->visor_states[WS::LevelLow2], this->visor_states[WS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->visor_states[WS::FilterBlocked], this->visor_states[WS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[WS::VisorTank], this->visor_states[WS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
@@ -312,29 +312,29 @@ public:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<HS>* stations[2];
+	Tracklet<WS>* stations[2];
 	LevelGaugelet* heater;
 	LevelGaugelet* visor_tank;
 	IShapelet* oil_tank;
-	std::map<HS, Credit<Labellet, HS>*> captions;
-	std::map<HS, Credit<Pumplet, HS>*> pumps;
-	std::map<HS, Credit<Labellet, HS>*> plabels;
-	std::map<HS, Credit<Labellet, HS>*> pcaptions;
-	std::map<HS, Credit<Valvelet, HS>*> valves;
-	std::map<HS, Credit<Labellet, HS>*> vlabels;
-	std::map<HS, Credit<Dimensionlet, HS>*> bars;
-	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
-	std::map<HS, Credit<Booleanlet, HS>*> heater_states;
-	std::map<HS, Credit<Labellet, HS>*> hslabels;
-	std::map<HS, Credit<Booleanlet, HS>*> visor_states;
-	std::map<HS, Credit<Labellet, HS>*> vslabels;
+	std::map<WS, Credit<Labellet, WS>*> captions;
+	std::map<WS, Credit<Pumplet, WS>*> pumps;
+	std::map<WS, Credit<Labellet, WS>*> plabels;
+	std::map<WS, Credit<Labellet, WS>*> pcaptions;
+	std::map<WS, Credit<Valvelet, WS>*> valves;
+	std::map<WS, Credit<Labellet, WS>*> vlabels;
+	std::map<WS, Credit<Dimensionlet, WS>*> bars;
+	std::map<WS, Credit<Dimensionlet, WS>*> temperatures;
+	std::map<WS, Credit<Booleanlet, WS>*> heater_states;
+	std::map<WS, Credit<Labellet, WS>*> hslabels;
+	std::map<WS, Credit<Booleanlet, WS>*> visor_states;
+	std::map<WS, Credit<Labellet, WS>*> vslabels;
 	
 private:
 	CanvasTextFormat^ caption_font;
 };
 
-HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
-	Hydraulics* dashboard = new Hydraulics(this);
+WaterSystemPage::WaterSystemPage(IMRMaster* plc) : Planet(":ws:"), device(plc) {
+	Waters* dashboard = new Waters(this);
 
 	this->dashboard = dashboard; 
 	this->gridsize = statusbar_height();
@@ -342,25 +342,25 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
 	this->device->append_confirmation_receiver(dashboard);
 }
 
-HydraulicsPage::~HydraulicsPage() {
+WaterSystemPage::~WaterSystemPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
+void WaterSystemPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+	auto dashboard = dynamic_cast<Waters*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 
 		{ // load graphlets
-			this->change_mode(HSMode::View);
+			this->change_mode(WSMode::View);
 			dashboard->load_pump_station(width, height, this->gridsize);
 			dashboard->load_devices(width, height, this->gridsize);
 			dashboard->load_state_indicators(width, height, this->gridsize);
 
-			this->change_mode(HSMode::WindowUI);
+			this->change_mode(WSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name(), this->device);
 			this->insert(this->statusbar);
@@ -381,24 +381,24 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 	}
 }
 
-void HydraulicsPage::reflow(float width, float height) {
-	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
+void WaterSystemPage::reflow(float width, float height) {
+	auto dashboard = dynamic_cast<Waters*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 
-		this->change_mode(HSMode::WindowUI);
+		this->change_mode(WSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
-		this->change_mode(HSMode::View);
+		this->change_mode(WSMode::View);
 		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
 		dashboard->reflow_devices(width, height, this->gridsize, vinset);
 		dashboard->reflow_state_indicators(width, height, this->gridsize, vinset);
 	}
 }
 
-void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	if (dynamic_cast<Tracklet<HS>*>(g) == nullptr) {
+void WaterSystemPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	if (dynamic_cast<Tracklet<WS>*>(g) == nullptr) {
 		this->set_selected(g);
 	}
 	// this->set_caret_owner(g);

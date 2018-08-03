@@ -36,6 +36,9 @@
     <ClCompile Include="decorator\page.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
+    <ClCompile Include="page\waters.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -50,6 +53,9 @@
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="dashboard.hpp" />
+    <ClInclude Include="page\waters.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

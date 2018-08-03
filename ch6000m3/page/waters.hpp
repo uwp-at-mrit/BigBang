@@ -7,10 +7,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HydraulicsPage : public WarGrey::SCADA::Planet {
+	private class WaterSystemPage : public WarGrey::SCADA::Planet {
 	public:
-		~HydraulicsPage() noexcept;
-		HydraulicsPage(WarGrey::SCADA::IMRMaster* plc);
+		~WaterSystemPage() noexcept;
+		WaterSystemPage(WarGrey::SCADA::IMRMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

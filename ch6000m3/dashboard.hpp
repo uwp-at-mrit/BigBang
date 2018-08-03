@@ -88,10 +88,7 @@ namespace WarGrey::SCADA {
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
-			Platform::String^ idstr = id.ToString();
-			Platform::String^ caption = (this->l10n_prefix == nullptr ? idstr : this->l10n_prefix + "_" + idstr);
-
-			return this->make_label(speak(caption), id, color, font);
+			return this->make_label(speak(id, l10n_prefix), id, color, font);
 		}
 
 	protected:

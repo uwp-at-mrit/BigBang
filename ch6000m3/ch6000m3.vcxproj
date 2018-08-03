@@ -221,6 +221,7 @@
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
+    <ClCompile Include="page\waters.cpp" />
     <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
     <ClCompile Include="plc.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="dashboard.hpp" />
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="page\waters.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />
     <ClInclude Include="plc.hpp" />
