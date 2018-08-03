@@ -215,8 +215,18 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\graphlets.resw" />
+    <PRIResource Include="stone\tongue\en-US\hydraulics.resw">
+      <SubType>Designer</SubType>
+    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\tongue.resw" />
+    <PRIResource Include="stone\tongue\en-US\waters.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\graphlets.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\hydraulics.resw">
+      <SubType>Designer</SubType>
+    </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\waters.resw" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />

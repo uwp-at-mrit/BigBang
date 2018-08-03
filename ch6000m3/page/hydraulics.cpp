@@ -51,7 +51,7 @@ private enum class HS : unsigned int {
 
 private class Hydraulics final : public PLCConfirmation, public DashBoard<HydraulicsPage, HS> {
 public:
-	Hydraulics(HydraulicsPage* master) : DashBoard(master, "HS") {
+	Hydraulics(HydraulicsPage* master) : DashBoard(master, "hydraulics") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 

@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
 	template<class T, typename E>
 	private class DashBoard abstract {
 	public:
-		DashBoard(T* master, Platform::String^ l10n) : master(master), l10n_prefix(l10n) {}
+		DashBoard(T* master, Platform::String^ l10n) : master(master), scope(l10n) {}
 
 	public:
 		template<class G>
@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 			this->load_graphlets(gs, id0, idn, radius, degrees);
 			
 			for(E id = id0; id <= idn; id++) {
-			    ls[id] = this->make_label(speak(id), id, Colours::Silver);
+			    ls[id] = this->make_label(speak(id, this->scope), id, Colours::Silver);
 		    }
 	    }
 
@@ -70,7 +70,7 @@ namespace WarGrey::SCADA {
 		void load_state_indicator(E id, float size
 			, std::map<E, Credit<WarGrey::SCADA::Booleanlet, E>*>& bs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			ls[id] = this->make_label(speak(id), id, WarGrey::SCADA::Colours::Silver);
+			ls[id] = this->make_label(speak(id, this->scope), id, WarGrey::SCADA::Colours::Silver);
 			bs[id] = this->master->insert_one(new Credit<WarGrey::SCADA::Booleanlet, E>(size, color));
 			bs[id]->id = id;
 		}
@@ -88,13 +88,13 @@ namespace WarGrey::SCADA {
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
-			return this->make_label(speak(id, l10n_prefix), id, color, font);
+			return this->make_label(speak(id, this->scope), id, color, font);
 		}
 
 	protected:
 		T* master;
 
 	protected:
-		Platform::String^ l10n_prefix;
+		Platform::String^ scope;
 	};
 }

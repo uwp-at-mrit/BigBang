@@ -117,49 +117,119 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="A" xml:space="preserve">
+    <value>Left Drag Head</value>
+    <comment>':' cannot appear between letters</comment>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="B" xml:space="preserve">
+    <value>Left Drag Arm</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="C" xml:space="preserve">
+    <value>Left Gland</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="D" xml:space="preserve">
+    <value>Door-Locking Pump</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="E" xml:space="preserve">
+    <value>Butterfly Valve Pump</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="F" xml:space="preserve">
+    <value>Right Gland</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="G" xml:space="preserve">
+    <value>Right Drag Arm</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="H" xml:space="preserve">
+    <value>Right Drag Head</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="K" xml:space="preserve">
+    <value>Circulating Cooling</value>
   </data>
-  <data name=":hs:" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="Y" xml:space="preserve">
+    <value>Emergency</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="SQa" xml:space="preserve">
+    <value>SQ.A</value>
   </data>
-  <data name=":gview:" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="SQb" xml:space="preserve">
+    <value>SQ.B</value>
   </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
+  <data name="SQc" xml:space="preserve">
+    <value>SQ.C</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="SQd" xml:space="preserve">
+    <value>SQ.D</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
-    <value>Water Sealing and Flushing System</value>
+  <data name="SQe" xml:space="preserve">
+    <value>SQ.E</value>
+  </data>
+  <data name="SQf" xml:space="preserve">
+    <value>SQ.F</value>
+  </data>
+  <data name="SQg" xml:space="preserve">
+    <value>SQ.G</value>
+  </data>
+  <data name="SQh" xml:space="preserve">
+    <value>SQ.H</value>
+  </data>
+  <data name="SQk1" xml:space="preserve">
+    <value>SQ.K1</value>
+  </data>
+  <data name="SQy" xml:space="preserve">
+    <value>SQ.Y</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port Hydraulic System</value>
+  </data>
+  <data name="Starboard" xml:space="preserve">
+    <value>Starboard Hydraulic System</value>
+  </data>
+  <data name="SQi" xml:space="preserve">
+    <value>SQ.I</value>
+  </data>
+  <data name="SQj" xml:space="preserve">
+    <value>SQ.J</value>
+  </data>
+  <data name="I" xml:space="preserve">
+    <value>Left Draghead Visor</value>
+  </data>
+  <data name="J" xml:space="preserve">
+    <value>Right Draghead Visor</value>
+  </data>
+  <data name="LevelHigh" xml:space="preserve">
+    <value>Level High</value>
+  </data>
+  <data name="LevelLow" xml:space="preserve">
+    <value>Level Low</value>
+  </data>
+  <data name="LevelLow2" xml:space="preserve">
+    <value>Level Low Low</value>
+  </data>
+  <data name="MasterTank" xml:space="preserve">
+    <value>Main Oil Tank</value>
+  </data>
+  <data name="SQk2" xml:space="preserve">
+    <value>SQ.K2</value>
+  </data>
+  <data name="M" xml:space="preserve">
+    <value>Circulating Cooling</value>
+  </data>
+  <data name="L" xml:space="preserve">
+    <value>Circulating Cooling</value>
+  </data>
+  <data name="OilTank" xml:space="preserve">
+    <value>Oil Tank</value>
+  </data>
+  <data name="Heater" xml:space="preserve">
+    <value>Heater</value>
+  </data>
+  <data name="VisorTank" xml:space="preserve">
+    <value>Draghead Visor Oil Tank</value>
+  </data>
+  <data name="F001Blocked" xml:space="preserve">
+    <value>Filter F0.01 Blocked</value>
+  </data>
+  <data name="FilterBlocked" xml:space="preserve">
+    <value>Filter Blocked</value>
   </data>
 </root>

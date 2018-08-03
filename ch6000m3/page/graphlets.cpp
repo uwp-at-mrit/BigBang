@@ -17,6 +17,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
+static Platform::String^ tongue_scope = "graphlets";
+
 private class Stage final {
 public:
 	Stage(GraphletOverview* master) : master(master) {
@@ -26,12 +28,12 @@ public:
 public:
 	void load(float width, float height) {
 		float unitsize = 32.0F;
-		Platform::String^ all_captions[] = {
-			"winch_state", "pump_state", "valve_state",
-			"dumpdoor_state", "upperdoor_state"
-		};
+		Platform::String^ all_captions[] = { "winch", "pump", "valve", "dumpdoor", "upperdoor" };
 		
-		this->load_captions(all_captions); // don't mind, it's Visual Studio's fault.
+		for (size_t i = 0; i < sizeof(all_captions)/sizeof(Platform::String^); i++) {
+			this->captions[i] = make_label(speak(all_captions[i], tongue_scope) + ":", this->font);
+		}
+
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->valves, this->vlabels, unitsize);
 		this->load_primitives(this->hoppers, this->hlabels, unitsize);
@@ -81,20 +83,13 @@ private:
 		return this->master->insert_one(label);
 	}
 
-	template<size_t N>
-	void load_captions(Platform::String^ (&all_captions)[N]) {
-		for (size_t i = 0; i < N; i++) {
-			this->captions[i] = make_label(speak(all_captions[i]) + ":", this->font);
-		}
-	}
-
 	template<typename T, typename S>
 	void load_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float unitsize) {
 		for (S s = _E0(S); s < S::_; s++) {
 			gs[s] = new T(s, unitsize);
 			this->master->insert(gs[s]);
 
-			ls[s] = make_label(speak(s));
+			ls[s] = make_label(speak(s, tongue_scope));
 		}
 	}
 

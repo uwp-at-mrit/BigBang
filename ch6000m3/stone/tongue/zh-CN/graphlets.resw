@@ -117,49 +117,79 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="Ready" xml:space="preserve">
+    <value>准备就绪</value>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="Remote" xml:space="preserve">
+    <value>遥控</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="Running" xml:space="preserve">
+    <value>运行</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="Starting" xml:space="preserve">
+    <value>正在运行</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="Stopped" xml:space="preserve">
+    <value>停止</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="Stopping" xml:space="preserve">
+    <value>正在停止</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="Unstartable" xml:space="preserve">
+    <value>运行失败</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="Unstoppable" xml:space="preserve">
+    <value>停止失败</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="pump" xml:space="preserve">
+    <value>液压泵</value>
   </data>
-  <data name=":hs:" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="valve" xml:space="preserve">
+    <value>阀</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="OpenReady" xml:space="preserve">
+    <value>打开条件</value>
   </data>
-  <data name=":gview:" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="Manual" xml:space="preserve">
+    <value>手动阀</value>
   </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
+  <data name="Open" xml:space="preserve">
+    <value>完全打开</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="Opening" xml:space="preserve">
+    <value>正在打开</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
-    <value>Water Sealing and Flushing System</value>
+  <data name="Unclosable" xml:space="preserve">
+    <value>关闭失败</value>
+  </data>
+  <data name="Unopenable" xml:space="preserve">
+    <value>打开失败</value>
+  </data>
+  <data name="upperdoor" xml:space="preserve">
+    <value>小泥门</value>
+  </data>
+  <data name="dumpdoor" xml:space="preserve">
+    <value>大泥门</value>
+  </data>
+  <data name="winch" xml:space="preserve">
+    <value>绞车</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>完全关闭</value>
+  </data>
+  <data name="CloseReady" xml:space="preserve">
+    <value>关闭条件</value>
+  </data>
+  <data name="Closing" xml:space="preserve">
+    <value>正在关闭</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="FalseClosed" xml:space="preserve">
+    <value>假关</value>
+  </data>
+  <data name="FalseOpen" xml:space="preserve">
+    <value>假开</value>
   </data>
 </root>

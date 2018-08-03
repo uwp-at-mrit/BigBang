@@ -117,49 +117,80 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="A" xml:space="preserve">
+    <value>左耙头</value>
+    <comment>":" 不能出现在名称中间</comment>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="B" xml:space="preserve">
+    <value>左耙中</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="C" xml:space="preserve">
+    <value>左弯管</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="D" xml:space="preserve">
+    <value>泥门紧锁泵</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="E" xml:space="preserve">
+    <value>蝶阀控制泵</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="F" xml:space="preserve">
+    <value>右弯管</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="G" xml:space="preserve">
+    <value>右耙中</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="H" xml:space="preserve">
+    <value>右耙头</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="K" xml:space="preserve">
+    <value>循环冷却</value>
   </data>
-  <data name=":hs:" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="Y" xml:space="preserve">
+    <value>应急</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="Port" xml:space="preserve">
+    <value>左舷液压系统</value>
   </data>
-  <data name=":gview:" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="Starboard" xml:space="preserve">
+    <value>右舷液压系统</value>
   </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
+  <data name="I" xml:space="preserve">
+    <value>左耙唇</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="J" xml:space="preserve">
+    <value>右耙唇</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
-    <value>Water Sealing and Flushing System</value>
+  <data name="LevelHigh" xml:space="preserve">
+    <value>液位高</value>
+  </data>
+  <data name="LevelLow" xml:space="preserve">
+    <value>液位低</value>
+  </data>
+  <data name="LevelLow2" xml:space="preserve">
+    <value>液位过低</value>
+  </data>
+  <data name="MasterTank" xml:space="preserve">
+    <value>主油箱</value>
+  </data>
+  <data name="M" xml:space="preserve">
+    <value>循环冷却</value>
+  </data>
+  <data name="L" xml:space="preserve">
+    <value>循环冷却</value>
+  </data>
+  <data name="OilTank" xml:space="preserve">
+    <value>储油罐</value>
+  </data>
+  <data name="Heater" xml:space="preserve">
+    <value>加热器</value>
+  </data>
+  <data name="VisorTank" xml:space="preserve">
+    <value>耙唇液压系统油箱</value>
+  </data>
+  <data name="F001Blocked" xml:space="preserve">
+    <value>滤器F0.01堵塞</value>
+  </data>
+  <data name="FilterBlocked" xml:space="preserve">
+    <value>滤器堵塞</value>
   </data>
 </root>

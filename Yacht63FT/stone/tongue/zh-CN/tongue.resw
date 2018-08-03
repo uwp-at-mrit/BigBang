@@ -183,9 +183,6 @@
   <data name=":mode:" xml:space="preserve">
     <value>工作状态</value>
   </data>
-  <data name=":t_pipe:" xml:space="preserve">
-    <value>盘管温度</value>
-  </data>
   <data name=":pd_filter:" xml:space="preserve">
     <value>滑油滤器压差</value>
   </data>
@@ -222,32 +219,8 @@
   <data name="SternDeck" xml:space="preserve">
     <value>艉甲板</value>
   </data>
-  <data name=":cnvt_current:" xml:space="preserve">
-    <value>电流</value>
-  </data>
   <data name=":frequency:" xml:space="preserve">
     <value>频率</value>
-  </data>
-  <data name=":pm_rspeed:" xml:space="preserve">
-    <value>推进电机转速</value>
-  </data>
-  <data name=":cnvt_voltage:" xml:space="preserve">
-    <value>变频器交流侧电压</value>
-  </data>
-  <data name=":p_oil:" xml:space="preserve">
-    <value>滑油压力</value>
-  </data>
-  <data name=":p_sea:" xml:space="preserve">
-    <value>海水压力</value>
-  </data>
-  <data name=":p_coolant:" xml:space="preserve">
-    <value>冷却水压力</value>
-  </data>
-  <data name=":t_oil:" xml:space="preserve">
-    <value>滑油温度</value>
-  </data>
-  <data name=":t_coolant:" xml:space="preserve">
-    <value>冷却水温度</value>
   </data>
   <data name="&lt;rpm&gt;" xml:space="preserve">
     <value>rpm</value>
@@ -263,9 +236,6 @@
   </data>
   <data name="&lt;voltage&gt;" xml:space="preserve">
     <value>V</value>
-  </data>
-  <data name=":pm_power:" xml:space="preserve">
-    <value>推进电机功率</value>
   </data>
   <data name="&lt;power&gt;" xml:space="preserve">
     <value>kW</value>
@@ -333,12 +303,6 @@
   <data name="&lt;pdrop&gt;" xml:space="preserve">
     <value>kPa</value>
   </data>
-  <data name=":t_sea:" xml:space="preserve">
-    <value>海水温度</value>
-  </data>
-  <data name=":cnvt_temperature:" xml:space="preserve">
-    <value>变频器温度</value>
-  </data>
   <data name=":current:" xml:space="preserve">
     <value>电流</value>
   </data>
@@ -389,11 +353,5 @@
   </data>
   <data name=":temperature:" xml:space="preserve">
     <value>温度</value>
-  </data>
-  <data name=":t_setting:" xml:space="preserve">
-    <value>设定温度</value>
-  </data>
-  <data name=":t_room:" xml:space="preserve">
-    <value>当前室温</value>
   </data>
 </root>

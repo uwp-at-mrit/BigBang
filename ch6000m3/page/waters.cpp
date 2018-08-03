@@ -51,7 +51,7 @@ private enum class WS : unsigned int {
 
 private class Waters final : public PLCConfirmation, public DashBoard<WaterSystemPage, WS> {
 public:
-	Waters(WaterSystemPage* master) : DashBoard(master, "WS") {
+	Waters(WaterSystemPage* master) : DashBoard(master, "waters") {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 

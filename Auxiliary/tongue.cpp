@@ -43,7 +43,7 @@ Platform::String^ WarGrey::SCADA::speak(Platform::String^ word) {
 }
 
 Platform::String^ WarGrey::SCADA::speak(Platform::String^ word, Platform::String^ name) {
-	return do_speak(name, word);
+	return ((name == nullptr) ? speak(word) : do_speak(name, word));
 }
 
 Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {

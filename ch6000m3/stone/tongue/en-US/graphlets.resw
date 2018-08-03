@@ -117,49 +117,79 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="Remote" xml:space="preserve">
+    <value>Control Remotely</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="Running" xml:space="preserve">
+    <value>Running</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="Starting" xml:space="preserve">
+    <value>Turning On</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="Stopped" xml:space="preserve">
+    <value>Not Running</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="Stopping" xml:space="preserve">
+    <value>Turning Off</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="Unstartable" xml:space="preserve">
+    <value>Failed to Turn On</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="Unstoppable" xml:space="preserve">
+    <value>Failed to Turn Off</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="pump" xml:space="preserve">
+    <value>Hydraulic Pump</value>
   </data>
-  <data name=":hs:" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="valve" xml:space="preserve">
+    <value>Valve</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="Closed" xml:space="preserve">
+    <value>Fully Closed</value>
   </data>
-  <data name=":gview:" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="Closing" xml:space="preserve">
+    <value>Turning Off</value>
   </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
+  <data name="CloseReady" xml:space="preserve">
+    <value>Ready to Close</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="OpenReady" xml:space="preserve">
+    <value>Ready to Open</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
-    <value>Water Sealing and Flushing System</value>
+  <data name="FalseClosed" xml:space="preserve">
+    <value>False Closed</value>
+  </data>
+  <data name="FalseOpen" xml:space="preserve">
+    <value>False Open</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manually Operation</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Fully Open</value>
+  </data>
+  <data name="Opening" xml:space="preserve">
+    <value>Turning On</value>
+  </data>
+  <data name="Unclosable" xml:space="preserve">
+    <value>Failed to Close</value>
+  </data>
+  <data name="Unopenable" xml:space="preserve">
+    <value>Failed to Open</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="upperdoor" xml:space="preserve">
+    <value>Upper Hopper Door</value>
+  </data>
+  <data name="dumpdoor" xml:space="preserve">
+    <value>Dump Door</value>
+  </data>
+  <data name="winch" xml:space="preserve">
+    <value>Winch</value>
   </data>
 </root>
