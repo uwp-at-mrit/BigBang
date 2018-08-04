@@ -100,7 +100,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\test\cyberspace.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
@@ -208,7 +208,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\test\cyberspace.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>

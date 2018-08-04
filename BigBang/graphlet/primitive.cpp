@@ -48,6 +48,16 @@ IGraphlet::~IGraphlet() {
 	}
 }
 
+IPlanet* IGraphlet::master() {
+	IPlanet* planet = nullptr;
+
+	if (this->info != nullptr) {
+		planet = this->info->master;
+	}
+
+	return planet;
+}
+
 Syslog* IGraphlet::get_logger() {
 	Syslog* logger = default_logger();
 

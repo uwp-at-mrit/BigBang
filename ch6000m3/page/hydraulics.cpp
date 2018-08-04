@@ -1,6 +1,7 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
 #include "dashboard.hpp"
+#include "menu.hpp"
 
 #include "text.hpp"
 #include "paint.hpp"
@@ -27,7 +28,11 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static Platform::String^ tongue_scope = "hydraulics";
+
 private enum HSMode { WindowUI = 0, View };
+
+private enum class HSOperation { Start, Stop, _ };
 
 // WARNING: order matters
 private enum class HS : unsigned int {
@@ -49,9 +54,12 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final : public PLCConfirmation, public DashBoard<HydraulicsPage, HS> {
+private class Hydraulics final
+	: public PLCConfirmation
+	, public DashBoard<HydraulicsPage, HS>
+	, public IMenuCommand<HSOperation> {
 public:
-	Hydraulics(HydraulicsPage* master) : DashBoard(master, "hydraulics") {
+	Hydraulics(HydraulicsPage* master) : DashBoard(master, tongue_scope) {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
@@ -104,6 +112,16 @@ public:
 		}
 
 		this->master->leave_critical_section();
+	}
+
+public:
+	void execute(HSOperation cmd, IGraphlet* target) {
+		float x, y, width, height;
+
+		this->master->fill_graphlet_boundary(target, &x, &y, &width, &height);
+		
+		this->master->get_logger()->log_message(Log::Info, L"%s [%f, %f]@(%f, %f)",
+			cmd.ToString()->Data(), width, height, x, y);
 	}
 
 public:
@@ -170,10 +188,10 @@ public:
 
 	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_graphlets(this->pumps, this->plabels, HS::A, HS::H, gridsize, 180.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::F, HS::E, gridsize, 0.000, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::Y, HS::K, gridsize, -90.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, HS::J, HS::I, gridsize, 90.00, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, gridsize, 180.0);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, gridsize, 0.000);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, gridsize, -90.0);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, gridsize, 90.00);
 
 			this->load_dimensions(this->bars, HS::A, HS::I, "bar");
 		}
@@ -188,14 +206,14 @@ public:
 	void load_state_indicators(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_state_indicator(HS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
 
-		this->load_state_indicator(HS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
 
 		this->load_dimensions(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
 	}
@@ -336,7 +354,8 @@ private:
 HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
 	Hydraulics* dashboard = new Hydraulics(this);
 
-	this->dashboard = dashboard; 
+	this->dashboard = dashboard;
+	this->operation = make_menu<HSOperation>(dashboard);
 	this->gridsize = statusbar_height();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -397,9 +416,19 @@ void HydraulicsPage::reflow(float width, float height) {
 	}
 }
 
+bool HydraulicsPage::can_select(IGraphlet* g) {
+	return (dynamic_cast<Pumplet*>(g) != nullptr);
+}
+
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	if (dynamic_cast<Tracklet<HS>*>(g) == nullptr) {
-		this->set_selected(g);
-	}
+	//if (dynamic_cast<Tracklet<HS>*>(g) == nullptr) {
+	//	this->set_selected(g);
+	//}
 	// this->set_caret_owner(g);
+
+	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
+
+	if (this->can_select(g)) {
+		menu_popup(this->operation, g, local_x, local_y);
+	}
 }

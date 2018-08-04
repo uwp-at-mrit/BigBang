@@ -17,11 +17,13 @@ namespace WarGrey::SCADA {
 		void reflow(float width, float height) override;
 
 	public:
+		bool can_select(IGraphlet* g) override;
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
 		WarGrey::SCADA::IMRMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
+		Windows::UI::Xaml::Controls::MenuFlyout^ operation;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

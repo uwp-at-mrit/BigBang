@@ -25,6 +25,12 @@ namespace WarGrey::SCADA {
 		IPlanet(Platform::String^ name);
 
 	public:
+		Platform::String^ name();
+		WarGrey::SCADA::IDisplay^ master();
+		Platform::Object^ navigation_label();
+		WarGrey::SCADA::Syslog* get_logger();
+
+	public:
 		bool shown();
 		bool ui_thread_ready();
 		float actual_width();
@@ -116,11 +122,6 @@ namespace WarGrey::SCADA {
 		{ return false; }
 
 	public:
-		Platform::String^ name();
-		Platform::Object^ navigation_label();
-		WarGrey::SCADA::Syslog* get_logger();
-
-	public:
 		Windows::Foundation::Point global_to_local_point(IGraphlet* g, float global_x, float global_y, float xoff = 0.0F, float yoff = 0.0F);
 		Windows::Foundation::Point local_to_global_point(IGraphlet* g, float local_x, float local_y, float xoff = 0.0F, float yoff = 0.0F);
 
@@ -205,7 +206,7 @@ namespace WarGrey::SCADA {
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
 
 	public:
-		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) override;
+		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float width, float height) override;
         void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;

@@ -170,10 +170,10 @@ public:
 
 	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_graphlets(this->pumps, this->plabels, WS::A, WS::H, gridsize, 180.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, WS::F, WS::E, gridsize, 0.000, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, WS::Y, WS::K, gridsize, -90.0, this->pcaptions);
-			this->load_graphlets(this->pumps, this->plabels, WS::J, WS::I, gridsize, 90.00, this->pcaptions);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, WS::A, WS::H, gridsize, 180.0);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, WS::F, WS::E, gridsize, 0.000);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, WS::Y, WS::K, gridsize, -90.0);
+			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, WS::J, WS::I, gridsize, 90.00);
 
 			this->load_dimensions(this->bars, WS::A, WS::I, "bar");
 		}
@@ -188,14 +188,14 @@ public:
 	void load_state_indicators(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_state_indicator(WS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(WS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(WS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_state_indicator(WS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(WS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(WS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(WS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(WS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
 
-		this->load_state_indicator(WS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(WS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_state_indicator(WS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(WS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(WS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(WS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
 
 		this->load_dimensions(this->temperatures, WS::Heater, WS::VisorTank, "celsius", "temperature");
 	}

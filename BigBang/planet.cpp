@@ -611,14 +611,18 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 	if (g != nullptr) {
 		GraphletInfo* info = GRAPHLET_INFO(g);
 
-		if ((!info->selected) && this->can_select(g)) {
-			if (shifted) {
-				if (this->rubberband_allowed) {
-					unsafe_add_selected(this, g, info);
+		if (this->can_select(g)) {
+			if (!info->selected) {
+				if (shifted) {
+					if (this->rubberband_allowed) {
+						unsafe_add_selected(this, g, info);
+					}
+				} else {
+					unsafe_set_selected(this, g, info);
 				}
-			} else {
-				unsafe_set_selected(this, g, info);
 			}
+		} else {
+			this->no_selected();
 		}
 	}
 }
@@ -1017,7 +1021,9 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 }
 
 void Planet::draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) {
-	ds->DrawRectangle(x, y, width, height, Colours::Highlight, 1.0F);
+	static CanvasStrokeStyle^ dash = make_dash_stroke(CanvasDashStyle::Dash);
+
+	ds->DrawRectangle(x, y, width, height, Colours::Highlight, 1.0F, dash);
 }
 
 /*************************************************************************************************/
@@ -1032,6 +1038,16 @@ IPlanet::~IPlanet() {
 
 Platform::String^ IPlanet::name() {
 	return this->caption;
+}
+
+IDisplay^ IPlanet::master() {
+	IDisplay^ display = nullptr;
+
+	if (this->info != nullptr) {
+		display = this->info->master;
+	}
+
+	return display;
 }
 
 Platform::Object^ IPlanet::navigation_label() {

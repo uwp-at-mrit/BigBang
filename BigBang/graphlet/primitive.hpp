@@ -24,6 +24,7 @@ namespace WarGrey::SCADA {
 		virtual ~IGraphlet() noexcept;
 
 	public:
+		WarGrey::SCADA::IPlanet* master();
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	public:

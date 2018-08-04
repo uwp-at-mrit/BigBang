@@ -37,10 +37,11 @@ namespace WarGrey::SCADA {
 
 		template<class G>
 		void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
-			, E id0, E idn, float radius, double degrees, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& cs) {
-			this->load_graphlets(gs, ls, id0, idn, radius, degrees);
+			, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
+			this->load_graphlets(gs, id0, idn, radius, degrees);
 
-			for(E id = id0; id <= idn; id++) {
+			for (E id = id0; id <= idn; id++) {
+				ls[id] = this->make_label(id.ToString(), id, Colours::Silver);
 				cs[id] = this->make_label(id, Colours::Silver);
 			}
 		}
@@ -67,7 +68,7 @@ namespace WarGrey::SCADA {
 			ls[id] = this->make_label(id, color, font);
 		}
 
-		void load_state_indicator(E id, float size
+		void load_status_indicator(E id, float size
 			, std::map<E, Credit<WarGrey::SCADA::Booleanlet, E>*>& bs, std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
 			ls[id] = this->make_label(speak(id, this->scope), id, WarGrey::SCADA::Colours::Silver);
@@ -75,6 +76,7 @@ namespace WarGrey::SCADA {
 			bs[id]->id = id;
 		}
 
+	public:
 		Credit<WarGrey::SCADA::Labellet, E>* make_label(Platform::String^ caption, E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
@@ -94,7 +96,7 @@ namespace WarGrey::SCADA {
 	protected:
 		T* master;
 
-	protected:
+	private:
 		Platform::String^ scope;
 	};
 }

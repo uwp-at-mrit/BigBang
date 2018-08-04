@@ -1,21 +1,23 @@
 #pragma once
 
 #include "object.hpp"
+
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
 	WarGrey::SCADA::IGraphlet* menu_current_target_graphlet();
 
-	void menu_append(
-		Windows::UI::Xaml::Controls::MenuFlyout^ menu_background,
+	void menu_append_command(
+		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		Platform::String^ label,
-		Windows::UI::Xaml::Input::ICommand^ cmd);
+		Windows::UI::Xaml::Input::ICommand^ cmd,
+		Platform::String^ tongue = nullptr);
 
-	void menu_show(
-		Windows::UI::Xaml::Controls::MenuFlyout^ menu_background,
+	void menu_popup(
+		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		WarGrey::SCADA::IGraphlet* g,
 		float local_x, float local_y,
-		float xoff, float yoff);
+		float xoff = 0.0F, float yoff = 0.0F);
 
 	template <typename Menu>
 	private class IMenuCommand abstract {
@@ -30,7 +32,7 @@ namespace WarGrey::SCADA {
 		 * all the required methods therefore should be marked as `virtual` instead of `override`.
 		 */
 	internal:
-		MenuCommand(IMenuCommand<Menu>* exe, Menu cmd) : executor(exe), command(cmd) {}
+		MenuCommand(WarGrey::SCADA::IMenuCommand<Menu>* exe, Menu cmd) : executor(exe), command(cmd) {}
 		
 	public:
 		virtual bool CanExecute(Platform::Object^ who_cares) {
@@ -56,21 +58,14 @@ namespace WarGrey::SCADA {
 		Menu command;
 	};
 
-	template <typename Menu>
-	private class CommandMenu {
-	public:
-		CommandMenu() { this->menu_background = ref new Windows::UI::Xaml::Controls::MenuFlyout(); }
+	template<typename Menu>
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_menu(WarGrey::SCADA::IMenuCommand<Menu>* exe, Platform::String^ tongue = nullptr) {
+		Windows::UI::Xaml::Controls::MenuFlyout^ m = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
-	public:
-		void append(Menu cmd, WarGrey::SCADA::IMenuCommand<Menu>* exe) {
-			menu_append(this->menu_background, cmd.ToString(), ref new WarGrey::SCADA::MenuCommand<Menu>(exe, cmd));
+		for (Menu cmd = static_cast<Menu>(0); cmd < Menu::_; cmd++) {
+			menu_append_command(m, cmd.ToString(), ref new WarGrey::SCADA::MenuCommand<Menu>(exe, cmd));
 		}
 
-		void show_for(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, float xoff = 2.0F, float yoff = 2.0F) {
-			menu_show(this->menu_background, g, local_x, local_y, xoff, yoff);
-		}
-
-	private:
-		Windows::UI::Xaml::Controls::MenuFlyout^ menu_background;
-	};
+		return m;
+	}
 }
