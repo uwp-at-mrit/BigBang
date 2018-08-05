@@ -2,10 +2,10 @@
 
 #include "object.hpp"
 
-#include "graphlet/primitive.hpp"
+#include "forward.hpp"
 
 namespace WarGrey::SCADA {
-	WarGrey::SCADA::IGraphlet* menu_current_target_graphlet();
+	WarGrey::SCADA::IGraphlet* menu_get_next_target_graphlet(WarGrey::SCADA::IGraphlet* start = nullptr);
 
 	void menu_append_command(
 		Windows::UI::Xaml::Controls::MenuFlyout^ master,
@@ -17,6 +17,12 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		WarGrey::SCADA::IGraphlet* g,
 		float local_x, float local_y,
+		float xoff = 0.0F, float yoff = 0.0F);
+
+	void menu_popup(
+		Windows::UI::Xaml::Controls::MenuFlyout^ master,
+		WarGrey::SCADA::IPlanet* g,
+		float x, float y,
 		float xoff = 0.0F, float yoff = 0.0F);
 
 	template <typename Menu>
@@ -40,7 +46,12 @@ namespace WarGrey::SCADA {
 		}
 
 		virtual void Execute(Platform::Object^ who_cares) {
-			this->executor->execute(this->command, menu_current_target_graphlet());
+			WarGrey::SCADA::IGraphlet* target = menu_get_next_target_graphlet(nullptr);
+
+			while (target != nullptr) {
+				this->executor->execute(this->command, target);
+				target = menu_get_next_target_graphlet(target);
+			}
 		}
 
 	public:

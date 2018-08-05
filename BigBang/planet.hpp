@@ -81,6 +81,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
+		virtual IGraphlet* find_next_selected_graphlet(IGraphlet* start = nullptr) = 0;
 		virtual void add_selected(IGraphlet* g) = 0;
 		virtual void set_selected(IGraphlet* g) = 0;
 		virtual void no_selected() = 0;
@@ -207,7 +208,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float width, float height) override;
-        void add_selected(IGraphlet* g) override;
+		IGraphlet* find_next_selected_graphlet(IGraphlet* start = nullptr) override;
+		void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;
 

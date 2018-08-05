@@ -135,10 +135,10 @@ static void graphlet_anchor_offset(IGraphlet* g, float width, float height, Grap
         switch (a) {
         case GraphletAnchor::LC:             dy = halfh;  break;
         case GraphletAnchor::LB:             dy = height; break;
-        case GraphletAnchor::CT: dx = halfw;                break;
+        case GraphletAnchor::CT: dx = halfw;              break;
         case GraphletAnchor::CC: dx = halfw; dy = halfh;  break;
         case GraphletAnchor::CB: dx = halfw; dy = height; break;
-        case GraphletAnchor::RT: dx = width;                break;
+        case GraphletAnchor::RT: dx = width;              break;
         case GraphletAnchor::RC: dx = width; dy = halfh;  break;
         case GraphletAnchor::RB: dx = width; dy = height; break;
         }
@@ -182,6 +182,24 @@ static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, Graphlet
 	}
 	
 	return unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
+}
+
+static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mode, IGraphlet* terminator) {
+	IGraphlet* found = nullptr;
+	IGraphlet* child = start;
+
+	do {
+		GraphletInfo* info = GRAPHLET_INFO(child);
+
+		if (info->selected && (unsafe_graphlet_unmasked(info, mode))) {
+			found = child;
+			break;
+		}
+
+		child = info->next;
+	} while (child != terminator);
+	
+	return found;
 }
 
 /*************************************************************************************************/
@@ -438,6 +456,24 @@ IGraphlet* Planet::find_graphlet(float x, float y) {
     }
 
     return found;
+}
+
+IGraphlet* Planet::find_next_selected_graphlet(IGraphlet* start) {
+	IGraphlet* found = nullptr;
+	
+	if (start == nullptr) {
+		if (this->head_graphlet != nullptr) {
+			found = do_search_selected_graphlet(this->head_graphlet, this->mode, this->head_graphlet);
+		}
+	} else {
+		GraphletInfo* info = planet_graphlet_info(this, start);
+
+		if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
+			found = do_search_selected_graphlet(info->next, this->mode, this->head_graphlet);
+		}
+	}
+
+	return found;
 }
 
 bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAnchor a) {
