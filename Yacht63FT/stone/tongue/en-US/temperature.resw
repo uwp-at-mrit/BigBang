@@ -117,22 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pipe" xml:space="preserve">
-    <value>Coil Pipe Temperature</value>
-  </data>
   <data name="oil" xml:space="preserve">
     <value>Lubricating Oil Temperature</value>
   </data>
   <data name="coolant" xml:space="preserve">
     <value>Coolant Temperature</value>
-  </data>
-  <data name="sea" xml:space="preserve">
-    <value>Sea Water Temperature</value>
-  </data>
-  <data name="setting" xml:space="preserve">
-    <value>Setting Temperature</value>
-  </data>
-  <data name="room" xml:space="preserve">
-    <value>Room Temperature</value>
   </data>
 </root>

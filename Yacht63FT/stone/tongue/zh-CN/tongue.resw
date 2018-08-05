@@ -354,4 +354,16 @@
   <data name=":temperature:" xml:space="preserve">
     <value>温度</value>
   </data>
+  <data name=":t_pipe:" xml:space="preserve">
+    <value>盘管温度</value>
+  </data>
+  <data name=":t_room:" xml:space="preserve">
+    <value>当前室温</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>海水温度</value>
+  </data>
+  <data name=":t_setting:" xml:space="preserve">
+    <value>设定温度</value>
+  </data>
 </root>

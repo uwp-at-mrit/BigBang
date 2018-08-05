@@ -1,10 +1,33 @@
 #include <algorithm>
 
 #include "string.hpp"
-#include "syslog.hpp"
+
+static const wchar_t linefeed = (wchar_t)(0x0A);
+static const wchar_t carriage_return = (wchar_t)(0x0D);
 
 static inline size_t integer_length(unsigned int n) {
 	return (size_t)(std::floor(log(n) / log(2)) + 1.0);
+}
+
+static unsigned int newline_position(const wchar_t* src, unsigned int idx0, unsigned int idxn, unsigned int* next_idx) {
+	unsigned int line_size = 0;
+	unsigned int eol_size = 0;
+
+	for (unsigned int idx = idx0; idx < idxn; idx ++) {
+		if (src[idx] == linefeed) {
+			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == carriage_return)) ? 2 : 1;
+			break;
+		} else if (src[idx] == carriage_return) {
+			eol_size = (((idx + 1) < idxn) && (src[idx + 1] == linefeed)) ? 2 : 1;
+			break;
+		}
+
+		line_size ++;
+	}
+
+	(*next_idx) = idx0 + line_size + eol_size;
+
+	return line_size;
 }
 
 /*************************************************************************************************/
@@ -65,4 +88,29 @@ std::string binumber(unsigned int n, size_t bitsize) {
 	}
 
 	return str;
+}
+
+/**************************************************************************************************/
+Platform::String^ string_first_line(Platform::String^ src) {
+	const wchar_t* wsrc = src->Data();
+	unsigned int total = src->Length();
+	unsigned int line_size = newline_position(wsrc, 0, total, &total);
+	
+	return ref new Platform::String(wsrc, line_size);
+}
+
+std::list<Platform::String^> string_lines(Platform::String^ src) {
+	std::list<Platform::String^> lines;
+	unsigned int nidx = 0;
+	unsigned int total = src->Length();
+	const wchar_t* wsrc = src->Data();
+
+	while (total > 0) {
+		unsigned int line_size = newline_position(wsrc, 0, total, &nidx);
+		lines.push_back(ref new Platform::String(wsrc, line_size));
+		wsrc += nidx;
+		total -= nidx;
+	}
+
+	return lines;
 }

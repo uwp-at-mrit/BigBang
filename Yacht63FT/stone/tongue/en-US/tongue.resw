@@ -354,4 +354,16 @@
   <data name=":temperature:" xml:space="preserve">
     <value>Temperature</value>
   </data>
+  <data name=":t_pipe:" xml:space="preserve">
+    <value>Coil Pipe Temperature</value>
+  </data>
+  <data name=":t_room:" xml:space="preserve">
+    <value>Room Temperature</value>
+  </data>
+  <data name=":t_sea:" xml:space="preserve">
+    <value>Sea Water Temperature</value>
+  </data>
+  <data name=":t_setting:" xml:space="preserve">
+    <value>Setting Temperature</value>
+  </data>
 </root>

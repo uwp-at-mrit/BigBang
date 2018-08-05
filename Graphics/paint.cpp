@@ -15,7 +15,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static inline GradientStops^ make_and_clean_gradient_stops(CanvasGradientStop* stops, size_t total) {
-	GradientStops^ stopa = ref new Platform::Array<CanvasGradientStop>(stops, total);
+	GradientStops^ stopa = ref new Platform::Array<CanvasGradientStop>(stops, (unsigned int)(total));
 	
 	delete[] stops;
 

@@ -74,10 +74,10 @@ void Pumplet::prepare_style(PumpStatus status, PumpStyle& s) {
 	switch (status) {
 	case PumpStatus::Running: CAS_SLOT(s.body_color, Colours::Green); break;
 	case PumpStatus::Starting: CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green); break;
-	case PumpStatus::Unstartable: CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green); break;
+	case PumpStatus::Unstartable: CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green); CAS_SLOT(s.border_color, Colours::Firebrick); break;
 	case PumpStatus::Remote: CAS_SLOT(s.border_color, Colours::Cyan); break;
 	case PumpStatus::Stopping: CAS_SLOT(s.mask_color, Colours::ForestGreen); break;
-	case PumpStatus::Unstoppable: CAS_SLOT(s.mask_color, Colours::ForestGreen); break;
+	case PumpStatus::Unstoppable: CAS_VALUES(s.mask_color, Colours::ForestGreen, s.border_color, Colours::Firebrick); break;
 	case PumpStatus::Ready: CAS_SLOT(s.skeleton_color, Colours::Cyan); break;
 	}
 

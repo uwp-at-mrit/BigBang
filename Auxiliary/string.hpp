@@ -4,6 +4,8 @@
 #include <cwchar>
 #include <cstdarg>
 
+#include <list>
+
 #define VSNWPRINT(pool, size, fmt) \
     static wchar_t pool[size]; \
     va_list argl; \
@@ -65,3 +67,6 @@ std::string make_nstring(const wchar_t* wbytes);
 std::string make_nstring(Platform::String^ wstr);
 
 std::string binumber(unsigned int n, size_t bitsize = 0);
+
+Platform::String^ string_first_line(Platform::String^ src);
+std::list<Platform::String^> string_lines(Platform::String^ src);

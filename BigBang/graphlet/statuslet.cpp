@@ -6,6 +6,7 @@
 
 #include "text.hpp"
 #include "paint.hpp"
+#include "string.hpp"
 #include "system.hpp"
 #include "tongue.hpp"
 #include "planet.hpp"
@@ -263,8 +264,9 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		}
 
 		for (size_t idx = 0; idx < total; idx++, mlt++, clt++) {
-			float content_y = y + status_height * float(idx) + (status_height - (*mlt)->LayoutBounds.Height) * 0.5F;
-
+			float content_y = y + status_height * float(idx);
+			
+			content_y += std::fmaxf((status_height - (*mlt)->LayoutBounds.Height) * 0.5F, 0.0F);
 			ds->DrawTextLayout((*mlt), x, content_y, (*clt));
 		}
 
@@ -292,5 +294,5 @@ void Statuslinelet::append_message(Platform::String^ message, Log level) {
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
-	this->append_message("[" + level.ToString() + "] " + message, level);
+	this->append_message("[" + level.ToString() + "] " + string_first_line(message), level);
 }
