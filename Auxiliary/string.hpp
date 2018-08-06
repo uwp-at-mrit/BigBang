@@ -69,4 +69,4 @@ std::string make_nstring(Platform::String^ wstr);
 std::string binumber(unsigned int n, size_t bitsize = 0);
 
 Platform::String^ string_first_line(Platform::String^ src);
-std::list<Platform::String^> string_lines(Platform::String^ src);
+std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line = false);

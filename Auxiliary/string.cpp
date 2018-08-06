@@ -99,7 +99,7 @@ Platform::String^ string_first_line(Platform::String^ src) {
 	return ref new Platform::String(wsrc, line_size);
 }
 
-std::list<Platform::String^> string_lines(Platform::String^ src) {
+std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line) {
 	std::list<Platform::String^> lines;
 	unsigned int nidx = 0;
 	unsigned int total = src->Length();
@@ -107,7 +107,11 @@ std::list<Platform::String^> string_lines(Platform::String^ src) {
 
 	while (total > 0) {
 		unsigned int line_size = newline_position(wsrc, 0, total, &nidx);
-		lines.push_back(ref new Platform::String(wsrc, line_size));
+
+		if ((line_size > 0) || (!skip_empty_line)) {
+			lines.push_back(ref new Platform::String(wsrc, line_size));
+		}
+
 		wsrc += nidx;
 		total -= nidx;
 	}
