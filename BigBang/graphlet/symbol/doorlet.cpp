@@ -67,10 +67,18 @@ void DumpDoorlet::on_status_changed(DoorStatus state) {
 
 void DumpDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
-	case DoorStatus::Open: CAS_SLOT(s.body_color, Colours::Green); break;
-	case DoorStatus::Opening: CAS_SLOT(s.mask_color, Colours::Green); break;
-	case DoorStatus::Closed: CAS_SLOT(s.body_color, Colours::LightGray); break;
-	case DoorStatus::Closing: CAS_SLOT(s.mask_color, Colours::DarkGray); break;
+	case DoorStatus::Open: {
+		CAS_SLOT(s.body_color, Colours::Green);
+	}; break;
+	case DoorStatus::Opening: {
+		CAS_SLOT(s.mask_color, Colours::Green);
+	}; break;
+	case DoorStatus::Closed: {
+		CAS_SLOT(s.body_color, Colours::LightGray);
+	}; break;
+	case DoorStatus::Closing: {
+		CAS_SLOT(s.mask_color, Colours::DarkGray);
+	}; break;
 	}
 
 	CAS_SLOT(s.skeleton_color, Colours::DarkGray);

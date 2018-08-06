@@ -60,17 +60,39 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 
 void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 	switch (status) {
-	case ValveStatus::Manual: CAS_SLOT(s.mask_color, Colours::Teal); break;
-	case ValveStatus::Open: CAS_SLOT(s.body_color, Colours::Green); break;
-	case ValveStatus::Opening: CAS_SLOT(s.mask_color, Colours::Green); break;
-	case ValveStatus::OpenReady: CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen); break;
-	case ValveStatus::Unopenable: CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green); break;
-	case ValveStatus::Closed: CAS_SLOT(s.body_color, Colours::LightGray); break;
-	case ValveStatus::Closing: CAS_SLOT(s.mask_color, Colours::DarkGray); break;
-	case ValveStatus::CloseReady: CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray); break;
-	case ValveStatus::Unclosable: CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray); break;
-	case ValveStatus::FalseOpen: CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::ForestGreen); break;
-	case ValveStatus::FalseClosed: CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::DimGray); break;
+	case ValveStatus::Manual: {
+		CAS_SLOT(s.mask_color, Colours::Teal);
+	}; break;
+	case ValveStatus::Open: {
+		CAS_SLOT(s.body_color, Colours::Green);
+	}; break;
+	case ValveStatus::Opening: {
+		CAS_SLOT(s.mask_color, Colours::Green);
+	}; break;
+	case ValveStatus::OpenReady: {
+		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
+	}; break;
+	case ValveStatus::Unopenable: {
+		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
+	}; break;
+	case ValveStatus::Closed: {
+		CAS_SLOT(s.body_color, Colours::LightGray);
+	}; break;
+	case ValveStatus::Closing: {
+		CAS_SLOT(s.mask_color, Colours::DarkGray);
+	}; break;
+	case ValveStatus::CloseReady: {
+		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
+	}; break;
+	case ValveStatus::Unclosable: {
+		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
+	}; break;
+	case ValveStatus::FalseOpen: {
+		CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::ForestGreen);
+	}; break;
+	case ValveStatus::FalseClosed: {
+		CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::DimGray);
+	}; break;
 	}
 
 	CAS_SLOT(s.skeleton_color, default_sketeton_color);

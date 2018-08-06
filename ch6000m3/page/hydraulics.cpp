@@ -32,7 +32,7 @@ static Platform::String^ tongue_scope = "hydraulics";
 
 private enum HSMode { WindowUI = 0, View };
 
-private enum class HSOperation { Start, Stop, _ };
+private enum class HSOperation { Start, Stop, Reset, _ };
 
 // WARNING: order matters
 private enum class HS : unsigned int {
@@ -56,8 +56,8 @@ private enum class HS : unsigned int {
 
 private class Hydraulics final
 	: public PLCConfirmation
-	, public DashBoard<HydraulicsPage, HS>
-	, public IMenuCommand<HSOperation> {
+	, public IMenuCommand<HSOperation, IMRMaster*>
+	, public DashBoard<HydraulicsPage, HS> {
 public:
 	Hydraulics(HydraulicsPage* master) : DashBoard(master, tongue_scope) {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
@@ -115,13 +115,14 @@ public:
 	}
 
 public:
-	void execute(HSOperation cmd, IGraphlet* target) {
-		float x, y, width, height;
+	void execute(HSOperation cmd, IGraphlet* target, IMRMaster* plc) {
+		auto pump = dynamic_cast<Credit<Pumplet, HS>*>(target);
 
-		this->master->fill_graphlet_boundary(target, &x, &y, &width, &height);
-		
-		this->master->get_logger()->log_message(Log::Info, L"%s [%f, %f]@(%f, %f)",
-			cmd.ToString()->Data(), width, height, x, y);
+		if (pump != nullptr) {
+			plc->get_logger()->log_message(Log::Info, L"%s %s",
+				cmd.ToString()->Data(),
+				pump->id.ToString()->Data());
+		}
 	}
 
 public:
@@ -355,7 +356,7 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<HSOperation>(dashboard);
+	this->operation = make_menu<HSOperation, IMRMaster*>(dashboard, plc);
 	this->gridsize = statusbar_height();
 
 	this->device->append_confirmation_receiver(dashboard);

@@ -30,12 +30,13 @@ IGraphlet* WarGrey::SCADA::menu_get_next_target_graphlet(IGraphlet* start) {
 	return target;
 }
 
-void WarGrey::SCADA::menu_append_command(MenuFlyout^ menu_background, Platform::String^ label, ICommand^ exe, Platform::String^ tongue) {
+/*************************************************************************************************/
+void WarGrey::SCADA::menu_append_command(MenuFlyout^ menu_background, ICommand^ exe, Platform::String^ label, Platform::String^ tongue) {
 	auto item = ref new MenuFlyoutItem();
 
-	item->Text = speak(label, tongue);
 	item->Command = exe;
-
+	item->Text = speak(label, tongue);
+	
 	menu_background->Items->Append(item);
 }
 
