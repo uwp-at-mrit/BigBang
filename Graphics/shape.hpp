@@ -38,6 +38,12 @@ Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ ellipse(float cx, float c
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sector(double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ sector(float cx, float cy, double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
 
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ masked_sector(double start_degrees, double end_degrees, double ratio, float radiusX, float radiusY = 0.0);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ masked_sector(float cx, float cy, double start_degrees, double end_degrees, double ratio, float radiusX, float radiusY = 0.0);
+
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ segment(double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
+Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ segment(float cx, float cy, double start_degrees, double end_degrees, float radiusX, float radiusY = 0.0);
+
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(float x, float y, float width, float height);
 Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rectangle(Windows::Foundation::Rect& region);

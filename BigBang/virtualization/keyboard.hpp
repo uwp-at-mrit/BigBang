@@ -28,7 +28,6 @@ namespace WarGrey::SCADA {
 		virtual bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) = 0;
 		
 	protected:
-		virtual void create() = 0;
 		virtual Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y) = 0;
 
 	protected:
@@ -41,14 +40,16 @@ namespace WarGrey::SCADA {
 
 	private class Keyboard abstract : public WarGrey::SCADA::IKeyboard {
 	public:
-		~Keyboard();
+		virtual ~Keyboard();
 		Keyboard(IPlanet* master, const KeyboardCell* keys, unsigned int keynum);
 
-		template<unsigned int N>
+		template<size_t N>
 		Keyboard(IPlanet* master, const KeyboardCell (&all_keys)[N]) : Keyboard(master, all_keys, N) {}
 
 	public:
-		void construct() override;
+		void sprite() override;
+
+	public:
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) override;

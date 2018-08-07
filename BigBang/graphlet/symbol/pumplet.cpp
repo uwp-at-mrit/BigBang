@@ -18,7 +18,6 @@ Pumplet::Pumplet(float radius, double degrees) : Pumplet(PumpStatus::Stopped, ra
 
 Pumplet::Pumplet(PumpStatus default_status, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
-	this->update_status();
 }
 
 void Pumplet::construct() {

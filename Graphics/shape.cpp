@@ -137,6 +137,40 @@ CanvasGeometry^ sector(double start, double end, float radiusX, float radiusY) {
 }
 
 CanvasGeometry^ sector(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
+	return masked_sector(cx, cy, start, end, 0.0, radiusX, maybe_radiusY);
+}
+
+CanvasGeometry^ masked_sector(double start, double end, double ratio, float radiusX, float radiusY) {
+	return masked_sector(0.0F, 0.0F, start, end, ratio, radiusX, radiusY);
+}
+
+CanvasGeometry^ masked_sector(float cx, float cy, double start, double end, double ratio, float radiusX, float maybe_radiusY) {
+	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
+	float mradiusX = radiusX * float(ratio);
+	float mradiusY = radiusY * float(ratio);
+	float rstart = degrees_to_radians(start);
+	float rsweep = degrees_to_radians(end - start);
+	float startx, starty, mendx, mendy;
+
+	ellipse_point(radiusX, radiusY, start, &startx, &starty);
+	ellipse_point(mradiusX, mradiusY, end, &mendx, &mendy);
+
+	sector_path->BeginFigure(cx + startx, cy + starty);
+	sector_path->AddArc(float2(cx, cy), radiusX, radiusY, rstart, rsweep);
+	sector_path->AddLine(cx + mendx, cy + mendy);
+	sector_path->AddArc(float2(cx, cy), mradiusX, mradiusY, rstart + rsweep, -rsweep);
+	sector_path->AddLine(cx + startx, cy + starty);
+	sector_path->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(sector_path);
+}
+
+CanvasGeometry^ segment(double start, double end, float radiusX, float radiusY) {
+	return segment(0.0F, 0.0F, start, end, radiusX, radiusY);
+}
+
+CanvasGeometry^ segment(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
 	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float rstart = degrees_to_radians(start);

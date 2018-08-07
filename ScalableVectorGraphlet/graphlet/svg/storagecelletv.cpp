@@ -59,8 +59,6 @@ void StorageCelletv::on_ready() {
 	if (default_sign_color == nullptr) {
 		default_sign_color = make_solid_brush(this->get_fill_color("seal"));
 	}
-
-	Svglet::on_ready();
 }
 
 void StorageCelletv::prepare_style(StorageCellVStatus status, StorageCellVStyle& style) {

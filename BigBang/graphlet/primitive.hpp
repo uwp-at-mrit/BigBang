@@ -134,13 +134,11 @@ namespace WarGrey::SCADA {
 		IStatuslet(Status status0) {
 			this->default_status = ((status0 == Status::_) ? 0 : _I(status0));
 			this->current_status = this->default_status;
+		}
 
-			/** WARNING
-			 * invoking `apply_style` and `on_status_changed` here has no effect
-			 * since they are virtual and here is inside the constructor
-			 *
-			 * `update_status` is designed for children to achieve the goal.
-			 */
+	public:
+		void sprite() override {
+			this->update_status();
 		}
 
 	public:

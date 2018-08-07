@@ -1,36 +1,23 @@
 #include "graphlet/symbol/doorlet.hpp"
 
-#include "polar.hpp"
-#include "paint.hpp"
-#include "geometry.hpp"
+#include "math.hpp"
+#include "shape.hpp"
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static float default_thickness = 1.5F;
+static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
 BottomDoorlet::BottomDoorlet(float radius, double degrees) : BottomDoorlet(DoorStatus::Closed, radius, degrees) {}
 
 BottomDoorlet::BottomDoorlet(DoorStatus default_state, float radius, double degrees) : ISymbollet(default_state, radius, degrees) {
-	this->fradius = radius;
-	this->sgradius = this->fradius - default_thickness * 2.0F;
-	this->update_status();
-}
-
-void BottomDoorlet::construct() {
-	float handle_length = this->sgradius * 0.618F;
-	auto handler_axis = polar_axis(handle_length, this->degrees);
-	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
-
-	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
-	this->handle = geometry_union(handler_axis, handler_pole);
-	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
-	this->body = geometry_freeze(this->skeleton);
+	this->radius = radius - default_thickness;
 }
 
 void BottomDoorlet::update(long long count, long long interval, long long uptime) {
@@ -41,7 +28,7 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->make_masked_door_partitions();
 		this->notify_updated();
 	} break;
 	case DoorStatus::Closing: {
@@ -50,7 +37,7 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, -this->mask_percentage);
+		this->make_masked_door_partitions();
 		this->notify_updated();
 	} break;
 	}
@@ -58,58 +45,70 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 
 void BottomDoorlet::on_status_changed(DoorStatus state) {
 	switch (state) {
-	default: {
-		this->mask = nullptr;
-		this->mask_percentage = -1.0;
-	}
+	case DoorStatus::Open: {
+		this->mask_percentage = 1.0;
+		this->make_masked_door_partitions();
+		this->notify_updated();
+	} break;
+	case DoorStatus::Disabled: {
+		if (this->disable_line == nullptr) {
+			float x1, y1, x2, y2;
+
+			circle_point(this->radius, this->degrees - 45.0, &x1, &y1);
+			circle_point(this->radius, this->degrees + 135.0, &x2, &y2);
+
+			this->disable_line = geometry_freeze(line(x1, y1, x2, y2, default_thickness));
+		}
+	} // NOTE: there is no `break` here;
+	case DoorStatus::Closed: {
+		this->mask_percentage = 0.0;
+		this->make_masked_door_partitions();
+		this->notify_updated();
+	} break;
 	}
 }
 
 void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
-	case DoorStatus::Open: {
-		CAS_SLOT(s.body_color, Colours::Green);
-	}; break;
-	case DoorStatus::Opening: {
-		CAS_SLOT(s.mask_color, Colours::Green);
-	}; break;
-	case DoorStatus::Closed: {
-		CAS_SLOT(s.body_color, Colours::LightGray);
-	}; break;
-	case DoorStatus::Closing: {
-		CAS_SLOT(s.mask_color, Colours::DarkGray);
+	case DoorStatus::Disabled: {
+		CAS_SLOT(s.disable_color, Colours::Firebrick);
 	}; break;
 	}
 
-	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
-	CAS_SLOT(s.body_color, Colours::Background);
+	CAS_SLOT(s.border_color, Colours::ForestGreen);
+	CAS_SLOT(s.door_color, Colours::DimGray);
+	CAS_SLOT(s.body_color, Colours::Khaki);
+	CAS_SLOT(s.skeleton_color, Colours::Black);
 
 	// NOTE: The others can be nullptr;
 }
 
 void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
+	float cx = x + this->radius + default_thickness;
+	float cy = y + this->radius + default_thickness;
 	
-	float radius = this->size * 0.5F - default_thickness;
-	float cx = x + radius + default_thickness;
-	float cy = y + radius + default_thickness;
+	ds->FillCircle(cx, cy, this->radius, Colours::Background);
+	ds->FillCircle(cx, cy, this->radius - default_thickness * 2.0F, style.body_color);
 	
-	if (style.border_color != nullptr) {
-		ds->DrawGeometry(this->frame, cx, cy, style.border_color, default_thickness);
+	for (unsigned int idx = 0; idx < sizeof(this->door_partitions) / sizeof(CanvasGeometry^); idx++) {
+		ds->FillGeometry(this->door_partitions[idx], cx, cy, style.door_color);
+		ds->DrawGeometry(this->door_partitions[idx], cx, cy, style.skeleton_color);
 	}
 
-	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);
-
-	if (style.mask_color != nullptr) {
-		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
-		
-		ds->FillGeometry(mask, cx, cy, style.mask_color);
-		ds->DrawGeometry(mask, cx, cy, style.mask_color, default_thickness);
+	if (style.disable_color != nullptr) {
+		if (this->disable_line != nullptr) { // this is always true
+			ds->DrawCachedGeometry(this->disable_line, cx, cy, style.disable_color);
+		}
 	}
 
-	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
+	ds->DrawCircle(cx, cy, this->radius, style.border_color, default_thickness);
+}
 
-	if (style.handler_color != nullptr) {
-		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);
-	}
+void BottomDoorlet::make_masked_door_partitions() {
+	double ratio = this->mask_percentage;
+
+	this->door_partitions[0] = masked_sector(this->degrees + 60.00, this->degrees - 60.00, ratio, this->radius);
+	this->door_partitions[1] = masked_sector(this->degrees - 60.00, this->degrees - 180.0, ratio, this->radius);
+	this->door_partitions[2] = masked_sector(this->degrees + 180.0, this->degrees + 60.00, ratio, this->radius);
 }

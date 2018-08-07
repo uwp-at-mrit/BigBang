@@ -15,10 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\StorageCell.svg" />
-    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\CoolPump.svg" />
-    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\Generator.svg" />
-    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\SolarPowerPanel.svg" />
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\CoolPump.svg">
+      <Filter>stone\graphlet</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\Generator.svg">
+      <Filter>stone\graphlet</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\SolarPowerPanel.svg">
+      <Filter>stone\graphlet</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)stone\graphlet\StorageCell.svg">
+      <Filter>stone\graphlet</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svg\storagecelletv.hpp">

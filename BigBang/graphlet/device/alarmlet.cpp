@@ -37,9 +37,7 @@ static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius,
 /*************************************************************************************************/
 Alarmlet::Alarmlet(float size) : Alarmlet(AlarmStatus::Normal, size) {}
 
-Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width(size), height(size) {
-	this->update_status();
-}
+Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width(size), height(size) {}
 
 void Alarmlet::construct() {
 	CanvasStrokeStyle^ light_style = make_roundcap_stroke_style(true);
@@ -68,7 +66,7 @@ void Alarmlet::construct() {
 	CanvasGeometry^ parts[] = {
 		rounded_rectangle(base_x, base_y, base_width, base_height * 2.0F, base_radius, base_radius),
 		rectangle(body_x, body_y, body_width, body_bottom - body_y),
-		sector(cx, body_y, 180.0, 360.0, hat_radius),
+		segment(cx, body_y, 180.0, 360.0, hat_radius),
 		make_alert_lights(cx, body_y, light_lradius, light_sradius, theta - 180.0, -theta, 7, light_thickness, light_style)
 	};
 

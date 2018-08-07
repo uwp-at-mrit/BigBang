@@ -34,7 +34,7 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	this->current_key = VirtualKey::None;
 }
 
-void Numpad::create() {
+void Numpad::construct() {
 	TextExtent te = get_text_extent("0", this->label_font);
 	Color fg = Colours::Foreground->Color;
 	Color bg = Colours::Background->Color;

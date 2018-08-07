@@ -21,7 +21,6 @@ Valvelet::Valvelet(float radius, double degrees) : Valvelet(ValveStatus::Manual,
 Valvelet::Valvelet(ValveStatus default_status, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
-	this->update_status();
 }
 
 void Valvelet::construct() {
@@ -61,7 +60,7 @@ void Valvelet::update(long long count, long long interval, long long uptime) {
 void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 	switch (status) {
 	case ValveStatus::Manual: {
-		CAS_SLOT(s.mask_color, Colours::Teal);
+		CAS_VALUES(s.mask_color, Colours::Teal, s.handler_color, Colours::DarkGray);
 	}; break;
 	case ValveStatus::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
@@ -136,11 +135,14 @@ void Valvelet::on_status_changed(ValveStatus status) {
 
 void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const ValveStyle style = this->get_style();
-	
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
 	
+	if (style.handler_color != nullptr) {
+		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);
+	}
+
 	if (style.border_color != nullptr) {
 		ds->DrawGeometry(this->frame, cx, cy, style.border_color, default_thickness);
 	}
@@ -155,8 +157,4 @@ void Valvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	}
 
 	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
-
-	if (style.handler_color != nullptr) {
-		ds->DrawGeometry(this->handle, cx, cy, style.handler_color, default_thickness);
-	}
 }

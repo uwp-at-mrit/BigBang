@@ -8,6 +8,7 @@ namespace WarGrey::SCADA {
 		Numpad(WarGrey::SCADA::IPlanet* master, float fontsize = 32.0F);
 
     public:
+		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void fill_auto_position(float* x, float* y) override;
 		
@@ -16,9 +17,6 @@ namespace WarGrey::SCADA {
 		void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			Windows::System::VirtualKey key, bool focused, bool tapped,
 			float x, float y, float width, float height) override;
-
-	protected:
-		void create() override;
 
     private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;

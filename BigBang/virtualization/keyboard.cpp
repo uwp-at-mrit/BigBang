@@ -24,8 +24,7 @@ static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, flo
 }
 
 /*************************************************************************************************/
-Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keynum)
-	: IKeyboard(master), cells(cells), keynum(keynum) {
+Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keynum) : IKeyboard(master), cells(cells), keynum(keynum) {
 	this->enable_events(true);
 }
 
@@ -35,9 +34,7 @@ Keyboard::~Keyboard() {
 	}
 }
 
-void Keyboard::construct() {
-	this->create();
-
+void Keyboard::sprite() {
 	if (this->cell_boxes != nullptr) {
 		delete [] this->cell_boxes;
 	}

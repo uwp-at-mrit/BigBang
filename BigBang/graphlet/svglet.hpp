@@ -26,7 +26,8 @@ namespace WarGrey::SCADA {
 		void on_appx(Windows::Foundation::Uri^ ms_appx_svg, Microsoft::Graphics::Canvas::Svg::CanvasSvgDocument^ doc_svg, int hint) override;
 		
 	protected:
-		virtual void on_ready() = 0;
+		virtual void on_ready() {}
+		virtual void post_ready() {}
 
 		void set_shape_color(Platform::String^ id, Windows::UI::Color& c);
 		void set_shape_color(Platform::String^ id, unsigned int hex, double alpha = 1.0);
@@ -77,9 +78,6 @@ namespace WarGrey::SCADA {
 		Platform::String^ name() override;
 		Platform::String^ rootdir() override;
 
-	protected:
-		void on_ready() override {}
-
 	private:
 		Platform::String^ file_svg;
 		Platform::String^ stone_subdir;
@@ -93,12 +91,15 @@ namespace WarGrey::SCADA {
 			, WarGrey::SCADA::IStatuslet<Status, Style>(status0) {}
 
 	public:
+		void sprite() override { /* at this point, status maybe not ready for updating */ }
+
+	public:
 		Platform::String^ rootdir() override {
 			return "graphlet";
 		}
 
 	protected:
-		void on_ready() override {
+		void post_ready() override {
 			this->update_status();
 		}
 	};

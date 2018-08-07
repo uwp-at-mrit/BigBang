@@ -70,6 +70,7 @@ void ISvglet::on_appx(Uri^ ms_appx_svg, CanvasSvgDocument^ doc_svg, int hint) {
 	this->set_percentage_attribute("height", 100.0F);
 
 	this->on_ready();
+	this->post_ready();
 }
 
 bool ISvglet::ready() {

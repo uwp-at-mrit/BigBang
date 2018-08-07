@@ -299,6 +299,7 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
         }
         info->next = this->head_graphlet;
 
+		g->sprite();
 		g->construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
 
