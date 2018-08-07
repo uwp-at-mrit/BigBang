@@ -13,10 +13,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handler_color;
 	};
 
-	private class DumpDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
+	private class BottomDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
 	public:
-		DumpDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = -90.0);
-		DumpDoorlet(float radius, double degrees = -90.0);
+		BottomDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = -90.0);
+		BottomDoorlet(float radius, double degrees = -90.0);
 
 	public:
 		void construct() override;
@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 		double mask_percentage;
 	};
 
-	private class UpperHopperDoorlet : public WarGrey::SCADA::DumpDoorlet {
-		using DumpDoorlet::DumpDoorlet;
+	private class UpperHopperDoorlet : public WarGrey::SCADA::BottomDoorlet {
+		using BottomDoorlet::BottomDoorlet;
 	};
 }

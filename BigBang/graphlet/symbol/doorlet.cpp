@@ -14,15 +14,15 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-DumpDoorlet::DumpDoorlet(float radius, double degrees) : DumpDoorlet(DoorStatus::Closed, radius, degrees) {}
+BottomDoorlet::BottomDoorlet(float radius, double degrees) : BottomDoorlet(DoorStatus::Closed, radius, degrees) {}
 
-DumpDoorlet::DumpDoorlet(DoorStatus default_state, float radius, double degrees) : ISymbollet(default_state, radius, degrees) {
+BottomDoorlet::BottomDoorlet(DoorStatus default_state, float radius, double degrees) : ISymbollet(default_state, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 	this->update_status();
 }
 
-void DumpDoorlet::construct() {
+void BottomDoorlet::construct() {
 	float handle_length = this->sgradius * 0.618F;
 	auto handler_axis = polar_axis(handle_length, this->degrees);
 	auto handler_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
@@ -33,7 +33,7 @@ void DumpDoorlet::construct() {
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void DumpDoorlet::update(long long count, long long interval, long long uptime) {
+void BottomDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
 	case DoorStatus::Opening: {
 		this->mask_percentage
@@ -56,7 +56,7 @@ void DumpDoorlet::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void DumpDoorlet::on_status_changed(DoorStatus state) {
+void BottomDoorlet::on_status_changed(DoorStatus state) {
 	switch (state) {
 	default: {
 		this->mask = nullptr;
@@ -65,7 +65,7 @@ void DumpDoorlet::on_status_changed(DoorStatus state) {
 	}
 }
 
-void DumpDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
+void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
 	case DoorStatus::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
@@ -87,7 +87,7 @@ void DumpDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void DumpDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	
 	float radius = this->size * 0.5F - default_thickness;

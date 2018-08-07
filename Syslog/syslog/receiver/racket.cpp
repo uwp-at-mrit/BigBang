@@ -25,20 +25,28 @@ RacketReceiver::RacketReceiver(Platform::String^ server, unsigned short service,
 
 	this->client = client = ref new DatagramSocket();
 	create_task(this->client->ConnectAsync(logserver, service.ToString())).then([this](task<void> conn) {
-		conn.get();
-		udpout = ref new DataWriter(client->OutputStream);
+		try {
+			conn.get();
 
-		this->section.lock();
-		while (!this->timestamps.empty()) {
-			auto ts = this->timestamps.front();
-			auto lvl = this->levels.front();
-			auto msg = this->messages.front();
-			send_to(udpout, ts, lvl, msg);
-			this->timestamps.pop();
-			this->levels.pop();
-			this->messages.pop();
-		};
-		this->section.unlock();
+			udpout = ref new DataWriter(client->OutputStream);
+
+			this->section.lock();
+			while (!this->timestamps.empty()) {
+				auto ts = this->timestamps.front();
+				auto lvl = this->levels.front();
+				auto msg = this->messages.front();
+
+				send_to(udpout, ts, lvl, msg);
+
+				this->timestamps.pop();
+				this->levels.pop();
+				this->messages.pop();
+			};
+			this->section.unlock();
+		} catch (Platform::Exception^ e) {
+			// keep silent: No such host is known.
+			// It occurs when there is no network connection.
+		}
 	});
 }
 
@@ -47,9 +55,17 @@ void RacketReceiver::on_log_message(Log level, Platform::String^ message, Syslog
 
 	if (udpout == nullptr) {
 		this->section.lock();
+
+		if (this->levels.size() > 1024) {
+			this->timestamps.pop();
+			this->levels.pop();
+			this->messages.pop();
+		}
+
 		this->levels.push(level.ToString());
 		this->messages.push(message);
 		this->timestamps.push(timestamp);
+		
 		this->section.unlock();
 	} else {
 		send_to(udpout, timestamp, level.ToString(), message);
