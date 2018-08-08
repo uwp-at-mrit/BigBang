@@ -3,6 +3,7 @@
 namespace WarGrey::SCADA {
 	Platform::String^ speak(Platform::String^ word);
 	Platform::String^ speak(Platform::String^ word, Platform::String^ scope);
+	Platform::String^ speak(Platform::String^ word, Platform::String^ scope, bool* exists);
 	Platform::String^ dbspeak(Platform::String^ field);
 
 	template<typename E>

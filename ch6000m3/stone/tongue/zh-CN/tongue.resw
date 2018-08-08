@@ -156,11 +156,8 @@
   <data name="temperature" xml:space="preserve">
     <value>温度</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
+  <data name="waters" xml:space="preserve">
     <value>泥泵封水及闸阀冲水管系</value>
-  </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
   </data>
   <data name="doors" xml:space="preserve">
     <value>泥门控制</value>

@@ -102,4 +102,18 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
+      <DeploymentContent>false</DeploymentContent>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
+      <DeploymentContent>false</DeploymentContent>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
+      <DeploymentContent>false</DeploymentContent>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\unit.resw">
+      <DeploymentContent>false</DeploymentContent>
+    </PRIResource>
+  </ItemGroup>
 </Project>

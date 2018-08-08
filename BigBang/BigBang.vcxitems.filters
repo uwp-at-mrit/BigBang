@@ -237,5 +237,31 @@
     <Filter Include="test">
       <UniqueIdentifier>{cf2335ef-226e-4246-b9c3-37b2e8b7a3d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="stone">
+      <UniqueIdentifier>{89470dd2-fef9-486a-8d48-f8d1345f8cad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stone\tongue">
+      <UniqueIdentifier>{7618a65a-c50d-493d-9f2e-80d0438f3c4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stone\tongue\en-US">
+      <UniqueIdentifier>{e182ce42-a881-4c49-b757-f71f8c1b60b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stone\tongue\zh-CN">
+      <UniqueIdentifier>{03e8a1f8-adf5-4a8b-9b43-d68e148d2fd2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\unit.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

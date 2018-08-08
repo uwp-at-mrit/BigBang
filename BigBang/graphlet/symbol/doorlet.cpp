@@ -77,7 +77,7 @@ void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 
 	CAS_SLOT(s.border_color, Colours::ForestGreen);
 	CAS_SLOT(s.door_color, Colours::DimGray);
-	CAS_SLOT(s.body_color, Colours::Khaki);
+	CAS_SLOT(s.body_color, Colours::DarkKhaki);
 	CAS_SLOT(s.skeleton_color, Colours::Black);
 
 	// NOTE: The others can be nullptr;

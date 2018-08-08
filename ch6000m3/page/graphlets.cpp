@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 private class Stage final {
 public:
 	Stage(GraphletOverview* master) : master(master) {
-		this->font = make_bold_text_format("Microsoft YaHei", 16.0F);
+		this->font = make_bold_text_format("Microsoft YaHei", large_font_size);
 	}
 
 public:
@@ -161,5 +161,9 @@ void GraphletOverview::reflow(float width, float height) {
 }
 
 bool GraphletOverview::can_select(WarGrey::SCADA::IGraphlet* g) {
-	return (dynamic_cast<Labellet*>(g) == nullptr);
+#ifdef _Debug
+	return true;
+#else
+	return false;
+#endif
 }

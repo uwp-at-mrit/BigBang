@@ -117,7 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="WaterDepth" xml:space="preserve">
-    <value>富余水深</value>
+  <data name="connecting" xml:space="preserve">
+    <value>Listening</value>
+  </data>
+  <data name="disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="ipv4" xml:space="preserve">
+    <value>Local IPv4: </value>
+  </data>
+  <data name="nowifi" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="plc" xml:space="preserve">
+    <value>PLC:  </value>
+  </data>
+  <data name="power" xml:space="preserve">
+    <value>Power:  </value>
+  </data>
+  <data name="sd" xml:space="preserve">
+    <value>Card Storage:  </value>
+  </data>
+  <data name="noipv4" xml:space="preserve">
+    <value>0.0.0.0</value>
+  </data>
+  <data name="wifi" xml:space="preserve">
+    <value>WiFi: </value>
+  </data>
+  <data name="offline" xml:space="preserve">
+    <value>Offline</value>
   </data>
 </root>

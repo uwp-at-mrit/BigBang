@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 			this->load_graphlets(gs, id0, idn, radius, degrees);
 			
 			for(E id = id0; id <= idn; id++) {
-			    ls[id] = this->make_label(speak(id, this->scope), id, Colours::Silver);
+			    ls[id] = this->make_label(speak(id, this->scope), id, WarGrey::SCADA::Colours::Silver);
 		    }
 	    }
 
@@ -41,30 +41,33 @@ namespace WarGrey::SCADA {
 			this->load_graphlets(gs, id0, idn, radius, degrees);
 
 			for (E id = id0; id <= idn; id++) {
-				ls[id] = this->make_label(id.ToString(), id, Colours::Silver);
-				cs[id] = this->make_label(id, Colours::Silver);
+				ls[id] = this->make_label(id.ToString(), id, WarGrey::SCADA::Colours::Silver);
+				cs[id] = this->make_label(id, WarGrey::SCADA::Colours::Silver);
 			}
 		}
 
-		void load_dimensions(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& sts, E id0, E idn
+		void load_dimension(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& ds, E id
+			, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, subscript));
+			ds[id]->id = id;
+		}
+
+		void load_dimensions(std::map<E, Credit<WarGrey::SCADA::Dimensionlet, E>*>& ds, E id0, E idn
 			, Platform::String^ unit, Platform::String^ label = nullptr, Platform::String^ subscript = nullptr) {
 			for(E id = id0; id <= idn; id++) {
-				sts[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, subscript));
-				sts[id]->id = id;
+				this->load_dimension(ds, id, unit, label, subscript);
 			}
 		}
 
 		void load_label(std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls, Platform::String^ caption, E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
-			
 			ls[id] = this->make_label(caption, id, color, font);
 		}
 
 		void load_label(std::map<E, Credit<WarGrey::SCADA::Labellet, E>*>& ls, E id
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color
 			, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr) {
-			
 			ls[id] = this->make_label(id, color, font);
 		}
 

@@ -28,8 +28,5 @@ namespace WarGrey::SCADA {
 	private: // never deletes these graphlets mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;
 		WarGrey::SCADA::Statuslinelet* statusline;
-
-	private:
-		float gridsize;
 	};
 }

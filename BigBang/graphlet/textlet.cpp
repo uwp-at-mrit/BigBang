@@ -20,6 +20,12 @@ static inline float aligned_y(TextExtent& te, float by) {
 	return by - (te.height - te.bspace);
 }
 
+static inline Platform::String^ unit_speak(Platform::String^ unit) {
+	bool exists;
+	Platform::String^ dialect = speak(unit, "unit", &exists);
+
+	return (exists ? dialect : speak(unit));
+}
 
 /*************************************************************************************************/
 void Textlet::set_color(ICanvasBrush^ color) {
@@ -159,7 +165,7 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Plat
 
 	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
 	this->set_font(num_font);
-	this->unit_layout = make_text_layout(speak(unit), label_font);
+	this->unit_layout = make_text_layout(unit_speak(unit), label_font);
 	this->unit_box = get_text_extent(this->unit_layout);
 
 	if (label != nullptr) {

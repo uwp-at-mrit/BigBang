@@ -7,14 +7,14 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::ApplicationModel::Resources;
 
-static ResourceLoader^ lookup_tongue(Platform::String^ name) {
+static ResourceLoader^ lookup_tongue(Platform::String^ scope) {
 	static std::map<Platform::String^, ResourceLoader^> tongues;
-	auto maybe_tongue = tongues.find(name);
+	auto maybe_tongue = tongues.find(scope);
 	ResourceLoader^ tongue = nullptr;
 
 	if (maybe_tongue == tongues.end()) {
-		tongue = ResourceLoader::GetForViewIndependentUse(name);
-		tongues.insert(std::pair<Platform::String^, ResourceLoader^>(name, tongue));
+		tongue = ResourceLoader::GetForViewIndependentUse(scope);
+		tongues.insert(std::pair<Platform::String^, ResourceLoader^>(scope, tongue));
 	} else {
 		tongue = maybe_tongue->second;
 	}
@@ -28,12 +28,30 @@ static inline Platform::String^ do_speak(ResourceLoader^ tongue, Platform::Strin
 	return (dialect == nullptr) ? word : dialect;
 }
 
-static inline Platform::String^ do_speak(Platform::String^ name, Platform::String^ word) {
-	return do_speak(lookup_tongue(name), word);
+static inline Platform::String^ do_speak(ResourceLoader^ tongue, Platform::String^ word, bool* exists) {
+	Platform::String^ dialect = tongue->GetString(word);
+
+	if (exists != nullptr) {
+		(*exists) = (dialect != nullptr);
+	}
+
+	return (dialect == nullptr) ? word : dialect;
 }
 
-static inline bool do_check(Platform::String^ name, unsigned int index) {
-	return (lookup_tongue(name)->GetString(index.ToString()) != nullptr);
+static inline Platform::String^ do_speak(Platform::String^ scope, Platform::String^ word) {
+	return do_speak(lookup_tongue(scope), word);
+}
+
+static inline Platform::String^ do_speak(Platform::String^ scope, Platform::String^ word, bool* exists) {
+	return do_speak(lookup_tongue(scope), word, exists);
+}
+
+static inline bool do_check(Platform::String^ scope, Platform::String^ word) {
+	return (lookup_tongue(scope)->GetString(word) != nullptr);
+}
+
+static inline bool do_check(Platform::String^ scope, unsigned int index) {
+	return do_check(scope, index.ToString());
 }
 
 /*************************************************************************************************/
@@ -43,8 +61,12 @@ Platform::String^ WarGrey::SCADA::speak(Platform::String^ word) {
     return do_speak(tongue, word);
 }
 
-Platform::String^ WarGrey::SCADA::speak(Platform::String^ word, Platform::String^ name) {
-	return ((name == nullptr) ? speak(word) : do_speak(name, word));
+Platform::String^ WarGrey::SCADA::speak(Platform::String^ word, Platform::String^ scope) {
+	return ((scope == nullptr) ? speak(word) : do_speak(scope, word));
+}
+
+Platform::String^ WarGrey::SCADA::speak(Platform::String^ word, Platform::String^ scope, bool* exists) {
+	return do_speak(scope, word, exists);
 }
 
 Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
@@ -54,7 +76,7 @@ Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
 }
 
 /*************************************************************************************************/
-ITongue::ITongue(Platform::String^ name, unsigned int idx) : type(name), index(idx) {}
+ITongue::ITongue(Platform::String^ scope, unsigned int idx) : type(scope), index(idx) {}
 
 int ITongue::unsafe_compare(ITongue* instance) {
 	unsigned int sidx = this->ToIndex();
@@ -70,12 +92,12 @@ int ITongue::unsafe_compare(ITongue* instance) {
 	return sign;
 }
 
-bool ITongue::exists(Platform::String^ name, int index) {
-	return do_check(name, index);
+bool ITongue::exists(Platform::String^ scope, int index) {
+	return do_check(scope, index);
 }
 
-int ITongue::sibling_index(Platform::String^ name, unsigned int self, int delta, unsigned int boundary) {
-	ResourceLoader^ tongue = lookup_tongue(name);
+int ITongue::sibling_index(Platform::String^ scope, unsigned int self, int delta, unsigned int boundary) {
+	ResourceLoader^ tongue = lookup_tongue(scope);
 	int sibling = -1;
 	
 	if (delta < 0) {

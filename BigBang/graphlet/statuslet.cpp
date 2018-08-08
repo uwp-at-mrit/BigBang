@@ -18,6 +18,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
+static Platform::String^ tongue_scope = "status";
+
 static CanvasTextFormat^ status_font = nullptr;
 static float status_prefix_width = 0.0F;
 static float status_height = 0.0F;
@@ -33,7 +35,7 @@ public:
     }
 
     void on_battery_capacity_changed(float capacity) override {
-		Platform::String^ label = speak(":power:");
+		Platform::String^ label = speak("power", tongue_scope);
 		Platform::String^ percentage = (round(capacity * 100.0F).ToString() + "%");
 
 		this->enter_critical_section();
@@ -44,8 +46,8 @@ public:
 
     void on_wifi_signal_strength_changed(char strength) override {
 		float percentage = std::roundf(float(strength) * 100.0F / 5.0F);
-		Platform::String^ label = speak(":wifi:");
-        Platform::String^ signal = ((strength < 0) ? speak(":nowifi:") : (percentage.ToString() + "%"));
+		Platform::String^ label = speak("wifi", tongue_scope);
+        Platform::String^ signal = ((strength < 0) ? speak("nowifi", tongue_scope) : (percentage.ToString() + "%"));
 
 		this->enter_critical_section();
         this->wifi = make_text_layout(label + signal, status_font);
@@ -54,7 +56,7 @@ public:
 	}
 
     void on_available_storage_changed(long long bytes) override {
-		Platform::String^ label = speak(":sd:");
+		Platform::String^ label = speak("sd", tongue_scope);
 		Platform::String^ size = bytes.ToString();
 
 		this->enter_critical_section();
@@ -64,8 +66,8 @@ public:
 	}
 
     void on_ipv4_address_changed(Platform::String^ ipv4) override {
-		Platform::String^ label = speak(":ipv4:");
-		Platform::String^ ip = ((ipv4 == nullptr) ? speak(":noipv4:") : ipv4);
+		Platform::String^ label = speak("ipv4", tongue_scope);
+		Platform::String^ ip = ((ipv4 == nullptr) ? speak("noipv4", tongue_scope) : ipv4);
 
 		this->enter_critical_section();
 		this->ipv4 = make_text_layout(label + ip, status_font);
@@ -121,7 +123,7 @@ static void initialize_status_font() {
 	if (status_font == nullptr) {
 		status_font = make_bold_text_format("Microsoft YaHei", 12.0F);
 		
-		TextExtent te = get_text_extent(speak(":plc:"), status_font);
+		TextExtent te = get_text_extent(speak("plc", tongue_scope), status_font);
 		status_height = te.height * 1.2F;
 		status_prefix_width = te.width;
 	}
@@ -181,11 +183,11 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	{ // highlight PLC Status
 		float plc_x = x + width * 4.0F;
 		
-		ds->DrawText(speak(":plc:"), plc_x, context_y, Colours::Yellow, status_font);
+		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
 
 		if (this->device == nullptr) {
 			if (this->device_name == nullptr) {
-				this->device_name = make_text_layout(speak(":offline:"), status_font);
+				this->device_name = make_text_layout(speak("offline", tongue_scope), status_font);
 			}
 
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Red);
@@ -200,7 +202,10 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
 			
-			ds->DrawText(speak(":connecting:") + dots[idx], plc_x + status_prefix_width, context_y, Colours::Red, status_font);
+			ds->DrawText(speak("connecting", tongue_scope) + dots[idx],
+				plc_x + status_prefix_width, context_y,
+				Colours::Red, status_font);
+
 			this->device_name = nullptr;
 		}
 	}

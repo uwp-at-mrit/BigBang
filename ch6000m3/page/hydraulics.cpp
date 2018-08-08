@@ -58,7 +58,7 @@ private class Hydraulics final
 	, public DashBoard<HydraulicsPage, HS> {
 public:
 	Hydraulics(HydraulicsPage* master) : DashBoard(master, __FILE__) {
-		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
+		this->caption_font = make_text_format("Microsoft YaHei", large_font_size);
 	}
 
 public:
@@ -420,11 +420,6 @@ bool HydraulicsPage::can_select(IGraphlet* g) {
 }
 
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	//if (dynamic_cast<Tracklet<HS>*>(g) == nullptr) {
-	//	this->set_selected(g);
-	//}
-	// this->set_caret_owner(g);
-
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (this->can_select(g)) {

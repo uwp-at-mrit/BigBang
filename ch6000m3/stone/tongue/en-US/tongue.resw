@@ -153,13 +153,10 @@
   <data name="graphlets" xml:space="preserve">
     <value>Graphlets States Overview </value>
   </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
-  </data>
   <data name="temperature" xml:space="preserve">
     <value>Temperature</value>
   </data>
-  <data name=":ws:" xml:space="preserve">
+  <data name="waters" xml:space="preserve">
     <value>Water Sealing and Flushing System</value>
   </data>
   <data name="doors" xml:space="preserve">
