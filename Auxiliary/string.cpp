@@ -58,6 +58,19 @@ size_t wstrlen(const wchar_t* content) {
 }
 
 /*************************************************************************************************/
+Platform::String^ substring(Platform::String^ src, int start, int endplus1) {
+	Platform::String^ substr = nullptr;
+	int max_size = src->Length();
+	const wchar_t* pool = (src->Data() + start);
+	int subsize = ((endplus1 > 0) ? std::min(endplus1, max_size) : src->Length()) - start;
+
+	if (subsize > 0) {
+		substr = ref new Platform::String(pool, subsize);
+	}
+
+	return substr;
+}
+
 std::string make_nstring(const char* fmt, ...) {
 	VSNPRINT(s, fmt);
 

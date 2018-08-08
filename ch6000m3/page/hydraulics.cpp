@@ -28,9 +28,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-static Platform::String^ tongue_scope = "hydraulics";
-
-private enum HSMode { WindowUI = 0, View };
+private enum HSMode { WindowUI = 0, Dashboard };
 
 private enum class HSOperation { Start, Stop, Reset, _ };
 
@@ -59,7 +57,7 @@ private class Hydraulics final
 	, public IMenuCommand<HSOperation, IMRMaster*>
 	, public DashBoard<HydraulicsPage, HS> {
 public:
-	Hydraulics(HydraulicsPage* master) : DashBoard(master, tongue_scope) {
+	Hydraulics(HydraulicsPage* master) : DashBoard(master, __FILE__) {
 		this->caption_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
@@ -352,7 +350,7 @@ private:
 	CanvasTextFormat^ caption_font;
 };
 
-HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(":hs:"), device(plc) {
+HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
@@ -375,7 +373,7 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 		float vinset = statusbar_height();
 
 		{ // load graphlets
-			this->change_mode(HSMode::View);
+			this->change_mode(HSMode::Dashboard);
 			dashboard->load_pump_station(width, height, this->gridsize);
 			dashboard->load_devices(width, height, this->gridsize);
 			dashboard->load_state_indicators(width, height, this->gridsize);
@@ -388,7 +386,7 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 		}
 
 		{ // delayed initializing
-			this->append_decorator(new PageDecorator(Colours::GrayText));
+			this->append_decorator(new PageDecorator());
 
 #ifdef _DEBUG
 			this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset));
@@ -410,7 +408,7 @@ void HydraulicsPage::reflow(float width, float height) {
 		this->change_mode(HSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
-		this->change_mode(HSMode::View);
+		this->change_mode(HSMode::Dashboard);
 		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
 		dashboard->reflow_devices(width, height, this->gridsize, vinset);
 		dashboard->reflow_state_indicators(width, height, this->gridsize, vinset);

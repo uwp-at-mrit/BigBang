@@ -57,6 +57,8 @@ std::string retval; { \
     if (pool != chpool) delete[] pool; \
 }
 
+Platform::String^ substring(Platform::String^ src, int start, int endplus1 = -1);
+
 Platform::String^ make_wstring(const wchar_t* fmt, ...);
 Platform::String^ make_wstring(const char* bytes);
 Platform::String^ make_wstring(std::string bytes);

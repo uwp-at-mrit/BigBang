@@ -87,9 +87,10 @@ void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	const DoorStyle style = this->get_style();
 	float cx = x + this->radius + default_thickness;
 	float cy = y + this->radius + default_thickness;
+	float body_radius = this->radius - default_thickness * 1.618F;
 	
 	ds->FillCircle(cx, cy, this->radius, Colours::Background);
-	ds->FillCircle(cx, cy, this->radius - default_thickness * 2.0F, style.body_color);
+	ds->FillCircle(cx, cy, body_radius, style.body_color);
 	
 	for (unsigned int idx = 0; idx < sizeof(this->door_partitions) / sizeof(CanvasGeometry^); idx++) {
 		ds->FillGeometry(this->door_partitions[idx], cx, cy, style.door_color);

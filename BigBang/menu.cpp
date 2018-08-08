@@ -35,7 +35,7 @@ void WarGrey::SCADA::menu_append_command(MenuFlyout^ menu_background, ICommand^ 
 	auto item = ref new MenuFlyoutItem();
 
 	item->Command = exe;
-	item->Text = speak(label, tongue);
+	item->Text = speak(label, ((tongue == nullptr) ? "menu" : tongue));
 	
 	menu_background->Items->Append(item);
 }

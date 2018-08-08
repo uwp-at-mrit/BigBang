@@ -3,7 +3,7 @@
 #include <map>
 
 #include "credit.hpp"
-#include "tongue.hpp"
+#include "module.hpp"
 #include "brushes.hxx"
 #include "planet.hpp"
 
@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
 	template<class T, typename E>
 	private class DashBoard abstract {
 	public:
-		DashBoard(T* master, Platform::String^ l10n) : master(master), scope(l10n) {}
+		DashBoard(T* master, Platform::String^ src) : master(master), scope(module_name(src)) {}
 
 	public:
 		template<class G>

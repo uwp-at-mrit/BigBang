@@ -27,7 +27,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum WSMode { WindowUI = 0, View };
+private enum WSMode { WindowUI = 0, Dashboard };
 
 // WARNING: order matters
 private enum class WS : unsigned int {
@@ -355,7 +355,7 @@ void WaterSystemPage::load(CanvasCreateResourcesReason reason, float width, floa
 		float vinset = statusbar_height();
 
 		{ // load graphlets
-			this->change_mode(WSMode::View);
+			this->change_mode(WSMode::Dashboard);
 			dashboard->load_pump_station(width, height, this->gridsize);
 			dashboard->load_devices(width, height, this->gridsize);
 			dashboard->load_state_indicators(width, height, this->gridsize);
@@ -390,7 +390,7 @@ void WaterSystemPage::reflow(float width, float height) {
 		this->change_mode(WSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
-		this->change_mode(WSMode::View);
+		this->change_mode(WSMode::Dashboard);
 		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
 		dashboard->reflow_devices(width, height, this->gridsize, vinset);
 		dashboard->reflow_state_indicators(width, height, this->gridsize, vinset);

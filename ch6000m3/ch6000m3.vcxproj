@@ -219,22 +219,27 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\doors.resw" />
     <PRIResource Include="stone\tongue\en-US\graphlets.resw" />
     <PRIResource Include="stone\tongue\en-US\hydraulics.resw">
       <SubType>Designer</SubType>
     </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\menu.resw" />
     <PRIResource Include="stone\tongue\en-US\tongue.resw" />
     <PRIResource Include="stone\tongue\en-US\waters.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\doors.resw" />
     <PRIResource Include="stone\tongue\zh-CN\graphlets.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hydraulics.resw">
       <SubType>Designer</SubType>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\menu.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw" />
     <PRIResource Include="stone\tongue\zh-CN\waters.resw" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
+    <ClCompile Include="page\doors.cpp" />
     <ClCompile Include="page\waters.cpp" />
     <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
@@ -244,6 +249,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="dashboard.hpp" />
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="page\doors.hpp" />
     <ClInclude Include="page\waters.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />
