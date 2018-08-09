@@ -33,8 +33,8 @@ private enum class DS : unsigned int {
 	Bow, Stern,
 	LDPressure, LockPressure, RDPressure,
 	Heel, Trim, EarthWork,
-	SBD1, SBD2, SBD3, SBD4, SBD5, SBD6, SBD7,
-	PSD1, PSD2, PSD3, PSD4, PSD5, PSD6, PSD7,
+	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
+	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	_
 };
 
@@ -53,7 +53,7 @@ public:
 			segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
 
 		{ // initializing sequence labels
-			CanvasTextFormat^ seq_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+			CanvasTextFormat^ seq_font = make_bold_text_format("Microsoft YaHei UI", large_font_size);
 			
 			this->seq_color = Colours::Tomato;
 
@@ -133,8 +133,8 @@ public:
 		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
 		
 		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->doors, this->progresses, DS::PSD1, DS::PSD7, radius);
-		this->load_doors(this->doors, this->progresses, DS::SBD1, DS::SBD7, radius);
+		this->load_doors(this->doors, this->progresses, DS::PS1, DS::PS7, radius);
+		this->load_doors(this->doors, this->progresses, DS::SB1, DS::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
 		this->load_indicators(this->draughts, this->dimensions, DS::Bow, DS::Stern, cylinder_height);
@@ -143,8 +143,8 @@ public:
 	void reflow(float width, float height, float vinset) {
 		float aheight = height - vinset - vinset;
 
-		this->reflow_doors(this->doors, this->progresses, DS::PSD1, DS::PSD7, 1.0F, -0.5F, GraphletAnchor::CT);
-		this->reflow_doors(this->doors, this->progresses, DS::SBD1, DS::SBD7, 3.0F, 0.5F, GraphletAnchor::CB);
+		this->reflow_doors(this->doors, this->progresses, DS::PS1, DS::PS7, 1.0F, -0.5F, GraphletAnchor::CT);
+		this->reflow_doors(this->doors, this->progresses, DS::SB1, DS::SB7, 3.0F, 0.5F, GraphletAnchor::CB);
 
 		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, aheight, 0.70F);
 		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, aheight, 0.30F);

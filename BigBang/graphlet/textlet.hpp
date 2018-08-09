@@ -114,6 +114,7 @@ namespace WarGrey::SCADA {
 		void on_value_changed(float value) override;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ num_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ unit_layout;
 
@@ -175,6 +176,7 @@ namespace WarGrey::SCADA {
 		void on_value_changed(float value) override;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ num_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ sign_layout;
 

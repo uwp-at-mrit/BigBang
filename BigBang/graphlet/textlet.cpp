@@ -15,6 +15,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
+static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 18.0F);
 
 static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	bool exists;
@@ -275,13 +276,10 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Canv
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color(ncolor) {
-	auto num_font = ((nfont == nullptr) ? make_bold_text_format() : nfont);
-	auto label_font = ((lfont == nullptr) ? num_font : lfont);
-
+	: num_color(ncolor), num_font((nfont == nullptr) ? default_math_font : nfont) {
 	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
-	this->set_font(num_font);
-	this->unit_layout = make_text_layout(unit_speak(unit), label_font);
+	this->set_font((lfont == nullptr) ? default_text_font : lfont);
+	this->unit_layout = make_text_layout(unit_speak(unit), this->text_font);
 	this->unit_box = get_text_extent(this->unit_layout);
 
 	if (label != nullptr) {
@@ -309,7 +307,7 @@ void Dimensionlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 }
 
 void Dimensionlet::on_value_changed(float value) {	
-	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->text_font);
+	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
 	this->num_box = get_text_extent(this->num_layout);
 }
 
@@ -354,13 +352,10 @@ Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ font, IC
 
 Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color(ncolor) {
-	auto num_font = ((nfont == nullptr) ? make_bold_text_format() : nfont);
-	auto label_font = ((lfont == nullptr) ? num_font : lfont);
-
+	: num_color(ncolor), num_font((nfont == nullptr) ? default_math_font : nfont) {
 	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
-	this->set_font(num_font);
-	this->sign_layout = make_text_layout("%", label_font);
+	this->set_font((lfont == nullptr) ? default_text_font : lfont);
+	this->sign_layout = make_text_layout("%", this->text_font);
 	this->sign_box = get_text_extent(this->sign_layout);
 
 	if (label != nullptr) {
@@ -388,7 +383,7 @@ void Percentagelet::fill_margin(float x, float y, float* t, float* r, float* b, 
 }
 
 void Percentagelet::on_value_changed(float value) {
-	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->text_font);
+	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
 	this->num_box = get_text_extent(this->num_layout);
 }
 
