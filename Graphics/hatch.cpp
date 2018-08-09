@@ -17,7 +17,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasTextFormat^ default_scale_font = make_text_format(8.0F);
+static CanvasTextFormat^ default_scale_font = make_bold_text_format(9.0F);
 static const float scale_lmark_ratio = 1.0F;
 static const float scale_space_ratio = 1.0F;
 

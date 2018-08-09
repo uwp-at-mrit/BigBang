@@ -248,8 +248,6 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 }
 
 UniverseDisplay::~UniverseDisplay() {
-	this->get_logger()->log_message(Log::Info, "destructor");
-
 	this->collapse();
 	this->transfer_clock->Stop();
 }

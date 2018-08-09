@@ -25,6 +25,8 @@ ICylinderlet::ICylinderlet(float vmin, float vmax, float width, float height, un
 	
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
+	} else if (this->height == 0.0F) {
+		this->height = this->width * 2.718F;
 	}
 
 	this->liquid_surface_radius = this->thickness;
@@ -121,8 +123,8 @@ CanvasGeometry^ ConvexCylinderlet::make_liquid_shape(CanvasGeometry^ body, float
 }
 
 /*************************************************************************************************/
-ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: ConcaveCylinderlet(tmin, tmax, width, height, 0, colors, bcolor) {}
+ConcaveCylinderlet::ConcaveCylinderlet(float range, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
+	: ConcaveCylinderlet(0.0F, range, width, height, step, colors, bcolor) {}
 
 ConcaveCylinderlet::ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
 	: ICylinderlet(tmin, tmax, width, height, step, colors, bcolor) {}

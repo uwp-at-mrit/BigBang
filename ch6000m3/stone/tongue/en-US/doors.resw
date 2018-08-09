@@ -117,7 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="WaterDepth" xml:space="preserve">
-    <value>Surplus Water Depth</value>
+  <data name="Bow" xml:space="preserve">
+    <value>Bow Draught</value>
+  </data>
+  <data name="EarthWork" xml:space="preserve">
+    <value>Earthwork Volume</value>
+  </data>
+  <data name="Heel" xml:space="preserve">
+    <value>Heeling Angle</value>
+  </data>
+  <data name="LDPressure" xml:space="preserve">
+    <value>Left Drag Output Pressure</value>
+  </data>
+  <data name="LockPressure" xml:space="preserve">
+    <value>Locking High Pressure</value>
+  </data>
+  <data name="RDPressure" xml:space="preserve">
+    <value>Right Drag Output Pressure</value>
+  </data>
+  <data name="Stern" xml:space="preserve">
+    <value>Stern Draught</value>
+  </data>
+  <data name="Trim" xml:space="preserve">
+    <value>Trimming Angle</value>
   </data>
 </root>

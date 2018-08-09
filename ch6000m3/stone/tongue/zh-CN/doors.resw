@@ -117,7 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="WaterDepth" xml:space="preserve">
-    <value>富余水深</value>
+  <data name="Bow" xml:space="preserve">
+    <value>艏吃水</value>
+  </data>
+  <data name="EarthWork" xml:space="preserve">
+    <value>土方量</value>
+  </data>
+  <data name="Heel" xml:space="preserve">
+    <value>横倾角度</value>
+  </data>
+  <data name="LDPressure" xml:space="preserve">
+    <value>左耙出口压力</value>
+  </data>
+  <data name="LockPressure" xml:space="preserve">
+    <value>高压锁紧压力</value>
+  </data>
+  <data name="RDPressure" xml:space="preserve">
+    <value>右耙出口压力</value>
+  </data>
+  <data name="Stern" xml:space="preserve">
+    <value>艉吃水</value>
+  </data>
+  <data name="Trim" xml:space="preserve">
+    <value>纵倾角度</value>
   </data>
 </root>

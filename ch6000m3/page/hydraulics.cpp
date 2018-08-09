@@ -409,7 +409,16 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 	this->operation = make_menu<HSOperation, IMRMaster*>(dashboard, plc);
 	this->gridsize = statusbar_height();
 
+
 	this->device->append_confirmation_receiver(dashboard);
+
+	{ // load decorators
+		this->append_decorator(new PageDecorator());
+
+#ifdef _DEBUG
+		this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset));
+#endif
+	}
 }
 
 HydraulicsPage::~HydraulicsPage() {
@@ -437,16 +446,8 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 			this->insert(this->statusline);
 		}
 
-		{ // delayed initializing
-			this->append_decorator(new PageDecorator());
-
-#ifdef _DEBUG
-			this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset));
-#endif
-
-			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
-			}
+		if (this->device != nullptr) {
+			this->device->get_logger()->append_log_receiver(this->statusline);
 		}
 	}
 }

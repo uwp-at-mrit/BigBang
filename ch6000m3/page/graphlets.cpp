@@ -117,7 +117,7 @@ private:
 static std::unordered_map<GraphletOverview*, Stage*> stages;
 
 GraphletOverview::GraphletOverview() : Planet(__MODULE__) {
-	this->append_decorator(new PageDecorator(Colours::GrayText));
+	this->append_decorator(new PageDecorator());
 }
 
 GraphletOverview::~GraphletOverview() {

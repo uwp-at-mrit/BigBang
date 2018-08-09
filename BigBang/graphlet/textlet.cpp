@@ -261,6 +261,12 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanv
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Dimensionlet(unit, label, "", font, font, ncolor, lcolor) {}
 
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Dimensionlet(unit, label, nullptr, ncolor, lcolor) {}
+
+Dimensionlet::Dimensionlet(Platform::String^ unit, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Dimensionlet(unit, "", ncolor, lcolor) {}
+
 Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ color)
 	: Dimensionlet(unit, "", font, color) {}
 
@@ -327,6 +333,12 @@ Percentagelet::Percentagelet(CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, I
 
 Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
 	: Percentagelet(label, "", nfont, lfont, color, color) {}
+
+Percentagelet::Percentagelet(ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Percentagelet("", ncolor, lcolor) {}
+
+Percentagelet::Percentagelet(Platform::String^ label, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
+	: Percentagelet(label, nullptr, ncolor, lcolor) {}
 
 Percentagelet::Percentagelet(CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Percentagelet("", font, ncolor, lcolor) {}

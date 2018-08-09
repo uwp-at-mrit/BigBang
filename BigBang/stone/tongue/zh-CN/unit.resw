@@ -117,10 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="bar" xml:space="preserve">
+    <value>bar</value>
+  </data>
   <data name="celsius" xml:space="preserve">
     <value>°C</value>
   </data>
+  <data name="degree" xml:space="preserve">
+    <value>deg</value>
+  </data>
   <data name="meter" xml:space="preserve">
     <value>m</value>
+  </data>
+  <data name="meter3" xml:space="preserve">
+    <value>m³</value>
   </data>
 </root>

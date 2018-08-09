@@ -79,11 +79,11 @@ namespace WarGrey::SCADA {
 
 	private class ConcaveCylinderlet : public WarGrey::SCADA::ICylinderlet {
 	public:
-		ConcaveCylinderlet(float tmin, float tmax, float width, float height,
+		ConcaveCylinderlet(float range, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 
-		ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step,
+		ConcaveCylinderlet(float tmin, float tmax, float width, float height, unsigned int step = 0,
 			WarGrey::SCADA::GradientStops^ colors = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::make(0xBBBBBB));
 
