@@ -184,18 +184,18 @@ public:
 
 	void load_devices(float width, float height, float gridsize) {
 		{ // load pumps
-			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, gridsize, 180.0);
-			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, gridsize, 0.000);
-			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, gridsize, -90.0);
-			this->load_graphlets(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, gridsize, 90.00);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, gridsize, 180.0);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, gridsize, 0.000);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, gridsize, -90.0);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, gridsize, 90.00);
 
 			this->load_dimensions(this->bars, HS::A, HS::I, "bar");
 		}
 
 		{ // load valves
-			this->load_graphlets(this->valves, this->vlabels, HS::SQ1, HS::SQj, gridsize, 0.000);
-			this->load_graphlets(this->valves, this->vlabels, HS::SQa, HS::SQk1, gridsize, -90.0);
-			this->load_graphlets(this->valves, this->vlabels, HS::SQf, HS::SQe, gridsize, 90.00);
+			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, gridsize, 0.000);
+			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, gridsize, -90.0);
+			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, gridsize, 90.00);
 		}
 	}
 
@@ -326,15 +326,15 @@ public:
 
 private:
 	template<class G, typename E>
-	void load_graphlets(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
+	void load_devices(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
 
 	template<class G, typename E>
-	void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
-		this->load_graphlets(gs, id0, idn, radius, degrees);
+	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
+		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
@@ -342,9 +342,9 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls
+	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls
 		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
-		this->load_graphlets(gs, id0, idn, radius, degrees);
+		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id.ToString(), id, WarGrey::SCADA::Colours::Silver);
@@ -354,7 +354,7 @@ private:
 
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
-		for (HS id = id0; id <= idn; id++) {
+		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label), id);
 		}
 	}

@@ -120,6 +120,8 @@ public:
 		float cylinder_height = height * 0.618F * 0.618F;
 		
 		this->load_dimension(this->dimensions, DS::WaterDepth, "meter", this->cpt_font);
+		this->load_doors(this->doors, this->progresses, DS::SB1, DS::SB7, unitsize);
+		this->load_doors(this->doors, this->progresses, DS::PS1, DS::PS7, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -144,18 +146,18 @@ public:
 
 private:
 	template<class G, typename E>
-	void load_graphlets(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
+	void load_doors(std::map<E, G*>& gs, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
-			gs[id] = this->master->insert_one(new G(radius, degrees), id);
+			gs[id] = this->master->insert_one(new G(radius), id);
 		}
 	}
 
 	template<class G, typename E>
-	void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
-		this->load_graphlets(gs, id0, idn, radius, degrees);
+	void load_doors(std::map<E, G*>& gs, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float radius) {
+		this->load_doors(gs, id0, idn, radius);
 
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(nullptr, Colours::Yellow, Colours::Silver), id);
 		}
 	}
 
@@ -172,7 +174,7 @@ private:
 
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
-		for (HS id = id0; id <= idn; id++) {
+		for (E id = id0; id <= idn; id++) {
 			this->load_dimension(ds, id, unit, label);
 		}
 	}
@@ -189,8 +191,8 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	std::map<DoorStatus, BottomDoorlet*> doors;
-	std::map<DoorStatus, Dimensionlet*> progresses;
+	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
+	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
 	std::map<DS, Credit<Cylinderlet, DS>*> indicators;
