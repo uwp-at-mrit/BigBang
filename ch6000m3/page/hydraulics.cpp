@@ -1,8 +1,8 @@
 ﻿#include "page/hydraulics.hpp"
 #include "configuration.hpp"
-#include "dashboard.hpp"
 #include "menu.hpp"
 
+#include "module.hpp"
 #include "text.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
@@ -52,12 +52,9 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k
 };
 
-private class Hydraulics final
-	: public PLCConfirmation
-	, public IMenuCommand<HSOperation, IMRMaster*>
-	, public DashBoard<HydraulicsPage, HS> {
+private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
 public:
-	Hydraulics(HydraulicsPage* master) : DashBoard(master, __FILE__) {
+	Hydraulics(HydraulicsPage* master) : master(master) {
 		this->caption_font = make_text_format("Microsoft YaHei", large_font_size);
 	}
 
@@ -205,14 +202,14 @@ public:
 	void load_state_indicators(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_status_indicator(HS::LevelLow, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_status_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_status_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels, Colours::Green);
-		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow, size, this->heater_states, this->hslabels);
+		this->load_status_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels);
+		this->load_status_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels);
+		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels);
 
-		this->load_status_indicator(HS::LevelLow, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_status_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels, Colours::Green);
-		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels, Colours::Green);
+		this->load_status_indicator(HS::LevelLow, size, this->visor_states, this->vslabels);
+		this->load_status_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels);
+		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels);
 
 		this->load_dimensions(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
 	}
@@ -327,6 +324,58 @@ public:
 		}
 	}
 
+private:
+	template<class G, typename E>
+	void load_graphlets(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
+		for (E id = id0; id <= idn; id++) {
+			gs[id] = this->master->insert_one(new G(radius, degrees), id);
+		}
+	}
+
+	template<class G, typename E>
+	void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
+		this->load_graphlets(gs, id0, idn, radius, degrees);
+
+		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+		}
+	}
+
+	template<class G, typename E>
+	void load_graphlets(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls
+		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
+		this->load_graphlets(gs, id0, idn, radius, degrees);
+
+		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id.ToString(), id, WarGrey::SCADA::Colours::Silver);
+			this->load_label(cs, id, WarGrey::SCADA::Colours::Silver);
+		}
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
+		for (HS id = id0; id <= idn; id++) {
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label), id);
+		}
+	}
+
+	template<typename E>
+	void load_status_indicator(E id, float size, std::map<E, Credit<Booleanlet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+		this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+		bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
+	}
+
+	template<typename E>
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ caption, E id
+		, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(caption, font, color), id);
+	}
+
+	template<typename E>
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
+		this->load_label(ls, _speak(id), id, color, font);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<HS>* stations[2];
@@ -348,6 +397,9 @@ private:
 	
 private:
 	CanvasTextFormat^ caption_font;
+
+private:
+	HydraulicsPage* master;
 };
 
 HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {

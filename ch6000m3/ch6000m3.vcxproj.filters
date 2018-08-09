@@ -36,9 +36,6 @@
     <ClCompile Include="decorator\page.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="page\waters.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\doors.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -54,10 +51,6 @@
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="decorator\page.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="dashboard.hpp" />
-    <ClInclude Include="page\waters.hpp">
-      <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\doors.hpp">
       <Filter>page</Filter>

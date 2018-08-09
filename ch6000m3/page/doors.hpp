@@ -23,6 +23,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::IMRMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
+		WarGrey::SCADA::IPlanetDecorator* decorator;
 		Windows::UI::Xaml::Controls::MenuFlyout^ operation;
 
 	private: // never deletes these graphlets mannually	

@@ -2,6 +2,8 @@
 #include "shape.hpp"
 #include "transformation.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 

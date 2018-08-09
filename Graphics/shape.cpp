@@ -2,6 +2,8 @@
 #include "math.hpp"
 #include "transformation.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 

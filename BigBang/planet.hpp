@@ -3,6 +3,8 @@
 #include <list>
 #include <shared_mutex>
 
+#include "credit.hpp"
+
 #include "universe.hxx"
 #include "decorator/decorator.hpp"
 #include "virtualization/numpad.hpp"
@@ -137,15 +139,19 @@ namespace WarGrey::SCADA {
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
 	public:
-		template<class G, unsigned int N>
+		template<class G, size_t N>
 		void insert_all(G* (&gs)[N], bool reversed = false) {
 			if (reversed) {
-				for (unsigned int idx = N; idx > 0; idx--) {
-					if (gs[idx - 1] != nullptr) this->insert(gs[idx - 1]);
+				for (size_t idx = N; idx > 0; idx--) {
+					if (gs[idx - 1] != nullptr) {
+						this->insert(gs[idx - 1]);
+					}
 				}
 			} else {
-				for (unsigned int idx = 0; idx < N; idx++) {
-					if (gs[idx] != nullptr) this->insert(gs[idx]);
+				for (size_t idx = 0; idx < N; idx++) {
+					if (gs[idx] != nullptr) {
+						this->insert(gs[idx]);
+					}
 				}
 			}
 		}
@@ -155,6 +161,13 @@ namespace WarGrey::SCADA {
 			this->insert(g, x, y, a);
 
 			return g;
+		}
+
+		template<class G, typename E>
+		Credit<G, E>* insert_one(Credit<G, E>* g, E id, float x = 0.0F, float y = 0.0F, GraphletAnchor a = GraphletAnchor::LT) {
+			g->id = id;
+
+			return this->insert_one(g, x, y, a);
 		}
 
 	public:
