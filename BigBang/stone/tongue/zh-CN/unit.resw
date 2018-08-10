@@ -123,7 +123,7 @@
   <data name="celsius" xml:space="preserve">
     <value>°C</value>
   </data>
-  <data name="degree" xml:space="preserve">
+  <data name="degrees" xml:space="preserve">
     <value>deg</value>
   </data>
   <data name="meter" xml:space="preserve">

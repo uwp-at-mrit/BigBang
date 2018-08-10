@@ -55,7 +55,7 @@ private enum class HS : unsigned int {
 private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {
-		this->caption_font = make_text_format("Microsoft YaHei", large_font_size);
+		this->caption_font = make_text_format("Microsoft YaHei UI", large_font_size);
 	}
 
 public:

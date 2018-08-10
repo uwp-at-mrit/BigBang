@@ -58,6 +58,11 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ caption, Platform::String^ subscript,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
 			unsigned int color_hex, double alpha = 1.0);
+
+		Labellet(Platform::String^ caption, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+		Labellet(Platform::String^ caption, Platform::String^ subscript, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+		Labellet(Platform::String^ caption, unsigned int color_hex, double alpha = 1.0);
+		Labellet(Platform::String^ caption, Platform::String^ subscript, unsigned int color_hex, double alpha = 1.0);
 	};
 
 	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {

@@ -126,13 +126,13 @@
   <data name="Heel" xml:space="preserve">
     <value>Heeling Angle</value>
   </data>
-  <data name="LDPressure" xml:space="preserve">
+  <data name="pLeftDrag" xml:space="preserve">
     <value>Left Drag Output Pressure</value>
   </data>
-  <data name="LockPressure" xml:space="preserve">
+  <data name="pLock" xml:space="preserve">
     <value>Locking High Pressure</value>
   </data>
-  <data name="RDPressure" xml:space="preserve">
+  <data name="pRightDrag" xml:space="preserve">
     <value>Right Drag Output Pressure</value>
   </data>
   <data name="Stern" xml:space="preserve">

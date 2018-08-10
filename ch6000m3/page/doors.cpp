@@ -31,8 +31,8 @@ private enum class DSOperation { Open, Stop, Close, Disable, _ };
 // WARNING: order matters
 private enum class DS : unsigned int {
 	Bow, Stern,
-	LDPressure, LockPressure, RDPressure,
-	Heel, Trim, EarthWork,
+	pLeftDrag, pLock, pRightDrag,
+	EarthWork, Heel, Trim,
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	_
@@ -109,6 +109,15 @@ public:
 		SET_BOX(y, this->y * aheight + cell_height * side_hint);
 	}
 
+	void fill_descent_anchor(float fx, float fy, float* x, float *y) {
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
+		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
+		
+		SET_BOX(x, this->x * awidth + this->ship_width * awidth * fx);
+		SET_BOX(y, aheight * fy + (this->y * aheight + abox.Height) * (1.0F - fy));
+	}
+
 private:
 	CanvasGeometry^ ship;
 	CanvasTextLayout^ sequences[door_count_per_side];
@@ -138,16 +147,34 @@ public:
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
 		this->load_indicators(this->draughts, this->dimensions, DS::Bow, DS::Stern, cylinder_height);
+
+		this->load_dimension(this->dimensions, this->labels, DS::EarthWork, "meter3");
+		this->load_dimensions(this->dimensions, this->labels, DS::pLeftDrag, DS::pRightDrag, "bar");
+		this->load_dimensions(this->dimensions, this->labels, DS::Heel, DS::Trim, "degrees");
 	}
 
 	void reflow(float width, float height, float vinset) {
-		float aheight = height - vinset - vinset;
-
 		this->reflow_doors(this->doors, this->progresses, DS::PS1, DS::PS7, 1.0F, -0.5F, GraphletAnchor::CT);
 		this->reflow_doors(this->doors, this->progresses, DS::SB1, DS::SB7, 3.0F, 0.5F, GraphletAnchor::CB);
 
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, aheight, 0.70F);
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, aheight, 0.30F);
+		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, 0.70F);
+		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, 0.30F);
+
+		{ // reflow dimensions
+			float x, y, label_height, xoff, yoff;
+
+			this->master->fill_graphlet_location(this->draughts[DS::Bow], nullptr, &y, GraphletAnchor::CC);
+			this->labels[DS::EarthWork]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+
+			xoff = label_height;
+			yoff = label_height * 2.0F;
+
+			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, nullptr);
+			this->reflow_tabular(this->labels, this->dimensions, DS::pLock, x, y, DS::pLeftDrag, DS::pRightDrag, xoff, yoff);
+			
+			this->decorator->fill_descent_anchor(0.5F, 0.0F, &x, nullptr);
+			this->reflow_tabular(this->labels, this->dimensions, DS::Heel, x, y, DS::EarthWork, DS::Trim, xoff, yoff);
+		}
 	}
 
 public:
@@ -163,32 +190,21 @@ public:
 
 private:
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^ label
-		, CanvasTextFormat^ font = nullptr) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, font, Colours::Yellow, Colours::Silver), id);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^ label = nullptr) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, Colours::Yellow, Colours::Silver), id);
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, CanvasTextFormat^ font = nullptr) {
-		this->load_dimension(ds, id, unit, _speak(id.ToString()), font);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), Colours::Silver), id);
+		this->load_dimension(ds, id, unit);
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, id, unit, label);
+			this->load_dimension(ds, ls, id, unit);
 		}
-	}
-
-	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ caption, E id
-		, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(caption, font, color), id);
-	}
-
-	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
-		this->load_label(ls, _speak(id), id, color, font);
 	}
 
 	template<typename E>
@@ -205,7 +221,7 @@ private:
 
 		for (E id = id0; id <= idn; id++) {
 			cs[id] = this->master->insert_one(new Credit<ConcaveCylinderlet, E>(10.0F, width, height), id);
-			this->load_dimension(ds, id, "meter");
+			this->load_dimension(ds, id, "meter", _speak(id.ToString()));
 		}
 	}
 
@@ -226,20 +242,26 @@ private:
 	}
 
 	template<class C, typename E>
-	void reflow_indicators(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float height, float fx) {
-		float ship_x, ship_y, ship_width, ship_height, indicator_height, label_height;
-		float ship_bottom, x, y;
+	void reflow_indicators(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float fx) {
+		float label_height, x, y;
 		
-		this->decorator->fill_ship_extent(&ship_x, &ship_y, &ship_width, &ship_height);
-		is[id]->fill_extent(0.0F, 0.0F, nullptr, &indicator_height);
 		ds[id]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
-		
-		ship_bottom = ship_y + ship_height;
-		x = ship_x + ship_width * fx;
-		y = (height - ship_bottom) * 0.5F + ship_bottom;
-		
-		this->master->move_to(is[id], x, y, GraphletAnchor::CC);
+		this->decorator->fill_descent_anchor(fx, 0.382F, &x, &y);	
+
+		this->master->move_to(is[id], x, y, GraphletAnchor::LC);
 		this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, label_height * 0.5F);
+	}
+
+	template <class G1, class G2, typename E>
+	void reflow_tabular(std::map<E, Credit<G1, E>*>& g1s, std::map<E, Credit<G2, E>*>& g2s
+		, E base, float x, float y, E above, E below, float xoff, float yoff) {
+		this->master->move_to(g1s[base], x, y, GraphletAnchor::CC);
+		this->master->move_to(g1s[above], g1s[base], GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -yoff);
+		this->master->move_to(g1s[below], g1s[base], GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, yoff);
+
+		this->master->move_to(g2s[base], g1s[base], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
+		this->master->move_to(g2s[above], g1s[above], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
+		this->master->move_to(g2s[below], g1s[below], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
 	}
 
 private: // never delete these graphlets manually.

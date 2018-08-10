@@ -15,17 +15,13 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
-static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 18.0F);
+static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 16.0F);
 
 static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	bool exists;
 	Platform::String^ dialect = speak(unit, "unit", &exists);
 
 	return (exists ? dialect : speak(unit));
-}
-
-static inline float aligned_y(TextExtent& te, float by) {
-	return by - (te.height - te.bspace);
 }
 
 static inline Platform::String^ scalar(float value, bool leader) {
@@ -45,13 +41,10 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 	(*bspace) = fmin(label_box->bspace, fmin(num_box.bspace, unit_box.bspace));
 
 	if (height != nullptr) {
-		float hsink = num_box.height - num_box.tspace - num_box.bspace;
-		float huink = unit_box.height - unit_box.tspace - unit_box.bspace;
-		float ink_height = fmax(hsink, huink);
-
-		if (layout != nullptr) {
-			ink_height = fmax(ink_height, label_box->height - label_box->tspace - label_box->bspace);
-		}
+		float link = label_box->height - label_box->tspace - unit_box.bspace;
+		float nink = num_box.height - num_box.tspace - unit_box.bspace;
+		float uink = unit_box.height - unit_box.tspace - unit_box.bspace;
+		float ink_height = fmax(fmax(nink, uink), link);
 
 		(*height) = (*tspace) + ink_height + (*bspace);
 	}
@@ -88,19 +81,19 @@ static void draw_metrics(CanvasDrawingSession^ ds, float x, float y, TextExtent&
 	, CanvasTextLayout^ text_layout, CanvasTextLayout^ num_layout, CanvasTextLayout^ unit_layout
 	, ICanvasBrush^ num_color, ICanvasBrush^ text_color) {
 	TextExtent label_box;
-	float tspace, bspace, height, by;
+	float tspace, bspace, height, base_y;
 	float lx = x;
 
 	fill_vmetrics(text_layout, num_box, unit_box, &label_box, &tspace, &bspace, &height);
-	by = y + height - bspace;
+	base_y = y + height;
 
 	if (text_layout != nullptr) {
-		ds->DrawTextLayout(text_layout, x, aligned_y(label_box, by), text_color);
+		ds->DrawTextLayout(text_layout, x, base_y - label_box.height, text_color);
 		lx += label_box.width;
 	}
 
-	ds->DrawTextLayout(num_layout, lx, aligned_y(num_box, by), num_color);
-	ds->DrawTextLayout(unit_layout, lx + num_box.width, aligned_y(unit_box, by), text_color);
+	ds->DrawTextLayout(num_layout, lx, base_y - num_box.height, num_color);
+	ds->DrawTextLayout(unit_layout, lx + num_box.width, base_y - unit_box.height, text_color);
 }
 
 /*************************************************************************************************/
@@ -245,6 +238,32 @@ Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, Canva
 		this->set_font(font);
 	}
 
+	this->set_color(color_hex, alpha);
+	this->set_subtext(caption, subscript);
+}
+
+Labellet::Labellet(Platform::String^ caption, ICanvasBrush^ color) {
+	if (color != nullptr) {
+		this->set_color(color);
+	}
+
+	this->set_text(caption);
+}
+
+Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, ICanvasBrush^ color) {
+	if (color != nullptr) {
+		this->set_color(color);
+	}
+
+	this->set_subtext(caption, subscript);
+}
+
+Labellet::Labellet(Platform::String^ caption, unsigned int color_hex, double alpha) {
+	this->set_color(color_hex, alpha);
+	this->set_text(caption);
+}
+
+Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsigned int color_hex, double alpha) {
 	this->set_color(color_hex, alpha);
 	this->set_subtext(caption, subscript);
 }
