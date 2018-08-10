@@ -105,7 +105,7 @@ private: // never delete these graphlets manually.
 	std::unordered_map<ValveStatus, Labellet*> vlabels;
 	std::unordered_map<DoorStatus, BottomDoorlet*> hoppers;
 	std::unordered_map<DoorStatus, Labellet*> hlabels;
-	std::unordered_map<DoorStatus, UpperHopperDoorlet*> doors;
+	std::unordered_map<DoorStatus, UpperDoorlet*> doors;
 	std::unordered_map<DoorStatus, Labellet*> dlabels;
 
 private:

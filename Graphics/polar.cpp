@@ -3,6 +3,8 @@
 #include "polar.hpp"
 #include "transformation.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
@@ -72,8 +74,41 @@ static CanvasGeometry^ make_masked_sandglass(float r, double d, double ratio) {
 	return CanvasGeometry::CreatePath(glass);
 }
 
+CanvasGeometry^ make_masked_rectangle(float r, double a, double d, double ratio) {
+	auto frame = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	double theta = 180.0 - a;
+	float xrt, yrt, xlt, ylt, xlb, ylb, xrb, yrb, x, y;
+
+	circle_point(r, d + a, &xrt, &yrt);
+	circle_point(r, d + theta, &xlt, &ylt);
+	circle_point(r, d - theta, &xlb, &ylb);
+	circle_point(r, d - a, &xrb, &yrb);
+	
+	if (ratio > 0.0) { // bottom-up
+		frame->BeginFigure(xrb, yrb);
+		frame->AddLine(xlb, ylb);
+		line_point(xlt, ylt, xlb, ylb, ratio, &x, &y);
+		frame->AddLine(x, y);
+		line_point(xrt, yrt, xrb, yrb, ratio, &x, &y);
+		frame->AddLine(x, y);
+		frame->AddLine(xrb, yrb);
+	} else { // top-down
+		frame->BeginFigure(xlt, ylt);
+		frame->AddLine(xrt, yrt);
+		line_point(xrb, yrb, xrt, yrt, -ratio, &x, &y);
+		frame->AddLine(x, y);
+		line_point(xlb, ylb, xlt, ylt, -ratio, &x, &y);
+		frame->AddLine(x, y);
+		frame->AddLine(xlt, ylt);
+	}
+
+	frame->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(frame);
+}
+
 /*************************************************************************************************/
-CanvasGeometry^ polar_axis(float r, double d) {
+CanvasGeometry^ WarGrey::SCADA::polar_axis(float r, double d) {
 	auto axis = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
@@ -85,7 +120,7 @@ CanvasGeometry^ polar_axis(float r, double d) {
 	return CanvasGeometry::CreatePath(axis);
 }
 
-CanvasGeometry^ polar_pole(float r, double d, float ptr) {
+CanvasGeometry^ WarGrey::SCADA::polar_pole(float r, double d, float ptr) {
 	float x, y;
 
 	circle_point(r, d, &x, &y);
@@ -93,7 +128,21 @@ CanvasGeometry^ polar_pole(float r, double d, float ptr) {
 	return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), x, y, ptr, ptr);
 }
 
-CanvasGeometry^ polar_triangle(float r, double d) {
+CanvasGeometry^ WarGrey::SCADA::polar_line(float radius, double start_degrees, double end_degrees) {
+	auto axis = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float x1, y1, x2, y2;
+
+	circle_point(radius, start_degrees, &x1, &y1);
+	circle_point(radius, end_degrees, &x2, &y2);
+
+	axis->BeginFigure(x1, y1);
+	axis->AddLine(x2, y2);
+	axis->EndFigure(CanvasFigureLoop::Open);
+
+	return CanvasGeometry::CreatePath(axis);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d) {
 	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
@@ -108,7 +157,7 @@ CanvasGeometry^ polar_triangle(float r, double d) {
 	return CanvasGeometry::CreatePath(equilateral_triangle);
 }
 
-CanvasGeometry^ polar_masked_triangle(float r, double d, double ratio) {
+CanvasGeometry^ WarGrey::SCADA::polar_masked_triangle(float r, double d, double ratio) {
 	if (ratio == 0.0) {
 		return blank();
 	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
@@ -118,7 +167,7 @@ CanvasGeometry^ polar_masked_triangle(float r, double d, double ratio) {
 	}
 }
 
-CanvasGeometry^ polar_sandglass(float r, double d) {
+CanvasGeometry^ WarGrey::SCADA::polar_sandglass(float r, double d) {
 	auto glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
@@ -135,7 +184,7 @@ CanvasGeometry^ polar_sandglass(float r, double d) {
 	return CanvasGeometry::CreatePath(glass);
 }
 
-CanvasGeometry^ polar_masked_sandglass(float r, double d, double ratio) {
+CanvasGeometry^ WarGrey::SCADA::polar_masked_sandglass(float r, double d, double ratio) {
 	if (ratio == 0.0) {
 		return blank();
 	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
@@ -145,7 +194,7 @@ CanvasGeometry^ polar_masked_sandglass(float r, double d, double ratio) {
 	}
 }
 
-CanvasGeometry^ polar_rectangle(float r, double alpha, double rotation) {
+CanvasGeometry^ WarGrey::SCADA::polar_rectangle(float r, double alpha, double rotation) {
 	auto frame = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double theta = 180.0 - alpha;
 	float x, y;
@@ -161,4 +210,14 @@ CanvasGeometry^ polar_rectangle(float r, double alpha, double rotation) {
 	frame->EndFigure(CanvasFigureLoop::Closed);
 
 	return CanvasGeometry::CreatePath(frame);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_masked_rectangle(float r, double alpha, double rotation, double ratio) {
+	if (ratio == 0.0) {
+		return blank();
+	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
+		return polar_rectangle(r, alpha, rotation);
+	} else {
+		return make_masked_rectangle(r, alpha, rotation, ratio);
+	}
 }

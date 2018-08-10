@@ -40,7 +40,34 @@ namespace WarGrey::SCADA {
 		double mask_percentage;
 	};
 
-	private class UpperHopperDoorlet : public WarGrey::SCADA::BottomDoorlet {
-		using BottomDoorlet::BottomDoorlet;
+	private class UpperDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
+	public:
+		UpperDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
+		UpperDoorlet(float radius, double degrees = 0.0);
+
+	public:
+		void construct() override;
+		void update(long long count, long long interval, long long uptime) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
+
+	private:
+		void make_masked_door();
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ disable_line;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ border;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ door;
+
+	private:
+		float radius;
+		float bradius;
+
+	private:
+		double mask_percentage;
 	};
 }

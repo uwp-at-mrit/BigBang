@@ -12,11 +12,11 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-CanvasGeometry^ blank() {
+CanvasGeometry^ WarGrey::SCADA::blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
 }
 
-CanvasGeometry^ paragraph(CanvasTextLayout^ tl, bool adjust) {
+CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, bool adjust) {
     CanvasGeometry^ layout = CanvasGeometry::CreateText(tl);
 	float x = tl->LayoutBounds.X;
 	float y = tl->LayoutBounds.Y;
@@ -31,7 +31,7 @@ CanvasGeometry^ paragraph(CanvasTextLayout^ tl, bool adjust) {
 	return layout;
 }
 
-CanvasGeometry^ line(float sx, float sy, float ex, float ey, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::line(float sx, float sy, float ex, float ey, float th, CanvasStrokeStyle^ style) {
 	auto line = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
 	line->BeginFigure(sx, sy);
@@ -41,31 +41,31 @@ CanvasGeometry^ line(float sx, float sy, float ex, float ey, float th, CanvasStr
 	return geometry_stroke(CanvasGeometry::CreatePath(line), th, style);
 }
 
-CanvasGeometry^ line(float ex, float ey, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::line(float ex, float ey, float th, CanvasStrokeStyle^ style) {
 	return line(0.0F, 0.0F, ex, ey, th, style);
 }
 
-CanvasGeometry^ hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::hline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
 	return line(x, y, x + l, y, th, style);
 }
 
-CanvasGeometry^ hline(float l, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::hline(float l, float th, CanvasStrokeStyle^ style) {
     return hline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ vline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::vline(float x, float y, float l, float th, CanvasStrokeStyle^ style) {
 	return line(x, y, x, y + l, th, style);
 }
 
-CanvasGeometry^ vline(float l, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::vline(float l, float th, CanvasStrokeStyle^ style) {
     return vline(0.0F, 0.0F, l, th, style);
 }
 
-CanvasGeometry^ arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	return arc(0.0F, 0.0F, start, end, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ arc(float cx, float cy, double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::arc(float cx, float cy, double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	auto arc_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float rstart = degrees_to_radians(start);
 	float rsweep = degrees_to_radians(end - start);
@@ -80,7 +80,7 @@ CanvasGeometry^ arc(float cx, float cy, double start, double end, float radiusX,
 	return geometry_stroke(CanvasGeometry::CreatePath(arc_path), th, style);
 }
 
-CanvasGeometry^ short_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::short_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	float sx, sy, ex, ey;
 
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
@@ -89,7 +89,7 @@ CanvasGeometry^ short_arc(double start, double end, float radiusX, float radiusY
 	return short_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
     
     arc->BeginFigure(sx, sy);
@@ -99,7 +99,7 @@ CanvasGeometry^ short_arc(float sx, float sy, float ex, float ey, float rx, floa
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
-CanvasGeometry^ long_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::long_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
 	float sx, sy, ex, ey;
 
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
@@ -108,7 +108,7 @@ CanvasGeometry^ long_arc(double start, double end, float radiusX, float radiusY,
 	return long_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
     arc->BeginFigure(sx, sy);
@@ -118,35 +118,35 @@ CanvasGeometry^ long_arc(float sx, float sy, float ex, float ey, float rx, float
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
-CanvasGeometry^ circle(float r) {
+CanvasGeometry^ WarGrey::SCADA::circle(float r) {
 	return circle(r * 0.5F, r * 0.5F, r);
 }
 
-CanvasGeometry^ circle(float cx, float cy, float r) {
+CanvasGeometry^ WarGrey::SCADA::circle(float cx, float cy, float r) {
     return CanvasGeometry::CreateCircle(CanvasDevice::GetSharedDevice(), cx, cy, r);
 }
 
-CanvasGeometry^ ellipse(float rx, float ry) {
+CanvasGeometry^ WarGrey::SCADA::ellipse(float rx, float ry) {
 	return ellipse(rx * 0.5F, ry * 0.5F, rx, ry);
 }
 
-CanvasGeometry^ ellipse(float cx, float cy, float rx, float ry) {
+CanvasGeometry^ WarGrey::SCADA::ellipse(float cx, float cy, float rx, float ry) {
     return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), cx, cy, rx, ry);
 }
 
-CanvasGeometry^ sector(double start, double end, float radiusX, float radiusY) {
+CanvasGeometry^ WarGrey::SCADA::sector(double start, double end, float radiusX, float radiusY) {
 	return sector(0.0F, 0.0F, start, end, radiusX, radiusY);
 }
 
-CanvasGeometry^ sector(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
+CanvasGeometry^ WarGrey::SCADA::sector(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
 	return masked_sector(cx, cy, start, end, 0.0, radiusX, maybe_radiusY);
 }
 
-CanvasGeometry^ masked_sector(double start, double end, double ratio, float radiusX, float radiusY) {
+CanvasGeometry^ WarGrey::SCADA::masked_sector(double start, double end, double ratio, float radiusX, float radiusY) {
 	return masked_sector(0.0F, 0.0F, start, end, ratio, radiusX, radiusY);
 }
 
-CanvasGeometry^ masked_sector(float cx, float cy, double start, double end, double ratio, float radiusX, float maybe_radiusY) {
+CanvasGeometry^ WarGrey::SCADA::masked_sector(float cx, float cy, double start, double end, double ratio, float radiusX, float maybe_radiusY) {
 	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float mradiusX = radiusX * float(ratio);
@@ -168,11 +168,11 @@ CanvasGeometry^ masked_sector(float cx, float cy, double start, double end, doub
 	return CanvasGeometry::CreatePath(sector_path);
 }
 
-CanvasGeometry^ segment(double start, double end, float radiusX, float radiusY) {
+CanvasGeometry^ WarGrey::SCADA::segment(double start, double end, float radiusX, float radiusY) {
 	return segment(0.0F, 0.0F, start, end, radiusX, radiusY);
 }
 
-CanvasGeometry^ segment(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
+CanvasGeometry^ WarGrey::SCADA::segment(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
 	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float rstart = degrees_to_radians(start);
@@ -189,42 +189,42 @@ CanvasGeometry^ segment(float cx, float cy, double start, double end, float radi
 	return CanvasGeometry::CreatePath(sector_path);
 }
 
-CanvasGeometry^ rectangle(Rect& region) {
+CanvasGeometry^ WarGrey::SCADA::rectangle(Rect& region) {
 	return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), region);
 }
 
-CanvasGeometry^ rectangle(float x, float y, float w, float h) {
+CanvasGeometry^ WarGrey::SCADA::rectangle(float x, float y, float w, float h) {
 	return rectangle(Rect(x, y, w, h));
 }
 
-CanvasGeometry^ rectangle(float w, float h) {
+CanvasGeometry^ WarGrey::SCADA::rectangle(float w, float h) {
     return rectangle(Rect(0.0F, 0.0F, w, h));
 }
 
-CanvasGeometry^ rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
+CanvasGeometry^ WarGrey::SCADA::rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
     float radius_x = (rx < 0.0F) ? -(w * rx) : rx;
     float radius_y = (ry < 0.0F) ? -(h * ry) : ry;
 
     return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h), radius_x, radius_y);
 }
 
-CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d) {
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d) {
     return rotate_rectangle(x, y, w, h, d, x + w * 0.5F, y + h * 0.5F);
 }
 
-CanvasGeometry^ rotate_rectangle(float w, float h, double d) {
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float w, float h, double d) {
     return rotate_rectangle(0.0F, 0.0F, w, h, d, w * 0.5F, h * 0.5F);
 }
 
-CanvasGeometry^ rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {
     return geometry_rotate(rectangle(x, y, w, h), d, cx, cy);
 }
 
-CanvasGeometry^ rotate_rectangle(float w, float h, double d, float cx, float cy) {
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float w, float h, double d, float cx, float cy) {
     return rotate_rectangle(0.0F, 0.0F, w, h, d, cx, cy);
 }
 
-CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::double_arrow(float x, float y, float arrow_size, float head_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
 	auto arrow = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float arrowheadsize = head_size * thickness;
 	float alignoff = thickness * 1.0F;
@@ -246,15 +246,15 @@ CanvasGeometry^ double_arrow(float x, float y, float arrow_size, float head_size
 	return geometry_stroke(CanvasGeometry::CreatePath(arrow), thickness);
 }
 
-CanvasGeometry^ double_arrow(float arrow_size, float arrowhead_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::double_arrow(float arrow_size, float arrowhead_size, float spacing, float thickness, CanvasStrokeStyle^ style) {
 	return double_arrow(0.0F, 0.0F, arrow_size, arrowhead_size, spacing, thickness, style);
 }
 
-Geometry::CanvasGeometry^ stadium(float length, float radius) {
+CanvasGeometry^ WarGrey::SCADA::stadium(float length, float radius) {
 	return stadium(0.0F, 0.0F, length, radius);
 }
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float x, float y, float length, float radius) {
+CanvasGeometry^ WarGrey::SCADA::stadium(float x, float y, float length, float radius) {
 	auto discorectangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float lx = x + radius;
 	float rx = lx + length;

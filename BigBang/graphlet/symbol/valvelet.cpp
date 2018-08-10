@@ -13,8 +13,6 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-static CanvasSolidColorBrush^ default_sketeton_color = Colours::DarkGray;
-
 /*************************************************************************************************/
 Valvelet::Valvelet(float radius, double degrees) : Valvelet(ValveStatus::Manual, radius, degrees) {}
 
@@ -75,7 +73,7 @@ void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
 	case ValveStatus::Closed: {
-		CAS_SLOT(s.body_color, Colours::LightGray);
+		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
 	case ValveStatus::Closing: {
 		CAS_SLOT(s.mask_color, Colours::DarkGray);
@@ -94,7 +92,7 @@ void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 	}; break;
 	}
 
-	CAS_SLOT(s.skeleton_color, default_sketeton_color);
+	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
 	CAS_SLOT(s.body_color, Colours::Background);
 
 	// NOTE: The others can be nullptr;
