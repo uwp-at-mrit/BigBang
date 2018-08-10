@@ -61,31 +61,41 @@ public:
 public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
 
 		this->temperatures[HS::Heater]->set_value(RealData(AI_DB203, 18U));
 		this->temperatures[HS::VisorTank]->set_value(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
+			static std::map<HS, bool> need_lock_position;
 			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
+
+			if (need_lock_position.size() == 0) {
+				need_lock_position[HS::F] = true;
+				need_lock_position[HS::C] = true;
+				need_lock_position[HS::D] = true;
+				need_lock_position[HS::E] = true;
+				need_lock_position[HS::J] = true;
+			}
 
 			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
 				HS id = bar_seq[i];
-				Dimensionlet* target = this->bars[id];
-				bool need_adjust_position = ((id == HS::F) || (id == HS::C) || (id == HS::D) || (id == HS::E));
 				
-				if (need_adjust_position) {
-					target->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
+				if (need_lock_position[id]) {
+					this->bars[id]->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
 				} else {
-					target->set_value(RealData(AI_DB203, 8 + i));
+					this->bars[id]->set_value(RealData(AI_DB203, 8 + i));
 				}
 			}
 		}
 
+		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
 
 	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
 		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
 
 		{ // pump states
 			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::G, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
@@ -106,6 +116,7 @@ public:
 			}
 		}
 
+		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
 
@@ -245,26 +256,32 @@ public:
 		float y0 = 0.0F;
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
-			switch (int(it->second->get_direction_degrees())) {
-			case -90: { // for Y, L, M, K
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
-				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
-				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no scales
-			} break;
-			case 90: {  // for J, I
-				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
-				bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
-			} break;
-			case 180: { // for A, B, G, H
+			switch (it->second->id) {
+			case HS::A: case HS::B: case HS::G: case HS::H: {
 				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
 				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
 				bar_dx = x0 + gridsize; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
-			default: {  // for F, C, D, E
+			case HS::F: case HS::C: case HS::D: case HS::E: {
 				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
 				bar_dx = x0 - gridsize; bar_dy = y0; bar_a = GraphletAnchor::RB;
+			} break;
+			case HS::Y: case HS::L: case HS::M: case HS::K: {
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
+				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no metrics
+			} break;
+			default: {
+				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
+			
+				if (it->second->id == HS::I) {
+					lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
+				} else {
+					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
+				}
 			}
 			}
 
@@ -408,7 +425,6 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 	this->dashboard = dashboard;
 	this->operation = make_menu<HSOperation, IMRMaster*>(dashboard, plc);
 	this->gridsize = statusbar_height();
-
 
 	this->device->append_confirmation_receiver(dashboard);
 

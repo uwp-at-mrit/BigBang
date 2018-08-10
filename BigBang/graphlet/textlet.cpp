@@ -303,12 +303,11 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Plat
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
-		Platform::String^ suffix = ":";
 
 		if (subscript == nullptr) {
-			this->set_text(symbol + suffix);
+			this->set_text(symbol);
 		} else {
-			this->set_subtext(symbol, speak(subscript), suffix);
+			this->set_subtext(symbol, speak(subscript));
 		}
 	}
 }
@@ -379,12 +378,11 @@ Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscrip
 
 	if (label != nullptr) {
 		Platform::String^ symbol = speak(label);
-		Platform::String^ suffix = ":";
 
 		if (subscript == nullptr) {
-			this->set_text(symbol + suffix);
+			this->set_text(symbol);
 		} else {
-			this->set_subtext(symbol, speak(subscript), suffix);
+			this->set_subtext(symbol, speak(subscript));
 		}
 	}
 }

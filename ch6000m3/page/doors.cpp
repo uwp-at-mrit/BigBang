@@ -157,8 +157,8 @@ public:
 		this->reflow_doors(this->doors, this->progresses, DS::PS1, DS::PS7, 1.0F, -0.5F, GraphletAnchor::CT);
 		this->reflow_doors(this->doors, this->progresses, DS::SB1, DS::SB7, 3.0F, 0.5F, GraphletAnchor::CB);
 
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, 0.70F);
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, 0.30F);
+		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, 0.618F);
+		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, 0.382F);
 
 		{ // reflow dimensions
 			float x, y, label_height, xoff, yoff;
@@ -166,15 +166,31 @@ public:
 			this->master->fill_graphlet_location(this->draughts[DS::Bow], nullptr, &y, GraphletAnchor::CC);
 			this->labels[DS::EarthWork]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 
-			xoff = label_height;
+			xoff = label_height * 0.5F;
 			yoff = label_height * 2.0F;
 
-			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, nullptr);
+			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
 			this->reflow_tabular(this->labels, this->dimensions, DS::pLock, x, y, DS::pLeftDrag, DS::pRightDrag, xoff, yoff);
 			
-			this->decorator->fill_descent_anchor(0.5F, 0.0F, &x, nullptr);
+			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
 			this->reflow_tabular(this->labels, this->dimensions, DS::Heel, x, y, DS::EarthWork, DS::Trim, xoff, yoff);
 		}
+	}
+
+public:
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->set_draught(DS::Bow, DBD(DB2, 164U));
+		this->set_draught(DS::Stern, DBD(DB2, 188U));
+
+		this->dimensions[DS::Trim]->set_value(DBD(DB2, 200U));
+		this->dimensions[DS::Heel]->set_value(DBD(DB2, 204U));
+		this->dimensions[DS::EarthWork]->set_value(DBD(DB2, 236U));
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
 	}
 
 public:
@@ -264,6 +280,12 @@ private:
 		this->master->move_to(g2s[below], g1s[below], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
 	}
 
+private:
+	void set_draught(DS id, float value) {
+		this->draughts[id]->set_value(value);
+		this->dimensions[id]->set_value(value);
+	}
+
 private: // never delete these graphlets manually.
 	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
@@ -283,6 +305,8 @@ DoorsPage::DoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->dashboard = dashboard;
 	this->operation = make_menu<DSOperation, IMRMaster*>(dashboard, plc);
+
+	this->device->append_confirmation_receiver(dashboard);
 
 	this->append_decorator(new PageDecorator());
 	this->append_decorator(decorator);

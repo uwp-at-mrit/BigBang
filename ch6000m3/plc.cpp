@@ -62,6 +62,10 @@ static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn,
 }
 
 /*************************************************************************************************/
+float WarGrey::SCADA::DBD(const uint8* src, size_t idx) {
+	return bigendian_float_ref(src, idx);
+}
+
 float WarGrey::SCADA::RealData(const uint8* src, size_t idx) {
 	return bigendian_float_ref(src, idx * 4U);
 }

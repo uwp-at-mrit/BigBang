@@ -214,7 +214,7 @@ void IMRMaster::wait_process_confirm_loop() {
 				delete[] data_pool;
 
 				modbus_protocol_fatal(this->logger,
-					L"message comes from devce[%s] has an malformed end(expected %u, received %u)",
+					L"message comes from devce[%s] has an malformed end(expected 0X%04X, received 0X%04X)",
 					this->device_description()->Data(), expected_tail, end_of_message);
 			} else {
 				this->logger->log_message(Log::Debug,

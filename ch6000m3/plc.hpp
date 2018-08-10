@@ -4,6 +4,7 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
+	float DBD(const uint8* src, size_t idx);
 	float RealData(const uint8* src, size_t idx);
 
 	private class PLCConfirmation : public WarGrey::SCADA::MRConfirmation {
