@@ -7,6 +7,7 @@ namespace WarGrey::SCADA {
 
 	private struct DoorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_hlcolor;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ door_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
@@ -38,6 +39,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		double mask_percentage;
+		bool flashing;
 	};
 
 	private class UpperDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
@@ -69,5 +71,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		double mask_percentage;
+		bool flashing;
 	};
 }

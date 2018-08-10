@@ -29,6 +29,7 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
+		this->flashing = !this->flashing;
 		this->make_masked_door_partitions();
 		this->notify_updated();
 	} break;
@@ -38,6 +39,7 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
+		this->flashing = !this->flashing;
 		this->make_masked_door_partitions();
 		this->notify_updated();
 	} break;
@@ -45,6 +47,8 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 }
 
 void BottomDoorlet::on_status_changed(DoorStatus state) {
+	this->flashing = false;
+
 	switch (state) {
 	case DoorStatus::Open: {
 		this->mask_percentage = 1.0;
@@ -72,9 +76,16 @@ void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	case DoorStatus::Disabled: {
 		CAS_SLOT(s.disable_color, Colours::Firebrick);
 	}; break;
+	case DoorStatus::Opening: {
+		CAS_SLOT(s.border_hlcolor, Colours::Green);
+	}; break;
+	case DoorStatus::Closing: {
+		CAS_SLOT(s.border_hlcolor, Colours::Yellow);
+	}; break;
 	}
 
 	CAS_SLOT(s.border_color, Colours::ForestGreen);
+	CAS_SLOT(s.border_hlcolor, s.border_color);
 	CAS_SLOT(s.door_color, Colours::DimGray);
 	CAS_SLOT(s.body_color, Colours::DarkKhaki);
 	CAS_SLOT(s.skeleton_color, Colours::Black);
@@ -102,7 +113,11 @@ void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		}
 	}
 
-	ds->DrawCircle(cx, cy, this->radius, style.border_color, default_thickness);
+	if (this->flashing) {
+		ds->DrawCircle(cx, cy, this->radius, style.border_hlcolor, default_thickness);
+	} else {
+		ds->DrawCircle(cx, cy, this->radius, style.border_color, default_thickness);
+	}
 }
 
 void BottomDoorlet::make_masked_door_partitions() {
@@ -139,6 +154,7 @@ void UpperDoorlet::update(long long count, long long interval, long long uptime)
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 		
+		this->flashing = !this->flashing;
 		this->make_masked_door();
 		this->notify_updated();
 	} break;
@@ -148,6 +164,7 @@ void UpperDoorlet::update(long long count, long long interval, long long uptime)
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
+		this->flashing = !this->flashing;
 		this->make_masked_door();
 		this->notify_updated();
 	} break;
@@ -155,6 +172,8 @@ void UpperDoorlet::update(long long count, long long interval, long long uptime)
 }
 
 void UpperDoorlet::on_status_changed(DoorStatus state) {
+	this->flashing = false;
+
 	switch (state) {
 	case DoorStatus::Open: {
 		this->mask_percentage = 0.0;
@@ -177,9 +196,16 @@ void UpperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	case DoorStatus::Closed: {
 		CAS_SLOT(s.door_color, Colours::Gray);
 	} break;
+	case DoorStatus::Opening: {
+		CAS_SLOT(s.border_hlcolor, Colours::Green);
+	}; break;
+	case DoorStatus::Closing: {
+		CAS_SLOT(s.border_hlcolor, Colours::Yellow);
+	}; break;
 	}
 
 	CAS_SLOT(s.border_color, Colours::ForestGreen);
+	CAS_SLOT(s.border_hlcolor, s.border_color);
 	CAS_SLOT(s.door_color, Colours::DimGray);
 	CAS_SLOT(s.body_color, Colours::DarkKhaki);
 	CAS_SLOT(s.skeleton_color, Colours::Black);
@@ -204,7 +230,11 @@ void UpperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		}
 	}
 
-	ds->DrawGeometry(this->border, cx, cy, style.border_color, default_thickness);
+	if (this->flashing) {
+		ds->DrawGeometry(this->border, cx, cy, style.border_hlcolor, default_thickness);
+	} else {
+		ds->DrawGeometry(this->border, cx, cy, style.border_color, default_thickness);
+	}
 }
 
 void UpperDoorlet::make_masked_door() {

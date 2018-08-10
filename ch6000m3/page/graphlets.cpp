@@ -34,8 +34,8 @@ public:
 
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->valves, this->vlabels, unitsize);
-		this->load_primitives(this->hoppers, this->hlabels, unitsize);
-		this->load_primitives(this->doors, this->dlabels, unitsize);
+		this->load_primitives(this->bdoors, this->bdlabels, unitsize);
+		this->load_primitives(this->udoors, this->udlabels, unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -68,10 +68,10 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		y0 += unitsize;
-		this->reflow_primitives(this->pumps, this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
+		this->reflow_primitives(this->pumps,  this->plabels,  x0, y0 + cellsize * 1.0F, cellsize);
 		this->reflow_primitives(this->valves, this->vlabels,  x0, y0 + cellsize * 2.0F, cellsize);
-		this->reflow_primitives(this->hoppers, this->hlabels, x0, y0 + cellsize * 3.0F, cellsize);
-		this->reflow_primitives(this->doors, this->dlabels,   x0, y0 + cellsize * 4.0F, cellsize);
+		this->reflow_primitives(this->bdoors, this->bdlabels, x0, y0 + cellsize * 3.0F, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels, x0, y0 + cellsize * 4.0F, cellsize);
 	}
 
 private:
@@ -103,10 +103,10 @@ private: // never delete these graphlets manually.
 	std::unordered_map<PumpStatus, Labellet*> plabels;
 	std::unordered_map<ValveStatus, Valvelet*> valves;
 	std::unordered_map<ValveStatus, Labellet*> vlabels;
-	std::unordered_map<DoorStatus, BottomDoorlet*> hoppers;
-	std::unordered_map<DoorStatus, Labellet*> hlabels;
-	std::unordered_map<DoorStatus, UpperDoorlet*> doors;
-	std::unordered_map<DoorStatus, Labellet*> dlabels;
+	std::unordered_map<DoorStatus, BottomDoorlet*> bdoors;
+	std::unordered_map<DoorStatus, Labellet*> bdlabels;
+	std::unordered_map<DoorStatus, UpperDoorlet*> udoors;
+	std::unordered_map<DoorStatus, Labellet*> udlabels;
 
 private:
 	GraphletOverview* master;
