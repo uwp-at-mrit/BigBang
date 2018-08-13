@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "text.hpp"
 
 using namespace WarGrey::SCADA;
@@ -28,6 +30,20 @@ CanvasTextLayout^ make_vertical_layout(Platform::String^ para, CanvasTextFormat^
     return layout;
 }
 
+CanvasTextFormat^ make_text_format(CanvasTextFormat^ src, float size) {
+	CanvasTextFormat^ font = make_text_format(src->FontFamily, size, src->WordWrapping, src->HorizontalAlignment);
+
+	font->FontWeight = src->FontWeight;
+	font->FontStretch = src->FontStretch;
+	font->FontStyle = src->FontStyle;
+
+	return font;
+}
+
+CanvasTextFormat^ make_text_format(CanvasTextFormat^ font, double size) {
+	return make_text_format(font, float(std::round(font->FontSize * size)));
+}
+
 CanvasTextFormat^ make_text_format(float size, CanvasWordWrapping wrapping, CanvasHorizontalAlignment align) {
     return make_text_format(nullptr, size, wrapping, align);
 }
@@ -42,7 +58,6 @@ CanvasTextFormat^ make_text_format(Platform::String^ face, float size, CanvasWor
 	font_config->WordWrapping = wrapping;
 	font_config->HorizontalAlignment = align;
 	font_config->FontSize = size;
-
 
 	return font_config;
 }

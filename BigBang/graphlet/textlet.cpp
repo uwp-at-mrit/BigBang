@@ -17,6 +17,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
 static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 16.0F);
 
+static ICanvasBrush^ default_number_color = Colours::Yellow;
+static ICanvasBrush^ default_unit_color = Colours::make(0x23EBB9U);
+
 static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	bool exists;
 	Platform::String^ dialect = speak(unit, "unit", &exists);
@@ -273,13 +276,13 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ nfont, Canv
 	: Dimensionlet(unit, "", nfont, lfont, color) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Dimensionlet(unit, label, "", nfont, lfont, color, color) {}
+	: Dimensionlet(unit, label, "", nfont, lfont, color, nullptr) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Dimensionlet(unit, "", font, ncolor, lcolor) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Dimensionlet(unit, label, "", font, font, ncolor, lcolor) {}
+	: Dimensionlet(unit, label, "", font, nullptr, ncolor, lcolor) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Dimensionlet(unit, label, nullptr, ncolor, lcolor) {}
@@ -291,12 +294,13 @@ Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanv
 	: Dimensionlet(unit, "", font, color) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Dimensionlet(unit, label, "", font, font, color, color) {}
+	: Dimensionlet(unit, label, "", font, nullptr, color, nullptr) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color(ncolor), num_font((nfont == nullptr) ? default_math_font : nfont) {
-	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
+	: num_color((ncolor == nullptr) ? default_number_color : ncolor)
+	, num_font((nfont == nullptr) ? default_math_font : nfont) {
+	this->set_color((lcolor == nullptr) ? default_unit_color : lcolor);
 	this->set_font((lfont == nullptr) ? default_text_font : lfont);
 	this->unit_layout = make_text_layout(unit_speak(unit), this->text_font);
 	this->unit_box = get_text_extent(this->unit_layout);
@@ -348,7 +352,7 @@ Percentagelet::Percentagelet(CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, I
 	: Percentagelet("", nfont, lfont, color) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Percentagelet(label, "", nfont, lfont, color, color) {}
+	: Percentagelet(label, "", nfont, lfont, color, nullptr) {}
 
 Percentagelet::Percentagelet(ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
 	: Percentagelet("", ncolor, lcolor) {}
@@ -360,18 +364,19 @@ Percentagelet::Percentagelet(CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanv
 	: Percentagelet("", font, ncolor, lcolor) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Percentagelet(label, "", font, font, ncolor, lcolor) {}
+	: Percentagelet(label, "", font, nullptr, ncolor, lcolor) {}
 
 Percentagelet::Percentagelet(CanvasTextFormat^ font, ICanvasBrush^ color)
 	: Percentagelet("", font, color) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Percentagelet(label, "", font, font, color, color) {}
+	: Percentagelet(label, "", font, nullptr, color, nullptr) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript
 	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color(ncolor), num_font((nfont == nullptr) ? default_math_font : nfont) {
-	this->set_color((lcolor == nullptr) ? ncolor : lcolor);
+	: num_color((ncolor == nullptr) ? default_number_color : ncolor)
+	, num_font((nfont == nullptr) ? default_math_font : nfont) {
+	this->set_color((lcolor == nullptr) ? default_unit_color : lcolor);
 	this->set_font((lfont == nullptr) ? default_text_font : lfont);
 	this->sign_layout = make_text_layout("%", this->text_font);
 	this->sign_box = get_text_extent(this->sign_layout);

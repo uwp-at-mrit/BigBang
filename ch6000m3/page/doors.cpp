@@ -237,7 +237,7 @@ private:
 		, float height, MarkPosition mark_position) {
 		float width = height * 0.382F;
 
-		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(mark_position, 10.0F, width, height), id);
+		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0F, width, height), id);
 		this->load_dimension(ds, id, "meter", _speak(id.ToString()));
 	}
 

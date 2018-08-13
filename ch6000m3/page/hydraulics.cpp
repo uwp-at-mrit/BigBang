@@ -56,6 +56,8 @@ private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSO
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {
 		this->caption_font = make_text_format("Microsoft YaHei UI", large_font_size);
+		this->number_font = make_bold_text_format("Cambria Math", 20.0F);
+		this->unit_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
 
 public:
@@ -372,7 +374,7 @@ private:
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, "", this->number_font, this->unit_font), id);
 		}
 	}
 
@@ -414,6 +416,8 @@ private:
 	
 private:
 	CanvasTextFormat^ caption_font;
+	CanvasTextFormat^ number_font;
+	CanvasTextFormat^ unit_font;
 
 private:
 	HydraulicsPage* master;

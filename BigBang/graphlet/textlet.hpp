@@ -70,8 +70,8 @@ namespace WarGrey::SCADA {
 		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = WarGrey::SCADA::Colours::Yellow,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = nullptr);
 
 		Dimensionlet(Platform::String^ unit,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
@@ -136,8 +136,8 @@ namespace WarGrey::SCADA {
 		Percentagelet(Platform::String^ label = "", Platform::String^ subscript = "",
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = WarGrey::SCADA::Colours::Yellow,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::make(0x23EBB9U));
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = nullptr);
 
 		Percentagelet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,

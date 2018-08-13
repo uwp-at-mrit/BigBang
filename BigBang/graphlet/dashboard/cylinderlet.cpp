@@ -25,7 +25,7 @@ Cylinderlet::Cylinderlet(float range, float width, float height, unsigned int st
 	: Cylinderlet(0.0F, range, width, height, step, colors, bcolor) {}
 
 Cylinderlet::Cylinderlet(float vmin, float vmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: Cylinderlet(LiquidSurface::Convex, MarkPosition::Left, vmin, vmax, width, height, step, colors, bcolor) {}
+	: Cylinderlet(LiquidSurface::_, MarkPosition::Left, vmin, vmax, width, height, step, colors, bcolor) {}
 
 Cylinderlet::Cylinderlet(LiquidSurface shape, float range, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
 	: Cylinderlet(shape, 0.0F, range, width, height, step, colors, bcolor) {}
@@ -37,7 +37,7 @@ Cylinderlet::Cylinderlet(MarkPosition mark, float range, float width, float heig
 	: Cylinderlet(mark, 0.0F, range, width, height, step, colors, bcolor) {}
 
 Cylinderlet::Cylinderlet(MarkPosition mark, float vmin, float vmax, float width, float height, unsigned int step, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
-	: Cylinderlet(LiquidSurface::Convex, mark, vmin, vmax, width, height, step, colors, bcolor) {}
+	: Cylinderlet(LiquidSurface::_, mark, vmin, vmax, width, height, step, colors, bcolor) {}
 
 Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float range, float width, float height, unsigned int step
 	, GradientStops^ colors, CanvasSolidColorBrush^ bcolor)
@@ -55,7 +55,7 @@ Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float vmin,
 		this->height = this->width * 2.718F;
 	}
 
-	this->liquid_surface_radius = this->thickness;
+	this->liquid_surface_radius = this->thickness * 0.618F;
 	this->colors = ((colors == nullptr) ? make_gradient_stops(cylinder_default_colors, cylinder_default_color_positions) : colors);
 }
 
@@ -135,17 +135,17 @@ CanvasGeometry^ Cylinderlet::make_liquid_shape(float percentage) {
 	switch (this->liquid_shape) {
 	case LiquidSurface::Convex: {
 		float r = this->liquid_surface_radius;
-		float liquid_height = region.Height * percentage + r;
-		float liquid_y = region.Y + region.Height + r - liquid_height;
-		
-		liquid = geometry_intersect(body, rounded_rectangle(region.X, liquid_y, region.Width, liquid_height, r, r));
-	}; break;
-	case LiquidSurface::Concave: {
-		float r = this->liquid_surface_radius;
 		float hollow_height = region.Height * (1.0F - percentage) + r;
 		float hollow_y = region.Y - r;
 		
 		liquid = geometry_subtract(body, rounded_rectangle(region.X, hollow_y, region.Width, hollow_height, r, r));
+	}; break;
+	case LiquidSurface::Concave: {
+		float r = this->liquid_surface_radius;
+		float liquid_height = region.Height * percentage + r;
+		float liquid_y = region.Y + region.Height + r - liquid_height;
+
+		liquid = geometry_intersect(body, rounded_rectangle(region.X, liquid_y, region.Width, liquid_height, r, r));
 	}; break;
 	default: {
 		float hollow_height = region.Height * (1.0F - percentage);
