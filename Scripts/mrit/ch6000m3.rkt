@@ -11,13 +11,11 @@
   (lambda []
     ;;; DB2
     (for ([i (in-range 1 176)]) ;; don't change the tidemark
-      (define fl (round (* (random) 1000)))
-      (real->floating-point-bytes (* fl 0.1) 4 #true memory (+ 3283 (* i 4))))
+      (real->floating-point-bytes (+ 2.0 (random)) 4 #true memory (+ 3283 (* i 4))))
     
     ;;; DB203
     (for ([i (in-range 280)])
-      (define fl (round (* (random) 1000)))
-      (real->floating-point-bytes (* fl 0.01) 4 #true memory (+ 1121 (* i 4))))
+      (real->floating-point-bytes (+ 203.0 (random)) 4 #true memory (+ 1121 (* i 4))))
 
     ;;; DB205
     (for ([i (in-range 385)])
@@ -37,12 +35,13 @@
                   (let wait-read-response-loop ()
                     (define-values (signature tidemark) (read-mrmsg /dev/tcpin 40))
                     (define-values (addr0 addrn) (values (mrmsg-addr0 signature) (mrmsg-addrn signature)))
-                    
-                    (refresh-memory)
-                    
-                    (printf ">> [sent ~a bytes to ~a:~a]~n"
-                            (write-mrmsg /dev/tcpout (mrmsg-code signature) (mrmsg-block signature) addr0 addrn memory)
-                            remote rport)
+
+                    (case (mrmsg-code signature)
+                      [(#x41) (refresh-memory)
+                              (printf ">> [sent ~a bytes to ~a:~a]~n"
+                                      (write-mrmsg /dev/tcpout (mrmsg-code signature) (mrmsg-block signature) addr0 addrn memory)
+                                      remote rport)]
+                      [else (void)])
                     (wait-read-response-loop))))
          (thunk (custodian-shutdown-all (current-custodian))))))
     

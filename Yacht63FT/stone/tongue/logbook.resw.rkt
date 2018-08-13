@@ -4,8 +4,8 @@
 
 (require syntax/location)
 
-(require "../../../../Scripts/catalogue/csv.rkt")
-(require "../../../../Scripts/catalogue/tongue.rkt")
+(require "../../../Scripts/catalogue/csv.rkt")
+(require "../../../Scripts/catalogue/tongue.rkt")
 
 (define ~level
   (lambda [level]

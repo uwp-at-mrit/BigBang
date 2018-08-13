@@ -4,13 +4,6 @@
 
 (require 2htdp/batch-io)
 
-(require racket/pretty)
-
-(define csv-split
-  (lambda [cell]
-    (cond [(not (string-contains? "\\" cell)) cell]
-          [else (with-input-from-string cell read)])))
-
 (define (read-csv src.csv)
   (read-csv-file (cond [(not (path? src.csv)) src.csv]
                        [else (path->string src.csv)])))
