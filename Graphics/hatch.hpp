@@ -1,8 +1,13 @@
 #pragma once
 
-Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vhatch(
-	float height, float vmin, float vmax, unsigned int step, float thickness, 
-	Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr,
-	float* mark_width = nullptr,
-	float* mark_y = nullptr,
-	float* mark_height = nullptr);
+namespace WarGrey::SCADA {
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatch(
+		float height, float vmin, float vmax, unsigned int step, float thickness,
+		Windows::Foundation::Rect* hatch_box = nullptr,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatch(
+		float height, float vmin, float vmax, unsigned int step, float thickness,
+		Windows::Foundation::Rect* hatch_box = nullptr,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+}

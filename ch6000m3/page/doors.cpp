@@ -146,7 +146,8 @@ public:
 		this->load_doors(this->doors, this->progresses, DS::SB1, DS::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
-		this->load_indicators(this->draughts, this->dimensions, DS::Bow, DS::Stern, cylinder_height);
+		this->load_indicator(this->draughts, this->dimensions, DS::Bow, cylinder_height, MarkPosition::Left);
+		this->load_indicator(this->draughts, this->dimensions, DS::Stern, cylinder_height, MarkPosition::Right);
 
 		this->load_dimension(this->dimensions, this->labels, DS::EarthWork, "meter3");
 		this->load_dimensions(this->dimensions, this->labels, DS::pLeftDrag, DS::pRightDrag, "bar");
@@ -232,13 +233,12 @@ private:
 	}
 
 	template<typename E>
-	void load_indicators(std::map<E, Credit<ConcaveCylinderlet, E>*>& cs, std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, float height) {
+	void load_indicator(std::map<E, Credit<Cylinderlet, E>*>& cs, std::map<E, Credit<Dimensionlet, E>*>& ds, E id
+		, float height, MarkPosition mark_position) {
 		float width = height * 0.382F;
 
-		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<ConcaveCylinderlet, E>(10.0F, width, height), id);
-			this->load_dimension(ds, id, "meter", _speak(id.ToString()));
-		}
+		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(mark_position, 10.0F, width, height), id);
+		this->load_dimension(ds, id, "meter", _speak(id.ToString()));
 	}
 
 private:
@@ -291,7 +291,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
-	std::map<DS, Credit<ConcaveCylinderlet, DS>*> draughts;
+	std::map<DS, Credit<Cylinderlet, DS>*> draughts;
 
 private:
 	DoorsPage* master;
@@ -358,7 +358,7 @@ void DoorsPage::reflow(float width, float height) {
 }
 
 bool DoorsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<BottomDoorlet*>(g) != nullptr);
+	return (dynamic_cast<Cylinderlet*>(g) != nullptr);
 }
 
 void DoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

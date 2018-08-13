@@ -17,12 +17,16 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 /*************************************************************************************************/
 IGaugelet::IGaugelet(float vmin, float vmax, float width, float height, unsigned int step0, ICanvasBrush^ color, ICanvasBrush^ bcolor, ICanvasBrush^ mcolor)
 	: height(height), min_value(vmin), max_value(vmax), color(color), body_color(bcolor), mark_color(mcolor) {
+	Rect measure_box;
 	auto step = ((step0 == 0) ? 10 : step0);
 	auto font = make_text_format(8.0F);
-	auto marks = vhatch(height, vmin, vmax, step, 3.0F, font, &this->body_x, &this->body_y, &this->body_height);
+	auto marks = vlhatch(height, vmin, vmax, step, 3.0F, &measure_box, font);
 
-	this->scale_marks = geometry_freeze(marks);
+	this->body_x = measure_box.Width;
+	this->body_y = measure_box.Y;
 	this->body_width = width - this->body_x;
+	this->body_height = measure_box.Height;
+	this->scale_marks = geometry_freeze(marks);
 }
 
 void IGaugelet::fill_extent(float x, float y, float* w, float* h) {
