@@ -13,6 +13,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static CanvasSolidColorBrush^ battery_default_border_color = WarGrey::SCADA::Colours::make(0xFDFDFD);
+
 static unsigned int battery_default_colors[] = {
 	0xF00D0D,
 	0xFFB33C,
@@ -34,10 +36,14 @@ static BatteryStatus* battery_status = nullptr;
 
 /*************************************************************************************************/
 Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(0.0F, 1.0F, width, height, bcolor, stops) {}
+	: Batterylet(1.0F, width, height, bcolor, stops) {}
+
+Batterylet::Batterylet(float range, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(0.0F, range, width, height, bcolor, stops) {}
 
 Batterylet::Batterylet(float emin, float emax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(emin, emax), width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor) {
+	: IRangelet(emin, emax), width(width), height(height), thickness(3.0F)
+	, border_color(bcolor == nullptr ? battery_default_border_color : bcolor) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {

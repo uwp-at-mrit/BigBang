@@ -160,6 +160,6 @@
     <value>Water Sealing and Flushing System</value>
   </data>
   <data name="doors" xml:space="preserve">
-    <value>Doors Control</value>
+    <value>Bottom Doors Control</value>
   </data>
 </root>

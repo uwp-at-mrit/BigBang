@@ -12,9 +12,10 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/svglet.hpp"
 
-#include "graphlet/device/gaugelet.hpp"
 #include "graphlet/symbol/pumplet.hpp"
 #include "graphlet/symbol/valvelet.hpp"
+#include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "decorator/page.hpp"
 #ifdef _DEBUG
@@ -144,7 +145,7 @@ public:
 		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
 		
-		pTurtle->move_up(12, HS::Port)->move_up(20)->turn_up_left()->move_left(35)->turn_left_down()->move_down(4);
+		pTurtle->move_up(12, HS::Starboard)->move_up(20)->turn_up_left()->move_left(35)->turn_left_down()->move_down(4);
 		pTurtle->jump_left(4)->move_up(4)->turn_up_left()->move_left(31)->turn_left_down()->move_down(20);
 
 		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
@@ -152,7 +153,7 @@ public:
 		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Starboard)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(12, HS::Port)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
@@ -181,18 +182,15 @@ public:
 
 		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
 
-		/** TODO
-		 * These two construtions may fail due to D2DERR_BAD_NUMBER(HRESULT: 0x88990011),
-		 * If it happens please try to change the `step` to ensure that `height / step >= 0.1F`,
-		 * the default `step` is 10.
-		 */
-		this->heater = new LevelGaugelet(1.5F, gridsize * 14.0F, gridsize * 6.0F, 6U);
-		this->visor_tank = new LevelGaugelet(0.8F, gridsize * 12.0F, gridsize * 5.0F, 8U);
+		this->heater = new Cylinderlet(1.5F, gridsize * 14.0F, gridsize * 6.0F);
+		this->master_thermometer = new Thermometerlet(80.0F, gridsize * 3.0F, 0.0F);
+		this->visor_tank = new Cylinderlet(1.2F, gridsize * 12.0F, gridsize * 5.0F);
 
 		this->master->insert_all(this->stations, true);
 		this->master->insert(this->oil_tank);
 		this->master->insert(this->heater);
 		this->master->insert(this->visor_tank);
+		this->master->insert(this->master_thermometer);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -241,6 +239,7 @@ public:
 		this->stations[0]->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAnchor::LC);
 		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
 		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
+		this->master->move_to(this->master_thermometer, this->heater, GraphletAnchor::CC, GraphletAnchor::CC);
 
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
 		this->stations[0]->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
@@ -398,8 +397,10 @@ private:
 // never deletes these graphlets mannually
 private:
 	Tracklet<HS>* stations[2];
-	LevelGaugelet* heater;
-	LevelGaugelet* visor_tank;
+	Cylinderlet* heater;
+	Cylinderlet* visor_tank;
+	Thermometerlet* master_thermometer;
+	Thermometerlet* visor_thermometer;
 	IShapelet* oil_tank;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;
@@ -436,7 +437,7 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 		this->append_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, vinset));
+		this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, this->gridsize));
 #endif
 	}
 }

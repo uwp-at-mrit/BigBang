@@ -16,16 +16,22 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static const float start_degrees = 135.0;
 static const float end_degrees = 405.0;
 
+static CanvasSolidColorBrush^ indicator_default_bgcolor = WarGrey::SCADA::Colours::make(0x505050);
+
 static unsigned int indicator_default_colors[] = {
 	0x30A1F6, 0xAEEE00, 0xFFB43D
 };
 
 /*************************************************************************************************/
 Indicatorlet::Indicatorlet(float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
-	: Indicatorlet(0.0F, 1.0F, size, thickness, bgcolor, stops) {}
+	: Indicatorlet(1.0F, size, thickness, bgcolor, stops) {}
+
+Indicatorlet::Indicatorlet(float range, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
+	: Indicatorlet(0.0F, range, size, thickness, bgcolor, stops) {}
 
 Indicatorlet::Indicatorlet(float vmin, float vmax, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
-	: IRangelet(vmin, vmax), size(size), thickness(thickness), bgcolor(bgcolor) {
+	: IRangelet(vmin, vmax), size(size), thickness(thickness)
+	, bgcolor(bgcolor == nullptr ? indicator_default_bgcolor : bgcolor) {
 	if (this->thickness < 0.0F) {
 		this->thickness *= (-size);
 	} else if (this->thickness == 0.0F) {

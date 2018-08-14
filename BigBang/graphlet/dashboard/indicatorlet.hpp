@@ -7,11 +7,15 @@
 namespace WarGrey::SCADA {
 	private class Indicatorlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Indicatorlet(float size, float thickness = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = WarGrey::SCADA::Colours::make(0x505050),
+		Indicatorlet(float size, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Indicatorlet(float vmin, float vmax, float size, float thickness = 0.0F,
+		Indicatorlet(float range, float size, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = nullptr,
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
+
+		Indicatorlet(float vmin, float vmax, float size, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = WarGrey::SCADA::Colours::make(0x505050),
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 

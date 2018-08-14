@@ -8,12 +8,16 @@
 namespace WarGrey::SCADA {
 	private class Thermometerlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Thermometerlet(float tmin, float tmax, float width, float height = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0x666666),
+		Thermometerlet(float tmin, float tmax, float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(float width, float height = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0x666666),
+		Thermometerlet(float range, float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Thermometerlet(float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
 	public:
