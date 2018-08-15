@@ -88,7 +88,7 @@ private:
 
 		this->decorator->fill_cell_anchor(0, fx, fy, &anchor_x, &anchor_y);
 
-		this->mcylinders[id] = new Cylinderlet(shape, 3000.0F, gwidth, gheight);
+		this->mcylinders[id] = new Cylinderlet(shape, 3000.0F, 20U, gwidth, gheight);
 		this->lblcylinders[id] = new Labellet(speak(id), this->font, this->fgcolor);
 
 		this->master->insert(this->mcylinders[id], anchor_x, anchor_y, GraphletAnchor::CC);

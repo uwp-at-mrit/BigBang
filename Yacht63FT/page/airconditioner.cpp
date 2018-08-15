@@ -29,9 +29,10 @@ private enum class ACStatus { Normal };
 
 private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refresh, _ };
 
-static size_t ac_count = _N(AC);
-static float t_min = -30.0F;
-static float t_max = 50.0F;
+static const size_t ac_count = _N(AC);
+static const unsigned int t_step = 8U;
+static const float t_min = -30.0F;
+static const float t_max = 50.0F;
 
 static CanvasTextFormat^ caption_font = nullptr;
 static CanvasTextFormat^ fore_font = nullptr;
@@ -106,7 +107,7 @@ public:
 		float mode_width = this->master->sketch_to_application_width(46.0F);
 
 		for (AC room = _E0(AC); room < AC::_; room++) {
-			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, icon_width, 0.0F, label_color));
+			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, t_step, icon_width, 0.0F, label_color));
 			this->temperatures[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
 			this->captions[room] = this->master->insert_one(new Labellet(speak(room), caption_font, Colours::GhostWhite));
 			this->modes[room] = this->master->insert_one(new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width));

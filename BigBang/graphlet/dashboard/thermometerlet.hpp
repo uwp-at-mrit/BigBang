@@ -8,15 +8,15 @@
 namespace WarGrey::SCADA {
 	private class Thermometerlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Thermometerlet(float tmin, float tmax, float width, float height,
+		Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(float range, float width, float height,
+		Thermometerlet(float range, unsigned int step, float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(float width, float height,
+		Thermometerlet(float width, float height = 0.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -46,5 +46,8 @@ namespace WarGrey::SCADA {
 		float thickness;
 		float mercury_x;
 		float mercury_y;
+
+	private:
+		unsigned int step;
 	};
 }

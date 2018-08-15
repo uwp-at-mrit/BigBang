@@ -236,8 +236,9 @@ private:
 	void load_indicator(std::map<E, Credit<Cylinderlet, E>*>& cs, std::map<E, Credit<Dimensionlet, E>*>& ds, E id
 		, float height, MarkPosition mark_position) {
 		float width = height * 0.382F;
+		auto cylinder = new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0F, 10U, width, height);
 
-		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0F, width, height), id);
+		cs[id] = this->master->insert_one(cylinder, id);
 		this->load_dimension(ds, id, "meter", _speak(id.ToString()));
 	}
 

@@ -34,7 +34,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
@@ -78,7 +77,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />

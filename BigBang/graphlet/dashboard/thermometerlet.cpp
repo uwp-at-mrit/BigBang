@@ -58,13 +58,14 @@ static CanvasGeometry^ make_thermometer_mercury(float bulb_width, float height) 
 
 /*************************************************************************************************/
 Thermometerlet::Thermometerlet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(-30.0F, 50.0F, width, height, bcolor, stops) {}
+	: Thermometerlet(-30.0F, 50.0F, 5U, width, height, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float range, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(0.0F, range, width, height, bcolor, stops) {}
+Thermometerlet::Thermometerlet(float range, unsigned int step, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(0.0F, range, step, width, height, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float tmin, float tmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(tmin,tmax), width(width), height(height), thickness(3.0F), border_color(bcolor) {
+Thermometerlet::Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(tmin,tmax), width(width), height(height), thickness(3.0F), step(step)
+	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
@@ -87,7 +88,7 @@ void Thermometerlet::construct() {
 		Rect hm_box;
 		float hatch_height = (mercury_lowest - mercury_highest) + em;
 		CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness);
-		CanvasGeometry^ hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, hatch_thickness, &hm_box);
+		CanvasGeometry^ hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &hm_box);
 		float hatch_y = mercury_highest - hm_box.Y * 0.5F; // TODO: it is not very precision.
 
 		glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));

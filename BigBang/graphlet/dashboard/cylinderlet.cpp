@@ -21,31 +21,32 @@ static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 
 static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
-Cylinderlet::Cylinderlet(float range, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(0.0F, range, width, height, bcolor, colors) {}
+Cylinderlet::Cylinderlet(float range, unsigned int step, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: Cylinderlet(0.0F, range, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(float vmin, float vmax, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(LiquidSurface::_, MarkPosition::Left, vmin, vmax, width, height, bcolor, colors) {}
+Cylinderlet::Cylinderlet(float vmin, float vmax, unsigned int step, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: Cylinderlet(LiquidSurface::_, MarkPosition::Left, vmin, vmax, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, float range, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, 0.0F, range, width, height, bcolor, colors) {}
+Cylinderlet::Cylinderlet(LiquidSurface shape, float range, unsigned int step, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: Cylinderlet(shape, 0.0F, range, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, float vmin, float vmax, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, MarkPosition::Left, vmin, vmax, width, height, bcolor, colors) {}
+Cylinderlet::Cylinderlet(LiquidSurface shape, float vmin, float vmax, unsigned int step, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: Cylinderlet(shape, MarkPosition::Left, vmin, vmax, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(MarkPosition mark, float range, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(mark, 0.0F, range, width, height, bcolor, colors) {}
+Cylinderlet::Cylinderlet(MarkPosition mark, float range, unsigned int step, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: Cylinderlet(mark, 0.0F, range, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(MarkPosition mark, float vmin, float vmax, float width, float height, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(LiquidSurface::_, mark, vmin, vmax, width, height, bcolor, colors) {}
-
-Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float range, float width, float height
+Cylinderlet::Cylinderlet(MarkPosition mark, float vmin, float vmax, unsigned int step, float width, float height
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, position, 0.0F, range, width, height, bcolor, colors) {}
+	: Cylinderlet(LiquidSurface::_, mark, vmin, vmax, step, width, height, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float vmin, float vmax, float width, float height
+Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float range, unsigned int step, float width, float height
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: IRangelet(vmin, vmax), width(width), height(height), thickness(3.0F)
+	: Cylinderlet(shape, position, 0.0F, range, step, width, height, bcolor, colors) {}
+
+Cylinderlet::Cylinderlet(LiquidSurface shape, MarkPosition position, float vmin, float vmax, unsigned int step, float width, float height
+	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+	: IRangelet(vmin, vmax), width(width), height(height), thickness(3.0F), step(step)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor)
 	, liquid_shape(shape), mark_position(position) {
 	
@@ -72,10 +73,10 @@ void Cylinderlet::construct() {
 	float hatch_thickness = this->thickness * 1.0F;
 
 	if (this->mark_position == MarkPosition::Left) {
-		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, hatch_thickness, &measure_box);
+		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
 		this->mark_x = 0.0F;
 	} else {
-		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, hatch_thickness, &measure_box);
+		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
 		this->mark_x = this->width - measure_box.Width;
 	}
 

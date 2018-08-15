@@ -51,6 +51,7 @@ static float resolve_vmetrics(float vmin, float vmax, float thickness, CanvasTex
 	return te.width + mark_space_ratio * char_width + hwidth;
 }
 
+#include "syslog.hpp"
 static CanvasGeometry^ make_vlhatch(float width, float interval, unsigned int step, float thickness, float x = 0.0F, float y = 0.0F) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float short_x = x + width * ((step % 2 == 0) ? 0.382F : 0.0F);
@@ -64,6 +65,8 @@ static CanvasGeometry^ make_vlhatch(float width, float interval, unsigned int st
 		hatch->EndFigure(CanvasFigureLoop::Open);
 		hatch->BeginFigure((i % 2 == 0) ? x : short_x, ythis);
 		hatch->AddLine(x + width, ythis);
+	
+		syslog(Log::Warning, L"hatch %d@%f", i, ythis);
 	}
 	hatch->EndFigure(CanvasFigureLoop::Open);
 
@@ -89,17 +92,19 @@ static CanvasGeometry^ make_vrhatch(float width, float interval, unsigned int st
 	return geometry_stroke(CanvasGeometry::CreatePath(hatch), thickness, make_roundcap_stroke_style(true));
 }
 
-static float resolve_interval(float vmin, float vmax, float height, float em, unsigned int* step, float* diff) {
-	// TODO: If `range / step < 0.1F`, it may fail due to `D2DERR_BAD_NUMBER(HRESULT: 0x88990011)`;
+static float resolve_interval(unsigned int step, float vmin, float vmax, float height, float em, unsigned int* skip, float* diff) {
+	/** TODO
+	 * Improper `range` and `step` may cause `D2DERR_BAD_NUMBER(HRESULT: 0x88990011)`.
+	 *
+	 * Meanwhile there is no detail about how to choose a suitable (range, step) pair,
+	 * But it is suggested that the `range` should be divisible by the `step`.
+	 */
 	float range = vmax - vmin;
 	float hatch_height = height - em;
-	float step_max_safe = ((range < 1.0F) ? std::ceilf(range / 0.1F) : 10.0F);
-	float step_max_clear = std::floorf(hatch_height / (em * 2.0F));
-	unsigned int count = (unsigned int)(std::fmaxf(std::fminf(step_max_safe, step_max_clear), 2.0F));
-	float interval = hatch_height / float(count);
-	float delta = range / float(count);
+	float interval = hatch_height / float(step);
+	float delta = range / float(step);
 
-	SET_BOX(step, count);
+	SET_BOX(skip, (step % 2 == 0) ? 2 : 1);
 	SET_BOX(diff, delta);
 
 	return interval;
@@ -111,16 +116,14 @@ float WarGrey::SCADA::vhatchmark_width(float vmin, float vmax, float thickness, 
 	return resolve_vmetrics(vmin, vmax, thickness, font, hatch_width, nullptr, ch, em);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax, float thickness, Rect* box, CanvasTextFormat^ ft) {
-	float hatch_width, ch, em, tspace, diff;
-	unsigned int span, step;
+CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax, unsigned int step, float thickness, Rect* box, CanvasTextFormat^ ft) {
+	float hatch_width, ch, em, tspace, diff, mark_span_off;
+	unsigned int span, skip;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	float hatchmark_width = resolve_vmetrics(vmin, vmax, thickness, font, &hatch_width, &span, &ch, &em, &tspace);
 	float hatch_x = hatchmark_width - hatch_width;
 	float hatch_y = em * 0.5F;
-	float interval = resolve_interval(vmin, vmax, height, em, &step, &diff);
-	unsigned int skip = (step % 2 == 0) ? 2 : 1;
-	float mark_span_off;
+	float interval = resolve_interval(step, vmin, vmax, height, em, &skip, &diff);
 
 	auto marks = make_vlhatch(hatch_width, interval, step, thickness, hatch_x, hatch_y);
 	for (unsigned int i = 0; i <= step; i += skip) {
@@ -128,6 +131,7 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax
 		auto translation = make_translation_matrix(mark_span_off * ch, interval * float(i) - tspace);
 
 		marks = geometry_union(marks, paragraph(make_text_layout(mark, font)), translation);
+		syslog(Log::Warning, L"mark %s for [%f, %f] within %f", mark->Data(), vmin, vmax, height);
 	}
 
 	if (box != nullptr) {
@@ -139,16 +143,15 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax
 	return marks;
 }
 
-CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, float vmin, float vmax, float thickness, Rect* box, CanvasTextFormat^ ft) {
+CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, float vmin, float vmax, unsigned int step, float thickness, Rect* box, CanvasTextFormat^ ft) {
 	float hatch_width, ch, em, tspace, diff;
-	unsigned int span, step;
+	unsigned int span, skip;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	float hatchmark_width = resolve_vmetrics(vmin, vmax, thickness, font, &hatch_width, &span, &ch, &em, &tspace);
 	float hatch_y = em * 0.5F;
-	float interval = resolve_interval(vmin, vmax, height, em, &step, &diff);
 	float mark_xoff = hatch_width + mark_space_ratio * ch;
-	unsigned int skip = (step % 2 == 0) ? 2 : 1;
-
+	float interval = resolve_interval(step, vmin, vmax, height, em, &skip, &diff);
+	
 	auto marks = make_vrhatch(hatch_width, interval, step, thickness, 0.0F, hatch_y);
 	for (unsigned int i = 0; i <= step; i += skip) {
 		Platform::String^ mark = make_rmark_string(vmax - diff * float(i));
