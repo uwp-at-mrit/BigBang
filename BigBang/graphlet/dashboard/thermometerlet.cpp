@@ -45,7 +45,7 @@ static CanvasGeometry^ make_thermometer_mercury(float bulb_width, float height) 
 	float bulb_radius = bulb_width * 0.5F;
 	float cx = bulb_radius;
 	float cy = height - bulb_radius;
-	float tube_width = bulb_width * (1.0F - 0.618F);
+	float tube_width = bulb_width * 0.382F;
 	float tube_x = (bulb_width - tube_width) * 0.5F;
 	float tradius = tube_width * 0.5F;
 	
@@ -57,15 +57,29 @@ static CanvasGeometry^ make_thermometer_mercury(float bulb_width, float height) 
 }
 
 /*************************************************************************************************/
-Thermometerlet::Thermometerlet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(-30.0F, 50.0F, 5U, width, height, bcolor, stops) {}
+Thermometerlet::Thermometerlet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float range, unsigned int step, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(0.0F, range, step, width, height, bcolor, stops) {}
+Thermometerlet::Thermometerlet(FitPosition mark_position, float width, float height, float thickness
+	, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(mark_position, -30.0F, 50.0F, 5U, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(tmin,tmax), width(width), height(height), thickness(3.0F), step(step)
-	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor) {
+Thermometerlet::Thermometerlet(float range, unsigned int step, float width, float height, float thickness
+	, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, range, step, width, height, thickness, bcolor, stops) {}
+
+Thermometerlet::Thermometerlet(FitPosition mark_position, float range, unsigned int step, float width, float height
+	, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(mark_position, 0.0F, range, step, width, height, thickness, bcolor, stops) {}
+
+Thermometerlet::Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height, float thickness
+	, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, tmin, tmax, step, width, height, thickness, bcolor, stops) {}
+
+Thermometerlet::Thermometerlet(FitPosition mark_position, float tmin, float tmax, unsigned int step, float width
+	, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(tmin,tmax), width(width), height(height), thickness(thickness), step(step)
+	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), mark_position(mark_position) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
@@ -85,14 +99,21 @@ void Thermometerlet::construct() {
 	this->fill_mercury_extent(nullptr, &mercury_highest, nullptr, &mercury_height); 
 	
 	{ // make skeleton
-		Rect hm_box;
-		float hatch_height = (mercury_lowest - mercury_highest) + em;
+		CanvasGeometry^ hatch;
+		Rect measure_box;
+		float hatch_height = (mercury_lowest - mercury_highest) + hatch_thickness + em;
 		CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness);
-		CanvasGeometry^ hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &hm_box);
-		float hatch_y = mercury_highest - hm_box.Y * 0.5F; // TODO: it is not very precision.
+		float mark_x = 0.0F;
+		
+		if (this->mark_position == FitPosition::Left) {
+			hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
+			glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
+		} else {
+			hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
+			mark_x = this->width - measure_box.Width;
+		}
 
-		glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
-		this->skeleton = geometry_freeze(geometry_union(glass, hatch, 0.0F, hatch_y));
+		this->skeleton = geometry_freeze(geometry_union(glass, hatch, mark_x, mercury_highest - measure_box.Y));
 	}
 
 	this->on_value_changed(0.0F);
@@ -104,7 +125,7 @@ void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {
 
 void Thermometerlet::fill_mercury_extent(float percentage, float* x, float* y, float *width, float* height) {
 	float mercury_width = this->bulb_size * 0.5F;
-	float bulb_cx = this->width - mercury_width;
+	float bulb_cx = ((this->mark_position == FitPosition::Left) ? (this->width - mercury_width) : mercury_width);
 	float bulb_cy = this->height - mercury_width;
 	float mercury_radius = mercury_width * 0.5F;
 	float mercury_bulb_bottom = bulb_cy + mercury_radius;

@@ -7,15 +7,15 @@
 namespace WarGrey::SCADA {
 	private class FuelTanklet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		FuelTanklet(float width, float height,
+		FuelTanklet(float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 
-		FuelTanklet(float range, float width, float height,
+		FuelTanklet(float range, float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 
-		FuelTanklet(float vmin, float vmax, float width, float height,
+		FuelTanklet(float vmin, float vmax, float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 

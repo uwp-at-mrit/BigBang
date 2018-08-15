@@ -10,6 +10,8 @@
 namespace WarGrey::SCADA {
 #define GRAPHLETS_LENGTH(a) (sizeof(a) / sizeof(IGraphlet*))
 
+	private enum class FitPosition { Left, Right, _ };
+
     private class IGraphletInfo abstract {
     public:
 		virtual ~IGraphletInfo() noexcept {};

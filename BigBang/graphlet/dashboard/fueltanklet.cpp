@@ -21,14 +21,14 @@ static unsigned int fueltank_default_colors[] = {
 };
 
 /*************************************************************************************************/
-FuelTanklet::FuelTanklet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(1.0F, width, height, bcolor, stops) {}
+FuelTanklet::FuelTanklet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: FuelTanklet(1.0F, width, height, thickness, bcolor, stops) {}
 
-FuelTanklet::FuelTanklet(float range, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(0.0F, range, width, height, bcolor, stops) {}
+FuelTanklet::FuelTanklet(float range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: FuelTanklet(0.0F, range, width, height, thickness, bcolor, stops) {}
 
-FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(vmin, vmax), width(width), height(height), thickness(3.0F)
+FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? fueltank_default_border_color : bcolor) {
 
 	if (this->height < 0.0F) {

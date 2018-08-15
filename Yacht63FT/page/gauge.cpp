@@ -37,7 +37,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		TextExtent ts = get_text_extent("Yacht", this->font);
-		float gwidth = this->master->sketch_to_application_width(90.0F);
+		float gwidth = this->master->sketch_to_application_width(100.0F);
 		float gheight = height * 0.5F * 0.618F;
 		float gapsize = ts.height * 0.5F;
 

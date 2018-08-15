@@ -8,15 +8,32 @@
 namespace WarGrey::SCADA {
 	private class Thermometerlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height = 0.0F,
+		Thermometerlet(float tmin, float tmax, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(float range, unsigned int step, float width, float height = 0.0F,
+		Thermometerlet(WarGrey::SCADA::FitPosition mark_position,
+			float tmin, float tmax, unsigned int step, float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(float width, float height = 0.0F,
+		Thermometerlet(float range, unsigned int step, float width,
+			float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Thermometerlet(WarGrey::SCADA::FitPosition mark_position, float range, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Thermometerlet(float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Thermometerlet(WarGrey::SCADA::FitPosition mark_position,
+			float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -46,6 +63,9 @@ namespace WarGrey::SCADA {
 		float thickness;
 		float mercury_x;
 		float mercury_y;
+		
+	private:
+		WarGrey::SCADA::FitPosition mark_position;
 
 	private:
 		unsigned int step;

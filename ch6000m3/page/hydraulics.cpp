@@ -14,7 +14,8 @@
 
 #include "graphlet/symbol/pumplet.hpp"
 #include "graphlet/symbol/valvelet.hpp"
-#include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/device/tanklet.hpp"
+#include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "decorator/page.hpp"
@@ -41,16 +42,18 @@ private enum class HS : unsigned int {
 	J, I,
 	Y, L, M, K,
 	// Valves
-	SQ1, SQ2, SQy, SQi, SQj,
+	SQ1, SQ2, SQy, SQl, SQm, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
 	// Key Labels
-	Heater, VisorTank, Port, Starboard, MasterTank, OilTank,
+	Heater, Port, Starboard, Master, Visor, Storage,
 	// Indicators
-	F001Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
+	F001Blocked, F002Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
 	_,
 	// anchors used as last jumping points
-	a, b, c, d, e, f, g, h, i, j, y, l, m, k
+	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
+	// anchors used for unnamed corners
+	sq1, sqr
 };
 
 private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
@@ -67,7 +70,7 @@ public:
 		this->master->begin_update_sequence();
 
 		this->temperatures[HS::Heater]->set_value(RealData(AI_DB203, 18U));
-		this->temperatures[HS::VisorTank]->set_value(RealData(AI_DB203, 19U));
+		this->temperatures[HS::Visor]->set_value(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
 			static std::map<HS, bool> need_lock_position;
@@ -138,7 +141,7 @@ public:
 	void load_pump_station(float width, float height, float gridsize) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
 
-		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(6);
+		pTurtle->move_down(HS::sq1)->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(6);
 		
 		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::c)->move_right(6, HS::SQc)->move_right(8, HS::C)->move_right(6)->jump_back();
@@ -153,16 +156,16 @@ public:
 		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Port)->move_up(6)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(12, HS::Port)->move_up(6, HS::F001Blocked)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(8, HS::L)->move_up(4)->jump_back();
 		pTurtle->move_right(5, HS::m)->turn_right_up()->move_up(8, HS::M)->move_up(4)->jump_back();
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(3)->turn_up_left();
-		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, HS::F001Blocked)->move_down(2.0F);
+		pTurtle->move_left(21)->turn_left_down()->move_down(1.0F, HS::F002Blocked)->move_down(2.0F);
 
-		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::OilTank);
+		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
 
 		pTurtle->jump_back(HS::SQ1)->jump_down(11.8F)->move_down(2, HS::SQi)->move_down(3, HS::I)->move_down(3);
 		pTurtle->jump_back(HS::SQ2)->jump_down(11.8F)->move_down(2, HS::SQj)->move_down(3, HS::J)->move_down(3);
@@ -170,26 +173,20 @@ public:
 		pTurtle->jump_back(HS::SQ1)->move_up(2);
 		pTurtle->jump_back(HS::SQ2)->move_up(2);
 		
-		this->pipeline = new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray); 
+		this->pipeline = this->master->insert_one(new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray)); 
 
-		this->load_label(this->captions, HS::MasterTank, Colours::Silver, this->caption_font);
+		this->load_label(this->captions, HS::Master, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Heater, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::VisorTank, Colours::Silver, this->caption_font);
-		this->load_label(this->captions, HS::OilTank, Colours::Silver);
+		this->load_label(this->captions, HS::Storage, Colours::Silver);
 
-		this->oil_tank = new Rectanglelet(gridsize * 2.5F, Colours::DimGray, Colours::WhiteSmoke, 3.0F);
+		this->oil_tank = this->master->insert_one(new FuelTanklet(gridsize * 2.5F, 0.0F, 3.0F, Colours::WhiteSmoke));
 
-		this->heater = new Cylinderlet(1.5F, 6U, gridsize * 14.0F, gridsize * 6.0F);
-		this->master_thermometer = new Thermometerlet(100.0F, 5U, gridsize * 2.5F, 0.0F);
-		this->visor_tank = new Cylinderlet(0.8F, 4U, gridsize * 12.0F, gridsize * 5.0F);
-
-		this->master->insert(this->pipeline);
-		this->master->insert(this->oil_tank);
-		this->master->insert(this->heater);
-		this->master->insert(this->visor_tank);
-		this->master->insert(this->master_thermometer);
+		this->load_tank(this->tanks, HS::Master, 1.5F, 6U, gridsize * 14.0F, gridsize * 6.0F);
+		this->load_tank(this->tanks, HS::Visor, 0.8F, 4U, gridsize * 12.0F, gridsize * 5.0F);
+		this->load_thermometer(this->thermometers, HS::Master, FitPosition::Left, gridsize * 2.5F);
+		this->load_thermometer(this->thermometers, HS::Visor, FitPosition::Right, gridsize * 2.5F);
 	}
 
 	void load_devices(float width, float height, float gridsize) {
@@ -216,14 +213,16 @@ public:
 		this->load_status_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels);
 		this->load_status_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels);
 		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels);
+		this->load_status_indicator(HS::F002Blocked, size, this->heater_states, this->hslabels);
 
 		this->load_status_indicator(HS::LevelLow, size, this->visor_states, this->vslabels);
 		this->load_status_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels);
 		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels);
 
-		this->load_dimensions(this->temperatures, HS::Heater, HS::VisorTank, "celsius", "temperature");
+		this->load_dimensions(this->temperatures, HS::Heater, HS::Visor, "celsius", "temperature");
 	}
 
+public:
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
 		float sw, sh, sx, sy, s1_x, s1_y;
 
@@ -234,16 +233,17 @@ public:
 		sy = (height - sh) * 0.5F - vinset * 0.5F;
 
 		this->master->move_to(this->pipeline, sx, sy);
-		this->pipeline->map_graphlet_at_anchor(this->oil_tank, HS::OilTank, GraphletAnchor::LC);
-		this->master->move_to(this->heater, sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
-		this->master->move_to(this->visor_tank, sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
-		this->master->move_to(this->master_thermometer, this->heater, GraphletAnchor::CC, GraphletAnchor::CC);
+		this->pipeline->map_graphlet_at_anchor(this->oil_tank, HS::Storage, GraphletAnchor::LC);
+		this->master->move_to(this->tanks[HS::Master], sx + (sw - gridsize) * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
+		this->master->move_to(this->tanks[HS::Visor], sx + (sw - gridsize) * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
+		this->master->move_to(this->thermometers[HS::Master], this->tanks[HS::Master], GraphletAnchor::CC, GraphletAnchor::CC);
+		this->master->move_to(this->thermometers[HS::Visor], this->tanks[HS::Visor], GraphletAnchor::CC, GraphletAnchor::CC);
 
 		this->pipeline->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
 		this->pipeline->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
-		this->master->move_to(this->captions[HS::OilTank], this->oil_tank, GraphletAnchor::CB, GraphletAnchor::CT);
-		this->master->move_to(this->captions[HS::Heater], this->heater, GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
-		this->master->move_to(this->captions[HS::VisorTank], this->visor_tank, GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
+		this->master->move_to(this->captions[HS::Storage], this->oil_tank, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->captions[HS::Heater], this->tanks[HS::Master], GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
+		this->master->move_to(this->captions[HS::Visor], this->tanks[HS::Visor], GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
 	}
 	
 	void reflow_devices(float width, float height, float gridsize, float vinset) {
@@ -313,17 +313,18 @@ public:
 	}
 
 	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
-		this->master->move_to(this->captions[HS::MasterTank], this->pipeline, GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
-		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::MasterTank], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
+		this->master->move_to(this->captions[HS::Master], this->pipeline, GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
+		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::Master], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
 		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 		this->pipeline->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAnchor::CC);
+		this->pipeline->map_credit_graphlet(this->heater_states[HS::F002Blocked], GraphletAnchor::CC);
 
-		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
+		this->master->move_to(this->visor_states[HS::LevelLow], this->tanks[HS::Visor], GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
 		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
 		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::VisorTank], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
+		this->master->move_to(this->temperatures[HS::Visor], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
@@ -381,6 +382,16 @@ private:
 		bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
 	}
 
+	template<class T, typename E>
+	void load_tank(std::map<E, Credit<T, E>*>& ts, E id, float range, unsigned int step, float width, float height) {
+		ts[id] = this->master->insert_one(new Credit<T, E>(width, height), id);
+	}
+
+	template<class T, typename E>
+	void load_thermometer(std::map<E, Credit<T, E>*>& ts, E id, FitPosition mp, float width) {
+		ts[id] = this->master->insert_one(new Credit<T, E>(mp, 100.0F, 5U, width, 0.0F, 2.5F), id);
+	}
+
 	template<typename E>
 	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ caption, E id
 		, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
@@ -395,11 +406,9 @@ private:
 // never deletes these graphlets mannually
 private:
 	Tracklet<HS>* pipeline;
-	Cylinderlet* heater;
-	Cylinderlet* visor_tank;
-	Thermometerlet* master_thermometer;
-	Thermometerlet* visor_thermometer;
-	IShapelet* oil_tank;
+	FuelTanklet* oil_tank;
+	std::map<HS, Credit<Tanklet, HS>*> tanks;
+	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;

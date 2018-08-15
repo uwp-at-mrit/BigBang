@@ -107,7 +107,7 @@ public:
 		float mode_width = this->master->sketch_to_application_width(46.0F);
 
 		for (AC room = _E0(AC); room < AC::_; room++) {
-			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, t_step, icon_width, 0.0F, label_color));
+			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, t_step, icon_width, 0.0F, 3.0F, label_color));
 			this->temperatures[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
 			this->captions[room] = this->master->insert_one(new Labellet(speak(room), caption_font, Colours::GhostWhite));
 			this->modes[room] = this->master->insert_one(new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width));

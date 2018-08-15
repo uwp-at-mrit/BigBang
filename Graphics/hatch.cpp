@@ -9,6 +9,8 @@
 #include "geometry.hpp"
 #include "transformation.hpp"
 
+#include "string.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
@@ -18,11 +20,11 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasTextFormat^ default_mark_font = make_bold_text_format(9.0F);
-static const float hatch_long_ratio = 1.0F;
-static const float mark_space_ratio = 1.0F;
+static const float hatch_long_ratio = 0.618F;
+static const float mark_space_ratio = 0.618F;
 
 inline static Platform::String^ make_rmark_string(float mark) {
-	return mark.ToString();
+	return make_wstring(L"%.1f", mark);
 }
 
 inline static Platform::String^ make_lmark_string(float mark, unsigned int span, float* span_off) {
@@ -51,7 +53,6 @@ static float resolve_vmetrics(float vmin, float vmax, float thickness, CanvasTex
 	return te.width + mark_space_ratio * char_width + hwidth;
 }
 
-#include "syslog.hpp"
 static CanvasGeometry^ make_vlhatch(float width, float interval, unsigned int step, float thickness, float x = 0.0F, float y = 0.0F) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float short_x = x + width * ((step % 2 == 0) ? 0.382F : 0.0F);
@@ -65,8 +66,6 @@ static CanvasGeometry^ make_vlhatch(float width, float interval, unsigned int st
 		hatch->EndFigure(CanvasFigureLoop::Open);
 		hatch->BeginFigure((i % 2 == 0) ? x : short_x, ythis);
 		hatch->AddLine(x + width, ythis);
-	
-		syslog(Log::Warning, L"hatch %d@%f", i, ythis);
 	}
 	hatch->EndFigure(CanvasFigureLoop::Open);
 
@@ -116,6 +115,20 @@ float WarGrey::SCADA::vhatchmark_width(float vmin, float vmax, float thickness, 
 	return resolve_vmetrics(vmin, vmax, thickness, font, hatch_width, nullptr, ch, em);
 }
 
+CanvasGeometry^ WarGrey::SCADA::vlhatch(float width, float height, unsigned int step, float thickness) {
+	float interval = (height - thickness) / float(step);
+	float offset = thickness * 0.5F;
+	
+	return make_vlhatch(width - thickness, interval, step, thickness, offset, offset);
+}
+
+CanvasGeometry^ WarGrey::SCADA::vrhatch(float width, float height, unsigned int step, float thickness) {
+	float interval = (height - thickness) / float(step);
+	float offset = thickness * 0.5F;
+
+	return make_vrhatch(width - thickness, interval, step, thickness, offset, offset);
+}
+
 CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax, unsigned int step, float thickness, Rect* box, CanvasTextFormat^ ft) {
 	float hatch_width, ch, em, tspace, diff, mark_span_off;
 	unsigned int span, skip;
@@ -131,7 +144,6 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax
 		auto translation = make_translation_matrix(mark_span_off * ch, interval * float(i) - tspace);
 
 		marks = geometry_union(marks, paragraph(make_text_layout(mark, font)), translation);
-		syslog(Log::Warning, L"mark %s for [%f, %f] within %f", mark->Data(), vmin, vmax, height);
 	}
 
 	if (box != nullptr) {
