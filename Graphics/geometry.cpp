@@ -10,7 +10,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
-CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d) {
+CanvasGeometry^ WarGrey::SCADA::geometry_rotate(CanvasGeometry^ g, double d) {
     Rect region = g->ComputeBounds();
 
     return geometry_rotate(g, d,
@@ -18,27 +18,71 @@ CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double d) {
         region.Y + region.Height * 0.5F);
 }
 
-CanvasGeometry^ geometry_rotate(CanvasGeometry^ g, double degrees, float cx, float cy) {
+CanvasGeometry^ WarGrey::SCADA::geometry_rotate(CanvasGeometry^ g, double degrees, float cx, float cy) {
     return g->Transform(make_rotation_matrix(degrees, cx, cy));
 }
 
-CanvasGeometry^ geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStrokeStyle^ style) {
     return (style == nullptr) ? g->Stroke(thickness) : g->Stroke(thickness, style);
 }
 
-CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+CanvasGeometry^ WarGrey::SCADA::geometry_translate(CanvasGeometry^ g, float tx, float ty) {
+	return g->Transform(make_translation_matrix(tx, ty));
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_scale(CanvasGeometry^ g, float sx, float sy) {
+	return g->Transform(make_scale_matrix(sx, sy));
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
     return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Exclude);
 }
 
-CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+CanvasGeometry^ WarGrey::SCADA::geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
     return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Intersect);
 }
 
-CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+CanvasGeometry^ WarGrey::SCADA::geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
+	return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Xor);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
     return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Union);
 }
 
-CanvasGeometry^ geometry_union(CanvasGeometry^ gs[], size_t count) {
+CanvasGeometry^ WarGrey::SCADA::geometry_subtract(CanvasGeometry^ g0, float tx1, float ty1, CanvasGeometry^ g2, float tx2, float ty2) {
+	return geometry_subtract(g0->Transform(make_translation_matrix(tx1, ty1)), g2, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_intersect(CanvasGeometry^ g0, float tx1, float ty1, CanvasGeometry^ g2, float tx2, float ty2) {
+	return geometry_intersect(g0->Transform(make_translation_matrix(tx1, ty1)), g2, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_xor(CanvasGeometry^ g0, float tx1, float ty1, CanvasGeometry^ g2, float tx2, float ty2) {
+	return geometry_xor(g0->Transform(make_translation_matrix(tx1, ty1)), g2, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_union(CanvasGeometry^ g0, float tx1, float ty1, CanvasGeometry^ g2, float tx2, float ty2) {
+	return geometry_union(g0->Transform(make_translation_matrix(tx1, ty1)), g2, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_subtract(CanvasGeometry^ g, float tx1, float ty1, float tx2, float ty2) {
+	return geometry_subtract(g, tx1, ty1, g, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_intersect(CanvasGeometry^ g, float tx1, float ty1, float tx2, float ty2) {
+	return geometry_intersect(g, tx1, ty1, g, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_xor(CanvasGeometry^ g, float tx1, float ty1, float tx2, float ty2) {
+	return geometry_xor(g, tx1, ty1, g, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_union(CanvasGeometry^ g, float tx1, float ty1, float tx2, float ty2) {
+	return geometry_union(g, tx1, ty1, g, tx2, ty2);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_union(CanvasGeometry^ gs[], size_t count) {
 	CanvasGeometry^ g = ((count > 0) ? gs[0] : blank());
 	
 	for (size_t i = 1; i < count; i++) {
@@ -48,31 +92,11 @@ CanvasGeometry^ geometry_union(CanvasGeometry^ gs[], size_t count) {
 	return g;
 }
 
-CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float tx, float ty) {
-    return g1->CombineWith(g2, make_translation_matrix(tx, ty), CanvasGeometryCombine::Xor);
-}
-
-CanvasGeometry^ geometry_subtract(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
-    return g1->CombineWith(g2, t, CanvasGeometryCombine::Exclude);
-}
-
-CanvasGeometry^ geometry_intersect(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
-    return g1->CombineWith(g2, t, CanvasGeometryCombine::Intersect);
-}
-
-CanvasGeometry^ geometry_union(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
-    return g1->CombineWith(g2, t, CanvasGeometryCombine::Union);
-}
-
-CanvasGeometry^ geometry_xor(CanvasGeometry^ g1, CanvasGeometry^ g2, float3x2 t) {
-    return g1->CombineWith(g2, t, CanvasGeometryCombine::Xor);
-}
-
 /*************************************************************************************************/
-CanvasCachedGeometry^ geometry_freeze(CanvasGeometry^ geometry) {
+CanvasCachedGeometry^ WarGrey::SCADA::geometry_freeze(CanvasGeometry^ geometry) {
     return CanvasCachedGeometry::CreateFill(geometry);
 }
 
-CanvasCachedGeometry^ geometry_draft(CanvasGeometry^ geometry, float linewidth) {
+CanvasCachedGeometry^ WarGrey::SCADA::geometry_draft(CanvasGeometry^ geometry, float linewidth) {
     return CanvasCachedGeometry::CreateStroke(geometry, linewidth);
 }

@@ -3,7 +3,6 @@
 #include "math.hpp"
 #include "text.hpp"
 #include "shape.hpp"
-#include "transformation.hpp"
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
@@ -34,8 +33,8 @@ Converterlet::Converterlet(ConverterStatus default_status, Platform::String^ sig
 	auto border = geometry_stroke(rectangle(offset, offset, sidelength, sidelength), this->thickness);
 
 	auto g_body = geometry_union(border, diagonal);
-	auto g_sign = paragraph(l_sign)->Transform(make_translation_matrix(-s_box.X + s_x, -s_box.Y + s_y));
-	auto g_pair = paragraph(l_pair)->Transform(make_translation_matrix(-p_box.X + p_x, -p_box.Y + p_y));
+	auto g_sign = geometry_translate(paragraph(l_sign), -s_box.X + s_x, -s_box.Y + s_y);
+	auto g_pair = geometry_translate(paragraph(l_pair), -p_box.X + p_x, -p_box.Y + p_y);
 
 	this->body = geometry_freeze(geometry_rotate(g_body, degrees, radius, radius));
 	this->sign = geometry_freeze(geometry_rotate(geometry_union(g_sign, g_pair), degrees, radius, radius));

@@ -34,14 +34,14 @@ private:
 static BatteryStatus* battery_status = nullptr;
 
 /*************************************************************************************************/
-Batterylet::Batterylet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(1.0F, width, height, bcolor, stops) {}
+Batterylet::Batterylet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(1.0F, width, height, thickness, bcolor, stops) {}
 
-Batterylet::Batterylet(float range, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(0.0F, range, width, height, bcolor, stops) {}
+Batterylet::Batterylet(float range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(0.0F, range, width, height, thickness, bcolor, stops) {}
 
-Batterylet::Batterylet(float emin, float emax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(emin, emax), width(width), height(height), thickness(3.0F)
+Batterylet::Batterylet(float emin, float emax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(emin, emax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? battery_default_border_color : bcolor) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);

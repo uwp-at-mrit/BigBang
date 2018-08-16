@@ -3,7 +3,6 @@
 #include "shape.hpp"
 #include "hatch.hpp"
 #include "geometry.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -64,7 +63,7 @@ Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, float vmin, 
 
 void Cylinderlet::construct() {
 	CanvasGeometry^ hatch;
-	Rect measure_box;
+	VHatchMarkMetrics metrics;
 	float hatch_height = this->height * 0.95F;
 	float hatch_y = (this->height - hatch_height) * 0.5F;
 	float base_height = hatch_y;
@@ -76,28 +75,28 @@ void Cylinderlet::construct() {
 	float mark_x = 0.0F;
 
 	if (this->mark_position == FitPosition::Left) {
-		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
+		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
 	} else {
-		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
-		mark_x = this->width - measure_box.Width;
+		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
+		mark_x = this->width - metrics.width;
 	}
 
 	{ // the only difference between left-cylinder and right-cylinder is the `base_x`; 
-		float base_width = (this->width - measure_box.Width - hatch_thickness) + base_corner_radius * 2.0F;
+		float base_width = (this->width - metrics.width - hatch_thickness) + base_corner_radius * 2.0F;
 		float base_x = ((this->mark_position == FitPosition::Left) ? (this->width - base_width) : 0.0F);
 		float glass_thickness = this->thickness * 0.5F;
 		float glass_offset = glass_thickness * 0.5F;
 		float glass_width = base_width - base_corner_radius * 4.0F - this->thickness;
-		float glass_height = measure_box.Height + glass_thickness;
+		float glass_height = metrics.hatch_height + glass_thickness;
 		float glass_x = base_x + (base_width - glass_width) * 0.5F;
-		float glass_y = measure_box.Y + hatch_y - glass_offset;
+		float glass_y = metrics.hatch_y + hatch_y - glass_offset;
 		float hat_width = glass_width + hat_corner_radius * 2.0F;
 		float hat_x = base_x + (base_width - hat_width) * 0.5F;
-		float body_height = measure_box.Height;
+		float body_height = metrics.hatch_height;
 		float body_width = glass_width - glass_thickness;
 		
 		CanvasGeometry^ glass_parts[] = {
-			hatch->Transform(make_translation_matrix(mark_x, hatch_y)),
+			geometry_translate(hatch, mark_x, hatch_y),
 			rounded_rectangle(hat_x, 0.0F, hat_width, hat_height, hat_corner_radius, hat_corner_radius),
 			geometry_stroke(rounded_rectangle(glass_x, glass_y, glass_width, glass_height, glass_thickness, glass_thickness), glass_thickness),
 			rounded_rectangle(base_x, base_y, base_width, base_height * 2.0F, base_corner_radius, base_corner_radius)

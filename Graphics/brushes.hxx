@@ -9,6 +9,7 @@ namespace WarGrey::SCADA {
 	public:
 		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make(double h, double s, double l, double alpha = 1.0);
 		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make(unsigned int hex, double alpha = 1.0);
+		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ make(WarGrey::SCADA::Colour^ src, double alpha = 1.0);
 		
 		static Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ contrast(WarGrey::SCADA::Colour^ src);
 

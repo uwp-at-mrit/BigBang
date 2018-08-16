@@ -4,7 +4,6 @@
 #include "paint.hpp"
 #include "hatch.hpp"
 #include "geometry.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -90,30 +89,29 @@ Thermometerlet::Thermometerlet(FitPosition mark_position, float tmin, float tmax
 }
 
 void Thermometerlet::construct() {
-	float mercury_lowest, mercury_highest, mercury_height, em;
+	float mercury_lowest, mercury_highest, mercury_height;
 	float hatch_thickness = this->thickness * 0.618F;
-	float hatch_width = vhatchmark_width(this->vmin, this->vmax, hatch_thickness, nullptr, nullptr, &em);
+	VHatchMarkMetrics metrics = vhatchmark_metrics(this->vmin, this->vmax, hatch_thickness);
 	
-	this->bulb_size = this->width - hatch_width;
+	this->bulb_size = this->width - metrics.width;
 	this->fill_mercury_extent(0.0F, nullptr, &mercury_lowest);
 	this->fill_mercury_extent(nullptr, &mercury_highest, nullptr, &mercury_height); 
 	
 	{ // make skeleton
 		CanvasGeometry^ hatch;
-		Rect measure_box;
-		float hatch_height = (mercury_lowest - mercury_highest) + hatch_thickness + em;
+		float hatch_height = (mercury_lowest - mercury_highest) + hatch_thickness + metrics.em;
 		CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness);
 		float mark_x = 0.0F;
 		
 		if (this->mark_position == FitPosition::Left) {
-			hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
-			glass = glass->Transform(make_translation_matrix(hatch_width, 0.0F));
+			hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
+			glass = geometry_translate(glass, metrics.width, 0.0F);
 		} else {
-			hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &measure_box);
-			mark_x = this->width - measure_box.Width;
+			hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
+			mark_x = this->width - metrics.width;
 		}
 
-		this->skeleton = geometry_freeze(geometry_union(glass, hatch, mark_x, mercury_highest - measure_box.Y));
+		this->skeleton = geometry_freeze(geometry_union(glass, hatch, mark_x, mercury_highest - metrics.hatch_y));
 	}
 
 	this->on_value_changed(0.0F);

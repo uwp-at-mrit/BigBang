@@ -1,6 +1,5 @@
 #include "shape.hpp"
 #include "math.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -25,7 +24,7 @@ CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, bool adjust) {
 		float xoff = (x >= 0.0F) ? x : -x;
 		float yoff = (y >= 0.0F) ? y : -y;
 
-        layout = geometry_union(blank(), layout, make_translation_matrix(xoff, yoff));
+        layout = geometry_union(blank(), layout, xoff, yoff);
     }
 
 	return layout;

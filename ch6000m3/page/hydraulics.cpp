@@ -407,7 +407,7 @@ private:
 private:
 	Tracklet<HS>* pipeline;
 	FuelTanklet* oil_tank;
-	std::map<HS, Credit<Tanklet, HS>*> tanks;
+	std::map<HS, Credit<ITanklet, HS>*> tanks;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;

@@ -18,6 +18,10 @@ CanvasSolidColorBrush^ Colours::make(unsigned int hex, double alpha) {
 	return make_solid_brush(hex, alpha);
 }
 
+CanvasSolidColorBrush^ Colours::make(Colour^ src, double alpha) {
+	return make_solid_brush(src->Color, alpha);
+}
+
 CanvasSolidColorBrush^ Colours::contrast(CanvasSolidColorBrush^ src) {
 	return make_solid_brush(contrast_color(src->Color));
 }

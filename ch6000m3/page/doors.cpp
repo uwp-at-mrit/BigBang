@@ -74,8 +74,7 @@ public:
 		float cell_width = sw / float(door_count_per_side);
 		float seq_y = sy - this->sequences[0]->LayoutBounds.Height * 1.618F;
 		
-		ds->DrawGeometry(this->ship->Transform(make_scale_matrix(Width, Height)),
-			sx, sy, Colours::Silver, thickness);
+		ds->DrawGeometry(geometry_scale(this->ship, Width, Height), sx, sy, Colours::Silver, thickness);
 
 		for (size_t idx = 0; idx < door_count_per_side; idx++) {
 			float cell_x = sx + cell_width * float(idx);

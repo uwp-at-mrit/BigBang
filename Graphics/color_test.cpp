@@ -2,6 +2,8 @@
 #include "colorspace.hpp"
 #include "syslog.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::UI;
 
 static inline int rgb_to_hex(Color rgb) {

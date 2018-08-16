@@ -4,6 +4,8 @@
 
 #include "colorspace.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::UI;
 
 #define UCHAR(v) ((unsigned char)std::round(v * 255.0))
@@ -80,7 +82,7 @@ static Color hsi_sector_to_rgb(double hue, double saturation, double intensity, 
     }
 }
 
-static inline char scale_color(unsigned char src, double s) {
+static inline char do_scale(unsigned char src, double s) {
 	unsigned char dest = src;
 
 	if (s > 1.0) {
@@ -93,16 +95,16 @@ static inline char scale_color(unsigned char src, double s) {
 }
 
 /*************************************************************************************************/
-unsigned char color_double_to_char(double c) {
+unsigned char WarGrey::SCADA::color_double_to_char(double c) {
 	return UCHAR(c);
 }
 
-unsigned int color_to_hexadecimal(Color& c) {
+unsigned int WarGrey::SCADA::color_to_hexadecimal(Color& c) {
 	return (c.R << 16) | (c.G << 8) | c.B; 
 }
 
 /*************************************************************************************************/
-Color rgba(unsigned int hex, double a) {
+Color WarGrey::SCADA::rgba(unsigned int hex, double a) {
     auto r = (unsigned char)((hex >> 16) & 0xFF);
     auto g = (unsigned char)((hex >> 8) & 0xFF);
     auto b = (unsigned char)(hex & 0xFF);
@@ -110,23 +112,23 @@ Color rgba(unsigned int hex, double a) {
     return ColorHelper::FromArgb(UCHAR(a), r, g, b);
 }
 
-Color rgba(Color& src, double a) {
+Color WarGrey::SCADA::rgba(Color& src, double a) {
     return ColorHelper::FromArgb(UCHAR(a), src.R, src.G, src.B);
 }
 
-Color rgba(double r, double g, double b, double a) {
+Color WarGrey::SCADA::rgba(double r, double g, double b, double a) {
     return ColorHelper::FromArgb(UCHAR(a), UCHAR(r), UCHAR(g), UCHAR(b));
 }
 
 /*************************************************************************************************/
-Color hsva(double hue, double saturation, double value, double alpha) {
+Color WarGrey::SCADA::hsva(double hue, double saturation, double value, double alpha) {
     double chroma = saturation * value;
     double m = value - chroma;
     
     return hue_to_rgba(hue, chroma, m, alpha);
 }
 
-void fill_hsv_color(Color& color, double* hue, double* saturation, double* value) {
+void WarGrey::SCADA::fill_hsv_color(Color& color, double* hue, double* saturation, double* value) {
 	double M, m, chroma;
 	
 	(*hue) = color_to_hue(color, &M, &m, &chroma);
@@ -134,19 +136,19 @@ void fill_hsv_color(Color& color, double* hue, double* saturation, double* value
 	(*value) = M;
 }
 
-void fill_hsv_color(unsigned int hex, double* hue, double* saturation, double* value) {
+void WarGrey::SCADA::fill_hsv_color(unsigned int hex, double* hue, double* saturation, double* value) {
 	fill_hsv_color(rgba(hex), hue, saturation, value);
 }
 
 /*************************************************************************************************/
-Color hsla(double hue, double saturation, double lightness, double alpha) {
+Color WarGrey::SCADA::hsla(double hue, double saturation, double lightness, double alpha) {
     double chroma = saturation * (1.0 - std::abs(lightness * 2.0 - 1.0));
     double m = lightness - chroma * 0.5;
     
     return hue_to_rgba(hue, chroma, m, alpha);
 }
 
-void fill_hsl_color(Color& color, double* hue, double* saturation, double* lightness) {
+void WarGrey::SCADA::fill_hsl_color(Color& color, double* hue, double* saturation, double* lightness) {
 	double M, m, chroma;
 	double h = color_to_hue(color, &M, &m, &chroma);
 	double L = (M + m) * 0.5;
@@ -156,12 +158,12 @@ void fill_hsl_color(Color& color, double* hue, double* saturation, double* light
 	(*lightness) = L;
 }
 
-void fill_hsl_color(unsigned int hex, double* hue, double* saturation, double* lightness) {
+void WarGrey::SCADA::fill_hsl_color(unsigned int hex, double* hue, double* saturation, double* lightness) {
 	fill_hsl_color(rgba(hex), hue, saturation, lightness);
 }
 
 /*************************************************************************************************/
-Color hsia(double hue, double saturation, double intensity, double alpha) {
+Color WarGrey::SCADA::hsia(double hue, double saturation, double intensity, double alpha) {
     if ((saturation == 0.0) || std::isnan(saturation)) {
         return rgba(intensity, intensity, intensity, alpha);
     } else if (hue < 120.0) {
@@ -173,7 +175,7 @@ Color hsia(double hue, double saturation, double intensity, double alpha) {
     }
 }
 
-void fill_hsi_color(Color& color, double* hue, double* saturation, double* intensity) {
+void WarGrey::SCADA::fill_hsi_color(Color& color, double* hue, double* saturation, double* intensity) {
 	double r = double(color.R);
 	double g = double(color.G);
 	double b = double(color.B);
@@ -187,12 +189,12 @@ void fill_hsi_color(Color& color, double* hue, double* saturation, double* inten
 	(*intensity) = I;
 }
 
-void fill_hsi_color(unsigned int hex, double* hue, double* saturation, double* intensity) {
+void WarGrey::SCADA::fill_hsi_color(unsigned int hex, double* hue, double* saturation, double* intensity) {
 	fill_hsl_color(rgba(hex), hue, saturation, intensity);
 }
 
 /*************************************************************************************************/
-Color contrast_color(Color& src) {
+Color WarGrey::SCADA::contrast_color(Color& src) {
 	// NOTE: human eye favors green color... 
 	double perceptive_luminance = 1.0 - (double(src.R) * 0.299 + double(src.G) * 0.587 + double(src.B) * 0.114) / 255.0;
 
@@ -203,16 +205,16 @@ Color contrast_color(Color& src) {
 	}
 }
 
-Color scale_color(Color& src, double scale) {
+Color WarGrey::SCADA::scale_color(Color& src, double scale) {
 	double s = std::max(scale, 0.0);
 
-	return ColorHelper::FromArgb(src.A, scale_color(src.R, s), scale_color(src.G, s), scale_color(src.B, s));
+	return ColorHelper::FromArgb(src.A, do_scale(src.R, s), do_scale(src.G, s), do_scale(src.B, s));
 }
 
-Color darken_color(Windows::UI::Color& src) {
+Color WarGrey::SCADA::darken_color(Windows::UI::Color& src) {
 	return scale_color(src, 0.5);
 }
 
-Color lighten_color(Windows::UI::Color& src) {
+Color WarGrey::SCADA::lighten_color(Windows::UI::Color& src) {
 	return scale_color(src, 2.0);
 }

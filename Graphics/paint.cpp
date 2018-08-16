@@ -108,8 +108,8 @@ void WarGrey::SCADA::brush_translate(ICanvasBrush^ brush, float x, float y) {
     brush->Transform = make_translation_matrix(x, y);
 }
 
-CanvasSolidColorBrush^ WarGrey::SCADA::make_solid_brush(Color& color) {
-    return ref new CanvasSolidColorBrush(CanvasDevice::GetSharedDevice(), color);
+CanvasSolidColorBrush^ WarGrey::SCADA::make_solid_brush(Color& color, double alpha) {
+    return ref new CanvasSolidColorBrush(CanvasDevice::GetSharedDevice(), (alpha == 1.0) ? color : rgba(color, alpha));
 }
 
 CanvasSolidColorBrush^ WarGrey::SCADA::make_solid_brush(unsigned int hex, double alpha) {

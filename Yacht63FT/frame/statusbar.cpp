@@ -70,8 +70,8 @@ public:
 				this->master->fill_graphlet_location(this->parameters[0], nullptr, &icon_bottom, GraphletAnchor::LB);
 
 				switch (i) {
-				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F); target = this->oiltank; break;
-				case Status::StorageCell: this->storage = new Batterylet(icon_width, -1.5714F); target = this->storage; break;
+				case Status::OilTank: this->oiltank = new FuelTanklet(icon_width, -1.5714F, 3.0F); target = this->oiltank; break;
+				case Status::StorageCell: this->storage = new Batterylet(icon_width, -1.5714F, 3.0F); target = this->storage; break;
 				case Status::GPS_E: this->gps = new Bitmaplet("gps", icon_width * 1.78F); target = this->gps; break;
 				}
 
