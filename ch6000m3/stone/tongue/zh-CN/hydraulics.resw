@@ -184,4 +184,16 @@
   <data name="FilterBlocked" xml:space="preserve">
     <value>滤器堵塞</value>
   </data>
+  <data name="TS1" xml:space="preserve">
+    <value>主油温度控制开关TS1</value>
+  </data>
+  <data name="TS11" xml:space="preserve">
+    <value>油温度控制开关TS11</value>
+  </data>
+  <data name="TS12" xml:space="preserve">
+    <value>油温度控制开关TS12</value>
+  </data>
+  <data name="TS2" xml:space="preserve">
+    <value>主油温度控制开关TS2</value>
+  </data>
 </root>

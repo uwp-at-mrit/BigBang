@@ -55,9 +55,11 @@ public:
 public: // for asynchronously loaded graphlets
 	float x0;
 	float y0;
-	GraphletAnchor anchor0;
+	float fx0;
+	float fy0;
+	float dx0;
+	float dy0;
 	
-
 public:
 	IGraphlet* next;
 	IGraphlet* prev;
@@ -124,28 +126,34 @@ static inline void unsafe_set_selected(IPlanet* master, IGraphlet* g, GraphletIn
 	master->end_update_sequence();
 }
 
-static void graphlet_anchor_offset(IGraphlet* g, float width, float height, GraphletAnchor& a, float* xoff, float* yoff) {
-    float dx = 0.0F;
-    float dy = 0.0F;
+static void graphlet_anchor_fraction(GraphletAnchor& a, float* ofx, float* ofy) {
+	float fx = 0.0F;
+	float fy = 0.0F;
 
-    if (a != GraphletAnchor::LT) {
-		float halfw = width  * 0.5F;
-		float halfh = height * 0.5F;
+	if (a != GraphletAnchor::LT) {
+		switch (a) {
+		case GraphletAnchor::LC:            fy = 0.5F; break;
+		case GraphletAnchor::LB:            fy = 1.0F; break;
+		case GraphletAnchor::CT: fx = 0.5F;            break;
+		case GraphletAnchor::CC: fx = 0.5F; fy = 0.5F; break;
+		case GraphletAnchor::CB: fx = 0.5F; fy = 1.0F; break;
+		case GraphletAnchor::RT: fx = 1.0F;            break;
+		case GraphletAnchor::RC: fx = 1.0F; fy = 0.5F; break;
+		case GraphletAnchor::RB: fx = 1.0F; fy = 1.0F; break;
+		}
+	}
 
-        switch (a) {
-        case GraphletAnchor::LC:             dy = halfh;  break;
-        case GraphletAnchor::LB:             dy = height; break;
-        case GraphletAnchor::CT: dx = halfw;              break;
-        case GraphletAnchor::CC: dx = halfw; dy = halfh;  break;
-        case GraphletAnchor::CB: dx = halfw; dy = height; break;
-        case GraphletAnchor::RT: dx = width;              break;
-        case GraphletAnchor::RC: dx = width; dy = halfh;  break;
-        case GraphletAnchor::RB: dx = width; dy = height; break;
-        }
-    }
+	(*ofx) = fx;
+	(*ofy) = fy;
+}
 
-	(*xoff) = dx;
-	(*yoff) = dy;
+static inline void graphlet_anchor_offset(float width, float height, GraphletAnchor& a, float* xoff, float* yoff) {
+    float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	(*xoff) = fx * width;
+	(*yoff) = fy * height;
 }
 
 static bool unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, float x, float y, bool absolute) {
@@ -167,21 +175,26 @@ static bool unsafe_move_graphlet_via_info(Planet* master, GraphletInfo* info, fl
 	return moved;
 }
 
-static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info, float x, float y, GraphletAnchor a, bool absolute) {
+static bool unsafe_move_graphlet_via_info(Planet* master, IGraphlet* g, GraphletInfo* info
+	, float x, float y, float fx, float fy, float dx, float dy, bool absolute) {
 	float sx, sy, sw, sh;
-	float dx = 0.0F;
-	float dy = 0.0F;
-
+	float ax = 0.0F;
+	float ay = 0.0F;
+	
 	if (g->ready()) {
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
+		ax = (sw * fx);
+		ay = (sh * fy);
 	} else {
 		info->x0 = x;
 		info->y0 = y;
-		info->anchor0 = a;
+		info->fx0 = fx;
+		info->fy0 = fy;
+		info->dx0 = dx;
+		info->dy0 = dy;
 	}
 	
-	return unsafe_move_graphlet_via_info(master, info, x - dx, y - dy, true);
+	return unsafe_move_graphlet_via_info(master, info, x - ax + dx, y - ay + dy, true);
 }
 
 static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mode, IGraphlet* terminator) {
@@ -244,7 +257,9 @@ void Planet::notify_graphlet_ready(IGraphlet* g) {
 		 * The moving may occur more than once in or not in the same thread,
 		 *  do we need a mechanism to avoid the redundant ones?
 		 */
-		unsafe_move_graphlet_via_info(this, g, info, info->x0, info->y0, info->anchor0, true);
+		unsafe_move_graphlet_via_info(this, g, info,
+			info->x0, info->y0, info->fx0, info->fy0, info->dx0, info->dy0,
+			true);
 		
 		this->notify_graphlet_updated(g);
 		this->on_graphlet_ready(g);
@@ -282,7 +297,7 @@ void Planet::end_update_sequence() {
 	}
 }
 
-void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
+void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx, float dy) {
 	if (g->info == nullptr) {
 		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, 0.0);
 
@@ -301,13 +316,13 @@ void Planet::insert(IGraphlet* g, float x, float y, GraphletAnchor a) {
 
 		g->sprite();
 		g->construct();
-		unsafe_move_graphlet_via_info(this, g, info, x, y, a, true);
+		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		this->notify_graphlet_updated(g);
 	}
 }
 
-void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, GraphletAnchor a, float dx, float dy) {
+void Planet::insert(IGraphlet* g, IGraphlet* target, float tfx, float tfy, float fx, float fy, float dx, float dy) {
 	if (g->info == nullptr) {
 		GraphletInfo* tinfo = planet_graphlet_info(this, target);
 		float x = 0.0F;
@@ -316,15 +331,14 @@ void Planet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, Graphlet
 		// TODO: what if the target graphlet is not ready?
 
 		if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
-			float sx, sy, sw, sh, xoff, yoff;
+			float tsx, tsy, tsw, tsh;
 
-			unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
-			graphlet_anchor_offset(target, sw, sh, ta, &xoff, &yoff);
-			x = sx + xoff + dx;
-			y = sy + yoff + dy;
+			unsafe_fill_graphlet_bound(target, tinfo, &tsx, &tsy, &tsw, &tsh);
+			x = tsx + tsw * tfx;
+			y = tsy + tsh * tfy;
 		}
 
-		this->insert(g, x, y, a);
+		this->insert(g, x, y, fx, fy, dx, dy);
 	}
 }
 
@@ -378,31 +392,30 @@ void Planet::erase() {
 	}
 }
 
-void Planet::move_to(IGraphlet* g, float x, float y, GraphletAnchor a) {
+void Planet::move_to(IGraphlet* g, float x, float y, float fx, float fy, float dx, float dy) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		if (unsafe_move_graphlet_via_info(this, g, info, x, y, a, true)) {
+		if (unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true)) {
 			this->notify_graphlet_updated(g);
 		}
 	}
 }
 
-void Planet::move_to(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, GraphletAnchor a, float dx, float dy) {
-	GraphletInfo* info = planet_graphlet_info(this, g);
+void Planet::move_to(IGraphlet* g, IGraphlet* target, float tfx, float tfy, float fx, float fy, float dx, float dy) {
 	GraphletInfo* tinfo = planet_graphlet_info(this, target);
+	float x = 0.0F;
+	float y = 0.0F;
 
-	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)
-		&& (tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
-		float sx, sy, sw, sh, xoff, yoff;
+	if ((tinfo != nullptr) && unsafe_graphlet_unmasked(tinfo, this->mode)) {
+		float tsx, tsy, tsw, tsh;
 
-		unsafe_fill_graphlet_bound(target, tinfo, &sx, &sy, &sw, &sh);
-		graphlet_anchor_offset(target, sw, sh, ta, &xoff, &yoff);
-		
-		if (unsafe_move_graphlet_via_info(this, g, info, sx + xoff + dx, sy + yoff + dy, a, true)) {
-			this->notify_graphlet_updated(g);
-		}
+		unsafe_fill_graphlet_bound(target, tinfo, &tsx, &tsy, &tsw, &tsh);
+		x = tsx + tsw * tfx;
+		y = tsy + tsh * tfy;
 	}
+		
+	this->move_to(g, x, y, fx, fy, dx, dy);
 }
 
 void Planet::move(IGraphlet* g, float x, float y) {
@@ -477,17 +490,16 @@ IGraphlet* Planet::find_next_selected_graphlet(IGraphlet* start) {
 	return found;
 }
 
-bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAnchor a) {
+bool Planet::fill_graphlet_location(IGraphlet* g, float* x, float* y, float fx, float fy) {
 	bool okay = false;
 	GraphletInfo* info = planet_graphlet_info(this, g);
 	
 	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
-		float sx, sy, sw, sh, dx, dy;
+		float sx, sy, sw, sh;
 
 		unsafe_fill_graphlet_bound(g, info, &sx, &sy, &sw, &sh);
-		graphlet_anchor_offset(g, sw, sh, a, &dx, &dy);
-		SET_BOX(x, sx + dx);
-		SET_BOX(y, sy + dy);
+		SET_BOX(x, sx + sw * fx);
+		SET_BOX(y, sy + sh * fy);
 
 		okay = true;
     }
@@ -723,7 +735,7 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 	if (puk == PointerUpdateKind::LeftButtonPressed) {
 		if (this->rubberband_y == nullptr) {
 			// TODO: implement interactive moving
-			this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
+			//this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
 			this->last_pointer_x = x;
 			this->last_pointer_y = y;
 		} else {
@@ -1225,4 +1237,78 @@ Point IPlanet::local_to_global_point(IGraphlet* g, float local_x, float local_y,
 	this->fill_graphlet_location(g, &gx, &gy);
 	
 	return Point(gx + local_x + xoff, gy + local_y + yoff);
+}
+
+bool IPlanet::fill_graphlet_location(IGraphlet* g, float* x, float* y, GraphletAnchor a) {
+	float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	return this->fill_graphlet_location(g, x, y, fx, fy);
+}
+
+void IPlanet::insert(IGraphlet* g, float x, float y, GraphletAnchor a, float dx, float dy) {
+	float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->insert(g, x, y, fx, fy, dx, dy);
+}
+
+void IPlanet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, GraphletAnchor a, float dx, float dy) {
+	float tfx, tfy, fx, fy;
+
+	graphlet_anchor_fraction(ta, &tfx, &tfy);
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->insert(g, target, tfx, tfy, fx, fy, dx, dy);
+}
+
+void IPlanet::insert(IGraphlet* g, IGraphlet* target, float tfx, float tfy, GraphletAnchor a, float dx, float dy) {
+	float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->insert(g, target, tfx, tfy, fx, fy, dx, dy);
+}
+
+void IPlanet::insert(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, float fx, float fy, float dx, float dy) {
+	float tfx, tfy;
+
+	graphlet_anchor_fraction(ta, &tfx, &tfy);
+	
+	this->insert(g, target, tfx, tfy, fx, fy, dx, dy);
+}
+
+void IPlanet::move_to(IGraphlet* g, float x, float y, GraphletAnchor a, float dx, float dy) {
+	float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->move_to(g, x, y, fx, fy, dx, dy);
+}
+
+void IPlanet::move_to(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, GraphletAnchor a, float dx, float dy) {
+	float tfx, tfy, fx, fy;
+
+	graphlet_anchor_fraction(ta, &tfx, &tfy);
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->move_to(g, target, tfx, tfy, fx, fy, dx, dy);
+}
+
+void IPlanet::move_to(IGraphlet* g, IGraphlet* target, float tfx, float tfy, GraphletAnchor a, float dx, float dy) {
+	float fx, fy;
+
+	graphlet_anchor_fraction(a, &fx, &fy);
+
+	this->move_to(g, target, tfx, tfy, fx, fy, dx, dy);
+}
+
+void IPlanet::move_to(IGraphlet* g, IGraphlet* target, GraphletAnchor ta, float fx, float fy, float dx, float dy) {
+	float tfx, tfy;
+
+	graphlet_anchor_fraction(ta, &tfx, &tfy);
+
+	this->move_to(g, target, tfx, tfy, fx, fy, dx, dy);
 }

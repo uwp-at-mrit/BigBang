@@ -50,7 +50,9 @@ private enum class HS : unsigned int {
 	// Key Labels
 	Port, Starboard, Master, Visor, Storage,
 	// Indicators
-	F001Blocked, F002Blocked, FilterBlocked,
+	F001Blocked, F002Blocked,
+	TS1, TS2, TS11, TS12,
+	FilterBlocked,
 	_,
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
@@ -213,13 +215,10 @@ public:
 		}
 	}
 
-	void load_state_indicators(float width, float height, float gridsize) {
+	void load_metrics(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels);
-		this->load_status_indicator(HS::F002Blocked, size, this->heater_states, this->hslabels);
-
-		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels);
+		this->load_boolean_indicators(HS::F001Blocked, HS::FilterBlocked, size, this->states, this->islabels);
 
 		this->load_dimensions(this->temperatures, HS::Master, HS::Visor, "celsius", "temperature");
 	}
@@ -313,24 +312,19 @@ public:
 		}
 	}
 
-	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
+	void reflow_metrics(float width, float height, float gridsize, float vinset) {
 		this->master->move_to(this->captions[HS::Master], this->station, GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
-		this->station->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAnchor::CC);
-		this->station->map_credit_graphlet(this->heater_states[HS::F002Blocked], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->states[HS::F001Blocked], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->states[HS::F002Blocked], GraphletAnchor::CC);
 
-		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_tank, GraphletAnchor::LB, GraphletAnchor::LT, gridsize * 2.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::Visor], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
+		this->master->move_to(this->states[HS::FilterBlocked], this->visor_tank, GraphletAnchor::RB, GraphletAnchor::LB, gridsize * 2.0F, gridsize * 0.5F);
+		this->master->move_to(this->temperatures[HS::Visor], this->states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
 
-			for (auto lt = this->heater_states.begin(); lt != this->heater_states.end(); lt++) {
-				this->master->move_to(this->hslabels[lt->first], this->heater_states[lt->first],
-					GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
-			}
-
-			for (auto lt = this->visor_states.begin(); lt != this->visor_states.end(); lt++) {
-				this->master->move_to(this->vslabels[lt->first], this->visor_states[lt->first],
+			for (auto lt = this->states.begin(); lt != this->states.end(); lt++) {
+				this->master->move_to(this->islabels[lt->first], this->states[lt->first],
 					GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 			}
 		}
@@ -372,9 +366,11 @@ private:
 	}
 
 	template<typename E>
-	void load_status_indicator(E id, float size, std::map<E, Credit<Booleanlet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
-		this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
-		bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
+	void load_boolean_indicators(E id0, E idn, float size, std::map<E, Credit<Booleanlet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+			bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
+		}
 	}
 
 	template<class T, typename E>
@@ -419,10 +415,9 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> bars;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
-	std::map<HS, Credit<Booleanlet, HS>*> heater_states;
-	std::map<HS, Credit<Labellet, HS>*> hslabels;
-	std::map<HS, Credit<Booleanlet, HS>*> visor_states;
-	std::map<HS, Credit<Labellet, HS>*> vslabels;
+	std::map<HS, Credit<Booleanlet, HS>*> states;
+	std::map<HS, Credit<Labellet, HS>*> islabels;
+
 	
 private:
 	CanvasTextFormat^ caption_font;
@@ -468,7 +463,7 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 			dashboard->load_pump_station(width, height, this->gridsize);
 			dashboard->load_tanks(width, height, this->gridsize);
 			dashboard->load_devices(width, height, this->gridsize);
-			dashboard->load_state_indicators(width, height, this->gridsize);
+			dashboard->load_metrics(width, height, this->gridsize);
 
 			this->change_mode(HSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
@@ -495,12 +490,12 @@ void HydraulicsPage::reflow(float width, float height) {
 		this->change_mode(HSMode::Dashboard);
 		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
 		dashboard->reflow_devices(width, height, this->gridsize, vinset);
-		dashboard->reflow_state_indicators(width, height, this->gridsize, vinset);
+		dashboard->reflow_metrics(width, height, this->gridsize, vinset);
 	}
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<ITanklet*>(g) != nullptr);
+	return (dynamic_cast<Pumplet*>(g) != nullptr);
 }
 
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

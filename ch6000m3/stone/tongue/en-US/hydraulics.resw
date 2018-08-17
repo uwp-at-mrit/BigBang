@@ -229,4 +229,16 @@
   <data name="SQm" xml:space="preserve">
     <value>SQ.M</value>
   </data>
+  <data name="TS1" xml:space="preserve">
+    <value>Master Tank Temperature Switch 1</value>
+  </data>
+  <data name="TS11" xml:space="preserve">
+    <value>Visor Tank Temperature Switch 1</value>
+  </data>
+  <data name="TS12" xml:space="preserve">
+    <value>Visor Tank Temperature Switch 1</value>
+  </data>
+  <data name="TS2" xml:space="preserve">
+    <value>Master Tank Temperature Switch 1</value>
+  </data>
 </root>

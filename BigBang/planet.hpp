@@ -54,14 +54,14 @@ namespace WarGrey::SCADA {
 		
 	public:
 		virtual WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) = 0;
-		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
+		virtual bool fill_graphlet_location(IGraphlet* g, float* x, float* y, float fx = 0.0F, float fy = 0.0F) = 0;
 		virtual bool fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* width, float* height) = 0;
 		virtual void fill_graphlets_boundary(float* x, float* y, float* width, float* height) = 0;
-		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
-		virtual void insert(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void insert(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) = 0;
 		virtual void move(IGraphlet* g, float x, float y) = 0;
-		virtual void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) = 0;
-		virtual void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void move_to(IGraphlet* g, float x, float y, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) = 0;
+		virtual void move_to(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) = 0;
 		virtual void remove(IGraphlet* g) = 0;
 		virtual void erase() = 0;
 
@@ -139,6 +139,17 @@ namespace WarGrey::SCADA {
 		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
 
 	public:
+		bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a);
+		void insert(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+		void insert(IGraphlet* g, IGraphlet* tg, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+		void insert(IGraphlet* g, IGraphlet* tg, WarGrey::SCADA::GraphletAnchor ta, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F);
+		void insert(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, WarGrey::SCADA::GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+		void move_to(IGraphlet* g, IGraphlet* tg, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+		void move_to(IGraphlet* g, IGraphlet* tg, WarGrey::SCADA::GraphletAnchor ta, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F);
+		void move_to(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, WarGrey::SCADA::GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
+
+	public:
 		template<class G, size_t N>
 		void insert_all(G* (&gs)[N], bool reversed = false) {
 			if (reversed) {
@@ -193,16 +204,20 @@ namespace WarGrey::SCADA {
         void update(long long count, long long interval, long long uptime) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
-    public:
+    public: // learn C++ "Name Hiding"
+		using WarGrey::SCADA::IPlanet::fill_graphlet_location;
+		using WarGrey::SCADA::IPlanet::insert;
+		using WarGrey::SCADA::IPlanet::move_to;
+
 		WarGrey::SCADA::IGraphlet* find_graphlet(float x, float y) override;
-        bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
+		bool fill_graphlet_location(IGraphlet* g, float* x, float* y, float fx = 0.0F, float fy = 0.0F) override;
 		bool fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* width, float* height) override;
-		void fill_graphlets_boundary(float* x, float* y, float* width, float* height);
-		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
-		void insert(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) override;
+		void fill_graphlets_boundary(float* x, float* y, float* width, float* height) override;
+		void insert(IGraphlet* g, float x = 0.0F, float y = 0.0F, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) override;
+		void insert(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) override;
 		void move(IGraphlet* g, float x, float y) override;
-		void move_to(IGraphlet* g, float x, float y, WarGrey::SCADA::GraphletAnchor a = GraphletAnchor::LT) override;
-		void move_to(IGraphlet* g, IGraphlet* target, WarGrey::SCADA::GraphletAnchor ta, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) override;
+		void move_to(IGraphlet* g, float x, float y, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) override;
+		void move_to(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, float fx = 0.0F, float fy = 0.0F, float dx = 0.0F, float dy = 0.0F) override;
 		void remove(IGraphlet* g) override;
 		void erase() override;
 		void size_cache_invalid();
