@@ -4,6 +4,8 @@
 
 #include "graphlet/textlet.hpp"
 
+#include "string.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -18,7 +20,7 @@ CyberSpace::~CyberSpace() {}
 
 void CyberSpace::on_tap(IGraphlet* g, float x, float y, bool shifted, bool controled) {
 	if (g == nullptr) {
-		this->insert(new Labellet(L"(%f, %f)", x, y), x, y);
+		this->insert(new Labellet(make_wstring(L"(%f, %f)", x, y)), x, y);
 	}
 }
 

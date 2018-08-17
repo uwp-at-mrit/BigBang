@@ -162,4 +162,22 @@
   <data name="doors" xml:space="preserve">
     <value>Bottom Doors Control</value>
   </data>
+  <data name="Empty" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="Full" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>H</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>N</value>
+  </data>
+  <data name="UltraLow" xml:space="preserve">
+    <value>UL</value>
+  </data>
 </root>

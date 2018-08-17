@@ -28,11 +28,11 @@ namespace WarGrey::SCADA {
 		float width, float height, unsigned int step, float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatch(
-		float width, float height, unsigned int weights[], size_t count, unsigned int base,
+		float width, float height, float weights[], size_t count,
 		float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatch(
-		float width, float height, unsigned int weights[], size_t count, unsigned int base,
+		float width, float height, float weights[], size_t count,
 		float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatchmark(
@@ -41,7 +41,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatchmark(
-		float height, Platform::String^ marks[], unsigned int weights[], size_t count, unsigned int base,
+		float height, Platform::String^ marks[], float weights[], size_t count,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
@@ -51,7 +51,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatchmark(
-		float height, Platform::String^ marks[], unsigned int weights[], size_t count, unsigned int base,
+		float height, Platform::String^ marks[], float weights[], size_t count,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 }

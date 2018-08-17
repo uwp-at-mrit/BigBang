@@ -162,4 +162,22 @@
   <data name="doors" xml:space="preserve">
     <value>泥门控制</value>
   </data>
+  <data name="Empty" xml:space="preserve">
+    <value>空</value>
+  </data>
+  <data name="Full" xml:space="preserve">
+    <value>满</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>低</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>正常</value>
+  </data>
+  <data name="UltraLow" xml:space="preserve">
+    <value>过低</value>
+  </data>
 </root>

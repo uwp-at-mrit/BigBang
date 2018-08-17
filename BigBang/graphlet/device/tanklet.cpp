@@ -1,10 +1,7 @@
 ﻿#include "graphlet/device/tanklet.hpp"
 
 #include "shape.hpp"
-#include "paint.hpp"
-#include "hatch.hpp"
 #include "geometry.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -14,10 +11,26 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ tank_default_border_color = Colours::make(0xBBBBBB);
-static CanvasSolidColorBrush^ tank_default_fill_color = Colours::make(0x333333);
-static unsigned int tank_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 0xFFB03A };
-static float tank_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
+/*************************************************************************************************/
+void WarGrey::SCADA::default_mark_weights(float* weights, unsigned int count) {
+	 if (count == 1) {
+		 weights[0] = 0.5F;
+	 } else {
+		 float flcount = float(count - 1);
+
+		 for (unsigned int idx = 0; idx < count; idx ++) {
+			 weights[idx] = float(idx) / flcount;
+		 }
+	 }
+}
+
+void WarGrey::SCADA::default_liquid_colors(ICanvasBrush^ lcolors[], unsigned int count) {
+	static ICanvasBrush^ default_liquid_color = Colours::make(Colours::DarkOrange, 0.618);
+	
+	for (unsigned int idx = 0; idx < count; idx++) {
+		lcolors[idx] = default_liquid_color;
+	}
+}
 
 /*************************************************************************************************/
 ITanklet::ITanklet(float width, float height, float thickness) : width(width), height(height), thickness(thickness) {
@@ -31,20 +44,18 @@ ITanklet::ITanklet(float width, float height, float thickness) : width(width), h
 }
 
 void ITanklet::construct() {
-	Platform::String^ en_marks[] = { "E", "UL", "L", "N", "H", "F" };
-	Platform::String^ zh_marks[] = { "空", "过低", "低", "正常", "高", "满" };
-	unsigned int weights[] = { 0, 2, 3, 5, 8, 10 };
-	unsigned int connectors[] = { 3, 7 };
+	VHatchMarkMetrics imetrics;
+	CanvasGeometry^ ruler0 = this->make_ruler(this->height, this->thickness, &imetrics);
 
-	VHatchMarkMetrics imetrics = vhatchmark_metrics(zh_marks, 6U, this->thickness);
+	float connector_weights[] = { 0.3F, 0.7F };
 	float thickoff = this->thickness * 0.5F;
 	float radius = this->thickness * 2.0F;
 	float tube_radius = radius * 0.618F;
 	
-	float tube_width = imetrics.width - imetrics.mark_width;
 	float tube_height = this->height - imetrics.hatch_y * 2.0F;
 	float tube_thickness = this->thickness * 1.618F;
-	auto tube_shape = vrhatch(tube_width, tube_height, connectors, 2U, 10U, tube_thickness);
+	float tube_width = tube_thickness * 2.718F;
+	auto tube_shape = vrhatch(tube_width, tube_height, connector_weights, 2U, tube_thickness);
 
 	float float_radius = tube_radius * 0.618F;
 	float float_height = this->float_half_height * 2.0F;
@@ -59,12 +70,11 @@ void ITanklet::construct() {
 	float ruler_x = this->width - imetrics.width;
 	
 	this->ruler_em = imetrics.em;
+
 	this->body = rounded_rectangle(body_x, thickoff, body_width, body_height, radius, radius);
 	this->tube = geometry_translate(tube_shape, thickoff, imetrics.hatch_y);
-	this->ruler = geometry_translate(vrhatchmark(this->height, zh_marks, weights, 6U, 10U, this->thickness), ruler_x);
+	this->ruler = geometry_translate(ruler0, ruler_x);
 	this->floating = geometry_freeze(geometry_subtract(float_body, float_centerline));
-	
-	this->update_liquid_level(0.8F, Colours::make(Colours::DodgerBlue, 0.618));
 }
 
 void ITanklet::fill_extent(float x, float y, float* w, float* h) {
@@ -72,25 +82,45 @@ void ITanklet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void ITanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	ds->FillGeometry(this->body, x, y, tank_default_fill_color);
-	ds->DrawGeometry(this->body, x, y, tank_default_border_color, this->thickness);
-	
-	ds->DrawGeometry(this->tube, x, y, tank_default_border_color, this->thickness);
-	ds->FillGeometry(this->tube, x, y, Colours::Background);
-	ds->FillGeometry(this->ruler, x, y, tank_default_border_color);
+	if (this->style != nullptr) {
+		ds->FillGeometry(this->body, x, y, this->style->body_color);
+		ds->DrawGeometry(this->body, x, y, this->style->border_color, this->thickness);
 
-	ds->DrawCachedGeometry(this->floating, x, y + this->liquid_y - this->float_half_height, Colours::Orange);
-	ds->DrawCachedGeometry(this->liquid, x, y, this->liquid_color);
-	ds->DrawCachedGeometry(this->indicator, x, y, Colours::Orange);
+		ds->DrawGeometry(this->tube, x, y, this->style->border_color, this->thickness);
+		ds->FillGeometry(this->tube, x, y, Colours::Background);
+		ds->FillGeometry(this->ruler, x, y, this->style->border_color);
+
+		ds->DrawCachedGeometry(this->floating, x, y + this->float_y, this->style->indicator_color);
+		ds->DrawCachedGeometry(this->liquid, x, y, this->style->liquid_color);
+		ds->DrawCachedGeometry(this->indicator, x, y, this->style->indicator_color);
+	}
 }
 
-void ITanklet::update_liquid_level(float percentage, ICanvasBrush^ color) {
-	auto tb = this->tube->ComputeBounds();
-	auto rb = this->ruler->ComputeBounds();
-	float indicator_y = rb.Y + (rb.Height - ruler_em) * percentage + 1.0F;
-	
-	this->liquid_color = color;
-	this->liquid_y = tb.Y + tb.Height * (1.0F  - percentage);
-	this->indicator = geometry_freeze(geometry_intersect(this->ruler, rectangle(rb.X, indicator_y, rb.Width, this->ruler_em)));
-	this->liquid = geometry_freeze(geometry_intersect(this->tube, rectangle(tb.X, this->liquid_y, tb.Width, tb.Height)));
+void ITanklet::apply_style(TankStyle* style) {
+	if (this->tube != nullptr) {
+		Rect tbox = this->tube->ComputeBounds();
+		Rect rbox = this->ruler->ComputeBounds();
+		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * style->mark_weight - 1.0F;
+		float liquid_y = tbox.Y + tbox.Height * (1.0F - style->mark_weight);
+		auto indicator_box = rectangle(rbox.X, indicator_y, rbox.Width, this->ruler_em + 3.0F);
+		auto liquid_box = rectangle(tbox.X, liquid_y, tbox.Width, tbox.Height);
+
+		this->style = style;
+		this->float_y = liquid_y - this->float_half_height;
+		this->indicator = geometry_freeze(geometry_intersect(this->ruler, indicator_box));
+		this->liquid = geometry_freeze(geometry_intersect(this->tube, liquid_box));
+	}
+}
+
+void ITanklet::prepare_style(TankStyle& style, unsigned int idx, float weights[], ICanvasBrush^ liquid_colors[]) {
+	static ICanvasBrush^ default_liquid_color = Colours::make(Colours::Gold, 0.618);
+
+	CAS_SLOT(style.border_color, Colours::make(0xBBBBBB));
+	CAS_SLOT(style.body_color, Colours::make(0x333333));
+	CAS_SLOT(style.indicator_color, Colours::Crimson);
+	CAS_SLOT(style.liquid_color, ((liquid_colors[idx] == nullptr) ? default_liquid_color : liquid_colors[idx]));
+
+	if ((style.mark_weight < 0.0F) || (style.mark_weight > 1.0F)) {
+		style.mark_weight = weights[idx];
+	}
 }
