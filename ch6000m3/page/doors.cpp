@@ -74,8 +74,7 @@ public:
 		float cell_width = sw / float(door_count_per_side);
 		float seq_y = sy - this->sequences[0]->LayoutBounds.Height * 1.618F;
 		
-		ds->DrawGeometry(this->ship->Transform(make_scale_matrix(Width, Height)),
-			sx, sy, Colours::Silver, thickness);
+		ds->DrawGeometry(geometry_scale(this->ship, Width, Height), sx, sy, Colours::Silver, thickness);
 
 		for (size_t idx = 0; idx < door_count_per_side; idx++) {
 			float cell_x = sx + cell_width * float(idx);
@@ -146,8 +145,8 @@ public:
 		this->load_doors(this->doors, this->progresses, DS::SB1, DS::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
-		this->load_indicator(this->draughts, this->dimensions, DS::Bow, cylinder_height, MarkPosition::Left);
-		this->load_indicator(this->draughts, this->dimensions, DS::Stern, cylinder_height, MarkPosition::Right);
+		this->load_indicator(this->draughts, this->dimensions, DS::Bow, cylinder_height, FitPosition::Left);
+		this->load_indicator(this->draughts, this->dimensions, DS::Stern, cylinder_height, FitPosition::Right);
 
 		this->load_dimension(this->dimensions, this->labels, DS::EarthWork, "meter3");
 		this->load_dimensions(this->dimensions, this->labels, DS::pLeftDrag, DS::pRightDrag, "bar");
@@ -234,10 +233,11 @@ private:
 
 	template<typename E>
 	void load_indicator(std::map<E, Credit<Cylinderlet, E>*>& cs, std::map<E, Credit<Dimensionlet, E>*>& ds, E id
-		, float height, MarkPosition mark_position) {
+		, float height, FitPosition mark_position) {
 		float width = height * 0.382F;
+		auto cylinder = new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0F, 10U, width, height);
 
-		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0F, width, height), id);
+		cs[id] = this->master->insert_one(cylinder, id);
 		this->load_dimension(ds, id, "meter", _speak(id.ToString()));
 	}
 

@@ -87,9 +87,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.cpp">
-      <Filter>graphlet\device</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
@@ -103,6 +100,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -195,9 +193,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gaugelet.hpp">
-      <Filter>graphlet\device</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
@@ -211,6 +206,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

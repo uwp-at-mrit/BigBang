@@ -7,43 +7,48 @@
 
 namespace WarGrey::SCADA {
 	private enum class LiquidSurface { Convex, Concave, _ };
-	private enum class MarkPosition { Left, Right, _};
-
+	
 	private class Cylinderlet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::MarkPosition mark_position,
-			float vmin, float vmax, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::FitPosition mark_position,
+			float vmin, float vmax, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::MarkPosition mark_position,
-			float range, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::FitPosition mark_position,
+			float range, unsigned int step, float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(float range, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(float range, unsigned int step, float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(float vmin, float vmax, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(float vmin, float vmax, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, float range, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, float range, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, float vmin, float vmax, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, float vmin, float vmax, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::MarkPosition mark_position, float range, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, float range, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::MarkPosition mark_position, float vmin, float vmax, float width, float height, unsigned int step = 0,
-			WarGrey::SCADA::GradientStops^ colors = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr);
+		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, float vmin, float vmax, unsigned int step,
+			float width, float height = 0.0F, float thickness = 3.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
 	public:
 		void construct() override;
@@ -59,14 +64,12 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ mark;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		WarGrey::SCADA::GradientStops^ colors;
 
 	private:
-		unsigned int step;
 		float width;
 		float height;
 		float thickness;
@@ -74,7 +77,9 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::LiquidSurface liquid_shape;
-		WarGrey::SCADA::MarkPosition mark_position;
-		float mark_x;
+		WarGrey::SCADA::FitPosition mark_position;
+
+	private:
+		unsigned int step;
 	};
 }

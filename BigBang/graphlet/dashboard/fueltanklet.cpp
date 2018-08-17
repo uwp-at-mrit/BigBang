@@ -12,6 +12,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static CanvasSolidColorBrush^ fueltank_default_border_color = WarGrey::SCADA::Colours::make(0xFDFDFD);
+
 static unsigned int fueltank_default_colors[] = {
 	0xF00D0D,
 	0xFFB33C,
@@ -19,11 +21,15 @@ static unsigned int fueltank_default_colors[] = {
 };
 
 /*************************************************************************************************/
-FuelTanklet::FuelTanklet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(0.0F, 1.0F, width, height, bcolor, stops) {}
+FuelTanklet::FuelTanklet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: FuelTanklet(1.0F, width, height, thickness, bcolor, stops) {}
 
-FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(vmin, vmax), width(width), height(height), thickness(this->width * 0.0618F), border_color(bcolor) {
+FuelTanklet::FuelTanklet(float range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: FuelTanklet(0.0F, range, width, height, thickness, bcolor, stops) {}
+
+FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness)
+	, border_color(bcolor == nullptr ? fueltank_default_border_color : bcolor) {
 
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
@@ -36,7 +42,7 @@ FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, ICan
 
 void FuelTanklet::construct() {
 	float corner_radius = this->thickness * 0.5F;
-	float tank_width = this->width * 0.4F / 0.7F;
+	float tank_width = this->width - this->thickness * 6.18F;
 	float base_height = this->thickness * 1.618F;
 	float tank_height = this->height - base_height * 1.8F;
 	float monitor_x = this->thickness * 2.0F;
@@ -84,6 +90,7 @@ void FuelTanklet::construct() {
 
 	this->skeleton = geometry_freeze(geometry_union(geometry_union(tank_parts), // don't mind, it's Visual Studio's fault
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
+
 	this->on_value_changed(0.0F);
 }
 

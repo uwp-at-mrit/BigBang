@@ -4,7 +4,7 @@
 #include "system.hpp"
 
 namespace WarGrey::SCADA {
-	template<class UniversalWindowsScreen, bool fullscreen>
+	template<class UniversalWindowsScreen>
 	private ref class UniversalWindowsApplication sealed : public Windows::UI::Xaml::Application {
 	protected:
 		void AppMain(Windows::UI::ViewManagement::ApplicationView^ self, UniversalWindowsScreen^ screen) {
@@ -18,12 +18,12 @@ namespace WarGrey::SCADA {
 
 			Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->TitleBar->ExtendViewIntoTitleBar = false;
 			
-			if (fullscreen) {
-				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::FullScreen;
-			} else {
-				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::PreferredLaunchViewSize;
-				Windows::UI::ViewManagement::ApplicationView::PreferredLaunchViewSize = system_screen_size();
-			}
+#if _DEBUG
+			Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::PreferredLaunchViewSize;
+			Windows::UI::ViewManagement::ApplicationView::PreferredLaunchViewSize = system_screen_size();
+#else
+			Windows::UI::ViewManagement::ApplicationView::PreferredLaunchWindowingMode = Windows::UI::ViewManagement::ApplicationViewWindowingMode::FullScreen;
+#endif
 
 			Windows::ApplicationModel::Core::CoreApplication::UnhandledErrorDetected
 				+= ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::Core::UnhandledErrorDetectedEventArgs^>(this,
@@ -79,10 +79,10 @@ namespace WarGrey::SCADA {
 		}
 	};
 
-	template<class UniversalWindowsScreen, bool fullscreen>
+	template<class UniversalWindowsScreen>
 	int launch_universal_windows_application(WarGrey::SCADA::Log level, Platform::String^ remote_rsyslog_server, Platform::String^ lang = nullptr) {
 		auto lazy_main = [](Windows::UI::Xaml::ApplicationInitializationCallbackParams^ p) {
-			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen, fullscreen>();
+			ref new WarGrey::SCADA::UniversalWindowsApplication<UniversalWindowsScreen>();
 		};
 
 #ifdef _DEBUG

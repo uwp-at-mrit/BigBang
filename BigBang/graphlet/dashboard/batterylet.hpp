@@ -7,12 +7,16 @@
 namespace WarGrey::SCADA {
 	private class Batterylet : public WarGrey::SCADA::IRangelet<float> {
 	public:
-		Batterylet(float width, float height = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
+		Batterylet(float width, float height, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Batterylet(float emin, float emax, float width, float height = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
+		Batterylet(float range, float width, float height, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ stops = nullptr);
+
+		Batterylet(float emin, float emax, float width, float height, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
 	public:
@@ -38,8 +42,8 @@ namespace WarGrey::SCADA {
 
 	private class SystemBatterylet : public WarGrey::SCADA::Batterylet {
 	public:
-		SystemBatterylet(float width, float height = 0.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = WarGrey::SCADA::Colours::make(0xFDFDFD),
+		SystemBatterylet(float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
 	public:

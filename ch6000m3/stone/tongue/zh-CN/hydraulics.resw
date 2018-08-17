@@ -128,10 +128,10 @@
     <value>左弯管</value>
   </data>
   <data name="D" xml:space="preserve">
-    <value>泥门紧锁泵</value>
+    <value>泥门紧锁/蝶阀</value>
   </data>
   <data name="E" xml:space="preserve">
-    <value>蝶阀控制泵</value>
+    <value>泥门紧锁/蝶阀</value>
   </data>
   <data name="F" xml:space="preserve">
     <value>右弯管</value>
@@ -169,26 +169,29 @@
   <data name="LevelLow2" xml:space="preserve">
     <value>液位过低</value>
   </data>
-  <data name="MasterTank" xml:space="preserve">
+  <data name="Master" xml:space="preserve">
     <value>主油箱</value>
   </data>
   <data name="M" xml:space="preserve">
-    <value>循环冷却</value>
+    <value>备用</value>
   </data>
   <data name="L" xml:space="preserve">
-    <value>循环冷却</value>
+    <value>马达冲洗</value>
   </data>
-  <data name="OilTank" xml:space="preserve">
+  <data name="Storage" xml:space="preserve">
     <value>储油罐</value>
   </data>
   <data name="Heater" xml:space="preserve">
     <value>加热器</value>
   </data>
-  <data name="VisorTank" xml:space="preserve">
+  <data name="Visor" xml:space="preserve">
     <value>耙唇液压系统油箱</value>
   </data>
   <data name="F001Blocked" xml:space="preserve">
     <value>滤器F0.01堵塞</value>
+  </data>
+  <data name="F002Blocked" xml:space="preserve">
+    <value>滤器F0.02堵塞</value>
   </data>
   <data name="FilterBlocked" xml:space="preserve">
     <value>滤器堵塞</value>
