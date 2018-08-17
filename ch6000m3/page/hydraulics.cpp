@@ -48,9 +48,9 @@ private enum class HS : unsigned int {
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
 	// Key Labels
-	Heater, Port, Starboard, Master, Visor, Storage,
+	Port, Starboard, Master, Visor, Storage,
 	// Indicators
-	F001Blocked, F002Blocked, LevelLow, LevelLow2, LevelHigh, FilterBlocked,
+	F001Blocked, F002Blocked, FilterBlocked,
 	_,
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
@@ -71,7 +71,7 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->temperatures[HS::Heater]->set_value(RealData(AI_DB203, 18U));
+		this->temperatures[HS::Master]->set_value(RealData(AI_DB203, 18U));
 		this->temperatures[HS::Visor]->set_value(RealData(AI_DB203, 19U));
 
 		{ // pump pressures
@@ -180,7 +180,6 @@ public:
 		this->load_label(this->captions, HS::Master, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
-		this->load_label(this->captions, HS::Heater, Colours::Silver, this->caption_font);
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
 	}
 
@@ -217,17 +216,12 @@ public:
 	void load_state_indicators(float width, float height, float gridsize) {
 		float size = gridsize * 1.0F;
 
-		this->load_status_indicator(HS::LevelLow, size, this->heater_states, this->hslabels);
-		this->load_status_indicator(HS::LevelLow2, size, this->heater_states, this->hslabels);
-		this->load_status_indicator(HS::LevelHigh, size, this->heater_states, this->hslabels);
 		this->load_status_indicator(HS::F001Blocked, size, this->heater_states, this->hslabels);
 		this->load_status_indicator(HS::F002Blocked, size, this->heater_states, this->hslabels);
 
-		this->load_status_indicator(HS::LevelLow, size, this->visor_states, this->vslabels);
-		this->load_status_indicator(HS::LevelLow2, size, this->visor_states, this->vslabels);
 		this->load_status_indicator(HS::FilterBlocked, size, this->visor_states, this->vslabels);
 
-		this->load_dimensions(this->temperatures, HS::Heater, HS::Visor, "celsius", "temperature");
+		this->load_dimensions(this->temperatures, HS::Master, HS::Visor, "celsius", "temperature");
 	}
 
 public:
@@ -250,7 +244,6 @@ public:
 		this->station->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
 		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
-		this->master->move_to(this->captions[HS::Heater], this->master_tank, GraphletAnchor::LB, GraphletAnchor::LT, gridsize);
 		this->master->move_to(this->captions[HS::Visor], this->visor_tank, GraphletAnchor::CT, GraphletAnchor::CB, gridsize * 0.5F);
 	}
 	
@@ -322,16 +315,10 @@ public:
 
 	void reflow_state_indicators(float width, float height, float gridsize, float vinset) {
 		this->master->move_to(this->captions[HS::Master], this->station, GraphletAnchor::LT, GraphletAnchor::CB, gridsize * 12.0F, gridsize * 4.0F);
-		this->master->move_to(this->heater_states[HS::LevelLow], this->captions[HS::Master], GraphletAnchor::LB, GraphletAnchor::LT, -gridsize, gridsize);
-		this->master->move_to(this->heater_states[HS::LevelLow2], this->heater_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->heater_states[HS::LevelHigh], this->heater_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->temperatures[HS::Heater], this->heater_states[HS::LevelHigh], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 		this->station->map_credit_graphlet(this->heater_states[HS::F001Blocked], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->heater_states[HS::F002Blocked], GraphletAnchor::CC);
 
-		this->master->move_to(this->visor_states[HS::LevelLow], this->visor_tank, GraphletAnchor::RT, GraphletAnchor::LT, gridsize * 2.0F, 0.0F);
-		this->master->move_to(this->visor_states[HS::LevelLow2], this->visor_states[HS::LevelLow], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
-		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_states[HS::LevelLow2], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize * 0.5F);
+		this->master->move_to(this->visor_states[HS::FilterBlocked], this->visor_tank, GraphletAnchor::LB, GraphletAnchor::LT, gridsize * 2.0F, gridsize * 0.5F);
 		this->master->move_to(this->temperatures[HS::Visor], this->visor_states[HS::FilterBlocked], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gridsize);
 
 		{ // reflow state labels
@@ -408,7 +395,13 @@ private:
 
 	template<typename E>
 	Tanklet<E>* make_tank(E id, float width, float height, float thickness) {
-		return this->master->insert_one(new Tanklet<E>(id, width, height, thickness));
+		Tanklet<E>* tank = new Tanklet<E>(id, width, height, thickness);
+		TankStyle style;
+
+		style.indicator_color = Colours::Green;
+		tank->set_style(E::Normal, style);
+
+		return this->master->insert_one(tank);
 	}
 
 // never deletes these graphlets mannually
@@ -507,7 +500,7 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Pumplet*>(g) != nullptr);
+	return (dynamic_cast<ITanklet*>(g) != nullptr);
 }
 
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

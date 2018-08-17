@@ -160,15 +160,6 @@
   <data name="J" xml:space="preserve">
     <value>右耙唇</value>
   </data>
-  <data name="LevelHigh" xml:space="preserve">
-    <value>液位高</value>
-  </data>
-  <data name="LevelLow" xml:space="preserve">
-    <value>液位低</value>
-  </data>
-  <data name="LevelLow2" xml:space="preserve">
-    <value>液位过低</value>
-  </data>
   <data name="Master" xml:space="preserve">
     <value>主油箱</value>
   </data>
@@ -180,9 +171,6 @@
   </data>
   <data name="Storage" xml:space="preserve">
     <value>储油罐</value>
-  </data>
-  <data name="Heater" xml:space="preserve">
-    <value>加热器</value>
   </data>
   <data name="Visor" xml:space="preserve">
     <value>耙唇液压系统油箱</value>

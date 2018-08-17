@@ -67,21 +67,21 @@ namespace WarGrey::SCADA {
 		, public WarGrey::SCADA::IStatuslet<Status, WarGrey::SCADA::TankStyle> {
 	public:
 		// WARNING: make sure `weights` and `liquid_colors` has enough elements, or the application may crash at random.
-		Tanklet(float width, float height = 0.0F, float thickness = 3.0F, float weights[] = nullptr
+		Tanklet(float width, float height = 0.0F, float thickness = 3.0F
 			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[] = nullptr
-			, Platform::String^ tongue = nullptr)
-			: Tanklet(_E(Status, 0), width, height, thickness, tongue, weights, liquid_colors) {}
+			, float weights[] = nullptr, Platform::String^ tongue = nullptr)
+			: Tanklet(_E(Status, 0), width, height, thickness, liquid_colors, weights, tongue) {}
 
 		Tanklet(Status default_status, float width, float height = 0.0F, float thickness = 3.0F
-			, float weights[] = nullptr, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors0[] = nullptr
-			, Platform::String^ tongue = nullptr)
+			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[] = nullptr
+			, float weights[] = nullptr, Platform::String^ tongue = nullptr)
 			: ITanklet(width, height, thickness), IStatuslet(default_status) {
 			unsigned int count = _N(Status);
 
 			for (unsigned int idx = 0; idx < count; idx ++) {
 				this->marks[idx] = speak(_E(Status, idx), tongue);
-				this->weights[idx] = ((weights == nullptr) ? -1.0F : weights[idx]);
 				this->liquid_colors[idx] = ((liquid_colors == nullptr) ? nullptr : liquid_colors[idx]);
+				this->weights[idx] = ((weights == nullptr) ? 0.0F : weights[idx]);
 			}
 
 			if (weights == nullptr) {

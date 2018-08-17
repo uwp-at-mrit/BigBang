@@ -4,7 +4,8 @@ namespace WarGrey::SCADA {
 	private value struct VHatchMarkMetrics {
 		unsigned int span;
 		float mark_width;
-		float tspace;
+		float gap_space;
+		float top_space;
 		float ch;
 		float em;
 

@@ -196,15 +196,6 @@
   <data name="J" xml:space="preserve">
     <value>Right Draghead Visor</value>
   </data>
-  <data name="LevelHigh" xml:space="preserve">
-    <value>Level High</value>
-  </data>
-  <data name="LevelLow" xml:space="preserve">
-    <value>Level Low</value>
-  </data>
-  <data name="LevelLow2" xml:space="preserve">
-    <value>Level Low Low</value>
-  </data>
   <data name="Master" xml:space="preserve">
     <value>Main Oil Tank</value>
   </data>
@@ -219,9 +210,6 @@
   </data>
   <data name="Storage" xml:space="preserve">
     <value>Oil Storage Tank</value>
-  </data>
-  <data name="Heater" xml:space="preserve">
-    <value>Heater</value>
   </data>
   <data name="Visor" xml:space="preserve">
     <value>Draghead Visor Oil Tank</value>
