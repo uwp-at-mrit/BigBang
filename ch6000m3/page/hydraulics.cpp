@@ -183,6 +183,13 @@ public:
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
+
+		this->station->append_subtrack(HS::A, HS::SQh, Colours::Gold);
+		this->station->append_subtrack(HS::SQf, HS::E, Colours::DodgerBlue);
+		this->station->clear_subtacks();
+		this->station->append_subtrack(HS::SQk1, HS::SQk2, Colours::Firebrick);
+		this->station->append_subtrack(HS::SQ1, HS::y, Colours::Green);
+		this->station->append_subtrack(HS::y, HS::Y, Colours::Green);
 	}
 
 	void load_tanks(float width, float height, float gridsize) {
@@ -219,18 +226,15 @@ public:
 
 public:
 	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
-		float sw, sh, sx, sy, s1_x, s1_y;
+		float cx = width * 0.5F;
+		float cy = height * 0.5F;
+		float sq1_y;
 
-		this->station->fill_extent(0.0F, 0.0F, &sw, &sh);
-		this->station->fill_anchor_location(HS::SQ1, &s1_x, &s1_y);
-
-		sx = (width - sw) * 0.5F;
-		sy = (height - sh) * 0.5F - vinset * 0.5F;
-
-		this->master->move_to(this->station, sx, sy);
+		this->master->move_to(this->station, cx, cy, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->storage_tank, HS::Storage, GraphletAnchor::LC);
-		this->master->move_to(this->master_tank, sx + sw * 0.5F, sy + s1_y - gridsize * 1.5F, GraphletAnchor::CB);
-		this->master->move_to(this->visor_tank, sx + sw * 0.5F, sy + s1_y + gridsize * 12.0F, GraphletAnchor::CB);
+		this->station->fill_anchor_location(HS::SQ1, nullptr, &sq1_y, true);
+		this->master->move_to(this->master_tank, cx, sq1_y, GraphletAnchor::CB, 0.0F, -gridsize * 1.5F);
+		this->master->move_to(this->visor_tank, cx, sq1_y, GraphletAnchor::CB, 0.0F, gridsize * 12.0F);
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 

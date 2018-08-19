@@ -3,6 +3,7 @@
 #include "turtle.hpp"
 
 #include "box.hpp"
+#include "shape.hpp"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -32,8 +33,8 @@ void ITurtle::wipe() {
 	this->do_rebuild();
 }
 
-void ITurtle::fill_anchor_location(unsigned int a_id, float* x, float* y) {
-	auto node = this->anchors.find(a_id);
+void ITurtle::fill_anchor_location(unsigned int anchor, float* x, float* y) {
+	auto node = this->anchors.find(anchor);
 
 	if (node != this->anchors.end()) {
 		std::complex<float> pt = node->second;
@@ -43,23 +44,33 @@ void ITurtle::fill_anchor_location(unsigned int a_id, float* x, float* y) {
 	}
 }
 
+CanvasGeometry^ ITurtle::subtrack(unsigned int lt_a, unsigned int rb_a, float thickness, CanvasStrokeStyle^ style) {
+	float thickoff = thickness * 0.5F;
+	float lx, ty, rx, by;
+
+	this->fill_anchor_location(lt_a, &lx, &ty);
+	this->fill_anchor_location(rb_a, &rx, &by);
+
+	return geometry_intersect(this->snap_track(thickness, style),
+		rectangle(lx - thickoff, ty - thickoff, rx - lx + thickness, by - ty + thickness));
+}
+
 CanvasGeometry^ ITurtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 	// WARNING: `CanvasGeometry::CreatePath` will close the track leaving it unavailable for future use.
 	if ((this->snapshot == nullptr) || this->moved) {
 		this->track->EndFigure(Microsoft::Graphics::Canvas::Geometry::CanvasFigureLoop::Open);
-		auto trackpath = Microsoft::Graphics::Canvas::Geometry::CanvasGeometry::CreatePath(this->track);
-		auto trackline = geometry_stroke(trackpath, thickness, style);
-
+		auto the_track = Microsoft::Graphics::Canvas::Geometry::CanvasGeometry::CreatePath(this->track);
+		
 		if (this->snapshot == nullptr) {
-			this->snapshot = trackline;
+			this->snapshot = the_track;
 		} else {
-			this->snapshot = geometry_union(this->snapshot, trackline);
+			this->snapshot = geometry_union(this->snapshot, the_track);
 		}
 
 		this->do_rebuild();
 	}
 
-	return this->snapshot;
+	return geometry_stroke(this->snapshot, thickness, style);
 }
 
 /*************************************************************************************************/

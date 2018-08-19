@@ -10,6 +10,20 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static inline Rect& smart_rect(float x, float y, float width, float height) {
+	if (width < 0.0F) {
+		x = x + width;
+		width = -width;
+	}
+
+	if (height < 0.0F) {
+		y = y + height;
+		height = -height;
+	}
+
+	return Rect(x, y, width, height);
+}
+
 /*************************************************************************************************/
 CanvasGeometry^ WarGrey::SCADA::blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
@@ -193,18 +207,18 @@ CanvasGeometry^ WarGrey::SCADA::rectangle(Rect& region) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::rectangle(float x, float y, float w, float h) {
-	return rectangle(Rect(x, y, w, h));
+	return rectangle(smart_rect(x, y, w, h));
 }
 
 CanvasGeometry^ WarGrey::SCADA::rectangle(float w, float h) {
-    return rectangle(Rect(0.0F, 0.0F, w, h));
+    return rectangle(smart_rect(0.0F, 0.0F, w, h));
 }
 
 CanvasGeometry^ WarGrey::SCADA::rounded_rectangle(float x, float y, float w, float h, float rx, float ry) {
     float radius_x = (rx < 0.0F) ? -(w * rx) : rx;
     float radius_y = (ry < 0.0F) ? -(h * ry) : ry;
 
-    return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), Rect(x, y, w, h), radius_x, radius_y);
+    return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), smart_rect(x, y, w, h), radius_x, radius_y);
 }
 
 CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d) {

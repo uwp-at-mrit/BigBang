@@ -1,26 +1,27 @@
 #pragma once
 
 #include <complex>
-#include <algorithm>
 #include <unordered_map>
 
-#include "box.hpp"
 #include "enum.hpp"
 #include "object.hpp"
-#include "geometry.hpp"
 
 namespace WarGrey::SCADA {
 	private class ITurtle abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		void clear();
 		void wipe();
-		void fill_anchor_location(unsigned int id, float* x, float* y);
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ snap_track(float thickness = 1.0F,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 	protected:
 		virtual ~ITurtle() noexcept {}
 		ITurtle(float stepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor);
+
+	protected:
+		void fill_anchor_location(unsigned int anchor, float* x, float* y);
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(unsigned int lt_a, unsigned int rb_a,
+			float thickness, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style);
 
 	protected:
 		void jump_back(unsigned int a_id);
@@ -96,6 +97,11 @@ namespace WarGrey::SCADA {
 	public:
 		void fill_anchor_location(Anchor a, float* x, float* y) {
 			WarGrey::SCADA::ITurtle::fill_anchor_location(_I(a), x, y);
+		}
+
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor lt_a, Anchor rb_a
+			, float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
+			return WarGrey::SCADA::ITurtle::subtrack(_I(lt_a), _I(rb_a), thickness, style);
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {
