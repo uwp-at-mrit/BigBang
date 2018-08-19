@@ -20,9 +20,6 @@ namespace WarGrey::SCADA {
 		float mark_weight = -1.0F; 
 	};
 
-	void default_mark_weights(float* weight, unsigned int count);
-	void default_liquid_colors(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lcolors[], unsigned int count);
-
 	private class ITanklet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		ITanklet(float width, float height, float thickness);
@@ -38,8 +35,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void apply_style(WarGrey::SCADA::TankStyle* style);
-		void prepare_style(WarGrey::SCADA::TankStyle& style, unsigned int idx,
-			float weights[], Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[]);
+		void prepare_style(WarGrey::SCADA::TankStyle& style, unsigned int idx, unsigned int count);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;
@@ -66,30 +62,13 @@ namespace WarGrey::SCADA {
 		: public WarGrey::SCADA::ITanklet
 		, public WarGrey::SCADA::IStatuslet<Status, WarGrey::SCADA::TankStyle> {
 	public:
-		// WARNING: make sure `weights` and `liquid_colors` has enough elements, or the application may crash at random.
-		Tanklet(float width, float height = 0.0F, float thickness = 3.0F
-			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[] = nullptr
-			, float weights[] = nullptr, Platform::String^ tongue = nullptr)
+		Tanklet(float width, float height = 0.0F, float thickness = 3.0F, Platform::String^ tongue = nullptr)
 			: Tanklet(_E(Status, 0), width, height, thickness, liquid_colors, weights, tongue) {}
 
-		Tanklet(Status default_status, float width, float height = 0.0F, float thickness = 3.0F
-			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[] = nullptr
-			, float weights[] = nullptr, Platform::String^ tongue = nullptr)
+		Tanklet(Status default_status, float width, float height = 0.0F, float thickness = 3.0F, Platform::String^ tongue = nullptr)
 			: ITanklet(width, height, thickness), IStatuslet(default_status) {
-			unsigned int count = _N(Status);
-
-			for (unsigned int idx = 0; idx < count; idx ++) {
-				this->marks[idx] = speak(_E(Status, idx), tongue);
-				this->liquid_colors[idx] = ((liquid_colors == nullptr) ? nullptr : liquid_colors[idx]);
-				this->weights[idx] = ((weights == nullptr) ? 0.0F : weights[idx]);
-			}
-
-			if (weights == nullptr) {
-				WarGrey::SCADA::default_mark_weights(this->weights, count);
-			}
-
-			if (liquid_colors == nullptr) {
-				WarGrey::SCADA::default_liquid_colors(this->liquid_colors, count);
+			for (Status s = _E(Status, 0); s < Status::_; s ++) {
+				this->marks[_I(s)] = speak(s, tongue);
 			}
 		}
 
@@ -101,7 +80,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(Status status, TankStyle& style) {
-			ITanklet::prepare_style(style, _I(status), this->weights, this->liquid_colors);
+			ITanklet::prepare_style(style, _I(status), _N(Status));
 		}
 
 		void apply_style(TankStyle& style) {
@@ -111,12 +90,16 @@ namespace WarGrey::SCADA {
 	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_ruler(float height, float thickness
 			, WarGrey::SCADA::VHatchMarkMetrics* metrics) {
-			return vrhatchmark(height, this->marks, this->weights, _N(Status), thickness, metrics);
+			float weights[_N(Status)];
+
+			for (Status s = _E(Status, 0); s < Status::_; s++) {
+				weights[_I(s)] = this->get_style(s).mark_weight;
+			}
+
+			return vrhatchmark(height, this->marks, weights, _N(Status), thickness, metrics);
 		}
 
 	private:
-		float weights[_N(Status)];
 		Platform::String^ marks[_N(Status)];
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_colors[_N(Status)];
 	};
 }

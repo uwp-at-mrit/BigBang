@@ -5,63 +5,102 @@
 #include <unordered_map>
 
 #include "box.hpp"
+#include "enum.hpp"
 #include "object.hpp"
 #include "geometry.hpp"
 
 namespace WarGrey::SCADA {
-	template<typename Anchor>
-	private class Turtle final : public WarGrey::SCADA::SharedObject {
+	private class ITurtle abstract : public WarGrey::SCADA::SharedObject {
 	public:
-		Turtle(float stepsize, bool big_turn = false, Anchor start_id = Anchor::_) : stepsize(stepsize), x(0.0F), y(0.0F) {
-			this->tradius = stepsize * (big_turn ? 1.0F : 0.5F);
-			this->do_rebuild();
-			this->do_anchor(start_id);
-		}
-
-	public:
-		void clear() {
-			this->anchors.clear();
-			this->snapshot = nullptr;
-			this->last_backtrace_anchor = Anchor::_;
-
-			this->do_rebuild();
-		}
-
-		void wipe() {
-			this->snapshot = nullptr;
-			this->do_rebuild();
-		}
-
-		void fill_anchor_location(Anchor id, float* x, float* y) {
-			auto node = this->anchors.find(id);
-
-			if (node != this->anchors.end()) {
-				std::complex<float> pt = node->second;
-
-				SET_BOX(x, pt.real());
-				SET_BOX(y, pt.imag());
-			}
-		}
-
+		void clear();
+		void wipe();
+		void fill_anchor_location(unsigned int id, float* x, float* y);
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ snap_track(float thickness = 1.0F,
-			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
-			// WARNING: `CanvasGeometry::CreatePath` will close the track leaving it unavailable for future use.
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
-			if ((this->snapshot == nullptr) || this->moved) {
-				this->track->EndFigure(Microsoft::Graphics::Canvas::Geometry::CanvasFigureLoop::Open);
-				auto trackpath = Microsoft::Graphics::Canvas::Geometry::CanvasGeometry::CreatePath(this->track);
-				auto trackline = geometry_stroke(trackpath, thickness, style);
+	protected:
+		virtual ~ITurtle() noexcept {}
+		ITurtle(float stepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor);
 
-				if (this->snapshot == nullptr) {
-					this->snapshot = trackline;
-				} else {
-					this->snapshot = geometry_union(this->snapshot, trackline);
-				}
+	protected:
+		void jump_back(unsigned int a_id);
+		void jump_up(float step, unsigned int a_id);
+		void jump_right(float step, unsigned int a_id);
+		void jump_down(float step, unsigned int a_id);
+		void jump_left(float step, unsigned int a_id);
+		void jump_up_right(float step, unsigned int a_id);
+		void jump_right_down(float step, unsigned int a_id);
+		void jump_down_left(float step, unsigned int a_id);
+		void jump_left_up(float step, unsigned int a_id);
 
-				this->do_rebuild();
-			}
+	protected:
+		void move_up(float step, unsigned int a_id);
+		void move_right(float step, unsigned int a_id);
+		void move_down(float step, unsigned int a_id);
+		void move_left(float step, unsigned int a_id);
+		void move_up_right(float step, unsigned int a_id);
+		void move_right_down(float step, unsigned int a_id);
+		void move_down_left(float step, unsigned int a_id);
+		void move_left_up(float step, unsigned int a_id);
 
-			return this->snapshot;
+	protected:
+		void turn_down_left(unsigned int a_id);
+		void turn_left_down(unsigned int a_id);
+		void turn_down_right(unsigned int a_id);
+		void turn_right_down(unsigned int a_id);
+		void turn_left_up(unsigned int a_id);
+		void turn_up_left(unsigned int a_id);
+		void turn_right_up(unsigned int a_id);
+		void turn_up_right(unsigned int a_id);
+
+	protected:
+		void turn_down_left_up(unsigned int a_id);
+		void turn_down_right_up(unsigned int a_id);
+		void turn_up_left_down(unsigned int a_id);
+		void turn_up_right_down(unsigned int a_id);
+		void turn_left_down_right(unsigned int a_id);
+		void turn_left_up_right(unsigned int a_id);
+		void turn_right_down_left(unsigned int a_id);
+		void turn_right_up_left(unsigned int a_id);
+
+	private:
+		void do_rebuild();
+		void do_step(unsigned int a_id);
+		void do_anchor(unsigned int a_id);
+		void do_jump(unsigned int a_id);
+		void do_move(unsigned int a_id);
+		void do_clockwise_turn(unsigned int a_id);
+		void do_counterclockwise_turn(unsigned int a_id);
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasPathBuilder^ track;
+		float stepsize;
+		float tradius;
+		float x;
+		float y;
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ snapshot;
+		std::unordered_map<unsigned int, std::complex<float>> anchors;
+		unsigned int last_backtrace_anchor;
+		unsigned int _anchor;
+		bool moved;
+	}; 
+	
+	template<typename Anchor>
+	private class Turtle final : public WarGrey::SCADA::ITurtle {
+	public:
+		Turtle(float stepsize, bool big_turn = false, Anchor start_anchor = Anchor::_)
+			: WarGrey::SCADA::ITurtle(stepsize, big_turn, _I(start_anchor), _I(Anchor::_)) {}
+
+	public:
+		void fill_anchor_location(Anchor a, float* x, float* y) {
+			WarGrey::SCADA::ITurtle::fill_anchor_location(_I(a), x, y);
+		}
+
+		WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {
+			WarGrey::SCADA::ITurtle::jump_back(_I(id));
+			return this;
 		}
 
 	public:
@@ -292,328 +331,171 @@ namespace WarGrey::SCADA {
 
 	public:
 		WarGrey::SCADA::Turtle<Anchor>* jump_up(float step, Anchor id = Anchor::_) {
-			this->y -= (this->stepsize * step);
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_up(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_right(float step, Anchor id = Anchor::_) {
-			this->x += (this->stepsize * step);
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_up(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_down(float step, Anchor id = Anchor::_) {
-			this->y += (this->stepsize * step);
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_down(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_left(float step, Anchor id = Anchor::_) {
-			this->x -= (this->stepsize * step);
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_left(step, _I(id));
+			return this;
 		}
 
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_up_right(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x += _;
-			this->y -= _;
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_up_right(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_right_down(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x += _;
-			this->y += _;
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_right_down(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_down_left(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x -= _;
-			this->y += _;
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_down_left(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_left_up(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x -= _;
-			this->y -= _;
-
-			return this->do_jump(id);
+			WarGrey::SCADA::ITurtle::jump_left_up(step, _I(id));
+			return this;
 		}
 
 	public:
 		WarGrey::SCADA::Turtle<Anchor>* move_up(float step, Anchor id = Anchor::_) {
-			this->y -= (this->stepsize * step);
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_up(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_right(float step, Anchor id = Anchor::_) {
-			this->x += (this->stepsize * step);
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_right(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_down(float step, Anchor id = Anchor::_) {
-			this->y += (this->stepsize * step);
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_down(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_left(float step, Anchor id = Anchor::_) {
-			this->x -= (this->stepsize * step);
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_left(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_up_right(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x += _;
-			this->y -= _;
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_up_right(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_right_down(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x += _;
-			this->y += _;
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_right_down(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_down_left(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x -= _;
-			this->y += _;
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_down_left(step, _I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* move_left_up(float step, Anchor id = Anchor::_) {
-			float _ = (this->stepsize * step);
-
-			this->x -= _;
-			this->y -= _;
-
-			return this->do_move(id);
+			WarGrey::SCADA::ITurtle::move_left_up(step, _I(id));
+			return this;
 		}
 
 	public:
 		WarGrey::SCADA::Turtle<Anchor>* turn_down_left(Anchor id = Anchor::_) {
-			this->x -= this->tradius;
-			this->y += this->tradius;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_down_left(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_left_down(Anchor id = Anchor::_) {
-			this->x -= this->tradius;
-			this->y += this->tradius;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_left_down(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_down_right(Anchor id = Anchor::_) {
-			this->x += this->tradius;
-			this->y += this->tradius;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_down_right(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_right_down(Anchor id = Anchor::_) {
-			this->x += this->tradius;
-			this->y += this->tradius;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_right_down(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_left_up(Anchor id = Anchor::_) {
-			this->x -= this->tradius;
-			this->y -= this->tradius;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_left_up(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_up_left(Anchor id = Anchor::_) {
-			this->x -= this->tradius;
-			this->y -= this->tradius;
+			WarGrey::SCADA::ITurtle::turn_up_left(_I(id));
+			return this;
 
-			return this->do_counterclockwise_turn(id);
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_right_up(Anchor id = Anchor::_) {
-			this->x += this->tradius;
-			this->y -= this->tradius;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_right_up(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_up_right(Anchor id = Anchor::_) {
-			this->x += this->tradius;
-			this->y -= this->tradius;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_up_right(_I(id));
+			return this;
 		}
 
 	public:
 		WarGrey::SCADA::Turtle<Anchor>* turn_down_left_up(Anchor id = Anchor::_) {
-			this->x -= this->stepsize;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_down_left_up(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_down_right_up(Anchor id = Anchor::_) {
-			this->x += this->stepsize;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_down_right_up(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_up_left_down(Anchor id = Anchor::_) {
-			this->x -= this->stepsize;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_up_left_down(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_up_right_down(Anchor id = Anchor::_) {
-			this->x += this->stepsize;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_up_right_down(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_left_down_right(Anchor id = Anchor::_) {
-			this->y += this->stepsize;
-
-			return this->do_counterclockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_left_down_right(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_left_up_right(Anchor id = Anchor::_) {
-			this->y -= this->stepsize;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_left_up_right(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_right_down_left(Anchor id = Anchor::_) {
-			this->y += this->stepsize;
-
-			return this->do_clockwise_turn(id);
+			WarGrey::SCADA::ITurtle::turn_right_down_left(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* turn_right_up_left(Anchor id = Anchor::_) {
-			this->y -= this->stepsize;
-
-			return this->do_counterclockwise_turn(id);
-		}
-
-	public:
-		WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {
-			Anchor target = ((id == Anchor::_) ? this->last_backtrace_anchor : id);
-
-			if (target != Anchor::_) {
-				this->fill_anchor_location(target, &this->x, &this->y);
-				this->last_backtrace_anchor = target;
-			} else {
-				this->x = 0.0F;
-				this->y = 0.0F;
-			}
-
-			return this->do_jump(Anchor::_);
-		}
-
-	private:
-		~Turtle() noexcept {}
-
-	private:
-		void do_rebuild() {
-			auto shared_ds = Microsoft::Graphics::Canvas::CanvasDevice::GetSharedDevice();
-
-			this->moved = false;
-			this->track = ref new Microsoft::Graphics::Canvas::Geometry::CanvasPathBuilder(shared_ds);
-			this->track->BeginFigure(this->x, this->y);
-		}
-
-		void do_step(Anchor id) {
-			this->do_anchor(id);
-			this->moved = true;
-		}
-
-		void Turtle::do_anchor(Anchor id) {
-			if (id != Anchor::_) {
-				std::complex<float> key_point(this->x, this->y);
-				auto anchor = std::pair<Anchor, std::complex<float>>(id, key_point);
-				auto ret = this->anchors.insert(anchor);
-
-				if (!ret.second) {
-					this->anchors.erase(ret.first);
-					this->anchors.insert(anchor);
-				}
-
-				if (id > Anchor::_) {
-					this->last_backtrace_anchor = id;
-				}
-			}
-		}
-
-		WarGrey::SCADA::Turtle<Anchor>* do_jump(Anchor id) {
-			this->do_anchor(id);
-			this->track->EndFigure(Microsoft::Graphics::Canvas::Geometry::CanvasFigureLoop::Open);
-			this->track->BeginFigure(this->x, this->y);
-
+			WarGrey::SCADA::ITurtle::turn_right_up_left(_I(id));
 			return this;
 		}
 
-		WarGrey::SCADA::Turtle<Anchor>* do_move(Anchor id) {
-			this->do_step(id);
-			this->track->AddLine(this->x, this->y);
-
-			return this;
-		}
-
-		WarGrey::SCADA::Turtle<Anchor>* do_clockwise_turn(Anchor id) {
-			this->do_step(id);
-			this->track->AddArc(Windows::Foundation::Numerics::float2(this->x, this->y),
-				this->tradius, this->tradius, 0.0F,
-				Microsoft::Graphics::Canvas::Geometry::CanvasSweepDirection::Clockwise,
-				Microsoft::Graphics::Canvas::Geometry::CanvasArcSize::Small);
-
-			return this;
-		}
-
-		WarGrey::SCADA::Turtle<Anchor>* do_counterclockwise_turn(Anchor id) {
-			this->do_step(id);
-			this->track->AddArc(Windows::Foundation::Numerics::float2(this->x, this->y),
-				this->tradius, this->tradius, 0.0F,
-				Microsoft::Graphics::Canvas::Geometry::CanvasSweepDirection::CounterClockwise,
-				Microsoft::Graphics::Canvas::Geometry::CanvasArcSize::Small);
-
-			return this;
-		}
-
-	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasPathBuilder^ track;
-		float stepsize;
-		float tradius;
-		float x;
-		float y;
-
-	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ snapshot;
-		std::unordered_map<Anchor, std::complex<float>> anchors;
-		Anchor last_backtrace_anchor = Anchor::_;
-		bool moved;
+	protected:
+		virtual ~Turtle() noexcept {}
 	};
 }

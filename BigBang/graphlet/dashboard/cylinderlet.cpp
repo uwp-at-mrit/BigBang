@@ -65,8 +65,8 @@ void Cylinderlet::construct() {
 	CanvasGeometry^ hatch;
 	VHatchMarkMetrics metrics;
 	float hatch_height = this->height * 0.95F;
-	float hatch_y = (this->height - hatch_height) * 0.5F;
-	float base_height = hatch_y;
+	float hatchmark_y = (this->height - hatch_height) * 0.5F;
+	float base_height = hatchmark_y;
 	float base_y = this->height - base_height;
 	float hat_height = base_height * 0.75F;
 	float base_corner_radius = base_height * 0.618F;
@@ -85,26 +85,26 @@ void Cylinderlet::construct() {
 		float base_width = (this->width - metrics.width - hatch_thickness) + base_corner_radius * 2.0F;
 		float base_x = ((this->mark_position == FitPosition::Left) ? (this->width - base_width) : 0.0F);
 		float glass_thickness = this->thickness * 0.5F;
-		float glass_offset = glass_thickness * 0.5F;
+		float glass_thickoff = glass_thickness * 0.5F;
 		float glass_width = base_width - base_corner_radius * 4.0F - this->thickness;
 		float glass_height = metrics.hatch_height + glass_thickness;
 		float glass_x = base_x + (base_width - glass_width) * 0.5F;
-		float glass_y = metrics.hatch_y + hatch_y - glass_offset;
+		float glass_y = metrics.hatch_y + hatchmark_y - glass_thickoff;
 		float hat_width = glass_width + hat_corner_radius * 2.0F;
 		float hat_x = base_x + (base_width - hat_width) * 0.5F;
 		float body_height = metrics.hatch_height;
 		float body_width = glass_width - glass_thickness;
 		
 		CanvasGeometry^ glass_parts[] = {
-			geometry_translate(hatch, mark_x, hatch_y),
+			geometry_translate(hatch, mark_x, hatchmark_y),
 			rounded_rectangle(hat_x, 0.0F, hat_width, hat_height, hat_corner_radius, hat_corner_radius),
 			geometry_stroke(rounded_rectangle(glass_x, glass_y, glass_width, glass_height, glass_thickness, glass_thickness), glass_thickness),
 			rounded_rectangle(base_x, base_y, base_width, base_height * 2.0F, base_corner_radius, base_corner_radius)
 		};
 
 		auto glass = geometry_union(glass_parts); // don't mind, it's Visual Studio's fault
-		float body_x = glass_x + glass_offset;
-		float body_y = glass_y + glass_offset;
+		float body_x = glass_x + glass_thickoff;
+		float body_y = glass_y + glass_thickoff;
 
 		this->body = rectangle(body_x, body_y, body_width, body_height);
 		this->skeleton = geometry_freeze(geometry_intersect(glass, rectangle(this->width, this->height)));

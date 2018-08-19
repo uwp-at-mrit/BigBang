@@ -196,9 +196,6 @@
   <data name="J" xml:space="preserve">
     <value>Right Draghead Visor</value>
   </data>
-  <data name="Master" xml:space="preserve">
-    <value>Main Oil Tank</value>
-  </data>
   <data name="SQk2" xml:space="preserve">
     <value>SQ.K2</value>
   </data>
@@ -210,9 +207,6 @@
   </data>
   <data name="Storage" xml:space="preserve">
     <value>Oil Storage Tank</value>
-  </data>
-  <data name="Visor" xml:space="preserve">
-    <value>Draghead Visor Oil Tank</value>
   </data>
   <data name="F001Blocked" xml:space="preserve">
     <value>Filter F0.01 Blocked</value>
@@ -240,5 +234,11 @@
   </data>
   <data name="TS2" xml:space="preserve">
     <value>Master Tank Temperature Switch 1</value>
+  </data>
+  <data name="Master" xml:space="preserve">
+    <value>Master Oil Temperature</value>
+  </data>
+  <data name="Visor" xml:space="preserve">
+    <value>Visor Oil Temperature</value>
   </data>
 </root>

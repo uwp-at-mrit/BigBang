@@ -12,27 +12,6 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-void WarGrey::SCADA::default_mark_weights(float* weights, unsigned int count) {
-	 if (count == 1) {
-		 weights[0] = 0.5F;
-	 } else {
-		 float flcount = float(count - 1);
-
-		 for (unsigned int idx = 0; idx < count; idx ++) {
-			 weights[idx] = float(idx) / flcount;
-		 }
-	 }
-}
-
-void WarGrey::SCADA::default_liquid_colors(ICanvasBrush^ lcolors[], unsigned int count) {
-	static ICanvasBrush^ default_liquid_color = Colours::make(Colours::DarkOrange, 0.618);
-	
-	for (unsigned int idx = 0; idx < count; idx++) {
-		lcolors[idx] = default_liquid_color;
-	}
-}
-
-/*************************************************************************************************/
 ITanklet::ITanklet(float width, float height, float thickness) : width(width), height(height), thickness(thickness) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
@@ -51,23 +30,25 @@ void ITanklet::construct() {
 	float thickoff = this->thickness * 0.5F;
 	float radius = this->thickness * 2.0F;
 	float tube_radius = radius * 0.618F;
-	
-	float tube_height = this->height - imetrics.hatch_y * 2.0F;
-	float tube_thickness = this->thickness * 1.618F;
-	float tube_width = tube_thickness * 2.718F;
-	auto tube_shape = vrhatch(tube_width, tube_height, connector_weights, 2U, tube_thickness);
 
 	float float_radius = tube_radius * 0.618F;
 	float float_height = this->float_half_height * 2.0F;
 	float float_width = float_height * 0.618F;
+	
+	float tube_height = this->height - imetrics.hatch_y * 2.0F;
+	float tube_thickness = float_width * 1.2F;
+	float tube_width = tube_thickness * 2.718F;
+	auto tube_shape = vrhatch(tube_width, tube_height, connector_weights, 2U, tube_thickness);
+
 	float float_x = (tube_thickness - float_width) * 0.5F + thickoff;
 	auto float_body = rounded_rectangle(float_x, 0.0F, float_width, float_height, float_radius, float_radius);
 	auto float_centerline = hline(float_x, float_height * 0.5F, float_width, 0.5F);
 
 	float body_x = tube_width + thickoff;
-	float body_width = this->width - body_x - imetrics.width - this->thickness * 1.618F;
+	float ruler_x = this->width - imetrics.width - this->thickness;
+	float body_width = ruler_x - body_x - this->thickness * 1.618F;
 	float body_height = this->height - this->thickness;
-	float ruler_x = this->width - imetrics.width;
+	
 	
 	this->ruler_em = imetrics.em;
 
@@ -112,15 +93,24 @@ void ITanklet::apply_style(TankStyle* style) {
 	}
 }
 
-void ITanklet::prepare_style(TankStyle& style, unsigned int idx, float weights[], ICanvasBrush^ liquid_colors[]) {
-	static ICanvasBrush^ default_liquid_color = Colours::make(Colours::Gold, 0.618);
-
+void ITanklet::prepare_style(TankStyle& style, unsigned int idx, unsigned int count) {
 	CAS_SLOT(style.border_color, Colours::make(0xBBBBBB));
 	CAS_SLOT(style.body_color, Colours::make(0x333333));
-	CAS_SLOT(style.indicator_color, Colours::Crimson);
-	CAS_SLOT(style.liquid_color, ((liquid_colors[idx] == nullptr) ? default_liquid_color : liquid_colors[idx]));
+	CAS_SLOT(style.liquid_color, Colours::make(Colours::DarkOrange, 0.618));
 
 	if ((style.mark_weight < 0.0F) || (style.mark_weight > 1.0F)) {
-		style.mark_weight = weights[idx];
+		style.mark_weight = ((count == 1) ? 0.5F : float(idx) / float(count - 1));
+	}
+
+	if (style.indicator_color == nullptr) {
+		float weight = ((style.mark_weight > 0.5F) ? (1.0F - style.mark_weight) : style.mark_weight);
+
+		if (weight >= 0.4F) {
+			style.indicator_color = Colours::Green;
+		} else if (weight >= 0.2F) {
+			style.indicator_color = Colours::Yellow;
+		} else {
+			style.indicator_color = Colours::Crimson;
+		}
 	}
 }

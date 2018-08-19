@@ -160,9 +160,6 @@
   <data name="J" xml:space="preserve">
     <value>右耙唇</value>
   </data>
-  <data name="Master" xml:space="preserve">
-    <value>主油箱</value>
-  </data>
   <data name="M" xml:space="preserve">
     <value>备用</value>
   </data>
@@ -172,28 +169,33 @@
   <data name="Storage" xml:space="preserve">
     <value>储油罐</value>
   </data>
-  <data name="Visor" xml:space="preserve">
-    <value>耙唇液压系统油箱</value>
-  </data>
   <data name="F001Blocked" xml:space="preserve">
-    <value>滤器F0.01堵塞</value>
+    <value>回油滤器F0.01堵塞</value>
   </data>
   <data name="F002Blocked" xml:space="preserve">
-    <value>滤器F0.02堵塞</value>
+    <value>回油滤器F0.02堵塞</value>
   </data>
   <data name="FilterBlocked" xml:space="preserve">
     <value>滤器堵塞</value>
   </data>
   <data name="TS1" xml:space="preserve">
-    <value>主油温度控制开关TS1</value>
+    <value>主油温开关TS1</value>
   </data>
   <data name="TS11" xml:space="preserve">
-    <value>油温度控制开关TS11</value>
+    <value>油温开关TS11</value>
   </data>
   <data name="TS12" xml:space="preserve">
-    <value>油温度控制开关TS12</value>
+    <value>油温开关TS12</value>
   </data>
   <data name="TS2" xml:space="preserve">
-    <value>主油温度控制开关TS2</value>
+    <value>主油温开关TS2</value>
+  </data>
+  <data name="Master" xml:space="preserve">
+    <value>主油温</value>
+    <comment>“主油箱”标签不显示</comment>
+  </data>
+  <data name="Visor" xml:space="preserve">
+    <value>油温</value>
+    <comment>“耙唇液压油箱”标签不显示</comment>
   </data>
 </root>
