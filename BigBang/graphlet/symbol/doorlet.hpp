@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable: 4250)
 
 #include "graphlet/primitive.hpp"
 
@@ -14,21 +15,20 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ disable_color;
 	};
 
-	private class BottomDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
+	private class BottomDoorlet
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle>
+		, public WarGrey::SCADA::IRangelet<double> {
 	public:
 		BottomDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
 		BottomDoorlet(float radius, double degrees = 0.0);
 
 	public:
-		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
 		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
-
-	private:
-		void make_masked_door_partitions();
+		void on_value_changed(double t) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ disable_line;
@@ -38,26 +38,24 @@ namespace WarGrey::SCADA {
 		float radius;
 
 	private:
-		double mask_percentage;
 		bool flashing;
 	};
 
-	private class UpperDoorlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle> {
+	private class UpperDoorlet
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle>
+		, public WarGrey::SCADA::IRangelet<double> {
 	public:
 		UpperDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
 		UpperDoorlet(float radius, double degrees = 0.0);
 
 	public:
 		void construct() override;
-		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
 		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
-
-	private:
-		void make_masked_door();
+		void on_value_changed(double t) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ disable_line;
@@ -70,7 +68,6 @@ namespace WarGrey::SCADA {
 		float bradius;
 
 	private:
-		double mask_percentage;
 		bool flashing;
 	};
 }

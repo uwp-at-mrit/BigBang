@@ -59,7 +59,7 @@ namespace WarGrey::SCADA {
 		void on_value_changed(float t) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(float percentage);
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(double percentage);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;

@@ -104,6 +104,10 @@ Color WarGrey::SCADA::gradient_discrete_color(GradientStops^ stops, float percen
 	return ((c == nullptr) ? stops[0].Color : (*c));
 }
 
+Color WarGrey::SCADA::gradient_discrete_color(GradientStops^ stops, double percentage) {
+	return gradient_discrete_color(stops, float(percentage));
+}
+
 void WarGrey::SCADA::brush_translate(ICanvasBrush^ brush, float x, float y) {
     brush->Transform = make_translation_matrix(x, y);
 }

@@ -19,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 private class Stage final {
 public:
-	Stage(GraphletOverview* master) : master(master) {
+	Stage(GraphletOverview* master) : master(master), progress(0.0) {
 		this->font = make_bold_text_format("Microsoft YaHei", large_font_size);
 	}
 
@@ -74,6 +74,20 @@ public:
 		this->reflow_primitives(this->udoors, this->udlabels, x0, y0 + cellsize * 4.0F, cellsize);
 	}
 
+public:
+	void update(long long count, long long interval, long long uptime) {
+		this->progress += 0.1;
+
+		if (this->progress > 1.0) {
+			this->progress = 0.0;
+		}
+
+		bdoors[DoorStatus::Opening]->set_value(this->progress);
+		udoors[DoorStatus::Opening]->set_value(this->progress);
+		bdoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
+		udoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
+	}
+
 private:
 	Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
 		return this->master->insert_one(new Labellet(text, font));
@@ -111,6 +125,9 @@ private: // never delete these graphlets manually.
 private:
 	GraphletOverview* master;
 	CanvasTextFormat^ font;
+
+private:
+	double progress;
 };
 
 /*************************************************************************************************/
@@ -157,6 +174,14 @@ void GraphletOverview::reflow(float width, float height) {
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 		
 		stage->reflow(width, height, vinset);
+	}
+}
+
+void GraphletOverview::on_elapse(long long count, long long interval, long long uptime) {
+	auto maybe_stage = stages.find(this);
+
+	if (maybe_stage != stages.end()) {
+		maybe_stage->second->update(count, interval, uptime);
 	}
 }
 

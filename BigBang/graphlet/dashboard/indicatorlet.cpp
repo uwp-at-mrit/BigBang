@@ -12,8 +12,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static const float start_degrees = 135.0;
-static const float end_degrees = 405.0;
+static const double start_degrees = 135.0;
+static const double end_degrees = 405.0;
 
 static CanvasSolidColorBrush^ indicator_default_bgcolor = WarGrey::SCADA::Colours::make(0x505050);
 
@@ -65,7 +65,7 @@ void Indicatorlet::on_value_changed(float v) {
 }
 
 void Indicatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float percentage = this->get_percentage();
+	float percentage = float(this->get_percentage());
 	float indicator_degrees = start_degrees + (end_degrees - start_degrees) * percentage;
 	float cx = x + this->size * 0.5F;
 	float cy = y + this->size * 0.5F;

@@ -4,6 +4,7 @@ namespace WarGrey::SCADA {
 	typedef Platform::Array<Microsoft::Graphics::Canvas::Brushes::CanvasGradientStop> GradientStops;
 
 	Windows::UI::Color gradient_discrete_color(WarGrey::SCADA::GradientStops^ stops, float percentage);
+	Windows::UI::Color gradient_discrete_color(WarGrey::SCADA::GradientStops^ stops, double percentage);
 	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], size_t total);
 	WarGrey::SCADA::GradientStops^ make_gradient_stops(unsigned int hexes[], float positions[], size_t total);
 	WarGrey::SCADA::GradientStops^ make_gradient_stops(Windows::UI::Color colors[], size_t total);

@@ -27,8 +27,18 @@ static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	return (exists ? dialect : speak(unit));
 }
 
+static inline Platform::String^ scalar(double value, bool leader) {
+	Platform::String^ s = make_wstring(L"%.1lf", value);
+
+	if (!leader) {
+		s = " " + s;
+	}
+
+	return s;
+}
+
 static inline Platform::String^ scalar(float value, bool leader) {
-	Platform::String^ s = value.ToString();
+	Platform::String^ s = make_wstring(L"%.1f", value);
 
 	if (!leader) {
 		s = " " + s;
@@ -404,7 +414,7 @@ void Percentagelet::fill_margin(float x, float y, float* t, float* r, float* b, 
 	do_fill_margin(this->text_layout, this->num_box, this->sign_box, t, r, b, l);
 }
 
-void Percentagelet::on_value_changed(float value) {
+void Percentagelet::on_value_changed(double value) {
 	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
 	this->num_box = get_text_extent(this->num_layout);
 }

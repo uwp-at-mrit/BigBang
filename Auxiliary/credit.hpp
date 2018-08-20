@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable: 4250)
 
 namespace WarGrey::SCADA {
 	template<class Base, typename IDEnum>

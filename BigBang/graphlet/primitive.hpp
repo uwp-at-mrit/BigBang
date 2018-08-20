@@ -104,12 +104,12 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		float get_percentage() {
-			float flmin = _F(this->vmin);
-			float flmax = _F(this->vmax);
-			float v = _F(this->get_value());
+		double get_percentage() {
+			double flmin = double(this->vmin);
+			double flrange = double(this->vmax) - flmin;
+			double v = double(this->get_value());
 
-			return ((this->vmin == this->vmax) ? 1.0F : ((v - flmin) / (flmax - flmin)));
+			return (this->vmin == this->vmax) ? 1.0 : ((v - flmin) / flrange);
 		}
 
 	protected:

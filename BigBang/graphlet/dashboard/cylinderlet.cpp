@@ -118,7 +118,7 @@ void Cylinderlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Cylinderlet::on_value_changed(float v) {
-	float percentage = this->get_percentage();
+	double percentage = this->get_percentage();
 	
 	this->color = make_solid_brush(gradient_discrete_color(this->colors, percentage));
 	this->liquid = geometry_freeze(this->make_liquid_shape(percentage));
@@ -130,27 +130,27 @@ void Cylinderlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
 }
 
-CanvasGeometry^ Cylinderlet::make_liquid_shape(float percentage) {
+CanvasGeometry^ Cylinderlet::make_liquid_shape(double percentage) {
 	Rect region = this->body->ComputeBounds();
 	CanvasGeometry^ liquid;
 	
 	switch (this->liquid_shape) {
 	case LiquidSurface::Convex: {
 		float r = this->liquid_surface_radius;
-		float hollow_height = region.Height * (1.0F - percentage) + r;
+		float hollow_height = region.Height * float(1.0 - percentage) + r;
 		float hollow_y = region.Y - r;
 		
 		liquid = geometry_subtract(body, rounded_rectangle(region.X, hollow_y, region.Width, hollow_height, r, r));
 	}; break;
 	case LiquidSurface::Concave: {
 		float r = this->liquid_surface_radius;
-		float liquid_height = region.Height * percentage + r;
+		float liquid_height = region.Height * float(percentage) + r;
 		float liquid_y = region.Y + region.Height + r - liquid_height;
 
 		liquid = geometry_intersect(body, rounded_rectangle(region.X, liquid_y, region.Width, liquid_height, r, r));
 	}; break;
 	default: {
-		float hollow_height = region.Height * (1.0F - percentage);
+		float hollow_height = region.Height * float(1.0 - percentage);
 
 		liquid = geometry_subtract(this->body, rectangle(region.X, region.Y, region.Width, hollow_height));
 	}

@@ -1,5 +1,5 @@
 #pragma once
-#pragma warning(disable : 4250) 
+#pragma warning(disable: 4250) 
 
 #include "graphlet/msappxlet.hxx"
 

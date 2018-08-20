@@ -103,7 +103,7 @@ void Batterylet::on_value_changed(float v) {
 }
 
 void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float capacity = this->get_percentage();
+	float capacity = float(this->get_percentage());
 
 	if (capacity > 0.0F) {
 		float capacity_height = fmin(this->charge.Height * capacity, this->charge.Height);
