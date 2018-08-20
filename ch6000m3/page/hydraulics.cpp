@@ -48,16 +48,16 @@ private enum class HS : unsigned int {
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
 	// Key Labels
-	Port, Starboard, Master, Visor, Storage,
+	Port, Starboard, Master, Visor, Storage, Pressure,
 	// Indicators
 	F001Blocked, F002Blocked,
 	TS1, TS2, TS11, TS12,
 	FilterBlocked,
 	_,
 	// anchors used as last jumping points
-	a, b, c, d, e, f, g, h, i, j, y, l, m, k
+	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
 
-	// anchors used for unnamed corners
+	// anchors used for unnamed anchors
 };
 
 private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
@@ -92,9 +92,9 @@ public:
 				HS id = bar_seq[i];
 				
 				if (need_lock_position[id]) {
-					this->bars[id]->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
+					this->pressures[id]->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
 				} else {
-					this->bars[id]->set_value(RealData(AI_DB203, 8 + i));
+					this->pressures[id]->set_value(RealData(AI_DB203, 8 + i));
 				}
 			}
 		}
@@ -143,8 +143,9 @@ public:
 
 public:
 	void load_pump_station(float width, float height, float gridsize) {
-		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::SQ1);
+		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::Master);
 
+		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1);
 		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(5);
 		
 		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
@@ -162,6 +163,7 @@ public:
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
+		pTurtle->move_up(5.5F)->move_right(2 /* HS::Master */);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(6)->jump_back();
@@ -171,27 +173,16 @@ public:
 		pTurtle->move_left(21)->turn_left_down()->move_down(HS::F002Blocked)->move_down(2);
 
 		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
-
-		pTurtle->jump_back(HS::SQ1)->jump_down(11.8F)->move_down(2, HS::SQi)->move_down(3, HS::I)->move_down(3);
-		pTurtle->jump_back(HS::SQ2)->jump_down(11.8F)->move_down(2, HS::SQj)->move_down(3, HS::J)->move_down(3);
 		
-		pTurtle->jump_back(HS::SQ1)->move_up(2);
-		pTurtle->jump_back(HS::SQ2)->move_up(2);
+		pTurtle->jump_back(HS::Master)->jump_down(14, HS::Visor);
+		pTurtle->move_right(2)->move_down(5, HS::SQi)->move_down(3, HS::I)->move_down(3);
+		pTurtle->jump_left(4)->move_up(3, HS::J)->move_up(3, HS::SQj)->move_up(5)->move_right(2 /* HS::Visor */);
 		
-		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray)); 
-
+		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray));
+		
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
-
-		this->station->append_subtrack(HS::A, HS::SQh, Colours::Gold);
-		this->station->append_subtrack(HS::SQf, HS::E, Colours::DodgerBlue);
-		this->station->clear_subtacks();
-
-		HS guides[] = { HS::SQ1, HS::y, HS::Y };
-		this->station->append_subtrack(HS::SQk1, HS::SQk2, Colours::Firebrick);
-		this->station->append_subtrack(HS::SQ1, HS::y, Colours::Green);
-		this->station->append_subtrack(guides, 3U, Colours::Green);
 	}
 
 	void load_tanks(float width, float height, float gridsize) {
@@ -216,7 +207,10 @@ public:
 			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, gridsize, -90.0);
 			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, gridsize, 90.00);
 
-			this->load_dimensions(this->bars, HS::A, HS::I, "bar");
+			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
+
+			this->station_pressure = new Dimensionlet("bar", _speak(HS::Pressure), "", this->number_font, this->unit_font);
+			this->master->insert(this->station_pressure);
 		}
 
 		{ // load valves
@@ -235,8 +229,9 @@ public:
 		this->master->move_to(this->station, cx, cy, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->storage_tank, HS::Storage, GraphletAnchor::LC);
 		this->station->fill_anchor_location(HS::SQ1, nullptr, &sq1_y, true);
-		this->master->move_to(this->master_tank, cx, sq1_y, GraphletAnchor::CB, 0.0F, -gridsize * 1.5F);
-		this->master->move_to(this->visor_tank, cx, sq1_y, GraphletAnchor::CB, 0.0F, gridsize * 12.0F);
+		this->station->map_graphlet_at_anchor(this->master_tank, HS::Master, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->visor_tank, HS::Visor, GraphletAnchor::CC);
+		this->master->move_to(this->station_pressure, this->station, GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 
@@ -287,8 +282,8 @@ public:
 			this->station->map_credit_graphlet(this->plabels[it->first], lbl_a, lbl_dx, lbl_dy);
 			this->station->map_credit_graphlet(this->pcaptions[it->first], cpt_a, cpt_dx, cpt_dy);
 
-			if (this->bars.find(it->first) != this->bars.end()) {
-				this->station->map_credit_graphlet(this->bars[it->first], bar_a, bar_dx, bar_dy);
+			if (this->pressures.find(it->first) != this->pressures.end()) {
+				this->station->map_credit_graphlet(this->pressures[it->first], bar_a, bar_dx, bar_dy);
 			}
 		}
 
@@ -428,6 +423,7 @@ private:
 	FuelTanklet* storage_tank;
 	Tanklet<HSMTStatus>* master_tank;
 	Tanklet<HSVTStatus>* visor_tank;
+	Dimensionlet* station_pressure;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Pumplet, HS>*> pumps;
@@ -435,7 +431,7 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
 	std::map<HS, Credit<Valvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
-	std::map<HS, Credit<Dimensionlet, HS>*> bars;
+	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Booleanlet, HS>*> states;
 	std::map<HS, Credit<Labellet, HS>*> islabels;

@@ -198,4 +198,7 @@
     <value>油温</value>
     <comment>“耙唇液压油箱”标签不显示</comment>
   </data>
+  <data name="Pressure" xml:space="preserve">
+    <value>回油压力</value>
+  </data>
 </root>

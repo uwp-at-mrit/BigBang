@@ -358,7 +358,7 @@ void DoorsPage::reflow(float width, float height) {
 }
 
 bool DoorsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Cylinderlet*>(g) != nullptr);
+	return (dynamic_cast<BottomDoorlet*>(g) != nullptr);
 }
 
 void DoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
