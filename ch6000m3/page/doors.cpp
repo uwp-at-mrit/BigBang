@@ -5,6 +5,7 @@
 #include "menu.hpp"
 
 #include "graphlet/symbol/doorlet.hpp"
+#include "graphlet/dashboard/tubelet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "decorator/page.hpp"
@@ -67,14 +68,15 @@ public:
 
 public:
 	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
+		auto real_ship = geometry_scale(this->ship, Width, Height);
+		Rect ship_box = real_ship->ComputeBounds();
 		float thickness = 2.0F;
 		float sx = this->x * Width;
 		float sy = this->y * Height;
-		float sw = this->ship_width * Width;
-		float cell_width = sw / float(door_count_per_side);
-		float seq_y = sy - this->sequences[0]->LayoutBounds.Height * 1.618F;
+		float cell_width = this->ship_width * Width / float(door_count_per_side);
+		float seq_y = sy + (ship_box.Height - this->sequences[0]->LayoutBounds.Height) * 0.5F;
 		
-		ds->DrawGeometry(geometry_scale(this->ship, Width, Height), sx, sy, Colours::Silver, thickness);
+		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
 
 		for (size_t idx = 0; idx < door_count_per_side; idx++) {
 			float cell_x = sx + cell_width * float(idx);
@@ -141,8 +143,8 @@ public:
 		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
 		
 		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->doors, this->progresses, DS::PS1, DS::PS7, radius);
-		this->load_doors(this->doors, this->progresses, DS::SB1, DS::SB7, radius);
+		this->load_doors(this->doors, this->progresses, this->tubes, DS::PS1, DS::PS7, radius);
+		this->load_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
 		this->load_indicator(this->draughts, this->dimensions, DS::Bow, cylinder_height, FitPosition::Left);
@@ -154,8 +156,8 @@ public:
 	}
 
 	void reflow(float width, float height, float vinset) {
-		this->reflow_doors(this->doors, this->progresses, DS::PS1, DS::PS7, 1.0F, -0.5F, GraphletAnchor::CT);
-		this->reflow_doors(this->doors, this->progresses, DS::SB1, DS::SB7, 3.0F, 0.5F, GraphletAnchor::CB);
+		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::PS1, DS::PS7, 1.0F, -0.5F);
+		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, 3.0F, 0.5F);
 
 		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, 0.618F);
 		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, 0.382F);
@@ -224,10 +226,15 @@ private:
 	}
 
 	template<typename E>
-	void load_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float radius) {
+	void load_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+		, std::map<E, Credit<Tubelet, E>*>& ts, E id0, E idn, float radius) {
+		float tube_height = radius * 2.0F * 1.618F;
+		float tube_width = tube_height * 0.10F;
+
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<BottomDoorlet, E>(radius), id);
 			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(Colours::Yellow, Colours::Silver), id);
+			ts[id] = this->master->insert_one(new Credit<Tubelet, E>(tube_width, tube_height), id);
 		}
 	}
 
@@ -243,17 +250,31 @@ private:
 
 private:
 	template<typename E>
-	void reflow_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float side_hint, float fy, GraphletAnchor p_anchor) {
-		float cx, cy, cwidth, cheight, center;
+	void reflow_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+		, std::map<E, Credit<Tubelet, E>*>& ts, E id0, E idn, float side_hint, float fy) {
+		GraphletAnchor t_anchor = GraphletAnchor::CT;
+		GraphletAnchor p_anchor = GraphletAnchor::CB;
+		float cell_x, cell_y, cell_width, cell_height, center;
+		float tube_width, door_width, center_xoff;
 
+		ds[id0]->fill_extent(0.0F, 0.0F, &door_width);
+		ts[id0]->fill_extent(0.0F, 0.0F, &tube_width);
+		center_xoff = tube_width + door_width * 0.5F;
+
+		if (fy > 0.0F) { // Starboard
+			t_anchor = GraphletAnchor::CB;
+			p_anchor = GraphletAnchor::CT;
+		}
+		
 		for (E id = id0; id <= idn; id++) {
 			size_t idx = static_cast<size_t>(id) - static_cast<size_t>(id0) + 1;
 
-			this->decorator->fill_door_cell_extent(&cx, &cy, &cwidth, &cheight, idx, side_hint);
-			center = cx + cwidth * 0.5F;
+			this->decorator->fill_door_cell_extent(&cell_x, &cell_y, &cell_width, &cell_height, idx, side_hint);
+			center = cell_x + cell_width * 0.5F;
 			
-			this->master->move_to(ds[id], center, cy + cheight * fy, GraphletAnchor::CC);
-			this->master->move_to(ps[id], center, cy, p_anchor);
+			this->master->move_to(ds[id], center, cell_y + cell_height * fy, GraphletAnchor::CC);
+			this->master->move_to(ts[id], ds[id], t_anchor, t_anchor, -center_xoff);
+			this->master->move_to(ps[id], ts[id], p_anchor, p_anchor, center_xoff);
 		}
 	}
 
@@ -290,6 +311,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
+	std::map<DS, Credit<Tubelet, DS>*> tubes;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
 	std::map<DS, Credit<Cylinderlet, DS>*> draughts;
 

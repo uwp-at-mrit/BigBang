@@ -1,4 +1,4 @@
-#include "graphlet/device/alarmlet.hpp"
+#include "graphlet/dashboard/alarmlet.hpp"
 
 #include "colorspace.hpp"
 

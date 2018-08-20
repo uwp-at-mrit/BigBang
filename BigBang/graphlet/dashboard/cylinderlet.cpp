@@ -14,7 +14,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ cylinder_default_border_color = Colours::make(0xBBBBBB);
 static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 0xFFB03A };
-static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
+static float tube_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
 Cylinderlet::Cylinderlet(float range, unsigned int step, float width, float height, float thickness
@@ -58,7 +58,7 @@ Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, float vmin, 
 	}
 
 	this->liquid_surface_radius = this->thickness * 0.618F;
-	this->colors = ((colors == nullptr) ? make_gradient_stops(cylinder_default_colors, cylinder_default_color_positions) : colors);
+	this->colors = ((colors == nullptr) ? make_gradient_stops(cylinder_default_colors, tube_default_color_positions) : colors);
 }
 
 void Cylinderlet::construct() {

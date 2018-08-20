@@ -37,8 +37,8 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new DoorsPage(this->device));
+		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new GraphletOverview());
 	}
 

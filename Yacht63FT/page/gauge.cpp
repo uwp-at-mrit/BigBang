@@ -6,7 +6,7 @@
 #include "configuration.hpp"
 
 #include "graphlet/textlet.hpp"
-#include "graphlet/device/alarmlet.hpp"
+#include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "tongue.hpp"

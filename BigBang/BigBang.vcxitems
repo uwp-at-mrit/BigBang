@@ -25,6 +25,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\machinelet.cpp" />
@@ -50,7 +51,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\motorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\statuslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\textlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)planet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\numpad.cpp" />
   </ItemGroup>
@@ -66,6 +67,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\msappxlet.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\converterlet.hpp" />
@@ -98,7 +100,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\primitive.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\textlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\alarmlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)planet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
