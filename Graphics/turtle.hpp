@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "enum.hpp"
+#include "shape.hpp"
 #include "object.hpp"
 
 namespace WarGrey::SCADA {
@@ -20,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void fill_anchor_location(unsigned int anchor, float* x, float* y);
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(unsigned int lt_a, unsigned int rb_a,
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(unsigned int a1, unsigned int a2,
 			float thickness, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style);
 
 	protected:
@@ -99,9 +100,27 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::ITurtle::fill_anchor_location(_I(a), x, y);
 		}
 
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor lt_a, Anchor rb_a
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor a1, Anchor a2
 			, float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
-			return WarGrey::SCADA::ITurtle::subtrack(_I(lt_a), _I(rb_a), thickness, style);
+			return WarGrey::SCADA::ITurtle::subtrack(_I(a1), _I(a2), thickness, style);
+		}
+
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor as[], unsigned int count
+			, float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
+			Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track = WarGrey::SCADA::blank();
+
+			for (unsigned int idx = 0; idx < count - 1; idx++) {
+				track = WarGrey::SCADA::geometry_union(track,
+					WarGrey::SCADA::ITurtle::subtrack(_I(as[idx]), _I(as[idx + 1]), thickness, style));
+			}
+
+			return track;
+		}
+
+		template<size_t N>
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor (&as)[N]
+			, float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
+			return this->subtrack(as, N, thickness, style);
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {

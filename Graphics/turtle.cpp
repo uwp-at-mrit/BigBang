@@ -4,6 +4,7 @@
 
 #include "box.hpp"
 #include "shape.hpp"
+#include "paint.hpp"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -44,15 +45,17 @@ void ITurtle::fill_anchor_location(unsigned int anchor, float* x, float* y) {
 	}
 }
 
-CanvasGeometry^ ITurtle::subtrack(unsigned int lt_a, unsigned int rb_a, float thickness, CanvasStrokeStyle^ style) {
+CanvasGeometry^ ITurtle::subtrack(unsigned int a1, unsigned int a2, float thickness, CanvasStrokeStyle^ style) {
+	float thickext = thickness * 4.0F;
 	float thickoff = thickness * 0.5F;
-	float lx, ty, rx, by;
+	float x1, y1, x2, y2;
 
-	this->fill_anchor_location(lt_a, &lx, &ty);
-	this->fill_anchor_location(rb_a, &rx, &by);
+	this->fill_anchor_location(a1, &x1, &y1);
+	this->fill_anchor_location(a2, &x2, &y2);
 
+	// TODO: handle track connection smoothly 
 	return geometry_intersect(this->snap_track(thickness, style),
-		rectangle(lx - thickoff, ty - thickoff, rx - lx + thickness, by - ty + thickness));
+		rectangle(x1 - thickoff, y1 - thickoff, x2 - x1 + thickext, y2 - y1 + thickext));
 }
 
 CanvasGeometry^ ITurtle::snap_track(float thickness, CanvasStrokeStyle^ style) {

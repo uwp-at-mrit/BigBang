@@ -187,9 +187,11 @@ public:
 		this->station->append_subtrack(HS::A, HS::SQh, Colours::Gold);
 		this->station->append_subtrack(HS::SQf, HS::E, Colours::DodgerBlue);
 		this->station->clear_subtacks();
+
+		HS guides[] = { HS::SQ1, HS::y, HS::Y };
 		this->station->append_subtrack(HS::SQk1, HS::SQk2, Colours::Firebrick);
 		this->station->append_subtrack(HS::SQ1, HS::y, Colours::Green);
-		this->station->append_subtrack(HS::y, HS::Y, Colours::Green);
+		this->station->append_subtrack(guides, 3U, Colours::Green);
 	}
 
 	void load_tanks(float width, float height, float gridsize) {
