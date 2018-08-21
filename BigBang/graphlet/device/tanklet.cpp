@@ -49,7 +49,6 @@ void ITanklet::construct() {
 	float body_width = ruler_x - body_x - this->thickness * 1.618F;
 	float body_height = this->height - this->thickness;
 	
-	
 	this->ruler_em = imetrics.em;
 
 	this->body = rounded_rectangle(body_x, thickoff, body_width, body_height, radius, radius);
@@ -81,7 +80,7 @@ void ITanklet::apply_style(TankStyle* style) {
 	if (this->tube != nullptr) {
 		Rect tbox = this->tube->ComputeBounds();
 		Rect rbox = this->ruler->ComputeBounds();
-		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * float(style->mark_weight - 1.0);
+		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * float(style->mark_weight) - 1.0F;
 		float liquid_y = tbox.Y + tbox.Height * float(1.0 - style->mark_weight);
 		auto indicator_box = rectangle(rbox.X, indicator_y, rbox.Width, this->ruler_em + 3.0F);
 		auto liquid_box = rectangle(tbox.X, liquid_y, tbox.Width, tbox.Height);
@@ -103,11 +102,12 @@ void ITanklet::prepare_style(TankStyle& style, unsigned int idx, unsigned int co
 	}
 
 	if (style.indicator_color == nullptr) {
-		double weight = ((style.mark_weight > 0.5) ? (1.0 - style.mark_weight) : style.mark_weight);
+		unsigned int fxweight = (unsigned int)std::floor(style.mark_weight * 10.0);
+		unsigned int weight = ((fxweight > 5) ? (10 - fxweight) : fxweight);
 
-		if (weight >= 0.4) {
+		if (weight >= 4) {
 			style.indicator_color = Colours::Green;
-		} else if (weight >= 0.2) {
+		} else if (weight >= 2) {
 			style.indicator_color = Colours::Yellow;
 		} else {
 			style.indicator_color = Colours::Crimson;

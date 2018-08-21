@@ -168,17 +168,39 @@ static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics& metrics, double weights[]
 	return geometry_stroke(CanvasGeometry::CreatePath(hatch), thickness, make_roundcap_stroke_style(true));
 }
 
-static float resolve_interval(unsigned int step, double vmin, double vmax, float height, float em, unsigned int* skip, double* diff) {
-	/** NOTE
-	 * Improper float `range` and `step` may cause `D2DERR_BAD_NUMBER(HRESULT: 0x88990011)`,
-	 * double `range` and `step` do not have such issues.
-	 */
-	double range = vmax - vmin;
-	double delta = range / double(step);
-	float hatch_height = height - em;
-	float interval = hatch_height / float(step);
+static unsigned int resolve_step(double vmin, double vmax, float height, float em, unsigned int precision) {
+	double range = (vmax - vmin) * std::pow(10.0, precision + 1);
+	double available_height = double(height - em);
+	unsigned int max_fxstep = ((unsigned int)(std::floor(available_height / (double(em) * 1.618))));
+	unsigned int fxstep = 2;
+
+	for (unsigned int step = max_fxstep; step > 2; step--) {
+		double interval = range / double(step);
+		unsigned int fxinterval = (unsigned int)interval;
+
+		if (interval == double(fxinterval)) {
+			if (fxinterval % 10 == 0) {
+				if ((step < 10) || (step % 2 == 0)) {
+					fxstep = step;
+					break;
+				}
+			}
+		}
+	}
 	
-	SET_BOX(skip, (step % 2 == 0) ? 2 : 1);
+	return fxstep;
+}
+
+static float resolve_interval(unsigned int* step, double vmin, double vmax, float height, float em
+	, unsigned int precision, unsigned int* skip, double* diff) {
+	unsigned int fxstep = (((*step) == 0) ? resolve_step(vmin, vmax, height, em, precision) : (*step));
+	double range = vmax - vmin;
+	double delta = range / double(fxstep);
+	float hatch_height = height - em;
+	float interval = hatch_height / float(fxstep);
+
+	(*step) = fxstep;
+	SET_BOX(skip, (fxstep % 2 == 0) ? 2 : 1);
 	SET_BOX(diff, delta);
 
 	return interval;
@@ -259,7 +281,7 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, double vmin, double vm
 	double diff;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, precision, font);
-	float interval = resolve_interval(step, vmin, vmax, height, metrics.em, &skip, &diff);
+	float interval = resolve_interval(&step, vmin, vmax, height, metrics.em, precision, &skip, &diff);
 	
 	metrics.hatch_x = metrics.width - metrics.hatch_width;
 
@@ -306,7 +328,7 @@ CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, double vmin, double vm
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, precision, font);
 	float mark_tx = metrics.hatch_width + metrics.gap_space;
-	float interval = resolve_interval(step, vmin, vmax, height, metrics.em, &skip, &diff);
+	float interval = resolve_interval(&step, vmin, vmax, height, metrics.em, precision, &skip, &diff);
 	
 	auto hatchmark = make_vrhatch(&metrics, interval, step, thickness);
 	for (unsigned int i = 0; i <= step; i += skip) {

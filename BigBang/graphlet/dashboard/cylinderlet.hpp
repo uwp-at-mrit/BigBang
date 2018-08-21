@@ -11,42 +11,46 @@ namespace WarGrey::SCADA {
 	private class Cylinderlet : public WarGrey::SCADA::IRangelet<double> {
 	public:
 		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::FitPosition mark_position,
-			double vmin, double vmax, unsigned int step,
-			float width, float height = 0.0F, float thickness = 3.0F,
+			double vmin, double vmax, float width, float height = 0.0F,
+			float thickness = 3.0F, unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
 		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, WarGrey::SCADA::FitPosition mark_position,
-			double range, unsigned int step, float width, float height = 0.0F, float thickness = 3.0F,
+			double range, float width, float height = 0.0F, float thickness = 3.0F,
+			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(double range, unsigned int step, float width, float height = 0.0F, float thickness = 3.0F,
+		Cylinderlet(double range, float width, float height = 0.0F, float thickness = 3.0F,
+			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(double vmin, double vmax, unsigned int step,
+		Cylinderlet(double vmin, double vmax, float width, float height = 0.0F,
+			float thickness = 3.0F, unsigned int step = 0U, unsigned int precision = 1U,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, double range, float width, float height = 0.0F,
+			float thickness = 3.0F, unsigned int step = 0U, unsigned int precision = 1U,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			WarGrey::SCADA::GradientStops^ colors = nullptr);
+
+		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, double vmin, double vmax,
 			float width, float height = 0.0F, float thickness = 3.0F,
+			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, double range, unsigned int step,
-			float width, float height = 0.0F, float thickness = 3.0F,
+		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, double range, float width, float height = 0.0F,
+			float thickness = 3.0F, unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Cylinderlet(WarGrey::SCADA::LiquidSurface liquid_shape, double vmin, double vmax, unsigned int step,
+		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, double vmin, double vmax,
 			float width, float height = 0.0F, float thickness = 3.0F,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
-			WarGrey::SCADA::GradientStops^ colors = nullptr);
-
-		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, double range, unsigned int step,
-			float width, float height = 0.0F, float thickness = 3.0F,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
-			WarGrey::SCADA::GradientStops^ colors = nullptr);
-
-		Cylinderlet(WarGrey::SCADA::FitPosition mark_position, double vmin, double vmax, unsigned int step,
-			float width, float height = 0.0F, float thickness = 3.0F,
+			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -81,5 +85,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		unsigned int step;
+		unsigned int precision;
 	};
 }

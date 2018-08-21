@@ -56,27 +56,28 @@ static CanvasGeometry^ make_thermometer_mercury(float bulb_width, float height) 
 }
 
 /*************************************************************************************************/
-Thermometerlet::Thermometerlet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(FitPosition::Left, width, height, thickness, bcolor, stops) {}
+Thermometerlet::Thermometerlet(float width, float height, float thickness
+	, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, width, height, thickness, step, bcolor, stops) {}
 
 Thermometerlet::Thermometerlet(FitPosition mark_position, float width, float height, float thickness
-	, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(mark_position, -30.0F, 50.0F, 5U, width, height, thickness, bcolor, stops) {}
+	, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(mark_position, -30.0F, 50.0F, width, height, thickness, step, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(double range, unsigned int step, float width, float height, float thickness
-	, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(FitPosition::Left, range, step, width, height, thickness, bcolor, stops) {}
+Thermometerlet::Thermometerlet(double range, float width, float height, float thickness
+	, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, range, width, height, thickness, step, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(FitPosition mark_position, double range, unsigned int step, float width, float height
-	, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(mark_position, 0.0F, range, step, width, height, thickness, bcolor, stops) {}
+Thermometerlet::Thermometerlet(FitPosition mark_position, double range, float width, float height
+	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(mark_position, 0.0F, range, width, height, thickness, step, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(double tmin, double tmax, unsigned int step, float width, float height, float thickness
-	, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Thermometerlet(FitPosition::Left, tmin, tmax, step, width, height, thickness, bcolor, stops) {}
+Thermometerlet::Thermometerlet(double tmin, double tmax, float width, float height, float thickness
+	, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Thermometerlet(FitPosition::Left, tmin, tmax, width, height, thickness, step, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(FitPosition mark_position, double tmin, double tmax, unsigned int step, float width
-	, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+Thermometerlet::Thermometerlet(FitPosition mark_position, double tmin, double tmax, float width, float height
+	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(tmin,tmax), width(width), height(height), thickness(thickness), step(step)
 	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), mark_position(mark_position) {
 	if (this->height < 0.0F) {

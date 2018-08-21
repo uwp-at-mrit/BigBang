@@ -384,7 +384,7 @@ private:
 
 	template<class T, typename E>
 	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, FitPosition mp, float width) {
-		ts[id] = this->master->insert_one(new Credit<T, E>(mp, 100.0F, 5U, width, 0.0F, 2.5F), id);
+		ts[id] = this->master->insert_one(new Credit<T, E>(mp, 100.0, width, 0.0F, 2.5F), id);
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("celsius", _speak(id), "", this->number_font, this->unit_font), id);
 	}
 
