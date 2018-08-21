@@ -17,35 +17,35 @@ static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 
 static float tube_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
-Cylinderlet::Cylinderlet(float range, unsigned int step, float width, float height, float thickness
+Cylinderlet::Cylinderlet(double range, unsigned int step, float width, float height, float thickness
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(0.0F, range, step, width, height, thickness, bcolor, colors) {}
+	: Cylinderlet(0.0, range, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(float vmin, float vmax, unsigned int step, float width, float height, float thickness
+Cylinderlet::Cylinderlet(double vmin, double vmax, unsigned int step, float width, float height, float thickness
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
 	: Cylinderlet(LiquidSurface::_, FitPosition::Left, vmin, vmax, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, float range, unsigned int step, float width, float height, float thickness
+Cylinderlet::Cylinderlet(LiquidSurface shape, double range, unsigned int step, float width, float height, float thickness
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, 0.0F, range, step, width, height, thickness, bcolor, colors) {}
+	: Cylinderlet(shape, 0.0, range, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, float vmin, float vmax, unsigned int step, float width, float height, float thickness
-	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, unsigned int step, float width, float height
+	, float thickness, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
 	: Cylinderlet(shape, FitPosition::Left, vmin, vmax, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(FitPosition mark, float range, unsigned int step, float width, float height, float thickness
+Cylinderlet::Cylinderlet(FitPosition mark, double range, unsigned int step, float width, float height, float thickness
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(mark, 0.0F, range, step, width, height, thickness, bcolor, colors) {}
+	: Cylinderlet(mark, 0.0, range, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(FitPosition mark, float vmin, float vmax, unsigned int step, float width, float height, float thickness
-	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+Cylinderlet::Cylinderlet(FitPosition mark, double vmin, double vmax, unsigned int step, float width, float height
+	, float thickness, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
 	: Cylinderlet(LiquidSurface::_, mark, vmin, vmax, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, float range, unsigned int step
+Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, double range, unsigned int step
 	, float width, float height, float thickness, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, position, 0.0F, range, step, width, height, thickness, bcolor, colors) {}
+	: Cylinderlet(shape, position, 0.0, range, step, width, height, thickness, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, float vmin, float vmax, unsigned int step
+Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, double vmin, double vmax, unsigned int step
 	, float width, float height, float thickness, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
 	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness), step(step)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor)
@@ -117,7 +117,7 @@ void Cylinderlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Cylinderlet::on_value_changed(float v) {
+void Cylinderlet::on_value_changed(double v) {
 	double percentage = this->get_percentage();
 	
 	this->color = make_solid_brush(gradient_discrete_color(this->colors, percentage));

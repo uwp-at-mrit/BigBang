@@ -63,19 +63,19 @@ Thermometerlet::Thermometerlet(FitPosition mark_position, float width, float hei
 	, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: Thermometerlet(mark_position, -30.0F, 50.0F, 5U, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float range, unsigned int step, float width, float height, float thickness
+Thermometerlet::Thermometerlet(double range, unsigned int step, float width, float height, float thickness
 	, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: Thermometerlet(FitPosition::Left, range, step, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(FitPosition mark_position, float range, unsigned int step, float width, float height
+Thermometerlet::Thermometerlet(FitPosition mark_position, double range, unsigned int step, float width, float height
 	, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: Thermometerlet(mark_position, 0.0F, range, step, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(float tmin, float tmax, unsigned int step, float width, float height, float thickness
+Thermometerlet::Thermometerlet(double tmin, double tmax, unsigned int step, float width, float height, float thickness
 	, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: Thermometerlet(FitPosition::Left, tmin, tmax, step, width, height, thickness, bcolor, stops) {}
 
-Thermometerlet::Thermometerlet(FitPosition mark_position, float tmin, float tmax, unsigned int step, float width
+Thermometerlet::Thermometerlet(FitPosition mark_position, double tmin, double tmax, unsigned int step, float width
 	, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(tmin,tmax), width(width), height(height), thickness(thickness), step(step)
 	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), mark_position(mark_position) {
@@ -121,7 +121,7 @@ void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Thermometerlet::fill_mercury_extent(float percentage, float* x, float* y, float *width, float* height) {
+void Thermometerlet::fill_mercury_extent(double percentage, float* x, float* y, float *width, float* height) {
 	float mercury_width = this->bulb_size * 0.5F;
 	float bulb_cx = ((this->mark_position == FitPosition::Left) ? (this->width - mercury_width) : mercury_width);
 	float bulb_cy = this->height - mercury_width;
@@ -130,7 +130,7 @@ void Thermometerlet::fill_mercury_extent(float percentage, float* x, float* y, f
 	float mercury_highest = mercury_radius;
 	float mercury_lowest = this->height - this->bulb_size;
 	float mercury_tube_height = mercury_lowest - mercury_highest;
-	float mercury_height = (mercury_bulb_bottom - mercury_lowest) + mercury_tube_height * percentage;
+	float mercury_height = (mercury_bulb_bottom - mercury_lowest) + mercury_tube_height * float(percentage);
 	float mercury_x = bulb_cx - mercury_radius;
 	float mercury_y = mercury_bulb_bottom - mercury_height;
 
@@ -142,13 +142,13 @@ void Thermometerlet::fill_mercury_extent(float* x, float* y, float *width, float
 	this->fill_mercury_extent(1.0F, x, y, width, height);
 }
 
-void Thermometerlet::on_value_changed(float v) {
+void Thermometerlet::on_value_changed(double v) {
 	float mercury_width, mercury_height;
-	float p = this->get_percentage();
+	double p = this->get_percentage();
 	
 	this->fill_mercury_extent(p, &this->mercury_x, &this->mercury_y, &mercury_width, &mercury_height);
 	this->mercury = geometry_freeze(make_thermometer_mercury(mercury_width, mercury_height));
-	this->mercury_color = make_solid_brush(gradient_discrete_color(this->colors, p));
+	this->mercury_color = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void Thermometerlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

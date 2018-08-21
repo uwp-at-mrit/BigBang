@@ -6,13 +6,13 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Tubelet : public WarGrey::SCADA::IRangelet<float> {
+	private class Tubelet : public WarGrey::SCADA::IRangelet<double> {
 	public:
-		Tubelet(float width, float height, float thickness = 2.0F,
+		Tubelet(float width, float height = 0.0F, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Tubelet(float range, float width, float height, float thickness = 2.0F,
+		Tubelet(double range, float width, float height = 0.0F, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -22,10 +22,10 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_changed(float t) override;
+		void on_value_changed(double t) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(float percentage);
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(double percentage);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;

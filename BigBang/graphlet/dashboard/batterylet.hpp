@@ -5,17 +5,17 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Batterylet : public WarGrey::SCADA::IRangelet<float> {
+	private class Batterylet : public WarGrey::SCADA::IRangelet<double> {
 	public:
 		Batterylet(float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Batterylet(float range, float width, float height, float thickness,
+		Batterylet(double range, float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Batterylet(float emin, float emax, float width, float height, float thickness,
+		Batterylet(double emin, double emax, float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_changed(float v) override;
+		void on_value_changed(double v) override;
 
 	private:
 		WarGrey::SCADA::GradientStops^ colors;

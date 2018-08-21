@@ -22,12 +22,12 @@ static unsigned int fueltank_default_colors[] = {
 
 /*************************************************************************************************/
 FuelTanklet::FuelTanklet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(1.0F, width, height, thickness, bcolor, stops) {}
+	: FuelTanklet(1.0, width, height, thickness, bcolor, stops) {}
 
-FuelTanklet::FuelTanklet(float range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: FuelTanklet(0.0F, range, width, height, thickness, bcolor, stops) {}
+FuelTanklet::FuelTanklet(double range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: FuelTanklet(0.0, range, width, height, thickness, bcolor, stops) {}
 
-FuelTanklet::FuelTanklet(float vmin, float vmax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+FuelTanklet::FuelTanklet(double vmin, double vmax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? fueltank_default_border_color : bcolor) {
 
@@ -98,12 +98,12 @@ void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void FuelTanklet::on_value_changed(float v) {
+void FuelTanklet::on_value_changed(double v) {
 	this->fuel_color = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void FuelTanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float capacity = this->get_percentage();
+	float capacity = float(this->get_percentage());
 	
 	if (capacity > 0.0F) {
 		float fuel_height = fmin(this->fuel.Height * capacity, this->fuel.Height);

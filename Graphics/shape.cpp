@@ -10,7 +10,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static inline Rect& smart_rect(float x, float y, float width, float height) {
+static inline Rect smart_rect(float x, float y, float width, float height) {
 	if (width < 0.0F) {
 		x = x + width;
 		width = -width;

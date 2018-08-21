@@ -23,12 +23,12 @@ static unsigned int indicator_default_colors[] = {
 
 /*************************************************************************************************/
 Indicatorlet::Indicatorlet(float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
-	: Indicatorlet(1.0F, size, thickness, bgcolor, stops) {}
+	: Indicatorlet(1.0, size, thickness, bgcolor, stops) {}
 
-Indicatorlet::Indicatorlet(float range, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
-	: Indicatorlet(0.0F, range, size, thickness, bgcolor, stops) {}
+Indicatorlet::Indicatorlet(double range, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
+	: Indicatorlet(0.0, range, size, thickness, bgcolor, stops) {}
 
-Indicatorlet::Indicatorlet(float vmin, float vmax, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
+Indicatorlet::Indicatorlet(double vmin, double vmax, float size, float thickness, ICanvasBrush^ bgcolor, GradientStops^ stops)
 	: IRangelet(vmin, vmax), size(size), thickness(thickness)
 	, bgcolor(bgcolor == nullptr ? indicator_default_bgcolor : bgcolor) {
 	if (this->thickness < 0.0F) {
@@ -60,13 +60,13 @@ void Indicatorlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 	SET_VALUES(t, 0.0F, b, this->bspace);
 }
 
-void Indicatorlet::on_value_changed(float v) {
+void Indicatorlet::on_value_changed(double v) {
 	this->fgcolor = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
 void Indicatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float percentage = float(this->get_percentage());
-	float indicator_degrees = start_degrees + (end_degrees - start_degrees) * percentage;
+	double percentage = this->get_percentage();
+	double indicator_degrees = start_degrees + (end_degrees - start_degrees) * percentage;
 	float cx = x + this->size * 0.5F;
 	float cy = y + this->size * 0.5F;
 

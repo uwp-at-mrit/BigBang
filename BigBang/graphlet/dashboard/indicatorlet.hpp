@@ -5,17 +5,17 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Indicatorlet : public WarGrey::SCADA::IRangelet<float> {
+	private class Indicatorlet : public WarGrey::SCADA::IRangelet<double> {
 	public:
 		Indicatorlet(float size, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Indicatorlet(float range, float size, float thickness,
+		Indicatorlet(double range, float size, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = nullptr,
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
-		Indicatorlet(float vmin, float vmax, float size, float thickness,
+		Indicatorlet(double vmin, double vmax, float size, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bgcolor = WarGrey::SCADA::Colours::make(0x505050),
 			WarGrey::SCADA::GradientStops^ stops = nullptr);
 
@@ -26,7 +26,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_changed(float v) override;
+		void on_value_changed(double v) override;
 
 	private:
 		WarGrey::SCADA::GradientStops^ colors;

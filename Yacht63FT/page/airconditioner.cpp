@@ -144,7 +144,7 @@ public:
 	}
 
 public:
-	void fill_metrics(AC room, float* temperature, float* t_sea, float* t_pipe) {
+	void fill_metrics(AC room, double* temperature, double* t_sea, double* t_pipe) {
 		SET_BOX(temperature, this->temperatures[room]->get_value());
 		SET_BOX(t_sea, this->Tseas[room]->get_value());
 		SET_BOX(t_pipe, this->Tpipes[room]->get_value());
@@ -356,7 +356,7 @@ private:
 	}
 
 	void pull_metrics() {
-		float t, t_sea, t_pipe;
+		double t, t_sea, t_pipe;
 
 		this->master->fill_metrics(this->channel, &t, &t_sea, &t_pipe);
 		

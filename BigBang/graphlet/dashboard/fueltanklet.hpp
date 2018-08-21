@@ -5,17 +5,17 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class FuelTanklet : public WarGrey::SCADA::IRangelet<float> {
+	private class FuelTanklet : public WarGrey::SCADA::IRangelet<double> {
 	public:
-		FuelTanklet(float width, float height, float thickness,
+		FuelTanklet(float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 
-		FuelTanklet(float range, float width, float height, float thickness,
+		FuelTanklet(double range, float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 
-		FuelTanklet(float vmin, float vmax, float width, float height, float thickness,
+		FuelTanklet(double vmin, double vmax, float width, float height = 0.0F, float thickness = 3.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			GradientStops^ stops = nullptr);
 
@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_changed(float v) override;
+		void on_value_changed(double v) override;
 
 	private:
 		GradientStops^ colors;

@@ -22,12 +22,12 @@ static CanvasTextFormat^ default_mark_font = make_bold_text_format(9.0F);
 static const float hatch_long_ratio = 0.618F;
 static const float mark_space_ratio = 0.618F;
 
-inline static Platform::String^ make_rmark_string(float mark) {
-	return make_wstring(L"%.1f", mark);
+inline static Platform::String^ make_rmark_string(double mark, unsigned int precision) {
+	return make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), mark);
 }
 
-inline static Platform::String^ make_lmark_string(float mark, unsigned int span, float* span_off) {
-	Platform::String^ s = make_rmark_string(mark);
+inline static Platform::String^ make_lmark_string(double mark, unsigned int precision, unsigned int span, float* span_off) {
+	Platform::String^ s = make_rmark_string(mark, precision);
 	(*span_off) = float(span - s->Length());
 
 	return s;
@@ -38,8 +38,8 @@ inline unsigned int mark_span(Platform::String^ mark) {
 	return mark->Length();
 }
 
-inline float discrete_weight_position(float height, float weight) {
-	return height * std::fmaxf(std::fminf(weight, 1.0F), 0.0F);
+inline float discrete_weight_position(float height, double weight) {
+	return height * float(std::fmax(std::fmin(weight, 1.0), 0.0));
 }
 
 static Platform::String^ resolve_longest_mark(Platform::String^ marks[], size_t count, unsigned int* span) {
@@ -103,7 +103,7 @@ static CanvasGeometry^ make_vlhatch(VHatchMarkMetrics* metrics, float interval, 
 	return geometry_stroke(CanvasGeometry::CreatePath(hatch), thickness, make_roundcap_stroke_style(true));
 }
 
-static CanvasGeometry^ make_vlhatch(VHatchMarkMetrics& metrics, float weights[], size_t count, float thickness) {
+static CanvasGeometry^ make_vlhatch(VHatchMarkMetrics& metrics, double weights[], size_t count, float thickness) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x = metrics.hatch_x;
 	float y = metrics.hatch_y;
@@ -147,7 +147,7 @@ static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics* metrics, float interval, 
 	return geometry_stroke(CanvasGeometry::CreatePath(hatch), thickness, make_roundcap_stroke_style(true));
 }
 
-static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics& metrics, float weights[], size_t count, float thickness) {
+static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics& metrics, double weights[], size_t count, float thickness) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x = metrics.hatch_x;
 	float y = metrics.hatch_y;
@@ -168,18 +168,16 @@ static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics& metrics, float weights[],
 	return geometry_stroke(CanvasGeometry::CreatePath(hatch), thickness, make_roundcap_stroke_style(true));
 }
 
-static float resolve_interval(unsigned int step, float vmin, float vmax, float height, float em, unsigned int* skip, float* diff) {
-	/** TODO
-	 * Improper `range` and `step` may cause `D2DERR_BAD_NUMBER(HRESULT: 0x88990011)`.
-	 *
-	 * Meanwhile there is no detail about how to choose a suitable (range, step) pair,
-	 * But it is suggested that the `range` should be divisible by the `step`.
+static float resolve_interval(unsigned int step, double vmin, double vmax, float height, float em, unsigned int* skip, double* diff) {
+	/** NOTE
+	 * Improper float `range` and `step` may cause `D2DERR_BAD_NUMBER(HRESULT: 0x88990011)`,
+	 * double `range` and `step` do not have such issues.
 	 */
-	float range = vmax - vmin;
+	double range = vmax - vmin;
+	double delta = range / double(step);
 	float hatch_height = height - em;
 	float interval = hatch_height / float(step);
-	float delta = range / float(step);
-
+	
 	SET_BOX(skip, (step % 2 == 0) ? 2 : 1);
 	SET_BOX(diff, delta);
 
@@ -187,10 +185,11 @@ static float resolve_interval(unsigned int step, float vmin, float vmax, float h
 }
 
 /*************************************************************************************************/
-VHatchMarkMetrics WarGrey::SCADA::vhatchmark_metrics(float vmin, float vmax, float thickness, CanvasTextFormat^ font) {
+VHatchMarkMetrics WarGrey::SCADA::vhatchmark_metrics(double vmin, double vmax, float thickness
+	, unsigned int precision, CanvasTextFormat^ font) {
 	VHatchMarkMetrics metrics;
-	Platform::String^ min_mark = make_rmark_string(vmin);
-	Platform::String^ max_mark = make_rmark_string(vmax);
+	Platform::String^ min_mark = make_rmark_string(vmin, precision);
+	Platform::String^ max_mark = make_rmark_string(vmax, precision);
 	Platform::String^ longer_mark = ((max_mark->Length() > min_mark->Length()) ? max_mark : min_mark);
 	unsigned int longer_span = longer_mark->Length();
 	TextExtent te = get_text_extent(longer_mark, ((font == nullptr) ? default_mark_font : font));
@@ -235,7 +234,7 @@ CanvasGeometry^ WarGrey::SCADA::vlhatch(float width, float height, unsigned int 
 	return make_vlhatch(&metrics, metrics.hatch_height / float(step), step, thickness);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vlhatch(float width, float height, float weights[], size_t count, float thickness) {
+CanvasGeometry^ WarGrey::SCADA::vlhatch(float width, float height, double weights[], size_t count, float thickness) {
 	VHatchMarkMetrics metrics = make_input_vmetrics(width, height, thickness);
 	
 	return make_vlhatch(metrics, weights, count, thickness);
@@ -247,25 +246,26 @@ CanvasGeometry^ WarGrey::SCADA::vrhatch(float width, float height, unsigned int 
 	return make_vrhatch(&metrics, metrics.hatch_height / float(step), step, thickness);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vrhatch(float width, float height, float weights[], size_t count, float thickness) {
+CanvasGeometry^ WarGrey::SCADA::vrhatch(float width, float height, double weights[], size_t count, float thickness) {
 	VHatchMarkMetrics metrics = make_input_vmetrics(width, height, thickness);
 
 	return make_vrhatch(metrics, weights, count, thickness);
 }
 
-CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax, unsigned int step, float thickness
-	, VHatchMarkMetrics* maybe_metrics, CanvasTextFormat^ ft) {
+CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, double vmin, double vmax, unsigned int step, float thickness
+	, VHatchMarkMetrics* maybe_metrics, unsigned int precision, CanvasTextFormat^ ft) {
 	unsigned int skip;
-	float diff, mark_span_off;
+	float mark_span_off;
+	double diff;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
-	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, font);
+	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, precision, font);
 	float interval = resolve_interval(step, vmin, vmax, height, metrics.em, &skip, &diff);
 	
 	metrics.hatch_x = metrics.width - metrics.hatch_width;
 
 	auto hatchmark = make_vlhatch(&metrics, interval, step, thickness);
 	for (unsigned int i = 0; i <= step; i += skip) {
-		Platform::String^ mark = make_lmark_string(vmax - diff * float(i), metrics.span, &mark_span_off);
+		Platform::String^ mark = make_lmark_string(vmax - diff * double(i), precision, metrics.span, &mark_span_off);
 		float tx = mark_span_off * metrics.ch;
 		float ty = interval * float(i) - metrics.top_space;
 
@@ -277,7 +277,7 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, float vmin, float vmax
 	return hatchmark;
 }
 
-CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, Platform::String^ marks[], float weights[], size_t count
+CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, Platform::String^ marks[], double weights[], size_t count
 	, float thickness, VHatchMarkMetrics* maybe_metrics, CanvasTextFormat^ ft) {
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	VHatchMarkMetrics metrics = vhatchmark_metrics(marks, count, thickness, font);
@@ -299,18 +299,18 @@ CanvasGeometry^ WarGrey::SCADA::vlhatchmark(float height, Platform::String^ mark
 	return hatchmark;
 }
 
-CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, float vmin, float vmax, unsigned int step, float thickness
-	, VHatchMarkMetrics* maybe_metrics, CanvasTextFormat^ ft) {
+CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, double vmin, double vmax, unsigned int step, float thickness
+	, VHatchMarkMetrics* maybe_metrics, unsigned int precision, CanvasTextFormat^ ft) {
 	unsigned int skip;
-	float diff;
+	double diff;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
-	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, font);
+	VHatchMarkMetrics metrics = vhatchmark_metrics(vmin, vmax, thickness, precision, font);
 	float mark_tx = metrics.hatch_width + metrics.gap_space;
 	float interval = resolve_interval(step, vmin, vmax, height, metrics.em, &skip, &diff);
 	
 	auto hatchmark = make_vrhatch(&metrics, interval, step, thickness);
 	for (unsigned int i = 0; i <= step; i += skip) {
-		Platform::String^ mark = make_rmark_string(vmax - diff * float(i));
+		Platform::String^ mark = make_rmark_string(vmax - diff * double(i), precision);
 		float ty = interval * float(i) - metrics.top_space;
 
 		hatchmark = geometry_union(hatchmark, paragraph(make_text_layout(mark, font)), mark_tx, ty);
@@ -321,7 +321,7 @@ CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, float vmin, float vmax
 	return hatchmark;
 }
 
-CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, Platform::String^ marks[], float weights[], size_t count
+CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, Platform::String^ marks[], double weights[], size_t count
 	, float thickness, VHatchMarkMetrics* maybe_metrics, CanvasTextFormat^ ft) {
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	VHatchMarkMetrics metrics = vhatchmark_metrics(marks, count, thickness, font);

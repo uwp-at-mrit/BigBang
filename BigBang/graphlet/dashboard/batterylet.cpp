@@ -35,12 +35,12 @@ static BatteryStatus* battery_status = nullptr;
 
 /*************************************************************************************************/
 Batterylet::Batterylet(float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(1.0F, width, height, thickness, bcolor, stops) {}
+	: Batterylet(1.0, width, height, thickness, bcolor, stops) {}
 
-Batterylet::Batterylet(float range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(0.0F, range, width, height, thickness, bcolor, stops) {}
+Batterylet::Batterylet(double range, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+	: Batterylet(0.0, range, width, height, thickness, bcolor, stops) {}
 
-Batterylet::Batterylet(float emin, float emax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
+Batterylet::Batterylet(double emin, double emax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(emin, emax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? battery_default_border_color : bcolor) {
 	if (this->height < 0.0F) {
@@ -98,7 +98,7 @@ void Batterylet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Batterylet::on_value_changed(float v) {
+void Batterylet::on_value_changed(double v) {
 	this->charge_color = make_solid_brush(gradient_discrete_color(this->colors, this->get_percentage()));
 }
 
@@ -120,7 +120,7 @@ void Batterylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 
 /*************************************************************************************************/
 SystemBatterylet::SystemBatterylet(float width, float height, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: Batterylet(0.0F, 1.0F, width, height, bcolor, stops) {
+	: Batterylet(0.0, 1.0, width, height, bcolor, stops) {
 	if (battery_status == nullptr) {
 		battery_status = new BatteryStatus();
 		register_system_status_listener(battery_status);

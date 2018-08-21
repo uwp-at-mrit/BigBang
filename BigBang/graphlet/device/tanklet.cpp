@@ -26,7 +26,7 @@ void ITanklet::construct() {
 	VHatchMarkMetrics imetrics;
 	CanvasGeometry^ ruler0 = this->make_ruler(this->height, this->thickness, &imetrics);
 
-	float connector_weights[] = { 0.3F, 0.7F };
+	double connector_weights[] = { 0.3, 0.7 };
 	float thickoff = this->thickness * 0.5F;
 	float radius = this->thickness * 2.0F;
 	float tube_radius = radius * 0.618F;
@@ -81,8 +81,8 @@ void ITanklet::apply_style(TankStyle* style) {
 	if (this->tube != nullptr) {
 		Rect tbox = this->tube->ComputeBounds();
 		Rect rbox = this->ruler->ComputeBounds();
-		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * style->mark_weight - 1.0F;
-		float liquid_y = tbox.Y + tbox.Height * (1.0F - style->mark_weight);
+		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * float(style->mark_weight - 1.0);
+		float liquid_y = tbox.Y + tbox.Height * float(1.0 - style->mark_weight);
 		auto indicator_box = rectangle(rbox.X, indicator_y, rbox.Width, this->ruler_em + 3.0F);
 		auto liquid_box = rectangle(tbox.X, liquid_y, tbox.Width, tbox.Height);
 
@@ -98,16 +98,16 @@ void ITanklet::prepare_style(TankStyle& style, unsigned int idx, unsigned int co
 	CAS_SLOT(style.body_color, Colours::make(0x333333));
 	CAS_SLOT(style.liquid_color, Colours::make(Colours::DarkOrange, 0.618));
 
-	if ((style.mark_weight < 0.0F) || (style.mark_weight > 1.0F)) {
-		style.mark_weight = ((count == 1) ? 0.5F : float(idx) / float(count - 1));
+	if ((style.mark_weight < 0.0) || (style.mark_weight > 1.0)) {
+		style.mark_weight = ((count == 1) ? 0.5 : double(idx) / double(count - 1));
 	}
 
 	if (style.indicator_color == nullptr) {
-		float weight = ((style.mark_weight > 0.5F) ? (1.0F - style.mark_weight) : style.mark_weight);
+		double weight = ((style.mark_weight > 0.5) ? (1.0 - style.mark_weight) : style.mark_weight);
 
-		if (weight >= 0.4F) {
+		if (weight >= 0.4) {
 			style.indicator_color = Colours::Green;
-		} else if (weight >= 0.2F) {
+		} else if (weight >= 0.2) {
 			style.indicator_color = Colours::Yellow;
 		} else {
 			style.indicator_color = Colours::Crimson;

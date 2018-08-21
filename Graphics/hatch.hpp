@@ -16,8 +16,8 @@ namespace WarGrey::SCADA {
 		float hatch_height;
 	};
 
-	WarGrey::SCADA::VHatchMarkMetrics vhatchmark_metrics(float vmin, float vmax, float thickness,
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+	WarGrey::SCADA::VHatchMarkMetrics vhatchmark_metrics(double vmin, double vmax, float thickness,
+		unsigned int precision = 0, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	WarGrey::SCADA::VHatchMarkMetrics vhatchmark_metrics(Platform::String^ marks[], size_t count, float thickness,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
@@ -29,30 +29,32 @@ namespace WarGrey::SCADA {
 		float width, float height, unsigned int step, float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatch(
-		float width, float height, float weights[], size_t count,
+		float width, float height, double weights[], size_t count,
 		float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatch(
-		float width, float height, float weights[], size_t count,
+		float width, float height, double weights[], size_t count,
 		float thickness = 1.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatchmark(
-		float height, float vmin, float vmax, unsigned int step,
+		float height, double vmin, double vmax, unsigned int step,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
+		unsigned int precision = 0,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatchmark(
-		float height, Platform::String^ marks[], float weights[], size_t count,
+		float height, Platform::String^ marks[], double weights[], size_t count,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatchmark(
-		float height, float vmin, float vmax, unsigned int step,
+		float height, double vmin, double vmax, unsigned int step,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
+		unsigned int precision = 0,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vrhatchmark(
-		float height, Platform::String^ marks[], float weights[], size_t count,
+		float height, Platform::String^ marks[], double weights[], size_t count,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 }

@@ -37,16 +37,6 @@ static inline Platform::String^ scalar(double value, bool leader) {
 	return s;
 }
 
-static inline Platform::String^ scalar(float value, bool leader) {
-	Platform::String^ s = make_wstring(L"%.1f", value);
-
-	if (!leader) {
-		s = " " + s;
-	}
-
-	return s;
-}
-
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? num_box : get_text_extent(layout));
@@ -338,7 +328,7 @@ void Dimensionlet::fill_margin(float x, float y, float* t, float* r, float* b, f
 	do_fill_margin(this->text_layout, this->num_box, this->unit_box, t, r, b, l);
 }
 
-void Dimensionlet::on_value_changed(float value) {	
+void Dimensionlet::on_value_changed(double value) {
 	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
 	this->num_box = get_text_extent(this->num_layout);
 }

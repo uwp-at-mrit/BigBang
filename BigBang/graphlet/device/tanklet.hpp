@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 		 * By design, `mark_weight` that not belongs to [0.0F, 1.0F]
 		 * will be considered not being set by client applications.
 		 */
-		float mark_weight = -1.0F; 
+		double mark_weight = -1.0;
 	};
 
 	private class ITanklet abstract : public virtual WarGrey::SCADA::IGraphlet {
@@ -90,7 +90,7 @@ namespace WarGrey::SCADA {
 	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_ruler(float height, float thickness
 			, WarGrey::SCADA::VHatchMarkMetrics* metrics) {
-			float weights[_N(Status)];
+			double weights[_N(Status)];
 
 			for (Status s = _E(Status, 0); s < Status::_; s++) {
 				weights[_I(s)] = this->get_style(s).mark_weight;

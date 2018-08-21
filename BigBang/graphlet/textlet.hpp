@@ -65,7 +65,7 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ caption, Platform::String^ subscript, unsigned int color_hex, double alpha = 1.0);
 	};
 
-	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<float> {
+	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<double> {
 	public:
 		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
@@ -116,7 +116,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void on_value_changed(float value) override;
+		void on_value_changed(double value) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font;
