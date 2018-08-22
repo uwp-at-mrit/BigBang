@@ -73,6 +73,8 @@ namespace WarGrey::SCADA {
 		float sx, float sy, float ex, float ey, float radiusX, float radiusY, float thickness = 1.0F,
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float x1, float y1, float x2, float y2);
+
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rounded_rectangle(
 		float x, float y, float width, float height, float radiusX = -0.25F, float radiusY = -0.25F);
 

@@ -25,9 +25,6 @@ namespace WarGrey::SCADA {
 		void on_value_changed(double t) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ make_liquid_shape(double percentage);
-
-	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;

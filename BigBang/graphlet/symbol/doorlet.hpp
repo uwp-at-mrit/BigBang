@@ -23,6 +23,7 @@ namespace WarGrey::SCADA {
 		BottomDoorlet(float radius, double degrees = 0.0);
 
 	public:
+		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
@@ -50,6 +51,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
+		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
@@ -69,5 +71,36 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool flashing;
+	};
+
+	private class Doorlet : public WarGrey::SCADA::IRangelet<double> {
+	public:
+		Doorlet(float width, float height = 0.0F, float thickness = 2.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bottom_color = nullptr);
+
+	public:
+		void construct() override;
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void on_value_changed(double t) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ progress;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ top;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ bottom;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ base;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ bottom_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+
+	private:
+		float width;
+		float height;
+		float thickness;
 	};
 }

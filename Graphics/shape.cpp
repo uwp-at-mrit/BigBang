@@ -202,6 +202,18 @@ CanvasGeometry^ WarGrey::SCADA::segment(float cx, float cy, double start, double
 	return CanvasGeometry::CreatePath(sector_path);
 }
 
+CanvasGeometry^ WarGrey::SCADA::triangle(float x1, float y1, float x2, float y2) {
+	auto ra_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+
+	ra_triangle->BeginFigure(x1, y1);
+	ra_triangle->AddLine(x1, y2);
+	ra_triangle->AddLine(x2, y2);
+	ra_triangle->AddLine(x1, y1);
+	ra_triangle->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(ra_triangle);
+}
+
 CanvasGeometry^ WarGrey::SCADA::rectangle(Rect& region) {
 	return CanvasGeometry::CreateRectangle(CanvasDevice::GetSharedDevice(), region);
 }

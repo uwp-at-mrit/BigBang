@@ -5,7 +5,6 @@
 #include "menu.hpp"
 
 #include "graphlet/symbol/doorlet.hpp"
-#include "graphlet/dashboard/tubelet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "decorator/page.hpp"
@@ -227,14 +226,14 @@ private:
 
 	template<typename E>
 	void load_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
-		, std::map<E, Credit<Tubelet, E>*>& ts, E id0, E idn, float radius) {
-		float tube_height = radius * 2.0F * 1.618F;
-		float tube_width = tube_height * 0.10F;
+		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float radius) {
+		float door_height = radius * 2.0F * 1.618F;
+		float door_width = door_height * 0.20F;
 
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<BottomDoorlet, E>(radius), id);
 			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(Colours::Yellow, Colours::Silver), id);
-			ts[id] = this->master->insert_one(new Credit<Tubelet, E>(tube_width, tube_height), id);
+			ts[id] = this->master->insert_one(new Credit<Doorlet, E>(door_width, door_height), id);
 		}
 	}
 
@@ -251,7 +250,7 @@ private:
 private:
 	template<typename E>
 	void reflow_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
-		, std::map<E, Credit<Tubelet, E>*>& ts, E id0, E idn, float side_hint, float fy) {
+		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float side_hint, float fy) {
 		GraphletAnchor t_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
 		float cell_x, cell_y, cell_width, cell_height, center;
@@ -311,7 +310,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
-	std::map<DS, Credit<Tubelet, DS>*> tubes;
+	std::map<DS, Credit<Doorlet, DS>*> tubes;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
 	std::map<DS, Credit<Cylinderlet, DS>*> draughts;
 

@@ -18,7 +18,7 @@ static float tube_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
 Tubelet::Tubelet(float width, float height, float thickness, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Tubelet(1.0F, width, height, thickness, bcolor, colors) {}
+	: Tubelet(1.0, width, height, thickness, bcolor, colors) {}
 
 Tubelet::Tubelet(double range, float width, float height, float thickness
 	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
@@ -52,20 +52,16 @@ void Tubelet::fill_extent(float x, float y, float* w, float* h) {
 
 void Tubelet::on_value_changed(double v) {
 	double percentage = this->get_percentage();
-	
+	Rect region = this->body->ComputeBounds();
+	float hollow_height = region.Height * float(1.0 - percentage);
+	auto liquid_box = rectangle(region.X, region.Y, region.Width, hollow_height);
+
 	this->color = make_solid_brush(gradient_discrete_color(this->colors, percentage));
-	this->liquid = geometry_freeze(this->make_liquid_shape(percentage));
+	this->liquid = geometry_freeze(geometry_subtract(this->body, liquid_box));
 }
 
 void Tubelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	ds->FillGeometry(this->body, x, y, Colours::Background);
 	ds->DrawCachedGeometry(this->liquid, x, y, this->color);
 	ds->DrawGeometry(this->body, x, y, this->border_color, this->thickness);
-}
-
-CanvasGeometry^ Tubelet::make_liquid_shape(double percentage) {
-	Rect region = this->body->ComputeBounds();
-	float hollow_height = region.Height * float(1.0 - percentage);
-	
-	return geometry_subtract(this->body, rectangle(region.X, region.Y, region.Width, hollow_height));
 }

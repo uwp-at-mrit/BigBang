@@ -2,9 +2,13 @@
 
 #include "polar.hpp"
 #include "shape.hpp"
+#include "paint.hpp"
 #include "brushes.hxx"
+#include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
+
+using namespace Windows::Foundation;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
@@ -13,12 +17,25 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static float default_thickness = 2.0F;
 static double default_alpha_degrees = 45.0;
 
+static CanvasSolidColorBrush^ door_default_border_color = Colours::make(0xBBBBBB);
+static CanvasSolidColorBrush^ door_default_bottom_color = Colours::make(0xBB6666);
+static CanvasSolidColorBrush^ door_default_progress_color = Colours::make(0xBBBB66);
+
 /*************************************************************************************************/
 BottomDoorlet::BottomDoorlet(float radius, double degrees) : BottomDoorlet(DoorStatus::Closed, radius, degrees) {}
 
 BottomDoorlet::BottomDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
 	this->radius = radius - default_thickness;
+}
+
+void BottomDoorlet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case DoorStatus::Opening: case DoorStatus::Closing: {
+		this->flashing = !this->flashing;
+		this->notify_updated();
+	}; break;
+	}
 }
 
 void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
@@ -37,7 +54,7 @@ void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	CAS_SLOT(s.border_color, Colours::ForestGreen);
 	CAS_SLOT(s.border_hlcolor, s.border_color);
 	CAS_SLOT(s.door_color, Colours::DimGray);
-	CAS_SLOT(s.body_color, Colours::DarkKhaki);
+	CAS_SLOT(s.body_color, door_default_progress_color);
 	CAS_SLOT(s.skeleton_color, Colours::Black);
 
 	// NOTE: The others can be nullptr;
@@ -117,6 +134,15 @@ void UpperDoorlet::construct() {
 	this->body = geometry_freeze(polar_rectangle(this->bradius, default_alpha_degrees, this->degrees));
 }
 
+void UpperDoorlet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case DoorStatus::Opening: case DoorStatus::Closing: {
+		this->flashing = !this->flashing;
+		this->notify_updated();
+	}; break;
+	}
+}
+
 void UpperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
 	case DoorStatus::Disabled: {
@@ -181,4 +207,70 @@ void UpperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	} else {
 		ds->DrawGeometry(this->border, cx, cy, style.border_color, default_thickness);
 	}
+}
+
+/*************************************************************************************************/
+Doorlet::Doorlet(float width, float height, float thickness, ICanvasBrush^ color
+	, CanvasSolidColorBrush^ bdcolor, CanvasSolidColorBrush^ btmcolor)
+	: IRangelet(0.0, 1.0), width(width), height(height), thickness(thickness)
+	, color((color == nullptr) ? door_default_progress_color : color)
+	, border_color((bdcolor == nullptr) ? door_default_border_color : bdcolor)
+	, bottom_color((btmcolor == nullptr) ? door_default_bottom_color : btmcolor) {
+	if (this->height < 0.0F) {
+		this->height *= (-this->width);
+	} else if (this->height == 0.0F) {
+		this->height = this->width * 6.18F;
+	}
+}
+
+void Doorlet::construct() {
+	float radius = this->thickness;
+	float thickoff = this->thickness * 0.5F;
+	float base_width = this->width * 0.1618F;
+	float bottom_x = base_width + this->thickness;
+	float bottom_y = this->height * 0.5F;
+	float bottom_width = this->width - bottom_x * 2.0F;
+	float bottom_height = this->height - bottom_y - thickoff;
+	float top_width = bottom_width * 0.5F;
+	float top_x = bottom_x + (bottom_width - top_width) * 0.5F;
+	float top_y = thickoff;
+	float top_height = bottom_y + this->thickness;
+	float base_height = bottom_height * 0.382F;
+	float base_bottom = this->height;
+	float base_left = 0.0F;
+	float base_right = this->width;
+	float base_y = base_bottom - base_height;
+	auto top = rounded_rectangle(top_x, top_y, top_width, top_height, radius, radius);
+	auto bottom = rectangle(bottom_x, bottom_y, bottom_width, bottom_height);
+	auto lbase = triangle(base_left + base_width, base_y, base_left, base_bottom);
+	auto rbase = triangle(base_right - base_width, base_y, base_right, base_bottom);
+	
+	this->top = geometry_draft(geometry_subtract(top, bottom), this->thickness * 1.618F);
+	this->bottom = geometry_draft(geometry_subtract(bottom, top), this->thickness * 1.618F);
+	this->base = geometry_freeze(geometry_union(lbase, rbase));
+	this->body = geometry_union(top, bottom);
+
+	this->on_value_changed(0.0F);
+}
+
+void Doorlet::fill_extent(float x, float y, float* w, float* h) {
+	SET_VALUES(w, this->width, h, this->height);
+}
+
+void Doorlet::on_value_changed(double v) {
+	double percentage = this->get_percentage();
+	Rect region = this->body->ComputeBounds();
+	float hollow_height = region.Height * float(1.0 - percentage);
+	auto pbox = rectangle(region.X, region.Y, region.Width, hollow_height);
+
+	this->progress = geometry_freeze(geometry_subtract(this->body, pbox));
+}
+
+void Doorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	ds->DrawCachedGeometry(this->top, x, y, this->border_color);
+	ds->DrawCachedGeometry(this->bottom, x, y, this->bottom_color);
+	ds->DrawCachedGeometry(this->base, x, y, this->bottom_color);
+	
+	ds->FillGeometry(this->body, x, y, Colours::Background);
+	ds->DrawCachedGeometry(this->progress, x, y, this->color);
 }
