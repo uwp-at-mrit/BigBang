@@ -17,28 +17,28 @@ static unsigned int cylinder_default_colors[] = { 0x00BFFF, 0xB3F000, 0xFFB03A, 
 static float cylinder_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 /*************************************************************************************************/
-Cylinderlet::Cylinderlet(double range, float width, float height, float thickness
+Cylinderlet::Cylinderlet(double range, float base_width, float height, float thickness
 	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(0.0, range, width, height, thickness, step, precision, bcolor, colors) {}
+	: Cylinderlet(0.0, range, base_width, height, thickness, step, precision, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(double vmin, double vmax, float width, float height, float thickness
+Cylinderlet::Cylinderlet(double vmin, double vmax, float base_width, float height, float thickness
 	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(LiquidSurface::_, vmin, vmax, width, height, thickness, step, precision, bcolor, colors) {}
+	: Cylinderlet(LiquidSurface::_, vmin, vmax, base_width, height, thickness, step, precision, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, double range, float width, float height
+Cylinderlet::Cylinderlet(LiquidSurface shape, double range, float base_width, float height
 	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, 0.0, range, width, height, thickness, step, precision, bcolor, colors) {}
+	: Cylinderlet(shape, 0.0, range, base_width, height, thickness, step, precision, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float width, float height
+Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float base_width, float height
 	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: IRangelet(vmin, vmax), width(std::fabsf(width)), height(height), thickness(thickness)
-	, step(step), precision(precision), liquid_shape(shape), leftward(width > 0.0F)
+	: IRangelet(vmin, vmax), base_width(std::fabsf(base_width)), height(height), thickness(thickness)
+	, step(step), precision(precision), liquid_shape(shape), leftward(base_width > 0.0F)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor) {
 
 	if (this->height < 0.0F) {
-		this->height *= (-this->width);
+		this->height *= (-this->base_width);
 	} else if (this->height == 0.0F) {
-		this->height = this->width * 2.718F;
+		this->height = this->base_width * 2.718F;
 	}
 
 	this->liquid_surface_radius = this->thickness * 0.618F;
@@ -62,20 +62,21 @@ void Cylinderlet::construct() {
 		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics, this->precision);
 	} else {
 		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics, this->precision);
-		mark_x = this->width - metrics.width;
+		mark_x = this->base_width - metrics.width;
 	}
 
-	{ // the only difference between left-cylinder and right-cylinder is the `base_x`; 
-		float base_width = (this->width - metrics.width - hatch_thickness) + base_corner_radius * 2.0F;
-		float base_x = (this->leftward ? (this->width - base_width) : 0.0F);
+	this->extended_width = metrics.width + hatch_thickness - base_corner_radius * 2.0F;
+
+	{ // the only difference between left-cylinder and right-cylinder is the `base_x`;
+		float base_x = (this->leftward ? this->extended_width : 0.0F);
 		float glass_thickness = this->thickness * 0.5F;
 		float glass_thickoff = glass_thickness * 0.5F;
-		float glass_width = base_width - base_corner_radius * 4.0F - this->thickness;
+		float glass_width = this->base_width - base_corner_radius * 4.0F - this->thickness;
 		float glass_height = metrics.hatch_height + glass_thickness;
-		float glass_x = base_x + (base_width - glass_width) * 0.5F;
+		float glass_x = base_x + (this->base_width - glass_width) * 0.5F;
 		float glass_y = metrics.hatch_y + hatchmark_y - glass_thickoff;
 		float hat_width = glass_width + hat_corner_radius * 2.0F;
-		float hat_x = base_x + (base_width - hat_width) * 0.5F;
+		float hat_x = base_x + (this->base_width - hat_width) * 0.5F;
 		float body_height = metrics.hatch_height;
 		float body_width = glass_width - glass_thickness;
 		
@@ -83,7 +84,7 @@ void Cylinderlet::construct() {
 			geometry_translate(hatch, mark_x, hatchmark_y),
 			rounded_rectangle(hat_x, 0.0F, hat_width, hat_height, hat_corner_radius, hat_corner_radius),
 			geometry_stroke(rounded_rectangle(glass_x, glass_y, glass_width, glass_height, glass_thickness, glass_thickness), glass_thickness),
-			rounded_rectangle(base_x, base_y, base_width, base_height * 2.0F, base_corner_radius, base_corner_radius)
+			rounded_rectangle(base_x, base_y, this->base_width, base_height * 2.0F, base_corner_radius, base_corner_radius)
 		};
 
 		auto glass = geometry_union(glass_parts); // don't mind, it's Visual Studio's fault
@@ -91,14 +92,14 @@ void Cylinderlet::construct() {
 		float body_y = glass_y + glass_thickoff;
 
 		this->body = rectangle(body_x, body_y, body_width, body_height);
-		this->skeleton = geometry_freeze(geometry_intersect(glass, rectangle(this->width, this->height)));
+		this->skeleton = geometry_freeze(geometry_intersect(glass, rectangle(this->base_width + this->extended_width, this->height)));
 	}
 
 	this->on_value_changed(0.0F);
 }
 
 void Cylinderlet::fill_extent(float x, float y, float* w, float* h) {
-	SET_VALUES(w, this->width, h, this->height);
+	SET_VALUES(w, this->base_width + this->extended_width, h, this->height);
 }
 
 void Cylinderlet::on_value_changed(double v) {

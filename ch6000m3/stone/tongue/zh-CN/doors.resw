@@ -153,4 +153,10 @@
   <data name="Load" xml:space="preserve">
     <value>装载量</value>
   </data>
+  <data name="Port" xml:space="preserve">
+    <value>左舷</value>
+  </data>
+  <data name="Starboard" xml:space="preserve">
+    <value>右舷</value>
+  </data>
 </root>

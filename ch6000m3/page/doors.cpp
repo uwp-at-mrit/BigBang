@@ -32,12 +32,12 @@ private enum class DSOperation { Open, Stop, Close, Disable, _ };
 private enum class DS : unsigned int {
 	BowDraft, EarthWork, Capacity, Height, Load, Displacement, SternDraft,
 	
-	pLeftDrag, pLock, pRightDrag,
-	
-	Heel, Trim,
+	pLeftDrag, pLock, pRightDrag, Heel, Trim,
 	
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
+
+	Port, Starboard,
 	_
 };
 
@@ -51,20 +51,25 @@ public:
 		
 		this->ship_width = 0.618F;
 		this->x = (1.0F - this->ship_width - radius) * 0.618F;
-		this->y = (0.618F - height) * 0.75F;
+		this->y = (0.618F - height) * 0.618F;
 		this->ship = geometry_union(rectangle(this->ship_width, height),
 			segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
 
 		{ // initializing sequence labels
-			CanvasTextFormat^ seq_font = make_bold_text_format("Microsoft YaHei UI", large_font_size);
+			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei UI", large_font_size);
 			
 			this->seq_color = Colours::Tomato;
+			this->ps_color = Colours::make(default_port_color);
+			this->sb_color = Colours::make(default_starboard_color);
 
 			for (size_t idx = 0; idx < door_count_per_side ; idx++) {
 				size_t ridx = door_count_per_side - idx;
 
-				this->sequences[idx] = make_text_layout(ridx.ToString() + "#", seq_font);
+				this->sequences[idx] = make_text_layout(ridx.ToString() + "#", cpt_font);
 			}
+
+			this->port = make_text_layout(_speak(DS::Port), cpt_font);
+			this->starboard = make_text_layout(_speak(DS::Starboard), cpt_font);
 		}
 	}
 
@@ -77,8 +82,15 @@ public:
 		float sy = this->y * Height;
 		float cell_width = this->ship_width * Width / float(door_count_per_side);
 		float seq_y = sy + (ship_box.Height - this->sequences[0]->LayoutBounds.Height) * 0.5F;
-		
+		float scx = sx + this->ship_width * Width * 0.5F;
+		float sby = sy + ship_box.Height;
+		float ps_width = this->port->LayoutBounds.Width;
+		float sb_width = this->starboard->LayoutBounds.Width;
+		float label_height = this->starboard->LayoutBounds.Height;
+
+		ds->DrawTextLayout(this->port, scx - ps_width * 0.5F, sy - label_height * 1.618F, this->ps_color);
 		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
+		ds->DrawTextLayout(this->starboard, scx - sb_width * 0.5F, sby + label_height * 0.618F, this->sb_color);
 
 		for (size_t idx = 0; idx < door_count_per_side; idx++) {
 			float cell_x = sx + cell_width * float(idx);
@@ -124,6 +136,10 @@ public:
 private:
 	CanvasGeometry^ ship;
 	CanvasTextLayout^ sequences[door_count_per_side];
+	CanvasTextLayout^ port;
+	CanvasTextLayout^ starboard;
+	ICanvasBrush^ ps_color;
+	ICanvasBrush^ sb_color;
 	ICanvasBrush^ seq_color;
 
 private:
@@ -239,10 +255,9 @@ private:
 	}
 
 	template<typename E>
-	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id
-		, float height, double range, Platform::String^ unit, LiquidSurface surface) {
-		float width = height * 0.42F;
-		auto cylinder = new Credit<Cylinderlet, E>(surface, range, width, height);
+	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height
+		, double range, Platform::String^ unit, LiquidSurface surface) {
+		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height);
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
@@ -271,7 +286,7 @@ private:
 			size_t idx = static_cast<size_t>(id) - static_cast<size_t>(id0) + 1;
 
 			this->decorator->fill_door_cell_extent(&cell_x, &cell_y, &cell_width, &cell_height, idx, side_hint);
-			center = cell_x + cell_width * 0.5F;
+			center = cell_x + cell_width * 0.64F;
 			
 			this->master->move_to(ds[id], center, cell_y + cell_height * fy, GraphletAnchor::CC);
 			this->master->move_to(ts[id], ds[id], t_anchor, t_anchor, -center_xoff);
@@ -285,8 +300,8 @@ private:
 		float x, y, xoff, gapsize;
 		float flcount = float(_I(idn) - _I(id0) + 1);
 	
-		this->decorator->fill_door_cell_extent(nullptr, &y, &xoff, nullptr, 1, 6.0F);
-		xoff *= 0.25F;
+		this->decorator->fill_door_cell_extent(nullptr, &y, &xoff, nullptr, 1, 5.5F);
+		xoff *= 0.5F;
 
 		for (E id = id0; id <= idn; id++) {
 			ls[id]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
@@ -294,7 +309,7 @@ private:
 
 			this->decorator->fill_descent_anchor((_I(id) - _I(id0)) / flcount, 0.0F, &x, nullptr);
 
-			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::LC);
+			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::CT);
 			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 		}

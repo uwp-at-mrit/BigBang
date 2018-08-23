@@ -87,20 +87,20 @@ void Thermometerlet::construct() {
 	this->fill_mercury_extent(nullptr, &mercury_highest, nullptr, &mercury_height); 
 	
 	{ // make skeleton
-		CanvasGeometry^ hatch;
+		CanvasGeometry^ hatchmark;
 		float hatch_height = (mercury_lowest - mercury_highest) + hatch_thickness + metrics.em;
 		CanvasGeometry^ glass = make_thermometer_glass(this->bulb_size, this->height, this->thickness);
 		float mark_x = 0.0F;
 		
 		if (this->leftward) {
-			hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
+			hatchmark = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
 			glass = geometry_translate(glass, metrics.width, 0.0F);
 		} else {
-			hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
+			hatchmark = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
 			mark_x = this->width - metrics.width;
 		}
 
-		this->skeleton = geometry_freeze(geometry_union(glass, hatch, mark_x, mercury_highest - metrics.hatch_y));
+		this->skeleton = geometry_freeze(geometry_union(glass, hatchmark, mark_x, mercury_highest - metrics.hatch_y));
 	}
 
 	this->on_value_changed(0.0F);
