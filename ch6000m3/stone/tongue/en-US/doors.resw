@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Bow" xml:space="preserve">
+  <data name="BowDraft" xml:space="preserve">
     <value>Bow Draught</value>
   </data>
   <data name="EarthWork" xml:space="preserve">
@@ -135,10 +135,22 @@
   <data name="pRightDrag" xml:space="preserve">
     <value>Right Drag Output Pressure</value>
   </data>
-  <data name="Stern" xml:space="preserve">
+  <data name="SternDraft" xml:space="preserve">
     <value>Stern Draught</value>
   </data>
   <data name="Trim" xml:space="preserve">
     <value>Trimming Angle</value>
+  </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>Hold Capacity</value>
+  </data>
+  <data name="Displacement" xml:space="preserve">
+    <value>Displacement</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Hold Height</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Hold Load</value>
   </data>
 </root>

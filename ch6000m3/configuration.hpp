@@ -16,3 +16,6 @@ static Platform::String^ remote_test_server = "172.20.10.2";
 static const unsigned int frame_per_second = 4;
 
 static const float large_font_size = 18.0F;
+
+static const unsigned int port_color = 0xFF0000;
+static const unsigned int starboard_color = 0x00FF00;

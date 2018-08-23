@@ -30,9 +30,12 @@ private enum class DSOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
-	Bow, Stern,
+	BowDraft, EarthWork, Capacity, Height, Load, Displacement, SternDraft,
+	
 	pLeftDrag, pLock, pRightDrag,
-	EarthWork, Heel, Trim,
+	
+	Heel, Trim,
+	
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	_
@@ -146,10 +149,14 @@ public:
 		this->load_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
-		this->load_indicator(this->draughts, this->dimensions, DS::Bow, cylinder_height, FitPosition::Left);
-		this->load_indicator(this->draughts, this->dimensions, DS::Stern, cylinder_height, FitPosition::Right);
+		this->load_cylinder(this->cylinders, DS::BowDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, DS::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DS::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DS::Height, cylinder_height, 15.0, "meter", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DS::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DS::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DS::SternDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
 
-		this->load_dimension(this->dimensions, this->labels, DS::EarthWork, "meter3");
 		this->load_dimensions(this->dimensions, this->labels, DS::pLeftDrag, DS::pRightDrag, "bar");
 		this->load_dimensions(this->dimensions, this->labels, DS::Heel, DS::Trim, "degrees");
 	}
@@ -158,23 +165,22 @@ public:
 		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::PS1, DS::PS7, 1.0F, -0.5F);
 		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, 3.0F, 0.5F);
 
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Bow, 0.618F);
-		this->reflow_indicators(this->draughts, this->dimensions, DS::Stern, 0.382F);
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, DS::BowDraft, DS::SternDraft);
 
 		{ // reflow dimensions
 			float x, y, label_height, xoff, yoff;
 
-			this->master->fill_graphlet_location(this->draughts[DS::Bow], nullptr, &y, GraphletAnchor::CC);
-			this->labels[DS::EarthWork]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+			this->master->fill_graphlet_location(this->cylinders[DS::BowDraft], nullptr, &y, GraphletAnchor::CC);
+			this->labels[DS::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 
 			xoff = label_height * 0.5F;
 			yoff = label_height * 2.0F;
 
 			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
-			this->reflow_tabular(this->labels, this->dimensions, DS::pLock, x, y, DS::pLeftDrag, DS::pRightDrag, xoff, yoff);
+			//this->reflow_tabular(this->labels, this->dimensions, DS::pLock, x, y, DS::pLeftDrag, DS::pRightDrag, xoff, yoff);
 			
 			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
-			this->reflow_tabular(this->labels, this->dimensions, DS::Heel, x, y, DS::EarthWork, DS::Trim, xoff, yoff);
+			//this->reflow_tabular(this->labels, this->dimensions, DS::Heel, x, y, DS::EarthWork, DS::Trim, xoff, yoff);
 		}
 	}
 
@@ -183,8 +189,8 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->set_draught(DS::Bow, DBD(DB2, 164U));
-		this->set_draught(DS::Stern, DBD(DB2, 188U));
+		this->set_cylinder(DS::BowDraft, DBD(DB2, 164U));
+		this->set_cylinder(DS::SternDraft, DBD(DB2, 188U));
 
 		this->dimensions[DS::Trim]->set_value(DBD(DB2, 200U));
 		this->dimensions[DS::Heel]->set_value(DBD(DB2, 204U));
@@ -207,14 +213,9 @@ public:
 
 private:
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^ label = nullptr) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, Colours::Yellow, Colours::Silver), id);
-	}
-
-	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), Colours::Silver), id);
-		this->load_dimension(ds, id, unit);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
 	}
 
 	template<typename E>
@@ -238,13 +239,14 @@ private:
 	}
 
 	template<typename E>
-	void load_indicator(std::map<E, Credit<Cylinderlet, E>*>& cs, std::map<E, Credit<Dimensionlet, E>*>& ds, E id
-		, float height, FitPosition mark_position) {
-		float width = height * 0.382F;
-		auto cylinder = new Credit<Cylinderlet, E>(LiquidSurface::Convex, mark_position, 10.0, width, height);
+	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id
+		, float height, double range, Platform::String^ unit, LiquidSurface surface) {
+		float width = height * 0.42F;
+		auto cylinder = new Credit<Cylinderlet, E>(surface, range, width, height);
 
 		cs[id] = this->master->insert_one(cylinder, id);
-		this->load_dimension(ds, id, "meter", _speak(id.ToString()));
+
+		this->load_dimension(this->dimensions, this->labels, id, unit);
 	}
 
 private:
@@ -278,14 +280,24 @@ private:
 	}
 
 	template<class C, typename E>
-	void reflow_indicators(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float fx) {
-		float label_height, x, y;
-		
-		ds[id]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
-		this->decorator->fill_descent_anchor(fx, 0.382F, &x, &y);	
+	void reflow_cylinders(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds
+		, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn) {
+		float x, y, xoff, gapsize;
+		float flcount = float(_I(idn) - _I(id0) + 1);
+	
+		this->decorator->fill_door_cell_extent(nullptr, &y, &xoff, nullptr, 1, 6.0F);
+		xoff *= 0.25F;
 
-		this->master->move_to(is[id], x, y, GraphletAnchor::LC);
-		this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, label_height * 0.5F);
+		for (E id = id0; id <= idn; id++) {
+			ls[id]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
+			gapsize *= 0.5F;
+
+			this->decorator->fill_descent_anchor((_I(id) - _I(id0)) / flcount, 0.0F, &x, nullptr);
+
+			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::LC);
+			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+		}
 	}
 
 	template <class G1, class G2, typename E>
@@ -301,8 +313,8 @@ private:
 	}
 
 private:
-	void set_draught(DS id, float value) {
-		this->draughts[id]->set_value(value);
+	void set_cylinder(DS id, float value) {
+		this->cylinders[id]->set_value(value);
 		this->dimensions[id]->set_value(value);
 	}
 
@@ -312,7 +324,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	std::map<DS, Credit<Doorlet, DS>*> tubes;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
-	std::map<DS, Credit<Cylinderlet, DS>*> draughts;
+	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
 
 private:
 	DoorsPage* master;

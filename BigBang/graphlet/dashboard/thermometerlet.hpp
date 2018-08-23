@@ -13,27 +13,12 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(WarGrey::SCADA::FitPosition mark_position, double tmin, double tmax,
-			float width, float height = 0.0F, float thickness = 3.0F, unsigned int step = 0U,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
-			WarGrey::SCADA::GradientStops^ colors = nullptr);
-
 		Thermometerlet(double range, float width, float height = 0.0F,
 			float thickness = 3.0F, unsigned int step = 0U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		Thermometerlet(WarGrey::SCADA::FitPosition mark_position, double range,
-			float width, float height = 0.0F, float thickness = 3.0F, unsigned int step = 0U,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
-			WarGrey::SCADA::GradientStops^ colors = nullptr);
-
 		Thermometerlet(float width, float height = 0.0F, float thickness = 3.0F, unsigned int step = 0U,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
-			WarGrey::SCADA::GradientStops^ colors = nullptr);
-
-		Thermometerlet(WarGrey::SCADA::FitPosition mark_position,
-			float width, float height = 0.0F, float thickness = 3.0F, unsigned int step = 0U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -65,7 +50,7 @@ namespace WarGrey::SCADA {
 		float mercury_y;
 		
 	private:
-		WarGrey::SCADA::FitPosition mark_position;
+		bool leftward;
 
 	private:
 		unsigned int step;

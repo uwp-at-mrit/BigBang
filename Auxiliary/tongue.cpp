@@ -23,13 +23,13 @@ static ResourceLoader^ lookup_tongue(Platform::String^ scope) {
 }
 
 static inline Platform::String^ do_speak(ResourceLoader^ tongue, Platform::String^ word) {
-	Platform::String^ dialect = tongue->GetString(word);
+	Platform::String^ dialect = ((word == nullptr) ? word : tongue->GetString(word));
 
 	return (dialect == nullptr) ? word : dialect;
 }
 
 static inline Platform::String^ do_speak(ResourceLoader^ tongue, Platform::String^ word, bool* exists) {
-	Platform::String^ dialect = tongue->GetString(word);
+	Platform::String^ dialect = ((word == nullptr) ? word : tongue->GetString(word));
 
 	if (exists != nullptr) {
 		(*exists) = (dialect != nullptr);

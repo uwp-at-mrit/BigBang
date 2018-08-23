@@ -23,36 +23,18 @@ Cylinderlet::Cylinderlet(double range, float width, float height, float thicknes
 
 Cylinderlet::Cylinderlet(double vmin, double vmax, float width, float height, float thickness
 	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(LiquidSurface::_, FitPosition::Left, vmin, vmax, width, height, thickness,
-		step, precision, bcolor, colors) {}
+	: Cylinderlet(LiquidSurface::_, vmin, vmax, width, height, thickness, step, precision, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, double range, float width, float height, float thickness
-	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
+Cylinderlet::Cylinderlet(LiquidSurface shape, double range, float width, float height
+	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
 	: Cylinderlet(shape, 0.0, range, width, height, thickness, step, precision, bcolor, colors) {}
 
-Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float width, float height, float thickness
-	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, FitPosition::Left, vmin, vmax, width, height, thickness, step, precision, bcolor, colors) {}
-
-Cylinderlet::Cylinderlet(FitPosition mark, double range, float width, float height, float thickness
-	, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(mark, 0.0, range, width, height, thickness, step, precision, bcolor, colors) {}
-
-Cylinderlet::Cylinderlet(FitPosition mark, double vmin, double vmax, float width, float height
+Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float width, float height
 	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(LiquidSurface::_, mark, vmin, vmax, width, height, thickness, step, precision, bcolor, colors) {}
-
-Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, double range, float width, float height
-	, float thickness, unsigned int step, unsigned int precision, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: Cylinderlet(shape, position, 0.0, range, width, height, thickness, step, precision, bcolor, colors) {}
-
-Cylinderlet::Cylinderlet(LiquidSurface shape, FitPosition position, double vmin, double vmax
-	, float width, float height, float thickness, unsigned int step, unsigned int precision
-	, CanvasSolidColorBrush^ bcolor, GradientStops^ colors)
-	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness)
-	, step(step), precision(precision), liquid_shape(shape), mark_position(position)
+	: IRangelet(vmin, vmax), width(std::fabsf(width)), height(height), thickness(thickness)
+	, step(step), precision(precision), liquid_shape(shape), leftward(width > 0.0F)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor) {
-	
+
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
@@ -76,7 +58,7 @@ void Cylinderlet::construct() {
 	float hatch_thickness = this->thickness * 0.75F;
 	float mark_x = 0.0F;
 
-	if (this->mark_position == FitPosition::Left) {
+	if (this->leftward) {
 		hatch = vlhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics, this->precision);
 	} else {
 		hatch = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics, this->precision);
@@ -85,7 +67,7 @@ void Cylinderlet::construct() {
 
 	{ // the only difference between left-cylinder and right-cylinder is the `base_x`; 
 		float base_width = (this->width - metrics.width - hatch_thickness) + base_corner_radius * 2.0F;
-		float base_x = ((this->mark_position == FitPosition::Left) ? (this->width - base_width) : 0.0F);
+		float base_x = (this->leftward ? (this->width - base_width) : 0.0F);
 		float glass_thickness = this->thickness * 0.5F;
 		float glass_thickoff = glass_thickness * 0.5F;
 		float glass_width = base_width - base_corner_radius * 4.0F - this->thickness;

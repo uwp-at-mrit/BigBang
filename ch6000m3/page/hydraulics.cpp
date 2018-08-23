@@ -191,8 +191,8 @@ public:
 		this->master_tank = this->make_tank(HSMTStatus::High, gridsize * 17.0F, gridsize * 8.0F, thickness);
 		this->visor_tank = this->make_tank(HSVTStatus::Normal, gridsize * 15.0F, gridsize * 6.0F, thickness);
 
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, FitPosition::Left, gridsize * 2.5F);
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, FitPosition::Left, gridsize * 2.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gridsize * 2.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gridsize * 2.5F);
 
 		this->storage_tank = new FuelTanklet(gridsize * 2.5F, 0.0F, thickness, Colours::WhiteSmoke);
 		this->master->insert(this->storage_tank);
@@ -383,8 +383,8 @@ private:
 	}
 
 	template<class T, typename E>
-	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, FitPosition mp, float width) {
-		ts[id] = this->master->insert_one(new Credit<T, E>(mp, 100.0, width, 0.0F, 2.5F), id);
+	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width) {
+		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, 0.0F, 2.5F), id);
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("celsius", _speak(id), "", this->number_font, this->unit_font), id);
 	}
 
