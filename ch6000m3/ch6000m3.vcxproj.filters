@@ -39,6 +39,9 @@
     <ClCompile Include="page\doors.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\sealed_waters.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -53,6 +56,9 @@
       <Filter>decorator</Filter>
     </ClInclude>
     <ClInclude Include="page\doors.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\sealed_waters.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,6 +131,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\doors.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\sealed_waters.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\sealed_waters.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
