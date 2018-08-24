@@ -93,5 +93,6 @@ namespace WarGrey::SCADA {
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ geometry_draft(
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry,
-		float linewidth = 1.0F);
+		float linewidth = 1.0F,
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 }

@@ -97,6 +97,8 @@ CanvasCachedGeometry^ WarGrey::SCADA::geometry_freeze(CanvasGeometry^ geometry) 
     return CanvasCachedGeometry::CreateFill(geometry);
 }
 
-CanvasCachedGeometry^ WarGrey::SCADA::geometry_draft(CanvasGeometry^ geometry, float linewidth) {
-    return CanvasCachedGeometry::CreateStroke(geometry, linewidth);
+CanvasCachedGeometry^ WarGrey::SCADA::geometry_draft(CanvasGeometry^ geometry, float linewidth, CanvasStrokeStyle^ style) {
+    return (style == nullptr)
+		? CanvasCachedGeometry::CreateStroke(geometry, linewidth)
+		: CanvasCachedGeometry::CreateStroke(geometry, linewidth, style);
 }

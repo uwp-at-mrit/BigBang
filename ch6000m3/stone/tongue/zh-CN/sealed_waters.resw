@@ -117,88 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A" xml:space="preserve">
-    <value>左耙头</value>
-    <comment>":" 不能出现在名称中间</comment>
-  </data>
-  <data name="B" xml:space="preserve">
-    <value>左耙中</value>
-  </data>
-  <data name="C" xml:space="preserve">
-    <value>左弯管</value>
-  </data>
-  <data name="D" xml:space="preserve">
-    <value>泥门紧锁/蝶阀</value>
-  </data>
-  <data name="E" xml:space="preserve">
-    <value>泥门紧锁/蝶阀</value>
-  </data>
-  <data name="F" xml:space="preserve">
-    <value>右弯管</value>
-  </data>
-  <data name="G" xml:space="preserve">
-    <value>右耙中</value>
-  </data>
-  <data name="H" xml:space="preserve">
-    <value>右耙头</value>
-  </data>
-  <data name="K" xml:space="preserve">
-    <value>循环冷却</value>
-  </data>
-  <data name="Y" xml:space="preserve">
-    <value>应急</value>
-  </data>
   <data name="Port" xml:space="preserve">
-    <value>左舷液压系统</value>
+    <value>左舷水下泵</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>右舷液压系统</value>
-  </data>
-  <data name="I" xml:space="preserve">
-    <value>左耙唇</value>
-  </data>
-  <data name="J" xml:space="preserve">
-    <value>右耙唇</value>
-  </data>
-  <data name="M" xml:space="preserve">
-    <value>备用</value>
-  </data>
-  <data name="L" xml:space="preserve">
-    <value>马达冲洗</value>
+    <value>右舷水下泵</value>
   </data>
   <data name="Hatch" xml:space="preserve">
     <value>机舱海底门</value>
   </data>
-  <data name="F001Blocked" xml:space="preserve">
-    <value>回油滤器F0.01堵塞</value>
+  <data name="F1" xml:space="preserve">
+    <value>1#闸阀冲洗泵</value>
   </data>
-  <data name="F002Blocked" xml:space="preserve">
-    <value>回油滤器F0.02堵塞</value>
+  <data name="F2" xml:space="preserve">
+    <value>2#闸阀冲洗泵</value>
   </data>
-  <data name="FilterBlocked" xml:space="preserve">
-    <value>滤器堵塞</value>
+  <data name="S13" xml:space="preserve">
+    <value>1#封水泵</value>
   </data>
-  <data name="TS1" xml:space="preserve">
-    <value>主油温开关TS1</value>
+  <data name="S15" xml:space="preserve">
+    <value>1#封水泵</value>
   </data>
-  <data name="TS11" xml:space="preserve">
-    <value>油温开关TS11</value>
+  <data name="S17" xml:space="preserve">
+    <value>1#封水泵</value>
   </data>
-  <data name="TS12" xml:space="preserve">
-    <value>油温开关TS12</value>
+  <data name="S19" xml:space="preserve">
+    <value>1#封水泵</value>
   </data>
-  <data name="TS2" xml:space="preserve">
-    <value>主油温开关TS2</value>
+  <data name="S20" xml:space="preserve">
+    <value>2#封水泵</value>
   </data>
-  <data name="Master" xml:space="preserve">
-    <value>主油温</value>
-    <comment>“主油箱”标签不显示</comment>
+  <data name="S24" xml:space="preserve">
+    <value>2#封水泵</value>
   </data>
-  <data name="Visor" xml:space="preserve">
-    <value>油温</value>
-    <comment>“耙唇液压油箱”标签不显示</comment>
+  <data name="S26" xml:space="preserve">
+    <value>2#封水泵</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>回油压力</value>
+  <data name="S28" xml:space="preserve">
+    <value>2#封水泵</value>
+  </data>
+  <data name="H1" xml:space="preserve">
+    <value>1级舱内泵</value>
+  </data>
+  <data name="H2" xml:space="preserve">
+    <value>2级舱内泵</value>
   </data>
 </root>

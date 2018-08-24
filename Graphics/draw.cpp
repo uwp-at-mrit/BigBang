@@ -6,7 +6,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-void draw_invalid_bitmap(Platform::String^ hint, CanvasDrawingSession^ ds
+void WarGrey::SCADA::draw_invalid_bitmap(Platform::String^ hint, CanvasDrawingSession^ ds
 	, float x, float y, float width, float height, float thickness
 	, ICanvasBrush^ color, CanvasTextFormat^ font) {
 	float x0 = x + thickness * 0.5F;

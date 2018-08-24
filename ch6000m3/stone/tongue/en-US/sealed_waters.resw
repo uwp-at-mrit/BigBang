@@ -117,131 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A" xml:space="preserve">
-    <value>Left Drag Head</value>
-    <comment>':' cannot appear between letters</comment>
-  </data>
-  <data name="B" xml:space="preserve">
-    <value>Left Drag Arm</value>
-  </data>
-  <data name="C" xml:space="preserve">
-    <value>Left Gland</value>
-  </data>
-  <data name="D" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
-  </data>
-  <data name="E" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
-  </data>
-  <data name="F" xml:space="preserve">
-    <value>Right Gland</value>
-  </data>
-  <data name="G" xml:space="preserve">
-    <value>Right Drag Arm</value>
-  </data>
-  <data name="H" xml:space="preserve">
-    <value>Right Drag Head</value>
-  </data>
-  <data name="K" xml:space="preserve">
-    <value>Circulating Cooling</value>
-  </data>
-  <data name="Y" xml:space="preserve">
-    <value>Emergency</value>
-  </data>
-  <data name="SQa" xml:space="preserve">
-    <value>SQ.A</value>
-  </data>
-  <data name="SQb" xml:space="preserve">
-    <value>SQ.B</value>
-  </data>
-  <data name="SQc" xml:space="preserve">
-    <value>SQ.C</value>
-  </data>
-  <data name="SQd" xml:space="preserve">
-    <value>SQ.D</value>
-  </data>
-  <data name="SQe" xml:space="preserve">
-    <value>SQ.E</value>
-  </data>
-  <data name="SQf" xml:space="preserve">
-    <value>SQ.F</value>
-  </data>
-  <data name="SQg" xml:space="preserve">
-    <value>SQ.G</value>
-  </data>
-  <data name="SQh" xml:space="preserve">
-    <value>SQ.H</value>
-  </data>
-  <data name="SQk1" xml:space="preserve">
-    <value>SQ.K1</value>
-  </data>
-  <data name="SQy" xml:space="preserve">
-    <value>SQ.Y</value>
-  </data>
-  <data name="Port" xml:space="preserve">
-    <value>Port Hydraulic System</value>
+  <data name="S26" xml:space="preserve">
+    <value>Sealed Water Pump #2</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>Starboard Hydraulic System</value>
-  </data>
-  <data name="SQi" xml:space="preserve">
-    <value>SQ.I</value>
-  </data>
-  <data name="SQj" xml:space="preserve">
-    <value>SQ.J</value>
-  </data>
-  <data name="I" xml:space="preserve">
-    <value>Left Draghead Visor</value>
-  </data>
-  <data name="J" xml:space="preserve">
-    <value>Right Draghead Visor</value>
-  </data>
-  <data name="SQk2" xml:space="preserve">
-    <value>SQ.K2</value>
-  </data>
-  <data name="M" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="L" xml:space="preserve">
-    <value>Motor Flushing</value>
+    <value>Starboard Underwater Pump</value>
   </data>
   <data name="Hatch" xml:space="preserve">
     <value>Hatch Against Sea</value>
   </data>
-  <data name="F001Blocked" xml:space="preserve">
-    <value>Filter F0.01 Blocked</value>
+  <data name="F1" xml:space="preserve">
+    <value>Flushing Pump #1</value>
   </data>
-  <data name="F002Blocked" xml:space="preserve">
-    <value>Filter F0.02 Blocked</value>
+  <data name="F2" xml:space="preserve">
+    <value>Flushing Pump #2</value>
   </data>
-  <data name="FilterBlocked" xml:space="preserve">
-    <value>Filter Blocked</value>
+  <data name="S13" xml:space="preserve">
+    <value>Sealed Water Pump #1</value>
   </data>
-  <data name="SQl" xml:space="preserve">
-    <value>SQ.L</value>
+  <data name="S24" xml:space="preserve">
+    <value>Sealed Water Pump #2</value>
   </data>
-  <data name="SQm" xml:space="preserve">
-    <value>SQ.M</value>
+  <data name="S15" xml:space="preserve">
+    <value>Sealed Water Pump #1</value>
   </data>
-  <data name="TS1" xml:space="preserve">
-    <value>Master Tank Temperature Switch 1</value>
+  <data name="Port" xml:space="preserve">
+    <value>Port Underwater Pump</value>
   </data>
-  <data name="TS11" xml:space="preserve">
-    <value>Visor Tank Temperature Switch 1</value>
+  <data name="S17" xml:space="preserve">
+    <value>Sealed Water Pump #1</value>
   </data>
-  <data name="TS12" xml:space="preserve">
-    <value>Visor Tank Temperature Switch 1</value>
+  <data name="S19" xml:space="preserve">
+    <value>Sealed Water Pump #1</value>
   </data>
-  <data name="TS2" xml:space="preserve">
-    <value>Master Tank Temperature Switch 1</value>
+  <data name="S20" xml:space="preserve">
+    <value>Sealed Water Pump #2</value>
   </data>
-  <data name="Master" xml:space="preserve">
-    <value>Master Oil Temperature</value>
+  <data name="S28" xml:space="preserve">
+    <value>Sealed Water Pump #2</value>
   </data>
-  <data name="Visor" xml:space="preserve">
-    <value>Visor Oil Temperature</value>
+  <data name="H1" xml:space="preserve">
+    <value>1st-class in-hatch pump</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>Pipeline Pressure</value>
+  <data name="H2" xml:space="preserve">
+    <value>2nd-class in-hatch pump</value>
   </data>
 </root>

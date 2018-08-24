@@ -56,7 +56,7 @@ public:
 			segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
 
 		{ // initializing sequence labels
-			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei UI", large_font_size);
+			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 			
 			this->seq_color = Colours::Tomato;
 			this->ps_color = Colours::make(default_port_color);

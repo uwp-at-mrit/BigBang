@@ -15,7 +15,8 @@ namespace WarGrey::SCADA {
 		IShapelet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
-			float thickness = 1.0F);
+			float thickness = 1.0F,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 	public:
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
@@ -24,8 +25,8 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ surface;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ border;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 
 	protected:
 		Windows::Foundation::Rect box;
@@ -42,6 +43,38 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
+	};
+
+	private class HLinelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		HLinelet(float thickness,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+	public:
+		void fill_extent(float x, float y, float* width, float* height) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
+		float thickness;
+	};
+	
+	private class VLinelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		VLinelet(float thickness, 
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+	public:
+		void fill_extent(float x, float y, float* width, float* height) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
+		float thickness;
 	};
 
 	template<typename Anchor>

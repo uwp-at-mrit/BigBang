@@ -58,13 +58,13 @@ private enum class HS : unsigned int {
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
 
-	// anchors used for unnamed anchors
+	// anchors used for unnamed corners
 };
 
 private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {
-		this->caption_font = make_text_format("Microsoft YaHei UI", large_font_size);
+		this->caption_font = make_text_format("Microsoft YaHei", large_font_size);
 		this->number_font = make_bold_text_format("Cambria Math", 20.0F);
 		this->unit_font = make_text_format("Microsoft YaHei", 18.0F);
 	}
@@ -195,9 +195,8 @@ public:
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gridsize * 2.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gridsize * 2.5F);
 
-		this->storage_tank = new FuelTanklet(gridsize * 2.5F, 0.0F, thickness, Colours::WhiteSmoke);
-		this->master->insert(this->storage_tank);
-
+		this->storage_tank = this->master->insert_one(new FuelTanklet(gridsize * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
+		
 		this->load_boolean_indicators(HS::F001Blocked, HS::FilterBlocked, gridsize, this->states, this->islabels);
 	}
 
@@ -353,7 +352,7 @@ private:
 		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+			this->load_label(ls, id, Colours::Silver);
 		}
 	}
 
@@ -363,8 +362,8 @@ private:
 		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id.ToString(), id, WarGrey::SCADA::Colours::Silver);
-			this->load_label(cs, id, WarGrey::SCADA::Colours::Silver);
+			this->load_label(ls, id.ToString(), id, Colours::Silver);
+			this->load_label(cs, id, Colours::Silver);
 		}
 	}
 
@@ -378,7 +377,7 @@ private:
 	template<typename E>
 	void load_boolean_indicators(E id0, E idn, float size, std::map<E, Credit<Booleanlet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, WarGrey::SCADA::Colours::Silver);
+			this->load_label(ls, id, Colours::Silver);
 			bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
 		}
 	}
