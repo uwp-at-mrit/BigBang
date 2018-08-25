@@ -126,6 +126,9 @@
   <data name="degrees" xml:space="preserve">
     <value>deg</value>
   </data>
+  <data name="m3ph" xml:space="preserve">
+    <value>m³/h</value>
+  </data>
   <data name="meter" xml:space="preserve">
     <value>m</value>
   </data>

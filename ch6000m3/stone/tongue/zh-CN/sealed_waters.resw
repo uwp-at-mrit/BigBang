@@ -126,40 +126,49 @@
   <data name="Hatch" xml:space="preserve">
     <value>机舱海底门</value>
   </data>
-  <data name="F1" xml:space="preserve">
+  <data name="FP1" xml:space="preserve">
     <value>1#闸阀冲洗泵</value>
   </data>
-  <data name="F2" xml:space="preserve">
+  <data name="FP2" xml:space="preserve">
     <value>2#闸阀冲洗泵</value>
   </data>
-  <data name="S13" xml:space="preserve">
+  <data name="SP13" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="S15" xml:space="preserve">
+  <data name="SP15" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="S17" xml:space="preserve">
+  <data name="SP11" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="S19" xml:space="preserve">
+  <data name="SP19" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="S20" xml:space="preserve">
+  <data name="SP20" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="S24" xml:space="preserve">
+  <data name="SP24" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="S26" xml:space="preserve">
+  <data name="SP26" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="S28" xml:space="preserve">
+  <data name="SP22" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="H1" xml:space="preserve">
+  <data name="HP1" xml:space="preserve">
     <value>1级舱内泵</value>
   </data>
-  <data name="H2" xml:space="preserve">
+  <data name="HP2" xml:space="preserve">
     <value>2级舱内泵</value>
+  </data>
+  <data name="SS1" xml:space="preserve">
+    <value>泥沙分离器</value>
+  </data>
+  <data name="SS2" xml:space="preserve">
+    <value>泥沙分离器</value>
+  </data>
+  <data name="ToPipeline" xml:space="preserve">
+    <value>至闸阀冲洗管系</value>
   </data>
 </root>
