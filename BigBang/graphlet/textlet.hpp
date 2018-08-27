@@ -10,11 +10,29 @@ namespace WarGrey::SCADA {
 
 	private struct DimensionStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ number_font;
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_background_color;
+
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ number_font;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ number_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ number_border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ number_background_color;
+
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ unit_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ unit_border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ unit_background_color;
+
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ caret_color;
+
+		float minimize_number_width = -1.0F;
+		float number_xfraction = -1.0F;
+
+		float number_leading_space = -1.0F;
+		float number_trailing_space = -1.0F;
+
+		int precision = -1;
 	};
 
 	private class ITextlet abstract : public virtual WarGrey::SCADA::IGraphlet {
@@ -109,6 +127,7 @@ namespace WarGrey::SCADA {
 		void prepare_style(WarGrey::SCADA::EditorStatus status, WarGrey::SCADA::DimensionStyle& style) override;
 		void apply_style(WarGrey::SCADA::DimensionStyle& style) override;
 		void on_value_changed(double value) override;
+		void on_status_changed(WarGrey::SCADA::EditorStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ number_layout;
@@ -119,10 +138,8 @@ namespace WarGrey::SCADA {
 	private:
 		Platform::String^ number;
 		Platform::String^ unit;
-		float gapsize;
 
 	private:
-		bool editing;
 		bool flashing;
 	};
 

@@ -54,12 +54,21 @@ private enum class SW : unsigned int {
 	sea
 };
 
+static const float default_thickness = 1.5F;
+
 private class SealedWaters final : public PLCConfirmation, public IMenuCommand<SWOperation, IMRMaster*> {
 public:
 	SealedWaters(SealedWaterPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 12.0F);
+
 		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 20.0F);
 		this->dimension_style.unit_font = make_bold_text_format("Cambria", 18.0F);
+		this->dimension_style.minimize_number_width = 50.0F;
+		this->dimension_style.number_background_color = Colours::Gray;
+		this->dimension_style.number_color = Colours::Background;
+		this->dimension_style.label_background_color = Colours::ForestGreen;
+		this->dimension_style.label_color = Colours::GhostWhite;
+		this->dimension_style.number_leading_space = 2.0F;
 	}
 
 public:
@@ -103,13 +112,13 @@ public:
 		pTurtle->move_down(4, SW::d13)->move_right(6, SW::DGV13)->move_right(6, SW::SP13)->move_right(6, SW::DGV3);
 		pTurtle->move_right(8)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d14)->move_right(6, SW::DGV14)->move_right(6, SW::SP24)->move_right(6, SW::DGV4);
-		pTurtle->move_right(12, SW::d44)->move_right(10, SW::DGV44)->move_right(6, SW::HP1)->jump_back();
-		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(5, SW::DGV8);
+		pTurtle->move_right(12, SW::d44)->move_right(12, SW::DGV44)->move_right(6, SW::HP1)->jump_back();
+		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(7, SW::DGV8);
 		pTurtle->move_right(10)->move_down(3)->move_left(2)->jump_back(SW::d14);
 
 		pTurtle->move_down(4, SW::d15)->move_right(6, SW::DGV15)->move_right(6, SW::SP15)->move_right(6, SW::DGV5);
-		pTurtle->move_right(12, SW::d45)->move_right(10, SW::DGV45)->move_right(6, SW::HP2)->jump_back();
-		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(5, SW::DGV7);
+		pTurtle->move_right(12, SW::d45)->move_right(12, SW::DGV45)->move_right(6, SW::HP2)->jump_back();
+		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(7, SW::DGV7);
 		pTurtle->move_right(10)->move_up(3)->move_left(2)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(6, SW::DGV16)->move_right(6, SW::SP26)->move_right(6, SW::DGV6);
 		pTurtle->move_right(8)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
@@ -119,14 +128,14 @@ public:
 		pTurtle->move_down(2, SW::d17)->move_right(6, SW::DGV17)->move_right(6, SW::SP11)->move_right(6, SW::DGV1);
 		pTurtle->move_right(8)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d18)->move_right(6, SW::DGV18)->move_right(6, SW::SP22)->move_right(6, SW::DGV2);
-		pTurtle->move_right(22, SW::DGV46)->move_right(6, SW::Port)->jump_back();
+		pTurtle->move_right(24, SW::DGV46)->move_right(6, SW::Port)->jump_back();
 
 		pTurtle->move_down(4, SW::d19)->move_right(6, SW::DGV19)->move_right(6, SW::SP19)->move_right(6, SW::DGV9);
-		pTurtle->move_right(22, SW::DGV47)->move_right(6, SW::Starboard)->jump_back();
+		pTurtle->move_right(24, SW::DGV47)->move_right(6, SW::Starboard)->jump_back();
 		pTurtle->move_down(4, SW::d20)->move_right(6, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
 		pTurtle->move_right(8)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
 
-		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, 1.5F, Colours::Gray));
+		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, Colours::Gray));
 		this->hatch = this->master->insert_one(new Hatchlet(gridsize * 2.5F));
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
@@ -175,13 +184,14 @@ public:
 
 		{ // reflow dimensions
 			float xoff = gridsize * 3.0F;
+			float yoff = default_thickness * 2.0F;
 
 			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff);
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -yoff);
 			}
 
 			for (auto it = this->flows.begin(); it != this->flows.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff);
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff, yoff);
 			}
 		}
 	}

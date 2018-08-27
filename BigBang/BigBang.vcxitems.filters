@@ -106,7 +106,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.cpp">
+      <Filter>graphlet\misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -218,7 +220,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.hpp">
+      <Filter>graphlet\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

@@ -29,21 +29,23 @@ static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	return (exists ? dialect : speak(unit));
 }
 
-static inline Platform::String^ scalar(double value) {
-	return value.ToString();
+static inline Platform::String^ scalar(double value, int precision) {
+	return ((precision > 0)
+		? make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), value)
+		: value.ToString());
 }
 
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? num_box : get_text_extent(layout));
-	(*tspace) = fmin(label_box->tspace, fmin(num_box.tspace, unit_box.tspace));
-	(*bspace) = fmin(label_box->bspace, fmin(num_box.bspace, unit_box.bspace));
+	(*tspace) = std::fminf(label_box->tspace, std::fminf(num_box.tspace, unit_box.tspace));
+	(*bspace) = std::fminf(label_box->bspace, std::fminf(num_box.bspace, unit_box.bspace));
 
 	if (height != nullptr) {
 		float link = label_box->height - label_box->tspace - unit_box.bspace;
 		float nink = num_box.height - num_box.tspace - unit_box.bspace;
 		float uink = unit_box.height - unit_box.tspace - unit_box.bspace;
-		float ink_height = fmax(fmax(nink, uink), link);
+		float ink_height = std::fmaxf(std::fmaxf(nink, uink), link);
 
 		(*height) = (*tspace) + ink_height + (*bspace);
 	}
@@ -215,7 +217,6 @@ IEditorlet::IEditorlet(EditorStatus status, DimensionStyle& style, Platform::Str
 	, Platform::String^ label, Platform::String^ subscript) : IStatuslet(status), unit(unit) {
 	
 	this->set_text(speak(label), speak(subscript));
-	this->editing = true;
 
 	/** TODO: Why it does not work if pass the `style` to IStatuslet */
 	this->set_style(style);
@@ -225,7 +226,6 @@ IEditorlet::IEditorlet(EditorStatus status, Platform::String^ unit, Platform::St
 	: IStatuslet(status), unit(unit) {
 	
 	this->set_text(speak(label), speak(subscript));
-	this->editing = true;
 }
 
 void IEditorlet::construct() {
@@ -234,7 +234,7 @@ void IEditorlet::construct() {
 
 void IEditorlet::update(long long count, long long interval, long long uptime) {
 	if (count % 2 == 0) {
-		if (this->editing) {
+		if (this->get_status() == EditorStatus::Enabled) {
 			this->flashing = !this->flashing;
 			this->notify_updated();
 		}
@@ -242,11 +242,17 @@ void IEditorlet::update(long long count, long long interval, long long uptime) {
 }
 
 void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
+	DimensionStyle style = this->get_style();
+
 	if (w != nullptr) {
-		(*w) = this->number_box.width + this->unit_box.width + this->gapsize;
+		(*w) = std::fmaxf(this->number_box.width, style.minimize_number_width) + this->unit_box.width;
 
 		if (this->text_layout != nullptr) {
-			(*w) += this->text_layout->LayoutBounds.Width;
+			(*w) += (this->text_layout->LayoutBounds.Width + style.number_leading_space);
+		}
+
+		if (this->unit_layout != nullptr) {
+			(*w) += style.number_trailing_space;
 		}
 	}
 
@@ -263,6 +269,15 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 	float tspace, bspace;
 
 	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace);
+	
+	if (this->text_layout == nullptr) {
+		DimensionStyle style = this->get_style();
+		float region_width = std::fmaxf(this->number_box.width, style.minimize_number_width);
+		
+		label_box.lspace = (region_width - this->number_box.width) * style.number_xfraction + this->number_box.lspace;
+	}
+
+
 
 	SET_VALUES(l, label_box.lspace, r, this->unit_box.rspace);
 	SET_VALUES(t, tspace, b, bspace);
@@ -271,15 +286,13 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 void IEditorlet::on_value_changed(double value) {
 	DimensionStyle style = this->get_style();
 
-	this->number = scalar(value);
+	this->number = scalar(value, style.precision);
 	this->number_layout = make_text_layout(this->number, style.number_font);
 	this->number_box = get_text_extent(this->number_layout);
+}
 
-	if (this->text_layout != nullptr) {
-		if (this->gapsize == 0.0F) {
-			this->gapsize = this->number_box.width / this->number->Length();
-		}
-	}
+void IEditorlet::on_status_changed(EditorStatus status) {
+	this->flashing = (status == EditorStatus::Enabled);
 }
 
 void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
@@ -290,6 +303,27 @@ void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
 	CAS_SLOT(style.number_font, default_math_font);
 	CAS_SLOT(style.unit_font, default_unit_font);
 	CAS_SLOT(style.label_font, style.unit_font);
+
+	CAS_SLOT(style.caret_color, Colours::Foreground); 
+	
+	switch (status) {
+	case EditorStatus::Enabled: {
+		FLCAS_SLOT(style.minimize_number_width, get_text_extent("123456.789", style.number_font).width);
+		FLCAS_SLOT(style.number_xfraction, 0.0F);
+		FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
+		FLCAS_SLOT(style.number_trailing_space, 0.0F);
+		style.precision = 0;
+	}; break;
+	case EditorStatus::Disabled: {
+		FLCAS_SLOT(style.minimize_number_width, 0.0F);
+		FLCAS_SLOT(style.number_xfraction, 0.5F);
+		FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
+		FLCAS_SLOT(style.number_trailing_space, 0.0F);
+		ICAS_SLOT(style.precision, 1);
+	}; break;
+	}
+
+	// NOTE: the others can be `nullptr`
 }
 
 void IEditorlet::apply_style(DimensionStyle& style) {
@@ -298,34 +332,69 @@ void IEditorlet::apply_style(DimensionStyle& style) {
 
 	this->number_layout = make_text_layout(this->number, style.number_font);
 	this->number_box = get_text_extent(this->number_layout);
-	
-	this->unit_layout = make_text_layout(this->unit, style.unit_font);
-	this->unit_box = get_text_extent(this->unit_layout);
+
+	if (this->unit != nullptr) {
+		this->unit_layout = make_text_layout(this->unit, style.unit_font);
+		this->unit_box = get_text_extent(this->unit_layout);
+	}
 }
 
 void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	DimensionStyle style = this->get_style();
 	TextExtent label_box;
-	float tspace, bspace, height, base_y;
-	float lx = x;
-
+	float tspace, bspace, height, base_y, box_height;
+	
 	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, &height);
 	base_y = y + height;
+	box_height = height - tspace - bspace;
 
-	if (text_layout != nullptr) {
-		ds->DrawTextLayout(text_layout, x, base_y - label_box.height, style.label_color);
-		lx += (label_box.width + this->gapsize);
-
-		ds->DrawRectangle(x, y + 0.5F, label_box.width, height - 1.0F, Colours::GrayText);
+	if (this->text_layout != nullptr) {
+		if (style.label_background_color != nullptr) {
+			ds->FillRectangle(x, y, label_box.width, height, style.label_background_color);
+		}
+		
+		ds->DrawTextLayout(this->text_layout, x, base_y - label_box.height, style.label_color);
+		
+		if (style.label_border_color != nullptr) {
+			ds->DrawRectangle(x + 0.5F, y + 0.5F, label_box.width - 1.0F, height - 1.0F, style.label_border_color);
+		}
+		
+		x += (label_box.width + style.number_leading_space);
 	}
 
-	ds->DrawTextLayout(this->number_layout, lx, base_y - number_box.height, style.number_color);
-	ds->DrawTextLayout(this->unit_layout, lx + number_box.width, base_y - unit_box.height, style.unit_color);
+	{ // draw number
+		float region_width = std::fmaxf(this->number_box.width, style.minimize_number_width);
+		float number_x = x + (region_width - this->number_box.width) * style.number_xfraction;
 
-	ds->DrawRectangle(lx, y + 0.5F, number_box.width, height - 1.0F, Colours::Foreground);
+		if (style.number_background_color != nullptr) {
+			ds->FillRectangle(x, y, region_width, height, style.number_background_color);
+		}
 
-	if (this->editing && this->flashing) {
-		ds->DrawLine(lx + 2.0F, y + 2.0F, lx + 2.0F, y + height - 4.0F, Colours::Foreground);
+		ds->DrawTextLayout(this->number_layout, x, base_y - number_box.height, style.number_color);
+
+		if (style.number_border_color != nullptr) {
+			ds->DrawRectangle(x + 0.5F, y + 0.5F, region_width - 1.0F, height - 1.0F, style.number_border_color);
+		}
+
+		x += region_width;
+	}
+
+	if (this->unit_layout != nullptr) {
+		x += style.number_trailing_space;
+
+		if (style.unit_background_color != nullptr) {
+			ds->FillRectangle(x, y, unit_box.width, height, style.unit_background_color);
+		}
+
+		ds->DrawTextLayout(this->unit_layout, x, base_y - unit_box.height, style.unit_color);
+
+		if (style.unit_border_color != nullptr) {
+			ds->DrawRectangle(x + 0.5F, y + 0.5F, unit_box.width - 1.0F, height - 1.0F, style.unit_border_color);
+		}
+	}
+
+	if (this->flashing) {
+		ds->DrawLine(x + 2.0F, y + 2.0F, x + 2.0F, y + height - 4.0F, style.caret_color);
 	}
 }
 
