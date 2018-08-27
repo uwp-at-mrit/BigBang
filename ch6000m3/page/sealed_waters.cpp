@@ -58,8 +58,8 @@ private class SealedWaters final : public PLCConfirmation, public IMenuCommand<S
 public:
 	SealedWaters(SealedWaterPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 12.0F);
-		this->number_font = make_bold_text_format("Cambria Math", 20.0F);
-		this->unit_font = make_text_format("Microsoft YaHei", 18.0F);
+		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 20.0F);
+		this->dimension_style.unit_font = make_bold_text_format("Cambria", 18.0F);
 	}
 
 public:
@@ -210,7 +210,7 @@ private:
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^label) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label, "", this->number_font, this->unit_font), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
 		}
 	}
 
@@ -242,8 +242,7 @@ private:
 	
 private:
 	CanvasTextFormat^ label_font;
-	CanvasTextFormat^ number_font;
-	CanvasTextFormat^ unit_font;
+	DimensionStyle dimension_style;
 
 private:
 	SealedWaterPage* master;

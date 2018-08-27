@@ -129,7 +129,7 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class IStatuslet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IStatuslet() : WarGrey::SCADA::IStatuslet<Status, Style>(Status::_) {}
+		IStatuslet() : IStatuslet(Status::_) {}
 
 		IStatuslet(Status status0) {
 			this->default_status = ((status0 == Status::_) ? 0 : _I(status0));
@@ -164,6 +164,12 @@ namespace WarGrey::SCADA {
 
 			if (idx == this->current_status) {
 				this->notify_updated();
+			}
+		}
+
+		void set_style(Style& style) {
+			for (Status s = _E(Status, 0); s < Status::_; s++) {
+				this->set_style(s, style);
 			}
 		}
 

@@ -1,14 +1,34 @@
 #pragma once
+#pragma warning (disable: 4250)
 
 #include "graphlet/primitive.hpp"
 #include "brushes.hxx"
 #include "text.hpp"
 
 namespace WarGrey::SCADA {
-	private class Textlet abstract : public virtual WarGrey::SCADA::IGraphlet {
+	private enum class EditorStatus { Disabled, Enabled, _ };
+
+	private struct DimensionStyle {
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ number_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ number_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ unit_color;
+	};
+
+	private class ITextlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		void set_text(const wchar_t* fmt, ...);
 		void set_text(Platform::String^ content, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
+		
+		void set_text(Platform::String^ content, unsigned int subidx, unsigned int subcount,
+			WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
+		
+		void set_text(Platform::String^ symbol, Platform::String^ subsymbol, Platform::String^ suffix = nullptr,
+			WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
+
+	public:
 		void set_font(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font, WarGrey::SCADA::GraphletAnchor anchor = GraphletAnchor::LT);
 		void set_color(unsigned int color_hex, double alpha = 1.0);
 		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = WarGrey::SCADA::Colours::Silver);
@@ -25,9 +45,9 @@ namespace WarGrey::SCADA {
 		void set_layout_font_size(int char_idx, int char_count);
 		void set_layout_font_size(int char_idx, int char_count, float size);
 		void set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style);
-	
-	protected:
-		void set_subtext(Platform::String^ symbol, Platform::String^ subsymbol, Platform::String^ suffix = nullptr);
+
+	private:
+		void set_subtext();
 
 	protected:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ text_font;
@@ -36,10 +56,12 @@ namespace WarGrey::SCADA {
 
 	private:
 		Platform::String^ raw;
+		unsigned int sub_index;
+		unsigned int sub_count;
 		float subscript_fontsize = 0.0F;
 	};
 
-    private class Labellet : public virtual WarGrey::SCADA::Textlet {
+    private class Labellet : public virtual WarGrey::SCADA::ITextlet {
     public:
         Labellet(const wchar_t* fmt, ...);
 
@@ -65,131 +87,62 @@ namespace WarGrey::SCADA {
 		Labellet(Platform::String^ caption, Platform::String^ subscript, unsigned int color_hex, double alpha = 1.0);
 	};
 
-	private class Dimensionlet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<double> {
+	private class IEditorlet abstract
+		: public virtual WarGrey::SCADA::ITextlet
+		, public virtual WarGrey::SCADA::IValuelet<double>
+		, public virtual WarGrey::SCADA::IStatuslet<WarGrey::SCADA::EditorStatus, WarGrey::SCADA::DimensionStyle> {
 	public:
-		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "",
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = nullptr);
+		IEditorlet(WarGrey::SCADA::EditorStatus default_status, Platform::String^ unit,
+			Platform::String^ label, Platform::String^ subscript);
 
-		Dimensionlet(Platform::String^ unit,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Dimensionlet(Platform::String^ unit, Platform::String^ label,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Dimensionlet(Platform::String^ unit,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Dimensionlet(Platform::String^ unit, Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Dimensionlet(Platform::String^ unit,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Dimensionlet(Platform::String^ unit, Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Dimensionlet(Platform::String^ unit,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Dimensionlet(Platform::String^ unit, Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+		IEditorlet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+			Platform::String^ unit, Platform::String^ label, Platform::String^ subscript);
 
 	public:
 		void construct() override;
+		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
+		void prepare_style(WarGrey::SCADA::EditorStatus status, WarGrey::SCADA::DimensionStyle& style) override;
+		void apply_style(WarGrey::SCADA::DimensionStyle& style) override;
 		void on_value_changed(double value) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ num_layout;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ number_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ unit_layout;
-
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color;
-
-	private:
-		WarGrey::SCADA::TextExtent num_box;
+		WarGrey::SCADA::TextExtent number_box;
 		WarGrey::SCADA::TextExtent unit_box;
+
+	private:
+		Platform::String^ number;
+		Platform::String^ unit;
+		float gapsize;
+
+	private:
+		bool editing;
+		bool flashing;
 	};
 
-	private class Percentagelet : public virtual WarGrey::SCADA::Textlet, public virtual WarGrey::SCADA::IValuelet<double> {
+	private class Dimensionlet : public WarGrey::SCADA::IEditorlet {
 	public:
-		Percentagelet(Platform::String^ label = "", Platform::String^ subscript = "",
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font = nullptr,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = nullptr);
+		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
+		
+		Dimensionlet(WarGrey::SCADA::EditorStatus default_status,
+			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
 
-		Percentagelet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
+		Dimensionlet(WarGrey::SCADA::DimensionStyle& default_style,
+			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
+		
+		Dimensionlet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
+	};
 
-		Percentagelet(Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Percentagelet(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Percentagelet(Platform::String^ label,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color);
-
-		Percentagelet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Percentagelet(Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ unit_font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Percentagelet(Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
-		Percentagelet(Platform::String^ label,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
+	private class Percentagelet : public WarGrey::SCADA::IEditorlet {
 	public:
-		void construct() override;
-		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	protected:
-		void on_value_changed(double value) override;
-
-	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ num_font;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ num_layout;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ sign_layout;
-
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ num_color;
-
-	private:
-		WarGrey::SCADA::TextExtent num_box;
-		WarGrey::SCADA::TextExtent sign_box;
+		Percentagelet(WarGrey::SCADA::DimensionStyle& style, Platform::String^ label = "", Platform::String^ subscript = "");
+		Percentagelet(Platform::String^ label = "", Platform::String^ subscript = "");
 	};
 }

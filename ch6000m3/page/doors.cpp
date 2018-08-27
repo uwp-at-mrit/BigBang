@@ -150,7 +150,9 @@ private:
 
 private class Doors final : public PLCConfirmation, public IMenuCommand<DSOperation, IMRMaster*> {
 public:
-	Doors(DoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {}
+	Doors(DoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
+		this->percentage_style.unit_color = Colours::Silver;
+	}
 
 public:
 	void load(float width, float height, float vinset) {
@@ -249,7 +251,7 @@ private:
 
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<BottomDoorlet, E>(radius), id);
-			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(Colours::Yellow, Colours::Silver), id);
+			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
 			ts[id] = this->master->insert_one(new Credit<Doorlet, E>(door_width, door_height), id);
 		}
 	}
@@ -340,6 +342,9 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Doorlet, DS>*> tubes;
 	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
 	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
+
+private:
+	DimensionStyle percentage_style;
 
 private:
 	DoorsPage* master;

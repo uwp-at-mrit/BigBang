@@ -15,8 +15,10 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ default_text_font = make_bold_text_format();
+static CanvasTextFormat^ default_unit_font = make_bold_text_format("Cambria", 14.0F);
 static CanvasTextFormat^ default_math_font = make_bold_text_format("Cambria Math", 16.0F);
 
+static ICanvasBrush^ default_text_color = Colours::Silver;
 static ICanvasBrush^ default_number_color = Colours::Yellow;
 static ICanvasBrush^ default_unit_color = Colours::make(0x23EBB9U);
 
@@ -27,14 +29,8 @@ static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	return (exists ? dialect : speak(unit));
 }
 
-static inline Platform::String^ scalar(double value, bool leader) {
-	Platform::String^ s = make_wstring(L"%.1lf", value);
-
-	if (!leader) {
-		s = " " + s;
-	}
-
-	return s;
+static inline Platform::String^ scalar(double value) {
+	return value.ToString();
 }
 
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
@@ -53,75 +49,35 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 	}
 }
 
-void do_fill_extent(CanvasTextLayout^ layout, TextExtent& nbox, TextExtent& ubox, float x, float y, float* w, float* h) {
-	if (w != nullptr) {
-		(*w) = nbox.width + ubox.width;
-
-		if (layout != nullptr) {
-			(*w) += layout->LayoutBounds.Width;
-		}
-	}
-
-	if (h != nullptr) {
-		TextExtent label_box;
-		float tspace, bspace;
-
-		fill_vmetrics(layout, nbox, ubox, &label_box, &tspace, &bspace, h);
-	}
-}
-
-static void do_fill_margin(CanvasTextLayout^ text_layout, TextExtent& nbox, TextExtent& ubox, float* t, float* r, float* b, float* l) {
-	TextExtent label_box;
-	float tspace, bspace;
-
-	fill_vmetrics(text_layout, nbox, ubox, &label_box, &tspace, &bspace);
-
-	SET_VALUES(l, label_box.lspace, r, ubox.rspace);
-	SET_VALUES(t, tspace, b, bspace);
-}
-
-static void draw_metrics(CanvasDrawingSession^ ds, float x, float y, TextExtent& num_box, TextExtent& unit_box
-	, CanvasTextLayout^ text_layout, CanvasTextLayout^ num_layout, CanvasTextLayout^ unit_layout
-	, ICanvasBrush^ num_color, ICanvasBrush^ text_color) {
-	TextExtent label_box;
-	float tspace, bspace, height, base_y;
-	float lx = x;
-
-	fill_vmetrics(text_layout, num_box, unit_box, &label_box, &tspace, &bspace, &height);
-	base_y = y + height;
-
-	if (text_layout != nullptr) {
-		ds->DrawTextLayout(text_layout, x, base_y - label_box.height, text_color);
-		lx += label_box.width;
-	}
-
-	ds->DrawTextLayout(num_layout, lx, base_y - num_box.height, num_color);
-	ds->DrawTextLayout(unit_layout, lx + num_box.width, base_y - unit_box.height, text_color);
-}
-
 /*************************************************************************************************/
-void Textlet::set_color(ICanvasBrush^ color) {
-	this->text_color = color;
+void ITextlet::set_color(ICanvasBrush^ color) {
+	this->text_color = ((color == nullptr) ? default_text_color : color);
 	this->notify_updated();
 }
 
-void Textlet::set_color(unsigned int color_hex, double alpha) {
+void ITextlet::set_color(unsigned int color_hex, double alpha) {
 	this->set_color(Colours::make(color_hex, alpha));
 }
 
-void Textlet::set_font(CanvasTextFormat^ font, GraphletAnchor anchor) {
-	this->moor(anchor);
+void ITextlet::set_font(CanvasTextFormat^ font, GraphletAnchor anchor) {
+	if (font == nullptr) {
+		this->set_font(default_text_font, anchor);
+	} else {
+		this->moor(anchor);
 
-	this->text_font = font;
-	this->subscript_fontsize = font->FontSize * 0.618F;
-	this->set_text(this->raw);
-	this->on_font_changed();
-	
-	this->notify_updated();
+		this->text_font = font;
+		this->subscript_fontsize = font->FontSize * 0.618F;
+		this->set_text(this->raw, this->sub_index, this->sub_count, anchor);
+		this->on_font_changed();
+
+		this->notify_updated();
+	}
 }
 
-void Textlet::set_text(Platform::String^ content, GraphletAnchor anchor) {
+void ITextlet::set_text(Platform::String^ content, unsigned int subidx, unsigned int subcount, GraphletAnchor anchor) {
 	this->raw = content;
+	this->sub_index = subidx;
+	this->sub_count = subcount;
 
 	this->moor(anchor);
 
@@ -131,42 +87,49 @@ void Textlet::set_text(Platform::String^ content, GraphletAnchor anchor) {
 		this->text_layout = nullptr;
 	} else {
 		this->text_layout = make_text_layout(this->raw, this->text_font);
+		this->set_subtext();
 	}
 
 	this->notify_updated();
 }
 
-void Textlet::set_subtext(Platform::String^ symbol, Platform::String^ subsymbol, Platform::String^ suffix) {
-	unsigned int symcount = symbol->Length();
-	unsigned int subcount = subsymbol->Length();
-
-	this->set_text(symbol + subsymbol + suffix);
-	this->set_layout_font_size(symcount, subcount);
-	this->set_layout_font_style(symcount, subcount, FontStyle::Italic);
+void ITextlet::set_text(Platform::String^ content, GraphletAnchor anchor) {
+	this->set_text(content, 0, 0, anchor);
 }
 
-void Textlet::set_text(const wchar_t *fmt, ...) {
+void ITextlet::set_text(Platform::String^ symbol, Platform::String^ subsymbol, Platform::String^ suffix, GraphletAnchor anchor) {
+	this->set_text(symbol + subsymbol + suffix, symbol->Length(), subsymbol->Length(), anchor);
+}
+
+void ITextlet::set_subtext() {
+	if (this->sub_count > 0) {
+		this->set_layout_font_size(this->sub_index, this->sub_count);
+		this->set_layout_font_style(this->sub_index, this->sub_count, FontStyle::Italic);
+	}
+}
+
+void ITextlet::set_text(const wchar_t *fmt, ...) {
 	VSWPRINT(content, fmt);
 	this->set_text(content);
 }
 
-void Textlet::set_layout_font_size(int char_idx, int char_count) {
+void ITextlet::set_layout_font_size(int char_idx, int char_count) {
 	this->set_layout_font_size(char_idx, char_count, this->subscript_fontsize);
 }
 
-void Textlet::set_layout_font_size(int char_idx, int char_count, float size) {
+void ITextlet::set_layout_font_size(int char_idx, int char_count, float size) {
 	if (this->text_layout != nullptr) {
 		this->text_layout->SetFontSize(char_idx, char_count, size);
 	}
 }
 
-void Textlet::set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style) {
+void ITextlet::set_layout_font_style(int char_idx, int char_count, Windows::UI::Text::FontStyle style) {
 	if (this->text_layout != nullptr) {
 		this->text_layout->SetFontStyle(char_idx, char_count, style);
 	}
 }
 
-void Textlet::fill_extent(float x, float y, float* w, float* h) {
+void ITextlet::fill_extent(float x, float y, float* w, float* h) {
 	if (this->text_layout != nullptr) {
 		auto box = this->text_layout->LayoutBounds;
 
@@ -176,7 +139,7 @@ void Textlet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
-void Textlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+void ITextlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
 	if (this->text_layout != nullptr) {
 		TextExtent te = get_text_extent(this->text_layout);
 
@@ -187,7 +150,7 @@ void Textlet::fill_margin(float x, float y, float* t, float* r, float* b, float*
 	}
 }
 
-void Textlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void ITextlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	if (this->text_layout != nullptr) {
 		if (this->text_color == nullptr) {
 			this->set_color();
@@ -204,61 +167,37 @@ Labellet::Labellet(const wchar_t *fmt, ...) {
 }
 
 Labellet::Labellet(Platform::String^ caption, CanvasTextFormat^ font, ICanvasBrush^ color) {
-	if (font != nullptr) {
-		this->set_font(font);
-	}
-
-	if (color != nullptr) {
-		this->set_color(color);
-	}
-
+	this->set_font(font);
+	this->set_color(color);
 	this->set_text(caption);
 }
 
 Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, CanvasTextFormat^ font, ICanvasBrush^ color) {
-	if (font != nullptr) {
-		this->set_font(font);
-	}
-
-	if (color != nullptr) {
-		this->set_color(color);
-	}
-
-	this->set_subtext(caption, subscript);
+	this->set_font(font);
+	this->set_color(color);
+	this->set_text(caption, subscript);
 }
 
 Labellet::Labellet(Platform::String^ caption, CanvasTextFormat^ font, unsigned int color_hex, double alpha) {
-	if (font != nullptr) {
-		this->set_font(font);
-	}
-
+	this->set_font(font);
 	this->set_color(color_hex, alpha);
 	this->set_text(caption);
 }
 
 Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, CanvasTextFormat^ font, unsigned int color_hex, double alpha) {
-	if (font != nullptr) {
-		this->set_font(font);
-	}
-
+	this->set_font(font);
 	this->set_color(color_hex, alpha);
-	this->set_subtext(caption, subscript);
+	this->set_text(caption, subscript);
 }
 
 Labellet::Labellet(Platform::String^ caption, ICanvasBrush^ color) {
-	if (color != nullptr) {
-		this->set_color(color);
-	}
-
+	this->set_color(color);
 	this->set_text(caption);
 }
 
 Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, ICanvasBrush^ color) {
-	if (color != nullptr) {
-		this->set_color(color);
-	}
-
-	this->set_subtext(caption, subscript);
+	this->set_color(color);
+	this->set_text(caption, subscript);
 }
 
 Labellet::Labellet(Platform::String^ caption, unsigned int color_hex, double alpha) {
@@ -268,157 +207,144 @@ Labellet::Labellet(Platform::String^ caption, unsigned int color_hex, double alp
 
 Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsigned int color_hex, double alpha) {
 	this->set_color(color_hex, alpha);
-	this->set_subtext(caption, subscript);
+	this->set_text(caption, subscript);
 }
 
 /*************************************************************************************************/
-Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Dimensionlet(unit, "", nfont, lfont, color) {}
+IEditorlet::IEditorlet(EditorStatus status, DimensionStyle& style, Platform::String^ unit
+	, Platform::String^ label, Platform::String^ subscript) : IStatuslet(status), unit(unit) {
+	
+	this->set_text(speak(label), speak(subscript));
+	this->editing = true;
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Dimensionlet(unit, label, "", nfont, lfont, color, color) {}
+	/** TODO: Why it does not work if pass the `style` to IStatuslet */
+	this->set_style(style);
+}
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Dimensionlet(unit, "", font, ncolor, lcolor) {}
+IEditorlet::IEditorlet(EditorStatus status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+	: IStatuslet(status), unit(unit) {
+	
+	this->set_text(speak(label), speak(subscript));
+	this->editing = true;
+}
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Dimensionlet(unit, label, "", font, font, ncolor, lcolor) {}
+void IEditorlet::construct() {
+	this->set_value(0.0, true);
+}
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Dimensionlet(unit, label, nullptr, ncolor, lcolor) {}
+void IEditorlet::update(long long count, long long interval, long long uptime) {
+	if (count % 2 == 0) {
+		if (this->editing) {
+			this->flashing = !this->flashing;
+			this->notify_updated();
+		}
+	}
+}
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Dimensionlet(unit, "", ncolor, lcolor) {}
+void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
+	if (w != nullptr) {
+		(*w) = this->number_box.width + this->unit_box.width + this->gapsize;
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Dimensionlet(unit, "", font, color) {}
+		if (this->text_layout != nullptr) {
+			(*w) += this->text_layout->LayoutBounds.Width;
+		}
+	}
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Dimensionlet(unit, label, "", font, font, color, color) {}
+	if (h != nullptr) {
+		TextExtent label_box;
+		float tspace, bspace;
 
-Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript
-	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color((ncolor == nullptr) ? default_number_color : ncolor)
-	, num_font((nfont == nullptr) ? default_math_font : nfont) {
-	this->set_color((lcolor == nullptr) ? default_unit_color : lcolor);
-	this->set_font((lfont == nullptr) ? default_text_font : lfont);
-	this->unit_layout = make_text_layout(unit_speak(unit), this->text_font);
+		fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, h);
+	}
+}
+
+void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	TextExtent label_box;
+	float tspace, bspace;
+
+	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace);
+
+	SET_VALUES(l, label_box.lspace, r, this->unit_box.rspace);
+	SET_VALUES(t, tspace, b, bspace);
+}
+
+void IEditorlet::on_value_changed(double value) {
+	DimensionStyle style = this->get_style();
+
+	this->number = scalar(value);
+	this->number_layout = make_text_layout(this->number, style.number_font);
+	this->number_box = get_text_extent(this->number_layout);
+
+	if (this->text_layout != nullptr) {
+		if (this->gapsize == 0.0F) {
+			this->gapsize = this->number_box.width / this->number->Length();
+		}
+	}
+}
+
+void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
+	CAS_SLOT(style.number_color, default_number_color);
+	CAS_SLOT(style.unit_color, default_unit_color);
+	CAS_SLOT(style.label_color, style.unit_color);
+
+	CAS_SLOT(style.number_font, default_math_font);
+	CAS_SLOT(style.unit_font, default_unit_font);
+	CAS_SLOT(style.label_font, style.unit_font);
+}
+
+void IEditorlet::apply_style(DimensionStyle& style) {
+	this->set_color(style.label_color);
+	this->set_font(style.label_font);
+
+	this->number_layout = make_text_layout(this->number, style.number_font);
+	this->number_box = get_text_extent(this->number_layout);
+	
+	this->unit_layout = make_text_layout(this->unit, style.unit_font);
 	this->unit_box = get_text_extent(this->unit_layout);
-
-	if (label != nullptr) {
-		Platform::String^ symbol = speak(label);
-
-		if (subscript == nullptr) {
-			this->set_text(symbol);
-		} else {
-			this->set_subtext(symbol, speak(subscript));
-		}
-	}
 }
 
-void Dimensionlet::construct() {
-	this->set_value(0.0F, true);
-}
+void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	DimensionStyle style = this->get_style();
+	TextExtent label_box;
+	float tspace, bspace, height, base_y;
+	float lx = x;
 
-void Dimensionlet::fill_extent(float x, float y, float* w, float* h) {
-	do_fill_extent(this->text_layout, this->num_box, this->unit_box, x, y, w, h);
-}
+	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, &height);
+	base_y = y + height;
 
-void Dimensionlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
-	do_fill_margin(this->text_layout, this->num_box, this->unit_box, t, r, b, l);
-}
+	if (text_layout != nullptr) {
+		ds->DrawTextLayout(text_layout, x, base_y - label_box.height, style.label_color);
+		lx += (label_box.width + this->gapsize);
 
-void Dimensionlet::on_value_changed(double value) {
-	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
-	this->num_box = get_text_extent(this->num_layout);
-}
-
-void Dimensionlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->text_color == nullptr) {
-		this->set_color();
+		ds->DrawRectangle(x, y + 0.5F, label_box.width, height - 1.0F, Colours::GrayText);
 	}
 
-	if (this->num_color == nullptr) {
-		this->num_color = this->text_color;
-	}
+	ds->DrawTextLayout(this->number_layout, lx, base_y - number_box.height, style.number_color);
+	ds->DrawTextLayout(this->unit_layout, lx + number_box.width, base_y - unit_box.height, style.unit_color);
 
-	draw_metrics(ds, x, y, this->num_box, this->unit_box,
-		this->text_layout, this->num_layout, this->unit_layout,
-		this->num_color, this->text_color);
+	ds->DrawRectangle(lx, y + 0.5F, number_box.width, height - 1.0F, Colours::Foreground);
+
+	if (this->editing && this->flashing) {
+		ds->DrawLine(lx + 2.0F, y + 2.0F, lx + 2.0F, y + height - 4.0F, Colours::Foreground);
+	}
 }
 
 /*************************************************************************************************/
-Percentagelet::Percentagelet(CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Percentagelet("", nfont, lfont, color) {}
+Dimensionlet::Dimensionlet(EditorStatus default_status, DimensionStyle& default_style, Platform::String^ unit
+	, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(default_status, default_style, unit_speak(unit), label, subscript) {}
 
-Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ color)
-	: Percentagelet(label, "", nfont, lfont, color, color) {}
+Dimensionlet::Dimensionlet(DimensionStyle& default_style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+	: Dimensionlet(EditorStatus::Disabled, default_style, unit, label, subscript) {}
 
-Percentagelet::Percentagelet(ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Percentagelet("", ncolor, lcolor) {}
+Dimensionlet::Dimensionlet(EditorStatus default_status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(default_status, unit_speak(unit), label, subscript) {}
 
-Percentagelet::Percentagelet(Platform::String^ label, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Percentagelet(label, nullptr, ncolor, lcolor) {}
+Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+	: Dimensionlet(EditorStatus::Disabled, unit, label, subscript) {}
 
-Percentagelet::Percentagelet(CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Percentagelet("", font, ncolor, lcolor) {}
+Percentagelet::Percentagelet(DimensionStyle& default_style, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(EditorStatus::Disabled, default_style, "%", label, subscript) {}
 
-Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: Percentagelet(label, "", font, font, ncolor, lcolor) {}
-
-Percentagelet::Percentagelet(CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Percentagelet("", font, color) {}
-
-Percentagelet::Percentagelet(Platform::String^ label, CanvasTextFormat^ font, ICanvasBrush^ color)
-	: Percentagelet(label, "", font, font, color, color) {}
-
-Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript
-	, CanvasTextFormat^ nfont, CanvasTextFormat^ lfont, ICanvasBrush^ ncolor, ICanvasBrush^ lcolor)
-	: num_color((ncolor == nullptr) ? default_number_color : ncolor)
-	, num_font((nfont == nullptr) ? default_math_font : nfont) {
-	this->set_color((lcolor == nullptr) ? default_unit_color : lcolor);
-	this->set_font((lfont == nullptr) ? default_text_font : lfont);
-	this->sign_layout = make_text_layout("%", this->text_font);
-	this->sign_box = get_text_extent(this->sign_layout);
-
-	if (label != nullptr) {
-		Platform::String^ symbol = speak(label);
-
-		if (subscript == nullptr) {
-			this->set_text(symbol);
-		} else {
-			this->set_subtext(symbol, speak(subscript));
-		}
-	}
-}
-
-void Percentagelet::construct() {
-	this->set_value(0.0F, true);
-}
-
-void Percentagelet::fill_extent(float x, float y, float* w, float* h) {
-	do_fill_extent(this->text_layout, this->num_box, this->sign_box, x, y, w, h);
-}
-
-void Percentagelet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
-	do_fill_margin(this->text_layout, this->num_box, this->sign_box, t, r, b, l);
-}
-
-void Percentagelet::on_value_changed(double value) {
-	this->num_layout = make_text_layout(scalar(value, this->text_layout == nullptr), this->num_font);
-	this->num_box = get_text_extent(this->num_layout);
-}
-
-void Percentagelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->text_color == nullptr) {
-		this->set_color();
-	}
-
-	if (this->num_color == nullptr) {
-		this->num_color = this->text_color;
-	}
-
-	draw_metrics(ds, x, y, this->num_box, this->sign_box,
-		this->text_layout, this->num_layout, this->sign_layout,
-		this->num_color, this->text_color);
-}
+Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(EditorStatus::Disabled, "%", label, subscript) {}
