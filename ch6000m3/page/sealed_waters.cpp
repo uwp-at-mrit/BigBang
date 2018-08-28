@@ -61,8 +61,10 @@ public:
 	SealedWaters(SealedWaterPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 12.0F);
 
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 20.0F);
-		this->dimension_style.unit_font = make_bold_text_format("Cambria", 18.0F);
+		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 18.0F);
+		this->dimension_style.unit_font = make_bold_text_format("Cambria", 16.0F);
+		this->dimension_style.minimize_label_width = get_text_extent("P", this->dimension_style.unit_font).height;
+		this->dimension_style.label_xfraction = 0.5F;
 		this->dimension_style.minimize_number_width = 50.0F;
 		this->dimension_style.number_background_color = Colours::Gray;
 		this->dimension_style.number_color = Colours::Background;

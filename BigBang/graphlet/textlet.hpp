@@ -26,6 +26,15 @@ namespace WarGrey::SCADA {
 
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ caret_color;
 
+		/**
+		 * By design,
+		 *  if these numerical parameters are less than 0,
+		 *  they are considered not set.
+		 */
+
+		float minimize_label_width = -1.0F;
+		float label_xfraction = -1.0F;
+
 		float minimize_number_width = -1.0F;
 		float number_xfraction = -1.0F;
 

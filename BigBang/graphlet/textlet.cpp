@@ -248,7 +248,8 @@ void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
 		(*w) = std::fmaxf(this->number_box.width, style.minimize_number_width) + this->unit_box.width;
 
 		if (this->text_layout != nullptr) {
-			(*w) += (this->text_layout->LayoutBounds.Width + style.number_leading_space);
+			(*w) += std::fmaxf(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
+			(*w) += style.number_leading_space;
 		}
 
 		if (this->unit_layout != nullptr) {
@@ -275,6 +276,11 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 		float region_width = std::fmaxf(this->number_box.width, style.minimize_number_width);
 		
 		label_box.lspace = (region_width - this->number_box.width) * style.number_xfraction + this->number_box.lspace;
+	} else {
+		DimensionStyle style = this->get_style();
+		float region_width = std::fmaxf(label_box.width, style.minimize_label_width);
+		
+		label_box.lspace += ((region_width - label_box.width) * style.label_xfraction);
 	}
 
 
@@ -306,6 +312,9 @@ void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
 
 	CAS_SLOT(style.caret_color, Colours::Foreground); 
 	
+	FLCAS_SLOT(style.minimize_label_width, 0.0F);
+	FLCAS_SLOT(style.label_xfraction, 1.0F);
+
 	switch (status) {
 	case EditorStatus::Enabled: {
 		FLCAS_SLOT(style.minimize_number_width, get_text_extent("123456.789", style.number_font).width);
@@ -349,17 +358,20 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	box_height = height - tspace - bspace;
 
 	if (this->text_layout != nullptr) {
+		float region_width = std::fmaxf(label_box.width, style.minimize_label_width);
+		float label_x = x + (region_width - label_box.width) * style.label_xfraction;
+
 		if (style.label_background_color != nullptr) {
-			ds->FillRectangle(x, y, label_box.width, height, style.label_background_color);
+			ds->FillRectangle(x, y, region_width, height, style.label_background_color);
 		}
 		
-		ds->DrawTextLayout(this->text_layout, x, base_y - label_box.height, style.label_color);
+		ds->DrawTextLayout(this->text_layout, label_x, base_y - label_box.height, style.label_color);
 		
 		if (style.label_border_color != nullptr) {
-			ds->DrawRectangle(x + 0.5F, y + 0.5F, label_box.width - 1.0F, height - 1.0F, style.label_border_color);
+			ds->DrawRectangle(x + 0.5F, y + 0.5F, region_width - 1.0F, height - 1.0F, style.label_border_color);
 		}
 		
-		x += (label_box.width + style.number_leading_space);
+		x += (region_width + style.number_leading_space);
 	}
 
 	{ // draw number
