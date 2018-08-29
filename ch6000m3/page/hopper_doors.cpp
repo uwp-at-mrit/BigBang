@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/doors.hpp"
+#include "page/hopper_doors.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -24,20 +24,20 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-private enum DSMode { WindowUI = 0, Dashboard };
+private enum HDMode { WindowUI = 0, Dashboard };
 
-private enum class DSOperation { Open, Stop, Close, Disable, _ };
+private enum class HDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
-private enum class DS : unsigned int {
+private enum class HD : unsigned int {
 	BowDraft, EarthWork, Capacity, Height, Load, Displacement, SternDraft,
 	
 	pLeftDrag, pLock, pRightDrag, Heel, Trim,
-	
+	Port, Starboard, OpenFlow, CloseFlow, Pressure,
+
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 
-	Port, Starboard,
 	_
 };
 
@@ -59,17 +59,12 @@ public:
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 			
 			this->seq_color = Colours::Tomato;
-			this->ps_color = Colours::make(default_port_color);
-			this->sb_color = Colours::make(default_starboard_color);
 
 			for (size_t idx = 0; idx < door_count_per_side ; idx++) {
 				size_t ridx = door_count_per_side - idx;
 
 				this->sequences[idx] = make_text_layout(ridx.ToString() + "#", cpt_font);
 			}
-
-			this->port = make_text_layout(_speak(DS::Port), cpt_font);
-			this->starboard = make_text_layout(_speak(DS::Starboard), cpt_font);
 		}
 	}
 
@@ -82,16 +77,9 @@ public:
 		float sy = this->y * Height;
 		float cell_width = this->ship_width * Width / float(door_count_per_side);
 		float seq_y = sy + (ship_box.Height - this->sequences[0]->LayoutBounds.Height) * 0.5F;
-		float scx = sx + this->ship_width * Width * 0.5F;
-		float sby = sy + ship_box.Height;
-		float ps_width = this->port->LayoutBounds.Width;
-		float sb_width = this->starboard->LayoutBounds.Width;
-		float label_height = this->starboard->LayoutBounds.Height;
-
-		ds->DrawTextLayout(this->port, scx - ps_width * 0.5F, sy - label_height * 1.618F, this->ps_color);
+		
 		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
-		ds->DrawTextLayout(this->starboard, scx - sb_width * 0.5F, sby + label_height * 0.618F, this->sb_color);
-
+		
 		for (size_t idx = 0; idx < door_count_per_side; idx++) {
 			float cell_x = sx + cell_width * float(idx);
 			float seq_width = this->sequences[idx]->LayoutBounds.Width;
@@ -124,6 +112,15 @@ public:
 		SET_BOX(y, this->y * aheight + cell_height * side_hint);
 	}
 
+	void fill_ascent_anchor(float fx, float fy, float* x, float *y) {
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
+		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
+
+		SET_BOX(x, this->x * awidth + this->ship_width * awidth * fx);
+		SET_BOX(y, this->y * aheight * fy);
+	}
+
 	void fill_descent_anchor(float fx, float fy, float* x, float *y) {
 		float awidth = this->actual_width();
 		float aheight = this->actual_height();
@@ -136,10 +133,6 @@ public:
 private:
 	CanvasGeometry^ ship;
 	CanvasTextLayout^ sequences[door_count_per_side];
-	CanvasTextLayout^ port;
-	CanvasTextLayout^ starboard;
-	ICanvasBrush^ ps_color;
-	ICanvasBrush^ sb_color;
 	ICanvasBrush^ seq_color;
 
 private:
@@ -148,10 +141,12 @@ private:
 	float ship_width;
 };
 
-private class Doors final : public PLCConfirmation, public IMenuCommand<DSOperation, IMRMaster*> {
+private class Doors final : public PLCConfirmation, public IMenuCommand<HDOperation, IMRMaster*> {
 public:
-	Doors(DoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
+	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->percentage_style.unit_color = Colours::Silver;
+		this->highlight_style = make_highlight_dimension_style(18.0F, 5U);
+		this->setting_style = make_setting_dimension_style(18.0F, 6U);
 	}
 
 public:
@@ -163,42 +158,70 @@ public:
 		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
 		
 		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->doors, this->progresses, this->tubes, DS::PS1, DS::PS7, radius);
-		this->load_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, radius);
+		this->load_doors(this->doors, this->progresses, this->tubes, HD::PS1, HD::PS7, radius);
+		this->load_doors(this->doors, this->progresses, this->tubes, HD::SB1, HD::SB7, radius);
 
 		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
-		this->load_cylinder(this->cylinders, DS::BowDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, DS::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DS::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DS::Height, cylinder_height, 15.0, "meter", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DS::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DS::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DS::SternDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::BowDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Height, cylinder_height, 15.0, "meter", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::SternDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
 
-		this->load_dimensions(this->dimensions, this->labels, DS::pLeftDrag, DS::pRightDrag, "bar");
-		this->load_dimensions(this->dimensions, this->labels, DS::Heel, DS::Trim, "degrees");
+		this->load_dimensions(this->dimensions, this->captions, HD::pLeftDrag, HD::pRightDrag, "bar");
+		this->load_dimensions(this->dimensions, this->captions, HD::Heel, HD::Trim, "degrees");
+
+		{ // load settings
+			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+			ICanvasBrush^ ps_color = Colours::make(default_port_color);
+			ICanvasBrush^ sb_color = Colours::make(default_starboard_color);
+
+			this->load_label(this->captions, HD::Port, ps_color, cpt_font);
+			this->load_label(this->captions, HD::Starboard, sb_color, cpt_font);
+
+			this->load_setting(this->ports, HD::Pressure, "bar");
+			this->load_setting(this->starboards, HD::Pressure, "bar");
+		}
 	}
 
 	void reflow(float width, float height, float vinset) {
-		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::PS1, DS::PS7, 1.0F, -0.5F);
-		this->reflow_doors(this->doors, this->progresses, this->tubes, DS::SB1, DS::SB7, 3.0F, 0.5F);
+		this->reflow_doors(this->doors, this->progresses, this->tubes, HD::PS1, HD::PS7, 1.0F, -0.5F);
+		this->reflow_doors(this->doors, this->progresses, this->tubes, HD::SB1, HD::SB7, 3.0F, 0.5F);
 
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, DS::BowDraft, DS::SternDraft);
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::BowDraft, HD::SternDraft);
 
-		{ // reflow dimensions
+		{ // reflow cylinders
 			float x, y, label_height, xoff, yoff;
 
-			this->master->fill_graphlet_location(this->cylinders[DS::BowDraft], nullptr, &y, GraphletAnchor::CC);
-			this->labels[DS::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+			this->master->fill_graphlet_location(this->cylinders[HD::BowDraft], nullptr, &y, GraphletAnchor::CC);
+			this->captions[HD::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 
 			xoff = label_height * 0.5F;
 			yoff = label_height * 2.0F;
 
 			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
-			//this->reflow_tabular(this->labels, this->dimensions, DS::pLock, x, y, DS::pLeftDrag, DS::pRightDrag, xoff, yoff);
-			
 			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
-			//this->reflow_tabular(this->labels, this->dimensions, DS::Heel, x, y, DS::EarthWork, DS::Trim, xoff, yoff);
+		}
+
+		{ // reflow settings
+			float x, y, yoff;
+
+			this->captions[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &yoff);
+			yoff *= 0.618F;
+
+			this->decorator->fill_ascent_anchor(0.1F, 1.0F, &x, &y);
+			this->master->move_to(this->captions[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -yoff);
+
+			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, &y);
+			this->master->move_to(this->captions[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, yoff);
+
+			this->master->move_to(this->ports[HD::Pressure], this->captions[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB);
+			this->master->move_to(this->dimensions[HD::pLeftDrag], this->ports[HD::Pressure], GraphletAnchor::RB, GraphletAnchor::LB);
+
+			this->master->move_to(this->starboards[HD::Pressure], this->captions[HD::Starboard], GraphletAnchor::RB, GraphletAnchor::LB);
+			this->master->move_to(this->dimensions[HD::pRightDrag], this->starboards[HD::Pressure], GraphletAnchor::RB, GraphletAnchor::LB);
 		}
 	}
 
@@ -207,20 +230,20 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->set_cylinder(DS::BowDraft, DBD(DB2, 164U));
-		this->set_cylinder(DS::SternDraft, DBD(DB2, 188U));
+		this->set_cylinder(HD::BowDraft, DBD(DB2, 164U));
+		this->set_cylinder(HD::SternDraft, DBD(DB2, 188U));
 
-		this->dimensions[DS::Trim]->set_value(DBD(DB2, 200U));
-		this->dimensions[DS::Heel]->set_value(DBD(DB2, 204U));
-		this->dimensions[DS::EarthWork]->set_value(DBD(DB2, 236U));
+		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
+		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
+		this->dimensions[HD::EarthWork]->set_value(DBD(DB2, 236U));
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
 
 public:
-	void execute(DSOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto door = dynamic_cast<Credit<BottomDoorlet, DS>*>(target);
+	void execute(HDOperation cmd, IGraphlet* target, IMRMaster* plc) {
+		auto door = dynamic_cast<Credit<HopperDoorlet, HD>*>(target);
 
 		if (door != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -231,8 +254,13 @@ public:
 
 private:
 	template<typename E>
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->setting_style, unit, _speak(id)), id);
+	}
+
+	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), Colours::Silver), id);
+		this->load_label(ls, id, Colours::Silver);
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
 	}
 
@@ -244,13 +272,13 @@ private:
 	}
 
 	template<typename E>
-	void load_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+	void load_doors(std::map<E, Credit<HopperDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
 		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float radius) {
 		float door_height = radius * 2.0F * 1.618F;
 		float door_width = door_height * 0.20F;
 
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<BottomDoorlet, E>(radius), id);
+			ds[id] = this->master->insert_one(new Credit<HopperDoorlet, E>(radius), id);
 			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
 			ts[id] = this->master->insert_one(new Credit<Doorlet, E>(door_width, door_height), id);
 		}
@@ -263,12 +291,17 @@ private:
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
-		this->load_dimension(this->dimensions, this->labels, id, unit);
+		this->load_dimension(this->dimensions, this->captions, id, unit);
+	}
+
+	template<typename E>
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), font, color), id);
 	}
 
 private:
 	template<typename E>
-	void reflow_doors(std::map<E, Credit<BottomDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+	void reflow_doors(std::map<E, Credit<HopperDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
 		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float side_hint, float fy) {
 		GraphletAnchor t_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
@@ -330,34 +363,38 @@ private:
 	}
 
 private:
-	void set_cylinder(DS id, float value) {
+	void set_cylinder(HD id, float value) {
 		this->cylinders[id]->set_value(value);
 		this->dimensions[id]->set_value(value);
 	}
 
 private: // never delete these graphlets manually.
-	std::map<DS, Credit<Labellet, DS>*> labels;
-	std::map<DS, Credit<BottomDoorlet, DS>*> doors;
-	std::map<DS, Credit<Percentagelet, DS>*> progresses;
-	std::map<DS, Credit<Doorlet, DS>*> tubes;
-	std::map<DS, Credit<Dimensionlet, DS>*> dimensions;
-	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
+	std::map<HD, Credit<Labellet, HD>*> captions;
+	std::map<HD, Credit<HopperDoorlet, HD>*> doors;
+	std::map<HD, Credit<Percentagelet, HD>*> progresses;
+	std::map<HD, Credit<Doorlet, HD>*> tubes;
+	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
+	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
+	std::map<HD, Credit<Dimensionlet, HD>*> ports;
+	std::map<HD, Credit<Dimensionlet, HD>*> starboards;
 
 private:
 	DimensionStyle percentage_style;
+	DimensionStyle highlight_style;
+	DimensionStyle setting_style;
 
 private:
-	DoorsPage* master;
+	HopperDoorsPage* master;
 	DoorDecorator* decorator;
 };
 
 /*************************************************************************************************/
-DoorsPage::DoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+HopperDoorsPage::HopperDoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	DoorDecorator* decorator = new DoorDecorator();
 	Doors* dashboard = new Doors(this, decorator);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<DSOperation, IMRMaster*>(dashboard, plc);
+	this->operation = make_menu<HDOperation, IMRMaster*>(dashboard, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -365,23 +402,23 @@ DoorsPage::DoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->append_decorator(decorator);
 }
 
-DoorsPage::~DoorsPage() {
+HopperDoorsPage::~HopperDoorsPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void DoorsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void HopperDoorsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto db = dynamic_cast<Doors*>(this->dashboard);
 
 	if (db != nullptr) {
 		float vinset = statusbar_height();
 
 		{ // load graphlets
-			this->change_mode(DSMode::Dashboard);
+			this->change_mode(HDMode::Dashboard);
 			db->load(width, height, vinset);
 
-			this->change_mode(DSMode::WindowUI);
+			this->change_mode(HDMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name());
 			this->insert(this->statusbar);
@@ -396,25 +433,25 @@ void DoorsPage::load(CanvasCreateResourcesReason reason, float width, float heig
 	}
 }
 
-void DoorsPage::reflow(float width, float height) {
+void HopperDoorsPage::reflow(float width, float height) {
 	auto db = dynamic_cast<Doors*>(this->dashboard);
 	
 	if (db != nullptr) {
 		float vinset = statusbar_height();
 
-		this->change_mode(DSMode::WindowUI);
+		this->change_mode(HDMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 		
-		this->change_mode(DSMode::Dashboard);
+		this->change_mode(HDMode::Dashboard);
 		db->reflow(width, height, vinset);
 	}
 }
 
-bool DoorsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<BottomDoorlet*>(g) != nullptr);
+bool HopperDoorsPage::can_select(IGraphlet* g) {
+	return (dynamic_cast<HopperDoorlet*>(g) != nullptr);
 }
 
-void DoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (this->can_select(g)) {

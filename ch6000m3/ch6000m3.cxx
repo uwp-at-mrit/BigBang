@@ -6,7 +6,7 @@
 #include "timer.hxx"
 
 #include "page/hydraulics.hpp"
-#include "page/doors.hpp"
+#include "page/hopper_doors.hpp"
 #include "page/sealed_waters.hpp"
 #include "page/graphlets.hpp"
 
@@ -38,9 +38,9 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new SealedWaterPage(this->device));
+		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new HydraulicsPage(this->device));
-		this->add_planet(new DoorsPage(this->device));
+		this->add_planet(new SealedWaterPage(this->device));
 		this->add_planet(new GraphletOverview());
 	}
 

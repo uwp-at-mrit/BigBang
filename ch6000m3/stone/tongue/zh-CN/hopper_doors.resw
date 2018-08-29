@@ -118,45 +118,54 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BowDraft" xml:space="preserve">
-    <value>Bow Draught</value>
+    <value>艏吃水</value>
   </data>
   <data name="EarthWork" xml:space="preserve">
-    <value>Earthwork Volume</value>
+    <value>土方量</value>
   </data>
   <data name="Heel" xml:space="preserve">
-    <value>Heeling Angle</value>
+    <value>横倾角度</value>
   </data>
   <data name="pLeftDrag" xml:space="preserve">
-    <value>Left Drag Output Pressure</value>
+    <value>左耙出口压力</value>
   </data>
   <data name="pLock" xml:space="preserve">
-    <value>Locking High Pressure</value>
+    <value>高压锁紧压力</value>
   </data>
   <data name="pRightDrag" xml:space="preserve">
-    <value>Right Drag Output Pressure</value>
+    <value>右耙出口压力</value>
   </data>
   <data name="SternDraft" xml:space="preserve">
-    <value>Stern Draught</value>
+    <value>艉吃水</value>
   </data>
   <data name="Trim" xml:space="preserve">
-    <value>Trimming Angle</value>
+    <value>纵倾角度</value>
   </data>
   <data name="Capacity" xml:space="preserve">
-    <value>Hold Capacity</value>
+    <value>舱容</value>
   </data>
   <data name="Displacement" xml:space="preserve">
-    <value>Displacement</value>
+    <value>排水量</value>
   </data>
   <data name="Height" xml:space="preserve">
-    <value>Hold Height</value>
+    <value>舱高</value>
   </data>
   <data name="Load" xml:space="preserve">
-    <value>Hold Load</value>
+    <value>装载量</value>
   </data>
   <data name="Port" xml:space="preserve">
-    <value>Port</value>
+    <value>左舷泥门</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>Starboard</value>
+    <value>右舷泥门</value>
+  </data>
+  <data name="CloseFlow" xml:space="preserve">
+    <value>关闭流量</value>
+  </data>
+  <data name="OpenFlow" xml:space="preserve">
+    <value>打开流量</value>
+  </data>
+  <data name="Pressure" xml:space="preserve">
+    <value>压力控制</value>
   </data>
 </root>

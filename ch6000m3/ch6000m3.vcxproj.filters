@@ -36,10 +36,10 @@
     <ClCompile Include="decorator\page.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="page\doors.cpp">
+    <ClCompile Include="page\sealed_waters.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\sealed_waters.cpp">
+    <ClCompile Include="page\hopper_doors.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -55,10 +55,10 @@
     <ClInclude Include="decorator\page.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="page\doors.hpp">
+    <ClInclude Include="page\sealed_waters.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\sealed_waters.hpp">
+    <ClInclude Include="page\hopper_doors.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -127,16 +127,16 @@
     <PRIResource Include="stone\tongue\zh-CN\menu.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\doors.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\doors.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\sealed_waters.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\sealed_waters.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

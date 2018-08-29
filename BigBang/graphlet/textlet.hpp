@@ -44,6 +44,9 @@ namespace WarGrey::SCADA {
 		int precision = -1;
 	};
 
+	WarGrey::SCADA::DimensionStyle make_setting_dimension_style(float number_fontsize, unsigned int min_number);
+	WarGrey::SCADA::DimensionStyle make_highlight_dimension_style(float number_fontsize, unsigned int min_number);
+
 	private class ITextlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
 		void set_text(const wchar_t* fmt, ...);
@@ -168,7 +171,15 @@ namespace WarGrey::SCADA {
 
 	private class Percentagelet : public WarGrey::SCADA::IEditorlet {
 	public:
-		Percentagelet(WarGrey::SCADA::DimensionStyle& style, Platform::String^ label = "", Platform::String^ subscript = "");
 		Percentagelet(Platform::String^ label = "", Platform::String^ subscript = "");
+		
+		Percentagelet(WarGrey::SCADA::EditorStatus default_status,
+			Platform::String^ label = "", Platform::String^ subscript = "");
+		
+		Percentagelet(WarGrey::SCADA::DimensionStyle& style,
+			Platform::String^ label = "", Platform::String^ subscript = "");
+		
+		Percentagelet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+			Platform::String^ label = "", Platform::String^ subscript = "");
 	};
 }

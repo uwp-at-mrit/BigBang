@@ -159,7 +159,7 @@
   <data name="sealed_waters" xml:space="preserve">
     <value>泥泵封水管系</value>
   </data>
-  <data name="doors" xml:space="preserve">
+  <data name="hopper_doors" xml:space="preserve">
     <value>泥门控制</value>
   </data>
   <data name="Empty" xml:space="preserve">

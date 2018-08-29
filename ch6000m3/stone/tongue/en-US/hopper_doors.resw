@@ -118,45 +118,57 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BowDraft" xml:space="preserve">
-    <value>艏吃水</value>
+    <value>Bow Draught</value>
   </data>
   <data name="EarthWork" xml:space="preserve">
-    <value>土方量</value>
+    <value>Earthwork Volume</value>
   </data>
   <data name="Heel" xml:space="preserve">
-    <value>横倾角度</value>
+    <value>Heeling Angle</value>
   </data>
   <data name="pLeftDrag" xml:space="preserve">
-    <value>左耙出口压力</value>
+    <value>Left Drag Output Pressure</value>
   </data>
   <data name="pLock" xml:space="preserve">
-    <value>高压锁紧压力</value>
+    <value>Locking High Pressure</value>
   </data>
   <data name="pRightDrag" xml:space="preserve">
-    <value>右耙出口压力</value>
+    <value>Right Drag Output Pressure</value>
   </data>
   <data name="SternDraft" xml:space="preserve">
-    <value>艉吃水</value>
+    <value>Stern Draught</value>
   </data>
   <data name="Trim" xml:space="preserve">
-    <value>纵倾角度</value>
+    <value>Trimming Angle</value>
   </data>
   <data name="Capacity" xml:space="preserve">
-    <value>舱容</value>
+    <value>Hold Capacity</value>
   </data>
   <data name="Displacement" xml:space="preserve">
-    <value>排水量</value>
+    <value>Displacement</value>
   </data>
   <data name="Height" xml:space="preserve">
-    <value>舱高</value>
+    <value>Hold Height</value>
   </data>
   <data name="Load" xml:space="preserve">
-    <value>装载量</value>
+    <value>Hold Load</value>
   </data>
   <data name="Port" xml:space="preserve">
-    <value>左舷</value>
+    <value>Port Hopper Door</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>右舷</value>
+    <value>Starboard Hopper Door</value>
+  </data>
+  <data name="ToPipeline" xml:space="preserve">
+    <value>Transfer to Flushing Pipeline System</value>
+  </data>
+  <data name="CloseFlow" xml:space="preserve">
+    <value>Closing Flow</value>
+  </data>
+  <data name="OpenFlow" xml:space="preserve">
+    <value>Opening Flow</value>
+  </data>
+  <data name="Pressure" xml:space="preserve">
+    <value>Pressure Control</value>
   </data>
 </root>

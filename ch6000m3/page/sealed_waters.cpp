@@ -35,15 +35,14 @@ private enum class SWOperation { Start, Stop, Reset, _ };
 // WARNING: order matters
 private enum class SW : unsigned int {
 	// Pumps
-	HP1, HP2, Port, Starboard, SS1, SS2,
+	Hatch, HP1, HP2, Port, Starboard,
 	FP1, FP2, SP13, SP24, SP15, SP26, SP11, SP22, SP19, SP20,
 	// Valves
 	DGV3, DGV4, DGV5, DGV6, DGV1, DGV2, DGV9, DGV10,
 	DGV12, DGV11, DGV13, DGV14, DGV15, DGV16, DGV17, DGV18, DGV19, DGV20,
 	DGV8, DGV44, DGV45, DGV7, DGV46, DGV47,
-	// Key Labels
-	Hatch, ToPipeline,
-	// Indicators
+	// Labels
+	ToPipeline, SS1, SS2,
 	_,
 	// anchors used as last jumping points
 	d3, d4, d5, d6,
@@ -60,17 +59,7 @@ private class SealedWaters final : public PLCConfirmation, public IMenuCommand<S
 public:
 	SealedWaters(SealedWaterPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 12.0F);
-
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 18.0F);
-		this->dimension_style.unit_font = make_bold_text_format("Cambria", 16.0F);
-		this->dimension_style.minimize_label_width = get_text_extent("P", this->dimension_style.unit_font).height;
-		this->dimension_style.label_xfraction = 0.5F;
-		this->dimension_style.minimize_number_width = 50.0F;
-		this->dimension_style.number_background_color = Colours::Gray;
-		this->dimension_style.number_color = Colours::Background;
-		this->dimension_style.label_background_color = Colours::ForestGreen;
-		this->dimension_style.label_color = Colours::GhostWhite;
-		this->dimension_style.number_leading_space = 2.0F;
+		this->dimension_style = make_highlight_dimension_style(18.0F, 5U);
 	}
 
 public:
@@ -112,30 +101,30 @@ public:
 		pTurtle->move_right(10)->move_up(1.5F)->move_right(6, SW::ToPipeline)->jump_back();
 
 		pTurtle->move_down(4, SW::d13)->move_right(6, SW::DGV13)->move_right(6, SW::SP13)->move_right(6, SW::DGV3);
-		pTurtle->move_right(8)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d14)->move_right(6, SW::DGV14)->move_right(6, SW::SP24)->move_right(6, SW::DGV4);
-		pTurtle->move_right(12, SW::d44)->move_right(12, SW::DGV44)->move_right(6, SW::HP1)->jump_back();
+		pTurtle->move_right(14, SW::d44)->move_right(12, SW::DGV44)->move_right(6, SW::HP1)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(7, SW::DGV8);
 		pTurtle->move_right(10)->move_down(3)->move_left(2)->jump_back(SW::d14);
 
 		pTurtle->move_down(4, SW::d15)->move_right(6, SW::DGV15)->move_right(6, SW::SP15)->move_right(6, SW::DGV5);
-		pTurtle->move_right(12, SW::d45)->move_right(12, SW::DGV45)->move_right(6, SW::HP2)->jump_back();
+		pTurtle->move_right(14, SW::d45)->move_right(12, SW::DGV45)->move_right(6, SW::HP2)->jump_back();
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(7, SW::DGV7);
 		pTurtle->move_right(10)->move_up(3)->move_left(2)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(6, SW::DGV16)->move_right(6, SW::SP26)->move_right(6, SW::DGV6);
-		pTurtle->move_right(8)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
 
 		pTurtle->move_down(3, SW::sea);
 
 		pTurtle->move_down(2, SW::d17)->move_right(6, SW::DGV17)->move_right(6, SW::SP11)->move_right(6, SW::DGV1);
-		pTurtle->move_right(8)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d18)->move_right(6, SW::DGV18)->move_right(6, SW::SP22)->move_right(6, SW::DGV2);
 		pTurtle->move_right(24, SW::DGV46)->move_right(6, SW::Port)->jump_back();
 
 		pTurtle->move_down(4, SW::d19)->move_right(6, SW::DGV19)->move_right(6, SW::SP19)->move_right(6, SW::DGV9);
 		pTurtle->move_right(24, SW::DGV47)->move_right(6, SW::Starboard)->jump_back();
 		pTurtle->move_down(4, SW::d20)->move_right(6, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
-		pTurtle->move_right(8)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, Colours::Gray));
 		this->hatch = this->master->insert_one(new Hatchlet(gridsize * 2.5F));
@@ -143,7 +132,8 @@ public:
 		
 		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gridsize, 0.000);
 		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gridsize, -90.000);
-		this->load_labels(this->captions, SW::HP1, SW::Starboard, Colours::Salmon);
+		this->load_labels(this->captions, SW::Hatch, SW::Starboard, Colours::Salmon);
+		this->load_labels(this->captions, SW::ToPipeline, SW::SS2, Colours::Silver);
 
 		this->load_dimensions(this->pressures, SW::FP1, SW::FP2, "bar", "P");
 		this->load_dimensions(this->pressures, SW::DGV1, SW::DGV10, "bar", "P");
@@ -165,6 +155,9 @@ public:
 		this->station->map_credit_graphlet(this->captions[SW::HP2], GraphletAnchor::CT);
 		this->station->map_credit_graphlet(this->captions[SW::Port], GraphletAnchor::CB);
 		this->station->map_credit_graphlet(this->captions[SW::Starboard], GraphletAnchor::CT);
+		this->station->map_credit_graphlet(this->captions[SW::ToPipeline], GraphletAnchor::RB);
+		this->station->map_credit_graphlet(this->captions[SW::SS1], GraphletAnchor::LC);
+		this->station->map_credit_graphlet(this->captions[SW::SS2], GraphletAnchor::LC);
 		this->master->move_to(this->captions[SW::Hatch], this->hatch, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		this->station->fill_anchor_location(SW::sea, nullptr, &horizon_y, true);

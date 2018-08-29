@@ -52,6 +52,43 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 }
 
 /*************************************************************************************************/
+DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number) {
+	auto nf = make_bold_text_format("Cambria Math", nfsize);
+	auto uf = make_bold_text_format("Cambria", nfsize);
+	ICanvasBrush^ color = Colours::GhostWhite;
+	DimensionStyle ds;
+
+	ds.number_font = nf;
+	ds.unit_font = uf;
+	ds.minimize_number_width = get_text_extent("0", nf).width * float(min_number);
+	ds.number_border_color = color;
+	ds.number_color = color;
+	ds.unit_color = color;
+	ds.caret_color = color;
+	
+	return ds;
+}
+
+DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number) {
+	auto nf = make_bold_text_format("Cambria Math", nfsize);
+	auto uf = make_bold_text_format("Cambria", nfsize * 0.90F);
+	DimensionStyle ds;
+
+	ds.number_font = nf;
+	ds.unit_font = uf;
+	ds.minimize_label_width = get_text_extent("O", uf).height;
+	ds.label_xfraction = 0.5F;
+	ds.minimize_number_width = get_text_extent("0", nf).width * float(min_number);
+	ds.number_background_color = Colours::Gray;
+	ds.number_color = Colours::Background;
+	ds.label_background_color = Colours::ForestGreen;
+	ds.label_color = Colours::GhostWhite;
+	ds.number_leading_space = 2.0F;
+
+	return ds;
+}
+
+/*************************************************************************************************/
 void ITextlet::set_color(ICanvasBrush^ color) {
 	this->text_color = ((color == nullptr) ? default_text_color : color);
 	this->notify_updated();
@@ -424,8 +461,16 @@ Dimensionlet::Dimensionlet(EditorStatus default_status, Platform::String^ unit, 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: Dimensionlet(EditorStatus::Disabled, unit, label, subscript) {}
 
+/*************************************************************************************************/
+Percentagelet::Percentagelet(EditorStatus default_status, DimensionStyle& default_style
+	, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(default_status, default_style, "%", label, subscript) {}
+
 Percentagelet::Percentagelet(DimensionStyle& default_style, Platform::String^ label, Platform::String^ subscript)
-	: IEditorlet(EditorStatus::Disabled, default_style, "%", label, subscript) {}
+	: Percentagelet(EditorStatus::Disabled, default_style, label, subscript) {}
+
+Percentagelet::Percentagelet(EditorStatus default_status, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(default_status, "%", label, subscript) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript)
-	: IEditorlet(EditorStatus::Disabled, "%", label, subscript) {}
+	: Percentagelet(EditorStatus::Disabled, label, subscript) {}

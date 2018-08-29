@@ -22,14 +22,14 @@ static CanvasSolidColorBrush^ door_default_bottom_color = Colours::make(0xBB6666
 static CanvasSolidColorBrush^ door_default_progress_color = Colours::make(0xBBBB66);
 
 /*************************************************************************************************/
-BottomDoorlet::BottomDoorlet(float radius, double degrees) : BottomDoorlet(DoorStatus::Closed, radius, degrees) {}
+HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Closed, radius, degrees) {}
 
-BottomDoorlet::BottomDoorlet(DoorStatus default_state, float radius, double degrees)
+HopperDoorlet::HopperDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
 	this->radius = radius - default_thickness;
 }
 
-void BottomDoorlet::update(long long count, long long interval, long long uptime) {
+void HopperDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
 	case DoorStatus::Opening: case DoorStatus::Closing: {
 		this->flashing = !this->flashing;
@@ -38,7 +38,7 @@ void BottomDoorlet::update(long long count, long long interval, long long uptime
 	}
 }
 
-void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
+void HopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
 	case DoorStatus::Disabled: {
 		CAS_SLOT(s.disable_color, Colours::Firebrick);
@@ -60,7 +60,7 @@ void BottomDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void BottomDoorlet::on_status_changed(DoorStatus state) {
+void HopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
 
 	switch (state) {
@@ -81,7 +81,7 @@ void BottomDoorlet::on_status_changed(DoorStatus state) {
 	}
 }
 
-void BottomDoorlet::on_value_changed(double v) {
+void HopperDoorlet::on_value_changed(double v) {
 	double ratio = this->get_percentage();
 
 	this->door_partitions[0] = masked_sector(this->degrees + 60.00, this->degrees - 60.00, ratio, this->radius);
@@ -89,7 +89,7 @@ void BottomDoorlet::on_value_changed(double v) {
 	this->door_partitions[2] = masked_sector(this->degrees + 180.0, this->degrees + 60.00, ratio, this->radius);
 }
 
-void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	float cx = x + this->radius + default_thickness;
 	float cy = y + this->radius + default_thickness;
@@ -117,16 +117,16 @@ void BottomDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 }
 
 /*************************************************************************************************/
-UpperDoorlet::UpperDoorlet(float radius, double degrees)
-	: UpperDoorlet(DoorStatus::Closed, radius, degrees) {}
+UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees)
+	: UpperHopperDoorlet(DoorStatus::Closed, radius, degrees) {}
 
-UpperDoorlet::UpperDoorlet(DoorStatus default_state, float radius, double degrees)
+UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
 	this->radius = radius - default_thickness;
 	this->bradius = this->radius - default_thickness * 1.618F;
 }
 
-void UpperDoorlet::construct() {
+void UpperHopperDoorlet::construct() {
 	auto pline = polar_line(this->radius, this->degrees, this->degrees + 180.0);
 	
 	this->border = polar_rectangle(this->radius, default_alpha_degrees, this->degrees);
@@ -134,7 +134,7 @@ void UpperDoorlet::construct() {
 	this->body = geometry_freeze(polar_rectangle(this->bradius, default_alpha_degrees, this->degrees));
 }
 
-void UpperDoorlet::update(long long count, long long interval, long long uptime) {
+void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
 	case DoorStatus::Opening: case DoorStatus::Closing: {
 		this->flashing = !this->flashing;
@@ -143,7 +143,7 @@ void UpperDoorlet::update(long long count, long long interval, long long uptime)
 	}
 }
 
-void UpperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
+void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	switch (state) {
 	case DoorStatus::Disabled: {
 		CAS_SLOT(s.disable_color, Colours::Firebrick);
@@ -168,7 +168,7 @@ void UpperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void UpperDoorlet::on_status_changed(DoorStatus state) {
+void UpperHopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
 
 	switch (state) {
@@ -181,11 +181,11 @@ void UpperDoorlet::on_status_changed(DoorStatus state) {
 	}
 }
 
-void UpperDoorlet::on_value_changed(double v) {
+void UpperHopperDoorlet::on_value_changed(double v) {
 	this->door = polar_masked_rectangle(this->bradius, default_alpha_degrees, this->degrees, this->get_percentage() - 1.0);
 }
 
-void UpperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void UpperHopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	float cx = x + this->radius + default_thickness;
 	float cy = y + this->radius + default_thickness;

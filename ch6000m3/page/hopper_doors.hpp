@@ -7,10 +7,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class DoorsPage : public WarGrey::SCADA::Planet {
+	private class HopperDoorsPage : public WarGrey::SCADA::Planet {
 	public:
-		~DoorsPage() noexcept;
-		DoorsPage(WarGrey::SCADA::IMRMaster* plc);
+		~HopperDoorsPage() noexcept;
+		HopperDoorsPage(WarGrey::SCADA::IMRMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
