@@ -168,4 +168,7 @@
   <data name="SS2" xml:space="preserve">
     <value>Sediment Separator</value>
   </data>
+  <data name="ToPipeline" xml:space="preserve">
+    <value>Transfer to the Flusing Pipeline System</value>
+  </data>
 </root>

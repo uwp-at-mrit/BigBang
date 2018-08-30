@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		bool shown();
 
 	public:
-		virtual void fill_auto_position(float* x, float* y) = 0;
+		virtual void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) = 0;
 		virtual bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) = 0;
 		
 	protected:

@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
     public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-		void fill_auto_position(float* x, float* y) override;
+		void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) override;
 		
 	public:
 		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

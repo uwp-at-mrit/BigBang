@@ -21,8 +21,6 @@ static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, flo
 	box.Y = gapsize * (flrow + 1.0F) + cellsize * flrow;
 	box.Width = cellsize * flncol + gapsize * (flncol - 1.0F);
 	box.Height = cellsize * flnrow + gapsize * (flnrow - 1.0F);
-
-	syslog(Log::Info, L"(%f, %f)", cellsize, gapsize);
 }
 
 /*************************************************************************************************/

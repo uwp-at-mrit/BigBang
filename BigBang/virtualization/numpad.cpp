@@ -44,10 +44,10 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 }
 
 void Numpad::construct() {
-	Color fg = Colours::Foreground->Color;
-	Color bg = Colours::Background->Color;
+	Color fg = Colours::Background->Color;
+	Color bg = Colours::Foreground->Color;
 	
-	this->foreground = Colours::Foreground;
+	this->foreground = make_solid_brush(fg, 1.0);
 	this->background = make_solid_brush(rgba(bg, 0.8));
 	this->border = make_solid_brush(rgba(fg, 0.618));
 	this->highlight = make_solid_brush(rgba(fg, 0.382));
@@ -103,19 +103,16 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 	}
 }
 
-void Numpad::fill_auto_position(float* x, float* y) {
-	IPlanet* planet = this->master;
-	IGraphlet* target = planet->get_focus_graphlet();
-
-	if (target == nullptr) {
-		float Width = planet->info->master->actual_width;
-		float Height = planet->info->master->actual_height;
+void Numpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+	if (g == nullptr) {
+		float Width = this->master->actual_width();
+		float Height = this->master->actual_height();
 		float this_width, this_height;
 
 		this->fill_extent(0.0F, 0.0F, &this_width, &this_height);
 		SET_BOX(x, Width - this_width);
 		SET_BOX(y, Height - this_height);
 	} else {
-		planet->fill_graphlet_location(target, x, y, GraphletAnchor::LB);
+		this->master->fill_graphlet_location(g, x, y, a);
 	}
 }

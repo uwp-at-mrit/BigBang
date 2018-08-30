@@ -251,11 +251,10 @@ Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsig
 
 /*************************************************************************************************/
 IEditorlet::IEditorlet(EditorStatus status, DimensionStyle& style, Platform::String^ unit
-	, Platform::String^ label, Platform::String^ subscript) : IStatuslet(status), unit(unit) {
+	, Platform::String^ label, Platform::String^ subscript)
+	: IEditorlet(status, unit, label, subscript) {
 	
-	this->set_text(speak(label), speak(subscript));
-
-	/** TODO: Why it does not work if pass the `style` to IStatuslet */
+	/** TODO: Why does not it work if pass the `style` to IStatuslet */
 	this->set_style(style);
 }
 
@@ -263,6 +262,9 @@ IEditorlet::IEditorlet(EditorStatus status, Platform::String^ unit, Platform::St
 	: IStatuslet(status), unit(unit) {
 	
 	this->set_text(speak(label), speak(subscript));
+
+	/** TODO: Why does not it work if pass the `status` to IStatuslet */
+	this->set_status(status);
 }
 
 void IEditorlet::construct() {
@@ -319,8 +321,6 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 		
 		label_box.lspace += ((region_width - label_box.width) * style.label_xfraction);
 	}
-
-
 
 	SET_VALUES(l, label_box.lspace, r, this->unit_box.rspace);
 	SET_VALUES(t, tspace, b, bspace);
@@ -425,7 +425,11 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 			ds->FillRectangle(x, y, region_width, height, style.number_background_color);
 		}
 
-		ds->DrawTextLayout(this->number_layout, x, base_y - number_box.height, style.number_color);
+		if (!this->has_caret()) {
+			ds->DrawTextLayout(this->number_layout, x, base_y - number_box.height, style.number_color);
+		} else {
+			// do nothing
+		}
 
 		if (style.number_border_color != nullptr) {
 			ds->DrawRectangle(x + 0.5F, y + 0.5F, region_width - 1.0F, height - 1.0F, style.number_border_color);

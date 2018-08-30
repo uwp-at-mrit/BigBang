@@ -244,8 +244,9 @@ namespace WarGrey::SCADA {
 	public:
 		WarGrey::SCADA::IGraphlet* get_focus_graphlet() override;
 		void set_caret_owner(IGraphlet* g) override;
-		void show_virtual_keyboard(ScreenKeyboard type);
-		void show_virtual_keyboard(ScreenKeyboard type, float x, float y);
+		void show_virtual_keyboard(ScreenKeyboard type, GraphletAnchor a = GraphletAnchor::RB, float dx = 0.0F, float dy = 0.0F);
+		void show_virtual_keyboard(ScreenKeyboard type, IGraphlet* g, GraphletAnchor a = GraphletAnchor::RB, float dx = 0.0F, float dy = 0.0F);
+		void show_virtual_keyboard(ScreenKeyboard type, float x, float y, float dx = 0.0F, float dy = 0.0F);
 
 	public:
 		bool on_pointer_pressed(float x, float y,

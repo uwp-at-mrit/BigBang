@@ -893,17 +893,22 @@ bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted
 }
 
 /*************************************************************************************************/
-void Planet::show_virtual_keyboard(ScreenKeyboard type) {
-	float auto_x, auto_y;
-
-	this->numpad->fill_auto_position(&auto_x, &auto_y);
-	this->show_virtual_keyboard(type, auto_x, auto_y);
+void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y, float dx, float dy) {
+	this->numpad->show(true);
+	this->keyboard_x = x + dx;
+	this->keyboard_y = y + dy;
 }
 
-void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y) {
-	this->numpad->show(true);
-	this->keyboard_x = x;
-	this->keyboard_y = y;
+void Planet::show_virtual_keyboard(ScreenKeyboard type, IGraphlet* g, GraphletAnchor a, float dx, float dy) {
+	float auto_x, auto_y;
+
+	this->numpad->fill_auto_position(&auto_x, &auto_y, g, a);
+
+	this->show_virtual_keyboard(type, auto_x, auto_y, dx, dy);
+}
+
+void Planet::show_virtual_keyboard(ScreenKeyboard type, GraphletAnchor a, float dx, float dy) {
+	this->show_virtual_keyboard(type, this->get_focus_graphlet(), a, dx, dy);
 }
 
 /*************************************************************************************************/
