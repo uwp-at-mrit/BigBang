@@ -271,7 +271,7 @@ void IEditorlet::construct() {
 
 void IEditorlet::update(long long count, long long interval, long long uptime) {
 	if (count % 2 == 0) {
-		if (this->get_status() == EditorStatus::Enabled) {
+		if (this->has_caret()) {
 			this->flashing = !this->flashing;
 			this->notify_updated();
 		}
@@ -335,7 +335,11 @@ void IEditorlet::on_value_changed(double value) {
 }
 
 void IEditorlet::on_status_changed(EditorStatus status) {
-	this->flashing = (status == EditorStatus::Enabled);
+	this->enable_events(status == EditorStatus::Enabled);
+}
+
+void IEditorlet::own_caret(bool on) {
+	this->flashing = on;
 }
 
 void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
@@ -389,6 +393,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	DimensionStyle style = this->get_style();
 	TextExtent label_box;
 	float tspace, bspace, height, base_y, box_height;
+	float number_region_x = 0.0F;
 	
 	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, &height);
 	base_y = y + height;
@@ -409,6 +414,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 		}
 		
 		x += (region_width + style.number_leading_space);
+		number_region_x = x;
 	}
 
 	{ // draw number
@@ -443,7 +449,9 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	}
 
 	if (this->flashing) {
-		ds->DrawLine(x + 2.0F, y + 2.0F, x + 2.0F, y + height - 4.0F, style.caret_color);
+		float caret_x = number_region_x + 2.0F;
+
+		ds->DrawLine(caret_x, y + 2.0F, caret_x, y + height - 4.0F, style.caret_color);
 	}
 }
 

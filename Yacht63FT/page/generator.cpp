@@ -235,14 +235,22 @@ private class GBoard final : public PLCConfirmation {
 public:
 	GBoard(GeneratorPage* master, GDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
-		this->rspeed_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(125.0F));
-		this->rspeed_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(45.00F));
-		this->power_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
-		this->power_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
-		this->gauge_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
-		this->gauge_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
+		auto fgcolor = Colours::make(0xD2D2D2);
 
-		this->fgcolor = Colours::make(0xD2D2D2);
+		this->rspeed_style.number_font = make_text_format(scale_face, this->master->sketch_to_application_height(125.0F));
+		this->rspeed_style.unit_font = make_text_format(scale_face, this->master->sketch_to_application_height(45.00F));
+		this->rspeed_style.number_color = fgcolor;
+		this->rspeed_style.unit_color = fgcolor;
+
+		this->power_style.number_font = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
+		this->power_style.unit_font = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
+		this->power_style.number_color = fgcolor;
+		this->power_style.unit_color = fgcolor;
+
+		this->gauge_style.number_font = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
+		this->gauge_style.unit_font = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
+		this->gauge_style.number_color = fgcolor;
+		this->gauge_style.unit_color = fgcolor;
 	}
 
 public:
@@ -250,12 +258,12 @@ public:
 		float gauge_size;
 
 		for (unsigned int idx = 0; idx < gcount; idx++) {
-			this->rspeeds[idx] = this->master->insert_one(new Dimensionlet("<rpm>", this->rspeed_fonts[0], this->rspeed_fonts[1], this->fgcolor));
+			this->rspeeds[idx] = this->master->insert_one(new Dimensionlet(this->rspeed_style, "<rpm>"));
 
 			for (GPower p = _E0(GPower); p < GPower::_; p++) {
 				Platform::String^ unit = "<" + p.ToString() + ">";
 
-				this->powers[p][idx] = this->master->insert_one(new Dimensionlet(unit, this->power_fonts[0], this->power_fonts[1], this->fgcolor));
+				this->powers[p][idx] = this->master->insert_one(new Dimensionlet(this->power_style, unit));
 			}
 
 			for (GMeter m = _E0(GMeter); m < GMeter::_; m++) {
@@ -264,16 +272,16 @@ public:
 				{ // load upper indicators
 					if (m == GMeter::sea) {
 						this->foil_filter_pdmeter[idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
-						this->foil_filter_pdrop[idx] = this->master->insert_one(new Dimensionlet("<pdrop>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));				
+						this->foil_filter_pdrop[idx] = this->master->insert_one(new Dimensionlet(this->gauge_style, "<pdrop>"));
 					} else {
 						this->thermometers[m][idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
-						this->temperatures[m][idx] = this->master->insert_one(new Dimensionlet("<temperature>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
+						this->temperatures[m][idx] = this->master->insert_one(new Dimensionlet(this->gauge_style, "<temperature>"));
 					}
 				}
 
 				{ // load bottom indicators
 					this->manometers[m][idx] = this->master->insert_one(new Indicatorlet(gauge_size, indicator_thickness));
-					this->pressures[m][idx] = this->master->insert_one(new Dimensionlet("<pressure>", this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
+					this->pressures[m][idx] = this->master->insert_one(new Dimensionlet(this->gauge_style, "<pressure>"));
 				}
 			}
 		}
@@ -391,10 +399,9 @@ private:
 	std::map<GMeter, Indicatorlet*[gcount]> thermometers;
 		
 private:
-	CanvasTextFormat^ rspeed_fonts[2];
-	CanvasTextFormat^ power_fonts[2];
-	CanvasTextFormat^ gauge_fonts[2];
-	ICanvasBrush^ fgcolor;
+	DimensionStyle rspeed_style;
+	DimensionStyle power_style;
+	DimensionStyle gauge_style;
 	GeneratorPage* master;
 	GDecorator* decorator;
 };

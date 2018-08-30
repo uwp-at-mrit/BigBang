@@ -21,6 +21,8 @@ static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, flo
 	box.Y = gapsize * (flrow + 1.0F) + cellsize * flrow;
 	box.Width = cellsize * flncol + gapsize * (flncol - 1.0F);
 	box.Height = cellsize * flnrow + gapsize * (flnrow - 1.0F);
+
+	syslog(Log::Info, L"(%f, %f)", cellsize, gapsize);
 }
 
 /*************************************************************************************************/
@@ -63,16 +65,18 @@ void Keyboard::update(long long count, long long interval, long long uptime) {
 void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	this->draw_before(ds, x, y, Width, Height);
 
-	for (unsigned char i = 0; i < this->keynum; i++) {
-		Rect box = this->cell_boxes[i];
+	if (this->cell_boxes != nullptr) {
+		for (unsigned char i = 0; i < this->keynum; i++) {
+			Rect box = this->cell_boxes[i];
 
-		VirtualKey key = this->cells[i].key;
-		float cx = x + box.X;
-		float cy = y + box.Y;
-		float cwidth = box.Width;
-		float cheight = box.Height;
+			VirtualKey key = this->cells[i].key;
+			float cx = x + box.X;
+			float cy = y + box.Y;
+			float cwidth = box.Width;
+			float cheight = box.Height;
 
-		this->draw_cell(ds, key, this->current_key == key, this->tapped, cx, cy, cwidth, cheight);
+			this->draw_cell(ds, key, this->current_key == key, this->tapped, cx, cy, cwidth, cheight);
+		}
 	}
 
 	this->draw_after(ds, x, y, Width, Height);
@@ -81,6 +85,7 @@ void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 void Keyboard::on_hover(float local_x, float local_y, bool shifted, bool controled) {
 	if (!this->tapped) {
 		this->current_key = this->find_tapped_key(local_x, local_y);
+		this->master->notify_graphlet_updated(this);
 	}
 }
 
@@ -139,6 +144,7 @@ Syslog* IKeyboard::get_logger() {
 
 void IKeyboard::show(bool shown) {
 	this->_shown = shown;
+	this->master->notify_graphlet_updated(this);
 }
 
 bool IKeyboard::shown() {

@@ -135,6 +135,9 @@ namespace WarGrey::SCADA {
 		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		void own_caret(bool is_own) override;
+
 	protected:
 		void prepare_style(WarGrey::SCADA::EditorStatus status, WarGrey::SCADA::DimensionStyle& style) override;
 		void apply_style(WarGrey::SCADA::DimensionStyle& style) override;

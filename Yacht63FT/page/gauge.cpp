@@ -37,7 +37,7 @@ public:
 public:
 	void load_and_flow(float width, float height) {
 		TextExtent ts = get_text_extent("Yacht", this->font);
-		float gwidth = this->master->sketch_to_application_width(100.0F);
+		float gwidth = this->master->sketch_to_application_width(50.0F);
 		float gheight = height * 0.5F * 0.618F;
 		float gapsize = ts.height * 0.5F;
 
@@ -88,7 +88,7 @@ private:
 
 		this->decorator->fill_cell_anchor(0, fx, fy, &anchor_x, &anchor_y);
 
-		this->mcylinders[id] = new Cylinderlet(shape, 3000.0F, 20U, gwidth, gheight);
+		this->mcylinders[id] = new Cylinderlet(shape, 3000.0F, gwidth, gheight);
 		this->lblcylinders[id] = new Labellet(speak(id), this->font, this->fgcolor);
 
 		this->master->insert(this->mcylinders[id], anchor_x, anchor_y, GraphletAnchor::CC);

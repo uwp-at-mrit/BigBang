@@ -361,7 +361,7 @@ namespace WarGrey::SCADA {
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_right(float step, Anchor id = Anchor::_) {
-			WarGrey::SCADA::ITurtle::jump_up(step, _I(id));
+			WarGrey::SCADA::ITurtle::jump_right(step, _I(id));
 			return this;
 		}
 

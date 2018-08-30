@@ -52,7 +52,11 @@ public:
 		this->label_color = Colours::DarkGray;
 		this->diagram_color = Colours::GhostWhite;
 		this->label_font = make_text_format("Microsoft YaHei", gridsize);
-		this->dim_font = make_text_format("Microsoft YaHei", gridsize * 0.5F);
+
+		this->dimension_style.number_font = make_text_format("Microsoft YaHei", gridsize * 0.5F);
+		this->dimension_style.unit_font = this->dimension_style.number_font;
+		this->dimension_style.number_color = Colours::Yellow;
+		this->dimension_style.unit_color = Colours::GhostWhite;
 	}
 
 public:
@@ -219,7 +223,7 @@ private:
 
 	void load_graphlets(std::map<PD, Dimensionlet*>& ds, PD id0, PD idn, Platform::String^ label, Platform::String^ unit) {
 		for (PD id = id0; id <= idn; id++) {
-			ds[id] = new Dimensionlet(unit, label, this->dim_font, Colours::Yellow, Colours::GhostWhite);
+			ds[id] = new Dimensionlet(this->dimension_style, unit, label);
 			
 			this->master->insert(ds[id]);
 		}
@@ -314,7 +318,7 @@ private:
 
 private:
 	CanvasTextFormat^ label_font;
-	CanvasTextFormat^ dim_font;
+	DimensionStyle dimension_style;
 	ICanvasBrush^ label_color;
 	ICanvasBrush^ diagram_color;
 	PropulsionPage* master;

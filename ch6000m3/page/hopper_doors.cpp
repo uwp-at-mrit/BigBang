@@ -255,7 +255,7 @@ public:
 private:
 	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->setting_style, unit, _speak(id)), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(EditorStatus::Enabled, this->setting_style, unit, _speak(id)), id);
 	}
 
 	template<typename E>
@@ -448,13 +448,21 @@ void HopperDoorsPage::reflow(float width, float height) {
 }
 
 bool HopperDoorsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<HopperDoorlet*>(g) != nullptr);
+	HopperDoorlet* hd = dynamic_cast<HopperDoorlet*>(g);
+	IEditorlet* e = dynamic_cast<IEditorlet*>(g);
+
+	return ((hd != nullptr) || ((e != nullptr) && (e->get_status() == EditorStatus::Enabled)));
 }
 
 void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	HopperDoorlet* hd = dynamic_cast<HopperDoorlet*>(g);
+	IEditorlet* e = dynamic_cast<IEditorlet*>(g);
+
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (this->can_select(g)) {
-		menu_popup(this->operation, g, local_x, local_y);
+	if (hd != nullptr) {
+		menu_popup(this->operation, hd, local_x, local_y);
+	} else if (e != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 	}
 }

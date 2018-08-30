@@ -31,9 +31,8 @@ namespace WarGrey::SCADA {
 		virtual void own_caret(bool is_own) {}
 
 	public:
-		void notify_ready();
-		void notify_updated();
 		void moor(WarGrey::SCADA::GraphletAnchor anchor);
+		bool has_caret();
 
 	public:
 		float available_visible_width(float here_x = 0.0F);
@@ -43,6 +42,10 @@ namespace WarGrey::SCADA {
 
 	public:
 		IGraphletInfo * info;
+
+	protected:
+		void notify_ready();
+		void notify_updated();
 
 	private:
 		float anchor_x;

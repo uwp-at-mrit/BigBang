@@ -31,13 +31,13 @@ private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refres
 
 static const size_t ac_count = _N(AC);
 static const unsigned int t_step = 8U;
-static const float t_min = -30.0F;
-static const float t_max = 50.0F;
+static const double t_min = -30.0;
+static const double t_max = 50.0;
 
 static CanvasTextFormat^ caption_font = nullptr;
 static CanvasTextFormat^ fore_font = nullptr;
-static CanvasTextFormat^ unit_font = nullptr;
 static CanvasTextFormat^ label_font = nullptr;
+static DimensionStyle board_style;
 
 static CanvasSolidColorBrush^ label_color = nullptr;
 
@@ -47,8 +47,12 @@ static void prepare_text_formats(IPlanet* master) {
 
 		caption_font = make_bold_text_format("Microsoft YaHei", master->sketch_to_application_height(33.75F));
 		fore_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(37.50F));
-		unit_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(30.00F));
 		label_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(24.79F));
+
+		board_style.number_font = fore_font;
+		board_style.unit_font = make_text_format("Microsoft YaHei", master->sketch_to_application_height(30.00F));
+		board_style.number_color = Colours::GhostWhite;
+		board_style.unit_color = Colours::GhostWhite;
 	}
 }
 
@@ -107,12 +111,12 @@ public:
 		float mode_width = this->master->sketch_to_application_width(46.0F);
 
 		for (AC room = _E0(AC); room < AC::_; room++) {
-			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, t_step, icon_width, 0.0F, 3.0F, label_color));
-			this->temperatures[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			this->thermometers[room] = this->master->insert_one(new Thermometerlet(t_min, t_max, icon_width, 0.0F, 3.0F, t_step, label_color));
+			this->temperatures[room] = this->master->insert_one(new Dimensionlet(board_style, "<temperature>"));
 			this->captions[room] = this->master->insert_one(new Labellet(speak(room), caption_font, Colours::GhostWhite));
 			this->modes[room] = this->master->insert_one(new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width));
-			this->Tseas[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
-			this->Tpipes[room] = this->master->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+			this->Tseas[room] = this->master->insert_one(new Dimensionlet(board_style, "<temperature>"));
+			this->Tpipes[room] = this->master->insert_one(new Dimensionlet(board_style, "<temperature>"));
 			this->auxes[room] = this->master->insert_one(new Labellet(speak(ACStatus::Normal), fore_font, Colours::GhostWhite));
 		}
 	}
@@ -251,9 +255,20 @@ public:
 	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
 		ACInfo infos[] = { ACInfo::t_setting, ACInfo::t_room, ACInfo::t_pipe, ACInfo::t_sea };
 		ICanvasBrush^ style_color = make_solid_brush(0xB3ED00);
+		DimensionStyle satellite_style, setting_style;
 		float indicator_scale = 0.75F;
 		float icon_scale = 0.80F;
 		float bar_height, cell_height;
+
+		satellite_style.number_font = board_style.number_font;
+		satellite_style.unit_font = board_style.unit_font;
+		satellite_style.number_color = Colours::GhostWhite;
+		satellite_style.unit_color = Colours::GhostWhite;
+
+		setting_style.number_font = board_style.unit_font;
+		setting_style.unit_font = board_style.unit_font;
+		setting_style.number_color = style_color;
+		setting_style.unit_color = style_color;
 
 		this->decorator->fill_cell_extent(0, nullptr, &bar_height, nullptr, &cell_height);
 
@@ -265,15 +280,17 @@ public:
 			Platform::String^ label = speak(":" + id.ToString() + ":");
 
 			if (id == ACInfo::t_setting) {
-				this->temperatures[id] = this->insert_one(new Dimensionlet("<temperature>", label, unit_font, style_color));
+				this->temperatures[id] = this->insert_one(new Dimensionlet(setting_style, "<temperature>", label));
 			} else {
 				this->labels[id] = this->insert_one(new Labellet(label, label_font, label_color));
-				this->temperatures[id] = this->insert_one(new Dimensionlet("<temperature>", fore_font, unit_font, Colours::GhostWhite));
+				this->temperatures[id] = this->insert_one(new Dimensionlet(satellite_style, "<temperature>"));
 			}
 		}
 
 		for (ACOP id = _E(ACOP, 0); id < ACOP::_; id++) {
-			this->handlers[id] = new Credit<OptionBitmaplet, ACOP>("AirConditioner/" + id.ToString(), bar_height * icon_scale);
+			Platform::String^ dirname = "AirConditioner/" + id.ToString();
+
+			this->handlers[id] = new Credit<OptionBitmaplet, ACOP>(dirname, bar_height * icon_scale);
 			this->handlers[id]->id = id;
 			
 			this->insert(this->handlers[id]);

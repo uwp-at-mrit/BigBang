@@ -239,12 +239,17 @@ private class PBoard final : public PLCConfirmation {
 public:
 	PBoard(PropellerPage* master, PDecorator* decorator) : master(master), decorator(decorator) {
 		Platform::String^ scale_face = "Arial";
-		this->metrics_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
-		this->metrics_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
-		this->gauge_fonts[0] = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
-		this->gauge_fonts[1] = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
+		auto fgcolor = Colours::make(0xD2D2D2);
 
-		this->fgcolor = Colours::make(0xD2D2D2);
+		this->metrics_style.number_font = make_text_format(scale_face, this->master->sketch_to_application_height(42.0F));
+		this->metrics_style.unit_font = make_text_format(scale_face, this->master->sketch_to_application_height(37.5F));
+		this->metrics_style.number_color = fgcolor;
+		this->metrics_style.unit_color = fgcolor;
+		
+		this->gauge_style.number_font = make_text_format(scale_face, this->master->sketch_to_application_height(32.0F));
+		this->gauge_style.unit_font = make_text_format(scale_face, this->master->sketch_to_application_height(28.00F));
+		this->gauge_style.number_color = fgcolor;
+		this->gauge_style.unit_color = fgcolor;
 	}
 
 public:
@@ -259,7 +264,7 @@ public:
 			for (PMoter m = _E0(PMoter); m < PMoter::_; m++) {
 				Platform::String^ unit = "<" + m.ToString() + ">";
 
-				this->ms[m][idx] = this->master->insert_one(new Dimensionlet(unit, this->gauge_fonts[0], this->gauge_fonts[1], this->fgcolor));
+				this->ms[m][idx] = this->master->insert_one(new Dimensionlet(this->gauge_style, unit));
 
 				this->decorator->fill_cell_anchor(idx, P::Motor, m, 0.5F, 0.5F, nullptr, nullptr, &cell_width, &cell_height);
 				this->gs[m][idx] = this->master->insert_one(new Indicatorlet(std::fminf(cell_width, cell_height) * 0.8F, indicator_thickness));
@@ -366,7 +371,7 @@ private:
 		case L'C': unit = "<temperature>"; break;
 		}
 
-		return new Dimensionlet(unit, this->metrics_fonts[0], this->metrics_fonts[1], this->fgcolor);
+		return new Dimensionlet(this->metrics_style, unit);
 	}
 
 // never deletes these graphlets mannually
@@ -379,9 +384,8 @@ private:
 	std::map<PMoter, Indicatorlet*[pcount]> gs;
 		
 private:
-	CanvasTextFormat^ metrics_fonts[2];
-	CanvasTextFormat^ gauge_fonts[2];
-	ICanvasBrush^ fgcolor;
+	DimensionStyle metrics_style;
+	DimensionStyle gauge_style;
 	PropellerPage* master;
 	PDecorator* decorator;
 };

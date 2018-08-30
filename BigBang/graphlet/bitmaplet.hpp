@@ -46,7 +46,7 @@ namespace WarGrey::SCADA {
 		OptionBitmaplet(Platform::String^ subdir, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
 		OptionBitmaplet(Platform::String^ subdir, Platform::String^ rootdir);
 
-		OptionBitmaplet(Platform::String^ file_tmp, Platform::String^ file_fmp, float width = 0.0F, float height = 0.0F, Platform::String^ rootdir = "graphlet");
+		OptionBitmaplet(Platform::String^ file_tmp, Platform::String^ file_fmp, float width, float height, Platform::String^ rootdir = "graphlet");
 		OptionBitmaplet(Platform::String^ file_tmp, Platform::String^ file_fmp, Platform::String^ rootdir);
 
 	public:

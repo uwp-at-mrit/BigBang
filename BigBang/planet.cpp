@@ -216,7 +216,8 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 }
 
 /*************************************************************************************************/
-Planet::Planet(Platform::String^ name, unsigned int initial_mode) : IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
+Planet::Planet(Platform::String^ name, unsigned int initial_mode)
+	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
 }
 
@@ -668,6 +669,10 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 					}
 				} else {
 					unsafe_set_selected(this, g, info);
+
+					if (g->handles_events()) {
+						this->set_caret_owner(g);
+					}
 				}
 			}
 		} else {
@@ -910,6 +915,7 @@ void Planet::append_decorator(IPlanetDecorator* decorator) {
 }
 
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
+	this->numpad->sprite();
 	this->numpad->construct();
 }
 

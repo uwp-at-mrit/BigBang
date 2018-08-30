@@ -94,6 +94,16 @@ void IGraphlet::moor(GraphletAnchor anchor) {
 	}
 }
 
+bool IGraphlet::has_caret() {
+	bool careted = false;
+
+	if (this->info != nullptr) {
+		careted = (this->info->master->get_focus_graphlet() == this);
+	}
+
+	return careted;
+}
+
 float IGraphlet::available_visible_width(float here_x) {
 	float width = here_x;
 
