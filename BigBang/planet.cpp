@@ -643,15 +643,15 @@ void Planet::set_caret_owner(IGraphlet* g) {
 }
 
 /************************************************************************************************/
-bool Planet::on_char(VirtualKey key) {
+bool Planet::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = false;
 
 	if (this->numpad->shown()) {
-		handled = this->numpad->on_char(key);
-	} else if (this->focused_graphlet != nullptr) {
-		if (this->focused_graphlet->handles_events()) {
-			handled = this->focused_graphlet->on_char(key);
-		}
+		this->numpad->on_char(key, wargrey_keyboard);
+	}
+	
+	if (this->focused_graphlet != nullptr) {
+		handled = this->focused_graphlet->on_char(key, wargrey_keyboard);
 	}
 
 	return handled;

@@ -4,6 +4,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::System;
 
 using namespace Windows::UI;
 using namespace Windows::System;
@@ -88,10 +89,20 @@ void Keyboard::on_hover(float local_x, float local_y, bool shifted, bool control
 }
 
 void Keyboard::on_tap(float local_x, float local_y, bool shifted, bool controled) {
-	this->current_key = this->find_tapped_key(local_x, local_y);
+	VirtualKey found = this->find_tapped_key(local_x, local_y);
+
+	if (found != VirtualKey::None) {
+		this->master->on_char(found, true);
+	}
+}
+
+bool Keyboard::on_char(VirtualKey key, bool wargrey_keyboard) {
+	this->current_key = key;
 	this->taptime = this->uptime;
 	this->tapped = true;
 	this->master->notify_graphlet_updated(this);
+
+	return false;
 }
 
 void Keyboard::on_goodbye(float local_x, float local_y, bool shifted, bool controled) {

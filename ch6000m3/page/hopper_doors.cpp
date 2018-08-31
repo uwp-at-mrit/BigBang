@@ -17,6 +17,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::System;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -252,6 +253,23 @@ public:
 		}
 	}
 
+public:
+	bool on_char(VirtualKey key) {
+		bool handled = false;
+
+		if (key == VirtualKey::Enter) {
+			auto editor = dynamic_cast<Credit<Dimensionlet, HD>*>(this->master->get_focus_graphlet());
+
+			if (editor != nullptr) {
+				this->master->get_logger()->log_message(Log::Info, L"%lf", editor->get_input_number());
+			}
+
+			handled = true;
+		}
+
+		return handled;
+	}
+
 private:
 	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
@@ -452,6 +470,20 @@ bool HopperDoorsPage::can_select(IGraphlet* g) {
 	IEditorlet* e = dynamic_cast<IEditorlet*>(g);
 
 	return ((hd != nullptr) || ((e != nullptr) && (e->get_status() == EditorStatus::Enabled)));
+}
+
+bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_char(key, wargrey_keyboard);
+
+	if (!handled) {
+		auto db = dynamic_cast<Doors*>(this->dashboard);
+		
+		if (db != nullptr) {
+			handled = db->on_char(key);
+		}
+	}
+
+	return handled;
 }
 
 void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

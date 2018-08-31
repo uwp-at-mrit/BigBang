@@ -1,3 +1,5 @@
+#include <cwchar>
+
 #include "graphlet/textlet.hpp"
 
 #include "planet.hpp"
@@ -8,6 +10,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::System;
 using namespace Windows::UI::Text;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -284,7 +287,9 @@ void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
 	DimensionStyle style = this->get_style();
 
 	if (w != nullptr) {
-		(*w) = std::fmaxf(this->number_box.width, style.minimize_number_width) + this->unit_box.width;
+		TextExtent nbox = (this->has_caret() ? this->caret_box : this->number_box);
+		
+		(*w) = std::fmaxf(nbox.width, style.minimize_number_width) + this->unit_box.width;
 
 		if (this->text_layout != nullptr) {
 			(*w) += std::fmaxf(this->text_layout->LayoutBounds.Width, style.minimize_label_width);
@@ -311,10 +316,11 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace);
 	
 	if (this->text_layout == nullptr) {
+		TextExtent nbox = (this->has_caret() ? this->caret_box : this->number_box);
 		DimensionStyle style = this->get_style();
-		float region_width = std::fmaxf(this->number_box.width, style.minimize_number_width);
+		float region_width = std::fmaxf(nbox.width, style.minimize_number_width);
 		
-		label_box.lspace = (region_width - this->number_box.width) * style.number_xfraction + this->number_box.lspace;
+		label_box.lspace = (region_width - nbox.width) * style.number_xfraction + nbox.lspace;
 	} else {
 		DimensionStyle style = this->get_style();
 		float region_width = std::fmaxf(label_box.width, style.minimize_label_width);
@@ -338,8 +344,80 @@ void IEditorlet::on_status_changed(EditorStatus status) {
 	this->enable_events(status == EditorStatus::Enabled);
 }
 
+bool IEditorlet::on_char(VirtualKey key, bool wargrey_keyboard) {
+	static unsigned int num0 = static_cast<unsigned int>(VirtualKey::Number0);
+	static unsigned int pad0 = static_cast<unsigned int>(VirtualKey::NumberPad0);
+	unsigned int keycode = static_cast<unsigned int>(key);
+	bool handled = false;
+
+	switch (key) {
+	case VirtualKey::Subtract: {
+		if (this->input_number == nullptr) {
+			this->input_number = "-";
+		}
+		handled = true;
+	}; break;
+	case VirtualKey::Decimal: {
+		if (this->decimal_position < 0) {
+			this->decimal_position = this->input_number->Length() - 1;
+			this->input_number += ".";
+		}
+		handled = true;
+	}; break;
+	case VirtualKey::Back: {
+		if (this->input_number != nullptr) {
+			int count = this->input_number->Length() - 1;
+
+			this->input_number = ref new Platform::String(this->input_number->Data(), count);
+
+			if (count < this->decimal_position) {
+				this->decimal_position = -1;
+			}
+		}
+		handled = true;
+	}; break;
+	default: {
+		if ((VirtualKey::Number0 <= key) && (key <= VirtualKey::Number9)) {
+			this->input_number += (keycode - num0).ToString();
+			handled = true;
+		} else if ((VirtualKey::NumberPad0 <= key) && (key <= VirtualKey::NumberPad9)) {
+			this->input_number += (keycode - pad0).ToString();
+			handled = true;
+		}
+	}
+	}
+
+	if (handled) {
+		DimensionStyle style = this->get_style();
+
+		this->caret_layout = make_text_layout(this->input_number, style.number_font);
+		this->caret_box = get_text_extent(this->caret_layout);
+
+		this->notify_updated();
+	}
+
+	return handled;
+}
+
 void IEditorlet::own_caret(bool on) {
 	this->flashing = on;
+
+	if (on) {
+		this->input_number = nullptr;
+		this->caret_layout = nullptr;
+		this->caret_box = TextExtent();
+		this->decimal_position = -1;
+	}
+}
+
+long double IEditorlet::get_input_number() {
+	long double v = 0.0;
+
+	if (this->input_number != nullptr) {
+		v = std::wcstod(this->input_number->Data(), nullptr);
+	}
+
+	return v;
 }
 
 void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
@@ -391,9 +469,12 @@ void IEditorlet::apply_style(DimensionStyle& style) {
 
 void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	DimensionStyle style = this->get_style();
+	CanvasTextLayout^ nlayout = this->number_layout;
+	TextExtent nbox = this->number_box;
 	TextExtent label_box;
 	float tspace, bspace, height, base_y, box_height;
 	float number_region_x = 0.0F;
+	float number_x = -nbox.width;
 	
 	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, &height);
 	base_y = y + height;
@@ -417,18 +498,21 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 		number_region_x = x;
 	}
 
-	{ // draw number
-		float region_width = std::fmaxf(this->number_box.width, style.minimize_number_width);
-		float number_x = x + (region_width - this->number_box.width) * style.number_xfraction;
+	if (this->has_caret()) {
+		nbox = this->caret_box;
+		nlayout = this->caret_layout;
+	}
 
+	{ // draw number
+		float region_width = std::fmaxf(nbox.width, style.minimize_number_width);
+		
 		if (style.number_background_color != nullptr) {
 			ds->FillRectangle(x, y, region_width, height, style.number_background_color);
 		}
 
-		if (!this->has_caret()) {
-			ds->DrawTextLayout(this->number_layout, x, base_y - number_box.height, style.number_color);
-		} else {
-			// do nothing
+		if (nlayout != nullptr) {
+			number_x = x + (region_width - nbox.width) * style.number_xfraction;
+			ds->DrawTextLayout(nlayout, number_x, base_y - number_box.height, style.number_color);
 		}
 
 		if (style.number_border_color != nullptr) {
@@ -453,9 +537,10 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	}
 
 	if (this->flashing) {
-		float caret_x = number_region_x + 2.0F;
+		float padding_x = 2.0F;
+		float caret_x = std::fmaxf(number_region_x + padding_x, number_x + nbox.width);
 
-		ds->DrawLine(caret_x, y + 2.0F, caret_x, y + height - 4.0F, style.caret_color);
+		ds->DrawLine(caret_x, y + padding_x, caret_x, y + height - padding_x, style.caret_color);
 	}
 }
 

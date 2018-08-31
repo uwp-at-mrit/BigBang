@@ -136,7 +136,11 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void own_caret(bool is_own) override;
+
+	public:
+		long double get_input_number();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::EditorStatus status, WarGrey::SCADA::DimensionStyle& style) override;
@@ -145,17 +149,21 @@ namespace WarGrey::SCADA {
 		void on_status_changed(WarGrey::SCADA::EditorStatus status) override;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caret_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ number_layout;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ unit_layout;
+		WarGrey::SCADA::TextExtent caret_box;
 		WarGrey::SCADA::TextExtent number_box;
 		WarGrey::SCADA::TextExtent unit_box;
 
 	private:
+		Platform::String^ input_number;
 		Platform::String^ number;
 		Platform::String^ unit;
 
 	private:
 		bool flashing;
+		int decimal_position;
 	};
 
 	private class Dimensionlet : public WarGrey::SCADA::IEditorlet {

@@ -57,6 +57,7 @@ namespace WarGrey::SCADA {
 	public:
 		void on_hover(float local_x, float local_y, bool shifted, bool controled) override;
 		void on_tap(float local_x, float local_y, bool shifted, bool controled) override;
+		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void on_goodbye(float local_x, float local_y, bool shifted, bool controled) override;
 
 	protected:
@@ -71,7 +72,6 @@ namespace WarGrey::SCADA {
 		Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y);
 		float cellsize;
 		float gapsize;
-		float em;
 
 	private:
 		const WarGrey::SCADA::KeyboardCell* cells;

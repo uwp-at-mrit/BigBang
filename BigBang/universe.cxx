@@ -649,7 +649,7 @@ void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args
 	if (this->recent_planet != nullptr) {
 		VirtualKey vkey = args->Key;
 
-		args->Handled = this->recent_planet->on_char(args->Key);
+		args->Handled = this->recent_planet->on_char(args->Key, false);
 	}
 
 	this->leave_critical_section();
