@@ -11,38 +11,72 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-IShapelet::IShapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color
-	, float thickness, CanvasStrokeStyle^ style) : color(color), border_color(border_color) {
+IShapelet::IShapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor
+	, float thickness, CanvasStrokeStyle^ style) : color(color), border_color(bcolor) {
 	this->surface = geometry_freeze(shape);
+	this->border = geometry_draft(shape, thickness, style);
 
-	if (border_color->Color.A == 0) {
-		this->border = nullptr;
-		this->box = shape->ComputeBounds();
-	} else {
-		this->border = geometry_draft(shape, thickness, style);
-		this->box = shape->ComputeStrokeBounds(thickness);
-	}
+	this->box = shape->ComputeBounds();
+	this->border_box = shape->ComputeStrokeBounds(thickness);
+}
+
+void IShapelet::construct() {
+	this->set_color(this->color);
+	this->set_border_color(this->border_color);
 }
 
 void IShapelet::fill_extent(float x, float y, float* w, float* h) {
-	SET_VALUES(w, this->box.Width, h, this->box.Height);
+	if (this->border_color == nullptr) {
+		SET_VALUES(w, this->box.Width, h, this->box.Height);
+	} else {
+		SET_VALUES(w, this->border_box.Width, h, this->border_box.Height);
+	}
+}
+
+void IShapelet::fill_shape_origin(float* x, float* y) {
+	if (this->border_color == nullptr) {
+		SET_VALUES(x, this->box.X, y, this->box.Y);
+	} else {
+		SET_VALUES(x, this->border_box.X, y, this->border_box.Y);
+	}
+}
+
+void IShapelet::set_border_color(CanvasSolidColorBrush^ color) {
+	this->border_color = color;
+
+	if ((color != nullptr) && (color->Color.A == 0)) {
+		this->border_color = nullptr;
+	}
+}
+
+void IShapelet::set_color(ICanvasBrush^ color) {
+	this->color = ((color == nullptr) ? Colours::Background : color);
 }
 
 void IShapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float px = x - this->box.X;
-	float py = y - this->box.Y;
+	float ox, oy;
 	
-	ds->DrawCachedGeometry(this->surface, px, py, this->color);
-	if (this->border != nullptr) {
-		ds->DrawCachedGeometry(this->border, px, py, this->border_color);
+	this->fill_shape_origin(&ox, &oy);
+	
+	ds->DrawCachedGeometry(this->surface, x - ox, y - oy, this->color);
+
+	if (this->border_color != nullptr) {
+		ds->DrawCachedGeometry(this->border, x - ox, y - oy, this->border_color);
 	}
 }
 
 /*************************************************************************************************/
-Rectanglelet::Rectanglelet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
 
-Rectanglelet::Rectanglelet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: IShapelet(rectangle(width, height), color, border_color, thickness) {}
+
+/*************************************************************************************************/
+Trianglet::Trianglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
+
+Trianglet::Trianglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: IShapelet(rectangle(width, height), color, border_color, thickness) {}
 
 /*************************************************************************************************/

@@ -38,9 +38,9 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new HopperDoorsPage(this->device));
-		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new SealedWaterPage(this->device));
+		this->add_planet(new HydraulicsPage(this->device));
+		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new GraphletOverview());
 	}
 

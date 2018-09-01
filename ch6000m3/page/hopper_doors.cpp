@@ -254,14 +254,22 @@ public:
 	}
 
 public:
-	bool on_char(VirtualKey key) {
+	bool on_char(VirtualKey key, IMRMaster* plc) {
 		bool handled = false;
 
 		if (key == VirtualKey::Enter) {
 			auto editor = dynamic_cast<Credit<Dimensionlet, HD>*>(this->master->get_focus_graphlet());
 
 			if (editor != nullptr) {
-				this->master->get_logger()->log_message(Log::Info, L"%lf", editor->get_input_number());
+				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
+					editor->id.ToString()->Data(),
+					editor->get_input_number());
+
+				if (editor == this->ports[editor->id]) {
+					this->dimensions[HD::pLeftDrag]->set_value(editor->get_input_number());
+				} else {
+					this->dimensions[HD::pRightDrag]->set_value(editor->get_input_number());
+				}
 			}
 
 			handled = true;
@@ -479,7 +487,7 @@ bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 		auto db = dynamic_cast<Doors*>(this->dashboard);
 		
 		if (db != nullptr) {
-			handled = db->on_char(key);
+			handled = db->on_char(key, this->device);
 		}
 	}
 

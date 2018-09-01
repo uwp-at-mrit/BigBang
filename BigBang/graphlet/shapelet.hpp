@@ -19,8 +19,14 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
 	public:
+		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+		void set_border_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color);
+		void fill_shape_origin(float* x, float* y);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ surface;
@@ -28,18 +34,32 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 
-	protected:
+	private:
+		Windows::Foundation::Rect border_box;
 		Windows::Foundation::Rect box;
 	};
 
-	private class Rectanglelet : public WarGrey::SCADA::IShapelet {
+	private class Rectanglet : public WarGrey::SCADA::IShapelet {
 	public:
-		Rectanglelet(float edge_size,
+		Rectanglet(float edge_size,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
 
-		Rectanglelet(float width, float height,
+		Rectanglet(float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
+	private class Trianglet : public WarGrey::SCADA::IShapelet {
+	public:
+		Trianglet(float edge_size,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+
+		Trianglet(float width, float height,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
@@ -109,18 +129,19 @@ namespace WarGrey::SCADA {
 
 	public:
 		void fill_anchor_location(Anchor a, float* x, float* y, bool need_absolute_location = true) {
-			float raw_x, raw_y;
+			float raw_x, raw_y, shape_x, shape_y;
 			float x0 = 0.0F;
 			float y0 = 0.0F;
 
+			this->fill_shape_origin(&shape_x, &shape_y);
 			this->turtle->fill_anchor_location(a, &raw_x, &raw_y);
 
 			if (need_absolute_location && (this->info != nullptr)) {
 				this->info->master->fill_graphlet_location(this, &x0, &y0);
 			}
 
-			SET_BOX(x, raw_x + x0 - this->box.X);
-			SET_BOX(y, raw_y + y0 - this->box.Y);
+			SET_BOX(x, raw_x + x0 - shape_x);
+			SET_BOX(y, raw_y + y0 - shape_y);
 		}
 
 		void append_subtrack(Anchor a1, Anchor a2, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
@@ -162,7 +183,10 @@ namespace WarGrey::SCADA {
 	private:
 		void append_subtrack(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track
 			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color) {
-			this->subtracks.push_back(geometry_freeze(geometry_translate(track, -this->box.X, -this->box.Y)));
+			float shape_x, shape_y;
+
+			this->fill_shape_origin(&shape_x, &shape_y);
+			this->subtracks.push_back(geometry_freeze(geometry_translate(track, -shape_x, -shape_y)));
 			this->subcolors.push_back(color);
 		}
 

@@ -10,7 +10,6 @@
 #include "brushes.hxx"
 #include "turtle.hpp"
 
-#include "graphlet/booleanlet.hpp"
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/symbol/pumplet.hpp"
@@ -36,6 +35,9 @@ private enum HSMode { WindowUI = 0, Dashboard };
 private enum class HSOperation { Start, Stop, Reset, _ };
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
+
+static ICanvasBrush^ block_color = Colours::Firebrick;
+static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 
 // WARNING: order matters
 private enum class HS : unsigned int {
@@ -375,10 +377,10 @@ private:
 	}
 
 	template<typename E>
-	void load_boolean_indicators(E id0, E idn, float size, std::map<E, Credit<Booleanlet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+	void load_boolean_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id, Colours::Silver);
-			bs[id] = this->master->insert_one(new Credit<Booleanlet, E>(size, Colours::Green), id);
+			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, nonblock_color), id);
 		}
 	}
 
@@ -433,7 +435,7 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
-	std::map<HS, Credit<Booleanlet, HS>*> states;
+	std::map<HS, Credit<Rectanglet, HS>*> states;
 	std::map<HS, Credit<Labellet, HS>*> islabels;
 
 	

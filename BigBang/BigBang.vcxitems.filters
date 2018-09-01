@@ -39,9 +39,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\togglet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.cpp">
-      <Filter>graphlet</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp">
       <Filter>graphlet</Filter>
     </ClCompile>
@@ -150,9 +147,6 @@
       <Filter>graphlet</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\booleanlet.hpp">
-      <Filter>graphlet</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp">
       <Filter>graphlet</Filter>
     </ClInclude>
