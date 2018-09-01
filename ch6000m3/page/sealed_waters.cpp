@@ -32,6 +32,9 @@ private enum SWMode { WindowUI = 0, Dashboard };
 
 private enum class SWOperation { Start, Stop, Reset, _ };
 
+static const float default_thickness = 1.5F;
+static CanvasSolidColorBrush^ track_color = Colours::Gray;
+
 // WARNING: order matters
 private enum class SW : unsigned int {
 	// Pumps
@@ -43,17 +46,17 @@ private enum class SW : unsigned int {
 	DGV8, DGV44, DGV45, DGV7, DGV46, DGV47,
 	// Labels
 	ToPipeline, SS1, SS2,
+	// Special Arrows
+	UA1, UA2, DA1, DA2,
 	_,
 	// anchors used as last jumping points
 	d3, d4, d5, d6,
 	d12, d11, d13, d14, d15, d16, d17, d18, d19, d20,
-	d44, d45,
+	d44, d45, d46, d47,
 
 	// anchors used for unnamed corners
 	sea
 };
-
-static const float default_thickness = 1.5F;
 
 private class SealedWaters final : public PLCConfirmation, public IMenuCommand<SWOperation, IMRMaster*> {
 public:
@@ -101,7 +104,7 @@ public:
 		pTurtle->move_right(10)->move_up(1.5F)->move_right(6, SW::ToPipeline)->jump_back();
 
 		pTurtle->move_down(4, SW::d13)->move_right(6, SW::DGV13)->move_right(6, SW::SP13)->move_right(6, SW::DGV3);
-		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA1)->move_down(1.5F)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d14)->move_right(6, SW::DGV14)->move_right(6, SW::SP24)->move_right(6, SW::DGV4);
 		pTurtle->move_right(14, SW::d44)->move_right(12, SW::DGV44)->move_right(6, SW::HP1)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(7, SW::DGV8);
@@ -112,26 +115,26 @@ public:
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(7, SW::DGV7);
 		pTurtle->move_right(10)->move_up(3)->move_left(2)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(6, SW::DGV16)->move_right(6, SW::SP26)->move_right(6, SW::DGV6);
-		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA1)->move_up(1.5F)->turn_up_right()->jump_back();
 
 		pTurtle->move_down(3, SW::sea);
 
 		pTurtle->move_down(2, SW::d17)->move_right(6, SW::DGV17)->move_right(6, SW::SP11)->move_right(6, SW::DGV1);
-		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA2)->move_down(1.5F)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d18)->move_right(6, SW::DGV18)->move_right(6, SW::SP22)->move_right(6, SW::DGV2);
-		pTurtle->move_right(24, SW::DGV46)->move_right(6, SW::Port)->jump_back();
+		pTurtle->move_right(14, SW::d46)->move_right(12, SW::DGV46)->move_right(6, SW::Port)->jump_back(SW::d18);
 
 		pTurtle->move_down(4, SW::d19)->move_right(6, SW::DGV19)->move_right(6, SW::SP19)->move_right(6, SW::DGV9);
-		pTurtle->move_right(24, SW::DGV47)->move_right(6, SW::Starboard)->jump_back();
+		pTurtle->move_right(14, SW::d47)->move_right(12, SW::DGV47)->move_right(6, SW::Starboard)->jump_back(SW::d19);
 		pTurtle->move_down(4, SW::d20)->move_right(6, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
-		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
-		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, Colours::Gray));
+		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, track_color));
 		this->hatch = this->master->insert_one(new Hatchlet(gridsize * 2.5F));
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
-		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gridsize, 0.000);
-		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gridsize, -90.000);
+		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gridsize, 0.0);
+		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gridsize, -90.0);
 		this->load_labels(this->captions, SW::Hatch, SW::Starboard, Colours::Salmon);
 		this->load_labels(this->captions, SW::ToPipeline, SW::SS2, Colours::Silver);
 
@@ -139,6 +142,18 @@ public:
 		this->load_dimensions(this->pressures, SW::DGV1, SW::DGV10, "bar", "P");
 		this->load_dimensions(this->pressures, SW::d44, SW::d45, "bar", "P");
 		this->load_dimensions(this->flows, SW::d44, SW::d45, "m3ph", "F");
+
+		{ // load arrows
+			float arrowsize = gridsize * 0.3F;
+
+			this->load_arrows(this->arrows, SW::d12, SW::d47, arrowsize, 0.0);
+			this->load_arrows(this->arrows, SW::DGV44, SW::DGV45, arrowsize, 0.0);
+			this->load_arrows(this->arrows, SW::DGV46, SW::DGV47, arrowsize, 0.0);
+			this->load_arrows(this->arrows, SW::FP1, SW::SP20, arrowsize, 0.0);
+			this->load_arrows(this->arrows, SW::UA1, SW::UA2, arrowsize, -90.0);
+			this->load_arrows(this->arrows, SW::DA1, SW::DA2, arrowsize, 90.0);
+			this->load_arrow(this->arrows, SW::ToPipeline, arrowsize * 2.0F, 0.0, Colours::Silver);
+		}
 	}
 
 public:
@@ -155,7 +170,6 @@ public:
 		this->station->map_credit_graphlet(this->captions[SW::HP2], GraphletAnchor::CT);
 		this->station->map_credit_graphlet(this->captions[SW::Port], GraphletAnchor::CB);
 		this->station->map_credit_graphlet(this->captions[SW::Starboard], GraphletAnchor::CT);
-		this->station->map_credit_graphlet(this->captions[SW::ToPipeline], GraphletAnchor::RB);
 		this->station->map_credit_graphlet(this->captions[SW::SS1], GraphletAnchor::LC);
 		this->station->map_credit_graphlet(this->captions[SW::SS2], GraphletAnchor::LC);
 		this->master->move_to(this->captions[SW::Hatch], this->hatch, GraphletAnchor::CB, GraphletAnchor::CT);
@@ -189,6 +203,25 @@ public:
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff, yoff);
 			}
 		}
+
+		{ // reflow arrows
+			float xoff = gridsize * 2.0F;
+			
+			for (auto it = this->arrows.begin(); it != this->arrows.end(); it++) {
+				switch (it->first) {
+				case SW::ToPipeline: {
+					this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, 0.0F, 0.0F);
+					this->master->move_to(this->captions[SW::ToPipeline], it->second, GraphletAnchor::LC, GraphletAnchor::RB);
+				}; break;
+				case SW::UA1: case SW::UA2: case SW::DA1: case SW::DA2: {
+					this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, 0.0F, 0.0F);
+				}; break;
+				default: {
+					this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, xoff, 0.0F);
+				}
+				}
+			}
+		}
 	}
 
 private:
@@ -210,6 +243,18 @@ private:
 		, E id0, E idn, float radius, double degrees) {
 		this->load_devices(gs, id0, idn, radius, degrees);
 		this->load_labels(ls, id0, idn, color);
+	}
+
+	template<class G, typename E>
+	void load_arrow(std::map<E, G*>& as, E id, float radius, double degrees, ICanvasBrush^ color = track_color) {
+		as[id] = this->master->insert_one(new Credit<ArrowHeadlet, E>(radius, degrees, color), id);
+	}
+
+	template<class G, typename E>
+	void load_arrows(std::map<E, G*>& as, E id0, E idn, float radius, double degrees, ICanvasBrush^ color = track_color) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_arrow(as, id, radius, degrees, color);
+		}
 	}
 
 	template<typename E>
@@ -237,6 +282,7 @@ private:
 	Hatchlet* hatch;
 	HLinelet* sea;
 	std::map<SW, Credit<Labellet, SW>*> captions;
+	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
 	std::map<SW, Credit<Pumplet, SW>*> pumps;
 	std::map<SW, Credit<Labellet, SW>*> plabels;
 	std::map<SW, Credit<Valvelet, SW>*> valves;

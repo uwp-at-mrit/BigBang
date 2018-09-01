@@ -2,6 +2,7 @@
 
 #include "paint.hpp"
 #include "shape.hpp"
+#include "polar.hpp"
 #include "geometry.hpp"
 
 using namespace WarGrey::SCADA;
@@ -11,7 +12,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
-IShapelet::IShapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor
+Shapelet::Shapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColorBrush^ bcolor
 	, float thickness, CanvasStrokeStyle^ style) : color(color), border_color(bcolor) {
 	this->surface = geometry_freeze(shape);
 	this->border = geometry_draft(shape, thickness, style);
@@ -20,12 +21,12 @@ IShapelet::IShapelet(CanvasGeometry^ shape, ICanvasBrush^ color, CanvasSolidColo
 	this->border_box = shape->ComputeStrokeBounds(thickness);
 }
 
-void IShapelet::construct() {
+void Shapelet::construct() {
 	this->set_color(this->color);
 	this->set_border_color(this->border_color);
 }
 
-void IShapelet::fill_extent(float x, float y, float* w, float* h) {
+void Shapelet::fill_extent(float x, float y, float* w, float* h) {
 	if (this->border_color == nullptr) {
 		SET_VALUES(w, this->box.Width, h, this->box.Height);
 	} else {
@@ -33,7 +34,7 @@ void IShapelet::fill_extent(float x, float y, float* w, float* h) {
 	}
 }
 
-void IShapelet::fill_shape_origin(float* x, float* y) {
+void Shapelet::fill_shape_origin(float* x, float* y) {
 	if (this->border_color == nullptr) {
 		SET_VALUES(x, this->box.X, y, this->box.Y);
 	} else {
@@ -41,7 +42,7 @@ void IShapelet::fill_shape_origin(float* x, float* y) {
 	}
 }
 
-void IShapelet::set_border_color(CanvasSolidColorBrush^ color) {
+void Shapelet::set_border_color(CanvasSolidColorBrush^ color) {
 	this->border_color = color;
 
 	if ((color != nullptr) && (color->Color.A == 0)) {
@@ -49,11 +50,11 @@ void IShapelet::set_border_color(CanvasSolidColorBrush^ color) {
 	}
 }
 
-void IShapelet::set_color(ICanvasBrush^ color) {
+void Shapelet::set_color(ICanvasBrush^ color) {
 	this->color = ((color == nullptr) ? Colours::Background : color);
 }
 
-void IShapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float ox, oy;
 	
 	this->fill_shape_origin(&ox, &oy);
@@ -67,17 +68,18 @@ void IShapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 /*************************************************************************************************/
 Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
+	: Shapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
 
 Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: IShapelet(rectangle(width, height), color, border_color, thickness) {}
+	: Shapelet(rectangle(width, height), color, border_color, thickness) {}
 
 /*************************************************************************************************/
-Trianglet::Trianglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: IShapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
+ArrowHeadlet::ArrowHeadlet(float radius, double degrees, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(polar_arrowhead(radius, degrees), color, border_color, thickness), start_degrees(degrees) {}
 
-Trianglet::Trianglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
-	: IShapelet(rectangle(width, height), color, border_color, thickness) {}
+double ArrowHeadlet::get_degrees() {
+	return this->start_degrees;
+}
 
 /*************************************************************************************************/
 HLinelet::HLinelet(float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)

@@ -142,6 +142,22 @@ CanvasGeometry^ WarGrey::SCADA::polar_line(float radius, double start_degrees, d
 	return CanvasGeometry::CreatePath(axis);
 }
 
+CanvasGeometry^ WarGrey::SCADA::polar_arrowhead(float r, double d) {
+	auto arrowhead = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float x, y;
+
+	circle_point(r, d, &x, &y);
+	arrowhead->BeginFigure(x, y);
+	circle_point(r, d + 120.0, &x, &y);
+	arrowhead->AddLine(x, y);
+	arrowhead->AddLine(0.0F, 0.0F);
+	circle_point(r, d - 120.0, &x, &y);
+	arrowhead->AddLine(x, y);
+	arrowhead->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(arrowhead);
+}
+
 CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d) {
 	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;

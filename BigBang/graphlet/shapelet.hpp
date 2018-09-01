@@ -10,9 +10,9 @@
 #include "geometry.hpp"
 
 namespace WarGrey::SCADA {
-	private class IShapelet : public virtual WarGrey::SCADA::IGraphlet {
+	private class Shapelet : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IShapelet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
+		Shapelet(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shape,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F,
@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Rect box;
 	};
 
-	private class Rectanglet : public WarGrey::SCADA::IShapelet {
+	private class Rectanglet : public WarGrey::SCADA::Shapelet {
 	public:
 		Rectanglet(float edge_size,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
@@ -52,17 +52,18 @@ namespace WarGrey::SCADA {
 			float thickness = 1.0F);
 	};
 
-	private class Trianglet : public WarGrey::SCADA::IShapelet {
+	private class ArrowHeadlet : public WarGrey::SCADA::Shapelet {
 	public:
-		Trianglet(float edge_size,
+		ArrowHeadlet(float radius, double degrees,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
 			float thickness = 1.0F);
 
-		Trianglet(float width, float height,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
-			float thickness = 1.0F);
+	public:
+		double get_degrees();
+
+	private:
+		double start_degrees;
 	};
 
 	private class HLinelet : public WarGrey::SCADA::IGraphlet {
@@ -98,7 +99,7 @@ namespace WarGrey::SCADA {
 	};
 
 	template<typename Anchor>
-	private class Tracklet : public virtual WarGrey::SCADA::IShapelet {
+	private class Tracklet : public virtual WarGrey::SCADA::Shapelet {
 	public:
 		~Tracklet() noexcept {
 			this->turtle->destroy();
@@ -107,7 +108,7 @@ namespace WarGrey::SCADA {
 		Tracklet(WarGrey::SCADA::Turtle<Anchor>* turtle, float thickness = 1.0F
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver
 			, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr)
-			: IShapelet(turtle->snap_track(thickness, style), color), turtle(turtle)
+			: Shapelet(turtle->snap_track(thickness, style), color), turtle(turtle)
 			, thickness(thickness), style(style) {
 			this->turtle->reference();
 		}
@@ -117,7 +118,7 @@ namespace WarGrey::SCADA {
 			auto subtrack = this->subtracks.begin();
 			auto subcolor = this->subcolors.begin();
 
-			WarGrey::SCADA::IShapelet::draw(ds, x, y, Width, Height);
+			WarGrey::SCADA::Shapelet::draw(ds, x, y, Width, Height);
 
 			while (subtrack != this->subtracks.end()) {
 				ds->DrawCachedGeometry((*subtrack), x, y, (*subcolor));
