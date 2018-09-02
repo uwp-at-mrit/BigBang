@@ -219,6 +219,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\draughts.resw" />
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -239,6 +240,7 @@
     <PRIResource Include="stone\tongue\en-US\waters.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -263,6 +265,7 @@
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
+    <ClCompile Include="page\draughts.cpp" />
     <ClCompile Include="page\hopper_doors.cpp" />
     <ClCompile Include="page\graphlets.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
@@ -272,6 +275,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="page\draughts.hpp" />
     <ClInclude Include="page\hopper_doors.hpp" />
     <ClInclude Include="page\graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />

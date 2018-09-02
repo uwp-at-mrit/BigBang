@@ -180,4 +180,7 @@
   <data name="UltraLow" xml:space="preserve">
     <value>过低</value>
   </data>
+  <data name="draughts" xml:space="preserve">
+    <value>吃水装载</value>
+  </data>
 </root>

@@ -31,7 +31,7 @@ private enum class HDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
-	BowDraft, EarthWork, Capacity, Height, Load, Displacement, SternDraft,
+	SternDraft, EarthWork, Capacity, Height, Load, Displacement, BowDraft,
 	
 	pLeftDrag, pLock, pRightDrag, Heel, Trim,
 	Port, Starboard, OpenFlow, CloseFlow, Pressure,
@@ -152,24 +152,22 @@ public:
 
 public:
 	void load(float width, float height, float vinset) {
-		float cell_width, cell_height, radius;
-		float ship_y, ship_height, cylinder_height;
+		float cell_width, cell_height, radius, cylinder_height;
 		
-		this->decorator->fill_ship_extent(nullptr, &ship_y, nullptr, &ship_height);
 		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
 		
 		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->doors, this->progresses, this->tubes, HD::PS1, HD::PS7, radius);
-		this->load_doors(this->doors, this->progresses, this->tubes, HD::SB1, HD::SB7, radius);
+		this->load_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, radius);
+		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
 
-		cylinder_height = (height - ship_y - ship_height - vinset * 2.0F) * 0.5F;
-		this->load_cylinder(this->cylinders, HD::BowDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
+		cylinder_height = cell_height * 1.618F;
+		this->load_cylinder(this->cylinders, HD::BowDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
 		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::Height, cylinder_height, 15.0, "meter", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::SternDraft, cylinder_height, 10.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::SternDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
 
 		this->load_dimensions(this->dimensions, this->captions, HD::pLeftDrag, HD::pRightDrag, "bar");
 		this->load_dimensions(this->dimensions, this->captions, HD::Heel, HD::Trim, "degrees");
@@ -188,23 +186,10 @@ public:
 	}
 
 	void reflow(float width, float height, float vinset) {
-		this->reflow_doors(this->doors, this->progresses, this->tubes, HD::PS1, HD::PS7, 1.0F, -0.5F);
-		this->reflow_doors(this->doors, this->progresses, this->tubes, HD::SB1, HD::SB7, 3.0F, 0.5F);
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, 1.0F, -0.5F);
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, 3.0F, 0.5F);
 
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::BowDraft, HD::SternDraft);
-
-		{ // reflow cylinders
-			float x, y, label_height, xoff, yoff;
-
-			this->master->fill_graphlet_location(this->cylinders[HD::BowDraft], nullptr, &y, GraphletAnchor::CC);
-			this->captions[HD::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
-
-			xoff = label_height * 0.5F;
-			yoff = label_height * 2.0F;
-
-			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
-			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
-		}
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::SternDraft, HD::BowDraft);
 
 		{ // reflow settings
 			float x, y, yoff;
@@ -223,6 +208,19 @@ public:
 
 			this->master->move_to(this->starboards[HD::Pressure], this->captions[HD::Starboard], GraphletAnchor::RB, GraphletAnchor::LB);
 			this->master->move_to(this->dimensions[HD::pRightDrag], this->starboards[HD::Pressure], GraphletAnchor::RB, GraphletAnchor::LB);
+		}
+		
+		{ // reflow dimensions
+			float x, y, label_height, xoff, yoff;
+
+			this->master->fill_graphlet_location(this->cylinders[HD::BowDraft], nullptr, &y, GraphletAnchor::CC);
+			this->captions[HD::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+
+			xoff = label_height * 0.5F;
+			yoff = label_height * 2.0F;
+
+			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
+			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
 		}
 	}
 
@@ -265,6 +263,7 @@ public:
 					editor->id.ToString()->Data(),
 					editor->get_input_number());
 
+				editor->set_value(editor->get_input_number());
 				if (editor == this->ports[editor->id]) {
 					this->dimensions[HD::pLeftDrag]->set_value(editor->get_input_number());
 				} else {
@@ -368,24 +367,12 @@ private:
 			ls[id]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
 			gapsize *= 0.5F;
 
-			this->decorator->fill_descent_anchor((_I(id) - _I(id0)) / flcount, 0.0F, &x, nullptr);
+			this->decorator->fill_descent_anchor(float(_I(id) - _I(id0)) / flcount, 0.0F, &x, nullptr);
 
 			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::CT);
 			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 		}
-	}
-
-	template <class G1, class G2, typename E>
-	void reflow_tabular(std::map<E, Credit<G1, E>*>& g1s, std::map<E, Credit<G2, E>*>& g2s
-		, E base, float x, float y, E above, E below, float xoff, float yoff) {
-		this->master->move_to(g1s[base], x, y, GraphletAnchor::CC);
-		this->master->move_to(g1s[above], g1s[base], GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -yoff);
-		this->master->move_to(g1s[below], g1s[base], GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, yoff);
-
-		this->master->move_to(g2s[base], g1s[base], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
-		this->master->move_to(g2s[above], g1s[above], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
-		this->master->move_to(g2s[below], g1s[below], GraphletAnchor::RC, GraphletAnchor::LC, xoff, 0.0F);
 	}
 
 private:
@@ -396,9 +383,9 @@ private:
 
 private: // never delete these graphlets manually.
 	std::map<HD, Credit<Labellet, HD>*> captions;
-	std::map<HD, Credit<HopperDoorlet, HD>*> doors;
+	std::map<HD, Credit<HopperDoorlet, HD>*> hdoors;
 	std::map<HD, Credit<Percentagelet, HD>*> progresses;
-	std::map<HD, Credit<Doorlet, HD>*> tubes;
+	std::map<HD, Credit<Doorlet, HD>*> doors;
 	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
 	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
 	std::map<HD, Credit<Dimensionlet, HD>*> ports;
@@ -474,10 +461,7 @@ void HopperDoorsPage::reflow(float width, float height) {
 }
 
 bool HopperDoorsPage::can_select(IGraphlet* g) {
-	HopperDoorlet* hd = dynamic_cast<HopperDoorlet*>(g);
-	IEditorlet* e = dynamic_cast<IEditorlet*>(g);
-
-	return ((hd != nullptr) || ((e != nullptr) && (e->get_status() == EditorStatus::Enabled)));
+	return (dynamic_cast<HopperDoorlet*>(g) != nullptr);
 }
 
 bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {

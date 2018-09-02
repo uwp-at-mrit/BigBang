@@ -117,70 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="BowDraft" xml:space="preserve">
+    <value>Bow Draught</value>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="EarthWork" xml:space="preserve">
+    <value>Earthwork Volume</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="Heel" xml:space="preserve">
+    <value>Heeling Angle</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="pLeftDrag" xml:space="preserve">
+    <value>Left Drag Output Pressure</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="pLock" xml:space="preserve">
+    <value>Locking High Pressure</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="pRightDrag" xml:space="preserve">
+    <value>Right Drag Output Pressure</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="SternDraft" xml:space="preserve">
+    <value>Stern Draught</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="Trim" xml:space="preserve">
+    <value>Trimming Angle</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="Capacity" xml:space="preserve">
+    <value>Hold Capacity</value>
   </data>
-  <data name="hydraulics" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="Displacement" xml:space="preserve">
+    <value>Displacement</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="Height" xml:space="preserve">
+    <value>Hold Height</value>
   </data>
-  <data name="graphlets" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="Load" xml:space="preserve">
+    <value>Hold Load</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="Port" xml:space="preserve">
+    <value>Port Hopper Door</value>
   </data>
-  <data name="hopper_doors" xml:space="preserve">
-    <value>Hopper Doors Control</value>
+  <data name="Starboard" xml:space="preserve">
+    <value>Starboard Hopper Door</value>
   </data>
-  <data name="Empty" xml:space="preserve">
-    <value>E</value>
+  <data name="ToPipeline" xml:space="preserve">
+    <value>Transfer to Flushing Pipeline System</value>
   </data>
-  <data name="Full" xml:space="preserve">
-    <value>F</value>
+  <data name="CloseFlow" xml:space="preserve">
+    <value>Closing Flow</value>
   </data>
-  <data name="High" xml:space="preserve">
-    <value>H</value>
+  <data name="OpenFlow" xml:space="preserve">
+    <value>Opening Flow</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>L</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>N</value>
-  </data>
-  <data name="UltraLow" xml:space="preserve">
-    <value>UL</value>
-  </data>
-  <data name="sealed_waters" xml:space="preserve">
-    <value>Sealed Water Pumps</value>
-  </data>
-  <data name="draughts" xml:space="preserve">
-    <value>Draught And Load</value>
+  <data name="Pressure" xml:space="preserve">
+    <value>Pressure Control</value>
   </data>
 </root>

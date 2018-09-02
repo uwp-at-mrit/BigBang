@@ -42,6 +42,9 @@
     <ClCompile Include="page\hopper_doors.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\draughts.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -59,6 +62,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\hopper_doors.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\draughts.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,6 +143,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\draughts.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\draughts.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
