@@ -92,13 +92,14 @@ public:
 	}
 
 public:
-	void fill_ship_extent(float* x, float* y, float* width, float* height) {
+	void fill_ship_extent(float* x, float* y, float* width, float* height, bool full = false) {
 		float awidth = this->actual_width();
 		float aheight = this->actual_height();
 		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
 
 		SET_VALUES(x, this->x * awidth, y, this->y * aheight);
-		SET_VALUES(width, this->ship_width * awidth, height, abox.Height);
+		SET_BOX(width, (full ? abox.Width : this->ship_width * awidth));
+		SET_BOX(height, abox.Height);
 	}
 
 	void fill_door_cell_extent(float* x, float* y, float* width, float* height, size_t idx, float side_hint) {

@@ -1,4 +1,5 @@
 #include "shape.hpp"
+#include "text.hpp"
 #include "math.hpp"
 
 using namespace WarGrey::SCADA;
@@ -29,11 +30,19 @@ CanvasGeometry^ WarGrey::SCADA::blank() {
     return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
 }
 
-CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, bool adjust) {
+CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, float* width, float* height, bool adjust) {
     CanvasGeometry^ layout = CanvasGeometry::CreateText(tl);
 	float x = tl->LayoutBounds.X;
 	float y = tl->LayoutBounds.Y;
     
+	if (width != nullptr) {
+		(*width) = tl->LayoutBounds.Width;
+	}
+
+	if (height != nullptr) {
+		(*height) = tl->LayoutBounds.Height;
+	}
+
     if (adjust && ((x < 0.0F) || (y < 0.0F))) {
 		float xoff = (x >= 0.0F) ? x : -x;
 		float yoff = (y >= 0.0F) ? y : -y;
@@ -42,6 +51,10 @@ CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, bool adjust) {
     }
 
 	return layout;
+}
+
+CanvasGeometry^ WarGrey::SCADA::paragraph(Platform::String^ text, CanvasTextFormat^ font, float* width, float* height, bool adjust) {
+	return paragraph(make_text_layout(text, font), width, height, adjust);
 }
 
 CanvasGeometry^ WarGrey::SCADA::line(float sx, float sy, float ex, float ey, float th, CanvasStrokeStyle^ style) {

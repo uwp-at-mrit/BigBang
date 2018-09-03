@@ -6,6 +6,7 @@
 
 #include <list>
 
+namespace WarGrey::SCADA {
 #define VSNWPRINT(pool, size, fmt) \
     static wchar_t pool[size]; \
     va_list argl; \
@@ -57,18 +58,20 @@ std::string retval; { \
     if (pool != chpool) delete[] pool; \
 }
 
-Platform::String^ substring(Platform::String^ src, int start, int endplus1 = -1);
+	Platform::String^ substring(Platform::String^ src, int start, int endplus1 = -1);
+	Platform::String^ flstring(double flonum, int precision);
 
-Platform::String^ make_wstring(const wchar_t* fmt, ...);
-Platform::String^ make_wstring(const char* bytes);
-Platform::String^ make_wstring(std::string bytes);
-size_t wstrlen(const wchar_t* content);
+	Platform::String^ make_wstring(const wchar_t* fmt, ...);
+	Platform::String^ make_wstring(const char* bytes);
+	Platform::String^ make_wstring(std::string bytes);
+	size_t wstrlen(const wchar_t* content);
 
-std::string make_nstring(const char* fmt, ...);
-std::string make_nstring(const wchar_t* wbytes);
-std::string make_nstring(Platform::String^ wstr);
+	std::string make_nstring(const char* fmt, ...);
+	std::string make_nstring(const wchar_t* wbytes);
+	std::string make_nstring(Platform::String^ wstr);
 
-std::string binumber(unsigned int n, size_t bitsize = 0);
+	std::string binumber(unsigned int n, size_t bitsize = 0);
 
-Platform::String^ string_first_line(Platform::String^ src);
-std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line = false);
+	Platform::String^ string_first_line(Platform::String^ src);
+	std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line = false);
+}

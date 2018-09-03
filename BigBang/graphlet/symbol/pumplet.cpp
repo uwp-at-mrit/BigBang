@@ -14,18 +14,18 @@ static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-Pumplet::Pumplet(float radius, double degrees) : Pumplet(PumpStatus::Stopped, radius, degrees) {}
+HydraulicPumplet::HydraulicPumplet(float radius, double degrees) : HydraulicPumplet(PumpStatus::Stopped, radius, degrees) {}
 
-Pumplet::Pumplet(PumpStatus default_status, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
+HydraulicPumplet::HydraulicPumplet(PumpStatus default_status, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
 }
 
-void Pumplet::construct() {
+void HydraulicPumplet::construct() {
 	this->skeleton = polar_triangle(this->tradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void Pumplet::update(long long count, long long interval, long long uptime) {
+void HydraulicPumplet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
 	case PumpStatus::Starting: {
 		this->mask_percentage
@@ -48,7 +48,7 @@ void Pumplet::update(long long count, long long interval, long long uptime) {
 	}
 }
 
-void Pumplet::on_status_changed(PumpStatus status) {
+void HydraulicPumplet::on_status_changed(PumpStatus status) {
 	switch (status) {
 	case PumpStatus::Unstartable: {
 		if (this->unstartable_mask == nullptr) {
@@ -69,7 +69,7 @@ void Pumplet::on_status_changed(PumpStatus status) {
 	}
 }
 
-void Pumplet::prepare_style(PumpStatus status, PumpStyle& s) {
+void HydraulicPumplet::prepare_style(PumpStatus status, PumpStyle& s) {
 	switch (status) {
 	case PumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
@@ -102,7 +102,7 @@ void Pumplet::prepare_style(PumpStatus status, PumpStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void Pumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void HydraulicPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const PumpStyle style = this->get_style();
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;

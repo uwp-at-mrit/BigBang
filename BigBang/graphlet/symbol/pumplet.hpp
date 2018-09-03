@@ -12,10 +12,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
-	private class Pumplet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
+	private class HydraulicPumplet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
 	public:
-		Pumplet(WarGrey::SCADA::PumpStatus default_status, float radius, double degrees = -90.0);
-		Pumplet(float radius, double degrees = -90.0);
+		HydraulicPumplet(WarGrey::SCADA::PumpStatus default_status, float radius, double degrees = -90.0);
+		HydraulicPumplet(float radius, double degrees = -90.0);
 
 	public:
 		void construct() override;

@@ -1,6 +1,8 @@
 #include "string.hpp"
 #include "path.hpp"
 
+using namespace WarGrey::SCADA;
+
 using namespace Windows::Foundation;
 
 static int last_slash_position(const wchar_t* raw, int size, int fallback = -1) {
@@ -30,11 +32,11 @@ static int last_dot_position(const wchar_t* raw, int size, int fallback = -1) {
 }
 
 /*************************************************************************************************/
-Platform::String^ file_name_from_path(Uri^ uri) {
+Platform::String^ WarGrey::SCADA::file_name_from_path(Uri^ uri) {
 	return file_name_from_path(uri->Path);
 }
 
-Platform::String^ file_name_from_path(Platform::String^ path) {
+Platform::String^ WarGrey::SCADA::file_name_from_path(Platform::String^ path) {
 	Platform::String^ filename = path;
 	unsigned int size = path->Length();
 	const wchar_t* raw = path->Data();
@@ -47,11 +49,11 @@ Platform::String^ file_name_from_path(Platform::String^ path) {
 	return filename;
 }
 
-Platform::String^ file_basename_from_path(Uri^ uri) {
+Platform::String^ WarGrey::SCADA::file_basename_from_path(Uri^ uri) {
 	return file_basename_from_path(uri->Path);
 }
 
-Platform::String^ file_basename_from_path(Platform::String^ path) {
+Platform::String^ WarGrey::SCADA::file_basename_from_path(Platform::String^ path) {
 	unsigned int size = path->Length();
 	const wchar_t* raw = path->Data();
 	int last_dot_idx = last_dot_position(raw, size, size);
@@ -60,11 +62,11 @@ Platform::String^ file_basename_from_path(Platform::String^ path) {
 	return substring(path, last_slash_idx + 1, last_dot_idx);
 }
 
-Platform::String^ file_extension_from_path(Uri^ uri) {
+Platform::String^ WarGrey::SCADA::file_extension_from_path(Uri^ uri) {
 	return file_extension_from_path(uri->Path);
 }
 
-Platform::String^ file_extension_from_path(Platform::String^ path) {
+Platform::String^ WarGrey::SCADA::file_extension_from_path(Platform::String^ path) {
 	Platform::String^ ext = nullptr;
 	unsigned int size = path->Length();
 	const wchar_t* raw = path->Data();
@@ -77,7 +79,7 @@ Platform::String^ file_extension_from_path(Platform::String^ path) {
 	return ext;
 }
 
-Uri^ ms_appx_file(Platform::String^ file, Platform::String^ ext, Platform::String^ rootdir) {
+Uri^ WarGrey::SCADA::ms_appx_file(Platform::String^ file, Platform::String^ ext, Platform::String^ rootdir) {
 	Platform::String^ file_ext = (file_extension_from_path(file) == nullptr) ? (file + ext) : file;
 	Platform::String^ path_ext = ((rootdir == nullptr) ? file_ext : (rootdir + "/" + file_ext));
 

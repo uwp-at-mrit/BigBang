@@ -114,7 +114,7 @@ public:
 			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::G, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
 
 			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
-				Pumplet* target = this->pumps[pump_seq[i]];
+				HydraulicPumplet* target = this->pumps[pump_seq[i]];
 
 				switch (DI_db205_X[i]) {
 				case 0b00000001: target->set_status(PumpStatus::Starting); break;
@@ -135,7 +135,7 @@ public:
 
 public:
 	void execute(HSOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto pump = dynamic_cast<Credit<Pumplet, HS>*>(target);
+		auto pump = dynamic_cast<Credit<HydraulicPumplet, HS>*>(target);
 
 		if (pump != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -428,7 +428,7 @@ private:
 	Dimensionlet* station_pressure;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Labellet, HS>*> captions;
-	std::map<HS, Credit<Pumplet, HS>*> pumps;
+	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
 	std::map<HS, Credit<Valvelet, HS>*> valves;
@@ -513,7 +513,7 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Pumplet*>(g) != nullptr);
+	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
 }
 
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

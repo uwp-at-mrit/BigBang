@@ -23,7 +23,7 @@ static const float hatch_long_ratio = 0.618F;
 static const float mark_space_ratio = 0.618F;
 
 inline static Platform::String^ make_rmark_string(double mark, unsigned int precision) {
-	return make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), mark);
+	return flstring(mark, precision);
 }
 
 inline static Platform::String^ make_lmark_string(double mark, unsigned int precision, unsigned int span, float* span_off) {

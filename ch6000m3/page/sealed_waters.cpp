@@ -84,7 +84,7 @@ public:
 
 public:
 	void execute(SWOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto pump = dynamic_cast<Credit<Pumplet, SW>*>(target);
+		auto pump = dynamic_cast<Credit<HydraulicPumplet, SW>*>(target);
 
 		if (pump != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -283,7 +283,7 @@ private:
 	HLinelet* sea;
 	std::map<SW, Credit<Labellet, SW>*> captions;
 	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
-	std::map<SW, Credit<Pumplet, SW>*> pumps;
+	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
 	std::map<SW, Credit<Labellet, SW>*> plabels;
 	std::map<SW, Credit<Valvelet, SW>*> valves;
 	std::map<SW, Credit<Labellet, SW>*> vlabels;
@@ -361,7 +361,7 @@ void SealedWaterPage::reflow(float width, float height) {
 }
 
 bool SealedWaterPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Pumplet*>(g) != nullptr);
+	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
 }
 
 void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

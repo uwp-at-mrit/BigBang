@@ -2,6 +2,8 @@
 
 #include "string.hpp"
 
+using namespace WarGrey::SCADA;
+
 static const wchar_t linefeed = (wchar_t)(0x0A);
 static const wchar_t carriage_return = (wchar_t)(0x0D);
 
@@ -39,26 +41,33 @@ static unsigned int newline_position(const wchar_t* src, unsigned int idx0, unsi
  *   and `C` and `S` for wide characters and strings, in all formatting functions.
  */
 
-Platform::String^ make_wstring(const wchar_t* fmt, ...) {
+Platform::String^ WarGrey::SCADA::make_wstring(const wchar_t* fmt, ...) {
 	VSWPRINT(s, fmt);
 	
 	return s;
 }
 
-Platform::String^ make_wstring(const char* bytes) {
+Platform::String^ WarGrey::SCADA::make_wstring(const char* bytes) {
 	return make_wstring(L"%S", bytes);
 }
 
-Platform::String^ make_wstring(std::string bytes) {
+Platform::String^ WarGrey::SCADA::make_wstring(std::string bytes) {
 	return make_wstring(L"%S", bytes.c_str());
 }
 
-size_t wstrlen(const wchar_t* content) {
+size_t WarGrey::SCADA::wstrlen(const wchar_t* content) {
 	return int(wcslen(content)) * 2 - 1;
 }
 
 /*************************************************************************************************/
-Platform::String^ substring(Platform::String^ src, int start, int endplus1) {
+Platform::String^ WarGrey::SCADA::flstring(double value, int precision) {
+	return ((precision > 0)
+		? make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), value)
+		: value.ToString());
+}
+
+/*************************************************************************************************/
+Platform::String^ WarGrey::SCADA::substring(Platform::String^ src, int start, int endplus1) {
 	Platform::String^ substr = nullptr;
 	int max_size = src->Length();
 	const wchar_t* pool = (src->Data() + start);
@@ -71,21 +80,21 @@ Platform::String^ substring(Platform::String^ src, int start, int endplus1) {
 	return substr;
 }
 
-std::string make_nstring(const char* fmt, ...) {
+std::string WarGrey::SCADA::make_nstring(const char* fmt, ...) {
 	VSNPRINT(s, fmt);
 
 	return s;
 }
 
-std::string make_nstring(const wchar_t* wbytes) {
+std::string WarGrey::SCADA::make_nstring(const wchar_t* wbytes) {
 	return make_nstring("%S", wbytes);
 }
 
-std::string make_nstring(Platform::String^ wstr) {
+std::string WarGrey::SCADA::make_nstring(Platform::String^ wstr) {
 	return make_nstring("%S", wstr->Data());
 }
 
-std::string binumber(unsigned int n, size_t bitsize) {
+std::string WarGrey::SCADA::binumber(unsigned int n, size_t bitsize) {
 	static char spool[64];
 	size_t size = ((bitsize < 1) ? ((n == 0) ? 1 : integer_length(n)) : bitsize);
 	char* pool = ((size > (sizeof(spool) / sizeof(char))) ? new char[size] : spool);
@@ -104,7 +113,7 @@ std::string binumber(unsigned int n, size_t bitsize) {
 }
 
 /**************************************************************************************************/
-Platform::String^ string_first_line(Platform::String^ src) {
+Platform::String^ WarGrey::SCADA::string_first_line(Platform::String^ src) {
 	const wchar_t* wsrc = src->Data();
 	unsigned int total = src->Length();
 	unsigned int line_size = newline_position(wsrc, 0, total, &total);
@@ -112,7 +121,7 @@ Platform::String^ string_first_line(Platform::String^ src) {
 	return ref new Platform::String(wsrc, line_size);
 }
 
-std::list<Platform::String^> string_lines(Platform::String^ src, bool skip_empty_line) {
+std::list<Platform::String^> WarGrey::SCADA::string_lines(Platform::String^ src, bool skip_empty_line) {
 	std::list<Platform::String^> lines;
 	unsigned int nidx = 0;
 	unsigned int total = src->Length();

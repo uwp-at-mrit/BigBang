@@ -4,6 +4,7 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
+#include "graphlet/dashboard/lineslet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "decorator/page.hpp"
@@ -43,7 +44,7 @@ public:
 		float radius = height * 0.5F;
 		
 		this->ship_width = 0.618F;
-		this->x = (1.0F - this->ship_width - radius) * 0.618F;
+		this->x = (1.0F - this->ship_width - radius) * 0.5F;
 		this->y = 0.5F;
 		this->ship = geometry_union(rectangle(this->ship_width, height),
 			segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
@@ -61,13 +62,14 @@ public:
 	}
 
 public:
-	void fill_ship_extent(float* x, float* y, float* width, float* height) {
+	void fill_ship_extent(float* x, float* y, float* width, float* height, bool full = false) {
 		float awidth = this->actual_width();
 		float aheight = this->actual_height();
 		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
 
 		SET_VALUES(x, this->x * awidth, y, this->y * aheight);
-		SET_VALUES(width, this->ship_width * awidth, height, abox.Height);
+		SET_BOX(width, (full ? abox.Width : this->ship_width * awidth));
+		SET_BOX(height, abox.Height);
 	}
 
 	void fill_ship_anchor(float fx, float fy, float* x, float *y) {
@@ -98,10 +100,13 @@ public:
 
 public:
 	void load(float width, float height, float vinset) {
-		float ship_y, ship_height, cylinder_height;
+		float ship_y, ship_height, cylinder_height, lines_width, lines_height;
 		
-		this->decorator->fill_ship_extent(nullptr, &ship_y, nullptr, &ship_height);
+		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 		
+		lines_height = ship_y * 0.618F;
+		this->lines = this->master->insert_one(new Lineslet(18000.0, lines_width, lines_height));
+
 		cylinder_height = ship_height * 0.382F;
 		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, DL::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
@@ -122,12 +127,20 @@ public:
 	}
 
 	void reflow(float width, float height, float vinset) {
+		float ship_y, lines_cy;
+		float lines_cx = width * 0.5F;
+
+		this->decorator->fill_ship_extent(nullptr, &ship_y, nullptr, nullptr);
+		lines_cy = ship_y * 0.5F;
+
+		this->master->move_to(this->lines, lines_cx, lines_cy, GraphletAnchor::CC);
+
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, DL::EarthWork, DL::Displacement);
 
 		{ // reflow dimensions
-			float x, y, label_height, xoff, yoff;
+			//float x, y, label_height, xoff, yoff;
 
-			this->master->fill_graphlet_location(this->cylinders[DL::BowDraft], nullptr, &y, GraphletAnchor::CC);
+			//this->master->fill_graphlet_location(this->cylinders[DL::BowDraft], nullptr, &y, GraphletAnchor::CC);
 			
 			//xoff = label_height * 0.5F;
 			//yoff = label_height * 2.0F;
@@ -219,6 +232,7 @@ private: // never delete these graphlets manually.
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
 	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
+	Lineslet* lines;
 
 private:
 	DimensionStyle percentage_style;

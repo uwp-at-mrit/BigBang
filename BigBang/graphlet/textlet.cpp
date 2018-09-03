@@ -32,12 +32,6 @@ static inline Platform::String^ unit_speak(Platform::String^ unit) {
 	return (exists ? dialect : speak(unit));
 }
 
-static inline Platform::String^ scalar(double value, int precision) {
-	return ((precision > 0)
-		? make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), value)
-		: value.ToString());
-}
-
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? num_box : get_text_extent(layout));
@@ -335,7 +329,7 @@ void IEditorlet::fill_margin(float x, float y, float* t, float* r, float* b, flo
 void IEditorlet::on_value_changed(double value) {
 	DimensionStyle style = this->get_style();
 
-	this->number = scalar(value, style.precision);
+	this->number = flstring(value, style.precision);
 	this->number_layout = make_text_layout(this->number, style.number_font);
 	this->number_box = get_text_extent(this->number_layout);
 }
