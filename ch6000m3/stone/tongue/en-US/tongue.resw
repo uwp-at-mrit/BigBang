@@ -183,4 +183,7 @@
   <data name="draughts" xml:space="preserve">
     <value>Draught And Load</value>
   </data>
+  <data name=":nodatum:" xml:space="preserve">
+    <value>No Datum</value>
+  </data>
 </root>

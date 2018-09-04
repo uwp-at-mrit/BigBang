@@ -61,8 +61,8 @@ CanvasGeometry^ ITurtle::subtrack(unsigned int a1, unsigned int a2, float thickn
 CanvasGeometry^ ITurtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 	// WARNING: `CanvasGeometry::CreatePath` will close the track leaving it unavailable for future use.
 	if ((this->snapshot == nullptr) || this->moved) {
-		this->track->EndFigure(Microsoft::Graphics::Canvas::Geometry::CanvasFigureLoop::Open);
-		auto the_track = Microsoft::Graphics::Canvas::Geometry::CanvasGeometry::CreatePath(this->track);
+		this->track->EndFigure(CanvasFigureLoop::Open);
+		auto the_track = CanvasGeometry::CreatePath(this->track);
 		
 		if (this->snapshot == nullptr) {
 			this->snapshot = the_track;
@@ -288,7 +288,7 @@ void ITurtle::do_rebuild() {
 	auto shared_ds = CanvasDevice::GetSharedDevice();
 
 	this->moved = false;
-	this->track = ref new Microsoft::Graphics::Canvas::Geometry::CanvasPathBuilder(shared_ds);
+	this->track = ref new CanvasPathBuilder(shared_ds);
 	this->track->BeginFigure(this->x, this->y);
 }
 
@@ -316,7 +316,7 @@ void ITurtle::do_anchor(unsigned int a_id) {
 
 void ITurtle::do_jump(unsigned int a_id) {
 	this->do_anchor(a_id);
-	this->track->EndFigure(Microsoft::Graphics::Canvas::Geometry::CanvasFigureLoop::Open);
+	this->track->EndFigure(CanvasFigureLoop::Open);
 	this->track->BeginFigure(this->x, this->y);
 }
 

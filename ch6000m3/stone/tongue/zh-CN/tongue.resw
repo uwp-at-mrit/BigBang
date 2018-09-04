@@ -183,4 +183,7 @@
   <data name="draughts" xml:space="preserve">
     <value>吃水装载</value>
   </data>
+  <data name=":nodatum:" xml:space="preserve">
+    <value>无数据</value>
+  </data>
 </root>

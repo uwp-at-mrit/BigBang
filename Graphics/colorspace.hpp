@@ -24,4 +24,7 @@ namespace WarGrey::SCADA {
 	Windows::UI::Color scale_color(Windows::UI::Color& src, double scale);
 	Windows::UI::Color darken_color(Windows::UI::Color& src);
 	Windows::UI::Color lighten_color(Windows::UI::Color& src);
+
+	Windows::UI::Color lookup_dark_color(unsigned int idx);
+	Windows::UI::Color lookup_light_color(unsigned int idx);
 }

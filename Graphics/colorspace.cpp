@@ -10,6 +10,62 @@ using namespace Windows::UI;
 
 #define UCHAR(v) ((unsigned char)std::round(v * 255.0))
 
+static const unsigned int REPEAT_PEN_COLOR_COUNT = 128U;
+static const unsigned int REPEAT_BRUSH_COLOR_COUNT = 128U;
+
+static double integer_to_gray_value(int n) {
+	return double(std::abs(n) % 8) / 7.0;
+}
+
+static int integer_to_hue(int n) {
+	int i = std::abs(n) / 6 * 18;
+	
+	switch (std::abs(n) % 6) {
+	case 0:  i += 0; break;
+	case 1:  i += 2; break;
+	case 2:  i += 4; break;
+	case 3:  i += 1; break;
+	case 4:  i += 3; break;
+	default: i += 5;
+	}
+
+	return (i * 59) % 360;
+}
+
+static Color integer_gray_pen_color(int idx) {
+	double r = std::pow(integer_to_gray_value(idx), 0.75) * 128.0;
+	unsigned char c = (unsigned char)std::round(r);
+
+	return ColorHelper::FromArgb((unsigned char)(255), c, c, c);
+}
+
+static Color integer_pen_color(int idx) {
+	double hue = double(integer_to_hue(idx));
+	double spi = std::sin((hue / 360.0) * 3.0 * M_PI);
+	double h = hue - spi * 25.0;
+	double s = 1.0;
+	double v = spi / 6.0 + 0.5;
+
+	return hsva(h, s, v);
+}
+
+static Color integer_gray_brush_color(int idx) {
+	double r = std::pow(std::max((integer_to_gray_value(idx) - 1.0), 0.0), 0.75) * 128.0 + 127.0;
+	unsigned char c = (unsigned char)std::round(r);
+
+	return ColorHelper::FromArgb((unsigned char)(255), c, c, c);
+}
+
+static Color integer_brush_color(int idx) {
+	double hue = double(integer_to_hue(idx));
+	double y = (std::sqrt(hue / 6.0 + 2.0) - std::sqrt(2.0)) / (std::sqrt(8.0) - std::sqrt(2.0)) * 6.0;
+	double h = hue - std::sin((y / 6.0) * 3.0 * M_PI) * 15.0;
+	double s = std::sin((hue / 360.0) * 2.0 * M_PI) * 3.0 / 32.0 + 3.0 / 16.0;
+	double v = 1.0;
+
+	return hsva(h, s, v);
+}
+
 static Color hue_to_rgba(double hue, double chroma, double m, double a) {
     double r = m;
     double g = m;
@@ -217,4 +273,37 @@ Color WarGrey::SCADA::darken_color(Windows::UI::Color& src) {
 
 Color WarGrey::SCADA::lighten_color(Windows::UI::Color& src) {
 	return scale_color(src, 2.0);
+}
+
+/*************************************************************************************************/
+Color WarGrey::SCADA::lookup_light_color(unsigned int idx0) {
+	unsigned int gray_idx = REPEAT_BRUSH_COLOR_COUNT - 7;
+	unsigned int idx = idx0 % REPEAT_BRUSH_COLOR_COUNT;
+	Color c;
+
+	if (idx == 0) {
+		c = integer_gray_brush_color(0);
+	} else if (idx < gray_idx) {
+		c = integer_brush_color(idx - 1);
+	} else {
+		c = integer_gray_brush_color(7 - (idx - gray_idx));
+	}
+
+	return c;
+}
+
+Color WarGrey::SCADA::lookup_dark_color(unsigned int idx0) {
+	unsigned int gray_idx = REPEAT_PEN_COLOR_COUNT - 7;
+	unsigned int idx = idx0 % REPEAT_PEN_COLOR_COUNT;
+	Color c;
+
+	if (idx == 0) {
+		c = integer_gray_pen_color(0);
+	} else if (idx < gray_idx) {
+		c = integer_pen_color(idx - 1);
+	} else {
+		c = integer_gray_pen_color(7 - (idx - gray_idx));
+	}
+
+	return c;
 }

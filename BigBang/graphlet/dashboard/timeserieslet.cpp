@@ -1,7 +1,9 @@
-﻿#include "graphlet/dashboard/lineslet.hpp"
+﻿#include "graphlet/dashboard/timeserieslet.hpp"
 
-#include "string.hpp"
 #include "time.hpp"
+#include "string.hpp"
+
+#include "colorspace.hpp"
 
 #include "text.hpp"
 #include "shape.hpp"
@@ -18,6 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ lines_default_border_color = Colours::make(0xBBBBBB);
 static CanvasTextFormat^ lines_default_font = make_bold_text_format(9.0F);
+static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(12.0F);
 
 /*************************************************************************************************/
 TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
@@ -30,17 +33,17 @@ TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	return ts;
 }
 
+ICanvasBrush^ WarGrey::SCADA::lookup_default_light_color(unsigned int idx) {
+	return make_solid_brush(lookup_light_color(idx + 1));
+}
+
+ICanvasBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int idx) {
+	return make_solid_brush(lookup_dark_color(idx + 1));
+}
+
 /*************************************************************************************************/
-Lineslet::Lineslet(double range, float width, float height, unsigned int step, unsigned int precision)
-	: Lineslet(0.0, range, width, height, step, precision) {}
-
-Lineslet::Lineslet(double range, TimeSeries& ts, float width, float height, unsigned int step, unsigned int precision)
-	: Lineslet(0.0, range, ts, width, height, step, precision) {}
-
-Lineslet::Lineslet(double vmin, double vmax, float width, float height, unsigned int step, unsigned int precision)
-	: Lineslet(vmin, vmax, make_today_series(), width, height, step, precision) {}
-
-Lineslet::Lineslet(double vmin, double vmax, TimeSeries& ts, float width, float height, unsigned int step, unsigned int precision)
+ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigned int n
+	,float width, float height, unsigned int step, unsigned int precision)
 	: width(std::fabsf(width)), height(height), step((step == 0) ? 5U : step), precision(precision)
 	, vmin(vmin), vmax(vmax), series(ts) {
 
@@ -54,17 +57,35 @@ Lineslet::Lineslet(double vmin, double vmax, TimeSeries& ts, float width, float 
 		this->vmin = vmax; 
 		this->vmax = vmin;
 	}
+
+	this->colors = ref new Platform::Array<ICanvasBrush^>(n);
+	this->lines = ref new Platform::Array<CanvasGeometry^>(n);
+	this->legends = ref new Platform::Array<CanvasTextLayout^>(n);
+	this->names = ref new Platform::Array<Platform::String^>(n);
+	this->values = ref new Platform::Array<double>(n);
+	this->xs = ref new Platform::Array<float>(n);
+	this->ys = ref new Platform::Array<float>(n);
 }
 
-void Lineslet::construct() {
+void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
+	TimeSeriesStyle s = this->get_style();
+
+	this->names[idx] = name;
+	this->lines[idx] = blank();
+	this->values[idx] = std::nan("waiting for the first datum");
+
+	this->update_legend(idx, s);
 }
 
-void Lineslet::fill_extent(float x, float y, float* w, float* h) {
+void ITimeSerieslet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void Lineslet::prepare_style(LinesStatus status, LinesStyle& style) {
+void ITimeSerieslet::prepare_style(TimeSeriesStatus status, TimeSeriesStyle& style) {
+	CAS_SLOT(style.lookup_color, lookup_default_light_color);
+
 	CAS_SLOT(style.font, lines_default_font);
+	CAS_SLOT(style.legend_font, lines_default_legend_font);
 	CAS_SLOT(style.border_color, lines_default_border_color);
 	CAS_SLOT(style.haxes_color, Colours::RoyalBlue);
 	CAS_SLOT(style.haxes_style, make_dash_stroke(CanvasDashStyle::DashDot));
@@ -75,15 +96,26 @@ void Lineslet::prepare_style(LinesStatus status, LinesStyle& style) {
 	FLCAS_SLOT(style.lines_thickness, 1.0F);
 	FLCAS_SLOT(style.haxes_thickness, 0.5F);
 	FLCAS_SLOT(style.vaxes_thickness, 1.0F);
+
+	if ((style.legend_fx < 0.0F) || (style.legend_fx > 1.0F)) {
+		style.legend_fx = 0.8F;
+	}
 }
 
-void Lineslet::on_status_changed(LinesStatus status) {
-	this->construct_vertical_axes();
-	this->construct_horizontal_axes();
+void ITimeSerieslet::on_status_changed(TimeSeriesStatus status) {
+	TimeSeriesStyle s = this->get_style();
+
+	this->update_vertical_axes(s);
+	this->update_horizontal_axes(s);
+
+
+	for (unsigned int idx = 0; idx < this->legends->Length; idx++) {
+		this->update_legend(idx, s);
+		this->colors[idx] = s.lookup_color(idx);
+	}
 }
 
-void Lineslet::construct_vertical_axes() {
-	LinesStyle s = this->get_style();
+void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& s) {
 	CanvasGeometry^ vaxes = blank();
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float interval = this->height / float(this->step + 1);
@@ -107,8 +139,7 @@ void Lineslet::construct_vertical_axes() {
 	this->vaxes = geometry_freeze(vaxes);
 }
 
-void Lineslet::construct_horizontal_axes() {
-	LinesStyle s = this->get_style();
+void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& s) {
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	CanvasGeometry^ hmarks = blank();
 	float interval = this->width / float(this->series.step + 1);
@@ -133,23 +164,53 @@ void Lineslet::construct_horizontal_axes() {
 	this->haxes = geometry_stroke(CanvasGeometry::CreatePath(axes), s.haxes_thickness, s.haxes_style);
 }
 
-void Lineslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	LinesStyle s = this->get_style();
+void ITimeSerieslet::update_legend(unsigned int idx, TimeSeriesStyle& s) {
+	double value = this->values[idx];
+	Platform::String^ legend = this->names[idx] + ": ";
+
+	legend += (std::isnan(value) ? speak(":nodatum:") : flstring(value, this->precision + 1));	
+	this->legends[idx] = make_text_layout(legend, s.legend_font);
+}
+
+void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	TimeSeriesStyle s = this->get_style();
 	float border_off = s.border_thickness * 0.5F;
+	float view_x = 0.0F;
 	
 	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 
 	ds->DrawCachedGeometry(this->vaxes, x, y, s.vaxes_color);
 
-	if (this->get_status() == LinesStatus::Realtime) {
+	if (this->get_status() == TimeSeriesStatus::Realtime) {
 		Rect haxes_box = this->haxes->ComputeBounds();
 		long long now = today_current_100ns();
 		float percentage = std::fminf(float(now - this->series.start) / float(this->series.span), 1.0F);
 		float xmin = this->width - haxes_box.Width;
-		float haxes_x = std::fmaxf(xmin, std::fminf(this->width * 0.5F - haxes_box.Width * percentage, 0.0F));
 		
-		ds->FillGeometry(this->haxes, x + haxes_x, y, s.haxes_color);
-		ds->DrawCachedGeometry(this->hmarks, x + haxes_x, y, s.haxes_color);
+		view_x = std::fmaxf(xmin, std::fminf(this->width * 0.5F - haxes_box.Width * percentage, 0.0F));
+		
+		ds->FillGeometry(this->haxes, x + view_x, y, s.haxes_color);
+		ds->DrawCachedGeometry(this->hmarks, x + view_x, y, s.haxes_color);
+	}
+
+	{ // draw legends and lines
+		float legend_x = x + this->width * s.legend_fx;
+		float legend_label_height = this->legends[0]->LayoutBounds.Height;
+		float legend_label_x = legend_x + legend_label_height * 1.618F;
+		float legend_width = legend_label_height;
+		float legend_height = legend_label_height * 0.618F;
+		float legend_yoff = (legend_label_height - legend_height) * 0.5F;
+		
+		for (unsigned int idx = 0; idx < this->legends->Length; idx++) {
+			float yoff = legend_label_height * (float(idx) + 0.618F);
+
+			ds->FillRectangle(legend_x, y + legend_yoff + yoff, legend_width, legend_height, this->colors[idx]);
+			ds->DrawTextLayout(this->legends[idx], legend_label_x, y + yoff, this->colors[idx]);
+		}
+
+		for (unsigned int idx = 0; idx < this->lines->Length; idx++) {
+			ds->FillGeometry(this->lines[idx], x + view_x, y, this->colors[idx]);
+		}
 	}
 	
 	ds->DrawRectangle(x + border_off, y + border_off,

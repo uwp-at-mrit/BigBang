@@ -4,8 +4,8 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
-#include "graphlet/dashboard/lineslet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/dashboard/timeserieslet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -26,6 +26,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DLMode { WindowUI = 0, Dashboard };
+
+private enum class DLTS { EarthWork, Capacity, Height, Load, Displacement, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -105,7 +107,7 @@ public:
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 		
 		lines_height = ship_y * 0.618F;
-		this->lines = this->master->insert_one(new Lineslet(18000.0, lines_width, lines_height));
+		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, 18000.0, lines_width, lines_height));
 
 		cylinder_height = ship_height * 0.382F;
 		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
@@ -133,7 +135,7 @@ public:
 		this->decorator->fill_ship_extent(nullptr, &ship_y, nullptr, nullptr);
 		lines_cy = ship_y * 0.5F;
 
-		this->master->move_to(this->lines, lines_cx, lines_cy, GraphletAnchor::CC);
+		this->master->move_to(this->timeseries, lines_cx, lines_cy, GraphletAnchor::CC);
 
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, DL::EarthWork, DL::Displacement);
 
@@ -232,7 +234,7 @@ private: // never delete these graphlets manually.
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
 	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
-	Lineslet* lines;
+	TimeSerieslet<DLTS>* timeseries;
 
 private:
 	DimensionStyle percentage_style;
