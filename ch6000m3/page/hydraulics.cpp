@@ -19,9 +19,6 @@
 #include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "decorator/page.hpp"
-#ifdef _DEBUG
-#include "decorator/grid.hpp"
-#endif
 
 using namespace WarGrey::SCADA;
 
@@ -65,11 +62,7 @@ private enum class HS : unsigned int {
 
 private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
 public:
-	Hydraulics(HydraulicsPage* master) : master(master) {
-		this->caption_font = make_text_format("Microsoft YaHei", large_font_size);
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", 20.0F);
-		this->dimension_style.unit_font = make_bold_text_format("Cambria", 18.0F);
-	}
+	Hydraulics(HydraulicsPage* master) : master(master) {}
 
 public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
@@ -145,8 +138,17 @@ public:
 	}
 
 public:
-	void load_pump_station(float width, float height, float gridsize) {
-		Turtle<HS>* pTurtle = new Turtle<HS>(gridsize, true, HS::Master);
+	void construct(float gwidth, float gheight) {
+		float fontsize = gheight;
+
+		this->caption_font = make_text_format("Microsoft YaHei", fontsize);
+		this->dimension_style.number_font = make_bold_text_format("Cambria Math", fontsize * 1.2F);
+		this->dimension_style.unit_font = make_bold_text_format("Cambria", fontsize);
+	}
+ 
+public:
+	void load_pump_station(float width, float height, float gwidth, float gheight) {
+		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1);
 		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(5);
@@ -188,26 +190,28 @@ public:
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
 	}
 
-	void load_tanks(float width, float height, float gridsize) {
+	void load_tanks(float width, float height, float gwidth, float gheight) {
 		float thickness = 3.0F;
 
-		this->master_tank = this->make_tank(HSMTStatus::High, gridsize * 17.0F, gridsize * 8.0F, thickness);
-		this->visor_tank = this->make_tank(HSVTStatus::Normal, gridsize * 15.0F, gridsize * 6.0F, thickness);
+		this->master_tank = this->make_tank(HSMTStatus::High, gwidth * 17.0F, gheight * 8.0F, thickness);
+		this->visor_tank = this->make_tank(HSVTStatus::Normal, gwidth * 15.0F, gheight * 6.0F, thickness);
 
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gridsize * 2.5F);
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gridsize * 2.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.0F, gheight * 4.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.0F, gheight * 4.5F);
 
-		this->storage_tank = this->master->insert_one(new FuelTanklet(gridsize * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
+		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		
-		this->load_boolean_indicators(HS::F001Blocked, HS::FilterBlocked, gridsize, this->states, this->islabels);
+		this->load_boolean_indicators(HS::F001Blocked, HS::FilterBlocked, gwidth, this->states, this->islabels);
 	}
 
-	void load_devices(float width, float height, float gridsize) {
+	void load_devices(float width, float height, float gwidth, float gheight) {
+		float radius = std::fminf(gwidth, gheight);
+
 		{ // load pumps
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, gridsize, 180.0);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, gridsize, 0.000);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, gridsize, -90.0);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, gridsize, 90.00);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, radius, 180.0);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, radius, 0.000);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, radius, -90.0);
+			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, radius, 90.00);
 
 			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
 
@@ -216,14 +220,14 @@ public:
 		}
 
 		{ // load valves
-			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, gridsize, 0.000);
-			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, gridsize, -90.0);
-			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, gridsize, 90.00);
+			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, radius, 0.000);
+			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, radius, -90.0);
+			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, radius, 90.00);
 		}
 	}
 
 public:
-	void reflow_pump_station(float width, float height, float gridsize, float vinset) {
+	void reflow_pump_station(float width, float height, float gwidth, float gheight, float vinset) {
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
 		float sq1_y;
@@ -237,15 +241,15 @@ public:
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 
-		this->station->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gridsize * 10.0F);
-		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gridsize * 10.0F);
+		this->station->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gwidth * 10.0F);
+		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gwidth * 10.0F);
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
 	}
 	
-	void reflow_devices(float width, float height, float gridsize, float vinset) {
+	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy;
-		float valve_adjust_gridsize = gridsize * 0.618F;
+		float valve_adjust_gridsize = gwidth * 0.618F;
 		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -253,29 +257,29 @@ public:
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (it->second->id) {
 			case HS::A: case HS::B: case HS::G: case HS::H: {
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
-				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
-				bar_dx = x0 + gridsize; bar_dy = y0; bar_a = GraphletAnchor::LB;
+				lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+				cpt_dx = x0 + gwidth; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
+				bar_dx = x0 + gwidth; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
 			case HS::F: case HS::C: case HS::D: case HS::E: {
-				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
-				bar_dx = x0 - gridsize; bar_dy = y0; bar_a = GraphletAnchor::RB;
+				lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+				cpt_dx = x0 - gwidth; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
+				bar_dx = x0 - gwidth; bar_dy = y0; bar_a = GraphletAnchor::RB;
 			} break;
 			case HS::Y: case HS::L: case HS::M: case HS::K: {
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
-				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
+				lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gwidth; cpt_a = GraphletAnchor::LB;
 				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no metrics
 			} break;
 			default: {
-				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
+				cpt_dx = x0; cpt_dy = y0 + gwidth * 3.0F; cpt_a = GraphletAnchor::CT;
 			
 				if (it->second->id == HS::I) {
-					lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
-					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
+					lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+					bar_dx = x0 + text_hspace; bar_dy = y0 + gwidth; bar_a = GraphletAnchor::LT;
 				} else {
-					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
+					lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+					bar_dx = x0 - text_hspace; bar_dy = y0 + gwidth; bar_a = GraphletAnchor::RT;
 				}
 			}
 			}
@@ -308,18 +312,18 @@ public:
 		}
 	}
 
-	void reflow_metrics(float width, float height, float gridsize, float vinset) {
-		float vgapsize = gridsize * 0.125F;
+	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
+		float vgapsize = gwidth * 0.125F;
 
 		this->station->map_credit_graphlet(this->states[HS::F001Blocked], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->states[HS::F002Blocked], GraphletAnchor::CC);
 		
-		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RB, GraphletAnchor::LB, gridsize);
-		this->master->move_to(this->states[HS::TS2], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LB, gridsize);
+		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RB, GraphletAnchor::LB, gwidth);
+		this->master->move_to(this->states[HS::TS2], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
 		this->master->move_to(this->states[HS::TS1], this->states[HS::TS2], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
 
-		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RB, GraphletAnchor::LB, gridsize);
-		this->master->move_to(this->states[HS::FilterBlocked], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gridsize);
+		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RB, GraphletAnchor::LB, gwidth);
+		this->master->move_to(this->states[HS::FilterBlocked], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gwidth);
 		this->master->move_to(this->states[HS::TS12], this->states[HS::FilterBlocked], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
 		this->master->move_to(this->states[HS::TS11], this->states[HS::TS12], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
 
@@ -385,8 +389,8 @@ private:
 	}
 
 	template<class T, typename E>
-	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width) {
-		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, 0.0F, 2.5F), id);
+	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width, float height) {
+		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, height, 2.5F), id);
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, "celsius", _speak(id)), id);
 	}
 
@@ -452,7 +456,7 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 
 	this->dashboard = dashboard;
 	this->operation = make_menu<HSOperation, IMRMaster*>(dashboard, plc);
-	this->gridsize = statusbar_height();
+	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -460,7 +464,7 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 		this->append_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, this->gridsize));
+		this->append_decorator(this->grid);
 #endif
 	}
 }
@@ -476,12 +480,19 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
+		float gwidth = width / 78.0F;
+		float gheight = (height - vinset - vinset) / 38.0F;
+
+		this->grid->set_grid_width(gwidth);
+		this->grid->set_grid_height(gheight, vinset);
+		
+		dashboard->construct(gwidth, gheight);
 
 		{ // load graphlets
 			this->change_mode(HSMode::Dashboard);
-			dashboard->load_pump_station(width, height, this->gridsize);
-			dashboard->load_tanks(width, height, this->gridsize);
-			dashboard->load_devices(width, height, this->gridsize);
+			dashboard->load_pump_station(width, height, gwidth, gheight);
+			dashboard->load_tanks(width, height, gwidth, gheight);
+			dashboard->load_devices(width, height, gwidth, gheight);
 
 			this->change_mode(HSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
@@ -501,14 +512,16 @@ void HydraulicsPage::reflow(float width, float height) {
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
+		float gwidth = this->grid->get_grid_width();
+		float gheight = this->grid->get_grid_height();
 
 		this->change_mode(HSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
 		this->change_mode(HSMode::Dashboard);
-		dashboard->reflow_pump_station(width, height, this->gridsize, vinset);
-		dashboard->reflow_devices(width, height, this->gridsize, vinset);
-		dashboard->reflow_metrics(width, height, this->gridsize, vinset);
+		dashboard->reflow_pump_station(width, height, gwidth, gheight, vinset);
+		dashboard->reflow_devices(width, height, gwidth, gheight, vinset);
+		dashboard->reflow_metrics(width, height, gwidth, gheight, vinset);
 	}
 }
 

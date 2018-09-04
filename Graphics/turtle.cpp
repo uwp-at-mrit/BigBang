@@ -14,9 +14,16 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 using namespace Windows::Foundation::Numerics;
 
-ITurtle::ITurtle(float stepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor)
-	: stepsize(stepsize), x(0.0F), y(0.0F), _anchor(_anchor) {
-	this->tradius = stepsize * (big_turn ? 1.0F : 0.5F);
+ITurtle::ITurtle(float xstepsize, float ystepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor)
+	: x(0.0F), y(0.0F), xstepsize(xstepsize), ystepsize(ystepsize), _anchor(_anchor) {
+	this->xradius = xstepsize;
+	this->yradius = ystepsize;
+
+	if (big_turn == false) {
+		this->xradius *= 0.5F;
+		this->yradius *= 0.5F;
+	}
+
 	this->do_rebuild();
 	this->do_anchor(start_anchor);
 }
@@ -92,194 +99,178 @@ void ITurtle::jump_back(unsigned int a_id) {
 }
 
 void ITurtle::jump_up(float step, unsigned int a_id) {
-	this->y -= (this->stepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_right(float step, unsigned int a_id) {
-	this->x += (this->stepsize * step);
+	this->x += (this->xstepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_down(float step, unsigned int a_id) {
-	this->y += (this->stepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_left(float step, unsigned int a_id) {
-	this->x -= (this->stepsize * step);
+	this->x -= (this->xstepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_up_right(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-	
-	this->x += _;
-	this->y -= _;
+	this->x += (this->xstepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_right_down(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x += _;
-	this->y += _;
+	this->x += (this->xstepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_down_left(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x -= _;
-	this->y += _;
+	this->x -= (this->xstepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::jump_left_up(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x -= _;
-	this->y -= _;
+	this->x -= (this->xstepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_jump(a_id);
 }
 
 void ITurtle::move_up(float step, unsigned int a_id) {
-	this->y -= (this->stepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_right(float step, unsigned int a_id) {
-	this->x += (this->stepsize * step);
+	this->x += (this->xstepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_down(float step, unsigned int a_id) {
-	this->y += (this->stepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_left(float step, unsigned int a_id) {
-	this->x -= (this->stepsize * step);
+	this->x -= (this->xstepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_up_right(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x += _;
-	this->y -= _;
+	this->x += (this->xstepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_right_down(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x += _;
-	this->y += _;
+	this->x += (this->xstepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_down_left(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x -= _;
-	this->y += _;
+	this->x -= (this->xstepsize * step);
+	this->y += (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::move_left_up(float step, unsigned int a_id) {
-	float _ = (this->stepsize * step);
-
-	this->x -= _;
-	this->y -= _;
+	this->x -= (this->xstepsize * step);
+	this->y -= (this->ystepsize * step);
 	this->do_move(a_id);
 }
 
 void ITurtle::turn_down_left(unsigned int a_id) {
-	this->x -= this->tradius;
-	this->y += this->tradius;
+	this->x -= this->xradius;
+	this->y += this->yradius;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_down(unsigned int a_id) {
-	this->x -= this->tradius;
-	this->y += this->tradius;
+	this->x -= this->xradius;
+	this->y += this->yradius;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_down_right(unsigned int a_id) {
-	this->x += this->tradius;
-	this->y += this->tradius;
+	this->x += this->xradius;
+	this->y += this->yradius;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_down(unsigned int a_id) {
-	this->x += this->tradius;
-	this->y += this->tradius;
+	this->x += this->xradius;
+	this->y += this->yradius;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_up(unsigned int a_id) {
-	this->x -= this->tradius;
-	this->y -= this->tradius;
+	this->x -= this->xradius;
+	this->y -= this->yradius;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_left(unsigned int a_id) {
-	this->x -= this->tradius;
-	this->y -= this->tradius;
+	this->x -= this->xradius;
+	this->y -= this->yradius;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_up(unsigned int a_id) {
-	this->x += this->tradius;
-	this->y -= this->tradius;
+	this->x += this->xradius;
+	this->y -= this->yradius;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_right(unsigned int a_id) {
-	this->x += this->tradius;
-	this->y -= this->tradius;
+	this->x += this->xradius;
+	this->y -= this->yradius;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_down_left_up(unsigned int a_id) {
-	this->x -= this->stepsize;
+	this->x -= this->xstepsize;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_down_right_up(unsigned int a_id) {
-	this->x += this->stepsize;
+	this->x += this->xstepsize;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_left_down(unsigned int a_id) {
-	this->x -= this->stepsize;
+	this->x -= this->xstepsize;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_right_down(unsigned int a_id) {
-	this->x += this->stepsize;
+	this->x += this->xstepsize;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_down_right(unsigned int a_id) {
-	this->y += this->stepsize;
+	this->y += this->xstepsize;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_up_right(unsigned int a_id) {
-	this->y -= this->stepsize;
+	this->y -= this->ystepsize;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_down_left(unsigned int a_id) {
-	this->y += this->stepsize;
+	this->y += this->ystepsize;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_up_left(unsigned int a_id) {
-	this->y -= this->stepsize;
+	this->y -= this->ystepsize;
 	this->do_counterclockwise_turn(a_id);
 }
 
@@ -327,12 +318,12 @@ void ITurtle::do_move(unsigned int a_id) {
 
 void ITurtle::do_clockwise_turn(unsigned int a_id) {
 	this->do_step(a_id);
-	this->track->AddArc(float2(this->x, this->y), this->tradius, this->tradius, 0.0F,
+	this->track->AddArc(float2(this->x, this->y), this->xradius, this->yradius, 0.0F,
 		CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
 }
 
 void ITurtle::do_counterclockwise_turn(unsigned int a_id) {
 	this->do_step(a_id);
-	this->track->AddArc(float2(this->x, this->y), this->tradius, this->tradius, 0.0F,
+	this->track->AddArc(float2(this->x, this->y), this->xradius, this->yradius, 0.0F,
 		CanvasSweepDirection::CounterClockwise, CanvasArcSize::Small);
 }

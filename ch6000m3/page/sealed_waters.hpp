@@ -3,6 +3,8 @@
 #include "planet.hpp"
 #include "plc.hpp"
 
+#include "decorator/grid.hpp"
+
 #include "graphlet/textlet.hpp"
 #include "graphlet/statuslet.hpp"
 
@@ -30,6 +32,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::Statuslinelet* statusline;
 
 	private:
-		float gridsize;
+		WarGrey::SCADA::GridDecorator* grid;
 	};
 }

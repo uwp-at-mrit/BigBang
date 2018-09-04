@@ -10,12 +10,19 @@ namespace WarGrey::SCADA {
     public:
         void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
+	public:
+		float get_grid_width();
+		void set_grid_width(float new_width, float start_x = 0.0F);
+
+		float get_grid_height();
+		void set_grid_height(float new_height, float start_y = 0.0F);
+
 	protected:
 		~GridDecorator() noexcept {}
 
     private:
-        float width;
-        float height;
+        float gwidth;
+        float gheight;
 		float x0;
 		float y0;
     };

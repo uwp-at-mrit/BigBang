@@ -16,9 +16,6 @@
 #include "graphlet/symbol/valvelet.hpp"
 
 #include "decorator/page.hpp"
-#ifdef _DEBUG
-#include "decorator/grid.hpp"
-#endif
 
 using namespace WarGrey::SCADA;
 
@@ -55,15 +52,12 @@ private enum class SW : unsigned int {
 	d44, d45, d46, d47,
 
 	// anchors used for unnamed corners
-	sea
+	sea, pipeline
 };
 
 private class SealedWaters final : public PLCConfirmation, public IMenuCommand<SWOperation, IMRMaster*> {
 public:
-	SealedWaters(SealedWaterPage* master) : master(master) {
-		this->label_font = make_bold_text_format("Microsoft YaHei", 12.0F);
-		this->dimension_style = make_highlight_dimension_style(18.0F, 5U);
-	}
+	SealedWaters(SealedWaterPage* master) : master(master) {}
 
 public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
@@ -93,15 +87,21 @@ public:
 		}
 	}
 
+
 public:
-	void load(float width, float height, float gridsize) {
-		Turtle<SW>* pTurtle = new Turtle<SW>(gridsize, false, SW::Hatch);
+	void construct(float gwidth, float gheight) {
+		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
+		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
+	}
+
+	void load(float width, float height, float gwidth, float gheight) {
+		Turtle<SW>* pTurtle = new Turtle<SW>(gwidth, gheight, false, SW::Hatch);
 
 		pTurtle->move_right(4);
 		pTurtle->move_down(1, SW::d12)->move_right(6, SW::DGV12)->move_right(6, SW::FP1);
-		pTurtle->move_right(10)->move_down(1.5F)->jump_back();
-		pTurtle->move_down(3, SW::d11)->move_right(6, SW::DGV11)->move_right(6, SW::FP2);
-		pTurtle->move_right(10)->move_up(1.5F)->move_right(6, SW::ToPipeline)->jump_back();
+		pTurtle->move_right(10)->move_down(2)->jump_back();
+		pTurtle->move_down(4, SW::d11)->move_right(6, SW::DGV11)->move_right(6, SW::FP2);
+		pTurtle->move_right(10)->move_up(2)->move_right(3, SW::ToPipeline)->move_right(3, SW::pipeline)->jump_back(SW::d11);
 
 		pTurtle->move_down(4, SW::d13)->move_right(6, SW::DGV13)->move_right(6, SW::SP13)->move_right(6, SW::DGV3);
 		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA1)->move_down(1.5F)->turn_down_right()->jump_back();
@@ -130,11 +130,11 @@ public:
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, track_color));
-		this->hatch = this->master->insert_one(new Hatchlet(gridsize * 2.5F));
+		this->hatch = this->master->insert_one(new Hatchlet(gwidth * 2.5F));
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
-		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gridsize, 0.0);
-		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gridsize, -90.0);
+		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gwidth, 0.0);
+		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gwidth, -90.0);
 		this->load_labels(this->captions, SW::Hatch, SW::Starboard, Colours::Salmon);
 		this->load_labels(this->captions, SW::ToPipeline, SW::SS2, Colours::Silver);
 
@@ -144,7 +144,7 @@ public:
 		this->load_dimensions(this->flows, SW::d44, SW::d45, "m3ph", "F");
 
 		{ // load arrows
-			float arrowsize = gridsize * 0.3F;
+			float arrowsize = gheight * 0.3F;
 
 			this->load_arrows(this->arrows, SW::d12, SW::d47, arrowsize, 0.0);
 			this->load_arrows(this->arrows, SW::DGV44, SW::DGV45, arrowsize, 0.0);
@@ -152,12 +152,12 @@ public:
 			this->load_arrows(this->arrows, SW::FP1, SW::SP20, arrowsize, 0.0);
 			this->load_arrows(this->arrows, SW::UA1, SW::UA2, arrowsize, -90.0);
 			this->load_arrows(this->arrows, SW::DA1, SW::DA2, arrowsize, 90.0);
-			this->load_arrow(this->arrows, SW::ToPipeline, arrowsize * 2.0F, 0.0, Colours::Silver);
+			this->load_arrow(this->arrows, SW::pipeline, arrowsize * 2.0F, 0.0, Colours::Silver);
 		}
 	}
 
 public:
-	void reflow(float width, float height, float gridsize, float vinset) {
+	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
 		float sq1_y, horizon_y;
@@ -184,7 +184,7 @@ public:
 			}
 
 			for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
-				float dy = gridsize * 0.618F;
+				float dy = gheight * 0.618F;
 
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
 				this->station->map_credit_graphlet(this->vlabels[it->first], GraphletAnchor::CT, 0.0F, dy);
@@ -192,7 +192,7 @@ public:
 		}
 
 		{ // reflow dimensions
-			float xoff = gridsize * 3.0F;
+			float xoff = gwidth * 3.5F;
 			float yoff = default_thickness * 2.0F;
 
 			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
@@ -205,13 +205,13 @@ public:
 		}
 
 		{ // reflow arrows
-			float xoff = gridsize * 2.0F;
+			float xoff = gwidth * 2.0F;
 			
 			for (auto it = this->arrows.begin(); it != this->arrows.end(); it++) {
 				switch (it->first) {
-				case SW::ToPipeline: {
+				case SW::pipeline: {
 					this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, 0.0F, 0.0F);
-					this->master->move_to(this->captions[SW::ToPipeline], it->second, GraphletAnchor::LC, GraphletAnchor::RB);
+					this->station->map_credit_graphlet(this->captions[SW::ToPipeline], GraphletAnchor::CB);
 				}; break;
 				case SW::UA1: case SW::UA2: case SW::DA1: case SW::DA2: {
 					this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, 0.0F, 0.0F);
@@ -304,7 +304,7 @@ SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 
 	this->dashboard = dashboard;
 	this->operation = make_menu<SWOperation, IMRMaster*>(dashboard, plc);
-	this->gridsize = statusbar_height();
+	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -312,7 +312,7 @@ SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 		this->append_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(new GridDecorator(this->gridsize, 0.0F, 0.0F, this->gridsize));
+		this->append_decorator(this->grid);
 #endif
 	}
 }
@@ -328,10 +328,17 @@ void SealedWaterPage::load(CanvasCreateResourcesReason reason, float width, floa
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
+		float gwidth = width / 68.0F;
+		float gheight = (height - vinset - vinset) / 42.0F;
+
+		this->grid->set_grid_width(gwidth);
+		this->grid->set_grid_height(gheight, vinset);
+
+		dashboard->construct(gwidth, gheight);
 
 		{ // load graphlets
 			this->change_mode(SWMode::Dashboard);
-			dashboard->load(width, height, this->gridsize);
+			dashboard->load(width, height, gwidth, gheight);
 
 			this->change_mode(SWMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
@@ -351,12 +358,14 @@ void SealedWaterPage::reflow(float width, float height) {
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
+		float gwidth = this->grid->get_grid_width();
+		float gheight = this->grid->get_grid_height();
 
 		this->change_mode(SWMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
 		this->change_mode(SWMode::Dashboard);
-		dashboard->reflow(width, height, this->gridsize, vinset);
+		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }
 

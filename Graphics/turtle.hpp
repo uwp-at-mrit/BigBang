@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual ~ITurtle() noexcept {}
-		ITurtle(float stepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor);
+		ITurtle(float xstepsize, float ystepsize, bool big_turn, unsigned int start_anchor, unsigned int _anchor);
 
 	protected:
 		void fill_anchor_location(unsigned int anchor, float* x, float* y);
@@ -76,8 +76,10 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasPathBuilder^ track;
-		float stepsize;
-		float tradius;
+		float xstepsize;
+		float ystepsize;
+		float xradius;
+		float yradius;
 		float x;
 		float y;
 
@@ -92,8 +94,11 @@ namespace WarGrey::SCADA {
 	template<typename Anchor>
 	private class Turtle final : public WarGrey::SCADA::ITurtle {
 	public:
+		Turtle(float xstepsize, float ystepsize, bool big_turn = false, Anchor start_anchor = Anchor::_)
+			: WarGrey::SCADA::ITurtle(xstepsize, ystepsize, big_turn, _I(start_anchor), _I(Anchor::_)) {}
+
 		Turtle(float stepsize, bool big_turn = false, Anchor start_anchor = Anchor::_)
-			: WarGrey::SCADA::ITurtle(stepsize, big_turn, _I(start_anchor), _I(Anchor::_)) {}
+			: WarGrey::SCADA::Turtle<Anchor>(stepsize, stepsize, big_turn, start_anchor) {}
 
 	public:
 		void fill_anchor_location(Anchor a, float* x, float* y) {
