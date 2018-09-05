@@ -1,10 +1,21 @@
 #pragma once
 
 namespace WarGrey::SCADA {
+	static const long long minute_span_100ns = 60LL * 1000LL * 1000LL * 10LL;
+	static const long long hour_span_100ns = 60LL * minute_span_100ns;
+	static const long long day_span_100ns = 24LL * hour_span_100ns;
+
 	Windows::Foundation::TimeSpan make_timespan_from_ms(unsigned int ms);
 	Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
 
-	long long today_current_100ns();
+	long long this_moment_100ns();
+
+	long long this_minute_first_100ns();
+	long long next_minute_first_100ns();
+
+	long long this_hour_first_100ns();
+	long long next_hour_first_100ns();
+
 	long long today_first_100ns();
 	long long tomorrow_first_100ns();
 

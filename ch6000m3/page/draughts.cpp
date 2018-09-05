@@ -101,6 +101,21 @@ public:
 	}
 
 public:
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		//this->set_cylinder(DL::BowDraft, DBD(DB2, 164U));
+		//this->set_cylinder(DL::SternDraft, DBD(DB2, 188U));
+
+		this->dimensions[DL::EarthWork]->set_value(DBD(DB2, 236U));
+		this->timeseries->set_value(DLTS::EarthWork, DBD(DB2, 236U) * 1000.0F);
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
+public:
 	void load(float width, float height, float vinset) {
 		float ship_y, ship_height, cylinder_height, lines_width, lines_height;
 		
@@ -147,20 +162,6 @@ public:
 			//xoff = label_height * 0.5F;
 			//yoff = label_height * 2.0F;
 		}
-	}
-
-public:
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
-
-		this->set_cylinder(DL::BowDraft, DBD(DB2, 164U));
-		this->set_cylinder(DL::SternDraft, DBD(DB2, 188U));
-
-		this->dimensions[DL::EarthWork]->set_value(DBD(DB2, 236U));
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 public:

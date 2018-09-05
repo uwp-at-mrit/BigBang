@@ -9,7 +9,7 @@
 namespace WarGrey::SCADA {
 	typedef Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ (*lookup_line_color)(unsigned int idx);
 
-	private enum class TimeSeriesStatus { Realtime, Manual, _ };
+	private enum class TimeSeriesStatus { Realtime, History, _ };
 
 	private struct TimeSeries {
 		long long start;
@@ -17,7 +17,9 @@ namespace WarGrey::SCADA {
 		unsigned int step;
 	};
 
-	TimeSeries make_today_series(unsigned int step = 11);
+	WarGrey::SCADA::TimeSeries make_this_minute_series(unsigned int step = 5);
+	WarGrey::SCADA::TimeSeries make_this_hour_series(unsigned int step = 5);
+	WarGrey::SCADA::TimeSeries make_today_series(unsigned int step = 11);
 
 	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lookup_default_light_color(unsigned int idx);
 	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lookup_default_dark_color(unsigned int idx);
@@ -51,8 +53,12 @@ namespace WarGrey::SCADA {
 			float width, float height, unsigned int step, unsigned int precision);
 
 	public:
+		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void set_value(unsigned idx, double value);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesStatus status, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -67,25 +73,29 @@ namespace WarGrey::SCADA {
 		void update_legend(unsigned int idx, WarGrey::SCADA::TimeSeriesStyle& style);
 
 	private:
+		void update_time_series(long long next_start);
+		void fill_this_position(long long time, double v, double* x, double* y);
+
+	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vaxes;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ haxes;
 
 	private:
 		Platform::Array<Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^>^ colors;
-		Platform::Array<Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^>^ lines;
 		Platform::Array<Microsoft::Graphics::Canvas::Text::CanvasTextLayout^>^ legends;
+		Platform::Array<Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^>^ lines;
 		Platform::Array<Platform::String^>^ names;
 		Platform::Array<double>^ values;
-		Platform::Array<float>^ xs;
-		Platform::Array<float>^ ys;
+		Platform::Array<double>^ xs;
+		Platform::Array<double>^ ys;
 
 	private:
 		float width;
 		float height;
 
 	private:
-		WarGrey::SCADA::TimeSeries& series;
+		WarGrey::SCADA::TimeSeries series;
 		unsigned int step;
 		unsigned int precision;
 
@@ -118,6 +128,11 @@ namespace WarGrey::SCADA {
 			for (unsigned int idx = 0; idx < _N(Name); idx++) {
 				this->construct_line(idx, speak(_E(Name, idx), this->tongue));
 			}
+		}
+
+	public:
+		void set_value(Name slot, double v) {
+			ITimeSerieslet::set_value(_I(slot), v);
 		}
 
 	private:

@@ -152,6 +152,22 @@ public:
 	}
 
 public:
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->set_cylinder(HD::BowDraft, DBD(DB2, 164U));
+		this->set_cylinder(HD::SternDraft, DBD(DB2, 188U));
+
+		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
+		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
+		this->dimensions[HD::EarthWork]->set_value(DBD(DB2, 236U));
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
+public:
 	void load(float width, float height, float vinset) {
 		float cell_width, cell_height, radius, cylinder_height;
 		
@@ -223,22 +239,6 @@ public:
 			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
 			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
 		}
-	}
-
-public:
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
-
-		this->set_cylinder(HD::BowDraft, DBD(DB2, 164U));
-		this->set_cylinder(HD::SternDraft, DBD(DB2, 188U));
-
-		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
-		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
-		this->dimensions[HD::EarthWork]->set_value(DBD(DB2, 236U));
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 public:

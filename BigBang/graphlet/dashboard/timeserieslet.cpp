@@ -23,11 +23,31 @@ static CanvasTextFormat^ lines_default_font = make_bold_text_format(9.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(12.0F);
 
 /*************************************************************************************************/
+TimeSeries WarGrey::SCADA::make_this_minute_series(unsigned int step) {
+	TimeSeries ts;
+
+	ts.start = this_minute_first_100ns();
+	ts.span = minute_span_100ns;
+	ts.step = step;
+
+	return ts;
+}
+
+TimeSeries WarGrey::SCADA::make_this_hour_series(unsigned int step) {
+	TimeSeries ts;
+
+	ts.start = this_hour_first_100ns();
+	ts.span = hour_span_100ns;
+	ts.step = step;
+
+	return ts;
+}
+
 TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	TimeSeries ts;
 
 	ts.start = today_first_100ns();
-	ts.span = 24LL * 3600LL * 1000LL * 1000LL * 10LL;
+	ts.span = day_span_100ns;
 	ts.step = step;
 
 	return ts;
@@ -63,8 +83,17 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 	this->legends = ref new Platform::Array<CanvasTextLayout^>(n);
 	this->names = ref new Platform::Array<Platform::String^>(n);
 	this->values = ref new Platform::Array<double>(n);
-	this->xs = ref new Platform::Array<float>(n);
-	this->ys = ref new Platform::Array<float>(n);
+	this->xs = ref new Platform::Array<double>(n);
+	this->ys = ref new Platform::Array<double>(n);
+}
+
+void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
+	long long now = this_moment_100ns();
+	long long next_start = this->series.start + this->series.span;
+
+	if (now > next_start) {
+		this->update_time_series(next_start);
+	}
 }
 
 void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
@@ -95,7 +124,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesStatus status, TimeSeriesStyle& sty
 	FLCAS_SLOT(style.border_thickness, 3.0F);
 	FLCAS_SLOT(style.lines_thickness, 1.0F);
 	FLCAS_SLOT(style.haxes_thickness, 0.5F);
-	FLCAS_SLOT(style.vaxes_thickness, 1.0F);
+	FLCAS_SLOT(style.vaxes_thickness, 0.5F);
 
 	if ((style.legend_fx < 0.0F) || (style.legend_fx > 1.0F)) {
 		style.legend_fx = 0.8F;
@@ -108,10 +137,19 @@ void ITimeSerieslet::on_status_changed(TimeSeriesStatus status) {
 	this->update_vertical_axes(s);
 	this->update_horizontal_axes(s);
 
-
 	for (unsigned int idx = 0; idx < this->legends->Length; idx++) {
 		this->update_legend(idx, s);
 		this->colors[idx] = s.lookup_color(idx);
+	}
+}
+
+void ITimeSerieslet::update_time_series(long long next_start) {
+	this->series.start = next_start;
+	this->update_horizontal_axes(this->get_style());
+
+	for (unsigned int idx = 0; idx < this->lines->Length; idx++) {
+		this->lines[idx] = blank();
+		this->values[idx] = std::nan("datum is reset");
 	}
 }
 
@@ -148,6 +186,8 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& s) {
 	float y = this->height - s.border_thickness;
 	float mark_width, mark_height;
 
+	long long now = this_moment_100ns();
+
 	for (unsigned int i = 0; i <= this->series.step + 1; i++) {
 		float xthis = x + interval * float(i);
 		Platform::String^ mark = make_daytimestamp(this->series.start + delta * i, false);
@@ -183,7 +223,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	if (this->get_status() == TimeSeriesStatus::Realtime) {
 		Rect haxes_box = this->haxes->ComputeBounds();
-		long long now = today_current_100ns();
+		long long now = this_moment_100ns();
 		float percentage = std::fminf(float(now - this->series.start) / float(this->series.span), 1.0F);
 		float xmin = this->width - haxes_box.Width;
 		
@@ -201,19 +241,54 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		float legend_height = legend_label_height * 0.618F;
 		float legend_yoff = (legend_label_height - legend_height) * 0.5F;
 		
+		for (unsigned int idx = 0; idx < this->lines->Length; idx++) {
+			ds->FillGeometry(this->lines[idx], x + view_x, y + s.lines_thickness * 0.5F, this->colors[idx]);
+		}
+
 		for (unsigned int idx = 0; idx < this->legends->Length; idx++) {
 			float yoff = legend_label_height * (float(idx) + 0.618F);
 
 			ds->FillRectangle(legend_x, y + legend_yoff + yoff, legend_width, legend_height, this->colors[idx]);
 			ds->DrawTextLayout(this->legends[idx], legend_label_x, y + yoff, this->colors[idx]);
 		}
-
-		for (unsigned int idx = 0; idx < this->lines->Length; idx++) {
-			ds->FillGeometry(this->lines[idx], x + view_x, y, this->colors[idx]);
-		}
 	}
 	
 	ds->DrawRectangle(x + border_off, y + border_off,
 		this->width - s.border_thickness, this->height - s.border_thickness,
 		s.border_color, s.border_thickness);
+}
+
+void ITimeSerieslet::fill_this_position(long long time, double v, double* x, double* y) {
+	Rect haxes_box = this->haxes->ComputeBounds();
+	double fx = double(time - this->series.start) / double(this->series.span);
+	double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - v) / (this->vmax - this->vmin);
+
+	// TODO: find a scalable method.
+	SET_BOX(x, fx * haxes_box.Width);
+	SET_BOX(y, fy * haxes_box.Height);
+}
+
+void ITimeSerieslet::set_value(unsigned int idx, double v) {
+	static auto linestyle = make_roundcap_stroke_style();
+	TimeSeriesStyle s = this->get_style();
+	long long now = this_moment_100ns();
+	long long next_start = this->series.start + this->series.span;
+	double px, py;
+
+	if (now > next_start) {
+		this->update_time_series(next_start);
+	}
+
+	this->fill_this_position(now, v, &px, &py);
+	if (!std::isnan(this->values[idx])) {
+		this->lines[idx] = geometry_union(this->lines[idx],
+			line(float(this->xs[idx]), float(this->ys[idx]),
+				float(px), float(py), s.lines_thickness, linestyle));
+	}
+
+	this->values[idx] = v;
+	this->update_legend(idx, s);
+
+	this->xs[idx] = px;
+	this->ys[idx] = py;
 }

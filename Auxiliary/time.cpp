@@ -27,31 +27,68 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
     return self->CpuUsage->GetReport();
 }
 
-inline static void mask_calendar_day(Calendar^ c) {
-	calendar->Hour = 0;
-	calendar->Minute = 0;
+inline static void mask_calendar_minute(Calendar^ c) {
 	calendar->Second = 0;
 	calendar->Nanosecond = 0;
 }
 
-/**************************************************************************************************/
-long long WarGrey::SCADA::today_first_100ns() {
-	calendar->SetToNow();
 
-	mask_calendar_day(calendar);
+inline static void mask_calendar_hour(Calendar^ c) {
+	mask_calendar_minute(c);
+	calendar->Minute = 0;
+}
+
+inline static void mask_calendar_day(Calendar^ c) {
+	mask_calendar_hour(c);
+	calendar->Hour = 0;
+}
+
+/**************************************************************************************************/
+long long WarGrey::SCADA::this_moment_100ns() {
+	calendar->SetToNow();
 
 	return calendar->GetDateTime().UniversalTime;
 }
 
-long long WarGrey::SCADA::today_current_100ns() {
+long long WarGrey::SCADA::this_minute_first_100ns() {
 	calendar->SetToNow();
+	mask_calendar_minute(calendar);
+
+	return calendar->GetDateTime().UniversalTime;
+}
+
+long long WarGrey::SCADA::next_minute_first_100ns() {
+	calendar->SetToNow();
+	mask_calendar_minute(calendar);
+	calendar->AddMinutes(1);
+
+	return calendar->GetDateTime().UniversalTime;
+}
+
+long long WarGrey::SCADA::this_hour_first_100ns() {
+	calendar->SetToNow();
+	mask_calendar_hour(calendar);
+
+	return calendar->GetDateTime().UniversalTime;
+}
+
+long long WarGrey::SCADA::next_hour_first_100ns() {
+	calendar->SetToNow();
+	mask_calendar_hour(calendar);
+	calendar->AddHours(1);
+
+	return calendar->GetDateTime().UniversalTime;
+}
+
+long long WarGrey::SCADA::today_first_100ns() {
+	calendar->SetToNow();
+	mask_calendar_day(calendar);
 
 	return calendar->GetDateTime().UniversalTime;
 }
 
 long long WarGrey::SCADA::tomorrow_first_100ns() {
 	calendar->SetToNow();
-
 	mask_calendar_day(calendar);
 	calendar->AddDays(1);
 

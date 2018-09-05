@@ -27,7 +27,9 @@ static inline Rect smart_rect(float x, float y, float width, float height) {
 
 /*************************************************************************************************/
 CanvasGeometry^ WarGrey::SCADA::blank() {
-    return CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
+	static auto singleton = CanvasGeometry::CreatePath(ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice()));
+    
+	return singleton;
 }
 
 CanvasGeometry^ WarGrey::SCADA::paragraph(CanvasTextLayout^ tl, float* width, float* height, bool adjust) {
