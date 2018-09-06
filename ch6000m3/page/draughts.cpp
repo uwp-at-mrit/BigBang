@@ -27,14 +27,14 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DLMode { WindowUI = 0, Dashboard };
 
-private enum class DLTS { EarthWork, Capacity, Height, Load, Displacement, _ };
+private enum class DLTS { EarthWork, Capacity, Load, Displacement, Draught, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
 	EarthWork, Capacity, Height, Load, Displacement,
 	
-	SternDraft, BowDraft,
-	Port, Starboard, OpenFlow, CloseFlow, Pressure,
+	SternDraft, lSternDraft, lSuctionDraft, rSternDraft, lSternHeight, rSternHeight,
+	BowDraft, lBowDraft, rSuctionDraft, rBowDraft, lBowHeight, rBowHeight,
 
 	_
 };
@@ -105,9 +105,6 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		//this->set_cylinder(DL::BowDraft, DBD(DB2, 164U));
-		//this->set_cylinder(DL::SternDraft, DBD(DB2, 188U));
-
 		this->dimensions[DL::EarthWork]->set_value(DBD(DB2, 236U));
 		this->timeseries->set_value(DLTS::EarthWork, DBD(DB2, 236U) * 1000.0F);
 
@@ -131,16 +128,8 @@ public:
 		this->load_cylinder(this->cylinders, DL::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
 
-		this->load_dimensions(this->dimensions, this->captions, DL::SternDraft, DL::BowDraft, "meter");
-
-		{ // load settings
-			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-			ICanvasBrush^ ps_color = Colours::make(default_port_color);
-			ICanvasBrush^ sb_color = Colours::make(default_starboard_color);
-
-			this->load_label(this->captions, DL::Port, ps_color, cpt_font);
-			this->load_label(this->captions, DL::Starboard, sb_color, cpt_font);
-		}
+		this->load_dimensions(this->dimensions, DL::SternDraft, DL::rSternHeight, "meter");
+		this->load_dimensions(this->dimensions, DL::BowDraft, DL::rBowHeight, "meter");
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -155,12 +144,28 @@ public:
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, DL::EarthWork, DL::Displacement);
 
 		{ // reflow dimensions
-			//float x, y, label_height, xoff, yoff;
+			float cpt_height, xoff, yoff;
 
-			//this->master->fill_graphlet_location(this->cylinders[DL::BowDraft], nullptr, &y, GraphletAnchor::CC);
+			this->dimensions[DL::BowDraft]->fill_extent(0.0F, 0.0F, nullptr, &cpt_height);
+			xoff = cpt_height * 0.50F;
+			yoff = cpt_height * 0.20F;
+
+			this->reflow_dimension(this->dimensions, DL::BowDraft, 1.0F, 0.5F, GraphletAnchor::LC, xoff);
+
+			this->reflow_dimension(this->dimensions, DL::lBowDraft, 1.0F, 0.0F, GraphletAnchor::RB, -yoff, -yoff);
+			this->reflow_dimension(this->dimensions, DL::lBowHeight, 1.0F, 0.0F, GraphletAnchor::RT, -yoff, yoff);
+			this->reflow_dimension(this->dimensions, DL::rBowDraft, 1.0F, 1.0F, GraphletAnchor::RT, -yoff, yoff);
+			this->reflow_dimension(this->dimensions, DL::rBowHeight, 1.0F, 1.0F, GraphletAnchor::RB, -yoff, -yoff);
 			
-			//xoff = label_height * 0.5F;
-			//yoff = label_height * 2.0F;
+			this->reflow_dimension(this->dimensions, DL::lSuctionDraft, 0.618F, 0.0F, GraphletAnchor::CB, 0.0F, -yoff);
+			this->reflow_dimension(this->dimensions, DL::rSuctionDraft, 0.618F, 1.0F, GraphletAnchor::CT, 0.0F, yoff);
+
+			this->reflow_dimension(this->dimensions, DL::lSternDraft, 0.0F, 0.0F, GraphletAnchor::LB, yoff, -yoff);
+			this->reflow_dimension(this->dimensions, DL::lSternHeight, 0.0F, 0.0F, GraphletAnchor::LT, yoff, yoff);
+			this->reflow_dimension(this->dimensions, DL::rSternDraft, 0.0F, 1.0F, GraphletAnchor::LT, yoff, yoff);
+			this->reflow_dimension(this->dimensions, DL::rSternHeight, 0.0F, 1.0F, GraphletAnchor::LB, yoff, -yoff);
+
+			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, - xoff);
 		}
 	}
 
@@ -173,14 +178,21 @@ public:
 
 private:
 	template<typename E>
-	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(EditorStatus::Enabled, this->setting_style, unit, _speak(id)), id);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, _speak(id)), id);
 	}
-
+	
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
 		this->load_label(ls, id, Colours::Silver);
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_dimension(ds, id, unit);
+		}
 	}
 
 	template<typename E>
@@ -222,6 +234,15 @@ private:
 			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 		}
+	}
+
+	template<typename E>
+	void reflow_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id , float fx, float fy
+		, GraphletAnchor a, float dx = 0.0F, float dy = 0.0F) {
+		float ax, ay;
+
+		this->decorator->fill_ship_anchor(fx, fy, &ax, &ay);
+		this->master->move_to(ds[id], ax, ay, a, dx, dy);
 	}
 
 private:

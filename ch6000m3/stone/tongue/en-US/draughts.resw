@@ -123,23 +123,8 @@
   <data name="EarthWork" xml:space="preserve">
     <value>Earthwork Volume</value>
   </data>
-  <data name="Heel" xml:space="preserve">
-    <value>Heeling Angle</value>
-  </data>
-  <data name="pLeftDrag" xml:space="preserve">
-    <value>Left Drag Output Pressure</value>
-  </data>
-  <data name="pLock" xml:space="preserve">
-    <value>Locking High Pressure</value>
-  </data>
-  <data name="pRightDrag" xml:space="preserve">
-    <value>Right Drag Output Pressure</value>
-  </data>
   <data name="SternDraft" xml:space="preserve">
     <value>Stern Draught</value>
-  </data>
-  <data name="Trim" xml:space="preserve">
-    <value>Trimming Angle</value>
   </data>
   <data name="Capacity" xml:space="preserve">
     <value>Hold Capacity</value>
@@ -153,22 +138,37 @@
   <data name="Load" xml:space="preserve">
     <value>Hold Load</value>
   </data>
-  <data name="Port" xml:space="preserve">
-    <value>Port Hopper Door</value>
+  <data name="Draught" xml:space="preserve">
+    <value>Average Draught</value>
   </data>
-  <data name="Starboard" xml:space="preserve">
-    <value>Starboard Hopper Door</value>
+  <data name="lBowDraft" xml:space="preserve">
+    <value>Bow Left Draught</value>
   </data>
-  <data name="ToPipeline" xml:space="preserve">
-    <value>Transfer to Flushing Pipeline System</value>
+  <data name="lBowHeight" xml:space="preserve">
+    <value>Bow Left Hold Height</value>
   </data>
-  <data name="CloseFlow" xml:space="preserve">
-    <value>Closing Flow</value>
+  <data name="lSternDraft" xml:space="preserve">
+    <value>Stern Left Draught</value>
   </data>
-  <data name="OpenFlow" xml:space="preserve">
-    <value>Opening Flow</value>
+  <data name="lSternHeight" xml:space="preserve">
+    <value>Stern Left Hold Height</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>Pressure Control</value>
+  <data name="lSuctionDraft" xml:space="preserve">
+    <value>Left Suction Draught</value>
+  </data>
+  <data name="rBowDraft" xml:space="preserve">
+    <value>Bow Right Draught</value>
+  </data>
+  <data name="rBowHeight" xml:space="preserve">
+    <value>Bow Right Hold Height</value>
+  </data>
+  <data name="rSternDraft" xml:space="preserve">
+    <value>Stern Right Draught</value>
+  </data>
+  <data name="rSternHeight" xml:space="preserve">
+    <value>Stern Right Hold Height</value>
+  </data>
+  <data name="rSuctionDraft" xml:space="preserve">
+    <value>Right Suction Draught</value>
   </data>
 </root>

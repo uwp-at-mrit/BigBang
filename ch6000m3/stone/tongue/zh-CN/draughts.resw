@@ -123,23 +123,8 @@
   <data name="EarthWork" xml:space="preserve">
     <value>土方量</value>
   </data>
-  <data name="Heel" xml:space="preserve">
-    <value>横倾角度</value>
-  </data>
-  <data name="pLeftDrag" xml:space="preserve">
-    <value>左耙出口压力</value>
-  </data>
-  <data name="pLock" xml:space="preserve">
-    <value>高压锁紧压力</value>
-  </data>
-  <data name="pRightDrag" xml:space="preserve">
-    <value>右耙出口压力</value>
-  </data>
   <data name="SternDraft" xml:space="preserve">
     <value>艉吃水</value>
-  </data>
-  <data name="Trim" xml:space="preserve">
-    <value>纵倾角度</value>
   </data>
   <data name="Capacity" xml:space="preserve">
     <value>舱容</value>
@@ -153,19 +138,37 @@
   <data name="Load" xml:space="preserve">
     <value>装载量</value>
   </data>
-  <data name="Port" xml:space="preserve">
-    <value>左舷泥门</value>
+  <data name="Draught" xml:space="preserve">
+    <value>平均吃水</value>
   </data>
-  <data name="Starboard" xml:space="preserve">
-    <value>右舷泥门</value>
+  <data name="lBowDraft" xml:space="preserve">
+    <value>艏左吃水</value>
   </data>
-  <data name="CloseFlow" xml:space="preserve">
-    <value>关闭流量</value>
+  <data name="lBowHeight" xml:space="preserve">
+    <value>艏左舱高</value>
   </data>
-  <data name="OpenFlow" xml:space="preserve">
-    <value>打开流量</value>
+  <data name="lSternDraft" xml:space="preserve">
+    <value>艉左吃水</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>压力控制</value>
+  <data name="lSternHeight" xml:space="preserve">
+    <value>艉左舱高</value>
+  </data>
+  <data name="lSuctionDraft" xml:space="preserve">
+    <value>左吸口吃水</value>
+  </data>
+  <data name="rBowDraft" xml:space="preserve">
+    <value>艏右吃水</value>
+  </data>
+  <data name="rBowHeight" xml:space="preserve">
+    <value>艏右舱高</value>
+  </data>
+  <data name="rSternDraft" xml:space="preserve">
+    <value>艉右吃水</value>
+  </data>
+  <data name="rSternHeight" xml:space="preserve">
+    <value>艉右舱高</value>
+  </data>
+  <data name="rSuctionDraft" xml:space="preserve">
+    <value>右吸口吃水</value>
   </data>
 </root>
