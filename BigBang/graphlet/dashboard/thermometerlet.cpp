@@ -14,9 +14,9 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ thermometer_default_border_color = Colours::make(0xBBBBBB);
-static unsigned int thermometer_default_colors[] = { 0x1E90FF, 0xB3F000, 0xFFB03A, 0xFFB03A };
-static float thermometer_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
+static CanvasSolidColorBrush^ overflowlet_default_border_color = Colours::make(0xBBBBBB);
+static unsigned int overflowlet_default_colors[] = { 0x1E90FF, 0xB3F000, 0xFFB03A, 0xFFB03A };
+static float overflowlet_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 static CanvasGeometry^ make_thermometer_glass(float width, float height, float thickness) {
 	CanvasPathBuilder^ glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -66,15 +66,15 @@ Thermometerlet::Thermometerlet(double range, float width, float height, float th
 
 Thermometerlet::Thermometerlet(double tmin, double tmax, float width, float height
 	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: IRangelet(tmin,tmax), width(std::fabsf(width)), height(height), thickness(thickness), step(step)
-	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), leftward(width > 0.0F) {
+	: IRangelet(tmin, tmax), width(std::fabsf(width)), height(height), thickness(thickness), step(step)
+	, border_color(bcolor == nullptr ? overflowlet_default_border_color : bcolor), leftward(width > 0.0F) {
 	if (this->height < 0.0F) {
 		this->height *= (-this->width);
 	} else if (this->height == 0.0F) {
 		this->height = this->width * 2.0F;
 	}
 
-	this->colors = ((stops == nullptr) ? make_gradient_stops(thermometer_default_colors, thermometer_default_color_positions) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(overflowlet_default_colors, overflowlet_default_color_positions) : stops);
 }
 
 void Thermometerlet::construct() {
@@ -99,11 +99,11 @@ void Thermometerlet::construct() {
 			hatchmark = vrhatchmark(hatch_height, this->vmin, this->vmax, this->step, hatch_thickness, &metrics);
 			mark_x = this->width - metrics.width;
 		}
-
+		    
 		this->skeleton = geometry_freeze(geometry_union(glass, hatchmark, mark_x, mercury_highest - metrics.hatch_y));
 	}
 
-	this->on_value_changed(0.0F);
+	this->set_value(0.0, true);
 }
 
 void Thermometerlet::fill_extent(float x, float y, float* w, float* h) {

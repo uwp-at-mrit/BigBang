@@ -36,6 +36,17 @@ namespace WarGrey::SCADA {
 		float width, float height, double weights[], size_t count,
 		float thickness = 1.0F);
 
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vhatchmark(
+		float height, double vmin, double vmax, unsigned int step,
+		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
+		unsigned int precision = 0,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vhatchmark(
+		float height, Platform::String^ marks[], double weights[], size_t count,
+		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vlhatchmark(
 		float height, double vmin, double vmax, unsigned int step,
 		float thickness = 1.0F, WarGrey::SCADA::VHatchMarkMetrics* metrics = nullptr,

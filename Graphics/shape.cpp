@@ -309,3 +309,24 @@ CanvasGeometry^ WarGrey::SCADA::stadium(float x, float y, float length, float ra
 
 	return CanvasGeometry::CreatePath(discorectangle);
 }
+
+CanvasGeometry^ WarGrey::SCADA::trapezoid(float x, float y, float ubase, float bbase, float height) {
+	auto trapezium = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float width = (ubase > bbase) ? ubase : bbase;
+	float ux = x + (width - ubase) * 0.5F;
+	float bx = x + (width - bbase) * 0.5F;
+	float by = y + height;
+
+	trapezium->BeginFigure(ux, y);
+	trapezium->AddLine(ux + ubase, y);
+	trapezium->AddLine(bx + bbase, by);
+	trapezium->AddLine(bx, by);
+	trapezium->AddLine(ux, y);
+	trapezium->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(trapezium);
+}
+
+CanvasGeometry^ WarGrey::SCADA::trapezoid(float ubase, float bbase, float height) {
+	return trapezoid(0.0F, 0.0F, ubase, bbase, height);
+}

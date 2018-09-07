@@ -196,8 +196,8 @@ public:
 		this->master_tank = this->make_tank(HSMTStatus::High, gwidth * 17.0F, gheight * 8.0F, thickness);
 		this->visor_tank = this->make_tank(HSVTStatus::Normal, gwidth * 15.0F, gheight * 6.0F, thickness);
 
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.0F, gheight * 4.5F);
-		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.0F, gheight * 4.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
+		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		

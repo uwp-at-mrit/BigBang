@@ -48,7 +48,7 @@ void Indicatorlet::construct() {
 	this->bspace = this->size - box.Height;
 	this->body_ring = geometry_freeze(ring);
 
-	this->on_value_changed(0.0F);
+	this->set_value(0.0, true);
 }
 
 void Indicatorlet::fill_extent(float x, float y, float* w, float* h) {

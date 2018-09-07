@@ -104,4 +104,7 @@ namespace WarGrey::SCADA {
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float length, float radius);
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stadium(float x, float y, float length, float radius);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trapezoid(float ubase, float bbase, float height);
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trapezoid(float x, float y, float ubase, float bbase, float height);
 }

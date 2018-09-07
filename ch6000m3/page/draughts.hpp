@@ -15,8 +15,8 @@ namespace WarGrey::SCADA {
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
-
-	public:
+		
+	protected:
 		bool can_select(IGraphlet* g) override;
 
 	private:

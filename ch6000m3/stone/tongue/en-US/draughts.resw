@@ -126,49 +126,52 @@
   <data name="SternDraft" xml:space="preserve">
     <value>Stern Draught</value>
   </data>
-  <data name="Capacity" xml:space="preserve">
-    <value>Hold Capacity</value>
+  <data name="Vessel" xml:space="preserve">
+    <value>Cabin Vessel</value>
   </data>
   <data name="Displacement" xml:space="preserve">
     <value>Displacement</value>
   </data>
-  <data name="Height" xml:space="preserve">
-    <value>Hold Height</value>
+  <data name="HopperHeight" xml:space="preserve">
+    <value>Hopper Height</value>
   </data>
-  <data name="Load" xml:space="preserve">
-    <value>Hold Load</value>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
   </data>
   <data name="Draught" xml:space="preserve">
     <value>Average Draught</value>
   </data>
-  <data name="lBowDraft" xml:space="preserve">
-    <value>Bow Left Draught</value>
+  <data name="pslBowDraft" xml:space="preserve">
+    <value>Port Bow Draught</value>
   </data>
-  <data name="lBowHeight" xml:space="preserve">
-    <value>Bow Left Hold Height</value>
+  <data name="psBowHeight" xml:space="preserve">
+    <value>Port Bow Hopper Height</value>
   </data>
-  <data name="lSternDraft" xml:space="preserve">
-    <value>Stern Left Draught</value>
+  <data name="psSternDraft" xml:space="preserve">
+    <value>Port Stern Draught</value>
   </data>
-  <data name="lSternHeight" xml:space="preserve">
-    <value>Stern Left Hold Height</value>
+  <data name="psSternHeight" xml:space="preserve">
+    <value>Port Stern Hopper Height</value>
   </data>
-  <data name="lSuctionDraft" xml:space="preserve">
-    <value>Left Suction Draught</value>
+  <data name="psSuctionDraft" xml:space="preserve">
+    <value>Port Suction Draught</value>
   </data>
-  <data name="rBowDraft" xml:space="preserve">
-    <value>Bow Right Draught</value>
+  <data name="sbBowDraft" xml:space="preserve">
+    <value>Starboard Bow Draught</value>
   </data>
-  <data name="rBowHeight" xml:space="preserve">
-    <value>Bow Right Hold Height</value>
+  <data name="sbBowHeight" xml:space="preserve">
+    <value>Starboard Bow Hopper Height</value>
   </data>
-  <data name="rSternDraft" xml:space="preserve">
-    <value>Stern Right Draught</value>
+  <data name="sbSternDraft" xml:space="preserve">
+    <value>Starboard Stern Draught</value>
   </data>
-  <data name="rSternHeight" xml:space="preserve">
-    <value>Stern Right Hold Height</value>
+  <data name="sbSternHeight" xml:space="preserve">
+    <value>Starboard Stern Hopper Height</value>
   </data>
-  <data name="rSuctionDraft" xml:space="preserve">
-    <value>Right Suction Draught</value>
+  <data name="sbSuctionDraft" xml:space="preserve">
+    <value>Starboard Suction Draught</value>
+  </data>
+  <data name="OverflowPipe" xml:space="preserve">
+    <value>Overflow Pipe</value>
   </data>
 </root>

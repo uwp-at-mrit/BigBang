@@ -91,7 +91,7 @@ void FuelTanklet::construct() {
 	this->skeleton = geometry_freeze(geometry_union(geometry_union(tank_parts), // don't mind, it's Visual Studio's fault
 		geometry_stroke(CanvasGeometry::CreatePath(tube), this->thickness)));
 
-	this->on_value_changed(0.0F);
+	this->set_value(0.0, true);
 }
 
 void FuelTanklet::fill_extent(float x, float y, float* w, float* h) {

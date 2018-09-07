@@ -250,7 +250,7 @@ void Doorlet::construct() {
 	this->base = geometry_freeze(geometry_union(lbase, rbase));
 	this->body = geometry_union(top, bottom);
 
-	this->on_value_changed(0.0F);
+	this->set_value(0.0, true);
 }
 
 void Doorlet::fill_extent(float x, float y, float* w, float* h) {

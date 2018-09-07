@@ -44,8 +44,9 @@ namespace WarGrey::SCADA {
 		int precision = -1;
 	};
 
-	WarGrey::SCADA::DimensionStyle make_setting_dimension_style(float number_fontsize, unsigned int min_number);
-	WarGrey::SCADA::DimensionStyle make_highlight_dimension_style(float number_fontsize, unsigned int min_number);
+	WarGrey::SCADA::DimensionStyle make_plain_dimension_style(float nfontsize, unsigned int min_n);
+	WarGrey::SCADA::DimensionStyle make_setting_dimension_style(float nfontsize, unsigned int min_n);
+	WarGrey::SCADA::DimensionStyle make_highlight_dimension_style(float nfontsize, unsigned int min_n);
 
 	private class ITextlet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:

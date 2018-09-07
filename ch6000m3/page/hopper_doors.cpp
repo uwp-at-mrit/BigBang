@@ -31,7 +31,7 @@ private enum class HDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
-	SternDraft, EarthWork, Capacity, Height, Load, Displacement, BowDraft,
+	SternDraft, EarthWork, Vessel, HopperHeight, Loading, Displacement, BowDraft,
 	
 	pLeftDrag, pLock, pRightDrag, Heel, Trim,
 	Port, Starboard, OpenFlow, CloseFlow, Pressure,
@@ -156,12 +156,16 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->set_cylinder(HD::BowDraft, DBD(DB2, 164U));
-		this->set_cylinder(HD::SternDraft, DBD(DB2, 188U));
+		this->set_cylinder(HD::HopperHeight, DBD(DB2, 224U));
+		this->set_cylinder(HD::Displacement, DBD(DB2, 228U));
+		this->set_cylinder(HD::Loading, DBD(DB2, 232U));
+		this->set_cylinder(HD::EarthWork, DBD(DB2, 236U));
+		this->set_cylinder(HD::Vessel, DBD(DB2, 320U));
 
+		this->dimensions[HD::BowDraft]->set_value(DBD(DB2, 164U));
+		this->dimensions[HD::SternDraft]->set_value(DBD(DB2, 188U));
 		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
 		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
-		this->dimensions[HD::EarthWork]->set_value(DBD(DB2, 236U));
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -180,9 +184,9 @@ public:
 		cylinder_height = cell_height * 1.618F;
 		this->load_cylinder(this->cylinders, HD::BowDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
 		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Capacity, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Height, cylinder_height, 15.0, "meter", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Load, cylinder_height, 18000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, 15.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, 18000.0, "ton", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
 		this->load_cylinder(this->cylinders, HD::SternDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
 

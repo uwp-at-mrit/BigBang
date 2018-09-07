@@ -117,9 +117,9 @@ public:
 		pTurtle->move_down(4, SW::d16)->move_right(6, SW::DGV16)->move_right(6, SW::SP26)->move_right(6, SW::DGV6);
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA1)->move_up(1.5F)->turn_up_right()->jump_back();
 
-		pTurtle->move_down(3, SW::sea);
+		pTurtle->move_down(2.5F, SW::sea);
 
-		pTurtle->move_down(2, SW::d17)->move_right(6, SW::DGV17)->move_right(6, SW::SP11)->move_right(6, SW::DGV1);
+		pTurtle->move_down(2.5F, SW::d17)->move_right(6, SW::DGV17)->move_right(6, SW::SP11)->move_right(6, SW::DGV1);
 		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA2)->move_down(1.5F)->turn_down_right()->jump_back();
 		pTurtle->move_down(4, SW::d18)->move_right(6, SW::DGV18)->move_right(6, SW::SP22)->move_right(6, SW::DGV2);
 		pTurtle->move_right(14, SW::d46)->move_right(12, SW::DGV46)->move_right(6, SW::Port)->jump_back(SW::d18);

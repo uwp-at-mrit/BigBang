@@ -49,6 +49,22 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 }
 
 /*************************************************************************************************/
+DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned int min_number) {
+	auto nf = make_bold_text_format("Cambria Math", nfsize);
+	auto uf = make_bold_text_format("Cambria", nfsize * 0.90F);
+	DimensionStyle ds;
+
+	ds.number_font = nf;
+	ds.unit_font = uf;
+	ds.minimize_number_width = get_text_extent("0", nf).width * float(min_number);
+	ds.number_xfraction = 0.5F;
+	ds.number_leading_space = 0.0F;
+	ds.number_trailing_space = 0.0F;
+	ds.label_color = Colours::Silver;
+
+	return ds;
+}
+
 DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
@@ -76,12 +92,12 @@ DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsi
 	ds.minimize_label_width = get_text_extent("O", uf).height;
 	ds.label_xfraction = 0.5F;
 	ds.minimize_number_width = get_text_extent("0", nf).width * float(min_number);
+	ds.number_leading_space = 2.0F;
 	ds.number_background_color = Colours::Gray;
 	ds.number_color = Colours::Background;
 	ds.label_background_color = Colours::ForestGreen;
 	ds.label_color = Colours::GhostWhite;
-	ds.number_leading_space = 2.0F;
-
+	
 	return ds;
 }
 
@@ -424,22 +440,21 @@ void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
 	CAS_SLOT(style.label_font, style.unit_font);
 
 	CAS_SLOT(style.caret_color, Colours::Foreground); 
-	
+
 	FLCAS_SLOT(style.minimize_label_width, 0.0F);
 	FLCAS_SLOT(style.label_xfraction, 1.0F);
+	FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
 
 	switch (status) {
 	case EditorStatus::Enabled: {
 		FLCAS_SLOT(style.minimize_number_width, get_text_extent("123456.789", style.number_font).width);
 		FLCAS_SLOT(style.number_xfraction, 0.0F);
-		FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
 		style.precision = 0;
 	}; break;
 	case EditorStatus::Disabled: {
 		FLCAS_SLOT(style.minimize_number_width, 0.0F);
 		FLCAS_SLOT(style.number_xfraction, 0.5F);
-		FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
 		ICAS_SLOT(style.precision, 1);
 	}; break;

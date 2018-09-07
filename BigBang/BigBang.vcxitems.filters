@@ -100,13 +100,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.cpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.cpp">
       <Filter>graphlet\misc</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -212,13 +210,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\alarmlet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\tubelet.hpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\misc\hatchlet.hpp">
       <Filter>graphlet\misc</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

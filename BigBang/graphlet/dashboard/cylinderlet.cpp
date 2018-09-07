@@ -95,7 +95,7 @@ void Cylinderlet::construct() {
 		this->skeleton = geometry_freeze(geometry_intersect(glass, rectangle(this->base_width + this->extended_width, this->height)));
 	}
 
-	this->on_value_changed(0.0F);
+	this->set_value(0.0, true);
 }
 
 void Cylinderlet::fill_extent(float x, float y, float* w, float* h) {
