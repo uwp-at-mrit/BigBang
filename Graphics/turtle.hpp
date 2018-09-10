@@ -25,7 +25,10 @@ namespace WarGrey::SCADA {
 			float thickness, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style);
 
 	protected:
+		void move_to(unsigned int a_id);
 		void jump_back(unsigned int a_id);
+
+	protected:
 		void jump_up(float step, unsigned int a_id);
 		void jump_right(float step, unsigned int a_id);
 		void jump_down(float step, unsigned int a_id);
@@ -126,6 +129,12 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor (&as)[N]
 			, float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr) {
 			return this->subtrack(as, N, thickness, style);
+		}
+
+	public:
+		WarGrey::SCADA::Turtle<Anchor>* move_to(Anchor id) {
+			WarGrey::SCADA::ITurtle::move_to(_I(id));
+			return this;
 		}
 
 		WarGrey::SCADA::Turtle<Anchor>* jump_back(Anchor id = Anchor::_) {

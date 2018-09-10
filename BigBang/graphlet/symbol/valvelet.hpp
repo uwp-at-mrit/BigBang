@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 		Manual,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
-		FalseOpen, FalseClosed,
+		FakeOpen, FakeClose,
 		_ };
 
 	private struct ValveStyle {

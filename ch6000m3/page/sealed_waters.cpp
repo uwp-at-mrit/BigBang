@@ -29,9 +29,6 @@ private enum SWMode { WindowUI = 0, Dashboard };
 
 private enum class SWOperation { Start, Stop, Reset, _ };
 
-static const float default_thickness = 1.5F;
-static CanvasSolidColorBrush^ track_color = Colours::Gray;
-
 // WARNING: order matters
 private enum class SW : unsigned int {
 	// Pumps
@@ -129,7 +126,7 @@ public:
 		pTurtle->move_down(4, SW::d20)->move_right(6, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
-		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_thickness, track_color));
+		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 		this->hatch = this->master->insert_one(new Hatchlet(gwidth * 2.5F));
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
@@ -152,7 +149,7 @@ public:
 			this->load_arrows(this->arrows, SW::FP1, SW::SP20, arrowsize, 0.0);
 			this->load_arrows(this->arrows, SW::UA1, SW::UA2, arrowsize, -90.0);
 			this->load_arrows(this->arrows, SW::DA1, SW::DA2, arrowsize, 90.0);
-			this->load_arrow(this->arrows, SW::pipeline, arrowsize * 2.0F, 0.0, Colours::Silver);
+			this->load_arrow(this->arrows, SW::pipeline, arrowsize * 2.0F, 0.0);
 		}
 	}
 
@@ -193,7 +190,7 @@ public:
 
 		{ // reflow dimensions
 			float xoff = gwidth * 3.5F;
-			float yoff = default_thickness * 2.0F;
+			float yoff = default_pipeline_thickness * 2.0F;
 
 			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -yoff);
@@ -246,12 +243,12 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_arrow(std::map<E, G*>& as, E id, float radius, double degrees, ICanvasBrush^ color = track_color) {
-		as[id] = this->master->insert_one(new Credit<ArrowHeadlet, E>(radius, degrees, color), id);
+	void load_arrow(std::map<E, G*>& as, E id, float radius, double degrees, unsigned int color = default_pipeline_color) {
+		as[id] = this->master->insert_one(new Credit<ArrowHeadlet, E>(radius, degrees, Colours::make(color)), id);
 	}
 
 	template<class G, typename E>
-	void load_arrows(std::map<E, G*>& as, E id0, E idn, float radius, double degrees, ICanvasBrush^ color = track_color) {
+	void load_arrows(std::map<E, G*>& as, E id0, E idn, float radius, double degrees, unsigned int color = default_pipeline_color) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_arrow(as, id, radius, degrees, color);
 		}

@@ -9,6 +9,7 @@
 #include "page/hopper_doors.hpp"
 #include "page/sealed_waters.hpp"
 #include "page/draughts.hpp"
+#include "page/barges.hpp"
 #include "page/graphlets.hpp"
 
 using namespace WarGrey::SCADA;
@@ -39,6 +40,7 @@ public:
 
 protected:
 	void construct() override {
+		this->add_planet(new BargePage(this->device));
 		this->add_planet(new DraughtsPage(this->device));
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));

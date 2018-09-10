@@ -117,79 +117,97 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Ready" xml:space="preserve">
-    <value>准备就绪</value>
+  <data name="Bracket" xml:space="preserve">
+    <value>装驳架</value>
   </data>
-  <data name="Remote" xml:space="preserve">
-    <value>遥控</value>
+  <data name="D001" xml:space="preserve">
+    <value>抽舱引水</value>
   </data>
-  <data name="Running" xml:space="preserve">
-    <value>运行</value>
+  <data name="D002" xml:space="preserve">
+    <value>抽舱</value>
   </data>
-  <data name="Starting" xml:space="preserve">
-    <value>正在运行</value>
+  <data name="D003" xml:space="preserve">
+    <value>左吸口</value>
   </data>
-  <data name="Stopped" xml:space="preserve">
-    <value>停止</value>
+  <data name="D004" xml:space="preserve">
+    <value>右吸口</value>
   </data>
-  <data name="Stopping" xml:space="preserve">
-    <value>正在停止</value>
+  <data name="D005" xml:space="preserve">
+    <value>左隔离</value>
   </data>
-  <data name="Unstartable" xml:space="preserve">
-    <value>运行失败</value>
+  <data name="D006" xml:space="preserve">
+    <value>左水下泵排出</value>
   </data>
-  <data name="Unstoppable" xml:space="preserve">
-    <value>停止失败</value>
+  <data name="D007" xml:space="preserve">
+    <value>右水下泵装舱</value>
   </data>
-  <data name="pump" xml:space="preserve">
-    <value>液压泵</value>
+  <data name="D008" xml:space="preserve">
+    <value>右总装舱</value>
   </data>
-  <data name="valve" xml:space="preserve">
-    <value>阀</value>
+  <data name="D009" xml:space="preserve">
+    <value>左水下泵装舱</value>
   </data>
-  <data name="OpenReady" xml:space="preserve">
-    <value>打开条件</value>
+  <data name="D010" xml:space="preserve">
+    <value>左总装舱</value>
   </data>
-  <data name="Manual" xml:space="preserve">
-    <value>手动阀</value>
+  <data name="D011" xml:space="preserve">
+    <value>右低排</value>
   </data>
-  <data name="Open" xml:space="preserve">
-    <value>完全打开</value>
+  <data name="D012" xml:space="preserve">
+    <value>左低排</value>
   </data>
-  <data name="Opening" xml:space="preserve">
-    <value>正在打开</value>
+  <data name="D013" xml:space="preserve">
+    <value>右前装舱</value>
   </data>
-  <data name="Unclosable" xml:space="preserve">
-    <value>关闭失败</value>
+  <data name="D014" xml:space="preserve">
+    <value>左前装舱</value>
   </data>
-  <data name="Unopenable" xml:space="preserve">
-    <value>打开失败</value>
+  <data name="D015" xml:space="preserve">
+    <value>右后装舱</value>
   </data>
-  <data name="upperdoor" xml:space="preserve">
-    <value>小泥门</value>
+  <data name="D016" xml:space="preserve">
+    <value>左后装舱</value>
   </data>
-  <data name="dumpdoor" xml:space="preserve">
-    <value>大泥门</value>
+  <data name="D017" xml:space="preserve">
+    <value>左舱内泵装舱</value>
   </data>
-  <data name="winch" xml:space="preserve">
-    <value>绞车</value>
+  <data name="D018" xml:space="preserve">
+    <value>右舱内泵装舱</value>
   </data>
-  <data name="Closed" xml:space="preserve">
-    <value>完全关闭</value>
+  <data name="D019" xml:space="preserve">
+    <value>右排岸</value>
   </data>
-  <data name="CloseReady" xml:space="preserve">
-    <value>关闭条件</value>
+  <data name="D020" xml:space="preserve">
+    <value>左排岸</value>
   </data>
-  <data name="Closing" xml:space="preserve">
-    <value>正在关闭</value>
+  <data name="D021" xml:space="preserve">
+    <value>艏吹</value>
   </data>
-  <data name="Disabled" xml:space="preserve">
-    <value>禁用</value>
+  <data name="D022" xml:space="preserve">
+    <value>艏喷</value>
   </data>
-  <data name="FakeClose" xml:space="preserve">
-    <value>假关</value>
+  <data name="D023" xml:space="preserve">
+    <value>左右贯通</value>
   </data>
-  <data name="FakeOpen" xml:space="preserve">
-    <value>假开</value>
+  <data name="D024" xml:space="preserve">
+    <value>装驳</value>
+  </data>
+  <data name="D025" xml:space="preserve">
+    <value>右隔离</value>
+  </data>
+  <data name="D026" xml:space="preserve">
+    <value>右水下泵排出</value>
+  </data>
+  <data name="PSHPump" xml:space="preserve">
+    <value>左舱内泵</value>
+  </data>
+  <data name="PSUWPump" xml:space="preserve">
+    <value>左水下泵</value>
+  </data>
+  <data name="SBHPump" xml:space="preserve">
+    <value>右舱内泵</value>
+  </data>
+  <data name="SBUWPump" xml:space="preserve">
+    <value>右水下泵</value>
   </data>
 </root>

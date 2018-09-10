@@ -19,7 +19,7 @@ ITurtle::ITurtle(float xstepsize, float ystepsize, bool big_turn, unsigned int s
 	this->xradius = xstepsize;
 	this->yradius = ystepsize;
 
-	if (big_turn == false) {
+	if (!big_turn) {
 		this->xradius *= 0.5F;
 		this->yradius *= 0.5F;
 	}
@@ -84,6 +84,11 @@ CanvasGeometry^ ITurtle::snap_track(float thickness, CanvasStrokeStyle^ style) {
 }
 
 /*************************************************************************************************/
+void ITurtle::move_to(unsigned int a_id) {
+	this->fill_anchor_location(a_id, &this->x, &this->y);
+	this->do_move(this->_anchor);
+}
+
 void ITurtle::jump_back(unsigned int a_id) {
 	unsigned int target = ((a_id == this->_anchor) ? this->last_backtrace_anchor : a_id);
 
@@ -95,7 +100,7 @@ void ITurtle::jump_back(unsigned int a_id) {
 		this->y = 0.0F;
 	}
 
-	return this->do_jump(this->_anchor);
+	this->do_jump(this->_anchor);
 }
 
 void ITurtle::jump_up(float step, unsigned int a_id) {
@@ -235,42 +240,42 @@ void ITurtle::turn_up_right(unsigned int a_id) {
 }
 
 void ITurtle::turn_down_left_up(unsigned int a_id) {
-	this->x -= this->xstepsize;
+	this->x -= this->xradius * 2.0F;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_down_right_up(unsigned int a_id) {
-	this->x += this->xstepsize;
+	this->x += this->xradius * 2.0F;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_left_down(unsigned int a_id) {
-	this->x -= this->xstepsize;
+	this->x -= this->xradius * 2.0F;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_up_right_down(unsigned int a_id) {
-	this->x += this->xstepsize;
+	this->x += this->xradius * 2.0F;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_down_right(unsigned int a_id) {
-	this->y += this->xstepsize;
+	this->y += this->yradius * 2.0F;
 	this->do_counterclockwise_turn(a_id);
 }
 
 void ITurtle::turn_left_up_right(unsigned int a_id) {
-	this->y -= this->ystepsize;
+	this->y -= this->yradius * 2.0F;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_down_left(unsigned int a_id) {
-	this->y += this->ystepsize;
+	this->y += this->yradius * 2.0F;
 	this->do_clockwise_turn(a_id);
 }
 
 void ITurtle::turn_right_up_left(unsigned int a_id) {
-	this->y -= this->ystepsize;
+	this->y -= this->yradius * 2.0F;
 	this->do_counterclockwise_turn(a_id);
 }
 

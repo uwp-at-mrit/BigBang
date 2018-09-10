@@ -105,6 +105,10 @@ namespace WarGrey::SCADA {
 			this->turtle->destroy();
 		}
 
+		Tracklet(WarGrey::SCADA::Turtle<Anchor>* turtle, float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr)
+			: Tracklet<Anchor>(turtle, thickness, WarGrey::SCADA::Colours::make(color), style) {}
+
 		Tracklet(WarGrey::SCADA::Turtle<Anchor>* turtle, float thickness = 1.0F
 			, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver
 			, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr)

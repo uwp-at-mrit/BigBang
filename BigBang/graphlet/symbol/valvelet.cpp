@@ -84,10 +84,10 @@ void Valvelet::prepare_style(ValveStatus status, ValveStyle& s) {
 	case ValveStatus::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
-	case ValveStatus::FalseOpen: {
+	case ValveStatus::FakeOpen: {
 		CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
-	case ValveStatus::FalseClosed: {
+	case ValveStatus::FakeClose: {
 		CAS_VALUES(s.border_color, Colours::Red, s.body_color, Colours::DimGray);
 	}; break;
 	}

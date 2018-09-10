@@ -186,4 +186,7 @@
   <data name=":nodatum:" xml:space="preserve">
     <value>No Datum</value>
   </data>
+  <data name="barges" xml:space="preserve">
+    <value>Loading Cabin &amp; Barge</value>
+  </data>
 </root>

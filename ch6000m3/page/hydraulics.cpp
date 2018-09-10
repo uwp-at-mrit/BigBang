@@ -183,7 +183,7 @@ public:
 		pTurtle->move_right(2)->move_down(5, HS::SQi)->move_down(3, HS::I)->move_down(3);
 		pTurtle->jump_left(4)->move_up(3, HS::J)->move_up(3, HS::SQj)->move_up(5)->move_right(2 /* HS::Visor */);
 		
-		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, 1.5F, Colours::Gray));
+		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 		
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
@@ -249,7 +249,7 @@ public:
 	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy;
-		float valve_adjust_gridsize = gwidth * 0.618F;
+		float valve_adjust_gridsize = gheight * 0.618F;
 		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
