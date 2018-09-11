@@ -20,10 +20,13 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
+using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LBMode { WindowUI = 0, Dashboard };
 
@@ -49,8 +52,69 @@ private enum class LB : unsigned int {
 	d0225, d0326, d0406,
 	d1720, d1819, d1920, d2122,
 
-	// anchors used for unnamed corners
+	// anchors used for unnamed nodes
+	ps, sb, deck_lx, deck_rx, deck_ty, deck_by
 };
+
+private class BargeDecorator : public IPlanetDecorator {
+public:
+	BargeDecorator() {
+		float height = 1.0F;
+		float xradius = height * 0.10F;
+		float yradius = height * 0.50F;
+
+		this->ship_width = 1.0F - xradius;
+		this->ship = geometry_union(rectangle(this->ship_width, height),
+			segment(this->ship_width, yradius, -90.0, 90.0, xradius, yradius));
+
+		this->ship_style = make_dash_stroke(CanvasDashStyle::Dash);
+	}
+
+public:
+	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
+		auto pipelines = dynamic_cast<Tracklet<LB>*>(g);
+
+		if (pipelines != nullptr) {
+			float ps_y, sb_y, deck_lx, deck_ty, deck_rx, deck_by;
+
+			pipelines->fill_anchor_location(LB::ps, nullptr, &ps_y, false);
+			pipelines->fill_anchor_location(LB::sb, nullptr, &sb_y, false);
+
+			pipelines->fill_anchor_location(LB::deck_lx, &deck_lx, nullptr, false);
+			pipelines->fill_anchor_location(LB::deck_rx, &deck_rx, nullptr, false);
+			pipelines->fill_anchor_location(LB::deck_ty, nullptr, &deck_ty, false);
+			pipelines->fill_anchor_location(LB::deck_by, nullptr, &deck_by, false);
+
+			{ // draw ship
+				float ship_width = this->actual_width();
+				float ship_height = std::fabsf(sb_y - ps_y);
+				auto real_ship = geometry_scale(this->ship, ship_width, ship_height);
+				Rect ship_box = real_ship->ComputeBounds();
+				float sx = 0.0F;
+				float sy = y + std::fminf(sb_y, ps_y);
+
+				ds->DrawGeometry(real_ship, sx, sy, Colours::SeaGreen, 1.0F, this->ship_style);
+			}
+
+			{ // draw deck region
+				float dx = x + std::fminf(deck_lx, deck_rx);
+				float dy = y + std::fminf(deck_ty, deck_by);
+				float dw = std::fabsf((deck_rx - deck_lx));
+				float dh = std::fabsf((deck_by - deck_ty));
+
+				ds->DrawGeometry(rectangle(dx, dy, dw, dh), Colours::SeaGreen, 1.0F, this->ship_style);
+			}
+		}
+	}
+
+private:
+	CanvasGeometry^ ship;
+	CanvasStrokeStyle^ ship_style;
+
+private:
+	float ship_width;
+};
+
 
 private class Barge final : public PLCConfirmation, public IMenuCommand<LBOperation, IMRMaster*> {
 public:
@@ -94,9 +158,9 @@ public:
 	void load(float width, float height, float gwidth, float gheight) {
 		Turtle<LB>* pTurtle = new Turtle<LB>(gwidth, gheight, false);
 
-		pTurtle->move_left(2, LB::D021)->move_left(2, LB::d2122);
-		pTurtle->move_down(3)->move_right(2, LB::D022)->move_right(2)->jump_back();
-		pTurtle->move_left(2, LB::d1920)->move_left(4, LB::D020)->move_left(4, LB::d1720);
+		pTurtle->move_left(LB::deck_rx)->move_left(2, LB::D021)->move_left(2, LB::d2122);
+		pTurtle->move_down(3)->move_right(2, LB::D022)->move_right(3)->jump_back();
+		pTurtle->move_left(2, LB::d1920)->move_left(2, LB::D020)->move_left(6, LB::d1720);
 
 		pTurtle->move_left(3, LB::D017)->move_left(10.5F)->turn_up_left_down()->move_left(3, LB::D010)->move_left(6, LB::d12);
 		pTurtle->move_down(1.5F, LB::D012)->move_down(4)->turn_right_down_left()->jump_back();
@@ -105,14 +169,14 @@ public:
 		pTurtle->move_up(2)->move_left(4, LB::D024)->move_left(6, LB::Bracket)->jump_back(LB::d1720);
 		
 		pTurtle->move_down(3.5F, LB::PSHPump)->move_left(14)->move_up(2, LB::D005);
-		pTurtle->move_up(5, LB::d0406)->move_right(4, LB::D006)->move_right(4)->move_down(1.5F, LB::D009);
+		pTurtle->move_up(5, LB::d0406)->move_right(4, LB::D006)->move_right(4)->move_down(0.5F, LB::deck_ty)->move_down(LB::D009);
 		pTurtle->move_down(5)->turn_right_down_left()->move_down(2, LB::D023)->jump_back(LB::d0406);
 
-		pTurtle->move_up(1.5F, LB::D004)->move_up(3)->turn_up_left();
+		pTurtle->move_up(1.5F, LB::D004)->move_up(LB::ps)->move_up(2)->turn_up_left();
 		pTurtle->move_left(12, LB::PSUWPump)->move_left(12, LB::Port);
 
 		pTurtle->jump_back(LB::D023)->move_down(2)->turn_right_down_left()->move_down(4.5F, LB::D007);
-		pTurtle->move_down(1.5F)->move_left(4, LB::D026)->move_left(4, LB::d0326)->move_up(5, LB::D025);
+		pTurtle->move_down(LB::deck_by)->move_down(0.5F)->move_left(4, LB::D026)->move_left(4, LB::d0326)->move_up(5, LB::D025);
 		pTurtle->move_up(1.5F, LB::d0225)->move_right(14, LB::SBHPump)->move_down(3, LB::d1819)->jump_back(LB::d0225);
 		pTurtle->move_up(2.5F)->move_left(2, LB::D002)->move_left(28, LB::D001)->move_left(2)->jump_back(LB::d1819);
 
@@ -121,12 +185,12 @@ public:
 		pTurtle->move_left(4, LB::d13)->move_left_up(1.5F, LB::D013)->move_left_up(1.5F)->jump_back();
 		pTurtle->move_left(4)->move_left(6)->move_left_up(1.5F, LB::D015)->move_left_up(1.5F)->jump_back(LB::d0326);
 
-		pTurtle->move_down(1.5F, LB::D003)->move_down(3)->turn_down_left();
+		pTurtle->move_down(1.5F, LB::D003)->move_down(LB::sb)->move_down(3)->turn_down_left();
 		pTurtle->move_left(12, LB::SBUWPump)->move_left(12, LB::Starboard);
 
-		pTurtle->jump_back(LB::d1819)->move_right(4, LB::D019)->move_right(4)->move_to(LB::d1920);
+		pTurtle->jump_back(LB::d1819)->move_right(4, LB::deck_lx)->move_right(2, LB::D019)->move_right(2)->move_to(LB::d1920);
 		
-		this->station = this->master->insert_one(new Tracklet<LB>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<LB>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
 		this->load_labels(this->captions, LB::PSUWPump, LB::SBHPump, Colours::Salmon);
 		this->load_label(this->captions, LB::Bracket, Colours::Yellow);
@@ -151,12 +215,12 @@ public:
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 
-		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->station->map_credit_graphlet(this->captions[LB::PSUWPump], GraphletAnchor::CB);
-		this->station->map_credit_graphlet(this->captions[LB::SBUWPump], GraphletAnchor::CT);
-		this->station->map_credit_graphlet(this->captions[LB::PSHPump], GraphletAnchor::LC);
-		this->station->map_credit_graphlet(this->captions[LB::SBHPump], GraphletAnchor::LC);
-		this->station->map_credit_graphlet(this->captions[LB::Bracket], GraphletAnchor::CC);
+		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
+		this->pipeline->map_credit_graphlet(this->captions[LB::PSUWPump], GraphletAnchor::CB);
+		this->pipeline->map_credit_graphlet(this->captions[LB::SBUWPump], GraphletAnchor::CT);
+		this->pipeline->map_credit_graphlet(this->captions[LB::PSHPump], GraphletAnchor::LC);
+		this->pipeline->map_credit_graphlet(this->captions[LB::SBHPump], GraphletAnchor::LC);
+		this->pipeline->map_credit_graphlet(this->captions[LB::Bracket], GraphletAnchor::CC);
 
 		this->vlabels[LB::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
@@ -167,7 +231,7 @@ public:
 			case LB::D013: case LB::D015: {
 				lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LB;
 			}; break;
-			case LB::D006: case LB::D017: {
+			case LB::D006: case LB::D008: case LB::D017: case LB::D019: case LB::D022: {
 				lbl_dx = x0; lbl_dy = y0 + valve_adjust_gridsize; lbl_a = GraphletAnchor::CT;
 			}; break;
 			default: {
@@ -179,8 +243,8 @@ public:
 			}
 			}
 
-			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->station->map_credit_graphlet(this->captions[it->first], lbl_a, lbl_dx, lbl_dy);
+			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
+			this->pipeline->map_credit_graphlet(this->captions[it->first], lbl_a, lbl_dx, lbl_dy);
 			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 	}
@@ -224,7 +288,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<LB>* station;
+	Tracklet<LB>* pipeline;
 	std::map<LB, Credit<Labellet, LB>*> captions;
 	std::map<LB, Credit<Valvelet, LB>*> valves;
 	std::map<LB, Credit<Labellet, LB>*> vlabels;
@@ -248,6 +312,7 @@ BargePage::BargePage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	{ // load decorators
 		this->append_decorator(new PageDecorator());
+		this->append_decorator(new BargeDecorator());
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
