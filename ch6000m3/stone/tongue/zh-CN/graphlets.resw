@@ -168,7 +168,7 @@
   <data name="upperdoor" xml:space="preserve">
     <value>小泥门</value>
   </data>
-  <data name="dumpdoor" xml:space="preserve">
+  <data name="hopperdoor" xml:space="preserve">
     <value>大泥门</value>
   </data>
   <data name="winch" xml:space="preserve">
@@ -191,5 +191,8 @@
   </data>
   <data name="FakeOpen" xml:space="preserve">
     <value>假开</value>
+  </data>
+  <data name="m_valve" xml:space="preserve">
+    <value>电动阀</value>
   </data>
 </root>

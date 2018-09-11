@@ -1,5 +1,7 @@
 #include "graphlet/symbol/circuit/converterlet.hpp"
 
+#include "string.hpp"
+
 #include "math.hpp"
 #include "text.hpp"
 #include "shape.hpp"
@@ -14,12 +16,12 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-Converterlet::Converterlet(Platform::String^ sign, float radius, float thickness, double degrees)
+Converterlet::Converterlet(char sign, float radius, float thickness, double degrees)
 	: Converterlet(ConverterStatus::Normal, sign, radius, thickness, degrees) {}
 
-Converterlet::Converterlet(ConverterStatus default_status, Platform::String^ sign, float radius, float thickness, double degrees)
+Converterlet::Converterlet(ConverterStatus default_status, char sign, float radius, float thickness, double degrees)
 	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
-	auto l_sign = make_text_layout(sign, make_bold_text_format("Cambria Math", radius * 1.2F));
+	auto l_sign = make_text_layout(make_wstring(sign), make_bold_text_format("Cambria Math", radius * 1.2F));
 	auto l_pair = make_text_layout(L"=", make_bold_text_format("Cambria Math", radius * 1.2F));
 	Rect s_box = l_sign->DrawBounds;
 	Rect p_box = l_pair->DrawBounds;

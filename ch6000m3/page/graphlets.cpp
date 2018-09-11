@@ -17,6 +17,10 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
+static Platform::String^ all_captions[] = {
+	"winch", "pump", "valve", "m_valve", "hopperdoor", "upperdoor"
+};
+
 private class Stage final {
 public:
 	Stage(GraphletOverview* master) : master(master), progress(0.0) {
@@ -26,7 +30,6 @@ public:
 public:
 	void load(float width, float height) {
 		float unitsize = 32.0F;
-		Platform::String^ all_captions[] = { "winch", "pump", "valve", "dumpdoor", "upperdoor" };
 		
 		for (size_t i = 0; i < sizeof(all_captions)/sizeof(Platform::String^); i++) {
 			this->captions[i] = make_label(_speak(all_captions[i]) + ":", this->font);
@@ -34,7 +37,8 @@ public:
 
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->valves, this->vlabels, unitsize);
-		this->load_primitives(this->bdoors, this->bdlabels, unitsize);
+		this->load_primitives(this->mvalves, this->mvlabels, unitsize);
+		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
 	}
 
@@ -68,10 +72,11 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		y0 += unitsize;
-		this->reflow_primitives(this->pumps,  this->plabels,  x0, y0 + cellsize * 1.0F, cellsize);
-		this->reflow_primitives(this->valves, this->vlabels,  x0, y0 + cellsize * 2.0F, cellsize);
-		this->reflow_primitives(this->bdoors, this->bdlabels, x0, y0 + cellsize * 3.0F, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels, x0, y0 + cellsize * 4.0F, cellsize);
+		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
+		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 2.0F, cellsize);
+		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 4.0F, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 5.0F, cellsize);
 	}
 
 public:
@@ -82,9 +87,9 @@ public:
 			this->progress = 0.0;
 		}
 
-		bdoors[DoorStatus::Opening]->set_value(this->progress);
+		hdoors[DoorStatus::Opening]->set_value(this->progress);
 		udoors[DoorStatus::Opening]->set_value(this->progress);
-		bdoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
+		hdoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
 		udoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
 	}
 
@@ -112,13 +117,15 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	Labellet* captions[5];
+	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
 	std::unordered_map<PumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<PumpStatus, Labellet*> plabels;
 	std::unordered_map<ValveStatus, Valvelet*> valves;
 	std::unordered_map<ValveStatus, Labellet*> vlabels;
-	std::unordered_map<DoorStatus, HopperDoorlet*> bdoors;
-	std::unordered_map<DoorStatus, Labellet*> bdlabels;
+	std::unordered_map<ValveStatus, TValvelet*> mvalves;
+	std::unordered_map<ValveStatus, Labellet*> mvlabels;
+	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;
+	std::unordered_map<DoorStatus, Labellet*> hdlabels;
 	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;
 	std::unordered_map<DoorStatus, Labellet*> udlabels;
 

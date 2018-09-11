@@ -117,79 +117,94 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="Bracket" xml:space="preserve">
+    <value>Loading Bracket</value>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="D001" xml:space="preserve">
+    <value>Empty and Water</value>
   </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>Local IPv4: </value>
+  <data name="D002" xml:space="preserve">
+    <value>Empty</value>
   </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>Not Found</value>
+  <data name="D003" xml:space="preserve">
+    <value>Port Suction</value>
   </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC:  </value>
+  <data name="D004" xml:space="preserve">
+    <value>Starboard Suction</value>
   </data>
-  <data name=":power:" xml:space="preserve">
-    <value>Power:  </value>
+  <data name="D005" xml:space="preserve">
+    <value>Port Isolation</value>
   </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="D006" xml:space="preserve">
+    <value>Port Underwater Discharge</value>
   </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
+  <data name="D007" xml:space="preserve">
+    <value>Starboard Underwater Charge</value>
   </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
+  <data name="D008" xml:space="preserve">
+    <value>Starboard Total Charge</value>
   </data>
-  <data name="hydraulics" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="D009" xml:space="preserve">
+    <value>Port Underwater Charge</value>
   </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>Offline</value>
+  <data name="D010" xml:space="preserve">
+    <value>Port Total Charge</value>
   </data>
-  <data name="graphlets" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="D011" xml:space="preserve">
+    <value>Starboard Low Discharge</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="D012" xml:space="preserve">
+    <value>Port Low Discharge</value>
   </data>
-  <data name="hopper_doors" xml:space="preserve">
-    <value>Hopper Doors Control</value>
+  <data name="D013" xml:space="preserve">
+    <value>Starboard Fore Charge</value>
   </data>
-  <data name="Empty" xml:space="preserve">
-    <value>E</value>
+  <data name="D014" xml:space="preserve">
+    <value>Port Fore Charge</value>
   </data>
-  <data name="Full" xml:space="preserve">
-    <value>F</value>
+  <data name="D015" xml:space="preserve">
+    <value>Starboard Back Charge</value>
   </data>
-  <data name="High" xml:space="preserve">
-    <value>H</value>
+  <data name="D016" xml:space="preserve">
+    <value>Port Back Charge</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>L</value>
+  <data name="D017" xml:space="preserve">
+    <value>Port Deck Pump Charge</value>
   </data>
-  <data name="Normal" xml:space="preserve">
-    <value>N</value>
+  <data name="D018" xml:space="preserve">
+    <value>Starboard Deck Pump Charge</value>
   </data>
-  <data name="UltraLow" xml:space="preserve">
-    <value>UL</value>
+  <data name="D019" xml:space="preserve">
+    <value>Starboard Shore Discharge</value>
   </data>
-  <data name="sealed_waters" xml:space="preserve">
-    <value>Sealed Water Pumps</value>
+  <data name="D020" xml:space="preserve">
+    <value>Port Shore Discharge</value>
   </data>
-  <data name="draughts" xml:space="preserve">
-    <value>Draught And Load</value>
+  <data name="D021" xml:space="preserve">
+    <value>Bow Fill</value>
   </data>
-  <data name=":nodatum:" xml:space="preserve">
-    <value>No Datum</value>
+  <data name="D022" xml:space="preserve">
+    <value>Bow Jet</value>
   </data>
-  <data name="loads" xml:space="preserve">
-    <value>Loading Cabin &amp; Barge</value>
+  <data name="D023" xml:space="preserve">
+    <value>Through</value>
   </data>
-  <data name="fill_jet" xml:space="preserve">
-    <value>Fill and Jet</value>
+  <data name="D024" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="D025" xml:space="preserve">
+    <value>Starboard Isolation</value>
+  </data>
+  <data name="D026" xml:space="preserve">
+    <value>Starboard Underwater Discharge</value>
+  </data>
+  <data name="Hatch" xml:space="preserve">
+    <value>Sea Water Inlet</value>
+  </data>
+  <data name="PSHPump" xml:space="preserve">
+    <value>Port Inhatch Pump</value>
+  </data>
+  <data name="SBHPump" xml:space="preserve">
+    <value>Starboard Inhatch Pump</value>
   </data>
 </root>

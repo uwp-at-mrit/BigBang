@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/barges.hpp"
+#include "page/loads.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -11,10 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
-
-#include "graphlet/symbol/pumplet.hpp"
 #include "graphlet/symbol/valvelet.hpp"
-#include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -28,15 +25,15 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-private enum LBMode { WindowUI = 0, Dashboard };
+private enum LDMode { WindowUI = 0, Dashboard };
 
-private enum class LBOperation { Open, Close, FakeOpen, FakeClose, _ };
+private enum class LDOperation { Open, Close, FakeOpen, FakeClose, _ };
 
 static ICanvasBrush^ block_color = Colours::Firebrick;
 static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 
 // WARNING: order matters
-private enum class LB : unsigned int {
+private enum class LD : unsigned int {
 	Port, Starboard,
 	// Valves
 	D001, D002, D006, D008, D010, D017, D018, D019, D020, D021, D022, D024, D026,
@@ -45,7 +42,7 @@ private enum class LB : unsigned int {
 	D014, D016,
 	D013, D015,
 	// Key Labels
-	PSUWPump, SBUWPump, PSHPump, SBHPump, Bracket,
+	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry,
 	_,
 	// anchors used as last jumping points
 	d11, d12, d13, d14, d24,
@@ -53,12 +50,12 @@ private enum class LB : unsigned int {
 	d1720, d1819, d1920, d2122,
 
 	// anchors used for unnamed nodes
-	ps, sb, deck_lx, deck_rx, deck_ty, deck_by
+	ps, sb, gantry, barge, deck_lx, deck_rx, deck_ty, deck_by
 };
 
-private class BargeDecorator : public IPlanetDecorator {
+private class ShipDecorator : public IPlanetDecorator {
 public:
-	BargeDecorator() {
+	ShipDecorator() {
 		float height = 1.0F;
 		float xradius = height * 0.10F;
 		float yradius = height * 0.50F;
@@ -71,19 +68,34 @@ public:
 	}
 
 public:
+	void set_gantry_pipeline_color() {
+
+	}
+
+public:
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto pipelines = dynamic_cast<Tracklet<LB>*>(g);
+		auto pipelines = dynamic_cast<Tracklet<LD>*>(g);
 
 		if (pipelines != nullptr) {
-			float ps_y, sb_y, deck_lx, deck_ty, deck_rx, deck_by;
+			float ps_y, sb_y;
+			float barge_x, barge_ty, barge_by;
+			float deck_lx, deck_ty, deck_rx, deck_by;
 
-			pipelines->fill_anchor_location(LB::ps, nullptr, &ps_y, false);
-			pipelines->fill_anchor_location(LB::sb, nullptr, &sb_y, false);
+			pipelines->fill_anchor_location(LD::ps, nullptr, &ps_y, false);
+			pipelines->fill_anchor_location(LD::sb, nullptr, &sb_y, false);
 
-			pipelines->fill_anchor_location(LB::deck_lx, &deck_lx, nullptr, false);
-			pipelines->fill_anchor_location(LB::deck_rx, &deck_rx, nullptr, false);
-			pipelines->fill_anchor_location(LB::deck_ty, nullptr, &deck_ty, false);
-			pipelines->fill_anchor_location(LB::deck_by, nullptr, &deck_by, false);
+			pipelines->fill_anchor_location(LD::gantry, &barge_x, &barge_ty, false);
+			pipelines->fill_anchor_location(LD::barge, nullptr, &barge_by, false);
+
+			pipelines->fill_anchor_location(LD::deck_lx, &deck_lx, nullptr, false);
+			pipelines->fill_anchor_location(LD::deck_rx, &deck_rx, nullptr, false);
+			pipelines->fill_anchor_location(LD::deck_ty, nullptr, &deck_ty, false);
+			pipelines->fill_anchor_location(LD::deck_by, nullptr, &deck_by, false);
+
+			{ // draw lines
+				ds->DrawLine(x + barge_x, y + barge_ty, x + barge_x, y + barge_by,
+					Colours::make(default_pipeline_color), default_pipeline_thickness, this->ship_style);
+			}
 
 			{ // draw ship
 				float ship_width = this->actual_width();
@@ -116,9 +128,9 @@ private:
 };
 
 
-private class Barge final : public PLCConfirmation, public IMenuCommand<LBOperation, IMRMaster*> {
+private class Barge final : public PLCConfirmation, public IMenuCommand<LDOperation, IMRMaster*> {
 public:
-	Barge(BargePage* master) : master(master) {}
+	Barge(LoadsPage* master) : master(master) {}
 
 public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
@@ -138,8 +150,8 @@ public:
 	}
 
 public:
-	void execute(LBOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<Valvelet, LB>*>(target);
+	void execute(LDOperation cmd, IGraphlet* target, IMRMaster* plc) {
+		auto valve = dynamic_cast<Credit<Valvelet, LD>*>(target);
 
 		if (valve != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -156,53 +168,54 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
-		Turtle<LB>* pTurtle = new Turtle<LB>(gwidth, gheight, false);
+		Turtle<LD>* pTurtle = new Turtle<LD>(gwidth, gheight, false);
 
-		pTurtle->move_left(LB::deck_rx)->move_left(2, LB::D021)->move_left(2, LB::d2122);
-		pTurtle->move_down(3)->move_right(2, LB::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, LB::d1920)->move_left(2, LB::D020)->move_left(6, LB::d1720);
+		pTurtle->move_left(LD::deck_rx)->move_left(2, LD::D021)->move_left(2, LD::d2122);
+		pTurtle->move_down(3)->move_right(2, LD::D022)->move_right(3)->jump_back();
+		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(6, LD::d1720);
 
-		pTurtle->move_left(3, LB::D017)->move_left(10.5F)->turn_up_left_down()->move_left(3, LB::D010)->move_left(6, LB::d12);
-		pTurtle->move_down(1.5F, LB::D012)->move_down(4)->turn_right_down_left()->jump_back();
-		pTurtle->move_left(4, LB::d14)->move_left_down(1.5F, LB::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(4, LB::d24)->move_left(6)->move_left_down(1.5F, LB::D016)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_up(2)->move_left(4, LB::D024)->move_left(6, LB::Bracket)->jump_back(LB::d1720);
+		pTurtle->move_left(3, LD::D017)->move_left(15, LD::D010)->move_left(6, LD::d12);
+		pTurtle->move_down(1.5F, LD::D012)->move_down(4)->turn_right_down_left()->jump_back();
+		pTurtle->move_left(4, LD::d14)->move_left_down(1.5F, LD::D014)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_left(5, LD::d24)->move_left(5)->move_left_down(1.5F, LD::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->jump_up(3)->jump_left(0.5F, LD::gantry)->move_left(4, LD::D024)->move_left(6, LD::Gantry)->jump_back(LD::d1720);
 		
-		pTurtle->move_down(3.5F, LB::PSHPump)->move_left(14)->move_up(2, LB::D005);
-		pTurtle->move_up(5, LB::d0406)->move_right(4, LB::D006)->move_right(4)->move_down(0.5F, LB::deck_ty)->move_down(LB::D009);
-		pTurtle->move_down(5)->turn_right_down_left()->move_down(2, LB::D023)->jump_back(LB::d0406);
+		pTurtle->move_down(3.5F, LD::PSHPump)->move_left(14)->move_up(1.5F, LD::D005)->move_up(1.5F)->turn_right_up_left();
+		pTurtle->move_up(3, LD::d0406)->move_right(4, LD::D006)->move_right(4)->move_down(0.5F, LD::deck_ty)->move_down(LD::D009);
+		pTurtle->move_down(5)->turn_right_down_left()->move_down(2, LD::D023)->jump_back(LD::d0406);
 
-		pTurtle->move_up(1.5F, LB::D004)->move_up(LB::ps)->move_up(2)->turn_up_left();
-		pTurtle->move_left(12, LB::PSUWPump)->move_left(12, LB::Port);
+		pTurtle->move_up(1.5F, LD::D004)->move_up(LD::ps)->move_up(2)->turn_up_left();
+		pTurtle->move_left(12, LD::PSUWPump)->move_left(12, LD::Port);
 
-		pTurtle->jump_back(LB::D023)->move_down(2)->turn_right_down_left()->move_down(4.5F, LB::D007);
-		pTurtle->move_down(LB::deck_by)->move_down(0.5F)->move_left(4, LB::D026)->move_left(4, LB::d0326)->move_up(5, LB::D025);
-		pTurtle->move_up(1.5F, LB::d0225)->move_right(14, LB::SBHPump)->move_down(3, LB::d1819)->jump_back(LB::d0225);
-		pTurtle->move_up(2.5F)->move_left(2, LB::D002)->move_left(28, LB::D001)->move_left(2)->jump_back(LB::d1819);
+		pTurtle->jump_back(LD::D023)->move_down(2)->turn_right_down_left()->move_down(5, LD::D007);
+		pTurtle->move_down(LD::deck_by)->move_down(0.5F)->move_left(4, LD::D026)->move_left(4, LD::d0326);
+		pTurtle->move_up(3)->turn_right_up_left()->move_up(1.5F, LD::D025)->move_up(1.5F, LD::d0225);
+		pTurtle->move_right(14, LD::SBHPump)->move_down(3.5F, LD::d1819)->jump_back(LD::d0225);
+		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
 
-		pTurtle->move_left(3, LB::D018)->move_left(10.5F)->turn_down_left_up()->move_left(3, LB::D008)->move_left(6, LB::d11);
-		pTurtle->move_up(1.5F, LB::D011)->move_up(3.5F)->turn_left_up_right()->jump_back();
-		pTurtle->move_left(4, LB::d13)->move_left_up(1.5F, LB::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(4)->move_left(6)->move_left_up(1.5F, LB::D015)->move_left_up(1.5F)->jump_back(LB::d0326);
+		pTurtle->move_left(3, LD::D018)->move_left(15, LD::D008)->move_left(6, LD::d11);
+		pTurtle->move_up(1.5F, LD::D011)->move_up(4)->turn_left_up_right()->jump_back();
+		pTurtle->move_left(4, LD::d13)->move_left_up(1.5F, LD::D013)->move_left_up(1.5F)->jump_back();
+		pTurtle->move_left(5, LD::barge)->move_left(5)->move_left_up(1.5F, LD::D015)->move_left_up(1.5F)->jump_back(LD::d0326);
 
-		pTurtle->move_down(1.5F, LB::D003)->move_down(LB::sb)->move_down(3)->turn_down_left();
-		pTurtle->move_left(12, LB::SBUWPump)->move_left(12, LB::Starboard);
+		pTurtle->move_down(1.5F, LD::D003)->move_down(LD::sb)->move_down(2)->turn_down_left();
+		pTurtle->move_left(12, LD::SBUWPump)->move_left(12, LD::Starboard);
 
-		pTurtle->jump_back(LB::d1819)->move_right(4, LB::deck_lx)->move_right(2, LB::D019)->move_right(2)->move_to(LB::d1920);
+		pTurtle->jump_back(LD::d1819)->move_right(4, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<LB>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
-		this->load_labels(this->captions, LB::PSUWPump, LB::SBHPump, Colours::Salmon);
-		this->load_label(this->captions, LB::Bracket, Colours::Yellow);
+		this->load_labels(this->captions, LD::PSUWPump, LD::SBHPump, Colours::Salmon);
+		this->load_label(this->captions, LD::Gantry, Colours::Yellow);
 
 		{ // load valves
 			float radius = std::fminf(gwidth, gheight);
 
-			this->load_valves(this->valves, this->vlabels, this->captions, LB::D001, LB::D026, radius, -90.0);
-			this->load_valves(this->valves, this->vlabels, this->captions, LB::D003, LB::D025, radius, 0.0);
-			this->load_valves(this->valves, this->vlabels, this->captions, LB::D004, LB::D012, radius, 180.0);
-			this->load_valves(this->valves, this->vlabels, this->captions, LB::D014, LB::D016, radius, 225.0);
-			this->load_valves(this->valves, this->vlabels, this->captions, LB::D013, LB::D015, radius, -45.0);
+			this->load_valves(this->valves, this->vlabels, this->captions, LD::D001, LD::D026, radius, -90.0);
+			this->load_valves(this->valves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 0.0);
+			this->load_valves(this->valves, this->vlabels, this->captions, LD::D004, LD::D012, radius, 180.0);
+			this->load_valves(this->valves, this->vlabels, this->captions, LD::D014, LD::D016, radius, 225.0);
+			this->load_valves(this->valves, this->vlabels, this->captions, LD::D013, LD::D015, radius, -45.0);
 		}
 	}
 
@@ -216,22 +229,22 @@ public:
 		float y0 = 0.0F;
 
 		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->pipeline->map_credit_graphlet(this->captions[LB::PSUWPump], GraphletAnchor::CB);
-		this->pipeline->map_credit_graphlet(this->captions[LB::SBUWPump], GraphletAnchor::CT);
-		this->pipeline->map_credit_graphlet(this->captions[LB::PSHPump], GraphletAnchor::LC);
-		this->pipeline->map_credit_graphlet(this->captions[LB::SBHPump], GraphletAnchor::LC);
-		this->pipeline->map_credit_graphlet(this->captions[LB::Bracket], GraphletAnchor::CC);
+		this->pipeline->map_credit_graphlet(this->captions[LD::PSUWPump], GraphletAnchor::CB);
+		this->pipeline->map_credit_graphlet(this->captions[LD::SBUWPump], GraphletAnchor::CT);
+		this->pipeline->map_credit_graphlet(this->captions[LD::PSHPump], GraphletAnchor::LC);
+		this->pipeline->map_credit_graphlet(this->captions[LD::SBHPump], GraphletAnchor::LC);
+		this->pipeline->map_credit_graphlet(this->captions[LD::Gantry], GraphletAnchor::CC);
 
-		this->vlabels[LB::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
-			case LB::D014: case LB::D016: {
+			case LD::D014: case LD::D016: {
 				lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LB;
 			}; break;
-			case LB::D013: case LB::D015: {
+			case LD::D013: case LD::D015: {
 				lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LB;
 			}; break;
-			case LB::D006: case LB::D008: case LB::D017: case LB::D019: case LB::D022: {
+			case LD::D006: case LD::D010: case LD::D017: case LD::D019: case LD::D022: case LD::D024: {
 				lbl_dx = x0; lbl_dy = y0 + valve_adjust_gridsize; lbl_a = GraphletAnchor::CT;
 			}; break;
 			default: {
@@ -254,10 +267,10 @@ private:
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls
 		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			gs[id] = this->master->insert_one(new G(radius, degrees), id);
-			
 			this->load_label(ls, "(" + id.ToString() + ")", id, Colours::Silver);
 			this->load_label(cs, id, Colours::Silver);
+
+			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
 
@@ -288,31 +301,31 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<LB>* pipeline;
-	std::map<LB, Credit<Labellet, LB>*> captions;
-	std::map<LB, Credit<Valvelet, LB>*> valves;
-	std::map<LB, Credit<Labellet, LB>*> vlabels;
+	Tracklet<LD>* pipeline;
+	std::map<LD, Credit<Labellet, LD>*> captions;
+	std::map<LD, Credit<TValvelet, LD>*> valves;
+	std::map<LD, Credit<Labellet, LD>*> vlabels;
 	
 private:
 	CanvasTextFormat^ caption_font;
 	DimensionStyle dimension_style;
 
 private:
-	BargePage* master;
+	LoadsPage* master;
 };
 
-BargePage::BargePage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+LoadsPage::LoadsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	Barge* dashboard = new Barge(this);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<LBOperation, IMRMaster*>(dashboard, plc);
+	this->operation = make_menu<LDOperation, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
 
 	{ // load decorators
 		this->append_decorator(new PageDecorator());
-		this->append_decorator(new BargeDecorator());
+		this->append_decorator(new ShipDecorator());
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
@@ -320,13 +333,13 @@ BargePage::BargePage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	}
 }
 
-BargePage::~BargePage() {
+LoadsPage::~LoadsPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
 }
 
-void BargePage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void LoadsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto dashboard = dynamic_cast<Barge*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -340,10 +353,10 @@ void BargePage::load(CanvasCreateResourcesReason reason, float width, float heig
 		dashboard->construct(gwidth, gheight);
 
 		{ // load graphlets
-			this->change_mode(LBMode::Dashboard);
+			this->change_mode(LDMode::Dashboard);
 			dashboard->load(width, height, gwidth, gheight);
 			
-			this->change_mode(LBMode::WindowUI);
+			this->change_mode(LDMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name(), this->device);
 			this->insert(this->statusbar);
@@ -356,7 +369,7 @@ void BargePage::load(CanvasCreateResourcesReason reason, float width, float heig
 	}
 }
 
-void BargePage::reflow(float width, float height) {
+void LoadsPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<Barge*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -364,19 +377,19 @@ void BargePage::reflow(float width, float height) {
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(LBMode::WindowUI);
+		this->change_mode(LDMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
-		this->change_mode(LBMode::Dashboard);
+		this->change_mode(LDMode::Dashboard);
 		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }
 
-bool BargePage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Valvelet*>(g) != nullptr);
+bool LoadsPage::can_select(IGraphlet* g) {
+	return (dynamic_cast<TValvelet*>(g) != nullptr);
 }
 
-void BargePage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void LoadsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (this->can_select(g)) {

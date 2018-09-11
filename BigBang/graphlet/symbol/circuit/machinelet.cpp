@@ -1,5 +1,7 @@
 #include "graphlet/symbol/circuit/machinelet.hpp"
 
+#include "string.hpp"
+
 #include "math.hpp"
 #include "text.hpp"
 #include "shape.hpp"
@@ -14,12 +16,12 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-Machinelet::Machinelet(Platform::String^ sign, float radius, float thickness, double degrees)
+Machinelet::Machinelet(char sign, float radius, float thickness, double degrees)
 	: Machinelet(MachineStatus::Normal, sign, radius, thickness, degrees) {}
 
-Machinelet::Machinelet(MachineStatus default_status, Platform::String^ sign, float radius, float thickness, double degrees)
+Machinelet::Machinelet(MachineStatus default_status, char sign, float radius, float thickness, double degrees)
 	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
-	auto l_sign = make_text_layout(sign, make_bold_text_format("Monospace", radius));
+	auto l_sign = make_text_layout(make_wstring(sign), make_bold_text_format("Monospace", radius));
 	auto l_pair = make_text_layout(L"~", make_bold_text_format("Cambria Math", radius * 2.0F));
 	Rect s_box = l_sign->DrawBounds;
 	Rect p_box = l_pair->DrawBounds;

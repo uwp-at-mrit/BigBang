@@ -203,12 +203,12 @@ private:
 	template<class G>
 	void load_graphlets(std::map<PD, G*>& ms, PD id0, PD idn, float radius, float thickness, double degrees) {
 		for (PD m = id0; m <= idn; m++) {
-			Platform::String^ sign = L"~"; // default for G1, G2, G3, M1, M2, T1, T2
+			char sign = '~'; // default for G1, G2, G3, M1, M2, T1, T2
 
 			switch (m) {
-			case PD::B1: sign = L"="; break;
-			case PD::Generator1: case PD::Generator2: sign = L"G"; break;
-			case PD::Propeller1: case PD::Propeller2: sign = L"M"; break;
+			case PD::B1: sign = '='; break;
+			case PD::Generator1: case PD::Generator2: sign = 'G'; break;
+			case PD::Propeller1: case PD::Propeller2: sign = 'M'; break;
 			}
 
 			ms[m] = this->master->insert_one(new G(sign, radius, thickness, degrees));

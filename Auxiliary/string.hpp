@@ -64,6 +64,7 @@ std::string retval; { \
 	Platform::String^ make_wstring(const wchar_t* fmt, ...);
 	Platform::String^ make_wstring(const char* bytes);
 	Platform::String^ make_wstring(std::string bytes);
+	Platform::String^ make_wstring(char ch);
 	size_t wstrlen(const wchar_t* content);
 
 	std::string make_nstring(const char* fmt, ...);

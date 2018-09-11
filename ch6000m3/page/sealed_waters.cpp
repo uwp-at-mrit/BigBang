@@ -127,7 +127,7 @@ public:
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipeline_thickness, default_pipeline_color));
-		this->hatch = this->master->insert_one(new Hatchlet(gwidth * 2.5F));
+		this->hatch = this->master->insert_one(new Hatchlet(std::fminf(gwidth, gheight) * 2.5F));
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gwidth, 0.0);

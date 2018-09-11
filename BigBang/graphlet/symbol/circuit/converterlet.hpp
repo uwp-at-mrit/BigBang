@@ -11,8 +11,8 @@ namespace WarGrey::SCADA {
 
 	private class Converterlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ConverterStatus, WarGrey::SCADA::ConverterStyle> {
 	public:
-		Converterlet(WarGrey::SCADA::ConverterStatus default_status, Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
-		Converterlet(Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
+		Converterlet(WarGrey::SCADA::ConverterStatus default_status, char sign, float radius, float thickness = 1.5F, double degrees = 0.0);
+		Converterlet(char sign, float radius, float thickness = 1.5F, double degrees = 0.0);
 
 	public:
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

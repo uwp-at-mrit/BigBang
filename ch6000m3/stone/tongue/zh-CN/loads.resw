@@ -117,97 +117,97 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Bracket" xml:space="preserve">
-    <value>Loading Bracket</value>
-  </data>
   <data name="D001" xml:space="preserve">
-    <value>Empty and Water</value>
+    <value>抽舱引水</value>
   </data>
   <data name="D002" xml:space="preserve">
-    <value>Empty</value>
+    <value>抽舱</value>
   </data>
   <data name="D003" xml:space="preserve">
-    <value>Port Suction</value>
+    <value>左吸口</value>
   </data>
   <data name="D004" xml:space="preserve">
-    <value>Starboard Suction</value>
+    <value>右吸口</value>
   </data>
   <data name="D005" xml:space="preserve">
-    <value>Port Isolation</value>
+    <value>左隔离</value>
   </data>
   <data name="D006" xml:space="preserve">
-    <value>Port Underwater Discharge</value>
+    <value>左水下泵排出</value>
   </data>
   <data name="D007" xml:space="preserve">
-    <value>Starboard Underwater Charge</value>
+    <value>右水下泵装舱</value>
   </data>
   <data name="D008" xml:space="preserve">
-    <value>Starboard Total Charge</value>
+    <value>右总装舱</value>
   </data>
   <data name="D009" xml:space="preserve">
-    <value>Port Underwater Charge</value>
+    <value>左水下泵装舱</value>
   </data>
   <data name="D010" xml:space="preserve">
-    <value>Port Total Charge</value>
+    <value>左总装舱</value>
   </data>
   <data name="D011" xml:space="preserve">
-    <value>Starboard Low Discharge</value>
+    <value>右低排</value>
   </data>
   <data name="D012" xml:space="preserve">
-    <value>Port Low Discharge</value>
+    <value>左低排</value>
   </data>
   <data name="D013" xml:space="preserve">
-    <value>Starboard Fore Charge</value>
+    <value>右前装舱</value>
   </data>
   <data name="D014" xml:space="preserve">
-    <value>Port Fore Charge</value>
+    <value>左前装舱</value>
   </data>
   <data name="D015" xml:space="preserve">
-    <value>Starboard Back Charge</value>
+    <value>右后装舱</value>
   </data>
   <data name="D016" xml:space="preserve">
-    <value>Port Back Charge</value>
+    <value>左后装舱</value>
   </data>
   <data name="D017" xml:space="preserve">
-    <value>Port Deck Pump Charge</value>
+    <value>左舱内泵装舱</value>
   </data>
   <data name="D018" xml:space="preserve">
-    <value>Starboard Deck Pump Charge</value>
+    <value>右舱内泵装舱</value>
   </data>
   <data name="D019" xml:space="preserve">
-    <value>Starboard Shore Discharge</value>
+    <value>右排岸</value>
   </data>
   <data name="D020" xml:space="preserve">
-    <value>Port Shore Discharge</value>
+    <value>左排岸</value>
   </data>
   <data name="D021" xml:space="preserve">
-    <value>Bow Fill</value>
+    <value>艏吹</value>
   </data>
   <data name="D022" xml:space="preserve">
-    <value>Bow Jet</value>
+    <value>艏喷</value>
   </data>
   <data name="D023" xml:space="preserve">
-    <value>Through</value>
+    <value>左右贯通</value>
   </data>
   <data name="D024" xml:space="preserve">
-    <value>Load</value>
+    <value>装驳</value>
   </data>
   <data name="D025" xml:space="preserve">
-    <value>Starboard Isolation</value>
+    <value>右隔离</value>
   </data>
   <data name="D026" xml:space="preserve">
-    <value>Starboard Underwater Discharge</value>
+    <value>右水下泵排出</value>
+  </data>
+  <data name="Gantry" xml:space="preserve">
+    <value>装驳架</value>
   </data>
   <data name="PSHPump" xml:space="preserve">
-    <value>Port Inhatch Pump</value>
+    <value>左舱内泵</value>
   </data>
   <data name="PSUWPump" xml:space="preserve">
-    <value>Port Underwater Pump</value>
+    <value>左水下泵</value>
   </data>
   <data name="SBHPump" xml:space="preserve">
-    <value>Starboard Inhatch Pump</value>
+    <value>右舱内泵</value>
   </data>
   <data name="SBUWPump" xml:space="preserve">
-    <value>Starboard Underwater Pump</value>
+    <value>右水下泵</value>
   </data>
 </root>

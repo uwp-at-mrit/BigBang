@@ -67,6 +67,12 @@ void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
+Rectanglet::Rectanglet(float edge_size, unsigned int border_color, float thickness)
+	: Rectanglet(edge_size, nullptr, Colours::make(border_color), thickness) {}
+
+Rectanglet::Rectanglet(float width, float height, unsigned int border_color, float thickness)
+	: Rectanglet(width, height, nullptr, Colours::make(border_color), thickness) {}
+
 Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: Shapelet(rectangle(edge_size, edge_size), color, border_color, thickness) {}
 
@@ -74,6 +80,16 @@ Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSol
 	: Shapelet(rectangle(width, height), color, border_color, thickness) {}
 
 /*************************************************************************************************/
+Circlelet::Circlelet(float radius, unsigned int border_color, float thickness)
+	: Circlelet(radius, nullptr, Colours::make(border_color), thickness) {}
+
+Circlelet::Circlelet(float radius, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(circle(radius), color, border_color, thickness) {}
+
+/*************************************************************************************************/
+ArrowHeadlet::ArrowHeadlet(float radius, double degrees, unsigned int border_color, float thickness)
+	: ArrowHeadlet(radius, degrees, nullptr, Colours::make(border_color), thickness) {}
+
 ArrowHeadlet::ArrowHeadlet(float radius, double degrees, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: Shapelet(polar_arrowhead(radius, degrees), color, border_color, thickness), start_degrees(degrees) {}
 
@@ -82,6 +98,9 @@ double ArrowHeadlet::get_degrees() {
 }
 
 /*************************************************************************************************/
+HLinelet::HLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: HLinelet(thickness, Colours::make(color), style) {}
+
 HLinelet::HLinelet(float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
 	: thickness(thickness), color(color), style(style) {}
 
@@ -95,6 +114,9 @@ void HLinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
 	ds->DrawLine(x, line_y, x + Width, line_y, this->color, this->thickness, this->style);
 }
+
+VLinelet::VLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: VLinelet(thickness, Colours::make(color), style) {}
 
 VLinelet::VLinelet(float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
 	: thickness(thickness), color(color), style(style) {}

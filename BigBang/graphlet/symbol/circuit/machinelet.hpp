@@ -12,8 +12,8 @@ namespace WarGrey::SCADA {
 
 	private class Machinelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::MachineStatus, WarGrey::SCADA::MachineStyle> {
 	public:
-		Machinelet(WarGrey::SCADA::MachineStatus default_status, Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
-		Machinelet(Platform::String^ sign, float radius, float thickness = 1.5F, double degrees = 0.0);
+		Machinelet(WarGrey::SCADA::MachineStatus default_status, char sign, float radius, float thickness = 1.5F, double degrees = 0.0);
+		Machinelet(char sign, float radius, float thickness = 1.5F, double degrees = 0.0);
 
 	public:
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;

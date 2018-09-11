@@ -186,10 +186,13 @@
   <data name="upperdoor" xml:space="preserve">
     <value>Upper Hopper Door</value>
   </data>
-  <data name="dumpdoor" xml:space="preserve">
-    <value>Dump Door</value>
+  <data name="hopperdoor" xml:space="preserve">
+    <value>Hopper Door</value>
   </data>
   <data name="winch" xml:space="preserve">
     <value>Winch</value>
+  </data>
+  <data name="m_valve" xml:space="preserve">
+    <value>Motor Valve</value>
   </data>
 </root>

@@ -41,6 +41,9 @@ namespace WarGrey::SCADA {
 
 	private class Rectanglet : public WarGrey::SCADA::Shapelet {
 	public:
+		Rectanglet(float edge_size, unsigned int border_color, float thickness = 1.0F);
+		Rectanglet(float width, float height, unsigned int border_color, float thickness = 1.0F);
+
 		Rectanglet(float edge_size,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
@@ -52,8 +55,20 @@ namespace WarGrey::SCADA {
 			float thickness = 1.0F);
 	};
 
+	private class Circlelet : public WarGrey::SCADA::Shapelet {
+	public:
+		Circlelet(float radius, unsigned int border_color, float thickness = 1.0F);
+
+		Circlelet(float radius,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
 	private class ArrowHeadlet : public WarGrey::SCADA::Shapelet {
 	public:
+		ArrowHeadlet(float radius, double degrees, unsigned int border_color, float thickness = 1.0F);
+
 		ArrowHeadlet(float radius, double degrees,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
@@ -68,6 +83,9 @@ namespace WarGrey::SCADA {
 
 	private class HLinelet : public WarGrey::SCADA::IGraphlet {
 	public:
+		HLinelet(float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
 		HLinelet(float thickness,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
@@ -84,6 +102,9 @@ namespace WarGrey::SCADA {
 	
 	private class VLinelet : public WarGrey::SCADA::IGraphlet {
 	public:
+		VLinelet(float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
 		VLinelet(float thickness, 
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
