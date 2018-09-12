@@ -1,4 +1,4 @@
-﻿#include "graphlet/misc/hatchlet.hpp"
+﻿#include "graphlet/symbol/door/hatchlet.hpp"
 
 #include "shape.hpp"
 #include "polar.hpp"

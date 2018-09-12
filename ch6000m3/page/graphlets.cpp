@@ -3,9 +3,10 @@
 #include "page/graphlets.hpp"
 #include "configuration.hpp"
 
-#include "graphlet/symbol/pumplet.hpp"
-#include "graphlet/symbol/valvelet.hpp"
-#include "graphlet/symbol/doorlet.hpp"
+#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/tagged_valvelet.hpp"
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -58,7 +59,7 @@ public:
 			}
 		}
 
-		this->pumps[_E0(PumpStatus)]->fill_extent(0.0F, 0.0F, &unitsize);
+		this->pumps[_E0(HydraulicPumpStatus)]->fill_extent(0.0F, 0.0F, &unitsize);
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 
@@ -118,12 +119,12 @@ private:
 
 private: // never delete these graphlets manually.
 	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
-	std::unordered_map<PumpStatus, HydraulicPumplet*> pumps;
-	std::unordered_map<PumpStatus, Labellet*> plabels;
-	std::unordered_map<ValveStatus, Valvelet*> valves;
-	std::unordered_map<ValveStatus, Labellet*> vlabels;
-	std::unordered_map<ValveStatus, TValvelet*> mvalves;
-	std::unordered_map<ValveStatus, Labellet*> mvlabels;
+	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
+	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
+	std::unordered_map<ManualValveStatus, Valvelet*> valves;
+	std::unordered_map<ManualValveStatus, Labellet*> vlabels;
+	std::unordered_map<TValveStatus, TValvelet*> mvalves;
+	std::unordered_map<TValveStatus, Labellet*> mvlabels;
 	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;
 	std::unordered_map<DoorStatus, Labellet*> hdlabels;
 	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;

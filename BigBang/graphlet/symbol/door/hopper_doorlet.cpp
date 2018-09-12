@@ -1,4 +1,4 @@
-#include "graphlet/symbol/doorlet.hpp"
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
 
 #include "polar.hpp"
 #include "shape.hpp"

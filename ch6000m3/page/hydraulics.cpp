@@ -12,8 +12,8 @@
 
 #include "graphlet/shapelet.hpp"
 
-#include "graphlet/symbol/pumplet.hpp"
-#include "graphlet/symbol/valvelet.hpp"
+#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/device/tanklet.hpp"
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
@@ -110,14 +110,14 @@ public:
 				HydraulicPumplet* target = this->pumps[pump_seq[i]];
 
 				switch (DI_db205_X[i]) {
-				case 0b00000001: target->set_status(PumpStatus::Starting); break;
-				case 0b00000010: target->set_status(PumpStatus::Stopping); break;
-				case 0b00000100: target->set_status(PumpStatus::Unstartable); break;
-				case 0b00001000: target->set_status(PumpStatus::Unstoppable); break;
-				case 0b00010000: target->set_status(PumpStatus::Running); break;
-				case 0b00100000: target->set_status(PumpStatus::Stopped); break;
-				case 0b01000000: target->set_status(PumpStatus::Remote); break;
-				case 0b10000000: target->set_status(PumpStatus::Ready); break;
+				case 0b00000001: target->set_status(HydraulicPumpStatus::Starting); break;
+				case 0b00000010: target->set_status(HydraulicPumpStatus::Stopping); break;
+				case 0b00000100: target->set_status(HydraulicPumpStatus::Unstartable); break;
+				case 0b00001000: target->set_status(HydraulicPumpStatus::Unstoppable); break;
+				case 0b00010000: target->set_status(HydraulicPumpStatus::Running); break;
+				case 0b00100000: target->set_status(HydraulicPumpStatus::Stopped); break;
+				case 0b01000000: target->set_status(HydraulicPumpStatus::Remote); break;
+				case 0b10000000: target->set_status(HydraulicPumpStatus::Ready); break;
 				}
 			}
 		}

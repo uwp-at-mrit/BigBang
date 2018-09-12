@@ -1,4 +1,4 @@
-#include "graphlet/symbol/pumplet.hpp"
+#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 
 #include "polar.hpp"
 #include "paint.hpp"
@@ -14,9 +14,11 @@ static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-HydraulicPumplet::HydraulicPumplet(float radius, double degrees) : HydraulicPumplet(PumpStatus::Stopped, radius, degrees) {}
+HydraulicPumplet::HydraulicPumplet(float radius, double degrees)
+	: HydraulicPumplet(HydraulicPumpStatus::Stopped, radius, degrees) {}
 
-HydraulicPumplet::HydraulicPumplet(PumpStatus default_status, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
+HydraulicPumplet::HydraulicPumplet(HydraulicPumpStatus default_status, float radius, double degrees)
+	: ISymbollet(default_status, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
 }
 
@@ -27,7 +29,7 @@ void HydraulicPumplet::construct() {
 
 void HydraulicPumplet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
-	case PumpStatus::Starting: {
+	case HydraulicPumpStatus::Starting: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -36,7 +38,7 @@ void HydraulicPumplet::update(long long count, long long interval, long long upt
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
-	case PumpStatus::Stopping: {
+	case HydraulicPumpStatus::Stopping: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -48,15 +50,15 @@ void HydraulicPumplet::update(long long count, long long interval, long long upt
 	}
 }
 
-void HydraulicPumplet::on_status_changed(PumpStatus status) {
+void HydraulicPumplet::on_status_changed(HydraulicPumpStatus status) {
 	switch (status) {
-	case PumpStatus::Unstartable: {
+	case HydraulicPumpStatus::Unstartable: {
 		if (this->unstartable_mask == nullptr) {
 			this->unstartable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);
 		}
 		this->mask = this->unstartable_mask;
 	} break;
-	case PumpStatus::Unstoppable: {
+	case HydraulicPumpStatus::Unstoppable: {
 		if (this->unstoppable_mask == nullptr) {
 			this->unstoppable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.618);
 		}
@@ -69,28 +71,28 @@ void HydraulicPumplet::on_status_changed(PumpStatus status) {
 	}
 }
 
-void HydraulicPumplet::prepare_style(PumpStatus status, PumpStyle& s) {
+void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpStyle& s) {
 	switch (status) {
-	case PumpStatus::Running: {
+	case HydraulicPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case PumpStatus::Starting: {
+	case HydraulicPumpStatus::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
-	case PumpStatus::Unstartable: {
+	case HydraulicPumpStatus::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.border_color, Colours::Firebrick);
 	}; break;
-	case PumpStatus::Remote: {
+	case HydraulicPumpStatus::Remote: {
 		CAS_SLOT(s.border_color, Colours::Cyan);
 	}; break;
-	case PumpStatus::Stopping: {
+	case HydraulicPumpStatus::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
-	case PumpStatus::Unstoppable: {
+	case HydraulicPumpStatus::Unstoppable: {
 		CAS_VALUES(s.mask_color, Colours::ForestGreen, s.border_color, Colours::Firebrick);
 	}; break;
-	case PumpStatus::Ready: {
+	case HydraulicPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	}
@@ -103,7 +105,7 @@ void HydraulicPumplet::prepare_style(PumpStatus status, PumpStyle& s) {
 }
 
 void HydraulicPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const PumpStyle style = this->get_style();
+	const HydraulicPumpStyle style = this->get_style();
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;

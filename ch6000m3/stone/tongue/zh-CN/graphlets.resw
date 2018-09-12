@@ -150,9 +150,6 @@
   <data name="OpenReady" xml:space="preserve">
     <value>打开条件</value>
   </data>
-  <data name="Manual" xml:space="preserve">
-    <value>手动阀</value>
-  </data>
   <data name="Open" xml:space="preserve">
     <value>完全打开</value>
   </data>

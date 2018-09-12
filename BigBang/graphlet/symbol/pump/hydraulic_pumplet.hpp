@@ -3,18 +3,21 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class PumpStatus { Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _ };
+	private enum class HydraulicPumpStatus {
+		Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _
+	};
 
-	private struct PumpStyle {
+	private struct HydraulicPumpStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
-	private class HydraulicPumplet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::PumpStatus, WarGrey::SCADA::PumpStyle> {
+	private class HydraulicPumplet
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HydraulicPumpStatus, WarGrey::SCADA::HydraulicPumpStyle> {
 	public:
-		HydraulicPumplet(WarGrey::SCADA::PumpStatus default_status, float radius, double degrees = -90.0);
+		HydraulicPumplet(WarGrey::SCADA::HydraulicPumpStatus default_status, float radius, double degrees = -90.0);
 		HydraulicPumplet(float radius, double degrees = -90.0);
 
 	public:
@@ -23,8 +26,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::PumpStatus status, WarGrey::SCADA::PumpStyle& style) override;
-		void on_status_changed(PumpStatus status) override;
+		void prepare_style(WarGrey::SCADA::HydraulicPumpStatus status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
+		void on_status_changed(HydraulicPumpStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

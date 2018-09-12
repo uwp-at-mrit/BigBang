@@ -165,9 +165,6 @@
   <data name="FakeOpen" xml:space="preserve">
     <value>Fake Open</value>
   </data>
-  <data name="Manual" xml:space="preserve">
-    <value>Manually Operation</value>
-  </data>
   <data name="Open" xml:space="preserve">
     <value>Fully Open</value>
   </data>

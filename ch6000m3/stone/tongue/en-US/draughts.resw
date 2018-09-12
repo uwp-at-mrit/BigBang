@@ -174,4 +174,7 @@
   <data name="OverflowPipe" xml:space="preserve">
     <value>Overflow Pipe</value>
   </data>
+  <data name="psBowDraft" xml:space="preserve">
+    <value>Port Bow Draft</value>
+  </data>
 </root>

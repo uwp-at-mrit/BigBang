@@ -11,9 +11,9 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
-#include "graphlet/misc/hatchlet.hpp"
-#include "graphlet/symbol/pumplet.hpp"
-#include "graphlet/symbol/valvelet.hpp"
+#include "graphlet/symbol/door/hatchlet.hpp"
+#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -89,6 +89,7 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
+		this->valve_style = make_manual_valve_style();
 	}
 
 	void load(float width, float height, float gwidth, float gheight) {
@@ -131,7 +132,7 @@ public:
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gwidth, 0.0);
-		this->load_devices(this->valves, this->vlabels, SW::DGV3, SW::DGV47, gwidth, -90.0);
+		this->load_devices(this->valves, this->vlabels, this->valve_style, SW::DGV3, SW::DGV47, gwidth, -90.0);
 		this->load_labels(this->captions, SW::Hatch, SW::Starboard, Colours::Salmon);
 		this->load_labels(this->captions, SW::ToPipeline, SW::SS2, Colours::Silver);
 
@@ -229,9 +230,18 @@ private:
 		}
 	}
 
-	template<class G, typename E>
-	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
-		this->load_devices(gs, id0, idn, radius, degrees);
+	template<class G, typename E, typename S>
+	void load_devices(std::map<E, G*>& gs, S& style, E id0, E idn, float radius, double degrees) {
+		for (E id = id0; id <= idn; id++) {
+			gs[id] = this->master->insert_one(new G(radius, degrees), id);
+			gs[id]->set_style(style);
+		}
+	}
+
+	template<class G, typename E, typename S>
+	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, S& style
+		, E id0, E idn, float radius, double degrees) {
+		this->load_devices(gs, style, id0, idn, radius, degrees);
 		this->load_labels(ls, id0, idn, Colours::Silver);
 	}
 
@@ -291,6 +301,7 @@ private:
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
+	ManualValveStyle valve_style;
 
 private:
 	SealedWaterPage* master;

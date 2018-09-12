@@ -11,7 +11,8 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
-#include "graphlet/symbol/valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 #include "decorator/page.hpp"
 

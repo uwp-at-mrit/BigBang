@@ -4,7 +4,7 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
-#include "graphlet/symbol/doorlet.hpp"
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "decorator/page.hpp"
