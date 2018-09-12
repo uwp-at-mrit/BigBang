@@ -4,7 +4,7 @@
 #include "configuration.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/shaft_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 
@@ -121,8 +121,8 @@ private: // never delete these graphlets manually.
 	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
-	std::unordered_map<ManualValveStatus, ManualValvelet*> valves;
-	std::unordered_map<ManualValveStatus, Labellet*> vlabels;
+	std::unordered_map<ShaftValveStatus, ShaftValvelet*> valves;
+	std::unordered_map<ShaftValveStatus, Labellet*> vlabels;
 	std::unordered_map<TValveStatus, TValvelet*> mvalves;
 	std::unordered_map<TValveStatus, Labellet*> mvlabels;
 	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;

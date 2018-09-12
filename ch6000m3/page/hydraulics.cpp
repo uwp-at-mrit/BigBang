@@ -13,7 +13,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/shaft_valvelet.hpp"
 #include "graphlet/device/tanklet.hpp"
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
@@ -435,7 +435,7 @@ private:
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
-	std::map<HS, Credit<ManualValvelet, HS>*> valves;
+	std::map<HS, Credit<ShaftValvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;

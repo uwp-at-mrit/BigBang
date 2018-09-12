@@ -99,7 +99,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\shaft_valvelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -204,7 +204,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\shaft_valvelet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

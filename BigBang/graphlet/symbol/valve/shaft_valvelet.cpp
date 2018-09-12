@@ -1,4 +1,4 @@
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/shaft_valvelet.hpp"
 
 #include "string.hpp"
 
@@ -20,37 +20,37 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
-ManualValveStyle WarGrey::SCADA::make_handle_valve_style(ICanvasBrush^ color) {
-	ManualValveStyle s;
+ShaftValveStyle WarGrey::SCADA::make_shaft_valve_style(ICanvasBrush^ color) {
+	ShaftValveStyle s;
 
-	s.handle_color = ((color == nullptr) ? Colours::Gray : color);
+	s.shaft_color = ((color == nullptr) ? Colours::Gray : color);
 
 	return s;
 }
 
 /*************************************************************************************************/
-ManualValvelet::ManualValvelet(float radius, double degrees) : ManualValvelet(ManualValveStatus::Disabled, radius, degrees) {}
+ShaftValvelet::ShaftValvelet(float radius, double degrees) : ShaftValvelet(ShaftValveStatus::Disabled, radius, degrees) {}
 
-ManualValvelet::ManualValvelet(ManualValveStatus default_status, float radius, double degrees)
+ShaftValvelet::ShaftValvelet(ShaftValveStatus default_status, float radius, double degrees)
 	: ISymbollet(default_status, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 }
 
-void ManualValvelet::construct() {
-	float handle_length = this->sgradius * 0.618F;
-	auto handle_axis = polar_axis(handle_length, this->degrees);
-	auto handle_pole = polar_pole(handle_length, this->degrees, handle_length * 0.1618F);
+void ShaftValvelet::construct() {
+	float shaft_length = this->sgradius * 0.618F;
+	auto shaft_axis = polar_axis(shaft_length, this->degrees);
+	auto shaft_pole = polar_pole(shaft_length, this->degrees, shaft_length * 0.1618F);
 
 	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
-	this->handle = geometry_union(handle_axis, handle_pole);
+	this->shaft = geometry_union(shaft_axis, shaft_pole);
 	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void ManualValvelet::update(long long count, long long interval, long long uptime) {
+void ShaftValvelet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
-	case ManualValveStatus::Opening: {
+	case ShaftValveStatus::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -59,7 +59,7 @@ void ManualValvelet::update(long long count, long long interval, long long uptim
 		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
-	case ManualValveStatus::Closing: {
+	case ShaftValveStatus::Closing: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -71,71 +71,71 @@ void ManualValvelet::update(long long count, long long interval, long long uptim
 	}
 }
 
-void ManualValvelet::prepare_style(ManualValveStatus status, ManualValveStyle& s) {
+void ShaftValvelet::prepare_style(ShaftValveStatus status, ShaftValveStyle& s) {
 	switch (status) {
-	case ManualValveStatus::Disabled: {
+	case ShaftValveStatus::Disabled: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
-	case ManualValveStatus::Open: {
+	case ShaftValveStatus::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case ManualValveStatus::Opening: {
+	case ShaftValveStatus::Opening: {
 		CAS_SLOT(s.mask_color, Colours::Green);
 	}; break;
-	case ManualValveStatus::OpenReady: {
+	case ShaftValveStatus::OpenReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
 	}; break;
-	case ManualValveStatus::Unopenable: {
+	case ShaftValveStatus::Unopenable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
-	case ManualValveStatus::Closed: {
+	case ShaftValveStatus::Closed: {
 		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
-	case ManualValveStatus::Closing: {
+	case ShaftValveStatus::Closing: {
 		CAS_SLOT(s.mask_color, Colours::DarkGray);
 	}; break;
-	case ManualValveStatus::CloseReady: {
+	case ShaftValveStatus::CloseReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
 	}; break;
-	case ManualValveStatus::Unclosable: {
+	case ShaftValveStatus::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
-	case ManualValveStatus::FakeOpen: {
+	case ShaftValveStatus::FakeOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
-	case ManualValveStatus::FakeClose: {
+	case ShaftValveStatus::FakeClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
 	}; break;
 	}
 
 	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
 	CAS_SLOT(s.body_color, Colours::Background);
-	CAS_SLOT(s.handle_color, Colours::Background);
+	CAS_SLOT(s.shaft_color, Colours::Background);
 
 	// NOTE: The others can be nullptr;
 }
 
-void ManualValvelet::on_status_changed(ManualValveStatus status) {
+void ShaftValvelet::on_status_changed(ShaftValveStatus status) {
 	switch (status) {
-	case ManualValveStatus::Unopenable: {
+	case ShaftValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case ManualValveStatus::Unclosable: case ManualValveStatus::Disabled: {
+	case ShaftValveStatus::Unclosable: case ShaftValveStatus::Disabled: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case ManualValveStatus::OpenReady: {
+	case ShaftValveStatus::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case ManualValveStatus::CloseReady: {
+	case ShaftValveStatus::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
 		}
@@ -148,13 +148,13 @@ void ManualValvelet::on_status_changed(ManualValveStatus status) {
 	}
 }
 
-void ManualValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const ManualValveStyle style = this->get_style();
+void ShaftValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	const ShaftValveStyle style = this->get_style();
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
 	
-	ds->DrawGeometry(this->handle, cx, cy, style.handle_color, default_thickness);
+	ds->DrawGeometry(this->shaft, cx, cy, style.shaft_color, default_thickness);
 	
 	if (style.frame_color != nullptr) {
 		ds->DrawGeometry(this->frame, cx, cy, style.frame_color, default_thickness);

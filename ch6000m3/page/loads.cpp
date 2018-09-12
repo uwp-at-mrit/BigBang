@@ -11,7 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/shaft_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 #include "decorator/page.hpp"
@@ -84,7 +84,7 @@ public:
 
 public:
 	void execute(LDOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<ManualValvelet, LD>*>(target);
+		auto valve = dynamic_cast<Credit<ShaftValvelet, LD>*>(target);
 
 		if (valve != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"Valve: %s %s",
@@ -327,7 +327,7 @@ private:
 private:
 	Tracklet<LD>* pipeline;
 	std::map<LD, Credit<Labellet, LD>*> captions;
-	std::map<LD, Credit<ManualValvelet, LD>*> valves;
+	std::map<LD, Credit<ShaftValvelet, LD>*> valves;
 	std::map<LD, Credit<TValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
 	std::map<LD, Arclet*> nintercs;
@@ -485,11 +485,11 @@ void LoadsPage::reflow(float width, float height) {
 }
 
 bool LoadsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<ManualValvelet*>(g) != nullptr) || (dynamic_cast<TValvelet*>(g) != nullptr));
+	return ((dynamic_cast<ShaftValvelet*>(g) != nullptr) || (dynamic_cast<TValvelet*>(g) != nullptr));
 }
 
 void LoadsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	auto valve = dynamic_cast<ManualValvelet*>(g);
+	auto valve = dynamic_cast<ShaftValvelet*>(g);
 	auto mvalve = dynamic_cast<TValvelet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);

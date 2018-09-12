@@ -13,7 +13,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/symbol/valve/shaft_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -89,7 +89,7 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
-		this->valve_style = make_handle_valve_style();
+		this->valve_style = make_shaft_valve_style();
 	}
 
 	void load(float width, float height, float gwidth, float gheight) {
@@ -292,7 +292,7 @@ private:
 	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
 	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
 	std::map<SW, Credit<Labellet, SW>*> plabels;
-	std::map<SW, Credit<ManualValvelet, SW>*> valves;
+	std::map<SW, Credit<ShaftValvelet, SW>*> valves;
 	std::map<SW, Credit<Labellet, SW>*> vlabels;
 	std::map<SW, Credit<Dimensionlet, SW>*> pressures;
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
@@ -301,7 +301,7 @@ private:
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
-	ManualValveStyle valve_style;
+	ShaftValveStyle valve_style;
 
 private:
 	SealedWaterPage* master;
