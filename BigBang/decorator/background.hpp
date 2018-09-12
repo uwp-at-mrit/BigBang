@@ -17,9 +17,6 @@ namespace WarGrey::SCADA {
 	public:
 		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
-	protected:
-		~BackgroundDecorator() noexcept;
-
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		float top_inset;

@@ -30,8 +30,6 @@ BackgroundDecorator::BackgroundDecorator(ICanvasBrush^ color, float tinset, floa
 	this->left_inset = linset;
 }
 
-BackgroundDecorator::~BackgroundDecorator() {}
-
 void BackgroundDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
 	float width = Width - this->left_inset - this->right_inset;
 	float height = Height - this->top_inset - this->bottom_inset;

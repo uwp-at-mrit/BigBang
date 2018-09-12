@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handle_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tag_color;
 	};
 
 	private class TValvelet
@@ -54,11 +54,15 @@ namespace WarGrey::SCADA {
 		float fradius;
 
 	private:
-		double mask_percentage;
-
-	private:
 		Platform::String^ tag;
 		float tag_xoff;
 		float tag_yoff;
+		float sign_cx;
+		float sign_cy;
+		float body_cx;
+		float body_cy;
+
+	private:
+		double mask_percentage;
 	};
 }

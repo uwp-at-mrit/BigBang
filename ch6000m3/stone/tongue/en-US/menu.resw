@@ -141,4 +141,7 @@
   <data name="FakeOpen" xml:space="preserve">
     <value>Fake Open</value>
   </data>
+  <data name="Heat" xml:space="preserve">
+    <value>Heat</value>
+  </data>
 </root>

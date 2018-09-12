@@ -141,4 +141,7 @@
   <data name="FakeOpen" xml:space="preserve">
     <value>假开</value>
   </data>
+  <data name="Heat" xml:space="preserve">
+    <value>加热</value>
+  </data>
 </root>

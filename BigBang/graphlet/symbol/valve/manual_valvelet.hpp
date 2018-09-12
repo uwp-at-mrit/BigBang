@@ -18,13 +18,13 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ handle_color;
 	};
 
-	WarGrey::SCADA::ManualValveStyle make_manual_valve_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
+	WarGrey::SCADA::ManualValveStyle make_handle_valve_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
 
-	private class Valvelet
+	private class ManualValvelet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ManualValveStatus, WarGrey::SCADA::ManualValveStyle> {
 	public:
-		Valvelet(WarGrey::SCADA::ManualValveStatus default_status, float radius, double degrees = -90.0);
-		Valvelet(float radius, double degrees = -90.0);
+		ManualValvelet(WarGrey::SCADA::ManualValveStatus default_status, float radius, double degrees = -90.0);
+		ManualValvelet(float radius, double degrees = -90.0);
 
 	public:
 		void construct() override;

@@ -43,10 +43,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::CanvasEdgeBehavior shade = Microsoft::Graphics::Canvas::CanvasEdgeBehavior::Mirror,
 		Microsoft::Graphics::Canvas::CanvasAlphaMode alpha = Microsoft::Graphics::Canvas::CanvasAlphaMode::Premultiplied);
 
-	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(Platform::Array<float>^ dashes, float offset = 0.0F);
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(
-		Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle style,
-		float offset = 0.0F);
+		Platform::Array<float>^ dashes, float offset = 0.0F);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_dash_stroke(
+		Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle style, float offset = 0.0F);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_roundcap_stroke_style(bool shared = true);
 }

@@ -89,7 +89,7 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
-		this->valve_style = make_manual_valve_style();
+		this->valve_style = make_handle_valve_style();
 	}
 
 	void load(float width, float height, float gwidth, float gheight) {
@@ -292,7 +292,7 @@ private:
 	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
 	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
 	std::map<SW, Credit<Labellet, SW>*> plabels;
-	std::map<SW, Credit<Valvelet, SW>*> valves;
+	std::map<SW, Credit<ManualValvelet, SW>*> valves;
 	std::map<SW, Credit<Labellet, SW>*> vlabels;
 	std::map<SW, Credit<Dimensionlet, SW>*> pressures;
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
@@ -321,6 +321,8 @@ SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
+#else
+		this->grid->set_active_planet(this);
 #endif
 	}
 }
@@ -329,6 +331,10 @@ SealedWaterPage::~SealedWaterPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
+
+#ifndef _DEBUG
+	delete this->grid;
+#endif
 }
 
 void SealedWaterPage::load(CanvasCreateResourcesReason reason, float width, float height) {

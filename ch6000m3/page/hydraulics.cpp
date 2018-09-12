@@ -435,7 +435,7 @@ private:
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;
 	std::map<HS, Credit<Labellet, HS>*> pcaptions;
-	std::map<HS, Credit<Valvelet, HS>*> valves;
+	std::map<HS, Credit<ManualValvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
@@ -465,6 +465,8 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
+#else
+		this->grid->set_active_planet(this);
 #endif
 	}
 }
@@ -473,6 +475,10 @@ HydraulicsPage::~HydraulicsPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
+
+#ifndef _DEBUG
+	delete this->grid;
+#endif
 }
 
 void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float height) {

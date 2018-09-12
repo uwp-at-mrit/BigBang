@@ -156,6 +156,7 @@ CanvasStrokeStyle^ WarGrey::SCADA::make_dash_stroke(Platform::Array<float>^ dash
 
 CanvasStrokeStyle^ WarGrey::SCADA::make_dash_stroke(CanvasDashStyle style, float offset) {
     auto dash = ref new CanvasStrokeStyle();
+
     dash->DashOffset = offset;
     dash->DashStyle = style;
 

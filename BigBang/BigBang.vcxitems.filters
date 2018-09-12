@@ -93,21 +93,13 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.cpp" />
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\door\hatchlet.cpp">
-      <Filter>graphlet\symbol\door</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\pump\hydraulic_pumplet.cpp">
-      <Filter>graphlet\symbol\pump</Filter>
-    </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\door\hopper_doorlet.cpp">
-      <Filter>graphlet\symbol\door</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.cpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\valve\manual_valvelet.cpp">
-      <Filter>graphlet\symbol\valve</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -206,21 +198,13 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.hpp" />
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\door\hatchlet.hpp">
-      <Filter>graphlet\symbol\door</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\pump\hydraulic_pumplet.hpp">
-      <Filter>graphlet\symbol\pump</Filter>
-    </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\door\hopper_doorlet.hpp">
-      <Filter>graphlet\symbol\door</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.hpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\valve\manual_valvelet.hpp">
-      <Filter>graphlet\symbol\valve</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

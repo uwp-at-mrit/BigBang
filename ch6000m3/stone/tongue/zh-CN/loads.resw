@@ -198,6 +198,12 @@
   <data name="Gantry" xml:space="preserve">
     <value>装驳架</value>
   </data>
+  <data name="LMOD" xml:space="preserve">
+    <value>LMOD</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>PS</value>
+  </data>
   <data name="PSHPump" xml:space="preserve">
     <value>左舱内泵</value>
   </data>
@@ -209,5 +215,8 @@
   </data>
   <data name="SBUWPump" xml:space="preserve">
     <value>右水下泵</value>
+  </data>
+  <data name="Starboard" xml:space="preserve">
+    <value>SB</value>
   </data>
 </root>

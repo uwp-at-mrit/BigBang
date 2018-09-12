@@ -24,8 +24,12 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		void set_color(unsigned int color);
 		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
+		void set_border_color(unsigned int color);
 		void set_border_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color);
+		
 		void fill_shape_origin(float* x, float* y);
 
 	private:
@@ -65,6 +69,26 @@ namespace WarGrey::SCADA {
 			float thickness = 1.0F);
 	};
 
+	private class Sectorlet : public WarGrey::SCADA::Shapelet {
+	public:
+		Sectorlet(double sdegrees, double edegrees, float radiusX, float radiusY, unsigned int border_color, float thickness = 1.0F);
+
+		Sectorlet(double sdegrees, double edegrees, float radiusX, float radiusY,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
+	private class Segmentlet : public WarGrey::SCADA::Shapelet {
+	public:
+		Segmentlet(double sdegrees, double edegrees, float radiusX, float radiusY, unsigned int border_color, float thickness = 1.0F);
+
+		Segmentlet(double sdegrees, double edegrees, float radiusX, float radiusY,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
 	private class ArrowHeadlet : public WarGrey::SCADA::Shapelet {
 	public:
 		ArrowHeadlet(float radius, double degrees, unsigned int border_color, float thickness = 1.0F);
@@ -81,42 +105,24 @@ namespace WarGrey::SCADA {
 		double start_degrees;
 	};
 
-	private class HLinelet : public WarGrey::SCADA::IGraphlet {
+	private class Linelet : public virtual WarGrey::SCADA::Shapelet {
 	public:
-		HLinelet(float thickness, unsigned int color,
+		Linelet(float sx, float sy, float ex, float ey, float thickness, unsigned int color,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
-		HLinelet(float thickness,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+		Linelet(float sx, float sy, float ex, float ey, float thickness = 1.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
-
-	public:
-		void fill_extent(float x, float y, float* width, float* height) override;
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
-		float thickness;
 	};
-	
-	private class VLinelet : public WarGrey::SCADA::IGraphlet {
+
+	private class Arclet : public virtual WarGrey::SCADA::Shapelet {
 	public:
-		VLinelet(float thickness, unsigned int color,
+		Arclet(double sdegrees, double edegrees, float radiusX, float radiusY, float thickness, unsigned int color,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
-		VLinelet(float thickness, 
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+		Arclet(double sdegrees, double edegrees, float radiusX, float radiusY, float thickness = 1.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver,
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
-
-	public:
-		void fill_extent(float x, float y, float* width, float* height) override;
-		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	private:
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
-		float thickness;
 	};
 
 	template<typename Anchor>
@@ -224,5 +230,43 @@ namespace WarGrey::SCADA {
 	private:
 		std::list<Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^> subtracks;
 		std::list<Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^> subcolors;
+	};
+
+	private class HLinelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		HLinelet(float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+		HLinelet(float thickness,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+	public:
+		void fill_extent(float x, float y, float* width, float* height) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
+		float thickness;
+	};
+
+	private class VLinelet : public WarGrey::SCADA::IGraphlet {
+	public:
+		VLinelet(float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+		VLinelet(float thickness,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+	public:
+		void fill_extent(float x, float y, float* width, float* height) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style;
+		float thickness;
 	};
 }

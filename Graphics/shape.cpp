@@ -201,7 +201,7 @@ CanvasGeometry^ WarGrey::SCADA::segment(double start, double end, float radiusX,
 }
 
 CanvasGeometry^ WarGrey::SCADA::segment(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY) {
-	auto sector_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	auto segment_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float rstart = degrees_to_radians(start);
 	float rsweep = degrees_to_radians(end - start);
@@ -209,12 +209,12 @@ CanvasGeometry^ WarGrey::SCADA::segment(float cx, float cy, double start, double
 
 	ellipse_point(radiusX, radiusY, start, &startx, &starty);
 
-	sector_path->BeginFigure(cx + startx, cy + starty);
-	sector_path->AddArc(float2(cx, cy), radiusX, radiusY, rstart, rsweep);
-	sector_path->AddLine(cx + startx, cy + starty);
-	sector_path->EndFigure(CanvasFigureLoop::Closed);
+	segment_path->BeginFigure(cx + startx, cy + starty);
+	segment_path->AddArc(float2(cx, cy), radiusX, radiusY, rstart, rsweep);
+	segment_path->AddLine(cx + startx, cy + starty);
+	segment_path->EndFigure(CanvasFigureLoop::Closed);
 
-	return CanvasGeometry::CreatePath(sector_path);
+	return CanvasGeometry::CreatePath(segment_path);
 }
 
 CanvasGeometry^ WarGrey::SCADA::triangle(float x1, float y1, float x2, float y2) {

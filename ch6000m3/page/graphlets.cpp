@@ -121,7 +121,7 @@ private: // never delete these graphlets manually.
 	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
-	std::unordered_map<ManualValveStatus, Valvelet*> valves;
+	std::unordered_map<ManualValveStatus, ManualValvelet*> valves;
 	std::unordered_map<ManualValveStatus, Labellet*> vlabels;
 	std::unordered_map<TValveStatus, TValvelet*> mvalves;
 	std::unordered_map<TValveStatus, Labellet*> mvlabels;

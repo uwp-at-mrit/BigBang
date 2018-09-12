@@ -198,6 +198,12 @@
   <data name="Gantry" xml:space="preserve">
     <value>Gantry</value>
   </data>
+  <data name="LMOD" xml:space="preserve">
+    <value>LMOD</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>PS</value>
+  </data>
   <data name="PSHPump" xml:space="preserve">
     <value>Port Inhatch Pump</value>
   </data>
@@ -209,5 +215,8 @@
   </data>
   <data name="SBUWPump" xml:space="preserve">
     <value>Starboard Underwater Pump</value>
+  </data>
+  <data name="Starboard" xml:space="preserve">
+    <value>SB</value>
   </data>
 </root>

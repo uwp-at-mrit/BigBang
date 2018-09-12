@@ -30,6 +30,14 @@ TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double
 	this->sradius = radius * 0.5F;
 	this->sgradius = radius * 0.5F;
 	this->fradius = this->sgradius + default_thickness * 2.0F;
+
+	{ // locate
+		float sign_distance = radius - default_thickness * 0.5F - this->sradius;
+		float body_distance = radius - default_thickness * 0.5F - this->sgradius;
+	
+		circle_point(sign_distance, this->degrees + 000.0, &this->sign_cx, &this->sign_cy);
+		circle_point(body_distance, this->degrees + 180.0, &this->body_cx, &this->body_cy);
+	}
 }
 
 void TValvelet::construct() {
@@ -110,7 +118,7 @@ void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
 
 	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
 	CAS_SLOT(s.body_color, Colours::Background);
-	CAS_SLOT(s.handle_color, s.skeleton_color);
+	CAS_SLOT(s.tag_color, s.skeleton_color);
 
 	// NOTE: The others can be nullptr;
 }
@@ -153,28 +161,16 @@ void TValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
-	float sign_distance = radius - this->sradius;
-	float body_distance = radius - this->sgradius;
-	float scx, scy, bcx, bcy;
+	float scx = cx + this->sign_cx;
+	float scy = cy + this->sign_cy;
+	float bcx = cx + this->body_cx;
+	float bcy = cy + this->body_cy;
 
-	circle_point(sign_distance, this->degrees, &scx, &scy);
-	circle_point(body_distance, this->degrees + 180.0, &bcx, &bcy);
-
-	scx += cx;
-	scy += cy;
-	bcx += cx;
-	bcy += cy;
-
-	{ // draw sign as tagged handle
-		float edx, edy;
-
-		circle_point(sign_distance - this->sradius, this->degrees, &edx, &edy);
-
-		ds->FillGeometry(this->sign_body, bcx, bcy, Colours::Background);
-
-		ds->DrawLine(cx + edx, cy + edy, bcx, bcy, style.skeleton_color, default_thickness * 1.618F);
-		ds->DrawGeometry(this->sign_body, scx, scy, style.handle_color, default_thickness);
-		ds->DrawCachedGeometry(this->sign, scx - this->tag_xoff, scy - this->tag_yoff, style.handle_color);
+	{ // draw sign as the tag
+		ds->DrawLine(scx, scy, bcx, bcy, style.skeleton_color, default_thickness * 1.618F);
+		ds->FillGeometry(this->sign_body, scx, scy, Colours::Background);
+		ds->DrawGeometry(this->sign_body, scx, scy, style.tag_color, default_thickness);
+		ds->DrawCachedGeometry(this->sign, scx - this->tag_xoff, scy - this->tag_yoff, style.tag_color);
 	}
 
 	ds->DrawCachedGeometry(this->body, bcx, bcy, style.body_color);

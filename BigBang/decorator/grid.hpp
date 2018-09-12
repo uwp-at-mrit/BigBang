@@ -17,9 +17,6 @@ namespace WarGrey::SCADA {
 		float get_grid_height();
 		void set_grid_height(float new_height, float start_y = 0.0F);
 
-	protected:
-		~GridDecorator() noexcept {}
-
     private:
         float gwidth;
         float gheight;

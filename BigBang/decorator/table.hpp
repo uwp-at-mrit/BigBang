@@ -25,9 +25,9 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		unsigned int count;
 		float radius;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	};
 
 	private class TableDecorator : public WarGrey::SCADA::ITableDecorator {

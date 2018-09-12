@@ -135,7 +135,7 @@ public:
 
 public:
 	void execute(FJOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<Valvelet, FJ>*>(target);
+		auto valve = dynamic_cast<Credit<ManualValvelet, FJ>*>(target);
 
 		if (valve != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -193,7 +193,7 @@ public:
 			this->load_valves(this->valves, this->vlabels, this->captions, FJ::D004, FJ::D009, radius, 180.0);
 		}
 
-		{ // load others
+		{ // load special nodes
 			float sthickness = default_pipeline_thickness * 1.618F;
 			float sradius = std::fminf(gheight, gwidth) * 0.618F;
 			float hatch_size = std::fminf(gheight, gwidth) * 2.5F;
@@ -287,7 +287,7 @@ private:
 	Circlelet* sb_suction;
 	Hatchlet* hatch;
 	std::map<FJ, Credit<Labellet, FJ>*> captions;
-	std::map<FJ, Credit<Valvelet, FJ>*> valves;
+	std::map<FJ, Credit<ManualValvelet, FJ>*> valves;
 	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
 	
 private:
@@ -302,7 +302,7 @@ FillnJetPage::FillnJetPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	FillnJet* dashboard = new FillnJet(this);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<FJOperation, IMRMaster*>(dashboard, plc);
+	this->manual_valve_op = make_menu<FJOperation, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -313,6 +313,8 @@ FillnJetPage::FillnJetPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
+#else
+		this->grid->set_active_planet(this);
 #endif
 	}
 }
@@ -321,6 +323,10 @@ FillnJetPage::~FillnJetPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
+
+#ifndef _DEBUG
+	delete this->grid;
+#endif
 }
 
 void FillnJetPage::load(CanvasCreateResourcesReason reason, float width, float height) {
@@ -370,13 +376,13 @@ void FillnJetPage::reflow(float width, float height) {
 }
 
 bool FillnJetPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<Valvelet*>(g) != nullptr);
+	return (dynamic_cast<ManualValvelet*>(g) != nullptr);
 }
 
 void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (this->can_select(g)) {
-		menu_popup(this->operation, g, local_x, local_y);
+		menu_popup(this->manual_valve_op, g, local_x, local_y);
 	}
 }

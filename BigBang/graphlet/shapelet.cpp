@@ -42,12 +42,20 @@ void Shapelet::fill_shape_origin(float* x, float* y) {
 	}
 }
 
+void Shapelet::set_border_color(unsigned int color) {
+	this->set_border_color(Colours::make(color));
+}
+
 void Shapelet::set_border_color(CanvasSolidColorBrush^ color) {
 	this->border_color = color;
 
 	if ((color != nullptr) && (color->Color.A == 0)) {
 		this->border_color = nullptr;
 	}
+}
+
+void Shapelet::set_color(unsigned int color) {
+	this->set_color(Colours::make(color));
 }
 
 void Shapelet::set_color(ICanvasBrush^ color) {
@@ -86,6 +94,20 @@ Circlelet::Circlelet(float radius, unsigned int border_color, float thickness)
 Circlelet::Circlelet(float radius, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: Shapelet(circle(radius), color, border_color, thickness) {}
 
+Sectorlet::Sectorlet(double sdegrees, double edegrees, float radiusX, float radiusY, unsigned int border_color, float thickness)
+	: Sectorlet(sdegrees, edegrees, radiusX, radiusY, nullptr, Colours::make(border_color), thickness) {}
+
+Sectorlet::Sectorlet(double sdegrees, double edegrees, float radiusX, float radiusY
+	, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(sector(sdegrees, edegrees, radiusX, radiusY), color, border_color, thickness) {}
+
+Segmentlet::Segmentlet(double sdegrees, double edegrees, float radiusX, float radiusY, unsigned int border_color, float thickness)
+	: Segmentlet(sdegrees, edegrees, radiusX, radiusY, nullptr, Colours::make(border_color), thickness) {}
+
+Segmentlet::Segmentlet(double sdegrees, double edegrees, float radiusX, float radiusY
+	, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(segment(sdegrees, edegrees, radiusX, radiusY), color, border_color, thickness) {}
+
 /*************************************************************************************************/
 ArrowHeadlet::ArrowHeadlet(float radius, double degrees, unsigned int border_color, float thickness)
 	: ArrowHeadlet(radius, degrees, nullptr, Colours::make(border_color), thickness) {}
@@ -96,6 +118,19 @@ ArrowHeadlet::ArrowHeadlet(float radius, double degrees, ICanvasBrush^ color, Ca
 double ArrowHeadlet::get_degrees() {
 	return this->start_degrees;
 }
+
+/*************************************************************************************************/
+Linelet::Linelet(float sx, float sy, float ex, float ey, float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: Linelet(sx, sy, ex, ey, thickness, Colours::make(color), style) {}
+
+Linelet::Linelet(float sx, float sy, float ex, float ey, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
+	: Shapelet(line(sx, sy, ex, ey, thickness, style), color) {}
+
+Arclet::Arclet(double sdegrees, double edegrees, float rx, float ry, float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: Arclet(sdegrees, edegrees, rx, ry, thickness, Colours::make(color), style) {}
+
+Arclet::Arclet(double sdegrees, double edegrees, float rx, float ry, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
+	: Shapelet(arc(sdegrees, edegrees, rx, ry, thickness, style), color) {}
 
 /*************************************************************************************************/
 HLinelet::HLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)

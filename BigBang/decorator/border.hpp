@@ -10,9 +10,6 @@ namespace WarGrey::SCADA {
 	public:
 		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
-	protected:
-		~BorderDecorator() noexcept {}
-
 	private:
 		bool draw_border;
 		bool draw_enclosing_box;
