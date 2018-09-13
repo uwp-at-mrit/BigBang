@@ -21,14 +21,8 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-TValvelet::TValvelet(float radius, double degrees, bool rotate_tag)
-	: TValvelet('M', radius, degrees, rotate_tag) {}
-
 TValvelet::TValvelet(char tag, float radius, double degrees, bool rotate_tag)
 	: TValvelet(TValveStatus::Disabled, tag, radius, degrees, rotate_tag) {}
-
-TValvelet::TValvelet(TValveStatus default_status, float radius, double degrees, bool rotate_tag)
-	: TValvelet(default_status, 'M', radius, degrees, rotate_tag) {}
 
 TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double degrees, bool rotate_tag)
 	: ISymbollet(default_status, radius, degrees), rotate_tag(rotate_tag) {
@@ -205,3 +199,10 @@ void TValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 	ds->DrawGeometry(this->skeleton, bcx, bcy, style.skeleton_color, default_thickness);
 }
+
+/*************************************************************************************************/
+MotorValvelet::MotorValvelet(float radius, double degrees, bool rotate_tag)
+	: TValvelet('M', radius, degrees, rotate_tag) {}
+
+MotorValvelet::MotorValvelet(TValveStatus default_status, float radius, double degrees, bool rotate_tag)
+	: TValvelet(default_status, 'M', radius, degrees, rotate_tag) {}

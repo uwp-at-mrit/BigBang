@@ -12,7 +12,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
-#include "graphlet/symbol/valve/shaft_valvelet.hpp"
+#include "graphlet/symbol/valve/gate_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -135,7 +135,7 @@ public:
 
 public:
 	void execute(FJOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<ShaftValvelet, FJ>*>(target);
+		auto valve = dynamic_cast<Credit<GateValvelet, FJ>*>(target);
 
 		if (valve != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"%s %s",
@@ -287,7 +287,7 @@ private:
 	Circlelet* sb_suction;
 	Hatchlet* hatch;
 	std::map<FJ, Credit<Labellet, FJ>*> captions;
-	std::map<FJ, Credit<ShaftValvelet, FJ>*> valves;
+	std::map<FJ, Credit<GateValvelet, FJ>*> valves;
 	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
 	
 private:
@@ -376,7 +376,7 @@ void FillnJetPage::reflow(float width, float height) {
 }
 
 bool FillnJetPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<ShaftValvelet*>(g) != nullptr);
+	return (dynamic_cast<GateValvelet*>(g) != nullptr);
 }
 
 void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {

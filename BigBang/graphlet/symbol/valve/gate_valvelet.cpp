@@ -1,4 +1,4 @@
-#include "graphlet/symbol/valve/shaft_valvelet.hpp"
+#include "graphlet/symbol/valve/gate_valvelet.hpp"
 
 #include "string.hpp"
 
@@ -21,40 +21,40 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-ShaftValveStyle WarGrey::SCADA::make_shaft_valve_style(ICanvasBrush^ color) {
-	ShaftValveStyle s;
+GateValveStyle WarGrey::SCADA::make_manual_valve_style(ICanvasBrush^ color) {
+	GateValveStyle s;
 
-	s.shaft_color = ((color == nullptr) ? Colours::Gray : color);
+	s.stem_color = ((color == nullptr) ? Colours::Gray : color);
 
 	return s;
 }
 
 /*************************************************************************************************/
-ShaftValvelet::ShaftValvelet(float radius, double degrees) : ShaftValvelet(ShaftValveStatus::Disabled, radius, degrees) {}
+GateValvelet::GateValvelet(float radius, double degrees) : GateValvelet(GateValveStatus::Disabled, radius, degrees) {}
 
-ShaftValvelet::ShaftValvelet(ShaftValveStatus default_status, float radius, double degrees)
+GateValvelet::GateValvelet(GateValveStatus default_status, float radius, double degrees)
 	: ISymbollet(default_status, radius, degrees) {
 	this->fradius = radius;
 	this->sgradius = this->fradius - default_thickness * 2.0F;
 }
 
-void ShaftValvelet::construct() {
+void GateValvelet::construct() {
 	double adjust_degrees = this->degrees + 90.0;
-	float shaft_length = this->sgradius * 0.618F;
-	auto shaft_axis = polar_axis(shaft_length, this->degrees - 90.0);
-	auto shaft_pole = polar_pole(shaft_length, this->degrees - 90.0, shaft_length * 0.1618F);
+	float stem_length = this->sgradius * 0.618F;
+	auto stem = polar_axis(stem_length, this->degrees - 90.0);
+	auto wheel = polar_pole(stem_length, this->degrees - 90.0, stem_length * 0.1618F);
 
 	this->frame = polar_rectangle(this->fradius, 60.0, adjust_degrees);
-	this->shaft = geometry_union(shaft_axis, shaft_pole);
+	this->shaft = geometry_union(stem, wheel);
 	this->skeleton = polar_sandglass(this->sgradius, adjust_degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
-void ShaftValvelet::update(long long count, long long interval, long long uptime) {
+void GateValvelet::update(long long count, long long interval, long long uptime) {
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (this->get_status()) {
-	case ShaftValveStatus::Opening: {
+	case GateValveStatus::Opening: {
 		this->mask_percentage
 			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
 			? 0.0
@@ -63,7 +63,7 @@ void ShaftValvelet::update(long long count, long long interval, long long uptime
 		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -this->mask_percentage);
 		this->notify_updated();
 	} break;
-	case ShaftValveStatus::Closing: {
+	case GateValveStatus::Closing: {
 		this->mask_percentage
 			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
 			? 1.0
@@ -75,73 +75,73 @@ void ShaftValvelet::update(long long count, long long interval, long long uptime
 	}
 }
 
-void ShaftValvelet::prepare_style(ShaftValveStatus status, ShaftValveStyle& s) {
+void GateValvelet::prepare_style(GateValveStatus status, GateValveStyle& s) {
 	switch (status) {
-	case ShaftValveStatus::Disabled: {
+	case GateValveStatus::Disabled: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
-	case ShaftValveStatus::Open: {
+	case GateValveStatus::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case ShaftValveStatus::Opening: {
+	case GateValveStatus::Opening: {
 		CAS_SLOT(s.mask_color, Colours::Green);
 	}; break;
-	case ShaftValveStatus::OpenReady: {
+	case GateValveStatus::OpenReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
 	}; break;
-	case ShaftValveStatus::Unopenable: {
+	case GateValveStatus::Unopenable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
-	case ShaftValveStatus::Closed: {
+	case GateValveStatus::Closed: {
 		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
-	case ShaftValveStatus::Closing: {
+	case GateValveStatus::Closing: {
 		CAS_SLOT(s.mask_color, Colours::DarkGray);
 	}; break;
-	case ShaftValveStatus::CloseReady: {
+	case GateValveStatus::CloseReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
 	}; break;
-	case ShaftValveStatus::Unclosable: {
+	case GateValveStatus::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
-	case ShaftValveStatus::FakeOpen: {
+	case GateValveStatus::FakeOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
-	case ShaftValveStatus::FakeClose: {
+	case GateValveStatus::FakeClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
 	}; break;
 	}
 
 	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
 	CAS_SLOT(s.body_color, Colours::Background);
-	CAS_SLOT(s.shaft_color, Colours::Background);
+	CAS_SLOT(s.stem_color, Colours::Background);
 
 	// NOTE: The others can be nullptr;
 }
 
-void ShaftValvelet::on_status_changed(ShaftValveStatus status) {
+void GateValvelet::on_status_changed(GateValveStatus status) {
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (status) {
-	case ShaftValveStatus::Unopenable: {
+	case GateValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case ShaftValveStatus::Unclosable: case ShaftValveStatus::Disabled: {
+	case GateValveStatus::Unclosable: case GateValveStatus::Disabled: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case ShaftValveStatus::OpenReady: {
+	case GateValveStatus::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case ShaftValveStatus::CloseReady: {
+	case GateValveStatus::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.70);
 		}
@@ -154,14 +154,14 @@ void ShaftValvelet::on_status_changed(ShaftValveStatus status) {
 	}
 }
 
-void ShaftValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const ShaftValveStyle style = this->get_style();
+void GateValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	const GateValveStyle style = this->get_style();
 	float radius = this->size * 0.5F - default_thickness;
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
 	
-	if (style.shaft_color != Colours::Background) {
-		ds->DrawGeometry(this->shaft, cx, cy, style.shaft_color, default_thickness);
+	if (style.stem_color != Colours::Background) {
+		ds->DrawGeometry(this->shaft, cx, cy, style.stem_color, default_thickness);
 	}
 	
 	if (style.frame_color != nullptr) {

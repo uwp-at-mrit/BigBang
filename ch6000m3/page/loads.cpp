@@ -11,7 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
-#include "graphlet/symbol/valve/shaft_valvelet.hpp"
+#include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 #include "decorator/page.hpp"
@@ -84,7 +84,7 @@ public:
 
 public:
 	void execute(LDOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<ShaftValvelet, LD>*>(target);
+		auto valve = dynamic_cast<Credit<GateValvelet, LD>*>(target);
 
 		if (valve != nullptr) {
 			plc->get_logger()->log_message(Log::Info, L"Valve: %s %s",
@@ -124,8 +124,8 @@ public:
 		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
 		pTurtle->move_left(4, LD::d14)->move_left_down(2, LD::D014)->move_left_down(1.5F)->jump_back();
 		pTurtle->move_left(5, LD::d24)->move_left(5)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
-		pTurtle->jump_up(3, LD::gantry)->move_left(4, LD::D024)->move_left(4)->move_up(LD::Gantry);
-		pTurtle->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
+		pTurtle->jump_up(2.5F, LD::gantry)->turn_up_left()->move_left(4, LD::D024)->move_left(4)->turn_left_up();
+		pTurtle->move_up(0.5F, LD::Gantry)->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
 		
 		pTurtle->move_down(3.5F, LD::PSHPump)->move_left(6, LD::n0923)->move_left(8)->move_up(1.5F, LD::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, LD::d0406)->move_right(4, LD::D006)->move_right(4)->move_down(0.5F, LD::deck_ty)->move_down(LD::D009);
@@ -365,8 +365,8 @@ private:
 private:
 	Tracklet<LD>* pipeline;
 	std::map<LD, Credit<Labellet, LD>*> captions;
-	std::map<LD, Credit<ShaftValvelet, LD>*> valves;
-	std::map<LD, Credit<TValvelet, LD>*> mvalves;
+	std::map<LD, Credit<GateValvelet, LD>*> valves;
+	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
 	std::map<LD, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
@@ -531,11 +531,11 @@ void LoadsPage::reflow(float width, float height) {
 }
 
 bool LoadsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<ShaftValvelet*>(g) != nullptr) || (dynamic_cast<TValvelet*>(g) != nullptr));
+	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<TValvelet*>(g) != nullptr));
 }
 
 void LoadsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	auto valve = dynamic_cast<ShaftValvelet*>(g);
+	auto valve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<TValvelet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);

@@ -3,28 +3,27 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ShaftValveStatus {
+	private enum class GateValveStatus {
 		Disabled,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
 		FakeOpen, FakeClose,
 		_ };
 
-	private struct ShaftValveStyle {
+	private struct GateValveStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ frame_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ shaft_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ stem_color;
 	};
 
-	WarGrey::SCADA::ShaftValveStyle make_shaft_valve_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
+	WarGrey::SCADA::GateValveStyle make_manual_valve_style(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr);
 
-	private class ShaftValvelet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ShaftValveStatus, WarGrey::SCADA::ShaftValveStyle> {
+	private class GateValvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::GateValveStatus, WarGrey::SCADA::GateValveStyle> {
 	public:
-		ShaftValvelet(WarGrey::SCADA::ShaftValveStatus default_status, float radius, double degrees = 0.0);
-		ShaftValvelet(float radius, double degrees = 0.0);
+		GateValvelet(WarGrey::SCADA::GateValveStatus default_status, float radius, double degrees = 0.0);
+		GateValvelet(float radius, double degrees = 0.0);
 
 	public:
 		void construct() override;
@@ -32,8 +31,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::ShaftValveStatus status, WarGrey::SCADA::ShaftValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::ShaftValveStatus status) override;
+		void prepare_style(WarGrey::SCADA::GateValveStatus status, WarGrey::SCADA::GateValveStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::GateValveStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

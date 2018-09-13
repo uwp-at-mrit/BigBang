@@ -18,14 +18,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tag_color;
 	};
 
-	private class TValvelet
+	private class TValvelet abstract
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::TValveStatus, WarGrey::SCADA::TValveStyle> {
 	public:
 		TValvelet(WarGrey::SCADA::TValveStatus default_status, char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
 		TValvelet(char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
-		
-		TValvelet(WarGrey::SCADA::TValveStatus default_status, float radius, double degrees = 0.0, bool rotate_tag = true);
-		TValvelet(float radius, double degrees = 0.0, bool rotate_tag = true);
 
 	public:
 		void construct() override;
@@ -68,5 +65,11 @@ namespace WarGrey::SCADA {
 
 	private:
 		double mask_percentage;
+	};
+
+	private class MotorValvelet : public WarGrey::SCADA::TValvelet {
+	public:
+		MotorValvelet(WarGrey::SCADA::TValveStatus default_status, float radius, double degrees = 0.0, bool rotate_tag = true);
+		MotorValvelet(float radius, double degrees = 0.0, bool rotate_tag = true);
 	};
 }

@@ -36,7 +36,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\shaft_valvelet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
@@ -79,7 +79,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\shaft_valvelet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\gate_valvelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)menu.hpp">
       <FileType>Document</FileType>
     </ClInclude>
