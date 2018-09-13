@@ -21,11 +21,17 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-TValvelet::TValvelet(float radius, double degrees) : TValvelet('M', radius, degrees) {}
-TValvelet::TValvelet(char tag, float radius, double degrees) : TValvelet(TValveStatus::Disabled, tag, radius, degrees) {}
-TValvelet::TValvelet(TValveStatus default_status, float radius, double degrees) : TValvelet(default_status, 'M', radius, degrees) {}
+TValvelet::TValvelet(float radius, double degrees, bool rotate_tag)
+	: TValvelet('M', radius, degrees, rotate_tag) {}
 
-TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double degrees) : ISymbollet(default_status, radius, degrees) {
+TValvelet::TValvelet(char tag, float radius, double degrees, bool rotate_tag)
+	: TValvelet(TValveStatus::Disabled, tag, radius, degrees, rotate_tag) {}
+
+TValvelet::TValvelet(TValveStatus default_status, float radius, double degrees, bool rotate_tag)
+	: TValvelet(default_status, 'M', radius, degrees, rotate_tag) {}
+
+TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double degrees, bool rotate_tag)
+	: ISymbollet(default_status, radius, degrees), rotate_tag(rotate_tag) {
 	this->tag = make_wstring(tag);
 	this->sradius = radius * 0.5F;
 	this->sgradius = radius * 0.5F;
@@ -35,28 +41,32 @@ TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double
 		float sign_distance = radius - default_thickness * 0.5F - this->sradius;
 		float body_distance = radius - default_thickness * 0.5F - this->sgradius;
 	
-		circle_point(sign_distance, this->degrees + 000.0, &this->sign_cx, &this->sign_cy);
-		circle_point(body_distance, this->degrees + 180.0, &this->body_cx, &this->body_cy);
+		circle_point(sign_distance, this->degrees - 90.0, &this->sign_cx, &this->sign_cy);
+		circle_point(body_distance, this->degrees + 90.0, &this->body_cx, &this->body_cy);
 	}
 }
 
 void TValvelet::construct() {
-	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
-	this->sign_body = circle(0.0F, 0.0F, this->sradius);
-	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
+	double adjust_degrees = this->degrees + 90.0;
+	this->frame = polar_rectangle(this->fradius, 60.0, adjust_degrees);
+	this->sign_body = circle(this->sradius);
+	this->skeleton = polar_sandglass(this->sgradius, adjust_degrees);
 	this->body = geometry_freeze(this->skeleton);
 
 	{ // make sign
 		auto tag_layout = make_text_layout(this->tag, make_bold_text_format("Monospace", this->sradius * 1.2F));
+		auto tag_shape = paragraph(tag_layout);
 		Rect tagbox = tag_layout->DrawBounds;
 
-		this->sign = geometry_freeze(geometry_rotate(paragraph(tag_layout), this->degrees + 90.0));
+		this->sign = geometry_freeze((this->rotate_tag) ? geometry_rotate(tag_shape, this->degrees) : tag_shape);
 		this->tag_xoff = tagbox.Width * 0.5F + tagbox.X;
 		this->tag_yoff = tagbox.Height * 0.5F + tagbox.Y;
 	}
 }
 
 void TValvelet::update(long long count, long long interval, long long uptime) {
+	double adjust_degrees = this->degrees + 90.0;
+
 	switch (this->get_status()) {
 	case TValveStatus::Opening: {
 		this->mask_percentage
@@ -64,7 +74,7 @@ void TValvelet::update(long long count, long long interval, long long uptime) {
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -this->mask_percentage);
 		this->notify_updated();
 	} break;
 	case TValveStatus::Closing: {
@@ -73,10 +83,15 @@ void TValvelet::update(long long count, long long interval, long long uptime) {
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, -this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
 	}
+}
+
+void TValvelet::fill_valve_origin(float* x, float* y) {
+	SET_BOX(x, this->body_cx);
+	SET_BOX(y, this->body_cy);
 }
 
 void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
@@ -124,28 +139,30 @@ void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
 }
 
 void TValvelet::on_status_changed(TValveStatus status) {
+	double adjust_degrees = this->degrees + 90.0;
+
 	switch (status) {
 	case TValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
-			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
+			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
 	case TValveStatus::Unclosable: case TValveStatus::Disabled: {
 		if (this->top_down_mask == nullptr) {
-			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
+			this->top_down_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
 	case TValveStatus::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
-			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
+			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
 	case TValveStatus::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
-			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
+			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.70);
 		}
 		this->mask = this->top_down_ready_mask;
 	} break;

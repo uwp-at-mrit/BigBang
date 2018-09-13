@@ -132,7 +132,7 @@ public:
 		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, gwidth, 0.0);
-		this->load_devices(this->valves, this->vlabels, this->valve_style, SW::DGV3, SW::DGV47, gwidth, -90.0);
+		this->load_devices(this->valves, this->vlabels, this->valve_style, SW::DGV3, SW::DGV47, gwidth, 0.0);
 		this->load_labels(this->captions, SW::Hatch, SW::Starboard, Colours::Salmon);
 		this->load_labels(this->captions, SW::ToPipeline, SW::SS2, Colours::Silver);
 

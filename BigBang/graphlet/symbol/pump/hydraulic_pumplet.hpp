@@ -17,8 +17,8 @@ namespace WarGrey::SCADA {
 	private class HydraulicPumplet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HydraulicPumpStatus, WarGrey::SCADA::HydraulicPumpStyle> {
 	public:
-		HydraulicPumplet(WarGrey::SCADA::HydraulicPumpStatus default_status, float radius, double degrees = -90.0);
-		HydraulicPumplet(float radius, double degrees = -90.0);
+		HydraulicPumplet(WarGrey::SCADA::HydraulicPumpStatus default_status, float radius, double degrees = 0.0);
+		HydraulicPumplet(float radius, double degrees = 0.0);
 
 	public:
 		void construct() override;

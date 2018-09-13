@@ -220,9 +220,9 @@ public:
 		}
 
 		{ // load valves
-			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, radius, 0.000);
-			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, radius, -90.0);
-			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, radius, 90.00);
+			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, radius, 90.000);
+			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, radius, 0.0);
+			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, radius, 180.00);
 		}
 	}
 
@@ -294,7 +294,7 @@ public:
 		}
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
-			if (it->second->get_direction_degrees() == 0.0) {
+			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
 				case HS::SQ2: case HS::SQy: {
 					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RC;

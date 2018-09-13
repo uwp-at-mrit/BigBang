@@ -125,6 +125,16 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 	};
 
+	private class Omegalet : public virtual WarGrey::SCADA::Shapelet {
+	public:
+		Omegalet(double sdegrees, float radius, float thickness, unsigned int color,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+
+		Omegalet(double sdegrees, float radius, float thickness = 1.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = WarGrey::SCADA::Colours::Silver,
+			Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
+	};
+
 	template<typename Anchor>
 	private class Tracklet : public virtual WarGrey::SCADA::Shapelet {
 	public:

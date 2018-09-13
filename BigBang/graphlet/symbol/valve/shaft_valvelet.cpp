@@ -20,6 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
+/*************************************************************************************************/
 ShaftValveStyle WarGrey::SCADA::make_shaft_valve_style(ICanvasBrush^ color) {
 	ShaftValveStyle s;
 
@@ -38,17 +39,20 @@ ShaftValvelet::ShaftValvelet(ShaftValveStatus default_status, float radius, doub
 }
 
 void ShaftValvelet::construct() {
+	double adjust_degrees = this->degrees + 90.0;
 	float shaft_length = this->sgradius * 0.618F;
-	auto shaft_axis = polar_axis(shaft_length, this->degrees);
-	auto shaft_pole = polar_pole(shaft_length, this->degrees, shaft_length * 0.1618F);
+	auto shaft_axis = polar_axis(shaft_length, this->degrees - 90.0);
+	auto shaft_pole = polar_pole(shaft_length, this->degrees - 90.0, shaft_length * 0.1618F);
 
-	this->frame = polar_rectangle(this->fradius, 60.0, this->degrees);
+	this->frame = polar_rectangle(this->fradius, 60.0, adjust_degrees);
 	this->shaft = geometry_union(shaft_axis, shaft_pole);
-	this->skeleton = polar_sandglass(this->sgradius, this->degrees);
+	this->skeleton = polar_sandglass(this->sgradius, adjust_degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
 
 void ShaftValvelet::update(long long count, long long interval, long long uptime) {
+	double adjust_degrees = this->degrees + 90.0;
+
 	switch (this->get_status()) {
 	case ShaftValveStatus::Opening: {
 		this->mask_percentage
@@ -56,7 +60,7 @@ void ShaftValvelet::update(long long count, long long interval, long long uptime
 			? 0.0
 			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -this->mask_percentage);
 		this->notify_updated();
 	} break;
 	case ShaftValveStatus::Closing: {
@@ -65,7 +69,7 @@ void ShaftValvelet::update(long long count, long long interval, long long uptime
 			? 1.0
 			: this->mask_percentage - dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, this->degrees, -this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
 	}
@@ -116,28 +120,30 @@ void ShaftValvelet::prepare_style(ShaftValveStatus status, ShaftValveStyle& s) {
 }
 
 void ShaftValvelet::on_status_changed(ShaftValveStatus status) {
+	double adjust_degrees = this->degrees + 90.0;
+
 	switch (status) {
 	case ShaftValveStatus::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
-			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.80);
+			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
 	case ShaftValveStatus::Unclosable: case ShaftValveStatus::Disabled: {
 		if (this->top_down_mask == nullptr) {
-			this->top_down_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.80);
+			this->top_down_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
 	case ShaftValveStatus::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
-			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, 0.70);
+			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
 	case ShaftValveStatus::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
-			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, this->degrees, -0.70);
+			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.70);
 		}
 		this->mask = this->top_down_ready_mask;
 	} break;
@@ -154,7 +160,9 @@ void ShaftValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	float cx = x + radius + default_thickness;
 	float cy = y + radius + default_thickness;
 	
-	ds->DrawGeometry(this->shaft, cx, cy, style.shaft_color, default_thickness);
+	if (style.shaft_color != Colours::Background) {
+		ds->DrawGeometry(this->shaft, cx, cy, style.shaft_color, default_thickness);
+	}
 	
 	if (style.frame_color != nullptr) {
 		ds->DrawGeometry(this->frame, cx, cy, style.frame_color, default_thickness);

@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "shape.hpp"
 #include "text.hpp"
 #include "math.hpp"
@@ -146,8 +148,33 @@ CanvasGeometry^ WarGrey::SCADA::long_arc(float sx, float sy, float ex, float ey,
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
+CanvasGeometry^ WarGrey::SCADA::omega(double sdegrees, float radius, float th, CanvasStrokeStyle^ style, float extent) {
+	return omega(0.0F, 0.0F, sdegrees, radius, th, style, extent);
+}
+
+CanvasGeometry^ WarGrey::SCADA::omega(float cx, float cy, double sdegrees, float radius, float th, CanvasStrokeStyle^ style, float extent) {
+	auto omega_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	double edegrees = sdegrees + 180.0;
+	float ext_radius = std::fmaxf(radius, (extent < 0.0F) ? (-extent * radius) : extent);
+	float rstart = degrees_to_radians(sdegrees);
+	float rsweep = degrees_to_radians(edegrees - sdegrees);
+	float startx, starty, ext_sx, ext_sy, ext_ex, ext_ey;
+
+	circle_point(radius, sdegrees, &startx, &starty);
+	circle_point(ext_radius, sdegrees, &ext_sx, &ext_sy);
+	circle_point(ext_radius, edegrees, &ext_ex, &ext_ey);
+
+	omega_path->BeginFigure(cx + ext_sx, cx + ext_sy);
+	omega_path->AddLine(cx + startx, cy + starty);
+	omega_path->AddArc(float2(cx, cy), radius, radius, rstart, rsweep);
+	omega_path->AddLine(cx + ext_ex, cy + ext_ey);
+	omega_path->EndFigure(CanvasFigureLoop::Open);
+
+	return geometry_stroke(CanvasGeometry::CreatePath(omega_path), th, style);
+}
+
 CanvasGeometry^ WarGrey::SCADA::circle(float r) {
-	return circle(r * 0.5F, r * 0.5F, r);
+	return circle(0.0F, 0.0F, r);
 }
 
 CanvasGeometry^ WarGrey::SCADA::circle(float cx, float cy, float r) {
@@ -155,7 +182,7 @@ CanvasGeometry^ WarGrey::SCADA::circle(float cx, float cy, float r) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::ellipse(float rx, float ry) {
-	return ellipse(rx * 0.5F, ry * 0.5F, rx, ry);
+	return ellipse(0.0F, 0.0F, rx, ry);
 }
 
 CanvasGeometry^ WarGrey::SCADA::ellipse(float cx, float cy, float rx, float ry) {

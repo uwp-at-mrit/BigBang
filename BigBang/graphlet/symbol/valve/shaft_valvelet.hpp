@@ -23,8 +23,8 @@ namespace WarGrey::SCADA {
 	private class ShaftValvelet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ShaftValveStatus, WarGrey::SCADA::ShaftValveStyle> {
 	public:
-		ShaftValvelet(WarGrey::SCADA::ShaftValveStatus default_status, float radius, double degrees = -90.0);
-		ShaftValvelet(float radius, double degrees = -90.0);
+		ShaftValvelet(WarGrey::SCADA::ShaftValveStatus default_status, float radius, double degrees = 0.0);
+		ShaftValvelet(float radius, double degrees = 0.0);
 
 	public:
 		void construct() override;

@@ -21,16 +21,19 @@ namespace WarGrey::SCADA {
 	private class TValvelet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::TValveStatus, WarGrey::SCADA::TValveStyle> {
 	public:
-		TValvelet(WarGrey::SCADA::TValveStatus default_status, char tag, float radius, double degrees = -90.0);
-		TValvelet(char tag, float radius, double degrees = -90.0);
+		TValvelet(WarGrey::SCADA::TValveStatus default_status, char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
+		TValvelet(char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
 		
-		TValvelet(WarGrey::SCADA::TValveStatus default_status, float radius, double degrees = -90.0);
-		TValvelet(float radius, double degrees = -90.0);
+		TValvelet(WarGrey::SCADA::TValveStatus default_status, float radius, double degrees = 0.0, bool rotate_tag = true);
+		TValvelet(float radius, double degrees = 0.0, bool rotate_tag = true);
 
 	public:
 		void construct() override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void fill_valve_origin(float* x, float* y);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TValveStatus status, WarGrey::SCADA::TValveStyle& style) override;
@@ -55,6 +58,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Platform::String^ tag;
+		bool rotate_tag;
 		float tag_xoff;
 		float tag_yoff;
 		float sign_cx;

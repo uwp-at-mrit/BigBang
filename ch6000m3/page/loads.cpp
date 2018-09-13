@@ -107,6 +107,8 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->relationship_color = Colours::DarkGray;
+		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
 	}
  
@@ -119,9 +121,9 @@ public:
 		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(6, LD::d1720);
 
 		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(4, LD::D010)->move_left(6, LD::d12);
-		pTurtle->move_down(1.5F, LD::D012)->move_down(3.5F)->jump_down(LD::LMOD)->jump_back(LD::d12);
-		pTurtle->move_left(4, LD::d14)->move_left_down(1.5F, LD::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(5, LD::d24)->move_left(5)->move_left_down(1.5F, LD::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
+		pTurtle->move_left(4, LD::d14)->move_left_down(2, LD::D014)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_left(5, LD::d24)->move_left(5)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
 		pTurtle->jump_up(3, LD::gantry)->move_left(4, LD::D024)->move_left(4)->move_up(LD::Gantry);
 		pTurtle->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
 		
@@ -139,9 +141,9 @@ public:
 		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
 
 		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008)->move_left(6, LD::d11);
-		pTurtle->move_up(1.5F, LD::D011)->move_up(3.5F)->jump_back();
-		pTurtle->move_left(4, LD::d13)->move_left_up(1.5F, LD::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(5, LD::barge)->move_left(5)->move_left_up(1.5F, LD::D015)->move_left_up(1.5F)->jump_back(LD::d0326);
+		pTurtle->move_up(2, LD::D011)->move_up(3)->jump_back();
+		pTurtle->move_left(4, LD::d13)->move_left_up(2, LD::D013)->move_left_up(1.5F)->jump_back();
+		pTurtle->move_left(5, LD::barge)->move_left(5)->move_left_up(2, LD::D015)->move_left_up(1.5F)->jump_back(LD::d0326);
 
 		pTurtle->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2)->turn_down_left();
 		pTurtle->move_left(10, LD::SBUWPump)->move_left(10, LD::Starboard);
@@ -153,12 +155,12 @@ public:
 		{ // load valves
 			float radius = std::fminf(gwidth, gheight);
 
-			this->load_valve(this->valves, this->vlabels, this->captions, LD::D001, radius, -90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, -90.0, 90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 0.0, 90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D004, LD::D012, radius, 180.0, 90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D014, LD::D016, radius, 225.0, 90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D013, LD::D015, radius, -45.0, 90.0);
+			this->load_valve(this->valves, this->vlabels, this->captions, LD::D001, radius, 0.0);
+			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, 00.0);
+			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 90.0);
+			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D004, LD::D012, radius, -90.0);
+			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D014, LD::D016, radius, -45.0);
+			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D013, LD::D015, radius, 45.0);
 		}
 
 		{ // load special nodes
@@ -186,8 +188,7 @@ public:
 
 			for (LD id = LD::n0325; id <= LD::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Arclet(-92.0, 92.0, nic_radius, nic_radius,
-						default_pipeline_thickness, default_pipeline_color));
+					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
 			}
 		}
 
@@ -202,7 +203,8 @@ public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
 		float dx, dy;
-		float valve_adjust_gridsize = std::fminf(gwidth, gheight) * 0.618F;
+		float gridsize = std::fminf(gwidth, gheight);
+		float adjust_gridsize = gridsize * 0.618F;
 		float label_height;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -222,7 +224,11 @@ public:
 		this->pipeline->map_graphlet_at_anchor(this->LMOD, LD::LMOD, GraphletAnchor::CC);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
-			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC);
+			/** NOTE
+			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
+			 * thus, we have to do aligning on our own.
+			 */
+			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
 		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -235,15 +241,20 @@ public:
 			case LD::D013: case LD::D015: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LB;
 			}; break;
-			case LD::D006: case LD::D010: case LD::D017: case LD::D020: case LD::D021: case LD::D022: case LD::D024: {
-				dx = x0; dy = y0 + valve_adjust_gridsize; anchor = GraphletAnchor::CT;
+			case LD::D006: case LD::D010: case LD::D020: case LD::D021: case LD::D022: case LD::D024: {
+				dx = x0; dy = y0 + adjust_gridsize; anchor = GraphletAnchor::CT;
+			}; break;
+			case LD::D017: {
+				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
+			}; break;
+			case LD::D018: {
+				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
+			}; break;
+			case LD::D001: case LD::D002: case LD::D008: case LD::D019: case LD::D026: {
+				dx = x0; dy = y0 - adjust_gridsize - label_height; anchor = GraphletAnchor::CB;
 			}; break;
 			default: {
-				if (it->second->get_direction_degrees() == -90.0) {
-					dx = x0; dy = y0 - valve_adjust_gridsize - label_height; anchor = GraphletAnchor::CB;
-				} else {
-					dx = x0 + valve_adjust_gridsize; dy = y0; anchor = GraphletAnchor::LB;
-				}
+				dx = x0 + adjust_gridsize; dy = y0; anchor = GraphletAnchor::LB;
 			}
 			}
 
@@ -252,27 +263,46 @@ public:
 			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 
-		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
-			switch (it->first) {
-			case LD::D014: case LD::D016: {
-				dx = x0 - valve_adjust_gridsize; dy = y0; anchor = GraphletAnchor::RC;
-			}; break;
-			case LD::D013: case LD::D015: {
-				dx = x0 - valve_adjust_gridsize; dy = y0; anchor = GraphletAnchor::RC;
-			}; break;
-			case LD::D006: case LD::D010: case LD::D017: case LD::D020: case LD::D021: case LD::D022: case LD::D024: {
-				dx = x0; dy = y0 - valve_adjust_gridsize; anchor = GraphletAnchor::CB;
-			}; break;
-			default: {
-				if (it->second->get_direction_degrees() == -90.0) {
-					dx = x0; dy = y0 + valve_adjust_gridsize; anchor = GraphletAnchor::CT;
-				} else {
-					dx = x0 - valve_adjust_gridsize; dy = y0; anchor = GraphletAnchor::CB;
-				}
-			}
-			}
+		{ // reflow motor-driven valves
+			float polar45 = gridsize * std::sqrtf(2.0F) * 0.618F;
+			float ox, oy;
 
-			this->pipeline->map_credit_graphlet(this->mvalves[it->first], anchor, dx, dy);
+			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
+				switch (it->first) {
+				case LD::D014: case LD::D016: {
+					dx = x0 - polar45; dy = y0 - polar45; anchor = GraphletAnchor::CC;
+				}; break;
+				case LD::D013: case LD::D015: {
+					dx = x0 - polar45; dy = y0 + polar45; anchor = GraphletAnchor::CC;
+				}; break;
+				case LD::D003: case LD::D004: case LD::D005: case LD::D007: case LD::D009:
+				case LD::D011: case LD::D012: case LD::D023: case LD::D025: {
+					dx = x0 - adjust_gridsize; dy = y0; anchor = GraphletAnchor::RC;
+				}; break;
+				case LD::D002: case LD::D008: case LD::D017: case LD::D019: case LD::D026: {
+					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;
+				}; break;
+				default: {
+					dx = x0; dy = y0 - gridsize; anchor = GraphletAnchor::CC;
+				}
+				}
+
+				it->second->fill_valve_origin(&ox, &oy);
+				this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
+			}
+		}
+	}
+
+public:
+	void draw_valves_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
+		float ox, oy, mx, my, vx, vy;
+
+		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
+			this->master->fill_graphlet_location(it->second, &mx, &my, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->valves[it->first], &vx, &vy, GraphletAnchor::CC);
+			it->second->fill_valve_origin(&ox, &oy);
+
+			ds->DrawLine(mx + ox, my + oy, vx, vy, this->relationship_color, 1.0F, this->relationship_style);
 		}
 	}
 
@@ -288,13 +318,21 @@ private:
 	
 	template<class G, class M, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, M*>& ms, std::map<E, Credit<Labellet, E>*>& ls
-		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees, double mdelta) {
-		float mradius = radius * 0.75F;
-		double mdegrees = degrees + mdelta;
+		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
+		float mradius = radius * 0.618F;
 
 		for (E id = id0; id <= idn; id++) {
-			ms[id] = this->master->insert_one(new M(mradius, mdegrees), id);
+			double mdegrees = 0.0;
+
+			switch (id) {
+			case LD::D014: case LD::D016: mdegrees = 45.0; break;
+			case LD::D013: case LD::D015: mdegrees = -45.0; break;
+			case LD::D002: case LD::D008: case LD::D009: case LD::D017: case LD::D019: case LD::D026: mdegrees = -180.0; break;
+			}
+
+			// moter-driven valves' second, catching events first 
 			this->load_valve(gs, ls, cs, id, radius, degrees);
+			ms[id] = this->master->insert_one(new M(mradius, mdegrees, false), id);
 		}
 	}
 
@@ -330,7 +368,7 @@ private:
 	std::map<LD, Credit<ShaftValvelet, LD>*> valves;
 	std::map<LD, Credit<TValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
-	std::map<LD, Arclet*> nintercs;
+	std::map<LD, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
 	Linelet* gantry_line;
@@ -339,16 +377,17 @@ private:
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
+	ICanvasBrush^ relationship_color;
+	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle dimension_style;
 
 private:
 	LoadsPage* master;
 };
 
-
 private class ShipDecorator : public IPlanetDecorator {
 public:
-	ShipDecorator() {
+	ShipDecorator(Barge* master) : master(master) {
 		float height = 1.0F;
 		float xradius = height * 0.10F;
 		float yradius = height * 0.50F;
@@ -361,6 +400,10 @@ public:
 	}
 
 public:
+	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
+		this->master->draw_valves_relationships(ds, Width, Height);
+	}
+
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
 		auto pipeline = dynamic_cast<Tracklet<LD>*>(g);
 
@@ -404,6 +447,9 @@ private:
 
 private:
 	float ship_width;
+
+private:
+	Barge* master;
 };
 
 LoadsPage::LoadsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
@@ -418,7 +464,7 @@ LoadsPage::LoadsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	{ // load decorators
 		this->append_decorator(new PageDecorator());
-		this->append_decorator(new ShipDecorator());
+		this->append_decorator(new ShipDecorator(dashboard));
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);

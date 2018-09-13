@@ -132,6 +132,12 @@ Arclet::Arclet(double sdegrees, double edegrees, float rx, float ry, float thick
 Arclet::Arclet(double sdegrees, double edegrees, float rx, float ry, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
 	: Shapelet(arc(sdegrees, edegrees, rx, ry, thickness, style), color) {}
 
+Omegalet::Omegalet(double sdegrees, float r, float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: Omegalet(sdegrees, r, thickness, Colours::make(color), style) {}
+
+Omegalet::Omegalet(double sdegrees, float r, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
+	: Shapelet(omega(sdegrees, r, thickness, style), color) {}
+
 /*************************************************************************************************/
 HLinelet::HLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)
 	: HLinelet(thickness, Colours::make(color), style) {}

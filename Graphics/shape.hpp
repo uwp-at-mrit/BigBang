@@ -80,6 +80,14 @@ namespace WarGrey::SCADA {
 		float sx, float sy, float ex, float ey, float radiusX, float radiusY, float thickness = 1.0F,
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);
 
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ omega(double start_degrees, float radius,
+		float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr,
+		float extent = -1.618F);
+
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ omega(float cx, float cy, double start_degrees, float radius,
+		float thickness = 1.0F, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr,
+		float extent = -1.618F);
+
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ triangle(float x1, float y1, float x2, float y2);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rounded_rectangle(
