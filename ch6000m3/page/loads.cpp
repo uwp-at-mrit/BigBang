@@ -38,14 +38,17 @@ static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 // WARNING: order matters
 private enum class LD : unsigned int {
 	Port, Starboard,
+	
 	// Valves
 	D001, D002, D006, D008, D010, D017, D018, D019, D020, D021, D022, D024, D026,
 	D003, D007, D011, D023, D025,
 	D004, D005, D009, D012,
 	D014, D016,
 	D013, D015,
+	
 	// Key Labels
 	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
+	
 	_,
 	// anchors used as last jumping points
 	d11, d12, d13, d14, d24,
@@ -121,10 +124,10 @@ public:
 		pTurtle->move_down(5)->move_right(2, LD::D022)->move_right(3)->jump_back();
 		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(6, LD::d1720);
 
-		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(4, LD::D010)->move_left(6, LD::d12);
+		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(3, LD::D010)->move_left(6, LD::d12);
 		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
 		pTurtle->move_left(4, LD::d14)->move_left_down(2, LD::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(6, LD::d24)->move_left(4)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_left(5, LD::d24)->move_left(4)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
 		pTurtle->jump_up(2.5F, LD::gantry)->turn_up_left()->move_left(3, LD::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, LD::Gantry)->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
 		
@@ -133,7 +136,7 @@ public:
 		pTurtle->move_down(5)->jump_down()->move_down(2, LD::D023)->jump_back(LD::d0406);
 
 		pTurtle->move_up(1.5F, LD::D004)->move_up(2, LD::ps)->move_up(2)->turn_up_left();
-		pTurtle->move_left(10, LD::PSUWPump)->move_left(10, LD::Port);
+		pTurtle->move_left(10, LD::PSUWPump)->move_left(8, LD::Port);
 
 		pTurtle->jump_back(LD::D023)->move_down(2)->jump_down()->move_down(5, LD::D007);
 		pTurtle->move_down(LD::deck_by)->move_down(0.5F)->move_left(4, LD::D026)->move_left(4, LD::d0326);
@@ -141,13 +144,13 @@ public:
 		pTurtle->move_right(8, LD::n0723)->move_right(6, LD::SBHPump)->move_down(3.5F, LD::d1819)->jump_back(LD::d0225);
 		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
 
-		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008);
+		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(3, LD::D008);
 		pTurtle->move_left(6, LD::d11)->move_up(2, LD::D011)->move_up(3)->jump_back();
 		pTurtle->move_left(4, LD::d13)->move_left_up(2, LD::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(10)->move_left_up(2, LD::D015)->move_left_up(1.5F);
+		pTurtle->move_left(9)->move_left_up(2, LD::D015)->move_left_up(1.5F);
 
 		pTurtle->jump_back(LD::d0326)->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2)->turn_down_left();
-		pTurtle->move_left(10, LD::SBUWPump)->move_left(10, LD::Starboard);
+		pTurtle->move_left(10, LD::SBUWPump)->move_left(8, LD::Starboard);
 
 		pTurtle->jump_back(LD::d1819)->move_right(4, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
@@ -295,14 +298,14 @@ public:
 
 public:
 	void draw_valves_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
-		float ox, oy, mx, my, vx, vy;
+		float ox, oy, gx, gy, mx, my;
 
 		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
 			this->master->fill_graphlet_location(it->second, &mx, &my, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->gvalves[it->first], &vx, &vy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->gvalves[it->first], &gx, &gy, GraphletAnchor::CC);
 			it->second->fill_valve_origin(&ox, &oy);
 
-			ds->DrawLine(mx + ox, my + oy, vx, vy, this->relationship_color, 1.0F, this->relationship_style);
+			ds->DrawLine(mx + ox, my + oy, gx, gy, this->relationship_color, 1.0F, this->relationship_style);
 		}
 	}
 

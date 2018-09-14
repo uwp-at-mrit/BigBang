@@ -12,6 +12,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
@@ -39,12 +40,19 @@ static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 // WARNING: order matters
 private enum class FJ : unsigned int {
 	Port, Starboard,
+	
 	// Valves
 	D001, D002, D006, D008, D010, D017, D018, D019, D020, D021, D022, D024,
 	D003, D007, D023, D025,
 	D004, D005, D009,
+
+	// Upper Hopper Doors
+	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
+	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
+
 	// Key Labels
 	Hatch, PSHPump, SBHPump, Gantry,
+	
 	_,
 	// anchors used as last jumping points
 	d0225, d0325, d0406,
@@ -106,9 +114,11 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
-		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
+
+		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
+		this->percentage_style.unit_color = Colours::Silver;
 	}
  
 public:
@@ -119,26 +129,26 @@ public:
 		pTurtle->move_down(5)->move_right(2, FJ::D022)->move_right(3)->jump_back();
 		pTurtle->move_left(2, FJ::d1920)->move_left(2, FJ::D020)->move_left(6, FJ::d1720);
 
-		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(4, FJ::D010)->jump_back(FJ::d1720);
+		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(3, FJ::D010)->jump_back(FJ::d1720);
 		
 		pTurtle->move_down(3.5F, FJ::PSHPump)->move_left(6, FJ::n0923)->move_left(8)->move_up(1.5F, FJ::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, FJ::d0406)->move_right(4, FJ::D006)->move_right(4)->move_down(0.5F, FJ::deck_ty)->move_down(FJ::D009);
 		pTurtle->move_down(5)->jump_down()->move_down(2, FJ::D023)->jump_back(FJ::d0406);
 
-		pTurtle->move_up(1.5F, FJ::D004)->move_up(2, FJ::ps)->move_up(2, FJ::Port);
+		pTurtle->move_up(1.5F, FJ::D004)->move_up(2, FJ::ps)->move_up(3, FJ::Port);
 
 		pTurtle->jump_back(FJ::D023)->move_down(2)->jump_down()->move_down(5, FJ::D007);
 		pTurtle->move_down(FJ::deck_by)->move_down(0.5F, FJ::d007)->jump_left(8, FJ::d0325);
 		pTurtle->move_up(3)->jump_up()->move_up(1.5F, FJ::D025)->move_up(1.5F, FJ::d0225);
 		pTurtle->move_right(8, FJ::n0723)->move_right(6, FJ::SBHPump)->move_down(3.5F, FJ::d1819)->jump_back(FJ::d0225);
-		pTurtle->jump_up(2.5F)->move_left(2, FJ::D002)->move_left(17, FJ::n24)->move_left(8, FJ::D001)->move_left(3, FJ::Hatch);
+		pTurtle->jump_up(2.5F)->move_left(2, FJ::D002)->move_left(15, FJ::n24)->move_left(10, FJ::D001)->move_left(3, FJ::Hatch);
 
-		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(4, FJ::D008);
-		pTurtle->move_left(15)->move_up(5.5F)->jump_up()->move_up(5.5F);
+		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(3, FJ::D008);
+		pTurtle->move_left(14)->move_up(5.5F)->jump_up()->move_up(5.5F);
 		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FJ::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, FJ::Gantry)->move_left()->jump_back(FJ::Gantry)->move_right()->jump_back(FJ::d0325);
 
-		pTurtle->move_down(1.5F, FJ::D003)->move_down(2, FJ::sb)->move_down(2, FJ::Starboard);
+		pTurtle->move_down(1.5F, FJ::D003)->move_down(2, FJ::sb)->move_down(3, FJ::Starboard);
 
 		pTurtle->jump_back(FJ::d1819)->move_right(4, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
 		
@@ -151,7 +161,15 @@ public:
 			this->pipeline->fill_anchor_location(FJ::D005, nullptr, &d05_y);
 
 			this->manual_pipe = this->master->insert_one(
-				new Linelet(0.0F, d02_y, 0.0F, d05_y, default_pipeline_thickness, default_pipeline_color));
+				new Linelet(0.0F, d02_y, 0.0F, d05_y,
+					default_pipeline_thickness, default_pipeline_color));
+		}
+
+		{ // load doors
+			float radius = std::fminf(gwidth, gheight);
+
+			this->load_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, radius);
+			this->load_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, radius);
 		}
 
 		{ // load valves
@@ -178,9 +196,15 @@ public:
 			}
 		}
 
-		{ // load labels
+		{ // load other labels
 			this->load_label(this->captions, FJ::Hatch, Colours::SeaGreen, this->caption_font);
 			this->load_label(this->captions, FJ::Gantry, Colours::Yellow, this->caption_font);
+
+			for (size_t idx = 0; idx < door_count_per_side; idx++) {
+				this->sequences[idx] = this->master->insert_one(new Labellet((door_count_per_side - idx).ToString() + "#"));
+				this->sequences[idx]->set_font(this->caption_font);
+				this->sequences[idx]->set_color(Colours::Tomato);
+			}
 		}
 	}
 
@@ -195,11 +219,11 @@ public:
 		float y0 = 0.0F;
 
 		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FJ::D005, GraphletAnchor::CT);
+		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FJ::D025, GraphletAnchor::CB);
 
 		this->pipeline->map_credit_graphlet(this->captions[FJ::Gantry], GraphletAnchor::CB);
-		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FJ::Port, GraphletAnchor::CB);
-		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FJ::Starboard, GraphletAnchor::CT);
+		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FJ::Port, GraphletAnchor::CC);
+		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FJ::Starboard, GraphletAnchor::CC);
 		this->pipeline->map_graphlet_at_anchor(this->sea_inlet, FJ::Hatch, GraphletAnchor::CC);
 		this->master->move_to(this->captions[FJ::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
 
@@ -210,6 +234,9 @@ public:
 			 */
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
+
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gridsize * -2.0F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gridsize * +2.0F);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
@@ -243,7 +270,6 @@ public:
 		}
 
 		{ // reflow motor-driven valves
-			float polar45 = gridsize * std::sqrtf(2.0F) * 0.618F;
 			float ox, oy;
 
 			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
@@ -264,18 +290,33 @@ public:
 				this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
 			}
 		}
+
+		{ // reflow door sequences
+			this->pipeline->fill_anchor_location(FJ::D010, nullptr, &y0);
+			for (unsigned int idx = 0; idx < door_count_per_side; idx++) {
+				this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &x0, nullptr, GraphletAnchor::CC);
+				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CT);
+			}
+		}
 	}
 
 public:
-	void draw_valves_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
-		float ox, oy, mx, my, vx, vy;
+	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
+		float ox, oy, sx, sy, tx, ty;
 
 		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
-			this->master->fill_graphlet_location(it->second, &mx, &my, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->gvalves[it->first], &vx, &vy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(it->second, &sx, &sy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->gvalves[it->first], &tx, &ty, GraphletAnchor::CC);
 			it->second->fill_valve_origin(&ox, &oy);
 
-			ds->DrawLine(mx + ox, my + oy, vx, vy, this->relationship_color, 1.0F, this->relationship_style);
+			ds->DrawLine(sx + ox, sy + oy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
+		}
+
+		for (unsigned int idx = 0; idx < door_count_per_side; idx++) {
+			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &sx, &sy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::SB1))], &tx, &ty, GraphletAnchor::CC);
+			
+			ds->DrawLine(sx, sy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
 		}
 	}
 
@@ -307,6 +348,14 @@ private:
 		}
 	}
 
+	template<class D, typename E>
+	void load_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float radius) {
+		for (E id = id0; id <= idn; id++) {
+			ds[id] = this->master->insert_one(new Credit<D, E>(radius), id);
+			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
+		}
+	}
+
 	template<class G, typename E>
 	void load_pumps(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
@@ -334,14 +383,42 @@ private:
 		this->load_label(ls, _speak(id), id, color, font);
 	}
 
+private:
+	template<class D, typename E>
+	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float yoff) {
+		GraphletAnchor d_anchor = GraphletAnchor::CT;
+		GraphletAnchor p_anchor = GraphletAnchor::CB;
+		float lx, rx, y, cell_width;
+		
+		if (yoff > 0.0F) { // Starboard
+			d_anchor = GraphletAnchor::CB;
+			p_anchor = GraphletAnchor::CT;
+		}
+
+		this->pipeline->fill_anchor_location(FJ::D001, &lx, &y);
+		this->pipeline->fill_anchor_location(FJ::D010, &rx, nullptr);
+		cell_width = (rx - lx) / float(door_count_per_side);
+
+		for (E id = id0; id <= idn; id++) {
+			size_t idx = static_cast<size_t>(id) - static_cast<size_t>(id0) + 1;
+			float x = lx + cell_width * (0.5F + float(door_count_per_side - idx));
+			
+			this->master->move_to(ds[id], x, y + yoff, GraphletAnchor::CC);
+			this->master->move_to(ps[id], ds[id], d_anchor, p_anchor);
+		}
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<FJ>* pipeline;
 	std::map<FJ, Credit<Labellet, FJ>*> captions;
+	std::map<FJ, Credit<UpperHopperDoorlet, FJ>*> uhdoors;
+	std::map<FJ, Credit<Percentagelet, FJ>*> progresses;
 	std::map<FJ, Credit<HopperPumplet, FJ>*> pumps;
 	std::map<FJ, Credit<GateValvelet, FJ>*> gvalves;
 	std::map<FJ, Credit<MotorValvelet, FJ>*> mvalves;
 	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
+	Labellet* sequences[door_count_per_side];
 	std::map<FJ, Omegalet*> nintercs;
 	Linelet* manual_pipe;
 	Hatchlet* sea_inlet;
@@ -354,6 +431,7 @@ private:
 	ICanvasBrush^ relationship_color;
 	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle dimension_style;
+	DimensionStyle percentage_style;
 
 private:
 	FillnJetPage* master;
@@ -375,7 +453,7 @@ public:
 
 public:
 	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
-		this->master->draw_valves_relationships(ds, Width, Height);
+		this->master->draw_relationships(ds, Width, Height);
 	}
 
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {

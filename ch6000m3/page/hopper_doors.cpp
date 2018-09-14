@@ -42,8 +42,6 @@ private enum class HD : unsigned int {
 	_
 };
 
-static const size_t door_count_per_side = 7;
-
 private class DoorDecorator : public IPlanetDecorator {
 public:
 	DoorDecorator() {
@@ -301,14 +299,14 @@ private:
 		}
 	}
 
-	template<typename E>
-	void load_doors(std::map<E, Credit<HopperDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+	template<class D, typename E>
+	void load_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
 		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float radius) {
 		float door_height = radius * 2.0F * 1.618F;
 		float door_width = door_height * 0.20F;
 
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<HopperDoorlet, E>(radius), id);
+			ds[id] = this->master->insert_one(new Credit<D, E>(radius), id);
 			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
 			ts[id] = this->master->insert_one(new Credit<Doorlet, E>(door_width, door_height), id);
 		}
@@ -330,8 +328,8 @@ private:
 	}
 
 private:
-	template<typename E>
-	void reflow_doors(std::map<E, Credit<HopperDoorlet, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
+	template<class D, typename E>
+	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps
 		, std::map<E, Credit<Doorlet, E>*>& ts, E id0, E idn, float side_hint, float fy) {
 		GraphletAnchor t_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;

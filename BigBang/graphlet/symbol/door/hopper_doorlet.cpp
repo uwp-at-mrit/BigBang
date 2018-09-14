@@ -159,7 +159,7 @@ void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	}; break;
 	}
 
-	CAS_SLOT(s.border_color, Colours::ForestGreen);
+	CAS_SLOT(s.border_color, Colours::Teal);
 	CAS_SLOT(s.border_hlcolor, s.border_color);
 	CAS_SLOT(s.door_color, Colours::DimGray);
 	CAS_SLOT(s.body_color, Colours::DarkKhaki);

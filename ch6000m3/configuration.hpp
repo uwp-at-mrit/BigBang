@@ -15,6 +15,8 @@ static Platform::String^ remote_test_server = "192.168.1.255";
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 4;
 
+static const size_t door_count_per_side = 7;
+
 static const float large_font_size = 18.0F;
 
 static const unsigned int default_port_color = 0xFF0000;
