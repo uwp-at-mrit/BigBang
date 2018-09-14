@@ -50,10 +50,10 @@ void Machinelet::prepare_style(MachineStatus status, MachineStyle& s) {
 
 void Machinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const MachineStyle style = this->get_style();
-	float cx = x + this->size * 0.5F;
-	float cy = y + this->size * 0.5F;
+	float cx = x + this->width * 0.5F;
+	float cy = y + this->height * 0.5F;
 	
-	ds->FillCircle(cx, cy, this->size * 0.5F, Colours::Background);
+	ds->FillEllipse(cx, cy, this->width * 0.5F, this->height * 0.5F, Colours::Background);
 	ds->DrawCachedGeometry(this->body, x, y, style.border_color);
 	ds->DrawCachedGeometry(this->sign, x, y, style.sign_color);
 }

@@ -13,6 +13,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
+#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 
 #include "decorator/page.hpp"
@@ -291,6 +292,7 @@ private:
 	std::map<SW, Credit<Labellet, SW>*> captions;
 	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
 	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
+	std::map<SW, Credit<HopperPumplet, SW>*> hoppers;
 	std::map<SW, Credit<Labellet, SW>*> plabels;
 	std::map<SW, Credit<GateValvelet, SW>*> valves;
 	std::map<SW, Credit<Labellet, SW>*> vlabels;

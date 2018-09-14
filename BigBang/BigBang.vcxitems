@@ -33,6 +33,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\powerstationlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hopper_pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\svglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\powerstationlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\circuit\switchlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hopper_doorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hopper_pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\svglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\tagged_valvelet.hpp" />

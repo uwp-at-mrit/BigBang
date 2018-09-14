@@ -11,7 +11,11 @@ using namespace Windows::Foundation::Numerics;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-Rect graphlet_enclosing_box(IGraphlet* g, float x, float y, float3x2 transform) {
+Windows::Foundation::Rect WarGrey::SCADA::symbol_enclosing_box(float radiusX, float radiusY, double degrees) {
+	return rotate_rectangle(radiusX * 2.0F, radiusY * 2.0F, degrees)->ComputeBounds();
+}
+
+Rect WarGrey::SCADA::graphlet_enclosing_box(IGraphlet* g, float x, float y, float3x2 transform) {
 	float width, height;
 
 	g->fill_extent(x, y, &width, &height);

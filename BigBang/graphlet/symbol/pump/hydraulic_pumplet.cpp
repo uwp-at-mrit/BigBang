@@ -106,12 +106,13 @@ void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpSt
 
 void HydraulicPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const HydraulicPumpStyle style = this->get_style();
-	float radius = this->size * 0.5F - default_thickness;
-	float cx = x + radius + default_thickness;
-	float cy = y + radius + default_thickness;
+	float radiusX = this->width * 0.5F - default_thickness;
+	float radiusY = this->height * 0.5F - default_thickness;
+	float cx = x + radiusX + default_thickness;
+	float cy = y + radiusY + default_thickness;
 	
-	ds->FillCircle(cx, cy, radius, Colours::Background);
-	ds->DrawCircle(cx, cy, radius, style.border_color, default_thickness);
+	ds->FillEllipse(cx, cy, radiusX, radiusY, Colours::Background);
+	ds->DrawEllipse(cx, cy, radiusX, radiusY, style.border_color, default_thickness);
 	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);
 	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
 

@@ -169,9 +169,10 @@ void TValvelet::on_status_changed(TValveStatus status) {
 
 void TValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const TValveStyle style = this->get_style();
-	float radius = this->size * 0.5F - default_thickness;
-	float cx = x + radius + default_thickness;
-	float cy = y + radius + default_thickness;
+	float radiusX = this->width * 0.5F - default_thickness;
+	float radiusY = this->height * 0.5F - default_thickness;
+	float cx = x + radiusX + default_thickness;
+	float cy = y + radiusY + default_thickness;
 	float scx = cx + this->sign_cx;
 	float scy = cy + this->sign_cy;
 	float bcx = cx + this->body_cx;

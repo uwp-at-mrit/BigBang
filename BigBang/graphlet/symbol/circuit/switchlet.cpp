@@ -18,7 +18,7 @@ Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness,
 
 void Switchlet::construct() {
 	float epradius = this->thickness * 1.618F;
-	float hradius = this->size * 0.5F - epradius;
+	float hradius = this->width * 0.5F - epradius;
 	
 	circle_point(hradius, this->degrees, &this->right_x, &this->right_y);
 	circle_point(hradius, this->degrees - 180.0, &this->left_x, &this->left_y);
@@ -39,8 +39,8 @@ void Switchlet::prepare_style(SwitchStatus status, SwitchStyle& s) {
 
 void Switchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	SwitchStyle style = this->get_style();
-	float cx = x + this->size * 0.5F;
-	float cy = y + this->size * 0.5F;
+	float cx = x + this->width * 0.5F;
+	float cy = y + this->height * 0.5F;
 	float sx = this->left_x + cx;
 	float sy = this->left_y + cy;
 	float hx = this->handle_x;

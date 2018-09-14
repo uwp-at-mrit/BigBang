@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
@@ -28,7 +29,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LDMode { WindowUI = 0, Dashboard };
 
-private enum class LDOperation { Open, Close, FakeOpen, FakeClose, _ };
+private enum class LDGVOperation { Open, Close, FakeOpen, FakeClose, _ };
 private enum class LDMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
 
 static ICanvasBrush^ block_color = Colours::Firebrick;
@@ -52,7 +53,7 @@ private enum class LD : unsigned int {
 	d1720, d1819, d1920, d2122,
 
 	// anchors used for unnamed nodes
-	ps, sb, gantry, barge, deck_lx, deck_rx, deck_ty, deck_by,
+	ps, sb, gantry, deck_lx, deck_rx, deck_ty, deck_by,
 
 	// anchors used for non-interconnected nodes
 	n0325, n0405, n0723, n0923
@@ -60,7 +61,7 @@ private enum class LD : unsigned int {
 
 private class Barge final
 	: public PLCConfirmation
-	, public IMenuCommand<LDOperation, IMRMaster*>
+	, public IMenuCommand<LDGVOperation, IMRMaster*>
 	, public IMenuCommand<LDMVOperation, IMRMaster*> {
 public:
 	Barge(LoadsPage* master) : master(master) {}
@@ -83,21 +84,21 @@ public:
 	}
 
 public:
-	void execute(LDOperation cmd, IGraphlet* target, IMRMaster* plc) {
+	void execute(LDGVOperation cmd, IGraphlet* target, IMRMaster* plc) {
 		auto valve = dynamic_cast<Credit<GateValvelet, LD>*>(target);
 
 		if (valve != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"Valve: %s %s",
+			plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
 				cmd.ToString()->Data(),
 				valve->id.ToString()->Data());
 		}
 	}
 
 	void execute(LDMVOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<TValvelet, LD>*>(target);
+		auto valve = dynamic_cast<Credit<MotorValvelet, LD>*>(target);
 
 		if (valve != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"MValve: %s %s",
+			plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
 				cmd.ToString()->Data(),
 				valve->id.ToString()->Data());
 		}
@@ -107,9 +108,9 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
-		this->relationship_color = Colours::DarkGray;
-		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
+		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
+		this->relationship_color = Colours::DarkGray;
 	}
  
 public:
@@ -123,8 +124,8 @@ public:
 		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(4, LD::D010)->move_left(6, LD::d12);
 		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
 		pTurtle->move_left(4, LD::d14)->move_left_down(2, LD::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(5, LD::d24)->move_left(5)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
-		pTurtle->jump_up(2.5F, LD::gantry)->turn_up_left()->move_left(4, LD::D024)->move_left(4)->turn_left_up();
+		pTurtle->move_left(6, LD::d24)->move_left(4)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->jump_up(2.5F, LD::gantry)->turn_up_left()->move_left(3, LD::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, LD::Gantry)->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
 		
 		pTurtle->move_down(3.5F, LD::PSHPump)->move_left(6, LD::n0923)->move_left(8)->move_up(1.5F, LD::D005)->move_up(1.5F)->jump_up();
@@ -140,12 +141,12 @@ public:
 		pTurtle->move_right(8, LD::n0723)->move_right(6, LD::SBHPump)->move_down(3.5F, LD::d1819)->jump_back(LD::d0225);
 		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
 
-		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008)->move_left(6, LD::d11);
-		pTurtle->move_up(2, LD::D011)->move_up(3)->jump_back();
+		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008);
+		pTurtle->move_left(6, LD::d11)->move_up(2, LD::D011)->move_up(3)->jump_back();
 		pTurtle->move_left(4, LD::d13)->move_left_up(2, LD::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(5, LD::barge)->move_left(5)->move_left_up(2, LD::D015)->move_left_up(1.5F)->jump_back(LD::d0326);
+		pTurtle->move_left(10)->move_left_up(2, LD::D015)->move_left_up(1.5F);
 
-		pTurtle->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2)->turn_down_left();
+		pTurtle->jump_back(LD::d0326)->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2)->turn_down_left();
 		pTurtle->move_left(10, LD::SBUWPump)->move_left(10, LD::Starboard);
 
 		pTurtle->jump_back(LD::d1819)->move_right(4, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
@@ -155,26 +156,20 @@ public:
 		{ // load valves
 			float radius = std::fminf(gwidth, gheight);
 
-			this->load_valve(this->valves, this->vlabels, this->captions, LD::D001, radius, 0.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, 00.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D004, LD::D012, radius, -90.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D014, LD::D016, radius, -45.0);
-			this->load_valves(this->valves, this->mvalves, this->vlabels, this->captions, LD::D013, LD::D015, radius, 45.0);
+			this->load_valve(this->gvalves, this->vlabels, this->captions, LD::D001, radius, 0.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, 00.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 90.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D004, LD::D012, radius, -90.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D014, LD::D016, radius, -45.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D013, LD::D015, radius, 45.0);
 		}
 
 		{ // load special nodes
 			float radius = std::fminf(gwidth, gheight);
 			float nic_radius = radius * 0.5F;
-			float barge_ty, barge_by;
 
-			this->pipeline->fill_anchor_location(LD::gantry, nullptr, &barge_ty, false);
-			this->pipeline->fill_anchor_location(LD::barge, nullptr, &barge_by, false);
 
-			this->gantry_line = this->master->insert_one(
-				new Linelet(0.0F, 0.0F, 0.0F, std::fabsf(barge_by - barge_ty) - default_pipeline_thickness,
-					default_pipeline_thickness * 1.618F, default_pipeline_color,
-					make_dash_stroke(CanvasDashStyle::Dash)));
+			this->load_pumps(this->pumps, this->captions, LD::PSUWPump, LD::SBHPump, radius);
 
 			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, radius, radius, 0.5F, default_pipeline_color));
 
@@ -193,7 +188,6 @@ public:
 		}
 
 		{ // load labels
-			this->load_labels(this->captions, LD::PSUWPump, LD::SBHPump, Colours::Salmon, this->caption_font);
 			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->label_font);
 		}
@@ -211,16 +205,11 @@ public:
 
 		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 
-		this->pipeline->map_credit_graphlet(this->captions[LD::PSUWPump], GraphletAnchor::CB);
-		this->pipeline->map_credit_graphlet(this->captions[LD::SBUWPump], GraphletAnchor::CT);
-		this->pipeline->map_credit_graphlet(this->captions[LD::PSHPump], GraphletAnchor::LC);
-		this->pipeline->map_credit_graphlet(this->captions[LD::SBHPump], GraphletAnchor::LC);
 		this->pipeline->map_credit_graphlet(this->captions[LD::Gantry], GraphletAnchor::CB);
 		this->pipeline->map_credit_graphlet(this->captions[LD::LMOD], GraphletAnchor::CB);
 
 		this->pipeline->map_graphlet_at_anchor(this->ps_draghead, LD::Port, GraphletAnchor::RC);
 		this->pipeline->map_graphlet_at_anchor(this->sb_draghead, LD::Starboard, GraphletAnchor::RC);
-		this->pipeline->map_graphlet_at_anchor(this->gantry_line, LD::gantry, GraphletAnchor::CT);
 		this->pipeline->map_graphlet_at_anchor(this->LMOD, LD::LMOD, GraphletAnchor::CC);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
@@ -231,9 +220,20 @@ public:
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
+		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
+			switch (it->first) {
+			case LD::PSUWPump: { anchor = GraphletAnchor::LB; }; break;
+			case LD::SBUWPump: { anchor = GraphletAnchor::LT; }; break;
+			default: { anchor = GraphletAnchor::LC; }
+			}
+
+			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
+			this->pipeline->map_credit_graphlet(this->captions[it->first], anchor, gridsize, 0.0F);
+		}
+
 		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		
-		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
+		for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 			switch (it->first) {
 			case LD::D014: case LD::D016: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LB;
@@ -299,7 +299,7 @@ public:
 
 		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
 			this->master->fill_graphlet_location(it->second, &mx, &my, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->valves[it->first], &vx, &vy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->gvalves[it->first], &vx, &vy, GraphletAnchor::CC);
 			it->second->fill_valve_origin(&ox, &oy);
 
 			ds->DrawLine(mx + ox, my + oy, vx, vy, this->relationship_color, 1.0F, this->relationship_style);
@@ -336,6 +336,15 @@ private:
 		}
 	}
 
+	template<class G, typename E>
+	void load_pumps(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id, Colours::Salmon, this->caption_font);
+
+			gs[id] = this->master->insert_one(new G(-radius, 0.0F, 0.0), id);
+		}
+	}
+
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
 		for (E id = id0; id <= idn; id++) {
@@ -354,24 +363,17 @@ private:
 		this->load_label(ls, _speak(id), id, color, font);
 	}
 
-	template<typename E>
-	void load_labels(std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, color, font);
-		}
-	}
-
 // never deletes these graphlets mannually
 private:
 	Tracklet<LD>* pipeline;
 	std::map<LD, Credit<Labellet, LD>*> captions;
-	std::map<LD, Credit<GateValvelet, LD>*> valves;
+	std::map<LD, Credit<HopperPumplet, LD>*> pumps;
+	std::map<LD, Credit<GateValvelet, LD>*> gvalves;
 	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
 	std::map<LD, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
-	Linelet* gantry_line;
 	Arclet* LMOD;
 	
 private:
@@ -410,7 +412,7 @@ public:
 		if (pipeline != nullptr) {
 			float ps_y, sb_y;
 			float deck_lx, deck_ty, deck_rx, deck_by;
-
+			
 			pipeline->fill_anchor_location(LD::ps, nullptr, &ps_y, false);
 			pipeline->fill_anchor_location(LD::sb, nullptr, &sb_y, false);
 
@@ -438,6 +440,22 @@ public:
 
 				ds->DrawGeometry(rectangle(dx, dy, dw, dh), Colours::SeaGreen, 1.0F, this->ship_style);
 			}
+
+			{ // draw non-important lines
+				float gantry_x, gantry_y, barge_y;
+				float d0525_x, d05_y, d25_y;
+
+				pipeline->fill_anchor_location(LD::gantry, &gantry_x, &gantry_y, false);
+				pipeline->fill_anchor_location(LD::D008, nullptr, &barge_y, false);
+				pipeline->fill_anchor_location(LD::D005, &d0525_x, &d05_y, false);
+				pipeline->fill_anchor_location(LD::D025, nullptr, &d25_y, false);
+
+				ds->DrawLine(x + gantry_x, y + gantry_y, x + gantry_x, y + barge_y,
+					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+
+				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
+					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+			}
 		}
 	}
 
@@ -456,7 +474,7 @@ LoadsPage::LoadsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	Barge* dashboard = new Barge(this);
 
 	this->dashboard = dashboard;
-	this->manual_valve_op = make_menu<LDOperation, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<LDGVOperation, IMRMaster*>(dashboard, plc);
 	this->motor_valve_op = make_menu<LDMVOperation, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
@@ -531,17 +549,17 @@ void LoadsPage::reflow(float width, float height) {
 }
 
 bool LoadsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<TValvelet*>(g) != nullptr));
+	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<MotorValvelet*>(g) != nullptr));
 }
 
 void LoadsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	auto valve = dynamic_cast<GateValvelet*>(g);
-	auto mvalve = dynamic_cast<TValvelet*>(g);
+	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (valve != nullptr) {
-		menu_popup(this->manual_valve_op, g, local_x, local_y);
+		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (mvalve != nullptr) {
 		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	}

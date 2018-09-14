@@ -208,14 +208,42 @@ namespace WarGrey::SCADA {
 	template<typename Status, typename Style>
 	private class ISymbollet abstract : public WarGrey::SCADA::IStatuslet<Status, Style> {
 	public:
-		ISymbollet(float radius, double degrees) : size(radius * 2.0F), degrees(degrees) {}
+		ISymbollet(float radius, double degrees)
+			: ISymbollet<Status, Style>(Status::_, radius, degrees) {}
 
 		ISymbollet(Status default_status, float radius, double degrees)
-			: IStatuslet<Status, Style>(default_status), size(radius * 2.0F), degrees(degrees) {}
+			: IStatuslet<Status, Style>(default_status)
+			, radiusX(radius), radiusY(radius)
+			, width(radius * 2.0F), height(radius * 2.0F), degrees(degrees) {}
+
+		ISymbollet(float radiusX, float radiusY, double degrees)
+			: ISymbollet<Status, Style>(Status::_, radiusX, radiusY, degrees) {}
+
+		ISymbollet(Status default_status, float radiusX, float radiusY, double degrees)
+			: IStatuslet<Status, Style>(default_status)
+			, radiusX(radiusX), radiusY(radiusY), degrees(degrees) {
+
+			{ // adjust radius
+				if (this->radiusY < 0.0F) {
+					this->radiusY *= -this->radiusX;
+				} else if (this->radiusY == 0.0F) {
+					this->radiusY = this->radiusX * 2.0F;
+				}
+			}
+
+			{ // detect enclosing box
+				Windows::Foundation::Rect box = WarGrey::SCADA::symbol_enclosing_box(
+					this->radiusX, this->radiusY, this->degrees);
+
+				this->width = box.Width;
+				this->height = box.Height;
+			}
+		}
 
 	public:
 		void ISymbollet::fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override {
-			SET_BOXES(w, h, this->size);
+			SET_BOX(w, this->width);
+			SET_BOX(h, this->height);
 		}
 
 	public:
@@ -223,10 +251,15 @@ namespace WarGrey::SCADA {
 
 	protected:
 		double degrees;
-		float size;
+		float radiusX;
+		float radiusY;
+		float width;
+		float height;
 	};
 
 	/************************************************************************************************/
+	Windows::Foundation::Rect symbol_enclosing_box(float radiusX, float radiusY, double degrees);
+
 	Windows::Foundation::Rect graphlet_enclosing_box(
 		WarGrey::SCADA::IGraphlet* g, float x, float y,
 		Windows::Foundation::Numerics::float3x2 tf);

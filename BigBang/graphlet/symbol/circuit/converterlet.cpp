@@ -53,7 +53,7 @@ void Converterlet::prepare_style(ConverterStatus status, ConverterStyle& s) {
 void Converterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const ConverterStyle style = this->get_style();
 	
-	ds->FillRectangle(x, y, this->size, this->size, Colours::Background);
+	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->body, x, y, style.color);
 	ds->DrawCachedGeometry(this->sign, x, y, style.color);
 }

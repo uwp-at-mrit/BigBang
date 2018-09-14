@@ -156,9 +156,10 @@ void GateValvelet::on_status_changed(GateValveStatus status) {
 
 void GateValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const GateValveStyle style = this->get_style();
-	float radius = this->size * 0.5F - default_thickness;
-	float cx = x + radius + default_thickness;
-	float cy = y + radius + default_thickness;
+	float radiusX = this->width * 0.5F - default_thickness;
+	float radiusY = this->width * 0.5F - default_thickness;
+	float cx = x + radiusX + default_thickness;
+	float cy = y + radiusY + default_thickness;
 	
 	if (style.stem_color != Colours::Background) {
 		ds->DrawGeometry(this->shaft, cx, cy, style.stem_color, default_thickness);
