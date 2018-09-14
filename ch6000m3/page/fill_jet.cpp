@@ -200,8 +200,8 @@ public:
 			this->load_label(this->captions, FJ::Hatch, Colours::SeaGreen, this->caption_font);
 			this->load_label(this->captions, FJ::Gantry, Colours::Yellow, this->caption_font);
 
-			for (size_t idx = 0; idx < door_count_per_side; idx++) {
-				this->sequences[idx] = this->master->insert_one(new Labellet((door_count_per_side - idx).ToString() + "#"));
+			for (size_t idx = 0; idx < hopper_count; idx++) {
+				this->sequences[idx] = this->master->insert_one(new Labellet((hopper_count - idx).ToString() + "#"));
 				this->sequences[idx]->set_font(this->caption_font);
 				this->sequences[idx]->set_color(Colours::Tomato);
 			}
@@ -293,7 +293,7 @@ public:
 
 		{ // reflow door sequences
 			this->pipeline->fill_anchor_location(FJ::D010, nullptr, &y0);
-			for (unsigned int idx = 0; idx < door_count_per_side; idx++) {
+			for (unsigned int idx = 0; idx < hopper_count; idx++) {
 				this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &x0, nullptr, GraphletAnchor::CC);
 				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CT);
 			}
@@ -312,7 +312,7 @@ public:
 			ds->DrawLine(sx + ox, sy + oy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
 		}
 
-		for (unsigned int idx = 0; idx < door_count_per_side; idx++) {
+		for (unsigned int idx = 0; idx < hopper_count; idx++) {
 			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &sx, &sy, GraphletAnchor::CC);
 			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::SB1))], &tx, &ty, GraphletAnchor::CC);
 			
@@ -397,11 +397,11 @@ private:
 
 		this->pipeline->fill_anchor_location(FJ::D001, &lx, &y);
 		this->pipeline->fill_anchor_location(FJ::D010, &rx, nullptr);
-		cell_width = (rx - lx) / float(door_count_per_side);
+		cell_width = (rx - lx) / float(hopper_count);
 
 		for (E id = id0; id <= idn; id++) {
 			size_t idx = static_cast<size_t>(id) - static_cast<size_t>(id0) + 1;
-			float x = lx + cell_width * (0.5F + float(door_count_per_side - idx));
+			float x = lx + cell_width * (0.5F + float(hopper_count - idx));
 			
 			this->master->move_to(ds[id], x, y + yoff, GraphletAnchor::CC);
 			this->master->move_to(ps[id], ds[id], d_anchor, p_anchor);
@@ -418,7 +418,7 @@ private:
 	std::map<FJ, Credit<GateValvelet, FJ>*> gvalves;
 	std::map<FJ, Credit<MotorValvelet, FJ>*> mvalves;
 	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
-	Labellet* sequences[door_count_per_side];
+	Labellet* sequences[hopper_count];
 	std::map<FJ, Omegalet*> nintercs;
 	Linelet* manual_pipe;
 	Hatchlet* sea_inlet;

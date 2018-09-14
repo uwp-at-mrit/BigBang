@@ -28,9 +28,7 @@ OverflowPipelet::OverflowPipelet(double range, float width, float height, unsign
 	, liquid_color((liquid_color == nullptr) ? overflow_default_liquid_color : liquid_color)
 	, hatch_color((hatchmark_color == nullptr) ? overflow_default_hatch_color : hatchmark_color) {
 
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width;
 	}
 }

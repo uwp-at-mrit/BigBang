@@ -43,9 +43,7 @@ Batterylet::Batterylet(double range, float width, float height, float thickness,
 Batterylet::Batterylet(double emin, double emax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(emin, emax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? battery_default_border_color : bcolor) {
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width * 1.618F;
 	}
 

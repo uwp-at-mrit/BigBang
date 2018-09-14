@@ -216,9 +216,7 @@ Doorlet::Doorlet(float width, float height, float thickness, ICanvasBrush^ color
 	, color((color == nullptr) ? door_default_progress_color : color)
 	, border_color((bdcolor == nullptr) ? door_default_border_color : bdcolor)
 	, bottom_color((btmcolor == nullptr) ? door_default_bottom_color : btmcolor) {
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width * 6.18F;
 	}
 }

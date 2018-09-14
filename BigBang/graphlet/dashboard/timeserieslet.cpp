@@ -67,9 +67,7 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 	: width(std::fabsf(width)), height(height), step((step == 0) ? 5U : step), precision(precision)
 	, vmin(vmin), vmax(vmax), series(ts) {
 
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width * 0.2718F;
 	}
 

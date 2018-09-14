@@ -194,9 +194,5 @@ void GraphletOverview::on_elapse(long long count, long long interval, long long 
 }
 
 bool GraphletOverview::can_select(IGraphlet* g) {
-#ifdef _Debug
 	return true;
-#else
-	return false;
-#endif
 }

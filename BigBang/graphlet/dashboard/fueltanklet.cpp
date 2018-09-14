@@ -30,10 +30,8 @@ FuelTanklet::FuelTanklet(double range, float width, float height, float thicknes
 FuelTanklet::FuelTanklet(double vmin, double vmax, float width, float height, float thickness, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(vmin, vmax), width(width), height(height), thickness(thickness)
 	, border_color(bcolor == nullptr ? fueltank_default_border_color : bcolor) {
-
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	
+	if (this->height == 0.0F) {
 		this->height = this->width * 1.618F;
 	}
 

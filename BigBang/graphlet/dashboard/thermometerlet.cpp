@@ -68,9 +68,8 @@ Thermometerlet::Thermometerlet(double tmin, double tmax, float width, float heig
 	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(tmin, tmax), width(std::fabsf(width)), height(height), thickness(thickness), step(step)
 	, border_color(bcolor == nullptr ? overflowlet_default_border_color : bcolor), leftward(width > 0.0F) {
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	
+	if (this->height == 0.0F) {
 		this->height = this->width * 2.0F;
 	}
 

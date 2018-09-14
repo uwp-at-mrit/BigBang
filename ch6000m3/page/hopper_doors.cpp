@@ -59,8 +59,8 @@ public:
 			
 			this->seq_color = Colours::Tomato;
 
-			for (size_t idx = 0; idx < door_count_per_side ; idx++) {
-				size_t ridx = door_count_per_side - idx;
+			for (size_t idx = 0; idx < hopper_count ; idx++) {
+				size_t ridx = hopper_count - idx;
 
 				this->sequences[idx] = make_text_layout(ridx.ToString() + "#", cpt_font);
 			}
@@ -74,12 +74,12 @@ public:
 		float thickness = 2.0F;
 		float sx = this->x * Width;
 		float sy = this->y * Height;
-		float cell_width = this->ship_width * Width / float(door_count_per_side);
+		float cell_width = this->ship_width * Width / float(hopper_count);
 		float seq_y = sy + (ship_box.Height - this->sequences[0]->LayoutBounds.Height) * 0.5F;
 		
 		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
 		
-		for (size_t idx = 0; idx < door_count_per_side; idx++) {
+		for (size_t idx = 0; idx < hopper_count; idx++) {
 			float cell_x = sx + cell_width * float(idx);
 			float seq_width = this->sequences[idx]->LayoutBounds.Width;
 			
@@ -104,11 +104,11 @@ public:
 		float awidth = this->actual_width();
 		float aheight = this->actual_height();
 		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
-		float cell_width = this->ship_width * awidth / float(door_count_per_side);
+		float cell_width = this->ship_width * awidth / float(hopper_count);
 		float cell_height = abox.Height / 4.0F;
 
 		SET_VALUES(width, cell_width, height, cell_height);
-		SET_BOX(x, this->x * awidth + cell_width * float(door_count_per_side - idx));
+		SET_BOX(x, this->x * awidth + cell_width * float(hopper_count - idx));
 		SET_BOX(y, this->y * aheight + cell_height * side_hint);
 	}
 
@@ -132,7 +132,7 @@ public:
 
 private:
 	CanvasGeometry^ ship;
-	CanvasTextLayout^ sequences[door_count_per_side];
+	CanvasTextLayout^ sequences[hopper_count];
 	ICanvasBrush^ seq_color;
 
 private:

@@ -35,9 +35,7 @@ Cylinderlet::Cylinderlet(LiquidSurface shape, double vmin, double vmax, float ba
 	, step(step), precision(precision), liquid_shape(shape), leftward(base_width > 0.0F)
 	, border_color((bcolor == nullptr) ? cylinder_default_border_color : bcolor) {
 
-	if (this->height < 0.0F) {
-		this->height *= (-this->base_width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->base_width * 2.718F;
 	}
 

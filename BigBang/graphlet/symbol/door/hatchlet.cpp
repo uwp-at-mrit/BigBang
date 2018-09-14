@@ -18,9 +18,7 @@ static CanvasSolidColorBrush^ hatch_default_color = Colours::SeaGreen;
 /*************************************************************************************************/
 Hatchlet::Hatchlet(float width, float height, float thickness, CanvasSolidColorBrush^ color)
 	: width(width), height(height), thickness(thickness), color((color == nullptr) ? hatch_default_color : color) {
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width;
 	}
 }

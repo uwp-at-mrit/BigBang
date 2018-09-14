@@ -13,9 +13,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 /*************************************************************************************************/
 ITanklet::ITanklet(float width, float height, float thickness) : width(width), height(height), thickness(thickness) {
-	if (this->height < 0.0F) {
-		this->height *= (-this->width);
-	} else if (this->height == 0.0F) {
+	if (this->height == 0.0F) {
 		this->height = this->width * 0.382F;
 	}
 
