@@ -275,12 +275,12 @@ CanvasGeometry^ WarGrey::SCADA::rounded_rectangle(float x, float y, float w, flo
     return CanvasGeometry::CreateRoundedRectangle(CanvasDevice::GetSharedDevice(), smart_rect(x, y, w, h), radius_x, radius_y);
 }
 
-CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d) {
-    return rotate_rectangle(x, y, w, h, d, x + w * 0.5F, y + h * 0.5F);
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float w, float h, double d) {
+    return rotate_rectangle(0.0F, 0.0F, w, h, d);
 }
 
-CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float w, float h, double d) {
-    return rotate_rectangle(0.0F, 0.0F, w, h, d, w * 0.5F, h * 0.5F);
+CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d) {
+	return rotate_rectangle(x, y, w, h, d, x + w * 0.5F, y + h * 0.5F);
 }
 
 CanvasGeometry^ WarGrey::SCADA::rotate_rectangle(float x, float y, float w, float h, double d, float cx, float cy) {

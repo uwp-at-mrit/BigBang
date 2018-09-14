@@ -216,19 +216,14 @@ namespace WarGrey::SCADA {
 			, radiusX(radius), radiusY(radius)
 			, width(radius * 2.0F), height(radius * 2.0F), degrees(degrees) {}
 
-		ISymbollet(float radiusX, float radiusY, double degrees)
-			: ISymbollet<Status, Style>(Status::_, radiusX, radiusY, degrees) {}
+		ISymbollet(float radiusX, float radiusY, double degrees, float proportion = 2.0F)
+			: ISymbollet<Status, Style>(Status::_, radiusX, radiusY, degrees, proportion) {}
 
-		ISymbollet(Status default_status, float radiusX, float radiusY, double degrees)
+		ISymbollet(Status default_status, float radiusX, float radiusY, double degrees, float proportion = 2.0F)
 			: IStatuslet<Status, Style>(default_status)
 			, radiusX(radiusX), radiusY(radiusY), degrees(degrees) {
-
-			{ // adjust radius
-				if (this->radiusY < 0.0F) {
-					this->radiusY *= -this->radiusX;
-				} else if (this->radiusY == 0.0F) {
-					this->radiusY = this->radiusX * 2.0F;
-				}
+			if (this->radiusY == 0.0F) {
+				this->radiusY = this->radiusX * proportion;
 			}
 
 			{ // detect enclosing box

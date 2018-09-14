@@ -115,6 +115,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp">
+      <Filter>decorator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -234,6 +237,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp">
       <Filter>graphlet\dashboard</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp">
+      <Filter>decorator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

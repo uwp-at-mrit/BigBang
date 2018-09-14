@@ -34,9 +34,6 @@ namespace WarGrey::SCADA {
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ disable_line;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ door_partitions[3];
-		
-	private:
-		float radius;
 
 	private:
 		bool flashing;
@@ -52,6 +49,7 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void update(long long count, long long interval, long long uptime) override;
+		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
@@ -66,8 +64,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ door;
 
 	private:
-		float radius;
-		float bradius;
+		float brdiff;
 
 	private:
 		bool flashing;

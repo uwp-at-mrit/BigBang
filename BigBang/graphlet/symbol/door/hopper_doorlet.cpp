@@ -25,9 +25,7 @@ static CanvasSolidColorBrush^ door_default_progress_color = Colours::make(0xBBBB
 HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Closed, radius, degrees) {}
 
 HopperDoorlet::HopperDoorlet(DoorStatus default_state, float radius, double degrees)
-	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
-	this->radius = radius - default_thickness;
-}
+	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {}
 
 void HopperDoorlet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
@@ -72,7 +70,7 @@ void HopperDoorlet::on_status_changed(DoorStatus state) {
 			double d0 = this->degrees - 45.0;
 			double dn = this->degrees + 135.0;
 
-			this->disable_line = geometry_draft(polar_line(this->radius, d0, dn), default_thickness);
+			this->disable_line = geometry_draft(polar_line(this->radiusX - default_thickness, d0, dn), default_thickness);
 		}
 	} // NOTE: there is no `break` here;
 	case DoorStatus::Closed: case DoorStatus::Opening: {
@@ -83,19 +81,21 @@ void HopperDoorlet::on_status_changed(DoorStatus state) {
 
 void HopperDoorlet::on_value_changed(double v) {
 	double ratio = this->get_percentage();
+	float r = this->radiusX - default_thickness;
 
-	this->door_partitions[0] = masked_sector(this->degrees + 60.00, this->degrees - 60.00, ratio, this->radius);
-	this->door_partitions[1] = masked_sector(this->degrees - 60.00, this->degrees - 180.0, ratio, this->radius);
-	this->door_partitions[2] = masked_sector(this->degrees + 180.0, this->degrees + 60.00, ratio, this->radius);
+	this->door_partitions[0] = masked_sector(this->degrees + 60.00, this->degrees - 60.00, ratio, r);
+	this->door_partitions[1] = masked_sector(this->degrees - 60.00, this->degrees - 180.0, ratio, r);
+	this->door_partitions[2] = masked_sector(this->degrees + 180.0, this->degrees + 60.00, ratio, r);
 }
 
 void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
-	float cx = x + this->radius + default_thickness;
-	float cy = y + this->radius + default_thickness;
-	float body_radius = this->radius - default_thickness * 1.618F;
+	float border_radius = this->radiusX - default_thickness;
+	float cx = x + this->radiusX;
+	float cy = y + this->radiusY;
+	float body_radius = border_radius - default_thickness * 1.618F;
 	
-	ds->FillCircle(cx, cy, this->radius, Colours::Background);
+	ds->FillCircle(cx, cy, border_radius, Colours::Background);
 	ds->FillCircle(cx, cy, body_radius, style.body_color);
 	
 	for (unsigned int idx = 0; idx < sizeof(this->door_partitions) / sizeof(CanvasGeometry^); idx++) {
@@ -110,9 +110,9 @@ void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	}
 
 	if (this->flashing) {
-		ds->DrawCircle(cx, cy, this->radius, style.border_hlcolor, default_thickness);
+		ds->DrawCircle(cx, cy, border_radius, style.border_hlcolor, default_thickness);
 	} else {
-		ds->DrawCircle(cx, cy, this->radius, style.border_color, default_thickness);
+		ds->DrawCircle(cx, cy, border_radius, style.border_color, default_thickness);
 	}
 }
 
@@ -122,16 +122,19 @@ UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees)
 
 UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
-	this->radius = radius - default_thickness;
-	this->bradius = this->radius - default_thickness * 1.618F;
+	this->radiusY = this->radiusX * 0.618F;
+	this->brdiff = default_thickness * 1.618F;
 }
 
 void UpperHopperDoorlet::construct() {
-	auto pline = polar_line(this->radius, this->degrees, this->degrees + 180.0);
+	auto pline = polar_line(this->radiusX, this->radiusY, this->degrees, this->degrees + 180.0);
 	
-	this->border = polar_rectangle(this->radius, default_alpha_degrees, this->degrees);
+	this->border = geometry_rotate(polar_rectangle(this->radiusX, this->radiusY, default_alpha_degrees, 0.0), this->degrees);
 	this->disable_line = geometry_draft(geometry_intersect(this->border, pline), default_thickness);
-	this->body = geometry_freeze(polar_rectangle(this->bradius, default_alpha_degrees, this->degrees));
+	
+	this->body = geometry_freeze(geometry_rotate(polar_rectangle(
+		this->radiusX - this->brdiff, this->radiusY - this->brdiff,
+		default_alpha_degrees, 0.0), this->degrees));
 }
 
 void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
@@ -141,6 +144,15 @@ void UpperHopperDoorlet::update(long long count, long long interval, long long u
 		this->notify_updated();
 	}; break;
 	}
+}
+
+void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right, float* bottom, float* left) {
+	auto box = this->border->ComputeStrokeBounds(default_thickness);
+	float hspace = this->width - box.Width;
+	float vspace = this->height - box.Height;
+
+	SET_BOXES(top, bottom, vspace * 0.5F);
+	SET_BOXES(left, right, hspace * 0.5F);
 }
 
 void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
@@ -182,13 +194,16 @@ void UpperHopperDoorlet::on_status_changed(DoorStatus state) {
 }
 
 void UpperHopperDoorlet::on_value_changed(double v) {
-	this->door = polar_masked_rectangle(this->bradius, default_alpha_degrees, this->degrees, this->get_percentage() - 1.0);
+	this->door = geometry_rotate(polar_masked_rectangle(
+		this->radiusX - this->brdiff, this->radiusY - this->brdiff,
+		default_alpha_degrees, 0.0F, this->get_percentage() - 1.0),
+		this->degrees);
 }
 
 void UpperHopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
-	float cx = x + this->radius + default_thickness;
-	float cy = y + this->radius + default_thickness;
+	float cx = x + this->width * 0.5F;
+	float cy = y + this->height * 0.5F;
 
 	ds->FillGeometry(this->border, cx, cy, Colours::Background);
 	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);

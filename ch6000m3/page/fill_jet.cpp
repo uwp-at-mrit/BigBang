@@ -33,6 +33,7 @@ private enum FJMode { WindowUI = 0, Dashboard };
 
 private enum class FJGVOperation { Open, Close, FakeOpen, FakeClose, _ };
 private enum class FJMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
+private enum class FJHDOperation { Open, Stop, Close, Disable, _ };
 
 static ICanvasBrush^ block_color = Colours::Firebrick;
 static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
@@ -68,7 +69,8 @@ private enum class FJ : unsigned int {
 private class FillJet final
 	: public PLCConfirmation
 	, public IMenuCommand<FJGVOperation, IMRMaster*>
-	, public IMenuCommand<FJMVOperation, IMRMaster*> {
+	, public IMenuCommand<FJMVOperation, IMRMaster*>
+	, public IMenuCommand<FJHDOperation, IMRMaster*> {
 public:
 	FillJet(FillnJetPage* master) : master(master) {}
 
@@ -107,6 +109,16 @@ public:
 			plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
 				cmd.ToString()->Data(),
 				valve->id.ToString()->Data());
+		}
+	}
+
+	void execute(FJHDOperation cmd, IGraphlet* target, IMRMaster* plc) {
+		auto door = dynamic_cast<Credit<UpperHopperDoorlet, FJ>*>(target);
+
+		if (door != nullptr) {
+			plc->get_logger()->log_message(Log::Info, L"%s %s",
+				cmd.ToString()->Data(),
+				door->id.ToString()->Data());
 		}
 	}
 
@@ -235,8 +247,8 @@ public:
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gridsize * -2.0F);
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gridsize * +2.0F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gridsize * -2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gridsize * +2.4F);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
@@ -532,6 +544,7 @@ FillnJetPage::FillnJetPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<FJGVOperation, IMRMaster*>(dashboard, plc);
 	this->motor_valve_op = make_menu<FJMVOperation, IMRMaster*>(dashboard, plc);
+	this->upper_door_op = make_menu<FJHDOperation, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -605,18 +618,23 @@ void FillnJetPage::reflow(float width, float height) {
 }
 
 bool FillnJetPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<MotorValvelet*>(g) != nullptr));
+	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
+		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
+		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
 }
 
 void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	auto valve = dynamic_cast<GateValvelet*>(g);
+	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
+	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (valve != nullptr) {
+	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (mvalve != nullptr) {
 		menu_popup(this->motor_valve_op, g, local_x, local_y);
+	} else if (uhdoor != nullptr) {
+		menu_popup(this->upper_door_op, g, local_x, local_y);
 	}
 }

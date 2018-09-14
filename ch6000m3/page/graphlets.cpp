@@ -9,6 +9,7 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 
 #include "decorator/page.hpp"
+#include "decorator/margin.hpp"
 
 #include "module.hpp"
 
@@ -72,12 +73,11 @@ public:
 		}
 
 		x0 += (label_max_width + offset + halfunit);
-		y0 += unitsize;
-		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, cellsize);
-		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 2.0F, cellsize);
-		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, cellsize);
-		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 4.0F, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 5.0F, cellsize);
+		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, halfunit, cellsize);
+		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 2.0F, halfunit, cellsize);
+		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, halfunit, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 4.0F, halfunit, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 5.0F, halfunit, cellsize);
 	}
 
 public:
@@ -108,12 +108,13 @@ private:
 	}
 
 	template<typename T, typename S>
-	void reflow_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float x0, float y, float cellsize) {
+	void reflow_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls
+		, float x0, float y, float halfunit, float cellsize) {
 		for (S i = _E0(S); i < S::_; i++) {
 			float x = x0 + _F(i) * cellsize;
 
-			this->master->move_to(gs[i], x, y, GraphletAnchor::CB);
-			this->master->move_to(ls[i], x, y, GraphletAnchor::CT);
+			this->master->move_to(gs[i], x, y + halfunit * 1.0F, GraphletAnchor::CC);
+			this->master->move_to(ls[i], x, y + halfunit * 2.0F, GraphletAnchor::CT);
 		}
 	}
 
@@ -143,6 +144,7 @@ static std::unordered_map<GraphletOverview*, Stage*> stages;
 
 GraphletOverview::GraphletOverview() : Planet(__MODULE__) {
 	this->append_decorator(new PageDecorator());
+	this->append_decorator(new MarginDecorator(true, true));
 }
 
 GraphletOverview::~GraphletOverview() {

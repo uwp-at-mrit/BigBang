@@ -12,13 +12,13 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasGeometry^ make_masked_triangle(float r, double d, double ratio) {
+static CanvasGeometry^ make_masked_triangle(float rx, float ry, double d, double ratio) {
 	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x0, y0, x1, y1, x2, y2, x, y;
 
-	circle_point(r, d, &x0, &y0);
-	circle_point(r, d + 120.0, &x1, &y1);
-	circle_point(r, d - 120.0, &x2, &y2);
+	ellipse_point(rx, ry, d, &x0, &y0);
+	ellipse_point(rx, ry, d + 120.0, &x1, &y1);
+	ellipse_point(rx, ry, d - 120.0, &x2, &y2);
 
 	if (ratio > 0.0) { // bottom-up
 		equilateral_triangle->BeginFigure(x1, y1);
@@ -42,14 +42,14 @@ static CanvasGeometry^ make_masked_triangle(float r, double d, double ratio) {
 	return CanvasGeometry::CreatePath(equilateral_triangle);
 }
 
-static CanvasGeometry^ make_masked_sandglass(float r, double d, double ratio) {
+static CanvasGeometry^ make_masked_sandglass(float rx, float ry, double d, double ratio) {
 	auto glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float xlt, ylt, xrt, yrt, xlb, ylb, xrb, yrb, x, y;
 
-	circle_point(r, d + 60.0, &xrt, &yrt);
-	circle_point(r, d + 120.0, &xlt, &ylt);
-	circle_point(r, d - 60.0, &xrb, &yrb);
-	circle_point(r, d - 120.0, &xlb, &ylb);
+	ellipse_point(rx, ry, d + 60.0, &xrt, &yrt);
+	ellipse_point(rx, ry, d + 120.0, &xlt, &ylt);
+	ellipse_point(rx, ry, d - 60.0, &xrb, &yrb);
+	ellipse_point(rx, ry, d - 120.0, &xlb, &ylb);
 
 	if (ratio > 0.0) { // bottom-up
 		glass->BeginFigure(xrb, yrb);
@@ -74,15 +74,15 @@ static CanvasGeometry^ make_masked_sandglass(float r, double d, double ratio) {
 	return CanvasGeometry::CreatePath(glass);
 }
 
-CanvasGeometry^ make_masked_rectangle(float r, double a, double d, double ratio) {
+CanvasGeometry^ make_masked_rectangle(float rx, float ry, double a, double d, double ratio) {
 	auto frame = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double theta = 180.0 - a;
 	float xrt, yrt, xlt, ylt, xlb, ylb, xrb, yrb, x, y;
 
-	circle_point(r, d + a, &xrt, &yrt);
-	circle_point(r, d + theta, &xlt, &ylt);
-	circle_point(r, d - theta, &xlb, &ylb);
-	circle_point(r, d - a, &xrb, &yrb);
+	ellipse_point(rx, ry, d + a, &xrt, &yrt);
+	ellipse_point(rx, ry, d + theta, &xlt, &ylt);
+	ellipse_point(rx, ry, d - theta, &xlb, &ylb);
+	ellipse_point(rx, ry, d - a, &xrb, &yrb);
 	
 	if (ratio > 0.0) { // bottom-up
 		frame->BeginFigure(xrb, yrb);
@@ -109,11 +109,15 @@ CanvasGeometry^ make_masked_rectangle(float r, double a, double d, double ratio)
 
 /*************************************************************************************************/
 CanvasGeometry^ WarGrey::SCADA::polar_axis(float r, double d) {
+	return polar_axis(r, r, d);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_axis(float rx, float ry, double d) {
 	auto axis = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
 	axis->BeginFigure(0.0F, 0.0F);
-	circle_point(r, d, &x, &y);
+	ellipse_point(rx, ry, d, &x, &y);
 	axis->AddLine(x, y);
 	axis->EndFigure(CanvasFigureLoop::Open);
 
@@ -121,19 +125,27 @@ CanvasGeometry^ WarGrey::SCADA::polar_axis(float r, double d) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_pole(float r, double d, float ptr) {
+	return polar_pole(r, r, d, ptr);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_pole(float rx, float ry, double d, float ptr) {
 	float x, y;
 
-	circle_point(r, d, &x, &y);
+	ellipse_point(rx, ry, d, &x, &y);
 	
 	return CanvasGeometry::CreateEllipse(CanvasDevice::GetSharedDevice(), x, y, ptr, ptr);
 }
 
-CanvasGeometry^ WarGrey::SCADA::polar_line(float radius, double start_degrees, double end_degrees) {
+CanvasGeometry^ WarGrey::SCADA::polar_line(float r, double sd, double ed) {
+	return polar_line(r, r, sd, ed);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_line(float rx, float ry, double sd, double ed) {
 	auto axis = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x1, y1, x2, y2;
 
-	circle_point(radius, start_degrees, &x1, &y1);
-	circle_point(radius, end_degrees, &x2, &y2);
+	ellipse_point(rx, ry, sd, &x1, &y1);
+	ellipse_point(rx, ry, ed, &x2, &y2);
 
 	axis->BeginFigure(x1, y1);
 	axis->AddLine(x2, y2);
@@ -143,15 +155,19 @@ CanvasGeometry^ WarGrey::SCADA::polar_line(float radius, double start_degrees, d
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_arrowhead(float r, double d) {
+	return polar_arrowhead(r, r, d);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_arrowhead(float rx, float ry, double d) {
 	auto arrowhead = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
-	circle_point(r, d, &x, &y);
+	ellipse_point(rx, ry, d, &x, &y);
 	arrowhead->BeginFigure(x, y);
-	circle_point(r, d + 120.0, &x, &y);
+	ellipse_point(rx, ry, d + 120.0, &x, &y);
 	arrowhead->AddLine(x, y);
 	arrowhead->AddLine(0.0F, 0.0F);
-	circle_point(r, d - 120.0, &x, &y);
+	ellipse_point(rx, ry, d - 120.0, &x, &y);
 	arrowhead->AddLine(x, y);
 	arrowhead->EndFigure(CanvasFigureLoop::Closed);
 
@@ -159,14 +175,18 @@ CanvasGeometry^ WarGrey::SCADA::polar_arrowhead(float r, double d) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d) {
+	return polar_triangle(r, r, d);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_triangle(float rx, float ry, double d) {
 	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
-	circle_point(r, d, &x, &y);
+	ellipse_point(rx, ry, d, &x, &y);
 	equilateral_triangle->BeginFigure(x, y);
-	circle_point(r, d + 120.0, &x, &y);
+	ellipse_point(rx, ry, d + 120.0, &x, &y);
 	equilateral_triangle->AddLine(x, y);
-	circle_point(r, d - 120.0, &x, &y);
+	ellipse_point(rx, ry, d - 120.0, &x, &y);
 	equilateral_triangle->AddLine(x, y);
 	equilateral_triangle->EndFigure(CanvasFigureLoop::Closed);
 
@@ -174,26 +194,34 @@ CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_masked_triangle(float r, double d, double ratio) {
+	return polar_masked_triangle(r, r, d, ratio);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_masked_triangle(float rx, float ry, double d, double ratio) {
 	if (ratio == 0.0) {
 		return blank();
 	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
-		return polar_triangle(r, d);
+		return polar_triangle(rx, ry, d);
 	} else {
-		return make_masked_triangle(r, d, ratio);
+		return make_masked_triangle(rx, ry, d, ratio);
 	}
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_sandglass(float r, double d) {
+	return polar_sandglass(r, r, d);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_sandglass(float rx, float ry, double d) {
 	auto glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
-	circle_point(r, d + 60.0, &x, &y);
+	ellipse_point(rx, ry, d + 60.0, &x, &y);
 	glass->BeginFigure(x, y);
-	circle_point(r, d + 120.0, &x, &y);
+	ellipse_point(rx, ry, d + 120.0, &x, &y);
 	glass->AddLine(x, y);
-	circle_point(r, d - 60.0, &x, &y);
+	ellipse_point(rx, ry, d - 60.0, &x, &y);
 	glass->AddLine(x, y);
-	circle_point(r, d - 120.0, &x, &y);
+	ellipse_point(rx, ry, d - 120.0, &x, &y);
 	glass->AddLine(x, y);
 	glass->EndFigure(CanvasFigureLoop::Closed);
 
@@ -201,27 +229,35 @@ CanvasGeometry^ WarGrey::SCADA::polar_sandglass(float r, double d) {
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_masked_sandglass(float r, double d, double ratio) {
+	return polar_masked_sandglass(r, r, d, ratio);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_masked_sandglass(float rx, float ry, double d, double ratio) {
 	if (ratio == 0.0) {
 		return blank();
 	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
-		return polar_sandglass(r, d);
+		return polar_sandglass(rx, ry, d);
 	} else {
-		return make_masked_sandglass(r, d, ratio);
+		return make_masked_sandglass(rx, ry, d, ratio);
 	}
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_rectangle(float r, double alpha, double rotation) {
+	return polar_rectangle(r, r, alpha, rotation);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_rectangle(float rx, float ry, double alpha, double rotation) {
 	auto frame = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double theta = 180.0 - alpha;
 	float x, y;
 
-	circle_point(r, rotation + alpha, &x, &y);
+	ellipse_point(rx, ry, rotation + alpha, &x, &y);
 	frame->BeginFigure(x, y);
-	circle_point(r, rotation + theta, &x, &y);
+	ellipse_point(rx, ry, rotation + theta, &x, &y);
 	frame->AddLine(x, y);
-	circle_point(r, rotation - theta, &x, &y);
+	ellipse_point(rx, ry, rotation - theta, &x, &y);
 	frame->AddLine(x, y);
-	circle_point(r, rotation - alpha, &x, &y);
+	ellipse_point(rx, ry, rotation - alpha, &x, &y);
 	frame->AddLine(x, y);
 	frame->EndFigure(CanvasFigureLoop::Closed);
 
@@ -229,11 +265,15 @@ CanvasGeometry^ WarGrey::SCADA::polar_rectangle(float r, double alpha, double ro
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_masked_rectangle(float r, double alpha, double rotation, double ratio) {
+	return polar_masked_rectangle(r, r, alpha, rotation, ratio);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_masked_rectangle(float rx, float ry, double alpha, double rotation, double ratio) {
 	if (ratio == 0.0) {
 		return blank();
 	} else if ((ratio <= -1.0) || (ratio >= 1.0)) {
-		return polar_rectangle(r, alpha, rotation);
+		return polar_rectangle(rx, ry, alpha, rotation);
 	} else {
-		return make_masked_rectangle(r, alpha, rotation, ratio);
+		return make_masked_rectangle(rx, ry, alpha, rotation, ratio);
 	}
 }

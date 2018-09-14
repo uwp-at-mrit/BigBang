@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\background.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\table.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\decorator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.cpp" />
@@ -60,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\background.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\table.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\bitmaplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
