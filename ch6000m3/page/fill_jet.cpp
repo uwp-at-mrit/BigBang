@@ -247,8 +247,8 @@ public:
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gridsize * -2.4F);
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gridsize * +2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gheight * +2.4F);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);

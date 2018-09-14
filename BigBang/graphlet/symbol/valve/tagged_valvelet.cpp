@@ -47,6 +47,9 @@ void TValvelet::construct() {
 	this->skeleton = polar_sandglass(this->sgradius, adjust_degrees);
 	this->body = geometry_freeze(this->skeleton);
 
+	this->enclosing_box = geometry_union(this->sign_body, this->sign_cx, this->sign_cy,
+		this->frame, this->body_cx, this->body_cy)->ComputeStrokeBounds(default_thickness);
+
 	{ // make sign
 		auto tag_layout = make_text_layout(this->tag, make_bold_text_format("Monospace", this->sradius * 1.2F));
 		auto tag_shape = paragraph(tag_layout);
@@ -56,6 +59,13 @@ void TValvelet::construct() {
 		this->tag_xoff = tagbox.Width * 0.5F + tagbox.X;
 		this->tag_yoff = tagbox.Height * 0.5F + tagbox.Y;
 	}
+}
+
+void TValvelet::fill_margin(float x, float y, float* top, float* right, float* bottom, float* left) {
+	SET_BOX(left, this->enclosing_box.X + this->radiusX);
+	SET_BOX(right, this->radiusX - (this->enclosing_box.X + this->enclosing_box.Width));
+	SET_BOX(top, this->enclosing_box.Y + this->radiusY);
+	SET_BOX(bottom, this->radiusY - (this->enclosing_box.Y + this->enclosing_box.Height));
 }
 
 void TValvelet::update(long long count, long long interval, long long uptime) {
@@ -169,10 +179,8 @@ void TValvelet::on_status_changed(TValveStatus status) {
 
 void TValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const TValveStyle style = this->get_style();
-	float radiusX = this->width * 0.5F - default_thickness;
-	float radiusY = this->height * 0.5F - default_thickness;
-	float cx = x + radiusX + default_thickness;
-	float cy = y + radiusY + default_thickness;
+	float cx = x + this->width * 0.5F;
+	float cy = y + this->height * 0.5F;
 	float scx = cx + this->sign_cx;
 	float scy = cy + this->sign_cy;
 	float bcx = cx + this->body_cx;

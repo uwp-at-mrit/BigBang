@@ -26,6 +26,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
+		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
@@ -49,6 +50,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ sign;
 
 	private:
+		Windows::Foundation::Rect enclosing_box;
 		float sgradius;
 		float sradius;
 		float fradius;

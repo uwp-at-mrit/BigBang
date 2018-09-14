@@ -127,7 +127,7 @@ UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_state, float radius, d
 }
 
 void UpperHopperDoorlet::construct() {
-	auto pline = polar_line(this->radiusX, this->radiusY, this->degrees, this->degrees + 180.0);
+	auto pline = geometry_rotate(polar_line(this->radiusX, this->radiusY, 0.0, 180.0), this->degrees);
 	
 	this->border = geometry_rotate(polar_rectangle(this->radiusX, this->radiusY, default_alpha_degrees, 0.0), this->degrees);
 	this->disable_line = geometry_draft(geometry_intersect(this->border, pline), default_thickness);
@@ -137,15 +137,6 @@ void UpperHopperDoorlet::construct() {
 		default_alpha_degrees, 0.0), this->degrees));
 }
 
-void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
-	case DoorStatus::Opening: case DoorStatus::Closing: {
-		this->flashing = !this->flashing;
-		this->notify_updated();
-	}; break;
-	}
-}
-
 void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right, float* bottom, float* left) {
 	auto box = this->border->ComputeStrokeBounds(default_thickness);
 	float hspace = this->width - box.Width;
@@ -153,6 +144,15 @@ void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right,
 
 	SET_BOXES(top, bottom, vspace * 0.5F);
 	SET_BOXES(left, right, hspace * 0.5F);
+}
+
+void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case DoorStatus::Opening: case DoorStatus::Closing: {
+		this->flashing = !this->flashing;
+		this->notify_updated();
+	}; break;
+	}
 }
 
 void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
@@ -194,10 +194,12 @@ void UpperHopperDoorlet::on_status_changed(DoorStatus state) {
 }
 
 void UpperHopperDoorlet::on_value_changed(double v) {
-	this->door = geometry_rotate(polar_masked_rectangle(
-		this->radiusX - this->brdiff, this->radiusY - this->brdiff,
-		default_alpha_degrees, 0.0F, this->get_percentage() - 1.0),
-		this->degrees);
+	float rx = this->radiusX - this->brdiff;
+	float ry = this->radiusY - this->brdiff;
+	auto partial_door = polar_masked_rectangle(rx, ry, default_alpha_degrees, 0.0F, this->get_percentage() - 1.0);
+
+	/** Note: all masked doors must be rotated with (0.0F, 0.0F) */
+	this->door = geometry_rotate(partial_door, this->degrees, 0.0F, 0.0F);
 }
 
 void UpperHopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

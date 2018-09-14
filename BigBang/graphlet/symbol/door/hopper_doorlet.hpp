@@ -48,8 +48,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
-		void update(long long count, long long interval, long long uptime) override;
 		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
+		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:

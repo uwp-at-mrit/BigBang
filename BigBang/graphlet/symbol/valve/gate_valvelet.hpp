@@ -27,6 +27,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
+		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
@@ -42,12 +43,11 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ top_down_ready_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ frame;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ shaft;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stem;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		
 	private:
-		float sgradius;
-		float fradius;
+		float sgrdiff;
 
 	private:
 		double mask_percentage;
