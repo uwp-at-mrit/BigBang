@@ -102,7 +102,7 @@ private:
 	template<typename T, typename S>
 	void load_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float unitsize) {
 		for (S s = _E0(S); s < S::_; s++) {
-			gs[s] = this->master->insert_one(new T(s, unitsize);
+			gs[s] = this->master->insert_one(new T(s, unitsize));
 			ls[s] = make_label(_speak(s));
 		}
 	}

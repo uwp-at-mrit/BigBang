@@ -223,10 +223,8 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
-		float dx, dy;
+		float dx, dy, margin, label_height;
 		float gridsize = std::fminf(gwidth, gheight);
-		float adjust_gridsize = gridsize * 0.618F;
-		float label_height;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 
@@ -260,7 +258,8 @@ public:
 		for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 			switch (it->first) {
 			case FJ::D006: case FJ::D010: case FJ::D020: case FJ::D021: case FJ::D022: case FJ::D024: {
-				dx = x0; dy = y0 + adjust_gridsize; anchor = GraphletAnchor::CT;
+				it->second->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
+				dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
 			}; break;
 			case FJ::D017: {
 				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
@@ -269,10 +268,12 @@ public:
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
 			}; break;
 			case FJ::D001: case FJ::D002: case FJ::D008: case FJ::D019: {
-				dx = x0; dy = y0 - adjust_gridsize - label_height; anchor = GraphletAnchor::CB;
+				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
+				dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
 			}; break;
 			default: {
-				dx = x0 + adjust_gridsize; dy = y0; anchor = GraphletAnchor::LB;
+				it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
+				dx = x0 + gridsize - margin; dy = y0; anchor = GraphletAnchor::LB;
 			}
 			}
 
@@ -288,7 +289,8 @@ public:
 				switch (it->first) {
 				case FJ::D003: case FJ::D004: case FJ::D005: case FJ::D007: case FJ::D009:
 				case FJ::D023: case FJ::D025: {
-					dx = x0 - adjust_gridsize; dy = y0; anchor = GraphletAnchor::RC;
+					this->gvalves[FJ::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+					dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
 				}; break;
 				case FJ::D002: case FJ::D008: case FJ::D017: case FJ::D019: {
 					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;

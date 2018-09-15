@@ -199,10 +199,8 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
-		float dx, dy;
+		float dx, dy, margin, label_height;
 		float gridsize = std::fminf(gwidth, gheight);
-		float adjust_gridsize = gridsize * 0.618F;
-		float label_height;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 
@@ -245,7 +243,8 @@ public:
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LB;
 			}; break;
 			case LD::D006: case LD::D010: case LD::D020: case LD::D021: case LD::D022: case LD::D024: {
-				dx = x0; dy = y0 + adjust_gridsize; anchor = GraphletAnchor::CT;
+				it->second->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
+				dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
 			}; break;
 			case LD::D017: {
 				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
@@ -254,10 +253,12 @@ public:
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
 			}; break;
 			case LD::D001: case LD::D002: case LD::D008: case LD::D019: case LD::D026: {
-				dx = x0; dy = y0 - adjust_gridsize - label_height; anchor = GraphletAnchor::CB;
+				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
+				dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
 			}; break;
 			default: {
-				dx = x0 + adjust_gridsize; dy = y0; anchor = GraphletAnchor::LB;
+				it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
+				dx = x0 + gridsize - margin; dy = y0; anchor = GraphletAnchor::LB;
 			}
 			}
 
@@ -280,7 +281,8 @@ public:
 				}; break;
 				case LD::D003: case LD::D004: case LD::D005: case LD::D007: case LD::D009:
 				case LD::D011: case LD::D012: case LD::D023: case LD::D025: {
-					dx = x0 - adjust_gridsize; dy = y0; anchor = GraphletAnchor::RC;
+					this->gvalves[LD::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+					dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
 				}; break;
 				case LD::D002: case LD::D008: case LD::D017: case LD::D019: case LD::D026: {
 					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;

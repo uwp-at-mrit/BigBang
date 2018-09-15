@@ -157,9 +157,9 @@ public:
 
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
+		float sq1_y, horizon_y, margin;
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
-		float sq1_y, horizon_y;
 
 		this->master->move_to(this->station, cx, cy, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->hatch, SW::Hatch, GraphletAnchor::LC);
@@ -183,10 +183,9 @@ public:
 			}
 
 			for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
-				float dy = gheight * 0.618F;
-
+				it->second->fill_margin(0.0F, 0.0F, nullptr, nullptr, &margin, nullptr);
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
-				this->station->map_credit_graphlet(this->vlabels[it->first], GraphletAnchor::CT, 0.0F, dy);
+				this->station->map_credit_graphlet(this->vlabels[it->first], GraphletAnchor::CT, 0.0F, gheight - margin);
 			}
 		}
 

@@ -248,8 +248,8 @@ public:
 	
 	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
-		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy;
-		float valve_adjust_gridsize = gheight * 0.618F;
+		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy, margin;
+		float gridsize = std::fminf(gwidth, gheight);
 		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -257,29 +257,29 @@ public:
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (it->second->id) {
 			case HS::A: case HS::B: case HS::G: case HS::H: {
-				lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
-				cpt_dx = x0 + gwidth; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
-				bar_dx = x0 + gwidth; bar_dy = y0; bar_a = GraphletAnchor::LB;
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
+				bar_dx = x0 + gridsize; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
 			case HS::F: case HS::C: case HS::D: case HS::E: {
-				lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-				cpt_dx = x0 - gwidth; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
-				bar_dx = x0 - gwidth; bar_dy = y0; bar_a = GraphletAnchor::RB;
+				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
+				bar_dx = x0 - gridsize; bar_dy = y0; bar_a = GraphletAnchor::RB;
 			} break;
 			case HS::Y: case HS::L: case HS::M: case HS::K: {
-				lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
-				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gwidth; cpt_a = GraphletAnchor::LB;
+				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
 				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no metrics
 			} break;
 			default: {
-				cpt_dx = x0; cpt_dy = y0 + gwidth * 3.0F; cpt_a = GraphletAnchor::CT;
+				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
 			
 				if (it->second->id == HS::I) {
-					lbl_dx = x0 - gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
-					bar_dx = x0 + text_hspace; bar_dy = y0 + gwidth; bar_a = GraphletAnchor::LT;
+					lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
 				} else {
-					lbl_dx = x0 + gwidth; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-					bar_dx = x0 - text_hspace; bar_dy = y0 + gwidth; bar_a = GraphletAnchor::RT;
+					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
 				}
 			}
 			}
@@ -297,14 +297,17 @@ public:
 			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
 				case HS::SQ2: case HS::SQy: {
-					lbl_dx = x0 - valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
+					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+					lbl_dx = x0 - gridsize + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				} break;
 				default: {
-					lbl_dx = x0 + valve_adjust_gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
+					it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
+					lbl_dx = x0 + gridsize - margin; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
 				}
 				}
 			} else {
-				lbl_dx = x0; lbl_dy = y0 - valve_adjust_gridsize; lbl_a = GraphletAnchor::CB;
+				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
+				lbl_dx = x0; lbl_dy = y0 - gridsize + margin; lbl_a = GraphletAnchor::CB;
 			}
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
