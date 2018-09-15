@@ -139,10 +139,10 @@ public:
 			this->load_devices(this->valves, this->vlabels, this->valve_style, SW::DGV3, SW::DGV47, radius, 0.0);
 			this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, radius, 0.0);
 
-			this->load_device(this->hoppers, this->captions, SW::HP1, radius, -2.4F);
-			this->load_device(this->hoppers, this->captions, SW::HP2, radius, 2.4F);
-			this->load_device(this->hoppers, this->captions, SW::Port, radius, 2.4F);
-			this->load_device(this->hoppers, this->captions, SW::Starboard, radius, -2.4F);
+			this->load_device(this->hoppers, this->captions, SW::HP1, radius, -2.0F);
+			this->load_device(this->hoppers, this->captions, SW::HP2, radius, 2.0F);
+			this->load_device(this->hoppers, this->captions, SW::Port, radius, 2.0F);
+			this->load_device(this->hoppers, this->captions, SW::Starboard, radius, -2.0F);
 		}
 
 		{ // load labels and dimensions

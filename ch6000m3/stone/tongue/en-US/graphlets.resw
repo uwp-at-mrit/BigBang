@@ -144,8 +144,8 @@
   <data name="pump" xml:space="preserve">
     <value>Hydraulic Pump</value>
   </data>
-  <data name="valve" xml:space="preserve">
-    <value>Valve</value>
+  <data name="g_valve" xml:space="preserve">
+    <value>Gate Valve</value>
   </data>
   <data name="Closed" xml:space="preserve">
     <value>Fully Closed</value>
@@ -191,5 +191,8 @@
   </data>
   <data name="m_valve" xml:space="preserve">
     <value>Motor Valve</value>
+  </data>
+  <data name="h_pump" xml:space="preserve">
+    <value>Hopper Pump</value>
   </data>
 </root>

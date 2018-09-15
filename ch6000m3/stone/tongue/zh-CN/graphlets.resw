@@ -144,7 +144,7 @@
   <data name="pump" xml:space="preserve">
     <value>液压泵</value>
   </data>
-  <data name="valve" xml:space="preserve">
+  <data name="g_valve" xml:space="preserve">
     <value>阀</value>
   </data>
   <data name="OpenReady" xml:space="preserve">
@@ -191,5 +191,8 @@
   </data>
   <data name="m_valve" xml:space="preserve">
     <value>电动阀</value>
+  </data>
+  <data name="h_pump" xml:space="preserve">
+    <value>泥泵</value>
   </data>
 </root>

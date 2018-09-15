@@ -24,10 +24,13 @@ HopperPumplet::HopperPumplet(HopperPumpStatus default_status, float radiusX, flo
 
 void HopperPumplet::construct() {
 	float thickoff = default_thickness * 0.5F;
-	float inlet_height = this->radiusY * 0.618F;
+	float inlet_height = this->radiusY * 0.5F;
 	float inlet_width = inlet_height * 0.382F;
+	float inlet_extend = inlet_height + inlet_width * 0.382F;
 	float inlet_y = (this->radiusY * 2.0F - inlet_height) * 0.5F;
 	float inlet_x = (this->leftward ? thickoff : (this->radiusX * 2.0F - inlet_width - thickoff));
+	float inlet_ex = (this->leftward ? thickoff : (this->radiusX * 2.0F - thickoff));
+	float inlet_ey = inlet_y - (inlet_extend - inlet_height) * 0.5F;
 	float body_width = this->radiusX * 2.0F - default_thickness - inlet_width;
 	float body_height = this->radiusY * 2.0F - default_thickness;
 	float body_radius = body_width * 0.5F;
@@ -40,23 +43,14 @@ void HopperPumplet::construct() {
 	float indicator_cy = (this->upward ? (body_y + icydiff) : (body_y + body_height - icydiff));
 	auto stadium = rounded_rectangle(body_x, body_y, body_width, body_height, body_radius, body_radius);
 	auto inlet = rectangle(inlet_x, inlet_y, inlet_width, inlet_height);
+	auto inlet_line = vline(inlet_ex, inlet_ey, inlet_extend);
+	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
+	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
 	
 	this->body = geometry_rotate(stadium, this->degrees, this->radiusX, this->radiusY);
-	this->inlet = geometry_rotate(inlet, this->degrees, this->radiusX, this->radiusY);
-	this->indicator = geometry_rotate(circle(indicator_cx, indicator_cy, indicator_radius),
-		this->degrees, this->radiusX, this->radiusY);
-}
-
-void HopperPumplet::update(long long count, long long interval, long long uptime) {
-}
-
-void HopperPumplet::on_status_changed(HopperPumpStatus status) {
-	//switch (status) {
-	//default: {
-		this->mask = nullptr;
-		this->mask_percentage = -1.0;
-	//}
-	//}
+	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, this->radiusX, this->radiusY);
+	this->indicator = geometry_rotate(indicator, this->degrees, this->radiusX, this->radiusY);
+	this->iborder = geometry_rotate(iborder, this->degrees, this->radiusX, this->radiusY);
 }
 
 void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
@@ -64,30 +58,17 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	case HopperPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case HopperPumpStatus::Starting: {
-		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
-	}; break;
 	case HopperPumpStatus::Unstartable: {
-		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+		CAS_SLOT(s.body_color, Colours::DimGray);
 		CAS_SLOT(s.border_color, Colours::Firebrick);
 	}; break;
-	case HopperPumpStatus::Remote: {
-		CAS_SLOT(s.border_color, Colours::Cyan);
-	}; break;
-	case HopperPumpStatus::Stopping: {
-		CAS_SLOT(s.mask_color, Colours::ForestGreen);
-	}; break;
 	case HopperPumpStatus::Unstoppable: {
-		CAS_VALUES(s.mask_color, Colours::ForestGreen, s.border_color, Colours::Firebrick);
-	}; break;
-	case HopperPumpStatus::Ready: {
-		CAS_SLOT(s.skeleton_color, Colours::Cyan);
+		CAS_SLOT(s.border_color, Colours::Firebrick);
 	}; break;
 	}
 
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
-	CAS_SLOT(s.skeleton_color, s.body_color);
 
 	// NOTE: The others can be nullptr;
 }
@@ -103,6 +84,5 @@ void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 	ds->FillGeometry(this->indicator, x, y, style.body_color);
 	ds->DrawGeometry(this->indicator, x, y, style.border_color);
-
-	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
+	ds->DrawGeometry(this->iborder, x, y, style.border_color, default_thickness);
 }

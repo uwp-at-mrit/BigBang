@@ -4,6 +4,7 @@
 #include "configuration.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
+#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
@@ -20,24 +21,26 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 static Platform::String^ all_captions[] = {
-	"winch", "pump", "valve", "m_valve", "hopperdoor", "upperdoor"
+	"winch", "pump", "h_pump", "g_valve", "m_valve", "hopperdoor", "upperdoor"
 };
 
 private class Stage final {
 public:
-	Stage(GraphletOverview* master) : master(master), progress(0.0) {
-		this->font = make_bold_text_format("Microsoft YaHei", large_font_size);
-	}
+	Stage(GraphletOverview* master) : master(master), progress(0.0) {}
 
 public:
-	void load(float width, float height) {
-		float unitsize = 32.0F;
+	void load(float width, float height, float vinset) {
+		size_t count = sizeof(all_captions) / sizeof(Platform::String^);
+		float unitsize = (height - vinset - vinset) / (float(count) * 2.0F * 1.618F);
+
+		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, large_font_size));
 		
-		for (size_t i = 0; i < sizeof(all_captions)/sizeof(Platform::String^); i++) {
+		for (size_t i = 0; i < count; i++) {
 			this->captions[i] = make_label(_speak(all_captions[i]) + ":", this->font);
 		}
 
 		this->load_primitives(this->pumps, this->plabels, unitsize);
+		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
 		this->load_primitives(this->valves, this->vlabels, unitsize);
 		this->load_primitives(this->mvalves, this->mvlabels, unitsize);
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
@@ -74,10 +77,11 @@ public:
 
 		x0 += (label_max_width + offset + halfunit);
 		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, halfunit, cellsize);
-		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 2.0F, halfunit, cellsize);
-		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, halfunit, cellsize);
-		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 4.0F, halfunit, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 5.0F, halfunit, cellsize);
+		this->reflow_primitives(this->hpumps, this->hplabels,  x0, y0 + cellsize * 2.0F, halfunit, cellsize);
+		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 3.0F, halfunit, cellsize);
+		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 4.0F, halfunit, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 5.0F, halfunit, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 6.0F, halfunit, cellsize);
 	}
 
 public:
@@ -122,6 +126,8 @@ private: // never delete these graphlets manually.
 	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
+	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
+	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
 	std::unordered_map<GateValveStatus, GateValvelet*> valves;
 	std::unordered_map<GateValveStatus, Labellet*> vlabels;
 	std::unordered_map<TValveStatus, MotorValvelet*> mvalves;
@@ -160,11 +166,12 @@ GraphletOverview::~GraphletOverview() {
 void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (stages.find(this) == stages.end()) {
 		Stage* stage = new Stage(this);
+		float vinset = statusbar_height();
 		
 		stages.insert(std::pair<GraphletOverview*, Stage*>(this, stage));
 
 		{ // load graphlets
-			stage->load(width, height);
+			stage->load(width, height, vinset);
 
 			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name());
