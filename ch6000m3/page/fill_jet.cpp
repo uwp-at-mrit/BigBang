@@ -197,7 +197,8 @@ public:
 			float radius = std::fminf(gwidth, gheight);
 			float nic_radius = radius * 0.5F;
 			
-			this->load_pumps(this->pumps, this->captions, FJ::PSHPump, FJ::SBHPump, radius);
+			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, -2.0F);
+			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, +2.0F);
 			this->ps_suction = this->master->insert_one(new Circlelet(nic_radius, default_port_color, default_pipeline_thickness));
 			this->sb_suction = this->master->insert_one(new Circlelet(nic_radius, default_starboard_color, default_pipeline_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
@@ -213,7 +214,7 @@ public:
 			this->load_label(this->captions, FJ::Gantry, Colours::Yellow, this->caption_font);
 
 			for (size_t idx = 0; idx < hopper_count; idx++) {
-				this->sequences[idx] = this->master->insert_one(new Labellet((hopper_count - idx).ToString() + "#"));
+				this->sequences[idx] = this->master->insert_one(new Labellet((idx + 1).ToString() + "#"));
 				this->sequences[idx]->set_font(this->caption_font);
 				this->sequences[idx]->set_color(Colours::Tomato);
 			}
@@ -371,12 +372,10 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_pumps(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, Colours::Salmon, this->caption_font);
+	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
-			gs[id] = this->master->insert_one(new G(-radius, 0.0F, 0.0), id);
-		}
+		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 	}
 
 	template<typename E>

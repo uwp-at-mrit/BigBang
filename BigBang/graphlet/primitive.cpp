@@ -12,7 +12,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 Windows::Foundation::Rect WarGrey::SCADA::symbol_enclosing_box(float radiusX, float radiusY, double degrees) {
-	return geometry_rotate(ellipse(radiusX, radiusY), degrees)->ComputeBounds();
+	return geometry_rotate(rectangle(radiusX * 2.0F, radiusY * 2.0F), degrees)->ComputeBounds();
 }
 
 Rect WarGrey::SCADA::graphlet_enclosing_box(IGraphlet* g, float x, float y, float3x2 transform) {

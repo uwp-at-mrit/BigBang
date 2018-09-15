@@ -19,18 +19,32 @@ HopperPumplet::HopperPumplet(float radiusX, float radiusY, double degrees)
 	: HopperPumplet(HopperPumpStatus::Stopped, radiusX, radiusY, degrees) {}
 
 HopperPumplet::HopperPumplet(HopperPumpStatus default_status, float radiusX, float radiusY, double degrees)
-	: ISymbollet(default_status, std::fabsf(radiusX), radiusY, degrees), leftward(radiusX > 0.0F) {}
+	: ISymbollet(default_status, std::fabsf(radiusX), std::fabsf(radiusY), degrees, 2.0F)
+	, leftward(radiusX > 0.0F), upward(radiusY >= 0.0F) {}
 
 void HopperPumplet::construct() {
 	float thickoff = default_thickness * 0.5F;
-	float body_width = this->radiusX * 2.0F - default_thickness;
+	float inlet_height = this->radiusY * 0.618F;
+	float inlet_width = inlet_height * 0.382F;
+	float inlet_y = (this->radiusY * 2.0F - inlet_height) * 0.5F;
+	float inlet_x = (this->leftward ? thickoff : (this->radiusX * 2.0F - inlet_width - thickoff));
+	float body_width = this->radiusX * 2.0F - default_thickness - inlet_width;
 	float body_height = this->radiusY * 2.0F - default_thickness;
-	float body_x = (this->leftward ? (this->radiusX * 2.0F - body_width - thickoff) : thickoff);
 	float body_radius = body_width * 0.5F;
-	float indicator_radius = body_radius * 0.618F;
+	float body_x = (this->leftward ? (thickoff + inlet_width) : thickoff);
+	float body_y = thickoff;
+	float irdiff = default_thickness * 2.0F;
+	float indicator_radius = body_radius - irdiff;
+	float icydiff = irdiff + indicator_radius;
+	float indicator_cx = body_x + irdiff + indicator_radius;
+	float indicator_cy = (this->upward ? (body_y + icydiff) : (body_y + body_height - icydiff));
+	auto stadium = rounded_rectangle(body_x, body_y, body_width, body_height, body_radius, body_radius);
+	auto inlet = rectangle(inlet_x, inlet_y, inlet_width, inlet_height);
 	
-	this->body = geometry_rotate(rounded_rectangle(0.0F, 0.0F, body_width, body_height, body_radius, body_radius), this->degrees);
-	this->indicator = circle(0.0F, 0.0F, indicator_radius);
+	this->body = geometry_rotate(stadium, this->degrees, this->radiusX, this->radiusY);
+	this->inlet = geometry_rotate(inlet, this->degrees, this->radiusX, this->radiusY);
+	this->indicator = geometry_rotate(circle(indicator_cx, indicator_cy, indicator_radius),
+		this->degrees, this->radiusX, this->radiusY);
 }
 
 void HopperPumplet::update(long long count, long long interval, long long uptime) {
@@ -80,12 +94,15 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 
 void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const HopperPumpStyle style = this->get_style();
-	float cx = this->width * 2.0F;
-	float cy = this->height * 2.0F;
 	
-	ds->FillGeometry(this->body, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->body, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->body, x, y, Colours::Background);
+	ds->DrawGeometry(this->body, x, y, style.border_color, default_thickness);
+	
+	ds->FillGeometry(this->inlet, x, y, Colours::Background);
+	ds->DrawGeometry(this->inlet, x, y, style.border_color, default_thickness);
 
-	ds->FillGeometry(this->indicator, cx, cy, style.body_color);
-	ds->DrawGeometry(this->indicator, cx, cy, style.border_color);
+	ds->FillGeometry(this->indicator, x, y, style.body_color);
+	ds->DrawGeometry(this->indicator, x, y, style.border_color);
+
+	ds->DrawRectangle(x, y, Width, Height, Colours::Firebrick);
 }

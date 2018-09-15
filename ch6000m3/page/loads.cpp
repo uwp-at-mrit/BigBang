@@ -171,8 +171,10 @@ public:
 			float radius = std::fminf(gwidth, gheight);
 			float nic_radius = radius * 0.5F;
 
-
-			this->load_pumps(this->pumps, this->captions, LD::PSUWPump, LD::SBHPump, radius);
+			this->load_pump(this->pumps, this->captions, LD::PSUWPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, LD::SBUWPump, -radius, -2.0F);
+			this->load_pump(this->pumps, this->captions, LD::PSHPump, -radius, -2.0F);
+			this->load_pump(this->pumps, this->captions, LD::SBHPump, -radius, +2.0F);
 
 			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, radius, radius, 0.5F, default_pipeline_color));
 
@@ -342,12 +344,10 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_pumps(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, Colours::Salmon, this->caption_font);
+	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
-			gs[id] = this->master->insert_one(new G(-radius, 0.0F, 0.0), id);
-		}
+		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 	}
 
 	template<typename E>

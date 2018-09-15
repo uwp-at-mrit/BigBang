@@ -34,11 +34,13 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstartable_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstoppable_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ inlet;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ indicator;
 		
 	private:
 		float radius;
 		bool leftward;
+		bool upward;
 
 	private:
 		double mask_percentage;
