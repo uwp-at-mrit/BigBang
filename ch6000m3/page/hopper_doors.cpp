@@ -141,7 +141,9 @@ private:
 	float ship_width;
 };
 
-private class Doors final : public PLCConfirmation, public IMenuCommand<HDOperation, IMRMaster*> {
+private class Doors final
+	: public PLCConfirmation
+	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->percentage_style.unit_color = Colours::Silver;
@@ -244,14 +246,10 @@ public:
 	}
 
 public:
-	void execute(HDOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto door = dynamic_cast<Credit<HopperDoorlet, HD>*>(target);
-
-		if (door != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"%s %s",
-				cmd.ToString()->Data(),
-				door->id.ToString()->Data());
-		}
+	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"%s %s",
+			cmd.ToString()->Data(),
+			door->id.ToString()->Data());
 	}
 
 public:
@@ -410,7 +408,7 @@ HopperDoorsPage::HopperDoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 	Doors* dashboard = new Doors(this, decorator);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<HDOperation, IMRMaster*>(dashboard, plc);
+	this->door_op = make_menu<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*>(dashboard, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -482,14 +480,14 @@ bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 }
 
 void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
-	HopperDoorlet* hd = dynamic_cast<HopperDoorlet*>(g);
-	IEditorlet* e = dynamic_cast<IEditorlet*>(g);
+	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
+	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (hd != nullptr) {
-		menu_popup(this->operation, hd, local_x, local_y);
-	} else if (e != nullptr) {
+	if (hdoor != nullptr) {
+		menu_popup(this->door_op, hdoor, local_x, local_y);
+	} else if (editor != nullptr) {
 		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 	}
 }

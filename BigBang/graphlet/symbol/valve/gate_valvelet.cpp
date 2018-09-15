@@ -21,30 +21,16 @@ static float default_thickness = 1.5F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-GateValveStyle WarGrey::SCADA::make_manual_valve_style(ICanvasBrush^ color) {
-	GateValveStyle s;
-
-	s.stem_color = ((color == nullptr) ? Colours::Gray : color);
-
-	return s;
-}
-
-/*************************************************************************************************/
-GateValvelet::GateValvelet(float radius, double degrees) : GateValvelet(GateValveStatus::Disabled, radius, degrees) {}
+GateValvelet::GateValvelet(float radius, double degrees)
+	: GateValvelet(GateValveStatus::Disabled, radius, degrees) {}
 
 GateValvelet::GateValvelet(GateValveStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, radius, degrees) {
-	this->sgrdiff = default_thickness * 2.0F;
-}
+	: ISymbollet(default_status, radius, degrees), sgrdiff(default_thickness * 2.0F) {}
 
 void GateValvelet::construct() {
 	double adjust_degrees = this->degrees + 90.0;
-	float stem_length = (this->radiusX - this->sgrdiff) * 0.618F;
-	auto stem = polar_axis(stem_length, this->degrees - 90.0);
-	auto wheel = polar_pole(stem_length, this->degrees - 90.0, stem_length * 0.1618F);
-
+	
 	this->frame = polar_rectangle(this->radiusX, 60.0, adjust_degrees);
-	this->stem = geometry_union(stem, wheel);
 	this->skeleton = polar_sandglass(this->radiusX - this->sgrdiff, adjust_degrees);
 	this->body = geometry_freeze(this->skeleton);
 }
@@ -52,24 +38,10 @@ void GateValvelet::construct() {
 void GateValvelet::fill_margin(float x, float y, float* top, float* right, float* bottom, float* left) {
 	GateValveStyle s = this->get_style();
 	auto box = this->frame->ComputeStrokeBounds(default_thickness);
-	float ls = (this->width - box.Width) * 0.5F;
-	float rs = ls;
-	float ts = (this->height - box.Height) * 0.5F;
-	float bs = ts;
-
-	if (s.stem_color != Colours::Background) {
-		auto stem_box = this->stem->ComputeStrokeBounds(default_thickness);
-
-		ls = std::fminf(ls, stem_box.X + this->radiusX);
-		rs = std::fminf(rs, this->radiusX - (stem_box.X + stem_box.Width));
-		ts = std::fminf(ts, stem_box.Y + this->radiusY);
-		bs = std::fminf(bs, this->radiusY - (stem_box.Y + stem_box.Height));
-	}
-
-	SET_VALUES(left, ls, right, rs);
-	SET_VALUES(top, ts, bottom, bs);
+	
+	SET_BOXES(left, right, (this->width - box.Width) * 0.5F);
+	SET_BOXES(top, bottom, (this->height - box.Height) * 0.5F);
 }
-
 
 void GateValvelet::update(long long count, long long interval, long long uptime) {
 	double adjust_degrees = this->degrees + 90.0;
@@ -136,7 +108,6 @@ void GateValvelet::prepare_style(GateValveStatus status, GateValveStyle& s) {
 
 	CAS_SLOT(s.skeleton_color, Colours::DarkGray);
 	CAS_SLOT(s.body_color, Colours::Background);
-	CAS_SLOT(s.stem_color, Colours::Background);
 	CAS_SLOT(s.frame_color, Colours::Background);
 
 	// NOTE: The others can be nullptr;
@@ -182,10 +153,6 @@ void GateValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	const GateValveStyle style = this->get_style();
 	float cx = x + this->radiusX;
 	float cy = y + this->radiusY;
-	
-	if (style.stem_color != Colours::Background) {
-		ds->DrawGeometry(this->stem, cx, cy, style.stem_color, default_thickness);
-	}
 	
 	if (style.frame_color != Colours::Background) {
 		ds->DrawGeometry(this->frame, cx, cy, style.frame_color, default_thickness);

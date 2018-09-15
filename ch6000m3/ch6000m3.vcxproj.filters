@@ -51,6 +51,9 @@
     <ClCompile Include="page\loads.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\flushs.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -77,6 +80,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\loads.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\flushs.hpp">
       <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
@@ -173,6 +179,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\loads.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\flushs.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\flushs.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

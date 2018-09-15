@@ -6,6 +6,7 @@
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 
@@ -20,8 +21,12 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-static Platform::String^ all_captions[] = {
-	"winch", "pump", "h_pump", "g_valve", "m_valve", "hopperdoor", "upperdoor"
+private enum class GS {
+	winch,
+	hydraulic_pump, hopper_pump,
+	manual_valve, gate_valve, motor_valve,
+	hopperdoor, upperdoor,
+	_
 };
 
 private class Stage final {
@@ -30,19 +35,19 @@ public:
 
 public:
 	void load(float width, float height, float vinset) {
-		size_t count = sizeof(all_captions) / sizeof(Platform::String^);
-		float unitsize = (height - vinset - vinset) / (float(count) * 2.0F * 1.618F);
+		float unitsize = (height - vinset - vinset) / (float(_N(GS)) * 2.0F * 1.618F);
 
 		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, large_font_size));
 		
-		for (size_t i = 0; i < count; i++) {
-			this->captions[i] = make_label(_speak(all_captions[i]) + ":", this->font);
+		for (GS id = _E(GS, 0); id < GS::_; id++) {
+			this->captions[_I(id)] = make_label(_speak(id) + ":", this->font);
 		}
 
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
-		this->load_primitives(this->valves, this->vlabels, unitsize);
 		this->load_primitives(this->mvalves, this->mvlabels, unitsize);
+		this->load_primitives(this->gvalves, this->gvlabels, unitsize);
+		this->load_primitives(this->evalves, this->evlabels, unitsize);
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
 	}
@@ -78,10 +83,11 @@ public:
 		x0 += (label_max_width + offset + halfunit);
 		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, halfunit, cellsize);
 		this->reflow_primitives(this->hpumps, this->hplabels,  x0, y0 + cellsize * 2.0F, halfunit, cellsize);
-		this->reflow_primitives(this->valves, this->vlabels,   x0, y0 + cellsize * 3.0F, halfunit, cellsize);
-		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 4.0F, halfunit, cellsize);
-		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 5.0F, halfunit, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 6.0F, halfunit, cellsize);
+		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, halfunit, cellsize);
+		this->reflow_primitives(this->gvalves, this->gvlabels, x0, y0 + cellsize * 4.0F, halfunit, cellsize);
+		this->reflow_primitives(this->evalves, this->evlabels, x0, y0 + cellsize * 5.0F, halfunit, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 6.0F, halfunit, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 7.0F, halfunit, cellsize);
 	}
 
 public:
@@ -123,15 +129,17 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	Labellet* captions[sizeof(all_captions) / sizeof(Platform::String^)];
+	Labellet* captions[_N(GS)];
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
 	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
 	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
-	std::unordered_map<GateValveStatus, GateValvelet*> valves;
-	std::unordered_map<GateValveStatus, Labellet*> vlabels;
-	std::unordered_map<TValveStatus, MotorValvelet*> mvalves;
-	std::unordered_map<TValveStatus, Labellet*> mvlabels;
+	std::unordered_map<GateValveStatus, GateValvelet*> gvalves;
+	std::unordered_map<GateValveStatus, Labellet*> gvlabels;
+	std::unordered_map<ManualValveStatus, ManualValvelet*> mvalves;
+	std::unordered_map<ManualValveStatus, Labellet*> mvlabels;
+	std::unordered_map<TValveStatus, MotorValvelet*> evalves;
+	std::unordered_map<TValveStatus, Labellet*> evlabels;
 	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;
 	std::unordered_map<DoorStatus, Labellet*> hdlabels;
 	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;

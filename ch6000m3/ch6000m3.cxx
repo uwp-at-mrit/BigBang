@@ -11,6 +11,7 @@
 #include "page/draughts.hpp"
 #include "page/loads.hpp"
 #include "page/fill_jet.hpp"
+#include "page/flushs.hpp"
 #include "page/graphlets.hpp"
 
 using namespace WarGrey::SCADA;
@@ -41,13 +42,14 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new FillnJetPage(this->device));
+		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new DraughtsPage(this->device));
 		this->add_planet(new SealedWaterPage(this->device));
 		this->add_planet(new LoadsPage(this->device));
 		this->add_planet(new FillnJetPage(this->device));
+		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new GraphletOverview());
 	}
 

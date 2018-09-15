@@ -32,9 +32,6 @@ private enum LDMode { WindowUI = 0, Dashboard };
 private enum class LDGVOperation { Open, Close, FakeOpen, FakeClose, _ };
 private enum class LDMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
 
-static ICanvasBrush^ block_color = Colours::Firebrick;
-static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
-
 // WARNING: order matters
 private enum class LD : unsigned int {
 	Port, Starboard,
@@ -64,8 +61,8 @@ private enum class LD : unsigned int {
 
 private class Barge final
 	: public PLCConfirmation
-	, public IMenuCommand<LDGVOperation, IMRMaster*>
-	, public IMenuCommand<LDMVOperation, IMRMaster*> {
+	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>
+	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, IMRMaster*> {
 public:
 	Barge(LoadsPage* master) : master(master) {}
 
@@ -87,24 +84,16 @@ public:
 	}
 
 public:
-	void execute(LDGVOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<GateValvelet, LD>*>(target);
-
-		if (valve != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
-				cmd.ToString()->Data(),
-				valve->id.ToString()->Data());
-		}
+	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
+			cmd.ToString()->Data(),
+			valve->id.ToString()->Data());
 	}
 
-	void execute(LDMVOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto valve = dynamic_cast<Credit<MotorValvelet, LD>*>(target);
-
-		if (valve != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
-				cmd.ToString()->Data(),
-				valve->id.ToString()->Data());
-		}
+	void execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
+			cmd.ToString()->Data(),
+			valve->id.ToString()->Data());
 	}
 
 public:
@@ -171,10 +160,10 @@ public:
 			float radius = std::fminf(gwidth, gheight);
 			float nic_radius = radius * 0.5F;
 
-			this->load_pump(this->pumps, this->captions, LD::PSUWPump, -radius, +2.0F);
-			this->load_pump(this->pumps, this->captions, LD::SBUWPump, -radius, -2.0F);
-			this->load_pump(this->pumps, this->captions, LD::PSHPump, -radius, -2.0F);
-			this->load_pump(this->pumps, this->captions, LD::SBHPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, LD::PSUWPump, -radius, -2.0F);
+			this->load_pump(this->pumps, this->captions, LD::SBUWPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, LD::PSHPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, LD::SBHPump, -radius, -2.0F);
 
 			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, radius, radius, 0.5F, default_pipeline_color));
 
@@ -479,8 +468,8 @@ LoadsPage::LoadsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	Barge* dashboard = new Barge(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<LDGVOperation, IMRMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<LDMVOperation, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>(dashboard, plc);
+	this->motor_valve_op = make_menu<LDMVOperation, Credit<MotorValvelet, LD>, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

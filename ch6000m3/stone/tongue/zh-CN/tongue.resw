@@ -192,4 +192,7 @@
   <data name="fill_jet" xml:space="preserve">
     <value>艏吹丨艏喷</value>
   </data>
+  <data name="flushs" xml:space="preserve">
+    <value>高压冲水</value>
+  </data>
 </root>

@@ -141,10 +141,10 @@
   <data name="Unstoppable" xml:space="preserve">
     <value>Failed to Turn Off</value>
   </data>
-  <data name="pump" xml:space="preserve">
+  <data name="hydraulic_pump" xml:space="preserve">
     <value>Hydraulic Pump</value>
   </data>
-  <data name="g_valve" xml:space="preserve">
+  <data name="gate_valve" xml:space="preserve">
     <value>Gate Valve</value>
   </data>
   <data name="Closed" xml:space="preserve">
@@ -189,10 +189,13 @@
   <data name="winch" xml:space="preserve">
     <value>Winch</value>
   </data>
-  <data name="m_valve" xml:space="preserve">
+  <data name="motor_valve" xml:space="preserve">
     <value>Motor Valve</value>
   </data>
-  <data name="h_pump" xml:space="preserve">
+  <data name="hopper_pump" xml:space="preserve">
     <value>Hopper Pump</value>
+  </data>
+  <data name="manual_valve" xml:space="preserve">
+    <value>Manual Valve</value>
   </data>
 </root>

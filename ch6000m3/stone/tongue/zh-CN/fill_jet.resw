@@ -147,24 +147,6 @@
   <data name="D010" xml:space="preserve">
     <value>左总装舱</value>
   </data>
-  <data name="D011" xml:space="preserve">
-    <value>右低排</value>
-  </data>
-  <data name="D012" xml:space="preserve">
-    <value>左低排</value>
-  </data>
-  <data name="D013" xml:space="preserve">
-    <value>右前装舱</value>
-  </data>
-  <data name="D014" xml:space="preserve">
-    <value>左前装舱</value>
-  </data>
-  <data name="D015" xml:space="preserve">
-    <value>右后装舱</value>
-  </data>
-  <data name="D016" xml:space="preserve">
-    <value>左后装舱</value>
-  </data>
   <data name="D017" xml:space="preserve">
     <value>左舱内泵装舱</value>
   </data>
@@ -191,9 +173,6 @@
   </data>
   <data name="D025" xml:space="preserve">
     <value>右隔离</value>
-  </data>
-  <data name="D026" xml:space="preserve">
-    <value>右水下泵排出</value>
   </data>
   <data name="Gantry" xml:space="preserve">
     <value>装驳架</value>

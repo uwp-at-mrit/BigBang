@@ -29,7 +29,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
 
-private enum class HSOperation { Start, Stop, Reset, _ };
+private enum class HSPOperation { Start, Stop, Reset, Auto, _ };
+private enum class HSVOperation { Start, Stop, Reset, _ };
+
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
 
@@ -50,9 +52,7 @@ private enum class HS : unsigned int {
 	// Key Labels
 	Port, Starboard, Master, Visor, Storage, Pressure,
 	// Indicators
-	F001Blocked, F002Blocked,
-	TS1, TS2, TS11, TS12,
-	FilterBlocked,
+	F001Blocked, F002Blocked, FilterBlocked,
 	_,
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
@@ -60,7 +60,10 @@ private enum class HS : unsigned int {
 	// anchors used for unnamed corners
 };
 
-private class Hydraulics final : public PLCConfirmation, public IMenuCommand<HSOperation, IMRMaster*> {
+private class Hydraulics final
+	: public PLCConfirmation
+	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>
+	, public IMenuCommand<HSVOperation, Credit<GateValvelet, HS>, IMRMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
@@ -127,14 +130,16 @@ public:
 	}
 
 public:
-	void execute(HSOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto pump = dynamic_cast<Credit<HydraulicPumplet, HS>*>(target);
+	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"%s %s",
+			cmd.ToString()->Data(),
+			pump->id.ToString()->Data());
+	}
 
-		if (pump != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"%s %s",
-				cmd.ToString()->Data(),
-				pump->id.ToString()->Data());
-		}
+	void execute(HSVOperation cmd, Credit<GateValvelet, HS>* valve, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"%s %s",
+			cmd.ToString()->Data(),
+			valve->id.ToString()->Data());
 	}
 
 public:
@@ -316,20 +321,13 @@ public:
 	}
 
 	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
-		float vgapsize = gwidth * 0.125F;
-
 		this->station->map_credit_graphlet(this->states[HS::F001Blocked], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->states[HS::F002Blocked], GraphletAnchor::CC);
 		
-		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RB, GraphletAnchor::LB, gwidth);
-		this->master->move_to(this->states[HS::TS2], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
-		this->master->move_to(this->states[HS::TS1], this->states[HS::TS2], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
-
-		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RB, GraphletAnchor::LB, gwidth);
-		this->master->move_to(this->states[HS::FilterBlocked], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gwidth);
-		this->master->move_to(this->states[HS::TS12], this->states[HS::FilterBlocked], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
-		this->master->move_to(this->states[HS::TS11], this->states[HS::TS12], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
-
+		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gwidth);
+		this->master->move_to(this->states[HS::FilterBlocked], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
+		
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
 
@@ -458,7 +456,8 @@ HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc)
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<HSOperation, IMRMaster*>(dashboard, plc);
+	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>(dashboard, plc);
+	this->valve_op = make_menu<HSVOperation, Credit<GateValvelet, HS>, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -535,13 +534,19 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
+	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
+		|| (dynamic_cast<GateValvelet*>(g) != nullptr));
 }
 
 void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	auto pump = dynamic_cast<HydraulicPumplet*>(g);
+	auto gvalve = dynamic_cast<GateValvelet*>(g);
+	
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (this->can_select(g)) {
-		menu_popup(this->operation, g, local_x, local_y);
+	if (pump != nullptr) {
+		menu_popup(this->pump_op, g, local_x, local_y);
+	} else if (gvalve != nullptr) {
+		menu_popup(this->valve_op, g, local_x, local_y);
 	}
 }

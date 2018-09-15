@@ -144,4 +144,7 @@
   <data name="Heat" xml:space="preserve">
     <value>Heat</value>
   </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto Control</value>
+  </data>
 </root>

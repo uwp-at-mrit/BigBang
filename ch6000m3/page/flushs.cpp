@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/fill_jet.hpp"
+#include "page/flushs.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -15,7 +15,6 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
-#include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -29,14 +28,13 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-private enum FJMode { WindowUI = 0, Dashboard };
+private enum FSMode { WindowUI = 0, Dashboard };
 
-private enum class FJGVOperation { Open, Close, FakeOpen, FakeClose, _ };
-private enum class FJMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
-private enum class FJHDOperation { Open, Stop, Close, Disable, _ };
+private enum class FSGVOperation { Open, Close, FakeOpen, FakeClose, _ };
+private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
-private enum class FJ : unsigned int {
+private enum class FS : unsigned int {
 	Port, Starboard,
 	
 	// Valves
@@ -63,13 +61,12 @@ private enum class FJ : unsigned int {
 	n24, n0325, n0405, n0723, n0923
 };
 
-private class FillJet final
+private class Flush final
 	: public PLCConfirmation
-	, public IMenuCommand<FJGVOperation, Credit<GateValvelet, FJ>, IMRMaster*>
-	, public IMenuCommand<FJMVOperation, Credit<MotorValvelet, FJ>, IMRMaster*>
-	, public IMenuCommand<FJHDOperation, Credit<UpperHopperDoorlet, FJ>, IMRMaster*> {
+	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, IMRMaster*>
+	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, IMRMaster*> {
 public:
-	FillJet(FillnJetPage* master) : master(master) {}
+	Flush(FlushsPage* master) : master(master) {}
 
 public:
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
@@ -89,19 +86,13 @@ public:
 	}
 
 public:
-	void execute(FJGVOperation cmd, Credit<GateValvelet, FJ>* valve, IMRMaster* plc) {
+	void execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, IMRMaster* plc) {
 		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
 	}
 
-	void execute(FJMVOperation cmd, Credit<MotorValvelet, FJ>* valve, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
-	}
-
-	void execute(FJHDOperation cmd, Credit<UpperHopperDoorlet, FJ>* door, IMRMaster* plc) {
+	void execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, IMRMaster* plc) {
 		plc->get_logger()->log_message(Log::Info, L"%s %s",
 			cmd.ToString()->Data(),
 			door->id.ToString()->Data());
@@ -120,42 +111,42 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
-		Turtle<FJ>* pTurtle = new Turtle<FJ>(gwidth, gheight, false);
+		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false);
 
-		pTurtle->move_left(FJ::deck_rx)->move_left(2, FJ::D021)->move_left(2, FJ::d2122);
-		pTurtle->move_down(5)->move_right(2, FJ::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, FJ::d1920)->move_left(2, FJ::D020)->move_left(6, FJ::d1720);
+		pTurtle->move_left(FS::deck_rx)->move_left(2, FS::D021)->move_left(2, FS::d2122);
+		pTurtle->move_down(5)->move_right(2, FS::D022)->move_right(3)->jump_back();
+		pTurtle->move_left(2, FS::d1920)->move_left(2, FS::D020)->move_left(6, FS::d1720);
 
-		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(3, FJ::D010)->jump_back(FJ::d1720);
+		pTurtle->move_left(3, FS::D017)->move_left(11, FS::n0405)->move_left(3, FS::D010)->jump_back(FS::d1720);
 		
-		pTurtle->move_down(3.5F, FJ::PSHPump)->move_left(6, FJ::n0923)->move_left(8)->move_up(1.5F, FJ::D005)->move_up(1.5F)->jump_up();
-		pTurtle->move_up(3, FJ::d0406)->move_right(4, FJ::D006)->move_right(4)->move_down(0.5F, FJ::deck_ty)->move_down(FJ::D009);
-		pTurtle->move_down(5)->jump_down()->move_down(2, FJ::D023)->jump_back(FJ::d0406);
+		pTurtle->move_down(3.5F, FS::PSHPump)->move_left(6, FS::n0923)->move_left(8)->move_up(1.5F, FS::D005)->move_up(1.5F)->jump_up();
+		pTurtle->move_up(3, FS::d0406)->move_right(4, FS::D006)->move_right(4)->move_down(0.5F, FS::deck_ty)->move_down(FS::D009);
+		pTurtle->move_down(5)->jump_down()->move_down(2, FS::D023)->jump_back(FS::d0406);
 
-		pTurtle->move_up(1.5F, FJ::D004)->move_up(2, FJ::ps)->move_up(3, FJ::Port);
+		pTurtle->move_up(1.5F, FS::D004)->move_up(2, FS::ps)->move_up(3, FS::Port);
 
-		pTurtle->jump_back(FJ::D023)->move_down(2)->jump_down()->move_down(5, FJ::D007);
-		pTurtle->move_down(FJ::deck_by)->move_down(0.5F, FJ::d007)->jump_left(8, FJ::d0325);
-		pTurtle->move_up(3)->jump_up()->move_up(1.5F, FJ::D025)->move_up(1.5F, FJ::d0225);
-		pTurtle->move_right(8, FJ::n0723)->move_right(6, FJ::SBHPump)->move_down(3.5F, FJ::d1819)->jump_back(FJ::d0225);
-		pTurtle->jump_up(2.5F)->move_left(2, FJ::D002)->move_left(15, FJ::n24)->move_left(10, FJ::D001)->move_left(3, FJ::Hatch);
+		pTurtle->jump_back(FS::D023)->move_down(2)->jump_down()->move_down(5, FS::D007);
+		pTurtle->move_down(FS::deck_by)->move_down(0.5F, FS::d007)->jump_left(8, FS::d0325);
+		pTurtle->move_up(3)->jump_up()->move_up(1.5F, FS::D025)->move_up(1.5F, FS::d0225);
+		pTurtle->move_right(8, FS::n0723)->move_right(6, FS::SBHPump)->move_down(3.5F, FS::d1819)->jump_back(FS::d0225);
+		pTurtle->jump_up(2.5F)->move_left(2, FS::D002)->move_left(15, FS::n24)->move_left(10, FS::D001)->move_left(3, FS::Hatch);
 
-		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(3, FJ::D008);
+		pTurtle->jump_back(FS::d1819)->move_left(3, FS::D018)->move_left(11, FS::n0325)->move_left(3, FS::D008);
 		pTurtle->move_left(14)->move_up(5.5F)->jump_up()->move_up(5.5F);
-		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FJ::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, FJ::Gantry)->move_left()->jump_back(FJ::Gantry)->move_right()->jump_back(FJ::d0325);
+		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FS::D024)->move_left(3)->turn_left_up();
+		pTurtle->move_up(0.5F, FS::Gantry)->move_left()->jump_back(FS::Gantry)->move_right()->jump_back(FS::d0325);
 
-		pTurtle->move_down(1.5F, FJ::D003)->move_down(2, FJ::sb)->move_down(3, FJ::Starboard);
+		pTurtle->move_down(1.5F, FS::D003)->move_down(2, FS::sb)->move_down(3, FS::Starboard);
 
-		pTurtle->jump_back(FJ::d1819)->move_right(4, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
+		pTurtle->jump_back(FS::d1819)->move_right(4, FS::deck_lx)->move_right(2, FS::D019)->move_right(2)->move_to(FS::d1920);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
 		{ // load manual pipe segement
 			float d02_y, d05_y;
 
-			this->pipeline->fill_anchor_location(FJ::D002, nullptr, &d02_y);
-			this->pipeline->fill_anchor_location(FJ::D005, nullptr, &d05_y);
+			this->pipeline->fill_anchor_location(FS::D002, nullptr, &d02_y);
+			this->pipeline->fill_anchor_location(FS::D005, nullptr, &d05_y);
 
 			this->manual_pipe = this->master->insert_one(
 				new Linelet(0.0F, d02_y, 0.0F, d05_y,
@@ -165,38 +156,37 @@ public:
 		{ // load doors
 			float radius = std::fminf(gwidth, gheight);
 
-			this->load_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, radius);
-			this->load_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, radius);
+			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
+			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
 		}
 
 		{ // load valves
 			float radius = std::fminf(gwidth, gheight);
 
-			this->load_valve(this->gvalves, this->vlabels, this->captions, FJ::D001, radius, 0.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, FJ::D002, FJ::D024, radius, 00.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, FJ::D003, FJ::D025, radius, 90.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, FJ::D004, FJ::D009, radius, -90.0);
+			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D001, FS::D024, radius, 00.0);
+			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D003, FS::D025, radius, 90.0);
+			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D004, FS::D009, radius, -90.0);
 		}
 
 		{ // load special nodes
 			float radius = std::fminf(gwidth, gheight);
 			float nic_radius = radius * 0.5F;
 			
-			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, +2.0F);
-			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, -2.0F);
+			this->load_pump(this->pumps, this->captions, FS::PSHPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, FS::SBHPump, -radius, -2.0F);
 			this->ps_suction = this->master->insert_one(new Circlelet(nic_radius, default_port_color, default_pipeline_thickness));
 			this->sb_suction = this->master->insert_one(new Circlelet(nic_radius, default_starboard_color, default_pipeline_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
 
-			for (FJ id = FJ::n24; id <= FJ::n0923; id++) {
+			for (FS id = FS::n24; id <= FS::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
 			}
 		}
 
 		{ // load other labels
-			this->load_label(this->captions, FJ::Hatch, Colours::SeaGreen, this->caption_font);
-			this->load_label(this->captions, FJ::Gantry, Colours::Yellow, this->caption_font);
+			this->load_label(this->captions, FS::Hatch, Colours::SeaGreen, this->caption_font);
+			this->load_label(this->captions, FS::Gantry, Colours::Yellow, this->caption_font);
 
 			for (size_t idx = 0; idx < hopper_count; idx++) {
 				this->sequences[idx] = this->master->insert_one(new Labellet((idx + 1).ToString() + "#"));
@@ -215,13 +205,13 @@ public:
 		float y0 = 0.0F;
 
 		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FJ::D025, GraphletAnchor::CB);
+		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FS::D025, GraphletAnchor::CB);
 
-		this->pipeline->map_credit_graphlet(this->captions[FJ::Gantry], GraphletAnchor::CB);
-		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FJ::Port, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FJ::Starboard, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sea_inlet, FJ::Hatch, GraphletAnchor::CC);
-		this->master->move_to(this->captions[FJ::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->pipeline->map_credit_graphlet(this->captions[FS::Gantry], GraphletAnchor::CB);
+		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FS::Port, GraphletAnchor::CC);
+		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FS::Starboard, GraphletAnchor::CC);
+		this->pipeline->map_graphlet_at_anchor(this->sea_inlet, FS::Hatch, GraphletAnchor::CC);
+		this->master->move_to(this->captions[FS::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
 			/** NOTE
@@ -231,29 +221,29 @@ public:
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.4F);
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gheight * +2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, gheight * -2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, gheight * +2.4F);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
 			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC);
 		}
 
-		this->vlabels[FJ::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+		this->vlabels[FS::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		
 		for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 			switch (it->first) {
-			case FJ::D006: case FJ::D010: case FJ::D020: case FJ::D021: case FJ::D022: case FJ::D024: {
+			case FS::D006: case FS::D010: case FS::D020: case FS::D021: case FS::D022: case FS::D024: {
 				it->second->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
 				dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
 			}; break;
-			case FJ::D017: {
+			case FS::D017: {
 				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
 			}; break;
-			case FJ::D018: {
+			case FS::D018: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
 			}; break;
-			case FJ::D001: case FJ::D002: case FJ::D008: case FJ::D019: {
+			case FS::D001: case FS::D002: case FS::D008: case FS::D019: {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
 				dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
 			}; break;
@@ -268,33 +258,10 @@ public:
 			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 
-		{ // reflow motor-driven valves
-			float ox, oy;
-
-			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
-				switch (it->first) {
-				case FJ::D003: case FJ::D004: case FJ::D005: case FJ::D007: case FJ::D009:
-				case FJ::D023: case FJ::D025: {
-					this->gvalves[FJ::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-					dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
-				}; break;
-				case FJ::D002: case FJ::D008: case FJ::D017: case FJ::D019: {
-					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;
-				}; break;
-				default: {
-					dx = x0; dy = y0 - gridsize; anchor = GraphletAnchor::CC;
-				}
-				}
-
-				it->second->fill_valve_origin(&ox, &oy);
-				this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
-			}
-		}
-
 		{ // reflow door sequences
-			this->pipeline->fill_anchor_location(FJ::D008, nullptr, &y0);
+			this->pipeline->fill_anchor_location(FS::D008, nullptr, &y0);
 			for (unsigned int idx = 0; idx < hopper_count; idx++) {
-				this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &x0, nullptr, GraphletAnchor::CC);
+				this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::PS1))], &x0, nullptr, GraphletAnchor::CC);
 				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CB);
 			}
 		}
@@ -302,19 +269,11 @@ public:
 
 public:
 	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
-		float ox, oy, sx, sy, tx, ty;
-
-		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
-			this->master->fill_graphlet_location(it->second, &sx, &sy, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->gvalves[it->first], &tx, &ty, GraphletAnchor::CC);
-			it->second->fill_valve_origin(&ox, &oy);
-
-			ds->DrawLine(sx + ox, sy + oy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
-		}
+		float sx, sy, tx, ty;
 
 		for (unsigned int idx = 0; idx < hopper_count; idx++) {
-			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &sx, &sy, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::SB1))], &tx, &ty, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::PS1))], &sx, &sy, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::SB1))], &tx, &ty, GraphletAnchor::CC);
 			
 			ds->DrawLine(sx, sy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
 		}
@@ -322,29 +281,13 @@ public:
 
 private:
 	template<class G, typename E>
-	void load_valve(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
-		, E id, float radius, double degrees) {
-		this->load_label(ls, "(" + id.ToString() + ")", id, Colours::Silver, this->label_font);
-		this->load_label(cs, id, Colours::Silver, this->label_font);
-
-		gs[id] = this->master->insert_one(new G(radius, degrees), id);
-	}
-	
-	template<class G, class M, typename E>
-	void load_valves(std::map<E, G*>& gs, std::map<E, M*>& ms, std::map<E, Credit<Labellet, E>*>& ls
-		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
-		float mradius = radius * 0.618F;
-
+	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
+		, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			double mdegrees = 0.0;
+			this->load_label(ls, "(" + id.ToString() + ")", id, Colours::Silver, this->label_font);
+			this->load_label(cs, id, Colours::Silver, this->label_font);
 
-			switch (id) {
-			case FJ::D002: case FJ::D008: case FJ::D009: case FJ::D017: case FJ::D019: mdegrees = -180.0; break;
-			}
-
-			// moter-driven valves' second, catching events first 
-			this->load_valve(gs, ls, cs, id, radius, degrees);
-			ms[id] = this->master->insert_one(new M(mradius, mdegrees, false), id);
+			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
 
@@ -393,8 +336,8 @@ private:
 			p_anchor = GraphletAnchor::CT;
 		}
 
-		this->pipeline->fill_anchor_location(FJ::D001, &lx, &y);
-		this->pipeline->fill_anchor_location(FJ::D010, &rx, nullptr);
+		this->pipeline->fill_anchor_location(FS::D001, &lx, &y);
+		this->pipeline->fill_anchor_location(FS::D010, &rx, nullptr);
 		cell_width = (rx - lx) / float(hopper_count);
 
 		for (E id = id0; id <= idn; id++) {
@@ -408,16 +351,15 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<FJ>* pipeline;
-	std::map<FJ, Credit<Labellet, FJ>*> captions;
-	std::map<FJ, Credit<UpperHopperDoorlet, FJ>*> uhdoors;
-	std::map<FJ, Credit<Percentagelet, FJ>*> progresses;
-	std::map<FJ, Credit<HopperPumplet, FJ>*> pumps;
-	std::map<FJ, Credit<GateValvelet, FJ>*> gvalves;
-	std::map<FJ, Credit<MotorValvelet, FJ>*> mvalves;
-	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
+	Tracklet<FS>* pipeline;
+	std::map<FS, Credit<Labellet, FS>*> captions;
+	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
+	std::map<FS, Credit<Percentagelet, FS>*> progresses;
+	std::map<FS, Credit<HopperPumplet, FS>*> pumps;
+	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
+	std::map<FS, Credit<Labellet, FS>*> vlabels;
 	Labellet* sequences[hopper_count];
-	std::map<FJ, Omegalet*> nintercs;
+	std::map<FS, Omegalet*> nintercs;
 	Linelet* manual_pipe;
 	Hatchlet* sea_inlet;
 	Circlelet* ps_suction;
@@ -432,12 +374,12 @@ private:
 	DimensionStyle percentage_style;
 
 private:
-	FillnJetPage* master;
+	FlushsPage* master;
 };
 
-private class FillnJetDecorator : public IPlanetDecorator {
+private class FlushDecorator : public IPlanetDecorator {
 public:
-	FillnJetDecorator(FillJet* master) : master(master) {
+	FlushDecorator(Flush* master) : master(master) {
 		float height = 1.0F;
 		float xradius = height * 0.10F;
 		float yradius = height * 0.50F;
@@ -455,19 +397,19 @@ public:
 	}
 
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto pipeline = dynamic_cast<Tracklet<FJ>*>(g);
+		auto pipeline = dynamic_cast<Tracklet<FS>*>(g);
 
 		if (pipeline != nullptr) {
 			float ps_y, sb_y;
 			float deck_lx, deck_ty, deck_rx, deck_by;
 
-			pipeline->fill_anchor_location(FJ::ps, nullptr, &ps_y, false);
-			pipeline->fill_anchor_location(FJ::sb, nullptr, &sb_y, false);
+			pipeline->fill_anchor_location(FS::ps, nullptr, &ps_y, false);
+			pipeline->fill_anchor_location(FS::sb, nullptr, &sb_y, false);
 
-			pipeline->fill_anchor_location(FJ::deck_lx, &deck_lx, nullptr, false);
-			pipeline->fill_anchor_location(FJ::deck_rx, &deck_rx, nullptr, false);
-			pipeline->fill_anchor_location(FJ::deck_ty, nullptr, &deck_ty, false);
-			pipeline->fill_anchor_location(FJ::deck_by, nullptr, &deck_by, false);
+			pipeline->fill_anchor_location(FS::deck_lx, &deck_lx, nullptr, false);
+			pipeline->fill_anchor_location(FS::deck_rx, &deck_rx, nullptr, false);
+			pipeline->fill_anchor_location(FS::deck_ty, nullptr, &deck_ty, false);
+			pipeline->fill_anchor_location(FS::deck_by, nullptr, &deck_by, false);
 
 			{ // draw ship
 				float ship_width = this->actual_width();
@@ -495,11 +437,11 @@ public:
 				float d0325_y, d03_x, d07_x;
 				float d10_x, d10_y;
 
-				pipeline->fill_anchor_location(FJ::D005, &d0525_x, &d05_y, false);
-				pipeline->fill_anchor_location(FJ::D025, nullptr, &d25_y, false);
-				pipeline->fill_anchor_location(FJ::D010, &d10_x, &d10_y, false);
-				pipeline->fill_anchor_location(FJ::d0325, &d03_x, &d0325_y, false);
-				pipeline->fill_anchor_location(FJ::d007, &d07_x, nullptr, false);
+				pipeline->fill_anchor_location(FS::D005, &d0525_x, &d05_y, false);
+				pipeline->fill_anchor_location(FS::D025, nullptr, &d25_y, false);
+				pipeline->fill_anchor_location(FS::D010, &d10_x, &d10_y, false);
+				pipeline->fill_anchor_location(FS::d0325, &d03_x, &d0325_y, false);
+				pipeline->fill_anchor_location(FS::d007, &d07_x, nullptr, false);
 
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
 					Colours::DimGray, default_pipeline_thickness, this->ship_style);
@@ -521,23 +463,22 @@ private:
 	float ship_width;
 
 private:
-	FillJet* master;
+	Flush* master;
 };
 
-FillnJetPage::FillnJetPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
-	FillJet* dashboard = new FillJet(this);
+FlushsPage::FlushsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<FJGVOperation, Credit<GateValvelet, FJ>, IMRMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<FJMVOperation, Credit<MotorValvelet, FJ>, IMRMaster*>(dashboard, plc);
-	this->upper_door_op = make_menu<FJHDOperation, Credit<UpperHopperDoorlet, FJ>, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, IMRMaster*>(dashboard, plc);
+	this->upper_door_op = make_menu<FSHDOperation, Credit<UpperHopperDoorlet, FS>, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
 
 	{ // load decorators
 		this->append_decorator(new PageDecorator());
-		this->append_decorator(new FillnJetDecorator(dashboard));
+		this->append_decorator(new FlushDecorator(dashboard));
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);
@@ -547,7 +488,7 @@ FillnJetPage::FillnJetPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	}
 }
 
-FillnJetPage::~FillnJetPage() {
+FlushsPage::~FlushsPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
@@ -557,8 +498,8 @@ FillnJetPage::~FillnJetPage() {
 #endif
 }
 
-void FillnJetPage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto dashboard = dynamic_cast<FillJet*>(this->dashboard);
+void FlushsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
@@ -571,10 +512,10 @@ void FillnJetPage::load(CanvasCreateResourcesReason reason, float width, float h
 		dashboard->construct(gwidth, gheight);
 
 		{ // load graphlets
-			this->change_mode(FJMode::Dashboard);
+			this->change_mode(FSMode::Dashboard);
 			dashboard->load(width, height, gwidth, gheight);
 			
-			this->change_mode(FJMode::WindowUI);
+			this->change_mode(FSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
 			this->statusbar = new Statusbarlet(this->name(), this->device);
 			this->insert(this->statusbar);
@@ -587,39 +528,35 @@ void FillnJetPage::load(CanvasCreateResourcesReason reason, float width, float h
 	}
 }
 
-void FillnJetPage::reflow(float width, float height) {
-	auto dashboard = dynamic_cast<FillJet*>(this->dashboard);
+void FlushsPage::reflow(float width, float height) {
+	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
 		float gwidth = this->grid->get_grid_width();
 		float gheight = this->grid->get_grid_height();
 
-		this->change_mode(FJMode::WindowUI);
+		this->change_mode(FSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 
-		this->change_mode(FJMode::Dashboard);
+		this->change_mode(FSMode::Dashboard);
 		dashboard->reflow(width, height, gwidth, gheight, vinset);
 	}
 }
 
-bool FillnJetPage::can_select(IGraphlet* g) {
+bool FlushsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
 }
 
-void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void FlushsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
-	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
-	} else if (mvalve != nullptr) {
-		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
 	}

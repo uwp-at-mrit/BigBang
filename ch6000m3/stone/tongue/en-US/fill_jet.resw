@@ -147,24 +147,6 @@
   <data name="D010" xml:space="preserve">
     <value>Port Total Charge</value>
   </data>
-  <data name="D011" xml:space="preserve">
-    <value>Starboard Low Discharge</value>
-  </data>
-  <data name="D012" xml:space="preserve">
-    <value>Port Low Discharge</value>
-  </data>
-  <data name="D013" xml:space="preserve">
-    <value>Starboard Fore Charge</value>
-  </data>
-  <data name="D014" xml:space="preserve">
-    <value>Port Fore Charge</value>
-  </data>
-  <data name="D015" xml:space="preserve">
-    <value>Starboard Back Charge</value>
-  </data>
-  <data name="D016" xml:space="preserve">
-    <value>Port Back Charge</value>
-  </data>
   <data name="D017" xml:space="preserve">
     <value>Port Deck Pump Charge</value>
   </data>
@@ -191,9 +173,6 @@
   </data>
   <data name="D025" xml:space="preserve">
     <value>Starboard Isolation</value>
-  </data>
-  <data name="D026" xml:space="preserve">
-    <value>Starboard Underwater Discharge</value>
   </data>
   <data name="Gantry" xml:space="preserve">
     <value>Gantry</value>

@@ -15,6 +15,7 @@
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -28,17 +29,20 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum SWMode { WindowUI = 0, Dashboard };
 
-private enum class SWOperation { Start, Stop, Reset, _ };
+private enum class SWPOperation { Start, Stop, Reset, Auto, _ };
+private enum class SWVOperation { Open, Close, FakeOpen, FakeClose, _ };
 
 // WARNING: order matters
 private enum class SW : unsigned int {
 	// Pumps
 	Hatch, HP1, HP2, Port, Starboard,
 	FP1, FP2, SP13, SP24, SP15, SP26, SP11, SP22, SP19, SP20,
-	// Valves
+	// Manual Valves
 	DGV3, DGV4, DGV5, DGV6, DGV1, DGV2, DGV9, DGV10,
 	DGV12, DGV11, DGV13, DGV14, DGV15, DGV16, DGV17, DGV18, DGV19, DGV20,
-	DGV7, DGV8, DGV44, DGV45, DGV46, DGV47,
+	DGV7, DGV8,
+	// Gate Valves
+	DGV44, DGV45, DGV46, DGV47,
 	// Labels
 	ToPipeline, SS1, SS2,
 	// Special Arrows
@@ -53,7 +57,10 @@ private enum class SW : unsigned int {
 	sea, pipeline
 };
 
-private class SealedWaters final : public PLCConfirmation, public IMenuCommand<SWOperation, IMRMaster*> {
+private class SealedWaters final
+	: public PLCConfirmation
+	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>
+	, public IMenuCommand<SWVOperation, Credit<GateValvelet, SW>, IMRMaster*> {
 public:
 	SealedWaters(SealedWaterPage* master) : master(master) {}
 
@@ -75,22 +82,22 @@ public:
 	}
 
 public:
-	void execute(SWOperation cmd, IGraphlet* target, IMRMaster* plc) {
-		auto pump = dynamic_cast<Credit<HydraulicPumplet, SW>*>(target);
-
-		if (pump != nullptr) {
-			plc->get_logger()->log_message(Log::Info, L"%s %s",
-				cmd.ToString()->Data(),
-				pump->id.ToString()->Data());
-		}
+	void execute(SWPOperation cmd, Credit<HydraulicPumplet, SW>* pump, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"%s %s",
+			cmd.ToString()->Data(),
+			pump->id.ToString()->Data());
 	}
 
+	void execute(SWVOperation cmd, Credit<GateValvelet, SW>* valve, IMRMaster* plc) {
+		plc->get_logger()->log_message(Log::Info, L"%s %s",
+			cmd.ToString()->Data(),
+			valve->id.ToString()->Data());
+	}
 
 public:
 	void construct(float gwidth, float gheight) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
-		this->valve_style = make_manual_valve_style();
 	}
 
 	void load(float width, float height, float gwidth, float gheight) {
@@ -136,8 +143,9 @@ public:
 
 			this->hatch = this->master->insert_one(new Hatchlet(radius * 2.5F));
 
-			this->load_devices(this->valves, this->vlabels, this->valve_style, SW::DGV3, SW::DGV47, radius, 0.0);
-			this->load_devices(this->pumps, this->plabels, Colours::Salmon, SW::FP1, SW::SP20, radius, 0.0);
+			this->load_devices(this->mvalves, this->labels, Colours::Silver, SW::DGV3, SW::DGV8, radius, 0.0);
+			this->load_devices(this->gvalves, this->labels, Colours::Silver, SW::DGV44, SW::DGV47, radius, 0.0);
+			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::FP1, SW::SP20, radius, 0.0);
 
 			this->load_device(this->hoppers, this->captions, SW::HP1, radius, -2.0F);
 			this->load_device(this->hoppers, this->captions, SW::HP2, radius, 2.0F);
@@ -171,7 +179,7 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		float gridsize = std::fminf(gwidth, gheight);
-		float sq1_y, horizon_y, margin;
+		float sq1_y, horizon_y;
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
 
@@ -187,15 +195,12 @@ public:
 		this->master->move_to(this->sea, 0.0F, horizon_y);
 
 		{ // reflow devices
-			for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
-				it->second->fill_margin(0.0F, 0.0F, nullptr, nullptr, &margin, nullptr);
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
-				this->station->map_credit_graphlet(this->vlabels[it->first], GraphletAnchor::CT, 0.0F, gridsize - margin);
-			}
+			this->reflow_valves(this->mvalves, this->labels, gridsize);
+			this->reflow_valves(this->gvalves, this->labels, gridsize);
 			
 			for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
-				this->master->move_to(this->plabels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
+				this->master->move_to(this->labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
 			}
 
 			for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
@@ -245,21 +250,6 @@ private:
 		}
 	}
 
-	template<class G, typename E, typename S>
-	void load_devices(std::map<E, G*>& gs, S& style, E id0, E idn, float radius, double degrees) {
-		for (E id = id0; id <= idn; id++) {
-			gs[id] = this->master->insert_one(new G(radius, degrees), id);
-			gs[id]->set_style(style);
-		}
-	}
-
-	template<class G, typename E, typename S>
-	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, S& style
-		, E id0, E idn, float radius, double degrees) {
-		this->load_devices(gs, style, id0, idn, radius, degrees);
-		this->load_labels(ls, id0, idn, Colours::Silver);
-	}
-
 	template<class G, typename E>
 	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, CanvasSolidColorBrush^ color
 		, E id0, E idn, float radius, double degrees) {
@@ -305,26 +295,36 @@ private:
 		}
 	}
 
+private:
+	template<class G, typename E>
+	void reflow_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, float gridsize) {
+		float margin;
+
+		for (auto it = gs.begin(); it != gs.end(); it++) {
+			it->second->fill_margin(0.0F, 0.0F, nullptr, nullptr, &margin, nullptr);
+			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
+			this->station->map_credit_graphlet(ls[it->first], GraphletAnchor::CT, 0.0F, gridsize - margin);
+		}
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<SW>* station;
 	Hatchlet* hatch;
 	HLinelet* sea;
 	std::map<SW, Credit<Labellet, SW>*> captions;
+	std::map<SW, Credit<Labellet, SW>*> labels;
 	std::map<SW, Credit<ArrowHeadlet, SW>*> arrows;
 	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
 	std::map<SW, Credit<HopperPumplet, SW>*> hoppers;
-	std::map<SW, Credit<Labellet, SW>*> plabels;
-	std::map<SW, Credit<GateValvelet, SW>*> valves;
-	std::map<SW, Credit<Labellet, SW>*> vlabels;
+	std::map<SW, Credit<ManualValvelet, SW>*> mvalves;
+	std::map<SW, Credit<GateValvelet, SW>*> gvalves;
 	std::map<SW, Credit<Dimensionlet, SW>*> pressures;
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
-	std::map<SW, Credit<Labellet, SW>*> islabels;
 	
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
-	GateValveStyle valve_style;
 
 private:
 	SealedWaterPage* master;
@@ -334,7 +334,8 @@ SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 	SealedWaters* dashboard = new SealedWaters(this);
 
 	this->dashboard = dashboard;
-	this->operation = make_menu<SWOperation, IMRMaster*>(dashboard, plc);
+	this->pump_op = make_menu<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>(dashboard, plc);
+	this->valve_op = make_menu<SWVOperation, Credit<GateValvelet, SW>, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -407,13 +408,19 @@ void SealedWaterPage::reflow(float width, float height) {
 }
 
 bool SealedWaterPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
+	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
+		|| (dynamic_cast<GateValvelet*>(g) != nullptr));
 }
 
 void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	auto pump = dynamic_cast<HydraulicPumplet*>(g);
+	auto gvalve = dynamic_cast<GateValvelet*>(g);
+	
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (this->can_select(g)) {
-		menu_popup(this->operation, g, local_x, local_y);
+	if (gvalve != nullptr) {
+		menu_popup(this->valve_op, g, local_x, local_y);
+	} else if (pump != nullptr) {
+		menu_popup(this->pump_op, g, local_x, local_y);
 	}
 }

@@ -8,7 +8,8 @@ namespace WarGrey::SCADA {
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
 		FakeOpen, FakeClose,
-		_ };
+		_
+	};
 
 	private struct TValveStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ frame_color;
