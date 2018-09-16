@@ -20,7 +20,11 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override;
+		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HopperPumpStatus status, WarGrey::SCADA::HopperPumpStyle& style) override;
@@ -32,7 +36,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ iborder;
 		
 	private:
+		Windows::Foundation::Rect enclosing_box;
 		float radius;
+		float pump_cx;
+		float pump_cy;
 		bool leftward;
 		bool upward;
 	};

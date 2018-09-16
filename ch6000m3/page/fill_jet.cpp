@@ -201,7 +201,7 @@ public:
 			for (size_t idx = 0; idx < hopper_count; idx++) {
 				this->sequences[idx] = this->master->insert_one(new Labellet((idx + 1).ToString() + "#"));
 				this->sequences[idx]->set_font(this->caption_font);
-				this->sequences[idx]->set_color(Colours::Tomato);
+				this->sequences[idx]->set_color(Colours::Silver);
 			}
 		}
 	}
@@ -209,7 +209,7 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
-		float dx, dy, margin, label_height;
+		float dx, dy, margin, label_height, ox, oy;
 		float gridsize = std::fminf(gwidth, gheight);
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -235,8 +235,9 @@ public:
 		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gheight * +2.4F);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
-			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC);
+			it->second->fill_pump_origin(&ox);
+			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
+			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
 		}
 
 		this->vlabels[FJ::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -268,27 +269,23 @@ public:
 			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 
-		{ // reflow motor-driven valves
-			float ox, oy;
-
-			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
-				switch (it->first) {
-				case FJ::D003: case FJ::D004: case FJ::D005: case FJ::D007: case FJ::D009:
-				case FJ::D023: case FJ::D025: {
-					this->gvalves[FJ::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-					dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
-				}; break;
-				case FJ::D002: case FJ::D008: case FJ::D017: case FJ::D019: {
-					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;
-				}; break;
-				default: {
-					dx = x0; dy = y0 - gridsize; anchor = GraphletAnchor::CC;
-				}
-				}
-
-				it->second->fill_valve_origin(&ox, &oy);
-				this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
+		for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
+			switch (it->first) {
+			case FJ::D003: case FJ::D004: case FJ::D005: case FJ::D007: case FJ::D009:
+			case FJ::D023: case FJ::D025: {
+				this->gvalves[FJ::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+				dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
+			}; break;
+			case FJ::D002: case FJ::D008: case FJ::D017: case FJ::D019: {
+				dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;
+			}; break;
+			default: {
+				dx = x0; dy = y0 - gridsize; anchor = GraphletAnchor::CC;
 			}
+			}
+
+			it->second->fill_valve_origin(&ox, &oy);
+			this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
 		}
 
 		{ // reflow door sequences

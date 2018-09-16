@@ -42,7 +42,8 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new FlushsPage(this->device));
+		this->add_planet(new LoadsPage(this->device));
+		
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new DraughtsPage(this->device));

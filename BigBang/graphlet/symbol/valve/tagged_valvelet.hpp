@@ -32,7 +32,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void fill_valve_origin(float* x, float* y);
+		void fill_valve_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TValveStatus status, WarGrey::SCADA::TValveStyle& style) override;

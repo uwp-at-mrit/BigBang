@@ -118,7 +118,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)decorator\margin.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\valve\manual_valvelet.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.cpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClCompile>
   </ItemGroup>
@@ -244,7 +244,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)decorator\margin.hpp">
       <Filter>decorator</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\valve\manual_valvelet.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.hpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClInclude>
   </ItemGroup>

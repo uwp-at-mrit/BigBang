@@ -190,7 +190,7 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
-		float dx, dy, margin, label_height;
+		float dx, dy, margin, label_height, ox, oy;
 		float gridsize = std::fminf(gwidth, gheight);
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -219,8 +219,9 @@ public:
 			default: { anchor = GraphletAnchor::LC; }
 			}
 
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
-			this->pipeline->map_credit_graphlet(this->captions[it->first], anchor, gridsize, 0.0F);
+			it->second->fill_pump_origin(&ox);
+			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
+			this->master->move_to(this->captions[it->first],it->second, GraphletAnchor::RC, anchor, std::fabsf(ox));
 		}
 
 		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -260,7 +261,6 @@ public:
 
 		{ // reflow motor-driven valves
 			float polar45 = gridsize * std::sqrtf(2.0F) * 0.618F;
-			float ox, oy;
 
 			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
 				switch (it->first) {

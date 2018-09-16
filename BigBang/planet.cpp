@@ -982,6 +982,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 			if (unsafe_graphlet_unmasked(info, this->mode)) {
 				child->fill_extent(info->x, info->y, &width, &height);
 				if ((info->x < dsWidth) && (info->y < dsHeight) && ((info->x + width) > dsX) && ((info->y + height) > dsY)) {
+#ifndef _DEBUG
 					if (info->rotation == 0.0F) {
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					} else {
@@ -991,6 +992,7 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						ds->Transform = make_rotation_matrix(info->rotation, cx, cy, transformX, transformY);
 						layer = ds->CreateLayer(1.0F, Rect(info->x, info->y, width, height));
 					}
+#endif
 
 					for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG
@@ -1037,8 +1039,10 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 						this->draw_visible_selection(ds, info->x, info->y, width, height);
 					}
 
+#ifndef _DEBUG
 					delete layer; // Must Close the Layer Explicitly, it is C++/CX's quirk.
 					ds->Transform = transform;
+#endif
 				}
 			}
 
