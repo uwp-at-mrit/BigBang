@@ -16,7 +16,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 static CanvasSolidColorBrush^ hatch_default_color = Colours::SeaGreen;
 
 /*************************************************************************************************/
-Hatchlet::Hatchlet(float width, float height, float thickness, CanvasSolidColorBrush^ color)
+Hatchlet::Hatchlet(float width, float height, unsigned int color, float thickness)
+	: Hatchlet(width, height, Colours::make(color), thickness) {}
+
+Hatchlet::Hatchlet(float width, float height, CanvasSolidColorBrush^ color, float thickness)
 	: width(width), height(height), thickness(thickness), color((color == nullptr) ? hatch_default_color : color) {
 	if (this->height == 0.0F) {
 		this->height = this->width;

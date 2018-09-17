@@ -155,7 +155,7 @@ public:
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, 18000.0, lines_width, lines_height));
-		
+
 		overflow_size = ship_height * 0.618F;
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, overflow_size, overflow_size));
 

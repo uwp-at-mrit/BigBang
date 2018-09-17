@@ -26,8 +26,8 @@ static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(12.0F
 TimeSeries WarGrey::SCADA::make_this_minute_series(unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = this_minute_first_100ns();
-	ts.span = minute_span_100ns;
+	ts.start = current_floor_seconds(minute_span_s);
+	ts.span = minute_span_s;
 	ts.step = step;
 
 	return ts;
@@ -36,8 +36,8 @@ TimeSeries WarGrey::SCADA::make_this_minute_series(unsigned int step) {
 TimeSeries WarGrey::SCADA::make_this_hour_series(unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = this_hour_first_100ns();
-	ts.span = hour_span_100ns;
+	ts.start = current_floor_seconds(hour_span_s);
+	ts.span = hour_span_s;
 	ts.step = step;
 
 	return ts;
@@ -46,8 +46,8 @@ TimeSeries WarGrey::SCADA::make_this_hour_series(unsigned int step) {
 TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = today_first_100ns();
-	ts.span = day_span_100ns;
+	ts.start = current_floor_seconds(day_span_s);
+	ts.span = day_span_s;
 	ts.step = step;
 
 	return ts;
@@ -86,7 +86,7 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 }
 
 void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
-	long long now = this_moment_100ns();
+	long long now = current_seconds();
 	long long next_start = this->series.start + this->series.span;
 
 	if (now > next_start) {
@@ -184,7 +184,7 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& s) {
 	float y = this->height - s.border_thickness;
 	float mark_width, mark_height;
 
-	long long now = this_moment_100ns();
+	long long now = current_seconds();
 
 	for (unsigned int i = 0; i <= this->series.step + 1; i++) {
 		float xthis = x + interval * float(i);
@@ -221,7 +221,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	if (this->get_status() == TimeSeriesStatus::Realtime) {
 		Rect haxes_box = this->haxes->ComputeBounds();
-		long long now = this_moment_100ns();
+		long long now = current_seconds();
 		float percentage = std::fminf(float(now - this->series.start) / float(this->series.span), 1.0F);
 		float xmin = this->width - haxes_box.Width;
 		
@@ -269,7 +269,7 @@ void ITimeSerieslet::fill_this_position(long long time, double v, double* x, dou
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	static auto linestyle = make_roundcap_stroke_style();
 	TimeSeriesStyle s = this->get_style();
-	long long now = this_moment_100ns();
+	long long now = current_seconds();
 	long long next_start = this->series.start + this->series.span;
 	double px, py;
 

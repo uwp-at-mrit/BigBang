@@ -7,8 +7,11 @@
 namespace WarGrey::SCADA {
 	private class Hatchlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		Hatchlet(float width, float height = 0.0F, float thickness = 2.0F,
-			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr);
+		Hatchlet(float width, float height, unsigned int color, float thickness = 2.0F);
+
+		Hatchlet(float width, float height = 0.0F,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color = nullptr,
+			float thickness = 2.0F);
 
 	public:
 		void construct() override;

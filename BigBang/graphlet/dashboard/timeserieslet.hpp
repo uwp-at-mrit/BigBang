@@ -58,7 +58,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void set_value(unsigned idx, double value);
+		void set_value(unsigned int idx, double value);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesStatus status, WarGrey::SCADA::TimeSeriesStyle& style) override;

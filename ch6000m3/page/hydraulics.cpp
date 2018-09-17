@@ -172,8 +172,8 @@ public:
 		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
 
-		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up()->move_up(1, HS::SQ2);
-		pTurtle->move_up(5.5F)->move_right(2 /* HS::Master */);
+		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
+		pTurtle->move_up(1, HS::SQ2)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::l);
 		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(6)->jump_back();

@@ -136,7 +136,7 @@ Omegalet::Omegalet(double sdegrees, float r, float thickness, unsigned int color
 	: Omegalet(sdegrees, r, thickness, Colours::make(color), style) {}
 
 Omegalet::Omegalet(double sdegrees, float r, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
-	: Shapelet(omega(sdegrees, r, thickness, style), color) {}
+	: Shapelet(omega(sdegrees, r, thickness, style, -(r * 2.0F + thickness) / r), color) {}
 
 /*************************************************************************************************/
 HLinelet::HLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)

@@ -179,7 +179,7 @@ public:
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		float gridsize = std::fminf(gwidth, gheight);
-		float sq1_y, horizon_y;
+		float sq1_y, sea_y, ox;
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;
 
@@ -191,8 +191,8 @@ public:
 		this->station->map_credit_graphlet(this->captions[SW::SS1], GraphletAnchor::LC);
 		this->station->map_credit_graphlet(this->captions[SW::SS2], GraphletAnchor::LC);
 		
-		this->station->fill_anchor_location(SW::sea, nullptr, &horizon_y, true);
-		this->master->move_to(this->sea, 0.0F, horizon_y);
+		this->station->fill_anchor_location(SW::sea, nullptr, &sea_y, true);
+		this->master->move_to(this->sea, 0.0F, sea_y);
 
 		{ // reflow devices
 			this->reflow_valves(this->mvalves, this->labels, gridsize);
@@ -204,8 +204,10 @@ public:
 			}
 
 			for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC);
+				it->second->fill_pump_origin(&ox);
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
+				this->master->move_to(this->captions[it->first], it->second,
+					GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
 			}
 		}
 

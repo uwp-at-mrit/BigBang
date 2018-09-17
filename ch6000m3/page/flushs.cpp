@@ -15,6 +15,7 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "decorator/page.hpp"
 
@@ -36,29 +37,30 @@ private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
 // WARNING: order matters
 private enum class FS : unsigned int {
 	Port, Starboard,
-	
+
+	// Pumps
+	PSPump, SBPump,
+
 	// Valves
-	D001, D002, D006, D008, D010, D017, D018, D019, D020, D021, D022, D024,
-	D003, D007, D023, D025,
-	D004, D005, D009,
+	HBV01, HBV02, HBV03, HBV08, HBV09, HBV11, HBV12, HBV13, HBV14, HBV15, HBV16, HBV17, HBV18,
+	HBV04, HBV05, HBV06, HBV07, HBV10,
+	SBV1, SBV2, SBV3, SBV4, SBV5,
 
 	// Upper Hopper Doors
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
-
-	// Key Labels
-	Hatch, PSHPump, SBHPump, Gantry,
 	
+	// key labels
+	PSSea, SBSea,
+
 	_,
-	// anchors used as last jumping points
+	// anchors used for unnamed corners
+	h3ps, h3sb, h4, h5, h10,
 	d0225, d0325, d0406,
 	d1720, d1819, d1920, d2122,
 
-	// anchors used for unnamed nodes
-	ps, sb, d007, deck_lx, deck_rx, deck_ty, deck_by,
-
 	// anchors used for non-interconnected nodes
-	n24, n0325, n0405, n0723, n0923
+	nic
 };
 
 private class Flush final
@@ -111,107 +113,85 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
-		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false);
+		float radius = std::fminf(gwidth, gheight);
+		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false, FS::HBV10);
 
-		pTurtle->move_left(FS::deck_rx)->move_left(2, FS::D021)->move_left(2, FS::d2122);
-		pTurtle->move_down(5)->move_right(2, FS::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, FS::d1920)->move_left(2, FS::D020)->move_left(6, FS::d1720);
-
-		pTurtle->move_left(3, FS::D017)->move_left(11, FS::n0405)->move_left(3, FS::D010)->jump_back(FS::d1720);
+		pTurtle->move_right(2, FS::SBV5)->move_right(2, FS::h10);
 		
-		pTurtle->move_down(3.5F, FS::PSHPump)->move_left(6, FS::n0923)->move_left(8)->move_up(1.5F, FS::D005)->move_up(1.5F)->jump_up();
-		pTurtle->move_up(3, FS::d0406)->move_right(4, FS::D006)->move_right(4)->move_down(0.5F, FS::deck_ty)->move_down(FS::D009);
-		pTurtle->move_down(5)->jump_down()->move_down(2, FS::D023)->jump_back(FS::d0406);
+		pTurtle->turn_right_up()->move_up(2, FS::HBV08)->move_up(2)->turn_up_right(FS::h5);
+		pTurtle->turn_left_up()->move_up(4)->turn_up_left();
+		pTurtle->move_left(6, FS::HBV07)->move_left(6, FS::SBV4)->move_left(6, FS::Port)->jump_back(FS::h10);
 
-		pTurtle->move_up(1.5F, FS::D004)->move_up(2, FS::ps)->move_up(3, FS::Port);
+		pTurtle->turn_right_down()->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
+		pTurtle->turn_left_down()->move_down(4)->turn_down_left();
+		pTurtle->move_left(6, FS::HBV06)->move_left(6, FS::SBV3)->move_left(6, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->jump_back(FS::D023)->move_down(2)->jump_down()->move_down(5, FS::D007);
-		pTurtle->move_down(FS::deck_by)->move_down(0.5F, FS::d007)->jump_left(8, FS::d0325);
-		pTurtle->move_up(3)->jump_up()->move_up(1.5F, FS::D025)->move_up(1.5F, FS::d0225);
-		pTurtle->move_right(8, FS::n0723)->move_right(6, FS::SBHPump)->move_down(3.5F, FS::d1819)->jump_back(FS::d0225);
-		pTurtle->jump_up(2.5F)->move_left(2, FS::D002)->move_left(15, FS::n24)->move_left(10, FS::D001)->move_left(3, FS::Hatch);
+		pTurtle->move_right(5, FS::HBV05)->move_right(7.5F, FS::nic)->move_right(4.5F)->turn_right_down()->move_down(5);
+		pTurtle->turn_down_left(FS::h3ps)->move_left(4, FS::PSPump)->turn_left_up();
+		pTurtle->move_up(3, FS::HBV02)->move_up(2)->jump_up()->move_up(2, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
-		pTurtle->jump_back(FS::d1819)->move_left(3, FS::D018)->move_left(11, FS::n0325)->move_left(3, FS::D008);
-		pTurtle->move_left(14)->move_up(5.5F)->jump_up()->move_up(5.5F);
-		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FS::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, FS::Gantry)->move_left()->jump_back(FS::Gantry)->move_right()->jump_back(FS::d0325);
+		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
+		pTurtle->turn_down_left(FS::h3sb)->move_left(4, FS::SBPump)->jump_back();
+		pTurtle->turn_right_down()->move_down(2)->turn_down_left()->move_left(4)->turn_left_down();
+		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
-		pTurtle->move_down(1.5F, FS::D003)->move_down(2, FS::sb)->move_down(3, FS::Starboard);
-
-		pTurtle->jump_back(FS::d1819)->move_right(4, FS::deck_lx)->move_right(2, FS::D019)->move_right(2)->move_to(FS::d1920);
+		pTurtle->move_right(5, FS::HBV04)->move_right(3)->turn_right_up()->move_up(2)->turn_up_right()->move_right(4);
+		
+		pTurtle->jump_back(FS::HBV10);
+		pTurtle->move_left(28, FS::HBV18);
 		
 		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
-		{ // load manual pipe segement
-			float d02_y, d05_y;
-
-			this->pipeline->fill_anchor_location(FS::D002, nullptr, &d02_y);
-			this->pipeline->fill_anchor_location(FS::D005, nullptr, &d05_y);
-
-			this->manual_pipe = this->master->insert_one(
-				new Linelet(0.0F, d02_y, 0.0F, d05_y,
-					default_pipeline_thickness, default_pipeline_color));
-		}
-
 		{ // load doors
-			float radius = std::fminf(gwidth, gheight);
 
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
 			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
 		}
 
 		{ // load valves
-			float radius = std::fminf(gwidth, gheight);
-
-			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D001, FS::D024, radius, 00.0);
-			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D003, FS::D025, radius, 90.0);
-			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::D004, FS::D009, radius, -90.0);
+			this->load_valves(this->mvalves, this->vlabels, this->captions, FS::SBV1, FS::SBV2, radius, 90.0);
+			this->load_valves(this->mvalves, this->vlabels, this->captions, FS::SBV3, FS::SBV5, radius, 00.0);
+			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
+			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
 		}
 
 		{ // load special nodes
-			float radius = std::fminf(gwidth, gheight);
-			float nic_radius = radius * 0.5F;
+			auto pscolor = Colours::make(default_port_color);
+			auto sbcolor = Colours::make(default_starboard_color);
+			float dh_radius = gwidth * 2.0F;
+			float nic_radius = radius * 0.25F;
 			
-			this->load_pump(this->pumps, this->captions, FS::PSHPump, -radius, +2.0F);
-			this->load_pump(this->pumps, this->captions, FS::SBHPump, -radius, -2.0F);
-			this->ps_suction = this->master->insert_one(new Circlelet(nic_radius, default_port_color, default_pipeline_thickness));
-			this->sb_suction = this->master->insert_one(new Circlelet(nic_radius, default_starboard_color, default_pipeline_thickness));
-			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
+			this->load_pump(this->pumps, this->captions, FS::PSPump, -radius, +2.0F);
+			this->load_pump(this->pumps, this->captions, FS::SBPump, -radius, -2.0F);
+			
+			this->ps_sea = this->master->insert_one(new Hatchlet(gwidth, gheight, pscolor));
+			this->sb_sea = this->master->insert_one(new Hatchlet(gwidth, gheight, sbcolor));
 
-			for (FS id = FS::n24; id <= FS::n0923; id++) {
+			this->ps_draghead = this->master->insert_one(
+				new Segmentlet(-90.0, 90.0, dh_radius, gheight,
+					nullptr, pscolor, default_pipeline_thickness));
+
+			this->sb_draghead = this->master->insert_one(
+				new Segmentlet(-90.0, 90.0, dh_radius, gheight,
+					nullptr, sbcolor, default_pipeline_thickness));
+			
+			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
-			}
-		}
-
-		{ // load other labels
-			this->load_label(this->captions, FS::Hatch, Colours::SeaGreen, this->caption_font);
-			this->load_label(this->captions, FS::Gantry, Colours::Yellow, this->caption_font);
-
-			for (size_t idx = 0; idx < hopper_count; idx++) {
-				this->sequences[idx] = this->master->insert_one(new Labellet((idx + 1).ToString() + "#"));
-				this->sequences[idx]->set_font(this->caption_font);
-				this->sequences[idx]->set_color(Colours::Tomato);
 			}
 		}
 	}
 
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
-		GraphletAnchor anchor;
-		float dx, dy, margin, label_height;
-		float gridsize = std::fminf(gwidth, gheight);
-		float x0 = 0.0F;
-		float y0 = 0.0F;
-
 		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FS::D025, GraphletAnchor::CB);
 
-		this->pipeline->map_credit_graphlet(this->captions[FS::Gantry], GraphletAnchor::CB);
-		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FS::Port, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FS::Starboard, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sea_inlet, FS::Hatch, GraphletAnchor::CC);
-		this->master->move_to(this->captions[FS::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
+		this->pipeline->map_graphlet_at_anchor(this->ps_draghead, FS::Port, GraphletAnchor::RC);
+		this->pipeline->map_graphlet_at_anchor(this->sb_draghead, FS::Starboard, GraphletAnchor::RC);
+		this->pipeline->map_graphlet_at_anchor(this->ps_sea, FS::PSSea, GraphletAnchor::CB);
+		this->pipeline->map_graphlet_at_anchor(this->sb_sea, FS::SBSea, GraphletAnchor::CT);
+		this->master->move_to(this->captions[FS::PSSea], this->ps_sea, GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->captions[FS::SBSea], this->sb_sea, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
 			/** NOTE
@@ -228,41 +208,16 @@ public:
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
 			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC);
 		}
-
-		this->vlabels[FS::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		
-		for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
-			switch (it->first) {
-			case FS::D006: case FS::D010: case FS::D020: case FS::D021: case FS::D022: case FS::D024: {
-				it->second->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
-				dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
-			}; break;
-			case FS::D017: {
-				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
-			}; break;
-			case FS::D018: {
-				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
-			}; break;
-			case FS::D001: case FS::D002: case FS::D008: case FS::D019: {
-				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
-				dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
-			}; break;
-			default: {
-				it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
-				dx = x0 + gridsize - margin; dy = y0; anchor = GraphletAnchor::LB;
-			}
+		{ // reflow valves
+			float gridsize = std::fminf(gwidth, gheight);
+
+			for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
+				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
 			}
 
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->pipeline->map_credit_graphlet(this->captions[it->first], anchor, dx, dy);
-			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
-		}
-
-		{ // reflow door sequences
-			this->pipeline->fill_anchor_location(FS::D008, nullptr, &y0);
-			for (unsigned int idx = 0; idx < hopper_count; idx++) {
-				this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::PS1))], &x0, nullptr, GraphletAnchor::CC);
-				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CB);
+			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
+				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
 			}
 		}
 	}
@@ -284,7 +239,7 @@ private:
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
 		, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, "(" + id.ToString() + ")", id, Colours::Silver, this->label_font);
+			this->load_label(ls, id.ToString(), id, Colours::Silver, this->label_font);
 			this->load_label(cs, id, Colours::Silver, this->label_font);
 
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
@@ -336,8 +291,8 @@ private:
 			p_anchor = GraphletAnchor::CT;
 		}
 
-		this->pipeline->fill_anchor_location(FS::D001, &lx, &y);
-		this->pipeline->fill_anchor_location(FS::D010, &rx, nullptr);
+		this->pipeline->fill_anchor_location(FS::HBV18, &lx, &y);
+		this->pipeline->fill_anchor_location(FS::HBV10, &rx, nullptr);
 		cell_width = (rx - lx) / float(hopper_count);
 
 		for (E id = id0; id <= idn; id++) {
@@ -349,6 +304,41 @@ private:
 		}
 	}
 
+	template<class D, typename E>
+	void reflow_valve(float x0, float y0, float gridsize, E id, D* valve) {
+		GraphletAnchor anchor;
+		float label_height, margin, dx, dy;
+
+		switch (id) {
+		case FS::HBV01: case FS::HBV02: case FS::HBV08: case FS::HBV09: case FS::SBV1: case FS::SBV2: {
+			valve->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
+			dx = x0 + gridsize - margin; dy = y0; anchor = GraphletAnchor::LB;
+		}; break;
+		case FS::HBV03: {
+			valve->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+			dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RB;
+		}; break;
+		case FS::HBV04: case FS::HBV07: case FS::SBV4: case FS::SBV5: {
+			valve->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
+			dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
+		}; break;
+		case FS::HBV05: case FS::HBV06: case FS::HBV10: case FS::HBV18: case FS::SBV3: {
+			this->vlabels[id]->fill_extent(x0, y0, nullptr, &label_height);
+			valve->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
+			dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
+		}; break;
+		default: {
+			this->vlabels[id]->fill_extent(x0, y0, nullptr, &label_height);
+			valve->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
+			dx = x0; dy = y0 - gridsize * 4.0F + margin; anchor = GraphletAnchor::CB;
+		}
+		}
+
+		this->pipeline->map_credit_graphlet(valve, GraphletAnchor::CC, x0, y0);
+		this->pipeline->map_credit_graphlet(this->captions[id], anchor, dx, dy);
+		this->master->move_to(this->vlabels[id], this->captions[id], GraphletAnchor::CB, GraphletAnchor::CT);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<FS>* pipeline;
@@ -357,13 +347,13 @@ private:
 	std::map<FS, Credit<Percentagelet, FS>*> progresses;
 	std::map<FS, Credit<HopperPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
+	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
 	std::map<FS, Credit<Labellet, FS>*> vlabels;
-	Labellet* sequences[hopper_count];
 	std::map<FS, Omegalet*> nintercs;
-	Linelet* manual_pipe;
-	Hatchlet* sea_inlet;
-	Circlelet* ps_suction;
-	Circlelet* sb_suction;
+	Segmentlet* ps_draghead;
+	Segmentlet* sb_draghead;
+	Hatchlet* ps_sea;
+	Hatchlet* sb_sea;
 	
 private:
 	CanvasTextFormat^ caption_font;
@@ -400,58 +390,6 @@ public:
 		auto pipeline = dynamic_cast<Tracklet<FS>*>(g);
 
 		if (pipeline != nullptr) {
-			float ps_y, sb_y;
-			float deck_lx, deck_ty, deck_rx, deck_by;
-
-			pipeline->fill_anchor_location(FS::ps, nullptr, &ps_y, false);
-			pipeline->fill_anchor_location(FS::sb, nullptr, &sb_y, false);
-
-			pipeline->fill_anchor_location(FS::deck_lx, &deck_lx, nullptr, false);
-			pipeline->fill_anchor_location(FS::deck_rx, &deck_rx, nullptr, false);
-			pipeline->fill_anchor_location(FS::deck_ty, nullptr, &deck_ty, false);
-			pipeline->fill_anchor_location(FS::deck_by, nullptr, &deck_by, false);
-
-			{ // draw ship
-				float ship_width = this->actual_width();
-				float ship_height = std::fabsf(sb_y - ps_y);
-				auto real_ship = geometry_scale(this->ship, ship_width, ship_height);
-				Rect ship_box = real_ship->ComputeBounds();
-				float sx = 0.0F;
-				float sy = y + std::fminf(sb_y, ps_y);
-
-				ds->DrawGeometry(real_ship, sx, sy, Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-			{ // draw deck region
-				float dx = x + std::fminf(deck_lx, deck_rx);
-				float dy = y + std::fminf(deck_ty, deck_by);
-				float dw = std::fabsf((deck_rx - deck_lx));
-				float dh = std::fabsf((deck_by - deck_ty));
-
-				ds->DrawGeometry(rectangle(dx, dy, dw, dh), Colours::SeaGreen, 1.0F, this->ship_style);
-			}
-
-
-			{ // draw non-important lines
-				float d0525_x, d05_y, d25_y;
-				float d0325_y, d03_x, d07_x;
-				float d10_x, d10_y;
-
-				pipeline->fill_anchor_location(FS::D005, &d0525_x, &d05_y, false);
-				pipeline->fill_anchor_location(FS::D025, nullptr, &d25_y, false);
-				pipeline->fill_anchor_location(FS::D010, &d10_x, &d10_y, false);
-				pipeline->fill_anchor_location(FS::d0325, &d03_x, &d0325_y, false);
-				pipeline->fill_anchor_location(FS::d007, &d07_x, nullptr, false);
-
-				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
-
-				ds->DrawLine(x + d03_x, y + d0325_y, x + d07_x, y + d0325_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
-
-				ds->DrawLine(d10_x, y + d10_y, x + d10_x, y + d10_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
-			}
 		}
 	}
 

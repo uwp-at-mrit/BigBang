@@ -67,8 +67,6 @@ void IRotativeDirectory::detect_time() {
 		//current->AddDays(this->count);
 	} break;
 	}
-
-	this->log_message(Log::Info, make_timestamp(current));
 }
 
 void IRotativeDirectory::on_exception(Platform::Exception^ e) {

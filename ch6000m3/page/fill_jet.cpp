@@ -180,7 +180,7 @@ public:
 
 		{ // load special nodes
 			float radius = std::fminf(gwidth, gheight);
-			float nic_radius = radius * 0.5F;
+			float nic_radius = radius * 0.25F;
 			
 			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, -2.0F);
@@ -237,7 +237,8 @@ public:
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			it->second->fill_pump_origin(&ox);
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
-			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
+			this->master->move_to(this->captions[it->first], it->second,
+				GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
 		}
 
 		this->vlabels[FJ::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);

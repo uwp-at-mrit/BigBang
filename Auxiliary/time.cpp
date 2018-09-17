@@ -1,5 +1,6 @@
 #include <cwchar>
 #include <chrono>
+#include <ctime>
 #include <thread>
 
 #include "time.hpp"
@@ -11,11 +12,21 @@ using namespace Windows::Foundation;
 using namespace Windows::Globalization;
 using namespace Windows::System::Diagnostics;
 
-#define STRFDAY(datetime) datetime->Hour, datetime->Minute, datetime->Second
-#define STRFTIME(datetime) datetime->Year, datetime->Month, datetime->Day, STRFDAY(datetime)
-
 static Calendar^ calendar = ref new Calendar();
+static struct tm now_s;
 static wchar_t timestamp[32];
+
+static wchar_t* wtime(time_t utc_s, const wchar_t* tfmt, bool locale = false) {
+	if (locale) {
+		localtime_s(&now_s, &utc_s);
+	} else {
+		gmtime_s(&now_s, &utc_s);
+	}
+
+	wcsftime(timestamp, 31, tfmt, &now_s);
+
+	return timestamp;
+}
 
 static ProcessCpuUsageReport^ process_cpu_usage() {
     static ProcessDiagnosticInfo^ self = nullptr;
@@ -27,72 +38,23 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
     return self->CpuUsage->GetReport();
 }
 
-inline static void mask_calendar_minute(Calendar^ c) {
-	calendar->Second = 0;
-	calendar->Nanosecond = 0;
-}
-
-
-inline static void mask_calendar_hour(Calendar^ c) {
-	mask_calendar_minute(c);
-	calendar->Minute = 0;
-}
-
-inline static void mask_calendar_day(Calendar^ c) {
-	mask_calendar_hour(c);
-	calendar->Hour = 0;
-}
-
 /**************************************************************************************************/
-long long WarGrey::SCADA::this_moment_100ns() {
-	calendar->SetToNow();
-
-	return calendar->GetDateTime().UniversalTime;
+long long WarGrey::SCADA::current_seconds() {
+	return std::time(nullptr);
 }
 
-long long WarGrey::SCADA::this_minute_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_minute(calendar);
+long long WarGrey::SCADA::current_floor_seconds(long long span) {
+	long long now = current_seconds();
+	long long remainder = now % span;
 
-	return calendar->GetDateTime().UniversalTime;
+	return now - remainder;
 }
 
-long long WarGrey::SCADA::next_minute_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_minute(calendar);
-	calendar->AddMinutes(1);
+long long WarGrey::SCADA::current_ceiling_seconds(long long span) {
+	long long now = current_seconds();
+	long long remainder = now % span;
 
-	return calendar->GetDateTime().UniversalTime;
-}
-
-long long WarGrey::SCADA::this_hour_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_hour(calendar);
-
-	return calendar->GetDateTime().UniversalTime;
-}
-
-long long WarGrey::SCADA::next_hour_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_hour(calendar);
-	calendar->AddHours(1);
-
-	return calendar->GetDateTime().UniversalTime;
-}
-
-long long WarGrey::SCADA::today_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_day(calendar);
-
-	return calendar->GetDateTime().UniversalTime;
-}
-
-long long WarGrey::SCADA::tomorrow_first_100ns() {
-	calendar->SetToNow();
-	mask_calendar_day(calendar);
-	calendar->AddDays(1);
-
-	return calendar->GetDateTime().UniversalTime;
+	return now + (span - remainder);
 }
 
 /**************************************************************************************************/
@@ -118,74 +80,30 @@ void WarGrey::SCADA::sleep(unsigned int ms) {
 }
 
 /*************************************************************************************************/
-wchar_t* WarGrey::SCADA::make_wtimestamp(Calendar^ c, bool need_us, int *l00nanosecond) {
-	int l00ns = c->Nanosecond / 100;
-	
-	if (need_us) {
-		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d.%06d", STRFTIME(c), l00ns / 10);
-	} else {
-		swprintf(timestamp, 31, L"%d-%02d-%02d %02d:%02d:%02d", STRFTIME(c));
-	}
-
-	SET_BOX(l00nanosecond, l00ns);
-
-	return timestamp;
+Platform::String^ WarGrey::SCADA::make_timestamp(long long utc_s, bool locale) {
+	return ref new Platform::String(wtime(utc_s, L"%Y-%m-%d %H:%M:%S", locale));
 }
 
-Platform::String^ WarGrey::SCADA::make_timestamp(Calendar^ c, bool need_us, int* l00ns) {
-	return ref new Platform::String(make_wtimestamp(c, need_us, l00ns));
-}
-
-Platform::String^ WarGrey::SCADA::make_timestamp(DateTime& dt, bool need_us, int* l00ns) {
-	calendar->SetDateTime(dt);
-
-	return ref new Platform::String(make_wtimestamp(calendar, need_us, l00ns));
-}
-
-Platform::String^ WarGrey::SCADA::make_timestamp(long long ut_l00ns, bool need_us, int* l00ns) {
-	DateTime dt;
-
-	dt.UniversalTime = ut_l00ns;
-
-	return make_timestamp(dt, need_us, l00ns);
-}
-
-wchar_t* WarGrey::SCADA::make_wdaytimestamp(Calendar^ c, bool need_us, int *l00nanosecond) {
-	int l00ns = c->Nanosecond / 100;
-	
-	if (need_us) {
-		swprintf(timestamp, 31, L"%02d:%02d:%02d.%06d", STRFDAY(c), l00ns / 10);
-	} else {
-		swprintf(timestamp, 31, L"%02d:%02d:%02d", STRFDAY(c));
-	}
-
-	SET_BOX(l00nanosecond, l00ns);
-
-	return timestamp;
-}
-
-Platform::String^ WarGrey::SCADA::make_daytimestamp(Calendar^ c, bool need_us, int* l00ns) {
-	return ref new Platform::String(make_wdaytimestamp(c, need_us, l00ns));
-}
-
-Platform::String^ WarGrey::SCADA::make_daytimestamp(DateTime& dt, bool need_us, int* l00ns) {
-	calendar->SetDateTime(dt);
-
-	return ref new Platform::String(make_wdaytimestamp(calendar, need_us, l00ns));
-}
-
-Platform::String^ WarGrey::SCADA::make_daytimestamp(long long ut_l00ns, bool need_us, int* l00ns) {
-	DateTime dt;
-
-	dt.UniversalTime = ut_l00ns;
-
-	return make_daytimestamp(dt, need_us, l00ns);
+Platform::String^ WarGrey::SCADA::make_daytimestamp(long long utc_s, bool locale) {
+	return ref new Platform::String(wtime(utc_s, L"%H:%M:%S", locale));
 }
 
 Platform::String^ WarGrey::SCADA::update_nowstamp(bool need_us, int* l00ns) {
-	calendar->SetToNow();
-	
-	return ref new Platform::String(make_wtimestamp(calendar, need_us, l00ns));
+	Platform::String^ ts = make_timestamp(current_seconds(), true);
+
+	if (need_us || (l00ns != nullptr)) {
+		calendar->SetToNow();
+	}
+
+	if (need_us) {
+		ts += (calendar->Nanosecond / 10LL / 1000LL).ToString();
+	}
+
+	if (l00ns != nullptr) {
+		(*l00ns) = calendar->Nanosecond;
+	}
+
+	return ts;
 }
 
 /*************************************************************************************************/
