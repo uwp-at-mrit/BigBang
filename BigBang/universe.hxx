@@ -170,5 +170,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPlanet* from_planet;
 		float transfer_delta;
 		float transferX;
+
+	private:
+		bool controlling;
 	};
 }

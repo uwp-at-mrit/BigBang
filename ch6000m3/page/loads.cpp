@@ -521,8 +521,12 @@ void LoadsPage::load(CanvasCreateResourcesReason reason, float width, float heig
 			this->insert(this->statusline);
 		}
 
-		if (this->device != nullptr) {
-			this->device->get_logger()->append_log_receiver(this->statusline);
+		{ // delayed initializing
+			this->get_logger()->append_log_receiver(this->statusline);
+			
+			if (this->device != nullptr) {
+				this->device->get_logger()->append_log_receiver(this->statusline);
+			}
 		}
 	}
 }

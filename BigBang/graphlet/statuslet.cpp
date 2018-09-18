@@ -172,17 +172,17 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 	statusbar->enter_shared_section();
 	float lastone_xoff = (Width - statusbar->ipv4->LayoutBounds.Width);
-	ds->DrawTextLayout(this->caption,      x + width * 0.0F, context_y, Colours::Chocolate);
-	ds->DrawTextLayout(statusbar->clock,   x + width * 1.0F, context_y, Colours::Foreground);
+	ds->DrawTextLayout(this->caption, x + width * 0.0F, context_y, Colours::Chocolate);
+	ds->DrawTextLayout(statusbar->clock, x + width * 1.0F, context_y, Colours::Foreground);
 	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
-	ds->DrawTextLayout(statusbar->wifi,    x + width * 3.0F, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->wifi, x + width * 3.0F, context_y, Colours::Yellow);
 	ds->DrawTextLayout(statusbar->storage, x + width * 5.0F, context_y, Colours::Yellow);
-    ds->DrawTextLayout(statusbar->ipv4,    x + lastone_xoff, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
 	{ // highlight PLC Status
 		float plc_x = x + width * 4.0F;
-		
+
 		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
 
 		if (this->device == nullptr) {
@@ -201,7 +201,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
 			static unsigned int retry_count = 0;
 			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
-			
+
 			ds->DrawText(speak("connecting", tongue_scope) + dots[idx],
 				plc_x + status_prefix_width, context_y,
 				Colours::Red, status_font);

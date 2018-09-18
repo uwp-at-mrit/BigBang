@@ -135,8 +135,17 @@ namespace WarGrey::SCADA {
 		void leave_shared_section();
 
 	public:
-		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height, float dpi = 96.0);
-		void save(Platform::String^ path, float width, float height, float dpi = 96.0);
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+		
+		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float x, float y, float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+
+		void save(Platform::String^ path, float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
+
+		void save(Platform::String^ path, float x, float y, float width, float height,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ bgcolor = nullptr, float dpi = 96.0);
 
 	public:
 		bool fill_graphlet_location(IGraphlet* g, float* x, float* y, WarGrey::SCADA::GraphletAnchor a);

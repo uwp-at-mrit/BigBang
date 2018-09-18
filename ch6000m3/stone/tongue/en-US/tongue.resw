@@ -192,4 +192,7 @@
   <data name="fill_jet" xml:space="preserve">
     <value>Fill and Jet</value>
   </data>
+  <data name="flushs" xml:space="preserve">
+    <value>Flushing System</value>
+  </data>
 </root>

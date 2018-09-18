@@ -2,6 +2,7 @@
 #include <WindowsNumerics.h>
 #include <ppltasks.h>
 
+#include "path.hpp"
 #include "planet.hpp"
 #include "syslog.hpp"
 #include "system.hpp"
@@ -1212,12 +1213,25 @@ void IPlanet::collapse() {
 	this->erase();
 }
 
-CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, float dpi) {
+CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
+	return this->take_snapshot(0.0F, 0.0F, width, height, bgcolor, dpi);
+}
+
+CanvasRenderTarget^ IPlanet::take_snapshot(float x, float y, float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
-	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
+	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width - x, height - y, dpi);
 	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
 
-	ds->Clear(ColorHelper::FromArgb(0, 0, 0, 0));
+	if (bgcolor == nullptr) {
+		ds->Clear(Colours::Background->Color);
+	} else {
+		ds->Clear(bgcolor->Color);
+	}
+
+	if ((x != 0.0F) || (y != 0.0F)) {
+		ds->Transform = make_translation_matrix(-x, -y);
+	}
+
 	this->enter_shared_section();
 	this->draw(ds, width, height);
 	this->leave_shared_section();
@@ -1225,15 +1239,25 @@ CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, float dpi)
 	return snapshot;
 }
 
-void IPlanet::save(Platform::String^ path, float width, float height, float dpi) {
-	CanvasRenderTarget^ snapshot = this->take_snapshot(width, height, dpi);
+void IPlanet::save(Platform::String^ path, float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
+	this->save(path, 0.0F, 0.0F, width, height, bgcolor, dpi);
+}
+
+void IPlanet::save(Platform::String^ path, float x, float y, float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
+	CanvasRenderTarget^ snapshot = this->take_snapshot(x, y, width, height, bgcolor, dpi);
 
 	Concurrency::create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
 		.then([=](Concurrency::task<void> saving) {
 		try {
 			saving.get();
+
+			this->get_logger()->log_message(Log::Notice,
+				L"planet[%s] has been saved to %s",
+				this->name()->Data(), path->Data());
 		} catch (Platform::Exception^ e) {
-			syslog(Log::Alarm, "failed to save universe as bitmap:" + e->Message);
+			this->get_logger()->log_message(Log::Panic,
+				L"failed to save planet[%s] to %s: %s",
+				this->name()->Data(), path->Data(), e->Message->Data());
 		}
 	});
 }

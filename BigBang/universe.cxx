@@ -4,6 +4,7 @@
 #include "system.hpp"
 #include "syslog.hpp"
 #include "time.hpp"
+#include "path.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -408,7 +409,7 @@ CanvasRenderTarget^ UniverseDisplay::take_snapshot(float dpi) {
 	if (this->recent_planet != nullptr) {
 		Size region = this->display->Size;
 
-		snapshot = this->recent_planet->take_snapshot(region.Width, region.Height, dpi);
+		snapshot = this->recent_planet->take_snapshot(region.Width, region.Height, nullptr, dpi);
 	}
 
 	return snapshot;
@@ -648,6 +649,24 @@ void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args
 
 	if (this->recent_planet != nullptr) {
 		VirtualKey vkey = args->Key;
+
+		if (this->controlling) {
+			switch (vkey) {
+			case VirtualKey::S: {
+				this->recent_planet->save(
+					ms_apptemp_file(this->recent_planet->name(), ".png"),
+					this->actual_width, this->actual_height);
+			}; break;
+			case VirtualKey::I: {
+				float x, y, width, height;
+
+				this->recent_planet->fill_graphlets_boundary(&x, &y, &width, &height);
+				this->recent_planet->save(ms_apptemp_file("icon", ".png"), x, y, width, height);
+			}; break;
+			}
+		}
+
+		this->controlling = (vkey == VirtualKey::Control);
 
 		args->Handled = this->recent_planet->on_char(args->Key, false);
 	}

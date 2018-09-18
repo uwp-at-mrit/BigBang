@@ -195,7 +195,7 @@
   <data name="hopper_pump" xml:space="preserve">
     <value>Hopper Pump</value>
   </data>
-  <data name="manual_valve" xml:space="preserve">
-    <value>Manual Valve</value>
+  <data name="cool_pump" xml:space="preserve">
+    <value>Cool Valve</value>
   </data>
 </root>

@@ -5,8 +5,8 @@
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
+#include "graphlet/symbol/pump/cool_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
-#include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 
@@ -23,8 +23,8 @@ using namespace Microsoft::Graphics::Canvas::Text;
 
 private enum class GS {
 	winch,
-	hydraulic_pump, hopper_pump,
-	manual_valve, gate_valve, motor_valve,
+	hydraulic_pump, hopper_pump, cool_pump,
+	gate_valve, motor_valve,
 	hopperdoor, upperdoor,
 	_
 };
@@ -45,7 +45,7 @@ public:
 
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
-		this->load_primitives(this->mvalves, this->mvlabels, unitsize);
+		this->load_primitives(this->cpumps, this->cplabels, unitsize);
 		this->load_primitives(this->gvalves, this->gvlabels, unitsize);
 		this->load_primitives(this->evalves, this->evlabels, unitsize);
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
@@ -83,7 +83,7 @@ public:
 		x0 += (label_max_width + offset + halfunit);
 		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, halfunit, cellsize);
 		this->reflow_primitives(this->hpumps, this->hplabels,  x0, y0 + cellsize * 2.0F, halfunit, cellsize);
-		this->reflow_primitives(this->mvalves, this->mvlabels, x0, y0 + cellsize * 3.0F, halfunit, cellsize);
+		this->reflow_primitives(this->cpumps, this->cplabels,  x0, y0 + cellsize * 3.0F, halfunit, cellsize);
 		this->reflow_primitives(this->gvalves, this->gvlabels, x0, y0 + cellsize * 4.0F, halfunit, cellsize);
 		this->reflow_primitives(this->evalves, this->evlabels, x0, y0 + cellsize * 5.0F, halfunit, cellsize);
 		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 6.0F, halfunit, cellsize);
@@ -134,10 +134,10 @@ private: // never delete these graphlets manually.
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
 	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
 	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
+	std::unordered_map<CoolPumpStatus, CoolPumplet*> cpumps;
+	std::unordered_map<CoolPumpStatus, Labellet*> cplabels;
 	std::unordered_map<GateValveStatus, GateValvelet*> gvalves;
 	std::unordered_map<GateValveStatus, Labellet*> gvlabels;
-	std::unordered_map<ManualValveStatus, ManualValvelet*> mvalves;
-	std::unordered_map<ManualValveStatus, Labellet*> mvlabels;
 	std::unordered_map<TValveStatus, MotorValvelet*> evalves;
 	std::unordered_map<TValveStatus, Labellet*> evlabels;
 	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;
@@ -185,6 +185,8 @@ void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, flo
 			this->statusbar = new Statusbarlet(this->name());
 			this->insert(this->statusbar);
 			this->insert(this->statusline);
+
+			this->get_logger()->append_log_receiver(this->statusline);
 		}
 	}
 }

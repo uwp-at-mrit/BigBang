@@ -180,12 +180,13 @@ public:
 
 		{ // load special nodes
 			float radius = std::fminf(gwidth, gheight);
+			float sct_radius = radius * 0.5F;
 			float nic_radius = radius * 0.25F;
 			
 			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, -2.0F);
-			this->ps_suction = this->master->insert_one(new Circlelet(nic_radius, default_port_color, default_pipeline_thickness));
-			this->sb_suction = this->master->insert_one(new Circlelet(nic_radius, default_starboard_color, default_pipeline_thickness));
+			this->ps_suction = this->master->insert_one(new Circlelet(sct_radius, default_port_color, default_pipeline_thickness));
+			this->sb_suction = this->master->insert_one(new Circlelet(sct_radius, default_starboard_color, default_pipeline_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
 
 			for (FJ id = FJ::n24; id <= FJ::n0923; id++) {
@@ -579,8 +580,12 @@ void FillnJetPage::load(CanvasCreateResourcesReason reason, float width, float h
 			this->insert(this->statusline);
 		}
 
-		if (this->device != nullptr) {
-			this->device->get_logger()->append_log_receiver(this->statusline);
+		{ // delayed initializing
+			this->get_logger()->append_log_receiver(this->statusline);
+			
+			if (this->device != nullptr) {
+				this->device->get_logger()->append_log_receiver(this->statusline);
+			}
 		}
 	}
 }

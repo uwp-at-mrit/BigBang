@@ -195,7 +195,8 @@
   <data name="hopper_pump" xml:space="preserve">
     <value>泥泵</value>
   </data>
-  <data name="manual_valve" xml:space="preserve">
-    <value>手动阀</value>
+  <data name="cool_pump" xml:space="preserve">
+    <value>高压水泵</value>
+    <comment>本项目使用“冷却泵”图元</comment>
   </data>
 </root>
