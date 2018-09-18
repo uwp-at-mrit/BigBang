@@ -117,94 +117,85 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="D001" xml:space="preserve">
-    <value>抽舱引水</value>
+  <data name="HBV01" xml:space="preserve">
+    <value>右吸入</value>
   </data>
-  <data name="D002" xml:space="preserve">
-    <value>抽舱</value>
+  <data name="HBV02" xml:space="preserve">
+    <value>左吸入</value>
   </data>
-  <data name="D003" xml:space="preserve">
-    <value>左吸口</value>
+  <data name="HBV03" xml:space="preserve">
+    <value>串联蝶阀</value>
   </data>
-  <data name="D004" xml:space="preserve">
-    <value>右吸口</value>
+  <data name="HBV04" xml:space="preserve">
+    <value>右排出</value>
   </data>
-  <data name="D005" xml:space="preserve">
-    <value>左隔离</value>
+  <data name="HBV05" xml:space="preserve">
+    <value>左排出</value>
   </data>
-  <data name="D006" xml:space="preserve">
-    <value>左水下泵排出</value>
+  <data name="HBV06" xml:space="preserve">
+    <value>右耙头冲水</value>
   </data>
-  <data name="D007" xml:space="preserve">
-    <value>右水下泵装舱</value>
+  <data name="HBV07" xml:space="preserve">
+    <value>左耙头冲水</value>
   </data>
-  <data name="D008" xml:space="preserve">
-    <value>右总装舱</value>
+  <data name="HBV08" xml:space="preserve">
+    <value>左耙头隔离</value>
   </data>
-  <data name="D009" xml:space="preserve">
-    <value>左水下泵装舱</value>
+  <data name="HBV09" xml:space="preserve">
+    <value>右耙头隔离</value>
   </data>
-  <data name="D010" xml:space="preserve">
-    <value>左总装舱</value>
+  <data name="HBV10" xml:space="preserve">
+    <value>泥舱冲水总蝶阀</value>
   </data>
-  <data name="D011" xml:space="preserve">
-    <value>右低排</value>
+  <data name="HBV11" xml:space="preserve">
+    <value>1#泥舱冲水</value>
   </data>
-  <data name="D012" xml:space="preserve">
-    <value>左低排</value>
+  <data name="HBV12" xml:space="preserve">
+    <value>2#泥舱冲水</value>
   </data>
-  <data name="D013" xml:space="preserve">
-    <value>右前装舱</value>
+  <data name="HBV13" xml:space="preserve">
+    <value>3#泥舱冲水</value>
   </data>
-  <data name="D014" xml:space="preserve">
-    <value>左前装舱</value>
+  <data name="HBV14" xml:space="preserve">
+    <value>4#泥舱冲水</value>
   </data>
-  <data name="D015" xml:space="preserve">
-    <value>右后装舱</value>
+  <data name="HBV15" xml:space="preserve">
+    <value>5#泥舱冲水</value>
   </data>
-  <data name="D016" xml:space="preserve">
-    <value>左后装舱</value>
+  <data name="HBV16" xml:space="preserve">
+    <value>6#泥舱冲水</value>
   </data>
-  <data name="D017" xml:space="preserve">
-    <value>左舱内泵装舱</value>
+  <data name="HBV17" xml:space="preserve">
+    <value>7#泥舱冲水</value>
   </data>
-  <data name="D018" xml:space="preserve">
-    <value>右舱内泵装舱</value>
+  <data name="HBV18" xml:space="preserve">
+    <value>抽舱闸阀冲水蝶阀</value>
   </data>
-  <data name="D019" xml:space="preserve">
-    <value>右排岸</value>
+  <data name="PSPump" xml:space="preserve">
+    <value>左高压水泵</value>
   </data>
-  <data name="D020" xml:space="preserve">
-    <value>左排岸</value>
+  <data name="PSSea" xml:space="preserve">
+    <value>接海底</value>
   </data>
-  <data name="D021" xml:space="preserve">
-    <value>艏吹</value>
+  <data name="SBPump" xml:space="preserve">
+    <value>右高压水泵</value>
   </data>
-  <data name="D022" xml:space="preserve">
-    <value>艏喷</value>
+  <data name="SBSea" xml:space="preserve">
+    <value>接海底</value>
   </data>
-  <data name="D023" xml:space="preserve">
-    <value>左右贯通</value>
+  <data name="SBV1" xml:space="preserve">
+    <value>右吸入手动</value>
   </data>
-  <data name="D024" xml:space="preserve">
-    <value>装驳</value>
+  <data name="SBV2" xml:space="preserve">
+    <value>左吸入手动</value>
   </data>
-  <data name="D025" xml:space="preserve">
-    <value>右隔离</value>
+  <data name="SBV3" xml:space="preserve">
+    <value>右吸口手动</value>
   </data>
-  <data name="D026" xml:space="preserve">
-    <value>右水下泵排出</value>
+  <data name="SBV4" xml:space="preserve">
+    <value>左吸口手动</value>
   </data>
-  <data name="Gantry" xml:space="preserve">
-    <value>装驳架</value>
-  </data>
-  <data name="Hatch" xml:space="preserve">
-    <value>海水口</value>
-  </data>
-  <data name="PSHPump" xml:space="preserve">
-    <value>左舱内泵</value>
-  </data>
-  <data name="SBHPump" xml:space="preserve">
-    <value>右舱内泵</value>
+  <data name="SBV5" xml:space="preserve">
+    <value>泥舱冲水手动蝶阀</value>
   </data>
 </root>

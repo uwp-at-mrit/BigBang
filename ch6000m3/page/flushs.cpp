@@ -56,8 +56,9 @@ private enum class FS : unsigned int {
 	_,
 	// anchors used for unnamed corners
 	h3ps, h3sb, h4, h5, h10,
-	d0225, d0325, d0406,
-	d1720, d1819, d1920, d2122,
+	s11, s12, s13, s14, s15, s16, s17,
+	h11, h12, h13, h14, h15, h16, h17,
+	e11, e12, e13, e14, e15, e16, e17,
 
 	// anchors used for non-interconnected nodes
 	nic
@@ -118,27 +119,43 @@ public:
 
 		pTurtle->move_right(2, FS::SBV5)->move_right(2, FS::h10);
 		
-		pTurtle->turn_right_up()->move_up(2, FS::HBV08)->move_up(2)->turn_up_right(FS::h5);
-		pTurtle->turn_left_up()->move_up(4)->turn_up_left();
+		pTurtle->turn_right_up()->move_up(2.5F, FS::HBV08)->move_up(2.5F)->turn_up_right(FS::h5);
+		pTurtle->turn_left_up()->move_up(5)->turn_up_left();
 		pTurtle->move_left(6, FS::HBV07)->move_left(6, FS::SBV4)->move_left(6, FS::Port)->jump_back(FS::h10);
 
 		pTurtle->turn_right_down()->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
-		pTurtle->turn_left_down()->move_down(4)->turn_down_left();
+		pTurtle->turn_left_down()->move_down(5)->turn_down_left();
 		pTurtle->move_left(6, FS::HBV06)->move_left(6, FS::SBV3)->move_left(6, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->move_right(5, FS::HBV05)->move_right(7.5F, FS::nic)->move_right(4.5F)->turn_right_down()->move_down(5);
-		pTurtle->turn_down_left(FS::h3ps)->move_left(4, FS::PSPump)->turn_left_up();
-		pTurtle->move_up(3, FS::HBV02)->move_up(2)->jump_up()->move_up(2, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
+		pTurtle->move_right(5, FS::HBV05)->move_right(7.5F, FS::nic)->move_right(5.5F)->turn_right_down()->move_down(6);
+		pTurtle->turn_down_left(FS::h3ps)->move_left(5, FS::PSPump)->turn_left_up();
+		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
-		pTurtle->turn_down_left(FS::h3sb)->move_left(4, FS::SBPump)->jump_back();
-		pTurtle->turn_right_down()->move_down(2)->turn_down_left()->move_left(4)->turn_left_down();
-		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
+		pTurtle->turn_down_left(FS::h3sb)->move_left(5, FS::SBPump)->jump_back();
+		pTurtle->turn_right_down()->move_down(2)->turn_down_left()->move_left(5)->turn_left_down();
+		pTurtle->move_down(2, FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
 		pTurtle->move_right(5, FS::HBV04)->move_right(3)->turn_right_up()->move_up(2)->turn_up_right()->move_right(4);
 		
 		pTurtle->jump_back(FS::HBV10);
-		pTurtle->move_left(28, FS::HBV18);
+
+		for (FS id = FS::HBV11; id < FS::HBV18; id++) {
+			unsigned int distance = _I(id) - _I(FS::HBV11);
+			float half_width = 2.0F;
+			float half_height = 2.5F;
+			FS hopper = _E(FS, (distance + _I(FS::h11)));
+			FS sohppr = _E(FS, (distance + _I(FS::s11)));
+			FS eohppr = _E(FS, (distance + _I(FS::e11)));
+
+			pTurtle->move_left(half_width);
+			pTurtle->move_left(0.5F, sohppr)->move_left(half_width, hopper);
+			pTurtle->move_down(half_height, id)->move_down(half_height);
+			pTurtle->jump_right(half_width)->move_left(half_width * 2.0F, eohppr);
+			pTurtle->jump_back(hopper);
+		}
+
+		pTurtle->jump_back(FS::HBV17)->jump_left(4, FS::HBV18);
 		
 		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
@@ -201,12 +218,12 @@ public:
 			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, gheight * -2.4F);
-		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, gheight * +2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, FS::HBV05);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, FS::HBV04);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
-			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC);
+			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RC);
 		}
 		
 		{ // reflow valves
@@ -224,14 +241,6 @@ public:
 
 public:
 	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
-		float sx, sy, tx, ty;
-
-		for (unsigned int idx = 0; idx < hopper_count; idx++) {
-			this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::PS1))], &sx, &sy, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->uhdoors[_E(FS, idx + _I(FS::SB1))], &tx, &ty, GraphletAnchor::CC);
-			
-			ds->DrawLine(sx, sy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
-		}
 	}
 
 private:
@@ -281,40 +290,39 @@ private:
 
 private:
 	template<class D, typename E>
-	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float yoff) {
+	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, E yid) {
 		GraphletAnchor d_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
-		float lx, rx, y, cell_width;
+		unsigned int distance = _I(FS::HBV11) - _I(id0);
+		float x, y, py;
+
+		this->pipeline->fill_anchor_location(yid, nullptr, &y);
+		this->pipeline->fill_anchor_location(FS::HBV11, &x, &py);
 		
-		if (yoff > 0.0F) { // Starboard
+		if (y > py) { // Starboard
 			d_anchor = GraphletAnchor::CB;
 			p_anchor = GraphletAnchor::CT;
 		}
 
-		this->pipeline->fill_anchor_location(FS::HBV18, &lx, &y);
-		this->pipeline->fill_anchor_location(FS::HBV10, &rx, nullptr);
-		cell_width = (rx - lx) / float(hopper_count);
-
 		for (E id = id0; id <= idn; id++) {
-			size_t idx = static_cast<size_t>(id) - static_cast<size_t>(id0) + 1;
-			float x = lx + cell_width * (0.5F + float(hopper_count - idx));
+			this->pipeline->fill_anchor_location(_E(FS, _I(id) + distance), &x, nullptr);
 			
-			this->master->move_to(ds[id], x, y + yoff, GraphletAnchor::CC);
-			this->master->move_to(ps[id], ds[id], d_anchor, p_anchor);
+			this->master->move_to(ds[id], x, y, d_anchor);
+			this->master->move_to(ps[id], x, y, p_anchor);
 		}
 	}
 
 	template<class D, typename E>
 	void reflow_valve(float x0, float y0, float gridsize, E id, D* valve) {
 		GraphletAnchor anchor;
-		float label_height, margin, dx, dy;
+		float label_height, margin, dx, dy, vy, hy;
 
 		switch (id) {
-		case FS::HBV01: case FS::HBV02: case FS::HBV08: case FS::HBV09: case FS::SBV1: case FS::SBV2: {
+		case FS::HBV01: case FS::HBV02: case FS::HBV08: case FS::HBV09: {
 			valve->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
 			dx = x0 + gridsize - margin; dy = y0; anchor = GraphletAnchor::LB;
 		}; break;
-		case FS::HBV03: {
+		case FS::HBV03: case FS::SBV1: case FS::SBV2: {
 			valve->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 			dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RB;
 		}; break;
@@ -329,8 +337,9 @@ private:
 		}; break;
 		default: {
 			this->vlabels[id]->fill_extent(x0, y0, nullptr, &label_height);
-			valve->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
-			dx = x0; dy = y0 - gridsize * 4.0F + margin; anchor = GraphletAnchor::CB;
+			this->pipeline->fill_anchor_location(id, nullptr, &vy);
+			this->pipeline->fill_anchor_location(_E(FS, _I(id) - _I(FS::HBV11) + _I(FS::h11)), nullptr, &hy);
+			dx = x0; dy = (hy - vy) - label_height; anchor = GraphletAnchor::CB;
 		}
 		}
 

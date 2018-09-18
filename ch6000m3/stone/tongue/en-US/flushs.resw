@@ -117,97 +117,85 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="D001" xml:space="preserve">
-    <value>Empty and Water</value>
+  <data name="HBV01" xml:space="preserve">
+    <value>Starboard Injection</value>
   </data>
-  <data name="D002" xml:space="preserve">
-    <value>Empty</value>
+  <data name="HBV02" xml:space="preserve">
+    <value>Port Injection</value>
   </data>
-  <data name="D003" xml:space="preserve">
-    <value>Port Suction</value>
-  </data>
-  <data name="D004" xml:space="preserve">
-    <value>Starboard Suction</value>
-  </data>
-  <data name="D005" xml:space="preserve">
-    <value>Port Isolation</value>
-  </data>
-  <data name="D006" xml:space="preserve">
-    <value>Port Underwater Discharge</value>
-  </data>
-  <data name="D007" xml:space="preserve">
-    <value>Starboard Underwater Charge</value>
-  </data>
-  <data name="D008" xml:space="preserve">
-    <value>Starboard Total Charge</value>
-  </data>
-  <data name="D009" xml:space="preserve">
-    <value>Port Underwater Charge</value>
-  </data>
-  <data name="D010" xml:space="preserve">
-    <value>Port Total Charge</value>
-  </data>
-  <data name="D011" xml:space="preserve">
-    <value>Starboard Low Discharge</value>
-  </data>
-  <data name="D012" xml:space="preserve">
-    <value>Port Low Discharge</value>
-  </data>
-  <data name="D013" xml:space="preserve">
-    <value>Starboard Fore Charge</value>
-  </data>
-  <data name="D014" xml:space="preserve">
-    <value>Port Fore Charge</value>
-  </data>
-  <data name="D015" xml:space="preserve">
-    <value>Starboard Back Charge</value>
-  </data>
-  <data name="D016" xml:space="preserve">
-    <value>Port Back Charge</value>
-  </data>
-  <data name="D017" xml:space="preserve">
-    <value>Port Deck Pump Charge</value>
-  </data>
-  <data name="D018" xml:space="preserve">
-    <value>Starboard Deck Pump Charge</value>
-  </data>
-  <data name="D019" xml:space="preserve">
-    <value>Starboard Shore Discharge</value>
-  </data>
-  <data name="D020" xml:space="preserve">
-    <value>Port Shore Discharge</value>
-  </data>
-  <data name="D021" xml:space="preserve">
-    <value>Bow Fill</value>
-  </data>
-  <data name="D022" xml:space="preserve">
-    <value>Bow Jet</value>
-  </data>
-  <data name="D023" xml:space="preserve">
+  <data name="HBV03" xml:space="preserve">
     <value>Through</value>
   </data>
-  <data name="D024" xml:space="preserve">
-    <value>Load</value>
+  <data name="HBV04" xml:space="preserve">
+    <value>Starboard Discharge</value>
   </data>
-  <data name="D025" xml:space="preserve">
-    <value>Starboard Isolation</value>
+  <data name="HBV05" xml:space="preserve">
+    <value>Port Discharge</value>
   </data>
-  <data name="D026" xml:space="preserve">
-    <value>Starboard Underwater Discharge</value>
+  <data name="HBV06" xml:space="preserve">
+    <value>Starboard Draghead Flushing</value>
   </data>
-  <data name="flushs" xml:space="preserve">
-    <value>High Pressure Flushing</value>
+  <data name="HBV07" xml:space="preserve">
+    <value>Port Draghead Flushing</value>
   </data>
-  <data name="Gantry" xml:space="preserve">
-    <value>Gantry</value>
+  <data name="HBV08" xml:space="preserve">
+    <value>Port Draghead Isolation</value>
   </data>
-  <data name="Hatch" xml:space="preserve">
-    <value>Sea Water Inlet</value>
+  <data name="HBV09" xml:space="preserve">
+    <value>Starboard Draghead Isolation</value>
   </data>
-  <data name="PSHPump" xml:space="preserve">
-    <value>Port Inhatch Pump</value>
+  <data name="HBV10" xml:space="preserve">
+    <value>General Flushing</value>
   </data>
-  <data name="SBHPump" xml:space="preserve">
-    <value>Starboard Inhatch Pump</value>
+  <data name="HBV11" xml:space="preserve">
+    <value>1# Flushing</value>
+  </data>
+  <data name="HBV12" xml:space="preserve">
+    <value>2# Flushing</value>
+  </data>
+  <data name="HBV13" xml:space="preserve">
+    <value>3# Flushing</value>
+  </data>
+  <data name="HBV14" xml:space="preserve">
+    <value>4# Flushing</value>
+  </data>
+  <data name="HBV15" xml:space="preserve">
+    <value>5# Flushing</value>
+  </data>
+  <data name="HBV16" xml:space="preserve">
+    <value>6# Flushing</value>
+  </data>
+  <data name="HBV17" xml:space="preserve">
+    <value>7# Flushing</value>
+  </data>
+  <data name="HBV18" xml:space="preserve">
+    <value>Empty</value>
+  </data>
+  <data name="PSPump" xml:space="preserve">
+    <value>Port High Pressure Water Pump</value>
+  </data>
+  <data name="PSSea" xml:space="preserve">
+    <value>Sea Inlet</value>
+  </data>
+  <data name="SBPump" xml:space="preserve">
+    <value>Starboard High Pressure Water Pump</value>
+  </data>
+  <data name="SBSea" xml:space="preserve">
+    <value>Sea Inlet</value>
+  </data>
+  <data name="SBV1" xml:space="preserve">
+    <value>Startboard Inject Manual</value>
+  </data>
+  <data name="SBV2" xml:space="preserve">
+    <value>Port Inject Manual</value>
+  </data>
+  <data name="SBV3" xml:space="preserve">
+    <value>Starboard Suction Manual</value>
+  </data>
+  <data name="SBV4" xml:space="preserve">
+    <value>Port Suction Manual</value>
+  </data>
+  <data name="SBV5" xml:space="preserve">
+    <value>General Flushing Manual</value>
   </data>
 </root>
