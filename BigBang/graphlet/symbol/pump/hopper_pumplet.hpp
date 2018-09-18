@@ -37,7 +37,6 @@ namespace WarGrey::SCADA {
 		
 	private:
 		Windows::Foundation::Rect enclosing_box;
-		float radius;
 		float pump_cx;
 		float pump_cy;
 		bool leftward;

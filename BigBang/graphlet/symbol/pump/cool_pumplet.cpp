@@ -15,51 +15,38 @@ static float default_thickness = 2.0F;
 static double dynamic_mask_interval = 1.0 / 8.0;
 
 /*************************************************************************************************/
-CoolPumplet::CoolPumplet(float radiusX, float radiusY, double degrees)
-	: CoolPumplet(CoolPumpStatus::Stopped, radiusX, radiusY, degrees) {}
+CoolPumplet::CoolPumplet(float radius, double degrees)
+	: CoolPumplet(CoolPumpStatus::Stopped, radius, degrees) {}
 
-CoolPumplet::CoolPumplet(CoolPumpStatus default_status, float radiusX, float radiusY, double degrees)
-	: ISymbollet(default_status, std::fabsf(radiusX), std::fabsf(radiusY), degrees, 2.0F)
-	, leftward(radiusX > 0.0F), upward(radiusY >= 0.0F) {}
+CoolPumplet::CoolPumplet(CoolPumpStatus default_status, float radius, double degrees)
+	: ISymbollet(default_status, std::fabsf(radius), 0.0F, degrees, 1.0F), leftward(radius > 0.0F) {}
 
 void CoolPumplet::construct() {
 	float thickoff = default_thickness * 0.5F;
-	float inlet_height = this->radiusY * 0.5F;
-	float inlet_width = inlet_height * 0.382F;
-	float inlet_extend = inlet_height + inlet_width * 0.382F;
-	float inlet_y = -inlet_height * 0.5F;
+	float pump_radius = this->radiusX * 0.80F;
+	float inlet_width = this->radiusX * 0.618F * 2.0F;
+	float inlet_height = inlet_width * 0.618F;
+	float inlet_extend = (this->radiusY - pump_radius) * 2.0F + inlet_height;
 	float inlet_x = (this->leftward ? (-this->radiusX + thickoff) : (this->radiusX - inlet_width - thickoff));
+	float inlet_y = -this->radiusY + (inlet_extend - inlet_height) * 0.5F + thickoff;
 	float inlet_ex = (this->leftward ? inlet_x : (inlet_x + inlet_width));
-	float inlet_ey = -inlet_extend * 0.5F;
-	float body_width = this->radiusX * 2.0F - default_thickness - inlet_width;
-	float body_height = this->radiusY * 2.0F - default_thickness;
-	float body_radius = body_width * 0.5F;
-	float body_x = (this->leftward ? (-this->radiusX + inlet_width) : -this->radiusX) + thickoff;
-	float body_y = -this->radiusY + thickoff;
-	float irdiff = default_thickness * 2.0F;
-	float indicator_radius = body_radius - irdiff;
-	float icydiff = irdiff + indicator_radius;
-	float indicator_cx = body_x + irdiff + indicator_radius;
-	float indicator_cy = (this->upward ? (body_y + icydiff) : (body_y + body_height - icydiff));
-	auto stadium = rounded_rectangle(body_x, body_y, body_width, body_height, body_radius, body_radius);
+	float inlet_ey = -this->radiusY + thickoff;
+	float pump_cx = (this->radiusX - pump_radius - thickoff) * (this->leftward ? 1.0F : -1.0F);
+	float pump_cy = this->radiusY - pump_radius - thickoff;
+	float indicator_radius = pump_radius * 0.618F;
+	auto pump = circle(pump_cx, pump_cy, pump_radius);
 	auto inlet = rectangle(inlet_x, inlet_y, inlet_width, inlet_height);
 	auto inlet_line = vline(inlet_ex, inlet_ey, inlet_extend);
-	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
-	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
-
-	//ellipse_point(this->radiusX, this->radiusY, &this->pump_cx, &this->pump_cy);
 	
-	this->body = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
-	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
-	this->indicator = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
-	this->iborder = geometry_rotate(iborder, this->degrees, 0.0F, 0.0F);
-
+	this->border = geometry_rotate(geometry_union(pump, geometry_union(inlet, inlet_line)), this->degrees, 0.0F, 0.0F);
+	this->indicator = geometry_rotate(circle(pump_cx, pump_cy, indicator_radius), this->degrees, 0.0F, 0.0F);
+	
 	{ // locate
-		auto box = this->body->ComputeBounds();
+		auto box = this->indicator->ComputeBounds();
 
 		this->pump_cx = box.X + box.Width * 0.5F;
 		this->pump_cy = box.Y + box.Height * 0.5F;
-		this->enclosing_box = geometry_union(this->body, this->inlet)->ComputeStrokeBounds(default_thickness);
+		this->enclosing_box = this->border->ComputeStrokeBounds(default_thickness);
 	}
 }
 
@@ -102,13 +89,9 @@ void CoolPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	float cx = x + this->width * 0.5F;
 	float cy = y + this->height * 0.5F;
 
-	ds->FillGeometry(this->body, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->body, cx, cy, style.border_color, default_thickness);
-	
-	ds->FillGeometry(this->inlet, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->inlet, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->border, cx, cy, Colours::Background);
+	ds->DrawGeometry(this->border, cx, cy, style.border_color, default_thickness);
 
 	ds->FillGeometry(this->indicator, cx, cy, style.body_color);
 	ds->DrawGeometry(this->indicator, cx, cy, style.border_color);
-	ds->DrawGeometry(this->iborder, cx, cy, style.border_color, default_thickness);
 }

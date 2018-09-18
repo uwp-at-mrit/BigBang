@@ -47,8 +47,6 @@ void HopperPumplet::construct() {
 	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
 	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
 
-	//ellipse_point(this->radiusX, this->radiusY, &this->pump_cx, &this->pump_cy);
-	
 	this->body = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
 	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
 	this->indicator = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
