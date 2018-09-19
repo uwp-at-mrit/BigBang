@@ -166,7 +166,6 @@ public:
 				make_dash_stroke(CanvasDashStyle::Dash)));
 
 		{ // load doors
-
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
 			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
 		}
@@ -182,7 +181,10 @@ public:
 			auto sbcolor = Colours::make(default_starboard_color);
 			float dh_radius = gwidth * 2.0F;
 			float nic_radius = radius * 0.25F;
-			
+
+			this->load_label(this->captions, FS::PSSea, Colours::Silver);
+			this->load_label(this->captions, FS::SBSea, Colours::Silver);
+
 			this->load_pump(this->pumps, this->captions, FS::PSPump, +radius, 180.0);
 			this->load_pump(this->pumps, this->captions, FS::SBPump, -radius, 180.0);
 			

@@ -1,6 +1,6 @@
 ﻿#include <unordered_map>
 
-#include "page/graphlets.hpp"
+#include "graphlets.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"

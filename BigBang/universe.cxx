@@ -650,25 +650,27 @@ void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args
 	if (this->recent_planet != nullptr) {
 		VirtualKey vkey = args->Key;
 
-		if (this->controlling) {
-			switch (vkey) {
-			case VirtualKey::S: {
-				this->recent_planet->save(
-					ms_apptemp_file(this->recent_planet->name(), ".png"),
-					this->actual_width, this->actual_height);
-			}; break;
-			case VirtualKey::I: {
-				float x, y, width, height;
+		args->Handled = this->recent_planet->on_char(args->Key, false);
 
-				this->recent_planet->fill_graphlets_boundary(&x, &y, &width, &height);
-				this->recent_planet->save(ms_apptemp_file("icon", ".png"), x, y, width, height);
-			}; break;
+		if (!args->Handled) { // save temporary snapshot
+			if (this->controlling) {
+				switch (vkey) {
+				case VirtualKey::S: {
+					this->recent_planet->save(
+						ms_apptemp_file(this->recent_planet->name(), ".png"),
+						this->actual_width, this->actual_height);
+				}; break;
+				case VirtualKey::L: {
+					this->recent_planet->save_logo();
+				}; break;
+				case VirtualKey::D: {
+					this->recent_planet->save_logo(-2.0F, -2.0F);
+				}; break;
+				}
 			}
 		}
 
 		this->controlling = (vkey == VirtualKey::Control);
-
-		args->Handled = this->recent_planet->on_char(args->Key, false);
 	}
 
 	this->leave_critical_section();
