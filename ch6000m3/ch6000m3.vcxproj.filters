@@ -254,12 +254,6 @@
     <PRIResource Include="stone\tongue\en-US\graphlets.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\waters.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\waters.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\menu.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>

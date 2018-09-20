@@ -10,7 +10,9 @@ using namespace Windows::UI::Text;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 
-CanvasTextLayout^ WarGrey::SCADA::make_text_layout(Platform::String^ para, CanvasTextFormat^ font) {
+CanvasTextLayout^ WarGrey::SCADA::make_text_layout(Platform::String^ para, CanvasTextFormat^ maybe_font) {
+	CanvasTextFormat^ font = ((maybe_font == nullptr) ? make_text_format() : maybe_font);
+
     return ref new CanvasTextLayout(CanvasDevice::GetSharedDevice(), para, font, 0.0F, 0.0F);
 }
 

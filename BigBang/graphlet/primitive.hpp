@@ -140,7 +140,7 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		void sprite() override {
+		void sprite_construct() override {
 			this->update_status();
 		}
 

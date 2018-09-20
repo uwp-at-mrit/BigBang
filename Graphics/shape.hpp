@@ -1,5 +1,6 @@
 #pragma once
 
+#include "text.hpp"
 #include "geometry.hpp"
 
 namespace WarGrey::SCADA {
@@ -7,11 +8,11 @@ namespace WarGrey::SCADA {
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ tl,
-		float* width = nullptr, float* height = nullptr, bool adjust = true);
+		WarGrey::SCADA::TextExtent* te = nullptr, bool adjust = true);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ paragraph(
-		Platform::String^ text, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font,
-		float* width = nullptr, float* height = nullptr, bool adjust = true);
+		Platform::String^ text, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr,
+		WarGrey::SCADA::TextExtent* te = nullptr, bool adjust = true);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ vline(
 		float length, float thickness = 1.0F,

@@ -119,7 +119,6 @@
   </resheader>
   <data name="A" xml:space="preserve">
     <value>Left Drag Head</value>
-    <comment>':' cannot appear between letters</comment>
   </data>
   <data name="B" xml:space="preserve">
     <value>Left Drag Arm</value>

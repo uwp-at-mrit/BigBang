@@ -3,21 +3,21 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class CoolPumpStatus {
+	private enum class WaterPumpStatus {
 		Running, Unstartable, Stopped, Unstoppable, _
 	};
 
-	private struct CoolPumpStyle {
+	private struct WaterPumpStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 	};
 
-	private class CoolPumplet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::CoolPumpStatus, WarGrey::SCADA::CoolPumpStyle> {
+	private class WaterPumplet
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::WaterPumpStatus, WarGrey::SCADA::WaterPumpStyle> {
 
 	public:
-		CoolPumplet(WarGrey::SCADA::CoolPumpStatus default_status, float radius, double degrees = 0.0);
-		CoolPumplet(float radius, double degrees = 0.0);
+		WaterPumplet(WarGrey::SCADA::WaterPumpStatus default_status, float radius, double degrees = 0.0);
+		WaterPumplet(float radius, double degrees = 0.0);
 
 	public:
 		void construct() override;
@@ -28,7 +28,7 @@ namespace WarGrey::SCADA {
 		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::CoolPumpStatus status, WarGrey::SCADA::CoolPumpStyle& style) override;
+		void prepare_style(WarGrey::SCADA::WaterPumpStatus status, WarGrey::SCADA::WaterPumpStyle& style) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ border;

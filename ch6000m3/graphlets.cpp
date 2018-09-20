@@ -3,9 +3,10 @@
 #include "graphlets.hpp"
 #include "configuration.hpp"
 
+#include "graphlet/device/winchlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
-#include "graphlet/symbol/pump/cool_pumplet.hpp"
+#include "graphlet/symbol/pump/water_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
@@ -22,8 +23,8 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 
 private enum class GS {
-	winch,
-	hydraulic_pump, hopper_pump, cool_pump,
+	winch_1, winch_2,
+	hydraulic_pump, hopper_pump, water_pump,
 	gate_valve, motor_valve,
 	hopperdoor, upperdoor,
 	_
@@ -37,12 +38,14 @@ public:
 	void load(float width, float height, float vinset) {
 		float unitsize = (height - vinset - vinset) / (float(_N(GS)) * 2.0F * 1.618F);
 
-		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, large_font_size));
+		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, 16.0F));
+		this->status_font = make_bold_text_format("Microsoft YaHei", 10.0F);
 		
 		for (GS id = _E(GS, 0); id < GS::_; id++) {
 			this->captions[_I(id)] = make_label(_speak(id) + ":", this->font);
 		}
 
+		this->load_primitives(this->winchs, this->wlabels, unitsize * 2.0F);
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
 		this->load_primitives(this->cpumps, this->cplabels, unitsize);
@@ -55,11 +58,10 @@ public:
 	void reflow(float width, float height, float vinset) {
 		float unitsize, halfunit, cellsize;
 		float label_max_width = 0.0F;
-		float offset = vinset * 0.5F;
-		float x0 = offset;
-		float y0 = vinset + offset;
+		float x0 = vinset * 0.5F;
+		float y = 0.0F;
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+		for (size_t i = 0; i < _N(GS); i++) {
 			if (this->captions[i] != nullptr) {
 				float label_width;
 
@@ -71,23 +73,32 @@ public:
 		this->pumps[_E0(HydraulicPumpStatus)]->fill_extent(0.0F, 0.0F, &unitsize);
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
+		y = (height - cellsize * float(_N(GS))) * 0.5F;
 
-		for (size_t i = 0; i < GRAPHLETS_LENGTH(this->captions); i++) {
+		for (size_t i = 0; i < _N(GS); i++) {
 			if (this->captions[i] != nullptr) {
-				float y = y0 + halfunit + float(i) * cellsize;
+				float yi = y + halfunit + float(i) * cellsize;
 
-				this->master->move_to(this->captions[i], x0 + label_max_width, y, GraphletAnchor::RC);
+				this->master->move_to(this->captions[i], x0 + label_max_width, yi, GraphletAnchor::RC);
 			}
 		}
 
-		x0 += (label_max_width + offset + halfunit);
-		this->reflow_primitives(this->pumps,  this->plabels,   x0, y0 + cellsize * 1.0F, halfunit, cellsize);
-		this->reflow_primitives(this->hpumps, this->hplabels,  x0, y0 + cellsize * 2.0F, halfunit, cellsize);
-		this->reflow_primitives(this->cpumps, this->cplabels,  x0, y0 + cellsize * 3.0F, halfunit, cellsize);
-		this->reflow_primitives(this->gvalves, this->gvlabels, x0, y0 + cellsize * 4.0F, halfunit, cellsize);
-		this->reflow_primitives(this->evalves, this->evlabels, x0, y0 + cellsize * 5.0F, halfunit, cellsize);
-		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, y0 + cellsize * 6.0F, halfunit, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels,  x0, y0 + cellsize * 7.0F, halfunit, cellsize);
+		x0 += (label_max_width + x0 + x0 + halfunit);
+
+		{ // split winch statuses
+			WinchStatus at = _E(WinchStatus, _N(WinchStatus) / 2);
+
+			this->reflow_primitives(this->winchs, this->wlabels, _E0(WinchStatus), at, x0, &y, halfunit, cellsize);
+			this->reflow_primitives(this->winchs, this->wlabels, at, WinchStatus::_,   x0, &y, halfunit, cellsize);
+		}
+
+		this->reflow_primitives(this->pumps,  this->plabels,   x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->hpumps, this->hplabels,  x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->cpumps, this->cplabels,  x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->gvalves, this->gvlabels, x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->evalves, this->evlabels, x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x0, &y, halfunit, cellsize);
 	}
 
 public:
@@ -113,29 +124,41 @@ private:
 	void load_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls, float unitsize) {
 		for (S s = _E0(S); s < S::_; s++) {
 			gs[s] = this->master->insert_one(new T(s, unitsize));
-			ls[s] = make_label(_speak(s));
+			ls[s] = make_label(_speak(s), this->status_font);
 		}
 	}
 
 	template<typename T, typename S>
 	void reflow_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls
-		, float x0, float y, float halfunit, float cellsize) {
-		for (S i = _E0(S); i < S::_; i++) {
-			float x = x0 + _F(i) * cellsize;
+		, float x0, float* y, float halfunit, float cellsize) {
+		this->reflow_primitives(gs, ls, _E0(S), S::_, x0, y, halfunit, cellsize);
+	}
 
-			this->master->move_to(gs[i], x, y + halfunit * 1.0F, GraphletAnchor::CC);
-			this->master->move_to(ls[i], x, y + halfunit * 2.0F, GraphletAnchor::CT);
+	template<typename T, typename S>
+	void reflow_primitives(std::unordered_map<S, T*>& gs, std::unordered_map<S, Labellet*>& ls
+		, S id0, S idN, float x0, float* y, float halfunit, float cellsize) {
+		unsigned int i0 = _I(id0);
+
+		for (S i = id0; i < idN; i++) {
+			float x = x0 + float(_I(i) - i0) * cellsize;
+
+			this->master->move_to(gs[i], x, (*y) + halfunit * 1.0F, GraphletAnchor::CC);
+			this->master->move_to(ls[i], x, (*y) + halfunit * 2.0F, GraphletAnchor::CT);
 		}
+
+		(*y) = (*y) + cellsize;
 	}
 
 private: // never delete these graphlets manually.
 	Labellet* captions[_N(GS)];
+	std::unordered_map<WinchStatus, Winchlet*> winchs;
+	std::unordered_map<WinchStatus, Labellet*> wlabels;
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
 	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
 	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
-	std::unordered_map<CoolPumpStatus, CoolPumplet*> cpumps;
-	std::unordered_map<CoolPumpStatus, Labellet*> cplabels;
+	std::unordered_map<WaterPumpStatus, WaterPumplet*> cpumps;
+	std::unordered_map<WaterPumpStatus, Labellet*> cplabels;
 	std::unordered_map<GateValveStatus, GateValvelet*> gvalves;
 	std::unordered_map<GateValveStatus, Labellet*> gvlabels;
 	std::unordered_map<TValveStatus, MotorValvelet*> evalves;
@@ -148,6 +171,7 @@ private: // never delete these graphlets manually.
 private:
 	GraphletOverview* master;
 	CanvasTextFormat^ font;
+	CanvasTextFormat^ status_font;
 
 private:
 	double progress;

@@ -15,7 +15,7 @@ static IModbusClient* client = nullptr;
 class BConfirmation : public ModbusConfirmation {
 public:
 	void on_discrete_inputs(uint16 transaction, uint16 address, uint8* status, uint8 count, Syslog* logger) override {
-		logger->log_message(Log::Info, L"Job(%hu) done, read %hhu input status(0x%02X, 0x%02X, 0x%02X)",
+		logger->log_message(Log::Info, L"Job(%hu) done, read %hhu input status_icon(0x%02X, 0x%02X, 0x%02X)",
 			transaction, count, status[0], status[1], status[2]);
 	};
 

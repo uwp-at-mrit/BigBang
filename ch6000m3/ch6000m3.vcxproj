@@ -279,9 +279,6 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\waters.resw">
-      <DeploymentContent>false</DeploymentContent>
-    </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
     <PRIResource Include="stone\tongue\zh-CN\loads.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
@@ -301,9 +298,6 @@
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\sealed_waters.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw">
-      <DeploymentContent>false</DeploymentContent>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\waters.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
   </ItemGroup>

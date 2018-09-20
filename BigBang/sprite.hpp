@@ -5,7 +5,8 @@
 namespace WarGrey::SCADA {
 	private class ISprite abstract {
 	public:
-		virtual void sprite() {} // pseudo constructor for special derived classes
+		virtual void sprite() {}           // pseudo constructor for special derived classes before constructing
+		virtual void sprite_construct() {} // pseudo constructor for special derived classes after constructing
 
 	public:
 		virtual WarGrey::SCADA::Syslog* get_logger() = 0;

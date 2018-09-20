@@ -9,9 +9,9 @@ using namespace Windows::System;
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 
-private class Canvas final {
+private class Screen final {
 public:
-	Canvas(SplashScreen* master) : master(master) {}
+	Screen(SplashScreen* master) : master(master) {}
 
 public:
 	void load(float width, float height, float logo_width, float logo_height) {
@@ -19,7 +19,7 @@ public:
 		float w = logo_width - border_size;
 		float h = logo_height - border_size;
 
-		this->frame = this->master->insert_one(new Rectanglet(w, h, Colours::Snow, Colours::RoyalBlue, border_size));
+		this->frame = this->master->insert_one(new Rectanglet(w, h, Colours::Background, Colours::RoyalBlue, border_size));
 	}
 
 	void reflow(float width, float height, float logo_width, float logo_height) {
@@ -34,7 +34,7 @@ private:
 };
 
 /*************************************************************************************************/
-static std::unordered_map<SplashScreen*, Canvas*> stages;
+static std::unordered_map<SplashScreen*, Screen*> screens;
 
 SplashScreen::SplashScreen(float square_size) : SplashScreen(square_size, square_size) {}
 
@@ -47,30 +47,30 @@ SplashScreen::SplashScreen(float wide_width, float wide_height)
 }
 
 SplashScreen::~SplashScreen() {
-	auto maybe_stage = stages.find(this);
+	auto maybe_stage = screens.find(this);
 
-	if (maybe_stage != stages.end()) {
+	if (maybe_stage != screens.end()) {
 		delete maybe_stage->second;
 
-		stages.erase(maybe_stage);
+		screens.erase(maybe_stage);
 	}
 }
 
 void SplashScreen::load(CanvasCreateResourcesReason reason, float width, float height) {
-	if (stages.find(this) == stages.end()) {
-		Canvas* stage = new Canvas(this);
+	if (screens.find(this) == screens.end()) {
+		Screen* stage = new Screen(this);
 		
-		stages.insert(std::pair<SplashScreen*, Canvas*>(this, stage));
+		screens.insert(std::pair<SplashScreen*, Screen*>(this, stage));
 
 		stage->load(width, height, this->logo_width, this->logo_height);
 	}
 }
 
 void SplashScreen::reflow(float width, float height) {
-	auto maybe_stage = stages.find(this);
+	auto maybe_stage = screens.find(this);
 	
-	if (maybe_stage != stages.end()) {
-		Canvas* stage = maybe_stage->second;
+	if (maybe_stage != screens.end()) {
+		Screen* stage = maybe_stage->second;
 		
 		stage->reflow(width, height, this->logo_width, this->logo_height);
 	}

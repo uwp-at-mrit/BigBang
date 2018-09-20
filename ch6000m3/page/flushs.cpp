@@ -13,7 +13,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
-#include "graphlet/symbol/pump/cool_pumplet.hpp"
+#include "graphlet/symbol/pump/water_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
@@ -362,7 +362,7 @@ private:
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
 	std::map<FS, Credit<Percentagelet, FS>*> progresses;
-	std::map<FS, Credit<CoolPumplet, FS>*> pumps;
+	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
 	std::map<FS, Credit<Labellet, FS>*> vlabels;

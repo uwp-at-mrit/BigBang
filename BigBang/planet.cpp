@@ -318,6 +318,7 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 
 		g->sprite();
 		g->construct();
+		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		this->notify_graphlet_updated(g);
@@ -924,6 +925,7 @@ void Planet::append_decorator(IPlanetDecorator* decorator) {
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
 	this->numpad->sprite();
 	this->numpad->construct();
+	this->numpad->sprite_construct();
 }
 
 void Planet::update(long long count, long long interval, long long uptime) {
