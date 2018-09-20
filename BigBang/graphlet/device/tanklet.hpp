@@ -63,11 +63,11 @@ namespace WarGrey::SCADA {
 		, public WarGrey::SCADA::IStatuslet<Status, WarGrey::SCADA::TankStyle> {
 	public:
 		Tanklet(float width, float height = 0.0F, float thickness = 3.0F, Platform::String^ tongue = nullptr)
-			: Tanklet(_E(Status, 0), width, height, thickness, liquid_colors, weights, tongue) {}
+			: Tanklet(_E0(Status), width, height, thickness, tongue) {}
 
 		Tanklet(Status default_status, float width, float height = 0.0F, float thickness = 3.0F, Platform::String^ tongue = nullptr)
 			: ITanklet(width, height, thickness), IStatuslet(default_status) {
-			for (Status s = _E(Status, 0); s < Status::_; s ++) {
+			for (Status s = _E0(Status); s < Status::_; s ++) {
 				this->marks[_I(s)] = speak(s, tongue);
 			}
 		}
@@ -75,7 +75,6 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override {
 			ITanklet::construct();
-			this->update_status();
 		}
 
 	protected:

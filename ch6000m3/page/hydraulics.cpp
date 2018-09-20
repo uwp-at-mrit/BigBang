@@ -60,6 +60,10 @@ private enum class HS : unsigned int {
 	// anchors used for unnamed corners
 };
 
+static inline float resolve_gridsize(float gwidth, float gheight) {
+	return (gwidth + gheight) * 0.5F;
+}
+
 private class Hydraulics final
 	: public PLCConfirmation
 	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>
@@ -210,7 +214,7 @@ public:
 	}
 
 	void load_devices(float width, float height, float gwidth, float gheight) {
-		float radius = std::fminf(gwidth, gheight);
+		float radius = resolve_gridsize(gwidth, gheight);
 
 		{ // load pumps
 			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, radius, 180.0);
@@ -254,7 +258,7 @@ public:
 	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy, margin;
-		float gridsize = std::fminf(gwidth, gheight);
+		float gridsize = resolve_gridsize(gwidth, gheight);
 		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;

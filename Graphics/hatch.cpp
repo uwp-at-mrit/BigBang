@@ -39,7 +39,7 @@ inline unsigned int mark_span(Platform::String^ mark) {
 }
 
 inline float discrete_weight_position(float height, double weight) {
-	return height * float(std::fmax(std::fmin(weight, 1.0), 0.0));
+	return height * float(std::fmax(std::fmin(1.0 - weight, 1.0), 0.0));
 }
 
 static Platform::String^ resolve_longest_mark(Platform::String^ marks[], size_t count, unsigned int* span) {
@@ -71,14 +71,12 @@ static VHatchMarkMetrics make_input_vmetrics(float width, float height, float th
 	return metrics;
 }
 
-void fill_consistent_vhatch_metrics(CanvasTextFormat^ font, float thickness, float* hatch_width, float* gapsize, float* ch, float* em) {
-	TextExtent css_metrics = get_text_extent("0", ((font == nullptr) ? default_mark_font : font));
+static void fill_consistent_vhatch_metrics(CanvasTextFormat^ maybe_font, float thickness, float* hatch_width, float* gapsize) {
+	TextExtent css_metrics = get_text_extent("0", ((maybe_font == nullptr) ? default_mark_font : maybe_font));
 	float chwidth = css_metrics.width;
 
 	SET_BOX(hatch_width, chwidth * hatch_long_ratio + thickness);
 	SET_BOX(gapsize, chwidth * mark_space_ratio);
-	SET_BOX(ch, chwidth);
-	SET_BOX(em, css_metrics.height - css_metrics.tspace - css_metrics.bspace);
 }
 
 static CanvasGeometry^ make_vlhatch(VHatchMarkMetrics* metrics, float interval, unsigned int step, float thickness) {
@@ -217,7 +215,10 @@ VHatchMarkMetrics WarGrey::SCADA::vhatchmark_metrics(double vmin, double vmax, f
 	unsigned int longer_span = longer_mark->Length();
 	TextExtent te = get_text_extent(longer_mark, ((font == nullptr) ? default_mark_font : font));
 	
-	fill_consistent_vhatch_metrics(font, thickness, &metrics.hatch_width, &metrics.gap_space, &metrics.ch, &metrics.em);
+	fill_consistent_vhatch_metrics(font, thickness, &metrics.hatch_width, &metrics.gap_space);
+
+	metrics.ch = te.width / float(longer_span);
+	metrics.em = te.height - te.tspace - te.bspace;
 
 	metrics.mark_width = te.width;
 	metrics.span = longer_span;
@@ -234,7 +235,10 @@ VHatchMarkMetrics WarGrey::SCADA::vhatchmark_metrics(Platform::String^ marks[], 
 	Platform::String^ longest_mark = resolve_longest_mark(marks, count, &metrics.span);
 	TextExtent te = get_text_extent(longest_mark, ((font == nullptr) ? default_mark_font : font));
 	
-	fill_consistent_vhatch_metrics(font, thickness, &metrics.hatch_width, &metrics.gap_space, &metrics.ch, &metrics.em);
+	fill_consistent_vhatch_metrics(font, thickness, &metrics.hatch_width, &metrics.gap_space);
+
+	metrics.ch = te.width / float(longest_mark->Length());
+	metrics.em = te.height - te.tspace - te.bspace;
 
 	metrics.mark_width = te.width;
 	metrics.top_space = te.tspace;
