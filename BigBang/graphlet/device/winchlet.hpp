@@ -4,7 +4,6 @@
 
 namespace WarGrey::SCADA {
 	private enum class WinchStatus {
-		Remote,
 		WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady,
 		UpperLimited, SoftUpperLimited, LowerLimited, SoftLowerLimited,
@@ -14,6 +13,7 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct WinchStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ base_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cable_top_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cable_bottom_color;
@@ -34,6 +34,9 @@ namespace WarGrey::SCADA {
 		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* width, float* height) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void set_remote_control(bool on);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::WinchStatus status, WarGrey::SCADA::WinchStyle& style) override;
@@ -60,5 +63,8 @@ namespace WarGrey::SCADA {
 		float thickness;
 		float base_thickness;
 		float cable_thickness;
+
+	private:
+		bool remote_control;
 	};
 }

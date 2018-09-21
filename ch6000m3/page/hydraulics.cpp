@@ -123,7 +123,6 @@ public:
 				case 0b00001000: target->set_status(HydraulicPumpStatus::Unstoppable); break;
 				case 0b00010000: target->set_status(HydraulicPumpStatus::Running); break;
 				case 0b00100000: target->set_status(HydraulicPumpStatus::Stopped); break;
-				case 0b01000000: target->set_status(HydraulicPumpStatus::Remote); break;
 				case 0b10000000: target->set_status(HydraulicPumpStatus::Ready); break;
 				}
 			}

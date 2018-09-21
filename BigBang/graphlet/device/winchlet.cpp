@@ -25,7 +25,7 @@ Winchlet::Winchlet(float width, float height, float thickness, unsigned int stra
 	: Winchlet(WinchStatus::WindingOut, width, height, thickness) {}
 
 Winchlet::Winchlet(WinchStatus default_status, float width, float height, float thickness, unsigned int strand)
-	: IStatuslet(default_status), width(width), height(height), strand(strand)
+	: IStatuslet(default_status), width(width), height(height), strand(strand), remote_control(false)
 	, thickness(thickness), base_thickness(thickness * 2.0F), cable_thickness(1.0F) {
 	if (this->height <= 0.0F) {
 		this->height = this->width * 0.618F;
@@ -169,13 +169,9 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 	case WinchStatus::SpoolLimited: case WinchStatus::Slack: {
 		CAS_SLOT(s.status_color, Colours::Firebrick);
 	}; break;
-	case WinchStatus::Remote: {
-		CAS_SLOT(s.base_color, Colours::Cyan);
-		CAS_SLOT(s.cable_top_color, winch_default_color);
-		CAS_SLOT(s.cable_bottom_color, winch_default_color);
-	}; break;
 	}
 
+	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.base_color, winch_default_color);
 	CAS_SLOT(s.cable_color, winch_default_color);
 	CAS_SLOT(s.cable_top_color, s.base_color);
@@ -221,5 +217,13 @@ void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	ds->DrawCachedGeometry(this->cable_upper, x, y, s.cable_top_color);
 	ds->DrawCachedGeometry(this->cable_bottom, x, y, s.cable_bottom_color);
 
-	ds->DrawCachedGeometry(this->base, x, y, s.base_color);
+	if (this->remote_control) {
+		ds->DrawCachedGeometry(this->base, x, y, s.remote_color);
+	} else {
+		ds->DrawCachedGeometry(this->base, x, y, s.base_color);
+	}
+}
+
+void Winchlet::set_remote_control(bool on) {
+	this->remote_control = on;
 }
