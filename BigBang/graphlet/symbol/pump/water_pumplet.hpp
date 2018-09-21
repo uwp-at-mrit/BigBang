@@ -4,11 +4,13 @@
 
 namespace WarGrey::SCADA {
 	private enum class WaterPumpStatus {
-		Running, Unstartable, Stopped, Unstoppable, _
+		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, _
 	};
 
 	private struct WaterPumpStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 	};
 
@@ -25,6 +27,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		void set_remote_control(bool on);
 		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
@@ -39,5 +42,8 @@ namespace WarGrey::SCADA {
 		float pump_cx;
 		float pump_cy;
 		bool leftward;
+
+	private:
+		bool remote_control;
 	};
 }

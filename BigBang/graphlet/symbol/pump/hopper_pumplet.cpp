@@ -47,17 +47,17 @@ void HopperPumplet::construct() {
 	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
 	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
 
-	this->body = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
+	this->border = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
 	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
 	this->indicator = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
 	this->iborder = geometry_rotate(iborder, this->degrees, 0.0F, 0.0F);
 
 	{ // locate
-		auto box = this->body->ComputeBounds();
+		auto box = this->border->ComputeBounds();
 
 		this->pump_cx = box.X + box.Width * 0.5F;
 		this->pump_cy = box.Y + box.Height * 0.5F;
-		this->enclosing_box = geometry_union(this->body, this->inlet)->ComputeStrokeBounds(default_thickness);
+		this->enclosing_box = geometry_union(this->border, this->inlet)->ComputeStrokeBounds(default_thickness);
 	}
 }
 
@@ -79,34 +79,45 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	switch (status) {
 	case HopperPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
 	case HopperPumpStatus::Unstartable: {
 		CAS_SLOT(s.body_color, Colours::DimGray);
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
 	case HopperPumpStatus::Unstoppable: {
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case HopperPumpStatus::Ready: {
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	}
 
+	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
+	CAS_SLOT(s.skeleton_color, s.border_color);
 
 	// NOTE: The others can be nullptr;
 }
 
 void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const HopperPumpStyle style = this->get_style();
+	const HopperPumpStyle s = this->get_style();
+	ICanvasBrush^ border_color = (this->remote_control ? s.remote_color : s.border_color);
 	float cx = x + this->width * 0.5F;
 	float cy = y + this->height * 0.5F;
 
-	ds->FillGeometry(this->body, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->body, cx, cy, style.border_color, default_thickness);
-	
-	ds->FillGeometry(this->inlet, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->inlet, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->border, cx, cy, Colours::Background);
+	ds->DrawGeometry(this->border, cx, cy, border_color, default_thickness);
 
-	ds->FillGeometry(this->indicator, cx, cy, style.body_color);
-	ds->DrawGeometry(this->indicator, cx, cy, style.border_color);
-	ds->DrawGeometry(this->iborder, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->inlet, cx, cy, Colours::Background);
+	ds->DrawGeometry(this->inlet, cx, cy, border_color, default_thickness);
+
+	ds->FillGeometry(this->indicator, cx, cy, s.body_color);
+	ds->DrawGeometry(this->indicator, cx, cy, s.skeleton_color, default_thickness);
+	ds->DrawGeometry(this->iborder, cx, cy, border_color, default_thickness);
+}
+
+void HopperPumplet::set_remote_control(bool on) {
+	this->remote_control = on;
 }

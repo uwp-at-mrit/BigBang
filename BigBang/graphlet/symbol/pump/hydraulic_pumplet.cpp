@@ -81,13 +81,14 @@ void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpSt
 	}; break;
 	case HydraulicPumpStatus::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
 	case HydraulicPumpStatus::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
 	case HydraulicPumpStatus::Unstoppable: {
-		CAS_VALUES(s.mask_color, Colours::ForestGreen, s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
 	case HydraulicPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
@@ -111,14 +112,14 @@ void HydraulicPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Wi
 	
 	ds->FillEllipse(cx, cy, radiusX, radiusY, Colours::Background);
 	ds->DrawCachedGeometry(this->body, cx, cy, style.body_color);
-	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
 
 	if (style.mask_color != nullptr) {
 		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
 		
 		ds->FillGeometry(mask, cx, cy, style.mask_color);
-		ds->DrawGeometry(mask, cx, cy, style.mask_color, default_thickness);
 	}
+
+	ds->DrawGeometry(this->skeleton, cx, cy, style.skeleton_color, default_thickness);
 
 	if (this->remote_control) {
 		ds->DrawEllipse(cx, cy, radiusX, radiusY, style.remote_color, default_thickness);

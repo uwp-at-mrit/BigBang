@@ -25,7 +25,7 @@ Winchlet::Winchlet(float width, float height, float thickness, unsigned int stra
 	: Winchlet(WinchStatus::WindingOut, width, height, thickness) {}
 
 Winchlet::Winchlet(WinchStatus default_status, float width, float height, float thickness, unsigned int strand)
-	: IStatuslet(default_status), width(width), height(height), strand(strand), remote_control(false)
+	: IStatuslet(default_status), width(width), height(height), strand(strand)
 	, thickness(thickness), base_thickness(thickness * 2.0F), cable_thickness(1.0F) {
 	if (this->height <= 0.0F) {
 		this->height = this->width * 0.618F;
@@ -36,7 +36,7 @@ void Winchlet::construct() {
 	float base_height = this->height - this->base_thickness;
 	float base_y = (this->height - base_height) * 0.5F;
 	float cable_height = base_height * 0.75F;
-	float cable_bunit_width = (this->width - this->base_thickness * 2.0F) / float(this->strand);
+	float cable_bunit_width = (this->width - this->base_thickness) / float(this->strand);
 	float cable_y = (this->height - cable_height) * 0.5F;
 	auto base_style = make_roundcap_stroke_style();
 	auto base_l = vline(this->base_thickness * 0.5F, base_y, base_height, this->base_thickness, base_style);
@@ -52,11 +52,11 @@ void Winchlet::construct() {
 		this->cable_base = blank();
 
 		for (unsigned int idx = 0; idx < this->strand; idx++) {
-			float cables_x = this->base_thickness + cable_bunit_width * float(idx) - this->thickness * 0.382F;
-			float cable_x = cables_x + cable_bunit_width * 0.5F + this->cable_thickness * 0.5F;
+			float cable_base_x = this->base_thickness * 0.25F + cable_bunit_width * float(idx);
+			float cable_x = cable_base_x + cable_bunit_width * 0.5F + this->cable_thickness * 0.5F;
 
 			this->cable_base = geometry_union(this->cable_base,
-				rounded_rectangle(cables_x, cable_y, cable_bunit_width + this->thickness * 0.618F, cable_height,
+				rounded_rectangle(cable_base_x, cable_y, cable_bunit_width + this->thickness * 0.618F, cable_height,
 					this->thickness, this->thickness));
 
 			if (idx >= threshold) {
@@ -167,7 +167,7 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 		CAS_SLOT(s.status_color, Colours::SeaGreen);
 	}; break;
 	case WinchStatus::SpoolLimited: case WinchStatus::Slack: {
-		CAS_SLOT(s.status_color, Colours::Firebrick);
+		CAS_SLOT(s.status_color, Colours::Crimson);
 	}; break;
 	}
 

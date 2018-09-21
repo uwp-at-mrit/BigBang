@@ -68,30 +68,41 @@ void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
 	switch (status) {
 	case WaterPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
 	case WaterPumpStatus::Unstartable: {
 		CAS_SLOT(s.body_color, Colours::DimGray);
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
 	case WaterPumpStatus::Unstoppable: {
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case WaterPumpStatus::Ready: {
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	}
 
+	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
+	CAS_SLOT(s.skeleton_color, s.border_color);
 
 	// NOTE: The others can be nullptr;
 }
 
 void WaterPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const WaterPumpStyle style = this->get_style();
+	const WaterPumpStyle s = this->get_style();
+	ICanvasBrush^ border_color = (this->remote_control ? s.remote_color : s.border_color);
 	float cx = x + this->width * 0.5F;
 	float cy = y + this->height * 0.5F;
 
 	ds->FillGeometry(this->border, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->border, cx, cy, style.border_color, default_thickness);
+	ds->DrawGeometry(this->border, cx, cy, border_color, default_thickness);
 
-	ds->FillGeometry(this->indicator, cx, cy, style.body_color);
-	ds->DrawGeometry(this->indicator, cx, cy, style.border_color);
+	ds->FillGeometry(this->indicator, cx, cy, s.body_color);
+	ds->DrawGeometry(this->indicator, cx, cy, s.skeleton_color, default_thickness);
+}
+
+void WaterPumplet::set_remote_control(bool on) {
+	this->remote_control = on;
 }

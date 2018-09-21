@@ -4,11 +4,13 @@
 
 namespace WarGrey::SCADA {
 	private enum class HopperPumpStatus {
-		Running, Unstartable, Stopped, Unstoppable, _
+		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, _
 	};
 
 	private struct HopperPumpStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 	};
 
@@ -24,13 +26,14 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		void set_remote_control(bool on);
 		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HopperPumpStatus status, WarGrey::SCADA::HopperPumpStyle& style) override;
 		
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ border;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ inlet;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ indicator;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ iborder;
@@ -41,5 +44,8 @@ namespace WarGrey::SCADA {
 		float pump_cy;
 		bool leftward;
 		bool upward;
+
+	private:
+		bool remote_control;
 	};
 }
