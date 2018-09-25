@@ -41,6 +41,7 @@ public:
 		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, 16.0F));
 		this->status_font = make_bold_text_format("Microsoft YaHei", 10.0F);
 		
+		this->remote_label = make_label(_speak("Remote"), this->font);
 		for (GS id = _E(GS, 0); id < GS::_; id++) {
 			this->captions[_I(id)] = make_label(_speak(id) + ":", this->font);
 		}
@@ -48,23 +49,26 @@ public:
 		this->load_primitives(this->winchs, this->wlabels, unitsize * 2.0F);
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
-		this->load_primitives(this->cpumps, this->cplabels, unitsize);
+		this->load_primitives(this->wpumps, this->wplabels, unitsize);
 		this->load_primitives(this->gvalves, this->gvlabels, unitsize);
 		this->load_primitives(this->evalves, this->evlabels, unitsize);
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
+
+		this->load_remote_primitive(&this->remote_winch,       WinchStatus::Stopped,         unitsize * 2.0F);
+		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpStatus::Stopped, unitsize);
+		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpStatus::Stopped,    unitsize * 0.5F);
+		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpStatus::Stopped,     unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
-		float unitsize, halfunit, cellsize;
+		float unitsize, halfunit, cellsize, label_width;
 		float label_max_width = 0.0F;
-		float x0 = vinset * 0.5F;
+		float x = vinset * 0.5F;
 		float y = 0.0F;
 
 		for (size_t i = 0; i < _N(GS); i++) {
 			if (this->captions[i] != nullptr) {
-				float label_width;
-
 				this->captions[i]->fill_extent(0.0F, 0.0F, &label_width);
 				label_max_width = fmax(label_max_width, label_width);
 			}
@@ -79,26 +83,37 @@ public:
 			if (this->captions[i] != nullptr) {
 				float yi = y + halfunit + float(i) * cellsize;
 
-				this->master->move_to(this->captions[i], x0 + label_max_width, yi, GraphletAnchor::RC);
+				this->master->move_to(this->captions[i], x + label_max_width, yi, GraphletAnchor::RC);
 			}
 		}
 
-		x0 += (label_max_width + x0 + x0 + halfunit);
+		x += (label_max_width + x + x + halfunit);
 
 		{ // split winch statuses
 			WinchStatus at = _E(WinchStatus, _N(WinchStatus) / 2);
 
-			this->reflow_primitives(this->winchs, this->wlabels, _E0(WinchStatus), at, x0, &y, halfunit, cellsize);
-			this->reflow_primitives(this->winchs, this->wlabels, at, WinchStatus::_,   x0, &y, halfunit, cellsize);
+			this->reflow_primitives(this->winchs, this->wlabels, _E0(WinchStatus), at, x, &y, halfunit, cellsize);
+			this->reflow_primitives(this->winchs, this->wlabels, at, WinchStatus::_,   x, &y, halfunit, cellsize);
 		}
 
-		this->reflow_primitives(this->pumps,  this->plabels,   x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->hpumps, this->hplabels,  x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->cpumps, this->cplabels,  x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->gvalves, this->gvlabels, x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->evalves, this->evlabels, x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->hdoors, this->hdlabels,  x0, &y, halfunit, cellsize);
-		this->reflow_primitives(this->udoors, this->udlabels,  x0, &y, halfunit, cellsize);
+		this->reflow_primitives(this->pumps,  this->plabels,   x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->hpumps, this->hplabels,  x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->wpumps, this->wplabels,  x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->gvalves, this->gvlabels, x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->evalves, this->evlabels, x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->hdoors, this->hdlabels,  x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->udoors, this->udlabels,  x, &y, halfunit, cellsize);
+
+		{ // reflow remote controlled graphlets
+			x = width - x + label_max_width;
+			y = vinset + cellsize * 0.5F;
+
+			this->master->move_to(this->remote_label,       x, y + cellsize * 0.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_winch,       x, y + cellsize * 1.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_pump,        x, y + cellsize * 2.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_hopper_pump, x, y + cellsize * 3.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_water_pump,  x, y + cellsize * 4.0F, GraphletAnchor::CC);
+		}
 	}
 
 public:
@@ -118,6 +133,12 @@ public:
 private:
 	Labellet* make_label(Platform::String^ text, CanvasTextFormat^ font = nullptr) {
 		return this->master->insert_one(new Labellet(text, font));
+	}
+
+	template<typename T, typename S>
+	void load_remote_primitive(T** g, S s, float unitsize) {
+		(*g) = this->master->insert_one(new T(s, unitsize));
+		(*g)->set_remote_control(true);
 	}
 
 	template<typename T, typename S>
@@ -157,8 +178,8 @@ private: // never delete these graphlets manually.
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
 	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
 	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
-	std::unordered_map<WaterPumpStatus, WaterPumplet*> cpumps;
-	std::unordered_map<WaterPumpStatus, Labellet*> cplabels;
+	std::unordered_map<WaterPumpStatus, WaterPumplet*> wpumps;
+	std::unordered_map<WaterPumpStatus, Labellet*> wplabels;
 	std::unordered_map<GateValveStatus, GateValvelet*> gvalves;
 	std::unordered_map<GateValveStatus, Labellet*> gvlabels;
 	std::unordered_map<TValveStatus, MotorValvelet*> evalves;
@@ -167,6 +188,12 @@ private: // never delete these graphlets manually.
 	std::unordered_map<DoorStatus, Labellet*> hdlabels;
 	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;
 	std::unordered_map<DoorStatus, Labellet*> udlabels;
+
+	Labellet* remote_label;
+	Winchlet* remote_winch;
+	HydraulicPumplet* remote_pump;
+	HopperPumplet* remote_hopper_pump;
+	WaterPumplet* remote_water_pump;
 
 private:
 	GraphletOverview* master;
