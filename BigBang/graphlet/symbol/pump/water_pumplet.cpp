@@ -33,20 +33,43 @@ void WaterPumplet::construct() {
 	float outlet_ey = -this->radiusY + thickoff;
 	float pump_cx = (this->radiusX - pump_radius - thickoff) * (this->leftward ? 1.0F : -1.0F);
 	float pump_cy = this->radiusY - pump_radius - thickoff;
-	float indicator_radius = pump_radius * 0.618F;
 	auto pump = circle(pump_cx, pump_cy, pump_radius);
 	auto outlet = rectangle(outlet_x, outlet_y, outlet_width, outlet_height);
 	auto outlet_line = vline(outlet_ex, outlet_ey, outlet_extend);
 	
+	this->iradius = pump_radius * 0.618F;
 	this->border = geometry_rotate(geometry_union(pump, geometry_union(outlet, outlet_line)), this->degrees, 0.0F, 0.0F);
-	this->indicator = geometry_rotate(circle(pump_cx, pump_cy, indicator_radius), this->degrees, 0.0F, 0.0F);
+	this->skeleton = geometry_rotate(circle(pump_cx, pump_cy, this->iradius), this->degrees, 0.0F, 0.0F);
 	
 	{ // locate
-		auto box = this->indicator->ComputeBounds();
+		auto box = this->skeleton->ComputeBounds();
 
 		this->pump_cx = box.X + box.Width * 0.5F;
 		this->pump_cy = box.Y + box.Height * 0.5F;
 		this->enclosing_box = this->border->ComputeStrokeBounds(default_thickness);
+	}
+}
+
+void WaterPumplet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case WaterPumpStatus::Starting: {
+		this->mask_percentage
+			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
+			? 0.0
+			: this->mask_percentage + dynamic_mask_interval;
+
+		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(this->mask_percentage));
+		this->notify_updated();
+	} break;
+	case WaterPumpStatus::Stopping: {
+		this->mask_percentage
+			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
+			? 1.0
+			: this->mask_percentage - dynamic_mask_interval;
+
+		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(this->mask_percentage));
+		this->notify_updated();
+	} break;
 	}
 }
 
@@ -64,17 +87,45 @@ void WaterPumplet::fill_pump_origin(float* x, float *y) {
 	SET_VALUES(x, this->pump_cx, y, this->pump_cy);
 }
 
+void WaterPumplet::on_status_changed(WaterPumpStatus status) {
+	switch (status) {
+	case WaterPumpStatus::Unstartable: {
+		if (this->unstartable_mask == nullptr) {
+			this->unstartable_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.382F);
+		}
+		this->mask = this->unstartable_mask;
+	} break;
+	case WaterPumpStatus::Unstoppable: {
+		if (this->unstoppable_mask == nullptr) {
+			this->unstoppable_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.618F);
+		}
+		this->mask = this->unstoppable_mask;
+	} break;
+	default: {
+		this->mask = nullptr;
+		this->mask_percentage = -1.0;
+	}
+	}
+}
+
 void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
 	switch (status) {
 	case WaterPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
+	case WaterPumpStatus::Starting: {
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+	}; break;
 	case WaterPumpStatus::Unstartable: {
-		CAS_SLOT(s.body_color, Colours::DimGray);
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
+	case WaterPumpStatus::Stopping: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+	}; break;
 	case WaterPumpStatus::Unstoppable: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
 	case WaterPumpStatus::Ready: {
@@ -85,7 +136,7 @@ void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
 	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
-	CAS_SLOT(s.skeleton_color, s.border_color);
+	CAS_SLOT(s.skeleton_color, s.body_color);
 
 	// NOTE: The others can be nullptr;
 }
@@ -99,8 +150,15 @@ void WaterPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->FillGeometry(this->border, cx, cy, Colours::Background);
 	ds->DrawGeometry(this->border, cx, cy, border_color, default_thickness);
 
-	ds->FillGeometry(this->indicator, cx, cy, s.body_color);
-	ds->DrawGeometry(this->indicator, cx, cy, s.skeleton_color, default_thickness);
+	ds->FillGeometry(this->skeleton, cx, cy, s.body_color);
+
+	if (s.mask_color != nullptr) {
+		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
+
+		ds->FillGeometry(mask, cx, cy, s.mask_color);
+	}
+
+	ds->DrawGeometry(this->skeleton, cx, cy, s.skeleton_color, default_thickness);
 }
 
 void WaterPumplet::set_remote_control(bool on) {
