@@ -101,8 +101,8 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
-		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
@@ -112,7 +112,7 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
-		float radius = std::fminf(gwidth, gheight);
+		float radius = resolve_gridsize(gwidth, gheight);
 		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false, FS::HBV10);
 		Turtle<FS>* rTurtle = new Turtle<FS>(gwidth, gheight, false);
 
@@ -238,7 +238,7 @@ public:
 		}
 		
 		{ // reflow valves
-			float gridsize = std::fminf(gwidth, gheight);
+			float gridsize = resolve_gridsize(gwidth, gheight);
 
 			for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);

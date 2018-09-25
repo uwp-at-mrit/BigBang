@@ -84,7 +84,7 @@ void Winchlet::construct() {
 		auto out_icon = polar_triangle(radius, 90.0);
 		auto fup_icon = geometry_union(up_icon, 0.0F, -fdiff, up_icon, 0.0F, fdiff);
 		auto fout_icon = geometry_union(out_icon, 0.0F, -fdiff, out_icon, 0.0F, fdiff);
-		auto tilde = paragraph("~", nullptr, &te);
+		auto tilde = paragraph("~", make_text_format(16.0F), &te);
 
 		this->icon_cx = this->base_thickness + (this->cable->ComputeBounds().X - this->base_thickness) * 0.5F;
 		this->icon_cy = this->height * 0.5F;

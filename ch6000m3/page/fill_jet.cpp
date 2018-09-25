@@ -109,8 +109,8 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
-		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
@@ -120,6 +120,7 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
+		float radius = resolve_gridsize(gwidth, gheight);
 		Turtle<FJ>* pTurtle = new Turtle<FJ>(gwidth, gheight, false);
 
 		pTurtle->move_left(FJ::deck_rx)->move_left(2, FJ::D021)->move_left(2, FJ::d2122);
@@ -162,16 +163,10 @@ public:
 					default_pipeline_thickness, default_pipeline_color));
 		}
 
-		{ // load doors
-			float radius = std::fminf(gwidth, gheight);
-
+		{ // load doors and valves
 			this->load_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, radius);
 			this->load_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, radius);
-		}
-
-		{ // load valves
-			float radius = std::fminf(gwidth, gheight);
-
+		
 			this->load_valve(this->gvalves, this->vlabels, this->captions, FJ::D001, radius, 0.0);
 			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, FJ::D002, FJ::D024, radius, 00.0);
 			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, FJ::D003, FJ::D025, radius, 90.0);
@@ -179,7 +174,6 @@ public:
 		}
 
 		{ // load special nodes
-			float radius = std::fminf(gwidth, gheight);
 			float sct_radius = radius * 0.5F;
 			float nic_radius = radius * 0.25F;
 			
@@ -211,7 +205,7 @@ public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor anchor;
 		float dx, dy, margin, label_height, ox, oy;
-		float gridsize = std::fminf(gwidth, gheight);
+		float gridsize = resolve_gridsize(gwidth, gheight);
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 

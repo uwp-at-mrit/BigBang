@@ -60,10 +60,6 @@ private enum class HS : unsigned int {
 	// anchors used for unnamed corners
 };
 
-static inline float resolve_gridsize(float gwidth, float gheight) {
-	return (gwidth + gheight) * 0.5F;
-}
-
 private class Hydraulics final
 	: public PLCConfirmation
 	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>
@@ -147,11 +143,10 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		float fontsize = gheight;
-
-		this->caption_font = make_text_format("Microsoft YaHei", fontsize);
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", fontsize * 1.2F);
-		this->dimension_style.unit_font = make_bold_text_format("Cambria", fontsize);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
+		this->dimension_style.number_font = make_bold_text_format("Cambria Math", large_font_size);
+		this->dimension_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -201,8 +196,8 @@ public:
 	void load_tanks(float width, float height, float gwidth, float gheight) {
 		float thickness = 3.0F;
 
-		this->master_tank = this->make_tank(HSMTStatus::High, gwidth * 17.0F, gheight * 8.0F, thickness);
-		this->visor_tank = this->make_tank(HSVTStatus::Normal, gwidth * 15.0F, gheight * 6.0F, thickness);
+		this->master_tank = this->make_tank(HSMTStatus::High, gwidth * 18.0F, gheight * 8.0F, thickness);
+		this->visor_tank = this->make_tank(HSVTStatus::Normal, gwidth * 16.0F, gheight * 7.0F, thickness);
 
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
@@ -401,7 +396,7 @@ private:
 	template<typename E>
 	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ caption, E id
 		, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(caption, font, color), id);
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(caption, ((font == nullptr) ? this->label_font : font), color), id);
 	}
 
 	template<typename E>
@@ -449,6 +444,7 @@ private:
 	
 private:
 	CanvasTextFormat^ caption_font;
+	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
 
 private:

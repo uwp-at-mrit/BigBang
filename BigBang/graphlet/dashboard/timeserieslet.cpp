@@ -19,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ lines_default_border_color = Colours::make(0xBBBBBB);
-static CanvasTextFormat^ lines_default_font = make_bold_text_format(9.0F);
+static CanvasTextFormat^ lines_default_font = make_bold_text_format(10.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(12.0F);
 
 /*************************************************************************************************/

@@ -38,12 +38,12 @@ public:
 	void load(float width, float height, float vinset) {
 		float unitsize = (height - vinset - vinset) / (float(_N(GS)) * 2.0F * 1.618F);
 
-		this->font = make_bold_text_format("Microsoft YaHei", std::fminf(unitsize * 0.5F, 16.0F));
-		this->status_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->font = make_bold_text_format(std::fminf(unitsize, 18.0F));
+		this->status_font = make_bold_text_format(14.0F);
 		
 		this->remote_label = make_label(_speak("Remote"), this->font);
 		for (GS id = _E(GS, 0); id < GS::_; id++) {
-			this->captions[_I(id)] = make_label(_speak(id) + ":", this->font);
+			this->captions[_I(id)] = make_label(_speak(id), this->font);
 		}
 
 		this->load_primitives(this->winchs, this->wlabels, unitsize * 2.0F);

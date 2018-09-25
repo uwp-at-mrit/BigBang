@@ -18,7 +18,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasTextFormat^ default_mark_font = make_bold_text_format(10.0F);
+static CanvasTextFormat^ default_mark_font = make_bold_text_format(12.0F);
 static const float hatch_long_ratio = 0.618F;
 static const float mark_space_ratio = 0.618F;
 

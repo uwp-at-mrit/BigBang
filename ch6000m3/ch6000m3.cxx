@@ -44,7 +44,7 @@ public:
 
 protected:
 	void construct() override {
-		this->add_planet(new GraphletOverview());
+		//this->add_planet(new GraphletOverview());
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
 		
