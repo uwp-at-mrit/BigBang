@@ -353,3 +353,26 @@ CanvasGeometry^ WarGrey::SCADA::trapezoid(float x, float y, float ubase, float b
 CanvasGeometry^ WarGrey::SCADA::trapezoid(float ubase, float bbase, float height) {
 	return trapezoid(0.0F, 0.0F, ubase, bbase, height);
 }
+
+CanvasGeometry^ WarGrey::SCADA::stadipe(float length, float radius) {
+	return stadipe(0.0F, 0.0F, length, radius);
+}
+
+CanvasGeometry^ WarGrey::SCADA::stadipe(float x, float y, float length, float radius) {
+	auto ship = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float lx = x + radius * 0.5F;
+	float rx = lx + length;
+	float by = y + radius + radius;
+	float tx = x;
+	float ty = y + radius;
+
+	ship->BeginFigure(lx, y);
+	ship->AddLine(rx, y);
+	ship->AddArc(float2(rx, by), radius, radius, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
+	ship->AddLine(lx, by);
+	ship->AddLine(tx, ty);
+	ship->AddLine(lx, y);
+	ship->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(ship);
+}

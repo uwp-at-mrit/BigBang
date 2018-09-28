@@ -2,9 +2,6 @@
 
 #include "planet.hpp"
 
-#include "graphlet/textlet.hpp"
-#include "graphlet/statuslet.hpp"
-
 namespace WarGrey::SCADA {
 	private class SplashScreen : public WarGrey::SCADA::Planet {
 	public:

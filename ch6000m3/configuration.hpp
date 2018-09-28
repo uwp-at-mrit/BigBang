@@ -30,4 +30,4 @@ static const unsigned int default_pipeline_color = 0xC0C0C0;
 static const float default_pipeline_thickness = 1.5F;
 
 /*************************************************************************************************/
-#define resolve_gridsize(gwidth, gheight) ((gwidth + gheight) * 0.5F)
+#define resolve_gridsize(gwidth, gheight) ((gwidth < gheight) ? gheight : gwidth)

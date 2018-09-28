@@ -1309,6 +1309,7 @@ void IPlanet::save_logo(float logo_width, float logo_height, Platform::String^ p
 		path += logo_width.ToString();
 		path += "x";
 		path += logo_height.ToString();
+		path += ".png"; // in case the dimension of logo is not an integer;
 
 		path = ms_apptemp_file(path, ".png");
 	}
