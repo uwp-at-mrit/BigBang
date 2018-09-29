@@ -1,17 +1,20 @@
 #include "plc.hpp"
 #include "box.hpp"
+#include "enum.hpp"
 
 using namespace WarGrey::SCADA;
 
-static const uint16 MRDB_REALTIME           = 2;
-static const uint16 MRDB_FORAT              = 20;
-static const uint16 MRDB_DIGITAL_INPUT      = 205;
-static const uint16 MRDB_DIGITAL_INPUT_RAW  = 4;
-static const uint16 MRDB_DIGITAL_OUTPUT_RAW = 6;
-static const uint16 MRDB_ANALOG_INPUT       = 203;
-static const uint16 MRDB_ANALOG_INPUT_RAW   = 3;
-static const uint16 MRDB_ANALOG_OUTPUT      = 204;
-static const uint16 MRDB_ANALOG_OUTPUT_RAW  = 5;
+private enum MRDB {
+	REALTIME           = 2,
+	FORAT              = 20,
+	DIGITAL_INPUT      = 205,
+	DIGITAL_INPUT_RAW  = 4,
+	DIGITAL_OUTPUT_RAW = 6,
+	ANALOG_INPUT       = 203,
+	ANALOG_INPUT_RAW   = 3,
+	ANALOG_OUTPUT      = 204,
+	ANALOG_OUTPUT_RAW  = 5
+};
 
 static bool fill_signal_preferences(size_t type, size_t* count, size_t* addr0, size_t* addrn) {
 	bool has_set = true;
@@ -20,16 +23,16 @@ static bool fill_signal_preferences(size_t type, size_t* count, size_t* addr0, s
 	size_t end = 0;
 
 	switch (type) {
-	case MRDB_ANALOG_INPUT_RAW:   c = 280; start = 1;    end = 1120; break; // DB3
-	case MRDB_ANALOG_INPUT:       c = 280; start = 1121; end = 2240; break; // DB203
-	case MRDB_ANALOG_OUTPUT_RAW:  c = 48;  start = 2241; end = 2432; break; // DB5
-	case MRDB_ANALOG_OUTPUT:      c = 48;  start = 2433; end = 2624; break; // DB204
-	case MRDB_FORAT:              c = 166; start = 2625; end = 3282; break; // DB20
-	case MRDB_REALTIME:           c = 176; start = 3283; end = 3986; break; // DB2
+	case MRDB::ANALOG_INPUT_RAW:   c = 280;     start = 1;    end = 1120; break; // DB3
+	case MRDB::ANALOG_INPUT:       c = 280;     start = 1121; end = 2240; break; // DB203
+	case MRDB::ANALOG_OUTPUT_RAW:  c = 48;      start = 2241; end = 2432; break; // DB5
+	case MRDB::ANALOG_OUTPUT:      c = 48;      start = 2433; end = 2624; break; // DB204
+	case MRDB::FORAT:              c = 2 + 198; start = 2625; end = 3418; break; // DB20, the first two are digital inputs
+	case MRDB::REALTIME:           c = 176;     start = 3419; end = 4122; break; // DB2
 
-	case MRDB_DIGITAL_INPUT_RAW:  c = 124; start = 3987; end = 4110; break; // DB4
-	case MRDB_DIGITAL_OUTPUT_RAW: c = 76;  start = 4111; end = 4186; break; // DB6
-	case MRDB_DIGITAL_INPUT:      c = 385; start = 4187; end = 4571; break; // DB205
+	case MRDB::DIGITAL_INPUT_RAW:  c = 124;     start = 4123; end = 4246; break; // DB4
+	case MRDB::DIGITAL_OUTPUT_RAW: c = 76;      start = 4247; end = 4322; break; // DB6
+	case MRDB::DIGITAL_INPUT:      c = 385;     start = 4323; end = 4707; break; // DB205
 
 	default: has_set = false; break;
 	}
@@ -48,8 +51,8 @@ static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn,
 
 	if (((addrn - addr0 + 1) != (count * unit_size))) {
 		logger->log_message(Log::Warning,
-			L"the address range [%u, %u] of DB%u is misconfigured or mistyped(count: %u != %u)",
-			db, addr0, addrn, count, (addrn - addr0 + 1) / unit_size);
+			L"the address range [%u, %u] of DB%u is misconfigured or mistyped(given count: %u; expect: %u)",
+			addr0, addrn, db, (addrn - addr0 + 1) / unit_size, count);
 	}
 
 	if (!valid) {
@@ -77,7 +80,7 @@ PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm), tidemark(0.0F) {
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	// TODO: why the initial tidemark has a negative float value?
-	this->read_all_signal(98, 0, 0x11DB, this->tidemark);
+	this->read_all_signal(98, 0, 0x1264, this->tidemark);
 }
 
 void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger) {
@@ -95,7 +98,7 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 
 	for (size_t i = 0; i < sizeof(analog_dbs) / sizeof(size_t); i++) {
 		if (fill_signal_preferences(analog_dbs[i], &count, &subaddr0, &subaddrn)) {
-			if (analog_dbs[i] == MRDB_FORAT) {
+			if (analog_dbs[i] == MRDB::FORAT) {
 				// this is a special case, some digital data is stored in the first two bytes. 
 				subaddr0 += dqcount;
 				count -= dqcount;
@@ -106,12 +109,12 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 				size_t real_count = count * analog_size;
 				
 				switch (analog_dbs[i]) {
-				case MRDB_REALTIME: this->on_realtime_data(raw, real_count, logger); break;
-				case MRDB_FORAT: this->on_forat_data(raw - dqcount, dqcount, raw, real_count, logger); break;
-				case MRDB_ANALOG_INPUT: this->on_analog_input_data(raw, real_count, logger); break;
-				case MRDB_ANALOG_INPUT_RAW: this->on_raw_analog_input_data(raw, real_count, logger); break;
-				case MRDB_ANALOG_OUTPUT: this->on_analog_output_data(raw, real_count, logger); break;
-				case MRDB_ANALOG_OUTPUT_RAW: this->on_raw_analog_output_data(raw, real_count, logger); break;
+				case MRDB::REALTIME: this->on_realtime_data(raw, real_count, logger); break;
+				case MRDB::FORAT: this->on_forat_data(raw - dqcount, dqcount, raw, real_count, logger); break;
+				case MRDB::ANALOG_INPUT: this->on_analog_input_data(raw, real_count, logger); break;
+				case MRDB::ANALOG_INPUT_RAW: this->on_raw_analog_input_data(raw, real_count, logger); break;
+				case MRDB::ANALOG_OUTPUT: this->on_analog_output_data(raw, real_count, logger); break;
+				case MRDB::ANALOG_OUTPUT_RAW: this->on_raw_analog_output_data(raw, real_count, logger); break;
 				}
 			}
 		} else {
@@ -125,9 +128,9 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 				uint8* raw = data + subaddr0;
 				
 				switch (digital_dbs[i]) {
-				case MRDB_DIGITAL_INPUT: this->on_digital_input(raw, count, logger); break;
-				case MRDB_DIGITAL_INPUT_RAW: this->on_raw_digital_input(raw, count, logger); break;
-				case MRDB_DIGITAL_OUTPUT_RAW: this->on_raw_digital_output(raw, count, logger); break;
+				case MRDB::DIGITAL_INPUT: this->on_digital_input(raw, count, logger); break;
+				case MRDB::DIGITAL_INPUT_RAW: this->on_raw_digital_input(raw, count, logger); break;
+				case MRDB::DIGITAL_OUTPUT_RAW: this->on_raw_digital_output(raw, count, logger); break;
 				}
 			}
 		} else {
