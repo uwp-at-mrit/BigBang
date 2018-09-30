@@ -4,23 +4,23 @@
 
 (require racket/tcp)
 
-(define memory (make-bytes #x11DC))
+(define memory (make-bytes #x1263))
 (define master-ipv4 (vector-ref (current-command-line-arguments) 0))
 
 (define refresh-memory
   (lambda []
     ;;; DB2
     (for ([i (in-range 1 176)]) ;; don't change the tidemark
-      (real->floating-point-bytes (+ 2.0 (random)) 4 #true memory (+ 3283 (* i 4))))
+      (real->floating-point-bytes (+ 2.0 (random)) 4 #true memory (+ 3422 (* i 4))))
     
     ;;; DB203
     (for ([i (in-range 280)])
-      (real->floating-point-bytes (+ 203.0 (random)) 4 #true memory (+ 1121 (* i 4))))
+      (real->floating-point-bytes (+ 203.0 (random)) 4 #true memory (+ 1120 (* i 4))))
 
     ;;; DB205
     (for ([i (in-range 385)])
       (define state (arithmetic-shift #x1 (random 8)))
-      (bytes-set! memory (+ 4187 i) state))))
+      (bytes-set! memory (+ 4322 i) state))))
 
 (with-handlers ([exn:break? void])
   (let connect-send-wait-loop ()
@@ -28,7 +28,7 @@
       (parameterize ([current-custodian (make-custodian)])
         (dynamic-wind
          (thunk (void))
-         (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break master-ipv4 2000)])
+         (thunk (let-values ([(/dev/tcpin /dev/tcpout) (tcp-connect/enable-break master-ipv4 2008)])
                   (define-values (local lport remote rport) (tcp-addresses /dev/tcpout #true))
                   (printf "[connected to ~a:~a]~n" remote rport)
 

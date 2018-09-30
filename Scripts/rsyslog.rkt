@@ -15,7 +15,10 @@
          [(notice) 154 #|YellowGreen|#]
          [(warning) "yellow"]
          [(error) "lightred"]
-         [(critical alert panic) "red"]
+         [(alarm) "red"]
+         [(critical) "red"]
+         [(alert) "red"]
+         [(panic) "red"]
          [else #false])))
 
 (define (server)
