@@ -121,9 +121,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.cpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\cool_pumplet.cpp">
-      <Filter>graphlet\symbol\pump</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -250,9 +249,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.hpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\cool_pumplet.hpp">
-      <Filter>graphlet\symbol\pump</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

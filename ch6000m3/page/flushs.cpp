@@ -13,7 +13,7 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
-#include "graphlet/symbol/pump/cool_pumplet.hpp"
+#include "graphlet/symbol/pump/water_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
@@ -101,8 +101,8 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
-		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
@@ -112,7 +112,7 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
-		float radius = std::fminf(gwidth, gheight);
+		float radius = resolve_gridsize(gwidth, gheight);
 		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false, FS::HBV10);
 		Turtle<FS>* rTurtle = new Turtle<FS>(gwidth, gheight, false);
 
@@ -127,15 +127,16 @@ public:
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
 		pTurtle->move_right(5, FS::HBV05)->move_right(7.5F, FS::nic)->move_right(5.5F)->turn_right_down()->move_down(6);
-		pTurtle->turn_down_left(FS::h3ps)->move_left(5, FS::PSPump)->turn_left_up();
+		pTurtle->turn_down_left(FS::h3ps)->move_left(5)->turn_left_up(FS::PSPump);
 		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
 		pTurtle->turn_down_left(FS::h3sb)->move_left(5, FS::SBPump)->jump_back();
-		pTurtle->turn_right_down()->move_down(2)->turn_down_left()->move_left(5)->turn_left_down();
-		pTurtle->move_down(2, FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
+		pTurtle->turn_right_down()->move_down(3)->turn_down_left()->move_left(5)->turn_left_down();
+		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
-		pTurtle->move_right(5, FS::HBV04)->move_right(3)->turn_right_up()->move_up(2)->turn_up_right()->move_right(4);
+		pTurtle->move_right(5, FS::HBV04)->move_right(3)->turn_right_up();
+		pTurtle->move_up(2.5F)->turn_up_right()->move_right(4);
 		
 		pTurtle->jump_back(FS::HBV10);
 
@@ -161,11 +162,10 @@ public:
 		
 		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 		this->hopper_room = this->master->insert_one(
-			new Tracklet<FS>(rTurtle, default_pipeline_thickness, Colours::make(default_pipeline_color, 0.64),
+			new Tracklet<FS>(rTurtle, default_pipeline_thickness, Colours::SeaGreen,
 				make_dash_stroke(CanvasDashStyle::Dash)));
 
 		{ // load doors
-
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
 			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
 		}
@@ -181,9 +181,12 @@ public:
 			auto sbcolor = Colours::make(default_starboard_color);
 			float dh_radius = gwidth * 2.0F;
 			float nic_radius = radius * 0.25F;
-			
-			this->load_pump(this->pumps, this->captions, FS::PSPump, -radius, +2.0F);
-			this->load_pump(this->pumps, this->captions, FS::SBPump, -radius, -2.0F);
+
+			this->load_label(this->captions, FS::PSSea, Colours::Silver);
+			this->load_label(this->captions, FS::SBSea, Colours::Silver);
+
+			this->load_pump(this->pumps, this->captions, FS::PSPump, +radius, 180.0);
+			this->load_pump(this->pumps, this->captions, FS::SBPump, -radius, 180.0);
 			
 			this->ps_sea = this->master->insert_one(new Hatchlet(gwidth, gheight, pscolor));
 			this->sb_sea = this->master->insert_one(new Hatchlet(gwidth, gheight, sbcolor));
@@ -227,12 +230,15 @@ public:
 		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, FS::HBV04);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC);
-			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RC);
+			float ox, oy;
+
+			it->second->fill_pump_origin(&ox, &oy);
+			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox, -oy);
+			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 		
 		{ // reflow valves
-			float gridsize = std::fminf(gwidth, gheight);
+			float gridsize = resolve_gridsize(gwidth, gheight);
 
 			for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
@@ -242,10 +248,6 @@ public:
 				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
 			}
 		}
-	}
-
-public:
-	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
 	}
 
 private:
@@ -269,10 +271,10 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, double degrees) {
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
-		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
+		gs[id] = this->master->insert_one(new G(rx, degrees), id);
 	}
 
 	template<typename E>
@@ -360,7 +362,7 @@ private:
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
 	std::map<FS, Credit<Percentagelet, FS>*> progresses;
-	std::map<FS, Credit<CoolPumplet, FS>*> pumps;
+	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
 	std::map<FS, Credit<Labellet, FS>*> vlabels;
@@ -382,43 +384,6 @@ private:
 	FlushsPage* master;
 };
 
-private class FlushDecorator : public IPlanetDecorator {
-public:
-	FlushDecorator(Flush* master) : master(master) {
-		float height = 1.0F;
-		float xradius = height * 0.10F;
-		float yradius = height * 0.50F;
-
-		this->ship_width = 1.0F - xradius;
-		this->ship = geometry_union(rectangle(this->ship_width, height),
-			segment(this->ship_width, yradius, -90.0, 90.0, xradius, yradius));
-
-		this->ship_style = make_dash_stroke(CanvasDashStyle::Dash);
-	}
-
-public:
-	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
-		this->master->draw_relationships(ds, Width, Height);
-	}
-
-	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto pipeline = dynamic_cast<Tracklet<FS>*>(g);
-
-		if (pipeline != nullptr) {
-		}
-	}
-
-private:
-	CanvasGeometry^ ship;
-	CanvasStrokeStyle^ ship_style;
-
-private:
-	float ship_width;
-
-private:
-	Flush* master;
-};
-
 FlushsPage::FlushsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
@@ -431,7 +396,6 @@ FlushsPage::FlushsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	{ // load decorators
 		this->append_decorator(new PageDecorator());
-		this->append_decorator(new FlushDecorator(dashboard));
 
 #ifdef _DEBUG
 		this->append_decorator(this->grid);

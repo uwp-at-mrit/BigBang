@@ -20,6 +20,7 @@
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
+using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -96,7 +97,7 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		this->label_font = make_bold_text_format("Microsoft YaHei", 14.0F);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
 	}
 
@@ -136,10 +137,10 @@ public:
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipeline_thickness, default_pipeline_color));
-		this->sea = this->master->insert_one(new HLinelet(0.618F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
+		this->sea = this->master->insert_one(new HLinelet(1.0F, Colours::SeaGreen, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		{ // load devices
-			float radius = std::fminf(gwidth, gheight);
+			float radius = resolve_gridsize(gwidth, gheight);
 
 			this->hatch = this->master->insert_one(new Hatchlet(radius * 2.5F));
 
@@ -178,7 +179,7 @@ public:
 
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
-		float gridsize = std::fminf(gwidth, gheight);
+		float gridsize = resolve_gridsize(gwidth, gheight);
 		float sq1_y, sea_y, ox;
 		float cx = width * 0.5F;
 		float cy = height * 0.5F;

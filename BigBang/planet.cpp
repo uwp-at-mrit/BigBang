@@ -318,6 +318,7 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
 
 		g->sprite();
 		g->construct();
+		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
 
 		this->notify_graphlet_updated(g);
@@ -528,6 +529,7 @@ bool Planet::fill_graphlet_boundary(IGraphlet* g, float* x, float* y, float* wid
 
 void Planet::fill_graphlets_boundary(float* x, float* y, float* width, float* height) {
     this->recalculate_graphlets_extent_when_invalid();
+
     SET_VALUES(x, this->graphlets_left, y, this->graphlets_top);
     SET_BOX(width, this->graphlets_right - this->graphlets_left);
     SET_BOX(height, this->graphlets_bottom - this->graphlets_top);
@@ -923,6 +925,7 @@ void Planet::append_decorator(IPlanetDecorator* decorator) {
 void Planet::construct(CanvasCreateResourcesReason reason, float Width, float Height) {
 	this->numpad->sprite();
 	this->numpad->construct();
+	this->numpad->sprite_construct();
 }
 
 void Planet::update(long long count, long long interval, long long uptime) {
@@ -1219,7 +1222,7 @@ CanvasRenderTarget^ IPlanet::take_snapshot(float width, float height, CanvasSoli
 
 CanvasRenderTarget^ IPlanet::take_snapshot(float x, float y, float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
 	CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
-	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width - x, height - y, dpi);
+	CanvasRenderTarget^ snapshot = ref new CanvasRenderTarget(shared_dc, width, height, dpi);
 	CanvasDrawingSession^ ds = snapshot->CreateDrawingSession();
 
 	if (bgcolor == nullptr) {
@@ -1228,8 +1231,11 @@ CanvasRenderTarget^ IPlanet::take_snapshot(float x, float y, float width, float 
 		ds->Clear(bgcolor->Color);
 	}
 
-	if ((x != 0.0F) || (y != 0.0F)) {
+	if ((x > 0.0F) || (y > 0.0F)) {
 		ds->Transform = make_translation_matrix(-x, -y);
+		
+		width += x;
+		height += y;
 	}
 
 	this->enter_shared_section();
@@ -1257,6 +1263,68 @@ void IPlanet::save(Platform::String^ path, float x, float y, float width, float 
 		} catch (Platform::Exception^ e) {
 			this->get_logger()->log_message(Log::Panic,
 				L"failed to save planet[%s] to %s: %s",
+				this->name()->Data(), path->Data(), e->Message->Data());
+		}
+	});
+}
+
+void IPlanet::save_logo(float logo_width, float logo_height, Platform::String^ path, float dpi) {
+	CanvasRenderTarget^ logo = nullptr;
+	float x, y, width, height;
+
+	this->fill_graphlets_boundary(&x, &y, &width, &height);
+
+	if (width <= 0.0F) {
+		width = 1240.0F;
+		height = 600.0F;
+	}
+
+	if (logo_width == 0.0F) {
+		logo_width = width;
+	} else if (logo_width < 0.0F) {
+		logo_width *= -width;
+	}
+
+	if (logo_height == 0.0F) {
+		logo_height = height;
+	} else if (logo_height < 0.0F) {
+		logo_height *= -height;
+	}
+
+	if ((logo_width == width) && (logo_height == height)) {
+		logo = this->take_snapshot(x, y, width, height, Colours::Transparent, dpi);
+	} else {
+		CanvasDevice^ shared_dc = CanvasDevice::GetSharedDevice();
+		CanvasRenderTarget^ src = this->take_snapshot(x, y, width, height, Colours::Transparent, dpi);
+		CanvasRenderTarget^ dest = ref new CanvasRenderTarget(shared_dc, logo_width, logo_height, dpi);
+		CanvasDrawingSession^ ds = dest->CreateDrawingSession();
+
+		ds->DrawImage(src, Rect(0.0F, 0.0F, logo_width, logo_height));
+		logo = dest;
+	}
+
+
+	if (path == nullptr) {
+		path = "logo-";
+		path += logo_width.ToString();
+		path += "x";
+		path += logo_height.ToString();
+		path += ".png"; // in case the dimension of logo is not an integer;
+
+		path = ms_apptemp_file(path, ".png");
+	}
+
+	Concurrency::create_task(logo->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
+		.then([=](Concurrency::task<void> saving) {
+		try {
+			saving.get();
+
+			this->get_logger()->log_message(Log::Notice,
+				L"Logo[%s] has been saved to %s",
+				this->name()->Data(), path->Data());
+		} catch (Platform::Exception^ e) {
+			this->get_logger()->log_message(Log::Panic,
+				L"failed to save logo[%s] to %s: %s",
 				this->name()->Data(), path->Data(), e->Message->Data());
 		}
 	});

@@ -19,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ lines_default_border_color = Colours::make(0xBBBBBB);
-static CanvasTextFormat^ lines_default_font = make_bold_text_format(9.0F);
+static CanvasTextFormat^ lines_default_font = make_bold_text_format(10.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(12.0F);
 
 /*************************************************************************************************/
@@ -157,18 +157,18 @@ void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& s) {
 	float interval = this->height / float(this->step + 1);
 	double delta = (this->vmax - this->vmin) / double(this->step + 1);
 	float y = this->height - s.haxes_thickness * 0.5F;
-	float mark_height;
+	TextExtent mark_te;
 
 	for (unsigned int i = 1; i <= step; i++) {
 		float ythis = y - interval * float(i);
 		Platform::String^ mark = flstring(this->vmin + delta * double(i), this->precision);
-		CanvasGeometry^ gmark = paragraph(mark, s.font, nullptr, &mark_height);
+		CanvasGeometry^ gmark = paragraph(mark, s.font, &mark_te);
 
 		axes->BeginFigure(0.0F, ythis);
 		axes->AddLine(this->width, ythis);
 		axes->EndFigure(CanvasFigureLoop::Open);
 
-		vaxes = geometry_union(vaxes, gmark, s.border_thickness + mark_height * 0.618F, ythis - mark_height);
+		vaxes = geometry_union(vaxes, gmark, s.border_thickness + mark_te.height * 0.618F, ythis - mark_te.height);
 	}
 
 	vaxes = geometry_union(vaxes, geometry_stroke(CanvasGeometry::CreatePath(axes), s.vaxes_thickness, s.vaxes_style));
@@ -182,20 +182,20 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& s) {
 	long long delta = this->series.span / (this->series.step + 1);
 	float x = s.haxes_thickness * 0.5F;
 	float y = this->height - s.border_thickness;
-	float mark_width, mark_height;
+	TextExtent mark_te;
 
 	long long now = current_seconds();
 
 	for (unsigned int i = 0; i <= this->series.step + 1; i++) {
 		float xthis = x + interval * float(i);
 		Platform::String^ mark = make_daytimestamp(this->series.start + delta * i, false);
-		CanvasGeometry^ gmark = paragraph(mark, s.font, &mark_width, &mark_height);
+		CanvasGeometry^ gmark = paragraph(mark, s.font, &mark_te);
 
 		axes->BeginFigure(xthis, 0.0F);
 		axes->AddLine(xthis, this->height);
 		axes->EndFigure(CanvasFigureLoop::Open);
 
-		hmarks = geometry_union(hmarks, gmark, xthis - mark_width * 0.5F, y - mark_height);
+		hmarks = geometry_union(hmarks, gmark, xthis - mark_te.width * 0.5F, y - mark_te.height);
 	}
 
 	this->hmarks = geometry_freeze(hmarks);

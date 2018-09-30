@@ -98,8 +98,9 @@ public:
 
 public:
 	void construct(float gwidth, float gheight) {
-		this->caption_font = make_bold_text_format("Microsoft YaHei", 14.0F);
-		this->label_font = make_bold_text_format("Microsoft YaHei", 10.0F);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->special_font = make_text_format(tiny_font_size);
 		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
@@ -107,6 +108,7 @@ public:
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
+		float radius = resolve_gridsize(gwidth, gheight);
 		Turtle<LD>* pTurtle = new Turtle<LD>(gwidth, gheight, false);
 
 		pTurtle->move_left(LD::deck_rx)->move_left(2, LD::D021)->move_left(2, LD::d2122);
@@ -146,8 +148,6 @@ public:
 		this->pipeline = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 
 		{ // load valves
-			float radius = std::fminf(gwidth, gheight);
-
 			this->load_valve(this->gvalves, this->vlabels, this->captions, LD::D001, radius, 0.0);
 			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, 00.0);
 			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 90.0);
@@ -157,15 +157,14 @@ public:
 		}
 
 		{ // load special nodes
-			float radius = std::fminf(gwidth, gheight);
-			float nic_radius = radius * 0.25F;
+			float nic_radius = gheight * 0.25F;
 
 			this->load_pump(this->pumps, this->captions, LD::PSUWPump, -radius, -2.0F);
 			this->load_pump(this->pumps, this->captions, LD::SBUWPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, LD::PSHPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, LD::SBHPump, -radius, -2.0F);
 
-			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, radius, radius, 0.5F, default_pipeline_color));
+			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 0.5F, default_pipeline_color));
 
 			this->ps_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
@@ -183,7 +182,7 @@ public:
 
 		{ // load labels
 			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
-			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->label_font);
+			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->special_font);
 		}
 	}
 
@@ -374,6 +373,7 @@ private:
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
+	CanvasTextFormat^ special_font;
 	ICanvasBrush^ relationship_color;
 	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle dimension_style;

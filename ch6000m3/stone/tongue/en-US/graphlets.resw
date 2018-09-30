@@ -186,7 +186,7 @@
   <data name="hopperdoor" xml:space="preserve">
     <value>Hopper Door</value>
   </data>
-  <data name="winch" xml:space="preserve">
+  <data name="winch_1" xml:space="preserve">
     <value>Winch</value>
   </data>
   <data name="motor_valve" xml:space="preserve">
@@ -195,7 +195,61 @@
   <data name="hopper_pump" xml:space="preserve">
     <value>Hopper Pump</value>
   </data>
-  <data name="cool_pump" xml:space="preserve">
-    <value>Cool Valve</value>
+  <data name="water_pump" xml:space="preserve">
+    <value>Water Pump</value>
+  </data>
+  <data name="FastWindingOut" xml:space="preserve">
+    <value>High-Speed Winding Out</value>
+  </data>
+  <data name="FastWindingUp" xml:space="preserve">
+    <value>High-Speed Winding Up</value>
+  </data>
+  <data name="WindingOut" xml:space="preserve">
+    <value>Winding Out</value>
+  </data>
+  <data name="WindingUp" xml:space="preserve">
+    <value>Winding Up</value>
+  </data>
+  <data name="Unlettable" xml:space="preserve">
+    <value>Failed to Wind Out</value>
+  </data>
+  <data name="Unpullable" xml:space="preserve">
+    <value>Failed to Wind Up</value>
+  </data>
+  <data name="FastWindOutReady" xml:space="preserve">
+    <value>Ready to High-Speed Wind Out</value>
+  </data>
+  <data name="FastWindUpReady" xml:space="preserve">
+    <value>Ready to High-Speed Wind Up</value>
+  </data>
+  <data name="LowerLimited" xml:space="preserve">
+    <value>Cable Lower Limited</value>
+  </data>
+  <data name="SoftLowerLimited" xml:space="preserve">
+    <value>Soft Lower Limited</value>
+  </data>
+  <data name="SoftUpperLimited" xml:space="preserve">
+    <value>Soft Upper Limited</value>
+  </data>
+  <data name="UpperLimited" xml:space="preserve">
+    <value>Cable Upper Limited</value>
+  </data>
+  <data name="WindOutReady" xml:space="preserve">
+    <value>Ready to Wind Out</value>
+  </data>
+  <data name="WindUpReady" xml:space="preserve">
+    <value>Ready to Wind Up</value>
+  </data>
+  <data name="winch_2" xml:space="preserve">
+    <value>Winch</value>
+  </data>
+  <data name="Slack" xml:space="preserve">
+    <value>Cable Slack</value>
+  </data>
+  <data name="SpoolLimited" xml:space="preserve">
+    <value>Spool Limited</value>
+  </data>
+  <data name="SuctionLimited" xml:space="preserve">
+    <value>Suction Limited</value>
   </data>
 </root>

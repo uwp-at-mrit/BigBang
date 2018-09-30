@@ -47,19 +47,22 @@ void HopperPumplet::construct() {
 	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
 	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
 
-	//ellipse_point(this->radiusX, this->radiusY, &this->pump_cx, &this->pump_cy);
-	
-	this->body = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
+	this->border = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
 	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
-	this->indicator = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
+	this->skeleton = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
 	this->iborder = geometry_rotate(iborder, this->degrees, 0.0F, 0.0F);
 
 	{ // locate
-		auto box = this->body->ComputeBounds();
+		auto box = this->border->ComputeBounds();
+		auto mask_box = this->skeleton->ComputeBounds();
 
 		this->pump_cx = box.X + box.Width * 0.5F;
 		this->pump_cy = box.Y + box.Height * 0.5F;
-		this->enclosing_box = geometry_union(this->body, this->inlet)->ComputeStrokeBounds(default_thickness);
+		this->enclosing_box = geometry_union(this->border, this->inlet)->ComputeStrokeBounds(default_thickness);
+
+		this->iradius = indicator_radius;
+		this->mask_cx = mask_box.X + mask_box.Width * 0.5F;
+		this->mask_cy = mask_box.Y + mask_box.Height * 0.5F;
 	}
 }
 
@@ -77,38 +80,107 @@ void HopperPumplet::fill_pump_origin(float* x, float *y) {
 	SET_VALUES(x, this->pump_cx, y, this->pump_cy);
 }
 
+void HopperPumplet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case HopperPumpStatus::Starting: {
+		this->mask_percentage
+			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
+			? 0.0
+			: this->mask_percentage + dynamic_mask_interval;
+
+		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(this->mask_percentage));
+		this->notify_updated();
+	} break;
+	case HopperPumpStatus::Stopping: {
+		this->mask_percentage
+			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
+			? 1.0
+			: this->mask_percentage - dynamic_mask_interval;
+
+		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(this->mask_percentage));
+		this->notify_updated();
+	} break;
+	}
+}
+
 void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	switch (status) {
 	case HopperPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Green);
+	}; break;
+	case HopperPumpStatus::Starting: {
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
 	case HopperPumpStatus::Unstartable: {
-		CAS_SLOT(s.body_color, Colours::DimGray);
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case HopperPumpStatus::Stopping: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
 	case HopperPumpStatus::Unstoppable: {
-		CAS_SLOT(s.border_color, Colours::Firebrick);
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case HopperPumpStatus::Ready: {
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	}
 
+	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.body_color, Colours::DarkGray);
+	CAS_SLOT(s.skeleton_color, s.body_color);
 
 	// NOTE: The others can be nullptr;
 }
 
+void HopperPumplet::on_status_changed(HopperPumpStatus status) {
+	switch (status) {
+	case HopperPumpStatus::Unstartable: {
+		if (this->unstartable_mask == nullptr) {
+			this->unstartable_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.382F);
+		}
+		this->mask = this->unstartable_mask;
+	} break;
+	case HopperPumpStatus::Unstoppable: {
+		if (this->unstoppable_mask == nullptr) {
+			this->unstoppable_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.618F);
+		}
+		this->mask = this->unstoppable_mask;
+	} break;
+	default: {
+		this->mask = nullptr;
+		this->mask_percentage = -1.0;
+	}
+	}
+}
+
 void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	const HopperPumpStyle style = this->get_style();
+	const HopperPumpStyle s = this->get_style();
+	ICanvasBrush^ border_color = (this->remote_control ? s.remote_color : s.border_color);
 	float cx = x + this->width * 0.5F;
 	float cy = y + this->height * 0.5F;
 
-	ds->FillGeometry(this->body, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->body, cx, cy, style.border_color, default_thickness);
-	
-	ds->FillGeometry(this->inlet, cx, cy, Colours::Background);
-	ds->DrawGeometry(this->inlet, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->border, cx, cy, Colours::Background);
+	ds->DrawGeometry(this->border, cx, cy, border_color, default_thickness);
 
-	ds->FillGeometry(this->indicator, cx, cy, style.body_color);
-	ds->DrawGeometry(this->indicator, cx, cy, style.border_color);
-	ds->DrawGeometry(this->iborder, cx, cy, style.border_color, default_thickness);
+	ds->FillGeometry(this->inlet, cx, cy, Colours::Background);
+	ds->DrawGeometry(this->inlet, cx, cy, border_color, default_thickness);
+
+	ds->FillGeometry(this->skeleton, cx, cy, s.body_color);
+
+	if (s.mask_color != nullptr) {
+		auto mask = ((this->mask == nullptr) ? this->skeleton : this->mask);
+
+		ds->FillGeometry(mask, cx, cy, s.mask_color);
+	}
+
+	ds->DrawGeometry(this->skeleton, cx, cy, s.skeleton_color, default_thickness);
+	ds->DrawGeometry(this->iborder, cx, cy, border_color, default_thickness);
+}
+
+void HopperPumplet::set_remote_control(bool on) {
+	this->remote_control = on;
 }

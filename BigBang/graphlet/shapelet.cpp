@@ -75,6 +75,13 @@ void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 /*************************************************************************************************/
+Shiplet::Shiplet(float length, float radius, unsigned int border_color, float thickness)
+	: Shiplet(length, radius, nullptr, Colours::make(border_color), thickness) {}
+
+Shiplet::Shiplet(float length, float radius, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(stadipe(length, radius), color, border_color, thickness) {}
+
+/*************************************************************************************************/
 Rectanglet::Rectanglet(float edge_size, unsigned int border_color, float thickness)
 	: Rectanglet(edge_size, nullptr, Colours::make(border_color), thickness) {}
 

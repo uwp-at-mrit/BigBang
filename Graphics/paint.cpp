@@ -145,11 +145,11 @@ CanvasLinearGradientBrush^ WarGrey::SCADA::make_linear_gradient_brush(float hext
     return make_linear_gradient_brush(0.0F, 0.0F, hextent, vextent, stops, edge, alpha);
 }
 
-CanvasStrokeStyle^ WarGrey::SCADA::make_dash_stroke(Platform::Array<float>^ dashes, float offset) {
+CanvasStrokeStyle^ WarGrey::SCADA::make_dash_stroke(float* dashes, unsigned int count, float offset) {
     auto dash = ref new CanvasStrokeStyle();
 
     dash->DashOffset = offset;
-    dash->CustomDashStyle = dashes;
+    dash->CustomDashStyle = ref new Platform::Array<float>(dashes, count);
 
     return dash;
 }

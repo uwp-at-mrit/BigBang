@@ -4,10 +4,11 @@
 
 namespace WarGrey::SCADA {
 	private enum class HydraulicPumpStatus {
-		Running, Starting, Unstartable, Remote, Stopped, Stopping, Unstoppable, Ready, _
+		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, _
 	};
 
 	private struct HydraulicPumpStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
@@ -25,6 +26,9 @@ namespace WarGrey::SCADA {
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		void set_remote_control(bool on);
+
 	protected:
 		void prepare_style(WarGrey::SCADA::HydraulicPumpStatus status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
 		void on_status_changed(HydraulicPumpStatus status) override;
@@ -41,5 +45,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		double mask_percentage;
+		bool remote_control;
 	};
 }

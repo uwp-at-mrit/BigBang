@@ -60,34 +60,30 @@ void ITanklet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void ITanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	if (this->style != nullptr) {
-		ds->FillGeometry(this->body, x, y, this->style->body_color);
-		ds->DrawGeometry(this->body, x, y, this->style->border_color, this->thickness);
+	ds->FillGeometry(this->body, x, y, this->style->body_color);
+	ds->DrawGeometry(this->body, x, y, this->style->border_color, this->thickness);
 
-		ds->DrawGeometry(this->tube, x, y, this->style->border_color, this->thickness);
-		ds->FillGeometry(this->tube, x, y, Colours::Background);
-		ds->FillGeometry(this->ruler, x, y, this->style->border_color);
+	ds->DrawGeometry(this->tube, x, y, this->style->border_color, this->thickness);
+	ds->FillGeometry(this->tube, x, y, Colours::Background);
+	ds->FillGeometry(this->ruler, x, y, this->style->border_color);
 
-		ds->DrawCachedGeometry(this->floating, x, y + this->float_y, this->style->indicator_color);
-		ds->DrawCachedGeometry(this->liquid, x, y, this->style->liquid_color);
-		ds->DrawCachedGeometry(this->indicator, x, y, this->style->indicator_color);
-	}
+	ds->DrawCachedGeometry(this->floating, x, y + this->float_y, this->style->indicator_color);
+	ds->DrawCachedGeometry(this->liquid, x, y, this->style->liquid_color);
+	ds->DrawCachedGeometry(this->indicator, x, y, this->style->indicator_color);
 }
 
 void ITanklet::apply_style(TankStyle* style) {
-	if (this->tube != nullptr) {
-		Rect tbox = this->tube->ComputeBounds();
-		Rect rbox = this->ruler->ComputeBounds();
-		float indicator_y = rbox.Y + (rbox.Height - ruler_em) * float(style->mark_weight) - 1.0F;
-		float liquid_y = tbox.Y + tbox.Height * float(1.0 - style->mark_weight);
-		auto indicator_box = rectangle(rbox.X, indicator_y, rbox.Width, this->ruler_em + 3.0F);
-		auto liquid_box = rectangle(tbox.X, liquid_y, tbox.Width, tbox.Height);
+	Rect tbox = this->tube->ComputeBounds();
+	Rect rbox = this->ruler->ComputeBounds();
+	float indicator_y = rbox.Y + (rbox.Height - ruler_em) * float(1.0 - style->mark_weight) - 1.0F;
+	float liquid_y = tbox.Y + tbox.Height * float(1.0 - style->mark_weight);
+	auto indicator_box = rectangle(rbox.X, indicator_y, rbox.Width, this->ruler_em + 3.0F);
+	auto liquid_box = rectangle(tbox.X, liquid_y, tbox.Width, tbox.Height);
 
-		this->style = style;
-		this->float_y = liquid_y - this->float_half_height;
-		this->indicator = geometry_freeze(geometry_intersect(this->ruler, indicator_box));
-		this->liquid = geometry_freeze(geometry_intersect(this->tube, liquid_box));
-	}
+	this->style = style;
+	this->float_y = liquid_y - this->float_half_height;
+	this->indicator = geometry_freeze(geometry_intersect(this->ruler, indicator_box));
+	this->liquid = geometry_freeze(geometry_intersect(this->tube, liquid_box));
 }
 
 void ITanklet::prepare_style(TankStyle& style, unsigned int idx, unsigned int count) {

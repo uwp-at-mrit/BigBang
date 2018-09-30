@@ -91,7 +91,7 @@ namespace WarGrey::SCADA {
 			, WarGrey::SCADA::IStatuslet<Status, Style>(status0) {}
 
 	public:
-		void sprite() override { /* at this point, status maybe not ready for updating */ }
+		void sprite_construct() override { /* at this point, status maybe not ready for updating */ }
 
 	public:
 		Platform::String^ rootdir() override {

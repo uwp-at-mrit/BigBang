@@ -9,21 +9,20 @@
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;
+using namespace Microsoft::Graphics::Canvas::Brushes;
 
-BorderDecorator::BorderDecorator(bool draw_border, bool draw_enclosing) {
-    this->draw_border = draw_border;
-    this->draw_enclosing_box = draw_enclosing;
-}
+BorderDecorator::BorderDecorator(CanvasSolidColorBrush^ border_color, CanvasSolidColorBrush^ enclosing_color)
+	: border_color(border_color), enclosing_color(enclosing_color) {}
 
 void BorderDecorator::draw_before(CanvasDrawingSession^ ds, float Width, float Height) {
-    if (this->draw_enclosing_box) {
+	if (this->border_color != nullptr) {
+		ds->DrawRectangle(0.0F, 0.0F, Width, Height, this->border_color);
+	}
+	
+	if (this->enclosing_color != nullptr) {
         float x, y, width, height;
 
         this->fill_graphlets_boundary(&x, &y, &width, &height);
-        ds->DrawRectangle(x, y, width, height, Colours::GrayText, 1.0F);
-    }
-
-    if (this->draw_border) {
-        ds->DrawRectangle(0.0F, 0.0F, Width, Height, Colours::AccentDark);
+        ds->DrawRectangle(x, y, width, height, this->enclosing_color, 1.0F);
     }
 }

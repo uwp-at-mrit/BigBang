@@ -43,6 +43,16 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Rect box;
 	};
 
+	private class Shiplet : public WarGrey::SCADA::Shapelet {
+	public:
+		Shiplet(float length, float radius, unsigned int border_color, float thickness = 1.0F);
+
+		Shiplet(float length, float radius,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
 	private class Rectanglet : public WarGrey::SCADA::Shapelet {
 	public:
 		Rectanglet(float edge_size, unsigned int border_color, float thickness = 1.0F);

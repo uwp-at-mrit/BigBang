@@ -13,7 +13,7 @@ static TableColumnInfo event_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "name", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "timestamp", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "status", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "status_icon", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
     { "code", SDT::Integer, nullptr, 0 | 0 | 0 },
     { "note", SDT::Text, nullptr, 0 | 0 | 0 },
 };
