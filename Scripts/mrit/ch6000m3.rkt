@@ -4,7 +4,7 @@
 
 (require racket/tcp)
 
-(define memory (make-bytes #x1263))
+(define memory (make-bytes #x1264))
 (define master-ipv4 (vector-ref (current-command-line-arguments) 0))
 
 (define refresh-memory
