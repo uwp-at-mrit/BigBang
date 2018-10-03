@@ -37,9 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\magic.hpp">
-      <Filter>mrit</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)shared\databytes.hpp">
       <Filter>shared</Filter>
     </ClInclude>

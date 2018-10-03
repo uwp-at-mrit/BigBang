@@ -5,8 +5,8 @@
 #include "menu.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
-#include "graphlet/dashboard/overflowlet.hpp"
 #include "graphlet/dashboard/timeserieslet.hpp"
+#include "graphlet/device/overflowlet.hpp"
 
 #include "decorator/page.hpp"
 

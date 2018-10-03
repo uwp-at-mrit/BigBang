@@ -53,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="graphlets.cpp" />
     <ClCompile Include="splash.cpp" />
+    <ClCompile Include="page\drags.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -83,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="graphlets.hpp" />
     <ClInclude Include="splash.hpp" />
+    <ClInclude Include="page\drags.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

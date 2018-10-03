@@ -126,6 +126,9 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	case HopperPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
+	case HopperPumpStatus::Broken: {
+		CAS_SLOT(s.body_color, Colours::Red);
+	}; break;
 	}
 
 	CAS_SLOT(s.remote_color, Colours::Cyan);

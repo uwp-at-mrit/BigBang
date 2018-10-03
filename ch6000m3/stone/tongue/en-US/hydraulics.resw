@@ -147,56 +147,17 @@
   <data name="Y" xml:space="preserve">
     <value>Emergency</value>
   </data>
-  <data name="SQa" xml:space="preserve">
-    <value>SQ.A</value>
-  </data>
-  <data name="SQb" xml:space="preserve">
-    <value>SQ.B</value>
-  </data>
-  <data name="SQc" xml:space="preserve">
-    <value>SQ.C</value>
-  </data>
-  <data name="SQd" xml:space="preserve">
-    <value>SQ.D</value>
-  </data>
-  <data name="SQe" xml:space="preserve">
-    <value>SQ.E</value>
-  </data>
-  <data name="SQf" xml:space="preserve">
-    <value>SQ.F</value>
-  </data>
-  <data name="SQg" xml:space="preserve">
-    <value>SQ.G</value>
-  </data>
-  <data name="SQh" xml:space="preserve">
-    <value>SQ.H</value>
-  </data>
-  <data name="SQk1" xml:space="preserve">
-    <value>SQ.K1</value>
-  </data>
-  <data name="SQy" xml:space="preserve">
-    <value>SQ.Y</value>
-  </data>
   <data name="Port" xml:space="preserve">
     <value>Port Hydraulic System</value>
   </data>
   <data name="Starboard" xml:space="preserve">
     <value>Starboard Hydraulic System</value>
   </data>
-  <data name="SQi" xml:space="preserve">
-    <value>SQ.I</value>
-  </data>
-  <data name="SQj" xml:space="preserve">
-    <value>SQ.J</value>
-  </data>
   <data name="I" xml:space="preserve">
     <value>Left Draghead Visor</value>
   </data>
   <data name="J" xml:space="preserve">
     <value>Right Draghead Visor</value>
-  </data>
-  <data name="SQk2" xml:space="preserve">
-    <value>SQ.K2</value>
   </data>
   <data name="M" xml:space="preserve">
     <value>Backup</value>
@@ -207,32 +168,14 @@
   <data name="Storage" xml:space="preserve">
     <value>Oil Storage Tank</value>
   </data>
-  <data name="F001Blocked" xml:space="preserve">
+  <data name="F01" xml:space="preserve">
     <value>Filter F0.01 Blocked</value>
   </data>
-  <data name="F002Blocked" xml:space="preserve">
+  <data name="F02" xml:space="preserve">
     <value>Filter F0.02 Blocked</value>
   </data>
-  <data name="FilterBlocked" xml:space="preserve">
+  <data name="F10" xml:space="preserve">
     <value>Filter Blocked</value>
-  </data>
-  <data name="SQl" xml:space="preserve">
-    <value>SQ.L</value>
-  </data>
-  <data name="SQm" xml:space="preserve">
-    <value>SQ.M</value>
-  </data>
-  <data name="TS1" xml:space="preserve">
-    <value>Master Tank Temperature Switch 1</value>
-  </data>
-  <data name="TS11" xml:space="preserve">
-    <value>Visor Tank Temperature Switch 1</value>
-  </data>
-  <data name="TS12" xml:space="preserve">
-    <value>Visor Tank Temperature Switch 1</value>
-  </data>
-  <data name="TS2" xml:space="preserve">
-    <value>Master Tank Temperature Switch 1</value>
   </data>
   <data name="Master" xml:space="preserve">
     <value>Master Oil Temperature</value>

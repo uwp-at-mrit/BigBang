@@ -1,8 +1,8 @@
 #pragma once
 
 #include <list>
+#include <cinttypes>
 
-#include "mrit/magic.hpp"
 #include "mrit/message.hpp"
 #include "shared/stream.hpp"
 
@@ -82,10 +82,7 @@ namespace WarGrey::SCADA {
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
     public:
-        MRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server = nullptr, uint16 port = MR_TCP_DEFAULT_PORT)
-			: IMRMaster(logger, server, port, nullptr) {}
-		
-		MRMaster(WarGrey::SCADA::Syslog* logger, IMRConfirmation* confirmation, Platform::String^ server = nullptr, uint16 port = MR_TCP_DEFAULT_PORT)
+        MRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
 			: IMRMaster(logger, server, port, confirmation) {}
 
 	public:

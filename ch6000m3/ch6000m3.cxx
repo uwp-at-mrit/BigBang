@@ -12,6 +12,7 @@
 #include "page/loads.hpp"
 #include "page/fill_jet.hpp"
 #include "page/flushs.hpp"
+#include "page/drags.hpp"
 
 #include "graphlets.hpp"
 #include "splash.hpp"
@@ -44,9 +45,9 @@ public:
 
 protected:
 	void construct() override {
-		//this->add_planet(new GraphletOverview());
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
+		//this->add_planet(new DragsPage(this->device));
 		
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));
@@ -55,6 +56,7 @@ protected:
 		this->add_planet(new LoadsPage(this->device));
 		this->add_planet(new FillnJetPage(this->device));
 		this->add_planet(new FlushsPage(this->device));
+		this->add_planet(new DragsPage(this->device));
 
 		this->add_planet(new GraphletOverview());
 	}

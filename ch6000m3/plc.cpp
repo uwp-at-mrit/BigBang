@@ -4,6 +4,8 @@
 
 using namespace WarGrey::SCADA;
 
+static uint16 MRIT_PORT = 2008;
+
 private enum MRDB {
 	REALTIME           = 2,
 	FORAT              = 20,
@@ -23,16 +25,16 @@ static bool fill_signal_preferences(size_t type, size_t* count, size_t* addr0, s
 	size_t end = 0;
 
 	switch (type) {
-	case MRDB::ANALOG_INPUT_RAW:   c = 280;     start = 1;    end = 1120; break; // DB3
-	case MRDB::ANALOG_INPUT:       c = 280;     start = 1121; end = 2240; break; // DB203
-	case MRDB::ANALOG_OUTPUT_RAW:  c = 48;      start = 2241; end = 2432; break; // DB5
-	case MRDB::ANALOG_OUTPUT:      c = 48;      start = 2433; end = 2624; break; // DB204
-	case MRDB::FORAT:              c = 2 + 198; start = 2625; end = 3418; break; // DB20, the first two are digital inputs
-	case MRDB::REALTIME:           c = 176;     start = 3419; end = 4122; break; // DB2
+	case MRDB::ANALOG_INPUT_RAW:   c = 280;     start = 0;    end = 1119; break; // DB3
+	case MRDB::ANALOG_INPUT:       c = 280;     start = 1120; end = 2239; break; // DB203
+	case MRDB::ANALOG_OUTPUT_RAW:  c = 48;      start = 2240; end = 2431; break; // DB5
+	case MRDB::ANALOG_OUTPUT:      c = 48;      start = 2432; end = 2623; break; // DB204
+	case MRDB::FORAT:              c = 2 + 198; start = 2624; end = 3417; break; // DB20, the first two are DIs
+	case MRDB::REALTIME:           c = 176;     start = 3418; end = 4121; break; // DB2
 
-	case MRDB::DIGITAL_INPUT_RAW:  c = 124;     start = 4123; end = 4246; break; // DB4
-	case MRDB::DIGITAL_OUTPUT_RAW: c = 76;      start = 4247; end = 4322; break; // DB6
-	case MRDB::DIGITAL_INPUT:      c = 385;     start = 4323; end = 4707; break; // DB205
+	case MRDB::DIGITAL_INPUT_RAW:  c = 124;     start = 4122; end = 4245; break; // DB4
+	case MRDB::DIGITAL_OUTPUT_RAW: c = 76;      start = 4246; end = 4321; break; // DB6
+	case MRDB::DIGITAL_INPUT:      c = 385;     start = 4322; end = 4706; break; // DB205
 
 	default: has_set = false; break;
 	}
@@ -65,6 +67,14 @@ static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn,
 }
 
 /*************************************************************************************************/
+bool WarGrey::SCADA::DBX(const uint8* src, size_t idx) {
+	return DBX(src, idx / 8, idx % 8);
+}
+
+bool WarGrey::SCADA::DBX(const uint8* src, size_t idx, size_t bidx) {
+	return quantity_bit_ref(src, idx, bidx);
+}
+
 float WarGrey::SCADA::DBD(const uint8* src, size_t idx) {
 	return bigendian_float_ref(src, idx);
 }
@@ -74,13 +84,13 @@ float WarGrey::SCADA::RealData(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm), tidemark(0.0F) {
+PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm, nullptr, MRIT_PORT), tidemark(0.0F) {
 	this->append_confirmation_receiver(this);
 }
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	// TODO: why the initial tidemark has a negative float value?
-	this->read_all_signal(98, 0, 0x1264, this->tidemark);
+	this->read_all_signal(98, 0, 0x1263, this->tidemark);
 }
 
 void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger) {

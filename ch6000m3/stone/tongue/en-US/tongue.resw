@@ -195,4 +195,7 @@
   <data name="flushs" xml:space="preserve">
     <value>Flushing System</value>
   </data>
+  <data name="drags" xml:space="preserve">
+    <value>Drags</value>
+  </data>
 </root>

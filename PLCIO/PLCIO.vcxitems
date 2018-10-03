@@ -24,7 +24,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbserver.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\exception.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mrit.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)mrit\magic.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mrit\mrmaster.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)mrit\message.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)shared\databytes.hpp" />

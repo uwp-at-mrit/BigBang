@@ -1,4 +1,4 @@
-﻿#include "graphlet/dashboard/overflowlet.hpp"
+﻿#include "graphlet/device/overflowlet.hpp"
 
 #include "text.hpp"
 #include "shape.hpp"

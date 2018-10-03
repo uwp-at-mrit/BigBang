@@ -51,8 +51,8 @@ private enum class HS : unsigned int {
 	SQf, SQc, SQd, SQe,
 	// Key Labels
 	Port, Starboard, Master, Visor, Storage, Pressure,
-	// Indicators
-	F001Blocked, F002Blocked, FilterBlocked,
+	// Filter Indicators
+	F01, F02, F10,
 	_,
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
@@ -72,8 +72,8 @@ public:
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
-		this->temperatures[HS::Master]->set_value(RealData(AI_DB203, 18U));
-		this->temperatures[HS::Visor]->set_value(RealData(AI_DB203, 19U));
+		this->set_temperature(HS::Visor, RealData(AI_DB203, 18U));
+		this->set_temperature(HS::Master, RealData(AI_DB203, 19U));
 
 		{ // pump pressures
 			static std::map<HS, bool> need_lock_position;
@@ -84,7 +84,7 @@ public:
 				need_lock_position[HS::C] = true;
 				need_lock_position[HS::D] = true;
 				need_lock_position[HS::E] = true;
-				need_lock_position[HS::J] = true;
+				need_lock_position[HS::I] = true;
 			}
 
 			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
@@ -102,24 +102,24 @@ public:
 		this->master->leave_critical_section();
 	}
 
-	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
+	void on_digital_input(const uint8* DI_DB205, size_t count, Syslog* logger) {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
 		{ // pump states
-			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::G, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
+			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::F, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
 
 			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
 				HydraulicPumplet* target = this->pumps[pump_seq[i]];
 
-				switch (DI_db205_X[i]) {
+				switch (DI_DB205[i + 1]) {
 				case 0b00000001: target->set_status(HydraulicPumpStatus::Starting); break;
 				case 0b00000010: target->set_status(HydraulicPumpStatus::Stopping); break;
 				case 0b00000100: target->set_status(HydraulicPumpStatus::Unstartable); break;
 				case 0b00001000: target->set_status(HydraulicPumpStatus::Unstoppable); break;
 				case 0b00010000: target->set_status(HydraulicPumpStatus::Running); break;
 				case 0b00100000: target->set_status(HydraulicPumpStatus::Stopped); break;
-				case 0b10000000: target->set_status(HydraulicPumpStatus::Ready); break;
+				case 0b01000000: target->set_status(HydraulicPumpStatus::Ready); break;
 				}
 			}
 		}
@@ -127,6 +127,61 @@ public:
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
+
+	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		{ // pump modes or statuses
+			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::I, HS::H, HS::G, HS::F, HS::J, HS::D, HS::E, HS::K, HS::L, HS::M, HS::Y };
+
+			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
+				HydraulicPumplet* target = this->pumps[pump_seq[i]];
+				size_t idx = i * 4 + 48;
+
+				target->set_remote_control(DBX(DI_DB4, idx));
+
+				if (DBX(DI_DB4, idx + 1)) {
+					target->set_status(HydraulicPumpStatus::Running);
+				}
+
+				if (DBX(DI_DB4, idx + 1)) {
+					target->set_status(HydraulicPumpStatus::Broken);
+				}
+			}
+		}
+
+		{ // pump modes or statuses
+			this->set_valve_status(HS::SQk1, DI_DB4, 122);
+			this->set_valve_status(HS::SQk2, DI_DB4, 123);
+			this->set_valve_status(HS::SQl,  DI_DB4, 124);
+			this->set_valve_status(HS::SQm,  DI_DB4, 125);
+			this->set_valve_status(HS::SQy,  DI_DB4, 126);
+
+			this->set_valve_status(HS::SQi, DI_DB4, 128);
+			this->set_valve_status(HS::SQj, DI_DB4, 129);
+
+			this->set_valve_status(HS::SQc, DI_DB4, 135);
+			this->set_valve_status(HS::SQd, DI_DB4, 136);
+			this->set_valve_status(HS::SQe, DI_DB4, 137);
+			this->set_valve_status(HS::SQf, DI_DB4, 138);
+
+			this->set_valve_status(HS::SQa, DI_DB4, 141);
+			this->set_valve_status(HS::SQb, DI_DB4, 142);
+			this->set_valve_status(HS::SQg, DI_DB4, 143);
+			this->set_valve_status(HS::SQh, DI_DB4, 144);
+		}
+
+		{ // filter statuses
+			this->set_filter_status(HS::F01, DI_DB4, 121);
+			this->set_filter_status(HS::F02, DI_DB4, 127);
+			this->set_filter_status(HS::F10, DI_DB4, 134);
+		}
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
 
 public:
 	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, IMRMaster* plc) {
@@ -162,7 +217,7 @@ public:
 		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
 		
 		pTurtle->move_up(11, HS::Starboard)->move_up(22)->turn_up_left()->move_left(35);
-		pTurtle->turn_left_down()->move_down(2, HS::F001Blocked)->move_down(2);
+		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
 		pTurtle->jump_up(4)->turn_up_left()->move_left(35)->turn_left_down()->move_down(21);
 
 		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
@@ -178,13 +233,13 @@ public:
 		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(4, HS::SQl)->move_up(4, HS::L)->move_up(6)->jump_back();
 		pTurtle->move_right(5, HS::m)->turn_right_up()->move_up(4, HS::SQm)->move_up(4, HS::M)->move_up(6)->jump_back();
 		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(5)->turn_up_left();
-		pTurtle->move_left(21)->turn_left_down()->move_down(HS::F002Blocked)->move_down(2);
+		pTurtle->move_left(21)->turn_left_down()->move_down(HS::F02)->move_down(2);
 
 		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
 		
 		pTurtle->jump_back(HS::Master)->jump_down(14, HS::Visor);
-		pTurtle->move_right(2)->move_down(5, HS::SQi)->move_down(3, HS::I)->move_down(3);
-		pTurtle->jump_left(4)->move_up(3, HS::J)->move_up(3, HS::SQj)->move_up(5)->move_right(2 /* HS::Visor */);
+		pTurtle->move_right(2)->move_down(5, HS::SQj)->move_down(3, HS::J)->move_down(3);
+		pTurtle->jump_left(4)->move_up(3, HS::I)->move_up(3, HS::SQi)->move_up(5)->move_right(2 /* HS::Visor */);
 		
 		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 		
@@ -204,7 +259,7 @@ public:
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		
-		this->load_boolean_indicators(HS::F001Blocked, HS::FilterBlocked, gwidth, this->states, this->islabels);
+		this->load_filter_indicators(HS::F01, HS::F10, gwidth, this->filters, this->islabels);
 	}
 
 	void load_devices(float width, float height, float gwidth, float gheight) {
@@ -277,10 +332,10 @@ public:
 			default: {
 				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
 			
-				if (it->second->id == HS::I) {
-					lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+				if (it->second->id == HS::J) {
+					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
-				} else {
+				} else { // HS::I
 					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
 				}
@@ -319,24 +374,24 @@ public:
 	}
 
 	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
-		this->station->map_credit_graphlet(this->states[HS::F001Blocked], GraphletAnchor::CC);
-		this->station->map_credit_graphlet(this->states[HS::F002Blocked], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->filters[HS::F01], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->filters[HS::F02], GraphletAnchor::CC);
 		
 		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gwidth);
-		this->master->move_to(this->states[HS::FilterBlocked], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
+		this->master->move_to(this->filters[HS::F10], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
 		
 		{ // reflow state labels
 			float gapsize = vinset * 0.25F;
 
-			for (auto lt = this->states.begin(); lt != this->states.end(); lt++) {
+			for (auto lt = this->filters.begin(); lt != this->filters.end(); lt++) {
 				switch (lt->first) {
-				case HS::F001Blocked: {
-					this->master->move_to(this->islabels[lt->first], this->states[lt->first],
+				case HS::F01: {
+					this->master->move_to(this->islabels[lt->first], this->filters[lt->first],
 						GraphletAnchor::LC, GraphletAnchor::RC, -gapsize);
 				}; break;
 				default: {
-					this->master->move_to(this->islabels[lt->first], this->states[lt->first],
+					this->master->move_to(this->islabels[lt->first], this->filters[lt->first],
 						GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 				}
 				}
@@ -357,7 +412,7 @@ private:
 		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, Colours::Silver);
+			this->load_label(ls, id.ToString(), id, Colours::Silver);
 		}
 	}
 
@@ -380,7 +435,7 @@ private:
 	}
 
 	template<typename E>
-	void load_boolean_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+	void load_filter_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id, Colours::Silver);
 			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, nonblock_color), id);
@@ -422,6 +477,31 @@ private:
 		return this->master->insert_one(tank);
 	}
 
+private:
+	template<typename E>
+	void set_temperature(E id, float t) {
+		this->thermometers[id]->set_value(t);
+		this->temperatures[id]->set_value(t);
+	}
+
+	template<typename E>
+	void set_valve_status(E id, const uint8* db4, size_t idx_p1) {
+		if (DBX(db4, idx_p1 - 1)) {
+			this->valves[id]->set_status(GateValveStatus::Open);
+		} else {
+			this->valves[id]->set_status(GateValveStatus::Closed);
+		}
+	}
+
+	template<typename E>
+	void set_filter_status(E id, const uint8* db4, size_t idx_p1) {
+		if (DBX(db4, idx_p1 - 1)) {
+			this->filters[id]->set_color(block_color);
+		} else {
+			this->filters[id]->set_color(nonblock_color);
+		}
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<HS>* station;
@@ -430,6 +510,7 @@ private:
 	Tanklet<HSVTStatus>* visor_tank;
 	Dimensionlet* station_pressure;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
+	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
 	std::map<HS, Credit<Labellet, HS>*> plabels;
@@ -437,8 +518,7 @@ private:
 	std::map<HS, Credit<GateValvelet, HS>*> valves;
 	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
-	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
-	std::map<HS, Credit<Rectanglet, HS>*> states;
+	std::map<HS, Credit<Rectanglet, HS>*> filters;
 	std::map<HS, Credit<Labellet, HS>*> islabels;
 
 	

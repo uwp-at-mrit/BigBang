@@ -93,6 +93,9 @@ void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpSt
 	case HydraulicPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
+	case HydraulicPumpStatus::Broken: {
+		CAS_SLOT(s.body_color, Colours::Red);
+	}; break;
 	}
 
 	CAS_SLOT(s.remote_color, Colours::Cyan);

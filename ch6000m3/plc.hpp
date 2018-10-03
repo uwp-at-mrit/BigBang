@@ -4,6 +4,8 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
+	bool DBX(const uint8* src, size_t idx);
+	bool DBX(const uint8* src, size_t idx, size_t bidx);
 	float DBD(const uint8* src, size_t idx);
 	float RealData(const uint8* src, size_t idx);
 

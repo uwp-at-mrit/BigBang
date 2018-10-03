@@ -4,7 +4,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class HopperPumpStatus {
-		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, _
+		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, Broken, _
 	};
 
 	private struct HopperPumpStyle {

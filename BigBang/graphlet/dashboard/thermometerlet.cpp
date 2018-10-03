@@ -14,9 +14,9 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ overflowlet_default_border_color = Colours::make(0xBBBBBB);
-static unsigned int overflowlet_default_colors[] = { 0x1E90FF, 0xB3F000, 0xFFB03A, 0xFFB03A };
-static float overflowlet_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
+static CanvasSolidColorBrush^ thermometer_default_border_color = Colours::make(0xBBBBBB);
+static unsigned int thermometer_default_colors[] = { 0x1E90FF, 0xB3F000, 0xFFB03A, 0xFFB03A };
+static float thermometer_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F };
 
 static CanvasGeometry^ make_thermometer_glass(float width, float height, float thickness) {
 	CanvasPathBuilder^ glass = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -67,13 +67,13 @@ Thermometerlet::Thermometerlet(double range, float width, float height, float th
 Thermometerlet::Thermometerlet(double tmin, double tmax, float width, float height
 	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
 	: IRangelet(tmin, tmax), width(std::fabsf(width)), height(height), thickness(thickness), step(step)
-	, border_color(bcolor == nullptr ? overflowlet_default_border_color : bcolor), leftward(width > 0.0F) {
+	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor), leftward(width > 0.0F) {
 	
 	if (this->height == 0.0F) {
 		this->height = this->width * 2.0F;
 	}
 
-	this->colors = ((stops == nullptr) ? make_gradient_stops(overflowlet_default_colors, overflowlet_default_color_positions) : stops);
+	this->colors = ((stops == nullptr) ? make_gradient_stops(thermometer_default_colors, thermometer_default_color_positions) : stops);
 }
 
 void Thermometerlet::construct() {

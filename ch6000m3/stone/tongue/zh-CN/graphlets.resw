@@ -252,4 +252,7 @@
   <data name="SuctionLimited" xml:space="preserve">
     <value>吸口限位</value>
   </data>
+  <data name="Broken" xml:space="preserve">
+    <value>故障</value>
+  </data>
 </root>

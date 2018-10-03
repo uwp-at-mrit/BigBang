@@ -1,6 +1,5 @@
 #include <ppltasks.h>
 
-#include "mrit/magic.hpp"
 #include "mrit/message.hpp"
 #include "mrit/mrmaster.hpp"
 

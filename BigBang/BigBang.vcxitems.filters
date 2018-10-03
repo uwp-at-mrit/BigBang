@@ -109,9 +109,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.cpp">
       <Filter>graphlet\symbol\pump</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.cpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp">
       <Filter>graphlet\dashboard</Filter>
     </ClCompile>
@@ -121,8 +118,18 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.cpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.cpp">
+      <Filter>graphlet\symbol\pump</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -237,9 +244,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\hydraulic_pumplet.hpp">
       <Filter>graphlet\symbol\pump</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\overflowlet.hpp">
-      <Filter>graphlet\dashboard</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp">
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
@@ -249,8 +253,18 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\valve\manual_valvelet.hpp">
       <Filter>graphlet\symbol\valve</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\pump\water_pumplet.hpp">
+      <Filter>graphlet\symbol\pump</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

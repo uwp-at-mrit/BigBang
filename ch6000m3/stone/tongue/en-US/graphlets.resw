@@ -252,4 +252,7 @@
   <data name="SuctionLimited" xml:space="preserve">
     <value>Suction Limited</value>
   </data>
+  <data name="Broken" xml:space="preserve">
+    <value>Broken</value>
+  </data>
 </root>
