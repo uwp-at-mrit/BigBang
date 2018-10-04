@@ -53,16 +53,31 @@ void ITurtle::fill_anchor_location(unsigned int anchor, float* x, float* y) {
 }
 
 CanvasGeometry^ ITurtle::subtrack(unsigned int a1, unsigned int a2, float thickness, CanvasStrokeStyle^ style) {
-	float thickext = thickness * 4.0F;
-	float thickoff = thickness * 0.5F;
-	float x1, y1, x2, y2;
+	float poff = thickness * 0.5F;
+	float sext = poff * 2.0F;
+	float x1, y1, x2, y2, x, y, w, h;
 
 	this->fill_anchor_location(a1, &x1, &y1);
 	this->fill_anchor_location(a2, &x2, &y2);
 
+	if (x1 < x2) {
+		x = x1;
+		w = x2 - x1;
+	} else {
+		x = x2;
+		w = x1 - x2;
+	}
+
+	if (y1 < y2) {
+		y = y1;
+		h = y2 - y;
+	} else {
+		y = y2;
+		h = y1 - y2;
+	}
+
 	// TODO: handle track connection smoothly 
-	return geometry_intersect(this->snap_track(thickness, style),
-		rectangle(x1 - thickoff, y1 - thickoff, x2 - x1 + thickext, y2 - y1 + thickext));
+	return geometry_intersect(this->snap_track(thickness, style), rectangle(x - poff, y - poff, w + sext, h + sext));
 }
 
 CanvasGeometry^ ITurtle::snap_track(float thickness, CanvasStrokeStyle^ style) {

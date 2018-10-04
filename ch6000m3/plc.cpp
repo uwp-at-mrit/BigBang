@@ -106,6 +106,8 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 	size_t analog_size = sizeof(float);
 	size_t digital_size = sizeof(uint8);
 
+	this->pre_read_data(logger);
+
 	for (size_t i = 0; i < sizeof(analog_dbs) / sizeof(size_t); i++) {
 		if (fill_signal_preferences(analog_dbs[i], &count, &subaddr0, &subaddrn)) {
 			if (analog_dbs[i] == MRDB::FORAT) {
@@ -147,4 +149,6 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 			logger->log_message(Log::Warning, L"missing configuration for data block %hu", digital_dbs[i]);
 		}
 	}
+
+	this->post_read_data(logger);
 }

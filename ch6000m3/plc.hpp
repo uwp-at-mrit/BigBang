@@ -14,6 +14,10 @@ namespace WarGrey::SCADA {
 		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;
 
 	public:
+		virtual void pre_read_data(WarGrey::SCADA::Syslog* logger) {}
+		virtual void post_read_data(WarGrey::SCADA::Syslog* logger) {}
+
+	public:
 		virtual void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {}
 		virtual void on_forat_data(const uint8* dqs, size_t dqc, const uint8* db20, size_t count, WarGrey::SCADA::Syslog* logger) {}
 		virtual void on_analog_input_data(const uint8* db203, size_t count, WarGrey::SCADA::Syslog* logger) {}

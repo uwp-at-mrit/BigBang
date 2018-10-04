@@ -35,6 +35,8 @@ private enum class HSVOperation { Start, Stop, Reset, _ };
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
 
+static CanvasSolidColorBrush^ oil_color = Colours::Yellow;
+
 static ICanvasBrush^ block_color = Colours::Red;
 static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 
@@ -55,9 +57,10 @@ private enum class HS : unsigned int {
 	F01, F02, F10,
 	_,
 	// anchors used as last jumping points
-	a, b, c, d, e, f, g, h, i, j, y, l, m, k,
+	a, b, c, d, e, f, g, h, y, l, m, k, k12,
 
 	// anchors used for unnamed corners
+	lt, tl, rt, tr, cl, cr, i, j, f02
 };
 
 private class Hydraulics final
@@ -74,28 +77,21 @@ public:
 
 		this->set_temperature(HS::Visor, RealData(AI_DB203, 18U));
 		this->set_temperature(HS::Master, RealData(AI_DB203, 19U));
+		this->station_pressure->set_value(RealData(AI_DB203, 21U));
 
 		{ // pump pressures
-			static std::map<HS, bool> need_lock_position;
-			HS bar_seq[] = { HS::C, HS::F, HS::D, HS::E, HS::A, HS::B, HS::G, HS::H, HS::I, HS::J };
+			this->pressures[HS::C]->set_value(RealData(AI_DB203, 8), GraphletAnchor::RB);
+			this->pressures[HS::F]->set_value(RealData(AI_DB203, 9), GraphletAnchor::RB);
+			this->pressures[HS::D]->set_value(RealData(AI_DB203, 10), GraphletAnchor::RB);
+			this->pressures[HS::E]->set_value(RealData(AI_DB203, 11), GraphletAnchor::RB);
 
-			if (need_lock_position.size() == 0) {
-				need_lock_position[HS::F] = true;
-				need_lock_position[HS::C] = true;
-				need_lock_position[HS::D] = true;
-				need_lock_position[HS::E] = true;
-				need_lock_position[HS::I] = true;
-			}
+			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12));
+			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13));
+			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14));
+			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15));
 
-			for (size_t i = 0; i < sizeof(bar_seq) / sizeof(HS); i++) {
-				HS id = bar_seq[i];
-				
-				if (need_lock_position[id]) {
-					this->pressures[id]->set_value(RealData(AI_DB203, 8 + i), GraphletAnchor::RB);
-				} else {
-					this->pressures[id]->set_value(RealData(AI_DB203, 8 + i));
-				}
-			}
+			this->pressures[HS::I]->set_value(RealData(AI_DB203, 16), GraphletAnchor::RB);
+			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17));
 		}
 
 		this->master->end_update_sequence();
@@ -183,6 +179,47 @@ public:
 		this->master->leave_critical_section();
 	}
 
+	void post_read_data(Syslog* logger) override {
+		HS ps_path[] = { HS::lt, HS::tl, HS::cl, HS::Master };
+		HS sb_path[] = { HS::rt, HS::tr, HS::cr, HS::Master };
+		HS i_path[] = { HS::f02, HS::Master };
+		
+		this->master->enter_critical_section();
+		this->master->begin_update_sequence();
+
+		this->station->append_subtrack(HS::Master, HS::SQ1, oil_color);
+		this->station->append_subtrack(HS::Master, HS::SQ2, oil_color);
+		this->station->append_subtrack(HS::Visor, HS::SQi, oil_color);
+		this->station->append_subtrack(HS::Visor, HS::SQj, oil_color);
+		this->station->append_subtrack(HS::Storage, HS::SQk1, oil_color);
+
+		this->try_flow_oil(HS::SQi, HS::I, HS::i, nullptr, 0, oil_color);
+		this->try_flow_oil(HS::SQj, HS::J, HS::j, nullptr, 0, oil_color);
+
+		this->try_flow_oil(HS::SQc, HS::C, HS::c, sb_path, oil_color);
+		this->try_flow_oil(HS::SQd, HS::D, HS::d, sb_path, oil_color);
+		this->try_flow_oil(HS::SQe, HS::E, HS::e, sb_path, oil_color);
+		this->try_flow_oil(HS::SQf, HS::F, HS::f, sb_path, oil_color);
+
+		this->try_flow_oil(HS::SQa, HS::A, HS::a, ps_path, oil_color);
+		this->try_flow_oil(HS::SQb, HS::B, HS::b, ps_path, oil_color);
+		this->try_flow_oil(HS::SQg, HS::G, HS::g, ps_path, oil_color);
+		this->try_flow_oil(HS::SQh, HS::H, HS::h, ps_path, oil_color);
+
+		this->try_flow_oil(HS::SQy, HS::Y, HS::y, i_path, oil_color);
+		this->try_flow_oil(HS::SQl, HS::L, HS::l, i_path, oil_color);
+		this->try_flow_oil(HS::SQm, HS::M, HS::m, i_path, oil_color);
+		this->try_flow_oil(HS::SQk1, HS::K, HS::k, i_path, oil_color);
+		this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, i_path */, oil_color);
+
+		this->try_flow_oil(HS::SQ1, HS::SQe, oil_color);
+		this->try_flow_oil(HS::SQ1, HS::SQk2, oil_color);
+		this->try_flow_oil(HS::SQ1, HS::SQm, oil_color);
+		this->try_flow_oil(HS::SQ2, HS::SQh, oil_color);
+
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
 
 public:
 	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, IMRMaster* plc) {
@@ -210,16 +247,16 @@ public:
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1);
-		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(5);
+		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(17);
 		
-		pTurtle->move_down(3, HS::f)->move_right(6, HS::SQf)->move_right(8, HS::F)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::c)->move_right(6, HS::SQc)->move_right(8, HS::C)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::d)->move_right(6, HS::SQd)->move_right(8, HS::D)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::e)->move_right(6, HS::SQe)->move_right(8, HS::E)->move_right(6);
+		pTurtle->jump_right(20, HS::e)->move_left(6, HS::E)->move_left(8, HS::SQe)->move_left(6)->jump_back();
+		pTurtle->move_up(3, HS::d)->move_left(6, HS::D)->move_left(8, HS::SQd)->move_left(6)->jump_back();
+		pTurtle->move_up(3, HS::c)->move_left(6, HS::C)->move_left(8, HS::SQc)->move_left(6)->jump_back();
+		pTurtle->move_up(3, HS::f)->move_left(6, HS::F)->move_left(8, HS::SQf)->move_left(6)->jump_back();
 		
-		pTurtle->move_up(11, HS::Starboard)->move_up(22)->turn_up_left()->move_left(35);
+		pTurtle->move_up(3, HS::Starboard)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
 		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
-		pTurtle->jump_up(4)->turn_up_left()->move_left(35)->turn_left_down()->move_down(21);
+		pTurtle->jump_up(4)->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
 
 		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
 		pTurtle->move_down(3, HS::b)->move_right(6, HS::B)->move_right(8, HS::SQb)->move_right(6)->jump_back();
@@ -229,18 +266,17 @@ public:
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
 		pTurtle->move_up(1, HS::SQ2)->move_up(5.5F)->move_to(HS::Master);
 
-		pTurtle->jump_back(HS::l);
-		pTurtle->jump_left(5, HS::y)->turn_right_up()->move_up(4, HS::SQy)->move_up(4, HS::Y)->move_up(6)->jump_back();
-		pTurtle->move_right(5, HS::l)->turn_right_up()->move_up(4, HS::SQl)->move_up(4, HS::L)->move_up(6)->jump_back();
-		pTurtle->move_right(5, HS::m)->turn_right_up()->move_up(4, HS::SQm)->move_up(4, HS::M)->move_up(6)->jump_back();
-		pTurtle->move_right(3, HS::SQk2)->move_right(3, HS::k)->move_up(9, HS::K)->move_up(5)->turn_up_left();
-		pTurtle->move_left(21)->turn_left_down()->move_down(HS::F02)->move_down(2);
-
-		pTurtle->jump_back(HS::k)->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
+		pTurtle->jump_back(HS::Master)->jump_right(4);
+		pTurtle->move_up(5.5F, HS::F02)->move_up(HS::f02)->turn_up_right()->move_right(2);
+		pTurtle->move_right(5, HS::y)->move_down(6, HS::Y)->move_down(4, HS::SQy)->move_down(4)->turn_down_left()->jump_back();
+		pTurtle->move_right(5, HS::l)->move_down(6, HS::L)->move_down(4, HS::SQl)->move_down(4)->turn_down_left()->jump_back();
+		pTurtle->move_right(5, HS::m)->move_down(6, HS::M)->move_down(4, HS::SQm)->move_down(4)->turn_down_left()->jump_back();
+		pTurtle->move_right(4, HS::k)->turn_right_down()->move_down(5, HS::K)->move_down(9, HS::k12);
+		pTurtle->move_left(3, HS::SQk2)->move_left(8)->jump_back()->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
 		
 		pTurtle->jump_back(HS::Master)->jump_down(14, HS::Visor);
-		pTurtle->move_right(2)->move_down(5, HS::SQj)->move_down(3, HS::J)->move_down(3);
-		pTurtle->jump_left(4)->move_up(3, HS::I)->move_up(3, HS::SQi)->move_up(5)->move_right(2 /* HS::Visor */);
+		pTurtle->move_right(2)->move_down(5, HS::SQj)->move_down(3, HS::J)->move_down(3, HS::j);
+		pTurtle->jump_left(4, HS::i)->move_up(3, HS::I)->move_up(3, HS::SQi)->move_up(5)->move_right(2 /* HS::Visor */);
 		
 		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
 		
@@ -337,7 +373,7 @@ public:
 					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
 				} else { // HS::I
-					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+					lbl_dx = x0 - gridsize - text_hspace; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
 				}
 			}
@@ -358,9 +394,13 @@ public:
 				case HS::SQ2: case HS::SQy: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					lbl_dx = x0 - gridsize + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
-				} break;
-				default: {
+				}; break;
+				case HS::SQi: {
 					it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
+					lbl_dx = x0 - gridsize + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
+				}; break;
+				default: {
+					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					lbl_dx = x0 + gridsize - margin; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
 				}
 				}
@@ -479,14 +519,12 @@ private:
 	}
 
 private:
-	template<typename E>
-	void set_temperature(E id, float t) {
+	void set_temperature(HS id, float t) {
 		this->thermometers[id]->set_value(t);
 		this->temperatures[id]->set_value(t);
 	}
 
-	template<typename E>
-	void set_valve_status(E id, const uint8* db4, size_t idx_p1) {
+	void set_valve_status(HS id, const uint8* db4, size_t idx_p1) {
 		if (DBX(db4, idx_p1 - 1)) {
 			this->valves[id]->set_status(GateValveStatus::Open);
 		} else {
@@ -494,13 +532,36 @@ private:
 		}
 	}
 
-	template<typename E>
-	void set_filter_status(E id, const uint8* db4, size_t idx_p1) {
+	void set_filter_status(HS id, const uint8* db4, size_t idx_p1) {
 		if (DBX(db4, idx_p1 - 1)) {
 			this->filters[id]->set_color(block_color);
 		} else {
 			this->filters[id]->set_color(nonblock_color);
 		}
+	}
+
+	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
+		if (this->valves[vid]->get_status() == GateValveStatus::Open) {
+			this->station->append_subtrack(vid, pid, color);
+		}
+	}
+
+	void try_flow_oil(HS vid, HS pid, HS _id, HS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		this->try_flow_oil(vid, pid, color);
+
+		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
+			this->station->append_subtrack(pid, _id, oil_color);
+
+			if (path != nullptr) {
+				this->station->append_subtrack(_id, path[0], oil_color);
+				this->station->append_subtrack(path, count, color);
+			}
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_oil(HS vid, HS pid, HS _id, HS (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_oil(vid, pid, _id, path, N, color);
 	}
 
 // never deletes these graphlets mannually
@@ -521,7 +582,6 @@ private:
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Rectanglet, HS>*> filters;
 	std::map<HS, Credit<Labellet, HS>*> islabels;
-
 	
 private:
 	CanvasTextFormat^ caption_font;
