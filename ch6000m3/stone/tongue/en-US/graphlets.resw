@@ -255,4 +255,10 @@
   <data name="Broken" xml:space="preserve">
     <value>Broken</value>
   </data>
+  <data name="StartReady" xml:space="preserve">
+    <value>Ready to Start</value>
+  </data>
+  <data name="StopReady" xml:space="preserve">
+    <value>Ready to Stop</value>
+  </data>
 </root>

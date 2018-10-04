@@ -109,12 +109,20 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 		CAS_SLOT(s.body_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
+	case HopperPumpStatus::StartReady: {
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
+	}; break;
 	case HopperPumpStatus::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
 	case HopperPumpStatus::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case HopperPumpStatus::StopReady: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	case HopperPumpStatus::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
@@ -141,17 +149,17 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 
 void HopperPumplet::on_status_changed(HopperPumpStatus status) {
 	switch (status) {
-	case HopperPumpStatus::Unstartable: {
-		if (this->unstartable_mask == nullptr) {
-			this->unstartable_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.382F);
+	case HopperPumpStatus::StartReady: case HopperPumpStatus::Unstartable: {
+		if (this->start_mask == nullptr) {
+			this->start_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.382F);
 		}
-		this->mask = this->unstartable_mask;
+		this->mask = this->start_mask;
 	} break;
-	case HopperPumpStatus::Unstoppable: {
-		if (this->unstoppable_mask == nullptr) {
-			this->unstoppable_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.618F);
+	case HopperPumpStatus::StopReady: case HopperPumpStatus::Unstoppable: {
+		if (this->stop_mask == nullptr) {
+			this->stop_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.618F);
 		}
-		this->mask = this->unstoppable_mask;
+		this->mask = this->stop_mask;
 	} break;
 	default: {
 		this->mask = nullptr;

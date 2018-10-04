@@ -255,4 +255,10 @@
   <data name="Broken" xml:space="preserve">
     <value>故障</value>
   </data>
+  <data name="StartReady" xml:space="preserve">
+    <value>启动条件成立</value>
+  </data>
+  <data name="StopReady" xml:space="preserve">
+    <value>停止条件成立</value>
+  </data>
 </root>

@@ -4,7 +4,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class HydraulicPumpStatus {
-		Running, Starting, Unstartable, Stopped, Stopping, Unstoppable, Ready, Broken, _
+		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready, Broken, _
 	};
 
 	private struct HydraulicPumpStyle {
@@ -35,8 +35,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstartable_mask;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ unstoppable_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ start_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stop_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ body;
 		

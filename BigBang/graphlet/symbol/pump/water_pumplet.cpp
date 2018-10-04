@@ -89,17 +89,17 @@ void WaterPumplet::fill_pump_origin(float* x, float *y) {
 
 void WaterPumplet::on_status_changed(WaterPumpStatus status) {
 	switch (status) {
-	case WaterPumpStatus::Unstartable: {
-		if (this->unstartable_mask == nullptr) {
-			this->unstartable_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.382F);
+	case WaterPumpStatus::StartReady: case WaterPumpStatus::Unstartable: {
+		if (this->start_mask == nullptr) {
+			this->start_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.382F);
 		}
-		this->mask = this->unstartable_mask;
+		this->mask = this->start_mask;
 	} break;
-	case WaterPumpStatus::Unstoppable: {
-		if (this->unstoppable_mask == nullptr) {
-			this->unstoppable_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.618F);
+	case WaterPumpStatus::StopReady: case WaterPumpStatus::Unstoppable: {
+		if (this->stop_mask == nullptr) {
+			this->stop_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.618F);
 		}
-		this->mask = this->unstoppable_mask;
+		this->mask = this->stop_mask;
 	} break;
 	default: {
 		this->mask = nullptr;
@@ -114,8 +114,16 @@ void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
 		CAS_SLOT(s.body_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
+	case WaterPumpStatus::StartReady: {
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
+	}; break;
 	case WaterPumpStatus::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+	}; break;
+	case WaterPumpStatus::StopReady: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	case WaterPumpStatus::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);

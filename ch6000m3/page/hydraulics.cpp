@@ -35,7 +35,7 @@ private enum class HSVOperation { Start, Stop, Reset, _ };
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
 
-static ICanvasBrush^ block_color = Colours::Firebrick;
+static ICanvasBrush^ block_color = Colours::Red;
 static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 
 // WARNING: order matters
@@ -117,9 +117,10 @@ public:
 				case 0b00000010: target->set_status(HydraulicPumpStatus::Stopping); break;
 				case 0b00000100: target->set_status(HydraulicPumpStatus::Unstartable); break;
 				case 0b00001000: target->set_status(HydraulicPumpStatus::Unstoppable); break;
-				case 0b00010000: target->set_status(HydraulicPumpStatus::Running); break;
-				case 0b00100000: target->set_status(HydraulicPumpStatus::Stopped); break;
-				case 0b01000000: target->set_status(HydraulicPumpStatus::Ready); break;
+				case 0b00010000: target->set_status(HydraulicPumpStatus::StartReady); break;
+				case 0b00100000: target->set_status(HydraulicPumpStatus::StopReady); break;
+				case 0b01000000: target->set_status(HydraulicPumpStatus::Stopped); break;
+				case 0b10000000: target->set_status(HydraulicPumpStatus::Ready); break;
 				}
 			}
 		}

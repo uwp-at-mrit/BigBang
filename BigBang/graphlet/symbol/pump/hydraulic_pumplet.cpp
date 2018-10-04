@@ -52,17 +52,17 @@ void HydraulicPumplet::update(long long count, long long interval, long long upt
 
 void HydraulicPumplet::on_status_changed(HydraulicPumpStatus status) {
 	switch (status) {
-	case HydraulicPumpStatus::Unstartable: {
-		if (this->unstartable_mask == nullptr) {
-			this->unstartable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);
+	case HydraulicPumpStatus::StartReady: case HydraulicPumpStatus::Unstartable: {
+		if (this->start_mask == nullptr) {
+			this->start_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);
 		}
-		this->mask = this->unstartable_mask;
+		this->mask = this->start_mask;
 	} break;
-	case HydraulicPumpStatus::Unstoppable: {
-		if (this->unstoppable_mask == nullptr) {
-			this->unstoppable_mask = polar_masked_triangle(this->tradius, this->degrees, 0.618);
+	case HydraulicPumpStatus::StopReady: case HydraulicPumpStatus::Unstoppable: {
+		if (this->stop_mask == nullptr) {
+			this->stop_mask = polar_masked_triangle(this->tradius, this->degrees, 0.618);
 		}
-		this->mask = this->unstoppable_mask;
+		this->mask = this->stop_mask;
 	} break;
 	default: {
 		this->mask = nullptr;
@@ -76,12 +76,20 @@ void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpSt
 	case HydraulicPumpStatus::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
+	case HydraulicPumpStatus::StartReady: {
+		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
+	}; break;
 	case HydraulicPumpStatus::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
 	case HydraulicPumpStatus::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
+	}; break;
+	case HydraulicPumpStatus::StopReady: {
+		CAS_SLOT(s.mask_color, Colours::ForestGreen);
+		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
 	case HydraulicPumpStatus::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
