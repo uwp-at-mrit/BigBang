@@ -243,6 +243,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		double get_direction_degrees() { return this->degrees; }
+		float get_radiusX() { return this->radiusX; }
+		float get_radiusY() { return this->radiusY; }
 
 	protected:
 		double degrees;

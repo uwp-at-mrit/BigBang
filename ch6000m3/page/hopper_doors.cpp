@@ -31,11 +31,20 @@ private enum class HDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
-	SternDraft, EarthWork, Vessel, HopperHeight, Loading, Displacement, BowDraft,
+	//labels
+	Port, Starboard,
 	
-	pLeftDrag, pLock, pRightDrag, Heel, Trim,
-	Port, Starboard, OpenFlow, CloseFlow, Pressure,
+	// Cylinders
+	EarthWork, Vessel, HopperHeight, Loading, Displacement,
+	
+	// Hydraulic pump dimensions, see hydraulics.cpp
+	A, D, E, H,
 
+	// Other Dimensions
+	Heel, Trim, BowDraft, SternDraft,
+	SBOP, SBCP, SBFC, PSOP, PSCP, PSFC,
+
+	// Hopper doors
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 
@@ -112,6 +121,16 @@ public:
 		SET_BOX(y, this->y * aheight + cell_height * side_hint);
 	}
 
+	void fill_ship_anchor(float fx, float fy, float* x, float *y, bool full = false) {
+		float awidth = this->actual_width();
+		float aheight = this->actual_height();
+		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
+		float width = (full ? abox.Width : this->ship_width * awidth);
+
+		SET_BOX(x, this->x * awidth + width * fx);
+		SET_BOX(y, this->y * aheight + abox.Height * fy);
+	}
+
 	void fill_ascent_anchor(float fx, float fy, float* x, float *y) {
 		float awidth = this->actual_width();
 		float aheight = this->actual_height();
@@ -147,15 +166,22 @@ private class Doors final
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->percentage_style.unit_color = Colours::Silver;
-		this->highlight_style = make_highlight_dimension_style(18.0F, 5U);
-		this->setting_style = make_setting_dimension_style(18.0F, 6U);
+		this->setting_style = make_setting_dimension_style(large_font_size, 6U);
+		this->pump_style = make_highlight_dimension_style(large_font_size, 6U);
+		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
+		this->highlight_style = this->pump_style;
+
+		this->pump_style.label_color = Colours::Background;
+		this->highlight_style.label_color = Colours::Green;
 	}
 
 public:
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+	}
 
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->set_cylinder(HD::HopperHeight, DBD(DB2, 224U));
 		this->set_cylinder(HD::Displacement, DBD(DB2, 228U));
 		this->set_cylinder(HD::Loading, DBD(DB2, 232U));
@@ -166,83 +192,46 @@ public:
 		this->dimensions[HD::SternDraft]->set_value(DBD(DB2, 188U));
 		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
 		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
+	}
 
+	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+		{ // door progresses
+			this->set_door_progress(HD::PS1, RealData(AI_DB203, 48));
+			this->set_door_progress(HD::PS2, RealData(AI_DB203, 49));
+			this->set_door_progress(HD::PS3, RealData(AI_DB203, 50));
+			this->set_door_progress(HD::PS4, RealData(AI_DB203, 72));
+			this->set_door_progress(HD::PS5, RealData(AI_DB203, 73));
+			this->set_door_progress(HD::PS6, RealData(AI_DB203, 74));
+			this->set_door_progress(HD::PS7, RealData(AI_DB203, 75));
+
+			this->set_door_progress(HD::SB1, RealData(AI_DB203, 64));
+			this->set_door_progress(HD::SB2, RealData(AI_DB203, 65));
+			this->set_door_progress(HD::SB3, RealData(AI_DB203, 66));
+			this->set_door_progress(HD::SB4, RealData(AI_DB203, 88));
+			this->set_door_progress(HD::SB5, RealData(AI_DB203, 89));
+			this->set_door_progress(HD::SB6, RealData(AI_DB203, 90));
+			this->set_door_progress(HD::SB7, RealData(AI_DB203, 91));
+		}
+
+		{ // pump pressures
+			this->dimensions[HD::D]->set_value(RealData(AI_DB203, 10), GraphletAnchor::LB);
+			this->dimensions[HD::E]->set_value(RealData(AI_DB203, 11), GraphletAnchor::LT);
+
+			this->dimensions[HD::A]->set_value(RealData(AI_DB203, 12), GraphletAnchor::CC);
+			this->dimensions[HD::H]->set_value(RealData(AI_DB203, 15), GraphletAnchor::CC);
+		}
+	}
+
+	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
+		this->set_pump_dimension_status(HD::A, DI_DB4, 50U);
+		this->set_pump_dimension_status(HD::D, DI_DB4, 82U);
+		this->set_pump_dimension_status(HD::E, DI_DB4, 86U);
+		this->set_pump_dimension_status(HD::H, DI_DB4, 66U);
+	}
+
+	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	void load(float width, float height, float vinset) {
-		float cell_width, cell_height, radius, cylinder_height;
-		
-		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
-		
-		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, radius);
-		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
-
-		cylinder_height = cell_height * 1.618F;
-		this->load_cylinder(this->cylinders, HD::BowDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, 15.0, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, 18000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::SternDraft, cylinder_height, 12.0, "meter", LiquidSurface::Convex);
-
-		this->load_dimensions(this->dimensions, this->captions, HD::pLeftDrag, HD::pRightDrag, "bar");
-		this->load_dimensions(this->dimensions, this->captions, HD::Heel, HD::Trim, "degrees");
-
-		{ // load settings
-			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-			ICanvasBrush^ ps_color = Colours::make(default_port_color);
-			ICanvasBrush^ sb_color = Colours::make(default_starboard_color);
-
-			this->load_label(this->captions, HD::Port, ps_color, cpt_font);
-			this->load_label(this->captions, HD::Starboard, sb_color, cpt_font);
-
-			this->load_setting(this->ports, HD::Pressure, "bar");
-			this->load_setting(this->starboards, HD::Pressure, "bar");
-		}
-	}
-
-	void reflow(float width, float height, float vinset) {
-		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, 1.0F, -0.5F);
-		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, 3.0F, 0.5F);
-
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::SternDraft, HD::BowDraft);
-
-		{ // reflow settings
-			float x, y, yoff;
-
-			this->captions[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &yoff);
-			yoff *= 0.618F;
-
-			this->decorator->fill_ascent_anchor(0.1F, 1.0F, &x, &y);
-			this->master->move_to(this->captions[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -yoff);
-
-			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, &y);
-			this->master->move_to(this->captions[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, yoff);
-
-			this->master->move_to(this->ports[HD::Pressure], this->captions[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB);
-			this->master->move_to(this->dimensions[HD::pLeftDrag], this->ports[HD::Pressure], GraphletAnchor::RB, GraphletAnchor::LB);
-
-			this->master->move_to(this->starboards[HD::Pressure], this->captions[HD::Starboard], GraphletAnchor::RB, GraphletAnchor::LB);
-			this->master->move_to(this->dimensions[HD::pRightDrag], this->starboards[HD::Pressure], GraphletAnchor::RB, GraphletAnchor::LB);
-		}
-		
-		{ // reflow dimensions
-			float x, y, label_height, xoff, yoff;
-
-			this->master->fill_graphlet_location(this->cylinders[HD::BowDraft], nullptr, &y, GraphletAnchor::CC);
-			this->captions[HD::Heel]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
-
-			xoff = label_height * 0.5F;
-			yoff = label_height * 2.0F;
-
-			this->decorator->fill_descent_anchor(0.10F, 0.0F, &x, nullptr);
-			this->decorator->fill_descent_anchor(0.90F, 0.0F, &x, nullptr);
-		}
 	}
 
 public:
@@ -257,19 +246,21 @@ public:
 		bool handled = false;
 
 		if (key == VirtualKey::Enter) {
-			auto editor = dynamic_cast<Credit<Dimensionlet, HD>*>(this->master->get_focus_graphlet());
+			auto peditor = dynamic_cast<Credit<Percentagelet, HD>*>(this->master->get_focus_graphlet());
+			auto deditor = dynamic_cast<Credit<Dimensionlet, HD>*>(this->master->get_focus_graphlet());
 
-			if (editor != nullptr) {
+			if (peditor != nullptr) {
 				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
-					editor->id.ToString()->Data(),
-					editor->get_input_number());
+					peditor->id.ToString()->Data(),
+					peditor->get_input_number());
 
-				editor->set_value(editor->get_input_number());
-				if (editor == this->ports[editor->id]) {
-					this->dimensions[HD::pLeftDrag]->set_value(editor->get_input_number());
-				} else {
-					this->dimensions[HD::pRightDrag]->set_value(editor->get_input_number());
-				}
+				peditor->set_value(peditor->get_input_number());
+			} else if (deditor != nullptr) {
+				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
+					deditor->id.ToString()->Data(),
+					deditor->get_input_number());
+
+				deditor->set_value(deditor->get_input_number());
 			}
 
 			handled = true;
@@ -278,22 +269,112 @@ public:
 		return handled;
 	}
 
+public:
+	void load(float width, float height, float vinset) {
+		float cell_width, cell_height, radius, cylinder_height;
+		
+		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
+		
+		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
+		this->load_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, radius);
+		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
+
+		cylinder_height = cell_height * 1.618F;
+		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, 15.0, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, 18000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
+
+		this->load_dimensions(this->dimensions, HD::A, HD::H, "bar");
+		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
+		this->load_dimensions(this->dimensions, HD::BowDraft, HD::SternDraft, "meter", this->plain_style);
+
+		{ // load settings
+			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+			ICanvasBrush^ ps_color = Colours::make(default_port_color);
+			ICanvasBrush^ sb_color = Colours::make(default_starboard_color);
+
+			this->load_label(this->captions, HD::Port, ps_color, cpt_font);
+			this->load_label(this->captions, HD::Starboard, sb_color, cpt_font);
+
+			this->load_setting(this->dsettings, HD::PSOP, "bar");
+			this->load_setting(this->dsettings, HD::PSCP, "bar");
+			this->load_setting(this->dsettings, HD::SBOP, "bar");
+			this->load_setting(this->dsettings, HD::SBCP, "bar");
+
+			this->load_setting(this->psettings, HD::PSFC);
+			this->load_setting(this->psettings, HD::SBFC);
+		}
+	}
+
+	void reflow(float width, float height, float vinset) {
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, 1.0F, -0.5F);
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, 3.0F, 0.5F);
+
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::EarthWork, HD::Displacement);
+
+		{ // reflow settings and dimensions
+			float x, y, off;
+
+			this->captions[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
+			off *= 0.618F;
+
+			this->decorator->fill_ascent_anchor(0.1F, 1.0F, &x, &y);
+			this->master->move_to(this->captions[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -off);
+
+			this->master->move_to(this->psettings[HD::PSFC], this->captions[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			this->master->move_to(this->dsettings[HD::PSOP], this->psettings[HD::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			this->master->move_to(this->dsettings[HD::PSCP], this->dsettings[HD::PSOP], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			this->master->move_to(this->dimensions[HD::A], this->dsettings[HD::PSCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+
+			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, &y);
+			this->master->move_to(this->captions[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, off);
+
+			this->master->move_to(this->psettings[HD::SBFC], this->captions[HD::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->dsettings[HD::SBOP], this->psettings[HD::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->dsettings[HD::SBCP], this->dsettings[HD::SBOP], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->dimensions[HD::H], this->dsettings[HD::SBCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+
+			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, false);
+			this->master->move_to(this->dimensions[HD::Heel], x, y, GraphletAnchor::LB, 0.0F, -off);
+			this->master->move_to(this->dimensions[HD::D], this->dimensions[HD::Heel], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -off);
+			this->master->move_to(this->dimensions[HD::Trim], x, y, GraphletAnchor::LT, 0.0F, +off);
+			this->master->move_to(this->dimensions[HD::E], this->dimensions[HD::Trim], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +off);
+
+			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, true);
+			this->master->move_to(this->dimensions[HD::BowDraft], x, y, GraphletAnchor::RC, -off);
+
+			this->decorator->fill_ship_anchor(0.0F, 0.5F, &x, &y, true);
+			this->master->move_to(this->dimensions[HD::SternDraft], x, y, GraphletAnchor::RC, -off);
+		}
+	}
+
 private:
 	template<typename E>
+	void load_setting(std::map<E, Credit<Percentagelet, E>*>& ds, E id) {
+		ds[id] = this->master->insert_one(new Credit<Percentagelet, E>(DimensionStatus::Input, this->setting_style, _speak(id)), id);
+	}
+
+	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(EditorStatus::Enabled, this->setting_style, unit, _speak(id)), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
-		this->load_label(ls, id, Colours::Silver);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
-	}
-
-	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, Platform::String^ unit) {
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, DimensionStyle& s) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, ls, id, unit);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(s, unit, _speak(id)), id);
+		}
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
+		for (E id = id0; id <= idn; id++) {
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, id.ToString()), id);
+
+			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
+			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
 		}
 	}
 
@@ -317,7 +398,8 @@ private:
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
-		this->load_dimension(this->dimensions, this->captions, id, unit);
+		this->load_label(this->captions, id, Colours::Silver);
+		this->dimensions[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
 	}
 
 	template<typename E>
@@ -358,10 +440,11 @@ private:
 	template<class C, typename E>
 	void reflow_cylinders(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds
 		, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn) {
+		unsigned int count = _I(idn) - _I(id0) + 1;
+		float flcount = float(count);
 		float x, y, xoff, gapsize;
-		float flcount = float(_I(idn) - _I(id0) + 1);
 	
-		this->decorator->fill_door_cell_extent(nullptr, &y, &xoff, nullptr, 1, 5.5F);
+		this->decorator->fill_door_cell_extent(nullptr, &y, &xoff, nullptr, (hopper_count - count), 6.0F);
 		xoff *= 0.5F;
 
 		for (E id = id0; id <= idn; id++) {
@@ -379,7 +462,17 @@ private:
 private:
 	void set_cylinder(HD id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value);
+		this->dimensions[id]->set_value(value, GraphletAnchor::LB);
+	}
+
+	void set_door_progress(HD id, float value) {
+		this->doors[id]->set_value(value / 100.0F);
+		this->hdoors[id]->set_value(value / 100.0F);
+		this->progresses[id]->set_value(value);
+	}
+
+	void set_pump_dimension_status(HD id, const uint8* db4, size_t idx_p1) {
+		this->dimensions[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
 	}
 
 private: // never delete these graphlets manually.
@@ -389,12 +482,14 @@ private: // never delete these graphlets manually.
 	std::map<HD, Credit<Doorlet, HD>*> doors;
 	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
 	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
-	std::map<HD, Credit<Dimensionlet, HD>*> ports;
-	std::map<HD, Credit<Dimensionlet, HD>*> starboards;
+	std::map<HD, Credit<Dimensionlet, HD>*> dsettings;
+	std::map<HD, Credit<Percentagelet, HD>*> psettings;
 
 private:
 	DimensionStyle percentage_style;
+	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
+	DimensionStyle plain_style;
 	DimensionStyle setting_style;
 
 private:
@@ -490,6 +585,8 @@ void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool sh
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);
 	} else if (editor != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		if (editor->get_status() == DimensionStatus::Input) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		}
 	}
 }

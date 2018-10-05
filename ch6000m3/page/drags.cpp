@@ -70,7 +70,7 @@ public:
 private:
 	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(EditorStatus::Enabled, this->setting_style, unit, _speak(id)), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
 	}
 
 	template<typename E>

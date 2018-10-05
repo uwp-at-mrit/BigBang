@@ -15,6 +15,7 @@ static const unsigned int frame_per_second = 4;
 
 static const size_t hopper_count = 7;
 
+static const float metrics_font_size = 20.0F;
 static const float large_font_size  = 18.0F;
 static const float normal_font_size = 16.0F;
 static const float small_font_size  = 14.0F;

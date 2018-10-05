@@ -47,15 +47,20 @@ private enum class HS : unsigned int {
 	F, C, D, E,
 	J, I,
 	Y, L, M, K,
+
 	// Valves
 	SQ1, SQ2, SQy, SQl, SQm, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
 	SQf, SQc, SQd, SQe,
+	
 	// Key Labels
 	Port, Starboard, Master, Visor, Storage, Pressure,
+	
 	// Filter Indicators
 	F01, F02, F10,
+	
 	_,
+	
 	// anchors used as last jumping points
 	a, b, c, d, e, f, g, h, y, l, m, k, k12,
 
@@ -71,10 +76,14 @@ public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
 public:
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 
+		this->station->clear_subtacks();
+	}
+
+	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(AI_DB203, 18U));
 		this->set_temperature(HS::Master, RealData(AI_DB203, 19U));
 		this->station_pressure->set_value(RealData(AI_DB203, 21U));
@@ -85,23 +94,17 @@ public:
 			this->pressures[HS::D]->set_value(RealData(AI_DB203, 10), GraphletAnchor::RB);
 			this->pressures[HS::E]->set_value(RealData(AI_DB203, 11), GraphletAnchor::RB);
 
-			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12));
-			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13));
-			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14));
-			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15));
+			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12), GraphletAnchor::LB);
+			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13), GraphletAnchor::LB);
+			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14), GraphletAnchor::LB);
+			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15), GraphletAnchor::LB);
 
 			this->pressures[HS::I]->set_value(RealData(AI_DB203, 16), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17));
+			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17), GraphletAnchor::LB);
 		}
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 	void on_digital_input(const uint8* DI_DB205, size_t count, Syslog* logger) {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
-
 		{ // pump states
 			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::F, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
 
@@ -120,35 +123,41 @@ public:
 				}
 			}
 		}
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
+		{ // tank status
+			if (DBX(DI_DB4, 118U - 1)) {
+				this->master_tank->set_status(HSMTStatus::Low);
+			} else if (DBX(DI_DB4, 119U - 1)) {
+				this->master_tank->set_status(HSMTStatus::UltraLow);
+			} else if (DBX(DI_DB4, 120U - 1)) {
+				this->master_tank->set_status(HSMTStatus::High);
+			} else {
+				this->master_tank->set_status(HSMTStatus::Normal);
+			}
+
+			if (DBX(DI_DB4, 132U - 1)) {
+				this->visor_tank->set_status(HSVTStatus::Low);
+			} else if (DBX(DI_DB4, 133U - 1)) {
+				this->visor_tank->set_status(HSVTStatus::UltraLow);
+			} else {
+				this->visor_tank->set_status(HSVTStatus::Normal);
+			}
+		}
 
 		{ // pump modes or statuses
 			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::I, HS::H, HS::G, HS::F, HS::J, HS::D, HS::E, HS::K, HS::L, HS::M, HS::Y };
 
 			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
-				HydraulicPumplet* target = this->pumps[pump_seq[i]];
-				size_t idx = i * 4 + 48;
-
-				target->set_remote_control(DBX(DI_DB4, idx));
-
-				if (DBX(DI_DB4, idx + 1)) {
-					target->set_status(HydraulicPumpStatus::Running);
-				}
-
-				if (DBX(DI_DB4, idx + 1)) {
-					target->set_status(HydraulicPumpStatus::Broken);
-				}
+				this->set_pump_status(pump_seq[i], DI_DB4, i * 4 + 49);
 			}
 		}
 
-		{ // pump modes or statuses
+		{ // valve statuses
+			this->set_valve_status(HS::SQ1, DI_DB4, 113);
+			this->set_valve_status(HS::SQ2, DI_DB4, 114);
+
 			this->set_valve_status(HS::SQk1, DI_DB4, 122);
 			this->set_valve_status(HS::SQk2, DI_DB4, 123);
 			this->set_valve_status(HS::SQl,  DI_DB4, 124);
@@ -174,49 +183,45 @@ public:
 			this->set_filter_status(HS::F02, DI_DB4, 127);
 			this->set_filter_status(HS::F10, DI_DB4, 134);
 		}
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 	void post_read_data(Syslog* logger) override {
-		HS ps_path[] = { HS::lt, HS::tl, HS::cl, HS::Master };
-		HS sb_path[] = { HS::rt, HS::tr, HS::cr, HS::Master };
-		HS i_path[] = { HS::f02, HS::Master };
+		{ // flow oil
+			HS ps_path[] = { HS::lt, HS::tl, HS::cl, HS::Master };
+			HS sb_path[] = { HS::rt, HS::tr, HS::cr, HS::Master };
+			HS i_path[] = { HS::f02, HS::Master };
+
+			this->station->append_subtrack(HS::Master, HS::SQ1, oil_color);
+			this->station->append_subtrack(HS::Master, HS::SQ2, oil_color);
+			this->station->append_subtrack(HS::Visor, HS::SQi, oil_color);
+			this->station->append_subtrack(HS::Visor, HS::SQj, oil_color);
+			this->station->append_subtrack(HS::Storage, HS::SQk1, oil_color);
+
+			this->try_flow_oil(HS::SQi, HS::I, HS::i, nullptr, 0, oil_color);
+			this->try_flow_oil(HS::SQj, HS::J, HS::j, nullptr, 0, oil_color);
+
+			this->try_flow_oil(HS::SQc, HS::C, HS::c, sb_path, oil_color);
+			this->try_flow_oil(HS::SQd, HS::D, HS::d, sb_path, oil_color);
+			this->try_flow_oil(HS::SQe, HS::E, HS::e, sb_path, oil_color);
+			this->try_flow_oil(HS::SQf, HS::F, HS::f, sb_path, oil_color);
+
+			this->try_flow_oil(HS::SQa, HS::A, HS::a, ps_path, oil_color);
+			this->try_flow_oil(HS::SQb, HS::B, HS::b, ps_path, oil_color);
+			this->try_flow_oil(HS::SQg, HS::G, HS::g, ps_path, oil_color);
+			this->try_flow_oil(HS::SQh, HS::H, HS::h, ps_path, oil_color);
+
+			this->try_flow_oil(HS::SQy, HS::Y, HS::y, i_path, oil_color);
+			this->try_flow_oil(HS::SQl, HS::L, HS::l, i_path, oil_color);
+			this->try_flow_oil(HS::SQm, HS::M, HS::m, i_path, oil_color);
+			this->try_flow_oil(HS::SQk1, HS::K, HS::k, i_path, oil_color);
+			this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, i_path */, oil_color);
+
+			this->try_flow_oil(HS::SQ1, HS::SQh, oil_color);
+			this->try_flow_oil(HS::SQ2, HS::SQe, oil_color);
+			this->try_flow_oil(HS::SQ2, HS::SQk2, oil_color);
+			this->try_flow_oil(HS::SQ2, HS::SQm, oil_color);
+		}
 		
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
-
-		this->station->append_subtrack(HS::Master, HS::SQ1, oil_color);
-		this->station->append_subtrack(HS::Master, HS::SQ2, oil_color);
-		this->station->append_subtrack(HS::Visor, HS::SQi, oil_color);
-		this->station->append_subtrack(HS::Visor, HS::SQj, oil_color);
-		this->station->append_subtrack(HS::Storage, HS::SQk1, oil_color);
-
-		this->try_flow_oil(HS::SQi, HS::I, HS::i, nullptr, 0, oil_color);
-		this->try_flow_oil(HS::SQj, HS::J, HS::j, nullptr, 0, oil_color);
-
-		this->try_flow_oil(HS::SQc, HS::C, HS::c, sb_path, oil_color);
-		this->try_flow_oil(HS::SQd, HS::D, HS::d, sb_path, oil_color);
-		this->try_flow_oil(HS::SQe, HS::E, HS::e, sb_path, oil_color);
-		this->try_flow_oil(HS::SQf, HS::F, HS::f, sb_path, oil_color);
-
-		this->try_flow_oil(HS::SQa, HS::A, HS::a, ps_path, oil_color);
-		this->try_flow_oil(HS::SQb, HS::B, HS::b, ps_path, oil_color);
-		this->try_flow_oil(HS::SQg, HS::G, HS::g, ps_path, oil_color);
-		this->try_flow_oil(HS::SQh, HS::H, HS::h, ps_path, oil_color);
-
-		this->try_flow_oil(HS::SQy, HS::Y, HS::y, i_path, oil_color);
-		this->try_flow_oil(HS::SQl, HS::L, HS::l, i_path, oil_color);
-		this->try_flow_oil(HS::SQm, HS::M, HS::m, i_path, oil_color);
-		this->try_flow_oil(HS::SQk1, HS::K, HS::k, i_path, oil_color);
-		this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, i_path */, oil_color);
-
-		this->try_flow_oil(HS::SQ1, HS::SQe, oil_color);
-		this->try_flow_oil(HS::SQ1, HS::SQk2, oil_color);
-		this->try_flow_oil(HS::SQ1, HS::SQm, oil_color);
-		this->try_flow_oil(HS::SQ2, HS::SQh, oil_color);
-
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -237,8 +242,8 @@ public:
 public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-		this->label_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", large_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->dimension_style.number_font = make_bold_text_format("Cambria Math", metrics_font_size);
 		this->dimension_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
@@ -246,28 +251,28 @@ public:
 	void load_pump_station(float width, float height, float gwidth, float gheight) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
-		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1);
+		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2);
 		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(17);
 		
-		pTurtle->jump_right(20, HS::e)->move_left(6, HS::E)->move_left(8, HS::SQe)->move_left(6)->jump_back();
-		pTurtle->move_up(3, HS::d)->move_left(6, HS::D)->move_left(8, HS::SQd)->move_left(6)->jump_back();
-		pTurtle->move_up(3, HS::c)->move_left(6, HS::C)->move_left(8, HS::SQc)->move_left(6)->jump_back();
-		pTurtle->move_up(3, HS::f)->move_left(6, HS::F)->move_left(8, HS::SQf)->move_left(6)->jump_back();
+		pTurtle->jump_right(20, HS::e)->move_left(5, HS::E)->move_left(10, HS::SQe)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::d)->move_left(5, HS::D)->move_left(10, HS::SQd)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::c)->move_left(5, HS::C)->move_left(10, HS::SQc)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::f)->move_left(5, HS::F)->move_left(10, HS::SQf)->move_left(5)->jump_back();
 		
-		pTurtle->move_up(3, HS::Starboard)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
+		pTurtle->move_up(3, HS::Port)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
 		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
 		pTurtle->jump_up(4)->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
 
-		pTurtle->move_down(3, HS::a)->move_right(6, HS::A)->move_right(8, HS::SQa)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::b)->move_right(6, HS::B)->move_right(8, HS::SQb)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::g)->move_right(6, HS::G)->move_right(8, HS::SQg)->move_right(6)->jump_back();
-		pTurtle->move_down(3, HS::h)->move_right(6, HS::H)->move_right(8, HS::SQh)->move_right(6);
+		pTurtle->move_down(3, HS::a)->move_right(5, HS::A)->move_right(10, HS::SQa)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::b)->move_right(5, HS::B)->move_right(10, HS::SQb)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::g)->move_right(5, HS::G)->move_right(10, HS::SQg)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::h)->move_right(5, HS::H)->move_right(10, HS::SQh)->move_right(5);
 
-		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
-		pTurtle->move_up(1, HS::SQ2)->move_up(5.5F)->move_to(HS::Master);
+		pTurtle->move_up(12, HS::Starboard)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
+		pTurtle->move_up(1, HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::Master)->jump_right(4);
-		pTurtle->move_up(5.5F, HS::F02)->move_up(HS::f02)->turn_up_right()->move_right(2);
+		pTurtle->move_up(5.5F, HS::F02)->move_up()->turn_up_right(HS::f02)->move_right(2);
 		pTurtle->move_right(5, HS::y)->move_down(6, HS::Y)->move_down(4, HS::SQy)->move_down(4)->turn_down_left()->jump_back();
 		pTurtle->move_right(5, HS::l)->move_down(6, HS::L)->move_down(4, HS::SQl)->move_down(4)->turn_down_left()->jump_back();
 		pTurtle->move_right(5, HS::m)->move_down(6, HS::M)->move_down(4, HS::SQm)->move_down(4)->turn_down_left()->jump_back();
@@ -288,8 +293,8 @@ public:
 	void load_tanks(float width, float height, float gwidth, float gheight) {
 		float thickness = 3.0F;
 
-		this->master_tank = this->make_tank(HSMTStatus::High, gwidth * 18.0F, gheight * 8.0F, thickness);
-		this->visor_tank = this->make_tank(HSVTStatus::Normal, gwidth * 16.0F, gheight * 7.0F, thickness);
+		this->master_tank = this->make_tank(HSMTStatus::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
+		this->visor_tank = this->make_tank(HSVTStatus::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
 
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
@@ -301,12 +306,13 @@ public:
 
 	void load_devices(float width, float height, float gwidth, float gheight) {
 		float radius = resolve_gridsize(gwidth, gheight);
+		float pradius = radius * 1.2F;
 
 		{ // load pumps
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::A, HS::H, radius, 180.0);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::F, HS::E, radius, 0.000);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::Y, HS::K, radius, -90.0);
-			this->load_devices(this->pumps, this->plabels, this->pcaptions, HS::J, HS::I, radius, 90.00);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::A, HS::H, pradius, 180.0, Colours::Salmon);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::F, HS::E, pradius, 0.000, Colours::Salmon);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::Y, HS::K, pradius, -90.0);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00);
 
 			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
 
@@ -315,9 +321,9 @@ public:
 		}
 
 		{ // load valves
-			this->load_devices(this->valves, this->vlabels, HS::SQ1, HS::SQj, radius, 90.000);
-			this->load_devices(this->valves, this->vlabels, HS::SQa, HS::SQk1, radius, 0.0);
-			this->load_devices(this->valves, this->vlabels, HS::SQf, HS::SQe, radius, 180.00);
+			this->load_devices(this->valves, this->labels, HS::SQ1, HS::SQj, radius, 90.000);
+			this->load_devices(this->valves, this->labels, HS::SQa, HS::SQk1, radius, 0.0);
+			this->load_devices(this->valves, this->labels, HS::SQf, HS::SQe, radius, 180.00);
 		}
 	}
 
@@ -344,7 +350,8 @@ public:
 	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
 		GraphletAnchor lbl_a, cpt_a, bar_a;
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy, margin;
-		float gridsize = resolve_gridsize(gwidth, gheight);
+		float pradius = this->pumps[HS::A]->get_radiusX();
+		float vradius = this->valves[HS::SQ1]->get_radiusY();
 		float text_hspace = vinset * 0.125F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
@@ -352,36 +359,36 @@ public:
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (it->second->id) {
 			case HS::A: case HS::B: case HS::G: case HS::H: {
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
-				cpt_dx = x0 + gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
-				bar_dx = x0 + gridsize; bar_dy = y0; bar_a = GraphletAnchor::LB;
+				lbl_dx = x0 - pradius; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+				cpt_dx = x0 + pradius; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
+				bar_dx = x0 + pradius; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
 			case HS::F: case HS::C: case HS::D: case HS::E: {
-				lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-				cpt_dx = x0 - gridsize; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
-				bar_dx = x0 - gridsize; bar_dy = y0; bar_a = GraphletAnchor::RB;
+				lbl_dx = x0 + pradius; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+				cpt_dx = x0 - pradius; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
+				bar_dx = x0 - pradius; bar_dy = y0; bar_a = GraphletAnchor::RB;
 			} break;
 			case HS::Y: case HS::L: case HS::M: case HS::K: {
-				lbl_dx = x0 - gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
-				cpt_dx = x0 + text_hspace; cpt_dy = y0 - gridsize; cpt_a = GraphletAnchor::LB;
+				lbl_dx = x0 - pradius; lbl_dy = y0; lbl_a = GraphletAnchor::RB;
+				cpt_dx = x0 + text_hspace; cpt_dy = y0 - pradius; cpt_a = GraphletAnchor::LB;
 				bar_dx = x0; bar_dy = y0; bar_a = GraphletAnchor::CC; // these devices have no metrics
 			} break;
 			default: {
-				cpt_dx = x0; cpt_dy = y0 + gridsize * 3.0F; cpt_a = GraphletAnchor::CT;
+				cpt_dx = x0; cpt_dy = y0 + gheight * 3.0F; cpt_a = GraphletAnchor::CT;
 			
 				if (it->second->id == HS::J) {
-					lbl_dx = x0 + gridsize; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-					bar_dx = x0 + text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::LT;
+					lbl_dx = x0 + pradius; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
+					bar_dx = x0 + text_hspace; bar_dy = y0 + pradius; bar_a = GraphletAnchor::LT;
 				} else { // HS::I
-					lbl_dx = x0 - gridsize - text_hspace; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
-					bar_dx = x0 - text_hspace; bar_dy = y0 + gridsize; bar_a = GraphletAnchor::RT;
+					lbl_dx = x0 - pradius; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
+					bar_dx = x0 - text_hspace; bar_dy = y0 + pradius; bar_a = GraphletAnchor::RT;
 				}
 			}
 			}
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->station->map_credit_graphlet(this->plabels[it->first], lbl_a, lbl_dx, lbl_dy);
-			this->station->map_credit_graphlet(this->pcaptions[it->first], cpt_a, cpt_dx, cpt_dy);
+			this->station->map_credit_graphlet(this->labels[it->first], lbl_a, lbl_dx, lbl_dy);
+			this->station->map_credit_graphlet(this->captions[it->first], cpt_a, cpt_dx, cpt_dy);
 
 			if (this->pressures.find(it->first) != this->pressures.end()) {
 				this->station->map_credit_graphlet(this->pressures[it->first], bar_a, bar_dx, bar_dy);
@@ -391,26 +398,22 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
-				case HS::SQ2: case HS::SQy: {
+				case HS::SQ1: case HS::SQi: case HS::SQy: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-					lbl_dx = x0 - gridsize + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
-				}; break;
-				case HS::SQi: {
-					it->second->fill_margin(x0, y0, nullptr, &margin, nullptr, nullptr);
-					lbl_dx = x0 - gridsize + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
+					lbl_dx = x0 - vradius + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				}; break;
 				default: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-					lbl_dx = x0 + gridsize - margin; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
+					lbl_dx = x0 + vradius - margin; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
 				}
 				}
 			} else {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
-				lbl_dx = x0; lbl_dy = y0 - gridsize + margin; lbl_a = GraphletAnchor::CB;
+				lbl_dx = x0; lbl_dy = y0 - vradius + margin; lbl_a = GraphletAnchor::CB;
 			}
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->station->map_credit_graphlet(this->vlabels[it->first], lbl_a, lbl_dx, lbl_dy);
+			this->station->map_credit_graphlet(this->labels[it->first], lbl_a, lbl_dx, lbl_dy);
 		}
 	}
 
@@ -458,13 +461,13 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls
-		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
+	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
+		, E id0, E idn, float radius, double degrees, CanvasSolidColorBrush^ color = Colours::Silver) {
 		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id.ToString(), id, Colours::Silver);
-			this->load_label(cs, id, Colours::Silver);
+			this->load_label(ls, id.ToString(), id, color);
+			this->load_label(cs, id, color);
 		}
 	}
 
@@ -521,7 +524,21 @@ private:
 private:
 	void set_temperature(HS id, float t) {
 		this->thermometers[id]->set_value(t);
-		this->temperatures[id]->set_value(t);
+		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
+	}
+
+	void set_pump_status(HS id, const uint8* db4, size_t idx_p1) {
+		HydraulicPumplet* target = this->pumps[id];
+		
+		target->set_remote_control(DBX(db4, idx_p1 - 1));
+
+		if (DBX(db4, idx_p1 + 0)) {
+			target->set_status(HydraulicPumpStatus::Running);
+		}
+
+		if (DBX(db4, idx_p1 + 1)) {
+			target->set_status(HydraulicPumpStatus::Broken);
+		}
 	}
 
 	void set_valve_status(HS id, const uint8* db4, size_t idx_p1) {
@@ -574,11 +591,9 @@ private:
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Labellet, HS>*> captions;
+	std::map<HS, Credit<Labellet, HS>*> labels;
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
-	std::map<HS, Credit<Labellet, HS>*> plabels;
-	std::map<HS, Credit<Labellet, HS>*> pcaptions;
 	std::map<HS, Credit<GateValvelet, HS>*> valves;
-	std::map<HS, Credit<Labellet, HS>*> vlabels;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Rectanglet, HS>*> filters;
 	std::map<HS, Credit<Labellet, HS>*> islabels;

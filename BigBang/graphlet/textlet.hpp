@@ -6,7 +6,7 @@
 #include "text.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class EditorStatus { Disabled, Enabled, _ };
+	private enum class DimensionStatus { Normal, Input, Highlight, _ };
 
 	private struct DimensionStyle {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ label_font;
@@ -121,12 +121,12 @@ namespace WarGrey::SCADA {
 	private class IEditorlet abstract
 		: public virtual WarGrey::SCADA::ITextlet
 		, public virtual WarGrey::SCADA::IValuelet<double>
-		, public virtual WarGrey::SCADA::IStatuslet<WarGrey::SCADA::EditorStatus, WarGrey::SCADA::DimensionStyle> {
+		, public virtual WarGrey::SCADA::IStatuslet<WarGrey::SCADA::DimensionStatus, WarGrey::SCADA::DimensionStyle> {
 	public:
-		IEditorlet(WarGrey::SCADA::EditorStatus default_status, Platform::String^ unit,
+		IEditorlet(WarGrey::SCADA::DimensionStatus default_status, Platform::String^ unit,
 			Platform::String^ label, Platform::String^ subscript);
 
-		IEditorlet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+		IEditorlet(WarGrey::SCADA::DimensionStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
 			Platform::String^ unit, Platform::String^ label, Platform::String^ subscript);
 
 	public:
@@ -144,10 +144,10 @@ namespace WarGrey::SCADA {
 		long double get_input_number();
 
 	protected:
-		void prepare_style(WarGrey::SCADA::EditorStatus status, WarGrey::SCADA::DimensionStyle& style) override;
+		void prepare_style(WarGrey::SCADA::DimensionStatus status, WarGrey::SCADA::DimensionStyle& style) override;
 		void apply_style(WarGrey::SCADA::DimensionStyle& style) override;
 		void on_value_changed(double value) override;
-		void on_status_changed(WarGrey::SCADA::EditorStatus status) override;
+		void on_status_changed(WarGrey::SCADA::DimensionStatus status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caret_layout;
@@ -171,13 +171,13 @@ namespace WarGrey::SCADA {
 	public:
 		Dimensionlet(Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
 		
-		Dimensionlet(WarGrey::SCADA::EditorStatus default_status,
+		Dimensionlet(WarGrey::SCADA::DimensionStatus default_status,
 			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
 
 		Dimensionlet(WarGrey::SCADA::DimensionStyle& default_style,
 			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
 		
-		Dimensionlet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+		Dimensionlet(WarGrey::SCADA::DimensionStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
 			Platform::String^ unit, Platform::String^ label = "", Platform::String^ subscript = "");
 	};
 
@@ -185,13 +185,13 @@ namespace WarGrey::SCADA {
 	public:
 		Percentagelet(Platform::String^ label = "", Platform::String^ subscript = "");
 		
-		Percentagelet(WarGrey::SCADA::EditorStatus default_status,
+		Percentagelet(WarGrey::SCADA::DimensionStatus default_status,
 			Platform::String^ label = "", Platform::String^ subscript = "");
 		
 		Percentagelet(WarGrey::SCADA::DimensionStyle& style,
 			Platform::String^ label = "", Platform::String^ subscript = "");
 		
-		Percentagelet(WarGrey::SCADA::EditorStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
+		Percentagelet(WarGrey::SCADA::DimensionStatus default_status, WarGrey::SCADA::DimensionStyle& default_style,
 			Platform::String^ label = "", Platform::String^ subscript = "");
 	};
 }

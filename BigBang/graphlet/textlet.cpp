@@ -84,7 +84,7 @@ DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsign
 
 DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
-	auto uf = make_bold_text_format("Cambria", nfsize * 0.90F);
+	auto uf = make_bold_text_format("Cambria", nfsize);
 	DimensionStyle ds;
 
 	ds.number_font = nf;
@@ -263,7 +263,7 @@ Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsig
 }
 
 /*************************************************************************************************/
-IEditorlet::IEditorlet(EditorStatus status, DimensionStyle& style, Platform::String^ unit
+IEditorlet::IEditorlet(DimensionStatus status, DimensionStyle& style, Platform::String^ unit
 	, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(status, unit, label, subscript) {
 	
@@ -271,7 +271,7 @@ IEditorlet::IEditorlet(EditorStatus status, DimensionStyle& style, Platform::Str
 	this->set_style(style);
 }
 
-IEditorlet::IEditorlet(EditorStatus status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+IEditorlet::IEditorlet(DimensionStatus status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IStatuslet(status), unit(unit) {
 	
 	this->set_text(speak(label), speak(subscript));
@@ -350,8 +350,8 @@ void IEditorlet::on_value_changed(double value) {
 	this->number_box = get_text_extent(this->number_layout);
 }
 
-void IEditorlet::on_status_changed(EditorStatus status) {
-	this->enable_events(status == EditorStatus::Enabled);
+void IEditorlet::on_status_changed(DimensionStatus status) {
+	this->enable_events(status == DimensionStatus::Input);
 }
 
 bool IEditorlet::on_char(VirtualKey key, bool wargrey_keyboard) {
@@ -430,7 +430,7 @@ long double IEditorlet::get_input_number() {
 	return v;
 }
 
-void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
+void IEditorlet::prepare_style(DimensionStatus status, DimensionStyle& style) {
 	CAS_SLOT(style.number_color, default_number_color);
 	CAS_SLOT(style.unit_color, default_unit_color);
 	CAS_SLOT(style.label_color, style.unit_color);
@@ -446,13 +446,13 @@ void IEditorlet::prepare_style(EditorStatus status, DimensionStyle& style) {
 	FLCAS_SLOT(style.number_leading_space, get_text_extent("0", style.number_font).width);
 
 	switch (status) {
-	case EditorStatus::Enabled: {
+	case DimensionStatus::Input: {
 		FLCAS_SLOT(style.minimize_number_width, get_text_extent("123456.789", style.number_font).width);
 		FLCAS_SLOT(style.number_xfraction, 0.0F);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
 		style.precision = 0;
 	}; break;
-	case EditorStatus::Disabled: {
+	case DimensionStatus::Normal: case DimensionStatus::Highlight: {
 		FLCAS_SLOT(style.minimize_number_width, 0.0F);
 		FLCAS_SLOT(style.number_xfraction, 0.5F);
 		FLCAS_SLOT(style.number_trailing_space, 0.0F);
@@ -554,29 +554,29 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 }
 
 /*************************************************************************************************/
-Dimensionlet::Dimensionlet(EditorStatus default_status, DimensionStyle& default_style, Platform::String^ unit
+Dimensionlet::Dimensionlet(DimensionStatus default_status, DimensionStyle& default_style, Platform::String^ unit
 	, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_status, default_style, unit_speak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(DimensionStyle& default_style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: Dimensionlet(EditorStatus::Disabled, default_style, unit, label, subscript) {}
+	: Dimensionlet(DimensionStatus::Normal, default_style, unit, label, subscript) {}
 
-Dimensionlet::Dimensionlet(EditorStatus default_status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
+Dimensionlet::Dimensionlet(DimensionStatus default_status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_status, unit_speak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: Dimensionlet(EditorStatus::Disabled, unit, label, subscript) {}
+	: Dimensionlet(DimensionStatus::Normal, unit, label, subscript) {}
 
 /*************************************************************************************************/
-Percentagelet::Percentagelet(EditorStatus default_status, DimensionStyle& default_style
+Percentagelet::Percentagelet(DimensionStatus default_status, DimensionStyle& default_style
 	, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_status, default_style, "%", label, subscript) {}
 
 Percentagelet::Percentagelet(DimensionStyle& default_style, Platform::String^ label, Platform::String^ subscript)
-	: Percentagelet(EditorStatus::Disabled, default_style, label, subscript) {}
+	: Percentagelet(DimensionStatus::Normal, default_style, label, subscript) {}
 
-Percentagelet::Percentagelet(EditorStatus default_status, Platform::String^ label, Platform::String^ subscript)
+Percentagelet::Percentagelet(DimensionStatus default_status, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(default_status, "%", label, subscript) {}
 
 Percentagelet::Percentagelet(Platform::String^ label, Platform::String^ subscript)
-	: Percentagelet(EditorStatus::Disabled, label, subscript) {}
+	: Percentagelet(DimensionStatus::Normal, label, subscript) {}

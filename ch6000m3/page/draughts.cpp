@@ -100,7 +100,7 @@ private:
 private class Draughts final : public PLCConfirmation {
 public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
-		this->plain_style = make_plain_dimension_style(16.0F, 5U);
+		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
 	}
 
 public:

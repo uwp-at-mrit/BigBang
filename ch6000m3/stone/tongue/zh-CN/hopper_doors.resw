@@ -126,15 +126,6 @@
   <data name="Heel" xml:space="preserve">
     <value>横倾角度</value>
   </data>
-  <data name="pLeftDrag" xml:space="preserve">
-    <value>左耙出口压力</value>
-  </data>
-  <data name="pLock" xml:space="preserve">
-    <value>高压锁紧压力</value>
-  </data>
-  <data name="pRightDrag" xml:space="preserve">
-    <value>右耙出口压力</value>
-  </data>
   <data name="SternDraft" xml:space="preserve">
     <value>艉吃水</value>
   </data>
@@ -159,13 +150,22 @@
   <data name="Starboard" xml:space="preserve">
     <value>右舷泥门</value>
   </data>
-  <data name="CloseFlow" xml:space="preserve">
-    <value>关闭流量</value>
+  <data name="SBCP" xml:space="preserve">
+    <value>关闭压力</value>
   </data>
-  <data name="OpenFlow" xml:space="preserve">
-    <value>打开流量</value>
+  <data name="SBOP" xml:space="preserve">
+    <value>打开压力</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>压力控制</value>
+  <data name="SBFC" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="PSCP" xml:space="preserve">
+    <value>关闭压力</value>
+  </data>
+  <data name="PSFC" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="PSOP" xml:space="preserve">
+    <value>打开压力</value>
   </data>
 </root>
