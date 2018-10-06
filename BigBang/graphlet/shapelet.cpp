@@ -133,6 +133,18 @@ Linelet::Linelet(float sx, float sy, float ex, float ey, float thickness, unsign
 Linelet::Linelet(float sx, float sy, float ex, float ey, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
 	: Shapelet(line(sx, sy, ex, ey, thickness, style), color) {}
 
+HLinelet::HLinelet(float length, float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: HLinelet(length, thickness, Colours::make(color), style) {}
+
+HLinelet::HLinelet(float length, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
+	: Linelet(0.0F, 0.0F, length, 0.0F, thickness, color, style) {}
+
+VLinelet::VLinelet(float length, float thickness, unsigned int color, CanvasStrokeStyle^ style)
+	: VLinelet(length, thickness, Colours::make(color), style) {}
+
+VLinelet::VLinelet(float length, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
+	: Linelet(0.0F, 0.0F, 0.0F, length, thickness, color, style) {}
+
 Arclet::Arclet(double sdegrees, double edegrees, float rx, float ry, float thickness, unsigned int color, CanvasStrokeStyle^ style)
 	: Arclet(sdegrees, edegrees, rx, ry, thickness, Colours::make(color), style) {}
 
@@ -144,38 +156,3 @@ Omegalet::Omegalet(double sdegrees, float r, float thickness, unsigned int color
 
 Omegalet::Omegalet(double sdegrees, float r, float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
 	: Shapelet(omega(sdegrees, r, thickness, style, -(r * 2.0F + thickness) / r), color) {}
-
-/*************************************************************************************************/
-HLinelet::HLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)
-	: HLinelet(thickness, Colours::make(color), style) {}
-
-HLinelet::HLinelet(float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
-	: thickness(thickness), color(color), style(style) {}
-
-void HLinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, this->available_visible_width(x));
-	SET_BOX(height, this->thickness);
-}
-
-void HLinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float line_y = y + this->thickness * 0.5F;
-
-	ds->DrawLine(x, line_y, x + Width, line_y, this->color, this->thickness, this->style);
-}
-
-VLinelet::VLinelet(float thickness, unsigned int color, CanvasStrokeStyle^ style)
-	: VLinelet(thickness, Colours::make(color), style) {}
-
-VLinelet::VLinelet(float thickness, CanvasSolidColorBrush^ color, CanvasStrokeStyle^ style)
-	: thickness(thickness), color(color), style(style) {}
-
-void VLinelet::fill_extent(float x, float y, float* width, float* height) {
-	SET_BOX(width, this->thickness);
-	SET_BOX(height, this->available_visible_height(y));
-}
-
-void VLinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float line_x = x + this->thickness * 0.5F;
-
-	ds->DrawLine(line_x, y, line_x, y + Height, this->color, this->thickness, this->style);
-}

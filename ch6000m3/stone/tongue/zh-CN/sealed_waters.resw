@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Port" xml:space="preserve">
+  <data name="PSUWP" xml:space="preserve">
     <value>左舷水下泵</value>
   </data>
-  <data name="Starboard" xml:space="preserve">
+  <data name="SBUWP" xml:space="preserve">
     <value>右舷水下泵</value>
   </data>
   <data name="Hatch" xml:space="preserve">
@@ -133,34 +133,34 @@
     <value>2#闸阀冲洗泵</value>
   </data>
   <data name="SP13" xml:space="preserve">
+    <value>封水泵A</value>
+  </data>
+  <data name="SP17" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
   <data name="SP15" xml:space="preserve">
-    <value>1#封水泵</value>
-  </data>
-  <data name="SP11" xml:space="preserve">
-    <value>1#封水泵</value>
+    <value>封水泵A</value>
   </data>
   <data name="SP19" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
+  <data name="SP14" xml:space="preserve">
+    <value>封水泵B</value>
+  </data>
   <data name="SP20" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="SP24" xml:space="preserve">
+  <data name="SP18" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="SP26" xml:space="preserve">
-    <value>2#封水泵</value>
+  <data name="SP16" xml:space="preserve">
+    <value>封水泵B</value>
   </data>
-  <data name="SP22" xml:space="preserve">
-    <value>2#封水泵</value>
+  <data name="SBHP" xml:space="preserve">
+    <value>1级右舱内泵</value>
   </data>
-  <data name="HP1" xml:space="preserve">
-    <value>1级舱内泵</value>
-  </data>
-  <data name="HP2" xml:space="preserve">
-    <value>2级舱内泵</value>
+  <data name="PSHP" xml:space="preserve">
+    <value>2级左舱内泵</value>
   </data>
   <data name="SS1" xml:space="preserve">
     <value>泥沙分离器</value>
@@ -168,7 +168,10 @@
   <data name="SS2" xml:space="preserve">
     <value>泥沙分离器</value>
   </data>
-  <data name="ToPipeline" xml:space="preserve">
-    <value>至闸阀冲洗管系</value>
+  <data name="ToFlushs" xml:space="preserve">
+    <value>至闸阀冲洗管路</value>
+  </data>
+  <data name="Sea" xml:space="preserve">
+    <value>潜水</value>
   </data>
 </root>

@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="SP26" xml:space="preserve">
+  <data name="SP20" xml:space="preserve">
     <value>Sealed Water Pump #2</value>
   </data>
-  <data name="Starboard" xml:space="preserve">
+  <data name="SBUWP" xml:space="preserve">
     <value>Starboard Underwater Pump</value>
   </data>
   <data name="Hatch" xml:space="preserve">
@@ -133,34 +133,34 @@
     <value>Flushing Pump #2</value>
   </data>
   <data name="SP13" xml:space="preserve">
-    <value>Sealed Water Pump #1</value>
+    <value>Sealed Water Pump A</value>
   </data>
-  <data name="SP24" xml:space="preserve">
+  <data name="SP18" xml:space="preserve">
     <value>Sealed Water Pump #2</value>
   </data>
-  <data name="SP15" xml:space="preserve">
+  <data name="SP17" xml:space="preserve">
     <value>Sealed Water Pump #1</value>
   </data>
-  <data name="Port" xml:space="preserve">
+  <data name="PSUWP" xml:space="preserve">
     <value>Port Underwater Pump</value>
   </data>
-  <data name="SP11" xml:space="preserve">
-    <value>Sealed Water Pump #1</value>
+  <data name="SP15" xml:space="preserve">
+    <value>Sealed Water Pump A</value>
   </data>
   <data name="SP19" xml:space="preserve">
     <value>Sealed Water Pump #1</value>
   </data>
-  <data name="SP20" xml:space="preserve">
-    <value>Sealed Water Pump #2</value>
+  <data name="SP14" xml:space="preserve">
+    <value>Sealed Water Pump B</value>
   </data>
-  <data name="SP22" xml:space="preserve">
-    <value>Sealed Water Pump #2</value>
+  <data name="SP16" xml:space="preserve">
+    <value>Sealed Water Pump B</value>
   </data>
-  <data name="HP1" xml:space="preserve">
-    <value>1st-class in-hatch pump</value>
+  <data name="PSHP" xml:space="preserve">
+    <value>Port in-hatch pump (2nd-class)</value>
   </data>
-  <data name="HP2" xml:space="preserve">
-    <value>2nd-class in-hatch pump</value>
+  <data name="SBHP" xml:space="preserve">
+    <value>Starboard in-hatch pump (1st-class)</value>
   </data>
   <data name="SS1" xml:space="preserve">
     <value>Sediment Separator</value>
@@ -168,7 +168,10 @@
   <data name="SS2" xml:space="preserve">
     <value>Sediment Separator</value>
   </data>
-  <data name="ToPipeline" xml:space="preserve">
+  <data name="ToFlushs" xml:space="preserve">
     <value>Transfer to the Flusing Pipeline System</value>
+  </data>
+  <data name="Sea" xml:space="preserve">
+    <value>Sea</value>
   </data>
 </root>

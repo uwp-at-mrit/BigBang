@@ -20,6 +20,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool can_select(IGraphlet* g) override;
+		void on_elapse(long long count, long long interval, long long uptime) override;
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
 	private:
