@@ -160,9 +160,9 @@ public:
 
 		pTurtle->jump_back(FS::HBV17)->jump_left(4, FS::HBV18);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->hopper_room = this->master->insert_one(
-			new Tracklet<FS>(rTurtle, default_pipeline_thickness, Colours::SeaGreen,
+			new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::SeaGreen,
 				make_dash_stroke(CanvasDashStyle::Dash)));
 
 		{ // load doors
@@ -177,8 +177,8 @@ public:
 		}
 
 		{ // load special nodes
-			auto pscolor = Colours::make(default_port_color);
-			auto sbcolor = Colours::make(default_starboard_color);
+			auto pscolor = Colours::make(default_ps_color);
+			auto sbcolor = Colours::make(default_sb_color);
 			float dh_radius = gwidth * 2.0F;
 			float nic_radius = radius * 0.25F;
 
@@ -193,15 +193,15 @@ public:
 
 			this->ps_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, dh_radius, gheight,
-					nullptr, pscolor, default_pipeline_thickness));
+					nullptr, pscolor, default_pipe_thickness));
 
 			this->sb_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, dh_radius, gheight,
-					nullptr, sbcolor, default_pipeline_thickness));
+					nullptr, sbcolor, default_pipe_thickness));
 			
 			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
+					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
 	}
@@ -223,7 +223,7 @@ public:
 			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
 			 * thus, we have to do aligning on our own.
 			 */
-			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
+			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
 		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, FS::HBV05);

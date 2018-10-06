@@ -76,11 +76,11 @@ public:
 		pTurtle->move_left(4)->move_up(4, DA::d14)->move_right(4)->move_up(2, DA::D14)->jump_back();
 		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D16);
 
-		this->pipeline = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->load_valves(this->valves, this->labels, DA::D03, DA::D12, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DA::D13, DA::D16, vinset, -90.0);
 		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->label_font);
-		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipeline_thickness, Colours::Green));
+		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipe_thickness, Colours::Green));
 		//this->ps_compensator = this->master->insert_one(new Compensatorlet(3.0, 64.0F));
 	}
 

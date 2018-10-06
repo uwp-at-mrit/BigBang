@@ -82,7 +82,8 @@ DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsign
 	return ds;
 }
 
-DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number) {
+DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number
+	, ICanvasBrush^ label_color, ICanvasBrush^ label_bgcolor) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
 	DimensionStyle ds;
@@ -95,8 +96,8 @@ DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsi
 	ds.number_leading_space = 2.0F;
 	ds.number_background_color = Colours::Gray;
 	ds.number_color = Colours::Background;
-	ds.label_background_color = Colours::ForestGreen;
-	ds.label_color = Colours::GhostWhite;
+	ds.label_background_color = label_bgcolor;
+	ds.label_color = label_color;
 	
 	return ds;
 }
@@ -112,18 +113,14 @@ void ITextlet::set_color(unsigned int color_hex, double alpha) {
 }
 
 void ITextlet::set_font(CanvasTextFormat^ font, GraphletAnchor anchor) {
-	if (font == nullptr) {
-		this->set_font(default_text_font, anchor);
-	} else {
-		this->moor(anchor);
+	this->moor(anchor);
 
-		this->text_font = font;
-		this->subscript_fontsize = font->FontSize * 0.618F;
-		this->set_text(this->raw, this->sub_index, this->sub_count, anchor);
-		this->on_font_changed();
+	this->text_font = ((font == nullptr) ? default_text_font : font);
+	this->subscript_fontsize = this->text_font->FontSize * 0.618F;
+	this->set_text(this->raw, this->sub_index, this->sub_count, anchor);
+	this->on_font_changed();
 
-		this->notify_updated();
-	}
+	this->notify_updated();
 }
 
 void ITextlet::set_text(Platform::String^ content, unsigned int subidx, unsigned int subcount, GraphletAnchor anchor) {
@@ -514,13 +511,14 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 
 	{ // draw number
 		float region_width = std::fmaxf(nbox.width, style.minimize_number_width);
+		float padding_x = ((style.number_border_color != nullptr) ? 1.0F : 0.0F);
 		
 		if (style.number_background_color != nullptr) {
 			ds->FillRectangle(x, y, region_width, height, style.number_background_color);
 		}
 
 		if (nlayout != nullptr) {
-			number_x = x + (region_width - nbox.width) * style.number_xfraction;
+			number_x = x + (region_width - nbox.width) * style.number_xfraction + padding_x;
 			ds->DrawTextLayout(nlayout, number_x, base_y - number_box.height, style.number_color);
 		}
 

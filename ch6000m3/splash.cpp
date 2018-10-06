@@ -54,10 +54,10 @@ public:
 
 		this->frame = this->master->insert_one(new Rectanglet(w, h, Colours::Background, Colours::LightSeaGreen, icon_thickness));
 		this->ship = this->master->insert_one(new Shiplet(ship_width, bow_radius, nullptr, Colours::Yellow, icon_thickness));
-		this->ps_dragarm = this->master->insert_one(new Shapelet(ps_dragbody, Colours::make(default_port_color)));
-		this->sb_dragarm = this->master->insert_one(new Shapelet(sb_dragbody, Colours::make(default_starboard_color)));
-		this->ps_draghead = this->master->insert_one(new Segmentlet(-90.0, 90.0, door_esize * 1.618F, door_esize, default_port_color, thinness));
-		this->sb_draghead = this->master->insert_one(new Segmentlet(-90.0, 90.0, door_esize * 1.618F, door_esize, default_starboard_color, thinness));
+		this->ps_dragarm = this->master->insert_one(new Shapelet(ps_dragbody, Colours::make(default_ps_color)));
+		this->sb_dragarm = this->master->insert_one(new Shapelet(sb_dragbody, Colours::make(default_sb_color)));
+		this->ps_draghead = this->master->insert_one(new Segmentlet(-90.0, 90.0, door_esize * 1.618F, door_esize, default_ps_color, thinness));
+		this->sb_draghead = this->master->insert_one(new Segmentlet(-90.0, 90.0, door_esize * 1.618F, door_esize, default_sb_color, thinness));
 		
 		for (unsigned int idx = 0; idx < this->hcount * 2U; idx++) {
 			this->hdoors[idx] = this->master->insert_one(new Rectanglet(door_esize, Colours::Yellow, Colours::Red, door_esize * 0.5F));

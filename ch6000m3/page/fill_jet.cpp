@@ -150,7 +150,7 @@ public:
 
 		pTurtle->jump_back(FJ::d1819)->move_right(4, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipe_thickness, default_pipe_color));
 
 		{ // load manual pipe segement
 			float d02_y, d05_y;
@@ -160,7 +160,7 @@ public:
 
 			this->manual_pipe = this->master->insert_one(
 				new Linelet(0.0F, d02_y, 0.0F, d05_y,
-					default_pipeline_thickness, default_pipeline_color));
+					default_pipe_thickness, default_pipe_color));
 		}
 
 		{ // load doors and valves
@@ -179,13 +179,13 @@ public:
 			
 			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, -2.0F);
-			this->ps_suction = this->master->insert_one(new Circlelet(sct_radius, default_port_color, default_pipeline_thickness));
-			this->sb_suction = this->master->insert_one(new Circlelet(sct_radius, default_starboard_color, default_pipeline_thickness));
+			this->ps_suction = this->master->insert_one(new Circlelet(sct_radius, default_ps_color, default_pipe_thickness));
+			this->sb_suction = this->master->insert_one(new Circlelet(sct_radius, default_sb_color, default_pipe_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
 
 			for (FJ id = FJ::n24; id <= FJ::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
+					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
 
@@ -223,7 +223,7 @@ public:
 			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
 			 * thus, we have to do aligning on our own.
 			 */
-			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
+			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
 		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.4F);
@@ -495,13 +495,13 @@ public:
 				pipeline->fill_anchor_location(FJ::d007, &d07_x, nullptr, false);
 
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
 				ds->DrawLine(x + d03_x, y + d0325_y, x + d07_x, y + d0325_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
 				ds->DrawLine(d10_x, y + d10_y, x + d10_x, y + d10_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+					Colours::DimGray, default_pipe_thickness, this->ship_style);
 			}
 		}
 	}

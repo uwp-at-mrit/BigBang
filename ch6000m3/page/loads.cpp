@@ -145,7 +145,7 @@ public:
 
 		pTurtle->jump_back(LD::d1819)->move_right(4, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->pipeline = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipe_thickness, default_pipe_color));
 
 		{ // load valves
 			this->load_valve(this->gvalves, this->vlabels, this->captions, LD::D001, radius, 0.0);
@@ -164,19 +164,19 @@ public:
 			this->load_pump(this->pumps, this->captions, LD::PSHPump, -radius, +2.0F);
 			this->load_pump(this->pumps, this->captions, LD::SBHPump, -radius, -2.0F);
 
-			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 0.5F, default_pipeline_color));
+			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 0.5F, default_pipe_color));
 
 			this->ps_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
-					default_port_color, default_pipeline_thickness));
+					default_ps_color, default_pipe_thickness));
 
 			this->sb_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
-					default_starboard_color, default_pipeline_thickness));
+					default_sb_color, default_pipe_thickness));
 
 			for (LD id = LD::n0325; id <= LD::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipeline_thickness, default_pipeline_color));
+					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
 
@@ -208,7 +208,7 @@ public:
 			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
 			 * thus, we have to do aligning on our own.
 			 */
-			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipeline_thickness * 0.5F);
+			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
@@ -446,10 +446,10 @@ public:
 				pipeline->fill_anchor_location(LD::D025, nullptr, &d25_y, false);
 
 				ds->DrawLine(x + gantry_x, y + gantry_y, x + gantry_x, y + barge_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
-					Colours::DimGray, default_pipeline_thickness, this->ship_style);
+					Colours::DimGray, default_pipe_thickness, this->ship_style);
 			}
 		}
 	}

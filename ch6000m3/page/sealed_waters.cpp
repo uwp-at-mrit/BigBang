@@ -71,7 +71,10 @@ private class SealedWaters final
 	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>
 	, public IMenuCommand<SWVOperation, Credit<GateValvelet, SW>, IMRMaster*> {
 public:
-	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {}
+	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
+		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->dimension_style = make_highlight_dimension_style(large_font_size, 6U);
+	}
 
 public:
 	void pre_read_data(Syslog* logger) override {
@@ -125,11 +128,6 @@ public:
 	}
 
 public:
-	void construct(float gwidth, float gheight) {
-		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->dimension_style = make_highlight_dimension_style(gheight, 6U);
-	}
-
 	void load(float width, float height, float gwidth, float gheight) {
 		Turtle<SW>* pTurtle = new Turtle<SW>(gwidth, gheight, false, SW::Hatch);
 
@@ -165,9 +163,9 @@ public:
 		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
 		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
 
-		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
-		this->sea = this->master->insert_one(new VLinelet(gheight * 2.0F, default_pipeline_thickness,
+		this->sea = this->master->insert_one(new VLinelet(gheight * 2.0F, default_pipe_thickness,
 			water_color, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		{ // load devices
@@ -233,7 +231,7 @@ public:
 
 		{ // reflow dimensions
 			float xoff = gwidth * 3.0F;
-			float yoff = default_pipeline_thickness * 2.0F;
+			float yoff = default_pipe_thickness * 2.0F;
 
 			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -yoff);
@@ -370,8 +368,6 @@ void SealedWaterPage::load(CanvasCreateResourcesReason reason, float width, floa
 
 		this->grid->set_grid_width(gwidth);
 		this->grid->set_grid_height(gheight, vinset);
-
-		dashboard->construct(gwidth, gheight);
 
 		{ // load graphlets
 			this->change_mode(SWMode::Dashboard);

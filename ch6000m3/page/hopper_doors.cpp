@@ -166,13 +166,10 @@ private class Doors final
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->percentage_style.unit_color = Colours::Silver;
-		this->setting_style = make_setting_dimension_style(large_font_size, 6U);
-		this->pump_style = make_highlight_dimension_style(large_font_size, 6U);
 		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
-		this->highlight_style = this->pump_style;
-
-		this->pump_style.label_color = Colours::Background;
-		this->highlight_style.label_color = Colours::Green;
+		this->setting_style = make_setting_dimension_style(large_font_size, 6U);
+		this->pump_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Green);
 	}
 
 public:
@@ -292,8 +289,8 @@ public:
 
 		{ // load settings
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-			ICanvasBrush^ ps_color = Colours::make(default_port_color);
-			ICanvasBrush^ sb_color = Colours::make(default_starboard_color);
+			ICanvasBrush^ ps_color = Colours::make(default_ps_color);
+			ICanvasBrush^ sb_color = Colours::make(default_sb_color);
 
 			this->load_label(this->captions, HD::Port, ps_color, cpt_font);
 			this->load_label(this->captions, HD::Starboard, sb_color, cpt_font);

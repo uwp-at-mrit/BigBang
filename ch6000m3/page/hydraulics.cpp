@@ -283,7 +283,7 @@ public:
 		pTurtle->move_right(2)->move_down(5, HS::SQj)->move_down(3, HS::J)->move_down(3, HS::j);
 		pTurtle->jump_left(4, HS::i)->move_up(3, HS::I)->move_up(3, HS::SQi)->move_up(5)->move_right(2 /* HS::Visor */);
 		
-		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipeline_thickness, default_pipeline_color));
+		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);

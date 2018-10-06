@@ -166,6 +166,7 @@ namespace WarGrey::SCADA {
 			this->style_ready[idx] = false;
 
 			if (idx == this->current_status) {
+				this->update_status();
 				this->notify_updated();
 			}
 		}
