@@ -28,7 +28,10 @@ const static KeyboardCell keys[] = {
     { VirtualKey::NumberPad3, 2, 2, 1, 1 }, { VirtualKey::NumberPad2, 1, 2, 1, 1 }, { VirtualKey::NumberPad1, 0, 2, 1, 1 },
     { VirtualKey::Subtract,   2, 3, 1, 1 }, { VirtualKey::Decimal,    1, 3, 1, 1 }, { VirtualKey::NumberPad0, 0, 3, 1, 1 },
 
-    { VirtualKey::Back, 3, 0, 1, 1 }, { VirtualKey::Enter, 3, 1, 1, 3 }
+	{ VirtualKey::PageUp,     3, 0, 1, 1 }, { VirtualKey::Up,         3, 1, 1, 1 },
+	{ VirtualKey::Down,       3, 2, 1, 1 },     { VirtualKey::PageDown,   3, 3, 1, 1 },
+
+    { VirtualKey::Back, 4, 0, 1, 1 }, { VirtualKey::Enter, 4, 1, 1, 3 }
 };
 
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
@@ -60,8 +63,12 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			switch (key) {
 			case VirtualKey::Subtract: label = "-"; break;
 			case VirtualKey::Decimal: label = "."; break;
-			case VirtualKey::Back: label = L"⟵"; break;
+			case VirtualKey::Back: label = L"←"; break;
 			case VirtualKey::Enter: label = L"↵"; break;
+			case VirtualKey::PageUp: label = L"↟"; break;
+			case VirtualKey::Up: label = L"↑"; break;
+			case VirtualKey::PageDown: label = L"↡"; break;
+			case VirtualKey::Down: label = L"↓"; break;
 			default: label = (static_cast<unsigned int>(key) - pad0).ToString();
 			}
 
@@ -81,17 +88,8 @@ void Numpad::construct() {
 	this->taplight = make_solid_brush(rgba(bg, 0.618));
 }
 
-void Numpad::fill_extent(float x, float y, float* w, float* h) {
-	float size = this->cellsize * 4.0F + this->gapsize * 5.0F;
-
-	SET_VALUES(w, size, h, size);
-}
-
 void Numpad::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float width, height;
-
-	this->fill_extent(x, y, &width, &height);
-	ds->FillRoundedRectangle(x, y, width, height, this->radius, this->radius, this->background);
+	ds->FillRoundedRectangle(x, y, this->width, this->height, this->radius, this->radius, this->background);
 }
 
 void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
@@ -111,20 +109,6 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 		float ty = y + (height - box.Height) * 0.5F;
 
 		ds->DrawTextLayout(label, tx, ty, this->foreground);
-	}
-}
-
-void Numpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
-	if (g == nullptr) {
-		float Width = this->master->actual_width();
-		float Height = this->master->actual_height();
-		float this_width, this_height;
-
-		this->fill_extent(0.0F, 0.0F, &this_width, &this_height);
-		SET_BOX(x, Width - this_width);
-		SET_BOX(y, Height - this_height);
-	} else {
-		this->master->fill_graphlet_location(g, x, y, a);
 	}
 }
 

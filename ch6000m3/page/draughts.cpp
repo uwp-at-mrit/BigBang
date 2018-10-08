@@ -104,12 +104,14 @@ public:
 	}
 
 public:
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+	}
 
+	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(AI_DB203, 55));
-		this->dimensions[DL::OverflowPipe]->set_value(RealData(AI_DB203, 55));
+		this->dimensions[DL::OverflowPipe]->set_value(this->overflowpipe->get_value());
 
 		this->dimensions[DL::psBowDraft]->set_value(RealData(AI_DB203, 31));
 		this->dimensions[DL::psSuctionDraft]->set_value(RealData(AI_DB203, 32));
@@ -118,15 +120,9 @@ public:
 		this->dimensions[DL::sbBowDraft]->set_value(RealData(AI_DB203, 46));
 		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(AI_DB203, 47));
 		this->dimensions[DL::sbSternDraft]->set_value(RealData(AI_DB203, 103));
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
-
 		this->timeseries->set_value(DLTS::Draught, DBD(DB2, 192U));
 
 		this->dimensions[DL::BowDraft]->set_value(DBD(DB2, 164U));
@@ -142,7 +138,9 @@ public:
 		this->set_cylinder(DL::Loading, DLTS::Loading, DBD(DB2, 232U));
 		this->set_cylinder(DL::EarthWork, DLTS::EarthWork, DBD(DB2, 236U));
 		this->set_cylinder(DL::Vessel, DLTS::Vessel, DBD(DB2, 320U));
+	}
 
+	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}

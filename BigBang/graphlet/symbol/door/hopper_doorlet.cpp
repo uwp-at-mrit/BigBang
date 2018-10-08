@@ -273,9 +273,8 @@ void Doorlet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Doorlet::on_value_changed(double v) {
-	double percentage = this->get_percentage();
 	Rect region = this->body->ComputeBounds();
-	float hollow_height = region.Height * float(1.0 - percentage);
+	float hollow_height = region.Height * float(this->get_percentage());
 	auto pbox = rectangle(region.X, region.Y, region.Width, hollow_height);
 
 	this->progress = geometry_freeze(geometry_subtract(this->body, pbox));

@@ -12,7 +12,7 @@ using namespace Microsoft::Graphics::Canvas;
 
 static const long long numpad_tap_duration = 3000000LL;
 
-static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, float gapsize) {
+static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, float gapsize, float* width, float* height) {
 	float flcol = float(cell.col);
 	float flrow = float(cell.row);
 	float flncol = float(cell.ncol);
@@ -22,10 +22,14 @@ static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, flo
 	box.Y = gapsize * (flrow + 1.0F) + cellsize * flrow;
 	box.Width = cellsize * flncol + gapsize * (flncol - 1.0F);
 	box.Height = cellsize * flnrow + gapsize * (flnrow - 1.0F);
+
+	(*width) = std::fmaxf((*width), box.X + box.Width + gapsize);
+	(*height) = std::fmaxf((*height), box.Y + box.Height + gapsize);
 }
 
 /*************************************************************************************************/
-Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keynum) : IKeyboard(master), cells(cells), keynum(keynum) {
+Keyboard::Keyboard(IPlanet* master, const KeyboardCell* cells, unsigned int keynum)
+	: IKeyboard(master), cells(cells), keynum(keynum) {
 	this->enable_events(true);
 }
 
@@ -42,8 +46,13 @@ void Keyboard::sprite() {
 
 	this->cell_boxes = new Rect[this->keynum];
 	for (size_t i = 0; i < this->keynum; i++) {
-		fill_cellbox(this->cell_boxes[i], this->cells[i], cellsize, gapsize);
+		fill_cellbox(this->cell_boxes[i], this->cells[i], cellsize, gapsize,
+			&this->width, &this->height);
 	}
+}
+
+void Keyboard::fill_extent(float x, float y, float* w, float* h) {
+	SET_VALUES(w, this->width, h, this->height);
 }
 
 void Keyboard::update(long long count, long long interval, long long uptime) {
@@ -125,6 +134,35 @@ VirtualKey Keyboard::find_tapped_key(float mouse_x, float mouse_y) {
 	}
 
 	return found;
+}
+
+/*************************************************************************************************/
+void Keyboard::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+	float Width = this->master->actual_width();
+	float Height = this->master->actual_height();
+	float width, height;
+
+	this->fill_extent(0.0F, 0.0F, &width, &height);
+
+	if (g == nullptr) {
+		SET_BOX(x, Width - width);
+		SET_BOX(y, Height - height);
+	} else {
+		float x0, y0, lx, ty;
+
+		this->master->fill_graphlet_location(g, &x0, &y0, a);
+		this->master->fill_graphlet_location(g, &lx, &ty, GraphletAnchor::LT);
+
+		if (x0 + width > Width) {
+			x0 = lx - width;
+		}
+		
+		if (y0 + height > Height) {
+			y0 = ty - height;
+		}
+
+		SET_VALUES(x, x0, y, y0);
+	}
 }
 
 bool Keyboard::is_colliding_with_mouse(float mouse_x, float mouse_y, float keyboard_x, float keyboard_y) {

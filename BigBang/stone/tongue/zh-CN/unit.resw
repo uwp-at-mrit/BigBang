@@ -135,6 +135,9 @@
   <data name="meter3" xml:space="preserve">
     <value>m³</value>
   </data>
+  <data name="rpm" xml:space="preserve">
+    <value>r/min</value>
+  </data>
   <data name="ton" xml:space="preserve">
     <value>t</value>
   </data>

@@ -258,6 +258,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\drags.resw" />
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
     <PRIResource Include="stone\tongue\en-US\loads.resw" />
     <PRIResource Include="stone\tongue\en-US\draughts.resw" />
@@ -279,6 +280,7 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\drags.resw" />
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
     <PRIResource Include="stone\tongue\zh-CN\loads.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />

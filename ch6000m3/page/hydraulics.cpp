@@ -291,7 +291,7 @@ public:
 	}
 
 	void load_tanks(float width, float height, float gwidth, float gheight) {
-		float thickness = 3.0F;
+		float thickness = default_pipe_thickness * 2.0F;
 
 		this->master_tank = this->make_tank(HSMTStatus::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
 		this->visor_tank = this->make_tank(HSVTStatus::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
@@ -352,7 +352,7 @@ public:
 		float lbl_dx, lbl_dy, cpt_dx, cpt_dy, bar_dx, bar_dy, margin;
 		float pradius = this->pumps[HS::A]->get_radiusX();
 		float vradius = this->valves[HS::SQ1]->get_radiusY();
-		float text_hspace = vinset * 0.125F;
+		float text_hspace = default_pipe_thickness * 2.0F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 

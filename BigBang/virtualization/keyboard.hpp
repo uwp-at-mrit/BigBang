@@ -51,7 +51,11 @@ namespace WarGrey::SCADA {
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) override;
 		bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) override;
 
 	public:
@@ -70,6 +74,8 @@ namespace WarGrey::SCADA {
 
 	protected:
 		Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y);
+		float width;
+		float height;
 		float cellsize;
 		float gapsize;
 

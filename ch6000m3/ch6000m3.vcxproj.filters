@@ -302,5 +302,11 @@
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\drags.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\drags.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

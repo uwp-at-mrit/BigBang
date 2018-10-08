@@ -48,6 +48,10 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 	}
 }
 
+static Platform::String^ accumulate_number(Platform::String^ src, double acc) {
+	return (std::wcstod(src->Data(), nullptr) + acc).ToString();
+}
+
 /*************************************************************************************************/
 DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned int min_number) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
@@ -369,6 +373,22 @@ bool IEditorlet::on_char(VirtualKey key, bool wargrey_keyboard) {
 			this->decimal_position = this->input_number->Length() - 1;
 			this->input_number += ".";
 		}
+		handled = true;
+	}; break;
+	case VirtualKey::PageUp: {
+		this->input_number = accumulate_number(this->input_number, 10.0);
+		handled = true;
+	}; break;
+	case VirtualKey::Up: {
+		this->input_number = accumulate_number(this->input_number, 1.0);
+		handled = true;
+	}; break;
+	case VirtualKey::PageDown: {
+		this->input_number = accumulate_number(this->input_number, -10.0);
+		handled = true;
+	}; break;
+	case VirtualKey::Down: {
+		this->input_number = accumulate_number(this->input_number, -1.0);
 		handled = true;
 	}; break;
 	case VirtualKey::Back: {

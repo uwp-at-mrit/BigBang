@@ -22,6 +22,9 @@
 using namespace WarGrey::SCADA;
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation;
+using namespace Windows::System;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -74,6 +77,7 @@ public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->dimension_style = make_highlight_dimension_style(large_font_size, 6U);
+		this->setting_style = make_highlight_dimension_style(large_font_size, 6U, Colours::GhostWhite, Colours::Salmon);
 	}
 
 public:
@@ -82,6 +86,13 @@ public:
 		this->master->begin_update_sequence();
 
 		this->station->clear_subtacks();
+	}
+
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		//this->rpms[SW::PSHP]->set_value(DBD(DB2, 604U));
+		//this->rpms[SW::SBHP]->set_value(DBD(DB2, 608U));
+		//this->rpms[SW::PSUWP]->set_value(DBD(DB2, 200U));
+		//this->rpms[SW::SBUWP]->set_value(DBD(DB2, 204U));
 	}
 
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
@@ -125,6 +136,27 @@ public:
 		plc->get_logger()->log_message(Log::Info, L"%s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
+	}
+
+public:
+	bool on_char(VirtualKey key, IMRMaster* plc) {
+		bool handled = false;
+
+		if (key == VirtualKey::Enter) {
+			auto editor = dynamic_cast<Credit<Dimensionlet, SW>*>(this->master->get_focus_graphlet());
+
+			if (editor != nullptr) {
+				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
+					editor->id.ToString()->Data(),
+					editor->get_input_number());
+
+				editor->set_value(editor->get_input_number());
+			}
+
+			handled = true;
+		}
+
+		return handled;
 	}
 
 public:
@@ -178,10 +210,10 @@ public:
 			this->load_devices(this->gvalves, this->labels, Colours::Silver, SW::DGV44, SW::DGV47, radius, 0.0);
 			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::FP1, SW::SP20, radius, 0.0);
 
-			this->load_device(this->hoppers, this->captions, SW::PSHP, hpradius, -2.0F);
-			this->load_device(this->hoppers, this->captions, SW::SBHP, hpradius, 2.0F);
-			this->load_device(this->hoppers, this->captions, SW::PSUWP, hpradius, 2.0F);
-			this->load_device(this->hoppers, this->captions, SW::SBUWP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, this->rpms, SW::PSHP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, this->rpms, SW::SBHP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, this->rpms, SW::PSUWP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, this->rpms, SW::SBUWP, hpradius, -2.0F);
 		}
 
 		{ // load labels and dimensions
@@ -197,10 +229,10 @@ public:
 
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
-		float text_hspace = vinset * 0.125F;
+		float toff = default_pipe_thickness * 2.0F;
 		
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC, -gwidth * 2.0F);
-		this->station->map_credit_graphlet(this->captions[SW::Sea], GraphletAnchor::RC, -text_hspace);
+		this->station->map_credit_graphlet(this->captions[SW::Sea], GraphletAnchor::RC, -toff);
 		this->station->map_graphlet_at_anchor(this->sea, SW::Sea, GraphletAnchor::LC, 0.0F, this->sea_oscillation);
 		this->station->map_graphlet_at_anchor(this->hatch, SW::Hatch, GraphletAnchor::LC);
 		this->master->move_to(this->captions[SW::Hatch], this->hatch, GraphletAnchor::CB, GraphletAnchor::CT);
@@ -224,21 +256,24 @@ public:
 
 			for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LC);
+				
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC,
+					GraphletAnchor::RB, -gwidth, -toff);
+				
 				this->master->move_to(this->captions[it->first], it->second,
-					GraphletAnchor::RC, GraphletAnchor::LC, text_hspace);
+					GraphletAnchor::RC, GraphletAnchor::LC, toff);
 			}
 		}
 
 		{ // reflow dimensions
 			float xoff = gwidth * 3.0F;
-			float yoff = default_pipe_thickness * 2.0F;
 
 			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -yoff);
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -toff);
 			}
 
 			for (auto it = this->flows.begin(); it != this->flows.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff, yoff);
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff, toff);
 			}
 		}
 	}
@@ -266,10 +301,12 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ds
+		, E id, float rx, float fy) {
 		this->load_label(ls, id, Colours::Salmon);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, "rpm", "S"), id);
 	}
 
 	template<typename E>
@@ -317,10 +354,12 @@ private:
 	std::map<SW, Credit<GateValvelet, SW>*> gvalves;
 	std::map<SW, Credit<Dimensionlet, SW>*> pressures;
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
+	std::map<SW, Credit<Dimensionlet, SW>*> rpms;
 	
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
+	DimensionStyle setting_style;
 	float sea_oscillation;
 
 private:
@@ -418,9 +457,25 @@ bool SealedWaterPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<GateValvelet*>(g) != nullptr));
 }
 
+
+bool SealedWaterPage::on_char(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_char(key, wargrey_keyboard);
+
+	if (!handled) {
+		auto db = dynamic_cast<SealedWaters*>(this->dashboard);
+
+		if (db != nullptr) {
+			handled = db->on_char(key, this->device);
+		}
+	}
+
+	return handled;
+}
+
 void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
+	auto editor = dynamic_cast<IEditorlet*>(g);
 	
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
@@ -428,5 +483,9 @@ void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool sh
 		menu_popup(this->valve_op, g, local_x, local_y);
 	} else if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);
+	} else if (editor != nullptr) {
+		if (editor->get_status() == DimensionStatus::Input) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		}
 	}
 }

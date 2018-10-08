@@ -9,8 +9,6 @@ namespace WarGrey::SCADA {
 
     public:
 		void construct() override;
-		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
-		void fill_auto_position(float* x, float* y, WarGrey::SCADA::IGraphlet* g, WarGrey::SCADA::GraphletAnchor a) override;
 		
 	public:
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;

@@ -117,28 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="bar" xml:space="preserve">
-    <value>bar</value>
-  </data>
-  <data name="celsius" xml:space="preserve">
-    <value>°C</value>
-  </data>
-  <data name="degrees" xml:space="preserve">
-    <value>deg</value>
-  </data>
-  <data name="m3ph" xml:space="preserve">
-    <value>m³/h</value>
-  </data>
-  <data name="meter" xml:space="preserve">
-    <value>m</value>
-  </data>
-  <data name="meter3" xml:space="preserve">
-    <value>m³</value>
-  </data>
-  <data name="rpm" xml:space="preserve">
-    <value>r/min</value>
-  </data>
-  <data name="ton" xml:space="preserve">
-    <value>t</value>
+  <data name="OverflowPipe" xml:space="preserve">
+    <value>Overflow Pipe</value>
   </data>
 </root>
