@@ -41,8 +41,8 @@ static CanvasSolidColorBrush^ water_color = Colours::Green;
 // WARNING: order matters
 private enum class SW : unsigned int {
 	// Pumps
-	PSHP, SBHP, PSUWP, SBUWP,
-	FP1, FP2, SP13, SP14, SP15, SP16, SP17, SP18, SP19, SP20,
+	PSHP, SBHP, PSUWP, SBUWP, PSFP, SBFP,
+	PSHPa, PSHPb, SBHPa, SBHPb, PSUWP1, PSUWP2, SBUWP1, SBUWP2,
 
 	// Manual Valves
 	DGV3, DGV4, DGV5, DGV6, DGV1, DGV2, DGV9, DGV10,
@@ -54,9 +54,6 @@ private enum class SW : unsigned int {
 	
 	// Labels
 	ToFlushs, SS1, SS2, Hatch, Sea,
-	
-	// Special Arrows
-	UA1, UA2, DA1, DA2,
 	
 	_,
 	
@@ -77,7 +74,8 @@ public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->dimension_style = make_highlight_dimension_style(large_font_size, 6U);
-		this->setting_style = make_highlight_dimension_style(large_font_size, 6U, Colours::GhostWhite, Colours::Salmon);
+		this->setting_style = make_highlight_dimension_style(large_font_size, 6U,
+			Colours::GhostWhite, Colours::RoyalBlue);
 	}
 
 public:
@@ -96,26 +94,35 @@ public:
 	}
 
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->pressures[SW::FP1]->set_value(RealData(AI_DB203, 34U), GraphletAnchor::LB);
+		this->pressures[SW::PSFP]->set_value(RealData(AI_DB203, 34U), GraphletAnchor::LB);
 
-		// for Port hopper pump
-		this->pressures[SW::DGV8]->set_value(RealData(AI_DB203, 28U), GraphletAnchor::LB);
-		this->flows[SW::DGV8]->set_value(RealData(AI_DB203, 29U), GraphletAnchor::LT);
+		this->pressures[SW::PSHP]->set_value(RealData(AI_DB203, 28U), GraphletAnchor::LB);
+		this->flows[SW::PSHP]->set_value(RealData(AI_DB203, 29U), GraphletAnchor::LT);
+		this->pressures[SW::SBHP]->set_value(RealData(AI_DB203, 44U), GraphletAnchor::LB);
+		this->flows[SW::SBHP]->set_value(RealData(AI_DB203, 45U), GraphletAnchor::LB);
 
-		// for Starboard hopper pump
-		this->pressures[SW::DGV7]->set_value(RealData(AI_DB203, 44U), GraphletAnchor::LB);
-		this->flows[SW::DGV7]->set_value(RealData(AI_DB203, 45U), GraphletAnchor::LB);
-
-		// for Port Underwater Pump
-		this->pressures[SW::DGV1]->set_value(RealData(AI_DB203, 112U), GraphletAnchor::LB);
-		this->pressures[SW::DGV2]->set_value(RealData(AI_DB203, 113U), GraphletAnchor::LB);
-
-		// for Starboard Underwater Pump
-		this->pressures[SW::DGV9]->set_value(RealData(AI_DB203, 118U), GraphletAnchor::LB);
-		this->pressures[SW::DGV10]->set_value(RealData(AI_DB203, 119U), GraphletAnchor::LB);
+		this->pressures[SW::PSUWP1]->set_value(RealData(AI_DB203, 112U), GraphletAnchor::LB);
+		this->pressures[SW::PSUWP2]->set_value(RealData(AI_DB203, 113U), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP1]->set_value(RealData(AI_DB203, 118U), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP2]->set_value(RealData(AI_DB203, 119U), GraphletAnchor::LB);
 	}
 
-	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
+	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
+		this->set_hopper_pump_status(SW::PSHP, SW::PSUWP, DI_DB4, 1U);
+		this->set_hopper_pump_status(SW::SBHP, SW::SBUWP, DI_DB4, 25U);
+
+		this->set_flushing_pump_status(SW::PSFP, DI_DB4, 105U);
+		this->set_flushing_pump_status(SW::SBFP, DI_DB4, 109U);
+
+		this->set_sealed_pump_status(SW::PSHPa, DI_DB4, 9U);
+		this->set_sealed_pump_status(SW::PSHPb, DI_DB4, 13U);
+		this->set_sealed_pump_status(SW::SBHPa, DI_DB4, 33U);
+		this->set_sealed_pump_status(SW::SBHPb, DI_DB4, 37U);
+
+		this->set_sealed_pump_status(SW::PSUWP1, DI_DB4, 513U);
+		this->set_sealed_pump_status(SW::PSUWP2, DI_DB4, 517U);
+		this->set_sealed_pump_status(SW::SBUWP1, DI_DB4, 529U);
+		this->set_sealed_pump_status(SW::SBUWP2, DI_DB4, 533U);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -164,36 +171,36 @@ public:
 		Turtle<SW>* pTurtle = new Turtle<SW>(gwidth, gheight, false, SW::Hatch);
 
 		pTurtle->move_right(3);
-		pTurtle->move_down(1, SW::d12)->move_right(5, SW::DGV12)->move_right(6, SW::FP1);
+		pTurtle->move_down(1, SW::d12)->move_right(5, SW::DGV12)->move_right(6, SW::PSFP);
 		pTurtle->move_right(10)->move_down(2)->jump_back();
-		pTurtle->move_down(4, SW::d11)->move_right(5, SW::DGV11)->move_right(6, SW::FP2);
+		pTurtle->move_down(4, SW::d11)->move_right(5, SW::DGV11)->move_right(6, SW::SBFP);
 		pTurtle->move_right(10)->move_up(2)->move_right(3, SW::ToFlushs)->move_right(3, SW::flushs)->jump_back(SW::d11);
 
-		pTurtle->move_down(4, SW::d13)->move_right(5, SW::DGV13)->move_right(6, SW::SP13)->move_right(6, SW::DGV3);
-		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA1)->move_down(1.5F)->turn_down_right()->jump_back();
-		pTurtle->move_down(4, SW::d14)->move_right(5, SW::DGV14)->move_right(6, SW::SP14)->move_right(6, SW::DGV4);
+		pTurtle->move_down(4, SW::d13)->move_right(5, SW::DGV13)->move_right(6, SW::PSHPa)->move_right(6, SW::DGV3);
+		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_down(4, SW::d14)->move_right(5, SW::DGV14)->move_right(6, SW::PSHPb)->move_right(6, SW::DGV4);
 		pTurtle->move_right(14, SW::d44)->move_right(9, SW::DGV44)->move_right(10, SW::PSHP)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(4, SW::DGV8);
 		pTurtle->move_right(10)->move_down(5)->jump_back(SW::d14);
 
-		pTurtle->move_down(5, SW::d15)->move_right(5, SW::DGV15)->move_right(6, SW::SP15)->move_right(6, SW::DGV5);
+		pTurtle->move_down(5, SW::d15)->move_right(5, SW::DGV15)->move_right(6, SW::SBHPa)->move_right(6, SW::DGV5);
 		pTurtle->move_right(14, SW::d45)->move_right(9, SW::DGV45)->move_right(10, SW::SBHP)->jump_back();
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(4, SW::DGV7);
 		pTurtle->move_right(10)->move_up(5)->jump_back(SW::d15);
-		pTurtle->move_down(4, SW::d16)->move_right(5, SW::DGV16)->move_right(6, SW::SP16)->move_right(6, SW::DGV6);
-		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA1)->move_up(1.5F)->turn_up_right()->jump_back();
+		pTurtle->move_down(4, SW::d16)->move_right(5, SW::DGV16)->move_right(6, SW::SBHPb)->move_right(6, SW::DGV6);
+		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
 
 		pTurtle->jump_down(3)->jump_left(SW::Sea)->move_right();
 
-		pTurtle->move_down(2, SW::d17)->move_right(5, SW::DGV17)->move_right(6, SW::SP17)->move_right(6, SW::DGV1);
-		pTurtle->move_right(10)->turn_right_down()->move_down(1.5F, SW::DA2)->move_down(1.5F)->turn_down_right()->jump_back();
-		pTurtle->move_down(4, SW::d18)->move_right(5, SW::DGV18)->move_right(6, SW::SP18)->move_right(6, SW::DGV2);
+		pTurtle->move_down(2, SW::d17)->move_right(5, SW::DGV17)->move_right(6, SW::PSUWP1)->move_right(6, SW::DGV1);
+		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_down(4, SW::d18)->move_right(5, SW::DGV18)->move_right(6, SW::PSUWP2)->move_right(6, SW::DGV2);
 		pTurtle->move_right(14, SW::d46)->move_right(9, SW::DGV46)->move_right(10, SW::PSUWP)->jump_back(SW::d18);
 
-		pTurtle->move_down(5, SW::d19)->move_right(5, SW::DGV19)->move_right(6, SW::SP19)->move_right(6, SW::DGV9);
+		pTurtle->move_down(5, SW::d19)->move_right(5, SW::DGV19)->move_right(6, SW::SBUWP1)->move_right(6, SW::DGV9);
 		pTurtle->move_right(14, SW::d47)->move_right(9, SW::DGV47)->move_right(10, SW::SBUWP)->jump_back(SW::d19);
-		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SP20)->move_right(6, SW::DGV10);
-		pTurtle->move_right(10)->turn_right_up()->move_up(1.5F, SW::UA2)->move_up(1.5F)->turn_up_right()->jump_back();
+		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SBUWP2)->move_right(6, SW::DGV10);
+		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
@@ -208,7 +215,7 @@ public:
 
 			this->load_devices(this->mvalves, this->labels, Colours::Silver, SW::DGV3, SW::DGV8, radius, 0.0);
 			this->load_devices(this->gvalves, this->labels, Colours::Silver, SW::DGV44, SW::DGV47, radius, 0.0);
-			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::FP1, SW::SP20, radius, 0.0);
+			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSFP, SW::SBUWP2, radius, 0.0);
 
 			this->load_device(this->hoppers, this->captions, this->rpms, SW::PSHP, hpradius, -2.0F);
 			this->load_device(this->hoppers, this->captions, this->rpms, SW::SBHP, hpradius, +2.0F);
@@ -220,10 +227,10 @@ public:
 			this->load_labels(this->captions, SW::ToFlushs, SW::SS2, Colours::Silver);
 			this->load_labels(this->captions, SW::Hatch, SW::Sea, Colours::Salmon);
 
-			this->load_dimensions(this->pressures, SW::FP1, SW::FP2, "bar", "P");
-			this->load_dimensions(this->pressures, SW::DGV1, SW::DGV10, "bar", "P");
-			this->load_dimensions(this->pressures, SW::DGV7, SW::DGV8, "bar", "P");
-			this->load_dimensions(this->flows, SW::DGV7, SW::DGV8, "m3ph", "F");
+			this->load_dimensions(this->pressures, SW::PSFP, SW::SBFP, "bar", "P");
+			this->load_dimensions(this->pressures, SW::PSUWP1, SW::SBUWP2, "bar", "P");
+			this->load_dimensions(this->pressures, SW::PSHP, SW::SBHP, "bar", "P");
+			this->load_dimensions(this->flows, SW::PSHP, SW::SBHP, "m3ph", "F");
 		}
 	}
 
@@ -243,8 +250,9 @@ public:
 		this->station->map_credit_graphlet(this->captions[SW::SS1], GraphletAnchor::LC);
 		this->station->map_credit_graphlet(this->captions[SW::SS2], GraphletAnchor::LC);
 
-		{ // reflow devices
+		{ // reflow devices and metrics
 			float gridsize = resolve_gridsize(gwidth, gheight);
+			float xoff = gwidth * 3.0F;
 			
 			this->reflow_valves(this->mvalves, this->labels, gridsize);
 			this->reflow_valves(this->gvalves, this->labels, gridsize);
@@ -252,9 +260,20 @@ public:
 			for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
 				this->master->move_to(this->labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
+
+				switch (it->first) {
+				case SW::PSFP: case SW::SBFP: {
+					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LB, xoff, -toff);
+				}; break;
+				case SW::PSUWP1: case SW::PSUWP2: case SW::SBUWP1: case SW::SBUWP2: {
+					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LB, gwidth * 9.0F, -toff);
+				}; break;
+				}
 			}
 
 			for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
+				SW tanchor = SW::_;
+
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LC);
 				
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC,
@@ -262,18 +281,16 @@ public:
 				
 				this->master->move_to(this->captions[it->first], it->second,
 					GraphletAnchor::RC, GraphletAnchor::LC, toff);
-			}
-		}
 
-		{ // reflow dimensions
-			float xoff = gwidth * 3.0F;
+				switch (it->first) {
+				case SW::PSHP: tanchor = SW::DGV8; break;
+				case SW::SBHP: tanchor = SW::DGV7; break;
+				}
 
-			for (auto it = this->pressures.begin(); it != this->pressures.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff, -toff);
-			}
-
-			for (auto it = this->flows.begin(); it != this->flows.end(); it++) {
-				this->station->map_credit_graphlet(it->second, GraphletAnchor::LT, xoff, toff);
+				if (tanchor != SW::_) {
+					this->station->map_graphlet_at_anchor(this->pressures[it->first], tanchor, GraphletAnchor::LB, xoff, -toff);
+					this->station->map_graphlet_at_anchor(this->flows[it->first], tanchor, GraphletAnchor::LT, xoff, toff);
+				}
 			}
 		}
 	}
@@ -337,6 +354,64 @@ private:
 			it->second->fill_margin(0.0F, 0.0F, nullptr, nullptr, &margin, nullptr);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
 			this->station->map_credit_graphlet(ls[it->first], GraphletAnchor::CT, 0.0F, gridsize - margin);
+		}
+	}
+
+private:
+	void set_hopper_pump_status(SW id, const uint8* db4, size_t idx, bool on) {
+		if (on) {
+			HopperPumplet* target = this->hoppers[id];
+
+			target->set_remote_control(DBX(db4, idx + 3));
+			
+			target->set_status(DBX(db4, idx + 0), HopperPumpStatus::Ready);
+			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
+			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
+			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
+			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Broken);
+		}
+	}
+
+	void set_hopper_pump_status(SW id1, SW id2, const uint8* db4, size_t idx_p1) {
+		bool hopper = DBX(db4, idx_p1 + 0);
+		bool underw = DBX(db4, idx_p1 + 1);
+
+		this->set_hopper_pump_status(id1, db4, idx_p1 - 1, hopper);
+		this->set_hopper_pump_status(id2, db4, idx_p1 - 1, underw);
+	}
+
+	void set_flushing_pump_status(SW id, const uint8* db4, size_t idx_p1) {
+		HydraulicPumplet* target = this->pumps[id];
+
+		target->set_remote_control(DBX(db4, idx_p1 - 1));
+
+		target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Running);
+		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Broken);
+	}
+	
+	void set_sealed_pump_status(SW id, const uint8* db4, size_t idx_p1) {
+		HydraulicPumplet* target = this->pumps[id];
+
+		switch (id) {
+		case SW::PSHPa: case SW::PSHPb: case SW::SBHPa: case SW::SBHPb: {
+			target->set_remote_control(DBX(db4, idx_p1 + 0));
+			target->set_status(DBX(db4, idx_p1 - 1), HydraulicPumpStatus::Ready);
+		}; break;
+		case SW::PSUWP1: case SW::PSUWP2: case SW::SBUWP1: case SW::SBUWP2: {
+			target->set_remote_control(DBX(db4, idx_p1 - 1));
+			target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Ready);
+		}; break;
+		}
+
+		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Running);
+		target->set_status(DBX(db4, idx_p1 + 2), HydraulicPumpStatus::Broken);
+	}
+
+	void set_valve_status(SW id, const uint8* db4, size_t idx_p1) {
+		if (DBX(db4, idx_p1 - 1)) {
+			this->mvalves[id]->set_status(ManualValveStatus::Open);
+		} else {
+			this->mvalves[id]->set_status(ManualValveStatus::Closed);
 		}
 	}
 

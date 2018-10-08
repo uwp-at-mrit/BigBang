@@ -126,34 +126,34 @@
   <data name="Hatch" xml:space="preserve">
     <value>机舱海底门</value>
   </data>
-  <data name="FP1" xml:space="preserve">
+  <data name="PSFP" xml:space="preserve">
     <value>1#闸阀冲洗泵</value>
   </data>
-  <data name="FP2" xml:space="preserve">
+  <data name="SBFP" xml:space="preserve">
     <value>2#闸阀冲洗泵</value>
   </data>
-  <data name="SP13" xml:space="preserve">
+  <data name="PSHPa" xml:space="preserve">
     <value>封水泵A</value>
   </data>
-  <data name="SP17" xml:space="preserve">
+  <data name="PSUWP1" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="SP15" xml:space="preserve">
+  <data name="SBHPa" xml:space="preserve">
     <value>封水泵A</value>
   </data>
-  <data name="SP19" xml:space="preserve">
+  <data name="SBUWP1" xml:space="preserve">
     <value>1#封水泵</value>
   </data>
-  <data name="SP14" xml:space="preserve">
+  <data name="PSHPb" xml:space="preserve">
     <value>封水泵B</value>
   </data>
-  <data name="SP20" xml:space="preserve">
+  <data name="SBUWP2" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="SP18" xml:space="preserve">
+  <data name="PSUWP2" xml:space="preserve">
     <value>2#封水泵</value>
   </data>
-  <data name="SP16" xml:space="preserve">
+  <data name="SBHPb" xml:space="preserve">
     <value>封水泵B</value>
   </data>
   <data name="SBHP" xml:space="preserve">

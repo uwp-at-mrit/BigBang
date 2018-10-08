@@ -41,16 +41,20 @@ void HopperPumplet::construct() {
 	float icydiff = irdiff + indicator_radius;
 	float indicator_cx = body_x + irdiff + indicator_radius;
 	float indicator_cy = (this->upward ? (body_y + icydiff) : (body_y + body_height - icydiff));
+	float wrench_radius = this->radiusY * 0.618F;
+
 	auto stadium = rounded_rectangle(body_x, body_y, body_width, body_height, body_radius, body_radius);
 	auto inlet = rectangle(inlet_x, inlet_y, inlet_width, inlet_height);
 	auto inlet_line = vline(inlet_ex, inlet_ey, inlet_extend);
 	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
 	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
-
+	auto wrshape = geometry_translate(polar_wrench(wrench_radius, 30.0, -95.0), indicator_cx, indicator_cx);
+	
 	this->border = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
 	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
 	this->skeleton = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
 	this->iborder = geometry_rotate(iborder, this->degrees, 0.0F, 0.0F);
+	this->wrench = geometry_freeze(geometry_rotate(wrshape, this->degrees, 0.0F, 0.0F));
 
 	{ // locate
 		auto box = this->border->ComputeBounds();
@@ -134,8 +138,11 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	case HopperPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HopperPumpStatus::Broken: {
+	case HopperPumpStatus::Broken: case HopperPumpStatus::Alert: {
 		CAS_SLOT(s.body_color, Colours::Red);
+	}; break;
+	case HopperPumpStatus::Maintenance: {
+		CAS_SLOT(s.wrench_color, Colours::Red);
 	}; break;
 	}
 
@@ -190,6 +197,10 @@ void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 	ds->DrawGeometry(this->skeleton, cx, cy, s.skeleton_color, default_thickness);
 	ds->DrawGeometry(this->iborder, cx, cy, border_color, default_thickness);
+
+	if (s.wrench_color != nullptr) {
+		ds->DrawCachedGeometry(this->wrench, cx, cy, s.wrench_color);
+	}
 }
 
 void HopperPumplet::set_remote_control(bool on) {

@@ -261,4 +261,10 @@
   <data name="StopReady" xml:space="preserve">
     <value>停止条件成立</value>
   </data>
+  <data name="Alert" xml:space="preserve">
+    <value>报警</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>维修</value>
+  </data>
 </root>

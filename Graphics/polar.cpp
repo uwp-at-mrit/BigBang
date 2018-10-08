@@ -277,3 +277,11 @@ CanvasGeometry^ WarGrey::SCADA::polar_masked_rectangle(float rx, float ry, doubl
 		return make_masked_rectangle(rx, ry, alpha, rotation, ratio);
 	}
 }
+
+CanvasGeometry^ WarGrey::SCADA::polar_wrench(float radius, double alpha_degrees, double rotation_degrees) {
+	return polar_wrench(radius, radius, alpha_degrees, rotation_degrees);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_wrench(float radiusX, float radiusY, double alpha_degrees, double rotation_degrees) {
+	return polar_rectangle(radiusX, radiusY, alpha_degrees, rotation_degrees);
+}

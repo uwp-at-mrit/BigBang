@@ -4,7 +4,8 @@
 
 namespace WarGrey::SCADA {
 	private enum class HopperPumpStatus {
-		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready, Broken, _
+		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready,
+		Broken, Alert, Maintenance, _
 	};
 
 	private struct HopperPumpStyle {
@@ -13,6 +14,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ wrench_color;
 	};
 
 	private class HopperPumplet
@@ -36,6 +38,7 @@ namespace WarGrey::SCADA {
 		void on_status_changed(HopperPumpStatus status) override;
 		
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ wrench;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ start_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stop_mask;

@@ -144,7 +144,7 @@ namespace WarGrey::SCADA {
 			this->update_status();
 		}
 
-	public:
+	public:		
 		void set_status(Status status) {
 			unsigned int new_status = ((status == Status::_) ? this->default_status : _I(status));
 
@@ -152,6 +152,20 @@ namespace WarGrey::SCADA {
 				this->current_status = new_status;
 				this->update_status();
 				this->notify_updated();
+			}
+		}
+
+		void set_status(bool condition, Status status) {
+			if (condition) {
+				this->set_status(status);
+			}
+		}
+
+		void set_status(bool condition, Status status_yes, Status status_no) {
+			if (condition) {
+				this->set_status(status_yes);
+			} else {
+				this->set_status(status_no);
 			}
 		}
 

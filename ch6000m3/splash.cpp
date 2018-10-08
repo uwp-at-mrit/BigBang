@@ -60,7 +60,7 @@ public:
 		this->sb_draghead = this->master->insert_one(new Segmentlet(-90.0, 90.0, door_esize * 1.618F, door_esize, default_sb_color, thinness));
 		
 		for (unsigned int idx = 0; idx < this->hcount * 2U; idx++) {
-			this->hdoors[idx] = this->master->insert_one(new Rectanglet(door_esize, Colours::Yellow, Colours::Red, door_esize * 0.5F));
+			this->hdoors[idx] = this->master->insert_one(new Rectanglet(door_esize, Colours::Yellow, Colours::ForestGreen, door_esize * 0.5F));
 		}
 	}
 

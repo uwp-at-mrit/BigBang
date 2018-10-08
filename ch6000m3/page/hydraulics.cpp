@@ -89,18 +89,18 @@ public:
 		this->station_pressure->set_value(RealData(AI_DB203, 21U));
 
 		{ // pump pressures
-			this->pressures[HS::C]->set_value(RealData(AI_DB203, 8), GraphletAnchor::RB);
-			this->pressures[HS::F]->set_value(RealData(AI_DB203, 9), GraphletAnchor::RB);
-			this->pressures[HS::D]->set_value(RealData(AI_DB203, 10), GraphletAnchor::RB);
-			this->pressures[HS::E]->set_value(RealData(AI_DB203, 11), GraphletAnchor::RB);
+			this->pressures[HS::C]->set_value(RealData(AI_DB203, 8U), GraphletAnchor::RB);
+			this->pressures[HS::F]->set_value(RealData(AI_DB203, 9U), GraphletAnchor::RB);
+			this->pressures[HS::D]->set_value(RealData(AI_DB203, 10U), GraphletAnchor::RB);
+			this->pressures[HS::E]->set_value(RealData(AI_DB203, 11U), GraphletAnchor::RB);
 
-			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12), GraphletAnchor::LB);
-			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13), GraphletAnchor::LB);
-			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14), GraphletAnchor::LB);
-			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15), GraphletAnchor::LB);
+			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12U), GraphletAnchor::LB);
+			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13U), GraphletAnchor::LB);
+			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14U), GraphletAnchor::LB);
+			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::LB);
 
-			this->pressures[HS::I]->set_value(RealData(AI_DB203, 16), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17), GraphletAnchor::LB);
+			this->pressures[HS::I]->set_value(RealData(AI_DB203, 16U), GraphletAnchor::RB);
+			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17U), GraphletAnchor::LB);
 		}
 	}
 
@@ -146,7 +146,7 @@ public:
 			}
 		}
 
-		{ // pump modes or statuses
+		{ // pump modes and/or statuses
 			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::I, HS::H, HS::G, HS::F, HS::J, HS::D, HS::E, HS::K, HS::L, HS::M, HS::Y };
 
 			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
@@ -155,33 +155,33 @@ public:
 		}
 
 		{ // valve statuses
-			this->set_valve_status(HS::SQ1, DI_DB4, 113);
-			this->set_valve_status(HS::SQ2, DI_DB4, 114);
+			this->set_valve_status(HS::SQ1, DI_DB4, 113U);
+			this->set_valve_status(HS::SQ2, DI_DB4, 114U);
 
-			this->set_valve_status(HS::SQk1, DI_DB4, 122);
-			this->set_valve_status(HS::SQk2, DI_DB4, 123);
-			this->set_valve_status(HS::SQl,  DI_DB4, 124);
-			this->set_valve_status(HS::SQm,  DI_DB4, 125);
-			this->set_valve_status(HS::SQy,  DI_DB4, 126);
+			this->set_valve_status(HS::SQk1, DI_DB4, 122U);
+			this->set_valve_status(HS::SQk2, DI_DB4, 123U);
+			this->set_valve_status(HS::SQl,  DI_DB4, 124U);
+			this->set_valve_status(HS::SQm,  DI_DB4, 125U);
+			this->set_valve_status(HS::SQy,  DI_DB4, 126U);
 
-			this->set_valve_status(HS::SQi, DI_DB4, 128);
-			this->set_valve_status(HS::SQj, DI_DB4, 129);
+			this->set_valve_status(HS::SQi, DI_DB4, 128U);
+			this->set_valve_status(HS::SQj, DI_DB4, 129U);
 
-			this->set_valve_status(HS::SQc, DI_DB4, 135);
-			this->set_valve_status(HS::SQd, DI_DB4, 136);
-			this->set_valve_status(HS::SQe, DI_DB4, 137);
-			this->set_valve_status(HS::SQf, DI_DB4, 138);
+			this->set_valve_status(HS::SQc, DI_DB4, 135U);
+			this->set_valve_status(HS::SQd, DI_DB4, 136U);
+			this->set_valve_status(HS::SQe, DI_DB4, 137U);
+			this->set_valve_status(HS::SQf, DI_DB4, 138U);
 
-			this->set_valve_status(HS::SQa, DI_DB4, 141);
-			this->set_valve_status(HS::SQb, DI_DB4, 142);
-			this->set_valve_status(HS::SQg, DI_DB4, 143);
-			this->set_valve_status(HS::SQh, DI_DB4, 144);
+			this->set_valve_status(HS::SQa, DI_DB4, 141U);
+			this->set_valve_status(HS::SQb, DI_DB4, 142U);
+			this->set_valve_status(HS::SQg, DI_DB4, 143U);
+			this->set_valve_status(HS::SQh, DI_DB4, 144U);
 		}
 
 		{ // filter statuses
-			this->set_filter_status(HS::F01, DI_DB4, 121);
-			this->set_filter_status(HS::F02, DI_DB4, 127);
-			this->set_filter_status(HS::F10, DI_DB4, 134);
+			this->set_filter_status(HS::F01, DI_DB4, 121U);
+			this->set_filter_status(HS::F02, DI_DB4, 127U);
+			this->set_filter_status(HS::F10, DI_DB4, 134U);
 		}
 	}
 
@@ -532,21 +532,12 @@ private:
 		
 		target->set_remote_control(DBX(db4, idx_p1 - 1));
 
-		if (DBX(db4, idx_p1 + 0)) {
-			target->set_status(HydraulicPumpStatus::Running);
-		}
-
-		if (DBX(db4, idx_p1 + 1)) {
-			target->set_status(HydraulicPumpStatus::Broken);
-		}
+		target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Running);
+		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Broken);
 	}
 
 	void set_valve_status(HS id, const uint8* db4, size_t idx_p1) {
-		if (DBX(db4, idx_p1 - 1)) {
-			this->valves[id]->set_status(GateValveStatus::Open);
-		} else {
-			this->valves[id]->set_status(GateValveStatus::Closed);
-		}
+		this->valves[id]->set_status(DBX(db4, idx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
 	}
 
 	void set_filter_status(HS id, const uint8* db4, size_t idx_p1) {
