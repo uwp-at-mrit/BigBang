@@ -385,7 +385,7 @@ private:
 			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
 			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
 			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
-			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Broken);
+			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Maintenance);
 		}
 	}
 

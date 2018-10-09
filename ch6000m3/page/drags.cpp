@@ -7,6 +7,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/device/compensatorlet.hpp"
@@ -32,7 +33,9 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DAMode { WindowUI = 0, Dashboard };
 
-private enum class HAOperation { Open, Stop, Close, Disable, _ };
+private enum class DAOperation { Open, Stop, Close, Disable, _ };
+
+private enum class DATS { EarthWork, Vessel, Loading, Displacement, Draught, _ };
 
 // WARNING: order matters
 private enum class DA : unsigned int {
@@ -44,7 +47,7 @@ private enum class DA : unsigned int {
 	ps, sb, d13, d14,
 
 	// dimensions
-	OverflowPipe
+	OverflowPipe, PSCompensator, SBCompensator
 };
 
 private class Drags final : public PLCConfirmation {
@@ -63,11 +66,17 @@ public:
 
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(AI_DB203, 55));
-		this->dimensions[DA::OverflowPipe]->set_value(this->overflowpipe->get_value());
+		this->lengths[DA::OverflowPipe]->set_value(this->overflowpipe->get_value());
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
+
+		this->timeseries->set_value(DATS::Draught, DBD(DB2, 192U));
+		this->timeseries->set_value(DATS::Displacement, DBD(DB2, 228U));
+		this->timeseries->set_value(DATS::Loading, DBD(DB2, 232U));
+		this->timeseries->set_value(DATS::EarthWork, DBD(DB2, 236U));
+		this->timeseries->set_value(DATS::Vessel, DBD(DB2, 320U));
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -76,7 +85,7 @@ public:
 	}
 
 public:
-	void load_pipeline(float width, float height, float vinset) {
+	void load_station(float width, float height, float vinset) {
 		float gridsize = vinset;
 		float rx = gridsize;
 		float ry = rx * 2.0F;
@@ -94,7 +103,7 @@ public:
 		pTurtle->move_left(4)->move_up(4, DA::d14)->move_right(4)->move_up(2, DA::D14)->jump_back();
 		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D16);
 
-		this->pipeline = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->load_valves(this->valves, this->labels, DA::D03, DA::D12, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DA::D13, DA::D16, vinset, -90.0);
 		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->label_font);
@@ -107,22 +116,29 @@ public:
 	}
 
 	void load_dashboard(float width, float height, float vinset) {
-		float overflow_size = vinset * 8.0F;
+		float shwidth, shheight, xstep, ystep;
 
-		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, overflow_size, overflow_size));
+		this->station->fill_extent(0.0F, 0.0F, &shwidth, &shheight);
+		this->station->fill_stepsize(&xstep, &ystep);
 
-		this->load_dimensions(this->dimensions, DA::OverflowPipe, DA::OverflowPipe, "meter");
-		//this->ps_compensator = this->master->insert_one(new Compensatorlet(3.0, 64.0F));
+		shwidth += (xstep * 2.0F);
+		shheight += ystep;
+
+		this->timeseries = this->master->insert_one(new TimeSerieslet<DATS>(__MODULE__, 18000.0, shwidth, shheight * 0.618F));
+		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
+		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
+
+		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, 42.0F, 3.0);
 	}
 
-	void reflow_pipeline(float width, float height, float vinset) {
+	void reflow_station(float width, float height, float vinset) {
 		GraphletAnchor anchor;
 		float dx, dy, margin;
 		float gridsize = vinset;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 		
-		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
+		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
@@ -136,23 +152,31 @@ public:
 			}
 			}
 
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->pipeline->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
+			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
+			this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
 		}
 
-		this->pipeline->map_graphlet_at_anchor(this->lmod, DA::LMOD, GraphletAnchor::CC);
-		this->pipeline->map_credit_graphlet(this->labels[DA::LMOD], GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->lmod, DA::LMOD, GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->labels[DA::LMOD], GraphletAnchor::CC);
 		
 		this->hpumps[DA::SBHP]->fill_pump_origin(&dx, nullptr);
-		this->pipeline->map_credit_graphlet(this->hpumps[DA::SBHP], GraphletAnchor::CC, +std::fabsf(dx));
-		this->pipeline->map_credit_graphlet(this->hpumps[DA::PSHP], GraphletAnchor::CC, -std::fabsf(dx));
-		this->pipeline->map_credit_graphlet(this->suctions[DA::PS], GraphletAnchor::CC);
-		this->pipeline->map_credit_graphlet(this->suctions[DA::SB], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->hpumps[DA::SBHP], GraphletAnchor::CC, +std::fabsf(dx));
+		this->station->map_credit_graphlet(this->hpumps[DA::PSHP], GraphletAnchor::CC, -std::fabsf(dx));
+		this->station->map_credit_graphlet(this->suctions[DA::PS], GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->suctions[DA::SB], GraphletAnchor::CC);
 	}
 
 	void reflow_dashboard(float width, float height, float vinset) {
-		this->master->move_to(this->dimensions[DA::OverflowPipe], this->pipeline, GraphletAnchor::CC, GraphletAnchor::CB);
-		this->master->move_to(this->overflowpipe, this->dimensions[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB);
+		float xstep, ystep;
+
+		this->station->fill_stepsize(&xstep, &ystep);
+
+		this->master->move_to(this->lengths[DA::OverflowPipe], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
+		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->timeseries, this->overflowpipe, GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -ystep);
+
+		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
+		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
 	}
 
 public:
@@ -183,27 +207,30 @@ private:
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, id, unit);
-		}
-	}
-
-	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_dimension(ds, ls, id, unit);
 		}
 	}
 
-	template<typename E>
-	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height
-		, double range, Platform::String^ unit, LiquidSurface surface) {
-		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height);
+	template<class C, typename E>
+	void load_cylinder(std::map<E, Credit<C, E>*>& cs, E id, float height, double range, Platform::String^ unit, LiquidSurface surface) {
+		auto cylinder = new Credit<C, E>(surface, range, height * 0.2718F, height);
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
 		this->load_dimension(this->dimensions, this->captions, id, unit);
+	}
+
+	template<class C, typename E>
+	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float size, double range) {
+		for (E id = id0; id <= idn; id++) {
+			cs[id] = this->master->insert_one(new Credit<C, E>(range, size), id);
+
+			this->load_label(this->labels, id, Colours::Silver);
+			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
+			this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
+		}
 	}
 
 	template<typename E>
@@ -241,20 +268,23 @@ private:
 private:
 	void set_cylinder(DA id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value);
+		//this->dimensions[id]->set_value(value);
 	}
 
 private: // never delete these graphlets manually.
-	Tracklet<DA>* pipeline;
+	Tracklet<DA>* station;
 	std::map<DA, Credit<Labellet, DA>*> labels;
 	std::map<DA, Credit<Percentagelet, DA>*> progresses;
-	std::map<DA, Credit<Dimensionlet, DA>*> dimensions;
 	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
 	std::map<DA, Credit<GateValvelet, DA>*> valves;
-	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
 	std::map<DA, Credit<HopperPumplet, DA>*> hpumps;
 	std::map<DA, Credit<Circlelet, DA>*> suctions;
+	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
+	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
+	std::map<DA, Credit<Dimensionlet, DA>*> rpms;
+	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
 	OverflowPipelet* overflowpipe;
+	TimeSerieslet<DATS>* timeseries;
 	Arclet* lmod;
 	
 private:
@@ -291,7 +321,7 @@ void DragsPage::load(CanvasCreateResourcesReason reason, float width, float heig
 
 		{ // load graphlets
 			this->change_mode(DAMode::Dashboard);
-			db->load_pipeline(width, height, vinset);
+			db->load_station(width, height, vinset);
 			db->load_dashboard(width, height, vinset);
 
 			this->change_mode(DAMode::WindowUI);
@@ -321,7 +351,7 @@ void DragsPage::reflow(float width, float height) {
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 		
 		this->change_mode(DAMode::Dashboard);
-		db->reflow_pipeline(width, height, vinset);
+		db->reflow_station(width, height, vinset);
 		db->reflow_dashboard(width, height, vinset);
 	}
 }

@@ -41,6 +41,11 @@ void ITurtle::wipe() {
 	this->do_rebuild();
 }
 
+void ITurtle::fill_stepsize(float* xstep, float* ystep) {
+	SET_BOX(xstep, this->xstepsize);
+	SET_BOX(ystep, this->ystepsize);
+}
+
 void ITurtle::fill_anchor_location(unsigned int anchor, float* x, float* y) {
 	auto node = this->anchors.find(anchor);
 

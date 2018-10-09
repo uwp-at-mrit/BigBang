@@ -201,6 +201,10 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
+		void fill_stepsize(float* xstep, float* ystep) {
+			this->turtle->fill_stepsize(xstep, ystep);
+		}
+
 		void fill_anchor_location(Anchor a, float* x, float* y, bool need_absolute_location = true) {
 			float raw_x, raw_y, shape_x, shape_y;
 			float x0 = 0.0F;

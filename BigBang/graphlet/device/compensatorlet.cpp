@@ -34,18 +34,29 @@ Compensatorlet::Compensatorlet(double range, float width, float height, unsigned
 	this->pulley_size = this->width * 0.5F;
 	this->base_width = this->pulley_size * 0.618F;
 	this->base_height = this->height * 0.618F - this->pulley_size - this->thickness;
-	this->anchor_by = this->height - this->base_height * 2.0F;
+	this->anchor_ny = this->height - this->base_height * 0.5F;
 }
 
 void Compensatorlet::construct() {
+	float node_size = this->thickness * 1.5F;
+	auto node = rectangle(this->thickness * 0.5F, -node_size * 0.5F, node_size, node_size);
+
 	this->pulley = circle(this->pulley_size * 0.5F);
 	this->base = rectangle(this->base_width, this->base_height);
+	this->nodes = geometry_draft(geometry_union(node, node, this->width - node_size - this->thickness), this->thickness);
 
 	this->set_value(0.0, true);
 }
 
 void Compensatorlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
+}
+
+void Compensatorlet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
+	SET_BOX(b, 0.0F);
+	SET_BOX(l, 0.0F);
+	SET_BOX(r, 0.0F);
+	SET_BOX(t, this->anchor_py - (this->pulley_size + this->thickness) * 0.5F - 1.0F);
 }
 
 void Compensatorlet::on_value_changed(double v) {
@@ -69,12 +80,14 @@ void Compensatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	{ // draw lines
 		float r = this->pulley_size * 0.5F;
+		float ny = y + this->anchor_ny - this->thickness;
 
-		ds->DrawLine(cx - r, y + this->anchor_py, x,               y + this->anchor_by, this->color, this->thickness);
-		ds->DrawLine(cx + r, y + this->anchor_py, x + this->width, y + this->anchor_by, this->color, this->thickness);
+		ds->DrawCachedGeometry(this->nodes, x, y + this->anchor_ny, this->color);
+		ds->DrawLine(cx - r, y + this->anchor_py, x + this->thickness,               ny, this->color, this->thickness);
+		ds->DrawLine(cx + r, y + this->anchor_py, x + this->width - this->thickness, ny, this->color, this->thickness);
 	}
 }
 
-float Compensatorlet::get_outlet_height(double percentage) {
-	return this->base_height;
+float Compensatorlet::get_node_height() {
+	return this->anchor_ny;
 }

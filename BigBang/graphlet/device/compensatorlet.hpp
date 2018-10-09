@@ -16,16 +16,18 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_margin(float x, float y, float* t = nullptr, float* r = nullptr, float* b = nullptr, float* l = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		float get_node_height();
 
 	protected:
 		void on_value_changed(double t) override;
 
 	private:
-		float get_outlet_height(double percentage);
-
-	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ progress;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ nodes;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pulley;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
@@ -37,7 +39,7 @@ namespace WarGrey::SCADA {
 		float base_height;
 		float progress_width;
 		float anchor_py;
-		float anchor_by;
+		float anchor_ny;
 
 	private:
 		float width;

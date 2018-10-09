@@ -18,14 +18,16 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ overflow_default_color = Colours::DarkGray;
 static CanvasSolidColorBrush^ overflow_default_liquid_color = Colours::DarkKhaki;
+static CanvasSolidColorBrush^ overflow_default_border_color = Colours::Aquamarine;
 static CanvasSolidColorBrush^ overflow_default_hatch_color = Colours::GhostWhite;
 
 /*************************************************************************************************/
-OverflowPipelet::OverflowPipelet(double range, float width, float height, unsigned int step
-	, unsigned int precision, ICanvasBrush^ color, ICanvasBrush^ liquid_color, CanvasSolidColorBrush^ hatchmark_color)
+OverflowPipelet::OverflowPipelet(double range, float width, float height, unsigned int step, unsigned int precision
+	, ICanvasBrush^ color, ICanvasBrush^ liquid_color, ICanvasBrush^ border_color, CanvasSolidColorBrush^ hatchmark_color)
 	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(1.0F), step(step), precision(precision)
 	, color((color == nullptr) ? overflow_default_color : color)
 	, liquid_color((liquid_color == nullptr) ? overflow_default_liquid_color : liquid_color)
+	, border_color((border_color == nullptr) ? overflow_default_border_color : border_color)
 	, hatch_color((hatchmark_color == nullptr) ? overflow_default_hatch_color : hatchmark_color) {
 
 	if (this->height == 0.0F) {
@@ -84,7 +86,7 @@ void OverflowPipelet::on_liquid_height_changed(double h) {
 	Rect region = this->body->ComputeBounds();
 	float liquid_height = this->get_outlet_height(percentage);
 	float liquid_y = region.Y + region.Height - liquid_height;
-	auto liquid = rectangle(0.0F, liquid_y, this->width, liquid_height);
+	auto liquid = rectangle(0.0F, liquid_y, this->width, liquid_height + 1.0F);
 
 	this->liquid = geometry_freeze(geometry_subtract(liquid, this->body));
 }
@@ -94,7 +96,7 @@ void OverflowPipelet::draw(CanvasDrawingSession^ ds, float x, float y, float Wid
 
 	ds->DrawCachedGeometry(this->liquid, x, y, this->liquid_color);
 	ds->FillGeometry(this->body, x, y, this->color);
-	ds->DrawGeometry(this->body, x, y, this->liquid_color, this->thickness);
+	ds->DrawGeometry(this->body, x, y, this->border_color, this->thickness);
 	ds->FillGeometry(this->hatchmark, x + (this->width - hatchmark_box.Width) * 0.5F, y, this->hatch_color);
 }
 

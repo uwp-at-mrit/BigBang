@@ -125,7 +125,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesStatus status, TimeSeriesStyle& sty
 	FLCAS_SLOT(style.vaxes_thickness, 0.5F);
 
 	if ((style.legend_fx < 0.0F) || (style.legend_fx > 1.0F)) {
-		style.legend_fx = 0.8F;
+		style.legend_fx = 0.75F;
 	}
 }
 

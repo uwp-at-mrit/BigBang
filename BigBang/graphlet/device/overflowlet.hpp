@@ -12,6 +12,7 @@ namespace WarGrey::SCADA {
 			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hatch_color = nullptr);
 
 	public:
@@ -35,6 +36,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatch_color;
 
 	private:
