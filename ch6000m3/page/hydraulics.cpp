@@ -554,6 +554,7 @@ private:
 		}
 	}
 
+private:
 	void try_flow_oil(HS vid, HS pid, HS _id, HS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		this->try_flow_oil(vid, pid, color);
 

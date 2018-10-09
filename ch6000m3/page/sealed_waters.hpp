@@ -28,7 +28,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IMRMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ pump_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ valve_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

@@ -14,7 +14,6 @@
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
-#include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "decorator/page.hpp"
@@ -47,10 +46,7 @@ private enum class SW : unsigned int {
 	// Manual Valves
 	DGV3, DGV4, DGV5, DGV6, DGV1, DGV2, DGV9, DGV10,
 	DGV12, DGV11, DGV13, DGV14, DGV15, DGV16, DGV17, DGV18, DGV19, DGV20,
-	DGV7, DGV8,
-	
-	// Gate Valves
-	DGV44, DGV45, DGV46, DGV47,
+	DGV7, DGV44, DGV45, DGV8,
 	
 	// Labels
 	ToFlushs, SS1, SS2, Hatch, Sea,
@@ -63,13 +59,12 @@ private enum class SW : unsigned int {
 	d44, d45, d46, d47,
 
 	// anchors used for unnamed corners
-	flushs
+	flushs, pshp, sbhp, psuwp, sbuwp
 };
 
 private class SealedWaters final
 	: public PLCConfirmation
-	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>
-	, public IMenuCommand<SWVOperation, Credit<GateValvelet, SW>, IMRMaster*> {
+	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*> {
 public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
@@ -87,6 +82,11 @@ public:
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->powers[SW::PSHP]->set_value(DBD(DB2, 12U));
+		this->powers[SW::SBHP]->set_value(DBD(DB2, 16U));
+		//this->powers[SW::PSUWP]->set_value(DBD(DB2, 200U));
+		//this->powers[SW::SBUWP]->set_value(DBD(DB2, 204U));
+
 		//this->rpms[SW::PSHP]->set_value(DBD(DB2, 604U));
 		//this->rpms[SW::SBHP]->set_value(DBD(DB2, 608U));
 		//this->rpms[SW::PSUWP]->set_value(DBD(DB2, 200U));
@@ -126,7 +126,25 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
+		SW ps_hopper_long_path[] = { SW::DGV13, SW::pshp, SW::d44, SW::DGV8, SW::PSHP };
+		SW ps_hopper_short_path[] = { SW::DGV14, SW::d44, SW::DGV8, SW::PSHP };
+		SW sb_hopper_short_path[] = { SW::DGV15, SW::d45, SW::DGV7, SW::SBHP };
+		SW sb_hopper_long_path[] = { SW::DGV16, SW::sbhp, SW::d45, SW::DGV7, SW::SBHP };
+		SW ps_underwater_path[] = { SW::DGV17, SW::psuwp, SW::d46, SW::PSUWP };
+		SW sb_underwater_path[] = { SW::DGV20, SW::sbuwp, SW::d47, SW::SBUWP };
 		this->station->append_subtrack(SW::Hatch, SW::DGV20, water_color);
+
+		this->try_flow_water(SW::PSFP, SW::DGV12, SW::flushs, water_color);
+		this->try_flow_water(SW::SBFP, SW::DGV11, SW::flushs, water_color);
+		this->try_flow_water(SW::PSHPa, ps_hopper_long_path, water_color);
+		this->try_flow_water(SW::PSHPb, ps_hopper_short_path, water_color);
+		this->try_flow_water(SW::SBHPa, sb_hopper_short_path, water_color);
+		this->try_flow_water(SW::SBHPb, sb_hopper_long_path, water_color);
+
+		this->try_flow_water(SW::PSUWP1, ps_underwater_path, water_color);
+		this->try_flow_water(SW::PSUWP2, SW::DGV18, SW::PSUWP, water_color);
+		this->try_flow_water(SW::SBUWP1, SW::DGV19, SW::SBUWP, water_color);
+		this->try_flow_water(SW::SBUWP2, sb_underwater_path, water_color);
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -137,12 +155,6 @@ public:
 		plc->get_logger()->log_message(Log::Info, L"%s %s",
 			cmd.ToString()->Data(),
 			pump->id.ToString()->Data());
-	}
-
-	void execute(SWVOperation cmd, Credit<GateValvelet, SW>* valve, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
 	}
 
 public:
@@ -177,7 +189,7 @@ public:
 		pTurtle->move_right(10)->move_up(2)->move_right(3, SW::ToFlushs)->move_right(3, SW::flushs)->jump_back(SW::d11);
 
 		pTurtle->move_down(4, SW::d13)->move_right(5, SW::DGV13)->move_right(6, SW::PSHPa)->move_right(6, SW::DGV3);
-		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down(SW::pshp)->move_down(3)->turn_down_right()->jump_back(SW::d13);
 		pTurtle->move_down(4, SW::d14)->move_right(5, SW::DGV14)->move_right(6, SW::PSHPb)->move_right(6, SW::DGV4);
 		pTurtle->move_right(14, SW::d44)->move_right(9, SW::DGV44)->move_right(10, SW::PSHP)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(4, SW::DGV8);
@@ -188,19 +200,19 @@ public:
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(4, SW::DGV7);
 		pTurtle->move_right(10)->move_up(5)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(5, SW::DGV16)->move_right(6, SW::SBHPb)->move_right(6, SW::DGV6);
-		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up(SW::sbhp)->move_up(3)->turn_up_right()->jump_back(SW::d16);
 
 		pTurtle->jump_down(3)->jump_left(SW::Sea)->move_right();
 
 		pTurtle->move_down(2, SW::d17)->move_right(5, SW::DGV17)->move_right(6, SW::PSUWP1)->move_right(6, SW::DGV1);
-		pTurtle->move_right(10)->turn_right_down()->move_down(3)->turn_down_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_down(SW::psuwp)->move_down(3)->turn_down_right()->jump_back(SW::d17);
 		pTurtle->move_down(4, SW::d18)->move_right(5, SW::DGV18)->move_right(6, SW::PSUWP2)->move_right(6, SW::DGV2);
-		pTurtle->move_right(14, SW::d46)->move_right(9, SW::DGV46)->move_right(10, SW::PSUWP)->jump_back(SW::d18);
+		pTurtle->move_right(14, SW::d46)->move_right(9)->move_right(10, SW::PSUWP)->jump_back(SW::d18);
 
 		pTurtle->move_down(5, SW::d19)->move_right(5, SW::DGV19)->move_right(6, SW::SBUWP1)->move_right(6, SW::DGV9);
-		pTurtle->move_right(14, SW::d47)->move_right(9, SW::DGV47)->move_right(10, SW::SBUWP)->jump_back(SW::d19);
+		pTurtle->move_right(14, SW::d47)->move_right(9)->move_right(10, SW::SBUWP)->jump_back(SW::d19);
 		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SBUWP2)->move_right(6, SW::DGV10);
-		pTurtle->move_right(10)->turn_right_up()->move_up(3)->turn_up_right()->jump_back();
+		pTurtle->move_right(10)->turn_right_up(SW::sbuwp)->move_up(3)->turn_up_right();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
@@ -214,13 +226,12 @@ public:
 			this->hatch = this->master->insert_one(new Hatchlet(hpradius * 2.5F));
 
 			this->load_devices(this->mvalves, this->labels, Colours::Silver, SW::DGV3, SW::DGV8, radius, 0.0);
-			this->load_devices(this->gvalves, this->labels, Colours::Silver, SW::DGV44, SW::DGV47, radius, 0.0);
 			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSFP, SW::SBUWP2, radius, 0.0);
 
-			this->load_device(this->hoppers, this->captions, this->rpms, SW::PSHP, hpradius, -2.0F);
-			this->load_device(this->hoppers, this->captions, this->rpms, SW::SBHP, hpradius, +2.0F);
-			this->load_device(this->hoppers, this->captions, this->rpms, SW::PSUWP, hpradius, +2.0F);
-			this->load_device(this->hoppers, this->captions, this->rpms, SW::SBUWP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, SW::PSHP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, SW::SBHP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, SW::PSUWP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, SW::SBUWP, hpradius, -2.0F);
 		}
 
 		{ // load labels and dimensions
@@ -255,7 +266,6 @@ public:
 			float xoff = gwidth * 3.0F;
 			
 			this->reflow_valves(this->mvalves, this->labels, gridsize);
-			this->reflow_valves(this->gvalves, this->labels, gridsize);
 			
 			for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
@@ -277,7 +287,10 @@ public:
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LC);
 				
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC,
-					GraphletAnchor::RB, -gwidth, -toff);
+					GraphletAnchor::RB, -gwidth * 0.5F, -toff);
+
+				this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LB,
+					GraphletAnchor::LT, 0.0, toff * 2.0F + default_pipe_thickness);
 				
 				this->master->move_to(this->captions[it->first], it->second,
 					GraphletAnchor::RC, GraphletAnchor::LC, toff);
@@ -318,12 +331,16 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ds
-		, E id, float rx, float fy) {
+	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
 		this->load_label(ls, id, Colours::Salmon);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, "rpm", "S"), id);
+
+		this->rpms[id] = this->master->insert_one(
+			new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, "rpm", "S"), id);
+
+		this->powers[id] = this->master->insert_one(
+			new Credit<Dimensionlet, E>(DimensionStatus::Normal, this->dimension_style, "kwatt", "P"), id);
 	}
 
 	template<typename E>
@@ -407,12 +424,24 @@ private:
 		target->set_status(DBX(db4, idx_p1 + 2), HydraulicPumpStatus::Broken);
 	}
 
-	void set_valve_status(SW id, const uint8* db4, size_t idx_p1) {
-		if (DBX(db4, idx_p1 - 1)) {
-			this->mvalves[id]->set_status(ManualValveStatus::Open);
-		} else {
-			this->mvalves[id]->set_status(ManualValveStatus::Closed);
+private:
+	void try_flow_water(SW pid, SW start, SW end, CanvasSolidColorBrush^ color) {
+		if (this->pumps[pid]->get_status() != HydraulicPumpStatus::Running) {
+			this->station->append_subtrack(start, end, color);
 		}
+	}
+
+	void try_flow_water(SW pid, SW* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		if (this->pumps[pid]->get_status() != HydraulicPumpStatus::Running) {
+			if (path != nullptr) {
+				this->station->append_subtrack(path, count, color);
+			}
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_water(SW pid, SW (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(pid, path, N, color);
 	}
 
 // never deletes these graphlets mannually
@@ -426,11 +455,11 @@ private:
 	std::map<SW, Credit<HydraulicPumplet, SW>*> pumps;
 	std::map<SW, Credit<HopperPumplet, SW>*> hoppers;
 	std::map<SW, Credit<ManualValvelet, SW>*> mvalves;
-	std::map<SW, Credit<GateValvelet, SW>*> gvalves;
 	std::map<SW, Credit<Dimensionlet, SW>*> pressures;
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
 	std::map<SW, Credit<Dimensionlet, SW>*> rpms;
-	
+	std::map<SW, Credit<Dimensionlet, SW>*> powers;
+
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle dimension_style;
@@ -446,7 +475,6 @@ SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(pl
 
 	this->dashboard = dashboard;
 	this->pump_op = make_menu<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>(dashboard, plc);
-	this->valve_op = make_menu<SWVOperation, Credit<GateValvelet, SW>, IMRMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -528,8 +556,7 @@ void SealedWaterPage::on_elapse(long long count, long long interval, long long u
 
 
 bool SealedWaterPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| (dynamic_cast<GateValvelet*>(g) != nullptr));
+	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
 }
 
 
@@ -549,14 +576,11 @@ bool SealedWaterPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 
 void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
-	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
 	
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
-	if (gvalve != nullptr) {
-		menu_popup(this->valve_op, g, local_x, local_y);
-	} else if (pump != nullptr) {
+	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);
 	} else if (editor != nullptr) {
 		if (editor->get_status() == DimensionStatus::Input) {
