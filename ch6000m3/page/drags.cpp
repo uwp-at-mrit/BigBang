@@ -86,7 +86,7 @@ public:
 
 public:
 	void load_station(float width, float height, float vinset) {
-		float gridsize = vinset;
+		float gridsize = vinset * 0.85F;
 		float rx = gridsize;
 		float ry = rx * 2.0F;
 		float rsct = rx * 0.5F;
@@ -116,11 +116,12 @@ public:
 	}
 
 	void load_dashboard(float width, float height, float vinset) {
-		float shwidth, shheight, xstep, ystep;
+		float shwidth, shheight, xstep, ystep, cylinder_height;
 
 		this->station->fill_extent(0.0F, 0.0F, &shwidth, &shheight);
 		this->station->fill_stepsize(&xstep, &ystep);
 
+		cylinder_height = shheight * 0.5F;
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
@@ -128,7 +129,7 @@ public:
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
 		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
 
-		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, 42.0F, 3.0);
+		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 	}
 
 	void reflow_station(float width, float height, float vinset) {
@@ -223,9 +224,9 @@ private:
 	}
 
 	template<class C, typename E>
-	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float size, double range) {
+	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double range) {
 		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<C, E>(range, size), id);
+			cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
 
 			this->load_label(this->labels, id, Colours::Silver);
 			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);

@@ -28,7 +28,7 @@ TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double
 	: ISymbollet(default_status, radius, degrees), rotate_tag(rotate_tag) {
 	this->tag = make_wstring(tag);
 	this->sradius = radius * 0.5F;
-	this->sgradius = radius * 0.5F;
+	this->sgradius = radius * 0.618F;
 	this->fradius = this->sgradius + default_thickness * 2.0F;
 
 	{ // locate

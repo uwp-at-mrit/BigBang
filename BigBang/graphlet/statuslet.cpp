@@ -122,7 +122,7 @@ static SingletonStatus* statusbar = nullptr;
 
 static void initialize_status_font() {
 	if (status_font == nullptr) {
-		status_font = make_bold_text_format("Microsoft YaHei", 12.0F);
+		status_font = make_bold_text_format("Microsoft YaHei", 14.0F);
 		
 		TextExtent te = get_text_extent(speak("plc", tongue_scope), status_font);
 		status_height = te.height * 1.2F;

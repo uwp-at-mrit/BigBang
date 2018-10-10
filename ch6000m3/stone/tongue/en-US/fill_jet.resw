@@ -124,10 +124,10 @@
     <value>Empty</value>
   </data>
   <data name="D003" xml:space="preserve">
-    <value>Port Suction</value>
+    <value>Starboard Suction</value>
   </data>
   <data name="D004" xml:space="preserve">
-    <value>Starboard Suction</value>
+    <value>Port Suction</value>
   </data>
   <data name="D005" xml:space="preserve">
     <value>Port Isolation</value>

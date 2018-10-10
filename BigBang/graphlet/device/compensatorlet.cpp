@@ -16,34 +16,36 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ compensator_default_color = Colours::DarkGray;
+static CanvasSolidColorBrush^ compensator_default_color = Colours::Yellow;
+static CanvasSolidColorBrush^ compensator_default_pulley_color = Colours::DarkGray;
 static CanvasSolidColorBrush^ compensator_default_progress_color = Colours::Gray;
 
 /*************************************************************************************************/
 Compensatorlet::Compensatorlet(double range, float width, float height, unsigned int step
-	, unsigned int precision, ICanvasBrush^ color, ICanvasBrush^ liquid_color)
+	, unsigned int precision, ICanvasBrush^ color, ICanvasBrush^ pulley_color, ICanvasBrush^ progress_color)
 	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(2.0F), step(step), precision(precision)
 	, color((color == nullptr) ? compensator_default_color : color)
-	, progress_color((liquid_color == nullptr) ? compensator_default_progress_color : liquid_color) {
+	, pulley_color((pulley_color == nullptr) ? compensator_default_pulley_color : pulley_color)
+	, progress_color((progress_color == nullptr) ? compensator_default_progress_color : progress_color) {
 
 	if (this->height == 0.0F) {
 		this->height = this->width * 2.718F;
 	}
 
 	this->progress_width = this->thickness * 3.14F;
-	this->pulley_size = this->width * 0.5F;
+	this->node_size = this->thickness * 1.5F;
+	this->pulley_size = this->width * 0.618F;
 	this->base_width = this->pulley_size * 0.618F;
 	this->base_height = this->height * 0.618F - this->pulley_size - this->thickness;
 	this->anchor_ny = this->height - this->base_height * 0.5F;
 }
 
 void Compensatorlet::construct() {
-	float node_size = this->thickness * 1.5F;
-	auto node = rectangle(this->thickness * 0.5F, -node_size * 0.5F, node_size, node_size);
+	auto node = rectangle(this->thickness * 0.5F, -this->node_size * 0.5F, this->node_size, this->node_size);
 
 	this->pulley = circle(this->pulley_size * 0.5F);
 	this->base = rectangle(this->base_width, this->base_height);
-	this->nodes = geometry_draft(geometry_union(node, node, this->width - node_size - this->thickness), this->thickness);
+	this->nodes = geometry_draft(geometry_union(node, node, this->width - this->node_size - this->thickness), this->thickness);
 
 	this->set_value(0.0, true);
 }
@@ -73,18 +75,19 @@ void Compensatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	float by = y + this->height - this->base_height - this->thickness * 0.5F;
 	float py = y + this->anchor_py + (this->pulley_size + this->thickness) * 0.5F;
 	
-	ds->FillGeometry(this->base, bx, by, this->progress_color);
-	ds->DrawGeometry(this->base, bx, by, this->color, this->thickness);
-	ds->DrawGeometry(this->pulley, cx, y + this->anchor_py, this->color, this->thickness);
+	ds->FillGeometry(this->base, bx, by, this->color);
+	ds->DrawGeometry(this->base, bx, by, this->progress_color, this->thickness);
+	ds->DrawGeometry(this->pulley, cx, y + this->anchor_py, this->pulley_color, this->thickness);
 	ds->DrawCachedGeometry(this->progress, cx - this->progress_width * 0.5F, py, this->progress_color);
 
 	{ // draw lines
 		float r = this->pulley_size * 0.5F;
+		float xoff = (this->node_size + this->thickness) * 0.5F;
 		float ny = y + this->anchor_ny - this->thickness;
 
-		ds->DrawCachedGeometry(this->nodes, x, y + this->anchor_ny, this->color);
-		ds->DrawLine(cx - r, y + this->anchor_py, x + this->thickness,               ny, this->color, this->thickness);
-		ds->DrawLine(cx + r, y + this->anchor_py, x + this->width - this->thickness, ny, this->color, this->thickness);
+		ds->DrawCachedGeometry(this->nodes, x, y + this->anchor_ny, this->pulley_color);
+		ds->DrawLine(cx - r, y + this->anchor_py, x + xoff,               ny, this->pulley_color, this->thickness);
+		ds->DrawLine(cx + r, y + this->anchor_py, x + this->width - xoff, ny, this->pulley_color, this->thickness);
 	}
 }
 

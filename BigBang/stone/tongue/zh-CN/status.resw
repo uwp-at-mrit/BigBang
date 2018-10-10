@@ -127,7 +127,7 @@
     <value>本机 IP: </value>
   </data>
   <data name="nowifi" xml:space="preserve">
-    <value>无连接</value>
+    <value>未使用</value>
   </data>
   <data name="plc" xml:space="preserve">
     <value>PLC: </value>

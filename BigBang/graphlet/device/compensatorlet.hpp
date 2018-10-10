@@ -11,6 +11,7 @@ namespace WarGrey::SCADA {
 		Compensatorlet(double range, float width, float height = 0.0F,
 			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ pulley_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ progress_color = nullptr);
 
 	public:
@@ -31,10 +32,12 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pulley;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ pulley_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ progress_color;
 
 	private:
 		float pulley_size;
+		float node_size;
 		float base_width;
 		float base_height;
 		float progress_width;

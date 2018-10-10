@@ -124,10 +124,10 @@
     <value>抽舱</value>
   </data>
   <data name="D003" xml:space="preserve">
-    <value>左吸口</value>
+    <value>右吸口</value>
   </data>
   <data name="D004" xml:space="preserve">
-    <value>右吸口</value>
+    <value>左吸口</value>
   </data>
   <data name="D005" xml:space="preserve">
     <value>左隔离</value>
