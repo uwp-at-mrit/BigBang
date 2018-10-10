@@ -300,11 +300,11 @@ void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long u
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 		
 		this->recent_planet->begin_update_sequence();
-		this->recent_planet->update(count, elapsed, uptime);
+		this->recent_planet->on_elapse(count, elapsed, uptime);
 		this->recent_planet->end_update_sequence();
 
 		while (child != this->recent_planet) {
-			child->update(count, elapsed, uptime);
+			child->on_elapse(count, elapsed, uptime);
 			child = PLANET_INFO(child)->next;
 		}
 	}

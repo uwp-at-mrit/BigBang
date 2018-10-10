@@ -84,13 +84,15 @@ float WarGrey::SCADA::RealData(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm, nullptr, MRIT_PORT), tidemark(0.0F) {
+PLCMaster::PLCMaster(Syslog* logger) : MRMaster(logger, nullptr, MRIT_PORT), tidemark(0.0F), last_sending_time(-1L) {
 	this->append_confirmation_receiver(this);
 }
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
-	// TODO: why the initial tidemark has a negative float value?
-	this->read_all_signal(98, 0, 0x1263, this->tidemark);
+	if (this->last_sending_time != uptime) {
+		this->read_all_signal(98, 0, 0x1263, this->tidemark);
+		this->last_sending_time = uptime;
+	}
 }
 
 void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger) {

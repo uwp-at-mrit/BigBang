@@ -193,29 +193,29 @@ public:
 
 	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		{ // door progresses
-			this->set_door_progress(HD::PS1, RealData(AI_DB203, 48));
-			this->set_door_progress(HD::PS2, RealData(AI_DB203, 49));
-			this->set_door_progress(HD::PS3, RealData(AI_DB203, 50));
-			this->set_door_progress(HD::PS4, RealData(AI_DB203, 72));
-			this->set_door_progress(HD::PS5, RealData(AI_DB203, 73));
-			this->set_door_progress(HD::PS6, RealData(AI_DB203, 74));
-			this->set_door_progress(HD::PS7, RealData(AI_DB203, 75));
+			this->set_door_progress(HD::PS1, RealData(AI_DB203, 48U));
+			this->set_door_progress(HD::PS2, RealData(AI_DB203, 49U));
+			this->set_door_progress(HD::PS3, RealData(AI_DB203, 50U));
+			this->set_door_progress(HD::PS4, RealData(AI_DB203, 72U));
+			this->set_door_progress(HD::PS5, RealData(AI_DB203, 73U));
+			this->set_door_progress(HD::PS6, RealData(AI_DB203, 74U));
+			this->set_door_progress(HD::PS7, RealData(AI_DB203, 75U));
 
-			this->set_door_progress(HD::SB1, RealData(AI_DB203, 64));
-			this->set_door_progress(HD::SB2, RealData(AI_DB203, 65));
-			this->set_door_progress(HD::SB3, RealData(AI_DB203, 66));
-			this->set_door_progress(HD::SB4, RealData(AI_DB203, 88));
-			this->set_door_progress(HD::SB5, RealData(AI_DB203, 89));
-			this->set_door_progress(HD::SB6, RealData(AI_DB203, 90));
-			this->set_door_progress(HD::SB7, RealData(AI_DB203, 91));
+			this->set_door_progress(HD::SB1, RealData(AI_DB203, 64U));
+			this->set_door_progress(HD::SB2, RealData(AI_DB203, 65U));
+			this->set_door_progress(HD::SB3, RealData(AI_DB203, 66U));
+			this->set_door_progress(HD::SB4, RealData(AI_DB203, 88U));
+			this->set_door_progress(HD::SB5, RealData(AI_DB203, 89U));
+			this->set_door_progress(HD::SB6, RealData(AI_DB203, 90U));
+			this->set_door_progress(HD::SB7, RealData(AI_DB203, 91U));
 		}
 
 		{ // pump pressures
-			this->dimensions[HD::D]->set_value(RealData(AI_DB203, 10), GraphletAnchor::LB);
-			this->dimensions[HD::E]->set_value(RealData(AI_DB203, 11), GraphletAnchor::LT);
+			this->dimensions[HD::D]->set_value(RealData(AI_DB203, 10U), GraphletAnchor::LB);
+			this->dimensions[HD::E]->set_value(RealData(AI_DB203, 11U), GraphletAnchor::LT);
 
-			this->dimensions[HD::A]->set_value(RealData(AI_DB203, 12), GraphletAnchor::CC);
-			this->dimensions[HD::H]->set_value(RealData(AI_DB203, 15), GraphletAnchor::CC);
+			this->dimensions[HD::A]->set_value(RealData(AI_DB203, 12U), GraphletAnchor::CC);
+			this->dimensions[HD::H]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::CC);
 		}
 	}
 

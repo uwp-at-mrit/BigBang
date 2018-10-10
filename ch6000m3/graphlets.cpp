@@ -255,7 +255,7 @@ void GraphletOverview::reflow(float width, float height) {
 	}
 }
 
-void GraphletOverview::on_elapse(long long count, long long interval, long long uptime) {
+void GraphletOverview::update(long long count, long long interval, long long uptime) {
 	auto maybe_stage = stages.find(this);
 
 	if (maybe_stage != stages.end()) {

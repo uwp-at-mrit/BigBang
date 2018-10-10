@@ -139,13 +139,13 @@
     <value>Starboard Underwater Charge</value>
   </data>
   <data name="D008" xml:space="preserve">
-    <value>Starboard Total Charge</value>
+    <value>Starboard Main Charge</value>
   </data>
   <data name="D009" xml:space="preserve">
     <value>Port Underwater Charge</value>
   </data>
   <data name="D010" xml:space="preserve">
-    <value>Port Total Charge</value>
+    <value>Port Main Charge</value>
   </data>
   <data name="D011" xml:space="preserve">
     <value>Starboard Low Discharge</value>

@@ -213,7 +213,6 @@ namespace WarGrey::SCADA {
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;
-        void update(long long count, long long interval, long long uptime) override;
         void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float Width, float Height) override;
 
     public: // learn C++ "Name Hiding"
@@ -245,6 +244,7 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
+		void on_elapse(long long count, long long interval, long long uptime) override;
 
 	public:
 		void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float width, float height) override;

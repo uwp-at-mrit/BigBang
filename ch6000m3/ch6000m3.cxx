@@ -37,17 +37,17 @@ public:
 	}
 
 	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
-		Syslog* alarm = make_system_logger(default_logging_level, name + ":PLC");
+		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(alarm);
+		this->device = new PLCMaster(logger);
 	}
 
 protected:
 	void construct() override {
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
-		this->add_planet(new DragsPage(this->device));
+		this->add_planet(new LoadsPage(this->device));
 
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));

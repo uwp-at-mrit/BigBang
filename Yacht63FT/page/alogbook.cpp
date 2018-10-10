@@ -136,7 +136,7 @@ void LogbookPage::load(CanvasCreateResourcesReason reason, float width, float he
 	}
 }
 
-void LogbookPage::on_elapse(long long count, long long interval, long long uptime) {
+void LogbookPage::update(long long count, long long interval, long long uptime) {
 	auto alarmboard = static_cast<LogBoard*>(this->dashboard);
 
 	if (alarmboard != nullptr) {

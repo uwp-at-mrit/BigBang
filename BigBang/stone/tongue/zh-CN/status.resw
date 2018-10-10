@@ -135,8 +135,8 @@
   <data name="power" xml:space="preserve">
     <value>电量: </value>
   </data>
-  <data name="sd" xml:space="preserve">
-    <value>SD 卡容量: </value>
+  <data name="storage" xml:space="preserve">
+    <value>可用硬盘空间: </value>
   </data>
   <data name="noipv4" xml:space="preserve">
     <value>0.0.0.0</value>

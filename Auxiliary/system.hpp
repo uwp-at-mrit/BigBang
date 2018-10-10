@@ -5,7 +5,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void on_timestamp_changed(Platform::String^ timestamp) {}
 		virtual void on_battery_capacity_changed(float capacity) {}
-		virtual void on_available_storage_changed(long long bytes) {}
+		virtual void on_available_storage_changed(unsigned long long free_bytes, unsigned long long total_bytes) {}
 		virtual void on_ipv4_address_changed(Platform::String^ ipv4) {}
 		virtual void on_wifi_signal_strength_changed(char strength) {}
 	};
@@ -18,7 +18,6 @@ namespace WarGrey::SCADA {
 	Windows::UI::Color system_color(Windows::UI::ViewManagement::UIColorType type);
 	Windows::UI::Color system_color(Windows::UI::ViewManagement::UIElementType type);
 
-	long long system_available_storage_size();
 	float system_battery_capacity(float defval_if_no_battery = 1.0F);
 	char system_wifi_signal_strength(char defval_if_no_wifi = -1);
 	Platform::String^ system_ipv4_address(Platform::String^ defval_if_no_nic = nullptr);

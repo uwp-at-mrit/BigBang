@@ -127,7 +127,7 @@ public:
 		pTurtle->move_down(5)->move_right(2, FJ::D022)->move_right(3)->jump_back();
 		pTurtle->move_left(2, FJ::d1920)->move_left(2, FJ::D020)->move_left(6, FJ::d1720);
 
-		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(3, FJ::D010)->jump_back(FJ::d1720);
+		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(4, FJ::D010)->jump_back(FJ::d1720);
 		
 		pTurtle->move_down(3.5F, FJ::PSHPump)->move_left(6, FJ::n0923)->move_left(8)->move_up(1.5F, FJ::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, FJ::d0406)->move_right(4, FJ::D006)->move_right(4)->move_down(0.5F, FJ::deck_ty)->move_down(FJ::D009);
@@ -141,8 +141,8 @@ public:
 		pTurtle->move_right(8, FJ::n0723)->move_right(6, FJ::SBHPump)->move_down(3.5F, FJ::d1819)->jump_back(FJ::d0225);
 		pTurtle->jump_up(2.5F)->move_left(2, FJ::D002)->move_left(15, FJ::n24)->move_left(10, FJ::D001)->move_left(3, FJ::Hatch);
 
-		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(3, FJ::D008);
-		pTurtle->move_left(14)->move_up(5.5F)->jump_up()->move_up(5.5F);
+		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(4, FJ::D008);
+		pTurtle->move_left(13)->move_up(5.5F)->jump_up()->move_up(5.5F);
 		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FJ::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, FJ::Gantry)->move_left()->jump_back(FJ::Gantry)->move_right()->jump_back(FJ::d0325);
 
@@ -150,13 +150,13 @@ public:
 
 		pTurtle->jump_back(FJ::d1819)->move_right(4, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
 		
-		this->pipeline = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->station = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipe_thickness, default_pipe_color));
 
 		{ // load manual pipe segement
 			float d02_y, d05_y;
 
-			this->pipeline->fill_anchor_location(FJ::D002, nullptr, &d02_y);
-			this->pipeline->fill_anchor_location(FJ::D005, nullptr, &d05_y);
+			this->station->fill_anchor_location(FJ::D002, nullptr, &d02_y);
+			this->station->fill_anchor_location(FJ::D005, nullptr, &d05_y);
 
 			this->manual_pipe = this->master->insert_one(
 				new Linelet(0.0F, d02_y, 0.0F, d05_y,
@@ -209,13 +209,13 @@ public:
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 
-		this->master->move_to(this->pipeline, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->manual_pipe, FJ::D025, GraphletAnchor::CB);
+		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->manual_pipe, FJ::D025, GraphletAnchor::CB);
 
-		this->pipeline->map_credit_graphlet(this->captions[FJ::Gantry], GraphletAnchor::CB);
-		this->pipeline->map_graphlet_at_anchor(this->ps_suction, FJ::Port, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sb_suction, FJ::Starboard, GraphletAnchor::CC);
-		this->pipeline->map_graphlet_at_anchor(this->sea_inlet, FJ::Hatch, GraphletAnchor::CC);
+		this->station->map_credit_graphlet(this->captions[FJ::Gantry], GraphletAnchor::CB);
+		this->station->map_graphlet_at_anchor(this->ps_suction, FJ::Port, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->sb_suction, FJ::Starboard, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->sea_inlet, FJ::Hatch, GraphletAnchor::CC);
 		this->master->move_to(this->captions[FJ::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
@@ -223,7 +223,7 @@ public:
 			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
 			 * thus, we have to do aligning on our own.
 			 */
-			this->pipeline->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
+			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
 		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.4F);
@@ -231,7 +231,7 @@ public:
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			it->second->fill_pump_origin(&ox);
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
+			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
 			this->master->move_to(this->captions[it->first], it->second,
 				GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
 		}
@@ -260,8 +260,8 @@ public:
 			}
 			}
 
-			this->pipeline->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->pipeline->map_credit_graphlet(this->captions[it->first], anchor, dx, dy);
+			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
+			this->station->map_credit_graphlet(this->captions[it->first], anchor, dx, dy);
 			this->master->move_to(this->vlabels[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 
@@ -281,11 +281,11 @@ public:
 			}
 
 			it->second->fill_valve_origin(&ox, &oy);
-			this->pipeline->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
+			this->station->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
 		}
 
 		{ // reflow door sequences
-			this->pipeline->fill_anchor_location(FJ::D008, nullptr, &y0);
+			this->station->fill_anchor_location(FJ::D008, nullptr, &y0);
 			for (unsigned int idx = 0; idx < hopper_count; idx++) {
 				this->master->fill_graphlet_location(this->uhdoors[_E(FJ, idx + _I(FJ::PS1))], &x0, nullptr, GraphletAnchor::CC);
 				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CB);
@@ -326,7 +326,7 @@ private:
 	template<class G, class M, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, M*>& ms, std::map<E, Credit<Labellet, E>*>& ls
 		, std::map<E, Credit<Labellet, E>*>& cs, E id0, E idn, float radius, double degrees) {
-		float mradius = radius * 0.618F;
+		float mradius = radius * 0.8F;
 
 		for (E id = id0; id <= idn; id++) {
 			double mdegrees = 0.0;
@@ -386,8 +386,8 @@ private:
 			p_anchor = GraphletAnchor::CT;
 		}
 
-		this->pipeline->fill_anchor_location(FJ::D001, &lx, &y);
-		this->pipeline->fill_anchor_location(FJ::D010, &rx, nullptr);
+		this->station->fill_anchor_location(FJ::D001, &lx, &y);
+		this->station->fill_anchor_location(FJ::D010, &rx, nullptr);
 		cell_width = (rx - lx) / float(hopper_count);
 
 		for (E id = id0; id <= idn; id++) {
@@ -401,7 +401,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<FJ>* pipeline;
+	Tracklet<FJ>* station;
 	std::map<FJ, Credit<Labellet, FJ>*> captions;
 	std::map<FJ, Credit<UpperHopperDoorlet, FJ>*> uhdoors;
 	std::map<FJ, Credit<Percentagelet, FJ>*> progresses;
@@ -448,19 +448,19 @@ public:
 	}
 
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto pipeline = dynamic_cast<Tracklet<FJ>*>(g);
+		auto station = dynamic_cast<Tracklet<FJ>*>(g);
 
-		if (pipeline != nullptr) {
+		if (station != nullptr) {
 			float ps_y, sb_y;
 			float deck_lx, deck_ty, deck_rx, deck_by;
 
-			pipeline->fill_anchor_location(FJ::ps, nullptr, &ps_y, false);
-			pipeline->fill_anchor_location(FJ::sb, nullptr, &sb_y, false);
+			station->fill_anchor_location(FJ::ps, nullptr, &ps_y, false);
+			station->fill_anchor_location(FJ::sb, nullptr, &sb_y, false);
 
-			pipeline->fill_anchor_location(FJ::deck_lx, &deck_lx, nullptr, false);
-			pipeline->fill_anchor_location(FJ::deck_rx, &deck_rx, nullptr, false);
-			pipeline->fill_anchor_location(FJ::deck_ty, nullptr, &deck_ty, false);
-			pipeline->fill_anchor_location(FJ::deck_by, nullptr, &deck_by, false);
+			station->fill_anchor_location(FJ::deck_lx, &deck_lx, nullptr, false);
+			station->fill_anchor_location(FJ::deck_rx, &deck_rx, nullptr, false);
+			station->fill_anchor_location(FJ::deck_ty, nullptr, &deck_ty, false);
+			station->fill_anchor_location(FJ::deck_by, nullptr, &deck_by, false);
 
 			{ // draw ship
 				float ship_width = this->actual_width();
@@ -488,11 +488,11 @@ public:
 				float d0325_y, d03_x, d07_x;
 				float d10_x, d10_y;
 
-				pipeline->fill_anchor_location(FJ::D005, &d0525_x, &d05_y, false);
-				pipeline->fill_anchor_location(FJ::D025, nullptr, &d25_y, false);
-				pipeline->fill_anchor_location(FJ::D010, &d10_x, &d10_y, false);
-				pipeline->fill_anchor_location(FJ::d0325, &d03_x, &d0325_y, false);
-				pipeline->fill_anchor_location(FJ::d007, &d07_x, nullptr, false);
+				station->fill_anchor_location(FJ::D005, &d0525_x, &d05_y, false);
+				station->fill_anchor_location(FJ::D025, nullptr, &d25_y, false);
+				station->fill_anchor_location(FJ::D010, &d10_x, &d10_y, false);
+				station->fill_anchor_location(FJ::d0325, &d03_x, &d0325_y, false);
+				station->fill_anchor_location(FJ::d007, &d07_x, nullptr, false);
 
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
 					Colours::DimGray, default_pipe_thickness, this->ship_style);

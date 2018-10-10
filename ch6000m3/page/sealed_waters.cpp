@@ -309,7 +309,7 @@ public:
 	}
 
 public:
-	void on_elapse(long long count, long long interval, long long uptime) {
+	void update(long long count, long long interval, long long uptime) {
 		this->sea_oscillation *= -1.0F;
 		this->master->move(this->sea, 0.0F, this->sea_oscillation);
 		this->master->notify_graphlet_updated(this->sea);
@@ -426,16 +426,14 @@ private:
 
 private:
 	void try_flow_water(SW pid, SW start, SW end, CanvasSolidColorBrush^ color) {
-		if (this->pumps[pid]->get_status() != HydraulicPumpStatus::Running) {
+		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
 			this->station->append_subtrack(start, end, color);
 		}
 	}
 
 	void try_flow_water(SW pid, SW* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		if (this->pumps[pid]->get_status() != HydraulicPumpStatus::Running) {
-			if (path != nullptr) {
-				this->station->append_subtrack(path, count, color);
-			}
+		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
+			this->station->append_subtrack(path, count, color);
 		}
 	}
 
@@ -546,11 +544,11 @@ void SealedWaterPage::reflow(float width, float height) {
 	}
 }
 
-void SealedWaterPage::on_elapse(long long count, long long interval, long long uptime) {
+void SealedWaterPage::update(long long count, long long interval, long long uptime) {
 	auto dashboard = dynamic_cast<SealedWaters*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		dashboard->on_elapse(count, interval, uptime);
+		dashboard->update(count, interval, uptime);
 	}
 }
 

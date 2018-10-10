@@ -55,12 +55,13 @@ public:
 		this->leave_critical_section();
 	}
 
-    void on_available_storage_changed(long long bytes) override {
-		Platform::String^ label = speak("sd", tongue_scope);
-		Platform::String^ size = bytes.ToString();
+    void on_available_storage_changed(unsigned long long free_bytes, unsigned long long total_bytes) override {
+		Platform::String^ label = speak("storage", tongue_scope);
+		Platform::String^ percentage = flstring(double(free_bytes) / double(total_bytes) * 100.0, 1);
+		Platform::String^ free = sstring(free_bytes, 1);
 
 		this->enter_critical_section();
-        this->storage = make_text_layout(label + size, status_font);
+        this->storage = make_text_layout(label + free + "(" + percentage + "%)", status_font);
 		this->updated = true;
 		this->leave_critical_section();
 	}
@@ -176,7 +177,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(statusbar->clock, x + width * 1.0F, context_y, Colours::Foreground);
 	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
 	ds->DrawTextLayout(statusbar->wifi, x + width * 3.0F, context_y, Colours::Yellow);
-	ds->DrawTextLayout(statusbar->storage, x + width * 5.0F, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->storage, x + width * 5.0F, context_y, Colours::GreenYellow);
 	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 

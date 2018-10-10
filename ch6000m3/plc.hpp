@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 
 	private class PLCMaster : public WarGrey::SCADA::MRMaster, WarGrey::SCADA::PLCConfirmation {
 	public:
-		PLCMaster(Syslog* alarm);
+		PLCMaster(Syslog* logger);
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);
@@ -42,6 +42,9 @@ namespace WarGrey::SCADA {
 		void on_realtime_data(const uint8* db2, size_t count, Syslog* logger) override;
 
 	private:
-		float tidemark;
+		float tidemark; // TODO: why the initial tidemark has a negative float value?
+
+	private:
+		long long last_sending_time;
 	};
 }

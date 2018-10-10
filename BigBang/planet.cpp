@@ -928,7 +928,7 @@ void Planet::construct(CanvasCreateResourcesReason reason, float Width, float He
 	this->numpad->sprite_construct();
 }
 
-void Planet::update(long long count, long long interval, long long uptime) {
+void Planet::on_elapse(long long count, long long interval, long long uptime) {
 	if (this->numpad->shown()) {
 		this->numpad->update(count, interval, uptime);
 	}
@@ -951,7 +951,7 @@ void Planet::update(long long count, long long interval, long long uptime) {
 		decorator->update(count, interval, uptime);
 	}
 
-	this->on_elapse(count, interval, uptime);
+	this->update(count, interval, uptime);
 }
 
 void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {

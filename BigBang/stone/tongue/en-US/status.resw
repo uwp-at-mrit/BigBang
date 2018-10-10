@@ -135,8 +135,8 @@
   <data name="power" xml:space="preserve">
     <value>Power:  </value>
   </data>
-  <data name="sd" xml:space="preserve">
-    <value>Card Storage:  </value>
+  <data name="storage" xml:space="preserve">
+    <value>Storage:  </value>
   </data>
   <data name="noipv4" xml:space="preserve">
     <value>0.0.0.0</value>

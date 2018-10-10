@@ -1,3 +1,5 @@
+#include <ppltasks.h>
+#include <collection.h>
 #include <algorithm>
 #include <list>
 
@@ -7,8 +9,15 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Concurrency;
+
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
+using namespace Platform::Collections;
+
 using namespace Windows::Graphics::Display;
+
+using namespace Windows::Storage;
 
 using namespace Windows::Devices::Power;
 using namespace Windows::Devices::WiFi;
@@ -69,10 +78,6 @@ Color WarGrey::SCADA::system_color(UIElementType type) {
 }
 
 /*************************************************************************************************/
-long long WarGrey::SCADA::system_available_storage_size() {
-	return 0LL;
-}
-
 float WarGrey::SCADA::system_battery_capacity(float defval_if_no_battery) {
 	auto info = Battery::AggregateBattery->GetReport();
 	auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
@@ -135,7 +140,7 @@ internal:
 			listener->on_timestamp_changed(update_nowstamp(false));
 			listener->on_battery_capacity_changed(system_battery_capacity());
 			listener->on_wifi_signal_strength_changed(system_wifi_signal_strength());
-			listener->on_available_storage_changed(system_available_storage_size());
+			listener->on_available_storage_changed(0L, 0L);
 			listener->on_ipv4_address_changed(system_ipv4_address());
 		}
 	}
@@ -152,6 +157,8 @@ private:
 		for (auto listener : this->listeners) {
 			listener->on_timestamp_changed(timestamp);
 		}
+
+		this->report_available_storage_if_changed();
 	}
 
 	void report_powerinfo(Battery^ sender, Platform::Object^ e) {
@@ -168,6 +175,35 @@ private:
 		for (auto listener : this->listeners) {
 			listener->on_wifi_signal_strength_changed(signal);
 		}
+	}
+
+	void report_available_storage_if_changed() {
+		static Vector<Platform::String^>^ properties = ref new Vector<Platform::String^>();
+		StorageFolder^ local = ApplicationData::Current->LocalFolder;
+
+		if (properties->Size == 0) {
+			properties->Append("System.FreeSpace");
+			properties->Append("System.Capacity");
+		}
+
+		create_task(local->Properties->RetrievePropertiesAsync(properties)).then([=](task<IMap<Platform::String^, Platform::Object^>^> t) {
+			try {
+				IMap<Platform::String^, Platform::Object^>^ ps = t.get();
+				uint64 fs = safe_cast<uint64>(ps->Lookup("System.FreeSpace"));
+				uint64 ts = safe_cast<uint64>(ps->Lookup("System.Capacity"));
+
+				if (fs != this->last_freespace) {
+					for (auto listener : this->listeners) {
+						listener->on_available_storage_changed(fs, ts);
+					}
+
+					this->last_freespace = fs;
+				}
+			} catch (task_canceled&) {
+			} catch (Platform::Exception^ e) {
+				syslog(Log::Warning, e->Message);
+			}
+		});
 	}
 
 private:
@@ -190,6 +226,9 @@ private:
 private:
 	std::list<ISystemStatusListener*> listeners;
 	DispatcherTimer^ clock;
+
+private:
+	long long last_freespace = -1L;
 };
 
 void WarGrey::SCADA::register_system_status_listener(ISystemStatusListener* listener) {

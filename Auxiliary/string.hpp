@@ -59,7 +59,8 @@ std::string retval; { \
 }
 
 	Platform::String^ substring(Platform::String^ src, int start, int endplus1 = -1);
-	Platform::String^ flstring(double flonum, int precision);
+	Platform::String^ flstring(double flonum, unsigned int precision);
+	Platform::String^ sstring(unsigned long long bytes, unsigned int precision);
 
 	Platform::String^ make_wstring(const wchar_t* fmt, ...);
 	Platform::String^ make_wstring(const char* bytes);

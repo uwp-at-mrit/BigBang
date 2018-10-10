@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
-		void on_elapse(long long count, long long interval, long long uptime) override;
+		void update(long long count, long long interval, long long uptime) override;
 		void reflow(float width, float height) override;
 
 	public:

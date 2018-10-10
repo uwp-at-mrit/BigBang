@@ -214,7 +214,7 @@ private:
 	}
 
 	template<class C, typename E>
-	void load_cylinder(std::map<E, Credit<C, E>*>& cs, E id, float height, double range, Platform::String^ unit, LiquidSurface surface) {
+	void load_cylinder(std::map<E, Credit<C, E>*>& cs, E id, float height, double range, Platform::String^ unit) {
 		auto cylinder = new Credit<C, E>(surface, range, height * 0.2718F, height);
 
 		cs[id] = this->master->insert_one(cylinder, id);
@@ -275,14 +275,14 @@ private: // never delete these graphlets manually.
 	Tracklet<DA>* station;
 	std::map<DA, Credit<Labellet, DA>*> labels;
 	std::map<DA, Credit<Percentagelet, DA>*> progresses;
-	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
 	std::map<DA, Credit<GateValvelet, DA>*> valves;
 	std::map<DA, Credit<HopperPumplet, DA>*> hpumps;
 	std::map<DA, Credit<Circlelet, DA>*> suctions;
+	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
+	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
 	std::map<DA, Credit<Dimensionlet, DA>*> rpms;
-	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
 	OverflowPipelet* overflowpipe;
 	TimeSerieslet<DATS>* timeseries;
 	Arclet* lmod;

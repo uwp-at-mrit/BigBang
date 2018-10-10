@@ -17,10 +17,10 @@ namespace WarGrey::SCADA {
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
+		void update(long long count, long long interval, long long uptime) override;
 
 	public:
 		bool can_select(IGraphlet* g) override;
-		void on_elapse(long long count, long long interval, long long uptime) override;
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
 
