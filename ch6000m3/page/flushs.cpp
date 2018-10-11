@@ -70,18 +70,30 @@ public:
 	Flush(FlushsPage* master) : master(master) {}
 
 public:
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
-	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->set_door_progress(FS::PS1, RealData(DB203, 53U));
+		this->set_door_progress(FS::PS2, RealData(DB203, 54U));
+		this->set_door_progress(FS::PS3, RealData(DB203, 55U));
+		this->set_door_progress(FS::PS4, RealData(DB203, 77U));
+		this->set_door_progress(FS::PS5, RealData(DB203, 78U));
+		this->set_door_progress(FS::PS6, RealData(DB203, 79U));
+		this->set_door_progress(FS::PS7, RealData(DB203, 80U));
 
+		this->set_door_progress(FS::SB1, RealData(DB203, 69U));
+		this->set_door_progress(FS::SB2, RealData(DB203, 70U));
+		this->set_door_progress(FS::SB3, RealData(DB203, 71U));
+		this->set_door_progress(FS::SB4, RealData(DB203, 93U));
+		this->set_door_progress(FS::SB5, RealData(DB203, 94U));
+		this->set_door_progress(FS::SB6, RealData(DB203, 95U));
+		this->set_door_progress(FS::SB7, RealData(DB203, 96U));
+	}
+
+	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -353,6 +365,12 @@ private:
 		this->station->map_credit_graphlet(valve, GraphletAnchor::CC, x0, y0);
 		this->station->map_credit_graphlet(this->captions[id], anchor, dx, dy);
 		this->master->move_to(this->vlabels[id], this->captions[id], GraphletAnchor::CB, GraphletAnchor::CT);
+	}
+
+private:
+	void set_door_progress(FS id, float value) {
+		this->uhdoors[id]->set_value(value / 100.0F);
+		this->progresses[id]->set_value(value);
 	}
 
 // never deletes these graphlets mannually

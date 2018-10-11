@@ -46,7 +46,7 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 
 	if (size == total) {
 		this->on_digital_input_data(data, digital_quantity_size, logger);
-		this->on_analog_input_data(analog_data, size - digital_quantity_size, logger);
+		this->on_analog_input(analog_data, size - digital_quantity_size, logger);
 	} else {
 		logger->log_message(Log::Warning, L"data size contract is broken, expected %d, given %d!", total, size);
 	}

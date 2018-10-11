@@ -167,9 +167,9 @@ public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->percentage_style.unit_color = Colours::Silver;
 		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
-		this->setting_style = make_setting_dimension_style(large_font_size, 6U);
-		this->pump_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Green);
+		this->setting_style = make_setting_dimension_style(metrics_font_size, 6U);
+		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
 	}
 
 public:
@@ -191,39 +191,39 @@ public:
 		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		{ // door progresses
-			this->set_door_progress(HD::PS1, RealData(AI_DB203, 48U));
-			this->set_door_progress(HD::PS2, RealData(AI_DB203, 49U));
-			this->set_door_progress(HD::PS3, RealData(AI_DB203, 50U));
-			this->set_door_progress(HD::PS4, RealData(AI_DB203, 72U));
-			this->set_door_progress(HD::PS5, RealData(AI_DB203, 73U));
-			this->set_door_progress(HD::PS6, RealData(AI_DB203, 74U));
-			this->set_door_progress(HD::PS7, RealData(AI_DB203, 75U));
+			this->set_door_progress(HD::PS1, RealData(DB203, 48U));
+			this->set_door_progress(HD::PS2, RealData(DB203, 49U));
+			this->set_door_progress(HD::PS3, RealData(DB203, 50U));
+			this->set_door_progress(HD::PS4, RealData(DB203, 72U));
+			this->set_door_progress(HD::PS5, RealData(DB203, 73U));
+			this->set_door_progress(HD::PS6, RealData(DB203, 74U));
+			this->set_door_progress(HD::PS7, RealData(DB203, 75U));
 
-			this->set_door_progress(HD::SB1, RealData(AI_DB203, 64U));
-			this->set_door_progress(HD::SB2, RealData(AI_DB203, 65U));
-			this->set_door_progress(HD::SB3, RealData(AI_DB203, 66U));
-			this->set_door_progress(HD::SB4, RealData(AI_DB203, 88U));
-			this->set_door_progress(HD::SB5, RealData(AI_DB203, 89U));
-			this->set_door_progress(HD::SB6, RealData(AI_DB203, 90U));
-			this->set_door_progress(HD::SB7, RealData(AI_DB203, 91U));
+			this->set_door_progress(HD::SB1, RealData(DB203, 64U));
+			this->set_door_progress(HD::SB2, RealData(DB203, 65U));
+			this->set_door_progress(HD::SB3, RealData(DB203, 66U));
+			this->set_door_progress(HD::SB4, RealData(DB203, 88U));
+			this->set_door_progress(HD::SB5, RealData(DB203, 89U));
+			this->set_door_progress(HD::SB6, RealData(DB203, 90U));
+			this->set_door_progress(HD::SB7, RealData(DB203, 91U));
 		}
 
 		{ // pump pressures
-			this->dimensions[HD::D]->set_value(RealData(AI_DB203, 10U), GraphletAnchor::LB);
-			this->dimensions[HD::E]->set_value(RealData(AI_DB203, 11U), GraphletAnchor::LT);
+			this->dimensions[HD::D]->set_value(RealData(DB203, 10U), GraphletAnchor::LB);
+			this->dimensions[HD::E]->set_value(RealData(DB203, 11U), GraphletAnchor::LT);
 
-			this->dimensions[HD::A]->set_value(RealData(AI_DB203, 12U), GraphletAnchor::CC);
-			this->dimensions[HD::H]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::CC);
+			this->dimensions[HD::A]->set_value(RealData(DB203, 12U), GraphletAnchor::CC);
+			this->dimensions[HD::H]->set_value(RealData(DB203, 15U), GraphletAnchor::CC);
 		}
 	}
 
-	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
-		this->set_pump_dimension_status(HD::A, DI_DB4, 50U);
-		this->set_pump_dimension_status(HD::D, DI_DB4, 82U);
-		this->set_pump_dimension_status(HD::E, DI_DB4, 86U);
-		this->set_pump_dimension_status(HD::H, DI_DB4, 66U);
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		this->set_pump_dimension_status(HD::A, DB4, 50U);
+		this->set_pump_dimension_status(HD::D, DB4, 82U);
+		this->set_pump_dimension_status(HD::E, DB4, 86U);
+		this->set_pump_dimension_status(HD::H, DB4, 66U);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -289,11 +289,9 @@ public:
 
 		{ // load settings
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-			ICanvasBrush^ ps_color = Colours::make(default_ps_color);
-			ICanvasBrush^ sb_color = Colours::make(default_sb_color);
 
-			this->load_label(this->captions, HD::Port, ps_color, cpt_font);
-			this->load_label(this->captions, HD::Starboard, sb_color, cpt_font);
+			this->load_label(this->captions, HD::Port, Colours::make(default_ps_color), cpt_font);
+			this->load_label(this->captions, HD::Starboard, Colours::make(default_ps_color), cpt_font);
 
 			this->load_setting(this->dsettings, HD::PSOP, "bar");
 			this->load_setting(this->dsettings, HD::PSCP, "bar");

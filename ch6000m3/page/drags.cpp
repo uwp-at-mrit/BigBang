@@ -64,7 +64,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* AI_DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(AI_DB203, 55));
 		this->lengths[DA::OverflowPipe]->set_value(this->overflowpipe->get_value());
 	}

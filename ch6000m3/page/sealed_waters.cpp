@@ -68,8 +68,8 @@ private class SealedWaters final
 public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->dimension_style = make_highlight_dimension_style(large_font_size, 6U);
-		this->setting_style = make_highlight_dimension_style(large_font_size, 6U,
+		this->dimension_style = make_highlight_dimension_style(metrics_font_size, 6U);
+		this->setting_style = make_highlight_dimension_style(metrics_font_size, 6U,
 			Colours::GhostWhite, Colours::RoyalBlue);
 	}
 
@@ -93,36 +93,36 @@ public:
 		//this->rpms[SW::SBUWP]->set_value(DBD(DB2, 204U));
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->pressures[SW::PSFP]->set_value(RealData(AI_DB203, 34U), GraphletAnchor::LB);
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->pressures[SW::PSFP]->set_value(RealData(DB203, 34U), GraphletAnchor::LB);
 
-		this->pressures[SW::PSHP]->set_value(RealData(AI_DB203, 28U), GraphletAnchor::LB);
-		this->flows[SW::PSHP]->set_value(RealData(AI_DB203, 29U), GraphletAnchor::LT);
-		this->pressures[SW::SBHP]->set_value(RealData(AI_DB203, 44U), GraphletAnchor::LB);
-		this->flows[SW::SBHP]->set_value(RealData(AI_DB203, 45U), GraphletAnchor::LB);
+		this->pressures[SW::PSHP]->set_value(RealData(DB203, 28U), GraphletAnchor::LB);
+		this->flows[SW::PSHP]->set_value(RealData(DB203, 29U), GraphletAnchor::LT);
+		this->pressures[SW::SBHP]->set_value(RealData(DB203, 44U), GraphletAnchor::LB);
+		this->flows[SW::SBHP]->set_value(RealData(DB203, 45U), GraphletAnchor::LB);
 
-		this->pressures[SW::PSUWP1]->set_value(RealData(AI_DB203, 112U), GraphletAnchor::LB);
-		this->pressures[SW::PSUWP2]->set_value(RealData(AI_DB203, 113U), GraphletAnchor::LB);
-		this->pressures[SW::SBUWP1]->set_value(RealData(AI_DB203, 118U), GraphletAnchor::LB);
-		this->pressures[SW::SBUWP2]->set_value(RealData(AI_DB203, 119U), GraphletAnchor::LB);
+		this->pressures[SW::PSUWP1]->set_value(RealData(DB203, 112U), GraphletAnchor::LB);
+		this->pressures[SW::PSUWP2]->set_value(RealData(DB203, 113U), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP1]->set_value(RealData(DB203, 118U), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP2]->set_value(RealData(DB203, 119U), GraphletAnchor::LB);
 	}
 
-	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
-		this->set_hopper_pump_status(SW::PSHP, SW::PSUWP, DI_DB4, 1U);
-		this->set_hopper_pump_status(SW::SBHP, SW::SBUWP, DI_DB4, 25U);
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {
+		this->set_hopper_pump_status(SW::PSHP, SW::PSUWP, DB4, 1U);
+		this->set_hopper_pump_status(SW::SBHP, SW::SBUWP, DB4, 25U);
 
-		this->set_flushing_pump_status(SW::PSFP, DI_DB4, 105U);
-		this->set_flushing_pump_status(SW::SBFP, DI_DB4, 109U);
+		this->set_flushing_pump_status(SW::PSFP, DB4, 105U);
+		this->set_flushing_pump_status(SW::SBFP, DB4, 109U);
 
-		this->set_sealed_pump_status(SW::PSHPa, DI_DB4, 9U);
-		this->set_sealed_pump_status(SW::PSHPb, DI_DB4, 13U);
-		this->set_sealed_pump_status(SW::SBHPa, DI_DB4, 33U);
-		this->set_sealed_pump_status(SW::SBHPb, DI_DB4, 37U);
+		this->set_sealed_pump_status(SW::PSHPa, DB4, 9U);
+		this->set_sealed_pump_status(SW::PSHPb, DB4, 13U);
+		this->set_sealed_pump_status(SW::SBHPa, DB4, 33U);
+		this->set_sealed_pump_status(SW::SBHPb, DB4, 37U);
 
-		this->set_sealed_pump_status(SW::PSUWP1, DI_DB4, 513U);
-		this->set_sealed_pump_status(SW::PSUWP2, DI_DB4, 517U);
-		this->set_sealed_pump_status(SW::SBUWP1, DI_DB4, 529U);
-		this->set_sealed_pump_status(SW::SBUWP2, DI_DB4, 533U);
+		this->set_sealed_pump_status(SW::PSUWP1, DB4, 513U);
+		this->set_sealed_pump_status(SW::PSUWP2, DB4, 517U);
+		this->set_sealed_pump_status(SW::SBUWP1, DB4, 529U);
+		this->set_sealed_pump_status(SW::SBUWP2, DB4, 533U);
 	}
 
 	void post_read_data(Syslog* logger) override {

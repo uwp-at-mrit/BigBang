@@ -8,11 +8,12 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Debug;
 static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 #endif
 
-static Platform::String^ remote_test_server = "192.168.0.8";
+static Platform::String^ remote_test_server = nullptr;
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 4;
 
+/*************************************************************************************************/
 static const size_t hopper_count = 7;
 
 static const float metrics_font_size = 20.0F;

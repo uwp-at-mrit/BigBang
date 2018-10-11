@@ -180,10 +180,28 @@
   <data name="Hatch" xml:space="preserve">
     <value>Sea Water Inlet</value>
   </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port Upper Hopper Door</value>
+  </data>
+  <data name="PSFC" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
   <data name="PSHPump" xml:space="preserve">
     <value>Port Inhatch Pump</value>
   </data>
+  <data name="PSPC" xml:space="preserve">
+    <value>Pressure Control</value>
+  </data>
+  <data name="SBFC" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
   <data name="SBHPump" xml:space="preserve">
     <value>Starboard Inhatch Pump</value>
+  </data>
+  <data name="SBPC" xml:space="preserve">
+    <value>Pressure Control</value>
+  </data>
+  <data name="Starboard" xml:space="preserve">
+    <value>Starboard Upper Hopper Door</value>
   </data>
 </root>

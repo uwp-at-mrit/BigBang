@@ -91,9 +91,9 @@ void HopperDoorlet::on_value_changed(double v) {
 void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	const DoorStyle style = this->get_style();
 	float border_radius = this->radiusX - default_thickness;
+	float body_radius = border_radius - default_thickness * 1.618F;
 	float cx = x + this->radiusX;
 	float cy = y + this->radiusY;
-	float body_radius = border_radius - default_thickness * 1.618F;
 	
 	ds->FillCircle(cx, cy, border_radius, Colours::Background);
 	ds->FillCircle(cx, cy, body_radius, style.body_color);

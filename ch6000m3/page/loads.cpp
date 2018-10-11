@@ -75,53 +75,64 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->dimensions[LD::C]->set_value(RealData(AI_DB203, 8U), GraphletAnchor::LB);
-		this->dimensions[LD::F]->set_value(RealData(AI_DB203, 9U), GraphletAnchor::LT);
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->powers[LD::PSHPump]->set_value(DBD(DB2, 12U));
+		this->powers[LD::SBHPump]->set_value(DBD(DB2, 16U));
+		//this->powers[LD::PSUWPump]->set_value(DBD(DB2, 200U));
+		//this->powers[LD::SBUWPump]->set_value(DBD(DB2, 204U));
 
-		this->dimensions[LD::A]->set_value(RealData(AI_DB203, 12U), GraphletAnchor::LB);
-		this->dimensions[LD::H]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::LT);
-
-		this->percentages[LD::D003]->set_value(RealData(AI_DB203, 39U), GraphletAnchor::LB);
-		//this->percentages[LD::D004]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::LT);
+		//this->rpms[LD::PSHPump]->set_value(DBD(DB2, 604U));
+		//this->rpms[LD::SBHPump]->set_value(DBD(DB2, 608U));
+		//this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 200U));
+		//this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 204U));
 	}
 
-	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
-		
-		this->set_hopper_pump_status(LD::PSHPump, LD::PSUWPump, DI_DB4, 1U);
-		this->set_hopper_pump_status(LD::SBHPump, LD::SBUWPump, DI_DB4, 25U);
-		
-		this->set_pump_dimension_status(LD::A, DI_DB4, 50U);
-		this->set_pump_dimension_status(LD::C, DI_DB4, 58U);
-		this->set_pump_dimension_status(LD::F, DI_DB4, 74U);
-		this->set_pump_dimension_status(LD::H, DI_DB4, 66U);
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->pressures[LD::C]->set_value(RealData(DB203, 8U), GraphletAnchor::LB);
+		this->pressures[LD::F]->set_value(RealData(DB203, 9U), GraphletAnchor::LT);
 
-		this->set_valve_status(LD::D005, DI_DB4, 259U, 417U); // PS Isolation
-		this->set_valve_status(LD::D006, DI_DB4, 261U, 419U); // PS Underwater Unload
-		this->set_valve_status(LD::D002, DI_DB4, 273U, 421U); // Empty
-		this->set_valve_status(LD::D003, DI_DB4, 279U, 423U); // SB Suction <==
-		this->set_valve_status(LD::D004, DI_DB4, 257U, 425U); // PS Suction
-		this->set_valve_status(LD::D016, DI_DB4, 375U, 427U); // PS Back Unload
-		this->set_valve_status(LD::D015, DI_DB4, 407U, 429U); // SB Back Unload
-		this->set_valve_status(LD::D014, DI_DB4, 373U, 431U); // PS Fore Unload
-		this->set_valve_status(LD::D013, DI_DB4, 405U, 433U); // SB Fore Unload
-		this->set_valve_status(LD::D024, DI_DB4, 413U, 435U); // Gantry
-		this->set_valve_status(LD::D012, DI_DB4, 333U, 437U); // PS LMOD Unload
-		this->set_valve_status(LD::D010, DI_DB4, 295U, 439U); // PS Main Load
-		this->set_valve_status(LD::D011, DI_DB4, 349U, 441U); // SB LMOD Unload
-		this->set_valve_status(LD::D009, DI_DB4, 293U, 443U); // PS Underwater Load
-		this->set_valve_status(LD::D017, DI_DB4, 297U, 445U); // PS Hopper Load
-		this->set_valve_status(LD::D020, DI_DB4, 303U, 447U); // PS Shore Unload
-		this->set_valve_status(LD::D021, DI_DB4, 305U, 449U); // Bow Fill
-		this->set_valve_status(LD::D019, DI_DB4, 301U, 451U); // SB Shore Unload
-		this->set_valve_status(LD::D018, DI_DB4, 299U, 453U); // SB Hopper Load
-		this->set_valve_status(LD::D007, DI_DB4, 289U, 455U); // SB Underwater Load
-		this->set_valve_status(LD::D008, DI_DB4, 291U, 457U); // SB Main Load
-		this->set_valve_status(LD::D023, DI_DB4, 309U, 459U); // Through
-		this->set_valve_status(LD::D022, DI_DB4, 307U, 461U); // Bow Jet
-		this->set_valve_status(LD::D026, DI_DB4, 277U, 463U); // SB Underwater Unload
-		//this->set_valve_status(LD::D001, DI_DB4, 239U, 465U); // Empty and Water
-		this->set_valve_status(LD::D025, DI_DB4, 275U, 467U); // SB Isolation
+		this->pressures[LD::A]->set_value(RealData(DB203, 12U), GraphletAnchor::LB);
+		this->pressures[LD::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+
+		this->progresses[LD::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
+		//this->progresses[LD::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+	}
+
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		this->set_hopper_pump_status(LD::PSHPump, LD::PSUWPump, DB4, 1U);
+		this->set_hopper_pump_status(LD::SBHPump, LD::SBUWPump, DB4, 25U);
+		
+		this->set_pump_dimension_status(LD::A, DB4, 50U);
+		this->set_pump_dimension_status(LD::C, DB4, 58U);
+		this->set_pump_dimension_status(LD::F, DB4, 74U);
+		this->set_pump_dimension_status(LD::H, DB4, 66U);
+
+		this->set_valve_status(LD::D005, DB4, 259U, 417U); // PS Isolation
+		this->set_valve_status(LD::D006, DB4, 261U, 419U); // PS Underwater Unload
+		this->set_valve_status(LD::D002, DB4, 273U, 421U); // Empty
+		this->set_valve_status(LD::D003, DB4, 279U, 423U); // SB Suction <==
+		this->set_valve_status(LD::D004, DB4, 257U, 425U); // PS Suction
+		this->set_valve_status(LD::D016, DB4, 375U, 427U); // PS Back Unload
+		this->set_valve_status(LD::D015, DB4, 407U, 429U); // SB Back Unload
+		this->set_valve_status(LD::D014, DB4, 373U, 431U); // PS Fore Unload
+		this->set_valve_status(LD::D013, DB4, 405U, 433U); // SB Fore Unload
+		this->set_valve_status(LD::D024, DB4, 413U, 435U); // Gantry
+		this->set_valve_status(LD::D012, DB4, 333U, 437U); // PS LMOD Unload
+		this->set_valve_status(LD::D010, DB4, 295U, 439U); // PS Main Load
+		this->set_valve_status(LD::D011, DB4, 349U, 441U); // SB LMOD Unload
+		this->set_valve_status(LD::D009, DB4, 293U, 443U); // PS Underwater Load
+		this->set_valve_status(LD::D017, DB4, 297U, 445U); // PS Hopper Load
+		this->set_valve_status(LD::D020, DB4, 303U, 447U); // PS Shore Unload
+		this->set_valve_status(LD::D021, DB4, 305U, 449U); // Bow Fill
+		this->set_valve_status(LD::D019, DB4, 301U, 451U); // SB Shore Unload
+		this->set_valve_status(LD::D018, DB4, 299U, 453U); // SB Hopper Load
+		this->set_valve_status(LD::D007, DB4, 289U, 455U); // SB Underwater Load
+		this->set_valve_status(LD::D008, DB4, 291U, 457U); // SB Main Load
+		this->set_valve_status(LD::D023, DB4, 309U, 459U); // Through
+		this->set_valve_status(LD::D022, DB4, 307U, 461U); // Bow Jet
+		this->set_valve_status(LD::D026, DB4, 277U, 463U); // SB Underwater Unload
+		//this->set_valve_status(LD::D001, DB4, 239U, 465U); // Empty and Water
+		this->set_valve_status(LD::D025, DB4, 275U, 467U); // SB Isolation
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -147,8 +158,8 @@ public:
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->special_font = make_text_format(tiny_font_size);
-		this->pump_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(large_font_size, 6U, Colours::Green);
+		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 	}
@@ -160,7 +171,7 @@ public:
 
 		pTurtle->move_left(LD::deck_rx)->move_left(2, LD::D021)->move_left(2, LD::d2122);
 		pTurtle->move_down(5)->move_right(2, LD::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(6, LD::d1720);
+		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(7, LD::d1720);
 
 		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(4, LD::D010)->move_left(6, LD::d12);
 		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
@@ -183,14 +194,14 @@ public:
 		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
 
 		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008);
-		pTurtle->move_left(6, LD::d11)->move_up(2, LD::D011)->move_up(3)->jump_back();
+		pTurtle->move_left(6, LD::d11)->move_up(2, LD::D011)->move_up(3 /* LD::LMOD */)->jump_back();
 		pTurtle->move_left(4, LD::d13)->move_left_up(2, LD::D013)->move_left_up(1.5F)->jump_back();
 		pTurtle->move_left(9)->move_left_up(2, LD::D015)->move_left_up(1.5F);
 
 		pTurtle->jump_back(LD::d0326)->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2, LD::F)->turn_down_left();
 		pTurtle->move_left(10, LD::SBUWPump)->move_left(8, LD::H)->move_left(LD::Starboard);
 
-		pTurtle->jump_back(LD::d1819)->move_right(4, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
+		pTurtle->jump_back(LD::d1819)->move_right(5, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipe_thickness, default_pipe_color));
 
@@ -228,9 +239,9 @@ public:
 		}
 
 		{ // load labels and dimensions
-			this->load_percentage(this->percentages, LD::D003);
-			this->load_percentage(this->percentages, LD::D004);
-			this->load_dimensions(this->dimensions, LD::A, LD::H, "bar");
+			this->load_percentage(this->progresses, LD::D003);
+			this->load_percentage(this->progresses, LD::D004);
+			this->load_dimensions(this->pressures, LD::A, LD::H, "bar");
 
 			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->special_font);
@@ -263,16 +274,18 @@ public:
 		}
 
 		for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
-			switch (it->first) {
-			case LD::PSUWPump: { anchor = GraphletAnchor::LB; }; break;
-			case LD::SBUWPump: { anchor = GraphletAnchor::LT; }; break;
-			default: { anchor = GraphletAnchor::LC; }
-			}
-
 			it->second->fill_pump_origin(&ox);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
-			this->master->move_to(this->captions[it->first],it->second,
-				GraphletAnchor::RC, anchor, std::fabsf(ox));
+
+			if (it->first == LD::SBUWPump) {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, std::fabsf(ox));
+				this->master->move_to(this->rpms[it->first], this->captions[it->first], GraphletAnchor::LT, GraphletAnchor::LB);
+				this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LT, GraphletAnchor::LB);
+			} else {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, std::fabsf(ox));
+				this->master->move_to(this->powers[it->first], this->captions[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
+				this->master->move_to(this->rpms[it->first], this->powers[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
+			}
 		}
 
 		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -342,13 +355,13 @@ public:
 		{ // reflow dimensions
 			float offset = default_pipe_thickness * 2.0F;
 
-			this->master->move_to(this->percentages[LD::D003], this->gvalves[LD::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
-			this->master->move_to(this->percentages[LD::D004], this->gvalves[LD::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
+			this->master->move_to(this->progresses[LD::D003], this->gvalves[LD::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
+			this->master->move_to(this->progresses[LD::D004], this->gvalves[LD::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 
-			this->station->map_credit_graphlet(this->dimensions[LD::A], GraphletAnchor::LB, 0.0F, -offset);
-			this->station->map_credit_graphlet(this->dimensions[LD::C], GraphletAnchor::LB, gwidth);
-			this->station->map_credit_graphlet(this->dimensions[LD::F], GraphletAnchor::LT, gwidth);
-			this->station->map_credit_graphlet(this->dimensions[LD::H], GraphletAnchor::LT, 0.0F, +offset);
+			this->station->map_credit_graphlet(this->pressures[LD::A], GraphletAnchor::LB, 0.0F, -offset);
+			this->station->map_credit_graphlet(this->pressures[LD::C], GraphletAnchor::LB, gwidth);
+			this->station->map_credit_graphlet(this->pressures[LD::F], GraphletAnchor::LT, gwidth);
+			this->station->map_credit_graphlet(this->pressures[LD::H], GraphletAnchor::LT, 0.0F, +offset);
 		}
 	}
 
@@ -400,11 +413,13 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
+		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "kwatt"), id);
+		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "rpm"), id);
 	}
 
 	template<typename E>
 	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
-		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
+		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
 	}
 
 	template<typename E>
@@ -452,12 +467,28 @@ private:
 	}
 
 	void set_valve_status(LD id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
-		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
-		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open, TValveStatus::Closed);
+		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open);
+		this->gvalves[id]->set_status(DBX(db4, gidx_p1 + 0), GateValveStatus::Closed);
+
+		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open);
+		this->mvalves[id]->set_status(DBX(db4, midx_p1 + 0), TValveStatus::Closed);
+	}
+
+	void set_valve_details(LD id, const uint8* db205, size_t idx_p1) {
+		GateValvelet* target = this->gvalves[id];
+
+		target->set_status(DBX(db205, idx_p1 - 1), GateValveStatus::Opening);
+		target->set_status(DBX(db205, idx_p1 + 0), GateValveStatus::Closing);
+		target->set_status(DBX(db205, idx_p1 + 1), GateValveStatus::Unopenable);
+		target->set_status(DBX(db205, idx_p1 + 2), GateValveStatus::Unclosable);
+		target->set_status(DBX(db205, idx_p1 + 3), GateValveStatus::OpenReady);
+		target->set_status(DBX(db205, idx_p1 + 4), GateValveStatus::CloseReady);
+		target->set_status(DBX(db205, idx_p1 + 5), GateValveStatus::FakeOpen);
+		target->set_status(DBX(db205, idx_p1 + 6), GateValveStatus::FakeClose);
 	}
 
 	void set_pump_dimension_status(LD id, const uint8* db4, size_t idx_p1) {
-		this->dimensions[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
+		this->pressures[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
 	}
 
 // never deletes these graphlets mannually
@@ -468,8 +499,10 @@ private:
 	std::map<LD, Credit<GateValvelet, LD>*> gvalves;
 	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
-	std::map<LD, Credit<Percentagelet, LD>*> percentages;
-	std::map<LD, Credit<Dimensionlet, LD>*> dimensions;
+	std::map<LD, Credit<Percentagelet, LD>*> progresses;
+	std::map<LD, Credit<Dimensionlet, LD>*> pressures;
+	std::map<LD, Credit<Dimensionlet, LD>*> powers;
+	std::map<LD, Credit<Dimensionlet, LD>*> rpms;
 	std::map<LD, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
@@ -483,7 +516,7 @@ private:
 	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
-	DimensionStyle percentage_style;
+	DimensionStyle plain_style;
 
 private:
 	LoadsPage* master;

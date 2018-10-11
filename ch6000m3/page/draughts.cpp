@@ -109,17 +109,17 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->overflowpipe->set_value(RealData(AI_DB203, 55));
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->overflowpipe->set_value(RealData(DB203, 55));
 		this->dimensions[DL::OverflowPipe]->set_value(this->overflowpipe->get_value());
 
-		this->dimensions[DL::psBowDraft]->set_value(RealData(AI_DB203, 31));
-		this->dimensions[DL::psSuctionDraft]->set_value(RealData(AI_DB203, 32));
-		this->dimensions[DL::psSternDraft]->set_value(RealData(AI_DB203, 102));
+		this->dimensions[DL::psBowDraft]->set_value(RealData(DB203, 31));
+		this->dimensions[DL::psSuctionDraft]->set_value(RealData(DB203, 32));
+		this->dimensions[DL::psSternDraft]->set_value(RealData(DB203, 102));
 
-		this->dimensions[DL::sbBowDraft]->set_value(RealData(AI_DB203, 46));
-		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(AI_DB203, 47));
-		this->dimensions[DL::sbSternDraft]->set_value(RealData(AI_DB203, 103));
+		this->dimensions[DL::sbBowDraft]->set_value(RealData(DB203, 46));
+		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(DB203, 47));
+		this->dimensions[DL::sbSternDraft]->set_value(RealData(DB203, 103));
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {

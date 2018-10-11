@@ -154,7 +154,7 @@ public:
 	}
 
 public:
-	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+	void on_analog_input(uint8* db4, size_t size, Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 

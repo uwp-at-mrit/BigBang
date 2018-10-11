@@ -178,7 +178,7 @@ public:
 		this->master->leave_critical_section();
 	}
 	
-	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+	void on_analog_input(uint8* db4, size_t size, Syslog* logger) override {
 		size_t db_idx_acc = 3;
 		
 		this->master->enter_critical_section();
@@ -350,7 +350,7 @@ public:
 		return (this->surface_ready() && this->shown());
 	}
 
-	void on_analog_input_data(uint8* db4, size_t size, Syslog* logger) override {
+	void on_analog_input(uint8* db4, size_t size, Syslog* logger) override {
 		this->enter_critical_section();
 		this->begin_update_sequence();
 

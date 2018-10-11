@@ -37,19 +37,23 @@ private enum class FJHDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class FJ : unsigned int {
-	Port, Starboard,
-	
 	// Valves
 	D001, D002, D006, D008, D010, D017, D018, D019, D020, D021, D022, D024,
 	D003, D007, D023, D025,
 	D004, D005, D009,
 
-	// Upper Hopper Doors
+	// Pump dimensions
+	A, C, F, H,
+
+	// Hopper doors
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 
 	// Key Labels
-	Hatch, PSHPump, SBHPump, Gantry,
+	Port, Starboard, Hatch, PSHPump, SBHPump, Gantry,
+
+	// Settings
+	PSPC, SBPC, PSFC, SBFC,
 	
 	_,
 	// anchors used as last jumping points
@@ -72,18 +76,83 @@ public:
 	FillJet(FillnJetPage* master) : master(master) {}
 
 public:
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
+	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
-
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
 	}
 
-	void on_digital_input(const uint8* DI_db205_X, size_t count, Syslog* logger) {
-		this->master->enter_critical_section();
-		this->master->begin_update_sequence();
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->powers[FJ::PSHPump]->set_value(DBD(DB2, 12U));
+		this->powers[FJ::SBHPump]->set_value(DBD(DB2, 16U));
+		//this->powers[FJ::PSUWPump]->set_value(DBD(DB2, 200U));
+		//this->powers[FJ::SBUWPump]->set_value(DBD(DB2, 204U));
 
+		//this->rpms[FJ::PSHPump]->set_value(DBD(DB2, 604U));
+		//this->rpms[FJ::SBHPump]->set_value(DBD(DB2, 608U));
+		//this->rpms[FJ::PSUWPump]->set_value(DBD(DB2, 200U));
+		//this->rpms[FJ::SBUWPump]->set_value(DBD(DB2, 204U));
+	}
+
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->pressures[FJ::C]->set_value(RealData(DB203, 8U), GraphletAnchor::LB);
+		this->pressures[FJ::F]->set_value(RealData(DB203, 9U), GraphletAnchor::LT);
+
+		this->pressures[FJ::A]->set_value(RealData(DB203, 12U), GraphletAnchor::LB);
+		this->pressures[FJ::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+
+		this->progresses[FJ::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
+		//this->progresses[FJ::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+
+		{ // door progresses
+			this->set_door_progress(FJ::PS1, RealData(DB203, 53U));
+			this->set_door_progress(FJ::PS2, RealData(DB203, 54U));
+			this->set_door_progress(FJ::PS3, RealData(DB203, 55U));
+			this->set_door_progress(FJ::PS4, RealData(DB203, 77U));
+			this->set_door_progress(FJ::PS5, RealData(DB203, 78U));
+			this->set_door_progress(FJ::PS6, RealData(DB203, 79U));
+			this->set_door_progress(FJ::PS7, RealData(DB203, 80U));
+
+			this->set_door_progress(FJ::SB1, RealData(DB203, 69U));
+			this->set_door_progress(FJ::SB2, RealData(DB203, 70U));
+			this->set_door_progress(FJ::SB3, RealData(DB203, 71U));
+			this->set_door_progress(FJ::SB4, RealData(DB203, 93U));
+			this->set_door_progress(FJ::SB5, RealData(DB203, 94U));
+			this->set_door_progress(FJ::SB6, RealData(DB203, 95U));
+			this->set_door_progress(FJ::SB7, RealData(DB203, 96U));
+		}
+	}
+
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		this->set_hopper_pump_status(FJ::PSHPump, DB4, 1U);
+		this->set_hopper_pump_status(FJ::SBHPump, DB4, 25U);
+
+		this->set_pump_dimension_status(FJ::A, DB4, 50U);
+		this->set_pump_dimension_status(FJ::C, DB4, 58U);
+		this->set_pump_dimension_status(FJ::F, DB4, 74U);
+		this->set_pump_dimension_status(FJ::H, DB4, 66U);
+
+		this->set_valve_status(FJ::D005, DB4, 259U, 417U); // PS Isolation
+		this->set_valve_status(FJ::D006, DB4, 261U, 419U); // PS Underwater Unload
+		this->set_valve_status(FJ::D002, DB4, 273U, 421U); // Empty
+		this->set_valve_status(FJ::D003, DB4, 279U, 423U); // SB Suction <==
+		this->set_valve_status(FJ::D004, DB4, 257U, 425U); // PS Suction
+		this->set_valve_status(FJ::D024, DB4, 413U, 435U); // Gantry
+		this->set_valve_status(FJ::D010, DB4, 295U, 439U); // PS Main Load
+		this->set_valve_status(FJ::D009, DB4, 293U, 443U); // PS Underwater Load
+		this->set_valve_status(FJ::D017, DB4, 297U, 445U); // PS Hopper Load
+		this->set_valve_status(FJ::D020, DB4, 303U, 447U); // PS Shore Unload
+		this->set_valve_status(FJ::D021, DB4, 305U, 449U); // Bow Fill
+		this->set_valve_status(FJ::D019, DB4, 301U, 451U); // SB Shore Unload
+		this->set_valve_status(FJ::D018, DB4, 299U, 453U); // SB Hopper Load
+		this->set_valve_status(FJ::D007, DB4, 289U, 455U); // SB Underwater Load
+		this->set_valve_status(FJ::D008, DB4, 291U, 457U); // SB Main Load
+		this->set_valve_status(FJ::D023, DB4, 309U, 459U); // Through
+		this->set_valve_status(FJ::D022, DB4, 307U, 461U); // Bow Jet
+		//this->set_valve_status(FJ::D001, DB4, 239U, 465U); // Empty and Water
+		this->set_valve_status(FJ::D025, DB4, 275U, 467U); // SB Isolation
+	}
+
+	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -111,11 +180,11 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
+		this->setting_style = make_setting_dimension_style(metrics_font_size, 6U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
-
-		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
-		this->percentage_style.unit_color = Colours::Silver;
 	}
  
 public:
@@ -125,7 +194,7 @@ public:
 
 		pTurtle->move_left(FJ::deck_rx)->move_left(2, FJ::D021)->move_left(2, FJ::d2122);
 		pTurtle->move_down(5)->move_right(2, FJ::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, FJ::d1920)->move_left(2, FJ::D020)->move_left(6, FJ::d1720);
+		pTurtle->move_left(2, FJ::d1920)->move_left(2, FJ::D020)->move_left(7, FJ::d1720);
 
 		pTurtle->move_left(3, FJ::D017)->move_left(11, FJ::n0405)->move_left(4, FJ::D010)->jump_back(FJ::d1720);
 		
@@ -133,7 +202,7 @@ public:
 		pTurtle->move_up(3, FJ::d0406)->move_right(4, FJ::D006)->move_right(4)->move_down(0.5F, FJ::deck_ty)->move_down(FJ::D009);
 		pTurtle->move_down(5)->jump_down()->move_down(2, FJ::D023)->jump_back(FJ::d0406);
 
-		pTurtle->move_up(1.5F, FJ::D004)->move_up(2, FJ::ps)->move_up(3, FJ::Port);
+		pTurtle->move_up(1.5F, FJ::D004)->move_up(2, FJ::ps)->move_up(2, FJ::C)->move_up(FJ::Port);
 
 		pTurtle->jump_back(FJ::D023)->move_down(2)->jump_down()->move_down(5, FJ::D007);
 		pTurtle->move_down(FJ::deck_by)->move_down(0.5F, FJ::d007)->jump_left(8, FJ::d0325);
@@ -142,13 +211,13 @@ public:
 		pTurtle->jump_up(2.5F)->move_left(2, FJ::D002)->move_left(15, FJ::n24)->move_left(10, FJ::D001)->move_left(3, FJ::Hatch);
 
 		pTurtle->jump_back(FJ::d1819)->move_left(3, FJ::D018)->move_left(11, FJ::n0325)->move_left(4, FJ::D008);
-		pTurtle->move_left(13)->move_up(5.5F)->jump_up()->move_up(5.5F);
+		pTurtle->move_left(13)->move_up(5.5F)->jump_up()->move_up(6.5F);
 		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, FJ::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, FJ::Gantry)->move_left()->jump_back(FJ::Gantry)->move_right()->jump_back(FJ::d0325);
 
-		pTurtle->move_down(1.5F, FJ::D003)->move_down(2, FJ::sb)->move_down(3, FJ::Starboard);
+		pTurtle->move_down(1.5F, FJ::D003)->move_down(2, FJ::sb)->move_down(2, FJ::F)->move_down(FJ::Starboard);
 
-		pTurtle->jump_back(FJ::d1819)->move_right(4, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
+		pTurtle->jump_back(FJ::d1819)->move_right(5, FJ::deck_lx)->move_right(2, FJ::D019)->move_right(2)->move_to(FJ::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<FJ>(pTurtle, default_pipe_thickness, default_pipe_color));
 
@@ -177,8 +246,8 @@ public:
 			float sct_radius = radius * 0.5F;
 			float nic_radius = radius * 0.25F;
 			
-			this->load_pump(this->pumps, this->captions, FJ::PSHPump, -radius, +2.0F);
-			this->load_pump(this->pumps, this->captions, FJ::SBHPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, FJ::PSHPump, -radius, +2.0F);
+			this->load_pump(this->hoppers, this->captions, FJ::SBHPump, -radius, -2.0F);
 			this->ps_suction = this->master->insert_one(new Circlelet(sct_radius, default_ps_color, default_pipe_thickness));
 			this->sb_suction = this->master->insert_one(new Circlelet(sct_radius, default_sb_color, default_pipe_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
@@ -189,7 +258,19 @@ public:
 			}
 		}
 
-		{ // load other labels
+		{ // load labels and dimensions
+			this->load_percentage(this->progresses, FJ::D003);
+			this->load_percentage(this->progresses, FJ::D004);
+			this->load_dimensions(this->pressures, FJ::A, FJ::H, "bar");
+
+			this->load_setting(this->dsettings, FJ::PSPC, "bar");
+			this->load_setting(this->dsettings, FJ::SBPC, "bar");
+
+			this->load_setting(this->psettings, FJ::PSFC);
+			this->load_setting(this->psettings, FJ::SBFC);
+
+			this->load_label(this->captions, FJ::Port, Colours::make(default_ps_color), this->caption_font);
+			this->load_label(this->captions, FJ::Starboard, Colours::make(default_sb_color), this->caption_font);
 			this->load_label(this->captions, FJ::Hatch, Colours::SeaGreen, this->caption_font);
 			this->load_label(this->captions, FJ::Gantry, Colours::Yellow, this->caption_font);
 
@@ -226,14 +307,15 @@ public:
 			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.4F);
-		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gheight * +2.4F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::PS1, FJ::PS7, gheight * -2.5F);
+		this->reflow_doors(this->uhdoors, this->progresses, FJ::SB1, FJ::SB7, gheight * +2.5F);
 
-		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
+		for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
 			it->second->fill_pump_origin(&ox);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
-			this->master->move_to(this->captions[it->first], it->second,
-				GraphletAnchor::RC, GraphletAnchor::LC, std::fabsf(ox));
+			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, std::fabsf(ox));
+			this->master->move_to(this->powers[it->first], this->captions[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
+			this->master->move_to(this->rpms[it->first], this->powers[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
 		}
 
 		this->vlabels[FJ::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -291,6 +373,28 @@ public:
 				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CB);
 			}
 		}
+
+		{ // reflow settings dimensions
+			float soff = gwidth * 24.0F;
+			float doff = gwidth * 18.0F;
+			float gap = default_pipe_thickness * 2.0F;
+
+			this->station->map_graphlet_at_anchor(this->captions[FJ::Port], FJ::ps, GraphletAnchor::RB, -soff, -gheight);
+			this->master->move_to(this->psettings[FJ::PSFC], this->captions[FJ::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			this->master->move_to(this->dsettings[FJ::PSPC], this->psettings[FJ::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			
+			this->station->map_graphlet_at_anchor(this->captions[FJ::Starboard], FJ::sb, GraphletAnchor::RT, -soff, gheight);
+			this->master->move_to(this->psettings[FJ::SBFC], this->captions[FJ::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->dsettings[FJ::SBPC], this->psettings[FJ::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			
+			this->master->move_to(this->progresses[FJ::D003], this->gvalves[FJ::D003], GraphletAnchor::CB, GraphletAnchor::LT, gap, -gap);
+			this->master->move_to(this->progresses[FJ::D004], this->gvalves[FJ::D004], GraphletAnchor::CT, GraphletAnchor::LB, gap);
+			
+			this->station->map_graphlet_at_anchor(this->pressures[FJ::A], FJ::Port, GraphletAnchor::LB, -doff);
+			this->station->map_credit_graphlet(this->pressures[FJ::C], GraphletAnchor::LB, gwidth);
+			this->station->map_credit_graphlet(this->pressures[FJ::F], GraphletAnchor::LT, gwidth);
+			this->station->map_graphlet_at_anchor(this->pressures[FJ::H], FJ::Starboard, GraphletAnchor::LT, -doff);
+		}
 	}
 
 public:
@@ -314,6 +418,16 @@ public:
 	}
 
 private:
+	template<typename E>
+	void load_setting(std::map<E, Credit<Percentagelet, E>*>& ds, E id) {
+		ds[id] = this->master->insert_one(new Credit<Percentagelet, E>(DimensionStatus::Input, this->setting_style, _speak(id)), id);
+	}
+
+	template<typename E>
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
+	}
+
 	template<class G, typename E>
 	void load_valve(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
 		, E id, float radius, double degrees) {
@@ -345,7 +459,7 @@ private:
 	void load_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<D, E>(radius), id);
-			ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->percentage_style), id);
+			this->load_percentage(ps, id);
 		}
 	}
 
@@ -354,12 +468,22 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
+		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "kwatt"), id);
+		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "rpm"), id);
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
+	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
+		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, id.ToString()), id);
+
+			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
+			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
 		}
 	}
 
@@ -380,6 +504,7 @@ private:
 		GraphletAnchor d_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
 		float lx, rx, y, cell_width;
+		float label_yoff = default_pipe_thickness * 2.0F;
 		
 		if (yoff > 0.0F) { // Starboard
 			d_anchor = GraphletAnchor::CB;
@@ -399,16 +524,56 @@ private:
 		}
 	}
 
+private:
+	void set_door_progress(FJ id, float value) {
+		this->uhdoors[id]->set_value(value / 100.0F);
+		this->progresses[id]->set_value(value);
+	}
+
+	void set_hopper_pump_status(FJ id, const uint8* db4, size_t idx, bool on) {
+		if (on) {
+			HopperPumplet* target = this->hoppers[id];
+
+			target->set_remote_control(DBX(db4, idx + 3));
+
+			target->set_status(DBX(db4, idx + 0), HopperPumpStatus::Ready);
+			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
+			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
+			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
+			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Maintenance);
+		}
+	}
+
+	void set_hopper_pump_status(FJ id, const uint8* db4, size_t idx_p1) {
+		bool hopper = DBX(db4, idx_p1 + 0);
+
+		this->set_hopper_pump_status(id, db4, idx_p1 - 1, hopper);
+	}
+
+	void set_valve_status(FJ id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
+		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
+		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open, TValveStatus::Closed);
+	}
+
+	void set_pump_dimension_status(FJ id, const uint8* db4, size_t idx_p1) {
+		this->pressures[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<FJ>* station;
 	std::map<FJ, Credit<Labellet, FJ>*> captions;
-	std::map<FJ, Credit<UpperHopperDoorlet, FJ>*> uhdoors;
-	std::map<FJ, Credit<Percentagelet, FJ>*> progresses;
-	std::map<FJ, Credit<HopperPumplet, FJ>*> pumps;
+	std::map<FJ, Credit<HopperPumplet, FJ>*> hoppers;
 	std::map<FJ, Credit<GateValvelet, FJ>*> gvalves;
 	std::map<FJ, Credit<MotorValvelet, FJ>*> mvalves;
 	std::map<FJ, Credit<Labellet, FJ>*> vlabels;
+	std::map<FJ, Credit<UpperHopperDoorlet, FJ>*> uhdoors;
+	std::map<FJ, Credit<Percentagelet, FJ>*> progresses;
+	std::map<FJ, Credit<Dimensionlet, FJ>*> dsettings;
+	std::map<FJ, Credit<Percentagelet, FJ>*> psettings;
+	std::map<FJ, Credit<Dimensionlet, FJ>*> pressures;
+	std::map<FJ, Credit<Dimensionlet, FJ>*> powers;
+	std::map<FJ, Credit<Dimensionlet, FJ>*> rpms;
 	Labellet* sequences[hopper_count];
 	std::map<FJ, Omegalet*> nintercs;
 	Linelet* manual_pipe;
@@ -421,8 +586,10 @@ private:
 	CanvasTextFormat^ label_font;
 	ICanvasBrush^ relationship_color;
 	CanvasStrokeStyle^ relationship_style;
-	DimensionStyle dimension_style;
-	DimensionStyle percentage_style;
+	DimensionStyle pump_style;
+	DimensionStyle highlight_style;
+	DimensionStyle setting_style;
+	DimensionStyle plain_style;
 
 private:
 	FillnJetPage* master;
@@ -610,6 +777,7 @@ void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shift
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
+	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
@@ -619,5 +787,9 @@ void FillnJetPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shift
 		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
+	} else if (editor != nullptr) {
+		if (editor->get_status() == DimensionStatus::Input) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		}
 	}
 }

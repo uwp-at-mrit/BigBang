@@ -72,7 +72,7 @@ bool WarGrey::SCADA::DBX(const uint8* src, size_t idx) {
 }
 
 bool WarGrey::SCADA::DBX(const uint8* src, size_t idx, size_t bidx) {
-	return quantity_bit_ref(src, idx, bidx);
+	return quantity_bit_ref(src, idx, (unsigned char)bidx);
 }
 
 float WarGrey::SCADA::DBD(const uint8* src, size_t idx) {
@@ -102,54 +102,55 @@ void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger)
 /*************************************************************************************************/
 void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	size_t count, subaddr0, subaddrn;
-	size_t analog_dbs[] = { 3, 203, 5, 204, 20, 2 };
-	size_t digital_dbs[] = { 4, 6, 205 };
+	size_t adbs[] = { MRDB::ANALOG_INPUT_RAW, MRDB::ANALOG_INPUT, MRDB::ANALOG_OUTPUT_RAW, MRDB::ANALOG_OUTPUT, MRDB::FORAT, MRDB::REALTIME };
+	size_t ddbs[] = { MRDB::DIGITAL_INPUT_RAW, MRDB::DIGITAL_OUTPUT_RAW, MRDB::DIGITAL_INPUT };
 	size_t dqcount = 2;
 	size_t analog_size = sizeof(float);
 	size_t digital_size = sizeof(uint8);
+	uint8* digital_data[] = { nullptr, nullptr, nullptr };
+	size_t digital_counts[] = { 0, 0, 0 };
 
 	this->pre_read_data(logger);
 
-	for (size_t i = 0; i < sizeof(analog_dbs) / sizeof(size_t); i++) {
-		if (fill_signal_preferences(analog_dbs[i], &count, &subaddr0, &subaddrn)) {
-			if (analog_dbs[i] == MRDB::FORAT) {
+	for (size_t i = 0; i < sizeof(adbs) / sizeof(size_t); i++) {
+		if (fill_signal_preferences(adbs[i], &count, &subaddr0, &subaddrn)) {
+			if (adbs[i] == MRDB::FORAT) {
 				// this is a special case, some digital data is stored in the first two bytes. 
 				subaddr0 += dqcount;
 				count -= dqcount;
 			}
 
-			if (valid_address(logger, analog_dbs[i], subaddr0, subaddrn, count, analog_size, size)) {
+			if (valid_address(logger, adbs[i], subaddr0, subaddrn, count, analog_size, size)) {
 				uint8* raw = data + subaddr0;
 				size_t real_count = count * analog_size;
 				
-				switch (analog_dbs[i]) {
+				switch (adbs[i]) {
 				case MRDB::REALTIME: this->on_realtime_data(raw, real_count, logger); break;
 				case MRDB::FORAT: this->on_forat_data(raw - dqcount, dqcount, raw, real_count, logger); break;
-				case MRDB::ANALOG_INPUT: this->on_analog_input_data(raw, real_count, logger); break;
-				case MRDB::ANALOG_INPUT_RAW: this->on_raw_analog_input_data(raw, real_count, logger); break;
-				case MRDB::ANALOG_OUTPUT: this->on_analog_output_data(raw, real_count, logger); break;
-				case MRDB::ANALOG_OUTPUT_RAW: this->on_raw_analog_output_data(raw, real_count, logger); break;
+				case MRDB::ANALOG_INPUT: this->on_analog_input(raw, real_count, logger); break;
+				case MRDB::ANALOG_INPUT_RAW: this->on_raw_analog_input(raw, real_count, logger); break;
+				case MRDB::ANALOG_OUTPUT: this->on_analog_output(raw, real_count, logger); break;
+				case MRDB::ANALOG_OUTPUT_RAW: this->on_raw_analog_output(raw, real_count, logger); break;
 				}
 			}
 		} else {
-			logger->log_message(Log::Warning, L"missing configuration for data block %hu", analog_dbs[i]);
+			logger->log_message(Log::Warning, L"missing configuration for data block %hu", adbs[i]);
 		}
 	}
 
-	for (size_t i = 0; i < sizeof(digital_dbs) / sizeof(size_t); i++) {
-		if (fill_signal_preferences(digital_dbs[i], &count, &subaddr0, &subaddrn)) {
-			if (valid_address(logger, digital_dbs[i], subaddr0, subaddrn, count, digital_size, size)) {
-				uint8* raw = data + subaddr0;
-				
-				switch (digital_dbs[i]) {
-				case MRDB::DIGITAL_INPUT: this->on_digital_input(raw, count, logger); break;
-				case MRDB::DIGITAL_INPUT_RAW: this->on_raw_digital_input(raw, count, logger); break;
-				case MRDB::DIGITAL_OUTPUT_RAW: this->on_raw_digital_output(raw, count, logger); break;
-				}
+	for (size_t i = 0; i < sizeof(ddbs) / sizeof(size_t); i++) {
+		if (fill_signal_preferences(ddbs[i], &count, &subaddr0, &subaddrn)) {
+			if (valid_address(logger, ddbs[i], subaddr0, subaddrn, count, digital_size, size)) {
+				digital_data[i] = data + subaddr0;
+				digital_counts[i] = count;
 			}
 		} else {
-			logger->log_message(Log::Warning, L"missing configuration for data block %hu", digital_dbs[i]);
+			logger->log_message(Log::Warning, L"missing configuration for data block %hu", ddbs[i]);
 		}
+	}
+
+	if ((digital_data[0] != nullptr) && (digital_data[2] != nullptr)) {
+		this->on_digital_input(digital_data[0], digital_counts[0], digital_data[2], digital_counts[2], logger);
 	}
 
 	this->post_read_data(logger);

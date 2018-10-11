@@ -83,105 +83,96 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input_data(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->set_temperature(HS::Visor, RealData(AI_DB203, 18U));
-		this->set_temperature(HS::Master, RealData(AI_DB203, 19U));
-		this->station_pressure->set_value(RealData(AI_DB203, 21U));
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->set_temperature(HS::Visor, RealData(DB203, 18U));
+		this->set_temperature(HS::Master, RealData(DB203, 19U));
+		this->station_pressure->set_value(RealData(DB203, 21U));
 
 		{ // pump pressures
-			this->pressures[HS::C]->set_value(RealData(AI_DB203, 8U), GraphletAnchor::RB);
-			this->pressures[HS::F]->set_value(RealData(AI_DB203, 9U), GraphletAnchor::RB);
-			this->pressures[HS::D]->set_value(RealData(AI_DB203, 10U), GraphletAnchor::RB);
-			this->pressures[HS::E]->set_value(RealData(AI_DB203, 11U), GraphletAnchor::RB);
+			this->pressures[HS::C]->set_value(RealData(DB203, 8U), GraphletAnchor::RB);
+			this->pressures[HS::F]->set_value(RealData(DB203, 9U), GraphletAnchor::RB);
+			this->pressures[HS::D]->set_value(RealData(DB203, 10U), GraphletAnchor::RB);
+			this->pressures[HS::E]->set_value(RealData(DB203, 11U), GraphletAnchor::RB);
 
-			this->pressures[HS::A]->set_value(RealData(AI_DB203, 12U), GraphletAnchor::LB);
-			this->pressures[HS::B]->set_value(RealData(AI_DB203, 13U), GraphletAnchor::LB);
-			this->pressures[HS::G]->set_value(RealData(AI_DB203, 14U), GraphletAnchor::LB);
-			this->pressures[HS::H]->set_value(RealData(AI_DB203, 15U), GraphletAnchor::LB);
+			this->pressures[HS::A]->set_value(RealData(DB203, 12U), GraphletAnchor::LB);
+			this->pressures[HS::B]->set_value(RealData(DB203, 13U), GraphletAnchor::LB);
+			this->pressures[HS::G]->set_value(RealData(DB203, 14U), GraphletAnchor::LB);
+			this->pressures[HS::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LB);
 
-			this->pressures[HS::I]->set_value(RealData(AI_DB203, 16U), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(AI_DB203, 17U), GraphletAnchor::LB);
+			this->pressures[HS::I]->set_value(RealData(DB203, 16U), GraphletAnchor::RB);
+			this->pressures[HS::J]->set_value(RealData(DB203, 17U), GraphletAnchor::LB);
 		}
 	}
 
-	void on_digital_input(const uint8* DI_DB205, size_t count, Syslog* logger) {
-		{ // pump states
-			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::D, HS::E, HS::F, HS::G, HS::H, HS::Y, HS::K, HS::L, HS::M, HS::I, HS::J };
-
-			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
-				HydraulicPumplet* target = this->pumps[pump_seq[i]];
-
-				switch (DI_DB205[i + 1]) {
-				case 0b00000001: target->set_status(HydraulicPumpStatus::Starting); break;
-				case 0b00000010: target->set_status(HydraulicPumpStatus::Stopping); break;
-				case 0b00000100: target->set_status(HydraulicPumpStatus::Unstartable); break;
-				case 0b00001000: target->set_status(HydraulicPumpStatus::Unstoppable); break;
-				case 0b00010000: target->set_status(HydraulicPumpStatus::StartReady); break;
-				case 0b00100000: target->set_status(HydraulicPumpStatus::StopReady); break;
-				case 0b01000000: target->set_status(HydraulicPumpStatus::Stopped); break;
-				case 0b10000000: target->set_status(HydraulicPumpStatus::Ready); break;
-				}
-			}
-		}
-	}
-
-	void on_raw_digital_input(const uint8* DI_DB4, size_t count, WarGrey::SCADA::Syslog* logger) override {
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
 		{ // tank status
-			if (DBX(DI_DB4, 118U - 1)) {
+			if (DBX(DB4, 118U - 1)) {
 				this->master_tank->set_status(HSMTStatus::Low);
-			} else if (DBX(DI_DB4, 119U - 1)) {
+			} else if (DBX(DB4, 119U - 1)) {
 				this->master_tank->set_status(HSMTStatus::UltraLow);
-			} else if (DBX(DI_DB4, 120U - 1)) {
+			} else if (DBX(DB4, 120U - 1)) {
 				this->master_tank->set_status(HSMTStatus::High);
 			} else {
 				this->master_tank->set_status(HSMTStatus::Normal);
 			}
 
-			if (DBX(DI_DB4, 132U - 1)) {
+			if (DBX(DB4, 132U - 1)) {
 				this->visor_tank->set_status(HSVTStatus::Low);
-			} else if (DBX(DI_DB4, 133U - 1)) {
+			} else if (DBX(DB4, 133U - 1)) {
 				this->visor_tank->set_status(HSVTStatus::UltraLow);
 			} else {
 				this->visor_tank->set_status(HSVTStatus::Normal);
 			}
-		}
+		} 
+		
+		{ // pump states
+			this->set_pump_status(HS::A, DB4, 9U, DB205, 49U);
+			this->set_pump_status(HS::B, DB4, 17U, DB205, 53U);
+			this->set_pump_status(HS::G, DB4, 57U, DB205, 69U);
+			this->set_pump_status(HS::H, DB4, 65U, DB205, 65U);
+			
+			this->set_pump_status(HS::C, DB4, 25U, DB205, 57U);
+			this->set_pump_status(HS::F, DB4, 49U, DB205, 73U);
+			this->set_pump_status(HS::D, DB4, 33U, DB205, 81U);
+			this->set_pump_status(HS::E, DB4, 41U, DB205, 85U);
+			
+			this->set_pump_status(HS::Y, DB4, 73U, DB205, 101U);
+			this->set_pump_status(HS::K, DB4, 81U, DB205, 89U);
+			this->set_pump_status(HS::L, DB4, 89U, DB205, 93U);
+			this->set_pump_status(HS::M, DB4, 97U, DB205, 97U);
 
-		{ // pump modes and/or statuses
-			HS pump_seq[] = { HS::A, HS::B, HS::C, HS::I, HS::H, HS::G, HS::F, HS::J, HS::D, HS::E, HS::K, HS::L, HS::M, HS::Y };
-
-			for (size_t i = 0; i < sizeof(pump_seq) / sizeof(HS); i++) {
-				this->set_pump_status(pump_seq[i], DI_DB4, i * 4 + 49);
-			}
+			this->set_pump_status(HS::I, DB4, 105U, DB205, 61U);
+			this->set_pump_status(HS::J, DB4, 113U, DB205, 77U);
 		}
 
 		{ // valve statuses
-			this->set_valve_status(HS::SQ1, DI_DB4, 113U);
-			this->set_valve_status(HS::SQ2, DI_DB4, 114U);
+			this->set_valve_status(HS::SQ1, DB4, 113U);
+			this->set_valve_status(HS::SQ2, DB4, 114U);
 
-			this->set_valve_status(HS::SQk1, DI_DB4, 122U);
-			this->set_valve_status(HS::SQk2, DI_DB4, 123U);
-			this->set_valve_status(HS::SQl,  DI_DB4, 124U);
-			this->set_valve_status(HS::SQm,  DI_DB4, 125U);
-			this->set_valve_status(HS::SQy,  DI_DB4, 126U);
+			this->set_valve_status(HS::SQk1, DB4, 122U);
+			this->set_valve_status(HS::SQk2, DB4, 123U);
+			this->set_valve_status(HS::SQl, DB4, 124U);
+			this->set_valve_status(HS::SQm, DB4, 125U);
+			this->set_valve_status(HS::SQy, DB4, 126U);
 
-			this->set_valve_status(HS::SQi, DI_DB4, 128U);
-			this->set_valve_status(HS::SQj, DI_DB4, 129U);
+			this->set_valve_status(HS::SQi, DB4, 128U);
+			this->set_valve_status(HS::SQj, DB4, 129U);
 
-			this->set_valve_status(HS::SQc, DI_DB4, 135U);
-			this->set_valve_status(HS::SQd, DI_DB4, 136U);
-			this->set_valve_status(HS::SQe, DI_DB4, 137U);
-			this->set_valve_status(HS::SQf, DI_DB4, 138U);
+			this->set_valve_status(HS::SQc, DB4, 135U);
+			this->set_valve_status(HS::SQd, DB4, 136U);
+			this->set_valve_status(HS::SQe, DB4, 137U);
+			this->set_valve_status(HS::SQf, DB4, 138U);
 
-			this->set_valve_status(HS::SQa, DI_DB4, 141U);
-			this->set_valve_status(HS::SQb, DI_DB4, 142U);
-			this->set_valve_status(HS::SQg, DI_DB4, 143U);
-			this->set_valve_status(HS::SQh, DI_DB4, 144U);
+			this->set_valve_status(HS::SQa, DB4, 141U);
+			this->set_valve_status(HS::SQb, DB4, 142U);
+			this->set_valve_status(HS::SQg, DB4, 143U);
+			this->set_valve_status(HS::SQh, DB4, 144U);
 		}
 
 		{ // filter statuses
-			this->set_filter_status(HS::F01, DI_DB4, 121U);
-			this->set_filter_status(HS::F02, DI_DB4, 127U);
-			this->set_filter_status(HS::F10, DI_DB4, 134U);
+			this->set_filter_status(HS::F01, DB4, 121U);
+			this->set_filter_status(HS::F02, DB4, 127U);
+			this->set_filter_status(HS::F10, DB4, 134U);
 		}
 	}
 
@@ -527,13 +518,22 @@ private:
 		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
 	}
 
-	void set_pump_status(HS id, const uint8* db4, size_t idx_p1) {
+	void set_pump_status(HS id, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
 		HydraulicPumplet* target = this->pumps[id];
 		
-		target->set_remote_control(DBX(db4, idx_p1 - 1));
+		target->set_remote_control(DBX(db4, idx4_p1 - 1));
 
-		target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Running);
-		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Broken);
+		target->set_status(DBX(db4, idx4_p1 + 0), HydraulicPumpStatus::Running);
+		target->set_status(DBX(db4, idx4_p1 + 1), HydraulicPumpStatus::Broken);
+
+		target->set_status(DBX(db205, idx205_p1 - 1), HydraulicPumpStatus::Starting);
+		target->set_status(DBX(db205, idx205_p1 + 0), HydraulicPumpStatus::Stopping);
+		target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Unstartable);
+		target->set_status(DBX(db205, idx205_p1 + 2), HydraulicPumpStatus::Unstoppable);
+		target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::StartReady);
+		target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StopReady);
+		target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
+		target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
 	}
 
 	void set_valve_status(HS id, const uint8* db4, size_t idx_p1) {
