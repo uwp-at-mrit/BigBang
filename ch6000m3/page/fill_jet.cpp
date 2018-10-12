@@ -17,6 +17,11 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
+#include "schema/di_pump_dimensions.hpp"
+#include "schema/di_hopper_pumps.hpp"
+#include "schema/di_valves.hpp"
+#include "schema/di_doors.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -123,33 +128,31 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		this->set_hopper_pump_status(FJ::PSHPump, DB4, 1U);
-		this->set_hopper_pump_status(FJ::SBHPump, DB4, 25U);
+		DI_hopper_pump(this->hoppers[FJ::PSHPump], DB4, 1U, DB205, 857U);
+		DI_hopper_pump(this->hoppers[FJ::SBHPump], DB4, 25U, DB205, 873U);
 
-		this->set_pump_dimension_status(FJ::A, DB4, 50U);
-		this->set_pump_dimension_status(FJ::C, DB4, 58U);
-		this->set_pump_dimension_status(FJ::F, DB4, 74U);
-		this->set_pump_dimension_status(FJ::H, DB4, 66U);
+		DI_pump_dimension(this->pressures[FJ::A], DB4, 50U);
+		DI_pump_dimension(this->pressures[FJ::C], DB4, 58U);
+		DI_pump_dimension(this->pressures[FJ::F], DB4, 74U);
+		DI_pump_dimension(this->pressures[FJ::H], DB4, 66U);
 
-		this->set_valve_status(FJ::D005, DB4, 259U, 417U); // PS Isolation
-		this->set_valve_status(FJ::D006, DB4, 261U, 419U); // PS Underwater Unload
-		this->set_valve_status(FJ::D002, DB4, 273U, 421U); // Empty
-		this->set_valve_status(FJ::D003, DB4, 279U, 423U); // SB Suction <==
-		this->set_valve_status(FJ::D004, DB4, 257U, 425U); // PS Suction
-		this->set_valve_status(FJ::D024, DB4, 413U, 435U); // Gantry
-		this->set_valve_status(FJ::D010, DB4, 295U, 439U); // PS Main Load
-		this->set_valve_status(FJ::D009, DB4, 293U, 443U); // PS Underwater Load
-		this->set_valve_status(FJ::D017, DB4, 297U, 445U); // PS Hopper Load
-		this->set_valve_status(FJ::D020, DB4, 303U, 447U); // PS Shore Unload
-		this->set_valve_status(FJ::D021, DB4, 305U, 449U); // Bow Fill
-		this->set_valve_status(FJ::D019, DB4, 301U, 451U); // SB Shore Unload
-		this->set_valve_status(FJ::D018, DB4, 299U, 453U); // SB Hopper Load
-		this->set_valve_status(FJ::D007, DB4, 289U, 455U); // SB Underwater Load
-		this->set_valve_status(FJ::D008, DB4, 291U, 457U); // SB Main Load
-		this->set_valve_status(FJ::D023, DB4, 309U, 459U); // Through
-		this->set_valve_status(FJ::D022, DB4, 307U, 461U); // Bow Jet
-		//this->set_valve_status(FJ::D001, DB4, 239U, 465U); // Empty and Water
-		this->set_valve_status(FJ::D025, DB4, 275U, 467U); // SB Isolation
+		{ // Missing DB4 info
+			DI_hopper_door(this->uhdoors[FJ::PS1], DB4, 329U, DB205, 1089U);
+			DI_hopper_door(this->uhdoors[FJ::PS2], DB4, 330U, DB205, 1105U);
+			DI_hopper_door(this->uhdoors[FJ::PS3], DB4, 331U, DB205, 1121U);
+			DI_hopper_door(this->uhdoors[FJ::PS4], DB4, 369U, DB205, 1137U);
+			DI_hopper_door(this->uhdoors[FJ::PS5], DB4, 370U, DB205, 1153U);
+			DI_hopper_door(this->uhdoors[FJ::PS6], DB4, 371U, DB205, 1169U);
+			DI_hopper_door(this->uhdoors[FJ::PS7], DB4, 372U, DB205, 1185U);
+
+			DI_hopper_door(this->uhdoors[FJ::SB1], DB4, 345U, DB205, 1097U);
+			DI_hopper_door(this->uhdoors[FJ::SB2], DB4, 346U, DB205, 1113U);
+			DI_hopper_door(this->uhdoors[FJ::SB3], DB4, 347U, DB205, 1129U);
+			DI_hopper_door(this->uhdoors[FJ::SB4], DB4, 401U, DB205, 1145U);
+			DI_hopper_door(this->uhdoors[FJ::SB5], DB4, 402U, DB205, 1161U);
+			DI_hopper_door(this->uhdoors[FJ::SB6], DB4, 403U, DB205, 1177U);
+			DI_hopper_door(this->uhdoors[FJ::SB7], DB4, 404U, DB205, 1193U);
+		}
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -527,36 +530,12 @@ private:
 private:
 	void set_door_progress(FJ id, float value) {
 		this->uhdoors[id]->set_value(value / 100.0F);
-		this->progresses[id]->set_value(value);
-	}
-
-	void set_hopper_pump_status(FJ id, const uint8* db4, size_t idx, bool on) {
-		if (on) {
-			HopperPumplet* target = this->hoppers[id];
-
-			target->set_remote_control(DBX(db4, idx + 3));
-
-			target->set_status(DBX(db4, idx + 0), HopperPumpStatus::Ready);
-			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
-			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
-			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
-			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Maintenance);
-		}
-	}
-
-	void set_hopper_pump_status(FJ id, const uint8* db4, size_t idx_p1) {
-		bool hopper = DBX(db4, idx_p1 + 0);
-
-		this->set_hopper_pump_status(id, db4, idx_p1 - 1, hopper);
+		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 	void set_valve_status(FJ id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
 		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
 		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open, TValveStatus::Closed);
-	}
-
-	void set_pump_dimension_status(FJ id, const uint8* db4, size_t idx_p1) {
-		this->pressures[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
 	}
 
 // never deletes these graphlets mannually

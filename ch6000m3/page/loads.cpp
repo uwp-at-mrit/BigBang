@@ -15,6 +15,10 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
+#include "schema/di_pump_dimensions.hpp"
+#include "schema/di_hopper_pumps.hpp"
+#include "schema/di_valves.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -99,40 +103,40 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		this->set_hopper_pump_status(LD::PSHPump, LD::PSUWPump, DB4, 1U);
-		this->set_hopper_pump_status(LD::SBHPump, LD::SBUWPump, DB4, 25U);
-		
-		this->set_pump_dimension_status(LD::A, DB4, 50U);
-		this->set_pump_dimension_status(LD::C, DB4, 58U);
-		this->set_pump_dimension_status(LD::F, DB4, 74U);
-		this->set_pump_dimension_status(LD::H, DB4, 66U);
+		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, 1U, DB205, 857U, 825U);
+		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, 25U, DB205, 873U, 841U);
 
-		this->set_valve_status(LD::D005, DB4, 259U, 417U); // PS Isolation
-		this->set_valve_status(LD::D006, DB4, 261U, 419U); // PS Underwater Unload
-		this->set_valve_status(LD::D002, DB4, 273U, 421U); // Empty
-		this->set_valve_status(LD::D003, DB4, 279U, 423U); // SB Suction <==
-		this->set_valve_status(LD::D004, DB4, 257U, 425U); // PS Suction
-		this->set_valve_status(LD::D016, DB4, 375U, 427U); // PS Back Unload
-		this->set_valve_status(LD::D015, DB4, 407U, 429U); // SB Back Unload
-		this->set_valve_status(LD::D014, DB4, 373U, 431U); // PS Fore Unload
-		this->set_valve_status(LD::D013, DB4, 405U, 433U); // SB Fore Unload
-		this->set_valve_status(LD::D024, DB4, 413U, 435U); // Gantry
-		this->set_valve_status(LD::D012, DB4, 333U, 437U); // PS LMOD Unload
-		this->set_valve_status(LD::D010, DB4, 295U, 439U); // PS Main Load
-		this->set_valve_status(LD::D011, DB4, 349U, 441U); // SB LMOD Unload
-		this->set_valve_status(LD::D009, DB4, 293U, 443U); // PS Underwater Load
-		this->set_valve_status(LD::D017, DB4, 297U, 445U); // PS Hopper Load
-		this->set_valve_status(LD::D020, DB4, 303U, 447U); // PS Shore Unload
-		this->set_valve_status(LD::D021, DB4, 305U, 449U); // Bow Fill
-		this->set_valve_status(LD::D019, DB4, 301U, 451U); // SB Shore Unload
-		this->set_valve_status(LD::D018, DB4, 299U, 453U); // SB Hopper Load
-		this->set_valve_status(LD::D007, DB4, 289U, 455U); // SB Underwater Load
-		this->set_valve_status(LD::D008, DB4, 291U, 457U); // SB Main Load
-		this->set_valve_status(LD::D023, DB4, 309U, 459U); // Through
-		this->set_valve_status(LD::D022, DB4, 307U, 461U); // Bow Jet
-		this->set_valve_status(LD::D026, DB4, 277U, 463U); // SB Underwater Unload
-		//this->set_valve_status(LD::D001, DB4, 239U, 465U); // Empty and Water
-		this->set_valve_status(LD::D025, DB4, 275U, 467U); // SB Isolation
+		DI_pump_dimension(this->pressures[LD::A], DB4, 50U);
+		DI_pump_dimension(this->pressures[LD::C], DB4, 58U);
+		DI_pump_dimension(this->pressures[LD::F], DB4, 74U);
+		DI_pump_dimension(this->pressures[LD::H], DB4, 66U);
+
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D001, DB4, 239U, 465U, DB205, 369U, 0U); // Empty and Water
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D002, DB4, 273U, 421U, DB205, 393U, 0U); // Empty
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D003, DB4, 279U, 423U, DB205, 385U, 0U); // SB Suction <==
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D004, DB4, 257U, 425U, DB205, 377U, 0U); // PS Suction
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D005, DB4, 259U, 417U, DB205, 401U, 0U); // PS Isolation
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D006, DB4, 261U, 419U, DB205, 409U, 0U); // PS Underwater Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D007, DB4, 289U, 455U, DB205, 417U, 0U); // SB Underwater Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D008, DB4, 291U, 457U, DB205, 425U, 0U); // SB Main Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D009, DB4, 293U, 443U, DB205, 433U, 0U); // PS Underwater Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D010, DB4, 295U, 439U, DB205, 441U, 0U); // PS Main Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D011, DB4, 349U, 441U, DB205, 449U, 0U); // SB LMOD Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D012, DB4, 333U, 437U, DB205, 457U, 0U); // PS LMOD Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D013, DB4, 405U, 433U, DB205, 465U, 0U); // SB Fore Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D014, DB4, 373U, 431U, DB205, 473U, 0U); // PS Fore Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D015, DB4, 407U, 429U, DB205, 481U, 0U); // SB Back Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D016, DB4, 375U, 427U, DB205, 489U, 0U); // PS Back Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D017, DB4, 297U, 445U, DB205, 497U, 0U); // PS Hopper Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D018, DB4, 299U, 453U, DB205, 505U, 0U); // SB Hopper Load
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D019, DB4, 301U, 451U, DB205, 513U, 0U); // SB Shore Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D020, DB4, 303U, 447U, DB205, 521U, 0U); // PS Shore Unload
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D021, DB4, 305U, 449U, DB205, 529U, 0U); // Bow Fill
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D022, DB4, 307U, 461U, DB205, 537U, 0U); // Bow Jet
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D023, DB4, 309U, 459U, DB205, 545U, 0U); // Through
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D024, DB4, 413U, 435U, DB205, 553U, 0U); // Gantry
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D025, DB4, 275U, 467U, DB205, 561U, 0U); // SB Isolation
+		DI_paired_valves(this->gvalves, this->mvalves, LD::D026, DB4, 277U, 463U, DB205, 569U, 0U); // SB Underwater Unload
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -441,54 +445,6 @@ private:
 	template<typename E>
 	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
 		this->load_label(ls, _speak(id), id, color, font);
-	}
-
-private:
-	void set_hopper_pump_status(LD id, const uint8* db4, size_t idx, bool on) {
-		if (on) {
-			HopperPumplet* target = this->hoppers[id];
-
-			target->set_remote_control(DBX(db4, idx + 3));
-
-			target->set_status(DBX(db4, idx + 0), HopperPumpStatus::Ready);
-			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
-			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
-			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
-			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Maintenance);
-		}
-	}
-
-	void set_hopper_pump_status(LD id1, LD id2, const uint8* db4, size_t idx_p1) {
-		bool hopper = DBX(db4, idx_p1 + 0);
-		bool underw = DBX(db4, idx_p1 + 1);
-
-		this->set_hopper_pump_status(id1, db4, idx_p1 - 1, hopper);
-		this->set_hopper_pump_status(id2, db4, idx_p1 - 1, underw);
-	}
-
-	void set_valve_status(LD id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
-		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open);
-		this->gvalves[id]->set_status(DBX(db4, gidx_p1 + 0), GateValveStatus::Closed);
-
-		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open);
-		this->mvalves[id]->set_status(DBX(db4, midx_p1 + 0), TValveStatus::Closed);
-	}
-
-	void set_valve_details(LD id, const uint8* db205, size_t idx_p1) {
-		GateValvelet* target = this->gvalves[id];
-
-		target->set_status(DBX(db205, idx_p1 - 1), GateValveStatus::Opening);
-		target->set_status(DBX(db205, idx_p1 + 0), GateValveStatus::Closing);
-		target->set_status(DBX(db205, idx_p1 + 1), GateValveStatus::Unopenable);
-		target->set_status(DBX(db205, idx_p1 + 2), GateValveStatus::Unclosable);
-		target->set_status(DBX(db205, idx_p1 + 3), GateValveStatus::OpenReady);
-		target->set_status(DBX(db205, idx_p1 + 4), GateValveStatus::CloseReady);
-		target->set_status(DBX(db205, idx_p1 + 5), GateValveStatus::FakeOpen);
-		target->set_status(DBX(db205, idx_p1 + 6), GateValveStatus::FakeClose);
-	}
-
-	void set_pump_dimension_status(LD id, const uint8* db4, size_t idx_p1) {
-		this->pressures[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
 	}
 
 // never deletes these graphlets mannually

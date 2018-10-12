@@ -16,6 +16,10 @@
 #include "graphlet/symbol/pump/water_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
+#include "graphlet/dashboard/cylinderlet.hpp"
+
+#include "schema/di_doors.hpp"
+#include "schema/di_pump_dimensions.hpp"
 
 #include "decorator/page.hpp"
 
@@ -41,6 +45,9 @@ private enum class FS : unsigned int {
 	// Pumps
 	PSPump, SBPump,
 
+	// Pump Dimensions
+	D, E,
+
 	// Valves
 	HBV01, HBV02, HBV03, HBV08, HBV09, HBV11, HBV12, HBV13, HBV14, HBV15, HBV16, HBV17, HBV18,
 	HBV04, HBV05, HBV06, HBV07, HBV10,
@@ -51,12 +58,13 @@ private enum class FS : unsigned int {
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	
 	// key labels
-	PSSea, SBSea,
+	PSSea, SBSea, PSPPower, SBPPower, PSPRpm, SBPRpm, 
 
 	_,
 	// anchors used for unnamed corners
 	h3ps, h3sb, h4, h5, h10,
-	h11, h12, h13, h14, h15, h16, h17,
+	h11, h12, h13, h14, h15, h16, h17, h18,
+	water, room,
 
 	// anchors used for non-interconnected nodes
 	nic
@@ -91,6 +99,32 @@ public:
 		this->set_door_progress(FS::SB5, RealData(DB203, 94U));
 		this->set_door_progress(FS::SB6, RealData(DB203, 95U));
 		this->set_door_progress(FS::SB7, RealData(DB203, 96U));
+
+		this->pressures[FS::D]->set_value(RealData(DB203, 10U), GraphletAnchor::RB);
+		this->pressures[FS::E]->set_value(RealData(DB203, 11U), GraphletAnchor::RB);
+	}
+
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		DI_pump_dimension(this->pressures[FS::D], DB4, 33U);
+		DI_pump_dimension(this->pressures[FS::E], DB4, 41U);
+
+		{ // Missing DB4 info
+			DI_hopper_door(this->uhdoors[FS::PS1], DB4, 329U, DB205, 1089U);
+			DI_hopper_door(this->uhdoors[FS::PS2], DB4, 330U, DB205, 1105U);
+			DI_hopper_door(this->uhdoors[FS::PS3], DB4, 331U, DB205, 1121U);
+			DI_hopper_door(this->uhdoors[FS::PS4], DB4, 369U, DB205, 1137U);
+			DI_hopper_door(this->uhdoors[FS::PS5], DB4, 370U, DB205, 1153U);
+			DI_hopper_door(this->uhdoors[FS::PS6], DB4, 371U, DB205, 1169U);
+			DI_hopper_door(this->uhdoors[FS::PS7], DB4, 372U, DB205, 1185U);
+
+			DI_hopper_door(this->uhdoors[FS::SB1], DB4, 345U, DB205, 1097U);
+			DI_hopper_door(this->uhdoors[FS::SB2], DB4, 346U, DB205, 1113U);
+			DI_hopper_door(this->uhdoors[FS::SB3], DB4, 347U, DB205, 1129U);
+			DI_hopper_door(this->uhdoors[FS::SB4], DB4, 401U, DB205, 1145U);
+			DI_hopper_door(this->uhdoors[FS::SB5], DB4, 402U, DB205, 1161U);
+			DI_hopper_door(this->uhdoors[FS::SB6], DB4, 403U, DB205, 1177U);
+			DI_hopper_door(this->uhdoors[FS::SB7], DB4, 404U, DB205, 1193U);
+		}
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -115,18 +149,20 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
-		this->relationship_color = Colours::DarkGray;
+		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
 
-		this->dimension_style = make_highlight_dimension_style(gheight, 5U);
-		this->percentage_style.unit_color = Colours::Silver;
+		this->plain_style.number_font = make_bold_text_format("Cambria Math", metrics_font_size);
+		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
 	void load(float width, float height, float gwidth, float gheight) {
 		float radius = resolve_gridsize(gwidth, gheight);
+		auto hstyle = make_dash_stroke(CanvasDashStyle::Dash);
 		Turtle<FS>* pTurtle = new Turtle<FS>(gwidth, gheight, false, FS::HBV10);
 		Turtle<FS>* rTurtle = new Turtle<FS>(gwidth, gheight, false);
+		Turtle<FS>* wTurtle = new Turtle<FS>(gwidth, gheight, false);
 
 		pTurtle->move_right(2, FS::h10);
 		
@@ -134,11 +170,11 @@ public:
 		pTurtle->turn_left_up()->move_up(2.5F, FS::SBV4)->move_up(2.5F)->turn_up_left();
 		pTurtle->move_left(10, FS::HBV07)->move_left(10, FS::Port)->jump_back(FS::h10);
 
-		pTurtle->turn_right_down()->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
+		pTurtle->turn_right_down(FS::D)->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
 		pTurtle->turn_left_down()->move_down(2.5F, FS::SBV3)->move_down(2.5F)->turn_down_left();
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->move_right(5, FS::HBV05)->move_right(7.5F, FS::nic)->move_right(5.5F)->turn_right_down()->move_down(6);
+		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(5.5F)->turn_right_down()->move_down(6);
 		pTurtle->turn_down_left(FS::h3ps)->move_left(5)->turn_left_up(FS::PSPump);
 		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
@@ -147,35 +183,47 @@ public:
 		pTurtle->turn_right_down()->move_down(3)->turn_down_left()->move_left(5)->turn_left_down();
 		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
-		pTurtle->move_right(5, FS::HBV04)->move_right(3)->turn_right_up();
-		pTurtle->move_up(2.5F)->turn_up_right()->move_right(4);
+		pTurtle->move_right(4, FS::HBV04)->move_right(5)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
 		
 		pTurtle->jump_back(FS::HBV10);
 
-		for (FS id = FS::HBV11; id < FS::HBV18; id++) {
-			unsigned int distance = _I(id) - _I(FS::HBV11);
+		for (FS HBV = FS::HBV11; HBV <= FS::HBV18; HBV++) {
+			unsigned int distance = _I(HBV) - _I(FS::HBV11);
 			float half_width = 2.0F;
 			float half_height = 2.5F;
-			FS hopper = _E(FS, _I(FS::h11) + distance);
+			float gapsize = 0.5F;
+			float room_height = (6.0F + half_height) * 2.0F;
+			float water_height = room_height - 5.0F;
+			FS hbv = _E(FS, _I(FS::h11) + distance);
 
 			pTurtle->move_left(half_width);
-			pTurtle->move_left(0.5F)->move_left(half_width, hopper);
-			pTurtle->move_down(half_height, id)->move_down(half_height);
-			pTurtle->jump_right(half_width)->move_left(half_width * 2.0F);
-			pTurtle->jump_back(hopper);
+			pTurtle->move_left(gapsize)->move_left(half_width, hbv);
+			pTurtle->move_down(half_height, HBV)->move_down(half_height);
+			pTurtle->jump_right(half_width)->move_left(half_width);
 
-			rTurtle->jump_left(0.5F)->move_left()->jump_left(half_width)->move_left(hopper);
-			rTurtle->move_down(6)->move_down(half_height * 2.0F)->move_down(6);
-			rTurtle->move_right()->jump_right(half_width)->move_right();
-			rTurtle->move_up(6)->move_up(half_height * 2.0F)->move_up(6)->jump_back(hopper);
+			if (HBV != FS::HBV18) {
+				pTurtle->move_left(half_width)->jump_back(hbv);
+
+				rTurtle->jump_left(gapsize)->move_left()->jump_left(half_width);
+				rTurtle->move_left(hbv)->move_down(room_height);
+				rTurtle->move_right()->jump_right(half_width)->move_right();
+				rTurtle->move_up(room_height)->jump_back(hbv);
+
+				wTurtle->jump_back()->jump_left(half_width)->jump_left(gapsize)->jump_left(half_width, hbv);
+				wTurtle->move_down(gapsize)->move_left(half_width)->move_left(gapsize);
+				wTurtle->move_down(water_height)->move_right(gapsize)->move_right(half_width)->move_down(gapsize);
+
+				if (HBV != FS::HBV11) {
+					wTurtle->jump_up(gapsize)->move_right(half_width)->jump_up(water_height)->move_left(half_width);
+				}
+			} else {
+				pTurtle->jump_back(FS::HBV18)->jump_right(half_width, FS::water)->jump_right(gapsize, FS::room);
+			}
 		}
-
-		pTurtle->jump_back(FS::HBV17)->jump_left(4, FS::HBV18);
 		
 		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
-		this->hopper_room = this->master->insert_one(
-			new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::SeaGreen,
-				make_dash_stroke(CanvasDashStyle::Dash)));
+		this->hopper_room = this->master->insert_one(new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::SeaGreen, hstyle));
+		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::SeaGreen, hstyle));
 
 		{ // load doors
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
@@ -183,9 +231,9 @@ public:
 		}
 
 		{ // load valves
-			this->load_valves(this->mvalves, this->vlabels, this->captions, FS::SBV1, FS::SBV4, radius * 0.618F, 90.0);
-			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
-			this->load_valves(this->gvalves, this->vlabels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
+			this->load_valves(this->mvalves, this->labels, this->captions, FS::SBV1, FS::SBV4, radius * 0.618F, 90.0);
+			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
+			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
 		}
 
 		{ // load special nodes
@@ -216,12 +264,21 @@ public:
 					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
+
+		{ // load other dimensions
+			this->load_dimensions(this->pressures, FS::D, FS::E, "bar");
+			this->load_dimension(this->pressures, FS::HBV04, "bar");
+			this->load_dimension(this->flows, FS::HBV04, "m3ph");
+			this->load_dimension(this->pressures, FS::HBV05, "bar");
+			this->load_dimension(this->flows, FS::HBV05, "m3ph");
+		}
 	}
 
 public:
 	void reflow(float width, float height, float gwidth, float gheight, float vinset) {
-		this->master->move_to(this->station, width * 0.5F + gwidth * 1.5F, height * 0.5F, GraphletAnchor::CC);
-		this->master->move_to(this->hopper_room, this->station, GraphletAnchor::LC, GraphletAnchor::LC);
+		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->hopper_room, FS::room, GraphletAnchor::LC);
+		this->station->map_graphlet_at_anchor(this->hopper_water, FS::water, GraphletAnchor::LC);
 
 		this->station->map_graphlet_at_anchor(this->ps_draghead, FS::Port, GraphletAnchor::RC);
 		this->station->map_graphlet_at_anchor(this->sb_draghead, FS::Starboard, GraphletAnchor::RC);
@@ -238,8 +295,8 @@ public:
 			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, FS::HBV05);
-		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, FS::HBV04);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, GraphletAnchor::CT);
+		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, GraphletAnchor::CB);
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			float ox, oy;
@@ -247,6 +304,7 @@ public:
 			it->second->fill_pump_origin(&ox, &oy);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox, -oy);
 			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::CT);
+			this->master->move_to(this->rpms[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 		
 		{ // reflow valves
@@ -259,6 +317,19 @@ public:
 			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
 				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
 			}
+		}
+
+		{ // reflow dimensions
+			float xoff = gwidth * 2.0F;
+
+			this->station->map_credit_graphlet(this->pressures[FS::D], GraphletAnchor::LB, xoff);
+			this->master->move_to(this->pressures[FS::E], this->pressures[FS::D], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gheight);
+
+			this->station->map_credit_graphlet(this->pressures[FS::HBV04], GraphletAnchor::LB, xoff);
+			this->station->map_credit_graphlet(this->flows[FS::HBV04], GraphletAnchor::LT, xoff);
+
+			this->station->map_credit_graphlet(this->pressures[FS::HBV05], GraphletAnchor::LB, xoff);
+			this->station->map_credit_graphlet(this->flows[FS::HBV05], GraphletAnchor::LT, xoff);
 		}
 	}
 
@@ -285,14 +356,32 @@ private:
 	template<class G, typename E>
 	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, double degrees) {
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
-
+	
 		gs[id] = this->master->insert_one(new G(rx, degrees), id);
 	}
 
+	template<class G, typename E>
+	void load_cylinders(std::map<E, G*>& cs, std::map<E, Credit<Labellet, E>*>& ls, E id, float height, double range, Platform::String^ unit) {
+		this->load_label(ls, id, Colours::Salmon, this->caption_font);
+		this->load_dimension(this->powers, id, "kwatt");
+		this->load_dimension(this->rpms, id, "rpm");
+
+		gs[id] = this->master->insert_one(new G(rx, degrees), id);
+
+	}
+
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit), id);
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, id.ToString()), id);
+
+			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
+			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
 		}
 	}
 
@@ -309,13 +398,13 @@ private:
 
 private:
 	template<class D, typename E>
-	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, E yid) {
+	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, GraphletAnchor ya) {
 		GraphletAnchor d_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
 		unsigned int distance = _I(FS::HBV11) - _I(id0);
 		float x, y, py;
 
-		this->station->fill_anchor_location(yid, nullptr, &y);
+		this->master->fill_graphlet_location(this->hopper_room, nullptr, &y, ya);
 		this->station->fill_anchor_location(FS::HBV11, &x, &py);
 		
 		if (y > py) { // Starboard
@@ -349,13 +438,13 @@ private:
 			valve->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
 			dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
 		}; break;
-		case FS::HBV05: case FS::HBV06: case FS::HBV10: case FS::HBV18: {
-			this->vlabels[id]->fill_extent(x0, y0, nullptr, &label_height);
+		case FS::HBV05: case FS::HBV06: case FS::HBV10: {
+			this->labels[id]->fill_extent(x0, y0, nullptr, &label_height);
 			valve->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
 			dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
 		}; break;
-		default: {
-			this->vlabels[id]->fill_extent(x0, y0, nullptr, &label_height);
+		default: { // HBV11 - HBV18
+			this->labels[id]->fill_extent(x0, y0, nullptr, &label_height);
 			this->station->fill_anchor_location(id, nullptr, &vy);
 			this->station->fill_anchor_location(_E(FS, _I(id) - _I(FS::HBV11) + _I(FS::h11)), nullptr, &hy);
 			dx = x0; dy = (hy - vy) - label_height; anchor = GraphletAnchor::CB;
@@ -364,26 +453,32 @@ private:
 
 		this->station->map_credit_graphlet(valve, GraphletAnchor::CC, x0, y0);
 		this->station->map_credit_graphlet(this->captions[id], anchor, dx, dy);
-		this->master->move_to(this->vlabels[id], this->captions[id], GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->labels[id], this->captions[id], GraphletAnchor::CB, GraphletAnchor::CT);
 	}
 
 private:
 	void set_door_progress(FS id, float value) {
 		this->uhdoors[id]->set_value(value / 100.0F);
-		this->progresses[id]->set_value(value);
+		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 // never deletes these graphlets mannually
 private:
 	Tracklet<FS>* station;
 	Tracklet<FS>* hopper_room;
+	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
-	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
-	std::map<FS, Credit<Percentagelet, FS>*> progresses;
+	std::map<FS, Credit<Labellet, FS>*> labels;
+	std::map<FS, Credit<Cylinderlet, FS>*> cylinders;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
-	std::map<FS, Credit<Labellet, FS>*> vlabels;
+	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
+	std::map<FS, Credit<Percentagelet, FS>*> progresses;
+	std::map<FS, Credit<Dimensionlet, FS>*> pressures;
+	std::map<FS, Credit<Dimensionlet, FS>*> powers;
+	std::map<FS, Credit<Dimensionlet, FS>*> flows;
+	std::map<FS, Credit<Dimensionlet, FS>*> rpms;
 	std::map<FS, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
@@ -393,10 +488,11 @@ private:
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
-	ICanvasBrush^ relationship_color;
-	CanvasStrokeStyle^ relationship_style;
-	DimensionStyle dimension_style;
 	DimensionStyle percentage_style;
+	DimensionStyle pump_style;
+	DimensionStyle highlight_style;
+	DimensionStyle plain_style;
+
 
 private:
 	FlushsPage* master;

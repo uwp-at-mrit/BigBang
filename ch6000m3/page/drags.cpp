@@ -54,8 +54,6 @@ private class Drags final : public PLCConfirmation {
 public:
 	Drags(DragsPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-
-		this->percentage_style.unit_color = Colours::Silver;
 	}
 
 public:

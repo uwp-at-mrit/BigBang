@@ -16,6 +16,9 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
+#include "schema/di_pumps.hpp"
+#include "schema/di_hopper_pumps.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -108,21 +111,21 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {
-		this->set_hopper_pump_status(SW::PSHP, SW::PSUWP, DB4, 1U);
-		this->set_hopper_pump_status(SW::SBHP, SW::SBUWP, DB4, 25U);
+		DI_hopper_pumps(this->hoppers[SW::PSHP], this->hoppers[SW::PSUWP], DB4, 1U, DB205, 857U, 825U);
+		DI_hopper_pumps(this->hoppers[SW::SBHP], this->hoppers[SW::SBUWP], DB4, 25U, DB205, 873U, 841U);
 
-		this->set_flushing_pump_status(SW::PSFP, DB4, 105U);
-		this->set_flushing_pump_status(SW::SBFP, DB4, 109U);
+		DI_flushing_pump(this->pumps[SW::PSFP], DB4, 105U, DB205, 1673U);
+		DI_flushing_pump(this->pumps[SW::SBFP], DB4, 109U, DB205, 1681U);
 
-		this->set_sealed_pump_status(SW::PSHPa, DB4, 9U);
-		this->set_sealed_pump_status(SW::PSHPb, DB4, 13U);
-		this->set_sealed_pump_status(SW::SBHPa, DB4, 33U);
-		this->set_sealed_pump_status(SW::SBHPb, DB4, 37U);
+		DI_sealed_water_pump(this->pumps[SW::PSHPa], false, DB4, 9U, DB205, 1713U);
+		DI_sealed_water_pump(this->pumps[SW::PSHPb], false, DB4, 13U, DB205, 1721U);
+		DI_sealed_water_pump(this->pumps[SW::SBHPa], false, DB4, 33U, DB205, 1729U);
+		DI_sealed_water_pump(this->pumps[SW::SBHPb], false, DB4, 37U, DB205, 1737U);
 
-		this->set_sealed_pump_status(SW::PSUWP1, DB4, 513U);
-		this->set_sealed_pump_status(SW::PSUWP2, DB4, 517U);
-		this->set_sealed_pump_status(SW::SBUWP1, DB4, 529U);
-		this->set_sealed_pump_status(SW::SBUWP2, DB4, 533U);
+		DI_sealed_water_pump(this->pumps[SW::PSUWP1], true, DB4, 513U, DB205, 1697U);
+		DI_sealed_water_pump(this->pumps[SW::PSUWP2], true, DB4, 517U, DB205, 1705U);
+		DI_sealed_water_pump(this->pumps[SW::SBUWP1], true, DB4, 529U, DB205, 1745U);
+		DI_sealed_water_pump(this->pumps[SW::SBUWP2], true, DB4, 533U, DB205, 1753U);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -132,6 +135,7 @@ public:
 		SW sb_hopper_long_path[] = { SW::DGV16, SW::sbhp, SW::d45, SW::DGV7, SW::SBHP };
 		SW ps_underwater_path[] = { SW::DGV17, SW::psuwp, SW::d46, SW::PSUWP };
 		SW sb_underwater_path[] = { SW::DGV20, SW::sbuwp, SW::d47, SW::SBUWP };
+
 		this->station->append_subtrack(SW::Hatch, SW::DGV20, water_color);
 
 		this->try_flow_water(SW::PSFP, SW::DGV12, SW::flushs, water_color);
@@ -375,65 +379,19 @@ private:
 	}
 
 private:
-	void set_hopper_pump_status(SW id, const uint8* db4, size_t idx, bool on) {
-		if (on) {
-			HopperPumplet* target = this->hoppers[id];
-
-			target->set_remote_control(DBX(db4, idx + 3));
-			
-			target->set_status(DBX(db4, idx + 0), HopperPumpStatus::Ready);
-			target->set_status(DBX(db4, idx + 4), HopperPumpStatus::Alert);
-			target->set_status(DBX(db4, idx + 5), HopperPumpStatus::Broken);
-			target->set_status(DBX(db4, idx + 6), HopperPumpStatus::Running);
-			target->set_status(DBX(db4, idx + 7), HopperPumpStatus::Maintenance);
-		}
-	}
-
-	void set_hopper_pump_status(SW id1, SW id2, const uint8* db4, size_t idx_p1) {
-		bool hopper = DBX(db4, idx_p1 + 0);
-		bool underw = DBX(db4, idx_p1 + 1);
-
-		this->set_hopper_pump_status(id1, db4, idx_p1 - 1, hopper);
-		this->set_hopper_pump_status(id2, db4, idx_p1 - 1, underw);
-	}
-
-	void set_flushing_pump_status(SW id, const uint8* db4, size_t idx_p1) {
-		HydraulicPumplet* target = this->pumps[id];
-
-		target->set_remote_control(DBX(db4, idx_p1 - 1));
-
-		target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Running);
-		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Broken);
-	}
-	
-	void set_sealed_pump_status(SW id, const uint8* db4, size_t idx_p1) {
-		HydraulicPumplet* target = this->pumps[id];
-
-		switch (id) {
-		case SW::PSHPa: case SW::PSHPb: case SW::SBHPa: case SW::SBHPb: {
-			target->set_remote_control(DBX(db4, idx_p1 + 0));
-			target->set_status(DBX(db4, idx_p1 - 1), HydraulicPumpStatus::Ready);
-		}; break;
-		case SW::PSUWP1: case SW::PSUWP2: case SW::SBUWP1: case SW::SBUWP2: {
-			target->set_remote_control(DBX(db4, idx_p1 - 1));
-			target->set_status(DBX(db4, idx_p1 + 0), HydraulicPumpStatus::Ready);
-		}; break;
-		}
-
-		target->set_status(DBX(db4, idx_p1 + 1), HydraulicPumpStatus::Running);
-		target->set_status(DBX(db4, idx_p1 + 2), HydraulicPumpStatus::Broken);
-	}
-
-private:
 	void try_flow_water(SW pid, SW start, SW end, CanvasSolidColorBrush^ color) {
-		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
+		switch (this->pumps[pid]->get_status()) {
+		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
 			this->station->append_subtrack(start, end, color);
+		}
 		}
 	}
 
 	void try_flow_water(SW pid, SW* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
+		switch (this->pumps[pid]->get_status()) {
+		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
 			this->station->append_subtrack(path, count, color);
+		}
 		}
 	}
 

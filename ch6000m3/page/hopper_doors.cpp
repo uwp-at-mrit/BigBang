@@ -7,6 +7,9 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
+#include "schema/di_doors.hpp"
+#include "schema/di_pump_dimensions.hpp"
+
 #include "decorator/page.hpp"
 
 #include "module.hpp"
@@ -165,7 +168,6 @@ private class Doors final
 	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
-		this->percentage_style.unit_color = Colours::Silver;
 		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
 		this->setting_style = make_setting_dimension_style(metrics_font_size, 6U);
 		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
@@ -220,10 +222,26 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		this->set_pump_dimension_status(HD::A, DB4, 50U);
-		this->set_pump_dimension_status(HD::D, DB4, 82U);
-		this->set_pump_dimension_status(HD::E, DB4, 86U);
-		this->set_pump_dimension_status(HD::H, DB4, 66U);
+		DI_pump_dimension(this->dimensions[HD::A], DB4, 50U);
+		DI_pump_dimension(this->dimensions[HD::D], DB4, 82U);
+		DI_pump_dimension(this->dimensions[HD::E], DB4, 86U);
+		DI_pump_dimension(this->dimensions[HD::H], DB4, 66U);
+
+		DI_hopper_door(this->hdoors[HD::PS1], DB4, 329U, DB205, 889U);
+		DI_hopper_door(this->hdoors[HD::PS2], DB4, 330U, DB205, 905U);
+		DI_hopper_door(this->hdoors[HD::PS3], DB4, 331U, DB205, 921U);
+		DI_hopper_door(this->hdoors[HD::PS4], DB4, 369U, DB205, 937U);
+		DI_hopper_door(this->hdoors[HD::PS5], DB4, 370U, DB205, 953U);
+		DI_hopper_door(this->hdoors[HD::PS6], DB4, 371U, DB205, 969U);
+		DI_hopper_door(this->hdoors[HD::PS7], DB4, 372U, DB205, 985U);
+
+		DI_hopper_door(this->hdoors[HD::SB1], DB4, 345U, DB205, 897U);
+		DI_hopper_door(this->hdoors[HD::SB2], DB4, 346U, DB205, 913U);
+		DI_hopper_door(this->hdoors[HD::SB3], DB4, 347U, DB205, 929U);
+		DI_hopper_door(this->hdoors[HD::SB4], DB4, 401U, DB205, 945U);
+		DI_hopper_door(this->hdoors[HD::SB5], DB4, 402U, DB205, 961U);
+		DI_hopper_door(this->hdoors[HD::SB6], DB4, 403U, DB205, 977U);
+		DI_hopper_door(this->hdoors[HD::SB7], DB4, 404U, DB205, 993U);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -291,7 +309,7 @@ public:
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 
 			this->load_label(this->captions, HD::Port, Colours::make(default_ps_color), cpt_font);
-			this->load_label(this->captions, HD::Starboard, Colours::make(default_ps_color), cpt_font);
+			this->load_label(this->captions, HD::Starboard, Colours::make(default_sb_color), cpt_font);
 
 			this->load_setting(this->dsettings, HD::PSOP, "bar");
 			this->load_setting(this->dsettings, HD::PSCP, "bar");
@@ -315,17 +333,15 @@ public:
 			this->captions[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
 			off *= 0.618F;
 
-			this->decorator->fill_ascent_anchor(0.1F, 1.0F, &x, &y);
+			this->decorator->fill_ascent_anchor(0.0618F, 1.0F, &x, &y);
 			this->master->move_to(this->captions[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -off);
-
 			this->master->move_to(this->psettings[HD::PSFC], this->captions[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dsettings[HD::PSOP], this->psettings[HD::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dsettings[HD::PSCP], this->dsettings[HD::PSOP], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dimensions[HD::A], this->dsettings[HD::PSCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 
-			this->decorator->fill_descent_anchor(0.1F, 0.0F, &x, &y);
+			this->decorator->fill_descent_anchor(0.0618F, 0.0F, &x, &y);
 			this->master->move_to(this->captions[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, off);
-
 			this->master->move_to(this->psettings[HD::SBFC], this->captions[HD::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dsettings[HD::SBOP], this->psettings[HD::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dsettings[HD::SBCP], this->dsettings[HD::SBOP], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
@@ -463,11 +479,7 @@ private:
 	void set_door_progress(HD id, float value) {
 		this->doors[id]->set_value(value / 100.0F);
 		this->hdoors[id]->set_value(value / 100.0F);
-		this->progresses[id]->set_value(value);
-	}
-
-	void set_pump_dimension_status(HD id, const uint8* db4, size_t idx_p1) {
-		this->dimensions[id]->set_status(DBX(db4, idx_p1 - 1) ? DimensionStatus::Highlight : DimensionStatus::Normal);
+		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 private: // never delete these graphlets manually.

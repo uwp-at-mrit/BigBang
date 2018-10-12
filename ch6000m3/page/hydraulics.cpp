@@ -18,6 +18,9 @@
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
 
+#include "schema/di_valves.hpp"
+#include "schema/di_pumps.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -126,47 +129,47 @@ public:
 		} 
 		
 		{ // pump states
-			this->set_pump_status(HS::A, DB4, 9U, DB205, 49U);
-			this->set_pump_status(HS::B, DB4, 17U, DB205, 53U);
-			this->set_pump_status(HS::G, DB4, 57U, DB205, 69U);
-			this->set_pump_status(HS::H, DB4, 65U, DB205, 65U);
+			DI_hydraulic_pump(this->pumps[HS::A], DB4, 9U, DB205, 49U);
+			DI_hydraulic_pump(this->pumps[HS::B], DB4, 17U, DB205, 53U);
+			DI_hydraulic_pump(this->pumps[HS::G], DB4, 57U, DB205, 69U);
+			DI_hydraulic_pump(this->pumps[HS::H], DB4, 65U, DB205, 65U);
 			
-			this->set_pump_status(HS::C, DB4, 25U, DB205, 57U);
-			this->set_pump_status(HS::F, DB4, 49U, DB205, 73U);
-			this->set_pump_status(HS::D, DB4, 33U, DB205, 81U);
-			this->set_pump_status(HS::E, DB4, 41U, DB205, 85U);
+			DI_hydraulic_pump(this->pumps[HS::C], DB4, 25U, DB205, 57U);
+			DI_hydraulic_pump(this->pumps[HS::F], DB4, 49U, DB205, 73U);
+			DI_hydraulic_pump(this->pumps[HS::D], DB4, 33U, DB205, 81U);
+			DI_hydraulic_pump(this->pumps[HS::E], DB4, 41U, DB205, 85U);
 			
-			this->set_pump_status(HS::Y, DB4, 73U, DB205, 101U);
-			this->set_pump_status(HS::K, DB4, 81U, DB205, 89U);
-			this->set_pump_status(HS::L, DB4, 89U, DB205, 93U);
-			this->set_pump_status(HS::M, DB4, 97U, DB205, 97U);
+			DI_hydraulic_pump(this->pumps[HS::Y], DB4, 73U, DB205, 101U);
+			DI_hydraulic_pump(this->pumps[HS::K], DB4, 81U, DB205, 89U);
+			DI_hydraulic_pump(this->pumps[HS::L], DB4, 89U, DB205, 93U);
+			DI_hydraulic_pump(this->pumps[HS::M], DB4, 97U, DB205, 97U);
 
-			this->set_pump_status(HS::I, DB4, 105U, DB205, 61U);
-			this->set_pump_status(HS::J, DB4, 113U, DB205, 77U);
+			DI_hydraulic_pump(this->pumps[HS::I], DB4, 105U, DB205, 61U);
+			DI_hydraulic_pump(this->pumps[HS::J], DB4, 113U, DB205, 77U);
 		}
 
 		{ // valve statuses
-			this->set_valve_status(HS::SQ1, DB4, 113U);
-			this->set_valve_status(HS::SQ2, DB4, 114U);
+			DI_gate_valve(this->valves[HS::SQ1], DB4, 113U);
+			DI_gate_valve(this->valves[HS::SQ2], DB4, 114U);
 
-			this->set_valve_status(HS::SQk1, DB4, 122U);
-			this->set_valve_status(HS::SQk2, DB4, 123U);
-			this->set_valve_status(HS::SQl, DB4, 124U);
-			this->set_valve_status(HS::SQm, DB4, 125U);
-			this->set_valve_status(HS::SQy, DB4, 126U);
+			DI_gate_valve(this->valves[HS::SQk1], DB4, 122U);
+			DI_gate_valve(this->valves[HS::SQk2], DB4, 123U);
+			DI_gate_valve(this->valves[HS::SQl], DB4, 124U);
+			DI_gate_valve(this->valves[HS::SQm], DB4, 125U);
+			DI_gate_valve(this->valves[HS::SQy], DB4, 126U);
 
-			this->set_valve_status(HS::SQi, DB4, 128U);
-			this->set_valve_status(HS::SQj, DB4, 129U);
+			DI_gate_valve(this->valves[HS::SQi], DB4, 128U);
+			DI_gate_valve(this->valves[HS::SQj], DB4, 129U);
 
-			this->set_valve_status(HS::SQc, DB4, 135U);
-			this->set_valve_status(HS::SQd, DB4, 136U);
-			this->set_valve_status(HS::SQe, DB4, 137U);
-			this->set_valve_status(HS::SQf, DB4, 138U);
+			DI_gate_valve(this->valves[HS::SQc], DB4, 135U);
+			DI_gate_valve(this->valves[HS::SQd], DB4, 136U);
+			DI_gate_valve(this->valves[HS::SQe], DB4, 137U);
+			DI_gate_valve(this->valves[HS::SQf], DB4, 138U);
 
-			this->set_valve_status(HS::SQa, DB4, 141U);
-			this->set_valve_status(HS::SQb, DB4, 142U);
-			this->set_valve_status(HS::SQg, DB4, 143U);
-			this->set_valve_status(HS::SQh, DB4, 144U);
+			DI_gate_valve(this->valves[HS::SQa], DB4, 141U);
+			DI_gate_valve(this->valves[HS::SQb], DB4, 142U);
+			DI_gate_valve(this->valves[HS::SQg], DB4, 143U);
+			DI_gate_valve(this->valves[HS::SQh], DB4, 144U);
 		}
 
 		{ // filter statuses
@@ -234,6 +237,7 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+
 		this->dimension_style.number_font = make_bold_text_format("Cambria Math", metrics_font_size);
 		this->dimension_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
@@ -518,28 +522,6 @@ private:
 		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
 	}
 
-	void set_pump_status(HS id, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-		HydraulicPumplet* target = this->pumps[id];
-		
-		target->set_remote_control(DBX(db4, idx4_p1 - 1));
-
-		target->set_status(DBX(db4, idx4_p1 + 0), HydraulicPumpStatus::Running);
-		target->set_status(DBX(db4, idx4_p1 + 1), HydraulicPumpStatus::Broken);
-
-		target->set_status(DBX(db205, idx205_p1 - 1), HydraulicPumpStatus::Starting);
-		target->set_status(DBX(db205, idx205_p1 + 0), HydraulicPumpStatus::Stopping);
-		target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Unstartable);
-		target->set_status(DBX(db205, idx205_p1 + 2), HydraulicPumpStatus::Unstoppable);
-		target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::StartReady);
-		target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StopReady);
-		target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
-		target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
-	}
-
-	void set_valve_status(HS id, const uint8* db4, size_t idx_p1) {
-		this->valves[id]->set_status(DBX(db4, idx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
-	}
-
 	void set_filter_status(HS id, const uint8* db4, size_t idx_p1) {
 		if (DBX(db4, idx_p1 - 1)) {
 			this->filters[id]->set_color(block_color);
@@ -548,23 +530,27 @@ private:
 		}
 	}
 
+private:
 	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
-		if (this->valves[vid]->get_status() == GateValveStatus::Open) {
+		switch (this->valves[vid]->get_status()) {
+		case GateValveStatus::Open: case GateValveStatus::CloseReady: {
 			this->station->append_subtrack(vid, pid, color);
+		}
 		}
 	}
 
-private:
 	void try_flow_oil(HS vid, HS pid, HS _id, HS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		this->try_flow_oil(vid, pid, color);
 
-		if (this->pumps[pid]->get_status() == HydraulicPumpStatus::Running) {
+		switch (this->pumps[pid]->get_status()) {
+		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
 			this->station->append_subtrack(pid, _id, oil_color);
 
 			if (path != nullptr) {
 				this->station->append_subtrack(_id, path[0], oil_color);
 				this->station->append_subtrack(path, count, color);
 			}
+		}
 		}
 	}
 

@@ -169,7 +169,7 @@
     <value>7#泥舱冲水</value>
   </data>
   <data name="HBV18" xml:space="preserve">
-    <value>抽舱闸阀冲水蝶阀</value>
+    <value>抽舱泥门冲水</value>
   </data>
   <data name="PSPump" xml:space="preserve">
     <value>左高压水泵</value>

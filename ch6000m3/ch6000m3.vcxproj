@@ -322,6 +322,11 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\drags.hpp" />
+    <ClInclude Include="schema\di_doors.hpp" />
+    <ClInclude Include="schema\di_hopper_pumps.hpp" />
+    <ClInclude Include="schema\di_pumps.hpp" />
+    <ClInclude Include="schema\di_pump_dimensions.hpp" />
+    <ClInclude Include="schema\di_valves.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\loads.hpp" />

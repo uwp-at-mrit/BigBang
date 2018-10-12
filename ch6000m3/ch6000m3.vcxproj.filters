@@ -23,6 +23,9 @@
     <Filter Include="stone\tongue\zh-CN">
       <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="schema">
+      <UniqueIdentifier>{f56f01fb-ab2b-409e-af09-3b1dfeadb7a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
@@ -88,6 +91,21 @@
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\drags.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_doors.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_pumps.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_pump_dimensions.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_valves.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_hopper_pumps.hpp">
+      <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
