@@ -169,12 +169,11 @@ private class Doors final
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
+		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U);
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
-
-		this->metrics_style.number_font = make_bold_text_format(small_metrics_font_size);
 	}
 
 public:
@@ -469,14 +468,14 @@ private:
 
 			this->master->move_to(is[id], x + xoff, y, GraphletAnchor::CT);
 			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
-			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize);
 		}
 	}
 
 private:
 	void set_cylinder(HD id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value, GraphletAnchor::LB);
+		this->dimensions[id]->set_value(value, GraphletAnchor::CT);
 	}
 
 	void set_door_progress(HD id, float value) {

@@ -53,6 +53,15 @@ static Platform::String^ accumulate_number(Platform::String^ src, double acc) {
 }
 
 /*************************************************************************************************/
+DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, float ufsize) {
+	DimensionStyle ds;
+
+	ds.number_font = make_bold_text_format("Cambria Math", nfsize);
+	ds.unit_font = make_bold_text_format("Cambria", ufsize);
+
+	return ds;
+}
+
 DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned int min_number) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize * 0.90F);

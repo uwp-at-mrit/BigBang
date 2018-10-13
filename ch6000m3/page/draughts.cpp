@@ -102,8 +102,7 @@ public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U);
-
-		this->metrics_style.number_font = make_bold_text_format(small_metrics_font_size);
+		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 	}
 
 public:
@@ -266,7 +265,7 @@ private:
 
 			this->master->move_to(is[id], x, y, GraphletAnchor::LC);
 			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
-			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize);
 		}
 	}
 
@@ -282,7 +281,7 @@ private:
 private:
 	void set_cylinder(DL id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value, GraphletAnchor::LB);
+		this->dimensions[id]->set_value(value, GraphletAnchor::CT);
 	}
 
 	void set_cylinder(DL id, DLTS ts_id, float value) {

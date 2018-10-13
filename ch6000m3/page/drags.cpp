@@ -7,18 +7,16 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
-#include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/device/compensatorlet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 
+#include "schema/di_valves.hpp"
+
 #include "decorator/page.hpp"
 
 #include "module.hpp"
-#include "shape.hpp"
-#include "geometry.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -37,7 +35,7 @@ private enum class DAOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class DA : unsigned int {
-	D03, D04, D11, D12, D13, D14, D15, D16,
+	D003, D004, D011, D012, D013, D014, D015, D016,
 	LMOD, PS, SB, PSHP, SBHP,
 	
 	_,
@@ -60,13 +58,29 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input(const uint8* AI_DB203, size_t count, Syslog* logger) override {
-		this->overflowpipe->set_value(RealData(AI_DB203, 55));
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->overflowpipe->set_value(RealData(DB203, 55));
 		this->lengths[DA::OverflowPipe]->set_value(this->overflowpipe->get_value());
+
+		this->set_compensator(DA::PSCompensator, DB203, 82U);
+		this->set_compensator(DA::SBCompensator, DB203, 98U);
+
+		this->progresses[DA::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
+		//this->progresses[DA::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
+	}
+
+
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		DI_gate_valve(this->valves[DA::D011], DB4, 349U, DB205, 449U);
+		DI_gate_valve(this->valves[DA::D012], DB4, 333U, DB205, 457U);
+		DI_gate_valve(this->valves[DA::D013], DB4, 405U, DB205, 465U);
+		DI_gate_valve(this->valves[DA::D014], DB4, 373U, DB205, 473U);
+		DI_gate_valve(this->valves[DA::D015], DB4, 407U, DB205, 481U);
+		DI_gate_valve(this->valves[DA::D016], DB4, 375U, DB205, 489U);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -83,19 +97,19 @@ public:
 		float rlmod = gridsize * 1.5F;
 		Turtle<DA>* pTurtle = new Turtle<DA>(gridsize, gridsize, DA::LMOD);
 
-		pTurtle->jump_right(1.5F)->move_right(2, DA::D11)->move_right(4, DA::sb)->move_down(4, DA::SBHP);
-		pTurtle->move_right(4, DA::D03)->move_right(4, DA::SB)->jump_back();
-		pTurtle->move_right(4)->move_up(4, DA::d13)->move_left(4)->move_up(2, DA::D13)->jump_back();
-		pTurtle->move_up(4)->move_left(4)->move_up(2, DA::D15)->jump_back(DA::LMOD);
+		pTurtle->jump_right(1.5F)->move_right(2, DA::D011)->move_right(4, DA::sb)->move_down(4, DA::SBHP);
+		pTurtle->move_right(4, DA::D003)->move_right(4, DA::SB)->jump_back();
+		pTurtle->move_right(4)->move_up(4, DA::d13)->move_left(4)->move_up(2, DA::D013)->jump_back();
+		pTurtle->move_up(4)->move_left(4)->move_up(2, DA::D015)->jump_back(DA::LMOD);
 
-		pTurtle->jump_left(1.5F)->move_left(2, DA::D12)->move_left(4, DA::ps)->move_down(4, DA::PSHP);
-		pTurtle->move_left(4, DA::D04)->move_left(4, DA::PS)->jump_back();
-		pTurtle->move_left(4)->move_up(4, DA::d14)->move_right(4)->move_up(2, DA::D14)->jump_back();
-		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D16);
+		pTurtle->jump_left(1.5F)->move_left(2, DA::D012)->move_left(4, DA::ps)->move_down(4, DA::PSHP);
+		pTurtle->move_left(4, DA::D004)->move_left(4, DA::PS)->jump_back();
+		pTurtle->move_left(4)->move_up(4, DA::d14)->move_right(4)->move_up(2, DA::D014)->jump_back();
+		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D016);
 
 		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
-		this->load_valves(this->valves, this->labels, DA::D03, DA::D12, vinset, 0.0);
-		this->load_valves(this->valves, this->labels, DA::D13, DA::D16, vinset, -90.0);
+		this->load_valves(this->valves, this->labels, DA::D003, DA::D012, vinset, 0.0);
+		this->load_valves(this->valves, this->labels, DA::D013, DA::D016, vinset, -90.0);
 		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->label_font);
 
 		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipe_thickness, Colours::Green));
@@ -118,6 +132,9 @@ public:
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
 		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
 
+		this->load_percentage(this->progresses, DA::D003);
+		this->load_percentage(this->progresses, DA::D004);
+
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 	}
 
@@ -132,7 +149,7 @@ public:
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
-			case DA::D03: case DA::D04: case DA::D11: case DA::D12: {
+			case DA::D003: case DA::D004: case DA::D011: case DA::D012: {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
 				dx = x0; dy = y0 - gridsize + margin; anchor = GraphletAnchor::CB;
 			}; break;
@@ -145,6 +162,9 @@ public:
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
 			this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
 		}
+
+		this->station->map_credit_graphlet(this->progresses[DA::D003], GraphletAnchor::CT, 0.0F, margin);
+		this->station->map_credit_graphlet(this->progresses[DA::D004], GraphletAnchor::CT, 0.0F, margin);
 
 		this->station->map_graphlet_at_anchor(this->lmod, DA::LMOD, GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->labels[DA::LMOD], GraphletAnchor::CC);
@@ -166,6 +186,11 @@ public:
 		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
+
+		for (DA id = DA::PSCompensator; id <= DA::SBCompensator; id++) {
+			this->master->move_to(this->lengths[id], this->compensators[id], GraphletAnchor::CB, GraphletAnchor::CT);
+			this->master->move_to(this->pressures[id], this->lengths[id], GraphletAnchor::CB, GraphletAnchor::CT);
+		}
 	}
 
 public:
@@ -182,6 +207,11 @@ private:
 			this->load_label(ls, id.ToString(), id, Colours::Silver, this->label_font);
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
+	}
+
+	template<typename E>
+	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
+		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
 	}
 
 	template<typename E>
@@ -260,10 +290,17 @@ private:
 		//this->dimensions[id]->set_value(value);
 	}
 
+	void set_compensator(DA id, const uint8* db203, unsigned int rd_idx) {
+		float progress = RealData(db203, rd_idx + 2);
+
+		this->compensators[id]->set_value(progress);
+		this->lengths[id]->set_value(progress, GraphletAnchor::CT);
+		this->pressures[id]->set_value(RealData(db203, rd_idx + 1), GraphletAnchor::CT);
+	}
+
 private: // never delete these graphlets manually.
 	Tracklet<DA>* station;
 	std::map<DA, Credit<Labellet, DA>*> labels;
-	std::map<DA, Credit<Percentagelet, DA>*> progresses;
 	std::map<DA, Credit<GateValvelet, DA>*> valves;
 	std::map<DA, Credit<HopperPumplet, DA>*> hpumps;
 	std::map<DA, Credit<Circlelet, DA>*> suctions;
@@ -272,6 +309,7 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
 	std::map<DA, Credit<Dimensionlet, DA>*> rpms;
+	std::map<DA, Credit<Percentagelet, DA>*> progresses;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
 	

@@ -16,11 +16,9 @@
 #include "graphlet/symbol/pump/water_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
-#include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "schema/di_doors.hpp"
 #include "schema/di_valves.hpp"
-#include "schema/di_pump_dimensions.hpp"
 
 #include "decorator/page.hpp"
 
@@ -46,9 +44,6 @@ private enum class FS : unsigned int {
 	// Pumps
 	PSPump, SBPump,
 
-	// Pump Dimensions
-	D, E,
-
 	// Valves
 	HBV01, HBV02, HBV03, HBV08, HBV09, HBV11, HBV12, HBV13, HBV14, HBV15, HBV16, HBV17, HBV18,
 	HBV04, HBV05, HBV06, HBV07, HBV10,
@@ -59,9 +54,7 @@ private enum class FS : unsigned int {
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	
 	// key labels
-	PSSea, SBSea,
-	PSPPower, SBPPower,
-	PSPRpm, SBPRpm, 
+	PSSea, SBSea, 
 
 	_,
 	// anchors used for unnamed corners
@@ -87,10 +80,10 @@ public:
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->set_cylinder(FS::PSPPower, DBD(DB2, 376U));
-		this->set_cylinder(FS::PSPRpm, DBD(DB2, 388U));
-		this->set_cylinder(FS::SBPPower, DBD(DB2, 392U));
-		this->set_cylinder(FS::SBPRpm, DBD(DB2, 404U));
+		//this->set_cylinder(FS::PSPPower, DBD(DB2, 376U));
+		//this->set_cylinder(FS::PSPRpm, DBD(DB2, 388U));
+		//this->set_cylinder(FS::SBPPower, DBD(DB2, 392U));
+		//this->set_cylinder(FS::SBPRpm, DBD(DB2, 404U));
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
@@ -109,15 +102,9 @@ public:
 		this->set_door_progress(FS::SB5, RealData(DB203, 94U));
 		this->set_door_progress(FS::SB6, RealData(DB203, 95U));
 		this->set_door_progress(FS::SB7, RealData(DB203, 96U));
-
-		this->pressures[FS::D]->set_value(RealData(DB203, 10U), GraphletAnchor::RB);
-		this->pressures[FS::E]->set_value(RealData(DB203, 11U), GraphletAnchor::RB);
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_pump_dimension(this->pressures[FS::D], DB4, 33U);
-		DI_pump_dimension(this->pressures[FS::E], DB4, 41U);
-
 		DI_gate_valve(this->gvalves[FS::HBV01], DB4, 281U, DB205, 161U);
 		DI_gate_valve(this->gvalves[FS::HBV02], DB4, 265U, DB205, 169U);
 		DI_gate_valve(this->gvalves[FS::HBV03], DB4, 263U, DB205, 177U);
@@ -199,17 +186,17 @@ public:
 		pTurtle->turn_left_up()->move_up(2.5F, FS::SBV4)->move_up(2.5F)->turn_up_left();
 		pTurtle->move_left(10, FS::HBV07)->move_left(10, FS::Port)->jump_back(FS::h10);
 
-		pTurtle->turn_right_down(FS::D)->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
+		pTurtle->turn_right_down()->move_down(5, FS::HBV09)->move_down(5)->turn_down_right(FS::h4);
 		pTurtle->turn_left_down()->move_down(2.5F, FS::SBV3)->move_down(2.5F)->turn_down_left();
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(5.5F)->turn_right_down()->move_down(6);
-		pTurtle->turn_down_left(FS::h3ps)->move_left(5)->turn_left_up(FS::PSPump);
+		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(6.5F)->turn_right_down()->move_down(6);
+		pTurtle->turn_down_left(FS::h3ps)->move_left(6)->turn_left_up(FS::PSPump);
 		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
-		pTurtle->turn_down_left(FS::h3sb)->move_left(5, FS::SBPump)->jump_back();
-		pTurtle->turn_right_down()->move_down(3)->turn_down_left()->move_left(5)->turn_left_down();
+		pTurtle->turn_down_left(FS::h3sb)->move_left(6, FS::SBPump)->jump_back();
+		pTurtle->turn_right_down()->move_down(3)->turn_down_left()->move_left(6)->turn_left_down();
 		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
 		pTurtle->move_right(4, FS::HBV04)->move_right(5)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
@@ -220,8 +207,8 @@ public:
 			unsigned int distance = _I(HBV) - _I(FS::HBV11);
 			float half_width = 2.0F;
 			float half_height = 2.5F;
-			float gapsize = 0.5F;
-			float room_height = (5.5F + half_height) * 2.0F;
+			float gapsize = 0.382F;
+			float room_height = (6.0F + half_height) * 2.0F;
 			float water_height = room_height - 5.0F;
 			FS hbv = _E(FS, _I(FS::h11) + distance);
 
@@ -297,10 +284,6 @@ public:
 		{ // load other dimensions
 			float cylinder_height = gheight * 5.0F;
 
-			this->load_cylinders(this->cylinders, this->labels, this->metrics, FS::PSPPower, FS::SBPPower, cylinder_height, 1000.0, "kwatt");
-			this->load_cylinders(this->cylinders, this->labels, this->metrics, FS::PSPRpm, FS::SBPRpm, cylinder_height, 1500.0, "rpm");
-
-			this->load_dimensions(this->pressures, FS::D, FS::E, "bar");
 			this->load_dimension(this->pressures, FS::HBV04, "bar");
 			this->load_dimension(this->flows, FS::HBV04, "m3ph");
 			this->load_dimension(this->pressures, FS::HBV05, "bar");
@@ -354,32 +337,17 @@ public:
 
 		{ // reflow dimensions
 			float xoff = gwidth * 2.0F;
+			float ps_oy = this->pumps[FS::PSPump]->get_radiusY() * 0.5F;
 			
-			this->station->map_credit_graphlet(this->pressures[FS::D], GraphletAnchor::LB, xoff);
-			this->master->move_to(this->pressures[FS::E], this->pressures[FS::D], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gheight);
-
 			this->station->map_credit_graphlet(this->pressures[FS::HBV04], GraphletAnchor::LB, xoff);
 			this->station->map_credit_graphlet(this->flows[FS::HBV04], GraphletAnchor::LT, xoff);
-
 			this->station->map_credit_graphlet(this->pressures[FS::HBV05], GraphletAnchor::LB, xoff);
 			this->station->map_credit_graphlet(this->flows[FS::HBV05], GraphletAnchor::LT, xoff);
-		}
 
-		{ // reflow cylinders
-			float pxoff = gwidth * 0.0F;
-			float rxoff = gwidth * 2.0F;
-			float yoff = gheight * 3.0F;
-			float tgap = vinset * 0.382F;
-			
-			this->master->move_to(this->cylinders[FS::PSPPower], this->hopper_room, GraphletAnchor::LT, GraphletAnchor::RB, pxoff, -yoff);
-			this->master->move_to(this->cylinders[FS::PSPRpm], this->hopper_room, GraphletAnchor::LT, GraphletAnchor::LB, rxoff, -yoff);
-			this->master->move_to(this->cylinders[FS::SBPPower], this->hopper_room, GraphletAnchor::LB, GraphletAnchor::RT, pxoff, yoff);
-			this->master->move_to(this->cylinders[FS::SBPRpm], this->hopper_room, GraphletAnchor::LB, GraphletAnchor::LT, rxoff, yoff);
-
-			for (FS mid = FS::PSPPower; mid <= FS::SBPRpm; mid++) {
-				this->master->move_to(this->labels[mid], this->cylinders[mid], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -tgap);
-				this->master->move_to(this->metrics[mid], this->cylinders[mid], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, tgap);
-			}
+			this->station->map_credit_graphlet(this->powers[FS::PSPump], GraphletAnchor::LB, xoff, ps_oy);
+			this->station->map_credit_graphlet(this->rpms[FS::PSPump], GraphletAnchor::LT, xoff, ps_oy);
+			this->station->map_credit_graphlet(this->powers[FS::SBPump], GraphletAnchor::LB, xoff);
+			this->station->map_credit_graphlet(this->rpms[FS::SBPump], GraphletAnchor::LT, xoff);
 		}
 	}
 
@@ -408,6 +376,9 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 	
 		gs[id] = this->master->insert_one(new G(rx, degrees), id);
+
+		this->load_dimension(this->powers, id, "kwatt");
+		this->load_dimension(this->rpms, id, "rpm");
 	}
 
 	template<class G, typename E>
@@ -513,11 +484,6 @@ private:
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 	}
 
-	void set_cylinder(FS id, float value) {
-		this->cylinders[id]->set_value(value);
-		this->metrics[id]->set_value(value, GraphletAnchor::LB);
-	}
-
 // never deletes these graphlets mannually
 private:
 	Tracklet<FS>* station;
@@ -525,14 +491,14 @@ private:
 	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
-	std::map<FS, Credit<Cylinderlet, FS>*> cylinders;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
 	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
 	std::map<FS, Credit<Percentagelet, FS>*> progresses;
 	std::map<FS, Credit<Dimensionlet, FS>*> pressures;
-	std::map<FS, Credit<Dimensionlet, FS>*> metrics;
+	std::map<FS, Credit<Dimensionlet, FS>*> powers;
+	std::map<FS, Credit<Dimensionlet, FS>*> rpms;
 	std::map<FS, Credit<Dimensionlet, FS>*> flows;
 	std::map<FS, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
