@@ -69,10 +69,9 @@ DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned
 	return ds;
 }
 
-DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number) {
+DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number, ICanvasBrush^ color) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
-	ICanvasBrush^ color = Colours::GhostWhite;
 	DimensionStyle ds;
 
 	ds.number_font = nf;

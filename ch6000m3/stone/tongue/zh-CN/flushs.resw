@@ -171,11 +171,23 @@
   <data name="HBV18" xml:space="preserve">
     <value>抽舱泥门冲水</value>
   </data>
+  <data name="PSPPower" xml:space="preserve">
+    <value>左高压冲水功率</value>
+  </data>
+  <data name="PSPRpm" xml:space="preserve">
+    <value>左高压冲水转速</value>
+  </data>
   <data name="PSPump" xml:space="preserve">
     <value>左高压水泵</value>
   </data>
   <data name="PSSea" xml:space="preserve">
     <value>接海底</value>
+  </data>
+  <data name="SBPPower" xml:space="preserve">
+    <value>右高压冲水功率</value>
+  </data>
+  <data name="SBPRpm" xml:space="preserve">
+    <value>右高压冲水转速</value>
   </data>
   <data name="SBPump" xml:space="preserve">
     <value>右高压水泵</value>

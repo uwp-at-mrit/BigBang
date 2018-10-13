@@ -117,7 +117,7 @@ public:
 		float aheight = this->actual_height();
 		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
 		float cell_width = this->ship_width * awidth / float(hopper_count);
-		float cell_height = abox.Height / 4.0F;
+		float cell_height = abox.Height * 0.25F;
 
 		SET_VALUES(width, cell_width, height, cell_height);
 		SET_BOX(x, this->x * awidth + cell_width * float(hopper_count - idx));
@@ -168,10 +168,13 @@ private class Doors final
 	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
-		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
-		this->setting_style = make_setting_dimension_style(metrics_font_size, 6U);
-		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
+		this->label_font = make_bold_text_format(large_font_size);
+		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U);
+		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
+		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
+
+		this->metrics_style.number_font = make_bold_text_format(small_metrics_font_size);
 	}
 
 public:
@@ -308,8 +311,8 @@ public:
 		{ // load settings
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 
-			this->load_label(this->captions, HD::Port, Colours::make(default_ps_color), cpt_font);
-			this->load_label(this->captions, HD::Starboard, Colours::make(default_sb_color), cpt_font);
+			this->load_label(this->labels, HD::Port, Colours::make(default_ps_color), cpt_font);
+			this->load_label(this->labels, HD::Starboard, Colours::make(default_sb_color), cpt_font);
 
 			this->load_setting(this->dsettings, HD::PSOP, "bar");
 			this->load_setting(this->dsettings, HD::PSCP, "bar");
@@ -325,24 +328,24 @@ public:
 		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, 1.0F, -0.5F);
 		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, 3.0F, 0.5F);
 
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, HD::EarthWork, HD::Displacement);
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, HD::EarthWork, HD::Displacement);
 
 		{ // reflow settings and dimensions
 			float x, y, off;
 
-			this->captions[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
+			this->labels[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
 			off *= 0.618F;
 
 			this->decorator->fill_ascent_anchor(0.0618F, 1.0F, &x, &y);
-			this->master->move_to(this->captions[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -off);
-			this->master->move_to(this->psettings[HD::PSFC], this->captions[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			this->master->move_to(this->labels[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -off);
+			this->master->move_to(this->psettings[HD::PSFC], this->labels[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dsettings[HD::PSOP], this->psettings[HD::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dsettings[HD::PSCP], this->dsettings[HD::PSOP], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
 			this->master->move_to(this->dimensions[HD::A], this->dsettings[HD::PSCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 
 			this->decorator->fill_descent_anchor(0.0618F, 0.0F, &x, &y);
-			this->master->move_to(this->captions[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, off);
-			this->master->move_to(this->psettings[HD::SBFC], this->captions[HD::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->labels[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, off);
+			this->master->move_to(this->psettings[HD::SBFC], this->labels[HD::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dsettings[HD::SBOP], this->psettings[HD::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dsettings[HD::SBCP], this->dsettings[HD::SBOP], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
 			this->master->move_to(this->dimensions[HD::H], this->dsettings[HD::SBCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
@@ -409,8 +412,8 @@ private:
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
-		this->load_label(this->captions, id, Colours::Silver);
-		this->dimensions[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+		this->load_label(this->labels, id, Colours::Silver, this->label_font);
+		this->dimensions[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}
 
 	template<typename E>
@@ -483,7 +486,7 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	std::map<HD, Credit<Labellet, HD>*> captions;
+	std::map<HD, Credit<Labellet, HD>*> labels;
 	std::map<HD, Credit<HopperDoorlet, HD>*> hdoors;
 	std::map<HD, Credit<Percentagelet, HD>*> progresses;
 	std::map<HD, Credit<Doorlet, HD>*> doors;
@@ -493,7 +496,9 @@ private: // never delete these graphlets manually.
 	std::map<HD, Credit<Percentagelet, HD>*> psettings;
 
 private:
+	CanvasTextFormat^ label_font;
 	DimensionStyle percentage_style;
+	DimensionStyle metrics_style;
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;

@@ -35,8 +35,6 @@ private enum DAMode { WindowUI = 0, Dashboard };
 
 private enum class DAOperation { Open, Stop, Close, Disable, _ };
 
-private enum class DATS { EarthWork, Vessel, Loading, Displacement, Draught, _ };
-
 // WARNING: order matters
 private enum class DA : unsigned int {
 	D03, D04, D11, D12, D13, D14, D15, D16,
@@ -69,12 +67,6 @@ public:
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
-
-		this->timeseries->set_value(DATS::Draught, DBD(DB2, 192U));
-		this->timeseries->set_value(DATS::Displacement, DBD(DB2, 228U));
-		this->timeseries->set_value(DATS::Loading, DBD(DB2, 232U));
-		this->timeseries->set_value(DATS::EarthWork, DBD(DB2, 236U));
-		this->timeseries->set_value(DATS::Vessel, DBD(DB2, 320U));
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -123,7 +115,6 @@ public:
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
-		this->timeseries = this->master->insert_one(new TimeSerieslet<DATS>(__MODULE__, 18000.0, shwidth, shheight * 0.618F));
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
 		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
 
@@ -172,8 +163,7 @@ public:
 
 		this->master->move_to(this->lengths[DA::OverflowPipe], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB);
-		this->master->move_to(this->timeseries, this->overflowpipe, GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -ystep);
-
+		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
 	}
@@ -283,7 +273,6 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
 	std::map<DA, Credit<Dimensionlet, DA>*> rpms;
 	OverflowPipelet* overflowpipe;
-	TimeSerieslet<DATS>* timeseries;
 	Arclet* lmod;
 	
 private:

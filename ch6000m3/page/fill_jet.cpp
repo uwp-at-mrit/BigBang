@@ -136,6 +136,26 @@ public:
 		DI_pump_dimension(this->pressures[FJ::F], DB4, 74U);
 		DI_pump_dimension(this->pressures[FJ::H], DB4, 66U);
 
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D001, DB4, 239U, 465U, DB205, 369U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D002, DB4, 273U, 421U, DB205, 393U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D003, DB4, 279U, 423U, DB205, 385U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D004, DB4, 257U, 425U, DB205, 377U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D005, DB4, 259U, 417U, DB205, 401U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D006, DB4, 261U, 419U, DB205, 409U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D007, DB4, 289U, 455U, DB205, 417U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D008, DB4, 291U, 457U, DB205, 425U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D009, DB4, 293U, 443U, DB205, 433U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D010, DB4, 295U, 439U, DB205, 441U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D017, DB4, 297U, 445U, DB205, 497U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D018, DB4, 299U, 453U, DB205, 505U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D019, DB4, 301U, 451U, DB205, 513U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D020, DB4, 303U, 447U, DB205, 521U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D021, DB4, 305U, 449U, DB205, 529U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D022, DB4, 307U, 461U, DB205, 537U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D023, DB4, 309U, 459U, DB205, 545U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D024, DB4, 413U, 435U, DB205, 553U, 0U);
+		DI_paired_valves(this->gvalves, this->mvalves, FJ::D025, DB4, 275U, 467U, DB205, 561U, 0U);
+		
 		{ // Missing DB4 info
 			DI_hopper_door(this->uhdoors[FJ::PS1], DB4, 329U, DB205, 1089U);
 			DI_hopper_door(this->uhdoors[FJ::PS2], DB4, 330U, DB205, 1105U);
@@ -183,9 +203,9 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
-		this->setting_style = make_setting_dimension_style(metrics_font_size, 6U);
+		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
+		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 	}

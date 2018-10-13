@@ -10,6 +10,21 @@ namespace WarGrey::SCADA {
 		target->set_status(DBX(db4, idx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
 	}
 
+	template<class V>
+	void DI_gate_valve(V* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
+		target->set_status(DBX(db4, idx4_p1 - 1), GateValveStatus::Open);
+		target->set_status(DBX(db4, idx4_p1 + 0), GateValveStatus::Closed);
+
+		target->set_status(DBX(db205, idx205_p1 - 1), GateValveStatus::Opening);
+		target->set_status(DBX(db205, idx205_p1 + 0), GateValveStatus::Closing);
+		target->set_status(DBX(db205, idx205_p1 + 1), GateValveStatus::Unopenable);
+		target->set_status(DBX(db205, idx205_p1 + 2), GateValveStatus::Unclosable);
+		target->set_status(DBX(db205, idx205_p1 + 3), GateValveStatus::OpenReady);
+		target->set_status(DBX(db205, idx205_p1 + 4), GateValveStatus::CloseReady);
+		target->set_status(DBX(db205, idx205_p1 + 5), GateValveStatus::FakeOpen);
+		target->set_status(DBX(db205, idx205_p1 + 6), GateValveStatus::FakeClose);
+	}
+
 	template<class G, class M, typename E>
 	void DI_paired_valves(G& gs, M& ms, E id
 		, const uint8* db4, size_t gidx4_p1, size_t midx4_p1

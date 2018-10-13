@@ -19,6 +19,7 @@
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "schema/di_doors.hpp"
+#include "schema/di_valves.hpp"
 #include "schema/di_pump_dimensions.hpp"
 
 #include "decorator/page.hpp"
@@ -58,7 +59,9 @@ private enum class FS : unsigned int {
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	
 	// key labels
-	PSSea, SBSea, PSPPower, SBPPower, PSPRpm, SBPRpm, 
+	PSSea, SBSea,
+	PSPPower, SBPPower,
+	PSPRpm, SBPRpm, 
 
 	_,
 	// anchors used for unnamed corners
@@ -81,6 +84,13 @@ public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+	}
+
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+		this->set_cylinder(FS::PSPPower, DBD(DB2, 376U));
+		this->set_cylinder(FS::PSPRpm, DBD(DB2, 388U));
+		this->set_cylinder(FS::SBPPower, DBD(DB2, 392U));
+		this->set_cylinder(FS::SBPRpm, DBD(DB2, 404U));
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
@@ -107,6 +117,25 @@ public:
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_pump_dimension(this->pressures[FS::D], DB4, 33U);
 		DI_pump_dimension(this->pressures[FS::E], DB4, 41U);
+
+		DI_gate_valve(this->gvalves[FS::HBV01], DB4, 281U, DB205, 161U);
+		DI_gate_valve(this->gvalves[FS::HBV02], DB4, 265U, DB205, 169U);
+		DI_gate_valve(this->gvalves[FS::HBV03], DB4, 263U, DB205, 177U);
+		DI_gate_valve(this->gvalves[FS::HBV04], DB4, 283U, DB205, 185U);
+		DI_gate_valve(this->gvalves[FS::HBV05], DB4, 267U, DB205, 193U);
+		DI_gate_valve(this->gvalves[FS::HBV06], DB4, 285U, DB205, 201U);
+		DI_gate_valve(this->gvalves[FS::HBV07], DB4, 269U, DB205, 209U);
+		DI_gate_valve(this->gvalves[FS::HBV08], DB4, 271U, DB205, 217U);
+		DI_gate_valve(this->gvalves[FS::HBV09], DB4, 287U, DB205, 225U);
+		DI_gate_valve(this->gvalves[FS::HBV10], DB4, 241U, DB205, 233U);
+		DI_gate_valve(this->gvalves[FS::HBV11], DB4, 243U, DB205, 241U);
+		DI_gate_valve(this->gvalves[FS::HBV12], DB4, 245U, DB205, 249U);
+		DI_gate_valve(this->gvalves[FS::HBV13], DB4, 247U, DB205, 257U);
+		DI_gate_valve(this->gvalves[FS::HBV14], DB4, 249U, DB205, 265U);
+		DI_gate_valve(this->gvalves[FS::HBV15], DB4, 251U, DB205, 273U);
+		DI_gate_valve(this->gvalves[FS::HBV16], DB4, 253U, DB205, 281U);
+		DI_gate_valve(this->gvalves[FS::HBV17], DB4, 255U, DB205, 289U);
+		DI_gate_valve(this->gvalves[FS::HBV18], DB4, 239U, DB205, 297U);
 
 		{ // Missing DB4 info
 			DI_hopper_door(this->uhdoors[FS::PS1], DB4, 329U, DB205, 1089U);
@@ -149,10 +178,10 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->pump_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(metrics_font_size, 6U, Colours::Green);
+		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
 
-		this->plain_style.number_font = make_bold_text_format("Cambria Math", metrics_font_size);
+		this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
 		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
@@ -192,7 +221,7 @@ public:
 			float half_width = 2.0F;
 			float half_height = 2.5F;
 			float gapsize = 0.5F;
-			float room_height = (6.0F + half_height) * 2.0F;
+			float room_height = (5.5F + half_height) * 2.0F;
 			float water_height = room_height - 5.0F;
 			FS hbv = _E(FS, _I(FS::h11) + distance);
 
@@ -222,8 +251,8 @@ public:
 		}
 		
 		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
-		this->hopper_room = this->master->insert_one(new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::SeaGreen, hstyle));
-		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::SeaGreen, hstyle));
+		this->hopper_room = this->master->insert_one(new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
+		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
 
 		{ // load doors
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
@@ -266,6 +295,11 @@ public:
 		}
 
 		{ // load other dimensions
+			float cylinder_height = gheight * 5.0F;
+
+			this->load_cylinders(this->cylinders, this->labels, this->metrics, FS::PSPPower, FS::SBPPower, cylinder_height, 1000.0, "kwatt");
+			this->load_cylinders(this->cylinders, this->labels, this->metrics, FS::PSPRpm, FS::SBPRpm, cylinder_height, 1500.0, "rpm");
+
 			this->load_dimensions(this->pressures, FS::D, FS::E, "bar");
 			this->load_dimension(this->pressures, FS::HBV04, "bar");
 			this->load_dimension(this->flows, FS::HBV04, "m3ph");
@@ -304,7 +338,6 @@ public:
 			it->second->fill_pump_origin(&ox, &oy);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox, -oy);
 			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::CT);
-			this->master->move_to(this->rpms[it->first], this->captions[it->first], GraphletAnchor::CB, GraphletAnchor::CT);
 		}
 		
 		{ // reflow valves
@@ -321,7 +354,7 @@ public:
 
 		{ // reflow dimensions
 			float xoff = gwidth * 2.0F;
-
+			
 			this->station->map_credit_graphlet(this->pressures[FS::D], GraphletAnchor::LB, xoff);
 			this->master->move_to(this->pressures[FS::E], this->pressures[FS::D], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, gheight);
 
@@ -330,6 +363,23 @@ public:
 
 			this->station->map_credit_graphlet(this->pressures[FS::HBV05], GraphletAnchor::LB, xoff);
 			this->station->map_credit_graphlet(this->flows[FS::HBV05], GraphletAnchor::LT, xoff);
+		}
+
+		{ // reflow cylinders
+			float pxoff = gwidth * 0.0F;
+			float rxoff = gwidth * 2.0F;
+			float yoff = gheight * 3.0F;
+			float tgap = vinset * 0.382F;
+			
+			this->master->move_to(this->cylinders[FS::PSPPower], this->hopper_room, GraphletAnchor::LT, GraphletAnchor::RB, pxoff, -yoff);
+			this->master->move_to(this->cylinders[FS::PSPRpm], this->hopper_room, GraphletAnchor::LT, GraphletAnchor::LB, rxoff, -yoff);
+			this->master->move_to(this->cylinders[FS::SBPPower], this->hopper_room, GraphletAnchor::LB, GraphletAnchor::RT, pxoff, yoff);
+			this->master->move_to(this->cylinders[FS::SBPRpm], this->hopper_room, GraphletAnchor::LB, GraphletAnchor::LT, rxoff, yoff);
+
+			for (FS mid = FS::PSPPower; mid <= FS::SBPRpm; mid++) {
+				this->master->move_to(this->labels[mid], this->cylinders[mid], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -tgap);
+				this->master->move_to(this->metrics[mid], this->cylinders[mid], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, tgap);
+			}
 		}
 	}
 
@@ -361,13 +411,14 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_cylinders(std::map<E, G*>& cs, std::map<E, Credit<Labellet, E>*>& ls, E id, float height, double range, Platform::String^ unit) {
-		this->load_label(ls, id, Colours::Salmon, this->caption_font);
-		this->load_dimension(this->powers, id, "kwatt");
-		this->load_dimension(this->rpms, id, "rpm");
+	void load_cylinders(std::map<E, G*>& cs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ds
+		, E id0, E idn, float height, double range, Platform::String^ unit) {
+		for (E id = id0; id <= idn; id++) {
+			cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::_, range, height * 0.314F, height), id);
 
-		gs[id] = this->master->insert_one(new G(rx, degrees), id);
-
+			this->load_label(ls, id, Colours::Silver, this->label_font);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+		}
 	}
 
 	template<typename E>
@@ -462,6 +513,11 @@ private:
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 	}
 
+	void set_cylinder(FS id, float value) {
+		this->cylinders[id]->set_value(value);
+		this->metrics[id]->set_value(value, GraphletAnchor::LB);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<FS>* station;
@@ -476,9 +532,8 @@ private:
 	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
 	std::map<FS, Credit<Percentagelet, FS>*> progresses;
 	std::map<FS, Credit<Dimensionlet, FS>*> pressures;
-	std::map<FS, Credit<Dimensionlet, FS>*> powers;
+	std::map<FS, Credit<Dimensionlet, FS>*> metrics;
 	std::map<FS, Credit<Dimensionlet, FS>*> flows;
-	std::map<FS, Credit<Dimensionlet, FS>*> rpms;
 	std::map<FS, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
@@ -492,7 +547,6 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
-
 
 private:
 	FlushsPage* master;

@@ -171,11 +171,23 @@
   <data name="HBV18" xml:space="preserve">
     <value>Empty</value>
   </data>
+  <data name="PSPPower" xml:space="preserve">
+    <value>Port Water Pump Power</value>
+  </data>
+  <data name="PSPRpm" xml:space="preserve">
+    <value>Port Water Pump Speed</value>
+  </data>
   <data name="PSPump" xml:space="preserve">
     <value>Port High Pressure Water Pump</value>
   </data>
   <data name="PSSea" xml:space="preserve">
     <value>Sea Inlet</value>
+  </data>
+  <data name="SBPPower" xml:space="preserve">
+    <value>Starboard Water Pump Power</value>
+  </data>
+  <data name="SBPRpm" xml:space="preserve">
+    <value>Starboard Water Pump Speed</value>
   </data>
   <data name="SBPump" xml:space="preserve">
     <value>Starboard High Pressure Water Pump</value>

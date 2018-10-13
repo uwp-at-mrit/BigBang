@@ -100,7 +100,10 @@ private:
 private class Draughts final : public PLCConfirmation {
 public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
-		this->plain_style = make_plain_dimension_style(normal_font_size, 5U);
+		this->label_font = make_bold_text_format(large_font_size);
+		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U);
+
+		this->metrics_style.number_font = make_bold_text_format(small_metrics_font_size);
 	}
 
 public:
@@ -179,7 +182,7 @@ public:
 		this->decorator->fill_ship_anchor(0.5F, 0.0F, &tsx, &tsy, true);
 		tsy *= 0.5F;
 
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->captions, DL::EarthWork, DL::Displacement, gapsize);
+		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, DL::EarthWork, DL::Displacement, gapsize);
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::OverflowPipe], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
@@ -225,8 +228,8 @@ private:
 	
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
-		this->load_label(ls, id, Colours::Silver);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), this->label_font, Colours::Silver), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}
 
 	template<typename E>
@@ -246,16 +249,9 @@ private:
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height, double range
 		, Platform::String^ unit, LiquidSurface surface) {
-		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height);
+		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height), id);
 
-		cs[id] = this->master->insert_one(cylinder, id);
-
-		this->load_dimension(this->dimensions, this->captions, id, unit);
-	}
-
-	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), font, color), id);
+		this->load_dimension(this->dimensions, this->labels, id, unit);
 	}
 
 private:
@@ -286,7 +282,7 @@ private:
 private:
 	void set_cylinder(DL id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value);
+		this->dimensions[id]->set_value(value, GraphletAnchor::LB);
 	}
 
 	void set_cylinder(DL id, DLTS ts_id, float value) {
@@ -295,7 +291,7 @@ private:
 	}
 
 private: // never delete these graphlets manually.
-	std::map<DL, Credit<Labellet, DL>*> captions;
+	std::map<DL, Credit<Labellet, DL>*> labels;
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
 	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
@@ -303,7 +299,9 @@ private: // never delete these graphlets manually.
 	OverflowPipelet* overflowpipe;
 
 private:
+	CanvasTextFormat^ label_font;
 	DimensionStyle plain_style;
+	DimensionStyle metrics_style;
 
 private:
 	DraughtsPage* master;
