@@ -195,14 +195,14 @@ public:
 		pTurtle->move_down(4, SW::d13)->move_right(5, SW::DGV13)->move_right(6, SW::PSHPa)->move_right(6, SW::DGV3);
 		pTurtle->move_right(10)->turn_right_down(SW::pshp)->move_down(3)->turn_down_right()->jump_back(SW::d13);
 		pTurtle->move_down(4, SW::d14)->move_right(5, SW::DGV14)->move_right(6, SW::PSHPb)->move_right(6, SW::DGV4);
-		pTurtle->move_right(14, SW::d44)->move_right(9, SW::DGV44)->move_right(10, SW::PSHP)->jump_back();
+		pTurtle->move_right(14, SW::d44)->move_right(9, SW::DGV44)->move_right(12, SW::PSHP)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(4, SW::DGV8);
-		pTurtle->move_right(10)->move_down(5)->jump_back(SW::d14);
+		pTurtle->move_right(12)->move_down(5)->jump_back(SW::d14);
 
 		pTurtle->move_down(5, SW::d15)->move_right(5, SW::DGV15)->move_right(6, SW::SBHPa)->move_right(6, SW::DGV5);
-		pTurtle->move_right(14, SW::d45)->move_right(9, SW::DGV45)->move_right(10, SW::SBHP)->jump_back();
+		pTurtle->move_right(14, SW::d45)->move_right(9, SW::DGV45)->move_right(12, SW::SBHP)->jump_back();
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(4, SW::DGV7);
-		pTurtle->move_right(10)->move_up(5)->jump_back(SW::d15);
+		pTurtle->move_right(12)->move_up(5)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(5, SW::DGV16)->move_right(6, SW::SBHPb)->move_right(6, SW::DGV6);
 		pTurtle->move_right(10)->turn_right_up(SW::sbhp)->move_up(3)->turn_up_right()->jump_back(SW::d16);
 
@@ -211,10 +211,10 @@ public:
 		pTurtle->move_down(2, SW::d17)->move_right(5, SW::DGV17)->move_right(6, SW::PSUWP1)->move_right(6, SW::DGV1);
 		pTurtle->move_right(10)->turn_right_down(SW::psuwp)->move_down(3)->turn_down_right()->jump_back(SW::d17);
 		pTurtle->move_down(4, SW::d18)->move_right(5, SW::DGV18)->move_right(6, SW::PSUWP2)->move_right(6, SW::DGV2);
-		pTurtle->move_right(14, SW::d46)->move_right(9)->move_right(10, SW::PSUWP)->jump_back(SW::d18);
+		pTurtle->move_right(14, SW::d46)->move_right(9)->move_right(12, SW::PSUWP)->jump_back(SW::d18);
 
 		pTurtle->move_down(5, SW::d19)->move_right(5, SW::DGV19)->move_right(6, SW::SBUWP1)->move_right(6, SW::DGV9);
-		pTurtle->move_right(14, SW::d47)->move_right(9)->move_right(10, SW::SBUWP)->jump_back(SW::d19);
+		pTurtle->move_right(14, SW::d47)->move_right(9)->move_right(12, SW::SBUWP)->jump_back(SW::d19);
 		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SBUWP2)->move_right(6, SW::DGV10);
 		pTurtle->move_right(10)->turn_right_up(SW::sbuwp)->move_up(3)->turn_up_right();
 

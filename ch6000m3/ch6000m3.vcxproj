@@ -262,7 +262,7 @@
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
     <PRIResource Include="stone\tongue\en-US\loads.resw" />
     <PRIResource Include="stone\tongue\en-US\draughts.resw" />
-    <PRIResource Include="stone\tongue\en-US\fill_jet.resw" />
+    <PRIResource Include="stone\tongue\en-US\rainbows.resw" />
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -284,7 +284,7 @@
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
     <PRIResource Include="stone\tongue\zh-CN\loads.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\fill_jet.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\rainbows.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -311,7 +311,7 @@
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\loads.cpp" />
     <ClCompile Include="page\draughts.cpp" />
-    <ClCompile Include="page\fill_jet.cpp" />
+    <ClCompile Include="page\rainbows.cpp" />
     <ClCompile Include="page\hopper_doors.cpp" />
     <ClCompile Include="graphlets.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
@@ -331,7 +331,7 @@
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\loads.hpp" />
     <ClInclude Include="page\draughts.hpp" />
-    <ClInclude Include="page\fill_jet.hpp" />
+    <ClInclude Include="page\rainbows.hpp" />
     <ClInclude Include="page\hopper_doors.hpp" />
     <ClInclude Include="graphlets.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />

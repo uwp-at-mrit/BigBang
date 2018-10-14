@@ -7,6 +7,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
+#include "graphlet/dashboard/densityflowmeterlet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/device/compensatorlet.hpp"
@@ -108,6 +109,8 @@ public:
 		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D016);
 
 		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->load_percentage(this->progresses, DA::D003);
+		this->load_percentage(this->progresses, DA::D004);
 		this->load_valves(this->valves, this->labels, DA::D003, DA::D012, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DA::D013, DA::D016, vinset, -90.0);
 		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->label_font);
@@ -120,42 +123,44 @@ public:
 	}
 
 	void load_dashboard(float width, float height, float vinset) {
-		float shwidth, shheight, xstep, ystep, cylinder_height;
+		float shwidth, shheight, xstep, ystep;
+		float cylinder_height, meter_height;
 
 		this->station->fill_extent(0.0F, 0.0F, &shwidth, &shheight);
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		cylinder_height = shheight * 0.5F;
+		meter_height = (height - vinset * 2.0F - shheight) * 0.382F;
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
 		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
 
-		this->load_percentage(this->progresses, DA::D003);
-		this->load_percentage(this->progresses, DA::D004);
-
+		this->load_densityflowmeters(this->dfmeters, DA::PS, DA::SB, meter_height);
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 	}
 
 	void reflow_station(float width, float height, float vinset) {
 		GraphletAnchor anchor;
-		float dx, dy, margin;
-		float gridsize = vinset;
+		float dx, dy, xstep, ystep;
+		float margin = 0.0F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 		
+		this->station->fill_stepsize(&xstep, &ystep);
+
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
 			case DA::D003: case DA::D004: case DA::D011: case DA::D012: {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
-				dx = x0; dy = y0 - gridsize + margin; anchor = GraphletAnchor::CB;
+				dx = x0; dy = y0 - ystep + margin; anchor = GraphletAnchor::CB;
 			}; break;
 			default: {
 				it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-				dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
+				dx = x0 - xstep + margin; dy = y0; anchor = GraphletAnchor::RC;
 			}
 			}
 
@@ -177,12 +182,20 @@ public:
 	}
 
 	void reflow_dashboard(float width, float height, float vinset) {
-		float xstep, ystep;
+		float gapsize = vinset * 0.5F;
+		float cx = width * 0.5F;
+		float xstep, ystep, df_cy;
 
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		this->master->move_to(this->lengths[DA::OverflowPipe], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
-		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+
+		this->master->fill_graphlet_location(this->overflowpipe, nullptr, &df_cy, GraphletAnchor::CT);
+		df_cy = (df_cy - vinset) * 0.5F + vinset;
+
+		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RC, -gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LC, +gapsize);
 		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
@@ -239,6 +252,13 @@ private:
 		cs[id] = this->master->insert_one(cylinder, id);
 
 		this->load_dimension(this->dimensions, this->captions, id, unit);
+	}
+
+	template<class C, typename E>
+	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
+		for (E id = id0; id <= idn; id++) {
+			dfs[id] = this->master->insert_one(new Credit<C, E>(2.0, 10.0, height, height), id);
+		}
 	}
 
 	template<class C, typename E>
@@ -305,6 +325,7 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<HopperPumplet, DA>*> hpumps;
 	std::map<DA, Credit<Circlelet, DA>*> suctions;
 	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
+	std::map<DA, Credit<DensityFlowmeterlet, DA>*> dfmeters;
 	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;

@@ -1,27 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="Globals">
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{73bfe193-7352-40ab-99c0-717f6ebee2d8}</ItemsProjectGuid>
-    <ItemsProjectName>Graphics</ItemsProjectName>
-  </PropertyGroup>
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemGroup>
-    <ProjectCapability Include="SourceItemsFromImports" />
-  </ItemGroup>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)brushes.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)colorspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)color_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)draw.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)measure\rhatchmark.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)measure\vhatchmark.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)paint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)polar.cpp" />
@@ -30,6 +14,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)transformation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)turtle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\rhatchmark.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\vhatchmark.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)brushes.hxx" />
@@ -37,8 +23,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)color_test.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)draw.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)measure\rhatchmark.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)measure\vhatchmark.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)math.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)paint.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)polar.hpp" />
@@ -47,5 +31,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)transformation.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)turtle.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\rhatchmark.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\vhatchmark.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="measure">
+      <UniqueIdentifier>{8ba30d35-7d01-4708-8f5f-48e855a98083}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

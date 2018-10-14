@@ -45,9 +45,6 @@
     <ClCompile Include="page\draughts.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\fill_jet.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\loads.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -57,6 +54,9 @@
     <ClCompile Include="graphlets.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\drags.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\rainbows.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -76,9 +76,6 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\draughts.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
-    <ClInclude Include="page\fill_jet.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\loads.hpp">
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="schema\di_hopper_pumps.hpp">
       <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\rainbows.hpp">
+      <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -302,12 +302,6 @@
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\fill_jet.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\fill_jet.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\loads.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
@@ -324,6 +318,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\drags.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\rainbows.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\rainbows.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

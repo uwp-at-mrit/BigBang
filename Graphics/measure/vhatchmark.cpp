@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "hatch.hpp"
+#include "measure/vhatchmark.hpp"
 
 #include "box.hpp"
 #include "text.hpp"

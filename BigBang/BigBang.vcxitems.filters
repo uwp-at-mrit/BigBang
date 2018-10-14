@@ -130,6 +130,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.cpp">
+      <Filter>graphlet\dashboard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -264,6 +267,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp">
       <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.hpp">
+      <Filter>graphlet\dashboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

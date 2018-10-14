@@ -66,13 +66,10 @@ public:
 	IGraphlet* prev;
 };
 
-static GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g, double degrees) {
+static inline GraphletInfo* bind_graphlet_owership(IPlanet* master, unsigned int mode, IGraphlet* g) {
     auto info = new GraphletInfo(master, mode);
-    g->info = info;
-
-    while (degrees <  0.000) degrees += 360.0;
-    while (degrees >= 360.0) degrees -= 360.0;
-    info->rotation = float(degrees * M_PI / 180.0);
+    
+	g->info = info;
 
     return info;
 }
@@ -301,7 +298,7 @@ void Planet::end_update_sequence() {
 
 void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx, float dy) {
 	if (g->info == nullptr) {
-		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g, 0.0);
+		GraphletInfo* info = bind_graphlet_owership(this, this->mode, g);
 
 		if (this->head_graphlet == nullptr) {
             this->head_graphlet = g;

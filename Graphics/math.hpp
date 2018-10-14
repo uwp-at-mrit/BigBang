@@ -5,6 +5,10 @@ namespace WarGrey::SCADA {
 	float viewport_fit_scaling(float src_width, float src_height, float target_width, float target_height);
 
 	float degrees_to_radians(double degrees);
+	double degrees_normalize(double degrees);
+
+	double ellipse_perimeter(double radiusX, double radiusY);
+	double ellipse_arclength(double radiusX, double radiusY, double start_degrees, double end_degrees);
 
 	void circle_point(float radius, double degrees, float* x, float* y);
 	void ellipse_point(float radiusX, float radiusY, double degrees, float* x, float* y);

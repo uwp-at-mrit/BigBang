@@ -1,8 +1,9 @@
 ﻿#include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "shape.hpp"
-#include "hatch.hpp"
 #include "geometry.hpp"
+
+#include "measure/vhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 

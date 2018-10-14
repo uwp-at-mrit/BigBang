@@ -23,6 +23,25 @@ float WarGrey::SCADA::degrees_to_radians(double degrees) {
 	return quick_degrees_to_radians(degrees);
 }
 
+double WarGrey::SCADA::degrees_normalize(double degrees) {
+	while (degrees < 0.000) degrees += 360.0;
+	while (degrees >= 360.0) degrees -= 360.0;
+
+	return degrees;
+}
+
+double WarGrey::SCADA::ellipse_perimeter(double a, double b) {
+	return (a == b)
+		? 2.0 * M_PI * a
+		: M_PI * (3.0F * (a + b) - std::sqrt((3.0 * a + b) * (a + 3.0 * b)));
+}
+
+double WarGrey::SCADA::ellipse_arclength(double a, double b, double start_degrees, double end_degrees) {
+	double p = ellipse_perimeter(a, b);
+
+	return p;
+}
+
 void WarGrey::SCADA::circle_point(float radius, double degrees, float* x, float* y) {
 	float radians = quick_degrees_to_radians(degrees);
 

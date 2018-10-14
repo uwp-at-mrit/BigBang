@@ -3,9 +3,10 @@
 #include "text.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
-#include "hatch.hpp"
 #include "geometry.hpp"
 #include "colorspace.hpp"
+
+#include "measure/vhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 

@@ -10,7 +10,7 @@
 #include "page/sealed_waters.hpp"
 #include "page/draughts.hpp"
 #include "page/loads.hpp"
-#include "page/fill_jet.hpp"
+#include "page/rainbows.hpp"
 #include "page/flushs.hpp"
 #include "page/drags.hpp"
 
@@ -54,7 +54,7 @@ protected:
 		this->add_planet(new DraughtsPage(this->device));
 		this->add_planet(new SealedWaterPage(this->device));
 		this->add_planet(new LoadsPage(this->device));
-		this->add_planet(new FillnJetPage(this->device));
+		this->add_planet(new RainbowsPage(this->device));
 		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new DragsPage(this->device));
 

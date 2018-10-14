@@ -3,8 +3,8 @@
 #include "graphlet/primitive.hpp"
 
 #include "paint.hpp"
-#include "hatch.hpp"
 #include "brushes.hxx"
+#include "measure/vhatchmark.hpp"
 
 namespace WarGrey::SCADA {
 	private struct TankStyle {
