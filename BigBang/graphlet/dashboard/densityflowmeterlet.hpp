@@ -8,12 +8,12 @@
 namespace WarGrey::SCADA {
 	private class DensityFlowmeterlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DensityFlowmeterlet(double drange, double frange, float width, float height = 0.0F,
-			float thickness = 3.0F, unsigned int step = 0U,
+		DensityFlowmeterlet(double dmin, double dmax, double fmin, double fmax, float width, float height = 0.0F,
+			float thickness = 2.0F, unsigned int step = 0U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
-		DensityFlowmeterlet(float width, float height = 0.0F, float thickness = 3.0F, unsigned int step = 0U,
+		DensityFlowmeterlet(float width, float height = 0.0F, float thickness = 2.0F, unsigned int step = 0U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			WarGrey::SCADA::GradientStops^ colors = nullptr);
 
@@ -29,6 +29,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::GradientStops^ colors;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ density;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ flspeed;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mercury_color;
 
@@ -38,8 +39,10 @@ namespace WarGrey::SCADA {
 		float thickness;
 
 	private:
-		double density_range;
-		double flow_range;
+		double density_min;
+		double density_max;
+		double flspeed_min;
+		double flspeed_max;
 		unsigned int step;
 	};
 }

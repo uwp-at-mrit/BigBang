@@ -29,7 +29,7 @@ static const unsigned int default_ps_color = 0xFF0000;
 static const unsigned int default_sb_color = 0x00FF00;
 static const unsigned int default_pipe_color = 0xC0C0C0;
 
-static const float default_pipe_thickness = 1.5F;
+static const float default_pipe_thickness = 2.0F;
 
 /*************************************************************************************************/
 #define resolve_gridsize(gwidth, gheight) ((gwidth < gheight) ? gheight : gwidth)

@@ -22,11 +22,12 @@ static float thermometer_default_color_positions[] = { 0.0F, 0.625F, 0.75F, 1.0F
 /*************************************************************************************************/
 DensityFlowmeterlet::DensityFlowmeterlet(float width, float height, float thickness
 	, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: DensityFlowmeterlet(2.0, 10.0, width, height, thickness, step, bcolor, stops) {}
+	: DensityFlowmeterlet(1.0, 2.0, 0.0, 10.0, width, height, thickness, step, bcolor, stops) {}
 
-DensityFlowmeterlet::DensityFlowmeterlet(double drange, double frange, float width, float height
+DensityFlowmeterlet::DensityFlowmeterlet(double dmin, double dmax, double fmin, double fmax, float width, float height
 	, float thickness, unsigned int step, ICanvasBrush^ bcolor, GradientStops^ stops)
-	: density_range(drange), flow_range(frange), width(width), height(height), thickness(thickness), step(step)
+	: density_min(dmin), density_max(dmax), flspeed_min(fmin), flspeed_max(fmax)
+	, width(width), height(height), thickness(thickness), step(step)
 	, border_color(bcolor == nullptr ? thermometer_default_border_color : bcolor) {
 	
 	if (this->height == 0.0F) {
@@ -35,10 +36,11 @@ DensityFlowmeterlet::DensityFlowmeterlet(double drange, double frange, float wid
 }
 
 void DensityFlowmeterlet::construct() {
-	float rx = this->width * 0.5F;
-	float ry = this->height * 0.5F;
+	float rx = this->width * 0.8F;
+	float ry = this->height * 0.8F;
 
-	this->density = geometry_freeze(rhatchmark(rx, ry, 180.0, 260.0, 0.0, this->density_range, this->step, this->thickness));
+	this->density = geometry_freeze(rhatchmark(rx, 190.0, 260.0, this->flspeed_min, this->flspeed_max, this->step, this->thickness));
+	this->flspeed = geometry_freeze(rhatchmark(rx, -10.0, -80.0, this->density_min, this->density_max, this->step, this->thickness));
 }
 
 void DensityFlowmeterlet::fill_extent(float x, float y, float* w, float* h) {
@@ -59,6 +61,9 @@ void DensityFlowmeterlet::on_value_changed(double v) {
 void DensityFlowmeterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	//ds->DrawCachedGeometry(this->mercury, x + this->mercury_x, y + this->mercury_y, this->mercury_color);
 	//ds->DrawCachedGeometry(this->skeleton, x, y, this->border_color);
+
+	ds->DrawCachedGeometry(this->density, x + this->width * 0.9F, y + this->height * 0.9F, Colours::Crimson);
+	ds->DrawCachedGeometry(this->flspeed, x + this->width * 0.1F, y + this->height * 0.9F, Colours::DodgerBlue);
 
 	ds->DrawRectangle(x, y, this->width, this->height, Colours::YellowGreen);
 }

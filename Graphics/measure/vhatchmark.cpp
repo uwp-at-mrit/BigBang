@@ -193,10 +193,8 @@ static unsigned int resolve_step(double vmin, double vmax, float height, float e
 static float resolve_interval(unsigned int* step, double vmin, double vmax, float height, float em
 	, unsigned int precision, unsigned int* skip, double* diff) {
 	unsigned int fxstep = (((*step) == 0) ? resolve_step(vmin, vmax, height, em, precision) : (*step));
-	double range = vmax - vmin;
-	double delta = range / double(fxstep);
-	float hatch_height = height - em;
-	float interval = hatch_height / float(fxstep);
+	double delta = (vmax - vmin) / double(fxstep);
+	float interval = (height - em) / float(fxstep);
 
 	(*step) = fxstep;
 	SET_BOX(skip, (fxstep % 2 == 0) ? 2 : 1);
@@ -212,8 +210,8 @@ VHatchMarkMetrics WarGrey::SCADA::vhatchmark_metrics(double vmin, double vmax, f
 	Platform::String^ min_mark = make_rmark_string(vmin, precision);
 	Platform::String^ max_mark = make_rmark_string(vmax, precision);
 	Platform::String^ longer_mark = ((max_mark->Length() > min_mark->Length()) ? max_mark : min_mark);
-	unsigned int longer_span = longer_mark->Length();
 	TextExtent te = get_text_extent(longer_mark, ((font == nullptr) ? default_mark_font : font));
+	unsigned int longer_span = longer_mark->Length();
 	
 	fill_consistent_vhatch_metrics(font, thickness, &metrics.hatch_width, &metrics.gap_space);
 

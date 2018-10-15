@@ -91,7 +91,7 @@ public:
 
 public:
 	void load_station(float width, float height, float vinset) {
-		float gridsize = vinset * 0.85F;
+		float gridsize = vinset * 0.75F;
 		float rx = gridsize;
 		float ry = rx * 2.0F;
 		float rsct = rx * 0.5F;
@@ -130,7 +130,7 @@ public:
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		cylinder_height = shheight * 0.5F;
-		meter_height = (height - vinset * 2.0F - shheight) * 0.382F;
+		meter_height = (height - vinset * 2.0F - shheight) * 0.5F;
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
@@ -141,6 +141,7 @@ public:
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 	}
 
+public:
 	void reflow_station(float width, float height, float vinset) {
 		GraphletAnchor anchor;
 		float dx, dy, xstep, ystep;
@@ -191,7 +192,7 @@ public:
 		this->master->move_to(this->lengths[DA::OverflowPipe], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 
-		this->master->fill_graphlet_location(this->overflowpipe, nullptr, &df_cy, GraphletAnchor::CT);
+		this->master->fill_graphlet_location(this->station, nullptr, &df_cy, GraphletAnchor::CT);
 		df_cy = (df_cy - vinset) * 0.5F + vinset;
 
 		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RC, -gapsize);
@@ -257,7 +258,7 @@ private:
 	template<class C, typename E>
 	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
 		for (E id = id0; id <= idn; id++) {
-			dfs[id] = this->master->insert_one(new Credit<C, E>(2.0, 10.0, height, height), id);
+			dfs[id] = this->master->insert_one(new Credit<C, E>(height, height), id);
 		}
 	}
 
@@ -314,8 +315,8 @@ private:
 		float progress = RealData(db203, rd_idx + 2);
 
 		this->compensators[id]->set_value(progress);
-		this->lengths[id]->set_value(progress, GraphletAnchor::CT);
-		this->pressures[id]->set_value(RealData(db203, rd_idx + 1), GraphletAnchor::CT);
+		this->lengths[id]->set_value(progress, GraphletAnchor::CC);
+		this->pressures[id]->set_value(RealData(db203, rd_idx + 1), GraphletAnchor::CC);
 	}
 
 private: // never delete these graphlets manually.

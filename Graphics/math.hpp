@@ -7,8 +7,10 @@ namespace WarGrey::SCADA {
 	float degrees_to_radians(double degrees);
 	double degrees_normalize(double degrees);
 
-	double ellipse_perimeter(double radiusX, double radiusY);
-	double ellipse_arclength(double radiusX, double radiusY, double start_degrees, double end_degrees);
+	double arc_length(float radius, double degrees0, double degreesn, float* xlength = nullptr, float* ylength = nullptr);
+
+	double circle_perimeter(float radius);
+	double ellipse_perimeter(float radiusX, float radiusY);
 
 	void circle_point(float radius, double degrees, float* x, float* y);
 	void ellipse_point(float radiusX, float radiusY, double degrees, float* x, float* y);
