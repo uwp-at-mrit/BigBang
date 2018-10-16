@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 	float degrees_to_radians(double degrees);
 	double degrees_normalize(double degrees);
 
-	double arc_length(float radius, double degrees0, double degreesn, float* xlength = nullptr, float* ylength = nullptr);
+	double arc_length(float radius, double degrees0, double degreesn);
 
 	double circle_perimeter(float radius);
 	double ellipse_perimeter(float radiusX, float radiusY);

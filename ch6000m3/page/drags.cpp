@@ -51,6 +51,7 @@ private class Drags final : public PLCConfirmation {
 public:
 	Drags(DragsPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->station_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
 	}
 
 public:
@@ -91,7 +92,7 @@ public:
 
 public:
 	void load_station(float width, float height, float vinset) {
-		float gridsize = vinset * 0.75F;
+		float gridsize = vinset * 0.618F;
 		float rx = gridsize;
 		float ry = rx * 2.0F;
 		float rsct = rx * 0.5F;
@@ -113,7 +114,7 @@ public:
 		this->load_percentage(this->progresses, DA::D004);
 		this->load_valves(this->valves, this->labels, DA::D003, DA::D012, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DA::D013, DA::D016, vinset, -90.0);
-		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->label_font);
+		this->load_label(this->labels, DA::LMOD.ToString(), DA::LMOD, Colours::Cyan, this->station_font);
 
 		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipe_thickness, Colours::Green));
 		this->hpumps[DA::PSHP] = this->master->insert_one(new Credit<HopperPumplet, DA>(+rx, -ry), DA::PSHP);
@@ -145,7 +146,6 @@ public:
 	void reflow_station(float width, float height, float vinset) {
 		GraphletAnchor anchor;
 		float dx, dy, xstep, ystep;
-		float margin = 0.0F;
 		float x0 = 0.0F;
 		float y0 = 0.0F;
 		
@@ -156,12 +156,10 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
 			case DA::D003: case DA::D004: case DA::D011: case DA::D012: {
-				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
-				dx = x0; dy = y0 - ystep + margin; anchor = GraphletAnchor::CB;
+				dx = x0; dy = y0 - ystep; anchor = GraphletAnchor::CB;
 			}; break;
 			default: {
-				it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-				dx = x0 - xstep + margin; dy = y0; anchor = GraphletAnchor::RC;
+				dx = x0 - xstep; dy = y0; anchor = GraphletAnchor::RC;
 			}
 			}
 
@@ -169,8 +167,8 @@ public:
 			this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
 		}
 
-		this->station->map_credit_graphlet(this->progresses[DA::D003], GraphletAnchor::CT, 0.0F, margin);
-		this->station->map_credit_graphlet(this->progresses[DA::D004], GraphletAnchor::CT, 0.0F, margin);
+		this->station->map_credit_graphlet(this->progresses[DA::D003], GraphletAnchor::CT, 0.0F, ystep);
+		this->station->map_credit_graphlet(this->progresses[DA::D004], GraphletAnchor::CT, 0.0F, ystep);
 
 		this->station->map_graphlet_at_anchor(this->lmod, DA::LMOD, GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->labels[DA::LMOD], GraphletAnchor::CC);
@@ -195,8 +193,8 @@ public:
 		this->master->fill_graphlet_location(this->station, nullptr, &df_cy, GraphletAnchor::CT);
 		df_cy = (df_cy - vinset) * 0.5F + vinset;
 
-		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RC, -gapsize);
-		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LC, +gapsize);
+		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RT, -gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LT, +gapsize);
 		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
@@ -218,7 +216,7 @@ private:
 	template<class G, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id.ToString(), id, Colours::Silver, this->label_font);
+			this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
@@ -258,7 +256,7 @@ private:
 	template<class C, typename E>
 	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
 		for (E id = id0; id <= idn; id++) {
-			dfs[id] = this->master->insert_one(new Credit<C, E>(height, height), id);
+			dfs[id] = this->master->insert_one(new Credit<C, E>(height), id);
 		}
 	}
 
@@ -337,6 +335,7 @@ private: // never delete these graphlets manually.
 	
 private:
 	CanvasTextFormat^ label_font;
+	CanvasTextFormat^ station_font;
 	DimensionStyle percentage_style;
 	DimensionStyle plain_style;
 

@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasTextFormat^ default_mark_font = make_bold_text_format(16.0F);
+static CanvasTextFormat^ default_mark_font = make_bold_text_format(14.0F);
 static const float hatch_long_ratio = 0.618F;
 static const float mark_space_ratio = 0.618F;
 
@@ -34,19 +34,19 @@ static CanvasGeometry^ make_rhatch(RHatchMarkMetrics* metrics, float radius, dou
 	float px, py;
 	float rstart = degrees_to_radians(degrees0);
 	float rsweep = degrees_to_radians(degreesn - degrees0);
-	float ring_radius = radius - metrics->hatch_width - metrics->gap_space - metrics->em * 0.5F;
-	float long_radius = ring_radius + metrics->hatch_width;
-	float short_radius = ring_radius + metrics->hatch_width * ((step % 2 == 0) ? 0.618F : 1.0F);
+	float long_radius = metrics->ring_radius + metrics->hatch_width;
+	float short_radius = metrics->ring_radius + metrics->hatch_width * ((step % 2 == 0) ? 0.618F : 1.0F);
 
-	circle_point(ring_radius, degrees0, &px, &py);
-	hatch->BeginFigure(px, py);
-	circle_point(ring_radius, degreesn, &px, &py);
-	hatch->AddArc(float2(0.0F, 0.0F), ring_radius, ring_radius, rstart, rsweep);
+	circle_point(metrics->ring_radius, degrees0, &metrics->arc_sx, &metrics->arc_sy);
+	circle_point(metrics->ring_radius, degreesn, &metrics->arc_ex, &metrics->arc_ey);
+	
+	hatch->BeginFigure(metrics->arc_sx, metrics->arc_sy);
+	hatch->AddArc(float2(0.0F, 0.0F), metrics->ring_radius, metrics->ring_radius, rstart, rsweep);
 	for (unsigned int i = 0; i <= step; i++) {
 		double theta = interval * double(i) + degrees0;
 
 		hatch->EndFigure(CanvasFigureLoop::Open);
-		circle_point(ring_radius, theta, &px, &py);
+		circle_point(metrics->ring_radius, theta, &px, &py);
 		hatch->BeginFigure(px, py);
 		circle_point(((i % 2 == 0) ? long_radius : short_radius), theta, &px, &py);
 		hatch->AddLine(px, py);
@@ -57,9 +57,8 @@ static CanvasGeometry^ make_rhatch(RHatchMarkMetrics* metrics, float radius, dou
 }
 
 static unsigned int resolve_step(float radius, double degrees0, double degreesn, double vmin, double vmax, float em, unsigned int precision) {
-	float ylength;
 	double range = (vmax - vmin) * std::pow(10.0, precision + 1);
-	double arclength = arc_length(radius, degrees0, degreesn, nullptr, &ylength);
+	double arclength = arc_length(radius, degrees0, degreesn);
 	double available_height = double(arclength - em);
 	unsigned int max_fxstep = ((unsigned int)(std::floor(available_height / (double(em) * 1.618))));
 	unsigned int fxstep = 2;
@@ -95,19 +94,20 @@ static double resolve_interval(unsigned int* step, float radius, double degrees0
 }
 
 /*************************************************************************************************/
-RHatchMarkMetrics WarGrey::SCADA::rhatchmark_metrics(float radius, double degrees0, double degreesn, double vmin, double vmax
+RHatchMarkMetrics WarGrey::SCADA::rhatchmark_metrics(float radius, double vmin, double vmax
 	, float thickness, unsigned int precision, CanvasTextFormat^ font) {
 	RHatchMarkMetrics metrics;
 	Platform::String^ min_mark = make_mark_string(vmin, precision);
 	Platform::String^ max_mark = make_mark_string(vmax, precision);
 	Platform::String^ longer_mark = ((max_mark->Length() > min_mark->Length()) ? max_mark : min_mark);
 	TextExtent te = get_text_extent(longer_mark, ((font == nullptr) ? default_mark_font : font));
-	unsigned int longer_span = longer_mark->Length();
-
+	
+	metrics.span = longer_mark->Length();
+	metrics.ch = (te.width - te.lspace - te.rspace) / float(metrics.span);
 	metrics.em = te.height - te.tspace - te.bspace;
 	metrics.hatch_width = metrics.em * hatch_long_ratio;
 	metrics.gap_space = metrics.em * mark_space_ratio;
-	metrics.mark_span = longer_span;
+	metrics.ring_radius = radius - metrics.hatch_width - metrics.gap_space - metrics.ch;
 
 	return metrics;
 }
@@ -117,23 +117,31 @@ CanvasGeometry^ WarGrey::SCADA::rhatchmark(float radius, double degrees0, double
 	, unsigned int precision, CanvasTextFormat^ ft) {
 	unsigned int skip;
 	double diff;
+	float mcx, mcy;
 	TextExtent te;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
-	RHatchMarkMetrics metrics = rhatchmark_metrics(radius, degrees0, degreesn, vmin, vmax, thickness, precision, font);
+	RHatchMarkMetrics metrics = rhatchmark_metrics(radius, vmin, vmax, thickness, precision, font);
 	double interval = resolve_interval(&step, radius, degrees0, degreesn, vmin, vmax, metrics.em, precision, &skip, &diff);
-	float mark_x = metrics.hatch_width + metrics.gap_space;
 	auto hatchmark = make_rhatch(&metrics, radius, degrees0, degreesn, interval, step, thickness);
+
+	metrics.label_lx = FLT_MAX;
+	metrics.label_rx = FLT_MIN;
+	metrics.label_ty = FLT_MAX;
+	metrics.label_by = FLT_MIN;
 
 	for (unsigned int i = 0; i <= step; i += skip) {
 		Platform::String^ mark = make_mark_string(vmax - diff * double(i), precision);
 		CanvasGeometry^ p = paragraph(make_text_layout(mark, font), &te);
-		double deg = degrees_normalize(degreesn - interval * double(i));
-		float radians = degrees_to_radians(deg);
-		float cos = cosf(radians);
-		float sin = sinf(radians);
+		float half_width = te.width * 0.5F;
+		float half_height = te.height * 0.5F;
 
-		hatchmark = geometry_union(hatchmark, p,
-			radius * cos, radius * sin);
+		circle_point(radius, degreesn - interval * double(i), &mcx, &mcy);
+		hatchmark = geometry_union(hatchmark, p, mcx - half_width, mcy - half_height);
+
+		metrics.label_lx = std::fminf(metrics.label_lx, mcx - half_width + te.lspace);
+		metrics.label_rx = std::fmaxf(metrics.label_rx, mcx + half_width - te.rspace);
+		metrics.label_ty = std::fminf(metrics.label_ty, mcy - half_height + te.tspace);
+		metrics.label_by = std::fmaxf(metrics.label_by, mcy + half_height - te.bspace);
 	}
 
 	SET_BOX(maybe_metrics, metrics);

@@ -31,18 +31,8 @@ double WarGrey::SCADA::degrees_normalize(double degrees) {
 	return degrees;
 }
 
-double WarGrey::SCADA::arc_length(float r, double deg0, double degn, float* xlength, float* ylength) {
+double WarGrey::SCADA::arc_length(float r, double deg0, double degn) {
 	double theta = std::abs(degn - deg0);
-	
-	if ((xlength != nullptr) || (ylength != nullptr)) {
-		float x0, y0, xn, yn;
-
-		circle_point(r, deg0, &x0, &y0);
-		circle_point(r, degn, &xn, &yn);
-
-		SET_BOX(xlength, std::fabsf(xn - x0));
-		SET_BOX(ylength, std::fabsf(yn - y0));
-	}
 
 	return (theta >= 360.0) ? circle_perimeter(r) :  (M_PI * r * theta / 180.0);
 }
