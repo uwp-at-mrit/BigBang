@@ -25,13 +25,6 @@ static ICanvasBrush^ default_text_color = Colours::Silver;
 static ICanvasBrush^ default_number_color = Colours::Yellow;
 static ICanvasBrush^ default_unit_color = Colours::make(0x23EBB9U);
 
-static inline Platform::String^ unit_speak(Platform::String^ unit) {
-	bool exists;
-	Platform::String^ dialect = speak(unit, "unit", &exists);
-
-	return (exists ? dialect : speak(unit));
-}
-
 static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExtent& unit_box
 	, TextExtent* label_box, float* tspace, float* bspace, float* height = nullptr) {
 	(*label_box) = ((layout == nullptr) ? num_box : get_text_extent(layout));
@@ -582,13 +575,13 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 /*************************************************************************************************/
 Dimensionlet::Dimensionlet(DimensionStatus default_status, DimensionStyle& default_style, Platform::String^ unit
 	, Platform::String^ label, Platform::String^ subscript)
-	: IEditorlet(default_status, default_style, unit_speak(unit), label, subscript) {}
+	: IEditorlet(default_status, default_style, unitspeak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(DimensionStyle& default_style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: Dimensionlet(DimensionStatus::Normal, default_style, unit, label, subscript) {}
 
 Dimensionlet::Dimensionlet(DimensionStatus default_status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: IEditorlet(default_status, unit_speak(unit), label, subscript) {}
+	: IEditorlet(default_status, unitspeak(unit), label, subscript) {}
 
 Dimensionlet::Dimensionlet(Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: Dimensionlet(DimensionStatus::Normal, unit, label, subscript) {}

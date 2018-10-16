@@ -75,6 +75,13 @@ Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
 	return do_speak(tongue, word);
 }
 
+Platform::String^ WarGrey::SCADA::unitspeak(Platform::String^ unit) {
+	bool exists;
+	Platform::String^ dialect = speak(unit, "unit", &exists);
+
+	return (exists ? dialect : speak(unit));
+}
+
 /*************************************************************************************************/
 ITongue::ITongue(Platform::String^ scope, unsigned int idx) : type(scope), index(idx) {}
 

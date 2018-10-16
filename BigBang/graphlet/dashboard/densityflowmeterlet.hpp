@@ -29,31 +29,39 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_values(double density, double flspeed);
+		void set_values(double density, double flspeed, bool force = false);
 		double get_density() { return this->_density; }
 		double get_flspeed() { return this->_flspeed; }
 
 	private:
-		WarGrey::SCADA::GradientStops^ colors;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ density;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ flspeed;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ pointers;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoint_bases;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoints;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ density_pointer;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ flspeed_pointer;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ pointer_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ density_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ flspeed_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ base_color;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ value_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ density_value;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ flspeed_value;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ density_unit;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ flspeed_unit;
+		float label_rx;
+		float label_by;
+
+	private:
 		float width;
 		float height;
 		float radius;
-		float pointer_radius;
-		float depcx;
-		float fepcx;
-		float epcy;
+		float dxoff;
+		float fxoff;
+		float yoff;
 		float thickness;
 
 	private:

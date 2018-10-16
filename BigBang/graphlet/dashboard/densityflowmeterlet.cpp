@@ -5,6 +5,9 @@
 #include "paint.hpp"
 #include "geometry.hpp"
 
+#include "tongue.hpp"
+#include "string.hpp"
+
 #include "measure/rhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
@@ -63,14 +66,13 @@ void DensityFlowmeterlet::construct() {
 	float ldistance = dmetrics.arc_sx - dmetrics.label_lx;
 	float rdistance = fmetrics.label_rx - fmetrics.arc_sx;
 
-	this->pointer_radius = this->radius + dmetrics.hatch_width * 0.618F;
-	this->epcy = -std::fminf(dmetrics.label_ty, fmetrics.label_ty) + thickoff;
+	this->yoff = -std::fminf(dmetrics.label_ty, fmetrics.label_ty) + thickoff;
 	this->width = ldistance + rdistance + this->radius + this->thickness;
-	this->height = this->epcy + epr + thickoff;
+	this->height = this->yoff + epr + thickoff;
+	this->dxoff = thickoff - dmetrics.label_lx;
+	this->fxoff = (this->width - thickoff) - fmetrics.label_rx;
 
 	{ // relocate and construct
-		float dx = thickoff - dmetrics.label_lx;
-		float fx = (this->width - thickoff) - fmetrics.label_rx;
 		float epoff = thickoff;
 		float rxdiff = epr - std::fmaxf((dmetrics.arc_sx - dmetrics.label_lx), (fmetrics.label_rx - fmetrics.arc_sx));
 		auto endpoint_base = circle(0.0F, 0.0F, epr);
@@ -79,50 +81,82 @@ void DensityFlowmeterlet::construct() {
 		if (rxdiff < 0.0F) {
 			epoff = -rxdiff;
 		} else {
-			dx += rxdiff;
-			fx -= rxdiff;
+			this->dxoff += rxdiff;
+			this->fxoff -= rxdiff;
 		}
 
-		this->fepcx = epr + epoff;
-		this->depcx = this->width - epr - epoff;
+		this->density = geometry_freeze(geometry_translate(density, this->dxoff, this->yoff));
+		this->flspeed = geometry_freeze(geometry_translate(flspeed, this->fxoff, this->yoff));
 
-		this->density = geometry_freeze(geometry_translate(density, dx, this->epcy));
-		this->flspeed = geometry_freeze(geometry_translate(flspeed, fx, this->epcy));
+		{ // make pointer bases
+			float fepcx = epr + epoff;
+			float depcx = this->width - epr - epoff;
 
-		this->endpoint_bases = geometry_freeze(geometry_union(endpoint_base, this->depcx, this->epcy, endpoint_base, this->fepcx, this->epcy));
-		this->endpoints = geometry_freeze(geometry_union(endpoint, this->depcx, this->epcy, endpoint, this->fepcx, this->epcy));
+			this->endpoint_bases = geometry_freeze(geometry_union(endpoint_base, depcx, this->yoff, endpoint_base, fepcx, this->yoff));
+			this->endpoints = geometry_freeze(geometry_union(endpoint, depcx, this->yoff, endpoint, fepcx, this->yoff));
+		}
 	}
 
-	this->set_values(this->density_max, this->flspeed_max);
+	{ // make dimensions
+		TextExtent dte, fte;
+		auto unit_font = make_bold_text_format("Cambria", dmetrics.em * 1.5F);
+		auto dunit = paragraph(make_text_layout(unitspeak("tpm3"), unit_font), &dte);
+		auto funit = paragraph(make_text_layout(unitspeak("mps"), unit_font), &fte);
+		
+		this->label_rx = this->width - fte.width;
+		this->label_by = this->height * 0.2718F;
+
+		this->density_unit = geometry_freeze(geometry_translate(dunit, 0.0F, this->label_by - dte.height));
+		this->flspeed_unit = geometry_freeze(geometry_translate(funit, label_rx, this->label_by - fte.height));
+
+		this->value_font = make_bold_text_format("Cambria Math", dmetrics.em * 2.0F);
+		this->set_values(this->density_min, this->flspeed_min, true);
+	}
 }
 
 void DensityFlowmeterlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void DensityFlowmeterlet::set_values(double density, double flspeed) {
-	float thickoff = this->thickness * 0.5F;
-	float r = this->pointer_radius;
-	float dx, dy, fx, fy;
+void DensityFlowmeterlet::set_values(double density, double flspeed, bool force) {
+	float epr = this->height - this->yoff + this->thickness * 1.5F;
+	float r = this->radius;
+	float px, py;
 
-	this->_density = density;
-	this->_flspeed = flspeed;
+	if (force || (this->_density != density)) {
+		this->_density = density;
+	
+		dfmeter_point(r, density, this->density_min, this->density_max, this->density_start, this->density_end, &px, &py);
+		this->density_pointer = geometry_freeze(line(this->dxoff + epr, this->yoff, this->dxoff + px, this->yoff + py, this->thickness));
+		this->density_value = make_text_layout(flstring(density, 2U), this->value_font);
+	}
 
-	dfmeter_point(r, density, this->density_min, this->density_max, this->density_start, this->density_end, &dx, &dy);
-	dfmeter_point(r, flspeed, this->flspeed_min, this->flspeed_max, this->flspeed_start, this->flspeed_end, &fx, &fy);
+	if (force || (this->_flspeed != flspeed)) {
+		this->_flspeed = flspeed;
 
-	this->pointers = geometry_freeze(
-		geometry_union(
-			line(this->depcx, this->epcy, this->depcx + dx - thickoff, this->epcy + dy + thickoff, this->thickness),
-			line(this->fepcx, this->epcy, this->fepcx + fx - thickoff, this->epcy + fy + thickoff, this->thickness)));
+		dfmeter_point(r, flspeed, this->flspeed_min, this->flspeed_max, this->flspeed_start, this->flspeed_end, &px, &py);
+		this->flspeed_pointer = geometry_freeze(line(this->fxoff - epr, this->yoff, this->fxoff + px, this->yoff + py, this->thickness));
+		this->flspeed_value = make_text_layout(flstring(flspeed, 2U), this->value_font);
+	}
 }
 
 void DensityFlowmeterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	Rect dbox = this->density_value->LayoutBounds;
+	Rect fbox = this->flspeed_value->LayoutBounds;
+	float box_rx = x + this->label_rx;
+	float box_by = y + this->label_by;
+
 	ds->DrawCachedGeometry(this->endpoint_bases, x, y, this->base_color);
 	ds->DrawCachedGeometry(this->endpoints, x, y, this->pointer_color);
 	
 	ds->DrawCachedGeometry(this->density, x, y, this->density_color);
+	ds->DrawTextLayout(this->density_value, x, box_by - dbox.Height, this->pointer_color);
+	ds->DrawCachedGeometry(this->density_unit, x + dbox.Width, y, this->density_color);
+
 	ds->DrawCachedGeometry(this->flspeed, x, y, this->flspeed_color);
+	ds->DrawTextLayout(this->flspeed_value, box_rx - fbox.Width, box_by - fbox.Height, this->pointer_color);
+	ds->DrawCachedGeometry(this->flspeed_unit, x, y, this->flspeed_color);
 	
-	ds->DrawCachedGeometry(this->pointers, x, y, this->pointer_color);
+	ds->DrawCachedGeometry(this->density_pointer, x, y, this->pointer_color);
+	ds->DrawCachedGeometry(this->flspeed_pointer, x, y, this->pointer_color);
 }

@@ -99,15 +99,15 @@ public:
 		float rlmod = gridsize * 1.5F;
 		Turtle<DA>* pTurtle = new Turtle<DA>(gridsize, gridsize, DA::LMOD);
 
-		pTurtle->jump_right(1.5F)->move_right(2, DA::D011)->move_right(4, DA::sb)->move_down(4, DA::SBHP);
-		pTurtle->move_right(4, DA::D003)->move_right(4, DA::SB)->jump_back();
-		pTurtle->move_right(4)->move_up(4, DA::d13)->move_left(4)->move_up(2, DA::D013)->jump_back();
-		pTurtle->move_up(4)->move_left(4)->move_up(2, DA::D015)->jump_back(DA::LMOD);
+		pTurtle->jump_right(1.5F)->move_right(2, DA::D011)->move_right(3, DA::sb)->move_down(4, DA::SBHP);
+		pTurtle->move_right(3, DA::D003)->move_right(3, DA::SB)->jump_back();
+		pTurtle->move_right(3)->move_up(4, DA::d13)->move_left(3)->move_up(2, DA::D013)->jump_back();
+		pTurtle->move_up(4)->move_left(3)->move_up(2, DA::D015)->jump_back(DA::LMOD);
 
-		pTurtle->jump_left(1.5F)->move_left(2, DA::D012)->move_left(4, DA::ps)->move_down(4, DA::PSHP);
-		pTurtle->move_left(4, DA::D004)->move_left(4, DA::PS)->jump_back();
-		pTurtle->move_left(4)->move_up(4, DA::d14)->move_right(4)->move_up(2, DA::D014)->jump_back();
-		pTurtle->move_up(4)->move_right(4)->move_up(2, DA::D016);
+		pTurtle->jump_left(1.5F)->move_left(2, DA::D012)->move_left(3, DA::ps)->move_down(4, DA::PSHP);
+		pTurtle->move_left(3, DA::D004)->move_left(3, DA::PS)->jump_back();
+		pTurtle->move_left(3)->move_up(4, DA::d14)->move_right(3)->move_up(2, DA::D014)->jump_back();
+		pTurtle->move_up(4)->move_right(3)->move_up(2, DA::D016);
 
 		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->load_percentage(this->progresses, DA::D003);
@@ -131,7 +131,7 @@ public:
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		cylinder_height = shheight * 0.5F;
-		meter_height = (height - vinset * 2.0F - shheight) * 0.5F;
+		meter_height = (height - vinset * 2.0F - shheight) * 0.382F;
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
@@ -155,11 +155,14 @@ public:
 
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			switch (it->first) {
-			case DA::D003: case DA::D004: case DA::D011: case DA::D012: {
-				dx = x0; dy = y0 - ystep; anchor = GraphletAnchor::CB;
+			case DA::D014: case DA::D016: {
+				dx = x0 + xstep; dy = y0; anchor = GraphletAnchor::LC;
+			}; break;
+			case DA::D013: case DA::D015: {
+				dx = x0 - xstep; dy = y0; anchor = GraphletAnchor::RC;
 			}; break;
 			default: {
-				dx = x0 - xstep; dy = y0; anchor = GraphletAnchor::RC;
+				dx = x0; dy = y0 - ystep; anchor = GraphletAnchor::CB;
 			}
 			}
 
@@ -193,8 +196,8 @@ public:
 		this->master->fill_graphlet_location(this->station, nullptr, &df_cy, GraphletAnchor::CT);
 		df_cy = (df_cy - vinset) * 0.5F + vinset;
 
-		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RT, -gapsize);
-		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LT, +gapsize);
+		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RC, -gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LC, +gapsize);
 		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);

@@ -117,38 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>等待链接</value>
-  </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>断开</value>
-  </data>
-  <data name=":ipv4:" xml:space="preserve">
-    <value>本机 IP: </value>
-  </data>
-  <data name=":nowifi:" xml:space="preserve">
-    <value>无连接</value>
-  </data>
-  <data name=":plc:" xml:space="preserve">
-    <value>PLC: </value>
-  </data>
-  <data name=":power:" xml:space="preserve">
-    <value>电量: </value>
-  </data>
-  <data name=":sd:" xml:space="preserve">
-    <value>SD 卡容量: </value>
-  </data>
-  <data name=":noipv4:" xml:space="preserve">
-    <value>0.0.0.0</value>
-  </data>
-  <data name=":wifi:" xml:space="preserve">
-    <value>WiFi: </value>
-  </data>
   <data name="hydraulics" xml:space="preserve">
     <value>液压系统</value>
-  </data>
-  <data name=":offline:" xml:space="preserve">
-    <value>未使用</value>
   </data>
   <data name="graphlets" xml:space="preserve">
     <value>图元状态示例</value>
@@ -183,9 +153,6 @@
   <data name="draughts" xml:space="preserve">
     <value>吃水装载</value>
   </data>
-  <data name=":nodatum:" xml:space="preserve">
-    <value>无数据</value>
-  </data>
   <data name="loads" xml:space="preserve">
     <value>装舱丨装驳</value>
   </data>
@@ -197,5 +164,11 @@
   </data>
   <data name="drags" xml:space="preserve">
     <value>耙臂指示</value>
+  </data>
+  <data name="density" xml:space="preserve">
+    <value>密度</value>
+  </data>
+  <data name="flspeed" xml:space="preserve">
+    <value>流速</value>
   </data>
 </root>
