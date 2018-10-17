@@ -12,6 +12,7 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/device/compensatorlet.hpp"
 #include "graphlet/device/overflowlet.hpp"
+#include "graphlet/device/draglet.hpp"
 
 #include "schema/di_valves.hpp"
 
@@ -66,6 +67,9 @@ public:
 
 		this->set_compensator(DA::PSCompensator, DB203, 82U);
 		this->set_compensator(DA::SBCompensator, DB203, 98U);
+
+		this->set_density_speed(DA::PS, DB203, 136U);
+		this->set_density_speed(DA::SB, DB203, 148U);
 
 		this->progresses[DA::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
 		//this->progresses[DA::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
@@ -125,21 +129,25 @@ public:
 
 	void load_dashboard(float width, float height, float vinset) {
 		float shwidth, shheight, xstep, ystep;
-		float cylinder_height, meter_height;
+		float cylinder_height, meter_height, drag_width;
 
 		this->station->fill_extent(0.0F, 0.0F, &shwidth, &shheight);
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		cylinder_height = shheight * 0.5F;
 		meter_height = (height - vinset * 2.0F - shheight) * 0.382F;
+		drag_width = width * 0.2718F;
 		shwidth += (xstep * 2.0F);
 		shheight += ystep;
 
-		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.5F));
+		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, shheight * 0.618F));
 		this->load_dimension(this->lengths, DA::OverflowPipe, "meter");
 
 		this->load_densityflowmeters(this->dfmeters, DA::PS, DA::SB, meter_height);
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
+
+		this->load_drag(this->drags, DA::PS, -drag_width, meter_height, -40.0, default_ps_color);
+		this->load_drag(this->drags, DA::SB, +drag_width, meter_height, -50.0, default_sb_color);
 	}
 
 public:
@@ -186,21 +194,21 @@ public:
 	void reflow_dashboard(float width, float height, float vinset) {
 		float gapsize = vinset * 0.5F;
 		float cx = width * 0.5F;
-		float xstep, ystep, df_cy;
+		float xstep, ystep;
 
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		this->master->move_to(this->lengths[DA::OverflowPipe], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 		this->master->move_to(this->overflowpipe, this->lengths[DA::OverflowPipe], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 
-		this->master->fill_graphlet_location(this->station, nullptr, &df_cy, GraphletAnchor::CT);
-		df_cy = (df_cy - vinset) * 0.5F + vinset;
-
-		this->master->move_to(this->dfmeters[DA::PS], cx, df_cy, GraphletAnchor::RC, -gapsize);
-		this->master->move_to(this->dfmeters[DA::SB], cx, df_cy, GraphletAnchor::LC, +gapsize);
+		this->master->move_to(this->dfmeters[DA::PS], this->valves[DA::D016], GraphletAnchor::CT, GraphletAnchor::RB, 0.0F, -gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], this->valves[DA::D015], GraphletAnchor::RT, GraphletAnchor::LB, 0.0F, -gapsize);
 		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
+
+		this->master->move_to(this->drags[DA::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
+		this->master->move_to(this->drags[DA::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
 
 		for (DA id = DA::PSCompensator; id <= DA::SBCompensator; id++) {
 			this->master->move_to(this->lengths[id], this->compensators[id], GraphletAnchor::CB, GraphletAnchor::CT);
@@ -264,6 +272,11 @@ private:
 	}
 
 	template<class C, typename E>
+	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, double depthest, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(5.0, depthest, -20.0, width, height, visor_color), id);
+	}
+
+	template<class C, typename E>
 	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double range) {
 		for (E id = id0; id <= idn; id++) {
 			cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
@@ -320,6 +333,15 @@ private:
 		this->pressures[id]->set_value(RealData(db203, rd_idx + 1), GraphletAnchor::CC);
 	}
 
+	void set_density_speed(DA id, const uint8* db203, unsigned int idx) {
+		float hdensity = RealData(db203, idx + 0U);
+		float udensity = RealData(db203, idx + 2U);
+		float hflspeed = RealData(db203, idx + 1U);
+		float uflspeed = RealData(db203, idx + 3U);
+
+		this->dfmeters[id]->set_values(std::fmaxf(hdensity, udensity), std::fmaxf(hflspeed, uflspeed));
+	}
+
 private: // never delete these graphlets manually.
 	Tracklet<DA>* station;
 	std::map<DA, Credit<Labellet, DA>*> labels;
@@ -327,8 +349,9 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<HopperPumplet, DA>*> hpumps;
 	std::map<DA, Credit<Circlelet, DA>*> suctions;
 	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
-	std::map<DA, Credit<DensityFlowmeterlet, DA>*> dfmeters;
+	std::map<DA, Credit<DensitySpeedmeterlet, DA>*> dfmeters;
 	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
+	std::map<DA, Credit<Draglet, DA>*> drags;
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
 	std::map<DA, Credit<Dimensionlet, DA>*> rpms;

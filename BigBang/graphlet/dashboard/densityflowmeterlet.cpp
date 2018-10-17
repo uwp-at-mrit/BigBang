@@ -19,24 +19,24 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ dfmeter_default_pointer_color = Colours::YellowGreen;
+static CanvasSolidColorBrush^ dfmeter_default_pointer_color = Colours::GreenYellow;
 static CanvasSolidColorBrush^ dfmeter_default_density_color = Colours::Crimson;
 static CanvasSolidColorBrush^ dfmeter_default_flspeed_color = Colours::DodgerBlue;
 static CanvasSolidColorBrush^ dfmeter_default_base_color = Colours::DarkSlateGray;
 
 static inline void dfmeter_point(float radius, double v, double vmin, double vmax, double start, double end, float* px, float* py) {
-	double percentage = (v - vmin) / (vmax - vmin);
+	double percentage = std::fmax(std::fmin((v - vmin) / (vmax - vmin), 1.0), 0.0);
 	double degrees = (end - start) * percentage + start;
 
 	circle_point(radius, degrees, px, py);
 }
 
 /*************************************************************************************************/
-DensityFlowmeterlet::DensityFlowmeterlet(float radius, double degoff, float thickness
+DensitySpeedmeterlet::DensitySpeedmeterlet(float radius, double degoff, float thickness
 	, unsigned int step, unsigned int precision, ICanvasBrush^ pcolor, ICanvasBrush^ dcolor, ICanvasBrush^ fcolor, ICanvasBrush^ bcolor)
-	: DensityFlowmeterlet(1.0, 2.0, 0.0, 10.0, radius, degoff, thickness, step, precision, pcolor, dcolor, fcolor, bcolor) {}
+	: DensitySpeedmeterlet(1.0, 2.0, 0.0, 10.0, radius, degoff, thickness, step, precision, pcolor, dcolor, fcolor, bcolor) {}
 
-DensityFlowmeterlet::DensityFlowmeterlet(double dmin, double dmax, double fmin, double fmax, float radius, double degoff
+DensitySpeedmeterlet::DensitySpeedmeterlet(double dmin, double dmax, double fmin, double fmax, float radius, double degoff
 	, float thickness, unsigned int step, unsigned int precision, ICanvasBrush^ pcolor
 	, ICanvasBrush^ dcolor, ICanvasBrush^ fcolor, ICanvasBrush^ bcolor)
 	: density_min(dmin), density_max(dmax), flspeed_min(fmin), flspeed_max(fmax)
@@ -48,11 +48,11 @@ DensityFlowmeterlet::DensityFlowmeterlet(double dmin, double dmax, double fmin, 
 	
 	this->density_start = 180.0 + degoff;
 	this->density_end = 270.0 - degoff;
-	this->flspeed_start = -degoff;
+	this->flspeed_start = 0.0 - degoff;
 	this->flspeed_end = degoff - 90.0;
 }
 
-void DensityFlowmeterlet::construct() {
+void DensitySpeedmeterlet::construct() {
 	RHatchMarkMetrics dmetrics, fmetrics;
 	float thickoff = this->thickness * 0.5F;
 	
@@ -67,8 +67,9 @@ void DensityFlowmeterlet::construct() {
 	float rdistance = fmetrics.label_rx - fmetrics.arc_sx;
 
 	this->yoff = -std::fminf(dmetrics.label_ty, fmetrics.label_ty) + thickoff;
+	this->epcxoff = epr + thickoff;
 	this->width = ldistance + rdistance + this->radius + this->thickness;
-	this->height = this->yoff + epr + thickoff;
+	this->height = this->yoff + this->epcxoff;
 	this->dxoff = thickoff - dmetrics.label_lx;
 	this->fxoff = (this->width - thickoff) - fmetrics.label_rx;
 
@@ -79,7 +80,7 @@ void DensityFlowmeterlet::construct() {
 		auto endpoint = circle(0.0F, 0.0F, this->thickness * 1.618F);
 
 		if (rxdiff < 0.0F) {
-			epoff = -rxdiff;
+			this->epcxoff = epr - rxdiff;
 		} else {
 			this->dxoff += rxdiff;
 			this->fxoff -= rxdiff;
@@ -88,9 +89,9 @@ void DensityFlowmeterlet::construct() {
 		this->density = geometry_freeze(geometry_translate(density, this->dxoff, this->yoff));
 		this->flspeed = geometry_freeze(geometry_translate(flspeed, this->fxoff, this->yoff));
 
-		{ // make pointer bases
-			float fepcx = epr + epoff;
-			float depcx = this->width - epr - epoff;
+		{ // make endpoints
+			float fepcx = this->epcxoff;
+			float depcx = this->width - this->epcxoff;
 
 			this->endpoint_bases = geometry_freeze(geometry_union(endpoint_base, depcx, this->yoff, endpoint_base, fepcx, this->yoff));
 			this->endpoints = geometry_freeze(geometry_union(endpoint, depcx, this->yoff, endpoint, fepcx, this->yoff));
@@ -114,33 +115,47 @@ void DensityFlowmeterlet::construct() {
 	}
 }
 
-void DensityFlowmeterlet::fill_extent(float x, float y, float* w, float* h) {
+void DensitySpeedmeterlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void DensityFlowmeterlet::set_values(double density, double flspeed, bool force) {
-	float epr = this->height - this->yoff + this->thickness * 1.5F;
+void DensitySpeedmeterlet::set_values(double density, double flspeed, bool force) {
+	this->set_density(density, force);
+	this->set_flspeed(flspeed, force);
+}
+
+void DensitySpeedmeterlet::set_density(double density, bool force) {
+	float depr = this->width - this->epcxoff;
 	float r = this->radius;
 	float px, py;
 
 	if (force || (this->_density != density)) {
 		this->_density = density;
-	
+
 		dfmeter_point(r, density, this->density_min, this->density_max, this->density_start, this->density_end, &px, &py);
-		this->density_pointer = geometry_freeze(line(this->dxoff + epr, this->yoff, this->dxoff + px, this->yoff + py, this->thickness));
+		this->density_pointer = geometry_freeze(line(depr, this->yoff, this->dxoff + px, this->yoff + py, this->thickness));
 		this->density_value = make_text_layout(flstring(density, 2U), this->value_font);
+
+		this->notify_updated();
 	}
+}
+
+void DensitySpeedmeterlet::set_flspeed(double flspeed, bool force) {
+	float r = this->radius;
+	float px, py;
 
 	if (force || (this->_flspeed != flspeed)) {
 		this->_flspeed = flspeed;
 
 		dfmeter_point(r, flspeed, this->flspeed_min, this->flspeed_max, this->flspeed_start, this->flspeed_end, &px, &py);
-		this->flspeed_pointer = geometry_freeze(line(this->fxoff - epr, this->yoff, this->fxoff + px, this->yoff + py, this->thickness));
+		this->flspeed_pointer = geometry_freeze(line(this->epcxoff, this->yoff, this->fxoff + px, this->yoff + py, this->thickness));
 		this->flspeed_value = make_text_layout(flstring(flspeed, 2U), this->value_font);
+
+		this->notify_updated();
 	}
 }
 
-void DensityFlowmeterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void DensitySpeedmeterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	Rect dbox = this->density_value->LayoutBounds;
 	Rect fbox = this->flspeed_value->LayoutBounds;
 	float box_rx = x + this->label_rx;

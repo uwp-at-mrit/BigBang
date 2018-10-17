@@ -28,6 +28,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.cpp" />
@@ -77,6 +78,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\thermometerlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.hpp" />

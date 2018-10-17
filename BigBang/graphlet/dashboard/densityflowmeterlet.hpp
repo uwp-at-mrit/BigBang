@@ -6,9 +6,9 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class DensityFlowmeterlet : public WarGrey::SCADA::IGraphlet {
+	private class DensitySpeedmeterlet : public WarGrey::SCADA::IGraphlet {
 	public:
-		DensityFlowmeterlet(double density_min, double density_max, double flspeed_min, double flspeed_max,
+		DensitySpeedmeterlet(double density_min, double density_max, double flspeed_min, double flspeed_max,
 			float radius, double degrees_offset = 4.0, float thickness = 2.0F,
 			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ pointer_color = nullptr,
@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ flspeed_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ base_color = nullptr);
 
-		DensityFlowmeterlet(float radius, double degrees_offset = 4.0, float thickness = 2.0F,
+		DensitySpeedmeterlet(float radius, double degrees_offset = 4.0, float thickness = 2.0F,
 			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ pointer_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ density_color = nullptr,
@@ -30,11 +30,12 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_values(double density, double flspeed, bool force = false);
+		void set_density(double density, bool force = false);
+		void set_flspeed(double density, bool force = false);
 		double get_density() { return this->_density; }
 		double get_flspeed() { return this->_flspeed; }
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ skeleton;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ density;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ flspeed;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoint_bases;
@@ -61,6 +62,7 @@ namespace WarGrey::SCADA {
 		float radius;
 		float dxoff;
 		float fxoff;
+		float epcxoff;
 		float yoff;
 		float thickness;
 
