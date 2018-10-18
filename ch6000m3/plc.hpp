@@ -9,6 +9,8 @@ namespace WarGrey::SCADA {
 	float DBD(const uint8* src, size_t idx);
 	float RealData(const uint8* src, size_t idx);
 
+	Windows::Foundation::Numerics::float3 DBD_3(const uint8* src, size_t idx);
+
 	private class PLCConfirmation : public WarGrey::SCADA::MRConfirmation {
 	public:
 		void on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, WarGrey::SCADA::Syslog* logger) override;

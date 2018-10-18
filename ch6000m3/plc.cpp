@@ -4,6 +4,8 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::Foundation::Numerics;
+
 static uint16 MRIT_PORT = 2008;
 
 private enum MRDB {
@@ -81,6 +83,16 @@ float WarGrey::SCADA::DBD(const uint8* src, size_t idx) {
 
 float WarGrey::SCADA::RealData(const uint8* src, size_t idx) {
 	return bigendian_float_ref(src, idx * 4U);
+}
+
+float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
+	float3 position;
+
+	position.x = DBD(src, idx + 0U);
+	position.y = DBD(src, idx + 4U);
+	position.z = DBD(src, idx + 8U);
+
+	return position;
 }
 
 /*************************************************************************************************/

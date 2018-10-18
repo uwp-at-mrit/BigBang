@@ -11,19 +11,37 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 static Platform::String^ remote_test_server = nullptr;
 
 /*************************************************************************************************/
-static const unsigned int frame_per_second = 4;
-
-/*************************************************************************************************/
-static const size_t hopper_count = 7;
+static const unsigned int frame_per_second = 4U;
 
 static const float large_metrics_font_size = 24.0F;
 static const float normal_metrics_font_size = 22.0F;
 static const float small_metrics_font_size = 20.0F;
 
-static const float large_font_size  = 18.0F;
+static const float large_font_size = 18.0F;
 static const float normal_font_size = 16.0F;
-static const float small_font_size  = 14.0F;
-static const float tiny_font_size   = 12.0F;
+static const float small_font_size = 14.0F;
+static const float tiny_font_size = 12.0F;
+
+/*************************************************************************************************/
+static const size_t hopper_count = 7;
+
+static const float ps_drag_trunnion_gapsize = 1.845F;
+static const float ps_drag_trunnion_length = 3.61F;
+static const float ps_drag_pipe1_length = 25.34F;
+static const float ps_drag_pipe2_length = 17.55F;
+static const float ps_drag_radius = 0.5F;
+static const float ps_drag_head_width = 4.03F;
+static const float ps_drag_head_length = 2.54F;
+static const float ps_drag_head_compensation = 0.5F;
+
+static const float sb_drag_trunnion_gapsize = 1.845F;
+static const float sb_drag_trunnion_length = 3.61F;
+static const float sb_drag_pipe1_length = 25.34F;
+static const float sb_drag_pipe2_length = 30.45F;
+static const float sb_drag_radius = 0.5F;
+static const float sb_drag_head_width = 4.03F;
+static const float sb_drag_head_length = 2.54F;
+static const float sb_drag_head_compensation = 0.107F;
 
 static const unsigned int default_ps_color = 0xFF0000;
 static const unsigned int default_sb_color = 0x00FF00;

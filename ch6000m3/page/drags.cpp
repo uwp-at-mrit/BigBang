@@ -22,8 +22,9 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::Foundation;
 using namespace Windows::System;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -53,6 +54,22 @@ public:
 	Drags(DragsPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->station_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
+
+		this->drags[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
+		this->drags[0].trunnion_length = ps_drag_trunnion_length;
+		this->drags[0].pipe_lengths[0] = ps_drag_pipe1_length;
+		this->drags[0].pipe_lengths[1] = ps_drag_pipe2_length;
+		this->drags[0].pipe_radius = ps_drag_radius;
+		this->drags[0].head_width = ps_drag_head_width;
+		this->drags[0].head_height = ps_drag_head_length;
+
+		this->drags[1].trunnion_gapsize = sb_drag_trunnion_gapsize;
+		this->drags[1].trunnion_length = sb_drag_trunnion_length;
+		this->drags[1].pipe_lengths[0] = sb_drag_pipe1_length;
+		this->drags[1].pipe_lengths[1] = sb_drag_pipe2_length;
+		this->drags[1].pipe_radius = sb_drag_radius;
+		this->drags[1].head_width = sb_drag_head_width;
+		this->drags[1].head_height = sb_drag_head_length;
 	}
 
 public:
@@ -77,8 +94,10 @@ public:
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
-	}
 
+		this->set_drag_positions(DA::PS, DB2, 20U);
+		this->set_drag_positions(DA::SB, DB2, 108U);
+	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_gate_valve(this->valves[DA::D011], DB4, 349U, DB205, 449U);
@@ -146,8 +165,8 @@ public:
 		this->load_densityflowmeters(this->dfmeters, DA::PS, DA::SB, meter_height);
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 
-		this->load_drag(this->drags, DA::PS, -drag_width, meter_height, -40.0, default_ps_color);
-		this->load_drag(this->drags, DA::SB, +drag_width, meter_height, -50.0, default_sb_color);
+		this->load_drag(this->xydrags, DA::PS, -drag_width, meter_height, -40.0, default_ps_color);
+		this->load_drag(this->xydrags, DA::SB, +drag_width, meter_height, -50.0, default_sb_color);
 	}
 
 public:
@@ -207,8 +226,8 @@ public:
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
 
-		this->master->move_to(this->drags[DA::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
-		this->master->move_to(this->drags[DA::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
+		this->master->move_to(this->xydrags[DA::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
+		this->master->move_to(this->xydrags[DA::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
 
 		for (DA id = DA::PSCompensator; id <= DA::SBCompensator; id++) {
 			this->master->move_to(this->lengths[id], this->compensators[id], GraphletAnchor::CB, GraphletAnchor::CT);
@@ -342,6 +361,20 @@ private:
 		this->dfmeters[id]->set_values(std::fmaxf(hdensity, udensity), std::fmaxf(hflspeed, uflspeed));
 	}
 
+	void set_drag_positions(DA id, const uint8* db2, unsigned int idx) {
+		float3 intermediates[2];
+		
+		float3 suction = DBD_3(db2, idx + 0U);
+		float3 intermediate = DBD_3(db2, idx + 12U);
+		float3 draghead = DBD_3(db2, idx + 24U);
+
+		intermediate.y -= DBD(db2, idx + 32U);
+		draghead.y -= DBD(db2, idx + 36U);
+		draghead.z += DBD(db2, idx + 40U);
+
+		this->xydrags[id]->set_position(suction, intermediates, draghead);
+	}
+
 private: // never delete these graphlets manually.
 	Tracklet<DA>* station;
 	std::map<DA, Credit<Labellet, DA>*> labels;
@@ -351,7 +384,7 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
 	std::map<DA, Credit<DensitySpeedmeterlet, DA>*> dfmeters;
 	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
-	std::map<DA, Credit<Draglet, DA>*> drags;
+	std::map<DA, Credit<DragXZlet, DA>*> xydrags;
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
 	std::map<DA, Credit<Dimensionlet, DA>*> lengths;
 	std::map<DA, Credit<Dimensionlet, DA>*> rpms;
@@ -364,6 +397,9 @@ private:
 	CanvasTextFormat^ station_font;
 	DimensionStyle percentage_style;
 	DimensionStyle plain_style;
+
+private:
+	DragInfo drags[2];
 
 private:
 	DragsPage* master;

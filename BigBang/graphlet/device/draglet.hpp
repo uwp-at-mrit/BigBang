@@ -6,38 +6,93 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private class Draglet : public WarGrey::SCADA::IGraphlet {
-	public:
-		Draglet(double depth_highest, double depth_lowest, double trunion_lowest, float width, float height,
-			unsigned int visor_color, float thickness = 2.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
+	private value struct DragInfo {
+		float trunnion_gapsize;
+		float trunnion_length;
+		float pipe_lengths[3];
+		float pipe_padding;
+		float pipe_radius;
+		float head_width;
+		float head_length;
+		float head_height;
+		float head_compensation;
+	};
 
-		Draglet(float width, float height, unsigned int visor_color, float thickness = 2.0F,
+	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
+	public:
+		IDraglet(WarGrey::SCADA::DragInfo& info, float width, float height, float thickness,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color);
+
+	public:
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+
+	public:
+		void set_position(
+			Windows::Foundation::Numerics::float3& trunnion,
+			Windows::Foundation::Numerics::float3 intermediates[],
+			Windows::Foundation::Numerics::float3& draghead,
+			bool force = false);
+
+	protected:
+		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
+		virtual void on_position_changed(
+			Windows::Foundation::Numerics::float3& trunnion,
+			Windows::Foundation::Numerics::float3 intermediates[],
+			Windows::Foundation::Numerics::float3& draghead) = 0;
+
+	protected:
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
+		
+	protected:
+		float width;
+		float height;
+		float thickness;
+		float drag_thickness;
+		bool leftward;
+
+	protected:
+		float ws_x;
+		float ws_y;
+		float ws_width;
+		float ws_height;
+
+	protected:
+		WarGrey::SCADA::DragInfo info;
+		Windows::Foundation::Numerics::float3 trunnion;
+		Windows::Foundation::Numerics::float3 intermediates[3];
+		Windows::Foundation::Numerics::float3 draghead;
+		float length;
+	};
+
+	private class DragXZlet : public WarGrey::SCADA::IDraglet {
+	public:
+		DragXZlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color,
+			float thickness = 2.0F, float hatchmark_interval = 5.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
 
 	public:
 		void construct() override;
-		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
-	public:
-		void set_depths(double draghead, double intermediate, double trunnion, bool force = false);
-		double get_trunnion_depth() { return this->trunnion_depth; }
-		double get_intermediate_depth() { return this->intermediate_depth; }
-		double get_draghead_depth() { return this->draghead_depth; }
+	protected:
+		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
+		void on_position_changed(
+			Windows::Foundation::Numerics::float3& trunnion,
+			Windows::Foundation::Numerics::float3 intermediates[],
+			Windows::Foundation::Numerics::float3& draghead) override;
 
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pivot;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ visor_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ value_font;
@@ -49,33 +104,16 @@ namespace WarGrey::SCADA {
 		float label_by;
 
 	private:
-		float width;
-		float height;
-		float ws_top;
-		float ws_height;
-		float thickness;
-
-	private:
 		double depth_highest;
 		double depth_lowest;
-		double trunnion_lowest;
-		bool leftward;
+		double suction_lowest;
 
 	private:
 		float draghead_pinx;
 		float draghead_piny;
-		float draghead_length;
-		float intermediate_pinx;
-		float intermediate_piny;
-		float intermediate_length;
 		float trunnion_pinx;
 		float trunnion_piny;
-		float trunnion_length;
-		float drag_thickness;
-
-	private:
-		double trunnion_depth;
-		double intermediate_depth;
-		double draghead_depth;
+		float intermediate_pinxs[3];
+		float intermediate_pinys[3];
 	};
 }
