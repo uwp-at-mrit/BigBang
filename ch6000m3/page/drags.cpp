@@ -55,21 +55,21 @@ public:
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->station_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
 
-		this->drags[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
-		this->drags[0].trunnion_length = ps_drag_trunnion_length;
-		this->drags[0].pipe_lengths[0] = ps_drag_pipe1_length;
-		this->drags[0].pipe_lengths[1] = ps_drag_pipe2_length;
-		this->drags[0].pipe_radius = ps_drag_radius;
-		this->drags[0].head_width = ps_drag_head_width;
-		this->drags[0].head_height = ps_drag_head_length;
+		this->drag_configs[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
+		this->drag_configs[0].trunnion_length = ps_drag_trunnion_length;
+		this->drag_configs[0].pipe_lengths[0] = ps_drag_pipe1_length;
+		this->drag_configs[0].pipe_lengths[1] = ps_drag_pipe2_length;
+		this->drag_configs[0].pipe_radius = ps_drag_radius;
+		this->drag_configs[0].head_width = ps_drag_head_width;
+		this->drag_configs[0].head_height = ps_drag_head_length;
 
-		this->drags[1].trunnion_gapsize = sb_drag_trunnion_gapsize;
-		this->drags[1].trunnion_length = sb_drag_trunnion_length;
-		this->drags[1].pipe_lengths[0] = sb_drag_pipe1_length;
-		this->drags[1].pipe_lengths[1] = sb_drag_pipe2_length;
-		this->drags[1].pipe_radius = sb_drag_radius;
-		this->drags[1].head_width = sb_drag_head_width;
-		this->drags[1].head_height = sb_drag_head_length;
+		this->drag_configs[1].trunnion_gapsize = sb_drag_trunnion_gapsize;
+		this->drag_configs[1].trunnion_length = sb_drag_trunnion_length;
+		this->drag_configs[1].pipe_lengths[0] = sb_drag_pipe1_length;
+		this->drag_configs[1].pipe_lengths[1] = sb_drag_pipe2_length;
+		this->drag_configs[1].pipe_radius = sb_drag_radius;
+		this->drag_configs[1].head_width = sb_drag_head_width;
+		this->drag_configs[1].head_height = sb_drag_head_length;
 	}
 
 public:
@@ -122,15 +122,15 @@ public:
 		float rlmod = gridsize * 1.5F;
 		Turtle<DA>* pTurtle = new Turtle<DA>(gridsize, gridsize, DA::LMOD);
 
-		pTurtle->jump_right(1.5F)->move_right(2, DA::D011)->move_right(3, DA::sb)->move_down(4, DA::SBHP);
+		pTurtle->jump_right(1.5F)->move_right(2.5F, DA::D011)->move_right(3, DA::sb)->move_down(4, DA::SBHP);
 		pTurtle->move_right(3, DA::D003)->move_right(3, DA::SB)->jump_back();
-		pTurtle->move_right(3)->move_up(4, DA::d13)->move_left(3)->move_up(2, DA::D013)->jump_back();
-		pTurtle->move_up(4)->move_left(3)->move_up(2, DA::D015)->jump_back(DA::LMOD);
+		pTurtle->move_right(3)->move_up(4, DA::d13)->move_left(1.5F)->move_up(2, DA::D013)->jump_back();
+		pTurtle->move_up(4)->move_left(1.5F)->move_up(2, DA::D015)->jump_back(DA::LMOD);
 
-		pTurtle->jump_left(1.5F)->move_left(2, DA::D012)->move_left(3, DA::ps)->move_down(4, DA::PSHP);
+		pTurtle->jump_left(1.5F)->move_left(2.5F, DA::D012)->move_left(3, DA::ps)->move_down(4, DA::PSHP);
 		pTurtle->move_left(3, DA::D004)->move_left(3, DA::PS)->jump_back();
-		pTurtle->move_left(3)->move_up(4, DA::d14)->move_right(3)->move_up(2, DA::D014)->jump_back();
-		pTurtle->move_up(4)->move_right(3)->move_up(2, DA::D016);
+		pTurtle->move_left(3)->move_up(4, DA::d14)->move_right(1.5F)->move_up(2, DA::D014)->jump_back();
+		pTurtle->move_up(4)->move_right(1.5F)->move_up(2, DA::D016);
 
 		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->load_percentage(this->progresses, DA::D003);
@@ -165,8 +165,8 @@ public:
 		this->load_densityflowmeters(this->dfmeters, DA::PS, DA::SB, meter_height);
 		this->load_compensators(this->compensators, DA::PSCompensator, DA::SBCompensator, cylinder_height, 3.0);
 
-		this->load_drag(this->xydrags, DA::PS, -drag_width, meter_height, -40.0, default_ps_color);
-		this->load_drag(this->xydrags, DA::SB, +drag_width, meter_height, -50.0, default_sb_color);
+		this->load_drag(this->xydrags, DA::PS, -drag_width, meter_height, this->drag_configs[0], default_ps_color);
+		this->load_drag(this->xydrags, DA::SB, +drag_width, meter_height, this->drag_configs[1], default_sb_color);
 	}
 
 public:
@@ -291,8 +291,8 @@ private:
 	}
 
 	template<class C, typename E>
-	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, double depthest, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(5.0, depthest, -20.0, width, height, visor_color), id);
+	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(info, width, height, visor_color), id);
 	}
 
 	template<class C, typename E>
@@ -362,17 +362,18 @@ private:
 	}
 
 	void set_drag_positions(DA id, const uint8* db2, unsigned int idx) {
-		float3 intermediates[2];
+		float3 ujoints[2];
+		float3 draghead = DBD_3(db2, idx + 36U);
+		float suction_depth = DBD(db2, idx + 0U);
+
+		ujoints[0] = DBD_3(db2, idx + 12U);
+		ujoints[1] = DBD_3(db2, idx + 24U);
 		
-		float3 suction = DBD_3(db2, idx + 0U);
-		float3 intermediate = DBD_3(db2, idx + 12U);
-		float3 draghead = DBD_3(db2, idx + 24U);
+		ujoints[1].y -= DBD(db2, idx + 48U);
+		draghead.y -= DBD(db2, idx + 52U);
+		draghead.z += DBD(db2, idx + 56U);
 
-		intermediate.y -= DBD(db2, idx + 32U);
-		draghead.y -= DBD(db2, idx + 36U);
-		draghead.z += DBD(db2, idx + 40U);
-
-		this->xydrags[id]->set_position(suction, intermediates, draghead);
+		this->xydrags[id]->set_position(suction_depth, ujoints, draghead);
 	}
 
 private: // never delete these graphlets manually.
@@ -399,7 +400,7 @@ private:
 	DimensionStyle plain_style;
 
 private:
-	DragInfo drags[2];
+	DragInfo drag_configs[2];
 
 private:
 	DragsPage* master;
