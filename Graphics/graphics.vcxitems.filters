@@ -14,8 +14,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)text.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)transformation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)turtle.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)measure\rhatchmark.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)measure\vhatchmark.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\rhatchmark.cpp">
+      <Filter>measure</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\vhatchmark.cpp">
+      <Filter>measure</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\hhatchmark.cpp">
+      <Filter>measure</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)brushes.hxx" />
@@ -31,8 +38,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)text.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)transformation.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)turtle.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)measure\rhatchmark.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)measure\vhatchmark.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\rhatchmark.hpp">
+      <Filter>measure</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\vhatchmark.hpp">
+      <Filter>measure</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\hhatchmark.hpp">
+      <Filter>measure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="measure">

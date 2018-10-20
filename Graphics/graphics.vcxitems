@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)color_test.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)draw.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)geometry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)measure\hhatchmark.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)measure\rhatchmark.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)measure\vhatchmark.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)color_test.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)draw.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)geometry.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)measure\hhatchmark.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)measure\rhatchmark.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)measure\vhatchmark.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)math.hpp" />

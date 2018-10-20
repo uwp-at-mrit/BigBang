@@ -37,7 +37,7 @@ private enum class DL : unsigned int {
 	SternDraft, psSternDraft, psSuctionDraft, sbSternDraft, psSternHeight, sbSternHeight,
 	BowDraft, psBowDraft, sbSuctionDraft, sbBowDraft, psBowHeight, sbBowHeight,
 
-	OverflowPipe,
+	Overflow,
 
 	_
 };
@@ -113,7 +113,7 @@ public:
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, 55));
-		this->dimensions[DL::OverflowPipe]->set_value(this->overflowpipe->get_value());
+		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value());
 
 		this->dimensions[DL::psBowDraft]->set_value(RealData(DB203, 31));
 		this->dimensions[DL::psSuctionDraft]->set_value(RealData(DB203, 32));
@@ -168,13 +168,13 @@ public:
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
-		this->load_dimension(this->dimensions, DL::OverflowPipe, "meter");
+		this->load_dimension(this->dimensions, DL::Overflow, "meter");
 	}
 
 	void reflow(float width, float height, float vinset) {
 		float tsx, tsy, ofpx, ofpy, gapsize;
 
-		this->dimensions[DL::OverflowPipe]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
+		this->dimensions[DL::Overflow]->fill_extent(0.0F, 0.0F, nullptr, &gapsize);
 		gapsize *= 0.5F;
 
 		this->decorator->fill_ship_anchor(0.9F, 0.5F, &ofpx, &ofpy);
@@ -184,7 +184,7 @@ public:
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, DL::EarthWork, DL::Displacement, gapsize);
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
-		this->master->move_to(this->dimensions[DL::OverflowPipe], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 
 		{ // reflow dimensions
 			float cpt_height, xoff, yoff;
