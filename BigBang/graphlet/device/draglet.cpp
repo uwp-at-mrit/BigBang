@@ -5,7 +5,6 @@
 #include "paint.hpp"
 #include "geometry.hpp"
 
-#include "tongue.hpp"
 #include "string.hpp"
 
 #include "measure/vhatchmark.hpp"

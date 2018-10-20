@@ -6,6 +6,7 @@
 
 #include "graphlet/shapelet.hpp"
 
+#include "graphlet/dashboard/dragheadlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/dashboard/densityflowmeterlet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
@@ -166,9 +167,13 @@ public:
 
 		{ // load drags
 			float over_drag_width = cylinder_height * 1.618F; 
-			float over_drag_height = (height - vinset) * 0.5F;
-			float side_drag_width = (width - shwidth) * 0.5F - vinset;
-			float side_drag_height = meter_height;
+			float over_drag_height = height * 0.5F - vinset * 2.0F;
+			float side_drag_width = (width - shwidth) * 0.42F - vinset;
+			float side_drag_height = height * 0.42F - vinset * 2.0F;
+			float draghead_radius = meter_height * 0.5F;
+
+			this->load_draghead(this->dragheads, DA::PS, -draghead_radius, default_ps_color);
+			this->load_draghead(this->dragheads, DA::SB, +draghead_radius, default_sb_color);
 		
 			this->load_drag(this->drag_over_views, DA::PS, -over_drag_width, over_drag_height, this->drag_configs[0], default_ps_color);
 			this->load_drag(this->drag_over_views, DA::SB, +over_drag_width, over_drag_height, this->drag_configs[1], default_sb_color);
@@ -228,17 +233,20 @@ public:
 		this->master->move_to(this->lengths[DA::Overflow], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 		this->master->move_to(this->overflowpipe, this->lengths[DA::Overflow], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 
-		this->master->move_to(this->dfmeters[DA::PS], this->valves[DA::D016], GraphletAnchor::CT, GraphletAnchor::RB, +xstep, -gapsize);
-		this->master->move_to(this->dfmeters[DA::SB], this->valves[DA::D015], GraphletAnchor::RT, GraphletAnchor::LB, -xstep, -gapsize);
-		
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
 
-		this->master->move_to(this->drag_over_views[DA::PS], xstep, vinset + ystep, GraphletAnchor::LT);
-		this->master->move_to(this->drag_over_views[DA::SB], width - xstep, vinset + ystep, GraphletAnchor::RT);
+		this->master->move_to(this->dfmeters[DA::PS], this->valves[DA::D016], GraphletAnchor::CT, GraphletAnchor::RB, +xstep, -gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], this->valves[DA::D015], GraphletAnchor::RT, GraphletAnchor::LB, -xstep, -gapsize);
+
+		this->master->move_to(this->drag_over_views[DA::PS], this->dfmeters[DA::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
+		this->master->move_to(this->drag_over_views[DA::SB], this->dfmeters[DA::SB], GraphletAnchor::RT, GraphletAnchor::LT, +vinset);
 
 		this->master->move_to(this->drag_side_views[DA::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
 		this->master->move_to(this->drag_side_views[DA::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
+
+		this->master->move_to(this->dragheads[DA::PS], this->drag_side_views[DA::PS], GraphletAnchor::RB, GraphletAnchor::LB, +vinset);
+		this->master->move_to(this->dragheads[DA::SB], this->drag_side_views[DA::SB], GraphletAnchor::LB, GraphletAnchor::RB, -vinset);
 
 		for (DA id = DA::PSCompensator; id <= DA::SBCompensator; id++) {
 			this->master->move_to(this->lengths[id], this->compensators[id], GraphletAnchor::CB, GraphletAnchor::CT);
@@ -299,6 +307,11 @@ private:
 		for (E id = id0; id <= idn; id++) {
 			dfs[id] = this->master->insert_one(new Credit<C, E>(height), id);
 		}
+	}
+
+	template<class C, typename E>
+	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, float radius, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color), id);
 	}
 
 	template<class C, typename E>
@@ -373,17 +386,16 @@ private:
 	}
 
 	void set_drag_positions(DA id, const uint8* db2, unsigned int idx) {
-		float3 ujoints[3];
-		float3 draghead = DBD_3(db2, idx + 48U);
+		float3 ujoints[2];
+		float3 draghead = DBD_3(db2, idx + 36U);
 		float suction_depth = DBD(db2, idx + 0U);
 
 		ujoints[0] = DBD_3(db2, idx + 12U);
 		ujoints[1] = DBD_3(db2, idx + 24U);
-		ujoints[1] = DBD_3(db2, idx + 36U);
 		
-		ujoints[1].y -= DBD(db2, idx + 60U);
-		draghead.y -= DBD(db2, idx + 64U);
-		draghead.z += DBD(db2, idx + 68U);
+		ujoints[1].y -= DBD(db2, idx + 48U);
+		draghead.y -= DBD(db2, idx + 52U);
+		draghead.z += DBD(db2, idx + 56U);
 
 		this->drag_over_views[id]->set_position(suction_depth, ujoints, draghead);
 		this->drag_side_views[id]->set_position(suction_depth, ujoints, draghead);
@@ -398,6 +410,7 @@ private: // never delete these graphlets manually.
 	std::map<DA, Credit<Cylinderlet, DA>*> cylinders;
 	std::map<DA, Credit<DensitySpeedmeterlet, DA>*> dfmeters;
 	std::map<DA, Credit<Compensatorlet, DA>*> compensators;
+	std::map<DA, Credit<DragHeadlet, DA>*> dragheads;
 	std::map<DA, Credit<DragXYlet, DA>*> drag_over_views;
 	std::map<DA, Credit<DragXZlet, DA>*> drag_side_views;
 	std::map<DA, Credit<Dimensionlet, DA>*> pressures;
