@@ -34,6 +34,9 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
+		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
+
+	public:
 		void set_position(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead,
@@ -41,9 +44,11 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
+		virtual Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) = 0;
+		
 		virtual void on_position_changed(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) = 0;
+			Windows::Foundation::Numerics::float3& draghead) {}
 
 	protected:
 		void draw_pipe_segment(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
@@ -80,21 +85,20 @@ namespace WarGrey::SCADA {
 
 	protected:
 		WarGrey::SCADA::DragInfo info;
+		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
-		float suction_depth;
 		float total_length;
 
 	protected:
-		float draghead_joint_x;
-		float draghead_joint_y;
-		float ujoints_xs[DRAG_SEGMENT_MAX_COUNT];
-		float ujoints_ys[DRAG_SEGMENT_MAX_COUNT];
+		Windows::Foundation::Numerics::float2 _suction;
+		Windows::Foundation::Numerics::float2 _draghead;
+		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
 	};
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 5.0F
+		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 4.0F
 			, unsigned int outside_step = 3U, unsigned int inside_step = 2U, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
@@ -106,11 +110,12 @@ namespace WarGrey::SCADA {
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
-		void on_position_changed(float suction_depth,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) override;
+		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 
 	private:
 		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
@@ -125,8 +130,7 @@ namespace WarGrey::SCADA {
 		unsigned int step;
 
 	private:
-		float suction_x;
-		float trunnion_x;
+		Windows::Foundation::Numerics::float2 _trunnion;
 	};
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {
@@ -143,8 +147,12 @@ namespace WarGrey::SCADA {
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
+		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 		void on_position_changed(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead) override;
@@ -164,8 +172,5 @@ namespace WarGrey::SCADA {
 		double depth_highest;
 		double depth_lowest;
 		double suction_lowest;
-
-	private:
-		float suction_y;
 	};
 }

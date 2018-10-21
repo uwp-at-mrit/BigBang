@@ -225,19 +225,19 @@ public:
 	}
 
 	void reflow_dashboard(float width, float height, float vinset) {
-		float gapsize = vinset * 0.5F;
+		float txt_gapsize = vinset * 0.5F;
 		float xstep, ystep;
 
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		this->master->move_to(this->lengths[DA::Overflow], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
-		this->master->move_to(this->overflowpipe, this->lengths[DA::Overflow], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+		this->master->move_to(this->overflowpipe, this->lengths[DA::Overflow], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -txt_gapsize);
 
 		this->master->move_to(this->compensators[DA::PSCompensator], this->station, GraphletAnchor::LC, GraphletAnchor::RB);
 		this->master->move_to(this->compensators[DA::SBCompensator], this->station, GraphletAnchor::RC, GraphletAnchor::LB);
 
-		this->master->move_to(this->dfmeters[DA::PS], this->valves[DA::D016], GraphletAnchor::CT, GraphletAnchor::RB, +xstep, -gapsize);
-		this->master->move_to(this->dfmeters[DA::SB], this->valves[DA::D015], GraphletAnchor::RT, GraphletAnchor::LB, -xstep, -gapsize);
+		this->master->move_to(this->dfmeters[DA::PS], this->valves[DA::D016], GraphletAnchor::CT, GraphletAnchor::RB, +xstep, -txt_gapsize);
+		this->master->move_to(this->dfmeters[DA::SB], this->valves[DA::D015], GraphletAnchor::RT, GraphletAnchor::LB, -xstep, -txt_gapsize);
 
 		this->master->move_to(this->drag_over_views[DA::PS], this->dfmeters[DA::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset);
 		this->master->move_to(this->drag_over_views[DA::SB], this->dfmeters[DA::SB], GraphletAnchor::RT, GraphletAnchor::LT, +vinset);
