@@ -50,7 +50,7 @@ static const float sb_drag_head_length = 2.54F;
 static const float sb_drag_head_compensation = 0.107F;
 
 static const unsigned int default_ps_color = 0xFF0000;
-static const unsigned int default_sb_color = 0x00FF00;
+static const unsigned int default_sb_color = 0x008000;
 static const unsigned int default_pipe_color = 0xC0C0C0;
 
 static const float default_pipe_thickness = 2.0F;

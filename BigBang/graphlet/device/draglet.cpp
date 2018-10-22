@@ -55,9 +55,17 @@ IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
 	this->draghead.y = this->info.trunnion_gapsize;
 
 	this->suction_style = make_dash_stroke(CanvasDashStyle::Dash);
+	this->dragarm_style = make_round_stroke_style();
 
 	if (this->mfont == nullptr) {
 		this->mfont = make_text_format(drag_hatchmark_fontsize);
+	}
+}
+
+void IDraglet::update(long long count, long long interval, long long uptime) {
+	if (this->dredging) {
+		this->suction_style->DashOffset = float(count);
+		this->notify_updated();
 	}
 }
 
@@ -88,28 +96,36 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 	}
 
 	if (force || schanged || ichanged || dchanged) {
+		CanvasPathBuilder^ arm = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+		float3 _trunnion;
+
 		this->_suction = this->space_to_local(this->suction);
 		this->_draghead = this->space_to_local(draghead);
 		this->draghead_m = make_text_layout(this->position_label(draghead), this->mfont);
 
+		_trunnion.x = 0.0F;
+		_trunnion.y = this->info.trunnion_gapsize;
+		_trunnion.z = suction_depth;
+
+		arm->BeginFigure(this->_suction);
+		arm->AddLine(this->space_to_local(_trunnion));
+
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
+				this->rubbers[idx] = circle(this->joint_radius * 1.2F);
 				this->_ujoints[idx] = this->space_to_local(ujoints[idx]);
 				this->ujoints_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->mfont);
+				
+				arm->AddLine(this->_ujoints[idx]);
 			}
 		}
 
+		arm->AddLine(this->_draghead);
+		arm->EndFigure(CanvasFigureLoop::Open);
+
+		this->dragarm = CanvasGeometry::CreatePath(arm);
 		this->on_position_changed(this->suction.z, this->ujoints, this->draghead);
-	}
-}
-
-void IDraglet::draw_pipe_segment(CanvasDrawingSession^ ds, float ex, float ey, float sx, float sy, bool draw_joint) {
-	ds->DrawLine(sx, sy, ex, ey, this->body_color, this->drag_thickness);
-	ds->DrawLine(sx, sy, ex, ey, this->color, 1.0F, this->suction_style);
-
-	if (draw_joint) {
-		ds->FillGeometry(this->universal_joint, ex, ey, this->color);
-		ds->DrawGeometry(this->universal_joint, ex, ey, this->body_color, this->thickness);
+		this->notify_updated();
 	}
 }
 
@@ -120,9 +136,6 @@ DragXYlet::DragXYlet(DragInfo& info, float width, float height, unsigned int col
 	this->outside_most = interval * float(ostep);
 	this->inside_most = -interval * float(istep);
 	this->step = ostep + istep;
-
-	this->trunnion_style = ref new CanvasStrokeStyle();
-	this->trunnion_style->LineJoin = CanvasLineJoin::Round;
 }
 
 void DragXYlet::construct() {
@@ -154,63 +167,40 @@ void DragXYlet::construct() {
 		this->ws_y = metrics.height * 1.618F;
 		this->ws_height = this->height - this->ws_y * 2.0F - metrics.height;
 		this->drag_thickness = this->ws_height * (this->info.pipe_radius * 2.0F) / this->total_length;
-		this->universal_joint = circle(this->drag_thickness * 1.618F * 0.5F);
+		this->joint_radius = this->drag_thickness * 0.618F;
 
+		this->universal_joint = circle(this->joint_radius);
+		
 		this->set_position(0.0F, this->ujoints, this->draghead, true);
-
-		{ // make trunnion
-			CanvasPathBuilder^ _trunnion = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-			float3 breakpoint;
-			float2 bkpoint;
-
-			breakpoint.x = this->info.trunnion_length;
-			breakpoint.y = this->info.trunnion_gapsize;
-			bkpoint = this->space_to_local(breakpoint);
-
-			_trunnion->BeginFigure(this->_suction.x, this->_suction.y);
-			_trunnion->AddLine(bkpoint.x, this->_suction.y);
-			_trunnion->AddLine(bkpoint.x, bkpoint.y);
-			_trunnion->EndFigure(CanvasFigureLoop::Open);
-
-			this->trunnion = CanvasGeometry::CreatePath(_trunnion);
-		}
 	}
 }
 
 void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float suction_y = this->_suction.y;
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
-	float last_joint_x = x + this->_ujoints[0].x;
-	float last_joint_y = y + this->_ujoints[0].y;
-
-	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
 	
-	ds->DrawGeometry(this->trunnion, x, y, this->body_color, this->drag_thickness, this->trunnion_style);
-	ds->DrawGeometry(this->trunnion, x, y, this->color, 1.0F, this->suction_style);
-
-	//this->draw_pipe_segment(ds, suction_x, suction_y, last_joint_x, last_joint_y, false);
+	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
 
 	{ // draw drag
-		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
+		ds->DrawGeometry(this->dragarm, x, y, this->body_color, this->drag_thickness, this->dragarm_style);
+
+		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
-				if (iy != suction_y) {
-					this->draw_pipe_segment(ds, last_joint_x, last_joint_y, ix, iy, idx );
-					last_joint_x = ix;
-					last_joint_y = iy;
+				if (this->rubbers[idx] != nullptr) {
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->body_color);
 				}
 			}
 		}
-
-		this->draw_pipe_segment(ds, last_joint_x, last_joint_y, draghead_x, draghead_y);
 
 		{ // draw draghead
 			ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->color);
 			ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->body_color, this->thickness);
 		}
+
+		ds->DrawGeometry(this->dragarm, x, y, this->color, 1.0F, this->suction_style);
 	}
 
 	{ // draw meters
@@ -219,9 +209,7 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
-				if (iy != suction_y) {
-					this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, x);
-				}
+				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, x);
 			}
 		}
 
@@ -309,11 +297,13 @@ void DragXZlet::construct() {
 		this->ws_width = (this->right_margin - hmetrics.em * 1.618F) - this->ws_x;
 	}
 
-	{ // make drag
+	{ // make dragfloat3 keypoint;
 		this->ws_y = hmetrics.hatch_y;
 		this->ws_height = hmetrics.hatch_height;
 		this->drag_thickness = std::fabsf(this->ws_width) * (this->info.pipe_radius * 2.0F) / this->total_length;
-		this->universal_joint = circle(this->drag_thickness * 1.618F * 0.5F);
+		this->joint_radius = this->drag_thickness * 0.618F;
+
+		this->universal_joint = circle(this->joint_radius);
 
 		this->set_position(0.0F, this->ujoints, this->draghead, true);
 	}
@@ -328,31 +318,32 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float suction_y = y + this->_suction.y;
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
-	float last_joint_x = suction_x;
-	float last_joint_y = suction_y;
 	
 	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
 
 	{ // draw drag
-		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
+		ds->DrawGeometry(this->dragarm, x, y, this->body_color, this->drag_thickness, this->dragarm_style);
+
+		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
-				if (ix != suction_x) {
-					this->draw_pipe_segment(ds, last_joint_x, last_joint_y, ix, iy);
-					last_joint_x = ix;
-					last_joint_y = iy;
+				if (this->rubbers[idx] != nullptr) {
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->body_color);
 				}
 			}
 		}
 
-		this->draw_pipe_segment(ds, last_joint_x, last_joint_y, draghead_x, draghead_y);
+		ds->FillGeometry(this->universal_joint, suction_x, suction_y, this->color);
+		ds->DrawGeometry(this->universal_joint, suction_x, suction_y, this->body_color, this->thickness);
 
 		{ // draw draghead
 			ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->color);
 			ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->body_color, this->thickness);
 		}
+
+		ds->DrawGeometry(this->dragarm, x, y, this->color, 1.0F, this->suction_style);
 	}
 	
 	{ // draw meters
@@ -365,9 +356,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
-				if (ix != suction_x) {
-					this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y);
-				}
+				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y);
 			}
 		}
 

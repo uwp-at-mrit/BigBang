@@ -140,7 +140,8 @@ public:
 		pTurtle->move_left(3)->move_up(4, DA::d14)->move_right(1.5F)->move_up(2, DA::D014)->jump_back();
 		pTurtle->move_up(4)->move_right(1.5F)->move_up(2, DA::D016);
 
-		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->station = this->master->insert_one(new Tracklet<DA>(pTurtle, default_pipe_thickness * 1.618F, default_pipe_color));
+
 		this->load_percentage(this->progresses, DA::D003);
 		this->load_percentage(this->progresses, DA::D004);
 		this->load_valves(this->valves, this->labels, DA::D003, DA::D012, vinset, 0.0);
@@ -446,6 +447,9 @@ private:
 
 		this->dragxys[id]->set_position(suction_depth, ujoints, draghead);
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead);
+
+		this->dragxys[id]->set_dredging(true);
+		this->dragxzes[id]->set_dredging(true);
 	}
 
 private: // never delete these graphlets manually.

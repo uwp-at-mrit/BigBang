@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 	private class OverflowPipelet : public WarGrey::SCADA::IRangelet<double> {
 	public:
 		OverflowPipelet(double range, float width, float height = 0.0F,
-			unsigned int step = 0U, unsigned int precision = 2U,
+			unsigned int step = 0U, unsigned int precision = 1U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,

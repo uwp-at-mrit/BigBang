@@ -54,6 +54,6 @@ namespace WarGrey::SCADA {
 		return WarGrey::SCADA::make_dash_stroke(dashes, N, offset);
 	}
 
-
 	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_roundcap_stroke_style(bool shared = true);
+	Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ make_round_stroke_style(bool shared = true);
 }

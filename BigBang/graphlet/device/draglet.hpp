@@ -31,12 +31,14 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
 
 	public:
+		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
 		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
 
 	public:
+		void set_dredging(bool on) { this->dredging = on; }
 		void set_position(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead,
@@ -51,13 +53,12 @@ namespace WarGrey::SCADA {
 			Windows::Foundation::Numerics::float3& draghead) {}
 
 	protected:
-		void draw_pipe_segment(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			float ex, float ey, float sx, float sy, bool draw_joint = true);
-
-	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ dragarm_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ dragarm;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ universal_joint;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rubbers[DRAG_SEGMENT_MAX_COUNT];
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
@@ -75,6 +76,7 @@ namespace WarGrey::SCADA {
 		float height;
 		float thickness;
 		float drag_thickness;
+		float joint_radius;
 		bool leftward;
 
 	protected:
@@ -94,6 +96,9 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 _suction;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
+
+	protected:
+		bool dredging;
 	};
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
@@ -120,10 +125,6 @@ namespace WarGrey::SCADA {
 	private:
 		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx);
-
-	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ trunnion_style;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trunnion;
 
 	private:
 		double outside_most;

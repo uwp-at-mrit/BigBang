@@ -57,7 +57,7 @@ static CanvasGeometry^ make_rhatch(RHatchMarkMetrics* metrics, float radius, dou
 }
 
 static unsigned int resolve_step(float radius, double degrees0, double degreesn, double vmin, double vmax, float em, unsigned int precision) {
-	double range = (vmax - vmin) * std::pow(10.0, precision + 1);
+	double range = (vmax - vmin) * std::pow(10.0, precision + 2);
 	double arclength = arc_length(radius, degrees0, degreesn);
 	double available_height = double(arclength - em);
 	unsigned int max_fxstep = ((unsigned int)(std::floor(available_height / (double(em) * 1.618))));

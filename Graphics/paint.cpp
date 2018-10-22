@@ -169,6 +169,14 @@ CanvasStrokeStyle^ WarGrey::SCADA::make_roundcap_stroke_style(bool shared) {
 
 	s->StartCap = CanvasCapStyle::Round;
 	s->EndCap = CanvasCapStyle::Round;
+
+	return s;
+}
+
+CanvasStrokeStyle^ WarGrey::SCADA::make_round_stroke_style(bool shared) {
+	static auto shared_style = ref new CanvasStrokeStyle();
+	auto s = (shared ? shared_style : ref new CanvasStrokeStyle());
+
 	s->LineJoin = CanvasLineJoin::Round;
 
 	return s;

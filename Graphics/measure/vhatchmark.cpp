@@ -168,7 +168,7 @@ static CanvasGeometry^ make_vrhatch(VHatchMarkMetrics& metrics, double weights[]
 }
 
 static unsigned int resolve_step(double vmin, double vmax, float height, float em, unsigned int precision) {
-	double range = (vmax - vmin) * std::pow(10.0, precision + 1);
+	double range = (vmax - vmin) * std::pow(10.0, precision + 2);
 	double available_height = double(height - em);
 	unsigned int max_fxstep = ((unsigned int)(std::floor(available_height / (double(em) * 1.618))));
 	unsigned int fxstep = 2;
