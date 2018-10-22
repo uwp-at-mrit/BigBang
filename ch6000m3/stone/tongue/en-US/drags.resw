@@ -117,31 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Displacement" xml:space="preserve">
-    <value>Displacement</value>
-  </data>
-  <data name="Draught" xml:space="preserve">
-    <value>Average Draught</value>
-  </data>
-  <data name="EarthWork" xml:space="preserve">
-    <value>Earthwork Volume</value>
-  </data>
-  <data name="HopperHeight" xml:space="preserve">
-    <value>Hopper Height</value>
-  </data>
-  <data name="Loading" xml:space="preserve">
-    <value>Loading</value>
-  </data>
   <data name="Overflow" xml:space="preserve">
     <value>Overflow Pipe</value>
   </data>
-  <data name="PSCompensator" xml:space="preserve">
-    <value>PS Compensator</value>
+  <data name="PSDP" xml:space="preserve">
+    <value>PS Discharge Pressure</value>
   </data>
-  <data name="SBCompensator" xml:space="preserve">
-    <value>SB Compensator</value>
+  <data name="PSVP" xml:space="preserve">
+    <value>PS Vacuum Pressure</value>
   </data>
-  <data name="Vessel" xml:space="preserve">
-    <value>Cabin Vessel</value>
+  <data name="PSWC" xml:space="preserve">
+    <value>PS Wave Compensator</value>
+  </data>
+  <data name="SBDP" xml:space="preserve">
+    <value>SB Discharge Pressure</value>
+  </data>
+  <data name="SBVP" xml:space="preserve">
+    <value>SB Vaccum Pressure</value>
+  </data>
+  <data name="SBWC" xml:space="preserve">
+    <value>SB Wave Compensator</value>
   </data>
 </root>

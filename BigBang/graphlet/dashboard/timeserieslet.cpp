@@ -206,7 +206,7 @@ void ITimeSerieslet::update_legend(unsigned int idx, TimeSeriesStyle& s) {
 	double value = this->values[idx];
 	Platform::String^ legend = this->names[idx] + ": ";
 
-	legend += (std::isnan(value) ? speak(":nodatum:") : flstring(value, this->precision + 1));	
+	legend += (std::isnan(value) ? speak("nodatum", "status") : flstring(value, this->precision + 1));	
 	this->legends[idx] = make_text_layout(legend, s.legend_font);
 }
 

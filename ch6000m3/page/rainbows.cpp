@@ -106,7 +106,7 @@ public:
 		this->pressures[RS::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
 
 		this->progresses[RS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
-		//this->progresses[RS::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+		this->progresses[RS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
 
 		{ // door progresses
 			this->set_door_progress(RS::PS1, RealData(DB203, 53U));

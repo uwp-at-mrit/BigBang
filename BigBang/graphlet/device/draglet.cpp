@@ -26,7 +26,7 @@ static CanvasSolidColorBrush^ drag_default_head_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_body_color = Colours::Yellow;
 static CanvasSolidColorBrush^ drag_default_hatchmark_color = Colours::Silver;
 
-static float drag_hatchmark_fontsize = 20.0F;
+static float drag_hatchmark_fontsize = 24.0F;
 
 /*************************************************************************************************/
 IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
@@ -120,12 +120,14 @@ DragXYlet::DragXYlet(DragInfo& info, float width, float height, unsigned int col
 	this->outside_most = interval * float(ostep);
 	this->inside_most = -interval * float(istep);
 	this->step = ostep + istep;
+
+	this->trunnion_style = ref new CanvasStrokeStyle();
+	this->trunnion_style->LineJoin = CanvasLineJoin::Round;
 }
 
 void DragXYlet::construct() {
 	HHatchMarkMetrics metrics;
 	CanvasGeometry^ hm;
-	float3 origin;
 	float hm_width = this->width;
 	
 	if (this->leftward) {
@@ -144,7 +146,7 @@ void DragXYlet::construct() {
 		float axis_by = this->height - metrics.height;
 		auto zero = vline(axis_by, this->thickness);
 		
-		this->_suction = this->space_to_local(origin);
+		this->_suction = this->space_to_local(this->suction);
 		this->hatchmarks = geometry_freeze(geometry_union(hm, 0.0F, axis_by, zero, this->_suction.x, 0.0));
 	}
 	
@@ -154,32 +156,49 @@ void DragXYlet::construct() {
 		this->drag_thickness = this->ws_height * (this->info.pipe_radius * 2.0F) / this->total_length;
 		this->universal_joint = circle(this->drag_thickness * 1.618F * 0.5F);
 
-		origin.y = this->info.trunnion_gapsize;
-		this->_trunnion = this->space_to_local(origin);
-		
 		this->set_position(0.0F, this->ujoints, this->draghead, true);
+
+		{ // make trunnion
+			CanvasPathBuilder^ _trunnion = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+			float3 breakpoint;
+			float2 bkpoint;
+
+			breakpoint.x = this->info.trunnion_length;
+			breakpoint.y = this->info.trunnion_gapsize;
+			bkpoint = this->space_to_local(breakpoint);
+
+			_trunnion->BeginFigure(this->_suction.x, this->_suction.y);
+			_trunnion->AddLine(bkpoint.x, this->_suction.y);
+			_trunnion->AddLine(bkpoint.x, bkpoint.y);
+			_trunnion->EndFigure(CanvasFigureLoop::Open);
+
+			this->trunnion = CanvasGeometry::CreatePath(_trunnion);
+		}
 	}
 }
 
 void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	float suction_x = x + this->_suction.x;
-	float suction_y = y + this->_suction.y;
+	float suction_y = this->_suction.y;
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
-	float last_joint_x = x + this->_trunnion.x;
-	float last_joint_y = y + this->_trunnion.y;
+	float last_joint_x = x + this->_ujoints[0].x;
+	float last_joint_y = y + this->_ujoints[0].y;
 
 	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
-	this->draw_pipe_segment(ds, suction_x, suction_y, last_joint_x, last_joint_y, false);
+	
+	ds->DrawGeometry(this->trunnion, x, y, this->body_color, this->drag_thickness, this->trunnion_style);
+	ds->DrawGeometry(this->trunnion, x, y, this->color, 1.0F, this->suction_style);
+
+	//this->draw_pipe_segment(ds, suction_x, suction_y, last_joint_x, last_joint_y, false);
 
 	{ // draw drag
-		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
+		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
 				if (iy != suction_y) {
-					this->draw_pipe_segment(ds, last_joint_x, last_joint_y, ix, iy);
+					this->draw_pipe_segment(ds, last_joint_x, last_joint_y, ix, iy, idx );
 					last_joint_x = ix;
 					last_joint_y = iy;
 				}
@@ -195,7 +214,7 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	}
 
 	{ // draw meters
-		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
+		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
@@ -213,14 +232,18 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 void DragXYlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y, float gx) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
-		float x = joint_x - box.Width - this->drag_thickness;
+		float x0 = this->_suction.x;
+		float lx0 = x0 - this->thickness;
+		float rx0 = x0 + this->thickness;
 		float y = joint_y - box.Height * 0.5F;
+		float x = joint_x + (this->leftward ? (-box.Width - this->drag_thickness) : this->drag_thickness);
+		float rx = x + box.Width;
 
-		if ((x < gx) || (x < this->_suction.x + this->thickness)) {
+		if ((x < gx) || ((x < x0) && (rx > rx0))) {
 			x = joint_x + this->drag_thickness;
 		}
-		
-		if ((x + box.Width > gx + this->width) || (x > this->_suction.x - this->thickness)) {
+
+		if (rx > gx + this->width) {
 			x = joint_x - box.Width - this->drag_thickness;
 		}
 
@@ -337,7 +360,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		float rX = x + this->right_margin - this->thickness;
 		float Y = y + this->height;
 	
-		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
+		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
@@ -376,7 +399,7 @@ bool DragXZlet::position_equal(float3& old_pos, float3& new_pos) {
 }
 
 Platform::String^ DragXZlet::position_label(float3& position) {
-	return flstring(-position.z, this->precision);
+	return flstring(position.z, this->precision);
 }
 
 float2 DragXZlet::space_to_local(float3& position) {

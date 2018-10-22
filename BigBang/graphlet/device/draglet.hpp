@@ -122,15 +122,13 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx);
 
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ trunnion_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ trunnion;
 
 	private:
 		double outside_most;
 		double inside_most;
 		unsigned int step;
-
-	private:
-		Windows::Foundation::Numerics::float2 _trunnion;
 	};
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {

@@ -22,7 +22,7 @@ static CanvasSolidColorBrush^ winch_default_color = Colours::DarkGray;
 
 /*************************************************************************************************/
 Winchlet::Winchlet(float width, float height, float thickness, unsigned int strand)
-	: Winchlet(WinchStatus::WindingOut, width, height, thickness) {}
+	: Winchlet(WinchStatus::Stopped, width, height, thickness) {}
 
 Winchlet::Winchlet(WinchStatus default_status, float width, float height, float thickness, unsigned int strand)
 	: IStatuslet(default_status), width(width), height(height), strand(strand)

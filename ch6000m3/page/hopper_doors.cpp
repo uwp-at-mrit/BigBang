@@ -297,11 +297,11 @@ public:
 		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
 
 		cylinder_height = cell_height * 1.618F;
-		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, 15.0, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, 18000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, "ton", LiquidSurface::_);
 
 		this->load_dimensions(this->dimensions, HD::A, HD::H, "bar");
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);

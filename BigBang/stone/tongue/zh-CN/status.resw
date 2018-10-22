@@ -147,4 +147,7 @@
   <data name="offline" xml:space="preserve">
     <value>未使用</value>
   </data>
+  <data name="nodatum" xml:space="preserve">
+    <value>无数据</value>
+  </data>
 </root>

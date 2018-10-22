@@ -149,22 +149,21 @@ public:
 
 public:
 	void load(float width, float height, float vinset) {
-		float ship_y, ship_height, cylinder_height, lines_width, lines_height, overflow_size;
+		float ship_y, ship_height, cylinder_height, lines_width, lines_height;
 		
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, 18000.0, lines_width, lines_height));
 
-		overflow_size = ship_height * 0.618F;
-		this->overflowpipe = this->master->insert_one(new OverflowPipelet(15.0, overflow_size, overflow_size));
+		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
 		cylinder_height = ship_height * 0.42F;
-		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::Vessel, cylinder_height, 15000.0, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::HopperHeight, cylinder_height, 15.0, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, DL::Loading, cylinder_height, 18000.0, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, 4000.0, "ton", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, earthwork_range, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::Vessel, cylinder_height, vessel_range, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::HopperHeight, cylinder_height, hopper_height_range, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, DL::Loading, cylinder_height, loading_range, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, displacement_range, "ton", LiquidSurface::Convex);
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");

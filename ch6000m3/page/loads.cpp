@@ -99,7 +99,7 @@ public:
 		this->pressures[LD::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
 
 		this->progresses[LD::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
-		//this->progresses[LD::D004]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+		this->progresses[LD::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {

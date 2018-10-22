@@ -25,6 +25,12 @@ static const float tiny_font_size = 12.0F;
 /*************************************************************************************************/
 static const size_t hopper_count = 7;
 
+static const double hopper_height_range = 13.85;
+static const double earthwork_range = 15000.0;
+static const double vessel_range = 15000.0;
+static const double loading_range = 18000.0;
+static const double displacement_range = 4000.0;
+
 static const float ps_drag_trunnion_gapsize = 1.845F;
 static const float ps_drag_trunnion_length = 3.61F;
 static const float ps_drag_pipe1_length = 25.34F;
