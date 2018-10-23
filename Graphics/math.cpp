@@ -48,15 +48,19 @@ double WarGrey::SCADA::ellipse_perimeter(float a, float b) {
 }
 
 void WarGrey::SCADA::circle_point(float radius, double degrees, float* x, float* y) {
-	float radians = quick_degrees_to_radians(degrees);
+	circle_point(radius, quick_degrees_to_radians(degrees), x, y);
+}
 
+void WarGrey::SCADA::circle_point(float radius, float radians, float* x, float* y) {
 	SET_BOX(x, radius * cosf(radians));
 	SET_BOX(y, radius * sinf(radians));
 }
 
 void WarGrey::SCADA::ellipse_point(float radiusX, float radiusY, double degrees, float* x, float* y) {
-	float radians = quick_degrees_to_radians(degrees);
+	ellipse_point(radiusX, radiusY, quick_degrees_to_radians(degrees), x, y);
+}
 
+void WarGrey::SCADA::ellipse_point(float radiusX, float radiusY, float radians, float* x, float* y) {
 	SET_BOX(x, radiusX * cosf(radians));
 	SET_BOX(y, radiusY * sinf(radians));
 }

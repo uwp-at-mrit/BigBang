@@ -120,7 +120,7 @@
   <data name="hydraulics" xml:space="preserve">
     <value>液压系统</value>
   </data>
-  <data name="graphlets" xml:space="preserve">
+  <data name="gallery" xml:space="preserve">
     <value>图元状态示例</value>
   </data>
   <data name="temperature" xml:space="preserve">

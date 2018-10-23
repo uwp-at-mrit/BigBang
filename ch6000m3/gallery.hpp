@@ -6,10 +6,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class GraphletOverview : public WarGrey::SCADA::Planet {
+	private class Gallery : public WarGrey::SCADA::Planet {
 	public:
-		~GraphletOverview() noexcept;
-		GraphletOverview();
+		~Gallery() noexcept;
+		Gallery();
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

@@ -51,7 +51,6 @@
     <ClCompile Include="page\flushs.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="graphlets.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\drags.cpp">
       <Filter>page</Filter>
@@ -59,6 +58,7 @@
     <ClCompile Include="page\rainbows.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="gallery.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -84,7 +84,6 @@
     <ClInclude Include="page\flushs.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="graphlets.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\drags.hpp">
       <Filter>page</Filter>
@@ -107,6 +106,7 @@
     <ClInclude Include="page\rainbows.hpp">
       <Filter>page</Filter>
     </ClInclude>
+    <ClInclude Include="gallery.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -272,12 +272,6 @@
     <PRIResource Include="stone\tongue\zh-CN\hydraulics.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\graphlets.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\graphlets.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\menu.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
@@ -324,6 +318,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\rainbows.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\gallery.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\gallery.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

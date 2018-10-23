@@ -9,6 +9,7 @@
 
 #include "measure/vhatchmark.hpp"
 #include "measure/hhatchmark.hpp"
+#include "measure/rhatchmark.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -27,6 +28,37 @@ static CanvasSolidColorBrush^ drag_default_body_color = Colours::Yellow;
 static CanvasSolidColorBrush^ drag_default_hatchmark_color = Colours::Silver;
 
 static float drag_hatchmark_fontsize = 24.0F;
+
+static CanvasGeometry^ make_draghead(float radius, float arm_length, double break_point, double degrees) {
+	auto head = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	auto center = circle(radius * 0.2718F);
+	float bradius = radius * 0.618F;
+	float arm_diffradians = degrees_to_radians(break_point);
+	float radians = degrees_to_radians(degrees);
+	float tstart_radians = degrees_to_radians(degrees - 100.0);
+	float tend_radians = degrees_to_radians(degrees - break_point * 0.8F);
+	float bstart_radians = degrees_to_radians(degrees + break_point);
+	float bsweep_radians = degrees_to_radians(180.0 - break_point);
+	float aradius = arm_length;
+	float2 tstart, aterminator, bstart;
+
+	head->SetFilledRegionDetermination(CanvasFilledRegionDetermination::Winding);
+
+	circle_point(radius, tstart_radians, &tstart.x, &tstart.y);
+	circle_point(aradius, radians, &aterminator.x, &aterminator.y);
+	circle_point(bradius, bstart_radians, &bstart.x, &bstart.y);
+
+	head->BeginFigure(tstart);
+	head->AddArc(float2(0.0F, 0.0F), radius, radius, tstart_radians, tend_radians - tstart_radians);
+	head->AddLine(aterminator);
+	head->AddLine(bstart);
+	head->AddArc(float2(0.0F, 0.0F), bradius, bradius, bstart_radians, bsweep_radians);
+	head->AddLine(0.0F, 0.0F);
+	head->AddLine(tstart);
+	head->EndFigure(CanvasFigureLoop::Closed);
+
+	return geometry_union(CanvasGeometry::CreatePath(head), center);
+}
 
 /*************************************************************************************************/
 IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
@@ -112,7 +144,7 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
-				this->rubbers[idx] = circle(this->joint_radius * 1.2F);
+				this->rubbers[idx] = this->universal_joint;
 				this->_ujoints[idx] = this->space_to_local(ujoints[idx]);
 				this->ujoints_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->mfont);
 				
@@ -190,7 +222,8 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float iy = y + this->_ujoints[idx].y;
 
 				if (this->rubbers[idx] != nullptr) {
-					ds->FillGeometry(this->rubbers[idx], ix, iy, this->body_color);
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->body_color);
 				}
 			}
 		}
@@ -330,7 +363,8 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float iy = y + this->_ujoints[idx].y;
 
 				if (this->rubbers[idx] != nullptr) {
-					ds->FillGeometry(this->rubbers[idx], ix, iy, this->body_color);
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->body_color);
 				}
 			}
 		}
@@ -401,4 +435,36 @@ float2 DragXZlet::space_to_local(float3& position) {
 	location.y = this->ws_height * py + this->ws_y;
 
 	return location;
+}
+
+/*************************************************************************************************/
+DragHeadlet::DragHeadlet(float radius, unsigned int color, double range, float thickness, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor)
+	: radius(std::fabsf(radius)), thickness(thickness), precision(0U), leftward(radius < 0.0F), range(range), offset(30.0)
+	, visor_color(Colours::make(color))
+	, body_color(bcolor == nullptr ? drag_default_head_color : bcolor)
+	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {}
+
+void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
+	SET_BOXES(w, h, this->radius * 2.0F);
+}
+
+void DragHeadlet::construct() {
+	RHatchMarkMetrics vmetrics, ametrics;
+	auto ahatchmark = rhatchmark(this->radius * 0.90F, 0.0, -this->range, 0.0, this->range, 0U, this->thickness, &ametrics, this->precision);
+	auto vhatchmark = rhatchmark(this->radius * 0.50F, -this->offset, -100.0, 0.0, this->range, 0U, this->thickness, &vmetrics, this->precision);
+
+	this->hatchmarks = geometry_freeze(geometry_union(vhatchmark, ahatchmark));
+	this->head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
+
+	this->draghead = make_draghead(this->head_radius, this->radius, this->offset, 0.0);
+}
+
+void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	float cx = x + this->radius;
+	float cy = y + this->radius;
+	
+	ds->FillGeometry(this->draghead, cx, cy, this->body_color);
+	ds->DrawCachedGeometry(this->hatchmarks, cx, cy, this->hatchmark_color);
+
+	ds->DrawRectangle(x, y, this->radius * 2.0F, this->radius * 2.0F, Colours::Crimson);
 }

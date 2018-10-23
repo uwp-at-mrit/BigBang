@@ -12,7 +12,11 @@ namespace WarGrey::SCADA {
 	double circle_perimeter(float radius);
 	double ellipse_perimeter(float radiusX, float radiusY);
 
+	void circle_point(float radius, float radians, float* x, float* y);
 	void circle_point(float radius, double degrees, float* x, float* y);
+
+	void ellipse_point(float radiusX, float radiusY, float radians, float* x, float* y);
 	void ellipse_point(float radiusX, float radiusY, double degrees, float* x, float* y);
+	
 	void line_point(float x0, float y0, float x1, float y1, double ratio, float* x, float* y);
 }

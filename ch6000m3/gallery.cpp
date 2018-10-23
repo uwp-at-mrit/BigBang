@@ -1,6 +1,6 @@
 ﻿#include <unordered_map>
 
-#include "graphlets.hpp"
+#include "gallery.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/device/winchlet.hpp"
@@ -32,7 +32,7 @@ private enum class GS {
 
 private class Stage final {
 public:
-	Stage(GraphletOverview* master) : master(master), progress(0.0) {}
+	Stage(Gallery* master) : master(master), progress(0.0) {}
 
 public:
 	void load(float width, float height, float vinset) {
@@ -196,7 +196,7 @@ private: // never delete these graphlets manually.
 	WaterPumplet* remote_water_pump;
 
 private:
-	GraphletOverview* master;
+	Gallery* master;
 	CanvasTextFormat^ font;
 	CanvasTextFormat^ status_font;
 
@@ -205,14 +205,14 @@ private:
 };
 
 /*************************************************************************************************/
-static std::unordered_map<GraphletOverview*, Stage*> stages;
+static std::unordered_map<Gallery*, Stage*> stages;
 
-GraphletOverview::GraphletOverview() : Planet(__MODULE__) {
+Gallery::Gallery() : Planet(__MODULE__) {
 	this->append_decorator(new PageDecorator());
 	this->append_decorator(new MarginDecorator(true, true));
 }
 
-GraphletOverview::~GraphletOverview() {
+Gallery::~Gallery() {
 	auto maybe_stage = stages.find(this);
 
 	if (maybe_stage != stages.end()) {
@@ -222,12 +222,12 @@ GraphletOverview::~GraphletOverview() {
 	}
 }
 
-void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, float height) {
+void Gallery::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (stages.find(this) == stages.end()) {
 		Stage* stage = new Stage(this);
 		float vinset = statusbar_height();
 		
-		stages.insert(std::pair<GraphletOverview*, Stage*>(this, stage));
+		stages.insert(std::pair<Gallery*, Stage*>(this, stage));
 
 		{ // load graphlets
 			stage->load(width, height, vinset);
@@ -242,7 +242,7 @@ void GraphletOverview::load(CanvasCreateResourcesReason reason, float width, flo
 	}
 }
 
-void GraphletOverview::reflow(float width, float height) {
+void Gallery::reflow(float width, float height) {
 	auto maybe_stage = stages.find(this);
 	
 	if (maybe_stage != stages.end()) {
@@ -255,7 +255,7 @@ void GraphletOverview::reflow(float width, float height) {
 	}
 }
 
-void GraphletOverview::update(long long count, long long interval, long long uptime) {
+void Gallery::update(long long count, long long interval, long long uptime) {
 	auto maybe_stage = stages.find(this);
 
 	if (maybe_stage != stages.end()) {
@@ -263,6 +263,6 @@ void GraphletOverview::update(long long count, long long interval, long long upt
 	}
 }
 
-bool GraphletOverview::can_select(IGraphlet* g) {
+bool Gallery::can_select(IGraphlet* g) {
 	return true;
 }

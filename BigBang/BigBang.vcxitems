@@ -23,7 +23,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\dragheadlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.cpp" />
@@ -74,7 +73,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\batterylet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\cylinderlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\densityflowmeterlet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\dragheadlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\fueltanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\indicatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\dashboard\timeserieslet.hpp" />

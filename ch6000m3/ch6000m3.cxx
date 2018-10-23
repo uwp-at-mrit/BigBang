@@ -14,8 +14,8 @@
 #include "page/flushs.hpp"
 #include "page/drags.hpp"
 
-#include "graphlets.hpp"
 #include "splash.hpp"
+#include "gallery.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -58,7 +58,7 @@ protected:
 		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new DragsPage(this->device));
 
-		this->add_planet(new GraphletOverview());
+		this->add_planet(new Gallery());
 	}
 
 private:

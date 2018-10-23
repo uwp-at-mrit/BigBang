@@ -20,6 +20,7 @@ namespace WarGrey::SCADA {
 		float head_compensation;
 	};
 
+	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
 		IDraglet(WarGrey::SCADA::DragInfo& info, float width, float height, float thickness,
@@ -103,8 +104,8 @@ namespace WarGrey::SCADA {
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 4.0F
-			, unsigned int outside_step = 3U, unsigned int inside_step = 2U, float thickness = 2.0F,
+		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 3.0F
+			, unsigned int outside_step = 2U, unsigned int inside_step = 1U, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
@@ -171,5 +172,37 @@ namespace WarGrey::SCADA {
 		double depth_highest;
 		double depth_lowest;
 		double suction_lowest;
+	};
+
+	/************************************************************************************************/
+	private class DragHeadlet abstract : public WarGrey::SCADA::IGraphlet {
+	public:
+		DragHeadlet(float radius, unsigned int color, double range = 60.0, float thickness = 2.0F,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
+
+	public:
+		void construct() override;
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ draghead;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ visor;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ visor_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
+
+	private:
+		double range;
+		double offset;
+
+	protected:
+		unsigned int precision;
+		float radius;
+		float head_radius;
+		float thickness;
+		bool leftward;
 	};
 }

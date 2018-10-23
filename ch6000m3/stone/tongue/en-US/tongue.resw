@@ -126,8 +126,8 @@
   <data name="hydraulics" xml:space="preserve">
     <value>Hydraulic System</value>
   </data>
-  <data name="graphlets" xml:space="preserve">
-    <value>Graphlets States Overview </value>
+  <data name="gallery" xml:space="preserve">
+    <value>Graphlets Gallery</value>
   </data>
   <data name="temperature" xml:space="preserve">
     <value>Temperature</value>
