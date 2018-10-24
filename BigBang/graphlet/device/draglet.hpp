@@ -186,6 +186,12 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		void set_position(float suction_depth,
+			Windows::Foundation::Numerics::float3 ujoints[],
+			Windows::Foundation::Numerics::float3& draghead,
+			bool force = false);
+
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ draghead;
@@ -195,14 +201,17 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 
 	private:
+		unsigned int precision;
 		double range;
 		double offset;
-
-	protected:
-		unsigned int precision;
 		float radius;
-		float head_radius;
+		float visor_radius;
 		float thickness;
 		bool leftward;
+
+	private:
+		double visor_degrees;
+		double head_degrees;
+		double depth;
 	};
 }

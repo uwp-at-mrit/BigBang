@@ -29,35 +29,81 @@ static CanvasSolidColorBrush^ drag_default_hatchmark_color = Colours::Silver;
 
 static float drag_hatchmark_fontsize = 24.0F;
 
-static CanvasGeometry^ make_draghead(float radius, float arm_length, double break_point, double degrees) {
+static inline float arm_adjust_outline_radian(float radius, float half_thickness, float* extended_radius = nullptr) {
+	float radians = std::atan2(half_thickness, radius);
+	float ext_radius = radius / std::cosf(radians);
+
+	SET_BOX(extended_radius, ext_radius);
+
+	return radians;
+}
+
+static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float arm_length, double offset, double degrees
+	, float sign, float thickness) {
 	auto head = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	auto center = circle(radius * 0.2718F);
-	float bradius = radius * 0.618F;
-	float arm_diffradians = degrees_to_radians(break_point);
+	float center_radius = radius * 0.2718F;
+	float bottom_radius = radius * 0.618F;
+	float arm_joint_x = arm_length - thickness * 0.5F;
+	float arm_joint_length = arm_thickness * 1.5F;
+	float arm_top_radius = arm_length * 0.618F;
+	float arm_near_radiusX = arm_length * 0.8F;
+	float arm_near_radiusY = radius * 1.0F;
+	float arm_half_thickness = arm_thickness * 0.5F;
+	float arm_diffradians = degrees_to_radians(offset);
 	float radians = degrees_to_radians(degrees);
-	float tstart_radians = degrees_to_radians(degrees - 100.0);
-	float tend_radians = degrees_to_radians(degrees - break_point * 0.8F);
-	float bstart_radians = degrees_to_radians(degrees + break_point);
-	float bsweep_radians = degrees_to_radians(180.0 - break_point);
-	float aradius = arm_length;
-	float2 tstart, aterminator, bstart;
+	float top_start_radians = degrees_to_radians(degrees - 100.0 * sign);
+	float top_end_radians = degrees_to_radians(degrees - offset * sign);
+	float bottom_start_radians = degrees_to_radians(degrees + 90.0 * sign);
+	float bottom_sweep_radians = degrees_to_radians(90.0 * sign);
+	float arm_start_radians = degrees_to_radians(degrees + 20.0 * sign);
+	float arm_end_radians = degrees_to_radians(degrees + 40.0 * sign);
+	float arm_near_top_delta_radians = arm_adjust_outline_radian(arm_top_radius, arm_half_thickness, &arm_top_radius);
+	float arm_far_delta_radians = arm_adjust_outline_radian(arm_length, arm_half_thickness, &arm_length);
+	float arm_near_top_radians = radians - arm_near_top_delta_radians * sign;
+	float arm_far_top_radians = radians - arm_far_delta_radians * sign;
+	float arm_far_bottom_radians = radians + arm_far_delta_radians * sign;
+	float2 top_start, arm_near_top, arm_far_top, arm_near_bottom, arm_far_bottom, bottom_start;
+	CanvasGeometry^ center = circle(center_radius);
+	CanvasGeometry^ joint = vline(arm_joint_x, -arm_joint_length * 0.5F, arm_joint_length, thickness);
 
-	head->SetFilledRegionDetermination(CanvasFilledRegionDetermination::Winding);
+	circle_point(radius, top_start_radians, &top_start.x, &top_start.y);
+	circle_point(arm_top_radius, arm_near_top_radians, &arm_near_top.x, &arm_near_top.y);
+	circle_point(arm_length, arm_far_top_radians, &arm_far_top.x, &arm_far_top.y);
+	circle_point(arm_length, arm_far_bottom_radians, &arm_far_bottom.x, &arm_far_bottom.y);
+	ellipse_point(arm_near_radiusX, arm_near_radiusY, arm_start_radians, &arm_near_bottom.x, &arm_near_bottom.y);
+	circle_point(bottom_radius, bottom_start_radians, &bottom_start.x, &bottom_start.y);
 
-	circle_point(radius, tstart_radians, &tstart.x, &tstart.y);
-	circle_point(aradius, radians, &aterminator.x, &aterminator.y);
-	circle_point(bradius, bstart_radians, &bstart.x, &bstart.y);
-
-	head->BeginFigure(tstart);
-	head->AddArc(float2(0.0F, 0.0F), radius, radius, tstart_radians, tend_radians - tstart_radians);
-	head->AddLine(aterminator);
-	head->AddLine(bstart);
-	head->AddArc(float2(0.0F, 0.0F), bradius, bradius, bstart_radians, bsweep_radians);
+	head->BeginFigure(top_start);
+	head->AddArc(float2(0.0F, 0.0F), radius, radius, top_start_radians, top_end_radians - top_start_radians);
+	head->AddLine(arm_near_top);
+	head->AddLine(arm_far_top);
+	head->AddLine(arm_far_bottom);
+	head->AddLine(arm_near_bottom);
+	head->AddArc(float2(0.0F, 0.0F), arm_near_radiusX, arm_near_radiusY, arm_start_radians, arm_end_radians - arm_start_radians);
+	head->AddLine(bottom_start);
+	head->AddArc(float2(0.0F, 0.0F), bottom_radius, bottom_radius, bottom_start_radians, bottom_sweep_radians);
 	head->AddLine(0.0F, 0.0F);
-	head->AddLine(tstart);
+	head->AddLine(top_start);
 	head->EndFigure(CanvasFigureLoop::Closed);
 
-	return geometry_union(CanvasGeometry::CreatePath(head), center);
+	return geometry_union(CanvasGeometry::CreatePath(head), geometry_union(center, geometry_rotate(joint, degrees, 0.0F, 0.0F)));
+}
+
+static CanvasGeometry^ make_visor(float radius, float teeth_length, double degrees, float sign) {
+	auto visor = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float radians = degrees_to_radians(degrees);
+	float bottom_radians = degrees_to_radians(degrees + 135.0 * sign);
+	float top_end_radians = degrees_to_radians(280.0 * sign);
+	float2 top_start, arm_start, arm_stop, bottom_start;
+
+	circle_point(radius, bottom_radians, &bottom_start.x, &bottom_start.y);
+	
+	visor->BeginFigure(0.0F, 0.0F);
+	visor->AddLine(bottom_start);
+	visor->AddArc(float2(0.0F, 0.0F), radius, radius, bottom_radians, top_end_radians - bottom_radians);
+	visor->EndFigure(CanvasFigureLoop::Closed);
+
+	return CanvasGeometry::CreatePath(visor);
 }
 
 /*************************************************************************************************/
@@ -330,7 +376,7 @@ void DragXZlet::construct() {
 		this->ws_width = (this->right_margin - hmetrics.em * 1.618F) - this->ws_x;
 	}
 
-	{ // make dragfloat3 keypoint;
+	{ // make draghead keypoint;
 		this->ws_y = hmetrics.hatch_y;
 		this->ws_height = hmetrics.hatch_height;
 		this->drag_thickness = std::fabsf(this->ws_width) * (this->info.pipe_radius * 2.0F) / this->total_length;
@@ -450,21 +496,39 @@ void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
 
 void DragHeadlet::construct() {
 	RHatchMarkMetrics vmetrics, ametrics;
-	auto ahatchmark = rhatchmark(this->radius * 0.90F, 0.0, -this->range, 0.0, this->range, 0U, this->thickness, &ametrics, this->precision);
-	auto vhatchmark = rhatchmark(this->radius * 0.50F, -this->offset, -100.0, 0.0, this->range, 0U, this->thickness, &vmetrics, this->precision);
+	float aradius = this->radius * 0.90F;
+	float vradius = this->radius * 0.50F;
+	double adeg0 = (this->leftward ? 0.0 : 180.0);
+	double adegn = (this->leftward ? -this->range : 180.0 + this->range);
+	double vdeg0 = (this->leftward ? -this->offset : 180.0 + this->offset);
+	double vdegn = (this->leftward ? -100.0 : 280.0);
+	double degrees = (this->leftward ? 0.0 : 180.0);
+	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, 0.0, this->range, 0U, this->thickness, &ametrics, this->precision);
+	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, 0.0, this->range, 0U, this->thickness, &vmetrics, this->precision);
+	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
+	float arm_thickness = head_radius * 0.618F * 2.0F;
 
 	this->hatchmarks = geometry_freeze(geometry_union(vhatchmark, ahatchmark));
-	this->head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
+	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius);
+	this->draghead = make_draghead(head_radius, arm_thickness, this->radius, this->offset, degrees,
+		(this->leftward ? 1.0F : -1.0F), this->thickness);
 
-	this->draghead = make_draghead(this->head_radius, this->radius, this->offset, 0.0);
+	float3 dh;
+	this->set_position(0.0F, nullptr, dh, true);
 }
 
 void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float cx = x + this->radius;
 	float cy = y + this->radius;
-	
-	ds->FillGeometry(this->draghead, cx, cy, this->body_color);
-	ds->DrawCachedGeometry(this->hatchmarks, cx, cy, this->hatchmark_color);
 
 	ds->DrawRectangle(x, y, this->radius * 2.0F, this->radius * 2.0F, Colours::Crimson);
+
+	ds->FillGeometry(this->visor, cx, cy, this->visor_color);
+	ds->FillGeometry(this->draghead, cx, cy, this->body_color);
+	ds->DrawCachedGeometry(this->hatchmarks, cx, cy, this->hatchmark_color);
+}
+
+void DragHeadlet::set_position(float suction_depth, float3 ujoints[], float3& draghead, bool force) {
+	float degrees = (this->leftward ? 0.0F : 180.0F);
+	this->visor = make_visor(this->visor_radius, this->radius, degrees, (this->leftward ? 1.0F : -1.0F));
 }
