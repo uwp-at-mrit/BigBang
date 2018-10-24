@@ -43,11 +43,11 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	auto head = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float center_radius = radius * 0.2718F;
 	float bottom_radius = radius * 0.618F;
+	float bottom_far_radius = arm_length * 0.72F;
 	float arm_joint_x = arm_length - thickness * 0.5F;
 	float arm_joint_length = arm_thickness * 1.5F;
 	float arm_top_radius = arm_length * 0.618F;
-	float arm_near_radiusX = arm_length * 0.8F;
-	float arm_near_radiusY = radius * 1.0F;
+	float arm_near_radius = arm_length * 0.85F;
 	float arm_half_thickness = arm_thickness * 0.5F;
 	float arm_diffradians = degrees_to_radians(offset);
 	float radians = degrees_to_radians(degrees);
@@ -55,14 +55,14 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	float top_end_radians = degrees_to_radians(degrees - offset * sign);
 	float bottom_start_radians = degrees_to_radians(degrees + 90.0 * sign);
 	float bottom_sweep_radians = degrees_to_radians(90.0 * sign);
-	float arm_start_radians = degrees_to_radians(degrees + 20.0 * sign);
-	float arm_end_radians = degrees_to_radians(degrees + 40.0 * sign);
+	float arm_start_radians = degrees_to_radians(degrees + 8.0 * sign);
+	float bottom_far_radians = radians + arm_adjust_outline_radian(bottom_far_radius, bottom_radius, &bottom_far_radius) * sign;
 	float arm_near_top_delta_radians = arm_adjust_outline_radian(arm_top_radius, arm_half_thickness, &arm_top_radius);
 	float arm_far_delta_radians = arm_adjust_outline_radian(arm_length, arm_half_thickness, &arm_length);
 	float arm_near_top_radians = radians - arm_near_top_delta_radians * sign;
 	float arm_far_top_radians = radians - arm_far_delta_radians * sign;
 	float arm_far_bottom_radians = radians + arm_far_delta_radians * sign;
-	float2 top_start, arm_near_top, arm_far_top, arm_near_bottom, arm_far_bottom, bottom_start;
+	float2 top_start, arm_near_top, arm_far_top, arm_near_bottom, arm_far_bottom, bottom_far, bottom_near_start;
 	CanvasGeometry^ center = circle(center_radius);
 	CanvasGeometry^ joint = vline(arm_joint_x, -arm_joint_length * 0.5F, arm_joint_length, thickness);
 
@@ -70,8 +70,9 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	circle_point(arm_top_radius, arm_near_top_radians, &arm_near_top.x, &arm_near_top.y);
 	circle_point(arm_length, arm_far_top_radians, &arm_far_top.x, &arm_far_top.y);
 	circle_point(arm_length, arm_far_bottom_radians, &arm_far_bottom.x, &arm_far_bottom.y);
-	ellipse_point(arm_near_radiusX, arm_near_radiusY, arm_start_radians, &arm_near_bottom.x, &arm_near_bottom.y);
-	circle_point(bottom_radius, bottom_start_radians, &bottom_start.x, &bottom_start.y);
+	circle_point(arm_near_radius, arm_start_radians, &arm_near_bottom.x, &arm_near_bottom.y);
+	circle_point(bottom_far_radius, bottom_far_radians, &bottom_far.x, &bottom_far.y);
+	circle_point(bottom_radius, bottom_start_radians, &bottom_near_start.x, &bottom_near_start.y);
 
 	head->BeginFigure(top_start);
 	head->AddArc(float2(0.0F, 0.0F), radius, radius, top_start_radians, top_end_radians - top_start_radians);
@@ -79,8 +80,8 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	head->AddLine(arm_far_top);
 	head->AddLine(arm_far_bottom);
 	head->AddLine(arm_near_bottom);
-	head->AddArc(float2(0.0F, 0.0F), arm_near_radiusX, arm_near_radiusY, arm_start_radians, arm_end_radians - arm_start_radians);
-	head->AddLine(bottom_start);
+	head->AddLine(bottom_far);
+	head->AddLine(bottom_near_start);
 	head->AddArc(float2(0.0F, 0.0F), bottom_radius, bottom_radius, bottom_start_radians, bottom_sweep_radians);
 	head->AddLine(0.0F, 0.0F);
 	head->AddLine(top_start);
