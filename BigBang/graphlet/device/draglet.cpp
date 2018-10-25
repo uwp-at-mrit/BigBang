@@ -47,7 +47,7 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	float arm_joint_x = arm_length - thickness * 0.5F;
 	float arm_joint_length = arm_thickness * 1.5F;
 	float arm_top_radius = arm_length * 0.618F;
-	float arm_near_radius = arm_length * 0.85F;
+	float arm_bottom_radius = arm_length * 0.85F;
 	float arm_half_thickness = arm_thickness * 0.5F;
 	float arm_diffradians = degrees_to_radians(offset);
 	float radians = degrees_to_radians(degrees);
@@ -70,7 +70,7 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 	circle_point(arm_top_radius, arm_near_top_radians, &arm_near_top.x, &arm_near_top.y);
 	circle_point(arm_length, arm_far_top_radians, &arm_far_top.x, &arm_far_top.y);
 	circle_point(arm_length, arm_far_bottom_radians, &arm_far_bottom.x, &arm_far_bottom.y);
-	circle_point(arm_near_radius, arm_start_radians, &arm_near_bottom.x, &arm_near_bottom.y);
+	circle_point(arm_bottom_radius, arm_start_radians, &arm_near_bottom.x, &arm_near_bottom.y);
 	circle_point(bottom_far_radius, bottom_far_radians, &bottom_far.x, &bottom_far.y);
 	circle_point(bottom_radius, bottom_start_radians, &bottom_near_start.x, &bottom_near_start.y);
 
@@ -92,16 +92,38 @@ static CanvasGeometry^ make_draghead(float radius, float arm_thickness, float ar
 
 static CanvasGeometry^ make_visor(float radius, float teeth_length, double degrees, float sign) {
 	auto visor = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-	float radians = degrees_to_radians(degrees);
-	float bottom_radians = degrees_to_radians(degrees + 135.0 * sign);
-	float top_end_radians = degrees_to_radians(280.0 * sign);
-	float2 top_start, arm_start, arm_stop, bottom_start;
+	float jaw_length = teeth_length * 0.9F;
+	float bottom_base_radians = degrees_to_radians(degrees + 90.0 * sign);
+	float bottom_diffradians = degrees_to_radians(45.0);
+	float bottom_radians = bottom_base_radians + bottom_diffradians * sign;
+	float bottom_intermediate_radians = degrees_to_radians(degrees + 175.0 * sign);
+	float radians = degrees_to_radians(degrees + 180.0 * sign);
+	float top_intermediate_radians = degrees_to_radians(degrees + 190.0 * sign);
+	float top_start_radians = degrees_to_radians(degrees + 215.0 * sign);
+	float top_stop_radians = degrees_to_radians(degrees + 280.0 * sign);
+	float teeth_radians = degrees_to_radians(degrees + 165.0 * sign);
+	float jaw_radians = bottom_base_radians + std::acos(std::cosf(bottom_diffradians) * radius / jaw_length) * sign;
+	float2 bottom_start, bottom_teeth, teeth, bottom_intermediate, top_teeth, top_intermediate_far, top_intermediate_near, top_start;
 
 	circle_point(radius, bottom_radians, &bottom_start.x, &bottom_start.y);
+	circle_point(jaw_length, jaw_radians, &bottom_teeth.x, &bottom_teeth.y);
+	circle_point(jaw_length, teeth_radians, &teeth.x, &teeth.y);
+	circle_point(teeth_length, bottom_intermediate_radians, &bottom_intermediate.x, &bottom_intermediate.y);
+	circle_point(teeth_length, radians, &top_teeth.x, &top_teeth.y);
+	circle_point(teeth_length, top_intermediate_radians, &top_intermediate_far.x, &top_intermediate_far.y);
+	circle_point(jaw_length, top_intermediate_radians, &top_intermediate_near.x, &top_intermediate_near.y);
+	circle_point(radius, top_start_radians, &top_start.x, &top_start.y);
 	
 	visor->BeginFigure(0.0F, 0.0F);
 	visor->AddLine(bottom_start);
-	visor->AddArc(float2(0.0F, 0.0F), radius, radius, bottom_radians, top_end_radians - bottom_radians);
+	visor->AddLine(bottom_teeth);
+	visor->AddLine(teeth);
+	visor->AddLine(bottom_intermediate);
+	visor->AddLine(top_teeth);
+	visor->AddLine(top_intermediate_far);
+	visor->AddLine(top_intermediate_near);
+	visor->AddLine(top_start);
+	visor->AddArc(float2(0.0F, 0.0F), radius, radius, top_start_radians, top_stop_radians - top_start_radians);
 	visor->EndFigure(CanvasFigureLoop::Closed);
 
 	return CanvasGeometry::CreatePath(visor);
@@ -510,7 +532,7 @@ void DragHeadlet::construct() {
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 
 	this->hatchmarks = geometry_freeze(geometry_union(vhatchmark, ahatchmark));
-	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius);
+	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius) * 0.618F;
 	this->draghead = make_draghead(head_radius, arm_thickness, this->radius, this->offset, degrees,
 		(this->leftward ? 1.0F : -1.0F), this->thickness);
 
