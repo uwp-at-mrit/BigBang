@@ -472,6 +472,7 @@ private:
 
 		this->dragxys[id]->set_position(suction_depth, ujoints, draghead);
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead);
+		this->dragheads[id]->set_position(suction_depth, ujoints, draghead);
 
 		this->dragxys[id]->set_dredging(true);
 		this->dragxzes[id]->set_dredging(true);

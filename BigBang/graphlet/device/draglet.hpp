@@ -183,6 +183,9 @@ namespace WarGrey::SCADA {
 			float depth_range = 60.0F, double visor_range = 60.0, double arm_range = 60.0,
 			float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_pointer_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_depth_pointer_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ draghead_depth_pointer_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
 
 	public:
@@ -197,14 +200,22 @@ namespace WarGrey::SCADA {
 			bool force = false);
 
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ draghead;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ visor;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ arm_pointer;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor_pointer;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ depth_pointer;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ visor_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_pointer_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_pointer_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ draghead_pointer_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 
 	private:
+		float depth_interval;
 		float depth_range;
 		double visor_range;
 		double arm_range;
@@ -218,13 +229,16 @@ namespace WarGrey::SCADA {
 		float bottom_radius;
 		float translate_x;
 		float translate_y;
-		float depth_pointer_length;
 		float visor_pointer_radius;
 		float arm_pointer_radius;
+		float arrow_radius;
+		float depth_top;
+		float depth_height;
 
 	private:
 		double visor_degrees;
-		double head_degrees;
-		double depth;
+		double arm_degrees;
+		float suction_depth;
+		float draghead_depth;
 	};
 }
