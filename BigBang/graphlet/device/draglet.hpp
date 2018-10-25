@@ -20,6 +20,8 @@ namespace WarGrey::SCADA {
 		float head_compensation;
 	};
 
+	float drag_depth(WarGrey::SCADA::DragInfo& info);
+
 	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
@@ -177,7 +179,9 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	private class DragHeadlet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
-		DragHeadlet(float radius, unsigned int color, double range = 60.0, float thickness = 2.0F,
+		DragHeadlet(float radius, unsigned int color,
+			float depth_range = 60.0F, double visor_range = 60.0, double arm_range = 60.0,
+			float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
 
@@ -201,13 +205,22 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 
 	private:
-		unsigned int precision;
-		double range;
+		float depth_range;
+		double visor_range;
+		double arm_range;
 		double offset;
 		float radius;
-		float visor_radius;
 		float thickness;
-		bool leftward;
+		float sign;
+
+	private:
+		float visor_radius;
+		float bottom_radius;
+		float translate_x;
+		float translate_y;
+		float depth_pointer_length;
+		float visor_pointer_radius;
+		float arm_pointer_radius;
 
 	private:
 		double visor_degrees;

@@ -29,13 +29,13 @@ inline static Platform::String^ make_mark_string(double mark, unsigned int preci
 }
 
 static CanvasGeometry^ make_rhatch(RHatchMarkMetrics* metrics, float radius, double degrees0, double degreesn
-	, double interval, unsigned int step, float thickness) {
+	, double interval, unsigned int step, float thickness, bool no_short) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float px, py;
 	float rstart = degrees_to_radians(degrees0);
 	float rsweep = degrees_to_radians(degreesn - degrees0);
 	float long_radius = metrics->ring_radius + metrics->hatch_width;
-	float short_radius = metrics->ring_radius + metrics->hatch_width * ((step % 2 == 0) ? 0.618F : 1.0F);
+	float short_radius = metrics->ring_radius + metrics->hatch_width * (((step % 2 == 1) || no_short) ? 1.0F : 0.618F);
 
 	circle_point(metrics->ring_radius, degrees0, &metrics->arc_sx, &metrics->arc_sy);
 	circle_point(metrics->ring_radius, degreesn, &metrics->arc_ex, &metrics->arc_ey);
@@ -114,7 +114,7 @@ RHatchMarkMetrics WarGrey::SCADA::rhatchmark_metrics(float radius, double vmin, 
 
 CanvasGeometry^ WarGrey::SCADA::rhatchmark(float radius, double degrees0, double degreesn
 	, double vmin, double vmax, unsigned int step, float thickness, RHatchMarkMetrics* maybe_metrics
-	, unsigned int precision, CanvasTextFormat^ ft) {
+	, unsigned int precision, bool no_short, CanvasTextFormat^ ft) {
 	unsigned int skip;
 	double diff;
 	float mcx, mcy;
@@ -122,14 +122,14 @@ CanvasGeometry^ WarGrey::SCADA::rhatchmark(float radius, double degrees0, double
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	RHatchMarkMetrics metrics = rhatchmark_metrics(radius, vmin, vmax, thickness, precision, font);
 	double interval = resolve_interval(&step, radius, degrees0, degreesn, vmin, vmax, metrics.em, precision, &skip, &diff);
-	auto hatchmark = make_rhatch(&metrics, radius, degrees0, degreesn, interval, step, thickness);
+	auto hatchmark = make_rhatch(&metrics, radius, degrees0, degreesn, interval, step, thickness, no_short);
 
 	metrics.label_lx = FLT_MAX;
 	metrics.label_rx = FLT_MIN;
 	metrics.label_ty = FLT_MAX;
 	metrics.label_by = FLT_MIN;
 
-	for (unsigned int i = 0; i <= step; i += skip) {
+	for (unsigned int i = 0; i <= step; i += (no_short ? 1 : skip)) {
 		Platform::String^ mark = make_mark_string(vmax - diff * double(i), precision);
 		CanvasGeometry^ p = paragraph(make_text_layout(mark, font), &te);
 		float half_width = te.width * 0.5F;

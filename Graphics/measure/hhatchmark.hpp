@@ -21,12 +21,12 @@ namespace WarGrey::SCADA {
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hthatchmark(
 		float width, double vmin, double vmax, unsigned int step,
 		float thickness = 1.0F, WarGrey::SCADA::HHatchMarkMetrics* metrics = nullptr,
-		unsigned int precision = 0,
+		unsigned int precision = 0, bool no_short = false,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hbhatchmark(
 		float width, double vmin, double vmax, unsigned int step,
 		float thickness = 1.0F, WarGrey::SCADA::HHatchMarkMetrics* metrics = nullptr,
-		unsigned int precision = 0,
+		unsigned int precision = 0, bool no_short = false,
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 }

@@ -182,14 +182,14 @@ public:
 		}
 
 		{ // load drags
-			float draghead_radius = shhmargin * 0.42F;
+			float draghead_radius = shhmargin * 0.382F;
 			float over_drag_height = height * 0.5F - vinset;
 			float over_drag_width = over_drag_height * 0.2718F;
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 2.0F;
 			float side_drag_height = height * 0.382F - vinset;
 			
-			this->load_draghead(this->dragheads, DA::PS, -draghead_radius, default_ps_color);
-			this->load_draghead(this->dragheads, DA::SB, +draghead_radius, default_sb_color);
+			this->load_draghead(this->dragheads, DA::PS, -draghead_radius, this->drag_configs[0], default_ps_color);
+			this->load_draghead(this->dragheads, DA::SB, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
 			this->load_drag(this->dragxys, DA::PS, -over_drag_width, over_drag_height, this->drag_configs[0], default_ps_color);
 			this->load_drag(this->dragxys, DA::SB, +over_drag_width, over_drag_height, this->drag_configs[1], default_sb_color);
@@ -416,8 +416,8 @@ private:
 	}
 
 	template<class C, typename E>
-	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, float radius, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color), id);
+	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, float radius, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
 	}
 
 	template<class C, typename E>

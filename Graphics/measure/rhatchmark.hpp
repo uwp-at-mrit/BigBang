@@ -21,11 +21,12 @@ namespace WarGrey::SCADA {
 	};
 
 	WarGrey::SCADA::RHatchMarkMetrics rhatchmark_metrics(
-		float radius, double vmin, double vmax, float thickness,
-		unsigned int precision = 1, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+		float radius, double vmin, double vmax, float thickness, unsigned int precision = 0U,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rhatchmark(
 		float radius, double degrees0, double degreesn, double vmin, double vmax,
 		unsigned int step, float thickness = 1.0F, WarGrey::SCADA::RHatchMarkMetrics* metrics = nullptr,
-		unsigned int precision = 1, Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+		unsigned int precision = 0U, bool no_short = false,
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
 }
