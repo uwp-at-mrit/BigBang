@@ -191,6 +191,7 @@ namespace WarGrey::SCADA {
 	public:
 		void construct() override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void fill_margin(float x, float y, float* ts = nullptr, float* rs = nullptr, float* bs = nullptr, float* ls = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
@@ -200,6 +201,7 @@ namespace WarGrey::SCADA {
 			bool force = false);
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ depth_font;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead;
@@ -223,6 +225,7 @@ namespace WarGrey::SCADA {
 		float radius;
 		float thickness;
 		float sign;
+		float hspace;
 
 	private:
 		float visor_radius;

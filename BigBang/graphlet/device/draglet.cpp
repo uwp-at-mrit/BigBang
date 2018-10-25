@@ -539,6 +539,11 @@ void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOXES(w, h, this->radius * 2.0F);
 }
 
+void DragHeadlet::fill_margin(float x, float y, float* ts, float* rs, float* bs, float* ls) {
+	SET_BOXES(ls, rs, 0.0F);
+	SET_BOXES(ts, bs, this->hspace);
+}
+
 void DragHeadlet::construct() {
 	RHatchMarkMetrics vmetrics, ametrics;
 	VHatchMarkMetrics dmetrics;
@@ -550,15 +555,17 @@ void DragHeadlet::construct() {
 	double vdeg0 = ((this->sign > 0.0F) ? -this->offset : 180.0 + this->offset);
 	double vdegn = ((this->sign > 0.0F) ? -100.0 : 280.0);
 	double degrees = ((this->sign > 0.0F) ? 0.0 : 180.0);
-	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, 0.0, this->arm_range, 0U, this->thickness, &ametrics, 0U);
-	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, 0.0, this->visor_range, 0U, this->thickness, &vmetrics, 0U);
+	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, 0.0, this->arm_range, 0U, this->thickness, &ametrics, 0U, true);
+	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, 0.0, this->visor_range, 0U, this->thickness, &vmetrics, 0U, true);
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
+	this->hspace = this->radius + ametrics.label_ty;
 	this->translate_x = this->radius - this->radius * 2.0F * 0.382F;
-	this->translate_y = this->radius + ametrics.label_ty;
+	this->translate_y = 0.0F;
 	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius) * 0.618F;
 	this->bottom_radius = head_radius * 0.618F;
+	this->depth_font = make_bold_text_format(ametrics.em * 0.85F);
 
 	this->arrow_radius = ametrics.ch * 0.5F;
 	this->visor_pointer_radius = vmetrics.ring_radius - this->arrow_radius;
@@ -568,8 +575,8 @@ void DragHeadlet::construct() {
 		this->offset, degrees, this->sign, this->thickness));
 
 	if (this->sign > 0.0F) {
-		float height = this->radius - this->bottom_radius + this->translate_y;
-		auto dhatchmark = vrhatchmark(height, -this->depth_range, depth_interval, depth_step, this->thickness, &dmetrics, 0U, true);
+		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
+		auto dhatchmark = vrhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
 		float arrow_length = dmetrics.mark_width;
 		auto arrow = hline(arrow_length);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 0.0);
@@ -577,8 +584,8 @@ void DragHeadlet::construct() {
 		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow, -arrow_length), -this->arrow_radius));
 		this->hatchmarks = geometry_freeze(geometry_union(geometry_union(vhatchmark, ahatchmark), dhatchmark, 0.0F, this->bottom_radius));
 	} else {
-		float height = this->radius - this->bottom_radius + this->translate_y;
-		auto dhatchmark = vlhatchmark(height, -this->depth_range, depth_interval, depth_step, this->thickness, &dmetrics, 0U, true);
+		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
+		auto dhatchmark = vlhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
 		auto arrow = hline(dmetrics.mark_width);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 180.0);
 		
