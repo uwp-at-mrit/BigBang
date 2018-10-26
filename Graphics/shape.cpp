@@ -91,8 +91,10 @@ CanvasGeometry^ WarGrey::SCADA::arc(double start, double end, float radiusX, flo
 	return arc(0.0F, 0.0F, start, end, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ WarGrey::SCADA::arc(float cx, float cy, double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::arc(float cx, float cy, double start, double end, float radiusX, float maybe_radiusY
+	, float th, CanvasStrokeStyle^ style) {
 	auto arc_path = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float rstart = degrees_to_radians(start);
 	float rsweep = degrees_to_radians(end - start);
 	float startx, starty;
@@ -106,17 +108,19 @@ CanvasGeometry^ WarGrey::SCADA::arc(float cx, float cy, double start, double end
 	return geometry_stroke(CanvasGeometry::CreatePath(arc_path), th, style);
 }
 
-CanvasGeometry^ WarGrey::SCADA::short_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::short_arc(double start, double end, float radiusX, float maybe_radiusY, float th, CanvasStrokeStyle^ style) {
+	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float sx, sy, ex, ey;
-
+	
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
 	ellipse_point(radiusX, radiusY, end, &ex, &ey);
 
 	return short_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ WarGrey::SCADA::short_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::short_arc(float sx, float sy, float ex, float ey, float rx, float maybe_ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float ry = (maybe_ry <= 0.0F) ? rx : maybe_ry;
     
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Small);
@@ -125,7 +129,8 @@ CanvasGeometry^ WarGrey::SCADA::short_arc(float sx, float sy, float ex, float ey
     return geometry_stroke(CanvasGeometry::CreatePath(arc), th, style);
 }
 
-CanvasGeometry^ WarGrey::SCADA::long_arc(double start, double end, float radiusX, float radiusY, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::long_arc(double start, double end, float radiusX, float maybe_radiusY, float th, CanvasStrokeStyle^ style) {
+	float radiusY = (maybe_radiusY <= 0.0F) ? radiusX : maybe_radiusY;
 	float sx, sy, ex, ey;
 
 	ellipse_point(radiusX, radiusY, start, &sx, &sy);
@@ -134,8 +139,9 @@ CanvasGeometry^ WarGrey::SCADA::long_arc(double start, double end, float radiusX
 	return long_arc(sx, sy, ex, ey, radiusX, radiusY, th, style);
 }
 
-CanvasGeometry^ WarGrey::SCADA::long_arc(float sx, float sy, float ex, float ey, float rx, float ry, float th, CanvasStrokeStyle^ style) {
+CanvasGeometry^ WarGrey::SCADA::long_arc(float sx, float sy, float ex, float ey, float rx, float maybe_ry, float th, CanvasStrokeStyle^ style) {
     auto arc = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	float ry = (maybe_ry <= 0.0F) ? rx : maybe_ry;
 
     arc->BeginFigure(sx, sy);
     arc->AddArc(float2(ex, ey), rx, ry, 0.0F, CanvasSweepDirection::Clockwise, CanvasArcSize::Large);

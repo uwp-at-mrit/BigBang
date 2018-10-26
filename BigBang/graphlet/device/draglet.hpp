@@ -50,6 +50,7 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
 		virtual Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) = 0;
+		virtual void update_drag_head() = 0;
 		
 		virtual void on_position_changed(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
@@ -59,6 +60,8 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ dragarm_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead_part;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor_part;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ dragarm;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ universal_joint;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rubbers[DRAG_SEGMENT_MAX_COUNT];
@@ -93,7 +96,7 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
-		float total_length;
+		float drag_length;
 
 	protected:
 		Windows::Foundation::Numerics::float2 _suction;
@@ -101,12 +104,14 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
 
 	protected:
+		double draghead_angle;
+		float draghead_length;
 		bool dredging;
 	};
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 3.0F
+		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 4.0F
 			, unsigned int outside_step = 2U, unsigned int inside_step = 1U, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
@@ -124,6 +129,7 @@ namespace WarGrey::SCADA {
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		void update_drag_head() override;
 
 	private:
 		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
@@ -155,6 +161,7 @@ namespace WarGrey::SCADA {
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		void update_drag_head() override;
 		void on_position_changed(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead) override;
@@ -165,6 +172,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head_joint;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head_joint_border;
 
 	private:
 		float left_margin;
@@ -239,8 +248,8 @@ namespace WarGrey::SCADA {
 		float depth_height;
 
 	private:
-		double visor_degrees;
-		double arm_degrees;
+		double visor_pointer_degrees;
+		double arm_pointer_degrees;
 		float suction_depth;
 		float draghead_depth;
 	};

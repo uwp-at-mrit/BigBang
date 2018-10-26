@@ -157,19 +157,19 @@
     <value>Sealed Water Pumps</value>
   </data>
   <data name="draughts" xml:space="preserve">
-    <value>Draught And Load</value>
+    <value>Draught And Loading</value>
   </data>
-  <data name="loads" xml:space="preserve">
-    <value>Loading Cabin &amp; Barge</value>
+  <data name="loadings" xml:space="preserve">
+    <value>Loading Cabin</value>
   </data>
-  <data name="rainbows" xml:space="preserve">
+  <data name="rainbowings" xml:space="preserve">
     <value>Rainbowing</value>
   </data>
   <data name="flushs" xml:space="preserve">
     <value>Flushing System</value>
   </data>
-  <data name="drags" xml:space="preserve">
-    <value>Drags</value>
+  <data name="dredges" xml:space="preserve">
+    <value>Dredges</value>
   </data>
   <data name="density" xml:space="preserve">
     <value>Density</value>

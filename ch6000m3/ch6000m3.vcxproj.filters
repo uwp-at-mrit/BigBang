@@ -45,20 +45,20 @@
     <ClCompile Include="page\draughts.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\loads.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\flushs.cpp">
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="splash.cpp" />
-    <ClCompile Include="page\drags.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
-    <ClCompile Include="page\rainbows.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="gallery.cpp" />
+    <ClCompile Include="page\dredges.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\rainbowings.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\loadings.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -78,16 +78,10 @@
     <ClInclude Include="page\draughts.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="page\loads.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="page\flushs.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="splash.hpp" />
-    <ClInclude Include="page\drags.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
     <ClInclude Include="schema\di_doors.hpp">
       <Filter>schema</Filter>
     </ClInclude>
@@ -103,10 +97,16 @@
     <ClInclude Include="schema\di_hopper_pumps.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="page\rainbows.hpp">
+    <ClInclude Include="gallery.hpp" />
+    <ClInclude Include="page\dredges.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="gallery.hpp" />
+    <ClInclude Include="page\rainbowings.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\loadings.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -296,34 +296,34 @@
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\loads.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\loads.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\flushs.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\drags.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\drags.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\rainbows.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\rainbows.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\gallery.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\gallery.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\loadings.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\rainbowings.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\dredges.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\dredges.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\loadings.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

@@ -258,11 +258,11 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="stone\tongue\en-US\drags.resw" />
+    <PRIResource Include="stone\tongue\en-US\dredges.resw" />
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
-    <PRIResource Include="stone\tongue\en-US\loads.resw" />
+    <PRIResource Include="stone\tongue\en-US\loadings.resw" />
     <PRIResource Include="stone\tongue\en-US\draughts.resw" />
-    <PRIResource Include="stone\tongue\en-US\rainbows.resw" />
+    <PRIResource Include="stone\tongue\en-US\rainbowings.resw" />
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -280,11 +280,11 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\drags.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\dredges.resw" />
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\loads.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\loadings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\rainbows.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -306,12 +306,12 @@
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
-    <ClCompile Include="page\drags.cpp" />
+    <ClCompile Include="page\dredges.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
-    <ClCompile Include="page\loads.cpp" />
+    <ClCompile Include="page\loadings.cpp" />
     <ClCompile Include="page\draughts.cpp" />
-    <ClCompile Include="page\rainbows.cpp" />
+    <ClCompile Include="page\rainbowings.cpp" />
     <ClCompile Include="page\hopper_doors.cpp" />
     <ClCompile Include="gallery.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
@@ -321,7 +321,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
-    <ClInclude Include="page\drags.hpp" />
+    <ClInclude Include="page\dredges.hpp" />
     <ClInclude Include="schema\di_doors.hpp" />
     <ClInclude Include="schema\di_hopper_pumps.hpp" />
     <ClInclude Include="schema\di_pumps.hpp" />
@@ -329,9 +329,9 @@
     <ClInclude Include="schema\di_valves.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
-    <ClInclude Include="page\loads.hpp" />
+    <ClInclude Include="page\loadings.hpp" />
     <ClInclude Include="page\draughts.hpp" />
-    <ClInclude Include="page\rainbows.hpp" />
+    <ClInclude Include="page\rainbowings.hpp" />
     <ClInclude Include="page\hopper_doors.hpp" />
     <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />

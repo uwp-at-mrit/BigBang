@@ -153,16 +153,16 @@
   <data name="draughts" xml:space="preserve">
     <value>吃水装载</value>
   </data>
-  <data name="loads" xml:space="preserve">
+  <data name="loadings" xml:space="preserve">
     <value>装舱丨装驳</value>
   </data>
-  <data name="rainbows" xml:space="preserve">
+  <data name="rainbowings" xml:space="preserve">
     <value>艏吹丨艏喷</value>
   </data>
   <data name="flushs" xml:space="preserve">
     <value>高压冲水</value>
   </data>
-  <data name="drags" xml:space="preserve">
+  <data name="dredges" xml:space="preserve">
     <value>耙臂指示</value>
   </data>
   <data name="density" xml:space="preserve">

@@ -7,6 +7,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 inline static float quick_degrees_to_radians(double degrees) {
 	return float(degrees * M_PI / 180.0);
@@ -20,6 +21,10 @@ float WarGrey::SCADA::viewport_fit_scaling(float src_width, float src_height, fl
 	return std::fmin(src_width / target_width, src_height / target_height);
 }
 
+double WarGrey::SCADA::radians_to_degrees(double radians) {
+	return (radians / M_PI) * 180.0;
+}
+
 float WarGrey::SCADA::degrees_to_radians(double degrees) {
 	return quick_degrees_to_radians(degrees);
 }
@@ -29,6 +34,14 @@ double WarGrey::SCADA::degrees_normalize(double degrees) {
 	while (degrees >= 360.0) degrees -= 360.0;
 
 	return degrees;
+}
+
+double WarGrey::SCADA::points_angle(float2 pt1, float2 pt2) {
+	return points_angle(pt1.x, pt1.y, pt2.x, pt2.y);
+}
+
+double WarGrey::SCADA::points_angle(float x1, float y1, float x2, float y2) {
+	return radians_to_degrees(std::atan2(double(y2 - y1), double(x2 - x1)));
 }
 
 double WarGrey::SCADA::arc_length(float r, double deg0, double degn) {

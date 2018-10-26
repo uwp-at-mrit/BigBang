@@ -9,10 +9,10 @@
 #include "page/hopper_doors.hpp"
 #include "page/sealed_waters.hpp"
 #include "page/draughts.hpp"
-#include "page/loads.hpp"
-#include "page/rainbows.hpp"
+#include "page/loadings.hpp"
+#include "page/rainbowings.hpp"
 #include "page/flushs.hpp"
-#include "page/drags.hpp"
+#include "page/dredges.hpp"
 
 #include "splash.hpp"
 #include "gallery.hpp"
@@ -47,16 +47,16 @@ protected:
 	void construct() override {
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
-		this->add_planet(new DragsPage(this->device));
+		this->add_planet(new DredgesPage(this->device));
 
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new DraughtsPage(this->device));
 		this->add_planet(new SealedWaterPage(this->device));
-		this->add_planet(new LoadsPage(this->device));
-		this->add_planet(new RainbowsPage(this->device));
+		this->add_planet(new LoadingsPage(this->device));
+		this->add_planet(new RainbowingsPage(this->device));
 		this->add_planet(new FlushsPage(this->device));
-		this->add_planet(new DragsPage(this->device));
+		this->add_planet(new DredgesPage(this->device));
 
 		this->add_planet(new Gallery());
 	}
