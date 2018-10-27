@@ -15,11 +15,16 @@ CanvasGeometry^ WarGrey::SCADA::geometry_rotate(CanvasGeometry^ g, double d) {
 
     return geometry_rotate(g, d,
         region.X + region.Width * 0.5F,
-        region.Y + region.Height * 0.5F);
+        region.Y + region.Height * 0.5F,
+		0.0F, 0.0F);
 }
 
 CanvasGeometry^ WarGrey::SCADA::geometry_rotate(CanvasGeometry^ g, double degrees, float cx, float cy) {
-    return g->Transform(make_rotation_matrix(degrees, cx, cy));
+    return geometry_rotate(g, degrees, cx, cy, 0.0F, 0.0F);
+}
+
+CanvasGeometry^ WarGrey::SCADA::geometry_rotate(CanvasGeometry^ g, double degrees, float cx, float cy, float tx, float ty) {
+	return g->Transform(make_rotation_matrix(degrees, cx, cy, tx, ty));
 }
 
 CanvasGeometry^ WarGrey::SCADA::geometry_stroke(CanvasGeometry^ g, float thickness, CanvasStrokeStyle^ style) {

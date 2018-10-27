@@ -7,6 +7,9 @@ namespace WarGrey::SCADA {
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_rotate(
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, double degrees, float cx, float cy);
 
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_rotate(
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, double degrees, float cx, float cy, float tx, float ty);
+
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry_stroke(
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ geometry, float thickness,
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style = nullptr);

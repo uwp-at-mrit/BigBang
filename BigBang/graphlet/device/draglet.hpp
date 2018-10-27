@@ -172,8 +172,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head_joint;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ head_joint_border;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ joint_mask;
 
 	private:
 		float left_margin;
@@ -183,6 +182,10 @@ namespace WarGrey::SCADA {
 		double depth_highest;
 		double depth_lowest;
 		double suction_lowest;
+
+	private:
+		float mask_dx;
+		float mask_dy;
 	};
 
 	/************************************************************************************************/
