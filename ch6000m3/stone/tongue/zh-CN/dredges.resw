@@ -156,4 +156,10 @@
   <data name="SBWC" xml:space="preserve">
     <value>补偿器</value>
   </data>
+  <data name="PS" xml:space="preserve">
+    <value>左压差</value>
+  </data>
+  <data name="SB" xml:space="preserve">
+    <value>右压差</value>
+  </data>
 </root>

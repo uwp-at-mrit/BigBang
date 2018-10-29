@@ -26,12 +26,13 @@ static CanvasSolidColorBrush^ drag_default_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_meter_color = Colours::GhostWhite;
 static CanvasSolidColorBrush^ drag_default_head_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_body_color = Colours::Yellow;
-static CanvasSolidColorBrush^ drag_default_angle_pointer_color = Colours::Silver;
-static CanvasSolidColorBrush^ drag_default_suction_depth_pointer_color = Colours::Yellow;
+static CanvasSolidColorBrush^ drag_default_angle_pointer_color = Colours::GhostWhite;
 static CanvasSolidColorBrush^ drag_default_draghead_depth_pointer_color = Colours::Cyan;
+static CanvasSolidColorBrush^ drag_default_suction_depth_pointer_color = Colours::Yellow;
 static CanvasSolidColorBrush^ drag_default_hatchmark_color = Colours::Silver;
 
 static float drag_hatchmark_fontsize = 24.0F;
+static double drag_visor_end_angle = 100.0;
 
 static inline double drag_adjusted_angle(double degrees, float sign) {
 	return ((sign > 0.0F) ? 0.0 - degrees : 180.0 + degrees);
@@ -60,7 +61,7 @@ static CanvasGeometry^ make_draghead(float radius, float bottom_radius, float ar
 	float arm_half_thickness = arm_thickness * 0.5F;
 	float arm_diffradians = degrees_to_radians(offset);
 	float radians = degrees_to_radians(degrees);
-	float top_start_radians = degrees_to_radians(degrees - 100.0 * sign);
+	float top_start_radians = degrees_to_radians(degrees - drag_visor_end_angle * sign);
 	float top_end_radians = degrees_to_radians(degrees - offset * sign);
 	float bottom_start_radians = degrees_to_radians(degrees + 90.0 * sign);
 	float bottom_sweep_radians = degrees_to_radians(90.0 * sign);
@@ -111,7 +112,7 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	float radians = degrees_to_radians(degrees + 180.0 * sign);
 	float top_intermediate_radians = degrees_to_radians(degrees + 190.0 * sign);
 	float top_start_radians = degrees_to_radians(degrees + 215.0 * sign); // TODO: this angle should based on the range
-	float top_stop_radians = degrees_to_radians(arm_degrees + ((sign > 0.0F) ? 280.0 : -260.0));
+	float top_stop_radians = degrees_to_radians(arm_degrees + drag_visor_end_angle + ((sign > 0.0F) ? 180.0 : -360.0));
 	float jaw_radians = bottom_base_radians + std::acos(bottom_radius / jaw_length) * sign;
 	float teeth_radians = jaw_radians - degrees_to_radians(6.18) * sign;
 	float2 bottom_start, bottom_teeth, teeth, bottom_intermediate, top_teeth, top_intermediate_far, top_intermediate_near, top_start;
@@ -138,6 +139,15 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	visor->EndFigure(CanvasFigureLoop::Closed);
 
 	return CanvasGeometry::CreatePath(visor);
+}
+
+static inline CanvasGeometry^ make_pointer(float radius, double degrees, float arrow_radius, CanvasStrokeStyle^ style) {
+	auto arrowhead = polar_arrowhead(arrow_radius, degrees);
+	float x, y;
+
+	circle_point(radius, degrees, &x, &y);
+
+	return geometry_union(line(x, y, 1.0F, style), arrowhead, x, y);
 }
 
 /*************************************************************************************************/
@@ -313,7 +323,7 @@ void DragXYlet::update_drag_head() {
 	float sign = (this->leftward ? 1.0F : -1.0F);
 	float tr_height;
 	auto hshape = polar_trapezoid(tradius, this->drag_thickness, angle, &tr_height);
-	auto vshape = rectangle(-tradius, -1.0F, tradius * 2.0F, this->draghead_length - tr_height + 2.0F);
+	auto vshape = rectangle(-tradius, 0.0F, tradius * 2.0F, this->draghead_length - tr_height);
 
 	this->visor_part = geometry_freeze(geometry_rotate(vshape, angle, 0.0F, 0.0F));
 	this->draghead_part = geometry_freeze(geometry_translate(hshape, 0.0F, 0.0F));
@@ -357,30 +367,30 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
 
-				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, x);
+				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, x, this->drag_thickness);
 			}
 		}
 
-		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, x);
+		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 2.0F);
 	}
 }
 
-void DragXYlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y, float gx) {
+void DragXYlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y, float gx, float hspace) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
 		float x0 = this->_suction.x;
 		float lx0 = x0 - this->thickness;
 		float rx0 = x0 + this->thickness;
 		float y = joint_y - box.Height * 0.5F;
-		float x = joint_x + (this->leftward ? (-box.Width - this->drag_thickness) : this->drag_thickness);
+		float x = joint_x + (this->leftward ? (-box.Width - hspace) : hspace);
 		float rx = x + box.Width;
 
 		if ((x < gx) || ((x < x0) && (rx > rx0))) {
-			x = joint_x + this->drag_thickness;
+			x = joint_x + hspace;
 		}
 
 		if (rx > gx + this->width) {
-			x = joint_x - box.Width - this->drag_thickness;
+			x = joint_x - box.Width - hspace;
 		}
 
 		ds->DrawTextLayout(meter, x, y, this->meter_color);
@@ -586,12 +596,12 @@ float2 DragXZlet::space_to_local(float3& position) {
 /*************************************************************************************************/
 DragHeadlet::DragHeadlet(float radius, unsigned int color, float depth_range, double visor_range, double arm_range
 	, float thickness, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
-	: radius(std::fabsf(radius)), thickness(thickness), sign((radius < 0.0F) ? 1.0F : -1.0F)
+	: radius(std::fabsf(radius)), thickness(thickness), sign((radius < 0.0F) ? 1.0F : -1.0F), precision(2U)
 	, depth_interval(10.0F), visor_range(visor_range), arm_range(arm_range), offset(30.0)
 	, visor_color(Colours::make(color))
 	, body_color(bcolor == nullptr ? drag_default_head_color : bcolor)
 	, angle_pointer_color(acolor == nullptr ? drag_default_angle_pointer_color : acolor)
-	, suction_pointer_color(sdcolor == nullptr ? drag_default_suction_depth_pointer_color : sdcolor)
+	, suction_pointer_color(acolor == nullptr ? drag_default_suction_depth_pointer_color : sdcolor)
 	, draghead_pointer_color(ddcolor == nullptr ? drag_default_draghead_depth_pointer_color : ddcolor)
 	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
 	this->pointer_style = make_dash_stroke(CanvasDashStyle::Dash);
@@ -604,7 +614,7 @@ void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
 
 void DragHeadlet::fill_margin(float x, float y, float* ts, float* rs, float* bs, float* ls) {
 	SET_BOXES(ls, rs, 0.0F);
-	SET_BOXES(ts, bs, this->hspace);
+	SET_BOXES(ts, bs, this->vspace);
 }
 
 void DragHeadlet::construct() {
@@ -616,13 +626,13 @@ void DragHeadlet::construct() {
 	double adeg0 = drag_adjusted_angle(0.0, this->sign);
 	double adegn = drag_adjusted_angle(this->arm_range, this->sign);
 	double vdeg0 = drag_adjusted_angle(this->offset, this->sign);
-	double vdegn = drag_adjusted_angle(100.0, this->sign);
+	double vdegn = drag_adjusted_angle(drag_visor_end_angle, this->sign);
 	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, 0.0, this->arm_range, 0U, this->thickness, &ametrics, 0U);
 	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, 0.0, this->visor_range, 0U, this->thickness, &vmetrics, 0U);
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
-	this->hspace = this->radius + ametrics.label_ty;
+	this->vspace = this->radius + ametrics.label_ty;
 	this->translate_x = this->radius - this->radius * 2.0F * 0.382F;
 	this->translate_y = 0.0F;
 	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius) * 0.618F;
@@ -630,28 +640,30 @@ void DragHeadlet::construct() {
 	this->depth_font = make_bold_text_format(ametrics.em * 0.85F);
 
 	this->arrow_radius = ametrics.ch * 0.5F;
-	this->visor_pointer_radius = vmetrics.ring_radius - this->arrow_radius;
-	this->arm_pointer_radius = ametrics.ring_radius - this->arrow_radius;
-
+	this->visor_pointer_radius = vmetrics.ring_radius - this->arrow_radius * 2.0F;
+	this->arm_pointer_radius = ametrics.ring_radius - this->arrow_radius * 2.0F;
+	
 	this->draghead = geometry_freeze(make_draghead(head_radius, this->bottom_radius, arm_thickness, this->radius + this->translate_x,
 		this->offset, 0.0, this->sign, this->thickness * 4.0F));
 
-	if (this->sign > 0.0F) {
+	if (this->sign > 0.0F) { // leftward
 		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
 		auto dhatchmark = vrhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
-		float arrow_length = dmetrics.mark_width;
+		float arrow_length = dmetrics.width;
 		auto arrow = hline(arrow_length);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 0.0);
 		
-		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow, -arrow_length), -this->arrow_radius));
+		this->depth_x = dmetrics.width + dmetrics.gap_space;
+		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow, -arrow_length), -this->arrow_radius * 2.0F));
 		this->hatchmarks = geometry_freeze(geometry_union(geometry_union(vhatchmark, ahatchmark), dhatchmark, 0.0F, this->bottom_radius));
 	} else {
 		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
 		auto dhatchmark = vlhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
-		auto arrow = hline(dmetrics.mark_width);
+		auto arrow = hline(dmetrics.width);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 180.0);
 		
-		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow), this->arrow_radius));
+		this->depth_x = -dmetrics.width - dmetrics.gap_space;
+		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow), this->arrow_radius * 2.0F));
 		this->hatchmarks = geometry_freeze(geometry_union(geometry_union(vhatchmark, ahatchmark), dhatchmark,
 			-dmetrics.width, this->bottom_radius));
 	}
@@ -659,32 +671,37 @@ void DragHeadlet::construct() {
 	this->depth_top = this->bottom_radius + dmetrics.hatch_y;
 	this->depth_height = dmetrics.hatch_height;
 
-	float3 dh;
-	this->set_position(0.0F, nullptr, dh, true);
+	this->set_angles(0.0, 0.0, true);
+	this->set_depths(0.0F, 0.0F, true);
 }
 
-void DragHeadlet::set_position(float suction_depth, float3 ujoints[], float3& draghead, bool force) {
+void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	float visor_length = this->radius - this->translate_x;
-	double visor_angle = 0.0;
+	double arm_degrees = drag_adjusted_angle(arm_angle, this->sign);
+	double visor_pointer_range = drag_visor_end_angle - offset;
+	double visor_degrees = drag_adjusted_angle(visor_angle / this->visor_range * visor_pointer_range + this->offset, this->sign);
 	
-	this->suction_depth = -suction_depth;
-	this->draghead_depth = -draghead.z;
-	this->visor_pointer_degrees = drag_adjusted_angle(visor_angle, this->sign);
-	this->arm_pointer_degrees = drag_adjusted_angle(0.0, this->sign);
+	if (force || (this->visor_pointer_degrees != visor_degrees)) {
+		this->visor_pointer_degrees = visor_degrees;
+		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_angle, 0.0F, this->sign));
+		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_degrees, this->arrow_radius, this->pointer_style));
+	}
 
-	this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_angle, 0.0, this->sign));
+	if (force || (this->arm_pointer_degrees != arm_degrees)) {
+		this->arm_pointer_degrees = arm_degrees;
+		this->arm_pointer = geometry_freeze(make_pointer(this->arm_pointer_radius, arm_degrees, this->arrow_radius, this->pointer_style));
+	}
+}
 
-	{ // make pointers
-		float vx, vy, ax, ay;
-		double vdeg = this->visor_pointer_degrees - this->offset * this->sign;
-		auto vhead = polar_arrowhead(this->arrow_radius, vdeg);
-		auto ahead = polar_arrowhead(this->arrow_radius, this->arm_pointer_degrees);
+void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool force) {
+	if (force || (this->suction_depth != -suction_depth)) {
+		this->suction_depth = -suction_depth;
+		this->suction_m = make_text_layout(flstring(suction_depth, this->precision), this->depth_font);
+	}
 
-		circle_point(this->visor_pointer_radius, vdeg, &vx, &vy);
-		circle_point(this->arm_pointer_radius, this->arm_pointer_degrees, &ax, &ay);
-
-		this->visor_pointer = geometry_freeze(geometry_union(line(vx, vy, 1.0F, this->pointer_style), vhead, vx, vy));
-		this->arm_pointer = geometry_freeze(geometry_union(line(ax, ay, 1.0F, this->pointer_style), ahead, ax, ay));
+	if (force || (this->draghead_depth != -draghead_depth)) {
+		this->draghead_depth = -draghead_depth;
+		this->depth_m = make_text_layout(flstring(draghead_depth, this->precision), this->depth_font);
 	}
 }
 
@@ -697,14 +714,27 @@ void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 	ds->DrawCachedGeometry(this->hatchmarks, cx, cy, this->hatchmark_color);
 
 	{ // draw pointers
+		Rect suction_box = this->suction_m->LayoutBounds;
+		Rect depth_box = this->depth_m->LayoutBounds;
 		float depth_range = this->depth_interval + this->depth_range;
 		float suction_dy = (this->depth_interval - this->suction_depth) / depth_range * this->depth_height + this->depth_top;
 		float draghead_dy = (this->depth_interval - this->draghead_depth) / depth_range * this->depth_height + this->depth_top;
+		float depth_x = cx + this->depth_x;
+		float depth_meter_y = cy + draghead_dy - depth_box.Height * 0.5F;
+		float suction_meter_y = cy + suction_dy - suction_box.Height * 0.5F;
 
 		ds->DrawCachedGeometry(this->visor_pointer, cx, cy, this->angle_pointer_color);
 		ds->DrawCachedGeometry(this->arm_pointer, cx, cy, this->angle_pointer_color);
 
 		ds->DrawCachedGeometry(this->depth_pointer, cx, cy + draghead_dy, this->draghead_pointer_color);
 		ds->DrawCachedGeometry(this->depth_pointer, cx, cy + suction_dy, this->suction_pointer_color);
+
+		if (this->sign > 0.0F) { // leftward
+			ds->DrawTextLayout(this->depth_m, depth_x, depth_meter_y, this->draghead_pointer_color);
+			ds->DrawTextLayout(this->suction_m, depth_x, suction_meter_y, this->suction_pointer_color);
+		} else {
+			ds->DrawTextLayout(this->depth_m, depth_x - depth_box.Width, depth_meter_y, this->draghead_pointer_color);
+			ds->DrawTextLayout(this->suction_m, depth_x - suction_box.Width, suction_meter_y, this->suction_pointer_color);
+		}
 	}
 }

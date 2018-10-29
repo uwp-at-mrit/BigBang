@@ -138,6 +138,9 @@
   <data name="meter3" xml:space="preserve">
     <value>m³</value>
   </data>
+  <data name="mpm" xml:space="preserve">
+    <value>m/min</value>
+  </data>
   <data name="mps" xml:space="preserve">
     <value>m/s</value>
   </data>

@@ -133,7 +133,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx);
+			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx, float hspace);
 
 	private:
 		double outside_most;
@@ -196,7 +196,7 @@ namespace WarGrey::SCADA {
 			float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_pointer_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_depth_pointer_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_depth_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ draghead_depth_pointer_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr);
 
@@ -207,13 +207,10 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_position(float suction_depth,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead,
-			bool force = false);
+		void set_angles(double visor_degrees, double arm_degrees, bool force = false);
+		void set_depths(float suction_depth, float draghead_depth, bool force = false);
 
 	private:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ depth_font;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead;
@@ -229,6 +226,13 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ depth_font;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ depth_m;
+		unsigned int precision;
+		float depth_x;
+
+	private:
 		float depth_interval;
 		float depth_range;
 		double visor_range;
@@ -237,7 +241,7 @@ namespace WarGrey::SCADA {
 		float radius;
 		float thickness;
 		float sign;
-		float hspace;
+		float vspace;
 
 	private:
 		float visor_radius;
