@@ -15,6 +15,7 @@
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/device/draglet.hpp"
 
+#include "schema/ai_dredges.hpp"
 #include "schema/di_valves.hpp"
 
 #include "decorator/page.hpp"
@@ -56,9 +57,9 @@ private enum class DS : unsigned int {
 	sbTrunnion, sbIntermediate, sbDragHead,
 };
 
-private class Drags final : public PLCConfirmation {
+private class IDredgingSystem : public PLCConfirmation {
 public:
-	Drags(DredgesPage* master) : master(master) {
+	IDredgingSystem(DredgesPage* master) : master(master) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->station_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
 
@@ -80,42 +81,224 @@ public:
 	}
 
 public:
+	virtual void load(float width, float height, float vinset) = 0;
+	virtual void reflow(float width, float height, float vinset) = 0;
+
+public:
+	virtual bool can_select(IGraphlet* g) { return false; }
+	virtual void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) {}
+
+public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
 	}
 
+	void post_read_data(Syslog* logger) override {
+		this->master->end_update_sequence();
+		this->master->leave_critical_section();
+	}
+
+protected:
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit, _speak(id)), id);
+	}
+
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
+		this->load_label(ls, id, Colours::Silver);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, Platform::String^ unit) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_dimension(ds, ls, id, unit);
+		}
+	}
+
+	template<class C, typename E>
+	void load_cylinders(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double vmin, double vmax, Platform::String^ unit) {
+		for (E id = id0; id <= idn; id++) {
+			auto cylinder = new Credit<C, E>(LiquidSurface::_, vmin, vmax, height * 0.2718F, height);
+
+			cs[id] = this->master->insert_one(cylinder, id);
+
+			this->load_dimension(this->pressures, this->labels, id, unit);
+		}
+	}
+
+	template<class C, typename E>
+	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
+		for (E id = id0; id <= idn; id++) {
+			dfs[id] = this->master->insert_one(new Credit<C, E>(height), id);
+		}
+	}
+
+	template<class C, typename E>
+	void load_winchs(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
+		for (E id = id0; id <= idn; id++) {
+			ws[id] = this->master->insert_one(new Credit<C, E>(radius), id);
+
+			this->load_label(this->labels, id, Colours::Silver);
+			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
+			this->speeds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("mpm"), id);
+		}
+	}
+
+	template<class C, typename E>
+	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double range) {
+		for (E id = id0; id <= idn; id++) {
+			cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
+
+			this->load_label(this->labels, id, Colours::Silver);
+			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
+			this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
+		}
+	}
+
+	template<class C, typename E>
+	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, float radius, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
+
+		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar", _speak(id)), id);
+		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
+		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>("degrees"), id);
+	}
+
+	template<class C, typename E>
+	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<C, E>(info, width, height, visor_color), id);
+	}
+
+	template<typename E>
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
+		this->load_label(ls, _speak(id), id, color, font);
+	}
+
+	template<typename E>
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ label, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
+	}
+
+protected:
+	void set_compensator(DS id, const uint8* db203, unsigned int rd_idx, GraphletAnchor a) {
+		float progress = RealData(db203, rd_idx + 2U);
+
+		this->compensators[id]->set_value(progress);
+		this->lengths[id]->set_value(progress, a);
+		this->pressures[id]->set_value(RealData(db203, rd_idx + 1U), a);
+	}
+
+	void set_winch_metrics(DS id, const uint8* db2, unsigned int speed_idx, unsigned int length_idx, GraphletAnchor a) {
+		this->speeds[id]->set_value(DBD(db2, speed_idx), a);
+		this->lengths[id]->set_value(DBD(db2, length_idx), a);
+	}
+
+	void set_draghead_angles(DS id, const uint8* db2, unsigned int idx) {
+		float visor_angle = DBD(db2, idx);
+
+		this->dragheads[id]->set_angles(visor_angle, 0.0);
+		this->degrees[id]->set_value(visor_angle, GraphletAnchor::CC);
+	}
+
+	void set_drag_positions(DS id, const uint8* db2, unsigned int idx) {
+		float3 ujoints[2];
+		float3 draghead = DBD_3(db2, idx + 36U);
+		float suction_depth = DBD(db2, idx + 0U);
+
+		ujoints[0] = DBD_3(db2, idx + 12U);
+		ujoints[1] = DBD_3(db2, idx + 24U);
+
+		ujoints[1].y -= DBD(db2, idx + 48U);
+		draghead.y -= DBD(db2, idx + 52U);
+		draghead.z += DBD(db2, idx + 56U);
+
+		this->dragxys[id]->set_position(suction_depth, ujoints, draghead);
+		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead);
+		this->dragheads[id]->set_depths(suction_depth, draghead.z);
+
+		this->lengths[id]->set_value(draghead.z, GraphletAnchor::CC);
+
+		this->dragxys[id]->set_dredging(true);
+		this->dragxzes[id]->set_dredging(true);
+	}
+
+protected: // never delete these graphlets manually.
+	std::map<DS, Credit<Labellet, DS>*> labels;
+	std::map<DS, Credit<Winchlet, DS>*> winchs;
+	std::map<DS, Credit<Compensatorlet, DS>*> compensators;
+	std::map<DS, Credit<DragHeadlet, DS>*> dragheads;
+	std::map<DS, Credit<DragXYlet, DS>*> dragxys;
+	std::map<DS, Credit<DragXZlet, DS>*> dragxzes;
+	std::map<DS, Credit<Dimensionlet, DS>*> pressures;
+	std::map<DS, Credit<Dimensionlet, DS>*> degrees;
+	std::map<DS, Credit<Dimensionlet, DS>*> lengths;
+	std::map<DS, Credit<Dimensionlet, DS>*> speeds;
+	
+protected:
+	CanvasTextFormat^ label_font;
+	CanvasTextFormat^ station_font;
+	DimensionStyle percentage_style;
+	DimensionStyle plain_style;
+
+protected:
+	DragInfo drag_configs[2];
+
+protected:
+	DredgesPage* master;
+};
+
+private class Dredges final : public IDredgingSystem {
+public:
+	Dredges(DredgesPage* master) : IDredgingSystem(master) {
+		this->ps_address = make_ps_dredging_system_schema();
+		this->sb_address = make_sb_dredging_system_schema();
+	}
+
+public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, 55U));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
 
-		this->set_compensator(DS::PSWC, DB203, 82U, GraphletAnchor::LC);
-		this->set_compensator(DS::SBWC, DB203, 98U, GraphletAnchor::RC);
-
-		this->pressures[DS::PS]->set_value(RealData(DB203, 109U), GraphletAnchor::CC);
-		this->pressures[DS::SB]->set_value(RealData(DB203, 125U), GraphletAnchor::CC);
-
-		this->set_density_speed(DS::PS, DB203, 136U);
-		this->set_density_speed(DS::SB, DB203, 148U);
-
 		this->progresses[DS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
 		this->progresses[DS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
+
+		this->set_cylinder(DS::PSDP, RealData(DB203, this->ps_address->discharge_pressure));
+		this->set_cylinder(DS::PSVP, RealData(DB203, this->ps_address->vacuum_pressure));
+		this->set_cylinder(DS::SBDP, RealData(DB203, this->sb_address->discharge_pressure));
+		this->set_cylinder(DS::SBVP, RealData(DB203, this->sb_address->vacuum_pressure));
+
+		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator_length, GraphletAnchor::LC);
+		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator_length, GraphletAnchor::RC);
+
+		this->pressures[DS::PS]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
+		this->pressures[DS::SB]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);
+
+		this->set_density_speed(DS::PS, DB203, this->ps_address->density_speed);
+		this->set_density_speed(DS::SB, DB203, this->sb_address->density_speed);
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->set_drag_positions(DS::PS, DB2, 20U);
-		this->set_drag_positions(DS::SB, DB2, 96U);
+		unsigned int psws_idx = this->ps_address->winch_speed;
+		unsigned int pswl_idx = this->ps_address->winch_length;
+		unsigned int sbws_idx = this->sb_address->winch_speed;
+		unsigned int sbwl_idx = this->sb_address->winch_length;
 
-		//this->set_draghead_angles(DS::PS, DB2, 272U);
-		//this->set_draghead_angles(DS::SB, DB2, 276U);
+		this->set_drag_positions(DS::PS, DB2, this->ps_address->drag_position);
+		this->set_drag_positions(DS::SB, DB2, this->sb_address->drag_position);
 
-		this->set_winch_metrics(DS::psTrunnion,     DB2, 280U, 544U, GraphletAnchor::LC);
-		this->set_winch_metrics(DS::psIntermediate, DB2, 284U, 548U, GraphletAnchor::LC);
-		this->set_winch_metrics(DS::psDragHead,     DB2, 288U, 552U, GraphletAnchor::LC);
+		this->set_draghead_angles(DS::PS, DB2, this->ps_address->draghead_angle);
+		this->set_draghead_angles(DS::SB, DB2, this->sb_address->draghead_angle);
 
-		this->set_winch_metrics(DS::sbTrunnion,     DB2, 292U, 556U, GraphletAnchor::RC);
-		this->set_winch_metrics(DS::sbIntermediate, DB2, 296U, 560U, GraphletAnchor::RC);
-		this->set_winch_metrics(DS::sbDragHead,     DB2, 300U, 564U, GraphletAnchor::RC);
+		this->set_winch_metrics(DS::psTrunnion,     DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::LC);
+		this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::LC);
+		this->set_winch_metrics(DS::psDragHead,     DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::LC);
+
+		this->set_winch_metrics(DS::sbTrunnion,     DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::RC);
+		this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::RC);
+		this->set_winch_metrics(DS::sbDragHead,     DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::RC);
 
 		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
 	}
@@ -129,9 +312,15 @@ public:
 		DI_gate_valve(this->valves[DS::D016], DB4, 375U, DB205, 489U);
 	}
 
-	void post_read_data(Syslog* logger) override {
-		this->master->end_update_sequence();
-		this->master->leave_critical_section();
+public:
+	void load(float width, float height, float vinset) override {
+		this->load_station(width, height, vinset);
+		this->load_dashboard(width, height, vinset);
+	}
+
+	void reflow(float width, float height, float vinset) {
+		this->reflow_station(width, height, vinset);
+		this->reflow_dashboard(width, height, vinset);
 	}
 
 public:
@@ -358,13 +547,6 @@ public:
 		}
 	}
 
-public:
-	bool on_char(VirtualKey key, IMRMaster* plc) {
-		bool handled = false;
-
-		return handled;
-	}
-
 private:
 	template<class G, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
@@ -379,100 +561,10 @@ private:
 		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
 	}
 
-	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit, _speak(id)), id);
-	}
-
-	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
-		this->load_label(ls, id, Colours::Silver);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
-	}
-
-	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, Platform::String^ unit) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, ls, id, unit);
-		}
-	}
-
-	template<class C, typename E>
-	void load_cylinders(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double vmin, double vmax, Platform::String^ unit) {
-		for (E id = id0; id <= idn; id++) {
-			auto cylinder = new Credit<C, E>(LiquidSurface::_, vmin, vmax, height * 0.2718F, height);
-
-			cs[id] = this->master->insert_one(cylinder, id);
-
-			this->load_dimension(this->pressures, this->labels, id, unit);
-		}
-	}
-
-	template<class C, typename E>
-	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
-		for (E id = id0; id <= idn; id++) {
-			dfs[id] = this->master->insert_one(new Credit<C, E>(height), id);
-		}
-	}
-
-	template<class C, typename E>
-	void load_winchs(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
-		for (E id = id0; id <= idn; id++) {
-			ws[id] = this->master->insert_one(new Credit<C, E>(radius), id);
-
-			this->load_label(this->labels, id, Colours::Silver);
-			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-			this->speeds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("mpm"), id);
-		}
-	}
-
-	template<class C, typename E>
-	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double range) {
-		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
-
-			this->load_label(this->labels, id, Colours::Silver);
-			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-			this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
-		}
-	}
-
-	template<class C, typename E>
-	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, float radius, DragInfo& info, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
-
-		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar", _speak(id)), id);
-		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>("degrees"), id);
-	}
-
-	template<class C, typename E>
-	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(info, width, height, visor_color), id);
-	}
-
-	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
-		this->load_label(ls, _speak(id), id, color, font);
-	}
-
-	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ label, E id, ICanvasBrush^ color, CanvasTextFormat^ font = nullptr) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
-	}
-
 private:
 	void set_cylinder(DS id, float value) {
 		this->cylinders[id]->set_value(value);
-		//this->dimensions[id]->set_value(value);
-	}
-
-	void set_compensator(DS id, const uint8* db203, unsigned int rd_idx, GraphletAnchor a) {
-		float progress = RealData(db203, rd_idx + 2U);
-
-		this->compensators[id]->set_value(progress);
-		this->lengths[id]->set_value(progress, a);
-		this->pressures[id]->set_value(RealData(db203, rd_idx + 1), a);
+		this->pressures[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 	void set_density_speed(DS id, const uint8* db203, unsigned int idx) {
@@ -484,77 +576,57 @@ private:
 		this->dfmeters[id]->set_values(std::fmaxf(hdensity, udensity), std::fmaxf(hflspeed, uflspeed));
 	}
 
-	void set_winch_metrics(DS id, const uint8* db2, unsigned int speed_idx, unsigned int length_idx, GraphletAnchor a) {
-		this->speeds[id]->set_value(DBD(db2, speed_idx), a);
-		this->lengths[id]->set_value(DBD(db2, length_idx), a);
-	}
-
-	void set_draghead_angles(DS id, const uint8* db2, unsigned int idx) {
-		float visor_angle = DBD(db2, idx);
-
-		this->dragheads[id]->set_angles(visor_angle, 0.0);
-		this->degrees[id]->set_value(visor_angle, GraphletAnchor::CC);
-	}
-
-	void set_drag_positions(DS id, const uint8* db2, unsigned int idx) {
-		float3 ujoints[2];
-		float3 draghead = DBD_3(db2, idx + 36U);
-		float suction_depth = DBD(db2, idx + 0U);
-
-		ujoints[0] = DBD_3(db2, idx + 12U);
-		ujoints[1] = DBD_3(db2, idx + 24U);
-		
-		ujoints[1].y -= DBD(db2, idx + 48U);
-		draghead.y -= DBD(db2, idx + 52U);
-		draghead.z += DBD(db2, idx + 56U);
-
-		this->dragxys[id]->set_position(suction_depth, ujoints, draghead);
-		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead);
-		this->dragheads[id]->set_depths(suction_depth, draghead.z);
-
-		this->lengths[id]->set_value(draghead.z, GraphletAnchor::CC);
-
-		this->dragxys[id]->set_dredging(true);
-		this->dragxzes[id]->set_dredging(true);
-	}
-
 private: // never delete these graphlets manually.
 	Tracklet<DS>* station;
-	std::map<DS, Credit<Labellet, DS>*> labels;
 	std::map<DS, Credit<GateValvelet, DS>*> valves;
 	std::map<DS, Credit<HopperPumplet, DS>*> hpumps;
-	std::map<DS, Credit<Winchlet, DS>*> winchs;
 	std::map<DS, Credit<Circlelet, DS>*> suctions;
 	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
 	std::map<DS, Credit<DensitySpeedmeterlet, DS>*> dfmeters;
-	std::map<DS, Credit<Compensatorlet, DS>*> compensators;
-	std::map<DS, Credit<DragHeadlet, DS>*> dragheads;
-	std::map<DS, Credit<DragXYlet, DS>*> dragxys;
-	std::map<DS, Credit<DragXZlet, DS>*> dragxzes;
-	std::map<DS, Credit<Dimensionlet, DS>*> pressures;
-	std::map<DS, Credit<Dimensionlet, DS>*> degrees;
-	std::map<DS, Credit<Dimensionlet, DS>*> lengths;
-	std::map<DS, Credit<Dimensionlet, DS>*> speeds;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
-	
-private:
-	CanvasTextFormat^ label_font;
-	CanvasTextFormat^ station_font;
-	DimensionStyle percentage_style;
-	DimensionStyle plain_style;
+
+private: // global objects
+	DredgeAddress* ps_address;
+	DredgeAddress* sb_address;
+};
+
+private class Drags final : public IDredgingSystem {
+public:
+	Drags(DredgesPage* master, DragView type) : IDredgingSystem(master), type(type) {}
+
+public:
+	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	}
+
+	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
+	}
+
+public:
+	void load(float width, float height, float vinset) override {
+	}
+
+	void reflow(float width, float height, float vinset) {
+	}
+
+private: // never delete these graphlets manually.
 
 private:
-	DragInfo drag_configs[2];
-
-private:
-	DredgesPage* master;
+	DragView type;
 };
 
 /*************************************************************************************************/
-DredgesPage::DredgesPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
-	Drags* dashboard = new Drags(this);
+DredgesPage::DredgesPage(IMRMaster* plc, DragView type)
+	: Planet(__MODULE__ + ((type == DragView::_) ? "" : "_" + type.ToString()))
+	, device(plc) {
+	IDredgingSystem* dashboard;
+	
+	switch (type) {
+	case DragView::Left: dashboard = new Dredges(this); break;
+	case DragView::Right: dashboard = new Dredges(this); break;
+	default: dashboard = new Dredges(this); break;
+	}
 
 	this->dashboard = dashboard;
 	
@@ -570,15 +642,12 @@ DredgesPage::~DredgesPage() {
 }
 
 void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto db = dynamic_cast<Drags*>(this->dashboard);
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
 		{ // load graphlets
 			this->change_mode(DSMode::Dashboard);
-			db->load_station(width, height, vinset);
-			db->load_dashboard(width, height, vinset);
+			db->load(width, height, statusbar_height());
 
 			this->change_mode(DSMode::WindowUI);
 			this->statusline = new Statuslinelet(default_logging_level);
@@ -598,24 +667,29 @@ void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float he
 }
 
 void DredgesPage::reflow(float width, float height) {
-	auto db = dynamic_cast<Drags*>(this->dashboard);
+	auto db = dynamic_cast<Dredges*>(this->dashboard);
 	
 	if (db != nullptr) {
-		float vinset = statusbar_height();
-
 		this->change_mode(DSMode::WindowUI);
 		this->move_to(this->statusline, 0.0F, height, GraphletAnchor::LB);
 		
 		this->change_mode(DSMode::Dashboard);
-		db->reflow_station(width, height, vinset);
-		db->reflow_dashboard(width, height, vinset);
+		db->reflow(width, height, statusbar_height());
 	}
 }
 
 bool DredgesPage::can_select(IGraphlet* g) {
-	return false;
+	auto db = dynamic_cast<Dredges*>(this->dashboard);
+	
+	return ((db != nullptr) && (db->can_select(g)));
 }
 
 void DredgesPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+	auto db = dynamic_cast<Dredges*>(this->dashboard);
+
 	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
+
+	if (db != nullptr) {
+		db->on_tap(g, local_x, local_y, shifted, ctrled);
+	}
 }

@@ -7,10 +7,12 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
+	private enum class DragView { Left, Right, _ };
+
 	private class DredgesPage : public WarGrey::SCADA::Planet {
 	public:
 		~DredgesPage() noexcept;
-		DredgesPage(WarGrey::SCADA::IMRMaster* plc);
+		DredgesPage(WarGrey::SCADA::IMRMaster* plc, WarGrey::SCADA::DragView type = WarGrey::SCADA::DragView::_);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

@@ -307,6 +307,7 @@
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="page\dredges.cpp" />
+    <ClCompile Include="schema\ai_dredges.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\loadings.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\dredges.hpp" />
+    <ClInclude Include="schema\ai_dredges.hpp" />
     <ClInclude Include="schema\di_doors.hpp" />
     <ClInclude Include="schema\di_hopper_pumps.hpp" />
     <ClInclude Include="schema\di_pumps.hpp" />

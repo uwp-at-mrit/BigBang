@@ -59,6 +59,9 @@
     <ClCompile Include="page\loadings.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="schema\ai_dredges.cpp">
+      <Filter>schema</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="page\loadings.hpp">
       <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\ai_dredges.hpp">
+      <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
