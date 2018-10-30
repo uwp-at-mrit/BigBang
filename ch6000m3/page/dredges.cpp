@@ -52,7 +52,7 @@ private enum class DS : unsigned int {
 	// dimensions
 	Overflow, PSWC, SBWC, PSDP, SBDP, PSVP, SBVP,
 
-	// winchs
+	// winches
 	psTrunnion, psIntermediate, psDragHead,
 	sbTrunnion, sbIntermediate, sbDragHead,
 };
@@ -137,7 +137,7 @@ protected:
 	}
 
 	template<class C, typename E>
-	void load_winchs(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
+	void load_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
 			ws[id] = this->master->insert_one(new Credit<C, E>(radius), id);
 
@@ -227,7 +227,7 @@ protected:
 
 protected: // never delete these graphlets manually.
 	std::map<DS, Credit<Labellet, DS>*> labels;
-	std::map<DS, Credit<Winchlet, DS>*> winchs;
+	std::map<DS, Credit<Winchlet, DS>*> winches;
 	std::map<DS, Credit<Compensatorlet, DS>*> compensators;
 	std::map<DS, Credit<DragHeadlet, DS>*> dragheads;
 	std::map<DS, Credit<DragXYlet, DS>*> dragxys;
@@ -380,9 +380,9 @@ public:
 			this->load_densityflowmeters(this->dfmeters, DS::PS, DS::SB, dfmeter_height);
 			this->load_compensators(this->compensators, DS::PSWC, DS::SBWC, cylinder_height, 3.0);
 			this->load_cylinders(this->cylinders, DS::PSDP, DS::SBDP, cylinder_height, 0.0, 20.0, "bar");
-			this->load_cylinders(this->cylinders, DS::PSVP, DS::SBVP, cylinder_height, -2.0, 2.0, "bar");
+			this->load_cylinders(this->cylinders, DS::PSVP, DS::SBVP, cylinder_height, -1.0, 1.0, "bar");
 
-			this->load_winchs(this->winchs, DS::psTrunnion, DS::sbDragHead, winch_radius);
+			this->load_winches(this->winches, DS::psTrunnion, DS::sbDragHead, winch_radius);
 		}
 
 		{ // load drags
@@ -479,16 +479,16 @@ public:
 			this->master->move_to(this->dragxzes[DS::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
 			this->master->move_to(this->compensators[DS::PSWC], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, vinset * 2.0F);
 
-			{ // reflow winchs
+			{ // reflow winches
 				float lx = vinset;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winchs[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winchs[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC);
-				this->master->move_to(this->winchs[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 3.0F);
+				this->master->move_to(this->winches[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->winches[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC);
+				this->master->move_to(this->winches[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 3.0F);
 			}
 		}
 
@@ -502,16 +502,16 @@ public:
 			this->master->move_to(this->dragxzes[DS::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
 			this->master->move_to(this->compensators[DS::SBWC], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -vinset * 2.0F);
 
-			{ // reflow winchs
+			{ // reflow winches
 				float rx = width - vinset;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winchs[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winchs[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC);
-				this->master->move_to(this->winchs[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 3.0F);
+				this->master->move_to(this->winches[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->winches[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC);
+				this->master->move_to(this->winches[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 3.0F);
 			}
 		}
 
@@ -534,13 +534,13 @@ public:
 			}
 
 			for (DS id = DS::psTrunnion; id <= DS::psDragHead; id++) {
-				this->master->move_to(this->lengths[id], this->winchs[id], GraphletAnchor::RC, GraphletAnchor::LC, txt_gapsize);
+				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LC, txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::LT, GraphletAnchor::LB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::LB, GraphletAnchor::LT);
 			}
 
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
-				this->master->move_to(this->lengths[id], this->winchs[id], GraphletAnchor::LC, GraphletAnchor::RC, -txt_gapsize);
+				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RC, -txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::RT, GraphletAnchor::RB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::RB, GraphletAnchor::RT);
 			}
@@ -587,14 +587,23 @@ private: // never delete these graphlets manually.
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
 
-private: // global objects
+private: // never delete these global objects
 	DredgeAddress* ps_address;
 	DredgeAddress* sb_address;
 };
 
 private class Drags final : public IDredgingSystem {
 public:
-	Drags(DredgesPage* master, DragView type) : IDredgingSystem(master), type(type) {}
+	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
+		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
+		if (this->DS_side == DS::PS) {
+			this->address = make_ps_dredging_system_schema();
+			this->sign = -1.0F;
+		} else {
+			this->address = make_sb_dredging_system_schema();
+			this->sign = +1.0F;
+		}
+	}
 
 public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
@@ -605,26 +614,71 @@ public:
 
 public:
 	void load(float width, float height, float vinset) override {
+		float drag_height = height * 0.618F;
+		float side_drag_width = width * 0.382F;
+		float over_drag_width = drag_height * 0.382F;
+		float winch_radius = over_drag_width * 0.382F;
+		DragInfo config = this->drag_configs[this->drag_idx];
+
+		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * sign, drag_height, config, this->drag_color);
+		this->load_drag(this->dragxys, this->DS_side, over_drag_width * sign, drag_height, config, this->drag_color);
+
+		if (this->DS_side == DS::PS) {
+			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
+		} else {
+			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
+		}
 	}
 
-	void reflow(float width, float height, float vinset) {
+	void reflow(float width, float height, float vinset) override {
+		float cx = width * 0.5F;
+		float cy = height * 0.5F;
+
+		if (this->DS_side == DS::PS) {
+			this->ps_reflow(width, height, cx, cy, vinset);
+		} else {
+			this->sb_reflow(width, height, cx, cy, vinset);
+		}
+	}
+
+private:
+	void ps_reflow(float width, float height, float cx, float cy, float vinset) {
+		this->master->move_to(this->dragxzes[DS::PS], vinset, cy, GraphletAnchor::LC);
+		this->master->move_to(this->dragxys[DS::PS], this->dragxzes[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+
+		{ // reflow winches
+			this->master->move_to(this->winches[DS::psIntermediate], this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->master->move_to(this->winches[DS::psTrunnion], this->winches[DS::psIntermediate], GraphletAnchor::LT, GraphletAnchor::LB);
+			this->master->move_to(this->winches[DS::psDragHead], this->winches[DS::psIntermediate], GraphletAnchor::LB, GraphletAnchor::LT);
+		}
+	}
+
+	void sb_reflow(float width, float height, float cx, float cy, float vinset) {
+		this->master->move_to(this->dragxzes[DS::SB], width - vinset, cy, GraphletAnchor::RC);
+		this->master->move_to(this->dragxys[DS::SB], this->dragxzes[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 	}
 
 private: // never delete these graphlets manually.
 
 private:
-	DragView type;
+	DS DS_side;
+	DredgeAddress* address; // global object
+	unsigned int drag_color;
+	unsigned int drag_idx;
+	float sign;
 };
 
 /*************************************************************************************************/
+using namespace Windows::Graphics::Display;
+
 DredgesPage::DredgesPage(IMRMaster* plc, DragView type)
 	: Planet(__MODULE__ + ((type == DragView::_) ? "" : "_" + type.ToString()))
 	, device(plc) {
 	IDredgingSystem* dashboard;
 	
 	switch (type) {
-	case DragView::Left: dashboard = new Dredges(this); break;
-	case DragView::Right: dashboard = new Dredges(this); break;
+	case DragView::Left: dashboard = new Drags(this, DS::PS, default_ps_color, 0); break;
+	case DragView::Right: dashboard = new Drags(this, DS::SB, default_sb_color, 1); break;
 	default: dashboard = new Dredges(this); break;
 	}
 
@@ -650,10 +704,8 @@ void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float he
 			db->load(width, height, statusbar_height());
 
 			this->change_mode(DSMode::WindowUI);
-			this->statusline = new Statuslinelet(default_logging_level);
-			this->statusbar = new Statusbarlet(this->name());
-			this->insert(this->statusbar);
-			this->insert(this->statusline);
+			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
+			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
 		}
 
 		{ // delayed initializing
@@ -667,7 +719,7 @@ void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float he
 }
 
 void DredgesPage::reflow(float width, float height) {
-	auto db = dynamic_cast<Dredges*>(this->dashboard);
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 	
 	if (db != nullptr) {
 		this->change_mode(DSMode::WindowUI);

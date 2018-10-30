@@ -475,7 +475,7 @@ private:
 private:
 	void set_cylinder(HD id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value, GraphletAnchor::CT);
+		this->dimensions[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 	void set_door_progress(HD id, float value) {
@@ -539,10 +539,8 @@ void HopperDoorsPage::load(CanvasCreateResourcesReason reason, float width, floa
 			db->load(width, height, vinset);
 
 			this->change_mode(HDMode::WindowUI);
-			this->statusline = new Statuslinelet(default_logging_level);
-			this->statusbar = new Statusbarlet(this->name());
-			this->insert(this->statusbar);
-			this->insert(this->statusline);
+			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
+			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
 		}
 
 		{ // delayed initializing

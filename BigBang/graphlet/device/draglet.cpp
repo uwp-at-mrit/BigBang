@@ -432,6 +432,9 @@ void DragXZlet::construct() {
 	float tail_height = head_height * float(tail_range / head_range) + this->thickness * float(head_range / tail_range);
 	unsigned int head_step = ((unsigned int)std::round(head_range / this->depth_highest));
 	unsigned int tail_step = ((unsigned int)std::round(tail_range / this->depth_highest));
+	float drag_thickness_ratio = (this->info.pipe_radius * 2.0F) / this->drag_length;
+
+	this->draghead_length = this->width * drag_thickness_ratio * 3.14F;
 	
 	if (this->leftward) {
 		auto head = vlhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->thickness, &hmetrics, 0U, true);
@@ -441,9 +444,8 @@ void DragXZlet::construct() {
 		
 		this->left_margin = hmetrics.width;
 		this->right_margin = this->width - tmetrics.width;
-		this->draghead_length = hmetrics.width;
 		this->ws_x = this->right_margin - tmetrics.em * 1.618F;
-		this->ws_width = (this->left_margin + hmetrics.em * 1.618F + this->draghead_length * 0.25F) - this->ws_x;
+		this->ws_width = (this->left_margin + hmetrics.em * 1.618F + this->draghead_length * 0.314F) - this->ws_x;
 	} else {
 		auto head = vrhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->thickness, &hmetrics, 0U, true);
 		auto tail = vlhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->thickness, &tmetrics, 0U, true);
@@ -452,15 +454,14 @@ void DragXZlet::construct() {
 		
 		this->left_margin = tmetrics.width;
 		this->right_margin = this->width - hmetrics.width;
-		this->draghead_length = hmetrics.width;
 		this->ws_x = this->left_margin + tmetrics.em * 1.618F;
-		this->ws_width = (this->right_margin - hmetrics.em * 1.618F - this->draghead_length * 0.25F) - this->ws_x;
+		this->ws_width = (this->right_margin - hmetrics.em * 1.618F - this->draghead_length * 0.314F) - this->ws_x;
 	}
 
 	{ // make drag
 		this->ws_y = hmetrics.hatch_y;
 		this->ws_height = hmetrics.hatch_height;
-		this->drag_thickness = std::fabsf(this->ws_width) * (this->info.pipe_radius * 2.0F) / this->drag_length;
+		this->drag_thickness = std::fabsf(this->ws_width) * drag_thickness_ratio;
 		this->joint_radius = this->drag_thickness * 0.618F;
 
 		this->universal_joint = circle(this->joint_radius);
@@ -559,14 +560,14 @@ void DragXZlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, fl
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
 		float x = std::fmaxf(lX, joint_x - box.Width * 0.5F);
-		float y = joint_y;
+		float y = joint_y + box.Height * 0.1618F;
 
 		if (x + box.Width >= rX) {
 			x = rX - box.Width;
 		}
 
 		if (y + box.Height >= Y) {
-			y = joint_y - box.Height;
+			y = joint_y - box.Height * 1.1618F;
 		}
 
 		ds->DrawTextLayout(meter, x, y, this->meter_color);

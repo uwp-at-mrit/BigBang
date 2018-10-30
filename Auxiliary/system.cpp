@@ -78,6 +78,20 @@ Color WarGrey::SCADA::system_color(UIElementType type) {
 }
 
 /*************************************************************************************************/
+double WarGrey::SCADA::system_screen_brightness(double defval_if_not_available) {
+	BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
+		
+	return (bo->IsSupported ? bo->BrightnessLevel : defval_if_not_available);
+}
+
+void WarGrey::SCADA::system_try_change_screen_brightness(double brightness, DisplayBrightnessOverrideOptions option) {
+	BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
+
+	bo->SetBrightnessLevel(brightness, option);
+	bo->StartOverride();
+}
+
+/*************************************************************************************************/
 float WarGrey::SCADA::system_battery_capacity(float defval_if_no_battery) {
 	auto info = Battery::AggregateBattery->GetReport();
 	auto maybe_remaining = info->RemainingCapacityInMilliwattHours;
@@ -139,6 +153,7 @@ internal:
 
 			listener->on_timestamp_changed(update_nowstamp(false));
 			listener->on_battery_capacity_changed(system_battery_capacity());
+			listener->on_brightness_changed(system_screen_brightness());
 			listener->on_wifi_signal_strength_changed(system_wifi_signal_strength());
 			listener->on_available_storage_changed(0L, 0L);
 			listener->on_ipv4_address_changed(system_ipv4_address());
@@ -177,6 +192,12 @@ private:
 		}
 	}
 
+	void report_brightness(BrightnessOverride^ bo, Platform::Object^ e) {
+		for (auto listener : this->listeners) {
+			listener->on_brightness_changed(bo->BrightnessLevel);
+		}
+	}
+
 	void report_available_storage_if_changed() {
 		static Vector<Platform::String^>^ properties = ref new Vector<Platform::String^>();
 		StorageFolder^ local = ApplicationData::Current->LocalFolder;
@@ -208,11 +229,14 @@ private:
 
 private:
 	SystemStatus() {
-		this->clock = ref new DispatcherTimer();
-
+		BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
+	
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemStatus::report_powerinfo);
 		// WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &SystemStatus::report_wifiinfo);
 
+		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemStatus::report_brightness);
+
+		this->clock = ref new DispatcherTimer();
 		this->clock->Tick += ref new EventHandler<Object^>(this, &SystemStatus::report_timestamp);
 		this->report_timestamp(nullptr, nullptr);
 		this->clock->Start();

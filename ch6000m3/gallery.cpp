@@ -46,7 +46,7 @@ public:
 			this->captions[_I(id)] = make_label(_speak(id), this->font);
 		}
 
-		this->load_primitives(this->winchs, this->wlabels, unitsize * 2.0F);
+		this->load_primitives(this->ps_winches, this->wlabels, unitsize * 2.0F);
 		this->load_primitives(this->pumps, this->plabels, unitsize);
 		this->load_primitives(this->hpumps, this->hplabels, unitsize * 0.5F);
 		this->load_primitives(this->wpumps, this->wplabels, unitsize);
@@ -92,8 +92,8 @@ public:
 		{ // split winch statuses
 			WinchStatus at = _E(WinchStatus, _N(WinchStatus) / 2);
 
-			this->reflow_primitives(this->winchs, this->wlabels, _E0(WinchStatus), at, x, &y, halfunit, cellsize);
-			this->reflow_primitives(this->winchs, this->wlabels, at, WinchStatus::_,   x, &y, halfunit, cellsize);
+			this->reflow_primitives(this->ps_winches, this->wlabels, _E0(WinchStatus), at, x, &y, halfunit, cellsize);
+			this->reflow_primitives(this->ps_winches, this->wlabels, at, WinchStatus::_,   x, &y, halfunit, cellsize);
 		}
 
 		this->reflow_primitives(this->pumps,  this->plabels,   x, &y, halfunit, cellsize);
@@ -172,7 +172,7 @@ private:
 
 private: // never delete these graphlets manually.
 	Labellet* captions[_N(GS)];
-	std::unordered_map<WinchStatus, Winchlet*> winchs;
+	std::unordered_map<WinchStatus, Winchlet*> ps_winches;
 	std::unordered_map<WinchStatus, Labellet*> wlabels;
 	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
 	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;

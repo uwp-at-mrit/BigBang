@@ -150,4 +150,7 @@
   <data name="nodatum" xml:space="preserve">
     <value>无数据</value>
   </data>
+  <data name="brightness" xml:space="preserve">
+    <value>亮度:</value>
+  </data>
 </root>

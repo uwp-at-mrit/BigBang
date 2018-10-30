@@ -5,6 +5,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual void on_timestamp_changed(Platform::String^ timestamp) {}
 		virtual void on_battery_capacity_changed(float capacity) {}
+		virtual void on_brightness_changed(double brightness) {}
 		virtual void on_available_storage_changed(unsigned long long free_bytes, unsigned long long total_bytes) {}
 		virtual void on_ipv4_address_changed(Platform::String^ ipv4) {}
 		virtual void on_wifi_signal_strength_changed(char strength) {}
@@ -17,6 +18,10 @@ namespace WarGrey::SCADA {
 
 	Windows::UI::Color system_color(Windows::UI::ViewManagement::UIColorType type);
 	Windows::UI::Color system_color(Windows::UI::ViewManagement::UIElementType type);
+
+	double system_screen_brightness(double defval_if_not_available = 0.0);
+	void system_try_change_screen_brightness(double brightness, Windows::Graphics::Display::DisplayBrightnessOverrideOptions opt
+		= Windows::Graphics::Display::DisplayBrightnessOverrideOptions::UseDimmedPolicyWhenBatteryIsLow);
 
 	float system_battery_capacity(float defval_if_no_battery = 1.0F);
 	char system_wifi_signal_strength(char defval_if_no_wifi = -1);

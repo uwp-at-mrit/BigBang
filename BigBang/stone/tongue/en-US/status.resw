@@ -150,4 +150,7 @@
   <data name="nodatum" xml:space="preserve">
     <value>No Datum</value>
   </data>
+  <data name="brightness" xml:space="preserve">
+    <value>Brightness:</value>
+  </data>
 </root>

@@ -636,10 +636,8 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 			dashboard->load_devices(width, height, gwidth, gheight);
 
 			this->change_mode(HSMode::WindowUI);
-			this->statusline = new Statuslinelet(default_logging_level);
-			this->statusbar = new Statusbarlet(this->name(), this->device);
-			this->insert(this->statusbar);
-			this->insert(this->statusline);
+			this->statusbar = this->insert_one(new Statusbarlet(this->name(), this->device));
+			this->statusline = this->insert_one(new Statuslinelet(default_logging_level));
 		}
 
 		{ // delayed initializing
