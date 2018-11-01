@@ -657,14 +657,15 @@ private:
 		this->master->move_to(this->dragxzes[DS::PS], vinset, cy, GraphletAnchor::LC);
 		this->master->move_to(this->dragxys[DS::PS], this->dragxzes[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 
-		{ // reflow gantries
+		{ // reflow gantries and winches
 			auto gantry = this->gantries[DS::psIntermediate];
-
+			
 			gantry->set_status(GantryStatus::WindedOut);
 
 			this->master->move_to(gantry, this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 			this->master->move_to(this->gantries[DS::psTrunnion], gantry, GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
 			this->master->move_to(this->gantries[DS::psDragHead], gantry, GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vinset);
+			this->reflow_winches(DS::PSWC, DS::psTrunnion, DS::psDragHead, GraphletAnchor::RC, GraphletAnchor::LC, vinset * 2.0F);
 		}
 	}
 
@@ -672,14 +673,15 @@ private:
 		this->master->move_to(this->dragxzes[DS::SB], width - vinset, cy, GraphletAnchor::RC);
 		this->master->move_to(this->dragxys[DS::SB], this->dragxzes[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 		
-		{ // reflow gantries
+		{ // reflow gantries and winches
 			auto gantry = this->gantries[DS::sbIntermediate];
-
+			
 			gantry->set_status(GantryStatus::WindedOut);
 
 			this->master->move_to(gantry, this->dragxys[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 			this->master->move_to(this->gantries[DS::sbTrunnion], gantry, GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -vinset);
 			this->master->move_to(this->gantries[DS::sbDragHead], gantry, GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, +vinset);
+			this->reflow_winches(DS::SBWC, DS::sbTrunnion, DS::sbDragHead, GraphletAnchor::LC, GraphletAnchor::RC, vinset * -2.0F);
 		}
 	}
 
@@ -688,6 +690,23 @@ private:
 	void load_gantries(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
 			cs[id] = this->master->insert_one(new Credit<C, E>(radius), id);
+		}
+	}
+
+private:
+	template<typename E>
+	void reflow_winches(E wc, E trunnion, E draghead, GraphletAnchor ga, GraphletAnchor wa, float gapsize) {
+		float compensator_width;
+		
+		this->compensators[wc]->fill_extent(0.0F, 0.0F, &compensator_width, nullptr);
+
+		{ // do reflowing
+			float gw_gap = gapsize * 2.0F + compensator_width * ((gapsize > 0.0F) ? 1.0F : -1.0F);
+
+			this->master->move_to(this->compensators[wc], this->gantries[draghead], ga, wa, gapsize);
+			for (E id = trunnion; id <= draghead; id++) {
+				this->master->move_to(this->winches[id], this->gantries[id], ga, wa, gw_gap);
+			}
 		}
 	}
 
