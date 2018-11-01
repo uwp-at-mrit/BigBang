@@ -136,6 +136,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.cpp">
       <Filter>graphlet\device</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.cpp">
+      <Filter>graphlet\device</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -275,6 +278,9 @@
       <Filter>graphlet\dashboard</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.hpp">
+      <Filter>graphlet\device</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.hpp">
       <Filter>graphlet\device</Filter>
     </ClInclude>
   </ItemGroup>

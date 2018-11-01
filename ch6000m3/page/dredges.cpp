@@ -11,6 +11,7 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/device/compensatorlet.hpp"
+#include "graphlet/device/gantrylet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/device/draglet.hpp"
@@ -52,7 +53,7 @@ private enum class DS : unsigned int {
 	// dimensions
 	Overflow, PSWC, SBWC, PSDP, SBDP, PSVP, SBVP,
 
-	// winches
+	// winches and gantries
 	psTrunnion, psIntermediate, psDragHead,
 	sbTrunnion, sbIntermediate, sbDragHead,
 };
@@ -148,13 +149,18 @@ protected:
 	}
 
 	template<class C, typename E>
+	void load_compensator(std::map<E, Credit<C, E>*>& cs, E id, float height, double range) {
+		cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
+
+		this->load_label(this->labels, id, Colours::Silver);
+		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
+		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
+	}
+
+	template<class C, typename E>
 	void load_compensators(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double range) {
 		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
-
-			this->load_label(this->labels, id, Colours::Silver);
-			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-			this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
+			this->load_compensator(cs, id, height, range);
 		}
 	}
 
@@ -378,9 +384,9 @@ public:
 			this->load_dimension(this->lengths, DS::Overflow, "meter");
 
 			this->load_densityflowmeters(this->dfmeters, DS::PS, DS::SB, dfmeter_height);
-			this->load_compensators(this->compensators, DS::PSWC, DS::SBWC, cylinder_height, 3.0);
+			this->load_compensators(this->compensators, DS::PSWC, DS::SBWC, cylinder_height, compensator_range);
 			this->load_cylinders(this->cylinders, DS::PSDP, DS::SBDP, cylinder_height, 0.0, 20.0, "bar");
-			this->load_cylinders(this->cylinders, DS::PSVP, DS::SBVP, cylinder_height, -1.0, 1.0, "bar");
+			this->load_cylinders(this->cylinders, DS::PSVP, DS::SBVP, cylinder_height, -2.0, 2.0, "bar");
 
 			this->load_winches(this->winches, DS::psTrunnion, DS::sbDragHead, winch_radius);
 		}
@@ -618,15 +624,20 @@ public:
 		float side_drag_width = width * 0.382F;
 		float over_drag_width = drag_height * 0.382F;
 		float winch_radius = over_drag_width * 0.382F;
+		float gantry_radius = drag_height * 0.25F;
 		DragInfo config = this->drag_configs[this->drag_idx];
 
 		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * sign, drag_height, config, this->drag_color);
 		this->load_drag(this->dragxys, this->DS_side, over_drag_width * sign, drag_height, config, this->drag_color);
 
 		if (this->DS_side == DS::PS) {
+			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_radius);
 			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
+			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 		} else {
+			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
 			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
+			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 		}
 	}
 
@@ -646,19 +657,42 @@ private:
 		this->master->move_to(this->dragxzes[DS::PS], vinset, cy, GraphletAnchor::LC);
 		this->master->move_to(this->dragxys[DS::PS], this->dragxzes[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 
-		{ // reflow winches
-			this->master->move_to(this->winches[DS::psIntermediate], this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
-			this->master->move_to(this->winches[DS::psTrunnion], this->winches[DS::psIntermediate], GraphletAnchor::LT, GraphletAnchor::LB);
-			this->master->move_to(this->winches[DS::psDragHead], this->winches[DS::psIntermediate], GraphletAnchor::LB, GraphletAnchor::LT);
+		{ // reflow gantries
+			auto gantry = this->gantries[DS::psIntermediate];
+
+			gantry->set_status(GantryStatus::WindedOut);
+
+			this->master->move_to(gantry, this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->master->move_to(this->gantries[DS::psTrunnion], gantry, GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
+			this->master->move_to(this->gantries[DS::psDragHead], gantry, GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vinset);
 		}
 	}
 
 	void sb_reflow(float width, float height, float cx, float cy, float vinset) {
 		this->master->move_to(this->dragxzes[DS::SB], width - vinset, cy, GraphletAnchor::RC);
 		this->master->move_to(this->dragxys[DS::SB], this->dragxzes[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+		
+		{ // reflow gantries
+			auto gantry = this->gantries[DS::sbIntermediate];
+
+			gantry->set_status(GantryStatus::WindedOut);
+
+			this->master->move_to(gantry, this->dragxys[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+			this->master->move_to(this->gantries[DS::sbTrunnion], gantry, GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -vinset);
+			this->master->move_to(this->gantries[DS::sbDragHead], gantry, GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, +vinset);
+		}
+	}
+
+private:
+	template<class C, typename E>
+	void load_gantries(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float radius) {
+		for (E id = id0; id <= idn; id++) {
+			cs[id] = this->master->insert_one(new Credit<C, E>(radius), id);
+		}
 	}
 
 private: // never delete these graphlets manually.
+	std::map<DS, Credit<Gantrylet, DS>*> gantries;
 
 private:
 	DS DS_side;
@@ -669,8 +703,6 @@ private:
 };
 
 /*************************************************************************************************/
-using namespace Windows::Graphics::Display;
-
 DredgesPage::DredgesPage(IMRMaster* plc, DragView type)
 	: Planet(__MODULE__ + ((type == DragView::_) ? "" : "_" + type.ToString()))
 	, device(plc) {

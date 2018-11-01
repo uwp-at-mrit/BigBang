@@ -2,8 +2,8 @@
 
 #include "math.hpp"
 #include "shape.hpp"
-#include "polar.hpp"
 #include "paint.hpp"
+#include "polar.hpp"
 #include "geometry.hpp"
 
 #include "string.hpp"
@@ -282,6 +282,7 @@ DragXYlet::DragXYlet(DragInfo& info, float width, float height, unsigned int col
 void DragXYlet::construct() {
 	HHatchMarkMetrics metrics;
 	CanvasGeometry^ hm;
+	float drag_thickness_ratio = (this->info.pipe_radius * 2.0F) / this->drag_length;
 	float hm_width = this->width;
 	
 	if (this->leftward) {
@@ -305,10 +306,10 @@ void DragXYlet::construct() {
 	}
 	
 	{ // make drag
-		this->draghead_length = metrics.height;
+		this->draghead_length = this->height * drag_thickness_ratio * 3.14F;
 		this->ws_y = metrics.height * 1.618F;
-		this->ws_height = this->height - this->ws_y - metrics.height * 2.0F - this->draghead_length * 0.25F;
-		this->drag_thickness = this->ws_height * (this->info.pipe_radius * 2.0F) / this->drag_length;
+		this->ws_height = this->height - this->ws_y - metrics.height * 2.0F - this->draghead_length * 0.382F;
+		this->drag_thickness = this->ws_height * drag_thickness_ratio;
 		this->joint_radius = this->drag_thickness * 0.618F;
 
 		this->universal_joint = circle(this->joint_radius);
@@ -318,15 +319,17 @@ void DragXYlet::construct() {
 }
 
 void DragXYlet::update_drag_head() {
-	float tradius = this->draghead_length * 0.618F;
+	float ubase = this->drag_thickness;
+	float bbase = this->width * this->info.head_width / this->drag_length;
+	float h_height = this->draghead_length * 0.618F;
 	double angle = this->draghead_angle + 90.0;
 	float sign = (this->leftward ? 1.0F : -1.0F);
-	float tr_height;
-	auto hshape = polar_trapezoid(tradius, this->drag_thickness, angle, &tr_height);
-	auto vshape = rectangle(-tradius, 0.0F, tradius * 2.0F, this->draghead_length - tr_height);
+	float shape_x = bbase * -0.5F;
+	auto hshape = trapezoid(shape_x, -h_height, ubase, bbase, h_height);
+	auto vshape = rectangle(shape_x, 0.0F, bbase, this->draghead_length - h_height);
 
 	this->visor_part = geometry_freeze(geometry_rotate(vshape, angle, 0.0F, 0.0F));
-	this->draghead_part = geometry_freeze(geometry_translate(hshape, 0.0F, 0.0F));
+	this->draghead_part = geometry_freeze(geometry_rotate(hshape, angle, 0.0F, 0.0F));
 }
 
 void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -371,7 +374,7 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 			}
 		}
 
-		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 2.0F);
+		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F);
 	}
 }
 
