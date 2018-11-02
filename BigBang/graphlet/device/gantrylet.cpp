@@ -49,11 +49,11 @@ static CanvasGeometry^ make_pivot_base(float radius, float extent_ratio, bool le
 }
 
 /*************************************************************************************************/
-Gantrylet::Gantrylet(float radius, double degrees)
-	: Gantrylet(GantryStatus::WindedUp, radius, degrees) {}
+Gantrylet::Gantrylet(float radius, float extent, double degrees)
+	: Gantrylet(GantryStatus::WindedUp, radius, extent, degrees) {}
 
-Gantrylet::Gantrylet(GantryStatus default_status, float radius, double degrees)
-	: IStatuslet(default_status), thickness(2.0F), leftward(radius < 0.0F), degrees(degrees) {
+Gantrylet::Gantrylet(GantryStatus default_status, float radius, float extent, double degrees)
+	: IStatuslet(default_status), thickness(2.0F), leftward(radius < 0.0F), base_extent_ratio(extent), degrees(degrees) {
 	float r = std::fabsf(radius);
 	float wo_x, wo_y;
 
@@ -62,7 +62,6 @@ Gantrylet::Gantrylet(GantryStatus default_status, float radius, double degrees)
 	this->pulley_radius = this->bottom_base_radius * 1.0F;
 	this->top_radiusX = this->pulley_radius * 1.2F;
 	this->top_radiusY = this->top_radiusX * 0.618F;
-	this->base_extent_ratio = 3.0F;
 
 	circle_point(r, degrees + 90.0, &wo_x, &wo_y);
 	
@@ -79,6 +78,22 @@ void Gantrylet::construct() {
 	this->bottom_base = make_pivot_base(this->bottom_base_radius, this->base_extent_ratio, this->leftward);
 
 	this->winded_top_y = this->winded_top_cy - this->winded_top->ComputeBounds().Height * 0.5F;
+	this->winding_style = make_dash_stroke(CanvasDashStyle::Dash);
+}
+
+void Gantrylet::update(long long count, long long interval, long long uptime) {
+	if (this->winding) {
+		switch (this->get_status()) {
+		case GantryStatus::WindingUp: {
+			this->winding_style->DashOffset = +float(count);
+			this->notify_updated();
+		}; break;
+		case GantryStatus::WindingOut: {
+			this->winding_style->DashOffset = -float(count);
+			this->notify_updated();
+		}; break;
+		}
+	}
 }
 
 void Gantrylet::fill_extent(float x, float y, float* w, float* h) {
@@ -112,6 +127,7 @@ void Gantrylet::fill_margin(float x, float y, float* t, float* r, float* b, floa
 void Gantrylet::prepare_style(GantryStatus status, GantryStyle& style) {
 	CAS_SLOT(style.border_color, Colours::DarkGray);
 	CAS_SLOT(style.pulley_color, Colours::DimGray);
+	CAS_SLOT(style.winding_color, Colours::ForestGreen);
 	CAS_SLOT(style.color, Colours::Yellow);
 }
 
@@ -119,11 +135,25 @@ void Gantrylet::on_status_changed(GantryStatus status) {
 	switch (status) {
 	case GantryStatus::WindedOut: {
 		this->winded_out = true;
+		this->winding = false;
 	}; break;
-	default: {
+	case GantryStatus::WindedUp: {
 		this->winded_out = false;
+		this->winding = false;
+	}; break;
+	case GantryStatus::WindingOut: {
+		this->winded_out = false;
+		this->winding = true;
+	}; break;
+	case GantryStatus::WindingUp: {
+		this->winded_out = true;
+		this->winding = true;
+	}; break;
 	}
-	}
+}
+
+float Gantrylet::get_winch_joint_y() {
+	return this->height * 0.5F + this->pivot_base_radius * 2.0F;
 }
 
 void Gantrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
@@ -131,41 +161,38 @@ void Gantrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	auto top = (this->winded_out ? this->winded_top : this->top);
 	float thickoff = this->thickness * 0.5F;
 	float mcx = x + this->pivot_base_radius * this->base_extent_ratio + thickoff;
-	float mcy = y + this->height * 0.5F + this->pivot_base_radius;
+	float mcy = y + this->get_winch_joint_y() - this->pivot_base_radius;
 	float bcx = x + this->bottom_base_radius * this->base_extent_ratio + thickoff;
 	float bcy = y + this->height - this->bottom_base_radius - thickoff;
 	float pcx = (this->winded_out ? (x + this->width - this->pulley_radius - thickoff) : (bcx + this->pulley_radius));
 	float tcx = pcx - this->pulley_radius;
 	float tcy = y + (this->winded_out ? this->winded_top_cy : (this->top_radiusY + thickoff));
 	float pcy = tcy + this->pulley_radius * (this->winded_out ? 1.618F : 1.0F);
+	float mtcx = tcx - this->pivot_base_radius;
 	
 	if (this->leftward) {
 		mcx = x + this->width - (mcx - x);
 		bcx = x + this->width - (bcx - x);
 		pcx = x + this->width - (pcx - x);
 		tcx = x + this->width - (tcx - x);
-	}
-
-	{ // draw boarder
-		float ts, rs, bs, ls;
-
-		this->fill_margin(x, y, &ts, &rs, &bs, &ls);
-
-		ds->DrawRectangle(x, y, this->width, this->height, Colours::Crimson);
-		ds->DrawRectangle(x + ls, y + ts, this->width - ls - rs, this->height - ts - bs, Colours::RoyalBlue);
+		mtcx = x + this->width - (mtcx - x);
 	}
 
 	ds->DrawGeometry(this->pulley, pcx, pcy, s.pulley_color, this->thickness);
 
-	ds->DrawLine(bcx, bcy, tcx, tcy, s.color, this->bottom_base_radius);
-	ds->DrawLine(mcx, mcy, tcx, tcy, s.color, this->pivot_base_radius);
-
-	ds->FillGeometry(top, tcx, tcy, s.color);
-	ds->DrawGeometry(top, tcx, tcy, s.border_color, this->thickness);
+	ds->DrawLine(mcx, mcy, mtcx, tcy, s.color, this->pivot_base_radius);
+	
+	if (this->winding) {
+		ds->DrawLine(mcx, mcy, mtcx, tcy, s.winding_color, this->pivot_base_radius, this->winding_style);
+	}
 
 	ds->FillGeometry(this->pivot_base, mcx, mcy, s.color);
 	ds->DrawGeometry(this->pivot_base, mcx, mcy, s.border_color, this->thickness);
 
+	ds->DrawLine(bcx, bcy, tcx, tcy, s.color, this->bottom_base_radius);
 	ds->FillGeometry(this->bottom_base, bcx, bcy, s.color);
 	ds->DrawGeometry(this->bottom_base, bcx, bcy, s.border_color, this->thickness);
+
+	ds->FillGeometry(top, tcx, tcy, s.color);
+	ds->DrawGeometry(top, tcx, tcy, s.border_color, this->thickness);
 }

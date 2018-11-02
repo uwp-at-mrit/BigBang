@@ -18,6 +18,7 @@
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
 
+#include "schema/ai_pumps.hpp"
 #include "schema/di_valves.hpp"
 #include "schema/di_pumps.hpp"
 
@@ -47,7 +48,7 @@ static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 private enum class HS : unsigned int {
 	// Pumps
 	A, B, G, H,
-	F, C, D, E,
+	C, F, D, E,
 	J, I,
 	Y, L, M, K,
 
@@ -92,18 +93,21 @@ public:
 		this->station_pressure->set_value(RealData(DB203, 21U));
 
 		{ // pump pressures
-			this->pressures[HS::C]->set_value(RealData(DB203, 8U), GraphletAnchor::RB);
-			this->pressures[HS::F]->set_value(RealData(DB203, 9U), GraphletAnchor::RB);
-			this->pressures[HS::D]->set_value(RealData(DB203, 10U), GraphletAnchor::RB);
-			this->pressures[HS::E]->set_value(RealData(DB203, 11U), GraphletAnchor::RB);
+			GraphletAnchor psa = GraphletAnchor::LB;
+			GraphletAnchor sba = GraphletAnchor::RB;
 
-			this->pressures[HS::A]->set_value(RealData(DB203, 12U), GraphletAnchor::LB);
-			this->pressures[HS::B]->set_value(RealData(DB203, 13U), GraphletAnchor::LB);
-			this->pressures[HS::G]->set_value(RealData(DB203, 14U), GraphletAnchor::LB);
-			this->pressures[HS::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LB);
+			this->pressures[HS::C]->set_value(RealData(DB203, Ppump_C), psa);
+			this->pressures[HS::F]->set_value(RealData(DB203, Ppump_F), psa);
+			this->pressures[HS::D]->set_value(RealData(DB203, Ppump_D), psa);
+			this->pressures[HS::E]->set_value(RealData(DB203, Ppump_E), psa);
 
-			this->pressures[HS::I]->set_value(RealData(DB203, 16U), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(DB203, 17U), GraphletAnchor::LB);
+			this->pressures[HS::A]->set_value(RealData(DB203, Ppump_A), sba);
+			this->pressures[HS::B]->set_value(RealData(DB203, Ppump_B), sba);
+			this->pressures[HS::G]->set_value(RealData(DB203, Ppump_G), sba);
+			this->pressures[HS::H]->set_value(RealData(DB203, Ppump_H), sba);
+
+			this->pressures[HS::I]->set_value(RealData(DB203, Ppump_I), GraphletAnchor::RB);
+			this->pressures[HS::J]->set_value(RealData(DB203, Ppump_J), GraphletAnchor::LB);
 		}
 	}
 
@@ -129,23 +133,23 @@ public:
 		} 
 		
 		{ // pump states
-			DI_hydraulic_pump(this->pumps[HS::A], DB4, 9U, DB205, 49U);
-			DI_hydraulic_pump(this->pumps[HS::B], DB4, 17U, DB205, 53U);
-			DI_hydraulic_pump(this->pumps[HS::G], DB4, 57U, DB205, 69U);
-			DI_hydraulic_pump(this->pumps[HS::H], DB4, 65U, DB205, 65U);
+			DI_hydraulic_pump(this->pumps[HS::A], DB4, pump_A_feedback, DB205, pump_A_status);
+			DI_hydraulic_pump(this->pumps[HS::B], DB4, pump_B_feedback, DB205, pump_B_status);
+			DI_hydraulic_pump(this->pumps[HS::G], DB4, pump_G_feedback, DB205, pump_G_status);
+			DI_hydraulic_pump(this->pumps[HS::H], DB4, pump_H_feedback, DB205, pump_H_status);
 			
-			DI_hydraulic_pump(this->pumps[HS::C], DB4, 25U, DB205, 57U);
-			DI_hydraulic_pump(this->pumps[HS::F], DB4, 49U, DB205, 73U);
-			DI_hydraulic_pump(this->pumps[HS::D], DB4, 33U, DB205, 81U);
-			DI_hydraulic_pump(this->pumps[HS::E], DB4, 41U, DB205, 85U);
+			DI_hydraulic_pump(this->pumps[HS::C], DB4, pump_C_feedback, DB205, pump_C_status);
+			DI_hydraulic_pump(this->pumps[HS::F], DB4, pump_F_feedback, DB205, pump_F_status);
+			DI_hydraulic_pump(this->pumps[HS::D], DB4, pump_D_feedback, DB205, pump_D_status);
+			DI_hydraulic_pump(this->pumps[HS::E], DB4, pump_E_feedback, DB205, pump_E_status);
 			
-			DI_hydraulic_pump(this->pumps[HS::Y], DB4, 73U, DB205, 101U);
-			DI_hydraulic_pump(this->pumps[HS::K], DB4, 81U, DB205, 89U);
-			DI_hydraulic_pump(this->pumps[HS::L], DB4, 89U, DB205, 93U);
-			DI_hydraulic_pump(this->pumps[HS::M], DB4, 97U, DB205, 97U);
+			DI_hydraulic_pump(this->pumps[HS::Y], DB4, pump_Y_feedback, DB205, pump_Y_status);
+			DI_hydraulic_pump(this->pumps[HS::L], DB4, pump_L_feedback, DB205, pump_L_status);
+			DI_hydraulic_pump(this->pumps[HS::M], DB4, pump_M_feedback, DB205, pump_M_status);
+			DI_hydraulic_pump(this->pumps[HS::K], DB4, pump_K_feedback, DB205, pump_K_status);
 
-			DI_hydraulic_pump(this->pumps[HS::I], DB4, 105U, DB205, 61U);
-			DI_hydraulic_pump(this->pumps[HS::J], DB4, 113U, DB205, 77U);
+			DI_hydraulic_pump(this->pumps[HS::I], DB4, pump_I_feedback, DB205, pump_I_status);
+			DI_hydraulic_pump(this->pumps[HS::J], DB4, pump_J_feedback, DB205, pump_J_status);
 		}
 
 		{ // valve statuses
@@ -249,21 +253,21 @@ public:
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2);
 		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(17);
 		
-		pTurtle->jump_right(20, HS::e)->move_left(5, HS::E)->move_left(10, HS::SQe)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::d)->move_left(5, HS::D)->move_left(10, HS::SQd)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::f)->move_left(5, HS::F)->move_left(10, HS::SQf)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::c)->move_left(5, HS::C)->move_left(10, HS::SQc)->move_left(5)->jump_back();
+		pTurtle->jump_right(20, HS::h)->move_left(5, HS::H)->move_left(10, HS::SQh)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::g)->move_left(5, HS::G)->move_left(10, HS::SQg)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::b)->move_left(5, HS::B)->move_left(10, HS::SQb)->move_left(5)->jump_back();
+		pTurtle->move_up(3, HS::a)->move_left(5, HS::A)->move_left(10, HS::SQa)->move_left(5)->jump_back();
 		
-		pTurtle->move_up(3, HS::Port)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
+		pTurtle->move_up(3, HS::Starboard)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
 		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
 		pTurtle->jump_up(4)->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
 
-		pTurtle->move_down(3, HS::a)->move_right(5, HS::A)->move_right(10, HS::SQa)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::b)->move_right(5, HS::B)->move_right(10, HS::SQb)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::g)->move_right(5, HS::G)->move_right(10, HS::SQg)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::h)->move_right(5, HS::H)->move_right(10, HS::SQh)->move_right(5);
+		pTurtle->move_down(3, HS::c)->move_right(5, HS::C)->move_right(10, HS::SQc)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::f)->move_right(5, HS::F)->move_right(10, HS::SQf)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::d)->move_right(5, HS::D)->move_right(10, HS::SQd)->move_right(5)->jump_back();
+		pTurtle->move_down(3, HS::e)->move_right(5, HS::E)->move_right(10, HS::SQe)->move_right(5);
 
-		pTurtle->move_up(12, HS::Starboard)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
+		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
 		pTurtle->move_up(1, HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::Master)->jump_right(4);
@@ -304,8 +308,8 @@ public:
 		float pradius = radius * 1.2F;
 
 		{ // load pumps
-			this->load_devices(this->pumps, this->labels, this->captions, HS::A, HS::H, pradius, 180.0, Colours::Salmon);
-			this->load_devices(this->pumps, this->labels, this->captions, HS::F, HS::E, pradius, 0.000, Colours::Salmon);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::A, HS::H, pradius, 0.000, Colours::Salmon);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::C, HS::E, pradius, 180.0, Colours::Salmon);
 			this->load_devices(this->pumps, this->labels, this->captions, HS::Y, HS::K, pradius, -90.0);
 			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00);
 
@@ -353,12 +357,12 @@ public:
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			switch (it->second->id) {
-			case HS::A: case HS::B: case HS::G: case HS::H: {
+			case HS::F: case HS::C: case HS::D: case HS::E: {
 				lbl_dx = x0 - pradius; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
 				cpt_dx = x0 + pradius; cpt_dy = y0; cpt_a = GraphletAnchor::LT;
 				bar_dx = x0 + pradius; bar_dy = y0; bar_a = GraphletAnchor::LB;
 			} break;
-			case HS::F: case HS::C: case HS::D: case HS::E: {
+			case HS::A: case HS::B: case HS::G: case HS::H: {
 				lbl_dx = x0 + pradius; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 				cpt_dx = x0 - pradius; cpt_dy = y0; cpt_a = GraphletAnchor::RT;
 				bar_dx = x0 - pradius; bar_dy = y0; bar_a = GraphletAnchor::RB;

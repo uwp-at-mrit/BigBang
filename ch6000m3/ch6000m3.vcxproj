@@ -324,10 +324,10 @@
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\dredges.hpp" />
     <ClInclude Include="schema\ai_dredges.hpp" />
+    <ClInclude Include="schema\ai_pumps.hpp" />
     <ClInclude Include="schema\di_doors.hpp" />
     <ClInclude Include="schema\di_hopper_pumps.hpp" />
     <ClInclude Include="schema\di_pumps.hpp" />
-    <ClInclude Include="schema\di_pump_dimensions.hpp" />
     <ClInclude Include="schema\di_valves.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />

@@ -17,7 +17,7 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
-#include "schema/di_pump_dimensions.hpp"
+#include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
 #include "schema/di_valves.hpp"
 #include "schema/di_doors.hpp"
@@ -131,10 +131,10 @@ public:
 		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, 1U, DB205, 857U);
 		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, 25U, DB205, 873U);
 
-		DI_pump_dimension(this->pressures[RS::A], DB4, 50U);
-		DI_pump_dimension(this->pressures[RS::C], DB4, 58U);
-		DI_pump_dimension(this->pressures[RS::F], DB4, 74U);
-		DI_pump_dimension(this->pressures[RS::H], DB4, 66U);
+		DI_pump_dimension(this->pressures[RS::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->pressures[RS::C], DB4, pump_C_feedback);
+		DI_pump_dimension(this->pressures[RS::F], DB4, pump_F_feedback);
+		DI_pump_dimension(this->pressures[RS::H], DB4, pump_H_feedback);
 
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D001, DB4, 239U, 465U, DB205, 369U, 0U);
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D002, DB4, 273U, 421U, DB205, 393U, 0U);

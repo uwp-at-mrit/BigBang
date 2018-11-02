@@ -21,14 +21,15 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		float get_node_height();
+		float get_cable_joint_y();
+		float get_cable_joint_size();
 
 	protected:
 		void on_value_changed(double t) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ progress;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ nodes;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ joints;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ pulley;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
@@ -37,7 +38,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		float pulley_size;
-		float node_size;
+		float joint_size;
 		float base_width;
 		float base_height;
 		float progress_width;

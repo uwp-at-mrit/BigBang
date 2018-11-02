@@ -8,7 +8,7 @@
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "schema/di_doors.hpp"
-#include "schema/di_pump_dimensions.hpp"
+#include "schema/di_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -224,10 +224,10 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_pump_dimension(this->dimensions[HD::A], DB4, 50U);
-		DI_pump_dimension(this->dimensions[HD::D], DB4, 82U);
-		DI_pump_dimension(this->dimensions[HD::E], DB4, 86U);
-		DI_pump_dimension(this->dimensions[HD::H], DB4, 66U);
+		DI_pump_dimension(this->dimensions[HD::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->dimensions[HD::D], DB4, pump_D_feedback);
+		DI_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);
+		DI_pump_dimension(this->dimensions[HD::H], DB4, pump_H_feedback);
 
 		DI_hopper_door(this->hdoors[HD::PS1], DB4, 329U, DB205, 889U);
 		DI_hopper_door(this->hdoors[HD::PS2], DB4, 330U, DB205, 905U);

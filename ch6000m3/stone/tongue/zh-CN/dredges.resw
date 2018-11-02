@@ -120,46 +120,64 @@
   <data name="Overflow" xml:space="preserve">
     <value>溢流桶</value>
   </data>
-  <data name="PSDP" xml:space="preserve">
+  <data name="PSHPDP" xml:space="preserve">
     <value>排压</value>
   </data>
   <data name="psDraghead" xml:space="preserve">
-    <value>左耙头</value>
+    <value>耙头</value>
   </data>
   <data name="psIntermediate" xml:space="preserve">
-    <value>左耙中</value>
+    <value>耙中</value>
   </data>
   <data name="psTrunnion" xml:space="preserve">
-    <value>左弯管</value>
+    <value>弯管</value>
   </data>
-  <data name="PSVP" xml:space="preserve">
+  <data name="PSHPVP" xml:space="preserve">
     <value>真空</value>
   </data>
   <data name="PSWC" xml:space="preserve">
-    <value>补偿器</value>
+    <value>波浪补偿器</value>
   </data>
-  <data name="SBDP" xml:space="preserve">
+  <data name="SBHPDP" xml:space="preserve">
     <value>排压</value>
   </data>
   <data name="sbDraghead" xml:space="preserve">
-    <value>右耙头</value>
+    <value>耙头</value>
   </data>
   <data name="sbIntermediate" xml:space="preserve">
-    <value>右耙中</value>
+    <value>耙中</value>
   </data>
   <data name="sbTrunnion" xml:space="preserve">
-    <value>右弯管</value>
+    <value>弯管</value>
   </data>
-  <data name="SBVP" xml:space="preserve">
+  <data name="SBHPVP" xml:space="preserve">
     <value>真空</value>
   </data>
   <data name="SBWC" xml:space="preserve">
-    <value>补偿器</value>
+    <value>波浪补偿器</value>
   </data>
-  <data name="PS" xml:space="preserve">
+  <data name="PSDP" xml:space="preserve">
     <value>左压差</value>
   </data>
-  <data name="SB" xml:space="preserve">
+  <data name="SBDP" xml:space="preserve">
     <value>右压差</value>
+  </data>
+  <data name="Overlook" xml:space="preserve">
+    <value>俯视图</value>
+  </data>
+  <data name="PS" xml:space="preserve">
+    <value>左舷</value>
+  </data>
+  <data name="Sidelook" xml:space="preserve">
+    <value>侧视图</value>
+  </data>
+  <data name="SB" xml:space="preserve">
+    <value>右舷</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>航速</value>
+  </data>
+  <data name="Tide" xml:space="preserve">
+    <value>潮位</value>
   </data>
 </root>

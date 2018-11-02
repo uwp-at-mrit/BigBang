@@ -34,7 +34,7 @@ Compensatorlet::Compensatorlet(double range, float width, float height, unsigned
 	}
 
 	this->progress_width = this->thickness * 3.14F;
-	this->node_size = this->thickness * 1.5F;
+	this->joint_size = this->thickness * 1.5F;
 	this->pulley_size = this->width * 0.618F;
 	this->base_width = this->pulley_size * 0.618F;
 	this->base_height = this->height * 0.618F - this->pulley_size - this->thickness;
@@ -42,11 +42,11 @@ Compensatorlet::Compensatorlet(double range, float width, float height, unsigned
 }
 
 void Compensatorlet::construct() {
-	auto node = rectangle(this->thickness * 0.5F, -this->node_size * 0.5F, this->node_size, this->node_size);
+	auto joint = rectangle(this->thickness * 0.5F, -this->joint_size * 0.5F, this->joint_size, this->joint_size);
 
 	this->pulley = circle(this->pulley_size * 0.5F);
 	this->base = rectangle(this->base_width, this->base_height);
-	this->nodes = geometry_draft(geometry_union(node, node, this->width - this->node_size - this->thickness), this->thickness);
+	this->joints = geometry_draft(geometry_union(joint, joint, this->width - this->joint_size - this->thickness), this->thickness);
 
 	this->set_value(0.0, true);
 }
@@ -83,15 +83,19 @@ void Compensatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	{ // draw lines
 		float r = this->pulley_size * 0.5F;
-		float xoff = (this->node_size + this->thickness) * 0.5F;
+		float xoff = (this->joint_size + this->thickness) * 0.5F;
 		float ny = y + this->anchor_ny - this->thickness;
 
-		ds->DrawCachedGeometry(this->nodes, x, y + this->anchor_ny, this->pulley_color);
+		ds->DrawCachedGeometry(this->joints, x, y + this->anchor_ny, this->pulley_color);
 		ds->DrawLine(cx - r, y + this->anchor_py, x + xoff,               ny, this->pulley_color, this->thickness);
 		ds->DrawLine(cx + r, y + this->anchor_py, x + this->width - xoff, ny, this->pulley_color, this->thickness);
 	}
 }
 
-float Compensatorlet::get_node_height() {
+float Compensatorlet::get_cable_joint_y() {
 	return this->anchor_ny;
+}
+
+float Compensatorlet::get_cable_joint_size() {
+	return this->joint_size;
 }

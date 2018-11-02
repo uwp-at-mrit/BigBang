@@ -91,9 +91,6 @@
     <ClInclude Include="schema\di_pumps.hpp">
       <Filter>schema</Filter>
     </ClInclude>
-    <ClInclude Include="schema\di_pump_dimensions.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
     <ClInclude Include="schema\di_valves.hpp">
       <Filter>schema</Filter>
     </ClInclude>
@@ -111,6 +108,9 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="schema\ai_dredges.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\ai_pumps.hpp">
       <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>

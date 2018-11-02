@@ -120,7 +120,7 @@
   <data name="Overflow" xml:space="preserve">
     <value>Overflow Pipe</value>
   </data>
-  <data name="PSDP" xml:space="preserve">
+  <data name="PSHPDP" xml:space="preserve">
     <value>PS Discharge Pressure</value>
   </data>
   <data name="psDraghead" xml:space="preserve">
@@ -132,13 +132,13 @@
   <data name="psTrunnion" xml:space="preserve">
     <value>PS Trunnion</value>
   </data>
-  <data name="PSVP" xml:space="preserve">
+  <data name="PSHPVP" xml:space="preserve">
     <value>PS Vacuum Pressure</value>
   </data>
   <data name="PSWC" xml:space="preserve">
     <value>PS Wave Compensator</value>
   </data>
-  <data name="SBDP" xml:space="preserve">
+  <data name="SBHPDP" xml:space="preserve">
     <value>SB Discharge Pressure</value>
   </data>
   <data name="sbDraghead" xml:space="preserve">
@@ -150,16 +150,34 @@
   <data name="sbTrunnion" xml:space="preserve">
     <value>SB Trunnion</value>
   </data>
-  <data name="SBVP" xml:space="preserve">
+  <data name="SBHPVP" xml:space="preserve">
     <value>SB Vaccum Pressure</value>
   </data>
   <data name="SBWC" xml:space="preserve">
     <value>SB Wave Compensator</value>
   </data>
-  <data name="PS" xml:space="preserve">
+  <data name="PSDP" xml:space="preserve">
     <value>PS Draghead Differential Pressure</value>
   </data>
-  <data name="SB" xml:space="preserve">
+  <data name="SBDP" xml:space="preserve">
     <value>SB Draghead Differential Pressure</value>
+  </data>
+  <data name="Overlook" xml:space="preserve">
+    <value>Over Look View</value>
+  </data>
+  <data name="PS" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Sidelook" xml:space="preserve">
+    <value>Side Look View</value>
+  </data>
+  <data name="SB" xml:space="preserve">
+    <value>Starboard</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="Tide" xml:space="preserve">
+    <value>Tide</value>
   </data>
 </root>

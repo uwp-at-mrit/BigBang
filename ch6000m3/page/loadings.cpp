@@ -15,7 +15,7 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
-#include "schema/di_pump_dimensions.hpp"
+#include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
 #include "schema/di_valves.hpp"
 
@@ -66,12 +66,12 @@ private enum class LD : unsigned int {
 	n0325, n0405, n0723, n0923
 };
 
-private class Barge final
+private class Vessel final
 	: public PLCConfirmation
 	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>
 	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, IMRMaster*> {
 public:
-	Barge(LoadingsPage* master) : master(master) {}
+	Vessel(LoadingsPage* master) : master(master) {}
 
 public:
 	void pre_read_data(Syslog* logger) override {
@@ -106,10 +106,10 @@ public:
 		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, 1U, DB205, 857U, 825U);
 		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, 25U, DB205, 873U, 841U);
 
-		DI_pump_dimension(this->pressures[LD::A], DB4, 50U);
-		DI_pump_dimension(this->pressures[LD::C], DB4, 58U);
-		DI_pump_dimension(this->pressures[LD::F], DB4, 74U);
-		DI_pump_dimension(this->pressures[LD::H], DB4, 66U);
+		DI_pump_dimension(this->pressures[LD::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->pressures[LD::C], DB4, pump_C_feedback);
+		DI_pump_dimension(this->pressures[LD::F], DB4, pump_F_feedback);
+		DI_pump_dimension(this->pressures[LD::H], DB4, pump_H_feedback);
 
 		DI_paired_valves(this->gvalves, this->mvalves, LD::D001, DB4, 239U, 465U, DB205, 369U, 0U);
 		DI_paired_valves(this->gvalves, this->mvalves, LD::D002, DB4, 273U, 421U, DB205, 393U, 0U);
@@ -480,7 +480,7 @@ private:
 
 private class ShipDecorator : public IPlanetDecorator {
 public:
-	ShipDecorator(Barge* master) : master(master) {
+	ShipDecorator(Vessel* master) : master(master) {
 		float height = 1.0F;
 		float xradius = height * 0.10F;
 		float yradius = height * 0.50F;
@@ -558,11 +558,11 @@ private:
 	float ship_width;
 
 private:
-	Barge* master;
+	Vessel* master;
 };
 
 LoadingsPage::LoadingsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
-	Barge* dashboard = new Barge(this);
+	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>(dashboard, plc);
@@ -594,7 +594,7 @@ LoadingsPage::~LoadingsPage() {
 }
 
 void LoadingsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
-	auto dashboard = dynamic_cast<Barge*>(this->dashboard);
+	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
@@ -626,7 +626,7 @@ void LoadingsPage::load(CanvasCreateResourcesReason reason, float width, float h
 }
 
 void LoadingsPage::reflow(float width, float height) {
-	auto dashboard = dynamic_cast<Barge*>(this->dashboard);
+	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
 		float vinset = statusbar_height();
