@@ -79,6 +79,7 @@ namespace WarGrey::SCADA {
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
 
 	public:
@@ -87,6 +88,7 @@ namespace WarGrey::SCADA {
 		virtual void add_selected(IGraphlet* g) = 0;
 		virtual void set_selected(IGraphlet* g) = 0;
 		virtual void no_selected() = 0;
+		virtual bool is_selected(IGraphlet* g) = 0;
 
 	public:
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
@@ -252,6 +254,7 @@ namespace WarGrey::SCADA {
 		void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;
+		bool is_selected(IGraphlet* g) override;
 
 	public:
 		WarGrey::SCADA::IGraphlet* get_focus_graphlet() override;

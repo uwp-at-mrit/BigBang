@@ -70,7 +70,7 @@ static bool valid_address(Syslog* logger, size_t db, size_t addr0, size_t addrn,
 
 /*************************************************************************************************/
 bool WarGrey::SCADA::DBX(const uint8* src, size_t idx) {
-	return DBX(src, idx / 8, idx % 8);
+	return DBX(src, idx / 8U, idx % 8U);
 }
 
 bool WarGrey::SCADA::DBX(const uint8* src, size_t idx, size_t bidx) {
@@ -96,19 +96,38 @@ float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* logger) : MRMaster(logger, nullptr, MRIT_PORT), tidemark(0.0F), last_sending_time(-1L) {
-	this->append_confirmation_receiver(this);
-}
+PLCMaster::PLCMaster(Syslog* logger, bool debug)
+	: MRMaster(logger, nullptr, MRIT_PORT), debug(debug), last_sending_time(-1L) {}
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->last_sending_time != uptime) {
-		this->read_all_signal(98, 0, 0x1263, this->tidemark);
+		this->read_all_signal((uint16)98U, (uint16)0U, (uint16)0x1263U);
 		this->last_sending_time = uptime;
 	}
 }
 
-void PLCMaster::on_realtime_data(const uint8* db2, size_t count, Syslog* logger) {
-	this->tidemark = bigendian_float_ref(db2, 0);
+void PLCMaster::send_setting(uint16 db, uint16 address, float datum) {
+	if (!debug) {
+		this->write_analog_quantity(db, address, datum);
+	} else {
+		this->get_logger()->log_message(Log::Info, L"SET DBA%d = %f, 1.%d", db, datum, address);
+	}
+}
+
+void PLCMaster::send_command(uint8 idx, uint8 bidx) {
+	if (!debug) {
+		this->write_digital_quantity((uint16)300U, idx, bidx, true);
+	} else {
+		this->get_logger()->log_message(Log::Info, L"EXE DB%d.DBX%d.%d", 300U, idx, bidx);
+	}
+}
+
+void PLCMaster::send_command(uint16 index_p1) {
+	uint16 idx = index_p1 - 1U;
+
+	if (idx >= 0U) {
+		this->send_command((uint8)(idx / 8), (uint8)(idx % 8));
+	}
 }
 
 /*************************************************************************************************/

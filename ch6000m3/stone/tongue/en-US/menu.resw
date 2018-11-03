@@ -147,4 +147,7 @@
   <data name="Auto" xml:space="preserve">
     <value>Auto Control</value>
   </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

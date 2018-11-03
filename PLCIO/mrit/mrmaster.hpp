@@ -43,9 +43,9 @@ namespace WarGrey::SCADA {
 		void append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
 
     public:
-		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) = 0;
-		virtual void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
-		virtual void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) = 0;
+		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark = 0.0F) = 0;
+		virtual void write_analog_quantity(uint16 data_block, uint16 address, float datum) = 0;
+		virtual void write_digital_quantity(uint16 data_block, uint8 index, uint8 bit_index, bool value) = 0;
 
 	public:
 		void on_socket(Windows::Networking::Sockets::StreamSocket^ plc) override;
@@ -89,11 +89,11 @@ namespace WarGrey::SCADA {
 		void send_scheduled_request(long long count, long long interval, long long uptime) {}
 
 	public:
-		void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) override;
+		void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark = 0.0F) override;
 
 	public:
-		void write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
-		void write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) override;
+		void write_analog_quantity(uint16 data_block, uint16 address, float datum) override;
+		void write_digital_quantity(uint16 data_block, uint8 index, uint8 bit_index, bool value) override;
 	};
 
 	private class MRConfirmation : public WarGrey::SCADA::IMRConfirmation {

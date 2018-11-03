@@ -18,9 +18,10 @@
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
 
-#include "schema/ai_pumps.hpp"
 #include "schema/di_valves.hpp"
+#include "schema/ai_pumps.hpp"
 #include "schema/di_pumps.hpp"
+#include "schema/do_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -33,8 +34,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
 
-private enum class HSPOperation { Start, Stop, Reset, Auto, _ };
-private enum class HSVOperation { Start, Stop, Reset, _ };
+private enum class HSPOperation { Start, Stop, Reset, _ };
+private enum class HSHOperation { Start, Stop, Cancel, Auto, _ };
 
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
@@ -74,8 +75,8 @@ private enum class HS : unsigned int {
 
 private class Hydraulics final
 	: public PLCConfirmation
-	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>
-	, public IMenuCommand<HSVOperation, Credit<GateValvelet, HS>, IMRMaster*> {
+	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>
+	, public IMenuCommand<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
@@ -153,27 +154,27 @@ public:
 		}
 
 		{ // valve statuses
-			DI_gate_valve(this->valves[HS::SQ1], DB4, 113U);
-			DI_gate_valve(this->valves[HS::SQ2], DB4, 114U);
+			DI_gate_valve(this->valves[HS::SQ1], DB4, gate_valve_SQ1_status);
+			DI_gate_valve(this->valves[HS::SQ2], DB4, gate_valve_SQ2_status);
 
-			DI_gate_valve(this->valves[HS::SQk1], DB4, 122U);
-			DI_gate_valve(this->valves[HS::SQk2], DB4, 123U);
-			DI_gate_valve(this->valves[HS::SQl], DB4, 124U);
-			DI_gate_valve(this->valves[HS::SQm], DB4, 125U);
-			DI_gate_valve(this->valves[HS::SQy], DB4, 126U);
+			DI_gate_valve(this->valves[HS::SQk1], DB4, gate_valve_SQk1_status);
+			DI_gate_valve(this->valves[HS::SQk2], DB4, gate_valve_SQk2_status);
+			DI_gate_valve(this->valves[HS::SQl], DB4, gate_valve_SQl_status);
+			DI_gate_valve(this->valves[HS::SQm], DB4, gate_valve_SQm_status);
+			DI_gate_valve(this->valves[HS::SQy], DB4, gate_valve_SQy_status);
 
-			DI_gate_valve(this->valves[HS::SQi], DB4, 128U);
-			DI_gate_valve(this->valves[HS::SQj], DB4, 129U);
+			DI_gate_valve(this->valves[HS::SQi], DB4, gate_valve_SQi_status);
+			DI_gate_valve(this->valves[HS::SQj], DB4, gate_valve_SQj_status);
 
-			DI_gate_valve(this->valves[HS::SQc], DB4, 135U);
-			DI_gate_valve(this->valves[HS::SQd], DB4, 136U);
-			DI_gate_valve(this->valves[HS::SQe], DB4, 137U);
-			DI_gate_valve(this->valves[HS::SQf], DB4, 138U);
+			DI_gate_valve(this->valves[HS::SQc], DB4, gate_valve_SQc_status);
+			DI_gate_valve(this->valves[HS::SQd], DB4, gate_valve_SQd_status);
+			DI_gate_valve(this->valves[HS::SQe], DB4, gate_valve_SQe_status);
+			DI_gate_valve(this->valves[HS::SQf], DB4, gate_valve_SQf_status);
 
-			DI_gate_valve(this->valves[HS::SQa], DB4, 141U);
-			DI_gate_valve(this->valves[HS::SQb], DB4, 142U);
-			DI_gate_valve(this->valves[HS::SQg], DB4, 143U);
-			DI_gate_valve(this->valves[HS::SQh], DB4, 144U);
+			DI_gate_valve(this->valves[HS::SQa], DB4, gate_valve_SQa_status);
+			DI_gate_valve(this->valves[HS::SQb], DB4, gate_valve_SQb_status);
+			DI_gate_valve(this->valves[HS::SQg], DB4, gate_valve_SQc_status);
+			DI_gate_valve(this->valves[HS::SQh], DB4, gate_valve_SQd_status);
 		}
 
 		{ // filter statuses
@@ -198,15 +199,15 @@ public:
 			this->try_flow_oil(HS::SQi, HS::I, HS::i, nullptr, 0, oil_color);
 			this->try_flow_oil(HS::SQj, HS::J, HS::j, nullptr, 0, oil_color);
 
-			this->try_flow_oil(HS::SQc, HS::C, HS::c, sb_path, oil_color);
-			this->try_flow_oil(HS::SQd, HS::D, HS::d, sb_path, oil_color);
-			this->try_flow_oil(HS::SQe, HS::E, HS::e, sb_path, oil_color);
-			this->try_flow_oil(HS::SQf, HS::F, HS::f, sb_path, oil_color);
+			this->try_flow_oil(HS::SQc, HS::C, HS::c, ps_path, oil_color);
+			this->try_flow_oil(HS::SQd, HS::D, HS::d, ps_path, oil_color);
+			this->try_flow_oil(HS::SQe, HS::E, HS::e, ps_path, oil_color);
+			this->try_flow_oil(HS::SQf, HS::F, HS::f, ps_path, oil_color);
 
-			this->try_flow_oil(HS::SQa, HS::A, HS::a, ps_path, oil_color);
-			this->try_flow_oil(HS::SQb, HS::B, HS::b, ps_path, oil_color);
-			this->try_flow_oil(HS::SQg, HS::G, HS::g, ps_path, oil_color);
-			this->try_flow_oil(HS::SQh, HS::H, HS::h, ps_path, oil_color);
+			this->try_flow_oil(HS::SQa, HS::A, HS::a, sb_path, oil_color);
+			this->try_flow_oil(HS::SQb, HS::B, HS::b, sb_path, oil_color);
+			this->try_flow_oil(HS::SQg, HS::G, HS::g, sb_path, oil_color);
+			this->try_flow_oil(HS::SQh, HS::H, HS::h, sb_path, oil_color);
 
 			this->try_flow_oil(HS::SQy, HS::Y, HS::y, i_path, oil_color);
 			this->try_flow_oil(HS::SQl, HS::L, HS::l, i_path, oil_color);
@@ -225,16 +226,17 @@ public:
 	}
 
 public:
-	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			pump->id.ToString()->Data());
+	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) {
+		plc->send_command(DO_hydraulic_pump_command(cmd, pump->id));
 	}
 
-	void execute(HSVOperation cmd, Credit<GateValvelet, HS>* valve, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
+	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) {
+		switch (cmd) {
+		case HSHOperation::Start:  plc->send_command(665U); break;
+		case HSHOperation::Stop:   plc->send_command(666U); break;
+		case HSHOperation::Cancel: plc->send_command(667U); break;
+		case HSHOperation::Auto:   plc->send_command(668U); break;
+		}
 	}
 
 public:
@@ -253,19 +255,19 @@ public:
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2);
 		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(17);
 		
-		pTurtle->jump_right(20, HS::h)->move_left(5, HS::H)->move_left(10, HS::SQh)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::g)->move_left(5, HS::G)->move_left(10, HS::SQg)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::b)->move_left(5, HS::B)->move_left(10, HS::SQb)->move_left(5)->jump_back();
-		pTurtle->move_up(3, HS::a)->move_left(5, HS::A)->move_left(10, HS::SQa)->move_left(5)->jump_back();
+		pTurtle->jump_right(20, HS::h)->move_left(4, HS::H)->move_left(12, HS::SQh)->move_left(4)->jump_back();
+		pTurtle->move_up(3, HS::g)->move_left(4, HS::G)->move_left(12, HS::SQg)->move_left(4)->jump_back();
+		pTurtle->move_up(3, HS::b)->move_left(4, HS::B)->move_left(12, HS::SQb)->move_left(4)->jump_back();
+		pTurtle->move_up(3, HS::a)->move_left(4, HS::A)->move_left(12, HS::SQa)->move_left(4)->jump_back();
 		
 		pTurtle->move_up(3, HS::Starboard)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
 		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
 		pTurtle->jump_up(4)->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
 
-		pTurtle->move_down(3, HS::c)->move_right(5, HS::C)->move_right(10, HS::SQc)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::f)->move_right(5, HS::F)->move_right(10, HS::SQf)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::d)->move_right(5, HS::D)->move_right(10, HS::SQd)->move_right(5)->jump_back();
-		pTurtle->move_down(3, HS::e)->move_right(5, HS::E)->move_right(10, HS::SQe)->move_right(5);
+		pTurtle->move_down(3, HS::c)->move_right(4, HS::C)->move_right(12, HS::SQc)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HS::f)->move_right(4, HS::F)->move_right(12, HS::SQf)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HS::d)->move_right(4, HS::D)->move_right(12, HS::SQd)->move_right(4)->jump_back();
+		pTurtle->move_down(3, HS::e)->move_right(4, HS::E)->move_right(12, HS::SQe)->move_right(4);
 
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
 		pTurtle->move_up(1, HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
@@ -589,12 +591,12 @@ private:
 	HydraulicsPage* master;
 };
 
-HydraulicsPage::HydraulicsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
-	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, IMRMaster*>(dashboard, plc);
-	this->valve_op = make_menu<HSVOperation, Credit<GateValvelet, HS>, IMRMaster*>(dashboard, plc);
+	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>(dashboard, plc);
+	this->heater_op = make_menu<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -673,19 +675,19 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
+	auto heater = dynamic_cast<Credit<Thermometerlet, HS>*>(g);
+
 	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| (dynamic_cast<GateValvelet*>(g) != nullptr));
+		|| ((heater != nullptr) && (heater->id == HS::Master)));
 }
 
-void HydraulicsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
-	auto gvalve = dynamic_cast<GateValvelet*>(g);
-	
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
+	auto heater = dynamic_cast<Thermometerlet*>(g);
 
 	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);
-	} else if (gvalve != nullptr) {
-		menu_popup(this->valve_op, g, local_x, local_y);
+	} else if (heater != nullptr) {
+		menu_popup(this->heater_op, g, local_x, local_y);
 	}
 }

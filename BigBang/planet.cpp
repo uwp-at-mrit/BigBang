@@ -618,6 +618,17 @@ void Planet::no_selected() {
 	}
 }
 
+bool Planet::is_selected(IGraphlet* g) {
+	GraphletInfo* info = planet_graphlet_info(this, g);
+	bool selected = false;
+
+	if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
+		selected = info->selected;
+	}
+
+	return selected;
+}
+
 IGraphlet* Planet::get_focus_graphlet() {
 	return (this->graphlet_unmasked(this->focused_graphlet) ? this->focused_graphlet : nullptr);
 }
@@ -838,6 +849,10 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 
 				this->on_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
 
+				if (info->selected) {
+					this->on_tap_selected(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+				}
+
 				if (pdt == PointerDeviceType::Touch) {
 					this->on_goodbye(unmasked_graphlet, local_x, local_y, shifted, ctrled);
 				}
@@ -847,6 +862,7 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 				if (unmasked_graphlet->handles_events()) {
 					unmasked_graphlet->on_right_tap(local_x, local_y, shifted, ctrled);
 				}
+
 				this->on_right_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
 			} break;
 			}

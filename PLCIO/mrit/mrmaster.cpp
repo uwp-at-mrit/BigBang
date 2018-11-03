@@ -292,16 +292,29 @@ void IMRMaster::notify_connectivity_changed() {
 /*************************************************************************************************/
 void MRMaster::read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark) {
 	uint8 flbytes[] = { 0, 0, 0, 0 };
+	size_t data_length = sizeof(flbytes) / sizeof(uint8);
 
-	bigendian_float_set(flbytes, 0, tidemark);
+	bigendian_float_set(flbytes, 0U, tidemark);
 
-	this->request(this->preference.read_signal_fcode(), data_block, addr0, addrn, flbytes, 4);
+	this->request(this->preference.read_signal_fcode(), data_block, addr0, addrn, flbytes, data_length);
 }
 
-void MRMaster::write_analog_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRMaster::write_analog_quantity(uint16 data_block, uint16 address, float datum) {
+	uint8 flbytes[] = { 0, 0, 0, 0 };
+	size_t data_length = sizeof(flbytes) / sizeof(uint8);
 
+	bigendian_float_set(flbytes, 0U, datum);
+
+	this->request(this->preference.write_analog_quantity_fcode(), data_block, address, address + 4U, flbytes, data_length);
 }
 
-void MRMaster::write_digital_quantity(uint16 data_block, uint16 addr0, uint16 addrn) {
+void MRMaster::write_digital_quantity(uint16 data_block, uint8 idx, uint8 bidx, bool value) {
+	uint8 xbytes[] = { 0, 0, 0, 0 };
+	size_t data_length = sizeof(xbytes) / sizeof(uint8);
 
+	xbytes[1] = idx;
+	xbytes[2] = bidx;
+	xbytes[3] = (value ? 0x01 : 0x00);
+
+	this->request(this->preference.write_digital_quantity_fcode(), data_block, 0U, 0U, xbytes, data_length);
 }
