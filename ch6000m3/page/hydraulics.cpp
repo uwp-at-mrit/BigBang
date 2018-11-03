@@ -226,8 +226,25 @@ public:
 	}
 
 public:
+	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) {
+		HydraulicPumpStatus status = pump->get_status();
+		bool executable = true;
+		
+		switch (cmd) {
+		case HSPOperation::Start: executable = (status == HydraulicPumpStatus::Ready); break;
+		case HSPOperation::Stop: executable = (status == HydraulicPumpStatus::Running); break;
+		}
+
+		return executable && plc->connected();
+	}
+
 	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) {
 		plc->send_command(DO_hydraulic_pump_command(cmd, pump->id));
+	}
+
+public:
+	bool can_execute(HSPOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) {
+		return plc->connected();
 	}
 
 	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) {

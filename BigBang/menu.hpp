@@ -28,12 +28,12 @@ namespace WarGrey::SCADA {
 	template<typename Menu, class G, class Attachment>
 	private class IMenuCommand abstract {
 	public:
-		virtual bool can_execute(Menu cmd, Attachment pobj) { return true; };
-
+		virtual bool can_execute(Menu cmd, G* g, Attachment pobj, bool acc_executable) { return true; };
+		
 	public:
-		virtual void begin_execute_sequence(Menu cmd, Attachment pobj) {}
+		virtual void begin_batch_sequence(Menu cmd, Attachment pobj) {}
 		virtual void execute(Menu cmd, G* g, Attachment pobj) = 0;
-		virtual void end_execute_sequence(Menu cmd, Attachment pobj) {}
+		virtual void end_batch_sequence(Menu cmd, Attachment pobj) {}
 	};
 
 	template<typename Menu, class G, class Attachment>
@@ -48,25 +48,38 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool CanExecute(Platform::Object^ parameter) {
-			return this->executor->can_execute(this->command, this->attachment);
-		}
-
-		virtual void Execute(Platform::Object^ parameter) {
 			IGraphlet* maybe_target = menu_get_next_target_graphlet(nullptr);
-
-			this->executor->begin_execute_sequence(this->command, this->attachment);
+			bool executable = true;
 
 			while (maybe_target != nullptr) {
 				auto target = dynamic_cast<G*>(maybe_target);
 
 				if (target != nullptr) {
+					executable = this->executor->can_execute(this->command, target, this->attachment, executable);
+				}
+
+				maybe_target = menu_get_next_target_graphlet(maybe_target);
+			}
+
+			return executable;
+		}
+
+		virtual void Execute(Platform::Object^ parameter) {
+			IGraphlet* maybe_target = menu_get_next_target_graphlet(nullptr);
+
+			this->executor->begin_batch_sequence(this->command, this->attachment);
+
+			while (maybe_target != nullptr) {
+				auto target = dynamic_cast<G*>(maybe_target);
+
+				if ((target != nullptr) && (this->executor->can_execute(this->command, target, this->attachment, true))) {
 					this->executor->execute(this->command, target, this->attachment);
 				}
 
 				maybe_target = menu_get_next_target_graphlet(maybe_target);
 			}
 
-			this->executor->end_execute_sequence(this->command, this->attachment);
+			this->executor->end_batch_sequence(this->command, this->attachment);
 		}
 
 	public:

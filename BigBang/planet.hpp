@@ -93,7 +93,7 @@ namespace WarGrey::SCADA {
 	public:
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
 		virtual bool can_select(IGraphlet* g) { return (g != nullptr); }
-		virtual bool can_select_multiple() { return false; }
+		virtual bool can_select_multiple() { return true; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
 		

@@ -674,10 +674,8 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 
 		if (this->can_select(g)) {
 			if (!info->selected) {
-				if (shifted) {
-					if (this->rubberband_allowed) {
-						unsafe_add_selected(this, g, info);
-					}
+				if (shifted && this->rubberband_allowed) {
+					unsafe_add_selected(this, g, info);
 				} else {
 					unsafe_set_selected(this, g, info);
 
