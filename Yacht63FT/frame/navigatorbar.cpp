@@ -190,7 +190,7 @@ void Navigatorbar::on_navigated_to(Yacht page) {
 	}
 }
 
-void Navigatorbar::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void Navigatorbar::on_tap(IGraphlet* g, float local_x, float local_y) {
 	auto credit_item = dynamic_cast<CreditItemlet*>(g);
 
 	if (credit_item != nullptr) {

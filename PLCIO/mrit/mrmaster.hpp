@@ -85,6 +85,9 @@ namespace WarGrey::SCADA {
         MRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
 			: IMRMaster(logger, server, port, confirmation) {}
 
+		MRMaster(WarGrey::SCADA::Syslog* logger, uint16 port, IMRConfirmation* confirmation = nullptr)
+			: MRMaster(logger, nullptr, port, confirmation) {}
+
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime) {}
 

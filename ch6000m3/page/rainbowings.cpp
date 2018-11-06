@@ -770,13 +770,11 @@ bool RainbowingsPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
 }
 
-void RainbowingsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void RainbowingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
-
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);

@@ -585,11 +585,9 @@ bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void HopperDoorsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
-
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);

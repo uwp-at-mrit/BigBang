@@ -63,13 +63,28 @@ namespace WarGrey::SCADA {
 				target->set_status(DBX(db205, idx205_p1 + 0), HydraulicPumpStatus::Stopping);
 				target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Unstartable);
 				target->set_status(DBX(db205, idx205_p1 + 2), HydraulicPumpStatus::Unstoppable);
-				target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
 
-				// equivalent
-				// target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::StartReady);
-				target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
+				// use HydraulicPumpStatus::Ready instead of HydraulicPumpStatus::StartReady.
+				target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::Ready);
+
+				// the rest two are not used
+				// target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
+				// target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
 			}
 		}
+	}
+
+	template<class H, typename Menu>
+	bool hydraulic_command_executable(H* target, Menu cmd, bool otherwise) {
+		HydraulicPumpStatus status = target->get_status();
+		bool executable = otherwise;
+
+		switch (cmd) {
+		case Menu::Start: executable = (status == HydraulicPumpStatus::Ready); break;
+		case Menu::Stop: executable = (status == HydraulicPumpStatus::Running); break;
+		}
+
+		return executable;
 	}
 
 	/************************************************************************************************/

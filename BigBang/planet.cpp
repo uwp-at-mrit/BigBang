@@ -668,13 +668,13 @@ bool Planet::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 	if (g != nullptr) {
 		GraphletInfo* info = GRAPHLET_INFO(g);
 
 		if (this->can_select(g)) {
 			if (!info->selected) {
-				if (shifted && this->rubberband_allowed) {
+				if (this->rubberband_allowed) {
 					unsafe_add_selected(this, g, info);
 				} else {
 					unsafe_set_selected(this, g, info);
@@ -691,7 +691,7 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bo
 }
 
 /************************************************************************************************/
-bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk, bool shifted, bool ctrled) {
+bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
 	if (!this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
@@ -720,16 +720,16 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 					float local_y = y - info->y;
 
 					if (unmasked_graphlet->handles_events()) {
-						unmasked_graphlet->on_hover(local_x, local_y, shifted, ctrled);
+						unmasked_graphlet->on_hover(local_x, local_y);
 					}
 
-					this->on_hover(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+					this->on_hover(unmasked_graphlet, local_x, local_y);
 				}
 			}
 
 			{ // Planet itself also has an opportunity to handle events directly.
 				if (pdt == PointerDeviceType::Touch) {
-					this->on_hover(nullptr, x, y, shifted, ctrled);
+					this->on_hover(nullptr, x, y);
 				}
 			}
 		} break;
@@ -739,7 +739,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 	return true;
 }
 
-bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerDeviceType pdt, PointerUpdateKind puk, bool shifted, bool ctrled) {
+bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerDeviceType pdt, PointerUpdateKind puk) {
 	bool handled = false;
 
 	/** WARNING
@@ -765,15 +765,15 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 			float local_y = y - keyboard_y;
 
 			if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
-				this->numpad->on_hover(local_x, local_y, shifted, ctrled);
+				this->numpad->on_hover(local_x, local_y);
 			} else {
-				this->numpad->on_goodbye(local_x, local_y, shifted, ctrled);
+				this->numpad->on_goodbye(local_x, local_y);
 			}
 		} else {
 			IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 			if (unmasked_graphlet != this->hovering_graphlet) {
-				this->say_goodbye_to_the_hovering_graphlet(x, y, shifted, ctrled);
+				this->say_goodbye_to_the_hovering_graphlet(x, y);
 			}
 
 			if (unmasked_graphlet != nullptr) {
@@ -784,10 +784,10 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 				this->hovering_graphlet = unmasked_graphlet;
 
 				if (unmasked_graphlet->handles_events()) {
-					this->hovering_graphlet->on_hover(local_x, local_y, shifted, ctrled);
+					this->hovering_graphlet->on_hover(local_x, local_y);
 				}
 
-				this->on_hover(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+				this->on_hover(unmasked_graphlet, local_x, local_y);
 
 				handled = true;
 			}
@@ -799,7 +799,7 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 				 *  clients may have to produce the `on_goodbye` event on their own
 				 *  if the PointerExited event handler is too rough.
 				 */
-				this->on_hover(nullptr, x, y, shifted, ctrled);
+				this->on_hover(nullptr, x, y);
 			}
 		}
 	}
@@ -807,21 +807,30 @@ bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, Point
 	return handled;
 }
 
-bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk, bool shifted, bool ctrled) {
+bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
+	/** NOTE
+	 * The `*Pressed` kinds of updating are used for tolerating, they are more intuitive.
+	 *
+	 *  The actual kinds provided by pointer devices are `*Released`,
+	 *  but our API may not follow the devices.
+	 */
+
 	if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		float local_x = x - keyboard_x;
 		float local_y = y - keyboard_y;
 
 		switch (puk) {
+		case PointerUpdateKind::LeftButtonReleased:
 		case PointerUpdateKind::LeftButtonPressed: {
-			this->numpad->on_tap(local_x, local_y, shifted, ctrled);
+			this->numpad->on_tap(local_x, local_y);
 
 			if (pdt == PointerDeviceType::Touch) {
-				this->numpad->on_goodbye(local_x, local_y, shifted, ctrled);
+				this->numpad->on_goodbye(local_x, local_y);
 			}
 		}; break;
+		case PointerUpdateKind::RightButtonReleased:
 		case PointerUpdateKind::RightButtonPressed: {
-			this->numpad->on_right_tap(local_x, local_y, shifted, ctrled);
+			this->numpad->on_right_tap(local_x, local_y);
 		}; break;
 		}
 	} else if (this->rubberband_y != nullptr) {
@@ -836,44 +845,48 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 			float local_y = y - info->y;
 
 			switch (puk) {
+			case PointerUpdateKind::LeftButtonReleased:
 			case PointerUpdateKind::LeftButtonPressed: {
 				if (unmasked_graphlet->handles_events()) {
-					unmasked_graphlet->on_tap(local_x, local_y, shifted, ctrled);
+					unmasked_graphlet->on_tap(local_x, local_y);
 
 					if (pdt == PointerDeviceType::Touch) {
-						unmasked_graphlet->on_goodbye(local_x, local_y, shifted, ctrled);
+						unmasked_graphlet->on_goodbye(local_x, local_y);
 					}
 				}
 
-				this->on_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+				this->on_tap(unmasked_graphlet, local_x, local_y);
 
 				if (info->selected) {
-					this->on_tap_selected(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+					this->on_tap_selected(unmasked_graphlet, local_x, local_y);
 				}
 
 				if (pdt == PointerDeviceType::Touch) {
-					this->on_goodbye(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+					this->on_goodbye(unmasked_graphlet, local_x, local_y);
 				}
 			} break;
+			case PointerUpdateKind::RightButtonReleased:
 			case PointerUpdateKind::RightButtonPressed: {
 				// NOTE: In macOS, Control + clicking produces a right clicking
 				if (unmasked_graphlet->handles_events()) {
-					unmasked_graphlet->on_right_tap(local_x, local_y, shifted, ctrled);
+					unmasked_graphlet->on_right_tap(local_x, local_y);
 				}
 
-				this->on_right_tap(unmasked_graphlet, local_x, local_y, shifted, ctrled);
+				this->on_right_tap(unmasked_graphlet, local_x, local_y);
 			} break;
 			}
 		}
 
 		{ // Planet itself also has an opportunity to handle events directly.
 			switch (puk) {
+			case PointerUpdateKind::LeftButtonReleased:
 			case PointerUpdateKind::LeftButtonPressed: {
-				this->on_tap(nullptr, x, y, shifted, ctrled);
+				this->on_tap(nullptr, x, y);
 			} break;
+			case PointerUpdateKind::RightButtonReleased:
 			case PointerUpdateKind::RightButtonPressed: {
 				// NOTE: In macOS, Control + clicking produces a right clicking
-				this->on_right_tap(nullptr, x, y, shifted, ctrled);
+				this->on_right_tap(nullptr, x, y);
 			} break;
 			}
 		}
@@ -882,11 +895,11 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	return true;
 }
 
-bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk, bool shifted, bool ctrled) {
-	return this->say_goodbye_to_the_hovering_graphlet(x, y, shifted, ctrled);
+bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
+	return this->say_goodbye_to_the_hovering_graphlet(x, y);
 }
 
-bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted, bool ctrled) {
+bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y) {
 	bool done = false;
 
 	if (this->hovering_graphlet != nullptr) {
@@ -895,10 +908,10 @@ bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted
 		float local_y = y - info->y;
 
 		if (this->hovering_graphlet->handles_events()) {
-			this->hovering_graphlet->on_goodbye(local_x, local_y, shifted, ctrled);
+			this->hovering_graphlet->on_goodbye(local_x, local_y);
 		}
 
-		this->on_goodbye(this->hovering_graphlet, local_x, local_y, shifted, ctrled);
+		this->on_goodbye(this->hovering_graphlet, local_x, local_y);
 
 		this->hovering_graphlet = nullptr;
 	}

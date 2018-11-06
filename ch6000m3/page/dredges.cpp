@@ -95,7 +95,7 @@ public:
 
 public:
 	virtual bool can_select(IGraphlet* g) { return false; }
-	virtual void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) {}
+	virtual void on_tap(IGraphlet* g, float x, float y) {}
 
 public:
 	virtual void draw_cables(CanvasDrawingSession^ ds, float Width, float Height) {}
@@ -888,12 +888,12 @@ bool DredgesPage::can_select(IGraphlet* g) {
 	return ((db != nullptr) && (db->can_select(g)));
 }
 
-void DredgesPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void DredgesPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 	auto db = dynamic_cast<Dredges*>(this->dashboard);
 
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
+	Planet::on_tap(g, local_x, local_y);
 
 	if (db != nullptr) {
-		db->on_tap(g, local_x, local_y, shifted, ctrled);
+		db->on_tap(g, local_x, local_y);
 	}
 }

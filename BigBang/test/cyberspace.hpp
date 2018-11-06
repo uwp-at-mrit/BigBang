@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 		CyberSpace();
 
 	public:
-		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
-		void on_right_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
+		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
+		void on_right_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 	};
 }

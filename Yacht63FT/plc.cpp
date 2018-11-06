@@ -3,6 +3,8 @@
 
 using namespace WarGrey::SCADA;
 
+static uint16 MRIT_PORT = 2008;
+
 float WarGrey::SCADA::AI_ref(const uint8* db, size_t idx, float scale) {
 	return bigendian_flword_ref(db, (idx - 1) * 2, scale);
 }
@@ -29,7 +31,7 @@ unsigned int WarGrey::SCADA::DI_ref(const uint8* db, size_t idx0, size_t idxn) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm) {
+PLCMaster::PLCMaster(Syslog* alarm) : MRMaster(alarm, MRIT_PORT) {
 	MrMessageConfiguration config(98, 40L, 1000);
 
 	config.set_fcode(char(0x31));

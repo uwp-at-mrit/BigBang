@@ -358,7 +358,7 @@ void PropulsionPage::reflow(float width, float height) {
 	}
 }
 
-void PropulsionPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void PropulsionPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

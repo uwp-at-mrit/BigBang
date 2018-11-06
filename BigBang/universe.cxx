@@ -30,8 +30,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 #define PLANET_INFO(planet) (static_cast<PlanetInfo*>(planet->info))
+
 #define SHIFTED(vkms) ((vkms & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift)
 #define CONTROLLED(vkms) ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control)
+#define WINDOWED(vkms) ((vkms & VirtualKeyModifiers::Windows) == VirtualKeyModifiers::Windows)
+#define MENUED(vkms) ((vkms & VirtualKeyModifiers::Menu) == VirtualKeyModifiers::Menu)
 
 class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
 public:
@@ -211,8 +214,10 @@ UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, Syslog* logger, IPlanet* first_planet, ListView^ navigator)
 	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, first_planet, navigator) {}
 
-UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight, Syslog* logger, IPlanet* first_planet, ListView^ navigator)
-	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight) {
+UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight, Syslog* logger
+	, IPlanet* first_planet, ListView^ navigator)
+	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
+	, figure_x0(std::nanf("swipe")) {
 	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
 	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
 	this->navigator_view->IsItemClickEnabled = true;
@@ -231,21 +236,21 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 		this->add_planet(first_planet);
 	}
 
-	/** TODO
-	 * All these events should be unloaded,
-	 *  however this control has the same lifetime with the application,
-	 *  currently there is no such code for unloading.
-	 */
-	this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
-	this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
-	this->display->Draw += ref new UniverseDrawHandler(this, &UniverseDisplay::do_paint);
+	{ // initialize gesture
+	    /** TODO
+		 * All these events should be unloaded,
+		 *  however this control has the same lifetime with the application,
+		 *  currently there is no such code for unloading.
+		 */
+		this->display->SizeChanged += ref new SizeChangedEventHandler(this, &UniverseDisplay::do_resize);
+		this->display->CreateResources += ref new UniverseLoadHandler(this, &UniverseDisplay::do_construct);
+		this->display->Draw += ref new UniverseDrawHandler(this, &UniverseDisplay::do_paint);
 
-	this->display->ManipulationMode = ManipulationModes::TranslateX;
-	this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
-	this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
-	this->display->ManipulationCompleted += ref new ManipulationCompletedEventHandler(this, &UniverseDisplay::on_maniplated);
-	this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
-	this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
+		this->display->PointerPressed += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_pressed);
+		this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
+		this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
+		this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
+	}
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -559,21 +564,27 @@ void UniverseDisplay::on_pointer_pressed(Platform::Object^ sender, PointerRouted
 		this->enter_critical_section();
 
 		if (this->recent_planet != nullptr) {
+			bool maniplation = ((this->figures.size() > 0) || MENUED(args->KeyModifiers));
+			unsigned int id = args->Pointer->PointerId;
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
-			PointerPointProperties^ ppp = pp->Properties;
+			PointerUpdateKind puk = pp->Properties->PointerUpdateKind;
 
-			this->saved_pressed_ppp = ppp;
-			args->Handled = this->recent_planet->on_pointer_pressed(
-				pp->Position.X, pp->Position.Y, pdt, ppp->PointerUpdateKind,
-				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+			this->figures.insert(std::pair<unsigned int, PointerUpdateKind>(id, puk));
+
+			if (maniplation) {
+				this->figure_x0 = pp->Position.X;
+				args->Handled = true;
+			} else {
+				this->figure_x0 = std::nanf("swipe");
+				args->Handled = this->recent_planet->on_pointer_pressed(pp->Position.X, pp->Position.Y, pdt, puk);
+			}
 		}
 
 		this->leave_critical_section();
 	}
 }
 
-// TODO: distinguish rubberhand event and maniplation
 void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
@@ -581,64 +592,68 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 		
-		args->Handled = this->recent_planet->on_pointer_moved(
-			pp->Position.X, pp->Position.Y,
-			args->GetIntermediatePoints(this->canvas),
-			pdt, pp->Properties->PointerUpdateKind,
-			SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+		if (this->figure_x0 >= 0.0F) {
+			this->figure_x = pp->Position.X;
+			args->Handled = true;
+		} else {
+			args->Handled = this->recent_planet->on_pointer_moved(
+				pp->Position.X, pp->Position.Y,
+				args->GetIntermediatePoints(this->canvas),
+				pdt, pp->Properties->PointerUpdateKind);
+		}
 	}
 
 	this->leave_critical_section();
 }
 
-void UniverseDisplay::on_maniplated(Platform::Object^ sender, ManipulationCompletedRoutedEventArgs^ args) {
-	float width = this->actual_width;
-	float delta = args->Cumulative.Translation.X;
-	float speed = args->Velocities.Linear.X;
-	float distance = width * 0.0618F;
-
-	if (delta < -distance) {
-		this->transfer_next(256);
-	} else if (delta > distance) {
-		this->transfer_previous(256);
-	}
-
-	args->Handled = true;
-}
-
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	if (this->saved_pressed_ppp != nullptr) {
-		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
+	auto lt = this->figures.find(args->Pointer->PointerId);
 
-		this->enter_critical_section();
+	if (lt != this->figures.end()) {
+		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
 
 		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
-			PointerUpdateKind puk = this->saved_pressed_ppp->PointerUpdateKind;
+			PointerUpdateKind puk = lt->second;
 
-			this->saved_pressed_ppp = nullptr;
-			args->Handled = this->recent_planet->on_pointer_released(
-				pp->Position.X, pp->Position.Y, pdt, puk,
-				SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
-			
+			this->figures.erase(lt);
+
+			if (std::isnan(this->figure_x0)) {
+				this->enter_critical_section();
+				args->Handled = this->recent_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, puk);
+				this->leave_critical_section();
+			} else {
+				if ((this->figures.size() == 1) || MENUED(args->KeyModifiers)) {
+					this->on_translating_x();
+					this->figure_x0 = std::nanf("swipe");
+				}
+
+				args->Handled = true;
+			}
 		}
-
-		this->leave_critical_section();
 	}
 }
 
 void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+	unsigned int id = args->Pointer->PointerId;
+	auto lt = this->figures.find(id);
+
 	this->enter_critical_section();
+
+	if (lt != this->figures.end()) {
+		this->figures.erase(lt);
+	}
 
 	if (this->recent_planet != nullptr) {
 		PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 		PointerDeviceType pdt = args->Pointer->PointerDeviceType;
 
-		args->Handled = this->recent_planet->on_pointer_moveout(
-			pp->Position.X, pp->Position.Y,
-			pdt, pp->Properties->PointerUpdateKind,
-			SHIFTED(args->KeyModifiers), CONTROLLED(args->KeyModifiers));
+		if (this->figures.size() == 0) {
+			args->Handled = this->recent_planet->on_pointer_moveout(
+				pp->Position.X, pp->Position.Y,
+				pdt, pp->Properties->PointerUpdateKind);
+		}
 	}
 
 	this->leave_critical_section();
@@ -674,4 +689,16 @@ void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_translating_x() {
+	float width = this->actual_width;
+	float delta = this->figure_x - this->figure_x0;
+	float distance = width * 0.0618F;
+
+	if (delta < -distance) {
+		this->transfer_next(256);
+	} else if (delta > distance) {
+		this->transfer_previous(256);
+	}
 }

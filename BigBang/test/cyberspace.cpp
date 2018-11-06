@@ -18,13 +18,13 @@ CyberSpace::CyberSpace() : Planet("Cyber Space") {
 
 CyberSpace::~CyberSpace() {}
 
-void CyberSpace::on_tap(IGraphlet* g, float x, float y, bool shifted, bool controled) {
+void CyberSpace::on_tap(IGraphlet* g, float x, float y) {
 	if (g == nullptr) {
 		this->insert(new Labellet(make_wstring(L"(%f, %f)", x, y)), x, y);
 	}
 }
 
-void CyberSpace::on_right_tap(IGraphlet* g, float x, float y, bool shifted, bool controled) {
+void CyberSpace::on_right_tap(IGraphlet* g, float x, float y) {
 	if (g != nullptr) {
 		this->remove(g);
 	}

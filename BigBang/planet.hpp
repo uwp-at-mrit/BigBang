@@ -76,11 +76,11 @@ namespace WarGrey::SCADA {
 	public:
 		virtual bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
-		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
-		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
-		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
-		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
-		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {}
+		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
@@ -92,7 +92,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
-		virtual bool can_select(IGraphlet* g) { return (g != nullptr); }
+		virtual bool can_select(IGraphlet* g) { return true; }
 		virtual bool can_select_multiple() { return true; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
@@ -104,26 +104,22 @@ namespace WarGrey::SCADA {
 	public:
 		virtual bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled)
+			Windows::UI::Input::PointerUpdateKind puk)
 		{ return false; }
 
 		virtual bool on_pointer_pressed(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled)
+			Windows::UI::Input::PointerUpdateKind puk)
 		{ return false; }
 
 		virtual bool on_pointer_released(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled)
+			Windows::UI::Input::PointerUpdateKind puk)
 		{ return false; }
 
 		virtual bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled)
+			Windows::UI::Input::PointerUpdateKind puk)
 		{ return false; }
 
 	public:
@@ -245,7 +241,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
-		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y, bool shifted, bool controled) override;
+		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 		void on_elapse(long long count, long long interval, long long uptime) override;
 
 	public:
@@ -266,27 +262,23 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_pointer_pressed(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled) override;
+			Windows::UI::Input::PointerUpdateKind puk) override;
 
 		bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled) override;
+			Windows::UI::Input::PointerUpdateKind puk) override;
 
 		bool on_pointer_released(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled) override;
+			Windows::UI::Input::PointerUpdateKind puk) override;
 
 		bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk,
-			bool shifted, bool ctrled) override;
+			Windows::UI::Input::PointerUpdateKind puk) override;
 
     private:
         void recalculate_graphlets_extent_when_invalid();
-		bool say_goodbye_to_the_hovering_graphlet(float x, float y, bool shifted, bool ctrled);
+		bool say_goodbye_to_the_hovering_graphlet(float x, float y);
 
     private:
         float last_pointer_x;

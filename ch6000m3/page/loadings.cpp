@@ -645,11 +645,9 @@ bool LoadingsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<MotorValvelet*>(g) != nullptr));
 }
 
-void LoadingsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void LoadingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
-
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);

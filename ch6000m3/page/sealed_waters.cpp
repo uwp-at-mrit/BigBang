@@ -528,11 +528,9 @@ bool SealedWaterPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void SealedWaterPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void SealedWaterPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
-	
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);

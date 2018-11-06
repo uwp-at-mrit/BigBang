@@ -59,10 +59,10 @@ namespace WarGrey::SCADA {
 		bool is_colliding_with_mouse(float mouse_x, float mouse_y, float x, float y) override;
 
 	public:
-		void on_hover(float local_x, float local_y, bool shifted, bool controled) override;
-		void on_tap(float local_x, float local_y, bool shifted, bool controled) override;
+		void on_hover(float local_x, float local_y) override;
+		void on_tap(float local_x, float local_y) override;
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
-		void on_goodbye(float local_x, float local_y, bool shifted, bool controled) override;
+		void on_goodbye(float local_x, float local_y) override;
 
 	protected:
 		virtual void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {}

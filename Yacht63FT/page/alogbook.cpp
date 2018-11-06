@@ -144,7 +144,7 @@ void LogbookPage::update(long long count, long long interval, long long uptime) 
 	}
 }
 
-void LogbookPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void LogbookPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

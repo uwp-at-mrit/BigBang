@@ -90,14 +90,14 @@ void Keyboard::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 	this->draw_after(ds, x, y, Width, Height);
 }
 
-void Keyboard::on_hover(float local_x, float local_y, bool shifted, bool controled) {
+void Keyboard::on_hover(float local_x, float local_y) {
 	if (!this->tapped) {
 		this->current_key = this->find_tapped_key(local_x, local_y);
 		this->master->notify_graphlet_updated(this);
 	}
 }
 
-void Keyboard::on_tap(float local_x, float local_y, bool shifted, bool controled) {
+void Keyboard::on_tap(float local_x, float local_y) {
 	VirtualKey found = this->find_tapped_key(local_x, local_y);
 
 	if (found != VirtualKey::None) {
@@ -114,7 +114,7 @@ bool Keyboard::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return false;
 }
 
-void Keyboard::on_goodbye(float local_x, float local_y, bool shifted, bool controled) {
+void Keyboard::on_goodbye(float local_x, float local_y) {
 	this->current_key = VirtualKey::None;
 }
 

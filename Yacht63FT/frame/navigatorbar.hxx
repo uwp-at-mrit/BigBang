@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
-		void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override;
+		void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) override;
 
 	public:
 		void on_navigated_to(WarGrey::SCADA::Yacht page);

@@ -63,7 +63,7 @@ void OperationPage::load(CanvasCreateResourcesReason reason, float width, float 
 	}
 }
 
-void OperationPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void OperationPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

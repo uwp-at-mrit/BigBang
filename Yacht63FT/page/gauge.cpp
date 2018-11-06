@@ -145,7 +145,7 @@ void GaugePage::load(CanvasCreateResourcesReason reason, float width, float heig
 	}
 }
 
-void GaugePage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void GaugePage::on_tap(IGraphlet* g, float local_x, float local_y) {
 #ifdef _DEBUG
 	Planet::on_tap(g, local_x, local_y, shifted, controlled);
 #endif

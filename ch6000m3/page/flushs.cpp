@@ -602,11 +602,9 @@ bool FlushsPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
 }
 
-void FlushsPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool ctrled) {
+void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
-
-	Planet::on_tap(g, local_x, local_y, shifted, ctrled);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);

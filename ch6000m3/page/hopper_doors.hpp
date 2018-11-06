@@ -19,7 +19,7 @@ namespace WarGrey::SCADA {
 	public:
 		bool can_select(IGraphlet* g) override;
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
-		void on_tap(IGraphlet* g, float x, float y, bool shifted, bool ctrled) override;
+		void on_tap_selected(IGraphlet* g, float x, float y) override;
 
 	private:
 		WarGrey::SCADA::IMRMaster* device;

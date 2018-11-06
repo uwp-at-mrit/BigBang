@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <mutex>
 
 #include "timer.hxx"
@@ -152,18 +153,22 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::UI::Xaml::CanvasDrawEventArgs^ args);
 
 	private:
-		Windows::UI::Input::PointerPointProperties^ saved_pressed_ppp;
 		void on_pointer_pressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
 		void on_pointer_moveout(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
-		void on_maniplated(Platform::Object^ sender, Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ args);
 		void on_pointer_released(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ args);
+		void on_translating_x();
 		
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		Windows::UI::Xaml::Controls::ListView^ navigator_view;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* recent_planet;
+
+	private:
+		std::map<unsigned int, Windows::UI::Input::PointerUpdateKind> figures;
+		float figure_x0;
+		float figure_x;
 
 	private:
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;

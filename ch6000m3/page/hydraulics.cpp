@@ -227,15 +227,7 @@ public:
 
 public:
 	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) {
-		HydraulicPumpStatus status = pump->get_status();
-		bool executable = true;
-		
-		switch (cmd) {
-		case HSPOperation::Start: executable = (status == HydraulicPumpStatus::Ready); break;
-		case HSPOperation::Stop: executable = (status == HydraulicPumpStatus::Running); break;
-		}
-
-		return executable && plc->connected();
+		return hydraulic_command_executable(pump, cmd, true) && plc->connected();
 	}
 
 	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) {
@@ -243,7 +235,7 @@ public:
 	}
 
 public:
-	bool can_execute(HSPOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) {
+	bool can_execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) {
 		return plc->connected();
 	}
 
@@ -698,7 +690,7 @@ bool HydraulicsPage::can_select(IGraphlet* g) {
 		|| ((heater != nullptr) && (heater->id == HS::Master)));
 }
 
-void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y, bool shifted, bool controled) {
+void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
 	auto heater = dynamic_cast<Thermometerlet*>(g);
 

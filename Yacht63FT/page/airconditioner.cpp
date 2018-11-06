@@ -321,7 +321,7 @@ public:
 	}
 
 public:
-	void on_hover(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
+	void on_hover(IGraphlet* g, float local_x, float local_y) override {
 		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
 		
 		if (button != nullptr) {
@@ -329,7 +329,7 @@ public:
 		}
 	}
 
-	void on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
+	void on_tap(IGraphlet* g, float local_x, float local_y) override {
 		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
 
 		if (button != nullptr) {
@@ -337,7 +337,7 @@ public:
 		}
 	}
 
-	void on_goodbye(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) override {
+	void on_goodbye(IGraphlet* g, float local_x, float local_y) override {
 		Credit<OptionBitmaplet, ACOP>* button = dynamic_cast<Credit<OptionBitmaplet, ACOP>*>(g);
 
 		if (button != nullptr) {
@@ -436,7 +436,7 @@ void ACPage::reflow(float width, float height) {
 	}
 }
 
-void ACPage::on_tap(IGraphlet* g, float local_x, float local_y, bool shifted, bool controlled) {
+void ACPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 	if (g != nullptr) {
 #ifdef _DEBUG
 		Planet::on_tap(g, local_x, local_y, shifted, controlled);
