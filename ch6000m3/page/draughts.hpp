@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	private class DraughtsPage : public WarGrey::SCADA::Planet {
 	public:
 		~DraughtsPage() noexcept;
-		DraughtsPage(WarGrey::SCADA::IMRMaster* plc);
+		DraughtsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 		bool can_select(IGraphlet* g) override;
 
 	private:
-		WarGrey::SCADA::IMRMaster* device;
+		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 
 	private: // never deletes these graphlets mannually	

@@ -7,7 +7,7 @@ namespace WarGrey::SCADA {
 		Disabled,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
-		FakeOpen, FakeClose,
+		VirtualOpen, VirtualClose,
 		_
 	};
 

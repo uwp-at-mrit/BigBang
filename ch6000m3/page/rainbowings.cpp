@@ -25,6 +25,8 @@
 #include "schema/ai_pumps.hpp"
 #include "schema/ai_doors.hpp"
 
+#include "schema/do_doors.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -39,9 +41,9 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum RSMode { WindowUI = 0, Dashboard };
 
-private enum class FJGVOperation { Open, Close, FakeOpen, FakeClose, _ };
-private enum class FJMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
-private enum class FJHDOperation { Open, Stop, Close, Disable, _ };
+private enum class RSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
+private enum class RSMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
+private enum class RSHDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
 private enum class RS : unsigned int {
@@ -77,9 +79,9 @@ private enum class RS : unsigned int {
 
 private class Rainbows final
 	: public PLCConfirmation
-	, public IMenuCommand<FJGVOperation, Credit<GateValvelet, RS>, IMRMaster*>
-	, public IMenuCommand<FJMVOperation, Credit<MotorValvelet, RS>, IMRMaster*>
-	, public IMenuCommand<FJHDOperation, Credit<UpperHopperDoorlet, RS>, IMRMaster*> {
+	, public IMenuCommand<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>
+	, public IMenuCommand<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>
+	, public IMenuCommand<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*> {
 public:
 	Rainbows(RainbowingsPage* master) : master(master) {}
 
@@ -159,21 +161,21 @@ public:
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D024, DB4, 413U, 435U, DB205, 553U, 0U);
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D025, DB4, 275U, 467U, DB205, 561U, 0U);
 		
-		DI_hopper_door(this->uhdoors[RS::PS1], DB4, upper_door_PS1_closed, DB205, upper_door_PS1_status);
-		DI_hopper_door(this->uhdoors[RS::PS2], DB4, upper_door_PS2_closed, DB205, upper_door_PS2_status);
-		DI_hopper_door(this->uhdoors[RS::PS3], DB4, upper_door_PS3_closed, DB205, upper_door_PS3_status);
-		DI_hopper_door(this->uhdoors[RS::PS4], DB4, upper_door_PS4_closed, DB205, upper_door_PS4_status);
-		DI_hopper_door(this->uhdoors[RS::PS5], DB4, upper_door_PS5_closed, DB205, upper_door_PS5_status);
-		DI_hopper_door(this->uhdoors[RS::PS6], DB4, upper_door_PS6_closed, DB205, upper_door_PS6_status);
-		DI_hopper_door(this->uhdoors[RS::PS7], DB4, upper_door_PS7_closed, DB205, upper_door_PS7_status);
+		DI_hopper_door(this->uhdoors[RS::PS1], DB205, upper_door_PS1_status);
+		DI_hopper_door(this->uhdoors[RS::PS2], DB205, upper_door_PS2_status);
+		DI_hopper_door(this->uhdoors[RS::PS3], DB205, upper_door_PS3_status);
+		DI_hopper_door(this->uhdoors[RS::PS4], DB205, upper_door_PS4_status);
+		DI_hopper_door(this->uhdoors[RS::PS5], DB205, upper_door_PS5_status);
+		DI_hopper_door(this->uhdoors[RS::PS6], DB205, upper_door_PS6_status);
+		DI_hopper_door(this->uhdoors[RS::PS7], DB205, upper_door_PS7_status);
 
-		DI_hopper_door(this->uhdoors[RS::SB1], DB4, upper_door_SB1_closed, DB205, upper_door_SB1_status);
-		DI_hopper_door(this->uhdoors[RS::SB2], DB4, upper_door_SB2_closed, DB205, upper_door_SB2_status);
-		DI_hopper_door(this->uhdoors[RS::SB3], DB4, upper_door_SB3_closed, DB205, upper_door_SB3_status);
-		DI_hopper_door(this->uhdoors[RS::SB4], DB4, upper_door_SB4_closed, DB205, upper_door_SB4_status);
-		DI_hopper_door(this->uhdoors[RS::SB5], DB4, upper_door_SB5_closed, DB205, upper_door_SB5_status);
-		DI_hopper_door(this->uhdoors[RS::SB6], DB4, upper_door_SB6_closed, DB205, upper_door_SB6_status);
-		DI_hopper_door(this->uhdoors[RS::SB7], DB4, upper_door_SB7_closed, DB205, upper_door_SB7_status);
+		DI_hopper_door(this->uhdoors[RS::SB1], DB205, upper_door_SB1_status);
+		DI_hopper_door(this->uhdoors[RS::SB2], DB205, upper_door_SB2_status);
+		DI_hopper_door(this->uhdoors[RS::SB3], DB205, upper_door_SB3_status);
+		DI_hopper_door(this->uhdoors[RS::SB4], DB205, upper_door_SB4_status);
+		DI_hopper_door(this->uhdoors[RS::SB5], DB205, upper_door_SB5_status);
+		DI_hopper_door(this->uhdoors[RS::SB6], DB205, upper_door_SB6_status);
+		DI_hopper_door(this->uhdoors[RS::SB7], DB205, upper_door_SB7_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -182,22 +184,25 @@ public:
 	}
 
 public:
-	void execute(FJGVOperation cmd, Credit<GateValvelet, RS>* valve, IMRMaster* plc) {
+	void execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc) override {
 		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
 	}
 
-	void execute(FJMVOperation cmd, Credit<MotorValvelet, RS>* valve, IMRMaster* plc) {
+	void execute(RSMVOperation cmd, Credit<MotorValvelet, RS>* valve, PLCMaster* plc) override {
 		plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
 	}
 
-	void execute(FJHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			door->id.ToString()->Data());
+public:
+	bool can_execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc, bool acc_executable) override {
+		return hopper_door_command_executable(door, cmd, true);// && plc->connected();
+	}
+
+	void execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc) override {
+		plc->send_command(DO_upper_door_command(cmd, door->id));
 	}
 
 public:
@@ -209,6 +214,9 @@ public:
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
+
+		this->hopper_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->hopper_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -492,8 +500,8 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
-		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "kwatt"), id);
-		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "rpm"), id);
+		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "kwatt"), id);
+		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "rpm"), id);
 	}
 
 	template<typename E>
@@ -552,6 +560,8 @@ private:
 	void set_door_progress(RS id, float value) {
 		this->uhdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
+
+		AI_hopper_door(this->uhdoors[id], value, bottom_door_open_threshold, upper_door_closed_threshold);
 	}
 
 	void set_valve_status(RS id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
@@ -590,6 +600,7 @@ private:
 	DimensionStyle highlight_style;
 	DimensionStyle setting_style;
 	DimensionStyle plain_style;
+	DimensionStyle hopper_style;
 
 private:
 	RainbowingsPage* master;
@@ -684,13 +695,13 @@ private:
 	Rainbows* master;
 };
 
-RainbowingsPage::RainbowingsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+RainbowingsPage::RainbowingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Rainbows* dashboard = new Rainbows(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<FJGVOperation, Credit<GateValvelet, RS>, IMRMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<FJMVOperation, Credit<MotorValvelet, RS>, IMRMaster*>(dashboard, plc);
-	this->upper_door_op = make_menu<FJHDOperation, Credit<UpperHopperDoorlet, RS>, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>(dashboard, plc);
+	this->motor_valve_op = make_menu<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>(dashboard, plc);
+	this->upper_door_op = make_menu<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

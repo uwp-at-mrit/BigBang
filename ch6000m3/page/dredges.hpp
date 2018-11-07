@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 	private class DredgesPage : public WarGrey::SCADA::Planet {
 	public:
 		~DredgesPage() noexcept;
-		DredgesPage(WarGrey::SCADA::IMRMaster* plc, WarGrey::SCADA::DragView type = WarGrey::SCADA::DragView::_);
+		DredgesPage(WarGrey::SCADA::PLCMaster* plc, WarGrey::SCADA::DragView type = WarGrey::SCADA::DragView::_);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		void on_tap(IGraphlet* g, float x, float y) override;
 
 	private:
-		WarGrey::SCADA::IMRMaster* device;
+		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 
 	private: // never deletes these graphlets mannually	

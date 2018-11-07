@@ -13,6 +13,8 @@
 #include "schema/ai_pumps.hpp"
 #include "schema/di_pumps.hpp"
 
+#include "schema/do_doors.hpp"
+
 #include "decorator/page.hpp"
 
 #include "module.hpp"
@@ -168,7 +170,7 @@ private:
 
 private class Doors final
 	: public PLCConfirmation
-	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*> {
+	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -255,14 +257,16 @@ public:
 	}
 
 public:
-	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			door->id.ToString()->Data());
+	bool can_execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc, bool acc_executable) override {
+		return hopper_door_command_executable(door, cmd, true) && plc->connected();
+	}
+
+	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc) override {
+		plc->send_command(DO_hopper_door_command(cmd, door->id));
 	}
 
 public:
-	bool on_char(VirtualKey key, IMRMaster* plc) {
+	bool on_char(VirtualKey key, PLCMaster* plc) {
 		bool handled = false;
 
 		if (key == VirtualKey::Enter) {
@@ -485,6 +489,8 @@ private:
 		this->doors[id]->set_value(value / 100.0F);
 		this->hdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
+
+		AI_hopper_door(this->hdoors[id], value, bottom_door_open_threshold, 0.0F);
 	}
 
 private: // never delete these graphlets manually.
@@ -512,12 +518,12 @@ private:
 };
 
 /*************************************************************************************************/
-HopperDoorsPage::HopperDoorsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	DoorDecorator* decorator = new DoorDecorator();
 	Doors* dashboard = new Doors(this, decorator);
 
 	this->dashboard = dashboard;
-	this->door_op = make_menu<HDOperation, Credit<HopperDoorlet, HD>, IMRMaster*>(dashboard, plc);
+	this->door_op = make_menu<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>(dashboard, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 

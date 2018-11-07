@@ -20,22 +20,7 @@ namespace WarGrey::SCADA {
 	static unsigned int bottom_door_SB6_closed = 403U;
 	static unsigned int bottom_door_SB7_closed = 404U;
 
-	// missing
-	static unsigned int upper_door_PS1_closed = 329U;
-	static unsigned int upper_door_PS2_closed = 330U;
-	static unsigned int upper_door_PS3_closed = 331U;
-	static unsigned int upper_door_PS4_closed = 369U;
-	static unsigned int upper_door_PS5_closed = 370U;
-	static unsigned int upper_door_PS6_closed = 371U;
-	static unsigned int upper_door_PS7_closed = 372U;
-
-	static unsigned int upper_door_SB1_closed = 345U;
-	static unsigned int upper_door_SB2_closed = 346U;
-	static unsigned int upper_door_SB3_closed = 347U;
-	static unsigned int upper_door_SB4_closed = 401U;
-	static unsigned int upper_door_SB5_closed = 402U;
-	static unsigned int upper_door_SB6_closed = 403U;
-	static unsigned int upper_door_SB7_closed = 404U;
+	// Upper hopper doors do not have DB4 data
 
 	// DB205, starts from 1
 	static unsigned int bottom_door_PS1_status = 889U;
@@ -72,11 +57,23 @@ namespace WarGrey::SCADA {
 
 	/************************************************************************************************/
 	template<class D>
-	void DI_hopper_door(D* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-		target->set_status(DBX(db4, idx4_p1 - 1), DoorStatus::Closed);
-		
+	void DI_hopper_door(D* target, const uint8* db205, size_t idx205_p1) {
 		target->set_status(DBX(db205, idx205_p1 - 1), DoorStatus::Opening);
 		target->set_status(DBX(db205, idx205_p1 + 0), DoorStatus::Closing);
 		target->set_status(DBX(db205, idx205_p1 + 6), DoorStatus::Disabled);
+	}
+
+	template<class D>
+	void DI_hopper_door(D* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
+		DI_hopper_door(target, db205, idx205_p1);
+		target->set_status(DBX(db4, idx4_p1 - 1), DoorStatus::Closed);
+	}
+
+	template<class D, typename Menu>
+	bool hopper_door_command_executable(D* target, Menu cmd, bool otherwise) {
+		DoorStatus status = target->get_status();
+		bool executable = otherwise;
+
+		return executable;
 	}
 }

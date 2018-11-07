@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 	private class FlushsPage : public WarGrey::SCADA::Planet {
 	public:
 		~FlushsPage() noexcept;
-		FlushsPage(WarGrey::SCADA::IMRMaster* plc);
+		FlushsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -23,7 +23,7 @@ namespace WarGrey::SCADA {
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
 
 	private:
-		WarGrey::SCADA::IMRMaster* device;
+		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;

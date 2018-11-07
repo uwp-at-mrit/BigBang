@@ -17,7 +17,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ overflow_default_color = Colours::DarkGray;
+static CanvasSolidColorBrush^ overflow_default_color = Colours::DimGray;
 static CanvasSolidColorBrush^ overflow_default_liquid_color = Colours::DarkKhaki;
 static CanvasSolidColorBrush^ overflow_default_border_color = Colours::Aquamarine;
 static CanvasSolidColorBrush^ overflow_default_hatch_color = Colours::GhostWhite;

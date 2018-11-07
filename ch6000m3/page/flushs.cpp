@@ -20,6 +20,7 @@
 #include "schema/ai_doors.hpp"
 #include "schema/di_doors.hpp"
 #include "schema/di_valves.hpp"
+#include "schema/do_doors.hpp"
 
 #include "decorator/page.hpp"
 
@@ -35,7 +36,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum FSMode { WindowUI = 0, Dashboard };
 
-private enum class FSGVOperation { Open, Close, FakeOpen, FakeClose, _ };
+private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
 
 // WARNING: order matters
@@ -69,8 +70,8 @@ private enum class FS : unsigned int {
 
 private class Flush final
 	: public PLCConfirmation
-	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, IMRMaster*>
-	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, IMRMaster*> {
+	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>
+	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*> {
 public:
 	Flush(FlushsPage* master) : master(master) {}
 
@@ -125,21 +126,21 @@ public:
 		DI_gate_valve(this->gvalves[FS::HBV17], DB4, 255U, DB205, 289U);
 		DI_gate_valve(this->gvalves[FS::HBV18], DB4, 239U, DB205, 297U);
 
-		DI_hopper_door(this->uhdoors[FS::PS1], DB4, upper_door_PS1_closed, DB205, upper_door_PS1_status);
-		DI_hopper_door(this->uhdoors[FS::PS2], DB4, upper_door_PS2_closed, DB205, upper_door_PS2_status);
-		DI_hopper_door(this->uhdoors[FS::PS3], DB4, upper_door_PS3_closed, DB205, upper_door_PS3_status);
-		DI_hopper_door(this->uhdoors[FS::PS4], DB4, upper_door_PS4_closed, DB205, upper_door_PS4_status);
-		DI_hopper_door(this->uhdoors[FS::PS5], DB4, upper_door_PS5_closed, DB205, upper_door_PS5_status);
-		DI_hopper_door(this->uhdoors[FS::PS6], DB4, upper_door_PS6_closed, DB205, upper_door_PS6_status);
-		DI_hopper_door(this->uhdoors[FS::PS7], DB4, upper_door_PS7_closed, DB205, upper_door_PS7_status);
+		DI_hopper_door(this->uhdoors[FS::PS1], DB205, upper_door_PS1_status);
+		DI_hopper_door(this->uhdoors[FS::PS2], DB205, upper_door_PS2_status);
+		DI_hopper_door(this->uhdoors[FS::PS3], DB205, upper_door_PS3_status);
+		DI_hopper_door(this->uhdoors[FS::PS4], DB205, upper_door_PS4_status);
+		DI_hopper_door(this->uhdoors[FS::PS5], DB205, upper_door_PS5_status);
+		DI_hopper_door(this->uhdoors[FS::PS6], DB205, upper_door_PS6_status);
+		DI_hopper_door(this->uhdoors[FS::PS7], DB205, upper_door_PS7_status);
 
-		DI_hopper_door(this->uhdoors[FS::SB1], DB4, upper_door_SB1_closed, DB205, upper_door_SB1_status);
-		DI_hopper_door(this->uhdoors[FS::SB2], DB4, upper_door_SB2_closed, DB205, upper_door_SB2_status);
-		DI_hopper_door(this->uhdoors[FS::SB3], DB4, upper_door_SB3_closed, DB205, upper_door_SB3_status);
-		DI_hopper_door(this->uhdoors[FS::SB4], DB4, upper_door_SB4_closed, DB205, upper_door_SB4_status);
-		DI_hopper_door(this->uhdoors[FS::SB5], DB4, upper_door_SB5_closed, DB205, upper_door_SB5_status);
-		DI_hopper_door(this->uhdoors[FS::SB6], DB4, upper_door_SB6_closed, DB205, upper_door_SB6_status);
-		DI_hopper_door(this->uhdoors[FS::SB7], DB4, upper_door_SB7_closed, DB205, upper_door_SB7_status);
+		DI_hopper_door(this->uhdoors[FS::SB1], DB205, upper_door_SB1_status);
+		DI_hopper_door(this->uhdoors[FS::SB2], DB205, upper_door_SB2_status);
+		DI_hopper_door(this->uhdoors[FS::SB3], DB205, upper_door_SB3_status);
+		DI_hopper_door(this->uhdoors[FS::SB4], DB205, upper_door_SB4_status);
+		DI_hopper_door(this->uhdoors[FS::SB5], DB205, upper_door_SB5_status);
+		DI_hopper_door(this->uhdoors[FS::SB6], DB205, upper_door_SB6_status);
+		DI_hopper_door(this->uhdoors[FS::SB7], DB205, upper_door_SB7_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -148,16 +149,19 @@ public:
 	}
 
 public:
-	void execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, IMRMaster* plc) {
+	bool can_execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, PLCMaster* plc, bool acc_executable) override {
+		return hopper_door_command_executable(door, cmd, true) && plc->connected();
+	}
+
+	void execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, PLCMaster* plc) override {
+		plc->send_command(DO_upper_door_command(cmd, door->id));
+	}
+
+public:
+	void execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, PLCMaster* plc) override {
 		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
-	}
-
-	void execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			door->id.ToString()->Data());
 	}
 
 public:
@@ -167,8 +171,8 @@ public:
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
 
-		this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->hopper_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->hopper_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -376,8 +380,8 @@ private:
 	
 		gs[id] = this->master->insert_one(new G(rx, degrees), id);
 
-		this->load_dimension(this->powers, id, "kwatt");
-		this->load_dimension(this->rpms, id, "rpm");
+		this->load_dimension(this->powers, id, "kwatt", this->hopper_style);
+		this->load_dimension(this->rpms, id, "rpm", this->hopper_style);
 	}
 
 	template<class G, typename E>
@@ -393,7 +397,12 @@ private:
 
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit), id);
+		this->load_dimension(ds, id, unit, this->plain_style);
+	}
+
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, DimensionStyle& style) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(style, unit), id);
 	}
 
 	template<typename E>
@@ -481,6 +490,8 @@ private:
 	void set_door_progress(FS id, float value) {
 		this->uhdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
+
+		AI_hopper_door(this->uhdoors[id], value, upper_door_open_threshold, upper_door_closed_threshold);
 	}
 
 // never deletes these graphlets mannually
@@ -512,17 +523,18 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
+	DimensionStyle hopper_style;
 
 private:
 	FlushsPage* master;
 };
 
-FlushsPage::FlushsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, IMRMaster*>(dashboard, plc);
-	this->upper_door_op = make_menu<FSHDOperation, Credit<UpperHopperDoorlet, FS>, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>(dashboard, plc);
+	this->upper_door_op = make_menu<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

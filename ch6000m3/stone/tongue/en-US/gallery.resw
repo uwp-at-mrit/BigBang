@@ -159,11 +159,11 @@
   <data name="OpenReady" xml:space="preserve">
     <value>Ready to Open</value>
   </data>
-  <data name="FakeClose" xml:space="preserve">
-    <value>Fake Close</value>
+  <data name="VirtualClose" xml:space="preserve">
+    <value>Virtual Close</value>
   </data>
-  <data name="FakeOpen" xml:space="preserve">
-    <value>Fake Open</value>
+  <data name="VirtualOpen" xml:space="preserve">
+    <value>Virtual Open</value>
   </data>
   <data name="Open" xml:space="preserve">
     <value>Fully Open</value>

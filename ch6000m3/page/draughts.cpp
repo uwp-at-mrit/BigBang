@@ -212,7 +212,7 @@ public:
 	}
 
 public:
-	bool on_char(VirtualKey key, IMRMaster* plc) {
+	bool on_char(VirtualKey key, PLCMaster* plc) {
 		bool handled = false;
 
 		return handled;
@@ -307,7 +307,7 @@ private:
 };
 
 /*************************************************************************************************/
-DraughtsPage::DraughtsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	DraughtDecorator* decorator = new DraughtDecorator();
 	Draughts* dashboard = new Draughts(this, decorator);
 

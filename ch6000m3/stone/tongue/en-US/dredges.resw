@@ -177,7 +177,13 @@
   <data name="Speed" xml:space="preserve">
     <value>Speed</value>
   </data>
-  <data name="Tide" xml:space="preserve">
-    <value>Tide</value>
+  <data name="TideMark" xml:space="preserve">
+    <value>Tide Mark</value>
+  </data>
+  <data name="Alet" xml:space="preserve">
+    <value>A let</value>
+  </data>
+  <data name="Blet" xml:space="preserve">
+    <value>B let</value>
   </data>
 </root>

@@ -226,20 +226,20 @@ public:
 	}
 
 public:
-	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) {
-		return hydraulic_command_executable(pump, cmd, true) && plc->connected();
+	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) override {
+		return hydraulic_pump_command_executable(pump, cmd, true) && plc->connected();
 	}
 
-	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) {
+	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) override {
 		plc->send_command(DO_hydraulic_pump_command(cmd, pump->id));
 	}
 
 public:
-	bool can_execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) {
+	bool can_execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) override {
 		return plc->connected();
 	}
 
-	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) {
+	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) override {
 		switch (cmd) {
 		case HSHOperation::Start:  plc->send_command(665U); break;
 		case HSHOperation::Stop:   plc->send_command(666U); break;

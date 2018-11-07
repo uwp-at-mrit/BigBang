@@ -16,6 +16,7 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
+#include "schema/do_pumps.hpp"
 #include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
 
@@ -36,7 +37,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 private enum SWMode { WindowUI = 0, Dashboard };
 
 private enum class SWPOperation { Start, Stop, Reset, Auto, _ };
-private enum class SWVOperation { Open, Close, FakeOpen, FakeClose, _ };
+private enum class SWVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
@@ -67,7 +68,7 @@ private enum class SW : unsigned int {
 
 private class SealedWaters final
 	: public PLCConfirmation
-	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*> {
+	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, SW>, PLCMaster*> {
 public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
@@ -114,18 +115,18 @@ public:
 		DI_hopper_pumps(this->hoppers[SW::PSHP], this->hoppers[SW::PSUWP], DB4, 1U, DB205, 857U, 825U);
 		DI_hopper_pumps(this->hoppers[SW::SBHP], this->hoppers[SW::SBUWP], DB4, 25U, DB205, 873U, 841U);
 
-		DI_flushing_pump(this->pumps[SW::PSFP], DB4, 105U, DB205, 1673U);
-		DI_flushing_pump(this->pumps[SW::SBFP], DB4, 109U, DB205, 1681U);
+		DI_gate_flushing_pump(this->pumps[SW::PSFP], DB4, pump_ps_gate_flushing_feedback, DB205, pump_ps_gate_flushing_status);
+		DI_gate_flushing_pump(this->pumps[SW::SBFP], DB4, pump_sb_gate_flushing_feedback, DB205, pump_sb_gate_flushing_status);
 
-		DI_sealed_water_pump(this->pumps[SW::PSHPa], false, DB4, 9U, DB205, 1713U);
-		DI_sealed_water_pump(this->pumps[SW::PSHPb], false, DB4, 13U, DB205, 1721U);
-		DI_sealed_water_pump(this->pumps[SW::SBHPa], false, DB4, 33U, DB205, 1729U);
-		DI_sealed_water_pump(this->pumps[SW::SBHPb], false, DB4, 37U, DB205, 1737U);
+		DI_sealed_water_pump(this->pumps[SW::PSHPa], false, DB4, pump_ps_hopper_A_feedback, DB205, pump_ps_hopper_A_status);
+		DI_sealed_water_pump(this->pumps[SW::PSHPb], false, DB4, pump_ps_hopper_B_feedback, DB205, pump_ps_hopper_B_status);
+		DI_sealed_water_pump(this->pumps[SW::SBHPa], false, DB4, pump_sb_hopper_A_feedback, DB205, pump_sb_hopper_A_status);
+		DI_sealed_water_pump(this->pumps[SW::SBHPb], false, DB4, pump_sb_hopper_B_feedback, DB205, pump_sb_hopper_B_status);
 
-		DI_sealed_water_pump(this->pumps[SW::PSUWP1], true, DB4, 513U, DB205, 1697U);
-		DI_sealed_water_pump(this->pumps[SW::PSUWP2], true, DB4, 517U, DB205, 1705U);
-		DI_sealed_water_pump(this->pumps[SW::SBUWP1], true, DB4, 529U, DB205, 1745U);
-		DI_sealed_water_pump(this->pumps[SW::SBUWP2], true, DB4, 533U, DB205, 1753U);
+		DI_sealed_water_pump(this->pumps[SW::PSUWP1], true, DB4, pump_ps_underwater_1_feedback, DB205, pump_ps_underwater_1_feedback);
+		DI_sealed_water_pump(this->pumps[SW::PSUWP2], true, DB4, pump_ps_underwater_2_feedback, DB205, pump_ps_underwater_2_feedback);
+		DI_sealed_water_pump(this->pumps[SW::SBUWP1], true, DB4, pump_sb_underwater_1_feedback, DB205, pump_sb_underwater_1_feedback);
+		DI_sealed_water_pump(this->pumps[SW::SBUWP2], true, DB4, pump_sb_underwater_2_feedback, DB205, pump_sb_underwater_2_feedback);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -155,14 +156,26 @@ public:
 	}
 
 public:
-	void execute(SWPOperation cmd, Credit<HydraulicPumplet, SW>* pump, IMRMaster* plc) {
-		plc->get_logger()->log_message(Log::Info, L"%s %s",
-			cmd.ToString()->Data(),
-			pump->id.ToString()->Data());
+	bool can_execute(SWPOperation cmd, Credit<HydraulicPumplet, SW>* pump, PLCMaster* plc, bool acc_executable) override {
+		bool executable = plc->connected();
+
+		switch (pump->id) {
+		case SW::PSFP: case SW::SBFP: executable = executable && gate_flushing_pump_command_executable(pump, cmd, true); break;
+		default: executable = executable && sealed_water_pump_command_executable(pump, cmd, true); break;
+		}
+
+		return executable;
+	}
+
+	void execute(SWPOperation cmd, Credit<HydraulicPumplet, SW>* pump, PLCMaster* plc) {
+		switch (pump->id) {
+		case SW::PSFP: case SW::SBFP: plc->send_command(DO_gate_flushing_pump_command(cmd, pump->id)); break;
+		default: plc->send_command(DO_sealed_water_pump_command(cmd, pump->id)); break;
+		}
 	}
 
 public:
-	bool on_char(VirtualKey key, IMRMaster* plc) {
+	bool on_char(VirtualKey key, PLCMaster* plc) {
 		bool handled = false;
 
 		if (key == VirtualKey::Enter) {
@@ -426,11 +439,11 @@ private:
 	SealedWaterPage* master;
 };
 
-SealedWaterPage::SealedWaterPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+SealedWaterPage::SealedWaterPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	SealedWaters* dashboard = new SealedWaters(this);
 
 	this->dashboard = dashboard;
-	this->pump_op = make_menu<SWPOperation, Credit<HydraulicPumplet, SW>, IMRMaster*>(dashboard, plc);
+	this->pump_op = make_menu<SWPOperation, Credit<HydraulicPumplet, SW>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

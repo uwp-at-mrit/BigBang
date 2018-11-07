@@ -33,8 +33,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LDMode { WindowUI = 0, Dashboard };
 
-private enum class LDGVOperation { Open, Close, FakeOpen, FakeClose, _ };
-private enum class LDMVOperation { Open, Close, FakeOpen, FakeClose, Heat, _ };
+private enum class LDGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
+private enum class LDMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
 
 // WARNING: order matters
 private enum class LD : unsigned int {
@@ -68,8 +68,8 @@ private enum class LD : unsigned int {
 
 private class Vessel final
 	: public PLCConfirmation
-	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>
-	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, IMRMaster*> {
+	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>
+	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*> {
 public:
 	Vessel(LoadingsPage* master) : master(master) {}
 
@@ -145,13 +145,13 @@ public:
 	}
 
 public:
-	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, IMRMaster* plc) {
+	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc) {
 		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
 	}
 
-	void execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, IMRMaster* plc) {
+	void execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, PLCMaster* plc) {
 		plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
 			cmd.ToString()->Data(),
 			valve->id.ToString()->Data());
@@ -166,6 +166,9 @@ public:
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
+
+		this->hopper_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->hopper_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -417,8 +420,8 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
-		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "kwatt"), id);
-		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "rpm"), id);
+		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "kwatt"), id);
+		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "rpm"), id);
 	}
 
 	template<typename E>
@@ -473,6 +476,7 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
+	DimensionStyle hopper_style;
 
 private:
 	LoadingsPage* master;
@@ -561,12 +565,12 @@ private:
 	Vessel* master;
 };
 
-LoadingsPage::LoadingsPage(IMRMaster* plc) : Planet(__MODULE__), device(plc) {
+LoadingsPage::LoadingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, IMRMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<LDMVOperation, Credit<MotorValvelet, LD>, IMRMaster*>(dashboard, plc);
+	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>(dashboard, plc);
+	this->motor_valve_op = make_menu<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

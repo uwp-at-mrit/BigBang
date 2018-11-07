@@ -10,7 +10,7 @@ namespace WarGrey::SCADA {
 	private class HopperDoorsPage : public WarGrey::SCADA::Planet {
 	public:
 		~HopperDoorsPage() noexcept;
-		HopperDoorsPage(WarGrey::SCADA::IMRMaster* plc);
+		HopperDoorsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
 
 	private:
-		WarGrey::SCADA::IMRMaster* device;
+		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ door_op;
 

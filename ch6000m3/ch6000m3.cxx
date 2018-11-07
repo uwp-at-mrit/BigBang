@@ -40,14 +40,14 @@ public:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger, true);
+		this->device = new PLCMaster(logger, false);
 	}
 
 protected:
 	void construct() override {
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
-		//this->add_planet(new DredgesPage(this->device, DragView::Left));
+		this->add_planet(new DredgesPage(this->device));
 
 		this->add_planet(new HydraulicsPage(this->device));
 		this->add_planet(new HopperDoorsPage(this->device));

@@ -135,10 +135,10 @@
   <data name="Open" xml:space="preserve">
     <value>打开</value>
   </data>
-  <data name="FakeClose" xml:space="preserve">
+  <data name="VirtualClose" xml:space="preserve">
     <value>假关</value>
   </data>
-  <data name="FakeOpen" xml:space="preserve">
+  <data name="VirtualOpen" xml:space="preserve">
     <value>假开</value>
   </data>
   <data name="Heat" xml:space="preserve">

@@ -4,32 +4,66 @@
 
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
+	
 	template<typename OP, typename E>
-	uint16 DO_hydraulic_pump_command(OP cmd, E id) {
+	uint16 DO_hopper_door_command(OP cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case OP::Start: offset = 0U; break;
-		case OP::Stop:  offset = 1U; break;
-		case OP::Reset: offset = 2U; break;
+		case OP::Open:    offset = 0U; break;
+		case OP::Stop:    offset = 1U; break;
+		case OP::Close:   offset = 2U; break;
+		case OP::Disable: offset = 3U; break;
 		}
 
 		switch (id) {
-		case E::A: index = 9U; break;
-		case E::B: index = 12U; break;
-		case E::C: index = 15U; break;
-		case E::D: index = 18U; break;
-		case E::E: index = 21U; break;
-		case E::F: index = 24U; break;
-		case E::G: index = 27U; break;
-		case E::H: index = 30U; break;
-		case E::I: index = 33U; break;
-		case E::J: index = 36U; break;
-		case E::K: index = 39U; break;
-		case E::L: index = 42U; break;
-		case E::M: index = 45U; break;
-		case E::Y: index = 48U; break;
+		case E::PS1: index = 337U; break;
+		case E::SB1: index = 341U; break;
+		case E::PS2: index = 345U; break;
+		case E::SB2: index = 349U; break;
+		case E::PS3: index = 353U; break;
+		case E::SB3: index = 357U; break;
+		case E::PS4: index = 361U; break;
+		case E::SB4: index = 365U; break;
+		case E::PS5: index = 369U; break;
+		case E::SB5: index = 373U; break;
+		case E::PS6: index = 377U; break;
+		case E::SB6: index = 381U; break;
+		case E::PS7: index = 385U; break;
+		case E::SB7: index = 389U; break;
+		}
+
+		return index + offset;
+	}
+
+	template<typename OP, typename E>
+	uint16 DO_upper_door_command(OP cmd, E id) {
+		uint16 offset = 0U;
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::Open:    offset = 0U; break;
+		case OP::Close:   offset = 1U; break;
+		case OP::Stop:    offset = 2U; break;
+		case OP::Disable: offset = 3U; break;
+		}
+
+		switch (id) {
+		case E::PS1: index = 433U; break;
+		case E::SB1: index = 437U; break;
+		case E::PS2: index = 441U; break;
+		case E::SB2: index = 445U; break;
+		case E::PS3: index = 449U; break;
+		case E::SB3: index = 453U; break;
+		case E::PS4: index = 457U; break;
+		case E::SB4: index = 461U; break;
+		case E::PS5: index = 465U; break;
+		case E::SB5: index = 469U; break;
+		case E::PS6: index = 473U; break;
+		case E::SB6: index = 477U; break;
+		case E::PS7: index = 481U; break;
+		case E::SB7: index = 485U; break;
 		}
 
 		return index + offset;

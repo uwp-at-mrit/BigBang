@@ -641,7 +641,7 @@ void DragHeadlet::construct() {
 	this->translate_y = 0.0F;
 	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius) * 0.618F;
 	this->bottom_radius = head_radius * 0.618F;
-	this->depth_font = make_bold_text_format(ametrics.em * 0.85F);
+	this->depth_font = make_bold_text_format(ametrics.em * 0.95F);
 
 	this->arrow_radius = ametrics.ch * 0.5F;
 	this->visor_pointer_radius = vmetrics.ring_radius - this->arrow_radius * 2.0F;

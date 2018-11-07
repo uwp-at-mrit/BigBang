@@ -111,8 +111,8 @@ namespace WarGrey::SCADA {
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 4.0F
-			, unsigned int outside_step = 2U, unsigned int inside_step = 1U, float thickness = 2.0F,
+		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 10.0F
+			, unsigned int outside_step = 1U, unsigned int inside_step = 1U, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,

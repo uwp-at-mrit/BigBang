@@ -44,8 +44,8 @@ namespace WarGrey::SCADA {
 		target->set_status(DBX(db205, idx205_p1 + 2), GateValveStatus::Unclosable);
 		target->set_status(DBX(db205, idx205_p1 + 3), GateValveStatus::OpenReady);
 		target->set_status(DBX(db205, idx205_p1 + 4), GateValveStatus::CloseReady);
-		target->set_status(DBX(db205, idx205_p1 + 5), GateValveStatus::FakeOpen);
-		target->set_status(DBX(db205, idx205_p1 + 6), GateValveStatus::FakeClose);
+		target->set_status(DBX(db205, idx205_p1 + 5), GateValveStatus::VirtualOpen);
+		target->set_status(DBX(db205, idx205_p1 + 6), GateValveStatus::VirtualClose);
 	}
 
 	template<class G, class M, typename E>
@@ -63,8 +63,8 @@ namespace WarGrey::SCADA {
 		gtarget->set_status(DBX(db205, gidx205_p1 + 2), GateValveStatus::Unclosable);
 		gtarget->set_status(DBX(db205, gidx205_p1 + 3), GateValveStatus::OpenReady);
 		gtarget->set_status(DBX(db205, gidx205_p1 + 4), GateValveStatus::CloseReady);
-		gtarget->set_status(DBX(db205, gidx205_p1 + 5), GateValveStatus::FakeOpen);
-		gtarget->set_status(DBX(db205, gidx205_p1 + 6), GateValveStatus::FakeClose);
+		gtarget->set_status(DBX(db205, gidx205_p1 + 5), GateValveStatus::VirtualOpen);
+		gtarget->set_status(DBX(db205, gidx205_p1 + 6), GateValveStatus::VirtualClose);
 
 		if (ms.find(id) != ms.end()) {
 			ms[id]->set_status(DBX(db4, midx4_p1 - 1), TValveStatus::Open);

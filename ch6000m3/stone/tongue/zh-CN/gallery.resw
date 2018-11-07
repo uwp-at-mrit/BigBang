@@ -183,10 +183,10 @@
   <data name="Disabled" xml:space="preserve">
     <value>禁用</value>
   </data>
-  <data name="FakeClose" xml:space="preserve">
+  <data name="VirtualClose" xml:space="preserve">
     <value>假关</value>
   </data>
-  <data name="FakeOpen" xml:space="preserve">
+  <data name="VirtualOpen" xml:space="preserve">
     <value>假开</value>
   </data>
   <data name="motor_valve" xml:space="preserve">
