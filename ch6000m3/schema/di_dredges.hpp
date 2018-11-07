@@ -4,50 +4,33 @@
 #include "graphlet/device/gantrylet.hpp"
 
 namespace WarGrey::SCADA {
+	private struct WinchThreshold {
+	public:
+		WinchThreshold(unsigned int upper, unsigned int spool, unsigned int slack = 0U, unsigned int suction = 0U)
+			: upper(upper), spool(spool), suction(suction), slack(slack) {}
+
+	public:
+		unsigned int upper;
+		unsigned int spool;
+		unsigned int suction;
+		unsigned int slack;
+	};
+
 	// DB4, starts from 1
-	/*
-	static unsigned int pump_A_feedback = 49U;
-	static unsigned int pump_B_feedback = 53U;
-	static unsigned int pump_G_feedback = 69U;
-	static unsigned int pump_H_feedback = 65U;
+	static WarGrey::SCADA::WinchThreshold winch_ps_trunnion_threshold = WarGrey::SCADA::WinchThreshold(321U, 322U, 323U, 324U);
+	static WarGrey::SCADA::WinchThreshold winch_ps_intermediate_threshold = WarGrey::SCADA::WinchThreshold(332U, 354U);
+	static WarGrey::SCADA::WinchThreshold winch_ps_draghead_threshold = WarGrey::SCADA::WinchThreshold(361U, 362U);
 
-	static unsigned int pump_C_feedback = 57U;
-	static unsigned int pump_F_feedback = 73U;
-	static unsigned int pump_D_feedback = 81U;
-	static unsigned int pump_E_feedback = 85U;
-
-	static unsigned int pump_Y_feedback = 101U;
-	static unsigned int pump_L_feedback = 93U;
-	static unsigned int pump_M_feedback = 97U;
-	static unsigned int pump_K_feedback = 89U;
-
-	static unsigned int pump_I_feedback = 61U;
-	static unsigned int pump_J_feedback = 77U;
+	static WarGrey::SCADA::WinchThreshold winch_sb_trunnion_threshold = WarGrey::SCADA::WinchThreshold(337U, 338U, 339U, 340U);
+	static WarGrey::SCADA::WinchThreshold winch_sb_intermediate_threshold = WarGrey::SCADA::WinchThreshold(348U, 386U);
+	static WarGrey::SCADA::WinchThreshold winch_sb_draghead_threshold = WarGrey::SCADA::WinchThreshold(393U, 394U);
 
 	// DB205, starts from 1
-	static unsigned int pump_A_status = 9U;
-	static unsigned int pump_B_status = 17U;
-	static unsigned int pump_G_status = 57U;
-	static unsigned int pump_H_status = 65U;
-
-	static unsigned int pump_C_status = 25U;
-	static unsigned int pump_F_status = 49U;
-	static unsigned int pump_D_status = 33U;
-	static unsigned int pump_E_status = 41U;
-
-	static unsigned int pump_Y_status = 73U;
-	static unsigned int pump_L_status = 89U;
-	static unsigned int pump_M_status = 97U;
-	static unsigned int pump_K_status = 81U;
-
-	static unsigned int pump_I_status = 105U;
-	static unsigned int pump_J_status = 113U;
-	*/
 
 	/************************************************************************************************/
 
 	template<class W>
-	void DI_winch(W* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
+	void DI_winch(W* target, const uint8* db4, WarGrey::SCADA::WinchThreshold& threshold, const uint8* db205, size_t idx205_p1) {
 		target->set_remote_control(DBX(db4, idx4_p1 - 1));
 
 		if (DBX(db4, idx4_p1 + 1)) {

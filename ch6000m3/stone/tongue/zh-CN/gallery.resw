@@ -225,10 +225,10 @@
   <data name="LowerLimited" xml:space="preserve">
     <value>钢丝绳下限</value>
   </data>
-  <data name="SoftLowerLimited" xml:space="preserve">
+  <data name="SensorLowerLimited" xml:space="preserve">
     <value>编码器下限</value>
   </data>
-  <data name="SoftUpperLimited" xml:space="preserve">
+  <data name="SensorUpperLimited" xml:space="preserve">
     <value>编码器上限</value>
   </data>
   <data name="UpperLimited" xml:space="preserve">
@@ -246,7 +246,7 @@
   <data name="Slack" xml:space="preserve">
     <value>钢丝绳松弛</value>
   </data>
-  <data name="SpoolLimited" xml:space="preserve">
+  <data name="SupportLimited" xml:space="preserve">
     <value>搁墩限位</value>
   </data>
   <data name="SuctionLimited" xml:space="preserve">

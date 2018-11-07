@@ -17,7 +17,9 @@
 #include "graphlet/device/draglet.hpp"
 
 #include "schema/ai_dredges.hpp"
+
 #include "schema/di_valves.hpp"
+#include "schema/di_dredges.hpp"
 
 #include "decorator/page.hpp"
 

@@ -78,34 +78,40 @@ void Winchlet::construct() {
 	
 	{ // construct icons
 		TextExtent te;
-		float radius = cable_height * 0.382F * 0.5F;
-		float fdiff = radius * 1.5F * 0.5F;
+		float radius = cable_height * 0.382F;
+		float sradius = radius * 0.5F;
+		float fsdiff = sradius * 1.5F * 0.5F;
+		auto sup_icon = polar_triangle(sradius, -90.0);
+		auto sout_icon = polar_triangle(sradius, 90.0);
 		auto up_icon = polar_triangle(radius, -90.0);
 		auto out_icon = polar_triangle(radius, 90.0);
-		auto fup_icon = geometry_union(up_icon, 0.0F, -fdiff, up_icon, 0.0F, fdiff);
-		auto fout_icon = geometry_union(out_icon, 0.0F, -fdiff, out_icon, 0.0F, fdiff);
-		auto tilde = paragraph("~", make_text_format(16.0F), &te);
+		auto fup_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sup_icon, 0.0F, fsdiff);
+		auto fout_icon = geometry_union(sout_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
+		auto tilde = paragraph("~", make_bold_text_format(20.0F), &te);
 
 		this->icon_cx = this->base_thickness + (this->cable->ComputeBounds().X - this->base_thickness) * 0.5F;
 		this->icon_cy = this->height * 0.5F;
 
-		this->icons[_I(WinchStatus::WindingUp)] = up_icon;
-		this->icons[_I(WinchStatus::WindingOut)] = out_icon;
-		this->icons[_I(WinchStatus::WindUpReady)] = up_icon;
-		this->icons[_I(WinchStatus::WindOutReady)] = out_icon;
-		this->icons[_I(WinchStatus::Unpullable)] = up_icon;
-		this->icons[_I(WinchStatus::Unlettable)] = out_icon;
-		this->icons[_I(WinchStatus::FastWindingUp)] = fup_icon;
-		this->icons[_I(WinchStatus::FastWindingOut)] = fout_icon;
-		this->icons[_I(WinchStatus::FastWindUpReady)] = fup_icon;
-		this->icons[_I(WinchStatus::FastWindOutReady)] = fout_icon;
-		this->icons[_I(WinchStatus::UpperLimited)] = up_icon;
-		this->icons[_I(WinchStatus::LowerLimited)] = out_icon;
-		this->icons[_I(WinchStatus::SoftUpperLimited)] = geometry_stroke(up_icon, 1.0F, this->cable_style);
-		this->icons[_I(WinchStatus::SoftLowerLimited)] = geometry_stroke(out_icon, 1.0F, this->cable_style);
-		this->icons[_I(WinchStatus::SuctionLimited)] = geometry_stroke(circle(radius), 2.0F);
-		this->icons[_I(WinchStatus::SpoolLimited)] = polar_rectangle(radius, -60.0, 0.0);
-		this->icons[_I(WinchStatus::Slack)] = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
+		this->icons[WinchStatus::WindingUp] = up_icon;
+		this->icons[WinchStatus::WindingOut] = out_icon;
+		this->icons[WinchStatus::WindUpReady] = up_icon;
+		this->icons[WinchStatus::WindOutReady] = out_icon;
+		this->icons[WinchStatus::Unpullable] = up_icon;
+		this->icons[WinchStatus::Unlettable] = out_icon;
+		this->icons[WinchStatus::FastWindingUp] = fup_icon;
+		this->icons[WinchStatus::FastWindingOut] = fout_icon;
+		this->icons[WinchStatus::FastWindUpReady] = fup_icon;
+		this->icons[WinchStatus::FastWindOutReady] = fout_icon;
+		this->icons[WinchStatus::UpperLimited] = up_icon;
+		this->icons[WinchStatus::LowerLimited] = out_icon;
+		this->icons[WinchStatus::SensorUpperLimited] = geometry_stroke(up_icon, 1.0F, this->cable_style);
+		this->icons[WinchStatus::SensorLowerLimited] = geometry_stroke(out_icon, 1.0F, this->cable_style);
+		this->icons[WinchStatus::SuctionLimited] = geometry_stroke(circle(radius), 2.0F);
+		this->icons[WinchStatus::SupportLimited] = polar_rectangle(radius, -60.0, 0.0);
+		this->icons[WinchStatus::Slack] = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
+
+		this->icons[WinchStatus::SuctionSlack] = this->icons[WinchStatus::SuctionLimited];
+		this->icons[WinchStatus::SupportSlack] = this->icons[WinchStatus::SupportLimited];
 	}
 }
 
@@ -124,7 +130,7 @@ void Winchlet::update(long long count, long long interval, long long uptime) {
 		}; break;
 		case WinchStatus::Unpullable: case WinchStatus::Unlettable:
 		case WinchStatus::UpperLimited: case WinchStatus::LowerLimited:
-		case WinchStatus::SoftUpperLimited: case WinchStatus::SoftLowerLimited: {
+		case WinchStatus::SensorUpperLimited: case WinchStatus::SensorLowerLimited: {
 			if (count % 2 == 1) {
 				this->cable_style->DashOffset += this->motion_step;
 				this->motion_step = -this->motion_step;
@@ -150,24 +156,30 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 	}; break;
 	case WinchStatus::WindUpReady: case WinchStatus::WindOutReady:
 	case WinchStatus::FastWindUpReady: case WinchStatus::FastWindOutReady: {
-		CAS_SLOT(s.cable_color, Colours::Cyan);
+		CAS_SLOT(s.cable_color, Colours::Gray);
 	}; break;
 	case WinchStatus::Unpullable: case WinchStatus::Unlettable: {
 		CAS_SLOT(s.cable_color, Colours::Red);
 	}; break;
-	case WinchStatus::UpperLimited: case WinchStatus::SoftUpperLimited: {
-		CAS_SLOT(s.cable_color, Colours::YellowGreen);
-		CAS_SLOT(s.cable_top_color, Colours::GreenYellow);
+	case WinchStatus::UpperLimited: case WinchStatus::SensorUpperLimited: {
+		CAS_SLOT(s.cable_color, Colours::Yellow);
+		CAS_SLOT(s.cable_top_color, Colours::Yellow);
 	}; break;
-	case WinchStatus::LowerLimited: case WinchStatus::SoftLowerLimited: {
-		CAS_SLOT(s.cable_color, Colours::YellowGreen);
-		CAS_SLOT(s.cable_bottom_color, Colours::GreenYellow);
+	case WinchStatus::LowerLimited: case WinchStatus::SensorLowerLimited: {
+		CAS_SLOT(s.cable_color, Colours::Yellow);
+		CAS_SLOT(s.cable_bottom_color, Colours::Yellow);
 	}; break;
-	case WinchStatus::SuctionLimited: {
+	case WinchStatus::SuctionLimited: case WinchStatus::SuctionSlack: {
 		CAS_SLOT(s.status_color, Colours::SeaGreen);
 	}; break;
-	case WinchStatus::SpoolLimited: case WinchStatus::Slack: {
+	case WinchStatus::SupportLimited: case WinchStatus::SupportSlack: case WinchStatus::Slack: {
 		CAS_SLOT(s.status_color, Colours::Crimson);
+	}; break;
+	}
+
+	switch (status) {
+	case WinchStatus::SuctionSlack: case WinchStatus::SupportSlack: {
+		CAS_SLOT(s.slack_color, Colours::Red);
 	}; break;
 	}
 
@@ -191,10 +203,10 @@ void Winchlet::on_status_changed(WinchStatus status) {
 	case WinchStatus::FastWindingOut: case WinchStatus::FastWindOutReady: {
 		this->motion_step = -1.5F;
 	}; break;
-	case WinchStatus::Unpullable: case WinchStatus::UpperLimited: case WinchStatus::SoftUpperLimited: {
+	case WinchStatus::Unpullable: case WinchStatus::UpperLimited: case WinchStatus::SensorUpperLimited: {
 		this->motion_step = 1.0F;
 	}; break;
-	case WinchStatus::Unlettable: case WinchStatus::LowerLimited: case WinchStatus::SoftLowerLimited: {
+	case WinchStatus::Unlettable: case WinchStatus::LowerLimited: case WinchStatus::SensorLowerLimited: {
 		this->motion_step = -1.0F;
 	}; break;
 	default: {
@@ -204,14 +216,22 @@ void Winchlet::on_status_changed(WinchStatus status) {
 }
 
 void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	CanvasGeometry^ icon = this->icons[_I(this->get_status())];
+	WinchStatus status = this->get_status();
 	WinchStyle s = this->get_style();
-
+	
 	ds->FillGeometry(this->cable_base, x, y, Colours::Background);
 	ds->DrawGeometry(this->cable, x, y, s.cable_color, this->cable_thickness, this->cable_style);
 	
-	if (icon != nullptr) {
-		ds->FillGeometry(icon, x + this->icon_cx, y + this->icon_cy, s.status_color);
+	if (this->icons.find(status) != this->icons.end()) {
+		ds->FillGeometry(this->icons[status], x + this->icon_cx, y + this->icon_cy, s.status_color);
+
+		if (s.slack_color != nullptr) {
+			if (this->icons.find(WinchStatus::Slack) != this->icons.end()) {
+				ds->FillGeometry(this->icons[WinchStatus::Slack],
+					x + this->width - this->icon_cx, y + this->icon_cy,
+					s.slack_color);
+			}
+		}
 	}
 	
 	ds->DrawCachedGeometry(this->cable_upper, x, y, s.cable_top_color);

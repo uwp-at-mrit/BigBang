@@ -1,15 +1,19 @@
 #pragma once
 
+#include <map>
+
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class WinchStatus {
 		Stopped, WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady,
-		UpperLimited, SoftUpperLimited, LowerLimited, SoftLowerLimited,
-		SpoolLimited, SuctionLimited, Unpullable, Unlettable,
+		UpperLimited, SensorUpperLimited, LowerLimited, SensorLowerLimited,
+		SupportLimited, SuctionLimited, Unpullable, Unlettable,
 		Slack,
-		_
+		_,
+
+		SupportSlack, SuctionSlack,
 	};
 
 	private struct WinchStyle {
@@ -19,6 +23,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cable_bottom_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ status_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ cable_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ slack_color;
 	};
 
 	private class Winchlet
@@ -43,7 +48,7 @@ namespace WarGrey::SCADA {
 		void on_status_changed(WarGrey::SCADA::WinchStatus status) override;
 		
 	private:
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ icons[_N(WarGrey::SCADA::WinchStatus)];
+		std::map<WarGrey::SCADA::WinchStatus, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> icons;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ cable_upper;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ cable_bottom;
