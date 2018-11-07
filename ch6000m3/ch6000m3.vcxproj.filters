@@ -116,6 +116,15 @@
     <ClInclude Include="schema\do_pumps.hpp">
       <Filter>schema</Filter>
     </ClInclude>
+    <ClInclude Include="schema\di_dredges.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\do_dredges.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\ai_doors.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

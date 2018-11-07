@@ -22,6 +22,9 @@
 #include "schema/di_valves.hpp"
 #include "schema/di_doors.hpp"
 
+#include "schema/ai_pumps.hpp"
+#include "schema/ai_doors.hpp"
+
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
@@ -99,31 +102,31 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->pressures[RS::C]->set_value(RealData(DB203, 8U), GraphletAnchor::LB);
-		this->pressures[RS::F]->set_value(RealData(DB203, 9U), GraphletAnchor::LT);
+		this->pressures[RS::C]->set_value(RealData(DB203, Pump_C_pressure), GraphletAnchor::LB);
+		this->pressures[RS::F]->set_value(RealData(DB203, Pump_F_pressure), GraphletAnchor::LT);
 
-		this->pressures[RS::A]->set_value(RealData(DB203, 12U), GraphletAnchor::LB);
-		this->pressures[RS::H]->set_value(RealData(DB203, 15U), GraphletAnchor::LT);
+		this->pressures[RS::A]->set_value(RealData(DB203, Pump_A_pressure), GraphletAnchor::LB);
+		this->pressures[RS::H]->set_value(RealData(DB203, Pump_H_pressure), GraphletAnchor::LT);
 
 		this->progresses[RS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
 		this->progresses[RS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
 
 		{ // door progresses
-			this->set_door_progress(RS::PS1, RealData(DB203, 53U));
-			this->set_door_progress(RS::PS2, RealData(DB203, 54U));
-			this->set_door_progress(RS::PS3, RealData(DB203, 55U));
-			this->set_door_progress(RS::PS4, RealData(DB203, 77U));
-			this->set_door_progress(RS::PS5, RealData(DB203, 78U));
-			this->set_door_progress(RS::PS6, RealData(DB203, 79U));
-			this->set_door_progress(RS::PS7, RealData(DB203, 80U));
+			this->set_door_progress(RS::PS1, RealData(DB203, upper_door_PS1_progress));
+			this->set_door_progress(RS::PS2, RealData(DB203, upper_door_PS2_progress));
+			this->set_door_progress(RS::PS3, RealData(DB203, upper_door_PS3_progress));
+			this->set_door_progress(RS::PS4, RealData(DB203, upper_door_PS4_progress));
+			this->set_door_progress(RS::PS5, RealData(DB203, upper_door_PS5_progress));
+			this->set_door_progress(RS::PS6, RealData(DB203, upper_door_PS6_progress));
+			this->set_door_progress(RS::PS7, RealData(DB203, upper_door_PS7_progress));
 
-			this->set_door_progress(RS::SB1, RealData(DB203, 69U));
-			this->set_door_progress(RS::SB2, RealData(DB203, 70U));
-			this->set_door_progress(RS::SB3, RealData(DB203, 71U));
-			this->set_door_progress(RS::SB4, RealData(DB203, 93U));
-			this->set_door_progress(RS::SB5, RealData(DB203, 94U));
-			this->set_door_progress(RS::SB6, RealData(DB203, 95U));
-			this->set_door_progress(RS::SB7, RealData(DB203, 96U));
+			this->set_door_progress(RS::SB1, RealData(DB203, upper_door_SB1_progress));
+			this->set_door_progress(RS::SB2, RealData(DB203, upper_door_SB2_progress));
+			this->set_door_progress(RS::SB3, RealData(DB203, upper_door_SB3_progress));
+			this->set_door_progress(RS::SB4, RealData(DB203, upper_door_SB4_progress));
+			this->set_door_progress(RS::SB5, RealData(DB203, upper_door_SB5_progress));
+			this->set_door_progress(RS::SB6, RealData(DB203, upper_door_SB6_progress));
+			this->set_door_progress(RS::SB7, RealData(DB203, upper_door_SB7_progress));
 		}
 	}
 
@@ -156,23 +159,21 @@ public:
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D024, DB4, 413U, 435U, DB205, 553U, 0U);
 		DI_paired_valves(this->gvalves, this->mvalves, RS::D025, DB4, 275U, 467U, DB205, 561U, 0U);
 		
-		{ // Missing DB4 info
-			DI_hopper_door(this->uhdoors[RS::PS1], DB4, 329U, DB205, 1089U);
-			DI_hopper_door(this->uhdoors[RS::PS2], DB4, 330U, DB205, 1105U);
-			DI_hopper_door(this->uhdoors[RS::PS3], DB4, 331U, DB205, 1121U);
-			DI_hopper_door(this->uhdoors[RS::PS4], DB4, 369U, DB205, 1137U);
-			DI_hopper_door(this->uhdoors[RS::PS5], DB4, 370U, DB205, 1153U);
-			DI_hopper_door(this->uhdoors[RS::PS6], DB4, 371U, DB205, 1169U);
-			DI_hopper_door(this->uhdoors[RS::PS7], DB4, 372U, DB205, 1185U);
+		DI_hopper_door(this->uhdoors[RS::PS1], DB4, upper_door_PS1_closed, DB205, upper_door_PS1_status);
+		DI_hopper_door(this->uhdoors[RS::PS2], DB4, upper_door_PS2_closed, DB205, upper_door_PS2_status);
+		DI_hopper_door(this->uhdoors[RS::PS3], DB4, upper_door_PS3_closed, DB205, upper_door_PS3_status);
+		DI_hopper_door(this->uhdoors[RS::PS4], DB4, upper_door_PS4_closed, DB205, upper_door_PS4_status);
+		DI_hopper_door(this->uhdoors[RS::PS5], DB4, upper_door_PS5_closed, DB205, upper_door_PS5_status);
+		DI_hopper_door(this->uhdoors[RS::PS6], DB4, upper_door_PS6_closed, DB205, upper_door_PS6_status);
+		DI_hopper_door(this->uhdoors[RS::PS7], DB4, upper_door_PS7_closed, DB205, upper_door_PS7_status);
 
-			DI_hopper_door(this->uhdoors[RS::SB1], DB4, 345U, DB205, 1097U);
-			DI_hopper_door(this->uhdoors[RS::SB2], DB4, 346U, DB205, 1113U);
-			DI_hopper_door(this->uhdoors[RS::SB3], DB4, 347U, DB205, 1129U);
-			DI_hopper_door(this->uhdoors[RS::SB4], DB4, 401U, DB205, 1145U);
-			DI_hopper_door(this->uhdoors[RS::SB5], DB4, 402U, DB205, 1161U);
-			DI_hopper_door(this->uhdoors[RS::SB6], DB4, 403U, DB205, 1177U);
-			DI_hopper_door(this->uhdoors[RS::SB7], DB4, 404U, DB205, 1193U);
-		}
+		DI_hopper_door(this->uhdoors[RS::SB1], DB4, upper_door_SB1_closed, DB205, upper_door_SB1_status);
+		DI_hopper_door(this->uhdoors[RS::SB2], DB4, upper_door_SB2_closed, DB205, upper_door_SB2_status);
+		DI_hopper_door(this->uhdoors[RS::SB3], DB4, upper_door_SB3_closed, DB205, upper_door_SB3_status);
+		DI_hopper_door(this->uhdoors[RS::SB4], DB4, upper_door_SB4_closed, DB205, upper_door_SB4_status);
+		DI_hopper_door(this->uhdoors[RS::SB5], DB4, upper_door_SB5_closed, DB205, upper_door_SB5_status);
+		DI_hopper_door(this->uhdoors[RS::SB6], DB4, upper_door_SB6_closed, DB205, upper_door_SB6_status);
+		DI_hopper_door(this->uhdoors[RS::SB7], DB4, upper_door_SB7_closed, DB205, upper_door_SB7_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
