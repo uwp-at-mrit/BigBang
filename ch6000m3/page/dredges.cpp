@@ -18,6 +18,7 @@
 
 #include "schema/ai_dredges.hpp"
 #include "schema/ai_pumps.hpp"
+#include "schema/ai_valves.hpp"
 
 #include "schema/di_valves.hpp"
 #include "schema/di_pumps.hpp"
@@ -302,8 +303,8 @@ public:
 		this->overflowpipe->set_value(RealData(DB203, 55U));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
 
-		this->progresses[DS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
-		this->progresses[DS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
+		this->progresses[DS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
+		this->progresses[DS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
 		this->set_cylinder(DS::PSHPDP, RealData(DB203, this->ps_address->discharge_pressure));
 		this->set_cylinder(DS::PSHPVP, RealData(DB203, this->ps_address->vacuum_pressure));
@@ -344,13 +345,15 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		DI_gate_valve(this->valves[DS::D011], DB4, 349U, DB205, 449U);
-		DI_gate_valve(this->valves[DS::D012], DB4, 333U, DB205, 457U);
-		DI_gate_valve(this->valves[DS::D013], DB4, 405U, DB205, 465U);
-		DI_gate_valve(this->valves[DS::D014], DB4, 373U, DB205, 473U);
-		DI_gate_valve(this->valves[DS::D015], DB4, 407U, DB205, 481U);
-		DI_gate_valve(this->valves[DS::D016], DB4, 375U, DB205, 489U);
-
+		DI_gate_valve(this->valves[DS::D003], DB4, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
+		DI_gate_valve(this->valves[DS::D004], DB4, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
+		DI_gate_valve(this->valves[DS::D011], DB4, gate_valve_D11_feedback, DB205, gate_valve_D11_status);
+		DI_gate_valve(this->valves[DS::D012], DB4, gate_valve_D12_feedback, DB205, gate_valve_D12_status);
+		DI_gate_valve(this->valves[DS::D013], DB4, gate_valve_D13_feedback, DB205, gate_valve_D13_status);
+		DI_gate_valve(this->valves[DS::D014], DB4, gate_valve_D14_feedback, DB205, gate_valve_D14_status);
+		DI_gate_valve(this->valves[DS::D015], DB4, gate_valve_D15_feedback, DB205, gate_valve_D15_status);
+		DI_gate_valve(this->valves[DS::D016], DB4, gate_valve_D16_feedback, DB205, gate_valve_D16_status);
+		
 		DI_winch(this->winches[DS::psTrunnion], DB4, winch_ps_trunnion_limited, DB205, winch_ps_trunnion_details);
 		DI_winch(this->winches[DS::psIntermediate], DB4, winch_ps_intermediate_limited, DB205, winch_ps_intermediate_details);
 		DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limited, DB205, winch_ps_draghead_details);

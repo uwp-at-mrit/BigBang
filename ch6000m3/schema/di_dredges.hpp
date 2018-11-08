@@ -83,7 +83,7 @@ namespace WarGrey::SCADA {
 		if (DBX(db4, limited.upper - 1U)) {
 			target->set_status(WinchStatus::UpperLimited);
 		} else if (DBX(db4, limited.support - 1U)) {
-			target->set_status(slack, WinchStatus::SupportSlack, WinchStatus::SupportLimited);
+			target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
 		} else if ((limited.suction > 0U) && DBX(db4, limited.suction - 1U)) {
 			target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
 		} else {

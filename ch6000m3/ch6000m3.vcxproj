@@ -335,6 +335,7 @@
     <ClInclude Include="schema\do_doors.hpp" />
     <ClInclude Include="schema\do_dredges.hpp" />
     <ClInclude Include="schema\do_pumps.hpp" />
+    <ClInclude Include="schema\do_valves.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\loadings.hpp" />

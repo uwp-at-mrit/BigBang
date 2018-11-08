@@ -22,10 +22,12 @@
 #include "schema/di_valves.hpp"
 #include "schema/di_doors.hpp"
 
+#include "schema/ai_valves.hpp"
 #include "schema/ai_pumps.hpp"
 #include "schema/ai_doors.hpp"
 
 #include "schema/do_doors.hpp"
+#include "schema/do_valves.hpp"
 
 #include "decorator/page.hpp"
 
@@ -68,6 +70,7 @@ private enum class RS : unsigned int {
 	PSPC, SBPC, PSFC, SBFC,
 	
 	_,
+
 	// anchors used as last jumping points
 	d0225, d0325, d0406,
 	d1720, d1819, d1920, d2122,
@@ -76,7 +79,10 @@ private enum class RS : unsigned int {
 	ps, sb, d007, deck_lx, deck_rx, deck_ty, deck_by,
 
 	// anchors used for non-interconnected nodes
-	n24, n0325, n0405, n0723, n0923
+	n24, n0325, n0405, n0723, n0923,
+
+	// unused, but template requires them
+	D011, D012, D013, D014, D015, D016, D026
 };
 
 private class Rainbows final
@@ -112,8 +118,8 @@ public:
 		this->pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
 		this->pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
 
-		this->progresses[RS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
-		this->progresses[RS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);
+		this->progresses[RS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
+		this->progresses[RS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
 		{ // door progresses
 			this->set_door_progress(RS::PS1, RealData(DB203, upper_door_PS1_progress));
@@ -143,25 +149,25 @@ public:
 		DI_pump_dimension(this->pressures[RS::F], DB4, pump_F_feedback);
 		DI_pump_dimension(this->pressures[RS::H], DB4, pump_H_feedback);
 
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D001, DB4, 239U, 465U, DB205, 369U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D002, DB4, 273U, 421U, DB205, 393U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D003, DB4, 279U, 423U, DB205, 385U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D004, DB4, 257U, 425U, DB205, 377U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D005, DB4, 259U, 417U, DB205, 401U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D006, DB4, 261U, 419U, DB205, 409U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D007, DB4, 289U, 455U, DB205, 417U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D008, DB4, 291U, 457U, DB205, 425U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D009, DB4, 293U, 443U, DB205, 433U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D010, DB4, 295U, 439U, DB205, 441U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D017, DB4, 297U, 445U, DB205, 497U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D018, DB4, 299U, 453U, DB205, 505U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D019, DB4, 301U, 451U, DB205, 513U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D020, DB4, 303U, 447U, DB205, 521U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D021, DB4, 305U, 449U, DB205, 529U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D022, DB4, 307U, 461U, DB205, 537U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D023, DB4, 309U, 459U, DB205, 545U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D024, DB4, 413U, 435U, DB205, 553U, 0U);
-		DI_paired_valves(this->gvalves, this->mvalves, RS::D025, DB4, 275U, 467U, DB205, 561U, 0U);
+		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status);
+		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status);
+		this->set_valves_status(RS::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status);
+		this->set_valves_status(RS::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status);
+		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status);
+		this->set_valves_status(RS::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status);
+		this->set_valves_status(RS::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status);
+		this->set_valves_status(RS::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status);
+		this->set_valves_status(RS::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status);
+		this->set_valves_status(RS::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status);
+		this->set_valves_status(RS::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status);
+		this->set_valves_status(RS::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status);
+		this->set_valves_status(RS::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status);
+		this->set_valves_status(RS::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status);
+		this->set_valves_status(RS::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status);
+		this->set_valves_status(RS::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status);
+		this->set_valves_status(RS::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status);
+		this->set_valves_status(RS::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status);
+		this->set_valves_status(RS::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status);
 		
 		DI_hopper_door(this->uhdoors[RS::PS1], DB205, upper_door_PS1_status);
 		DI_hopper_door(this->uhdoors[RS::PS2], DB205, upper_door_PS2_status);
@@ -186,21 +192,26 @@ public:
 	}
 
 public:
+	bool can_execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
+		return gate_valve_command_executable(valve, cmd, true) && plc->connected();
+	}
+
 	void execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc) override {
-		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
+		plc->send_command(DO_gate_valve_command(cmd, valve->id));
+	}
+
+public:
+	bool can_execute(RSMVOperation cmd, Credit<MotorValvelet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
+		return motor_valve_command_executable(valve, cmd, true) && plc->connected();
 	}
 
 	void execute(RSMVOperation cmd, Credit<MotorValvelet, RS>* valve, PLCMaster* plc) override {
-		plc->get_logger()->log_message(Log::Info, L"Motor Valve: %s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
+		plc->send_command(DO_motor_valve_command(cmd, valve->id));
 	}
 
 public:
 	bool can_execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc, bool acc_executable) override {
-		return hopper_door_command_executable(door, cmd, true);// && plc->connected();
+		return hopper_door_command_executable(door, cmd, true) && plc->connected();
 	}
 
 	void execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc) override {
@@ -587,9 +598,14 @@ private:
 		AI_hopper_door(this->uhdoors[id], value, bottom_door_open_threshold, upper_door_closed_threshold);
 	}
 
-	void set_valve_status(RS id, const uint8* db4, size_t gidx_p1, size_t midx_p1) {
-		this->gvalves[id]->set_status(DBX(db4, gidx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
-		this->mvalves[id]->set_status(DBX(db4, midx_p1 - 1), TValveStatus::Open, TValveStatus::Closed);
+	void set_valves_status(RS id, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1, const uint8* db205, unsigned int idx205_p1) {
+		MotorValvelet* maybe_mvalve = nullptr;
+
+		if (this->mvalves.find(id) != this->mvalves.end()) {
+			maybe_mvalve = this->mvalves[id];
+		}
+
+		DI_paired_valves(this->gvalves[id], maybe_mvalve, db4, gidx4_p1, midx4_p1, db205, idx205_p1);
 	}
 
 // never deletes these graphlets mannually
