@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool can_select(IGraphlet* g) override;
-		void on_tap(IGraphlet* g, float x, float y) override;
+		void on_tap_selected(IGraphlet* g, float x, float y) override;
 
 	private:
 		WarGrey::SCADA::PLCMaster* device;

@@ -150,4 +150,19 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="WindOut" xml:space="preserve">
+    <value>Wind Out</value>
+  </data>
+  <data name="WindUp" xml:space="preserve">
+    <value>Wind Up</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>Down</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>Up</value>
+  </data>
+  <data name="HighSpeed" xml:space="preserve">
+    <value>High Speed</value>
+  </data>
 </root>

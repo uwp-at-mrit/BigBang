@@ -220,11 +220,11 @@ public:
 		}
 
 		{ // pump pressures
-			this->dimensions[HD::D]->set_value(RealData(DB203, Pump_D_pressure), GraphletAnchor::LB);
-			this->dimensions[HD::E]->set_value(RealData(DB203, Pump_E_pressure), GraphletAnchor::LT);
+			this->dimensions[HD::D]->set_value(RealData(DB203, pump_D_pressure), GraphletAnchor::LB);
+			this->dimensions[HD::E]->set_value(RealData(DB203, pump_E_pressure), GraphletAnchor::LT);
 
-			this->dimensions[HD::A]->set_value(RealData(DB203, Pump_A_pressure), GraphletAnchor::CC);
-			this->dimensions[HD::H]->set_value(RealData(DB203, Pump_H_pressure), GraphletAnchor::CC);
+			this->dimensions[HD::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::CC);
+			this->dimensions[HD::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::CC);
 		}
 	}
 

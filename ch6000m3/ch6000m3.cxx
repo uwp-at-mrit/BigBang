@@ -47,17 +47,17 @@ protected:
 	void construct() override {
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
-		this->add_planet(new DredgesPage(this->device));
+		//this->add_planet(new DredgesPage(this->device, DragView::Right));
 
 		this->add_planet(new HydraulicsPage(this->device));
+		this->add_planet(new LoadingsPage(this->device));
+		this->add_planet(new DredgesPage(this->device));
+		this->add_planet(new RainbowingsPage(this->device));
+		this->add_planet(new SealedWaterPage(this->device));
+		this->add_planet(new FlushsPage(this->device));
+		this->add_planet(new DredgesPage(this->device, DragView::Left));
 		this->add_planet(new HopperDoorsPage(this->device));
 		this->add_planet(new DraughtsPage(this->device));
-		this->add_planet(new SealedWaterPage(this->device));
-		this->add_planet(new LoadingsPage(this->device));
-		this->add_planet(new RainbowingsPage(this->device));
-		this->add_planet(new FlushsPage(this->device));
-		this->add_planet(new DredgesPage(this->device));
-		this->add_planet(new DredgesPage(this->device, DragView::Left));
 		this->add_planet(new DredgesPage(this->device, DragView::Right));
 
 		this->add_planet(new Gallery());

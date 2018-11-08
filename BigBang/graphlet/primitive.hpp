@@ -169,6 +169,16 @@ namespace WarGrey::SCADA {
 			}
 		}
 
+		void set_status(bool condition, bool case_condition, Status status1, Status status2) {
+			if (condition) {
+				if (case_condition) {
+					this->set_status(status1);
+				} else {
+					this->set_status(status2);
+				}
+			}
+		}
+
 		Status get_status() {
 			return _E(Status, this->current_status);
 		}

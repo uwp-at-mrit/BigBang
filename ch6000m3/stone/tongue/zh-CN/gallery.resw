@@ -267,4 +267,10 @@
   <data name="Maintenance" xml:space="preserve">
     <value>维修</value>
   </data>
+  <data name="SuctionSlack" xml:space="preserve">
+    <value>吸口限位 + 松弛</value>
+  </data>
+  <data name="SupportSlack" xml:space="preserve">
+    <value>搁墩限位 + 松弛</value>
+  </data>
 </root>

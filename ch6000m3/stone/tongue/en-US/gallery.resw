@@ -247,7 +247,7 @@
     <value>Cable Slack</value>
   </data>
   <data name="SupportLimited" xml:space="preserve">
-    <value>Spool Limited</value>
+    <value>Support Limited</value>
   </data>
   <data name="SuctionLimited" xml:space="preserve">
     <value>Suction Limited</value>
@@ -266,5 +266,11 @@
   </data>
   <data name="Maintenance" xml:space="preserve">
     <value>Maintenance</value>
+  </data>
+  <data name="SuctionSlack" xml:space="preserve">
+    <value>Suction + Slack</value>
+  </data>
+  <data name="SupportSlack" xml:space="preserve">
+    <value>Support  + Slack</value>
   </data>
 </root>

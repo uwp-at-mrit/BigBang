@@ -119,9 +119,9 @@ std::string WarGrey::SCADA::make_nstring(Platform::String^ wstr) {
 }
 
 std::string WarGrey::SCADA::binumber(unsigned int n, size_t bitsize) {
-	static char spool[64];
+	static char support[64];
 	size_t size = ((bitsize < 1) ? ((n == 0) ? 1 : integer_length(n)) : bitsize);
-	char* pool = ((size > (sizeof(spool) / sizeof(char))) ? new char[size] : spool);
+	char* pool = ((size > (sizeof(support) / sizeof(char))) ? new char[size] : support);
 
 	for (size_t idx = size; idx > 0; idx--) {
 		pool[idx - 1] = (((n >> (size - idx)) & 0b1) ? '1' : '0');
@@ -129,7 +129,7 @@ std::string WarGrey::SCADA::binumber(unsigned int n, size_t bitsize) {
 
 	std::string str(pool, size);
 
-	if (pool != spool) {
+	if (pool != support) {
 		delete[] pool;
 	}
 

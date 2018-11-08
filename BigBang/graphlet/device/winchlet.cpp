@@ -87,7 +87,7 @@ void Winchlet::construct() {
 		auto out_icon = polar_triangle(radius, 90.0);
 		auto fup_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sup_icon, 0.0F, fsdiff);
 		auto fout_icon = geometry_union(sout_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
-		auto tilde = paragraph("~", make_bold_text_format(20.0F), &te);
+		auto tilde = paragraph("~", make_bold_text_format(24.0F), &te);
 
 		this->icon_cx = this->base_thickness + (this->cable->ComputeBounds().X - this->base_thickness) * 0.5F;
 		this->icon_cy = this->height * 0.5F;
@@ -172,7 +172,8 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 	case WinchStatus::SuctionLimited: case WinchStatus::SuctionSlack: {
 		CAS_SLOT(s.status_color, Colours::SeaGreen);
 	}; break;
-	case WinchStatus::SupportLimited: case WinchStatus::SupportSlack: case WinchStatus::Slack: {
+	case WinchStatus::SupportLimited: case WinchStatus::SupportSlack:
+	case WinchStatus::Slack: {
 		CAS_SLOT(s.status_color, Colours::Crimson);
 	}; break;
 	}

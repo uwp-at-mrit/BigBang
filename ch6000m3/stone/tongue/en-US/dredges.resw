@@ -186,4 +186,31 @@
   <data name="Blet" xml:space="preserve">
     <value>B let</value>
   </data>
+  <data name="hVirtualOut" xml:space="preserve">
+    <value>Draghead Gantry Virtual Wind Out Limited</value>
+  </data>
+  <data name="hVirtualUp" xml:space="preserve">
+    <value>Draghead Gantry Virtual Wind Up Limited</value>
+  </data>
+  <data name="iVirtualOut" xml:space="preserve">
+    <value>Intermediate Gantry Virtual Wind Out Limited</value>
+  </data>
+  <data name="iVirtualUp" xml:space="preserve">
+    <value>Intermediate Gantry Virtual Wind Up Limited</value>
+  </data>
+  <data name="tVirtualOut" xml:space="preserve">
+    <value>Trunnion Gantry Virtual Wind Out Limited</value>
+  </data>
+  <data name="tVirtualUp" xml:space="preserve">
+    <value>Trunnion Gantry Virtual Wind Up Limited</value>
+  </data>
+  <data name="on" xml:space="preserve">
+    <value>Working</value>
+  </data>
+  <data name="ps_gantry_settings" xml:space="preserve">
+    <value>PS Gantry Limitation Settings</value>
+  </data>
+  <data name="sb_gantry_settings" xml:space="preserve">
+    <value>SB Gantry Limitation Settings</value>
+  </data>
 </root>

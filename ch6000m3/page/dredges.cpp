@@ -17,9 +17,13 @@
 #include "graphlet/device/draglet.hpp"
 
 #include "schema/ai_dredges.hpp"
+#include "schema/ai_pumps.hpp"
 
 #include "schema/di_valves.hpp"
+#include "schema/di_pumps.hpp"
 #include "schema/di_dredges.hpp"
+
+#include "schema/do_dredges.hpp"
 
 #include "decorator/page.hpp"
 
@@ -31,6 +35,8 @@ using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 
+using namespace Windows::UI::Xaml::Controls;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -39,7 +45,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DSMode { WindowUI = 0, Dashboard };
 
-private enum class DSOperation { Open, Stop, Close, Disable, _ };
+private enum class DSWOperation { Up, Down, Stop, HighSpeed, _ };
+private enum class DSGOperation { WindOut, WindUp, Stop, _ };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
@@ -67,7 +74,16 @@ private enum class DS : unsigned int {
 	// winches and gantries
 	psTrunnion, psIntermediate, psDragHead,
 	sbTrunnion, sbIntermediate, sbDragHead,
+
+	// instructions
+	ps_gantry_settings, sb_gantry_settings, on,
+	tVirtualUp, tVirtualOut,
+	iVirtualUp, iVirtualOut,
+	hVirtualUp, hVirtualOut
 };
+
+static ICanvasBrush^ checked_color = Colours::Green;
+static ICanvasBrush^ unchecked_color = Colours::WhiteSmoke;
 
 private class IDredgingSystem : public PLCConfirmation {
 public:
@@ -100,7 +116,7 @@ public:
 
 public:
 	virtual bool can_select(IGraphlet* g) { return false; }
-	virtual void on_tap(IGraphlet* g, float x, float y) {}
+	virtual void on_tap_selected(IGraphlet* g, float x, float y) {}
 
 public:
 	virtual void draw_cables(CanvasDrawingSession^ ds, float Width, float Height) {}
@@ -334,6 +350,14 @@ public:
 		DI_gate_valve(this->valves[DS::D014], DB4, 373U, DB205, 473U);
 		DI_gate_valve(this->valves[DS::D015], DB4, 407U, DB205, 481U);
 		DI_gate_valve(this->valves[DS::D016], DB4, 375U, DB205, 489U);
+
+		DI_winch(this->winches[DS::psTrunnion], DB4, winch_ps_trunnion_limited, DB205, winch_ps_trunnion_details);
+		DI_winch(this->winches[DS::psIntermediate], DB4, winch_ps_intermediate_limited, DB205, winch_ps_intermediate_details);
+		DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limited, DB205, winch_ps_draghead_details);
+
+		DI_winch(this->winches[DS::sbTrunnion], DB4, winch_sb_trunnion_limited, DB205, winch_sb_trunnion_details);
+		DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limited, DB205, winch_sb_intermediate_details);
+		DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limited, DB205, winch_sb_draghead_details);
 	}
 
 public:
@@ -612,13 +636,19 @@ private: // never delete these global objects
 	DredgeAddress* sb_address;
 };
 
-private class Drags final : public IDredgingSystem {
+private class Drags final
+	: public IDredgingSystem
+	, public IMenuCommand<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>
+	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*> {
 public:
-	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
+	Drags(DredgesPage* master, PLCMaster* plc, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
 		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Green);
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
+
+		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, plc);
+		this->gantry_op = make_menu<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>(this, plc);
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
@@ -631,6 +661,31 @@ public:
 
 public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		if (DS_side == DS::PS) {
+			this->pressures[DS::psTrunnion]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::CC);
+			this->pressures[DS::psIntermediate]->set_value(RealData(DB203, pump_B_pressure), GraphletAnchor::CC);
+			this->pressures[DS::psDragHead]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::CC);
+			this->set_compensator(DS::PSWC, DB203, this->address->compensator_length, GraphletAnchor::LC);
+
+			this->Alets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_A_pressure), GraphletAnchor::LB);
+			this->Blets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_B_pressure), GraphletAnchor::LT);
+			this->Alets[DS::psIntermediate]->set_value(RealData(DB203, winch_ps_intermediate_A_pressure), GraphletAnchor::LB);
+			this->Blets[DS::psIntermediate]->set_value(RealData(DB203, winch_ps_intermediate_B_pressure), GraphletAnchor::LT);
+			this->Alets[DS::psDragHead]->set_value(RealData(DB203, winch_ps_draghead_A_pressure), GraphletAnchor::LB);
+			this->Blets[DS::psDragHead]->set_value(RealData(DB203, winch_ps_draghead_B_pressure), GraphletAnchor::LT);
+		} else {
+			this->pressures[DS::sbTrunnion]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::CC);
+			this->pressures[DS::sbIntermediate]->set_value(RealData(DB203, pump_G_pressure), GraphletAnchor::CC);
+			this->pressures[DS::sbDragHead]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::CC);
+			this->set_compensator(DS::SBWC, DB203, this->address->compensator_length, GraphletAnchor::RC);
+
+			this->Alets[DS::sbTrunnion]->set_value(RealData(DB203, winch_sb_trunnion_A_pressure), GraphletAnchor::RB);
+			this->Blets[DS::sbTrunnion]->set_value(RealData(DB203, winch_sb_trunnion_B_pressure), GraphletAnchor::RT);
+			this->Alets[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_A_pressure), GraphletAnchor::RB);
+			this->Blets[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_B_pressure), GraphletAnchor::RT);
+			this->Alets[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_A_pressure), GraphletAnchor::RB);
+			this->Blets[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_B_pressure), GraphletAnchor::RT);
+		}
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
@@ -655,6 +710,74 @@ public:
 		}
 	}
 
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		if (DS_side == DS::PS) {
+			DI_pump_dimension(this->pressures[DS::psTrunnion], DB4, pump_C_feedback);
+			DI_pump_dimension(this->pressures[DS::psIntermediate], DB4, pump_B_feedback);
+			DI_pump_dimension(this->pressures[DS::psDragHead], DB4, pump_A_feedback);
+
+			DI_winch(this->winches[DS::psTrunnion], DB4, winch_ps_trunnion_limited, DB205, winch_ps_trunnion_details);
+			DI_winch(this->winches[DS::psIntermediate], DB4, winch_ps_intermediate_limited, DB205, winch_ps_intermediate_details);
+			DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limited, DB205, winch_ps_draghead_details);
+
+			DI_gantry(this->gantries[DS::psTrunnion], DB4, gantry_ps_trunnion_limited, DB205, gantry_ps_trunnion_details);
+			DI_gantry(this->gantries[DS::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
+			DI_gantry(this->gantries[DS::psDragHead], DB4, gantry_ps_draghead_limited, DB205, gantry_ps_draghead_details);
+
+			this->set_gantry_virtual_action_status(DS::tVirtualUp, DB205, gantry_ps_trunnion_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::tVirtualOut, DB205, gantry_ps_trunnion_virtual_out_limited);
+			this->set_gantry_virtual_action_status(DS::iVirtualUp, DB205, gantry_ps_intermediate_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::iVirtualOut, DB205, gantry_ps_intermediate_virtual_out_limited);
+			this->set_gantry_virtual_action_status(DS::hVirtualUp, DB205, gantry_ps_draghead_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::hVirtualOut, DB205, gantry_ps_draghead_virtual_out_limited);
+		} else {
+			DI_pump_dimension(this->pressures[DS::sbTrunnion], DB4, pump_F_feedback);
+			DI_pump_dimension(this->pressures[DS::sbIntermediate], DB4, pump_G_feedback);
+			DI_pump_dimension(this->pressures[DS::sbDragHead], DB4, pump_H_feedback);
+
+			DI_winch(this->winches[DS::sbTrunnion], DB4, winch_sb_trunnion_limited, DB205, winch_sb_trunnion_details);
+			DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limited, DB205, winch_sb_intermediate_details);
+			DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limited, DB205, winch_sb_draghead_details);
+
+			DI_gantry(this->gantries[DS::sbTrunnion], DB4, gantry_sb_trunnion_limited, DB205, gantry_sb_trunnion_details);
+			DI_gantry(this->gantries[DS::sbIntermediate], DB4, gantry_sb_intermediate_limited, DB205, gantry_sb_intermediate_details);
+
+			if (DI_long_sb_drag(DB205)) {
+				DI_gantry(this->gantries[DS::sbDragHead], DB4, gantry_sb_long_draghead_limited, DB205, gantry_sb_draghead_details);
+			} else {
+				DI_gantry(this->gantries[DS::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
+			}
+
+			this->set_gantry_virtual_action_status(DS::tVirtualUp, DB205, gantry_sb_trunnion_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::tVirtualOut, DB205, gantry_sb_trunnion_virtual_out_limited);
+			this->set_gantry_virtual_action_status(DS::iVirtualUp, DB205, gantry_sb_intermediate_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::iVirtualOut, DB205, gantry_sb_intermediate_virtual_out_limited);
+			this->set_gantry_virtual_action_status(DS::hVirtualUp, DB205, gantry_sb_draghead_virtual_up_limited);
+			this->set_gantry_virtual_action_status(DS::hVirtualOut, DB205, gantry_sb_draghead_virtual_out_limited);
+		}
+	}
+
+public:
+	bool can_execute(DSWOperation cmd, Credit<Winchlet, DS>* pump, PLCMaster* plc, bool acc_executable) override {
+		DS id = pump->id;
+		bool draghead = ((id == DS::psDragHead) || (id == DS::sbDragHead));
+
+		return winch_command_executable(pump, cmd, draghead, true) && plc->connected();
+	}
+
+	void execute(DSWOperation cmd, Credit<Winchlet, DS>* pump, PLCMaster* plc) override {
+		plc->send_command(DO_winch_command(cmd, pump->id));
+	}
+
+public:
+	bool can_execute(DSGOperation cmd, Credit<Gantrylet, DS>* pump, PLCMaster* plc, bool acc_executable) override {
+		return gantry_command_executable(pump, cmd, true) && plc->connected();
+	}
+
+	void execute(DSGOperation cmd, Credit<Gantrylet, DS>* pump, PLCMaster* plc) override {
+		plc->send_command(DO_gantry_command(cmd, pump->id));
+	}
+
 public:
 	void load(float width, float height, float vinset) override {
 		float drag_height = height * 0.618F;
@@ -663,6 +786,7 @@ public:
 		float draghead_radius = side_drag_width * 0.18F;
 		float winch_radius = over_drag_width * 0.382F;
 		float gantry_radius = drag_height * 0.20F;
+		float table_header_width = width * 0.1618F;
 		DragInfo config = this->drag_configs[this->drag_idx];
 
 		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * sign, drag_height, config, this->drag_color);
@@ -674,6 +798,9 @@ public:
 
 		this->load_dimension(this->lengths, DS::TideMark, "meter");
 		this->load_dimension(this->speeds, DS::Speed, "kmeter");
+		
+		this->load_table_header(this->table_headers, DS::ps_gantry_settings, table_header_width, normal_font_size, Colours::SeaGreen);
+		this->load_gantry_indicators(DS::tVirtualUp, DS::hVirtualOut, large_font_size, this->indicators, this->labels);
 
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PS, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
@@ -681,13 +808,19 @@ public:
 			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius, true);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::psTrunnion, DS::psDragHead, DS::C, "bar");
+
+			this->load_label(this->labels, DS::ps_gantry_settings, Colours::Black);
 		} else {
 			this->load_draghead(this->dragheads, DS::SB, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
 			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius, true);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::sbTrunnion, DS::sbDragHead, DS::F, "bar");
+
+			this->load_label(this->labels, DS::sb_gantry_settings, Colours::Black);
 		}
+
+		this->load_label(this->labels, DS::on, checked_color);
 	}
 
 	void reflow(float width, float height, float vinset) override {
@@ -770,6 +903,35 @@ public:
 			this->master->move_to(this->lengths[DS::TideMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 		}
+
+		{ // flow gantry indicators
+			GraphletAnchor table_anchor = GraphletAnchor::LC;
+			Credit<Rectanglet, DS>* table_header = this->table_headers[DS::ps_gantry_settings];
+			float xoff = vinset * 0.5F;
+			float ygapsize = vinset * 0.5F;
+			float yoff = ygapsize;
+			float icy = cy * 0.382F;
+
+			if (DS_side == DS::PS) {
+				this->master->move_to(table_header, width - vinset, icy, GraphletAnchor::RC);
+			} else {
+				this->master->move_to(table_header, vinset, icy, GraphletAnchor::LC);
+			}
+
+			this->master->move_to(this->labels[table_header->id], table_header, GraphletAnchor::LC, GraphletAnchor::LC, xoff);
+			this->master->move_to(this->labels[DS::on], table_header, GraphletAnchor::RC, GraphletAnchor::RC, -xoff);
+
+			for (DS id = DS::tVirtualUp; id <= DS::hVirtualOut; id++) {
+				float iheight;
+
+				this->indicators[id]->fill_extent(0.0F, 0.0F, nullptr, &iheight);
+
+				this->master->move_to(this->labels[id], table_header, GraphletAnchor::LB, GraphletAnchor::LT, xoff, yoff);
+				this->master->move_to(this->indicators[id], table_header, GraphletAnchor::RB, GraphletAnchor::RT, -xoff, yoff);
+
+				yoff += (iheight + ygapsize);
+			}
+		}
 	}
 
 public:
@@ -785,6 +947,23 @@ public:
 			this->draw_cable(ds, DS::sbTrunnion, GraphletAnchor::LT, GraphletAnchor::RC, color, thickness);
 			this->draw_cable(ds, DS::sbIntermediate, GraphletAnchor::LT, GraphletAnchor::RC, color, thickness);
 			this->draw_cable(ds, DS::SBWC, DS::sbDragHead, GraphletAnchor::LT, GraphletAnchor::RC, color, thickness);
+		}
+	}
+
+public:
+	bool can_select(IGraphlet* g) override {
+		return ((dynamic_cast<Winchlet*>(g) != nullptr) 
+			|| (dynamic_cast<Gantrylet*>(g) != nullptr));
+	}
+
+	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
+		auto winch = dynamic_cast<Winchlet*>(g);
+		auto gantry = dynamic_cast<Gantrylet*>(g);
+
+		if (winch != nullptr) {
+			menu_popup(this->winch_op, g, local_x, local_y);
+		} else if (gantry != nullptr) {
+			menu_popup(this->gantry_op, g, local_x, local_y);
 		}
 	}
 
@@ -811,6 +990,20 @@ private:
 			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
 			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
 		}
+	}
+
+	template<typename E>
+	void load_gantry_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id, Colours::Silver);
+			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, unchecked_color), id);
+		}
+	}
+	
+	template<class S, typename E>
+	void load_table_header(std::map<E, Credit<S, E>*>& ths, E id, float width, float height, ICanvasBrush^ color) {
+		ths[id] = this->master->insert_one(new Credit<S, E>(width, height, color), id);
+		this->load_label(this->labels, id, Colours::Background);
 	}
 
 private:
@@ -870,16 +1063,32 @@ private:
 		ds->DrawLine(wc_wx - wc_adjust * sign, wc_y + wc_joint, winch_x, winch_y, color, thickness);
 	}
 
+private:
+	template<typename E>
+	void set_gantry_virtual_action_status(E id, const uint8* db205, unsigned int idx_p1) {
+		if (DBX(db205, idx_p1 - 1U)) {
+			this->indicators[id]->set_color(checked_color);
+		} else {
+			this->indicators[id]->set_color(unchecked_color);
+		}
+	}
+
 private: // never delete these graphlets manually.
 	std::map<DS, Credit<Gantrylet, DS>*> gantries;
 	std::map<DS, Credit<Gantrylet, DS>*> lines;
 	std::map<DS, Credit<Dimensionlet, DS>*> Alets;
 	std::map<DS, Credit<Dimensionlet, DS>*> Blets;
+	std::map<DS, Credit<Rectanglet, DS>*> indicators;
+	std::map<DS, Credit<Rectanglet, DS>*> table_headers;
 
 private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle setting_style;
+
+private:
+	MenuFlyout^ winch_op;
+	MenuFlyout^ gantry_op;
 
 private:
 	DS DS_side;
@@ -909,8 +1118,8 @@ DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
 	IDredgingSystem* dashboard = nullptr;
 	
 	switch (type) {
-	case DragView::Left: dashboard = new Drags(this, DS::PS, default_ps_color, 0); break;
-	case DragView::Right: dashboard = new Drags(this, DS::SB, default_sb_color, 1); break;
+	case DragView::Left: dashboard = new Drags(this, plc, DS::PS, default_ps_color, 0); break;
+	case DragView::Right: dashboard = new Drags(this, plc, DS::SB, default_sb_color, 1); break;
 	default: dashboard = new Dredges(this); break;
 	}
 
@@ -963,17 +1172,15 @@ void DredgesPage::reflow(float width, float height) {
 }
 
 bool DredgesPage::can_select(IGraphlet* g) {
-	auto db = dynamic_cast<Dredges*>(this->dashboard);
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 	
 	return ((db != nullptr) && (db->can_select(g)));
 }
 
-void DredgesPage::on_tap(IGraphlet* g, float local_x, float local_y) {
-	auto db = dynamic_cast<Dredges*>(this->dashboard);
-
-	Planet::on_tap(g, local_x, local_y);
+void DredgesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
 	if (db != nullptr) {
-		db->on_tap(g, local_x, local_y);
+		db->on_tap_selected(g, local_x, local_y);
 	}
 }

@@ -97,18 +97,18 @@ public:
 			GraphletAnchor psa = GraphletAnchor::LB;
 			GraphletAnchor sba = GraphletAnchor::RB;
 
-			this->pressures[HS::C]->set_value(RealData(DB203, Pump_C_pressure), psa);
-			this->pressures[HS::F]->set_value(RealData(DB203, Pump_F_pressure), psa);
-			this->pressures[HS::D]->set_value(RealData(DB203, Pump_D_pressure), psa);
-			this->pressures[HS::E]->set_value(RealData(DB203, Pump_E_pressure), psa);
+			this->pressures[HS::C]->set_value(RealData(DB203, pump_C_pressure), psa);
+			this->pressures[HS::F]->set_value(RealData(DB203, pump_F_pressure), psa);
+			this->pressures[HS::D]->set_value(RealData(DB203, pump_D_pressure), psa);
+			this->pressures[HS::E]->set_value(RealData(DB203, pump_E_pressure), psa);
 
-			this->pressures[HS::A]->set_value(RealData(DB203, Pump_A_pressure), sba);
-			this->pressures[HS::B]->set_value(RealData(DB203, Pump_B_pressure), sba);
-			this->pressures[HS::G]->set_value(RealData(DB203, Pump_G_pressure), sba);
-			this->pressures[HS::H]->set_value(RealData(DB203, Pump_H_pressure), sba);
+			this->pressures[HS::A]->set_value(RealData(DB203, pump_A_pressure), sba);
+			this->pressures[HS::B]->set_value(RealData(DB203, pump_B_pressure), sba);
+			this->pressures[HS::G]->set_value(RealData(DB203, pump_G_pressure), sba);
+			this->pressures[HS::H]->set_value(RealData(DB203, pump_H_pressure), sba);
 
-			this->pressures[HS::I]->set_value(RealData(DB203, Pump_I_pressure), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(DB203, Pump_J_pressure), GraphletAnchor::LB);
+			this->pressures[HS::I]->set_value(RealData(DB203, pump_I_pressure), GraphletAnchor::RB);
+			this->pressures[HS::J]->set_value(RealData(DB203, pump_J_pressure), GraphletAnchor::LB);
 		}
 	}
 

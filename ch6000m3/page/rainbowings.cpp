@@ -104,11 +104,11 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->pressures[RS::C]->set_value(RealData(DB203, Pump_C_pressure), GraphletAnchor::LB);
-		this->pressures[RS::F]->set_value(RealData(DB203, Pump_F_pressure), GraphletAnchor::LT);
+		this->pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
+		this->pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
 
-		this->pressures[RS::A]->set_value(RealData(DB203, Pump_A_pressure), GraphletAnchor::LB);
-		this->pressures[RS::H]->set_value(RealData(DB203, Pump_H_pressure), GraphletAnchor::LT);
+		this->pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
+		this->pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
 
 		this->progresses[RS::D003]->set_value(RealData(DB203, 39U), GraphletAnchor::LB);
 		this->progresses[RS::D004]->set_value(RealData(DB203, 35U), GraphletAnchor::LT);

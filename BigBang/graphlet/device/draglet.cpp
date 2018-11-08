@@ -554,7 +554,7 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 			}
 		}
 
-		this->draw_meter(ds, this->suction_m, suction_x, suction_y, lX, rX, Y);
+		//this->draw_meter(ds, this->suction_m, suction_x, suction_y, lX, rX, Y);
 		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, Y);
 	}
 }
