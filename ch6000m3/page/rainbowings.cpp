@@ -33,6 +33,8 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
 
+using namespace Windows::System;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -203,6 +205,27 @@ public:
 
 	void execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc) override {
 		plc->send_command(DO_upper_door_command(cmd, door->id));
+	}
+
+public:
+	bool on_char(VirtualKey key, PLCMaster* plc) {
+		bool handled = false;
+
+		if (key == VirtualKey::Enter) {
+			auto editor = dynamic_cast<Credit<Dimensionlet, RS>*>(this->master->get_focus_graphlet());
+
+			if (editor != nullptr) {
+				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
+					editor->id.ToString()->Data(),
+					editor->get_input_number());
+
+				editor->set_value(editor->get_input_number());
+			}
+
+			handled = true;
+		}
+
+		return handled;
 	}
 
 public:
@@ -780,6 +803,28 @@ bool RainbowingsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
+}
+
+bool RainbowingsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_char(key, wargrey_keyboard);
+
+	if (!handled) {
+		auto db = dynamic_cast<Rainbows*>(this->dashboard);
+
+		if (db != nullptr) {
+			handled = db->on_char(key, this->device);
+		}
+	}
+
+	return handled;
+}
+
+void RainbowingsPage::on_focus(IGraphlet* g) {
+	auto editor = dynamic_cast<IEditorlet*>(g);
+
+	if (editor != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+	}
 }
 
 void RainbowingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

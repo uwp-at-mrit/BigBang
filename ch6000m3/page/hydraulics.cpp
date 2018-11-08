@@ -70,7 +70,7 @@ private enum class HS : unsigned int {
 	a, b, c, d, e, f, g, h, y, l, m, k, k12,
 
 	// anchors used for unnamed corners
-	lt, tl, rt, tr, cl, cr, i, j, f02
+	lt, tl, rt, tr, cl, cr, i, j, f02, master, sb
 };
 
 private class Hydraulics final
@@ -188,8 +188,8 @@ public:
 		{ // flow oil
 			HS ps_path[] = { HS::lt, HS::tl, HS::cl, HS::Master };
 			HS sb_path[] = { HS::rt, HS::tr, HS::cr, HS::Master };
-			HS i_path[] = { HS::f02, HS::Master };
-
+			HS mt_path[] = { HS::f02, HS::master };
+			
 			this->station->append_subtrack(HS::Master, HS::SQ1, oil_color);
 			this->station->append_subtrack(HS::Master, HS::SQ2, oil_color);
 			this->station->append_subtrack(HS::Visor, HS::SQi, oil_color);
@@ -209,14 +209,14 @@ public:
 			this->try_flow_oil(HS::SQg, HS::G, HS::g, sb_path, oil_color);
 			this->try_flow_oil(HS::SQh, HS::H, HS::h, sb_path, oil_color);
 
-			this->try_flow_oil(HS::SQy, HS::Y, HS::y, i_path, oil_color);
-			this->try_flow_oil(HS::SQl, HS::L, HS::l, i_path, oil_color);
-			this->try_flow_oil(HS::SQm, HS::M, HS::m, i_path, oil_color);
-			this->try_flow_oil(HS::SQk1, HS::K, HS::k, i_path, oil_color);
-			this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, i_path */, oil_color);
+			this->try_flow_oil(HS::SQy, HS::Y, HS::y, mt_path, oil_color);
+			this->try_flow_oil(HS::SQl, HS::L, HS::l, mt_path, oil_color);
+			this->try_flow_oil(HS::SQm, HS::M, HS::m, mt_path, oil_color);
+			this->try_flow_oil(HS::SQk1, HS::K, HS::k, mt_path, oil_color);
+			this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, mt_path */, oil_color);
 
-			this->try_flow_oil(HS::SQ1, HS::SQh, oil_color);
-			this->try_flow_oil(HS::SQ2, HS::SQe, oil_color);
+			this->try_flow_oil(HS::SQ1, HS::Port, HS::SQe, oil_color);
+			this->try_flow_oil(HS::SQ2, HS::sb, HS::SQh, oil_color);
 			this->try_flow_oil(HS::SQ2, HS::SQk2, oil_color);
 			this->try_flow_oil(HS::SQ2, HS::SQm, oil_color);
 		}
@@ -262,7 +262,7 @@ public:
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2);
-		pTurtle->move_down()->turn_down_right()->move_right(13, HS::l)->turn_right_down()->move_down(17);
+		pTurtle->move_down()->turn_down_right()->move_right(13, HS::sb)->turn_right_down()->move_down(17);
 		
 		pTurtle->jump_right(20, HS::h)->move_left(4, HS::H)->move_left(12, HS::SQh)->move_left(4)->jump_back();
 		pTurtle->move_up(3, HS::g)->move_left(4, HS::G)->move_left(12, HS::SQg)->move_left(4)->jump_back();
@@ -279,9 +279,9 @@ public:
 		pTurtle->move_down(3, HS::e)->move_right(4, HS::E)->move_right(12, HS::SQe)->move_right(4);
 
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
-		pTurtle->move_up(1, HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
+		pTurtle->move_up(HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
 
-		pTurtle->jump_back(HS::Master)->jump_right(4);
+		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master);
 		pTurtle->move_up(5.5F, HS::F02)->move_up()->turn_up_right(HS::f02)->move_right(2);
 		pTurtle->move_right(5, HS::y)->move_down(6, HS::Y)->move_down(4, HS::SQy)->move_down(4)->turn_down_left()->jump_back();
 		pTurtle->move_right(5, HS::l)->move_down(6, HS::L)->move_down(4, HS::SQl)->move_down(4)->turn_down_left()->jump_back();
@@ -550,6 +550,15 @@ private:
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: case GateValveStatus::CloseReady: {
 			this->station->append_subtrack(vid, pid, color);
+		}
+		}
+	}
+
+	void try_flow_oil(HS vid, HS mid, HS eid, CanvasSolidColorBrush^ color) {
+		switch (this->valves[vid]->get_status()) {
+		case GateValveStatus::Open: case GateValveStatus::CloseReady: {
+			this->station->append_subtrack(vid, mid, color);
+			this->station->append_subtrack(mid, eid, color);
 		}
 		}
 	}

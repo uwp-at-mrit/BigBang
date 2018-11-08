@@ -31,9 +31,11 @@ namespace WarGrey::SCADA {
 		virtual void on_digital_input(const uint8* db4, size_t count4, const uint8* db205, size_t count205, WarGrey::SCADA::Syslog* logger) {}
 	};
 
+	private enum class MasterMode { Debug, Release };
+
 	private class PLCMaster : public WarGrey::SCADA::MRMaster {
 	public:
-		PLCMaster(Syslog* logger, bool debug);
+		PLCMaster(Syslog* logger, WarGrey::SCADA::MasterMode mode);
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);
@@ -43,6 +45,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		long long last_sending_time;
-		bool debug;
+		WarGrey::SCADA::MasterMode mode;
 	};
 }

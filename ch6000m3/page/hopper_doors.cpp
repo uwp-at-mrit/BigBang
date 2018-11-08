@@ -594,15 +594,18 @@ bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
-	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
+void HopperDoorsPage::on_focus(IGraphlet* g) {
 	auto editor = dynamic_cast<IEditorlet*>(g);
 
+	if (editor != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+	}
+}
+
+void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
+	
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);
-	} else if (editor != nullptr) {
-		if (editor->get_status() == DimensionStatus::Input) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-		}
 	}
 }

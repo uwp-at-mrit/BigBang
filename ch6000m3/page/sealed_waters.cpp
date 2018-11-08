@@ -526,7 +526,6 @@ bool SealedWaterPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
 }
 
-
 bool SealedWaterPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_char(key, wargrey_keyboard);
 
@@ -539,6 +538,14 @@ bool SealedWaterPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	}
 
 	return handled;
+}
+
+void SealedWaterPage::on_focus(IGraphlet* g) {
+	auto editor = dynamic_cast<IEditorlet*>(g);
+
+	if (editor != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+	}
 }
 
 void SealedWaterPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

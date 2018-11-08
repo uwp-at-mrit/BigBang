@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool can_select(IGraphlet* g) override;
+		void on_focus(IGraphlet* g) override;
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
 

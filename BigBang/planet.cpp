@@ -648,6 +648,8 @@ void Planet::set_caret_owner(IGraphlet* g) {
 
 				this->focused_graphlet = g;
 				g->own_caret(true);
+
+				this->on_focus(g);
 			}
 		}
 	}

@@ -74,6 +74,7 @@ namespace WarGrey::SCADA {
 		virtual void end_update_sequence() = 0;
 
 	public:
+		virtual void on_focus(WarGrey::SCADA::IGraphlet* g) {}
 		virtual bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
