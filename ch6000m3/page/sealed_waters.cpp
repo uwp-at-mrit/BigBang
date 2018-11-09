@@ -550,13 +550,8 @@ void SealedWaterPage::on_focus(IGraphlet* g) {
 
 void SealedWaterPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
-	auto editor = dynamic_cast<IEditorlet*>(g);
-
+	
 	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);
-	} else if (editor != nullptr) {
-		if (editor->get_status() == DimensionStatus::Input) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-		}
 	}
 }

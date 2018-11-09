@@ -332,8 +332,10 @@
     <ClInclude Include="schema\di_hopper_pumps.hpp" />
     <ClInclude Include="schema\di_pumps.hpp" />
     <ClInclude Include="schema\di_valves.hpp" />
+    <ClInclude Include="schema\do_devices.hpp" />
     <ClInclude Include="schema\do_doors.hpp" />
     <ClInclude Include="schema\do_dredges.hpp" />
+    <ClInclude Include="schema\do_hopper_pumps.hpp" />
     <ClInclude Include="schema\do_pumps.hpp" />
     <ClInclude Include="schema\do_valves.hpp" />
     <ClInclude Include="splash.hpp" />

@@ -26,9 +26,11 @@ namespace WarGrey::SCADA {
 	public:
 		void set_color(unsigned int color);
 		void set_color(Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ get_color();
 
 		void set_border_color(unsigned int color);
 		void set_border_color(Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color);
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ get_border_color();
 		
 		void fill_shape_origin(float* x, float* y);
 

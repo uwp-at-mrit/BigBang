@@ -28,6 +28,7 @@
 
 #include "schema/do_doors.hpp"
 #include "schema/do_valves.hpp"
+#include "schema/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -48,6 +49,9 @@ private enum RSMode { WindowUI = 0, Dashboard };
 private enum class RSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class RSMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
 private enum class RSHDOperation { Open, Stop, Close, Disable, _ };
+
+private enum class RSPSHPOperation { Prepare, Start, Stop, Reset, PSDischarge, PSRainbowing, BothDischarge, BothRainbowing, _ };
+private enum class RSSBHPOperation { Prepare, Start, Stop, Reset, SBDischarge, SBRainbowing, BothDischarge, BothRainbowing, _ };
 
 // WARNING: order matters
 private enum class RS : unsigned int {
@@ -89,7 +93,9 @@ private class Rainbows final
 	: public PLCConfirmation
 	, public IMenuCommand<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>
 	, public IMenuCommand<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>
-	, public IMenuCommand<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*> {
+	, public IMenuCommand<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*>
+	, public IMenuCommand<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>
+	, public IMenuCommand<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*> {
 public:
 	Rainbows(RainbowingsPage* master) : master(master) {}
 
@@ -149,25 +155,25 @@ public:
 		DI_pump_dimension(this->pressures[RS::F], DB4, pump_F_feedback);
 		DI_pump_dimension(this->pressures[RS::H], DB4, pump_H_feedback);
 
-		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status);
-		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status);
-		this->set_valves_status(RS::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status);
-		this->set_valves_status(RS::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status);
-		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status);
-		this->set_valves_status(RS::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status);
-		this->set_valves_status(RS::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status);
-		this->set_valves_status(RS::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status);
-		this->set_valves_status(RS::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status);
-		this->set_valves_status(RS::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status);
-		this->set_valves_status(RS::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status);
-		this->set_valves_status(RS::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status);
-		this->set_valves_status(RS::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status);
-		this->set_valves_status(RS::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status);
-		this->set_valves_status(RS::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status);
-		this->set_valves_status(RS::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status);
-		this->set_valves_status(RS::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status);
-		this->set_valves_status(RS::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status);
-		this->set_valves_status(RS::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status);
+		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
+		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
+		this->set_valves_status(RS::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status, motor_valve_D03_status);
+		this->set_valves_status(RS::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status, motor_valve_D04_status);
+		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
+		this->set_valves_status(RS::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status, motor_valve_D06_status);
+		this->set_valves_status(RS::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status, motor_valve_D07_status);
+		this->set_valves_status(RS::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status, motor_valve_D08_status);
+		this->set_valves_status(RS::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status, motor_valve_D09_status);
+		this->set_valves_status(RS::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status, motor_valve_D10_status);
+		this->set_valves_status(RS::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status, motor_valve_D17_status);
+		this->set_valves_status(RS::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status, motor_valve_D18_status);
+		this->set_valves_status(RS::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status, motor_valve_D19_status);
+		this->set_valves_status(RS::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status, motor_valve_D20_status);
+		this->set_valves_status(RS::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status, motor_valve_D21_status);
+		this->set_valves_status(RS::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status, motor_valve_D22_status);
+		this->set_valves_status(RS::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status, motor_valve_D23_status);
+		this->set_valves_status(RS::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status, motor_valve_D24_status);
+		this->set_valves_status(RS::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status, motor_valve_D25_status);
 		
 		DI_hopper_door(this->uhdoors[RS::PS1], DB205, upper_door_PS1_status);
 		DI_hopper_door(this->uhdoors[RS::PS2], DB205, upper_door_PS2_status);
@@ -216,6 +222,24 @@ public:
 
 	void execute(RSHDOperation cmd, Credit<UpperHopperDoorlet, RS>* door, PLCMaster* plc) override {
 		plc->send_command(DO_upper_door_command(cmd, door->id));
+	}
+
+
+public:
+	bool can_execute(RSPSHPOperation cmd, Credit<HopperPumplet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(RSPSHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_ps_hopper_pump_discharge_command(cmd));
+	}
+
+	bool can_execute(RSSBHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(RSSBHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_sb_hopper_pump_discharge_command(cmd));
 	}
 
 public:
@@ -598,14 +622,14 @@ private:
 		AI_hopper_door(this->uhdoors[id], value, bottom_door_open_threshold, upper_door_closed_threshold);
 	}
 
-	void set_valves_status(RS id, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1, const uint8* db205, unsigned int idx205_p1) {
-		MotorValvelet* maybe_mvalve = nullptr;
+	void set_valves_status(RS id
+		, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1
+		, const uint8* db205, unsigned int gidx205_p1, unsigned int midx205_p1) {
+		DI_gate_valve(this->gvalves[id], db4, gidx4_p1, db205, gidx205_p1);
 
 		if (this->mvalves.find(id) != this->mvalves.end()) {
-			maybe_mvalve = this->mvalves[id];
+			DI_motor_valve(this->mvalves[id], db4, midx4_p1, db205, midx205_p1);
 		}
-
-		DI_paired_valves(this->gvalves[id], maybe_mvalve, db4, gidx4_p1, midx4_p1, db205, idx205_p1);
 	}
 
 // never deletes these graphlets mannually
@@ -741,6 +765,8 @@ RainbowingsPage::RainbowingsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	this->gate_valve_op = make_menu<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>(dashboard, plc);
 	this->motor_valve_op = make_menu<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>(dashboard, plc);
 	this->upper_door_op = make_menu<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*>(dashboard, plc);
+	this->ps_hopper_op = make_menu<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
+	this->sb_hopper_op = make_menu<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -818,7 +844,8 @@ void RainbowingsPage::reflow(float width, float height) {
 bool RainbowingsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
-		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
+		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
 bool RainbowingsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
@@ -848,6 +875,7 @@ void RainbowingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
+	auto hpump = dynamic_cast<Credit<HopperPumplet, RS>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
@@ -855,9 +883,10 @@ void RainbowingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y
 		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
-	} else if (editor != nullptr) {
-		if (editor->get_status() == DimensionStatus::Input) {
-			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+	} else if (hpump != nullptr) {
+		switch (hpump->id) {
+		case RS::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;
+		case RS::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
 		}
 	}
 }

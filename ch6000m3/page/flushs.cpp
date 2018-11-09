@@ -20,7 +20,9 @@
 #include "schema/ai_doors.hpp"
 #include "schema/di_doors.hpp"
 #include "schema/di_valves.hpp"
+
 #include "schema/do_doors.hpp"
+#include "schema/do_valves.hpp"
 
 #include "decorator/page.hpp"
 
@@ -107,24 +109,24 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_gate_valve(this->gvalves[FS::HBV01], DB4, 281U, DB205, 161U);
-		DI_gate_valve(this->gvalves[FS::HBV02], DB4, 265U, DB205, 169U);
-		DI_gate_valve(this->gvalves[FS::HBV03], DB4, 263U, DB205, 177U);
-		DI_gate_valve(this->gvalves[FS::HBV04], DB4, 283U, DB205, 185U);
-		DI_gate_valve(this->gvalves[FS::HBV05], DB4, 267U, DB205, 193U);
-		DI_gate_valve(this->gvalves[FS::HBV06], DB4, 285U, DB205, 201U);
-		DI_gate_valve(this->gvalves[FS::HBV07], DB4, 269U, DB205, 209U);
-		DI_gate_valve(this->gvalves[FS::HBV08], DB4, 271U, DB205, 217U);
-		DI_gate_valve(this->gvalves[FS::HBV09], DB4, 287U, DB205, 225U);
-		DI_gate_valve(this->gvalves[FS::HBV10], DB4, 241U, DB205, 233U);
-		DI_gate_valve(this->gvalves[FS::HBV11], DB4, 243U, DB205, 241U);
-		DI_gate_valve(this->gvalves[FS::HBV12], DB4, 245U, DB205, 249U);
-		DI_gate_valve(this->gvalves[FS::HBV13], DB4, 247U, DB205, 257U);
-		DI_gate_valve(this->gvalves[FS::HBV14], DB4, 249U, DB205, 265U);
-		DI_gate_valve(this->gvalves[FS::HBV15], DB4, 251U, DB205, 273U);
-		DI_gate_valve(this->gvalves[FS::HBV16], DB4, 253U, DB205, 281U);
-		DI_gate_valve(this->gvalves[FS::HBV17], DB4, 255U, DB205, 289U);
-		DI_gate_valve(this->gvalves[FS::HBV18], DB4, 239U, DB205, 297U);
+		DI_gate_valve(this->gvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
+		DI_gate_valve(this->gvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);
+		DI_gate_valve(this->gvalves[FS::HBV03], DB4, butterfly_valve_HBV03_feedback, DB205, butterfly_valve_HBV03_status);
+		DI_gate_valve(this->gvalves[FS::HBV04], DB4, butterfly_valve_HBV04_feedback, DB205, butterfly_valve_HBV04_status);
+		DI_gate_valve(this->gvalves[FS::HBV05], DB4, butterfly_valve_HBV05_feedback, DB205, butterfly_valve_HBV05_status);
+		DI_gate_valve(this->gvalves[FS::HBV06], DB4, butterfly_valve_HBV06_feedback, DB205, butterfly_valve_HBV06_status);
+		DI_gate_valve(this->gvalves[FS::HBV07], DB4, butterfly_valve_HBV07_feedback, DB205, butterfly_valve_HBV07_status);
+		DI_gate_valve(this->gvalves[FS::HBV08], DB4, butterfly_valve_HBV08_feedback, DB205, butterfly_valve_HBV08_status);
+		DI_gate_valve(this->gvalves[FS::HBV09], DB4, butterfly_valve_HBV09_feedback, DB205, butterfly_valve_HBV09_status);
+		DI_gate_valve(this->gvalves[FS::HBV10], DB4, butterfly_valve_HBV10_feedback, DB205, butterfly_valve_HBV10_status);
+		DI_gate_valve(this->gvalves[FS::HBV11], DB4, butterfly_valve_HBV11_feedback, DB205, butterfly_valve_HBV11_status);
+		DI_gate_valve(this->gvalves[FS::HBV12], DB4, butterfly_valve_HBV12_feedback, DB205, butterfly_valve_HBV12_status);
+		DI_gate_valve(this->gvalves[FS::HBV13], DB4, butterfly_valve_HBV13_feedback, DB205, butterfly_valve_HBV13_status);
+		DI_gate_valve(this->gvalves[FS::HBV14], DB4, butterfly_valve_HBV14_feedback, DB205, butterfly_valve_HBV14_status);
+		DI_gate_valve(this->gvalves[FS::HBV15], DB4, butterfly_valve_HBV15_feedback, DB205, butterfly_valve_HBV15_status);
+		DI_gate_valve(this->gvalves[FS::HBV16], DB4, butterfly_valve_HBV16_feedback, DB205, butterfly_valve_HBV16_status);
+		DI_gate_valve(this->gvalves[FS::HBV17], DB4, butterfly_valve_HBV17_feedback, DB205, butterfly_valve_HBV17_status);
+		DI_gate_valve(this->gvalves[FS::HBV18], DB4, butterfly_valve_HBV18_feedback, DB205, butterfly_valve_HBV18_status);
 
 		DI_hopper_door(this->uhdoors[FS::PS1], DB205, upper_door_PS1_status);
 		DI_hopper_door(this->uhdoors[FS::PS2], DB205, upper_door_PS2_status);
@@ -158,10 +160,12 @@ public:
 	}
 
 public:
+	bool can_execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, PLCMaster* plc, bool acc_executable) override {
+		return gate_valve_command_executable(valve, cmd, true) && plc->connected();
+	}
+
 	void execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, PLCMaster* plc) override {
-		plc->get_logger()->log_message(Log::Info, L"Gate Valve: %s %s",
-			cmd.ToString()->Data(),
-			valve->id.ToString()->Data());
+		plc->send_command(DO_butterfly_valve_command(cmd, valve->id));
 	}
 
 public:

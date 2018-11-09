@@ -165,4 +165,49 @@
   <data name="HighSpeed" xml:space="preserve">
     <value>高速</value>
   </data>
+  <data name="BothHopper" xml:space="preserve">
+    <value>双舱内泵挖泥</value>
+  </data>
+  <data name="BothUnderWater" xml:space="preserve">
+    <value>双水下泵挖泥</value>
+  </data>
+  <data name="PSHopper" xml:space="preserve">
+    <value>左舱内泵挖泥</value>
+  </data>
+  <data name="PSUnderWater" xml:space="preserve">
+    <value>左水下泵挖泥</value>
+  </data>
+  <data name="SBHopper" xml:space="preserve">
+    <value>右舱内泵挖泥</value>
+  </data>
+  <data name="SBUnderWater" xml:space="preserve">
+    <value>右水下泵挖泥</value>
+  </data>
+  <data name="Prepare" xml:space="preserve">
+    <value>备车</value>
+  </data>
+  <data name="HPBarge" xml:space="preserve">
+    <value>右舱内泵挖泥装驳</value>
+  </data>
+  <data name="UWPBarge" xml:space="preserve">
+    <value>右水下泵挖泥装驳</value>
+  </data>
+  <data name="BothDischarge" xml:space="preserve">
+    <value>双舱内泵艏吹</value>
+  </data>
+  <data name="BothRainbowing" xml:space="preserve">
+    <value>双舱内泵艏喷</value>
+  </data>
+  <data name="PSDischarge" xml:space="preserve">
+    <value>左舱内泵艏吹</value>
+  </data>
+  <data name="PSRainbowing" xml:space="preserve">
+    <value>左舱内泵艏喷</value>
+  </data>
+  <data name="SBDischarge" xml:space="preserve">
+    <value>右舱内泵艏吹</value>
+  </data>
+  <data name="SBRainbowing" xml:space="preserve">
+    <value>右舱内泵艏喷</value>
+  </data>
 </root>

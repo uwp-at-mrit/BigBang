@@ -30,6 +30,8 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ motor_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

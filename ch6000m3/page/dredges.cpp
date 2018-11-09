@@ -644,14 +644,14 @@ private class Drags final
 	, public IMenuCommand<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>
 	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*> {
 public:
-	Drags(DredgesPage* master, PLCMaster* plc, DS side, unsigned int drag_color, unsigned int config_idx)
+	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
 		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Green);
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 
-		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, plc);
-		this->gantry_op = make_menu<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>(this, plc);
+		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, master->get_plc_device());
+		this->gantry_op = make_menu<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>(this, master->get_plc_device());
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
@@ -955,18 +955,34 @@ public:
 
 public:
 	bool can_select(IGraphlet* g) override {
-		return ((dynamic_cast<Winchlet*>(g) != nullptr) 
+		bool select_settings = false;
+		auto settings = dynamic_cast<Credit<Rectanglet, DS>*>(g);
+
+		if (settings != nullptr) {
+			select_settings = (this->indicators.find(settings->id) != this->indicators.end());
+		}
+
+		return (select_settings
+			|| (dynamic_cast<Winchlet*>(g) != nullptr) 
 			|| (dynamic_cast<Gantrylet*>(g) != nullptr));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
 		auto winch = dynamic_cast<Winchlet*>(g);
 		auto gantry = dynamic_cast<Gantrylet*>(g);
+		auto indicator = dynamic_cast<Credit<Rectanglet, DS>*>(g);
 
 		if (winch != nullptr) {
 			menu_popup(this->winch_op, g, local_x, local_y);
 		} else if (gantry != nullptr) {
 			menu_popup(this->gantry_op, g, local_x, local_y);
+		} else if (indicator != nullptr) {
+			PLCMaster* plc = this->master->get_plc_device();
+
+			if (plc->connected()) {
+				//bool okay = (indicator->get_color() == checked_color);
+				plc->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
+			}
 		}
 	}
 
@@ -1121,8 +1137,8 @@ DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
 	IDredgingSystem* dashboard = nullptr;
 	
 	switch (type) {
-	case DragView::Left: dashboard = new Drags(this, plc, DS::PS, default_ps_color, 0); break;
-	case DragView::Right: dashboard = new Drags(this, plc, DS::SB, default_sb_color, 1); break;
+	case DragView::Left: dashboard = new Drags(this, DS::PS, default_ps_color, 0); break;
+	case DragView::Right: dashboard = new Drags(this, DS::SB, default_sb_color, 1); break;
 	default: dashboard = new Dredges(this); break;
 	}
 
@@ -1172,6 +1188,10 @@ void DredgesPage::reflow(float width, float height) {
 		this->change_mode(DSMode::Dashboard);
 		db->reflow(width, height, statusbar_height());
 	}
+}
+
+PLCMaster* DredgesPage::get_plc_device() {
+	return this->device;
 }
 
 bool DredgesPage::can_select(IGraphlet* g) {

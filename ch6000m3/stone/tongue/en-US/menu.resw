@@ -165,4 +165,49 @@
   <data name="HighSpeed" xml:space="preserve">
     <value>High Speed</value>
   </data>
+  <data name="BothHopper" xml:space="preserve">
+    <value>Both Hopper Pump Dredging</value>
+  </data>
+  <data name="BothUnderWater" xml:space="preserve">
+    <value>Both Underwater Pump Dredging</value>
+  </data>
+  <data name="PSHopper" xml:space="preserve">
+    <value>PS Hopper Pump Dredging</value>
+  </data>
+  <data name="PSUnderWater" xml:space="preserve">
+    <value>PS Underwater Pump Dredging</value>
+  </data>
+  <data name="SBHopper" xml:space="preserve">
+    <value>SB Hopper Pump Dredging</value>
+  </data>
+  <data name="SBUnderWater" xml:space="preserve">
+    <value>SB Underwater Pump Dredging</value>
+  </data>
+  <data name="Prepare" xml:space="preserve">
+    <value>Prepare</value>
+  </data>
+  <data name="HPBarge" xml:space="preserve">
+    <value>PS Hopper Pump Dredging and Barging</value>
+  </data>
+  <data name="UWPBarge" xml:space="preserve">
+    <value>PS Underwater Pump Dredging and Barging</value>
+  </data>
+  <data name="BothDischarge" xml:space="preserve">
+    <value>Both Discharge</value>
+  </data>
+  <data name="BothRainbowing" xml:space="preserve">
+    <value>Both Rainbowing</value>
+  </data>
+  <data name="PSDischarge" xml:space="preserve">
+    <value>PS Discharge</value>
+  </data>
+  <data name="PSRainbowing" xml:space="preserve">
+    <value>PS Rainbowing</value>
+  </data>
+  <data name="SBDischarge" xml:space="preserve">
+    <value>SB Discharge</value>
+  </data>
+  <data name="SBRainbowing" xml:space="preserve">
+    <value>SB Rainbowing</value>
+  </data>
 </root>

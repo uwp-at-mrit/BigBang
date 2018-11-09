@@ -30,6 +30,8 @@ private enum DLMode { WindowUI = 0, Dashboard };
 
 private enum class DLTS { EarthWork, Vessel, Loading, Displacement, Draught, _ };
 
+private enum class DLOFPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
+
 // WARNING: order matters
 private enum class DL : unsigned int {
 	EarthWork, Vessel, HopperHeight, Loading, Displacement,

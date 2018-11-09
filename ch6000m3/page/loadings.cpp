@@ -23,6 +23,7 @@
 #include "schema/di_valves.hpp"
 
 #include "schema/do_valves.hpp"
+#include "schema/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -40,6 +41,11 @@ private enum LDMode { WindowUI = 0, Dashboard };
 
 private enum class LDGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class LDMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
+
+private enum class LDPSHPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
+private enum class LDSBHPOperation { Prepare, Start, Stop, Reset, SBHopper, BothHopper, HPBarge, _ };
+private enum class LDPSUWPOperation { Prepare, Start, Stop, Reset, PSUnderWater, BothUnderWater, _ };
+private enum class LDSBUWPOperation { Prepare, Start, Stop, Reset, SBUnderWater, BothUnderWater, UWPBarge, _ };
 
 // WARNING: order matters
 private enum class LD : unsigned int {
@@ -74,7 +80,11 @@ private enum class LD : unsigned int {
 private class Vessel final
 	: public PLCConfirmation
 	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>
-	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*> {
+	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*>
+	, public IMenuCommand<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
+	, public IMenuCommand<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
+	, public IMenuCommand<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
+	, public IMenuCommand<LDSBUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*> {
 public:
 	Vessel(LoadingsPage* master) : master(master) {}
 
@@ -116,32 +126,32 @@ public:
 		DI_pump_dimension(this->pressures[LD::F], DB4, pump_F_feedback);
 		DI_pump_dimension(this->pressures[LD::H], DB4, pump_H_feedback);
 
-		this->set_valves_status(LD::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status);
-		this->set_valves_status(LD::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status);
-		this->set_valves_status(LD::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status);
-		this->set_valves_status(LD::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status);
-		this->set_valves_status(LD::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status);
-		this->set_valves_status(LD::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status);
-		this->set_valves_status(LD::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status);
-		this->set_valves_status(LD::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status);
-		this->set_valves_status(LD::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status);
-		this->set_valves_status(LD::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status);
-		this->set_valves_status(LD::D011, DB4, gate_valve_D11_feedback, motor_valve_D11_feedback, DB205, gate_valve_D11_status);
-		this->set_valves_status(LD::D012, DB4, gate_valve_D12_feedback, motor_valve_D12_feedback, DB205, gate_valve_D12_status);
-		this->set_valves_status(LD::D013, DB4, gate_valve_D13_feedback, motor_valve_D13_feedback, DB205, gate_valve_D13_status);
-		this->set_valves_status(LD::D014, DB4, gate_valve_D14_feedback, motor_valve_D14_feedback, DB205, gate_valve_D14_status);
-		this->set_valves_status(LD::D015, DB4, gate_valve_D15_feedback, motor_valve_D15_feedback, DB205, gate_valve_D15_status);
-		this->set_valves_status(LD::D016, DB4, gate_valve_D16_feedback, motor_valve_D16_feedback, DB205, gate_valve_D16_status);
-		this->set_valves_status(LD::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status);
-		this->set_valves_status(LD::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status);
-		this->set_valves_status(LD::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status);
-		this->set_valves_status(LD::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status);
-		this->set_valves_status(LD::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status);
-		this->set_valves_status(LD::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status);
-		this->set_valves_status(LD::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status);
-		this->set_valves_status(LD::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status);
-		this->set_valves_status(LD::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status);
-		this->set_valves_status(LD::D026, DB4, gate_valve_D26_feedback, motor_valve_D26_feedback, DB205, gate_valve_D26_status);
+		this->set_valves_status(LD::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
+		this->set_valves_status(LD::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
+		this->set_valves_status(LD::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status, motor_valve_D03_status);
+		this->set_valves_status(LD::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status, motor_valve_D04_status);
+		this->set_valves_status(LD::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
+		this->set_valves_status(LD::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status, motor_valve_D06_status);
+		this->set_valves_status(LD::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status, motor_valve_D07_status);
+		this->set_valves_status(LD::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status, motor_valve_D08_status);
+		this->set_valves_status(LD::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status, motor_valve_D09_status);
+		this->set_valves_status(LD::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status, motor_valve_D10_status);
+		this->set_valves_status(LD::D011, DB4, gate_valve_D11_feedback, motor_valve_D11_feedback, DB205, gate_valve_D11_status, motor_valve_D11_status);
+		this->set_valves_status(LD::D012, DB4, gate_valve_D12_feedback, motor_valve_D12_feedback, DB205, gate_valve_D12_status, motor_valve_D12_status);
+		this->set_valves_status(LD::D013, DB4, gate_valve_D13_feedback, motor_valve_D13_feedback, DB205, gate_valve_D13_status, motor_valve_D13_status);
+		this->set_valves_status(LD::D014, DB4, gate_valve_D14_feedback, motor_valve_D14_feedback, DB205, gate_valve_D14_status, motor_valve_D14_status);
+		this->set_valves_status(LD::D015, DB4, gate_valve_D15_feedback, motor_valve_D15_feedback, DB205, gate_valve_D15_status, motor_valve_D15_status);
+		this->set_valves_status(LD::D016, DB4, gate_valve_D16_feedback, motor_valve_D16_feedback, DB205, gate_valve_D16_status, motor_valve_D16_status);
+		this->set_valves_status(LD::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status, motor_valve_D17_status);
+		this->set_valves_status(LD::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status, motor_valve_D18_status);
+		this->set_valves_status(LD::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status, motor_valve_D19_status);
+		this->set_valves_status(LD::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status, motor_valve_D20_status);
+		this->set_valves_status(LD::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status, motor_valve_D21_status);
+		this->set_valves_status(LD::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status, motor_valve_D22_status);
+		this->set_valves_status(LD::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status, motor_valve_D23_status);
+		this->set_valves_status(LD::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status, motor_valve_D24_status);
+		this->set_valves_status(LD::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status, motor_valve_D25_status);
+		this->set_valves_status(LD::D026, DB4, gate_valve_D26_feedback, motor_valve_D26_feedback, DB205, gate_valve_D26_status, motor_valve_D26_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -158,13 +168,46 @@ public:
 		plc->send_command(DO_gate_valve_command(cmd, valve->id));
 	}
 
-public:
 	bool can_execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
 		return motor_valve_command_executable(valve, cmd, true) && plc->connected();
 	}
 
 	void execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, PLCMaster* plc) override {
 		plc->send_command(DO_motor_valve_command(cmd, valve->id));
+	}
+
+public:
+	bool can_execute(LDPSHPOperation cmd, Credit<HopperPumplet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(LDPSHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_ps_hopper_pump_charge_command(cmd));
+	}
+
+	bool can_execute(LDSBHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(LDSBHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_sb_hopper_pump_charge_command(cmd));
+	}
+
+public:
+	bool can_execute(LDPSUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(LDPSUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_ps_underwater_pump_command(cmd));
+	}
+
+	bool can_execute(LDSBUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(LDSBUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
+		plc->send_command(DO_sb_underwater_pump_command(cmd));
 	}
 
 public:
@@ -461,14 +504,14 @@ private:
 	}
 
 private:
-	void set_valves_status(LD id, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1, const uint8* db205, unsigned int idx205_p1) {
-		MotorValvelet* maybe_mvalve = nullptr;
+	void set_valves_status(LD id
+		, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1
+		, const uint8* db205, unsigned int gidx205_p1, unsigned int midx205_p1) {
+		DI_gate_valve(this->gvalves[id], db4, gidx4_p1, db205, gidx205_p1);
 
 		if (this->mvalves.find(id) != this->mvalves.end()) {
-			maybe_mvalve = this->mvalves[id];
+			DI_motor_valve(this->mvalves[id], db4, midx4_p1, db205, midx205_p1);
 		}
-		
-		DI_paired_valves(this->gvalves[id], maybe_mvalve, db4, gidx4_p1, midx4_p1, db205, idx205_p1);
 	}
 
 // never deletes these graphlets mannually
@@ -592,6 +635,10 @@ LoadingsPage::LoadingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>(dashboard, plc);
 	this->motor_valve_op = make_menu<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*>(dashboard, plc);
+	this->ps_hopper_op = make_menu<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
+	this->sb_hopper_op = make_menu<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
+	this->ps_underwater_op = make_menu<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
+	this->sb_underwater_op = make_menu<LDSBUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -667,16 +714,26 @@ void LoadingsPage::reflow(float width, float height) {
 }
 
 bool LoadingsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr) || (dynamic_cast<MotorValvelet*>(g) != nullptr));
+	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
+		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
+		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
 void LoadingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
+	auto hpump = dynamic_cast<Credit<HopperPumplet, LD>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (mvalve != nullptr) {
 		menu_popup(this->motor_valve_op, g, local_x, local_y);
+	} else if (hpump != nullptr) {
+		switch (hpump->id) {
+		case LD::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;
+		case LD::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
+		case LD::PSUWPump: menu_popup(this->ps_underwater_op, g, local_x, local_y); break;
+		case LD::SBUWPump: menu_popup(this->sb_underwater_op, g, local_x, local_y); break;
+		}
 	}
 }

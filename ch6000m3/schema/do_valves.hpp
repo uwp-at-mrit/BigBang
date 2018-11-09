@@ -92,4 +92,40 @@ namespace WarGrey::SCADA {
 
 		return ((offset >= 0U) ? (index + offset) : heat);
 	}
+
+	template<typename OP, typename E>
+	uint16 DO_butterfly_valve_command(OP cmd, E id) {
+		uint16 offset = 0U;
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::Open:         offset = 0U; break;
+		case OP::Close:        offset = 1U; break;
+		case OP::VirtualOpen:  offset = 2U; break;
+		case OP::VirtualClose: offset = 3U; break;
+		}
+
+		switch (id) {
+		case E::HBV01: index = 185U; break;
+		case E::HBV02: index = 189U; break;
+		case E::HBV03: index = 193; break;
+		case E::HBV04: index = 197U; break;
+		case E::HBV05: index = 201U; break;
+		case E::HBV06: index = 205U; break;
+		case E::HBV07: index = 209U; break;
+		case E::HBV08: index = 213U; break;
+		case E::HBV09: index = 217U; break;
+		case E::HBV10: index = 221U; break;
+		case E::HBV11: index = 225U; break;
+		case E::HBV12: index = 229U; break;
+		case E::HBV13: index = 233U; break;
+		case E::HBV14: index = 237U; break;
+		case E::HBV15: index = 241U; break;
+		case E::HBV16: index = 245U; break;
+		case E::HBV17: index = 249U; break;
+		case E::HBV18: index = 253U; break;
+		}
+
+		return index + offset;
+	}
 }

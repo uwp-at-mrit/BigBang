@@ -54,12 +54,20 @@ void Shapelet::set_border_color(CanvasSolidColorBrush^ color) {
 	}
 }
 
+CanvasSolidColorBrush^ Shapelet::get_border_color() {
+	return this->border_color;
+}
+
 void Shapelet::set_color(unsigned int color) {
 	this->set_color(Colours::make(color));
 }
 
 void Shapelet::set_color(ICanvasBrush^ color) {
 	this->color = ((color == nullptr) ? Colours::Background : color);
+}
+
+ICanvasBrush^ Shapelet::get_color() {
+	return this->color;
 }
 
 void Shapelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

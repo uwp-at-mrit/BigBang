@@ -123,7 +123,7 @@ void PLCMaster::send_command(uint8 idx, uint8 bidx) {
 }
 
 void PLCMaster::send_command(uint16 index_p1) {
-	uint16 idx = index_p1 - 1U;
+	int16 idx = index_p1 - 1U;
 
 	if (idx >= 0U) {
 		this->send_command((uint8)(idx / 8), (uint8)(idx % 8));

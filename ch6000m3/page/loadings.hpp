@@ -27,6 +27,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ motor_valve_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ ps_underwater_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ sb_underwater_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

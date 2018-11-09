@@ -50,4 +50,31 @@ namespace WarGrey::SCADA {
 
 		return index + offset;
 	}
+
+	template<typename E>
+	uint16 DO_gantry_virtual_action_command(E id, bool ps) {
+		uint16 index = 0U;
+
+		if (ps) {
+			switch (id) {
+			case E::tVirtualUp:  index = 793U; break;
+			case E::tVirtualOut: index = 794U; break;
+			case E::iVirtualUp:  index = 795U; break;
+			case E::iVirtualOut: index = 796U; break;
+			case E::hVirtualUp:  index = 797U; break;
+			case E::hVirtualOut: index = 798U; break;
+			}
+		} else {
+			switch (id) {
+			case E::tVirtualUp:  index = 799U; break;
+			case E::tVirtualOut: index = 800U; break;
+			case E::iVirtualUp:  index = 801U; break;
+			case E::iVirtualOut: index = 802U; break;
+			case E::hVirtualUp:  index = 803U; break;
+			case E::hVirtualOut: index = 804U; break;
+			}
+		}
+
+		return index;
+	}
 }
