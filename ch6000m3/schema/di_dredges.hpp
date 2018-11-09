@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 	static WarGrey::SCADA::WinchLimited winch_ps_draghead_limited = WarGrey::SCADA::WinchLimited(361U, 362U);
 	static unsigned int gantry_ps_trunnion_limited = 325U;
 	static unsigned int gantry_ps_intermediate_limited = 357U;
-	static unsigned int gantry_ps_draghead_limited = 361U;
+	static unsigned int gantry_ps_draghead_limited = 365U;
 
 	static WarGrey::SCADA::WinchLimited winch_sb_trunnion_limited = WarGrey::SCADA::WinchLimited(337U, 338U, 339U, 340U);
 	static WarGrey::SCADA::WinchLimited winch_sb_intermediate_limited = WarGrey::SCADA::WinchLimited(348U, 386U);
@@ -77,7 +77,6 @@ namespace WarGrey::SCADA {
 	void DI_winch(W* target
 		, const uint8* db4, WarGrey::SCADA::WinchLimited& limited
 		, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
-		//target->set_remote_control(DBX(db4, idx4_p1 - 1));
 		bool slack = (limited.slack > 0U) && DBX(db4, limited.slack - 1U);
 		
 		if (DBX(db4, limited.upper - 1U)) {
@@ -90,17 +89,24 @@ namespace WarGrey::SCADA {
 			unsigned int status = details.status - 1U;
 			unsigned int sensor = details.sensor - 1U;
 			bool fast = (details.draghead && DBX(db205, status + 7U));
-			
-			target->set_status(DBX(db205, status + 0U), fast, WinchStatus::FastWindingOut, WinchStatus::FastWindingOut);
-			target->set_status(DBX(db205, status + 1U), fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
-			target->set_status(DBX(db205, status + 2U), fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
-			target->set_status(DBX(db205, status + 3U), fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
-				
-			target->set_status(DBX(db205, status + 4U), WinchStatus::Unlettable);
-			target->set_status(DBX(db205, status + 5U), WinchStatus::Unpullable);
 
-			target->set_status(DBX(db4, sensor + 0U), WinchStatus::SensorUpperLimited);
-			target->set_status(DBX(db4, sensor + 1U), WinchStatus::SensorLowerLimited);
+			if (DBX(db205, status + 0U)) {
+				target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
+			} else if (DBX(db205, status + 1U)) {
+				target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
+			} else if (DBX(db205, status + 4U)) {
+				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
+			} else if (DBX(db205, status + 5U)) {
+				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
+			} else if (DBX(db205, sensor + 0U)) {
+				target->set_status(WinchStatus::SensorUpperLimited);
+			} else if (DBX(db205, sensor + 1U)) {
+				target->set_status(WinchStatus::SensorLowerLimited);
+			}
+			
+			// the rest are unused;
+			//  target->set_status(DBX(db205, status + 2U), WinchStatus::Unlettable);
+			//  target->set_status(DBX(db205, status + 3U), WinchStatus::Unpullable);
 		}
 	}
 

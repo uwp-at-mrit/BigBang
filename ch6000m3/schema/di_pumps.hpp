@@ -85,17 +85,20 @@ namespace WarGrey::SCADA {
 				target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StopReady);
 				target->set_status(HydraulicPumpStatus::Running);
 				// use HydraulicPumpStatus::Ready instead of HydraulicPumpStatus::StartReady.	
-			} else {
-				target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::Ready);
-				target->set_status(DBX(db205, idx205_p1 - 1), HydraulicPumpStatus::Starting);
-				target->set_status(DBX(db205, idx205_p1 + 0), HydraulicPumpStatus::Stopping);
-				target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Unstartable);
-				target->set_status(DBX(db205, idx205_p1 + 2), HydraulicPumpStatus::Unstoppable);
-
+			} else if (DBX(db205, idx205_p1 - 1)) {
+				target->set_status(HydraulicPumpStatus::Starting);
+			} else if (DBX(db205, idx205_p1 + 0)) {
+				target->set_status(HydraulicPumpStatus::Stopping);
+			} else if (DBX(db205, idx205_p1 + 1)) {
+				target->set_status(HydraulicPumpStatus::Unstartable);
+			} else if (DBX(db205, idx205_p1 + 2)) {
+				target->set_status(HydraulicPumpStatus::Unstoppable);
+			} else if (DBX(db205, idx205_p1 + 3)) {
+				target->set_status(HydraulicPumpStatus::Ready);
+			}
 				// the rest two are not used
 				// target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
 				// target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
-			}
 		}
 	}
 

@@ -16,12 +16,14 @@ namespace WarGrey::SCADA {
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 		
-	protected:
+	public:
 		bool can_select(IGraphlet* g) override;
+		void on_tap_selected(IGraphlet* g, float local_x, float local_y) override;
 
 	private:
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
+		Windows::UI::Xaml::Controls::MenuFlyout^ overflow_op;
 
 	private: // never deletes these graphlets mannually	
 		WarGrey::SCADA::Statusbarlet* statusbar;

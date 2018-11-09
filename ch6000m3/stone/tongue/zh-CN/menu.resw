@@ -210,4 +210,25 @@
   <data name="SBRainbowing" xml:space="preserve">
     <value>右舱内泵艏喷</value>
   </data>
+  <data name="Charge" xml:space="preserve">
+    <value>冲油</value>
+  </data>
+  <data name="Discharge" xml:space="preserve">
+    <value>放油</value>
+  </data>
+  <data name="Lock" xml:space="preserve">
+    <value>锁紧</value>
+  </data>
+  <data name="Unlock" xml:space="preserve">
+    <value>松开</value>
+  </data>
+  <data name="AllOut" xml:space="preserve">
+    <value>联合推出</value>
+  </data>
+  <data name="AllStop" xml:space="preserve">
+    <value>全部停止</value>
+  </data>
+  <data name="AllUp" xml:space="preserve">
+    <value>联合收进</value>
+  </data>
 </root>

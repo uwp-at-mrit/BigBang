@@ -210,4 +210,25 @@
   <data name="SBRainbowing" xml:space="preserve">
     <value>SB Rainbowing</value>
   </data>
+  <data name="Charge" xml:space="preserve">
+    <value>Charge</value>
+  </data>
+  <data name="Discharge" xml:space="preserve">
+    <value>Discharge</value>
+  </data>
+  <data name="Lock" xml:space="preserve">
+    <value>Lock</value>
+  </data>
+  <data name="Unlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="AllOut" xml:space="preserve">
+    <value>Wind Out All</value>
+  </data>
+  <data name="AllStop" xml:space="preserve">
+    <value>Stop All</value>
+  </data>
+  <data name="AllUp" xml:space="preserve">
+    <value>Wind Up All</value>
+  </data>
 </root>

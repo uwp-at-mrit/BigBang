@@ -188,15 +188,22 @@ namespace WarGrey::SCADA {
 			target->set_status(GateValveStatus::Open);
 		} else if (DBX(db4, idx4_p1 + 0U)) {
 			target->set_status(GateValveStatus::Closed);
-		} else {
-			target->set_status(DBX(db205, idx205_p1 - 1U), GateValveStatus::Opening);
-			target->set_status(DBX(db205, idx205_p1 + 0U), GateValveStatus::Closing);
-			target->set_status(DBX(db205, idx205_p1 + 1U), GateValveStatus::Unopenable);
-			target->set_status(DBX(db205, idx205_p1 + 2U), GateValveStatus::Unclosable);
-			target->set_status(DBX(db205, idx205_p1 + 3U), GateValveStatus::OpenReady);
-			target->set_status(DBX(db205, idx205_p1 + 4U), GateValveStatus::CloseReady);
-			target->set_status(DBX(db205, idx205_p1 + 5U), GateValveStatus::VirtualOpen);
-			target->set_status(DBX(db205, idx205_p1 + 6U), GateValveStatus::VirtualClose);
+		} else if (DBX(db205, idx205_p1 - 1U)) {
+			target->set_status(GateValveStatus::Opening);
+		} else if (DBX(db205, idx205_p1 + 0U)) {
+			target->set_status(GateValveStatus::Closing);
+		} else if (DBX(db205, idx205_p1 + 1U)) {
+			target->set_status(GateValveStatus::Unopenable);
+		} else if (DBX(db205, idx205_p1 + 2U)) {
+			target->set_status(GateValveStatus::Unclosable);
+		} else if (DBX(db205, idx205_p1 + 3U)) {
+			target->set_status(GateValveStatus::OpenReady);
+		} else if (DBX(db205, idx205_p1 + 4U)) {
+			target->set_status(GateValveStatus::CloseReady);
+		} else if (DBX(db205, idx205_p1 + 5U)) {
+			target->set_status(GateValveStatus::VirtualOpen);
+		} else if (DBX(db205, idx205_p1 + 6U)) {
+			target->set_status(GateValveStatus::VirtualClose);
 		}
 	}
 
@@ -206,15 +213,22 @@ namespace WarGrey::SCADA {
 			target->set_status(TValveStatus::Open);
 		} else if (DBX(db4, idx4_p1 + 0U)) {
 			target->set_status(TValveStatus::Closed);
-		} else {
-			target->set_status(DBX(db205, idx205_p1 - 1U), TValveStatus::Opening);
-			target->set_status(DBX(db205, idx205_p1 + 0U), TValveStatus::Closing);
-			target->set_status(DBX(db205, idx205_p1 + 1U), TValveStatus::Unopenable);
-			target->set_status(DBX(db205, idx205_p1 + 2U), TValveStatus::Unclosable);
-			target->set_status(DBX(db205, idx205_p1 + 3U), TValveStatus::OpenReady);
-			target->set_status(DBX(db205, idx205_p1 + 4U), TValveStatus::CloseReady);
-			target->set_status(DBX(db205, idx205_p1 + 5U), TValveStatus::VirtualOpen);
-			target->set_status(DBX(db205, idx205_p1 + 6U), TValveStatus::VirtualClose);
+		} else if (DBX(db205, idx205_p1 - 1U)) {
+			target->set_status(TValveStatus::Opening);
+		} else if (DBX(db205, idx205_p1 + 0U)) {
+			target->set_status(TValveStatus::Closing);
+		} else if (DBX(db205, idx205_p1 + 1U)) {
+			target->set_status(TValveStatus::Unopenable);
+		} else if (DBX(db205, idx205_p1 + 2U)) {
+			target->set_status(TValveStatus::Unclosable);
+		} else if (DBX(db205, idx205_p1 + 3U)) {
+			target->set_status(TValveStatus::OpenReady);
+		} else if (DBX(db205, idx205_p1 + 4U)) {
+			target->set_status(TValveStatus::CloseReady);
+		} else if (DBX(db205, idx205_p1 + 5U)) {
+			target->set_status(TValveStatus::VirtualOpen);
+		} else if (DBX(db205, idx205_p1 + 6U)) {
+			target->set_status(TValveStatus::VirtualClose);
 		}
 	}
 

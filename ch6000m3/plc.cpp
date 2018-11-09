@@ -106,6 +106,16 @@ void PLCMaster::send_scheduled_request(long long count, long long interval, long
 	}
 }
 
+Platform::String^ PLCMaster::device_hostname() {
+	Platform::String^ name = MRMaster::device_hostname();
+
+	if (this->mode == MasterMode::Debug) {
+		name += "[Debug]";
+	}
+
+	return name;
+}
+
 void PLCMaster::send_setting(uint16 db, uint16 address, float datum) {
 	if (this->mode == MasterMode::Release) {
 		this->write_analog_quantity(db, address, datum);
@@ -125,7 +135,7 @@ void PLCMaster::send_command(uint8 idx, uint8 bidx) {
 void PLCMaster::send_command(uint16 index_p1) {
 	int16 idx = index_p1 - 1U;
 
-	if (idx >= 0U) {
+	if (idx >= 0) {
 		this->send_command((uint8)(idx / 8), (uint8)(idx % 8));
 	}
 }

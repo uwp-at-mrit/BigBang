@@ -19,7 +19,7 @@ static double default_alpha_degrees = 45.0;
 
 static CanvasSolidColorBrush^ door_default_border_color = Colours::make(0xBBBBBB);
 static CanvasSolidColorBrush^ door_default_bottom_color = Colours::make(0xBB6666);
-static CanvasSolidColorBrush^ door_default_progress_color = Colours::make(0xBBBB66);
+static CanvasSolidColorBrush^ door_default_progress_color = Colours::Yellow;
 
 /*************************************************************************************************/
 HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Closed, radius, degrees) {}
@@ -28,11 +28,13 @@ HopperDoorlet::HopperDoorlet(DoorStatus default_state, float radius, double degr
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {}
 
 void HopperDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
-	case DoorStatus::Opening: case DoorStatus::Closing: {
-		this->flashing = !this->flashing;
-		this->notify_updated();
-	}; break;
+	if (!this->stopped) {
+		switch (this->get_status()) {
+		case DoorStatus::Opening: case DoorStatus::Closing: {
+			this->flashing = !this->flashing;
+			this->notify_updated();
+		}; break;
+		}
 	}
 }
 
@@ -60,9 +62,10 @@ void HopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 
 void HopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
+	this->stopped = false;
 
 	switch (state) {
-	case DoorStatus::Open: case DoorStatus::Closing: {
+	case DoorStatus::Open: {
 		this->set_value(1.0, true);
 	} break;
 	case DoorStatus::Disabled: {
@@ -73,10 +76,15 @@ void HopperDoorlet::on_status_changed(DoorStatus state) {
 			this->disable_line = geometry_draft(polar_line(this->radiusX - default_thickness, d0, dn), default_thickness);
 		}
 	} // NOTE: there is no `break` here;
-	case DoorStatus::Closed: case DoorStatus::Opening: {
+	case DoorStatus::Closed: {
 		this->set_value(0.0, true);
 	} break;
 	}
+}
+
+void HopperDoorlet::stop() {
+	this->stopped = true;
+	this->flashing = false;
 }
 
 void HopperDoorlet::on_value_changed(double v) {
@@ -147,11 +155,13 @@ void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right,
 }
 
 void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
-	case DoorStatus::Opening: case DoorStatus::Closing: {
-		this->flashing = !this->flashing;
-		this->notify_updated();
-	}; break;
+	if (!this->stopped) {
+		switch (this->get_status()) {
+		case DoorStatus::Opening: case DoorStatus::Closing: {
+			this->flashing = !this->flashing;
+			this->notify_updated();
+		}; break;
+		}
 	}
 }
 
@@ -180,14 +190,20 @@ void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
+void UpperHopperDoorlet::stop() {
+	this->stopped = true;
+	this->flashing = false;
+}
+
 void UpperHopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
+	this->stopped = false;
 
 	switch (state) {
-	case DoorStatus::Open: case DoorStatus::Closing: {
+	case DoorStatus::Open: {
 		this->set_value(1.0, true);
 	} break;
-	case DoorStatus::Closed: case DoorStatus::Disabled: case DoorStatus::Opening: {
+	case DoorStatus::Closed: case DoorStatus::Disabled: {
 		this->set_value(0.0, true);
 	} break;
 	}

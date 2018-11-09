@@ -26,6 +26,9 @@ namespace WarGrey::SCADA {
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		void stop();
+
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
 		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
@@ -37,6 +40,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool flashing;
+		bool stopped;
 	};
 
 	private class UpperHopperDoorlet
@@ -51,6 +55,9 @@ namespace WarGrey::SCADA {
 		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void stop();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
@@ -68,6 +75,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool flashing;
+		bool stopped;
 	};
 
 	private class Doorlet : public WarGrey::SCADA::IRangelet<double> {

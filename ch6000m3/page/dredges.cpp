@@ -47,7 +47,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 private enum DSMode { WindowUI = 0, Dashboard };
 
 private enum class DSWOperation { Up, Down, Stop, HighSpeed, _ };
-private enum class DSGOperation { WindOut, WindUp, Stop, _ };
+private enum class DSGOperation { WindOut, WindUp, Stop, AllOut, AllUp, AllStop, _ };
+private enum class DSWCOperation { Charge, Discharge, Stop, Lock, Unlock, _ };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
@@ -642,7 +643,8 @@ private: // never delete these global objects
 private class Drags final
 	: public IDredgingSystem
 	, public IMenuCommand<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>
-	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*> {
+	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>
+	, public IMenuCommand<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*> {
 public:
 	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
@@ -652,6 +654,7 @@ public:
 
 		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, master->get_plc_device());
 		this->gantry_op = make_menu<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>(this, master->get_plc_device());
+		this->compensator_op = make_menu<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*>(this, master->get_plc_device());
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
@@ -761,24 +764,33 @@ public:
 	}
 
 public:
-	bool can_execute(DSWOperation cmd, Credit<Winchlet, DS>* pump, PLCMaster* plc, bool acc_executable) override {
-		DS id = pump->id;
+	bool can_execute(DSWOperation cmd, Credit<Winchlet, DS>* winch, PLCMaster* plc, bool acc_executable) override {
+		DS id = winch->id;
 		bool draghead = ((id == DS::psDragHead) || (id == DS::sbDragHead));
 
-		return winch_command_executable(pump, cmd, draghead, true) && plc->connected();
+		return winch_command_executable(winch, cmd, draghead, true) && plc->connected();
 	}
 
-	void execute(DSWOperation cmd, Credit<Winchlet, DS>* pump, PLCMaster* plc) override {
-		plc->send_command(DO_winch_command(cmd, pump->id));
+	void execute(DSWOperation cmd, Credit<Winchlet, DS>* winch, PLCMaster* plc) override {
+		plc->send_command(DO_winch_command(cmd, winch->id));
 	}
 
 public:
-	bool can_execute(DSGOperation cmd, Credit<Gantrylet, DS>* pump, PLCMaster* plc, bool acc_executable) override {
-		return gantry_command_executable(pump, cmd, true) && plc->connected();
+	bool can_execute(DSGOperation cmd, Credit<Gantrylet, DS>* gantry, PLCMaster* plc, bool acc_executable) override {
+		return gantry_command_executable(gantry, cmd, true) && plc->connected();
 	}
 
-	void execute(DSGOperation cmd, Credit<Gantrylet, DS>* pump, PLCMaster* plc) override {
-		plc->send_command(DO_gantry_command(cmd, pump->id));
+	void execute(DSGOperation cmd, Credit<Gantrylet, DS>* gantry, PLCMaster* plc) override {
+		plc->send_command(DO_gantry_command(cmd, gantry->id));
+	}
+
+public:
+	bool can_execute(DSWCOperation cmd, Credit<Compensatorlet, DS>* wc, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(DSWCOperation cmd, Credit<Compensatorlet, DS>* wc, PLCMaster* plc) override {
+		plc->send_command(DO_wave_compensator_command(cmd, (wc->id == DS::PSWC)));
 	}
 
 public:
@@ -964,18 +976,22 @@ public:
 
 		return (select_settings
 			|| (dynamic_cast<Winchlet*>(g) != nullptr) 
-			|| (dynamic_cast<Gantrylet*>(g) != nullptr));
+			|| (dynamic_cast<Gantrylet*>(g) != nullptr)
+			|| (dynamic_cast<Compensatorlet*>(g) != nullptr));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
 		auto winch = dynamic_cast<Winchlet*>(g);
 		auto gantry = dynamic_cast<Gantrylet*>(g);
+		auto compensator = dynamic_cast<Compensatorlet*>(g);
 		auto indicator = dynamic_cast<Credit<Rectanglet, DS>*>(g);
 
 		if (winch != nullptr) {
 			menu_popup(this->winch_op, g, local_x, local_y);
 		} else if (gantry != nullptr) {
 			menu_popup(this->gantry_op, g, local_x, local_y);
+		} else if (compensator != nullptr) {
+			menu_popup(this->compensator_op, g, local_x, local_y);
 		} else if (indicator != nullptr) {
 			PLCMaster* plc = this->master->get_plc_device();
 
@@ -1108,6 +1124,7 @@ private:
 private:
 	MenuFlyout^ winch_op;
 	MenuFlyout^ gantry_op;
+	MenuFlyout^ compensator_op;
 
 private:
 	DS DS_side;

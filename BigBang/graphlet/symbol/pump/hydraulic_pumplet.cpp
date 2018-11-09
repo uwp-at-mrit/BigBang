@@ -11,7 +11,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 2.0F;
-static double dynamic_mask_interval = 1.0 / 8.0;
+static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 HydraulicPumplet::HydraulicPumplet(float radius, double degrees)
@@ -30,20 +30,12 @@ void HydraulicPumplet::construct() {
 void HydraulicPumplet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
 	case HydraulicPumpStatus::Starting: {
-		this->mask_percentage
-			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
-			? 0.0
-			: this->mask_percentage + dynamic_mask_interval;
-
+		this->mask_percentage = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;
 	case HydraulicPumpStatus::Stopping: {
-		this->mask_percentage
-			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
-			? 1.0
-			: this->mask_percentage - dynamic_mask_interval;
-
+		this->mask_percentage = 1.0 - double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
 		this->notify_updated();
 	} break;

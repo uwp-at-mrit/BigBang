@@ -90,7 +90,7 @@ namespace WarGrey::SCADA {
 		case E::D026: index = 1117U; heat = 1146U; break;
 		}
 
-		return ((offset >= 0U) ? (index + offset) : heat);
+		return ((offset >= 0) ? (index + offset) : heat);
 	}
 
 	template<typename OP, typename E>

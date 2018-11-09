@@ -8,6 +8,8 @@
 #include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 
+#include "schema/do_devices.hpp"
+
 #include "decorator/page.hpp"
 
 #include "module.hpp"
@@ -30,7 +32,7 @@ private enum DLMode { WindowUI = 0, Dashboard };
 
 private enum class DLTS { EarthWork, Vessel, Loading, Displacement, Draught, _ };
 
-private enum class DLOFPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
+private enum class DLOFOperation { Up, Down, Stop, Auto, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -99,11 +101,13 @@ private:
 	float ship_width;
 };
 
-private class Draughts final : public PLCConfirmation {
+private class Draughts final
+	: public PLCConfirmation
+	, public IMenuCommand<DLOFOperation, OverflowPipelet, PLCMaster*> {
 public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
-		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U);
+		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
 		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 	}
 
@@ -147,6 +151,15 @@ public:
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
+	}
+
+public:
+	bool can_execute(DLOFOperation cmd, OverflowPipelet* ofp, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(DLOFOperation cmd, OverflowPipelet* ofp, PLCMaster* plc) override {
+		plc->send_command(DO_overflow_command(cmd));
 	}
 
 public:
@@ -314,6 +327,7 @@ DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Draughts* dashboard = new Draughts(this, decorator);
 
 	this->dashboard = dashboard;
+	this->overflow_op = make_menu<DLOFOperation, OverflowPipelet, PLCMaster*>(dashboard, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -367,5 +381,13 @@ void DraughtsPage::reflow(float width, float height) {
 }
 
 bool DraughtsPage::can_select(IGraphlet* g) {
-	return false;
+	return (dynamic_cast<OverflowPipelet*>(g) != nullptr);
+}
+
+void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+	auto overflow = dynamic_cast<OverflowPipelet*>(g);
+
+	if (overflow != nullptr) {
+		menu_popup(this->overflow_op, g, local_x, local_y);
+	}
 }

@@ -46,16 +46,17 @@ static Platform::String^ accumulate_number(Platform::String^ src, double acc) {
 }
 
 /*************************************************************************************************/
-DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, float ufsize) {
+DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, float ufsize, int precision) {
 	DimensionStyle ds;
 
 	ds.number_font = make_bold_text_format("Cambria Math", nfsize);
 	ds.unit_font = make_bold_text_format("Cambria", ufsize);
+	ds.precision = precision;
 
 	return ds;
 }
 
-DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned int min_number) {
+DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned int min_number, int precision) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize * 0.90F);
 	DimensionStyle ds;
@@ -67,6 +68,7 @@ DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned
 	ds.number_leading_space = 0.0F;
 	ds.number_trailing_space = 0.0F;
 	ds.label_color = Colours::Silver;
+	ds.precision = precision;
 
 	return ds;
 }

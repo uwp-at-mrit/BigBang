@@ -38,6 +38,9 @@ namespace WarGrey::SCADA {
 		PLCMaster(Syslog* logger, WarGrey::SCADA::MasterMode mode);
 
 	public:
+		Platform::String^ device_hostname() override;
+
+	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);
 		void send_setting(uint16 db, uint16 address, float datum);
 		void send_command(uint8 idx, uint8 bidx);

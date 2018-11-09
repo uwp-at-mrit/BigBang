@@ -58,9 +58,15 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	template<class D>
 	void DI_hopper_door(D* target, const uint8* db205, size_t idx205_p1) {
-		target->set_status(DBX(db205, idx205_p1 - 1), DoorStatus::Opening);
-		target->set_status(DBX(db205, idx205_p1 + 0), DoorStatus::Closing);
-		target->set_status(DBX(db205, idx205_p1 + 6), DoorStatus::Disabled);
+		if (DBX(db205, idx205_p1 + 6)) {
+			target->set_status(DoorStatus::Disabled);
+		} else if (DBX(db205, idx205_p1 - 1)) {
+			target->set_status(DoorStatus::Opening);
+		} else if (DBX(db205, idx205_p1 + 0)) {
+			target->set_status(DoorStatus::Closing);
+		} else {
+			target->stop();
+		}
 	}
 
 	template<class D>

@@ -172,15 +172,17 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 	case WinchStatus::SuctionLimited: case WinchStatus::SuctionSlack: {
 		CAS_SLOT(s.status_color, Colours::SeaGreen);
 	}; break;
-	case WinchStatus::SaddleLimited: case WinchStatus::SaddleSlack:
-	case WinchStatus::Slack: {
+	case WinchStatus::SaddleLimited: case WinchStatus::SaddleSlack: {
 		CAS_SLOT(s.status_color, Colours::Crimson);
+	}; break;
+	case WinchStatus::Slack: {
+		CAS_SLOT(s.status_color, Colours::ForestGreen);
 	}; break;
 	}
 
 	switch (status) {
 	case WinchStatus::SuctionSlack: case WinchStatus::SaddleSlack: {
-		CAS_SLOT(s.slack_color, Colours::Red);
+		CAS_SLOT(s.slack_color, Colours::Green);
 	}; break;
 	}
 
