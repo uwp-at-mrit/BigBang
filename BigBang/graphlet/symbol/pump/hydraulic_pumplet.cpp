@@ -28,15 +28,15 @@ void HydraulicPumplet::construct() {
 }
 
 void HydraulicPumplet::update(long long count, long long interval, long long uptime) {
+	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
+	
 	switch (this->get_status()) {
 	case HydraulicPumpStatus::Starting: {
-		this->mask_percentage = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_triangle(this->tradius, this->degrees, pmask);
 		this->notify_updated();
 	} break;
 	case HydraulicPumpStatus::Stopping: {
-		this->mask_percentage = 1.0 - double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = polar_masked_triangle(this->tradius, this->degrees, this->mask_percentage);
+		this->mask = polar_masked_triangle(this->tradius, this->degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
 	}
@@ -58,7 +58,6 @@ void HydraulicPumplet::on_status_changed(HydraulicPumpStatus status) {
 	} break;
 	default: {
 		this->mask = nullptr;
-		this->mask_percentage = -1.0;
 	}
 	}
 }

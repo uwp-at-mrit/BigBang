@@ -44,7 +44,6 @@ namespace WarGrey::SCADA {
 		float tradius;
 
 	private:
-		double mask_percentage;
 		bool remote_control;
 	};
 }

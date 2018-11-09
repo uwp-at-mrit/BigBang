@@ -65,7 +65,7 @@ namespace WarGrey::SCADA {
 		} else if (DBX(db205, idx205_p1 + 0)) {
 			target->set_status(DoorStatus::Closing);
 		} else {
-			target->stop();
+			target->set_status(DoorStatus::Default);
 		}
 	}
 

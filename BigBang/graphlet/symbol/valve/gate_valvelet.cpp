@@ -18,7 +18,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 1.5F;
-static double dynamic_mask_interval = 1.0 / 8.0;
+static unsigned int dynamic_mask_step = 8;
 
 /*************************************************************************************************/
 GateValvelet::GateValvelet(float radius, double degrees)
@@ -44,26 +44,17 @@ void GateValvelet::fill_margin(float x, float y, float* top, float* right, float
 }
 
 void GateValvelet::update(long long count, long long interval, long long uptime) {
+	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX - this->sgrdiff;
 
 	switch (this->get_status()) {
 	case GateValveStatus::Opening: {
-		this->mask_percentage
-			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
-			? 0.0
-			: this->mask_percentage + dynamic_mask_interval;
-
-		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -this->mask_percentage);
+		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -pmask);
 		this->notify_updated();
 	} break;
 	case GateValveStatus::Closing: {
-		this->mask_percentage
-			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
-			? 1.0
-			: this->mask_percentage - dynamic_mask_interval;
-
-		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
 	}
@@ -144,7 +135,6 @@ void GateValvelet::on_status_changed(GateValveStatus status) {
 	} break;
 	default: {
 		this->mask = nullptr;
-		this->mask_percentage = -1.0;
 	}
 	}
 }

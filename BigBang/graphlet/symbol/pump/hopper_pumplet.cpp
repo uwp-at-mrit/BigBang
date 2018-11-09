@@ -85,15 +85,15 @@ void HopperPumplet::fill_pump_origin(float* x, float *y) {
 }
 
 void HopperPumplet::update(long long count, long long interval, long long uptime) {
+	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
+	
 	switch (this->get_status()) {
 	case HopperPumpStatus::Starting: {
-		this->mask_percentage = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(this->mask_percentage));
+		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(pmask));
 		this->notify_updated();
 	} break;
 	case HopperPumpStatus::Stopping: {
-		this->mask_percentage = 1.0 - double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(this->mask_percentage));
+		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(1.0 - pmask));
 		this->notify_updated();
 	} break;
 	}
@@ -162,7 +162,6 @@ void HopperPumplet::on_status_changed(HopperPumpStatus status) {
 	} break;
 	default: {
 		this->mask = nullptr;
-		this->mask_percentage = -1.0;
 	}
 	}
 }

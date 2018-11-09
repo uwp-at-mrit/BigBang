@@ -4,7 +4,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class DoorStatus { Open, Opening, Closed, Closing, Disabled, _ };
+	private enum class DoorStatus { Default, Open, Opening, Closed, Closing, Disabled, _ };
 
 	private struct DoorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
@@ -12,6 +12,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ door_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ depth_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ disable_color;
 	};
 
@@ -23,11 +24,9 @@ namespace WarGrey::SCADA {
 		HopperDoorlet(float radius, double degrees = 0.0);
 
 	public:
+		void construct() override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		void stop();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
@@ -36,11 +35,11 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ disable_line;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ depth_line;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ door_partitions[3];
 
 	private:
 		bool flashing;
-		bool stopped;
 	};
 
 	private class UpperHopperDoorlet
@@ -55,9 +54,6 @@ namespace WarGrey::SCADA {
 		void fill_margin(float x, float y, float* top = nullptr, float* right = nullptr, float* bottom = nullptr, float* left = nullptr) override;
 		void update(long long count, long long interval, long long uptime) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
-
-	public:
-		void stop();
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
@@ -75,7 +71,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool flashing;
-		bool stopped;
 	};
 
 	private class Doorlet : public WarGrey::SCADA::IRangelet<double> {

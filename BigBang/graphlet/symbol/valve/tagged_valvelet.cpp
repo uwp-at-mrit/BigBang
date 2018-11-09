@@ -18,7 +18,7 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static float default_thickness = 1.5F;
-static double dynamic_mask_interval = 1.0 / 8.0;
+static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 TValvelet::TValvelet(char tag, float radius, double degrees, bool rotate_tag)
@@ -69,25 +69,17 @@ void TValvelet::fill_margin(float x, float y, float* top, float* right, float* b
 }
 
 void TValvelet::update(long long count, long long interval, long long uptime) {
+	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (this->get_status()) {
 	case TValveStatus::Opening: {
-		this->mask_percentage
-			= ((this->mask_percentage < 0.0) || (this->mask_percentage >= 1.0))
-			? 0.0
-			: this->mask_percentage + dynamic_mask_interval;
 
-		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -pmask);
 		this->notify_updated();
 	} break;
 	case TValveStatus::Closing: {
-		this->mask_percentage
-			= ((this->mask_percentage <= 0.0) || (this->mask_percentage > 1.0))
-			? 1.0
-			: this->mask_percentage - dynamic_mask_interval;
-
-		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, this->mask_percentage);
+		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
 	}
@@ -172,7 +164,6 @@ void TValvelet::on_status_changed(TValveStatus status) {
 	} break;
 	default: {
 		this->mask = nullptr;
-		this->mask_percentage = -1.0;
 	}
 	}
 }

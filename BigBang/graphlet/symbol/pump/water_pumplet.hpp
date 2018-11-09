@@ -51,7 +51,6 @@ namespace WarGrey::SCADA {
 		bool leftward;
 
 	private:
-		double mask_percentage;
 		bool remote_control;
 	};
 }

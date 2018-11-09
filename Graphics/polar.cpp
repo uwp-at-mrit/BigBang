@@ -178,23 +178,31 @@ CanvasGeometry^ WarGrey::SCADA::polar_arrowhead(float rx, float ry, double d) {
 	return CanvasGeometry::CreatePath(arrowhead);
 }
 
+CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d1, double d2, double d3) {
+	return polar_triangle(r, r, d1, d2, d3);
+}
+
 CanvasGeometry^ WarGrey::SCADA::polar_triangle(float r, double d) {
 	return polar_triangle(r, r, d);
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_triangle(float rx, float ry, double d) {
-	auto equilateral_triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+	return polar_triangle(rx, ry, d, d + 120.0, d - 120.0);
+}
+
+CanvasGeometry^ WarGrey::SCADA::polar_triangle(float rx, float ry, double d1, double d2, double d3) {
+	auto triangle = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x, y;
 
-	ellipse_point(rx, ry, d, &x, &y);
-	equilateral_triangle->BeginFigure(x, y);
-	ellipse_point(rx, ry, d + 120.0, &x, &y);
-	equilateral_triangle->AddLine(x, y);
-	ellipse_point(rx, ry, d - 120.0, &x, &y);
-	equilateral_triangle->AddLine(x, y);
-	equilateral_triangle->EndFigure(CanvasFigureLoop::Closed);
+	ellipse_point(rx, ry, d1, &x, &y);
+	triangle->BeginFigure(x, y);
+	ellipse_point(rx, ry, d2, &x, &y);
+	triangle->AddLine(x, y);
+	ellipse_point(rx, ry, d3, &x, &y);
+	triangle->AddLine(x, y);
+	triangle->EndFigure(CanvasFigureLoop::Closed);
 
-	return CanvasGeometry::CreatePath(equilateral_triangle);
+	return CanvasGeometry::CreatePath(triangle);
 }
 
 CanvasGeometry^ WarGrey::SCADA::polar_masked_triangle(float r, double d, double ratio) {

@@ -65,9 +65,6 @@ namespace WarGrey::SCADA {
 		float sign_cy;
 		float body_cx;
 		float body_cy;
-
-	private:
-		double mask_percentage;
 	};
 
 	private class MotorValvelet : public WarGrey::SCADA::TValvelet {

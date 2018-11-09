@@ -42,14 +42,16 @@ namespace WarGrey::SCADA {
 
 	template<class D>
 	void AI_hopper_door(D* target, float progress, float open_threshold, float closed_threshold) {
-		if (progress >= open_threshold) {
-			if (target->get_status() == DoorStatus::Opening) {
+		DoorStatus s = target->get_status();
+
+		if (s == DoorStatus::Opening) {
+			if (progress >= open_threshold) {
 				target->set_status(DoorStatus::Open);
 			}
 		}
 
-		if (progress <= closed_threshold) {
-			if (target->get_status() == DoorStatus::Closing) {
+		if (s == DoorStatus::Closing) {
+			if (progress <= closed_threshold) {
 				target->set_status(DoorStatus::Closed);
 			}
 		}

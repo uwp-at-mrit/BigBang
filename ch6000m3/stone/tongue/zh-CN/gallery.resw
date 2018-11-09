@@ -273,4 +273,7 @@
   <data name="SaddleSlack" xml:space="preserve">
     <value>搁墩限位 + 松弛</value>
   </data>
+  <data name="Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
 </root>

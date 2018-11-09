@@ -51,15 +51,15 @@ void WaterPumplet::construct() {
 }
 
 void WaterPumplet::update(long long count, long long interval, long long uptime) {
+	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
+	
 	switch (this->get_status()) {
 	case WaterPumpStatus::Starting: {
-		this->mask_percentage = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(this->mask_percentage));
+		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(pmask));
 		this->notify_updated();
 	} break;
 	case WaterPumpStatus::Stopping: {
-		this->mask_percentage = 1.0 - double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
-		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(this->mask_percentage));
+		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(1.0 - pmask));
 		this->notify_updated();
 	} break;
 	}
@@ -95,7 +95,6 @@ void WaterPumplet::on_status_changed(WaterPumpStatus status) {
 	} break;
 	default: {
 		this->mask = nullptr;
-		this->mask_percentage = -1.0;
 	}
 	}
 }

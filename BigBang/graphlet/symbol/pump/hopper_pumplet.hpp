@@ -56,7 +56,6 @@ namespace WarGrey::SCADA {
 		bool upward;
 
 	private:
-		double mask_percentage;
 		float mask_cx;
 		float mask_cy;
 		bool remote_control;

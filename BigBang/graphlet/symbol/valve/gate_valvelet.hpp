@@ -45,8 +45,5 @@ namespace WarGrey::SCADA {
 		
 	private:
 		float sgrdiff;
-
-	private:
-		double mask_percentage;
 	};
 }

@@ -13,6 +13,8 @@ namespace WarGrey::SCADA {
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_arrowhead(float radius, double degrees);
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_arrowhead(float radiusX, float radiusY, double degrees);
 
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_triangle(float radius, double degrees1, double degrees2, double degrees3);
+	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_triangle(float radiusX, float radiusY, double degrees1, double degrees2, double degrees3);
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_triangle(float radius, double degrees);
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_triangle(float radiusX, float radiusY, double degrees);
 	Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ polar_masked_triangle(float radius, double degrees, double height_ratio);

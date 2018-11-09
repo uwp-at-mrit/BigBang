@@ -1,7 +1,7 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 
-#include "polar.hpp"
 #include "shape.hpp"
+#include "polar.hpp"
 #include "paint.hpp"
 #include "brushes.hxx"
 #include "geometry.hpp"
@@ -22,19 +22,23 @@ static CanvasSolidColorBrush^ door_default_bottom_color = Colours::make(0xBB6666
 static CanvasSolidColorBrush^ door_default_progress_color = Colours::Yellow;
 
 /*************************************************************************************************/
-HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Closed, radius, degrees) {}
+HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Default, radius, degrees) {}
 
 HopperDoorlet::HopperDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {}
 
+void HopperDoorlet::construct() {
+	float r = this->radiusX - default_thickness * 2.0F;
+	
+	this->depth_line = geometry_draft(polar_triangle(r, this->degrees + 60.00), default_thickness);
+}
+
 void HopperDoorlet::update(long long count, long long interval, long long uptime) {
-	if (!this->stopped) {
-		switch (this->get_status()) {
-		case DoorStatus::Opening: case DoorStatus::Closing: {
-			this->flashing = !this->flashing;
-			this->notify_updated();
-		}; break;
-		}
+	switch (this->get_status()) {
+	case DoorStatus::Opening: case DoorStatus::Closing: {
+		this->flashing = !this->flashing;
+		this->notify_updated();
+	}; break;
 	}
 }
 
@@ -43,8 +47,14 @@ void HopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	case DoorStatus::Disabled: {
 		CAS_SLOT(s.disable_color, Colours::Firebrick);
 	}; break;
+	case DoorStatus::Open: {
+		CAS_SLOT(s.depth_color, Colours::DimGray);
+	} break;
 	case DoorStatus::Opening: {
 		CAS_SLOT(s.border_hlcolor, Colours::Green);
+	}; break;
+	case DoorStatus::Closed: {
+		CAS_SLOT(s.depth_color, Colours::LightGray);
 	}; break;
 	case DoorStatus::Closing: {
 		CAS_SLOT(s.border_hlcolor, Colours::Yellow);
@@ -62,12 +72,10 @@ void HopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 
 void HopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
-	this->stopped = false;
-
+	
 	switch (state) {
-	case DoorStatus::Open: {
-		this->set_value(1.0, true);
-	} break;
+	case DoorStatus::Opening: case DoorStatus::Closing: this->flashing = true; break;
+	case DoorStatus::Open: this->set_value(1.0, true); break;
 	case DoorStatus::Disabled: {
 		if (this->disable_line == nullptr) {
 			double d0 = this->degrees - 45.0;
@@ -76,15 +84,13 @@ void HopperDoorlet::on_status_changed(DoorStatus state) {
 			this->disable_line = geometry_draft(polar_line(this->radiusX - default_thickness, d0, dn), default_thickness);
 		}
 	} // NOTE: there is no `break` here;
-	case DoorStatus::Closed: {
-		this->set_value(0.0, true);
-	} break;
+	case DoorStatus::Closed: this->set_value(0.0, true); break;
+	case DoorStatus::Default: {
+		if (this->door_partitions[0] == nullptr) {
+			this->set_value(0.0, true);
+		}
+	}; break;
 	}
-}
-
-void HopperDoorlet::stop() {
-	this->stopped = true;
-	this->flashing = false;
 }
 
 void HopperDoorlet::on_value_changed(double v) {
@@ -111,6 +117,10 @@ void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 		ds->DrawGeometry(this->door_partitions[idx], cx, cy, style.skeleton_color);
 	}
 
+	if (style.depth_color != nullptr) {
+		ds->DrawCachedGeometry(this->depth_line, cx, cy, style.depth_color);
+	}
+
 	if (style.disable_color != nullptr) {
 		if (this->disable_line != nullptr) { // this is always true
 			ds->DrawCachedGeometry(this->disable_line, cx, cy, style.disable_color);
@@ -126,7 +136,7 @@ void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 /*************************************************************************************************/
 UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees)
-	: UpperHopperDoorlet(DoorStatus::Closed, radius, degrees) {}
+	: UpperHopperDoorlet(DoorStatus::Default, radius, degrees) {}
 
 UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_state, float radius, double degrees)
 	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
@@ -155,13 +165,11 @@ void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right,
 }
 
 void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
-	if (!this->stopped) {
-		switch (this->get_status()) {
-		case DoorStatus::Opening: case DoorStatus::Closing: {
-			this->flashing = !this->flashing;
-			this->notify_updated();
-		}; break;
-		}
+	switch (this->get_status()) {
+	case DoorStatus::Opening: case DoorStatus::Closing: {
+		this->flashing = !this->flashing;
+		this->notify_updated();
+	}; break;
 	}
 }
 
@@ -173,11 +181,11 @@ void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	case DoorStatus::Closed: {
 		CAS_SLOT(s.door_color, Colours::Gray);
 	} break;
-	case DoorStatus::Opening: {
-		CAS_SLOT(s.border_hlcolor, Colours::Green);
-	}; break;
 	case DoorStatus::Closing: {
 		CAS_SLOT(s.border_hlcolor, Colours::Yellow);
+	}; break;
+	case DoorStatus::Opening: {
+		CAS_SLOT(s.border_hlcolor, Colours::Green);
 	}; break;
 	}
 
@@ -190,22 +198,18 @@ void UpperHopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void UpperHopperDoorlet::stop() {
-	this->stopped = true;
-	this->flashing = false;
-}
-
 void UpperHopperDoorlet::on_status_changed(DoorStatus state) {
 	this->flashing = false;
-	this->stopped = false;
 
 	switch (state) {
-	case DoorStatus::Open: {
-		this->set_value(1.0, true);
-	} break;
-	case DoorStatus::Closed: case DoorStatus::Disabled: {
-		this->set_value(0.0, true);
-	} break;
+	case DoorStatus::Opening: case DoorStatus::Closing: this->flashing = true; break;
+	case DoorStatus::Open: this->set_value(1.0, true); break;
+	case DoorStatus::Closed: case DoorStatus::Disabled: this->set_value(0.0, true); break;
+	case DoorStatus::Default: {
+		if (this->door == nullptr) {
+			this->set_value(0.0, true);
+		}
+	}; break;
 	}
 }
 
