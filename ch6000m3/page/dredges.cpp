@@ -16,6 +16,7 @@
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/device/draglet.hpp"
 
+#include "schema/ai_metrics.hpp"
 #include "schema/ai_dredges.hpp"
 #include "schema/ai_pumps.hpp"
 #include "schema/ai_valves.hpp"
@@ -170,17 +171,13 @@ protected:
 	}
 
 	template<class C, typename E>
-	void load_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius, bool details) {
+	void load_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
 			ws[id] = this->master->insert_one(new Credit<C, E>(radius), id);
 
 			this->load_label(this->labels, id, this->caption_color);
 			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
 			this->speeds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("mpm"), id);
-
-			if (details && (id != id0)) {
-				this->load_percentage(this->progresses, id);
-			}
 		}
 	}
 
@@ -275,7 +272,6 @@ protected: // never delete these graphlets manually.
 	std::map<DS, Credit<Dimensionlet, DS>*> degrees;
 	std::map<DS, Credit<Dimensionlet, DS>*> lengths;
 	std::map<DS, Credit<Dimensionlet, DS>*> speeds;
-	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	
 protected:
 	CanvasTextFormat^ caption_font;
@@ -301,7 +297,7 @@ public:
 
 public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->overflowpipe->set_value(RealData(DB203, 55U));
+		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
 
 		this->progresses[DS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
@@ -434,7 +430,7 @@ public:
 			this->load_cylinders(this->cylinders, DS::PSHPDP, DS::SBHPDP, cylinder_height, 0.0, 20.0, "bar");
 			this->load_cylinders(this->cylinders, DS::PSHPVP, DS::SBHPVP, cylinder_height, -2.0, 2.0, "bar");
 
-			this->load_winches(this->winches, DS::psTrunnion, DS::sbDragHead, winch_radius, false);
+			this->load_winches(this->winches, DS::psTrunnion, DS::sbDragHead, winch_radius);
 		}
 
 		{ // load drags
@@ -632,6 +628,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Circlelet, DS>*> suctions;
 	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
 	std::map<DS, Credit<DensitySpeedmeterlet, DS>*> dfmeters;
+	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
 
@@ -671,6 +668,10 @@ public:
 			this->pressures[DS::psTrunnion]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::CC);
 			this->pressures[DS::psIntermediate]->set_value(RealData(DB203, pump_B_pressure), GraphletAnchor::CC);
 			this->pressures[DS::psDragHead]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::CC);
+
+			this->rc_speeds[DS::psIntermediate]->set_value(RealData(DB203, winch_ps_intermediate_remote_speed), GraphletAnchor::CC);
+			this->rc_speeds[DS::psDragHead]->set_value(RealData(DB203, winch_ps_draghead_remote_speed), GraphletAnchor::CC);
+
 			this->set_compensator(DS::PSWC, DB203, this->address->compensator_length, GraphletAnchor::LC);
 
 			this->Alets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_A_pressure), GraphletAnchor::LB);
@@ -683,6 +684,10 @@ public:
 			this->pressures[DS::sbTrunnion]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::CC);
 			this->pressures[DS::sbIntermediate]->set_value(RealData(DB203, pump_G_pressure), GraphletAnchor::CC);
 			this->pressures[DS::sbDragHead]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::CC);
+
+			this->rc_speeds[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_remote_speed), GraphletAnchor::CC);
+			this->rc_speeds[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_remote_speed), GraphletAnchor::CC);
+
 			this->set_compensator(DS::SBWC, DB203, this->address->compensator_length, GraphletAnchor::RC);
 
 			this->Alets[DS::sbTrunnion]->set_value(RealData(DB203, winch_sb_trunnion_A_pressure), GraphletAnchor::RB);
@@ -820,7 +825,7 @@ public:
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PS, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_radius);
-			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius, true);
+			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::psTrunnion, DS::psDragHead, DS::C, "bar");
 
@@ -828,7 +833,7 @@ public:
 		} else {
 			this->load_draghead(this->dragheads, DS::SB, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
-			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius, true);
+			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::sbTrunnion, DS::sbDragHead, DS::F, "bar");
 
@@ -867,9 +872,9 @@ public:
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB, txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LT, txt_gapsize);
 
-				if (this->progresses.find(id) != this->progresses.end()) {
-					this->master->move_to(this->progresses[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
-					this->master->move_to(this->lengths[id], this->progresses[id], GraphletAnchor::CB, GraphletAnchor::CT);
+				if (this->rc_speeds.find(id) != this->rc_speeds.end()) {
+					this->master->move_to(this->rc_speeds[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
+					this->master->move_to(this->lengths[id], this->rc_speeds[id], GraphletAnchor::CB, GraphletAnchor::CT);
 				} else {
 					this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
 				}
@@ -899,9 +904,9 @@ public:
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB, -txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RT, -txt_gapsize);
 
-				if (this->progresses.find(id) != this->progresses.end()) {
-					this->master->move_to(this->progresses[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
-					this->master->move_to(this->lengths[id], this->progresses[id], GraphletAnchor::CB, GraphletAnchor::CT);
+				if (this->rc_speeds.find(id) != this->rc_speeds.end()) {
+					this->master->move_to(this->rc_speeds[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
+					this->master->move_to(this->lengths[id], this->rc_speeds[id], GraphletAnchor::CB, GraphletAnchor::CT);
 				} else {
 					this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
 				}
@@ -1010,6 +1015,17 @@ private:
 		}
 	}
 
+	template<class C, typename E>
+	void load_detailed_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
+		this->load_winches(ws, id0, idn, radius);
+
+		for (E id = id0; id <= idn; id++) {
+			if (id != id0) {
+				this->load_percentage(this->rc_speeds, id);
+			}
+		}
+	}
+
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, E lbl0, Platform::String^ unit) {
 		Platform::String^ A = _speak("Alet");
@@ -1113,6 +1129,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Gantrylet, DS>*> lines;
 	std::map<DS, Credit<Dimensionlet, DS>*> Alets;
 	std::map<DS, Credit<Dimensionlet, DS>*> Blets;
+	std::map<DS, Credit<Percentagelet, DS>*> rc_speeds;
 	std::map<DS, Credit<Rectanglet, DS>*> indicators;
 	std::map<DS, Credit<Rectanglet, DS>*> table_headers;
 

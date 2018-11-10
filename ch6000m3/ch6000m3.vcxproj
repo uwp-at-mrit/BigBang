@@ -325,6 +325,7 @@
     <ClInclude Include="page\dredges.hpp" />
     <ClInclude Include="schema\ai_doors.hpp" />
     <ClInclude Include="schema\ai_dredges.hpp" />
+    <ClInclude Include="schema\ai_metrics.hpp" />
     <ClInclude Include="schema\ai_pumps.hpp" />
     <ClInclude Include="schema\ai_valves.hpp" />
     <ClInclude Include="schema\di_doors.hpp" />

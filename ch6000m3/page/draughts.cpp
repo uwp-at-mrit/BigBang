@@ -8,6 +8,8 @@
 #include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 
+#include "schema/ai_metrics.hpp"
+
 #include "schema/do_devices.hpp"
 
 #include "decorator/page.hpp"
@@ -118,34 +120,35 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->overflowpipe->set_value(RealData(DB203, 55));
+		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value());
 
-		this->dimensions[DL::psBowDraft]->set_value(RealData(DB203, 31));
-		this->dimensions[DL::psSuctionDraft]->set_value(RealData(DB203, 32));
-		this->dimensions[DL::psSternDraft]->set_value(RealData(DB203, 102));
-
-		this->dimensions[DL::sbBowDraft]->set_value(RealData(DB203, 46));
-		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(DB203, 47));
-		this->dimensions[DL::sbSternDraft]->set_value(RealData(DB203, 103));
+		this->dimensions[DL::psSuctionDraft]->set_value(RealData(DB203, ps_suction_draught));
+		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(DB203, sb_suction_draught));
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->timeseries->set_value(DLTS::Draught, DBD(DB2, 192U));
+		this->timeseries->set_value(DLTS::Draught, DBD(DB2, average_draught));
 
-		this->dimensions[DL::BowDraft]->set_value(DBD(DB2, 164U));
-		this->dimensions[DL::SternDraft]->set_value(DBD(DB2, 188U));
-		this->dimensions[DL::psBowHeight]->set_value(DBD(DB2, 208U));
-		this->dimensions[DL::sbBowHeight]->set_value(DBD(DB2, 212U));
-		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, 216U));
-		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, 220U));
+		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
+		this->dimensions[DL::psSternDraft]->set_value(DBD(DB2, ps_fixed_stern_draught));
 
-		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
-		this->set_cylinder(DL::HopperHeight, DBD(DB2, 224U));
-		this->set_cylinder(DL::Displacement, DLTS::Displacement, DBD(DB2, 228U));
-		this->set_cylinder(DL::Loading, DLTS::Loading, DBD(DB2, 232U));
-		this->set_cylinder(DL::EarthWork, DLTS::EarthWork, DBD(DB2, 236U));
-		this->set_cylinder(DL::Vessel, DLTS::Vessel, DBD(DB2, 320U));
+		this->dimensions[DL::sbBowDraft]->set_value(DBD(DB2, sb_fixed_bow_draught));
+		this->dimensions[DL::sbSternDraft]->set_value(DBD(DB2, sb_fixed_stern_draught));
+
+		this->dimensions[DL::BowDraft]->set_value(DBD(DB2, fixed_bow_draught));
+		this->dimensions[DL::SternDraft]->set_value(DBD(DB2, fixed_stern_draught));
+		this->dimensions[DL::psBowHeight]->set_value(DBD(DB2, ps_bow_hopper_height));
+		this->dimensions[DL::sbBowHeight]->set_value(DBD(DB2, sb_bow_hopper_height));
+		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
+		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
+
+		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
+		this->set_cylinder(DL::HopperHeight, DBD(DB2, average_hopper_height));
+		this->set_cylinder(DL::Displacement, DLTS::Displacement, DBD(DB2, displacement_value));
+		this->set_cylinder(DL::Loading, DLTS::Loading, DBD(DB2, loading_value));
+		this->set_cylinder(DL::EarthWork, DLTS::EarthWork, DBD(DB2, earthwork_value));
+		this->set_cylinder(DL::Vessel, DLTS::Vessel, DBD(DB2, vessel_value));
 	}
 
 	void post_read_data(Syslog* logger) override {

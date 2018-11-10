@@ -7,6 +7,8 @@
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
+#include "schema/ai_metrics.hpp"
+
 #include "schema/ai_doors.hpp"
 #include "schema/di_doors.hpp"
 
@@ -188,16 +190,16 @@ public:
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->set_cylinder(HD::HopperHeight, DBD(DB2, 224U));
-		this->set_cylinder(HD::Displacement, DBD(DB2, 228U));
-		this->set_cylinder(HD::Loading, DBD(DB2, 232U));
-		this->set_cylinder(HD::EarthWork, DBD(DB2, 236U));
-		this->set_cylinder(HD::Vessel, DBD(DB2, 320U));
+		this->set_cylinder(HD::HopperHeight, DBD(DB2, average_hopper_height));
+		this->set_cylinder(HD::Displacement, DBD(DB2, displacement_value));
+		this->set_cylinder(HD::Loading, DBD(DB2, loading_value));
+		this->set_cylinder(HD::EarthWork, DBD(DB2, earthwork_value));
+		this->set_cylinder(HD::Vessel, DBD(DB2, vessel_value));
 
-		this->dimensions[HD::BowDraft]->set_value(DBD(DB2, 164U));
-		this->dimensions[HD::SternDraft]->set_value(DBD(DB2, 188U));
-		this->dimensions[HD::Trim]->set_value(DBD(DB2, 200U));
-		this->dimensions[HD::Heel]->set_value(DBD(DB2, 204U));
+		this->dimensions[HD::BowDraft]->set_value(DBD(DB2, fixed_bow_draught));
+		this->dimensions[HD::SternDraft]->set_value(DBD(DB2, fixed_stern_draught));
+		this->dimensions[HD::Trim]->set_value(DBD(DB2, trim_degrees));
+		this->dimensions[HD::Heel]->set_value(DBD(DB2, heel_degrees));
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {

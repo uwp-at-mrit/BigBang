@@ -140,6 +140,9 @@
     <ClInclude Include="schema\do_devices.hpp">
       <Filter>schema</Filter>
     </ClInclude>
+    <ClInclude Include="schema\ai_metrics.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
