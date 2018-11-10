@@ -4,15 +4,10 @@ namespace WarGrey::SCADA {
 	// DB203, real data
 	static unsigned int overflow_pipe_progress = 55U;
 
-	static unsigned int ps_bow_draught = 30U;
-	static unsigned int ps_suction_draught = 31U;
-	static unsigned int ps_stern_draught = 102U;
-
-	static unsigned int sb_bow_draught = 46U;
-	static unsigned int sb_suction_draught = 47U;
-	static unsigned int sb_stern_draught = 103U;
-
 	// DB2, DBD
+	static unsigned int ps_suction_draught = 20U; // same as the ps suction depth 
+	static unsigned int sb_suction_draught = 96U; // same as the sb suction draught
+
 	static unsigned int ps_fixed_bow_draught = 156U;
 	static unsigned int sb_fixed_bow_draught = 160U;
 	static unsigned int fixed_bow_draught = 164U;

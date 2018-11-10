@@ -698,7 +698,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 		this->numpad->show(false);
-
+		
 		this->set_caret_owner(unmasked_graphlet);
 		if (unmasked_graphlet == nullptr) {
 			this->no_selected();
@@ -708,15 +708,19 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		case PointerUpdateKind::LeftButtonPressed: {
 			this->last_pointer_x = x;
 			this->last_pointer_y = y;
+			this->track_thickness = 1.0F;
 
-			if (unmasked_graphlet == nullptr) {
-				this->rubberband_x[0] = x;
-				this->rubberband_x[1] = y;
-				this->rubberband_y = this->rubberband_allowed ? (this->rubberband_x + 1) : nullptr;
-			} else {
-				this->rubberband_y = nullptr;
+#ifdef _DEBUG
+			this->figure_track = blank();
+#endif
 
-				if ((pdt == PointerDeviceType::Touch) && (this->hovering_graphlet != nullptr)) {
+			this->figure_points.clear();
+			this->figure_points.push_back(float2(x, y));
+
+			if (pdt == PointerDeviceType::Touch) {
+				this->track_thickness = 8.0F;
+
+				if (this->hovering_graphlet != nullptr) {
 					GraphletInfo* info = GRAPHLET_INFO(this->hovering_graphlet);
 					float local_x = x - info->x;
 					float local_y = y - info->y;
@@ -741,26 +745,28 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 	return true;
 }
 
-bool Planet::on_pointer_moved(float x, float y, VectorOfPointerPoint^ pps, PointerDeviceType pdt, PointerUpdateKind puk) {
+bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
 	bool handled = false;
 
-	/** WARNING
-	 * Touchscreen will never produce this event.
-	 */
+	if (this->figure_points.size() > 0) {
+#ifdef _DEBUG
+		auto segment = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
-	if (puk == PointerUpdateKind::LeftButtonPressed) {
-		if (this->rubberband_y == nullptr) {
-			// TODO: implement interactive moving
-			//this->move(nullptr, x - this->last_pointer_x, y - this->last_pointer_y);
-			this->last_pointer_x = x;
-			this->last_pointer_y = y;
-		} else {
-			(*this->rubberband_x) = x;
-			(*this->rubberband_y) = y;
-		}
+		segment->BeginFigure(this->last_pointer_x, this->last_pointer_y);
+		segment->AddLine(x, y);
+		segment->EndFigure(CanvasFigureLoop::Open);
+
+		this->figure_track = geometry_union(this->figure_track, CanvasGeometry::CreatePath(segment));
+#endif
+
+		this->last_pointer_x = x;
+		this->last_pointer_y = y;
+		this->figure_points.push_back(float2(x, y));
 
 		handled = true;
-	} else {
+	}
+
+	if (puk != PointerUpdateKind::LeftButtonPressed) {
 		// NOTE non-left clicking always produces PointerUpdateKind::Other
 		if (this->numpad->shown()) {
 			float local_x = x - keyboard_x;
@@ -817,6 +823,12 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	 *  but our API may not follow the devices.
 	 */
 
+#ifdef _DEBUG
+	this->figure_track = nullptr;
+	this->figure_points.clear();
+#endif
+
+
 	if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		float local_x = x - keyboard_x;
 		float local_y = y - keyboard_y;
@@ -835,9 +847,6 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 			this->numpad->on_right_tap(local_x, local_y);
 		}; break;
 		}
-	} else if (this->rubberband_y != nullptr) {
-		this->rubberband_y = nullptr;
-		// TODO: select all touched graphlets
 	} else {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
@@ -1080,19 +1089,11 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 		} while (child != this->head_graphlet);
 	}
 
-	if (this->rubberband_y != nullptr) {
-		ICanvasBrush^ rubberband_color = Colours::Highlight;
-
-		float left = min(this->last_pointer_x, (*this->rubberband_x));
-		float top = min(this->last_pointer_y, (*this->rubberband_y));
-		float width = abs((*this->rubberband_x) - this->last_pointer_x);
-		float height = abs((*this->rubberband_y) - this->last_pointer_y);
-
-		rubberband_color->Opacity = 0.32F;
-		ds->FillRectangle(left, top, width, height, rubberband_color);
-		rubberband_color->Opacity = 1.00F;
-		ds->DrawRectangle(left, top, width, height, rubberband_color);
+#ifdef _DEBUG
+	if (this->figure_track != nullptr) {
+		ds->DrawGeometry(this->figure_track, Colours::Highlight, this->track_thickness);
 	}
+#endif
 
 	for (IPlanetDecorator* decorator : this->decorators) {
 #ifdef _DEBUG

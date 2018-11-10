@@ -157,8 +157,6 @@ public:
 
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
-		this->set_valves_status(RS::D003, DB4, gate_valve_D03_feedback, motor_valve_D03_feedback, DB205, gate_valve_D03_status, motor_valve_D03_status);
-		this->set_valves_status(RS::D004, DB4, gate_valve_D04_feedback, motor_valve_D04_feedback, DB205, gate_valve_D04_status, motor_valve_D04_status);
 		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
 		this->set_valves_status(RS::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status, motor_valve_D06_status);
 		this->set_valves_status(RS::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status, motor_valve_D07_status);
@@ -175,6 +173,12 @@ public:
 		this->set_valves_status(RS::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status, motor_valve_D24_status);
 		this->set_valves_status(RS::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status, motor_valve_D25_status);
 		
+		DI_gate_valve(this->gvalves[RS::D003], DB205, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
+		DI_motor_valve(this->mvalves[RS::D003], DB4, motor_valve_D03_feedback, DB205, motor_valve_D03_status);
+
+		DI_gate_valve(this->gvalves[RS::D004], DB205, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
+		DI_motor_valve(this->mvalves[RS::D004], DB4, motor_valve_D04_feedback, DB205, motor_valve_D04_status);
+
 		DI_hopper_door(this->uhdoors[RS::PS1], DB205, upper_door_PS1_status);
 		DI_hopper_door(this->uhdoors[RS::PS2], DB205, upper_door_PS2_status);
 		DI_hopper_door(this->uhdoors[RS::PS3], DB205, upper_door_PS3_status);

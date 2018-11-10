@@ -255,6 +255,7 @@ public:
 
 		this->dimension_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
 		this->dimension_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->dimension_style.precision = 0;
 	}
  
 public:

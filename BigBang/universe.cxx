@@ -598,7 +598,6 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 		} else {
 			args->Handled = this->recent_planet->on_pointer_moved(
 				pp->Position.X, pp->Position.Y,
-				args->GetIntermediatePoints(this->canvas),
 				pdt, pp->Properties->PointerUpdateKind);
 		}
 	}
@@ -607,24 +606,21 @@ void UniverseDisplay::on_pointer_moved(Platform::Object^ sender, PointerRoutedEv
 }
 
 void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-	auto lt = this->figures.find(args->Pointer->PointerId);
-
-	if (lt != this->figures.end()) {
+	auto it = this->figures.find(args->Pointer->PointerId);
+	
+	if (it != this->figures.end()) {
 		this->canvas->ReleasePointerCapture(args->Pointer); // TODO: deal with PointerCaptureLost event;
 
 		if (this->recent_planet != nullptr) {
 			PointerPoint^ pp = args->GetCurrentPoint(this->canvas);
 			PointerDeviceType pdt = args->Pointer->PointerDeviceType;
-			PointerUpdateKind puk = lt->second;
-
-			this->figures.erase(lt);
 
 			if (std::isnan(this->figure_x0)) {
 				this->enter_critical_section();
-				args->Handled = this->recent_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, puk);
+				args->Handled = this->recent_planet->on_pointer_released(pp->Position.X, pp->Position.Y, pdt, it->second);
 				this->leave_critical_section();
 			} else {
-				if ((this->figures.size() == 1) || MENUED(args->KeyModifiers)) {
+				if ((this->figures.size() == 2) || MENUED(args->KeyModifiers)) {
 					this->on_translating_x();
 					this->figure_x0 = std::nanf("swipe");
 				}
@@ -632,6 +628,8 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 				args->Handled = true;
 			}
 		}
+
+		this->figures.erase(it);
 	}
 }
 

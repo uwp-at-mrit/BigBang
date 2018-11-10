@@ -1,6 +1,5 @@
 #pragma once
 
-#include "universe.hxx"
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "enum.hpp"

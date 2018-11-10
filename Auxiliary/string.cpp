@@ -64,13 +64,13 @@ size_t WarGrey::SCADA::wstrlen(const wchar_t* content) {
 }
 
 /*************************************************************************************************/
-Platform::String^ WarGrey::SCADA::flstring(double value, unsigned int precision) {
-	return ((precision > 0)
+Platform::String^ WarGrey::SCADA::flstring(double value, int precision) {
+	return ((precision >= 0)
 		? make_wstring(make_wstring(L"%%.%dlf", precision)->Data(), value)
 		: value.ToString());
 }
 
-Platform::String^ WarGrey::SCADA::sstring(unsigned long long bytes, unsigned int precision) {
+Platform::String^ WarGrey::SCADA::sstring(unsigned long long bytes, int precision) {
 	static Platform::String^ units[] = { L"KB", L"MB", L"GB", L"TB" };
 	static unsigned int max_idx = sizeof(units) / sizeof(Platform::String^) - 1;
 	Platform::String^ size = bytes.ToString();

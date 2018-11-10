@@ -10,8 +10,6 @@
 #include "virtualization/numpad.hpp"
 
 namespace WarGrey::SCADA {
-	typedef Windows::Foundation::Collections::IVector<Windows::UI::Input::PointerPoint^> VectorOfPointerPoint;
-
 	private class IPlanetInfo abstract {
 	public:
 		virtual ~IPlanetInfo() noexcept {}
@@ -103,7 +101,7 @@ namespace WarGrey::SCADA {
 		virtual void set_caret_owner(IGraphlet* g) = 0;
 
 	public:
-		virtual bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
+		virtual bool on_pointer_moved(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
 			Windows::UI::Input::PointerUpdateKind puk)
 		{ return false; }
@@ -263,29 +261,36 @@ namespace WarGrey::SCADA {
 	public:
 		bool on_pointer_pressed(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk) override;
+			Windows::UI::Input::PointerUpdateKind puk)
+			override;
 
-		bool on_pointer_moved(float x, float y, WarGrey::SCADA::VectorOfPointerPoint^ pts,
+		bool on_pointer_moved(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk) override;
+			Windows::UI::Input::PointerUpdateKind puk)
+			override;
 
 		bool on_pointer_released(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk) override;
+			Windows::UI::Input::PointerUpdateKind puk)
+			override;
 
 		bool on_pointer_moveout(float x, float y,
 			Windows::Devices::Input::PointerDeviceType type,
-			Windows::UI::Input::PointerUpdateKind puk) override;
+			Windows::UI::Input::PointerUpdateKind puk)
+			override;
 
     private:
         void recalculate_graphlets_extent_when_invalid();
 		bool say_goodbye_to_the_hovering_graphlet(float x, float y);
 
     private:
+#ifdef _DEBUG
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ figure_track;
+#endif
+		std::list<Windows::Foundation::Numerics::float2> figure_points;
+		float track_thickness;
         float last_pointer_x;
         float last_pointer_y;
-        float rubberband_x[2];
-        float* rubberband_y;
         bool rubberband_allowed;
 
     private:

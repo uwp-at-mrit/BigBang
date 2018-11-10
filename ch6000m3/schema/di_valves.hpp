@@ -30,8 +30,6 @@ namespace WarGrey::SCADA {
 
 	static unsigned int gate_valve_D01_feedback = 279U;
 	static unsigned int gate_valve_D02_feedback = 273U;
-	static unsigned int gate_valve_D03_feedback = 279U;
-	static unsigned int gate_valve_D04_feedback = 257U;
 	static unsigned int gate_valve_D05_feedback = 259U;
 	static unsigned int gate_valve_D06_feedback = 261U;
 	static unsigned int gate_valve_D07_feedback = 289U;
@@ -40,8 +38,8 @@ namespace WarGrey::SCADA {
 	static unsigned int gate_valve_D10_feedback = 295U;
 	static unsigned int gate_valve_D11_feedback = 349U;
 	static unsigned int gate_valve_D12_feedback = 333U;
-	static unsigned int gate_valve_D13_feedback = 351U;
-	static unsigned int gate_valve_D14_feedback = 335U;
+	static unsigned int gate_valve_D13_feedback = 405U;
+	static unsigned int gate_valve_D14_feedback = 373U;
 	static unsigned int gate_valve_D15_feedback = 407U;
 	static unsigned int gate_valve_D16_feedback = 375U;
 	static unsigned int gate_valve_D17_feedback = 297U;
@@ -102,6 +100,9 @@ namespace WarGrey::SCADA {
 	static unsigned int butterfly_valve_HBV18_feedback = 239U;
 
 	// DB205, starts from 1
+	static unsigned int gate_valve_D03_feedback = 1645U;
+	static unsigned int gate_valve_D04_feedback = 1629U;
+
 	static unsigned int gate_valve_D01_status = 369U;
 	static unsigned int gate_valve_D02_status = 393U;
 	static unsigned int gate_valve_D03_status = 385U;

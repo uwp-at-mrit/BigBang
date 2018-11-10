@@ -122,18 +122,17 @@ public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value());
-
-		this->dimensions[DL::psSuctionDraft]->set_value(RealData(DB203, ps_suction_draught));
-		this->dimensions[DL::sbSuctionDraft]->set_value(RealData(DB203, sb_suction_draught));
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->timeseries->set_value(DLTS::Draught, DBD(DB2, average_draught));
 
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
+		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
 		this->dimensions[DL::psSternDraft]->set_value(DBD(DB2, ps_fixed_stern_draught));
 
 		this->dimensions[DL::sbBowDraft]->set_value(DBD(DB2, sb_fixed_bow_draught));
+		this->dimensions[DL::sbSuctionDraft]->set_value(DBD(DB2, sb_suction_draught));
 		this->dimensions[DL::sbSternDraft]->set_value(DBD(DB2, sb_fixed_stern_draught));
 
 		this->dimensions[DL::BowDraft]->set_value(DBD(DB2, fixed_bow_draught));

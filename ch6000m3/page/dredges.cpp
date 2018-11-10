@@ -342,8 +342,8 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		DI_gate_valve(this->valves[DS::D003], DB4, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
-		DI_gate_valve(this->valves[DS::D004], DB4, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
+		DI_gate_valve(this->valves[DS::D003], DB205, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
+		DI_gate_valve(this->valves[DS::D004], DB205, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
 		DI_gate_valve(this->valves[DS::D011], DB4, gate_valve_D11_feedback, DB205, gate_valve_D11_status);
 		DI_gate_valve(this->valves[DS::D012], DB4, gate_valve_D12_feedback, DB205, gate_valve_D12_status);
 		DI_gate_valve(this->valves[DS::D013], DB4, gate_valve_D13_feedback, DB205, gate_valve_D13_status);
