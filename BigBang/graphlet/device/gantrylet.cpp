@@ -65,13 +65,12 @@ Gantrylet::Gantrylet(GantryStatus default_status, float radius, float extent, do
 
 	circle_point(this->radius, degrees + 90.0, &wo_x, &wo_y);
 	
-	this->width = this->bottom_base_radius * this->base_extent_ratio + std::fabsf(wo_x) + this->pulley_radius + this->thickness;
+	this->width = this->bottom_base_radius * this->base_extent_ratio + std::fabsf(wo_x) + this->pulley_radius * 2.0F + this->thickness;
 	this->height = this->radius + this->bottom_base_radius + this->hat_radiusY + this->thickness;
 }
 
 void Gantrylet::construct() {
 	this->pulley = circle(this->pulley_radius);
-	this->hat = rounded_rectangle(-this->hat_radiusX, -this->hat_radiusY, this->hat_radiusX * 2.0F, this->hat_radiusY * 2.0F);
 	this->pivot_base = make_pivot_base(this->pivot_base_radius, this->base_extent_ratio, this->leftward);
 	this->bottom_base = make_pivot_base(this->bottom_base_radius, this->base_extent_ratio, this->leftward);
 
@@ -187,7 +186,7 @@ void Gantrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float hcx = bcx + this->hat_cxoff;
 	float hcy = y + this->hat_cy;
 	float pcx = hcx + this->pulley_radius;
-	float pcy = hcy + this->pulley_radius;
+	float pcy = hcy + this->pulley_radius + this->pulley_cyoff;
 	float mtcx = hcx - this->pivot_base_radius;
 	
 	if (this->leftward) {
@@ -213,18 +212,20 @@ void Gantrylet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	ds->FillGeometry(this->bottom_base, bcx, bcy, s.base_color);
 	ds->DrawGeometry(this->bottom_base, bcx, bcy, s.border_color, this->thickness);
 
-	ds->FillGeometry(hat, hcx, hcy, s.hat_color);
-	ds->DrawGeometry(hat, hcx, hcy, s.border_color, this->thickness);
+	ds->FillGeometry(this->hat, hcx, hcy, s.hat_color);
+	ds->DrawGeometry(this->hat, hcx, hcy, s.border_color, this->thickness);
 }
 
 void Gantrylet::make_hat(double ratio) {
+	auto hat = rounded_rectangle(-this->hat_radiusX, -this->hat_radiusY, this->hat_radiusX * 2.0F, this->hat_radiusY * 2.0F);
 	double this_degrees = this->degrees * ratio;
 	float wx, wy;
 
 	circle_point(this->radius, this_degrees + 90.0, &wx, &wy);
 
+	this->pulley_cyoff = this->hat_radiusX * sinf(degrees_to_radians(this_degrees));
 	this->hat_cxoff = std::fabsf(wx);
-	this->hat_cy = this->height - this->bottom_base_radius - std::fabsf(wy) - this->thickness;
-	this->hat = geometry_rotate(this->hat, this_degrees * (this->leftward ? -1.0 : 1.0), 0.0F, 0.0F);
-	this->hat_y = this->hat_cy - this->hat->ComputeBounds().Height * 0.5F + this->thickness * 0.5F;
+	this->hat_cy = this->height - this->bottom_base_radius - std::fabsf(wy) - this->thickness * 0.5F;
+	this->hat = geometry_rotate(hat, this_degrees * (this->leftward ? -1.0 : 1.0), 0.0F, 0.0F);
+	this->hat_y = this->hat_cy - this->hat->ComputeBounds().Height * 0.5F;
 }

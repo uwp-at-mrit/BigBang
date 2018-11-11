@@ -2,6 +2,11 @@
 
 namespace WarGrey::SCADA {
 	// DB203, real data
+	static unsigned int visor_tank_temperature = 18U;
+	static unsigned int master_tank_temperature = 19U;
+	static unsigned int visor_tank_level = 20U;
+	static unsigned int master_back_oil_pressure = 21U;
+
 	static unsigned int overflow_pipe_progress = 55U;
 
 	// DB2, DBD

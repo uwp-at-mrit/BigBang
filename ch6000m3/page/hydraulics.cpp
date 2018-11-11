@@ -18,9 +18,10 @@
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
 
-#include "schema/di_valves.hpp"
-
+#include "schema/ai_metrics.hpp"
 #include "schema/ai_pumps.hpp"
+
+#include "schema/di_valves.hpp"
 #include "schema/di_pumps.hpp"
 
 #include "schema/do_pumps.hpp"
@@ -99,9 +100,9 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->set_temperature(HS::Visor, RealData(DB203, 18U));
-		this->set_temperature(HS::Master, RealData(DB203, 19U));
-		this->station_pressure->set_value(RealData(DB203, 21U));
+		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
+		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
+		this->station_pressure->set_value(RealData(DB203, master_back_oil_pressure));
 
 		{ // pump pressures
 			GraphletAnchor psa = GraphletAnchor::LB;

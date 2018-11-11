@@ -51,6 +51,7 @@ namespace WarGrey::SCADA {
 		float bottom_base_radius;
 		float base_extent_ratio;
 		float pulley_radius;
+		float pulley_cyoff;
 		float hat_radiusX;
 		float hat_radiusY;
 		float hat_cxoff;

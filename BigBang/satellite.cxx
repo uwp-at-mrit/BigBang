@@ -114,14 +114,16 @@ void ISatellite::fill_satellite_padding(Thickness& padding) {
 }
 
 void ISatellite::show() {
-	FrameworkElement^ frame = dynamic_cast<FrameworkElement^>(Window::Current->Content);
-
-	if (frame != nullptr) {
+	try {
+		FrameworkElement^ frame = dynamic_cast<FrameworkElement^>(Window::Current->Content);
+		
 		if (this->orbit->FlyoutPresenterStyle == nullptr) {
 			configure_flyout(this->orbit, this);
 		}
 
 		this->orbit->ShowAt(frame);
+	} catch (Platform::Exception^ e) {
+		this->get_logger()->log_message(Log::Critical, e->Message);
 	}
 }
 

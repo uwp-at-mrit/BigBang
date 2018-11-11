@@ -7,6 +7,8 @@
 namespace WarGrey::SCADA {
 	class IPLCMaster;
 
+	private enum class PLCMasterMode { Debug, Release };
+
 	private class IPLCStatusListener {
 	public:
 		virtual void on_plc_connectivity_changed(WarGrey::SCADA::IPLCMaster* master, bool connected) {}

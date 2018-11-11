@@ -14,8 +14,8 @@ namespace WarGrey::SCADA {
 		bool surface_ready() override;
 
 	public:
-		void show();
 		void hide();
+		void show();
 
 	public:
 		virtual void fill_satellite_extent(float* width, float* height) = 0;
@@ -37,7 +37,7 @@ namespace WarGrey::SCADA {
 	};
 
 	template<class Master, typename ID>
-	private class ICreditSatellite abstract : public ISatellite {
+	private class ICreditSatellite abstract : public WarGrey::SCADA::ISatellite {
 	public:
 		ICreditSatellite(WarGrey::SCADA::Syslog* logger, Master* master, Platform::String^ caption, unsigned int initial_mode = 0U)
 			: ISatellite(logger, caption, initial_mode), pending(true), master(master) {}

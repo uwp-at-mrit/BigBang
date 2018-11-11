@@ -4,6 +4,8 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
+#include "satellite.hpp"
+
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
@@ -1034,12 +1036,7 @@ public:
 		} else if (visor != nullptr) {
 			menu_popup(this->visor_op, g, local_x, local_y);
 		} else if (indicator != nullptr) {
-			PLCMaster* plc = this->master->get_plc_device();
-
-			if (plc->connected()) {
-				//bool okay = (indicator->get_color() == checked_color);
-				plc->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
-			}
+			this->master->get_plc_device()->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
 		}
 	}
 
@@ -1260,7 +1257,7 @@ DredgesPage::~DredgesPage() {
 
 void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
-
+	
 	if (db != nullptr) {
 		{ // load graphlets
 			this->change_mode(DSMode::Dashboard);

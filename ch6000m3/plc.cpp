@@ -96,8 +96,7 @@ float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* logger, MasterMode mode)
-	: MRMaster(logger, MRIT_PORT), mode(mode), last_sending_time(-1L) {}
+PLCMaster::PLCMaster(Syslog* logger, PLCMasterMode mode) : MRMaster(logger, mode, MRIT_PORT), last_sending_time(-1L) {}
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->last_sending_time != uptime) {
@@ -106,30 +105,12 @@ void PLCMaster::send_scheduled_request(long long count, long long interval, long
 	}
 }
 
-Platform::String^ PLCMaster::device_hostname() {
-	Platform::String^ name = MRMaster::device_hostname();
-
-	if (this->mode == MasterMode::Debug) {
-		name += "[Debug]";
-	}
-
-	return name;
-}
-
 void PLCMaster::send_setting(uint16 db, uint16 address, float datum) {
-	if (this->mode == MasterMode::Release) {
-		this->write_analog_quantity(db, address, datum);
-	} else {
-		this->get_logger()->log_message(Log::Info, L"SET DBA%d = %f, 1.%d", db, datum, address);
-	}
+	this->write_analog_quantity(db, address, datum);
 }
 
 void PLCMaster::send_command(uint8 idx, uint8 bidx) {
-	if (this->mode == MasterMode::Release) {
-		this->write_digital_quantity((uint16)300U, idx, bidx, true);
-	} else {
-		this->get_logger()->log_message(Log::Info, L"EXE DB%d.DBX%d.%d", 300U, idx, bidx);
-	}
+	this->write_digital_quantity((uint16)300U, idx, bidx, true);
 }
 
 void PLCMaster::send_command(uint16 index_p1) {
