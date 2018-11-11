@@ -19,13 +19,19 @@
 #include "graphlet/dashboard/thermometerlet.hpp"
 
 #include "schema/di_valves.hpp"
+
 #include "schema/ai_pumps.hpp"
 #include "schema/di_pumps.hpp"
+
 #include "schema/do_pumps.hpp"
+#include "schema/do_devices.hpp"
 
 #include "decorator/page.hpp"
 
 using namespace WarGrey::SCADA;
+
+using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -33,6 +39,9 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
+
+private enum class HSGroup { MasterPumps, PSPumps, SBPumps, VisorPumps, _ };
+private enum class HSGHOperation { Start, Stop, Cancel, _ };
 
 private enum class HSPOperation { Start, Stop, Reset, _ };
 private enum class HSHOperation { Start, Stop, Cancel, Auto, _ };
@@ -76,7 +85,8 @@ private enum class HS : unsigned int {
 private class Hydraulics final
 	: public PLCConfirmation
 	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>
-	, public IMenuCommand<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*> {
+	, public IMenuCommand<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>
+	, public IGroupMenuCommand<HSGHOperation, HSGroup, PLCMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
@@ -107,8 +117,8 @@ public:
 			this->pressures[HS::G]->set_value(RealData(DB203, pump_G_pressure), sba);
 			this->pressures[HS::H]->set_value(RealData(DB203, pump_H_pressure), sba);
 
-			this->pressures[HS::I]->set_value(RealData(DB203, pump_I_pressure), GraphletAnchor::RB);
-			this->pressures[HS::J]->set_value(RealData(DB203, pump_J_pressure), GraphletAnchor::LB);
+			this->pressures[HS::I]->set_value(RealData(DB203, pump_I_pressure), GraphletAnchor::LB);
+			this->pressures[HS::J]->set_value(RealData(DB203, pump_J_pressure), GraphletAnchor::RB);
 		}
 	}
 
@@ -240,12 +250,16 @@ public:
 	}
 
 	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) override {
-		switch (cmd) {
-		case HSHOperation::Start:  plc->send_command(665U); break;
-		case HSHOperation::Stop:   plc->send_command(666U); break;
-		case HSHOperation::Cancel: plc->send_command(667U); break;
-		case HSHOperation::Auto:   plc->send_command(668U); break;
-		}
+		plc->send_command(DO_tank_heater_command(cmd));
+	}
+
+public:
+	bool can_execute(HSGHOperation cmd, HSGroup group, PLCMaster* plc) override {
+		return plc->connected();
+	}
+
+	void execute(HSGHOperation cmd, HSGroup group, PLCMaster* plc) override {
+		plc->send_command(DO_hydraulic_pump_group_command(cmd, group));
 	}
 
 public:
@@ -291,8 +305,8 @@ public:
 		pTurtle->move_left(3, HS::SQk2)->move_left(8)->jump_back()->move_right(3, HS::SQk1)->move_right(2.5F, HS::Storage);
 		
 		pTurtle->jump_back(HS::Master)->jump_down(14, HS::Visor);
-		pTurtle->move_right(2)->move_down(5, HS::SQj)->move_down(3, HS::J)->move_down(3, HS::j);
-		pTurtle->jump_left(4, HS::i)->move_up(3, HS::I)->move_up(3, HS::SQi)->move_up(5)->move_right(2 /* HS::Visor */);
+		pTurtle->move_right(2)->move_down(5, HS::SQi)->move_down(3, HS::I)->move_down(3, HS::i);
+		pTurtle->jump_left(4, HS::j)->move_up(3, HS::J)->move_up(3, HS::SQj)->move_up(5)->move_right(2 /* HS::Visor */);
 		
 		this->station = this->master->insert_one(new Tracklet<HS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		
@@ -387,10 +401,10 @@ public:
 			default: {
 				cpt_dx = x0; cpt_dy = y0 + gheight * 3.0F; cpt_a = GraphletAnchor::CT;
 			
-				if (it->second->id == HS::J) {
+				if (it->second->id == HS::I) {
 					lbl_dx = x0 + pradius; lbl_dy = y0; lbl_a = GraphletAnchor::LT;
 					bar_dx = x0 + text_hspace; bar_dy = y0 + pradius; bar_a = GraphletAnchor::LT;
-				} else { // HS::I
+				} else { // HS::J
 					lbl_dx = x0 - pradius; lbl_dy = y0; lbl_a = GraphletAnchor::RT;
 					bar_dx = x0 - text_hspace; bar_dy = y0 + pradius; bar_a = GraphletAnchor::RT;
 				}
@@ -409,7 +423,7 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
-				case HS::SQ1: case HS::SQi: case HS::SQy: {
+				case HS::SQ1: case HS::SQj: case HS::SQy: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					lbl_dx = x0 - vradius + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				}; break;
@@ -452,6 +466,20 @@ public:
 				}
 			}
 		}
+	}
+
+public:
+	bool pumps_selected(HS id0, HS idn) {
+		bool okay = true;
+
+		for (HS id = id0; id <= idn; id++) {
+			if (!this->master->is_selected(this->pumps[id])) {
+				okay = false;
+				break;
+			}
+		}
+
+		return okay;
 	}
 
 private:
@@ -614,10 +642,15 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
+	this->grid = new GridDecorator();
+	
+	this->gmaster_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::MasterPumps, plc);
+	this->gps_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::PSPumps, plc);
+	this->gsb_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::SBPumps, plc);
+	this->gvisor_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::VisorPumps, plc);
 	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>(dashboard, plc);
 	this->heater_op = make_menu<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>(dashboard, plc);
-	this->grid = new GridDecorator();
-
+	
 	this->device->append_confirmation_receiver(dashboard);
 
 	{ // load decorators
@@ -700,6 +733,10 @@ bool HydraulicsPage::can_select(IGraphlet* g) {
 		|| ((heater != nullptr) && (heater->id == HS::Master)));
 }
 
+bool HydraulicsPage::can_select_multiple() {
+	return true;
+}
+
 void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
 	auto heater = dynamic_cast<Thermometerlet*>(g);
@@ -708,5 +745,21 @@ void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y)
 		menu_popup(this->pump_op, g, local_x, local_y);
 	} else if (heater != nullptr) {
 		menu_popup(this->heater_op, g, local_x, local_y);
+	}
+}
+
+void HydraulicsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		if (dashboard->pumps_selected(HS::Y, HS::K)) {
+			group_menu_popup(this->gmaster_op, this, x, y);
+		} else if (dashboard->pumps_selected(HS::C, HS::E)) {
+			group_menu_popup(this->gps_op, this, x, y);
+		} else if (dashboard->pumps_selected(HS::A, HS::H)) {
+			group_menu_popup(this->gsb_op, this, x, y);
+		} else if (dashboard->pumps_selected(HS::J, HS::I)) {
+			group_menu_popup(this->gvisor_op, this, x, y);
+		}
 	}
 }

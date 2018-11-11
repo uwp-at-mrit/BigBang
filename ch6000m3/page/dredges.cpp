@@ -50,6 +50,7 @@ private enum DSMode { WindowUI = 0, Dashboard };
 private enum class DSWOperation { Up, Down, Stop, HighSpeed, _ };
 private enum class DSGOperation { WindOut, WindUp, Stop, AllOut, AllUp, AllStop, _ };
 private enum class DSWCOperation { Charge, Discharge, Stop, Lock, Unlock, _ };
+private enum class DSDVOperation { Up, Down, Stop, _ };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
@@ -238,7 +239,7 @@ protected:
 	void set_draghead_angles(DS id, const uint8* db2, unsigned int idx) {
 		float visor_angle = DBD(db2, idx);
 
-		this->dragheads[id]->set_angles(visor_angle, 0.0);
+		this->dragheads[id]->set_angles(visor_angle - 90.0, 0.0);
 		this->degrees[id]->set_value(visor_angle, GraphletAnchor::CC);
 	}
 
@@ -641,7 +642,8 @@ private class Drags final
 	: public IDredgingSystem
 	, public IMenuCommand<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>
 	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>
-	, public IMenuCommand<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*> {
+	, public IMenuCommand<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*>
+	, public IMenuCommand<DSDVOperation, Credit<DragHeadlet, DS>, PLCMaster*> {
 public:
 	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
@@ -652,6 +654,7 @@ public:
 		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, master->get_plc_device());
 		this->gantry_op = make_menu<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>(this, master->get_plc_device());
 		this->compensator_op = make_menu<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*>(this, master->get_plc_device());
+		this->visor_op = make_menu<DSDVOperation, Credit<DragHeadlet, DS>, PLCMaster*>(this, master->get_plc_device());
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
@@ -758,7 +761,7 @@ public:
 			} else {
 				DI_gantry(this->gantries[DS::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
 			}
-
+			
 			this->set_gantry_virtual_action_status(DS::tVirtualUp, DB205, gantry_sb_trunnion_virtual_up_limited);
 			this->set_gantry_virtual_action_status(DS::tVirtualOut, DB205, gantry_sb_trunnion_virtual_out_limited);
 			this->set_gantry_virtual_action_status(DS::iVirtualUp, DB205, gantry_sb_intermediate_virtual_up_limited);
@@ -796,6 +799,16 @@ public:
 
 	void execute(DSWCOperation cmd, Credit<Compensatorlet, DS>* wc, PLCMaster* plc) override {
 		plc->send_command(DO_wave_compensator_command(cmd, (wc->id == DS::PSWC)));
+	}
+
+
+public:
+	bool can_execute(DSDVOperation cmd, Credit<DragHeadlet, DS>* visor, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(DSDVOperation cmd, Credit<DragHeadlet, DS>* visor, PLCMaster* plc) override {
+		plc->send_command(DO_visor_command(cmd, (visor->id == DS::PS)));
 	}
 
 public:
@@ -860,7 +873,7 @@ public:
 				this->pressures[DS::psTrunnion]->fill_extent(0.0F, 0.0F, nullptr, &vgapsize);
 
 				vgapsize = vgapsize * 2.0F + vinset;
-				this->master->move_to(gantry, this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+				this->master->move_to(gantry, this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC);
 				this->master->move_to(this->gantries[DS::psTrunnion], gantry, GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
 				this->master->move_to(this->gantries[DS::psDragHead], gantry, GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vgapsize);
 				this->reflow_winches(DS::PSWC, DS::psTrunnion, DS::psDragHead, GraphletAnchor::RC, GraphletAnchor::LC, vinset * 2.0F);
@@ -892,7 +905,7 @@ public:
 				this->pressures[DS::sbTrunnion]->fill_extent(0.0F, 0.0F, nullptr, &vgapsize);
 
 				vgapsize = vgapsize * 2.0F + vinset;
-				this->master->move_to(gantry, this->dragxys[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+				this->master->move_to(gantry, this->dragxys[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC);
 				this->master->move_to(this->gantries[DS::sbTrunnion], gantry, GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -vgapsize);
 				this->master->move_to(this->gantries[DS::sbDragHead], gantry, GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, +vgapsize);
 				this->reflow_winches(DS::SBWC, DS::sbTrunnion, DS::sbDragHead, GraphletAnchor::LC, GraphletAnchor::RC, vinset * -2.0F);
@@ -982,13 +995,15 @@ public:
 		return (select_settings
 			|| (dynamic_cast<Winchlet*>(g) != nullptr) 
 			|| (dynamic_cast<Gantrylet*>(g) != nullptr)
-			|| (dynamic_cast<Compensatorlet*>(g) != nullptr));
+			|| (dynamic_cast<Compensatorlet*>(g) != nullptr)
+			|| (dynamic_cast<DragHeadlet*>(g) != nullptr));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
 		auto winch = dynamic_cast<Winchlet*>(g);
 		auto gantry = dynamic_cast<Gantrylet*>(g);
 		auto compensator = dynamic_cast<Compensatorlet*>(g);
+		auto visor = dynamic_cast<Credit<DragHeadlet, DS>*>(g);
 		auto indicator = dynamic_cast<Credit<Rectanglet, DS>*>(g);
 
 		if (winch != nullptr) {
@@ -997,6 +1012,8 @@ public:
 			menu_popup(this->gantry_op, g, local_x, local_y);
 		} else if (compensator != nullptr) {
 			menu_popup(this->compensator_op, g, local_x, local_y);
+		} else if (visor != nullptr) {
+			menu_popup(this->visor_op, g, local_x, local_y);
 		} else if (indicator != nullptr) {
 			PLCMaster* plc = this->master->get_plc_device();
 
@@ -1142,6 +1159,7 @@ private:
 	MenuFlyout^ winch_op;
 	MenuFlyout^ gantry_op;
 	MenuFlyout^ compensator_op;
+	MenuFlyout^ visor_op;
 
 private:
 	DS DS_side;

@@ -78,6 +78,7 @@ public:
 		this->DisplayMode = SplitViewDisplayMode::Overlay;
 		this->IsPaneOpen = false;
 
+		this->PointerPressed += ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed);
 		this->PointerMoved += ref new PointerEventHandler(this, &CH6000m3::on_pointer_moved);
 	}
 
@@ -92,6 +93,21 @@ public:
 	}
 
 private:
+	void on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+		auto pt = args->GetCurrentPoint(this);
+		float x = pt->Position.X;
+
+		if (!pt->Properties->IsLeftButtonPressed) {
+			if (x <= 80.0F) {
+				this->IsPaneOpen = true;
+				args->Handled = true;
+			} else if (x > this->OpenPaneLength) {
+				this->IsPaneOpen = false;
+				args->Handled = true;
+			}
+		}
+	}
+	
 	void on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 		auto pt = args->GetCurrentPoint(this);
 		float x = pt->Position.X;

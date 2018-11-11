@@ -15,4 +15,18 @@ namespace WarGrey::SCADA {
 
 		return index;
 	}
+
+	template<typename OP>
+	uint16 DO_tank_heater_command(OP cmd) {
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::Start:  index = 665U; break;
+		case OP::Stop:   index = 666U; break;
+		case OP::Cancel: index = 667U; break;
+		case OP::Auto:   index = 668U; break;
+		}
+
+		return index;
+	}
 }

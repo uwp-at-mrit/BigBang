@@ -113,6 +113,7 @@ char WarGrey::SCADA::system_wifi_signal_strength(char defval_if_no_wifi) {
 
 	for (unsigned int i = 0; i < nics->Size; ++i) {
 		auto nic = nics->GetAt(i);
+
 		if (nic->IsWlanConnectionProfile) {
 			signal = nic->GetSignalBars()->Value;
 			break;
@@ -174,6 +175,7 @@ private:
 		}
 
 		this->report_available_storage_if_changed();
+		this->report_wifiinfo_if_changed();
 	}
 
 	void report_powerinfo(Battery^ sender, Platform::Object^ e) {
@@ -184,17 +186,21 @@ private:
 		}
 	}
 
-	void report_wifiinfo(WiFiAdapter^ sender, Platform::Object^ e) {
-		char signal = system_wifi_signal_strength();
-
-		for (auto listener : this->listeners) {
-			listener->on_wifi_signal_strength_changed(signal);
-		}
-	}
-
 	void report_brightness(BrightnessOverride^ bo, Platform::Object^ e) {
 		for (auto listener : this->listeners) {
 			listener->on_brightness_changed(bo->BrightnessLevel);
+		}
+	}
+
+	void report_wifiinfo_if_changed() {
+		char signal = system_wifi_signal_strength();
+
+		if (signal != this->last_wifi_strength) {
+			for (auto listener : this->listeners) {
+				listener->on_wifi_signal_strength_changed(signal);
+			}
+
+			this->last_wifi_strength = signal;
 		}
 	}
 
@@ -232,8 +238,7 @@ private:
 		BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
 	
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemStatus::report_powerinfo);
-		// WiFiAdapter::AvailableNetworksChanged += ref new WiFiUpdateHandler(this, &SystemStatus::report_wifiinfo);
-
+		
 		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemStatus::report_brightness);
 
 		this->clock = ref new DispatcherTimer();
@@ -253,6 +258,7 @@ private:
 
 private:
 	long long last_freespace = -1L;
+	char last_wifi_strength = -1;
 };
 
 void WarGrey::SCADA::register_system_status_listener(ISystemStatusListener* listener) {

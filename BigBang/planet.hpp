@@ -77,9 +77,11 @@ namespace WarGrey::SCADA {
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
+		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
 
 	public:
 		virtual void draw_visible_selection(Microsoft::Graphics::Canvas::CanvasDrawingSession^ args, float x, float y, float width, float height) = 0;
@@ -87,12 +89,13 @@ namespace WarGrey::SCADA {
 		virtual void add_selected(IGraphlet* g) = 0;
 		virtual void set_selected(IGraphlet* g) = 0;
 		virtual void no_selected() = 0;
+		virtual unsigned int count_selected() = 0;
 		virtual bool is_selected(IGraphlet* g) = 0;
 
 	public:
 		virtual bool can_interactive_move(IGraphlet* g, float local_x, float local_y) { return false; }
 		virtual bool can_select(IGraphlet* g) { return true; }
-		virtual bool can_select_multiple() { return true; }
+		virtual bool can_select_multiple() { return false; }
 		virtual void before_select(IGraphlet* g, bool on_or_off) {}
 		virtual void after_select(IGraphlet* g, bool on_or_off) {}
 		
@@ -240,6 +243,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) override;
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 		void on_elapse(long long count, long long interval, long long uptime) override;
 
@@ -249,6 +253,7 @@ namespace WarGrey::SCADA {
 		void add_selected(IGraphlet* g) override;
         void set_selected(IGraphlet* g) override;
         void no_selected() override;
+		unsigned int count_selected() override;
 		bool is_selected(IGraphlet* g) override;
 
 	public:
@@ -287,11 +292,8 @@ namespace WarGrey::SCADA {
 #ifdef _DEBUG
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ figure_track;
 #endif
-		std::list<Windows::Foundation::Numerics::float2> figure_points;
+		std::list<Windows::Foundation::Numerics::float2> figure_anchors;
 		float track_thickness;
-        float last_pointer_x;
-        float last_pointer_y;
-        bool rubberband_allowed;
 
     private:
         float graphlets_left;

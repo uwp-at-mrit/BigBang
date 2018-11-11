@@ -1,5 +1,4 @@
 #include "graphlet/bitmaplet.hpp"
-#include "planet.hpp"
 
 using namespace WarGrey::SCADA;
 

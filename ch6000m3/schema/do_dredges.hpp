@@ -98,4 +98,18 @@ namespace WarGrey::SCADA {
 
 		return index + offset;
 	}
+
+	template<typename E>
+	uint16 DO_visor_command(E cmd, bool ps) {
+		uint16 offset = 0U;
+		uint16 index = (ps ? 649U : 652U);
+
+		switch (cmd) {
+		case E::Up:   offset = 0U; break;
+		case E::Down: offset = 1U; break;
+		case E::Stop: offset = 2U; break;
+		}
+
+		return index + offset;
+	}
 }

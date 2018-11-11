@@ -574,7 +574,7 @@ void Planet::recalculate_graphlets_extent_when_invalid() {
 }
 
 void Planet::add_selected(IGraphlet* g) {
-	if (this->rubberband_allowed) {
+	if (this->can_select_multiple()) {
 		GraphletInfo* info = planet_graphlet_info(this, g);
 
 		if ((info != nullptr) && (!info->selected)) {
@@ -629,6 +629,26 @@ bool Planet::is_selected(IGraphlet* g) {
 	return selected;
 }
 
+unsigned int Planet::count_selected() {
+	unsigned int n = 0U;
+
+	if (this->head_graphlet != nullptr) {
+		IGraphlet* child = this->head_graphlet;
+
+		do {
+			GraphletInfo* info = GRAPHLET_INFO(child);
+
+			if (info->selected && unsafe_graphlet_unmasked(info, this->mode)) {
+				n += 1U;
+			}
+
+			child = info->next;
+		} while (child != this->head_graphlet);
+	}
+
+	return n;
+}
+
 IGraphlet* Planet::get_focus_graphlet() {
 	return (this->graphlet_unmasked(this->focused_graphlet) ? this->focused_graphlet : nullptr);
 }
@@ -670,24 +690,32 @@ bool Planet::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
+void Planet::on_swipe(IGraphlet* g, float local_x, float local_y) {
+	GraphletInfo* info = GRAPHLET_INFO(g);
+
+	if (!info->selected) {
+		if (this->can_select(g)) {
+			if (this->can_select_multiple()) {
+				unsafe_add_selected(this, g, info);
+			}
+		}
+	}
+}
+
 void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 	if (g != nullptr) {
 		GraphletInfo* info = GRAPHLET_INFO(g);
 
-		if (this->can_select(g)) {
-			if (!info->selected) {
-				if (this->rubberband_allowed) {
-					unsafe_add_selected(this, g, info);
-				} else {
-					unsafe_set_selected(this, g, info);
+		if (!info->selected) {
+			if (this->can_select(g)) {
+				unsafe_set_selected(this, g, info);
 
-					if (g->handles_events()) {
-						this->set_caret_owner(g);
-					}
+				if (g->handles_events()) {
+					this->set_caret_owner(g);
 				}
+			} else {
+				this->no_selected();
 			}
-		} else {
-			this->no_selected();
 		}
 	}
 }
@@ -700,22 +728,18 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		this->numpad->show(false);
 		
 		this->set_caret_owner(unmasked_graphlet);
-		if (unmasked_graphlet == nullptr) {
-			this->no_selected();
-		}
+		this->no_selected();
 
 		switch (puk) {
 		case PointerUpdateKind::LeftButtonPressed: {
-			this->last_pointer_x = x;
-			this->last_pointer_y = y;
 			this->track_thickness = 1.0F;
 
 #ifdef _DEBUG
 			this->figure_track = blank();
 #endif
 
-			this->figure_points.clear();
-			this->figure_points.push_back(float2(x, y));
+			this->figure_anchors.clear();
+			this->figure_anchors.push_back(float2(x, y));
 
 			if (pdt == PointerDeviceType::Touch) {
 				this->track_thickness = 8.0F;
@@ -748,20 +772,33 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
 	bool handled = false;
 
-	if (this->figure_points.size() > 0) {
+	if (!this->figure_anchors.empty()) {
+		float2 last_anchor = this->figure_anchors.back();
+		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
+
+		if (unmasked_graphlet != nullptr) {
+			if (unmasked_graphlet != nullptr) {
+				GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
+				float local_x = x - info->x;
+				float local_y = y - info->y;
+
+				this->on_swipe(unmasked_graphlet, local_x, local_y);
+			}
+		}
+
 #ifdef _DEBUG
 		auto segment = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 
-		segment->BeginFigure(this->last_pointer_x, this->last_pointer_y);
+		segment->BeginFigure(last_anchor.x, last_anchor.y);
 		segment->AddLine(x, y);
 		segment->EndFigure(CanvasFigureLoop::Open);
 
 		this->figure_track = geometry_union(this->figure_track, CanvasGeometry::CreatePath(segment));
 #endif
 
-		this->last_pointer_x = x;
-		this->last_pointer_y = y;
-		this->figure_points.push_back(float2(x, y));
+		if ((x != last_anchor.x) || (y != last_anchor.y)) {
+			this->figure_anchors.push_back(float2(x, y));
+		}
 
 		handled = true;
 	}
@@ -823,12 +860,6 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	 *  but our API may not follow the devices.
 	 */
 
-#ifdef _DEBUG
-	this->figure_track = nullptr;
-	this->figure_points.clear();
-#endif
-
-
 	if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		float local_x = x - keyboard_x;
 		float local_y = y - keyboard_y;
@@ -849,58 +880,68 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 		}
 	} else {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
+		size_t anchor_count = this->figure_anchors.size();
+		
+		if (anchor_count == 1) {
+			if (unmasked_graphlet != nullptr) {
+				GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
+				float local_x = x - info->x;
+				float local_y = y - info->y;
 
-		if (unmasked_graphlet != nullptr) {
-			GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
-			float local_x = x - info->x;
-			float local_y = y - info->y;
+				switch (puk) {
+				case PointerUpdateKind::LeftButtonReleased:
+				case PointerUpdateKind::LeftButtonPressed: {
+					if (unmasked_graphlet->handles_events()) {
+						unmasked_graphlet->on_tap(local_x, local_y);
 
-			switch (puk) {
-			case PointerUpdateKind::LeftButtonReleased:
-			case PointerUpdateKind::LeftButtonPressed: {
-				if (unmasked_graphlet->handles_events()) {
-					unmasked_graphlet->on_tap(local_x, local_y);
+						if (pdt == PointerDeviceType::Touch) {
+							unmasked_graphlet->on_goodbye(local_x, local_y);
+						}
+					}
+
+					this->on_tap(unmasked_graphlet, local_x, local_y);
+
+					if (info->selected) {
+						this->on_tap_selected(unmasked_graphlet, local_x, local_y);
+					}
 
 					if (pdt == PointerDeviceType::Touch) {
-						unmasked_graphlet->on_goodbye(local_x, local_y);
+						this->on_goodbye(unmasked_graphlet, local_x, local_y);
 					}
-				}
+				}; break;
+				case PointerUpdateKind::RightButtonReleased:
+				case PointerUpdateKind::RightButtonPressed: {
+					if (unmasked_graphlet->handles_events()) {
+						unmasked_graphlet->on_right_tap(local_x, local_y);
+					}
 
-				this->on_tap(unmasked_graphlet, local_x, local_y);
-
-				if (info->selected) {
-					this->on_tap_selected(unmasked_graphlet, local_x, local_y);
+					// NOTE: In macOS, Control + clicking produces a right clicking
+					this->on_right_tap(unmasked_graphlet, local_x, local_y);
+				} break;
 				}
-
-				if (pdt == PointerDeviceType::Touch) {
-					this->on_goodbye(unmasked_graphlet, local_x, local_y);
-				}
-			} break;
-			case PointerUpdateKind::RightButtonReleased:
-			case PointerUpdateKind::RightButtonPressed: {
-				// NOTE: In macOS, Control + clicking produces a right clicking
-				if (unmasked_graphlet->handles_events()) {
-					unmasked_graphlet->on_right_tap(local_x, local_y);
-				}
-
-				this->on_right_tap(unmasked_graphlet, local_x, local_y);
-			} break;
 			}
+
+			{ // Planet itself also has an opportunity to handle events directly.
+				switch (puk) {
+				case PointerUpdateKind::LeftButtonReleased:
+				case PointerUpdateKind::LeftButtonPressed: {
+					this->on_tap(nullptr, x, y);
+				} break;
+				case PointerUpdateKind::RightButtonReleased:
+				case PointerUpdateKind::RightButtonPressed: {
+					// NOTE: In macOS, Control + clicking produces a right clicking
+					this->on_right_tap(nullptr, x, y);
+				} break;
+				}
+			}
+		} else {
+			this->on_gesture(this->figure_anchors, x, y);
 		}
 
-		{ // Planet itself also has an opportunity to handle events directly.
-			switch (puk) {
-			case PointerUpdateKind::LeftButtonReleased:
-			case PointerUpdateKind::LeftButtonPressed: {
-				this->on_tap(nullptr, x, y);
-			} break;
-			case PointerUpdateKind::RightButtonReleased:
-			case PointerUpdateKind::RightButtonPressed: {
-				// NOTE: In macOS, Control + clicking produces a right clicking
-				this->on_right_tap(nullptr, x, y);
-			} break;
-			}
-		}
+#ifdef _DEBUG
+		this->figure_track = nullptr;
+#endif
+		this->figure_anchors.clear();
 	}
 
 	return true;

@@ -2,10 +2,6 @@
 
 #include "decorator/border.hpp"
 
-#include "planet.hpp"
-#include "paint.hpp"
-#include "brushes.hxx"
-
 using namespace WarGrey::SCADA;
 
 using namespace Microsoft::Graphics::Canvas;

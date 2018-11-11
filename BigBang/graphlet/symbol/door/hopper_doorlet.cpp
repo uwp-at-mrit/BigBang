@@ -48,13 +48,13 @@ void HopperDoorlet::prepare_style(DoorStatus state, DoorStyle& s) {
 		CAS_SLOT(s.disable_color, Colours::Firebrick);
 	}; break;
 	case DoorStatus::Open: {
-		CAS_SLOT(s.depth_color, Colours::DimGray);
+		CAS_SLOT(s.depth_color, Colours::LightGray);
 	} break;
 	case DoorStatus::Opening: {
 		CAS_SLOT(s.border_hlcolor, Colours::Green);
 	}; break;
 	case DoorStatus::Closed: {
-		CAS_SLOT(s.depth_color, Colours::LightGray);
+		CAS_SLOT(s.depth_color, Colours::DarkGray);
 	}; break;
 	case DoorStatus::Closing: {
 		CAS_SLOT(s.border_hlcolor, Colours::Yellow);

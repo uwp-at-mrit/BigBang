@@ -58,7 +58,7 @@ namespace WarGrey::SCADA {
 	static unsigned int gantry_ps_draghead_virtual_up_limited = 2045U;
 	static unsigned int gantry_ps_draghead_virtual_out_limited = 2046U;
 
-	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(3377U, 1799U, false);
+	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(1377U, 1799U, false);
 	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(1385U, 1801U, false);
 	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(1393U, 1803U, true);
 	static unsigned int gantry_sb_trunnion_details = 1329U;
@@ -116,9 +116,12 @@ namespace WarGrey::SCADA {
 			target->set_status(GantryStatus::WindedOut);
 		} else if (DBX(db4, idx4_p1 + 0U)) {
 			target->set_status(GantryStatus::WindedUp);
+		} else if (DBX(db205, idx205_p1 - 1U)) {
+			target->set_status(GantryStatus::WindingOut);
+		} else if (DBX(db205, idx205_p1 + 0U)) {
+			target->set_status(GantryStatus::WindingUp);
 		} else {
-			target->set_status(DBX(db205, idx205_p1 - 1U), GantryStatus::WindingOut);
-			target->set_status(DBX(db205, idx205_p1 + 0U), GantryStatus::WindingUp);
+			target->set_status(GantryStatus::Default);
 		}
 	}
 

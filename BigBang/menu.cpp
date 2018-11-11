@@ -40,6 +40,17 @@ void WarGrey::SCADA::menu_append_command(MenuFlyout^ menu_background, ICommand^ 
 	menu_background->Items->Append(item);
 }
 
+void WarGrey::SCADA::group_menu_append_command(MenuFlyout^ menu_background, ICommand^ exe
+	, Platform::String^ group, Platform::String^ label, Platform::String^ maybe_tongue) {
+	auto item = ref new MenuFlyoutItem();
+	Platform::String^ tongue = ((maybe_tongue == nullptr) ? "menu" : maybe_tongue);
+
+	item->Command = exe;
+	item->Text = speak(group, tongue) + ": " + speak(label, tongue);
+
+	menu_background->Items->Append(item);
+}
+
 void WarGrey::SCADA::menu_popup(MenuFlyout^ m, IGraphlet* g, float local_x, float local_y, float xoff, float yoff) {
 	IPlanet* p = g->master();
 
@@ -58,6 +69,14 @@ void WarGrey::SCADA::menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, flo
 
 		the_planet_for_multiple_selected_targets = p;
 		the_specific_target = nullptr;
+		m->ShowAt(p->master()->canvas, position);
+	}
+}
+
+void WarGrey::SCADA::group_menu_popup(MenuFlyout^ m, IPlanet* p, float x, float y, float xoff, float yoff) {
+	if (p != nullptr) {
+		Point position(x, y);
+
 		m->ShowAt(p->master()->canvas, position);
 	}
 }

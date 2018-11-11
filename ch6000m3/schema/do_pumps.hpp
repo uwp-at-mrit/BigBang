@@ -35,6 +35,27 @@ namespace WarGrey::SCADA {
 		return index + offset;
 	}
 
+	template<typename OP, typename G>
+	uint16 DO_hydraulic_pump_group_command(OP cmd, G id) {
+		uint16 offset = 0U;
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::Start:  offset = 0U; break;
+		case OP::Stop:   offset = 1U; break;
+		case OP::Cancel: offset = 2U; break;
+		}
+
+		switch (id) {
+		case G::MasterPumps: index = 51U; break;
+		case G::SBPumps: index = 54U; break;
+		case G::PSPumps: index = 61U; break;
+		case G::VisorPumps: index = 64U; break;
+		}
+
+		return index + offset;
+	}
+
 	template<typename OP, typename E>
 	uint16 DO_gate_flushing_pump_command(OP cmd, E id) {
 		uint16 offset = 0U;

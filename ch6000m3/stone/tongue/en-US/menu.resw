@@ -231,4 +231,16 @@
   <data name="AllUp" xml:space="preserve">
     <value>Wind Up All</value>
   </data>
+  <data name="MasterPumps" xml:space="preserve">
+    <value>Master Hydraulics Pump Group</value>
+  </data>
+  <data name="PSPumps" xml:space="preserve">
+    <value>PS Hydraulics Pump Group</value>
+  </data>
+  <data name="SBPumps" xml:space="preserve">
+    <value>SB Hydraulics Pump Group</value>
+  </data>
+  <data name="VisorPumps" xml:space="preserve">
+    <value>Visor Hydraulics Pump Group</value>
+  </data>
 </root>

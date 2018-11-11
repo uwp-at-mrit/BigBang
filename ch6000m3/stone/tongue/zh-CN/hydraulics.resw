@@ -154,10 +154,10 @@
     <value>右舷液压系统</value>
   </data>
   <data name="I" xml:space="preserve">
-    <value>左耙唇</value>
+    <value>右耙唇</value>
   </data>
   <data name="J" xml:space="preserve">
-    <value>右耙唇</value>
+    <value>左耙唇</value>
   </data>
   <data name="M" xml:space="preserve">
     <value>备用</value>

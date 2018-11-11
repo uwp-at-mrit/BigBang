@@ -2,8 +2,7 @@
 
 #include "decorator/margin.hpp"
 
-#include "planet.hpp"
-#include "paint.hpp"
+#include "graphlet/primitive.hpp"
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
