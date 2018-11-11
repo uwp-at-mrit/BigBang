@@ -1176,6 +1176,10 @@ Platform::String^ IPlanet::name() {
 	return this->caption;
 }
 
+Platform::String^ IPlanet::display_name() {
+	return speak(this->caption);
+}
+
 IDisplay^ IPlanet::master() {
 	IDisplay^ display = nullptr;
 
@@ -1187,7 +1191,7 @@ IDisplay^ IPlanet::master() {
 }
 
 Platform::Object^ IPlanet::navigation_label() {
-	return speak(this->caption);
+	return this->display_name();
 }
 
 bool IPlanet::shown() {

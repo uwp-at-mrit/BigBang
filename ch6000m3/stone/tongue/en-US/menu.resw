@@ -243,4 +243,10 @@
   <data name="VisorPumps" xml:space="preserve">
     <value>Visor Hydraulics Pump Group</value>
   </data>
+  <data name="PSGantries" xml:space="preserve">
+    <value>PS Gantries</value>
+  </data>
+  <data name="SBGantries" xml:space="preserve">
+    <value>SB Gantries</value>
+  </data>
 </root>

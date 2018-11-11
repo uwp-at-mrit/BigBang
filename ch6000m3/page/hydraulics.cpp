@@ -41,7 +41,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum HSMode { WindowUI = 0, Dashboard };
 
 private enum class HSGroup { MasterPumps, PSPumps, SBPumps, VisorPumps, _ };
-private enum class HSGHOperation { Start, Stop, Cancel, _ };
+private enum class HSGPOperation { Start, Stop, Cancel, _ };
 
 private enum class HSPOperation { Start, Stop, Reset, _ };
 private enum class HSHOperation { Start, Stop, Cancel, Auto, _ };
@@ -86,7 +86,7 @@ private class Hydraulics final
 	: public PLCConfirmation
 	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>
 	, public IMenuCommand<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>
-	, public IGroupMenuCommand<HSGHOperation, HSGroup, PLCMaster*> {
+	, public IGroupMenuCommand<HSGPOperation, HSGroup, PLCMaster*> {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
@@ -254,11 +254,11 @@ public:
 	}
 
 public:
-	bool can_execute(HSGHOperation cmd, HSGroup group, PLCMaster* plc) override {
+	bool can_execute(HSGPOperation cmd, HSGroup group, PLCMaster* plc) override {
 		return plc->connected();
 	}
 
-	void execute(HSGHOperation cmd, HSGroup group, PLCMaster* plc) override {
+	void execute(HSGPOperation cmd, HSGroup group, PLCMaster* plc) override {
 		plc->send_command(DO_hydraulic_pump_group_command(cmd, group));
 	}
 
@@ -644,10 +644,10 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->dashboard = dashboard;
 	this->grid = new GridDecorator();
 	
-	this->gmaster_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::MasterPumps, plc);
-	this->gps_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::PSPumps, plc);
-	this->gsb_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::SBPumps, plc);
-	this->gvisor_op = make_group_menu<HSGHOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::VisorPumps, plc);
+	this->gmaster_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::MasterPumps, plc);
+	this->gps_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::PSPumps, plc);
+	this->gsb_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::SBPumps, plc);
+	this->gvisor_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::VisorPumps, plc);
 	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>(dashboard, plc);
 	this->heater_op = make_menu<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>(dashboard, plc);
 	

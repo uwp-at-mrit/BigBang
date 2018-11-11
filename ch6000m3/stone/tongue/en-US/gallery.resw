@@ -276,4 +276,10 @@
   <data name="Default" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="FastWindReady" xml:space="preserve">
+    <value>Ready to High-Speed Wind Up or Out</value>
+  </data>
+  <data name="WindReady" xml:space="preserve">
+    <value>Ready to Wind Up or Out</value>
+  </data>
 </root>

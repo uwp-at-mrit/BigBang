@@ -47,9 +47,11 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DSMode { WindowUI = 0, Dashboard };
 
+private enum class DSGroup { PSGantries, SBGantries };
+
 private enum class DSWOperation { Up, Down, Stop, HighSpeed, _ };
-private enum class DSGOperation { WindOut, WindUp, Stop, AllOut, AllUp, AllStop, _ };
-private enum class DSWCOperation { Charge, Discharge, Stop, Lock, Unlock, _ };
+private enum class DSGOperation { WindOut, WindUp, Stop, _ };
+private enum class DSWCOperation { Charge, Discharge, Stop, _ };
 private enum class DSDVOperation { Up, Down, Stop, _ };
 
 // WARNING: order matters
@@ -120,7 +122,9 @@ public:
 
 public:
 	virtual bool can_select(IGraphlet* g) { return false; }
+	virtual bool can_select_multiple() { return false; }
 	virtual void on_tap_selected(IGraphlet* g, float x, float y) {}
+	virtual void on_gesture(std::list<float2>& anchors, float x, float y) {}
 
 public:
 	virtual void draw_cables(CanvasDrawingSession^ ds, float Width, float Height) {}
@@ -309,8 +313,8 @@ public:
 		this->set_cylinder(DS::SBHPDP, RealData(DB203, this->sb_address->discharge_pressure));
 		this->set_cylinder(DS::SBHPVP, RealData(DB203, this->sb_address->vacuum_pressure));
 
-		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator_length, GraphletAnchor::LC);
-		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator_length, GraphletAnchor::RC);
+		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator, GraphletAnchor::LC);
+		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator, GraphletAnchor::RC);
 
 		this->pressures[DS::PS]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
 		this->pressures[DS::SB]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);
@@ -643,7 +647,8 @@ private class Drags final
 	, public IMenuCommand<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>
 	, public IMenuCommand<DSGOperation, Credit<Gantrylet, DS>, PLCMaster*>
 	, public IMenuCommand<DSWCOperation, Credit<Compensatorlet, DS>, PLCMaster*>
-	, public IMenuCommand<DSDVOperation, Credit<DragHeadlet, DS>, PLCMaster*> {
+	, public IMenuCommand<DSDVOperation, Credit<DragHeadlet, DS>, PLCMaster*>
+	, public IGroupMenuCommand<DSGOperation, DSGroup, PLCMaster*> {
 public:
 	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
@@ -658,9 +663,11 @@ public:
 
 		if (this->DS_side == DS::PS) {
 			this->address = make_ps_dredging_system_schema();
+			this->ggantries_op = make_group_menu<DSGOperation, DSGroup, PLCMaster*>(this, DSGroup::PSGantries, master->get_plc_device());
 			this->sign = -1.0F;
 		} else {
 			this->address = make_sb_dredging_system_schema();
+			this->ggantries_op = make_group_menu<DSGOperation, DSGroup, PLCMaster*>(this, DSGroup::SBGantries, master->get_plc_device());
 			this->sign = +1.0F;
 		}
 	}
@@ -675,7 +682,7 @@ public:
 			this->rc_speeds[DS::psIntermediate]->set_value(RealData(DB203, winch_ps_intermediate_remote_speed), GraphletAnchor::CC);
 			this->rc_speeds[DS::psDragHead]->set_value(RealData(DB203, winch_ps_draghead_remote_speed), GraphletAnchor::CC);
 
-			this->set_compensator(DS::PSWC, DB203, this->address->compensator_length, GraphletAnchor::LC);
+			this->set_compensator(DS::PSWC, DB203, this->address->compensator, GraphletAnchor::LC);
 
 			this->Alets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_A_pressure), GraphletAnchor::LB);
 			this->Blets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_B_pressure), GraphletAnchor::LT);
@@ -691,7 +698,7 @@ public:
 			this->rc_speeds[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_remote_speed), GraphletAnchor::CC);
 			this->rc_speeds[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_remote_speed), GraphletAnchor::CC);
 
-			this->set_compensator(DS::SBWC, DB203, this->address->compensator_length, GraphletAnchor::RC);
+			this->set_compensator(DS::SBWC, DB203, this->address->compensator, GraphletAnchor::RC);
 
 			this->Alets[DS::sbTrunnion]->set_value(RealData(DB203, winch_sb_trunnion_A_pressure), GraphletAnchor::RB);
 			this->Blets[DS::sbTrunnion]->set_value(RealData(DB203, winch_sb_trunnion_B_pressure), GraphletAnchor::RT);
@@ -793,6 +800,15 @@ public:
 	}
 
 public:
+	bool can_execute(DSGOperation cmd, DSGroup group, PLCMaster* plc) override {
+		return plc->connected();
+	}
+
+	void execute(DSGOperation cmd, DSGroup group, PLCMaster* plc) override {
+		plc->send_command(DO_gantry_group_command(cmd, group));
+	}
+
+public:
 	bool can_execute(DSWCOperation cmd, Credit<Compensatorlet, DS>* wc, PLCMaster* plc, bool acc_executable) override {
 		return plc->connected();
 	}
@@ -800,7 +816,6 @@ public:
 	void execute(DSWCOperation cmd, Credit<Compensatorlet, DS>* wc, PLCMaster* plc) override {
 		plc->send_command(DO_wave_compensator_command(cmd, (wc->id == DS::PSWC)));
 	}
-
 
 public:
 	bool can_execute(DSDVOperation cmd, Credit<DragHeadlet, DS>* visor, PLCMaster* plc, bool acc_executable) override {
@@ -822,8 +837,8 @@ public:
 		float table_header_width = width * 0.1618F;
 		DragInfo config = this->drag_configs[this->drag_idx];
 
-		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * sign, drag_height, config, this->drag_color);
-		this->load_drag(this->dragxys, this->DS_side, over_drag_width * sign, drag_height, config, this->drag_color);
+		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_height, config, this->drag_color);
+		this->load_drag(this->dragxys, this->DS_side, over_drag_width * this->sign, drag_height, config, this->drag_color);
 
 		this->load_label(this->labels, DS_side, this->caption_color, this->caption_font);
 		this->load_label(this->labels, DS::Overlook, this->caption_color, this->label_font);
@@ -999,6 +1014,10 @@ public:
 			|| (dynamic_cast<DragHeadlet*>(g) != nullptr));
 	}
 
+	bool can_select_multiple() override {
+		return true;
+	}
+
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
 		auto winch = dynamic_cast<Winchlet*>(g);
 		auto gantry = dynamic_cast<Gantrylet*>(g);
@@ -1020,6 +1039,18 @@ public:
 			if (plc->connected()) {
 				//bool okay = (indicator->get_color() == checked_color);
 				plc->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
+			}
+		}
+	}
+
+	void on_gesture(std::list<float2>& anchors, float x, float y) {
+		if (this->DS_side == DS::PS) {
+			if (this->gantries_selected(DS::psTrunnion, DS::psDragHead, 2)) {
+				group_menu_popup(this->ggantries_op, this->master, x, y);
+			}
+		} else {
+			if (this->gantries_selected(DS::sbTrunnion, DS::sbDragHead, 2)) {
+				group_menu_popup(this->ggantries_op, this->master, x, y);
 			}
 		}
 	}
@@ -1141,6 +1172,25 @@ private:
 		}
 	}
 
+private:
+	bool gantries_selected(DS id0, DS idn, int tolerance) {
+		bool okay = false;
+		int ok = 0;
+
+		for (DS id = id0; id <= idn; id++) {
+			if (this->master->is_selected(this->gantries[id])) {
+				ok += 1;
+
+				if (ok >= tolerance) {
+					okay = true;
+					break;
+				}
+			}
+		}
+
+		return okay;
+	}
+
 private: // never delete these graphlets manually.
 	std::map<DS, Credit<Gantrylet, DS>*> gantries;
 	std::map<DS, Credit<Gantrylet, DS>*> lines;
@@ -1156,8 +1206,9 @@ private:
 	DimensionStyle setting_style;
 
 private:
-	MenuFlyout^ winch_op;
+	MenuFlyout^ ggantries_op;
 	MenuFlyout^ gantry_op;
+	MenuFlyout^ winch_op;
 	MenuFlyout^ compensator_op;
 	MenuFlyout^ visor_op;
 
@@ -1252,10 +1303,24 @@ bool DredgesPage::can_select(IGraphlet* g) {
 	return ((db != nullptr) && (db->can_select(g)));
 }
 
+bool DredgesPage::can_select_multiple() {
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+	return ((db != nullptr) && (db->can_select_multiple()));
+}
+
 void DredgesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
 	if (db != nullptr) {
 		db->on_tap_selected(g, local_x, local_y);
+	}
+}
+
+void DredgesPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+	if (db != nullptr) {
+		db->on_gesture(anchors, x, y);
 	}
 }

@@ -78,8 +78,11 @@ public:
 		this->DisplayMode = SplitViewDisplayMode::Overlay;
 		this->IsPaneOpen = false;
 
-		this->PointerPressed += ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed);
+		// for Mouse pointer
 		this->PointerMoved += ref new PointerEventHandler(this, &CH6000m3::on_pointer_moved);
+
+		// for TouchScreen pointer, but others can also be satisfied
+		this->AddHandler(UIElement::PointerPressedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed), true);
 	}
 
 public:
@@ -97,8 +100,8 @@ private:
 		auto pt = args->GetCurrentPoint(this);
 		float x = pt->Position.X;
 
-		if (!pt->Properties->IsLeftButtonPressed) {
-			if (x <= 80.0F) {
+		if (pt->Properties->IsLeftButtonPressed) {
+			if (x <= tiny_font_size) {
 				this->IsPaneOpen = true;
 				args->Handled = true;
 			} else if (x > this->OpenPaneLength) {

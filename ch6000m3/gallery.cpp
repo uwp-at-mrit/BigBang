@@ -55,7 +55,7 @@ public:
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
 
-		this->load_remote_primitive(&this->remote_winch,       WinchStatus::Stopped,         unitsize * 2.0F);
+		this->load_remote_primitive(&this->remote_winch,       WinchStatus::Default,         unitsize * 2.0F);
 		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpStatus::Stopped, unitsize);
 		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpStatus::Stopped,    unitsize * 0.5F);
 		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpStatus::Stopped,     unitsize);

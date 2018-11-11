@@ -88,16 +88,20 @@ namespace WarGrey::SCADA {
 		} else {
 			unsigned int status = details.status - 1U;
 			unsigned int sensor = details.sensor - 1U;
+			bool windout = (DBX(db205, status + 4U));
+			bool windup = (DBX(db205, status + 5U));
 			bool fast = (details.draghead && DBX(db205, status + 7U));
 
-			if (DBX(db205, status + 0U)) {
+			if (windout && windup) {
+				target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
+			} else if (windout) {
+				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
+			} else if (windup) {
+				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
+			} else if (DBX(db205, status + 0U)) {
 				target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
 			} else if (DBX(db205, status + 1U)) {
 				target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
-			} else if (DBX(db205, status + 4U)) {
-				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
-			} else if (DBX(db205, status + 5U)) {
-				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
 			} else if (DBX(db205, sensor + 0U)) {
 				target->set_status(WinchStatus::SensorUpperLimited);
 			} else if (DBX(db205, sensor + 1U)) {

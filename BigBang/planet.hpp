@@ -26,6 +26,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		Platform::String^ name();
+		Platform::String^ display_name();
 		WarGrey::SCADA::IDisplay^ master();
 		Platform::Object^ navigation_label();
 		WarGrey::SCADA::Syslog* get_logger();

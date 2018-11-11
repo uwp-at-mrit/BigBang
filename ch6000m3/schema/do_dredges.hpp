@@ -32,28 +32,42 @@ namespace WarGrey::SCADA {
 	uint16 DO_gantry_command(OP cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
-		int16 alloff = -1;
-		uint16 allidx = 0U;
 
 		switch (cmd) {
 		case OP::WindOut: offset = 0U; break;
 		case OP::WindUp:  offset = 1U; break;
 		case OP::Stop:    offset = 2U; break;
-		case OP::AllOut:  alloff = 0U; break;
-		case OP::AllUp:   alloff = 1U; break;
-		case OP::AllStop: alloff = 2U; break;
 		}
 
 		switch (id) {
-		case E::psTrunnion:     index = 561U; allidx = 601U; break;
-		case E::psIntermediate: index = 564U; allidx = 601U; break;
-		case E::psDragHead:     index = 567U; allidx = 601U; break;
-		case E::sbTrunnion:     index = 580U; allidx = 604U; break;
-		case E::sbIntermediate: index = 583U; allidx = 604U; break;
-		case E::sbDragHead:     index = 586U; allidx = 604U; break;
+		case E::psTrunnion:     index = 561U; break;
+		case E::psIntermediate: index = 564U; break;
+		case E::psDragHead:     index = 567U; break;
+		case E::sbTrunnion:     index = 580U; break;
+		case E::sbIntermediate: index = 583U; break;
+		case E::sbDragHead:     index = 586U; break;
 		}
 
-		return ((alloff >= 0) ? (allidx + alloff) : (index + offset));
+		return index + offset;
+	}
+
+	template<typename OP, typename E>
+	uint16 DO_gantry_group_command(OP cmd, E id) {
+		uint16 offset = 0U;
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::WindOut: offset = 0U; break;
+		case OP::WindUp:  offset = 1U; break;
+		case OP::Stop:    offset = 2U; break;
+		}
+
+		switch (id) {
+		case E::PSGantries: index = 601U; break;
+		case E::SBGantries: index = 604U; break;
+		}
+
+		return index + offset;
 	}
 
 	template<typename E>
@@ -92,8 +106,8 @@ namespace WarGrey::SCADA {
 		case E::Charge:    offset = 0U; break;
 		case E::Discharge: offset = 1U; break;
 		case E::Stop:      offset = 2U; break;
-		case E::Lock:      offset = 3U; break;
-		case E::Unlock:    offset = 4U; break;
+		//case E::Lock:      offset = 3U; break;
+		//case E::Unlock:    offset = 4U; break;
 		}
 
 		return index + offset;

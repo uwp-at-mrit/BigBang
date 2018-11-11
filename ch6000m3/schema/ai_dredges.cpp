@@ -10,7 +10,7 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 	if (ps_schema == nullptr) {
 		DredgeAddress* schema = new DredgeAddress();
 
-		schema->compensator_length = 82U;
+		schema->compensator = 82U;
 		schema->density_speed = 136U;
 
 		schema->differential_pressure = 109U;
@@ -32,7 +32,7 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 	if (sb_schema == nullptr) {
 		DredgeAddress* schema = new DredgeAddress();
 
-		schema->compensator_length = 98U;
+		schema->compensator = 98U;
 		schema->density_speed = 148U;
 
 		schema->differential_pressure = 125U;

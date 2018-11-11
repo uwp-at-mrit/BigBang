@@ -243,4 +243,10 @@
   <data name="VisorPumps" xml:space="preserve">
     <value>耙唇液压泵组</value>
   </data>
+  <data name="PSGantries" xml:space="preserve">
+    <value>左舷A支架</value>
+  </data>
+  <data name="SBGantries" xml:space="preserve">
+    <value>右舷A支架</value>
+  </data>
 </root>

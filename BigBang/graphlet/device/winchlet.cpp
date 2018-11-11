@@ -22,7 +22,7 @@ static CanvasSolidColorBrush^ winch_default_color = Colours::DarkGray;
 
 /*************************************************************************************************/
 Winchlet::Winchlet(float width, float height, float thickness, unsigned int strand)
-	: Winchlet(WinchStatus::Stopped, width, height, thickness) {}
+	: Winchlet(WinchStatus::Default, width, height, thickness) {}
 
 Winchlet::Winchlet(WinchStatus default_status, float width, float height, float thickness, unsigned int strand)
 	: IStatuslet(default_status), width(width), height(height), strand(strand)
@@ -85,6 +85,7 @@ void Winchlet::construct() {
 		auto sout_icon = polar_triangle(sradius, 90.0);
 		auto up_icon = polar_triangle(radius, -90.0);
 		auto out_icon = polar_triangle(radius, 90.0);
+		auto uo_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
 		auto fup_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sup_icon, 0.0F, fsdiff);
 		auto fout_icon = geometry_union(sout_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
 		auto tilde = paragraph("~", make_bold_text_format(24.0F), &te);
@@ -96,12 +97,14 @@ void Winchlet::construct() {
 		this->icons[WinchStatus::WindingOut] = out_icon;
 		this->icons[WinchStatus::WindUpReady] = up_icon;
 		this->icons[WinchStatus::WindOutReady] = out_icon;
+		this->icons[WinchStatus::WindReady] = uo_icon;
 		this->icons[WinchStatus::Unpullable] = up_icon;
 		this->icons[WinchStatus::Unlettable] = out_icon;
 		this->icons[WinchStatus::FastWindingUp] = fup_icon;
 		this->icons[WinchStatus::FastWindingOut] = fout_icon;
 		this->icons[WinchStatus::FastWindUpReady] = fup_icon;
 		this->icons[WinchStatus::FastWindOutReady] = fout_icon;
+		this->icons[WinchStatus::FastWindReady] = geometry_union(uo_icon, -fsdiff, 0.0F, uo_icon, fsdiff, 0.0F);
 		this->icons[WinchStatus::UpperLimited] = up_icon;
 		this->icons[WinchStatus::LowerLimited] = out_icon;
 		this->icons[WinchStatus::SensorUpperLimited] = geometry_stroke(up_icon, 1.0F, this->cable_style);
@@ -155,7 +158,8 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 		CAS_SLOT(s.cable_color, Colours::Green);
 	}; break;
 	case WinchStatus::WindUpReady: case WinchStatus::WindOutReady:
-	case WinchStatus::FastWindUpReady: case WinchStatus::FastWindOutReady: {
+	case WinchStatus::FastWindUpReady: case WinchStatus::FastWindOutReady:
+	case WinchStatus::WindReady: case WinchStatus::FastWindReady: {
 		CAS_SLOT(s.cable_color, Colours::Gray);
 	}; break;
 	case WinchStatus::Unpullable: case WinchStatus::Unlettable: {
