@@ -44,8 +44,8 @@
 
     ;;; DB205
     ;; gantries, ps trunnion - sb draghead
-    (for ([dbx (in-range 163 168)])
-      (set-digital-input db205 dbx (random 2)))
+    (for ([dbx (in-range 163 169)])
+      (set-digital-input db205 dbx (random 3)))
     
     ;; winches
     (for ([dbx (in-range 169 174)])
