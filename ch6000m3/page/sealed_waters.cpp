@@ -245,17 +245,17 @@ public:
 			this->load_devices(this->mvalves, this->labels, Colours::Silver, SW::DGV3, SW::DGV8, radius, 0.0);
 			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSFP, SW::SBUWP2, radius, 0.0);
 
-			this->load_device(this->hoppers, this->captions, SW::PSHP, hpradius, -2.0F);
-			this->load_device(this->hoppers, this->captions, SW::SBHP, hpradius, +2.0F);
-			this->load_device(this->hoppers, this->captions, SW::PSUWP, hpradius, +2.0F);
-			this->load_device(this->hoppers, this->captions, SW::SBUWP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, SW::PSHP, hpradius, -2.0F, true);
+			this->load_device(this->hoppers, this->captions, SW::SBHP, hpradius, +2.0F, true);
+			this->load_device(this->hoppers, this->captions, SW::PSUWP, hpradius, +2.0F, false);
+			this->load_device(this->hoppers, this->captions, SW::SBUWP, hpradius, -2.0F, false);
 		}
 
 		{ // load labels and dimensions
 			this->load_labels(this->captions, SW::ToFlushs, SW::SS2, Colours::Silver);
 			this->load_labels(this->captions, SW::Hatch, SW::Sea, Colours::Salmon);
 
-			this->load_dimensions(this->pressures, SW::PSFP, SW::SBFP, "bar", "P");
+			this->load_dimension(this->pressures, SW::PSFP, "bar", "P");
 			this->load_dimensions(this->pressures, SW::PSUWP1, SW::SBUWP2, "bar", "P");
 			this->load_dimensions(this->pressures, SW::PSHP, SW::SBHP, "bar", "P");
 			this->load_dimensions(this->flows, SW::PSHP, SW::SBHP, "m3ph", "F");
@@ -289,8 +289,8 @@ public:
 				this->master->move_to(this->labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
 
 				switch (it->first) {
-				case SW::PSFP: case SW::SBFP: {
-					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LB, xoff, -toff);
+				case SW::PSFP: {
+					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LT, xoff, gridsize);
 				}; break;
 				case SW::PSUWP1: case SW::PSUWP2: case SW::SBUWP1: case SW::SBUWP2: {
 					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LB, gwidth * 9.0F, -toff);
@@ -302,16 +302,14 @@ public:
 				SW tanchor = SW::_;
 
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::LC);
-				
-				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC,
-					GraphletAnchor::RB, -gwidth * 0.5F, -toff);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, toff);
 
-				this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LB,
-					GraphletAnchor::LT, 0.0, toff * 2.0F + default_pipe_thickness);
+				if (this->rpms.find(it->first) != this->rpms.end()) {
+					this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -gwidth * 0.5F, -toff);
+					this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LB,
+						GraphletAnchor::LT, 0.0, toff * 2.0F + default_pipe_thickness);
+				}
 				
-				this->master->move_to(this->captions[it->first], it->second,
-					GraphletAnchor::RC, GraphletAnchor::LC, toff);
-
 				switch (it->first) {
 				case SW::PSHP: tanchor = SW::DGV8; break;
 				case SW::SBHP: tanchor = SW::DGV7; break;
@@ -348,22 +346,26 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy, bool has_dimensions) {
 		this->load_label(ls, id, Colours::Salmon);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 
-		this->rpms[id] = this->master->insert_one(
-			new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, "rpm", "S"), id);
+		if (has_dimensions) {
+			this->load_dimension(this->rpms, id, "rpm", "S");
+			this->load_dimension(this->powers, id, "kwatt", "P");
+		}
+	}
 
-		this->powers[id] = this->master->insert_one(
-			new Credit<Dimensionlet, E>(DimensionStatus::Normal, this->dimension_style, "kwatt", "P"), id);
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^label) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
 	}
 
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^label) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
+			this->load_dimension(ds, id, unit, label);
 		}
 	}
 

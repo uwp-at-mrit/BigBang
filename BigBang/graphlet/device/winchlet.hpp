@@ -9,8 +9,7 @@ namespace WarGrey::SCADA {
 		Default, WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady, WindReady, FastWindReady,
 		UpperLimited, SensorUpperLimited, LowerLimited, SensorLowerLimited,
-		SaddleLimited, SuctionLimited, Unpullable, Unlettable,
-		Slack, SaddleSlack, SuctionSlack,
+		SaddleLimited, SuctionLimited, SaddleSlack, SuctionSlack, Unpullable, Unlettable,
 		_,
 	};
 
@@ -52,6 +51,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ cable_bottom;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cable_base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ cable;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ slack_icon;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ cable_style;

@@ -77,23 +77,23 @@ namespace WarGrey::SCADA {
 	void DI_hydraulic_pump(H* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
 		target->set_remote_control(DBX(db4, idx4_p1 - 1));
 
-		if (DBX(db4, idx4_p1 + 1)) {
+		if (DBX(db4, idx4_p1 + 1U)) {
 			target->set_status(HydraulicPumpStatus::Broken);
 		} else {
-			if (DBX(db4, idx4_p1 + 0)) {
+			if (DBX(db4, idx4_p1 + 0U)) {
 				// equivalent
-				target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StopReady);
+				target->set_status(DBX(db205, idx205_p1 + 4U), HydraulicPumpStatus::StopReady);
 				target->set_status(HydraulicPumpStatus::Running);
 				// use HydraulicPumpStatus::Ready instead of HydraulicPumpStatus::StartReady.	
-			} else if (DBX(db205, idx205_p1 - 1)) {
+			} else if (DBX(db205, idx205_p1 - 1U)) {
 				target->set_status(HydraulicPumpStatus::Starting);
-			} else if (DBX(db205, idx205_p1 + 0)) {
+			} else if (DBX(db205, idx205_p1 + 0U)) {
 				target->set_status(HydraulicPumpStatus::Stopping);
-			} else if (DBX(db205, idx205_p1 + 1)) {
+			} else if (DBX(db205, idx205_p1 + 1U)) {
 				target->set_status(HydraulicPumpStatus::Unstartable);
-			} else if (DBX(db205, idx205_p1 + 2)) {
+			} else if (DBX(db205, idx205_p1 + 2U)) {
 				target->set_status(HydraulicPumpStatus::Unstoppable);
-			} else if (DBX(db205, idx205_p1 + 3)) {
+			} else if (DBX(db205, idx205_p1 + 3U)) {
 				target->set_status(HydraulicPumpStatus::Ready);
 			}
 				// the rest two are not used

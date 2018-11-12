@@ -4,9 +4,9 @@
 #include "graphlet/device/gantrylet.hpp"
 
 namespace WarGrey::SCADA {
-	private struct WinchLimited {
+	private struct WinchLimits {
 	public:
-		WinchLimited(unsigned int upper, unsigned int support, unsigned int slack = 0U, unsigned int suction = 0U)
+		WinchLimits(unsigned int upper, unsigned int support, unsigned int slack = 0U, unsigned int suction = 0U)
 			: upper(upper), support(support), suction(suction), slack(slack) {}
 
 	public:
@@ -18,35 +18,36 @@ namespace WarGrey::SCADA {
 
 	private struct WinchDetails {
 	public:
-		WinchDetails(unsigned int status, unsigned int sensor, bool draghead)
-			: status(status), sensor(sensor), draghead(draghead) {}
+		WinchDetails(unsigned int status, unsigned int sensor, unsigned int control, bool draghead)
+			: status(status), sensor(sensor), control(control), draghead(draghead) {}
 
 	public:
 		unsigned int status;
 		unsigned int sensor;
+		unsigned int control;
 		bool draghead;
 	};
 
 	// DB4, starts from 1
-	static WarGrey::SCADA::WinchLimited winch_ps_trunnion_limited = WarGrey::SCADA::WinchLimited(321U, 322U, 323U, 324U);
-	static WarGrey::SCADA::WinchLimited winch_ps_intermediate_limited = WarGrey::SCADA::WinchLimited(332U, 354U);
-	static WarGrey::SCADA::WinchLimited winch_ps_draghead_limited = WarGrey::SCADA::WinchLimited(361U, 362U);
+	static WarGrey::SCADA::WinchLimits winch_ps_trunnion_limits = WarGrey::SCADA::WinchLimits(321U, 322U, 323U, 324U);
+	static WarGrey::SCADA::WinchLimits winch_ps_intermediate_limits = WarGrey::SCADA::WinchLimits(332U, 354U);
+	static WarGrey::SCADA::WinchLimits winch_ps_draghead_limits = WarGrey::SCADA::WinchLimits(361U, 362U);
 	static unsigned int gantry_ps_trunnion_limited = 325U;
 	static unsigned int gantry_ps_intermediate_limited = 357U;
 	static unsigned int gantry_ps_draghead_limited = 365U;
 
-	static WarGrey::SCADA::WinchLimited winch_sb_trunnion_limited = WarGrey::SCADA::WinchLimited(337U, 338U, 339U, 340U);
-	static WarGrey::SCADA::WinchLimited winch_sb_intermediate_limited = WarGrey::SCADA::WinchLimited(348U, 386U);
-	static WarGrey::SCADA::WinchLimited winch_sb_draghead_limited = WarGrey::SCADA::WinchLimited(393U, 394U);
+	static WarGrey::SCADA::WinchLimits winch_sb_trunnion_limits = WarGrey::SCADA::WinchLimits(337U, 338U, 339U, 340U);
+	static WarGrey::SCADA::WinchLimits winch_sb_intermediate_limits = WarGrey::SCADA::WinchLimits(348U, 386U);
+	static WarGrey::SCADA::WinchLimits winch_sb_draghead_limits = WarGrey::SCADA::WinchLimits(393U, 394U);
 	static unsigned int gantry_sb_trunnion_limited = 341U;
 	static unsigned int gantry_sb_intermediate_limited = 389U;
 	static unsigned int gantry_sb_long_draghead_limited = 397U;
 	static unsigned int gantry_sb_short_draghead_limited = 409U;
 
 	// DB205, starts from 1
-	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(1353U, 1793U, false);
-	static WarGrey::SCADA::WinchDetails winch_ps_intermediate_details = WarGrey::SCADA::WinchDetails(1361U, 1795U, false);
-	static WarGrey::SCADA::WinchDetails winch_ps_draghead_details = WarGrey::SCADA::WinchDetails(1369U, 1797U, true);
+	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(1353U, 1793U, 2033U, false);
+	static WarGrey::SCADA::WinchDetails winch_ps_intermediate_details = WarGrey::SCADA::WinchDetails(1361U, 1795U, 2034U, false);
+	static WarGrey::SCADA::WinchDetails winch_ps_draghead_details = WarGrey::SCADA::WinchDetails(1369U, 1797U, 2035U, true);
 	static unsigned int gantry_ps_trunnion_details = 1305U;
 	static unsigned int gantry_ps_intermediate_details = 1313U;
 	static unsigned int gantry_ps_draghead_details = 1321U;
@@ -58,9 +59,9 @@ namespace WarGrey::SCADA {
 	static unsigned int gantry_ps_draghead_virtual_up_limited = 2045U;
 	static unsigned int gantry_ps_draghead_virtual_out_limited = 2046U;
 
-	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(1377U, 1799U, false);
-	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(1385U, 1801U, false);
-	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(1393U, 1803U, true);
+	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(1377U, 1799U, 2036U, false);
+	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(1385U, 1801U, 2037U, false);
+	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(1393U, 1803U, 2038U, true);
 	static unsigned int gantry_sb_trunnion_details = 1329U;
 	static unsigned int gantry_sb_intermediate_details = 1337U;
 	static unsigned int gantry_sb_draghead_details = 1345U;
@@ -75,33 +76,35 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	template<class W>
 	void DI_winch(W* target
-		, const uint8* db4, WarGrey::SCADA::WinchLimited& limited
+		, const uint8* db4, WarGrey::SCADA::WinchLimits& limits
 		, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
-		bool slack = (limited.slack > 0U) && DBX(db4, limited.slack - 1U);
+		bool slack = (limits.slack > 0U) && DBX(db4, limits.slack - 1U);
 		
-		if (DBX(db4, limited.upper - 1U)) {
+		target->set_remote_control(DBX(db205, details.control - 1U));
+
+		if (DBX(db4, limits.upper - 1U)) {
 			target->set_status(WinchStatus::UpperLimited);
-		} else if (DBX(db4, limited.support - 1U)) {
+		} else if (DBX(db4, limits.support - 1U)) {
 			target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
-		} else if ((limited.suction > 0U) && DBX(db4, limited.suction - 1U)) {
+		} else if ((limits.suction > 0U) && DBX(db4, limits.suction - 1U)) {
 			target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
 		} else {
 			unsigned int status = details.status - 1U;
 			unsigned int sensor = details.sensor - 1U;
-			bool windout = (DBX(db205, status + 4U));
-			bool windup = (DBX(db205, status + 5U));
+			bool can_windout = (DBX(db205, status + 4U));
+			bool can_windup = (DBX(db205, status + 5U));
 			bool fast = (details.draghead && DBX(db205, status + 7U));
 
-			if (windout && windup) {
-				target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
-			} else if (windout) {
-				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
-			} else if (windup) {
-				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
-			} else if (DBX(db205, status + 0U)) {
+			if (DBX(db205, status + 0U)) {
 				target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
 			} else if (DBX(db205, status + 1U)) {
 				target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
+			} else if (can_windout && can_windup) {
+				target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
+			} else if (can_windout) {
+				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
+			} else if (can_windup) {
+				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
 			} else if (DBX(db205, sensor + 0U)) {
 				target->set_status(WinchStatus::SensorUpperLimited);
 			} else if (DBX(db205, sensor + 1U)) {

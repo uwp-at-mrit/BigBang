@@ -97,13 +97,13 @@ public:
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->powers[LD::PSHPump]->set_value(DBD(DB2, 12U));
 		this->powers[LD::SBHPump]->set_value(DBD(DB2, 16U));
-		//this->powers[LD::PSUWPump]->set_value(DBD(DB2, 200U));
-		//this->powers[LD::SBUWPump]->set_value(DBD(DB2, 204U));
+		this->powers[LD::PSUWPump]->set_value(DBD(DB2, 200U));
+		this->powers[LD::SBUWPump]->set_value(DBD(DB2, 204U));
 
-		//this->rpms[LD::PSHPump]->set_value(DBD(DB2, 604U));
-		//this->rpms[LD::SBHPump]->set_value(DBD(DB2, 608U));
-		//this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 200U));
-		//this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 204U));
+		this->rpms[LD::PSHPump]->set_value(DBD(DB2, 604U));
+		this->rpms[LD::SBHPump]->set_value(DBD(DB2, 608U));
+		this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 200U));
+		this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 204U));
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {

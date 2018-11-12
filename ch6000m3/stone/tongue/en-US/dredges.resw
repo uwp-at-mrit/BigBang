@@ -222,4 +222,10 @@
   <data name="SuctionLimited" xml:space="preserve">
     <value>Suction Limited</value>
   </data>
+  <data name="Upper" xml:space="preserve">
+    <value>Upper</value>
+  </data>
+  <data name="SoftUpper" xml:space="preserve">
+    <value>Soft Upper</value>
+  </data>
 </root>

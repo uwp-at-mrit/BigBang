@@ -83,15 +83,21 @@ void Winchlet::construct() {
 		float fsdiff = sradius * 1.5F * 0.5F;
 		auto sup_icon = polar_triangle(sradius, -90.0);
 		auto sout_icon = polar_triangle(sradius, 90.0);
+		auto sfup_icon = polar_arrowhead(sradius, -90.0);
+		auto sfout_icon = polar_arrowhead(sradius, 90.0);
+		auto base_icon = polar_rectangle(sradius, -45.0, 0.0);
 		auto up_icon = polar_triangle(radius, -90.0);
 		auto out_icon = polar_triangle(radius, 90.0);
 		auto uo_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
-		auto fup_icon = geometry_union(sup_icon, 0.0F, -fsdiff, sup_icon, 0.0F, fsdiff);
-		auto fout_icon = geometry_union(sout_icon, 0.0F, -fsdiff, sout_icon, 0.0F, fsdiff);
+		auto fup_icon = polar_arrowhead(radius, -90.0);
+		auto fout_icon = polar_arrowhead(radius, 90.0);
+		auto fuo_icon = geometry_union(sfup_icon, 0.0F, -fsdiff, sfout_icon, 0.0F, fsdiff);
+		auto saddle_icon = geometry_union(fout_icon, 0.0F, -fsdiff, base_icon, 0.0F, fsdiff);
 		auto tilde = paragraph("~", make_bold_text_format(24.0F), &te);
 
 		this->icon_cx = this->base_thickness + (this->cable->ComputeBounds().X - this->base_thickness) * 0.5F;
 		this->icon_cy = this->height * 0.5F;
+		this->slack_icon = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
 
 		this->icons[WinchStatus::WindingUp] = up_icon;
 		this->icons[WinchStatus::WindingOut] = out_icon;
@@ -104,15 +110,13 @@ void Winchlet::construct() {
 		this->icons[WinchStatus::FastWindingOut] = fout_icon;
 		this->icons[WinchStatus::FastWindUpReady] = fup_icon;
 		this->icons[WinchStatus::FastWindOutReady] = fout_icon;
-		this->icons[WinchStatus::FastWindReady] = geometry_union(uo_icon, -fsdiff, 0.0F, uo_icon, fsdiff, 0.0F);
+		this->icons[WinchStatus::FastWindReady] = fuo_icon;
 		this->icons[WinchStatus::UpperLimited] = up_icon;
 		this->icons[WinchStatus::LowerLimited] = out_icon;
 		this->icons[WinchStatus::SensorUpperLimited] = geometry_stroke(up_icon, 1.0F, this->cable_style);
 		this->icons[WinchStatus::SensorLowerLimited] = geometry_stroke(out_icon, 1.0F, this->cable_style);
 		this->icons[WinchStatus::SuctionLimited] = geometry_stroke(circle(radius), 2.0F);
-		this->icons[WinchStatus::SaddleLimited] = polar_rectangle(radius, -60.0, 0.0);
-		this->icons[WinchStatus::Slack] = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
-
+		this->icons[WinchStatus::SaddleLimited] = saddle_icon;
 		this->icons[WinchStatus::SuctionSlack] = this->icons[WinchStatus::SuctionLimited];
 		this->icons[WinchStatus::SaddleSlack] = this->icons[WinchStatus::SaddleLimited];
 	}
@@ -179,9 +183,6 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 	case WinchStatus::SaddleLimited: case WinchStatus::SaddleSlack: {
 		CAS_SLOT(s.status_color, Colours::Crimson);
 	}; break;
-	case WinchStatus::Slack: {
-		CAS_SLOT(s.status_color, Colours::ForestGreen);
-	}; break;
 	}
 
 	switch (status) {
@@ -233,11 +234,7 @@ void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 		ds->FillGeometry(this->icons[status], x + this->icon_cx, y + this->icon_cy, s.status_color);
 
 		if (s.slack_color != nullptr) {
-			if (this->icons.find(WinchStatus::Slack) != this->icons.end()) {
-				ds->FillGeometry(this->icons[WinchStatus::Slack],
-					x + this->width - this->icon_cx, y + this->icon_cy,
-					s.slack_color);
-			}
+			ds->FillGeometry(this->slack_icon, x + this->width - this->icon_cx, y + this->icon_cy, s.slack_color);
 		}
 	}
 	
