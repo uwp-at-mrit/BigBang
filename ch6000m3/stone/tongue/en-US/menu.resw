@@ -249,4 +249,16 @@
   <data name="SBGantries" xml:space="preserve">
     <value>SB Gantries</value>
   </data>
+  <data name="HDoor12" xml:space="preserve">
+    <value>Hopper Door 1-2#</value>
+  </data>
+  <data name="HDoor35" xml:space="preserve">
+    <value>Hopper Door 3-5#</value>
+  </data>
+  <data name="HDoor67" xml:space="preserve">
+    <value>Hopper Door 6-7#</value>
+  </data>
+  <data name="HDoor17" xml:space="preserve">
+    <value>All Hopper Doors</value>
+  </data>
 </root>

@@ -56,6 +56,8 @@ private enum class DSGOperation { WindOut, WindUp, Stop, _ };
 private enum class DSWCOperation { Charge, Discharge, Stop, _ };
 private enum class DSDVOperation { Up, Down, Stop, _ };
 
+static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
+
 // WARNING: order matters
 private enum class DS : unsigned int {
 	// pipeline
@@ -82,6 +84,9 @@ private enum class DS : unsigned int {
 	// winches and gantries
 	psTrunnion, psIntermediate, psDragHead,
 	sbTrunnion, sbIntermediate, sbDragHead,
+
+	// winch statuses
+	SuctionLimited, SaddleLimited, Slack,
 
 	// instructions
 	ps_gantry_settings, sb_gantry_settings, on,
@@ -185,6 +190,10 @@ protected:
 			this->load_label(this->labels, id, this->caption_color);
 			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
 			this->speeds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("mpm"), id);
+
+			this->load_label(this->winch_status_saddles, _speak(DS::SaddleLimited.ToString()), id, Colours::Silver);
+			this->load_label(this->winch_status_suctions, _speak(DS::SuctionLimited.ToString()), id, Colours::Silver);
+			this->load_label(this->winch_status_slacks, _speak(DS::Slack.ToString()), id, Colours::Silver);
 		}
 	}
 
@@ -229,6 +238,13 @@ protected:
 	}
 
 protected:
+	void reflow_winch_status(DS id) {
+		this->master->move_to(this->winch_status_saddles[id], this->winches[id], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->winch_status_suctions[id], this->winch_status_saddles[id], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->winch_status_slacks[id], this->winch_status_suctions[id], GraphletAnchor::CT, GraphletAnchor::CB);
+	}
+
+protected:
 	void set_compensator(DS id, const uint8* db203, unsigned int rd_idx, GraphletAnchor a) {
 		float progress = RealData(db203, rd_idx + 2U);
 
@@ -240,6 +256,34 @@ protected:
 	void set_winch_metrics(DS id, const uint8* db2, unsigned int speed_idx, unsigned int length_idx, GraphletAnchor a) {
 		this->speeds[id]->set_value(DBD(db2, speed_idx), a);
 		this->lengths[id]->set_value(DBD(db2, length_idx), a);
+	}
+
+	void set_winch_status_labels(DS id0, DS idn) {
+		for (DS id = id0; id <= idn; id++) {
+			bool slack = false;
+			bool saddle = false;
+			bool suction = false;
+
+			switch (this->winches[id]->get_status()) {
+			case WinchStatus::SaddleLimited: saddle = true; break;
+			case WinchStatus::SuctionLimited: suction = true; break;
+			case WinchStatus::Slack: slack = true; break;
+			case WinchStatus::SaddleSlack: saddle = true; slack = true; break;
+			case WinchStatus::SuctionSlack: suction = true; slack = true; break;
+			}
+
+			if (saddle) {
+				this->winch_status_saddles[id]->set_color(winch_status_highlight_color);
+			}
+
+			if (suction) {
+				this->winch_status_suctions[id]->set_color(winch_status_highlight_color);
+			}
+
+			if (slack) {
+				this->winch_status_slacks[id]->set_color(winch_status_highlight_color);
+			}
+		}
 	}
 
 	void set_draghead_angles(DS id, const uint8* db2, unsigned int idx) {
@@ -279,6 +323,9 @@ protected: // never delete these graphlets manually.
 	std::map<DS, Credit<Dimensionlet, DS>*> degrees;
 	std::map<DS, Credit<Dimensionlet, DS>*> lengths;
 	std::map<DS, Credit<Dimensionlet, DS>*> speeds;
+	std::map<DS, Credit<Labellet, DS>*> winch_status_suctions;
+	std::map<DS, Credit<Labellet, DS>*> winch_status_saddles;
+	std::map<DS, Credit<Labellet, DS>*> winch_status_slacks;
 	
 protected:
 	CanvasTextFormat^ caption_font;
@@ -365,6 +412,9 @@ public:
 		DI_winch(this->winches[DS::sbTrunnion], DB4, winch_sb_trunnion_limited, DB205, winch_sb_trunnion_details);
 		DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limited, DB205, winch_sb_intermediate_details);
 		DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limited, DB205, winch_sb_draghead_details);
+
+		this->set_winch_status_labels(DS::psTrunnion, DS::psDragHead);
+		this->set_winch_status_labels(DS::sbTrunnion, DS::sbDragHead);
 	}
 
 public:
@@ -594,12 +644,16 @@ public:
 				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LC, txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::LT, GraphletAnchor::LB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::LB, GraphletAnchor::LT);
+
+				this->reflow_winch_status(id);
 			}
 
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
 				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RC, -txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::RT, GraphletAnchor::RB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::RB, GraphletAnchor::RT);
+
+				this->reflow_winch_status(id);
 			}
 		}
 	}
@@ -742,6 +796,7 @@ public:
 			DI_winch(this->winches[DS::psTrunnion], DB4, winch_ps_trunnion_limited, DB205, winch_ps_trunnion_details);
 			DI_winch(this->winches[DS::psIntermediate], DB4, winch_ps_intermediate_limited, DB205, winch_ps_intermediate_details);
 			DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limited, DB205, winch_ps_draghead_details);
+			this->set_winch_status_labels(DS::psTrunnion, DS::psDragHead);
 
 			DI_gantry(this->gantries[DS::psTrunnion], DB4, gantry_ps_trunnion_limited, DB205, gantry_ps_trunnion_details);
 			DI_gantry(this->gantries[DS::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
@@ -761,6 +816,7 @@ public:
 			DI_winch(this->winches[DS::sbTrunnion], DB4, winch_sb_trunnion_limited, DB205, winch_sb_trunnion_details);
 			DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limited, DB205, winch_sb_intermediate_details);
 			DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limited, DB205, winch_sb_draghead_details);
+			this->set_winch_status_labels(DS::sbTrunnion, DS::sbDragHead);
 
 			DI_gantry(this->gantries[DS::sbTrunnion], DB4, gantry_sb_trunnion_limited, DB205, gantry_sb_trunnion_details);
 			DI_gantry(this->gantries[DS::sbIntermediate], DB4, gantry_sb_intermediate_limited, DB205, gantry_sb_intermediate_details);
@@ -898,9 +954,11 @@ public:
 
 			for (DS id = DS::psTrunnion; id <= DS::psDragHead; id++) {
 				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::RB, GraphletAnchor::CT, 0.0F, txt_gapsize);
-				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::CT, GraphletAnchor::CB);
+				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB);
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB, txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LT, txt_gapsize);
+
+				this->reflow_winch_status(id);
 
 				if (this->rc_speeds.find(id) != this->rc_speeds.end()) {
 					this->master->move_to(this->rc_speeds[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);
@@ -930,9 +988,11 @@ public:
 
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
 				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::LB, GraphletAnchor::CT, 0.0F, txt_gapsize);
-				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::CT, GraphletAnchor::CB);
+				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB);
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB, -txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RT, -txt_gapsize);
+
+				this->reflow_winch_status(id);
 
 				if (this->rc_speeds.find(id) != this->rc_speeds.end()) {
 					this->master->move_to(this->rc_speeds[id], this->winches[id], GraphletAnchor::CB, GraphletAnchor::CT);

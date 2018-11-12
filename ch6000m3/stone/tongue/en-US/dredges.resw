@@ -213,4 +213,13 @@
   <data name="sb_gantry_settings" xml:space="preserve">
     <value>SB Gantry Limitation Settings</value>
   </data>
+  <data name="SaddleLimited" xml:space="preserve">
+    <value>Saddle Limited</value>
+  </data>
+  <data name="Slack" xml:space="preserve">
+    <value>Slack</value>
+  </data>
+  <data name="SuctionLimited" xml:space="preserve">
+    <value>Suction Limited</value>
+  </data>
 </root>

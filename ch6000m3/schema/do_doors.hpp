@@ -38,6 +38,27 @@ namespace WarGrey::SCADA {
 	}
 
 	template<typename OP, typename E>
+	uint16 DO_hopper_door_group_command(OP cmd, E id) {
+		uint16 offset = 0U;
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::Open:    offset = 0U; break;
+		case OP::Stop:    offset = 1U; break;
+		case OP::Close:   offset = 2U; break;
+		}
+
+		switch (id) {
+		case E::HDoor12:  index = 417U; break;
+		case E::HDoor35:  index = 420U; break;
+		case E::HDoor67:  index = 423U; break;
+		case E::HDoor17: index = 426U; break;
+		}
+
+		return index + offset;
+	}
+
+	template<typename OP, typename E>
 	uint16 DO_upper_door_command(OP cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;

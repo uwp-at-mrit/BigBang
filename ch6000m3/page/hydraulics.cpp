@@ -470,13 +470,18 @@ public:
 	}
 
 public:
-	bool pumps_selected(HS id0, HS idn) {
-		bool okay = true;
+	bool pumps_selected(HS id0, HS idn, int tolerance) {
+		bool okay = false;
+		int ok = 0;
 
 		for (HS id = id0; id <= idn; id++) {
-			if (!this->master->is_selected(this->pumps[id])) {
-				okay = false;
-				break;
+			if (this->master->is_selected(this->pumps[id])) {
+				ok += 1;
+
+				if (ok >= tolerance) {
+					okay = true;
+					break;
+				}
 			}
 		}
 
@@ -753,13 +758,13 @@ void HydraulicsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		if (dashboard->pumps_selected(HS::Y, HS::K)) {
+		if (dashboard->pumps_selected(HS::Y, HS::K, 2)) {
 			group_menu_popup(this->gmaster_op, this, x, y);
-		} else if (dashboard->pumps_selected(HS::C, HS::E)) {
+		} else if (dashboard->pumps_selected(HS::C, HS::E, 2)) {
 			group_menu_popup(this->gps_op, this, x, y);
-		} else if (dashboard->pumps_selected(HS::A, HS::H)) {
+		} else if (dashboard->pumps_selected(HS::A, HS::H, 2)) {
 			group_menu_popup(this->gsb_op, this, x, y);
-		} else if (dashboard->pumps_selected(HS::J, HS::I)) {
+		} else if (dashboard->pumps_selected(HS::J, HS::I, 2)) {
 			group_menu_popup(this->gvisor_op, this, x, y);
 		}
 	}

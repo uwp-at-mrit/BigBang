@@ -26,8 +26,9 @@
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::Foundation;
 using namespace Windows::System;
+using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -37,7 +38,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum HDMode { WindowUI = 0, Dashboard };
 
+private enum class HDGroup { HDoor12, HDoor35, HDoor67, HDoor17, _};
+
 private enum class HDOperation { Open, Stop, Close, Disable, _ };
+private enum class HDGOperation { Open, Stop, Close, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
@@ -172,7 +176,8 @@ private:
 
 private class Doors final
 	: public PLCConfirmation
-	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*> {
+	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>
+	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -265,6 +270,15 @@ public:
 
 	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc) override {
 		plc->send_command(DO_hopper_door_command(cmd, door->id));
+	}
+
+public:
+	bool can_execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
+		return plc->connected();
+	}
+
+	void execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
+		plc->send_command(DO_hopper_door_group_command(cmd, group));
 	}
 
 public:
@@ -370,6 +384,32 @@ public:
 			this->decorator->fill_ship_anchor(0.0F, 0.5F, &x, &y, true);
 			this->master->move_to(this->dimensions[HD::SternDraft], x, y, GraphletAnchor::RC, -off);
 		}
+	}
+
+	public:
+
+public:
+	bool doors_selected(HD ids[], unsigned int count, int tolerance) {
+		bool okay = false;
+		int ok = 0;
+
+		for (unsigned int idx = 0; idx < count; idx++) {
+			if (this->master->is_selected(this->hdoors[ids[idx]])) {
+				ok += 1;
+
+				if (ok >= tolerance) {
+					okay = true;
+					break;
+				}
+			}
+		}
+
+		return okay;
+	}
+
+	template<unsigned int N>
+	bool doors_selected(HD (&ids)[N], int tolerance) {
+		return this->doors_selected(ids, N, tolerance);
 	}
 
 private:
@@ -526,6 +566,10 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 
 	this->dashboard = dashboard;
 	this->door_op = make_menu<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>(dashboard, plc);
+	this->gdoors12_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor12, plc);
+	this->gdoors35_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor35, plc);
+	this->gdoors67_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor67, plc);
+	this->gdoors17_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -582,6 +626,10 @@ bool HopperDoorsPage::can_select(IGraphlet* g) {
 	return (dynamic_cast<HopperDoorlet*>(g) != nullptr);
 }
 
+bool HopperDoorsPage::can_select_multiple() {
+	return true;
+}
+
 bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_char(key, wargrey_keyboard);
 
@@ -609,5 +657,26 @@ void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y
 	
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);
+	}
+}
+
+void HopperDoorsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto dashboard = dynamic_cast<Doors*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		HD hds12[] = { HD::PS1, HD::PS2, HD::SB1, HD::SB2 };
+		HD hds35[] = { HD::PS3, HD::PS4, HD::PS5, HD::SB3, HD::SB4, HD::SB5 };
+		HD hds67[] = { HD::PS6, HD::PS7, HD::SB6, HD::SB7 };
+		HD hds17[] = { HD::PS1, HD::PS2, HD::PS3, HD::PS4, HD::PS5, HD::PS6, HD::PS7, HD::SB1, HD::SB2, HD::SB3, HD::SB4, HD::SB5, HD::SB6, HD::SB7 };
+		
+		if (dashboard->doors_selected(hds17, 7)) {
+			group_menu_popup(this->gdoors17_op, this, x, y);
+		} else if (dashboard->doors_selected(hds35, 2)) {
+			group_menu_popup(this->gdoors35_op, this, x, y);
+		} else if (dashboard->doors_selected(hds12, 2)) {
+			group_menu_popup(this->gdoors12_op, this, x, y);
+		} else if (dashboard->doors_selected(hds67, 2)) {
+			group_menu_popup(this->gdoors67_op, this, x, y);
+		}
 	}
 }
