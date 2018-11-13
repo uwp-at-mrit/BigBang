@@ -17,10 +17,16 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ base_color;
 	};
 
+	private struct GantrySymbolStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ highlight_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
+	};
+
 	private class Gantrylet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::GantryStatus, WarGrey::SCADA::GantryStyle> {
 	public:
 		Gantrylet(float radius, float base_extent_ratio = 3.0F, double degrees = 42.0);
-		Gantrylet(WarGrey::SCADA::GantryStatus default_status, float radius, float base_extent_ratio = 3.0F, double degrees = 30.0);
+		Gantrylet(WarGrey::SCADA::GantryStatus default_status, float radius, float base_extent_ratio = 3.0F, double degrees = 42.0);
 
 	public:
 		void construct() override;
@@ -68,5 +74,30 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool leftward;
+	};
+
+	private class GantrySymbollet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::GantryStatus, WarGrey::SCADA::GantrySymbolStyle> {
+	public:
+		GantrySymbollet(float width, float height = 0.0F);
+		GantrySymbollet(WarGrey::SCADA::GantryStatus default_status, float width, float height = 0.0F);
+
+	public:
+		void construct() override;
+		void update(long long count, long long interval, long long uptime) override;
+		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	protected:
+		void prepare_style(WarGrey::SCADA::GantryStatus status, WarGrey::SCADA::GantrySymbolStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::GantryStatus status) override;
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ leftward_arrow;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rightward_arrow;
+
+	private:
+		float width;
+		float height;
+		float thickness;
 	};
 }

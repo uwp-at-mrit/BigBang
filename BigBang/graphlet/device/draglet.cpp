@@ -207,18 +207,15 @@ void IDraglet::fill_extent(float x, float y, float* w, float* h) {
 	SET_VALUES(w, this->width, h, this->height);
 }
 
-void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& draghead, bool force) {
+void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& draghead, double visor_angle, bool force) {
 	bool schanged = (this->suction.z != suction_depth);
 	bool dchanged = (!this->position_equal(this->draghead, draghead));
+	bool vchanged = (this->visor_angle != visor_angle);
 	bool ichanged = false;
 
-	if (schanged) {
-		this->suction.z = suction_depth;
-	}
-
-	if (dchanged) {
-		this->draghead = draghead;
-	}
+	this->suction.z = suction_depth;
+	this->draghead = draghead;
+	this->visor_angle = visor_angle;
 
 	for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 		if (this->info.pipe_lengths[idx] > 0.0) {
@@ -484,7 +481,7 @@ void DragXZlet::update_drag_head() {
 	double angle = drag_adjusted_angle(this->draghead_angle, sign);
 	double head_joint_start = (this->leftward ? -angle + 90.0 : angle - 90.0);
 	double head_joint_end = (this->leftward ? -angle + 270.0 : angle + 90.0);
-	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, angle, angle, sign);
+	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, angle + this->visor_angle, angle, sign);
 	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->thickness * 2.0F);
 	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->thickness);
 	

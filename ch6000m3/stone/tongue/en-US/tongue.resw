@@ -183,4 +183,7 @@
   <data name="dredges_Right" xml:space="preserve">
     <value>Right Winches &amp;&amp; Gantries</value>
   </data>
+  <data name="lubricatings" xml:space="preserve">
+    <value>Lubricating Unit</value>
+  </data>
 </root>

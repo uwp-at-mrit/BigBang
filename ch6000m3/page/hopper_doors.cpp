@@ -42,6 +42,7 @@ private enum class HDGroup { HDoor12, HDoor35, HDoor67, HDoor17, _};
 
 private enum class HDOperation { Open, Stop, Close, Disable, _ };
 private enum class HDGOperation { Open, Stop, Close, _ };
+private enum class HDGLOperation { Open, Stop, Close, Lock, AutoLock, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
@@ -177,7 +178,8 @@ private:
 private class Doors final
 	: public PLCConfirmation
 	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>
-	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*> {
+	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*>
+	, public IGroupMenuCommand<HDGLOperation, HDGroup, PLCMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -277,8 +279,16 @@ public:
 		return plc->connected();
 	}
 
+	bool can_execute(HDGLOperation cmd, HDGroup group, PLCMaster* plc) override {
+		return plc->connected();
+	}
+
 	void execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
 		plc->send_command(DO_hopper_door_group_command(cmd, group));
+	}
+
+	void execute(HDGLOperation cmd, HDGroup group, PLCMaster* plc) override {
+		plc->send_command(DO_all_hopper_door_command(cmd, group));
 	}
 
 public:
@@ -569,7 +579,7 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	this->gdoors12_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor12, plc);
 	this->gdoors35_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor35, plc);
 	this->gdoors67_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor67, plc);
-	this->gdoors17_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
+	this->gdoors17_op = make_group_menu<HDGLOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -667,9 +677,11 @@ void HopperDoorsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
 		HD hds12[] = { HD::PS1, HD::PS2, HD::SB1, HD::SB2 };
 		HD hds35[] = { HD::PS3, HD::PS4, HD::PS5, HD::SB3, HD::SB4, HD::SB5 };
 		HD hds67[] = { HD::PS6, HD::PS7, HD::SB6, HD::SB7 };
-		HD hds17[] = { HD::PS1, HD::PS2, HD::PS3, HD::PS4, HD::PS5, HD::PS6, HD::PS7, HD::SB1, HD::SB2, HD::SB3, HD::SB4, HD::SB5, HD::SB6, HD::SB7 };
+		bool g1_okay = dashboard->doors_selected(hds12, 1);
+		bool g2_okay = dashboard->doors_selected(hds35, 1);
+		bool g3_okay = dashboard->doors_selected(hds67, 1);
 		
-		if (dashboard->doors_selected(hds17, 7)) {
+		if (g1_okay && g2_okay && g3_okay) {
 			group_menu_popup(this->gdoors17_op, this, x, y);
 		} else if (dashboard->doors_selected(hds35, 2)) {
 			group_menu_popup(this->gdoors35_op, this, x, y);

@@ -229,3 +229,61 @@ void Gantrylet::make_hat(double ratio) {
 	this->hat = geometry_rotate(hat, this_degrees * (this->leftward ? -1.0 : 1.0), 0.0F, 0.0F);
 	this->hat_y = this->hat_cy - this->hat->ComputeBounds().Height * 0.5F;
 }
+
+/*************************************************************************************************/
+GantrySymbollet::GantrySymbollet(float width, float height)
+	: GantrySymbollet(GantryStatus::WindedUp, width, height) {}
+
+GantrySymbollet::GantrySymbollet(GantryStatus default_status, float width, float height)
+	: IStatuslet(default_status), thickness(2.0F), width(width), height(height) {
+	if (this->height <= 0.0F) {
+		this->height = this->width / 7.0F;
+	}
+}
+
+void GantrySymbollet::construct() {
+}
+
+void GantrySymbollet::update(long long count, long long interval, long long uptime) {
+	switch (this->get_status()) {
+	case GantryStatus::WindingUp: {
+		this->notify_updated();
+	}; break;
+	case GantryStatus::WindingOut: {
+		this->notify_updated();
+	}; break;
+	case GantryStatus::Default: {
+		// do nothing
+	}; break;
+	}
+}
+
+void GantrySymbollet::fill_extent(float x, float y, float* w, float* h) {
+	SET_VALUES(w, this->width, h, this->height);
+}
+
+void GantrySymbollet::prepare_style(GantryStatus status, GantrySymbolStyle& style) {
+	CAS_SLOT(style.color, Colours::Gray);
+	CAS_SLOT(style.highlight_color, Colours::Green);
+	CAS_SLOT(style.border_color, Colours::DarkGray);
+}
+
+void GantrySymbollet::on_status_changed(GantryStatus status) {
+	switch (status) {
+	case GantryStatus::WindedOut: {
+	}; break;
+	case GantryStatus::WindedUp: {
+	}; break;
+	case GantryStatus::WindingOut: {
+	}; break;
+	case GantryStatus::WindingUp: {
+	}; break;
+	case GantryStatus::Default: {
+		// keep current settings, but animation is paused by `update()`.
+	}; break;
+	}
+}
+
+void GantrySymbollet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+	
+}

@@ -97,13 +97,13 @@ public:
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->powers[LD::PSHPump]->set_value(DBD(DB2, 12U));
 		this->powers[LD::SBHPump]->set_value(DBD(DB2, 16U));
-		this->powers[LD::PSUWPump]->set_value(DBD(DB2, 200U));
-		this->powers[LD::SBUWPump]->set_value(DBD(DB2, 204U));
+		this->powers[LD::PSUWPump]->set_value(DBD(DB2, 12U));
+		this->powers[LD::SBUWPump]->set_value(DBD(DB2, 16U));
 
 		this->rpms[LD::PSHPump]->set_value(DBD(DB2, 604U));
 		this->rpms[LD::SBHPump]->set_value(DBD(DB2, 608U));
-		this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 200U));
-		this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 204U));
+		this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 604U));
+		this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 608U));
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
@@ -118,8 +118,8 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, 1U, DB205, 857U, 825U);
-		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, 25U, DB205, 873U, 841U);
+		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
+		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
 		DI_pump_dimension(this->pressures[LD::A], DB4, pump_A_feedback);
 		DI_pump_dimension(this->pressures[LD::C], DB4, pump_C_feedback);

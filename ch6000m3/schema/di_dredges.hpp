@@ -41,8 +41,8 @@ namespace WarGrey::SCADA {
 	static WarGrey::SCADA::WinchLimits winch_sb_draghead_limits = WarGrey::SCADA::WinchLimits(393U, 394U);
 	static unsigned int gantry_sb_trunnion_limited = 341U;
 	static unsigned int gantry_sb_intermediate_limited = 389U;
-	static unsigned int gantry_sb_long_draghead_limited = 397U;
-	static unsigned int gantry_sb_short_draghead_limited = 409U;
+	static unsigned int gantry_sb_long_draghead_limited = 409U;
+	static unsigned int gantry_sb_short_draghead_limited = 397U;
 
 	// DB205, starts from 1
 	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(1353U, 1793U, 2033U, false);

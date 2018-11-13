@@ -262,6 +262,7 @@
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
     <PRIResource Include="stone\tongue\en-US\loadings.resw" />
     <PRIResource Include="stone\tongue\en-US\draughts.resw" />
+    <PRIResource Include="stone\tongue\en-US\lubricatings.resw" />
     <PRIResource Include="stone\tongue\en-US\rainbowings.resw" />
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
@@ -284,6 +285,7 @@
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
     <PRIResource Include="stone\tongue\zh-CN\loadings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\lubricatings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
@@ -307,6 +309,7 @@
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="page\dredges.cpp" />
+    <ClCompile Include="page\lubricatings.cpp" />
     <ClCompile Include="schema\ai_dredges.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
@@ -323,6 +326,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="page\dredges.hpp" />
+    <ClInclude Include="page\lubricatings.hpp" />
     <ClInclude Include="schema\ai_doors.hpp" />
     <ClInclude Include="schema\ai_dredges.hpp" />
     <ClInclude Include="schema\ai_metrics.hpp" />
@@ -333,6 +337,7 @@
     <ClInclude Include="schema\di_hopper_pumps.hpp" />
     <ClInclude Include="schema\di_pumps.hpp" />
     <ClInclude Include="schema\di_valves.hpp" />
+    <ClInclude Include="schema\di_water_pumps.hpp" />
     <ClInclude Include="schema\do_devices.hpp" />
     <ClInclude Include="schema\do_doors.hpp" />
     <ClInclude Include="schema\do_dredges.hpp" />

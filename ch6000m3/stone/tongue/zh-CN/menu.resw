@@ -261,4 +261,7 @@
   <data name="HDoor17" xml:space="preserve">
     <value>全部大泥门</value>
   </data>
+  <data name="AutoLock" xml:space="preserve">
+    <value>自动锁紧</value>
+  </data>
 </root>

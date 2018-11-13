@@ -11,7 +11,8 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 		DredgeAddress* schema = new DredgeAddress();
 
 		schema->compensator = 82U;
-		schema->density_speed = 136U;
+		schema->density_speed = 172U;
+		schema->pulling_force = 110U;
 
 		schema->differential_pressure = 109U;
 		schema->vacuum_pressure = 164U;
@@ -33,7 +34,8 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 		DredgeAddress* schema = new DredgeAddress();
 
 		schema->compensator = 98U;
-		schema->density_speed = 148U;
+		schema->density_speed = 174U;
+		schema->pulling_force = 126U;
 
 		schema->differential_pressure = 125U;
 		schema->vacuum_pressure = 166U;

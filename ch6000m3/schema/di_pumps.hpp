@@ -19,8 +19,8 @@ namespace WarGrey::SCADA {
 	static unsigned int pump_M_feedback = 97U;
 	static unsigned int pump_K_feedback = 89U;
 
-	static unsigned int pump_I_feedback = 77U;
-	static unsigned int pump_J_feedback = 61U;
+	static unsigned int pump_I_feedback = 61U;
+	static unsigned int pump_J_feedback = 77U;
 
 	static unsigned int pump_ps_gate_flushing_feedback = 105U;
 	static unsigned int pump_sb_gate_flushing_feedback = 109U;

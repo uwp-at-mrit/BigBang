@@ -129,6 +129,9 @@
   <data name="kmeter" xml:space="preserve">
     <value>km</value>
   </data>
+  <data name="knewton" xml:space="preserve">
+    <value>kN</value>
+  </data>
   <data name="kwatt" xml:space="preserve">
     <value>kW</value>
   </data>

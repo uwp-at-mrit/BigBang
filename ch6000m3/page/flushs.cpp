@@ -20,6 +20,7 @@
 #include "schema/ai_doors.hpp"
 #include "schema/di_doors.hpp"
 #include "schema/di_valves.hpp"
+#include "schema/di_water_pumps.hpp"
 
 #include "schema/do_doors.hpp"
 #include "schema/do_valves.hpp"
@@ -109,6 +110,9 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
+		DI_water_pump(this->pumps[FS::PSPump], DB4, ps_water_pump_feedback, DB205, ps_water_pump_details);
+		DI_water_pump(this->pumps[FS::SBPump], DB4, sb_water_pump_feedback, DB205, sb_water_pump_details);
+
 		DI_gate_valve(this->gvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
 		DI_gate_valve(this->gvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);
 		DI_gate_valve(this->gvalves[FS::HBV03], DB4, butterfly_valve_HBV03_feedback, DB205, butterfly_valve_HBV03_status);

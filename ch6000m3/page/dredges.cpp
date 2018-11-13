@@ -25,6 +25,7 @@
 
 #include "schema/di_valves.hpp"
 #include "schema/di_pumps.hpp"
+#include "schema/di_hopper_pumps.hpp"
 #include "schema/di_dredges.hpp"
 
 #include "schema/do_dredges.hpp"
@@ -71,12 +72,12 @@ private enum class DS : unsigned int {
 	C, B, A, F, G, H,
 
 	// labels
-	Overlook, Sidelook,
+	Overlook, Sidelook, pump, hopper, underwater,
 
 	// dimensions
-	Overflow, PSWC, SBWC, PSDP, SBDP, TideMark, Speed,
+	Overflow, PSWC, SBWC, PSDP, SBDP, PSPF1, PSPF2, SBPF1, SBPF2, TideMark, Speed,
 
-	// pumps
+	// hopper pump metrics
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
 	// winches and gantries
@@ -102,10 +103,13 @@ static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
 private class IDredgingSystem : public PLCConfirmation {
 public:
 	IDredgingSystem(DredgesPage* master) : master(master) {
-		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->label_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->station_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
+		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->caption_color = Colours::Salmon;
+
+		//this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		//this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 
 		this->drag_configs[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
 		this->drag_configs[0].trunnion_length = ps_drag_trunnion_length;
@@ -157,12 +161,12 @@ protected:
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
 		this->load_label(ls, id, Colours::Silver);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit), id);
 	}
 
 	template<typename E>
 	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
-		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
+		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(), id);
 	}
 
 	template<class C, typename E>
@@ -259,7 +263,7 @@ protected:
 
 		this->compensators[id]->set_value(progress);
 		this->lengths[id]->set_value(progress, a);
-		this->pressures[id]->set_value(RealData(db203, rd_idx + 1U), a);
+		this->pressures[id]->set_value(RealData(db203, rd_idx + 0U), a);
 	}
 
 	void set_winch_metrics(DS id, const uint8* db2, unsigned int speed_idx, unsigned int length_idx, GraphletAnchor a) {
@@ -279,31 +283,21 @@ protected:
 			case WinchStatus::SaddleLimited: saddle = true; break;
 			case WinchStatus::SuctionLimited: suction = true; break;
 			case WinchStatus::UpperLimited: upper = true; break;
-			case WinchStatus::SensorUpperLimited: upper = true; break;
+			case WinchStatus::SensorUpperLimited: soft_upper = true; break;
 			case WinchStatus::SaddleSlack: saddle = true; slack = true; break;
 			case WinchStatus::SuctionSlack: suction = true; slack = true; break;
 			}
 
-			if (saddle) {
-				this->winch_saddles[id]->set_color(winch_status_highlight_color);
+			this->winch_saddles[id]->set_color(saddle ? winch_status_highlight_color : winch_status_color);
+			this->winch_uppers[id]->set_color(upper ? winch_status_highlight_color : winch_status_color);
+			this->winch_soft_uppers[id]->set_color(soft_upper ? winch_status_highlight_color : winch_status_color);
+
+			if (this->winch_slacks.find(id) != this->winch_slacks.end()) {
+				this->winch_slacks[id]->set_color(slack ? winch_status_highlight_color : winch_status_color);
 			}
 
-			if (slack) {
-				this->winch_slacks[id]->set_color(winch_status_highlight_color);
-			}
-
-			if (upper) {
-				this->winch_uppers[id]->set_color(winch_status_highlight_color);
-			}
-
-			if (soft_upper) {
-				this->winch_soft_uppers[id]->set_color(winch_status_highlight_color);
-			}
-
-			if (suction) {
-				if (this->winch_suctions.find(id) != this->winch_suctions.end()) {
-					this->winch_suctions[id]->set_color(winch_status_highlight_color);
-				}
+			if (this->winch_suctions.find(id) != this->winch_suctions.end()) {
+				this->winch_suctions[id]->set_color(suction ? winch_status_highlight_color : winch_status_color);
 			}
 		}
 	}
@@ -315,20 +309,23 @@ protected:
 		this->degrees[id]->set_value(visor_angle, GraphletAnchor::CC);
 	}
 
-	void set_drag_positions(DS id, const uint8* db2, unsigned int idx) {
+	void set_drag_positions(DS id, const uint8* db2, DredgeAddress* address) {
+		unsigned int pidx = address->drag_position;
+		unsigned int aidx = address->draghead_angle;
 		float3 ujoints[2];
-		float3 draghead = DBD_3(db2, idx + 36U);
-		float suction_depth = DBD(db2, idx + 0U);
+		float3 draghead = DBD_3(db2, pidx + 36U);
+		float suction_depth = DBD(db2, pidx + 0U);
+		float draghead_angle = DBD(db2, aidx) - 90.0F;
 
-		ujoints[0] = DBD_3(db2, idx + 12U);
-		ujoints[1] = DBD_3(db2, idx + 24U);
+		ujoints[0] = DBD_3(db2, pidx + 12U);
+		ujoints[1] = DBD_3(db2, pidx + 24U);
 
-		ujoints[1].y = DBD(db2, idx + 48U);
-		draghead.y = DBD(db2, idx + 52U);
-		draghead.z = DBD(db2, idx + 56U);
+		ujoints[1].y = DBD(db2, pidx + 48U);
+		draghead.y = DBD(db2, pidx + 52U);
+		draghead.z = DBD(db2, pidx + 56U);
 
-		this->dragxys[id]->set_position(suction_depth, ujoints, draghead);
-		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead);
+		this->dragxys[id]->set_position(suction_depth, ujoints, draghead, draghead_angle);
+		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, draghead_angle);
 		this->dragheads[id]->set_depths(suction_depth, draghead.z);
 
 		this->lengths[id]->set_value(draghead.z, GraphletAnchor::CC);
@@ -341,6 +338,7 @@ protected: // never delete these graphlets manually.
 	std::map<DS, Credit<DragHeadlet, DS>*> dragheads;
 	std::map<DS, Credit<DragXYlet, DS>*> dragxys;
 	std::map<DS, Credit<DragXZlet, DS>*> dragxzes;
+	std::map<DS, Credit<Dimensionlet, DS>*> forces;
 	std::map<DS, Credit<Dimensionlet, DS>*> pressures;
 	std::map<DS, Credit<Dimensionlet, DS>*> degrees;
 	std::map<DS, Credit<Dimensionlet, DS>*> lengths;
@@ -394,6 +392,11 @@ public:
 
 		this->set_density_speed(DS::PS, DB203, this->ps_address->density_speed);
 		this->set_density_speed(DS::SB, DB203, this->sb_address->density_speed);
+
+		this->forces[DS::PSPF1]->set_value(RealData(DB203, this->ps_address->pulling_force + 0U), GraphletAnchor::LC);
+		this->forces[DS::PSPF2]->set_value(RealData(DB203, this->ps_address->pulling_force + 1U), GraphletAnchor::LC);
+		this->forces[DS::SBPF1]->set_value(RealData(DB203, this->sb_address->pulling_force + 0U), GraphletAnchor::LC);
+		this->forces[DS::SBPF2]->set_value(RealData(DB203, this->sb_address->pulling_force + 1U), GraphletAnchor::LC);
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
@@ -402,8 +405,8 @@ public:
 		unsigned int sbws_idx = this->sb_address->winch_speed;
 		unsigned int sbwl_idx = this->sb_address->winch_length;
 
-		this->set_drag_positions(DS::PS, DB2, this->ps_address->drag_position);
-		this->set_drag_positions(DS::SB, DB2, this->sb_address->drag_position);
+		this->set_drag_positions(DS::PS, DB2, this->ps_address);
+		this->set_drag_positions(DS::SB, DB2, this->sb_address);
 
 		this->set_draghead_angles(DS::PS, DB2, this->ps_address->draghead_angle);
 		this->set_draghead_angles(DS::SB, DB2, this->sb_address->draghead_angle);
@@ -420,6 +423,9 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		DI_hopper_pumps(this->hpumps[DS::PSHP], this->hpumps[DS::PSHP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
+		DI_hopper_pumps(this->hpumps[DS::SBHP], this->hpumps[DS::SBHP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
+
 		DI_gate_valve(this->valves[DS::D003], DB205, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
 		DI_gate_valve(this->valves[DS::D004], DB205, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
 		DI_gate_valve(this->valves[DS::D011], DB4, gate_valve_D11_feedback, DB205, gate_valve_D11_status);
@@ -439,6 +445,9 @@ public:
 
 		this->set_winch_limits(DS::psTrunnion, DS::psDragHead);
 		this->set_winch_limits(DS::sbTrunnion, DS::sbDragHead);
+
+		this->set_hopper_type(DS::PS, DB4, ps_hopper_pump_feedback);
+		this->set_hopper_type(DS::SB, DB4, sb_hopper_pump_feedback);
 	}
 
 public:
@@ -478,6 +487,8 @@ public:
 		this->load_valves(this->valves, this->labels, DS::D003, DS::D012, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DS::D013, DS::D016, vinset, -90.0);
 		this->load_label(this->labels, DS::LMOD.ToString(), DS::LMOD, Colours::Cyan, this->station_font);
+		this->load_label(this->hopper_types, _speak(DS::pump), DS::PS, Colours::Salmon, this->caption_font);
+		this->load_label(this->hopper_types, _speak(DS::pump), DS::SB, Colours::Salmon, this->caption_font);
 
 		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipe_thickness, Colours::Green));
 		this->hpumps[DS::PSHP] = this->master->insert_one(new Credit<HopperPumplet, DS>(+rx, -ry), DS::PSHP);
@@ -505,6 +516,10 @@ public:
 		
 			this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, overflow_height));
 			this->load_dimension(this->lengths, DS::Overflow, "meter");
+			this->load_dimension(this->forces, DS::PSPF1, "knewton");
+			this->load_dimension(this->forces, DS::PSPF2, "knewton");
+			this->load_dimension(this->forces, DS::SBPF1, "knewton");
+			this->load_dimension(this->forces, DS::SBPF2, "knewton");
 
 			this->load_densityflowmeters(this->dfmeters, DS::PS, DS::SB, dfmeter_height);
 			this->load_compensators(this->compensators, DS::PSWC, DS::SBWC, cylinder_height, compensator_range);
@@ -573,10 +588,10 @@ public:
 		this->station->map_credit_graphlet(this->suctions[DS::PS], GraphletAnchor::CC);
 		this->station->map_credit_graphlet(this->suctions[DS::SB], GraphletAnchor::CC);
 
-		this->master->move_to(this->cylinders[DS::PSHPDP], this->station, GraphletAnchor::LC, GraphletAnchor::RB, -vinset, vinset);
-		this->master->move_to(this->cylinders[DS::PSHPVP], this->cylinders[DS::PSHPDP], GraphletAnchor::LB, GraphletAnchor::RB, -vinset * 2.0F);
-		this->master->move_to(this->cylinders[DS::SBHPDP], this->station, GraphletAnchor::RC, GraphletAnchor::LB, +vinset, vinset);
-		this->master->move_to(this->cylinders[DS::SBHPVP], this->cylinders[DS::SBHPDP], GraphletAnchor::RB, GraphletAnchor::LB, +vinset * 2.0F);
+		this->master->move_to(this->cylinders[DS::PSHPDP], this->station, GraphletAnchor::LC, GraphletAnchor::RB, 0.0F, vinset);
+		this->master->move_to(this->cylinders[DS::PSHPVP], this->cylinders[DS::PSHPDP], GraphletAnchor::LB, GraphletAnchor::RB, -vinset);
+		this->master->move_to(this->cylinders[DS::SBHPDP], this->station, GraphletAnchor::RC, GraphletAnchor::LB, 0.0F, vinset);
+		this->master->move_to(this->cylinders[DS::SBHPVP], this->cylinders[DS::SBHPDP], GraphletAnchor::RB, GraphletAnchor::LB, +vinset);
 	}
 
 	void reflow_dashboard(float width, float height, float vinset) {
@@ -588,71 +603,69 @@ public:
 		
 		this->station->fill_stepsize(&xstep, &ystep);
 
-		{ // flow centeral components
+		{ // reflow centeral components
 			this->master->move_to(this->lengths[DS::Overflow], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 			this->master->move_to(this->overflowpipe, this->lengths[DS::Overflow], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -txt_gapsize);
 
 			this->master->move_to(this->dfmeters[DS::PS], this->overflowpipe, GraphletAnchor::LT, GraphletAnchor::RB);
 			this->master->move_to(this->dfmeters[DS::SB], this->overflowpipe, GraphletAnchor::RT, GraphletAnchor::LB);
+			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -vinset);
 
 			this->master->move_to(this->dragheads[DS::PS], cx, height * 0.80F, GraphletAnchor::RC, -xstep);
 			this->master->move_to(this->dragheads[DS::SB], cx, height * 0.80F, GraphletAnchor::LC, +xstep);
+			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +vinset);
 		}
 
-		{ // flow left dredging system
-			float dflx, cylx;
+		{ // reflow left dredging system
+			float dflx, wclx;
 
 			this->master->fill_graphlet_location(this->dfmeters[DS::PS], &dflx, nullptr, GraphletAnchor::LC);
-			this->master->fill_graphlet_location(this->cylinders[DS::PSHPVP], &cylx, nullptr, GraphletAnchor::LC);
+			this->master->fill_graphlet_location(this->compensators[DS::PSWC], &wclx, nullptr, GraphletAnchor::LC);
 
-			this->master->move_to(this->dragxys[DS::PS], std::fminf(dflx, cylx), cy, GraphletAnchor::RB, -vinset * 2.0F, vinset);
+			this->master->move_to(this->dragxys[DS::PS], std::fminf(dflx, wclx), cy, GraphletAnchor::RB, -vinset, vinset);
 			this->master->move_to(this->dragxzes[DS::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
-			this->master->move_to(this->compensators[DS::PSWC], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, vinset * 2.0F);
 
-			{ // flow winches
+			{ // reflow winches
 				float lx = vinset;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winches[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winches[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC);
-				this->master->move_to(this->winches[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 3.0F);
+				this->master->move_to(this->winches[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 6.0F);
+				this->master->move_to(this->winches[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->winches[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 0.0F);
 			}
 		}
 
-		{ // flow right dredging system
-			float dfrx, cyrx;
+		{ // reflow right dredging system
+			float dfrx, wcrx;
 
 			this->master->fill_graphlet_location(this->dfmeters[DS::SB], &dfrx, nullptr, GraphletAnchor::RC);
-			this->master->fill_graphlet_location(this->cylinders[DS::SBHPVP], &cyrx, nullptr, GraphletAnchor::RC);
+			this->master->fill_graphlet_location(this->compensators[DS::SBWC], &wcrx, nullptr, GraphletAnchor::RC);
 
-			this->master->move_to(this->dragxys[DS::SB], std::fmaxf(dfrx, cyrx), cy, GraphletAnchor::LB, vinset * 2.0F, vinset);
+			this->master->move_to(this->dragxys[DS::SB], std::fmaxf(dfrx, wcrx), cy, GraphletAnchor::LB, vinset, vinset);
 			this->master->move_to(this->dragxzes[DS::SB], width - xstep, height - vinset - ystep, GraphletAnchor::RB);
-			this->master->move_to(this->compensators[DS::SBWC], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -vinset * 2.0F);
 
-			{ // flow winches
+			{ // reflow winches
 				float rx = width - vinset;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winches[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winches[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC);
-				this->master->move_to(this->winches[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 3.0F);
+				this->master->move_to(this->winches[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 6.0F);
+				this->master->move_to(this->winches[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->winches[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 0.0F);
 			}
 		}
 
-		{ // flow dimensions and labels
-			this->master->move_to(this->pressures[DS::PSWC], this->compensators[DS::PSWC], GraphletAnchor::RB, GraphletAnchor::LB, txt_gapsize);
-			this->master->move_to(this->lengths[DS::PSWC], this->pressures[DS::PSWC], GraphletAnchor::LT, GraphletAnchor::LB);
-			this->master->move_to(this->labels[DS::PSWC], this->lengths[DS::PSWC], GraphletAnchor::LT, GraphletAnchor::LB);
-
-			this->master->move_to(this->pressures[DS::SBWC], this->compensators[DS::SBWC], GraphletAnchor::LB, GraphletAnchor::RB, -txt_gapsize);
-			this->master->move_to(this->lengths[DS::SBWC], this->pressures[DS::SBWC], GraphletAnchor::RT, GraphletAnchor::RB);
-			this->master->move_to(this->labels[DS::SBWC], this->lengths[DS::SBWC], GraphletAnchor::RT, GraphletAnchor::RB);
+		{ // reflow dimensions and labels
+			for (DS id = DS::PSWC; id <= DS::SBWC; id++) {
+				this->master->move_to(this->labels[id], this->compensators[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -txt_gapsize);
+				this->master->move_to(this->lengths[id], this->compensators[id], GraphletAnchor::CB, GraphletAnchor::CT);
+				this->master->move_to(this->pressures[id], this->lengths[id], GraphletAnchor::CB, GraphletAnchor::CT);
+			}
 
 			for (DS id = DS::PS; id <= DS::SB; id++) {
 				this->master->move_to(this->pressures[id], this->dragheads[id], GraphletAnchor::CT, GraphletAnchor::CB);
@@ -680,6 +693,14 @@ public:
 
 				this->reflow_winch_limits(id);
 			}
+
+			this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB);
+			this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
+			this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB);
+			this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
+
+			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
+			this->master->move_to(this->hopper_types[DS::SB], this->labels[DS::SBHPDP], GraphletAnchor::RT, GraphletAnchor::CB, +vinset, -txt_gapsize);
 		}
 	}
 
@@ -699,12 +720,41 @@ private:
 	}
 
 	void set_density_speed(DS id, const uint8* db203, unsigned int idx) {
-		float hdensity = RealData(db203, idx + 0U);
-		float udensity = RealData(db203, idx + 2U);
-		float hflspeed = RealData(db203, idx + 1U);
-		float uflspeed = RealData(db203, idx + 3U);
+		this->dfmeters[id]->set_values(RealData(db203, idx + 0U), RealData(db203, idx + 1U));
+	}
 
-		this->dfmeters[id]->set_values(std::fmaxf(hdensity, udensity), std::fmaxf(hflspeed, uflspeed));
+	void set_hopper_type(DS id, const uint8* db4, unsigned int idx_p1) {
+		DS type = DS::pump;
+
+		if (DI_hopper_type(db4, idx_p1)) {
+			type = DS::hopper;
+		} else if (DI_underwater_type(db4, idx_p1)) {
+			type = DS::underwater;
+		}
+
+		this->hopper_types[id]->set_text(_speak(type), GraphletAnchor::CC);
+	}
+
+private:
+	void try_flow_water(DS vid, DS start, DS end, CanvasSolidColorBrush^ color) {
+		switch (this->valves[vid]->get_status()) {
+		case GateValveStatus::Open: {
+			this->station->append_subtrack(start, end, color);
+		}
+		}
+	}
+
+	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		switch (this->valves[vid]->get_status()) {
+		case GateValveStatus::Open: {
+			this->station->append_subtrack(path, count, color);
+		}
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_water(DS vid, DS (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, path, N, color);
 	}
 
 private: // never delete these graphlets manually.
@@ -715,6 +765,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Cylinderlet, DS>*> cylinders;
 	std::map<DS, Credit<DensitySpeedmeterlet, DS>*> dfmeters;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
+	std::map<DS, Credit<Labellet, DS>*> hopper_types;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
 
@@ -762,7 +813,10 @@ public:
 
 			this->rc_speeds[DS::psIntermediate]->set_value(RealData(DB203, winch_ps_intermediate_remote_speed), GraphletAnchor::CC);
 			this->rc_speeds[DS::psDragHead]->set_value(RealData(DB203, winch_ps_draghead_remote_speed), GraphletAnchor::CC);
-
+			
+			this->forces[DS::PSPF1]->set_value(RealData(DB203, this->address->pulling_force + 0U), GraphletAnchor::LC);
+			this->forces[DS::PSPF2]->set_value(RealData(DB203, this->address->pulling_force + 1U), GraphletAnchor::LC);
+			
 			this->set_compensator(DS::PSWC, DB203, this->address->compensator, GraphletAnchor::LC);
 
 			this->Alets[DS::psTrunnion]->set_value(RealData(DB203, winch_ps_trunnion_A_pressure), GraphletAnchor::LB);
@@ -778,6 +832,9 @@ public:
 
 			this->rc_speeds[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_remote_speed), GraphletAnchor::CC);
 			this->rc_speeds[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_remote_speed), GraphletAnchor::CC);
+
+			this->forces[DS::SBPF1]->set_value(RealData(DB203, this->address->pulling_force + 0U), GraphletAnchor::LC);
+			this->forces[DS::SBPF2]->set_value(RealData(DB203, this->address->pulling_force + 1U), GraphletAnchor::LC);
 
 			this->set_compensator(DS::SBWC, DB203, this->address->compensator, GraphletAnchor::RC);
 
@@ -797,8 +854,9 @@ public:
 		unsigned int sbwl_idx = this->address->winch_length;
 
 		this->lengths[DS::TideMark]->set_value(DBD(DB2, 0U));
+		this->speeds[DS::Speed]->set_value(DBD(DB2, 584U));
 
-		this->set_drag_positions(this->DS_side, DB2, this->address->drag_position);
+		this->set_drag_positions(this->DS_side, DB2, this->address);
 		this->set_draghead_angles(this->DS_side, DB2, this->address->draghead_angle);
 
 		if (this->DS_side == DS::PS) {
@@ -912,12 +970,12 @@ public:
 public:
 	void load(float width, float height, float vinset) override {
 		float drag_height = height * 0.618F;
-		float side_drag_width = width * 0.35F;
+		float side_drag_width = width * 0.32F;
 		float over_drag_width = drag_height * 0.382F;
 		float draghead_radius = side_drag_width * 0.18F;
 		float winch_radius = over_drag_width * 0.382F;
 		float gantry_radius = drag_height * 0.20F;
-		float table_header_width = width * 0.1618F;
+		float table_header_width = width * 0.14F;
 		DragInfo config = this->drag_configs[this->drag_idx];
 
 		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_height, config, this->drag_color);
@@ -939,6 +997,8 @@ public:
 			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::psTrunnion, DS::psDragHead, DS::C, "bar");
+			this->load_dimension(this->forces, DS::PSPF1, "knewton");
+			this->load_dimension(this->forces, DS::PSPF2, "knewton");
 
 			this->load_label(this->labels, DS::ps_gantry_settings, Colours::Black);
 		} else {
@@ -947,6 +1007,8 @@ public:
 			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::sbTrunnion, DS::sbDragHead, DS::F, "bar");
+			this->load_dimension(this->forces, DS::SBPF1, "knewton");
+			this->load_dimension(this->forces, DS::SBPF2, "knewton");
 
 			this->load_label(this->labels, DS::sb_gantry_settings, Colours::Black);
 		}
@@ -1030,16 +1092,24 @@ public:
 			}
 		}
 
-		{ // flow labels and dimensions
+		{ // reflow labels and dimensions
 			this->master->move_to(this->labels[DS_side], cx, vinset * 2.0F, GraphletAnchor::CC);
 			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
 			this->master->move_to(this->labels[DS::Overlook], this->dragxys[DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
 
 			this->master->move_to(this->lengths[DS::TideMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
+
+			if (DS_side == DS::PS) {
+				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS_side], GraphletAnchor::RT, GraphletAnchor::CB);
+				this->master->move_to(this->forces[DS::PSPF1], this->forces[DS::PSPF2], GraphletAnchor::CT, GraphletAnchor::CB);
+			} else {
+				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS_side], GraphletAnchor::LT, GraphletAnchor::CB);
+				this->master->move_to(this->forces[DS::SBPF1], this->forces[DS::SBPF2], GraphletAnchor::CT, GraphletAnchor::CB);
+			}
 		}
 
-		{ // flow gantry indicators
+		{ // reflow gantry indicators
 			GraphletAnchor table_anchor = GraphletAnchor::LC;
 			Credit<Rectanglet, DS>* table_header = this->table_headers[DS::ps_gantry_settings];
 			float xoff = vinset * 0.5F;

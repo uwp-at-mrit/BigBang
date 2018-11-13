@@ -261,4 +261,7 @@
   <data name="HDoor17" xml:space="preserve">
     <value>All Hopper Doors</value>
   </data>
+  <data name="AutoLock" xml:space="preserve">
+    <value>Auto Lock</value>
+  </data>
 </root>

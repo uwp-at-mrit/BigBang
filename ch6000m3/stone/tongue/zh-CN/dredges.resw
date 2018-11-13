@@ -228,4 +228,25 @@
   <data name="SoftUpper" xml:space="preserve">
     <value>编码器上限</value>
   </data>
+  <data name="PSPF1" xml:space="preserve">
+    <value>耙管拉力1</value>
+  </data>
+  <data name="PSPF2" xml:space="preserve">
+    <value>耙管拉力2</value>
+  </data>
+  <data name="SBPF1" xml:space="preserve">
+    <value>耙管拉力1</value>
+  </data>
+  <data name="SBPF2" xml:space="preserve">
+    <value>耙管拉力2</value>
+  </data>
+  <data name="hopper" xml:space="preserve">
+    <value>舱内泵</value>
+  </data>
+  <data name="pump" xml:space="preserve">
+    <value>泥泵</value>
+  </data>
+  <data name="underwater" xml:space="preserve">
+    <value>水下泵</value>
+  </data>
 </root>

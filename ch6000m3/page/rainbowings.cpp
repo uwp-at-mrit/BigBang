@@ -147,8 +147,8 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, 1U, DB205, 857U);
-		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, 25U, DB205, 873U);
+		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details);
+		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details);
 
 		DI_pump_dimension(this->pressures[RS::A], DB4, pump_A_feedback);
 		DI_pump_dimension(this->pressures[RS::C], DB4, pump_C_feedback);

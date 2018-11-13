@@ -3,6 +3,21 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 
 namespace WarGrey::SCADA {
+	// DB4, starts from 1
+#define DI_hopper_type(db4, idx_p1) DBX(db4, idx_p1 + 0U)
+#define DI_underwater_type(db4, idx_p1) DBX(db4, idx_p1 + 1U)
+
+	static unsigned int ps_hopper_pump_feedback = 1U;
+	static unsigned int sb_hopper_pump_feedback = 25U;
+
+	// DB205, starts from 1
+	static unsigned int ps_hopper_pump_details = 857U;
+	static unsigned int ps_underwater_pump_details = 825U;
+
+	static unsigned int sb_hopper_pump_details = 873U;
+	static unsigned int sb_underwater_pump_details = 841U;
+
+	/************************************************************************************************/
 	template<class H>
 	void DI_hopper_pump(H* target, const uint8* db4, size_t idx4, const uint8* db205, size_t idx205, bool on) {
 		if (on) {
@@ -37,17 +52,12 @@ namespace WarGrey::SCADA {
 
 	template<class H>
 	void DI_hopper_pumps(H* t1, H* t2, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_1_p1, size_t idx205_2_p1) {
-		bool hopper = DBX(db4, idx4_p1 + 0U);
-		bool underw = DBX(db4, idx4_p1 + 1U);
-
-		DI_hopper_pump(t1, db4, idx4_p1 - 1U, db205, idx205_1_p1 - 1U, hopper);
-		DI_hopper_pump(t2, db4, idx4_p1 - 1U, db205, idx205_2_p1 - 1U, underw);
+		DI_hopper_pump(t1, db4, idx4_p1 - 1U, db205, idx205_1_p1 - 1U, DI_hopper_type(db4, idx4_p1));
+		DI_hopper_pump(t2, db4, idx4_p1 - 1U, db205, idx205_2_p1 - 1U, DI_underwater_type(db4, idx4_p1));
 	}
 
 	template<class H>
 	void DI_hopper_pump(H* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
-		bool hopper = DBX(db4, idx_p1 + 0U);
-
-		DI_hopper_pump(target, db4, idx_p1 - 1U, db205, idx205_p1 - 1U, hopper);
+		DI_hopper_pump(target, db4, idx_p1 - 1U, db205, idx205_p1 - 1U, DI_hopper_type(db4, idx_p1));
 	}
 }

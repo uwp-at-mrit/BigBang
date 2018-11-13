@@ -177,4 +177,7 @@
   <data name="dredges_Right" xml:space="preserve">
     <value>右绞车 &amp;&amp; 吊架</value>
   </data>
+  <data name="lubricatings" xml:space="preserve">
+    <value>轴承润滑单元 &amp;&amp; 齿轮箱滑油泵</value>
+  </data>
 </root>

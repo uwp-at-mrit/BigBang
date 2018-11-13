@@ -8,7 +8,7 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Debug;
 static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 #endif
 
-static Platform::String^ remote_test_server = nullptr;
+static Platform::String^ remote_test_server = "192.168.0.123";
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 4U;
@@ -30,12 +30,12 @@ static const double earthwork_range = 9000.0;
 static const double vessel_range = 9000.0;
 static const double loading_range = 14000.0;
 static const double displacement_range = 40000.0;
-static const double compensator_range = 3.0;
+static const double compensator_range = 4.0;
 
 static const float ps_drag_trunnion_gapsize = 1.845F;
 static const float ps_drag_trunnion_length = 3.61F;
 static const float ps_drag_pipe1_length = 25.34F;
-static const float ps_drag_pipe2_length = 17.55F;
+static const float ps_drag_pipe2_length = 17.55F; // long one is 30.55F.
 static const float ps_drag_radius = 0.5F;
 static const float ps_drag_head_width = 4.03F;
 static const float ps_drag_head_length = 2.54F;
@@ -44,7 +44,7 @@ static const float ps_drag_head_compensation = 0.5F;
 static const float sb_drag_trunnion_gapsize = 1.845F;
 static const float sb_drag_trunnion_length = 3.61F;
 static const float sb_drag_pipe1_length = 25.34F;
-static const float sb_drag_pipe2_length = 30.45F;
+static const float sb_drag_pipe2_length = 17.45F;
 static const float sb_drag_radius = 0.5F;
 static const float sb_drag_head_width = 4.03F;
 static const float sb_drag_head_length = 2.54F;

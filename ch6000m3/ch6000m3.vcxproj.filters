@@ -62,6 +62,9 @@
     <ClCompile Include="schema\ai_dredges.cpp">
       <Filter>schema</Filter>
     </ClCompile>
+    <ClCompile Include="page\lubricatings.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -141,6 +144,12 @@
       <Filter>schema</Filter>
     </ClInclude>
     <ClInclude Include="schema\ai_metrics.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\lubricatings.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\di_water_pumps.hpp">
       <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
@@ -360,6 +369,12 @@
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\lubricatings.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\lubricatings.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

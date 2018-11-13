@@ -102,9 +102,10 @@ public:
 
 		this->pressures[SW::PSHP]->set_value(RealData(DB203, 28U), GraphletAnchor::LB);
 		this->flows[SW::PSHP]->set_value(RealData(DB203, 29U), GraphletAnchor::LT);
+		
 		this->pressures[SW::SBHP]->set_value(RealData(DB203, 44U), GraphletAnchor::LB);
 		this->flows[SW::SBHP]->set_value(RealData(DB203, 45U), GraphletAnchor::LB);
-
+		
 		this->pressures[SW::PSUWP1]->set_value(RealData(DB203, 112U), GraphletAnchor::LB);
 		this->pressures[SW::PSUWP2]->set_value(RealData(DB203, 113U), GraphletAnchor::LB);
 		this->pressures[SW::SBUWP1]->set_value(RealData(DB203, 118U), GraphletAnchor::LB);
@@ -112,8 +113,8 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {
-		DI_hopper_pumps(this->hoppers[SW::PSHP], this->hoppers[SW::PSUWP], DB4, 1U, DB205, 857U, 825U);
-		DI_hopper_pumps(this->hoppers[SW::SBHP], this->hoppers[SW::SBUWP], DB4, 25U, DB205, 873U, 841U);
+		DI_hopper_pumps(this->hoppers[SW::PSHP], this->hoppers[SW::PSUWP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
+		DI_hopper_pumps(this->hoppers[SW::SBHP], this->hoppers[SW::SBUWP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
 		DI_gate_flushing_pump(this->pumps[SW::PSFP], DB4, pump_ps_gate_flushing_feedback, DB205, pump_ps_gate_flushing_status);
 		DI_gate_flushing_pump(this->pumps[SW::SBFP], DB4, pump_sb_gate_flushing_feedback, DB205, pump_sb_gate_flushing_status);

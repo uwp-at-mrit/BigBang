@@ -45,6 +45,7 @@ namespace WarGrey::SCADA {
 		void set_position(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead,
+			double visor_angle,
 			bool force = false);
 
 	protected:
@@ -105,6 +106,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		double draghead_angle;
+		double visor_angle;
 		float draghead_length;
 		bool dredging;
 	};

@@ -117,136 +117,75 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Overflow" xml:space="preserve">
-    <value>Overflow Pipe</value>
+  <data name="A" xml:space="preserve">
+    <value>左耙头、左泥门、装驳、溢流桶</value>
   </data>
-  <data name="PSHPDP" xml:space="preserve">
-    <value>PS Discharge Pressure</value>
+  <data name="B" xml:space="preserve">
+    <value>左耙中</value>
   </data>
-  <data name="psDraghead" xml:space="preserve">
-    <value>PS Draghead</value>
+  <data name="C" xml:space="preserve">
+    <value>左弯管、左闸阀、艏吹、艏靠泊</value>
   </data>
-  <data name="psIntermediate" xml:space="preserve">
-    <value>PS Intermediate</value>
+  <data name="D" xml:space="preserve">
+    <value>蝶阀</value>
   </data>
-  <data name="psTrunnion" xml:space="preserve">
-    <value>PS Trunnion</value>
+  <data name="E" xml:space="preserve">
+    <value>泥门紧锁</value>
   </data>
-  <data name="PSHPVP" xml:space="preserve">
-    <value>PS Vacuum Pressure</value>
+  <data name="F" xml:space="preserve">
+    <value>右弯管、右闸阀</value>
   </data>
-  <data name="PSWC" xml:space="preserve">
-    <value>PS Wave Compensator</value>
+  <data name="G" xml:space="preserve">
+    <value>右耙中</value>
   </data>
-  <data name="SBHPDP" xml:space="preserve">
-    <value>SB Discharge Pressure</value>
+  <data name="H" xml:space="preserve">
+    <value>右耙头、右泥门、引水闸阀</value>
   </data>
-  <data name="sbDraghead" xml:space="preserve">
-    <value>SB Draghead</value>
+  <data name="K" xml:space="preserve">
+    <value>循环冷却</value>
   </data>
-  <data name="sbIntermediate" xml:space="preserve">
-    <value>SB Intermediate</value>
+  <data name="Y" xml:space="preserve">
+    <value>应急</value>
   </data>
-  <data name="sbTrunnion" xml:space="preserve">
-    <value>SB Trunnion</value>
+  <data name="Port" xml:space="preserve">
+    <value>左舷液压系统</value>
   </data>
-  <data name="SBHPVP" xml:space="preserve">
-    <value>SB Vaccum Pressure</value>
+  <data name="Starboard" xml:space="preserve">
+    <value>右舷液压系统</value>
   </data>
-  <data name="SBWC" xml:space="preserve">
-    <value>SB Wave Compensator</value>
+  <data name="I" xml:space="preserve">
+    <value>右耙唇</value>
   </data>
-  <data name="PSDP" xml:space="preserve">
-    <value>PS Draghead Differential Pressure</value>
+  <data name="J" xml:space="preserve">
+    <value>左耙唇</value>
   </data>
-  <data name="SBDP" xml:space="preserve">
-    <value>SB Draghead Differential Pressure</value>
+  <data name="M" xml:space="preserve">
+    <value>备用</value>
   </data>
-  <data name="Overlook" xml:space="preserve">
-    <value>Over Look View</value>
+  <data name="L" xml:space="preserve">
+    <value>马达冲洗</value>
   </data>
-  <data name="PS" xml:space="preserve">
-    <value>Port</value>
+  <data name="Storage" xml:space="preserve">
+    <value>储油罐</value>
   </data>
-  <data name="Sidelook" xml:space="preserve">
-    <value>Side Look View</value>
+  <data name="F01" xml:space="preserve">
+    <value>回油滤器F0.01堵塞</value>
   </data>
-  <data name="SB" xml:space="preserve">
-    <value>Starboard</value>
+  <data name="F02" xml:space="preserve">
+    <value>回油滤器F0.02堵塞</value>
   </data>
-  <data name="Speed" xml:space="preserve">
-    <value>Speed</value>
+  <data name="F10" xml:space="preserve">
+    <value>滤器堵塞</value>
   </data>
-  <data name="TideMark" xml:space="preserve">
-    <value>Tide Mark</value>
+  <data name="Master" xml:space="preserve">
+    <value>主油温</value>
+    <comment>“主油箱”标签不显示</comment>
   </data>
-  <data name="Alet" xml:space="preserve">
-    <value>A let</value>
+  <data name="Visor" xml:space="preserve">
+    <value>油温</value>
+    <comment>“耙唇液压油箱”标签不显示</comment>
   </data>
-  <data name="Blet" xml:space="preserve">
-    <value>B let</value>
-  </data>
-  <data name="hVirtualOut" xml:space="preserve">
-    <value>Draghead Gantry Virtual Wind Out Limited</value>
-  </data>
-  <data name="hVirtualUp" xml:space="preserve">
-    <value>Draghead Gantry Virtual Wind Up Limited</value>
-  </data>
-  <data name="iVirtualOut" xml:space="preserve">
-    <value>Intermediate Gantry Virtual Wind Out Limited</value>
-  </data>
-  <data name="iVirtualUp" xml:space="preserve">
-    <value>Intermediate Gantry Virtual Wind Up Limited</value>
-  </data>
-  <data name="tVirtualOut" xml:space="preserve">
-    <value>Trunnion Gantry Virtual Wind Out Limited</value>
-  </data>
-  <data name="tVirtualUp" xml:space="preserve">
-    <value>Trunnion Gantry Virtual Wind Up Limited</value>
-  </data>
-  <data name="on" xml:space="preserve">
-    <value>Working</value>
-  </data>
-  <data name="ps_gantry_settings" xml:space="preserve">
-    <value>PS Gantry Limitation Settings</value>
-  </data>
-  <data name="sb_gantry_settings" xml:space="preserve">
-    <value>SB Gantry Limitation Settings</value>
-  </data>
-  <data name="SaddleLimited" xml:space="preserve">
-    <value>Saddle Limited</value>
-  </data>
-  <data name="Slack" xml:space="preserve">
-    <value>Slack</value>
-  </data>
-  <data name="SuctionLimited" xml:space="preserve">
-    <value>Suction Limited</value>
-  </data>
-  <data name="Upper" xml:space="preserve">
-    <value>Upper</value>
-  </data>
-  <data name="SoftUpper" xml:space="preserve">
-    <value>Soft Upper</value>
-  </data>
-  <data name="PSPF1" xml:space="preserve">
-    <value>PS Pulling Force 1</value>
-  </data>
-  <data name="PSPF2" xml:space="preserve">
-    <value>PS Pulling Force 2</value>
-  </data>
-  <data name="SBPF1" xml:space="preserve">
-    <value>SB Pulling Force 1</value>
-  </data>
-  <data name="SBPF2" xml:space="preserve">
-    <value>SB Pulling Force 2</value>
-  </data>
-  <data name="hopper" xml:space="preserve">
-    <value>hopper pump</value>
-  </data>
-  <data name="pump" xml:space="preserve">
-    <value>hopper pump</value>
-  </data>
-  <data name="underwater" xml:space="preserve">
-    <value>underwater pump</value>
+  <data name="Pressure" xml:space="preserve">
+    <value>回油压力</value>
   </data>
 </root>
