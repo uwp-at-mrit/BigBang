@@ -244,7 +244,7 @@
     <value>舱内泵</value>
   </data>
   <data name="pump" xml:space="preserve">
-    <value>泥泵</value>
+    <value>[泥泵]</value>
   </data>
   <data name="underwater" xml:space="preserve">
     <value>水下泵</value>

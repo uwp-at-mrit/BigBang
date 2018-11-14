@@ -27,8 +27,8 @@ static const float tiny_font_size = 12.0F;
 static const size_t hopper_count = 7;
 
 static const double hopper_height_range = 13.85;
-static const double earthwork_range = 9000.0;
-static const double vessel_range = 9000.0;
+static const double earthwork_range = 10000.0;
+static const double vessel_range = 10000.0;
 static const double loading_range = 14000.0;
 static const double displacement_range = 30000.0;
 static const double compensator_range = 4.0;

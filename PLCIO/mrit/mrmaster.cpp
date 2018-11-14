@@ -171,9 +171,8 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 				reading_safe = false;
 
 				syslog(Log::Notice,
-					L"requesting for command '%c' on data block %u[%u, %u] to device[%s] is cancelled because %d previous %s are delayed",
-					fcode, datablock, addr0, addrn, this->device_description()->Data(), this->delay_balance,
-					((this->delay_balance == 1) ? L"requests" : L"request"));
+					L"requesting for command '%c' on data block %u[%u, %u] to device[%s] is cancelled because of network delay",
+					fcode, datablock, addr0, addrn, this->device_description()->Data());
 			}
 		}
 
@@ -258,9 +257,7 @@ void IMRMaster::wait_process_confirm_loop() {
 				this->delay_balance -= 1;
 
 				if (this->delay_balance > 0) {
-					syslog(Log::Notice, L"descard a delayed response from device[%s] for next %d %s",
-						this->device_description()->Data(), this->delay_balance,
-						((this->delay_balance == 1) ? "one" : "ones"));
+					syslog(Log::Notice, L"descard a delayed response from device[%s]", this->device_description()->Data());
 				} else if (!this->confirmations.empty()) {
 					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
 				}

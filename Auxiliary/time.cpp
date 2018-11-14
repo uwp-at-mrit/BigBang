@@ -82,11 +82,11 @@ void WarGrey::SCADA::sleep(unsigned int ms) {
 
 /*************************************************************************************************/
 Platform::String^ WarGrey::SCADA::make_timestamp(long long utc_s, bool locale) {
-	return ref new Platform::String(wtime(utc_s, L"%Y-%m-%d %H:%M:%S", locale));
+	return ref new Platform::String(wtime(utc_s, L"%F %T", locale));
 }
 
 Platform::String^ WarGrey::SCADA::make_daytimestamp(long long utc_s, bool locale) {
-	return ref new Platform::String(wtime(utc_s, L"%H:%M:%S", locale));
+	return ref new Platform::String(wtime(utc_s, L"%T", locale));
 }
 
 Platform::String^ WarGrey::SCADA::update_nowstamp(bool need_us, int* l00ns) {
@@ -97,6 +97,7 @@ Platform::String^ WarGrey::SCADA::update_nowstamp(bool need_us, int* l00ns) {
 	}
 
 	if (need_us) {
+		ts += ".";
 		ts += (calendar->Nanosecond / 10LL / 1000LL).ToString();
 	}
 

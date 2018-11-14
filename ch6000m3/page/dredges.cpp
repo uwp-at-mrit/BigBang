@@ -66,7 +66,7 @@ private enum class DS : unsigned int {
 	_,
 
 	// unnamed nodes
-	ps, sb, d13, d14,
+	ps, sb, d13, d14, d15, d16, d013, d014, d1315, d1416,
 
 	// Pump Dimensions
 	C, B, A, F, G, H,
@@ -99,6 +99,8 @@ static ICanvasBrush^ unchecked_color = Colours::WhiteSmoke;
 
 static ICanvasBrush^ winch_status_color = Colours::DimGray;
 static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
+
+static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 private class IDredgingSystem : public PLCConfirmation {
 public:
@@ -372,6 +374,12 @@ public:
 	}
 
 public:
+	void pre_read_data(Syslog* logger) override {
+		IDredgingSystem::pre_read_data(logger);
+
+		this->station->clear_subtacks();
+	}
+
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
@@ -450,6 +458,35 @@ public:
 		this->set_hopper_type(DS::SB, DB4, sb_hopper_pump_feedback);
 	}
 
+	void post_read_data(Syslog* logger) override {
+		this->station->append_subtrack(DS::D003, DS::SB, water_color);
+		this->station->append_subtrack(DS::D004, DS::PS, water_color);
+
+		if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
+			DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
+			DS d14[] = { DS::d014, DS::d14, DS::PSHP };
+			DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
+
+			this->station->append_subtrack(DS::PSHP, DS::PS, water_color);
+			this->try_flow_water(DS::D012, d12, water_color);
+			this->try_flow_water(DS::D014, d14, water_color);
+			this->try_flow_water(DS::D016, d16, water_color);
+		}
+
+		if (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running) {
+			DS d11[] = { DS::LMOD, DS::sb, DS::SBHP };
+			DS d13[] = { DS::d013, DS::d13, DS::SBHP };
+			DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
+
+			this->station->append_subtrack(DS::SBHP, DS::SB, water_color);
+			this->try_flow_water(DS::D011, d11, water_color);
+			this->try_flow_water(DS::D013, d13, water_color);
+			this->try_flow_water(DS::D015, d15, water_color);
+		}
+
+		IDredgingSystem::post_read_data(logger);
+	}
+
 public:
 	void load(float width, float height, float vinset) override {
 		this->load_station(width, height, vinset);
@@ -472,15 +509,15 @@ public:
 
 		pTurtle->jump_right(1.5F)->move_right(2.5F, DS::D011)->move_right(3, DS::sb)->move_down(4, DS::SBHP);
 		pTurtle->move_right(3, DS::D003)->move_right(3, DS::SB)->jump_back();
-		pTurtle->move_right(3)->move_up(4, DS::d13)->move_left(1.5F)->move_up(2, DS::D013)->jump_back();
-		pTurtle->move_up(4)->move_left(1.5F)->move_up(2, DS::D015)->jump_back(DS::LMOD);
+		pTurtle->move_right(3, DS::d1315)->move_up(4, DS::d13)->move_left(1.5F, DS::d013)->move_up(2, DS::D013)->jump_back(DS::d13);
+		pTurtle->move_up(4, DS::d15)->move_left(1.5F)->move_up(2, DS::D015)->jump_back(DS::LMOD);
 
 		pTurtle->jump_left(1.5F)->move_left(2.5F, DS::D012)->move_left(3, DS::ps)->move_down(4, DS::PSHP);
 		pTurtle->move_left(3, DS::D004)->move_left(3, DS::PS)->jump_back();
-		pTurtle->move_left(3)->move_up(4, DS::d14)->move_right(1.5F)->move_up(2, DS::D014)->jump_back();
-		pTurtle->move_up(4)->move_right(1.5F)->move_up(2, DS::D016);
+		pTurtle->move_left(3, DS::d1416)->move_up(4, DS::d14)->move_right(1.5F, DS::d014)->move_up(2, DS::D014)->jump_back(DS::d14);
+		pTurtle->move_up(4, DS::d16)->move_right(1.5F)->move_up(2, DS::D016);
 
-		this->station = this->master->insert_one(new Tracklet<DS>(pTurtle, default_pipe_thickness * 1.618F, default_pipe_color));
+		this->station = this->master->insert_one(new Tracklet<DS>(pTurtle, default_pipe_thickness, default_pipe_color));
 
 		this->load_percentage(this->progresses, DS::D003);
 		this->load_percentage(this->progresses, DS::D004);
@@ -728,29 +765,20 @@ private:
 	}
 
 	void set_hopper_type(DS id, const uint8* db4, unsigned int idx_p1) {
-		DS type = DS::pump;
-
 		if (DI_hopper_type(db4, idx_p1)) {
-			type = DS::hopper;
+			this->hopper_types[id]->set_text(_speak(DS::hopper), GraphletAnchor::CC);
 		} else if (DI_underwater_type(db4, idx_p1)) {
-			type = DS::underwater;
+			this->hopper_types[id]->set_text(_speak(DS::underwater), GraphletAnchor::CC);
+		} else {
+			this->hopper_types[id]->set_text("", GraphletAnchor::CC);
 		}
-
-		this->hopper_types[id]->set_text(_speak(type), GraphletAnchor::CC);
 	}
 
 private:
-	void try_flow_water(DS vid, DS start, DS end, CanvasSolidColorBrush^ color) {
-		switch (this->valves[vid]->get_status()) {
-		case GateValveStatus::Open: {
-			this->station->append_subtrack(start, end, color);
-		}
-		}
-	}
-
 	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
+			this->station->append_subtrack(vid, path[0], water_color);
 			this->station->append_subtrack(path, count, color);
 		}
 		}
