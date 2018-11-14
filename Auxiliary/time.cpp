@@ -13,10 +13,10 @@ using namespace Windows::Globalization;
 using namespace Windows::System::Diagnostics;
 
 static Calendar^ calendar = ref new Calendar();
-static struct tm now_s;
 
 static wchar_t* wtime(time_t utc_s, const wchar_t* tfmt, bool locale = false) {
 	wchar_t timestamp[32];
+	struct tm now_s;
 
 	if (locale) {
 		localtime_s(&now_s, &utc_s);

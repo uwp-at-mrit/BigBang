@@ -330,11 +330,11 @@ public:
 		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
 
 		cylinder_height = cell_height * 1.618F;
-		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, 0U, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, 0U, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, 0U, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, 0U, "ton", LiquidSurface::_);
 
 		this->load_dimensions(this->dimensions, HD::A, HD::H, "bar");
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
@@ -465,8 +465,8 @@ private:
 
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height
-		, double range, Platform::String^ unit, LiquidSurface surface) {
-		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height);
+		, double range, unsigned int precision, Platform::String^ unit, LiquidSurface surface) {
+		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height, 3.0F, 0U, precision);
 
 		cs[id] = this->master->insert_one(cylinder, id);
 

@@ -32,7 +32,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DLMode { WindowUI = 0, Dashboard };
 
-private enum class DLTS { EarthWork, Vessel, Loading, Displacement, Draught, _ };
+private enum class DLTS { EarthWork, Vessel, Loading, Displacement, _ };
 
 private enum class DLOFOperation { Up, Down, Stop, Auto, _ };
 
@@ -125,8 +125,6 @@ public:
 	}
 
 	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->timeseries->set_value(DLTS::Draught, DBD(DB2, average_draught));
-
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
 		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
 		this->dimensions[DL::psSternDraft]->set_value(DBD(DB2, ps_fixed_stern_draught));
@@ -176,11 +174,11 @@ public:
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
 		cylinder_height = ship_height * 0.42F;
-		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, earthwork_range, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::Vessel, cylinder_height, vessel_range, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::HopperHeight, cylinder_height, hopper_height_range, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, DL::Loading, cylinder_height, loading_range, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, displacement_range, "ton", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, earthwork_range, 0U, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::Vessel, cylinder_height, vessel_range, 0U, "meter3", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter", LiquidSurface::Convex);
+		this->load_cylinder(this->cylinders, DL::Loading, cylinder_height, loading_range, 0U, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, displacement_range, 0U, "ton", LiquidSurface::Convex);
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
@@ -263,8 +261,8 @@ private:
 
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height, double range
-		, Platform::String^ unit, LiquidSurface surface) {
-		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height), id);
+		, unsigned int precision, Platform::String^ unit, LiquidSurface surface) {
+		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height, 3.0F, 0U, precision), id);
 
 		this->load_dimension(this->dimensions, this->labels, id, unit);
 	}

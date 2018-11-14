@@ -694,10 +694,14 @@ public:
 				this->reflow_winch_limits(id);
 			}
 
-			this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB);
-			this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
-			this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB);
-			this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
+			{ // reflow pulling forces
+				float pf_xoff = vinset * 2.0F;
+
+				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
+				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
+				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
+				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
+			}
 
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
 			this->master->move_to(this->hopper_types[DS::SB], this->labels[DS::SBHPDP], GraphletAnchor::RT, GraphletAnchor::CB, +vinset, -txt_gapsize);

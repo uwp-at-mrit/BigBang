@@ -26,8 +26,7 @@ namespace WarGrey::SCADA {
         virtual ~IMRMaster() noexcept;
 
 		IMRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
-			Platform::String^ server, uint16 service,
-			WarGrey::SCADA::IMRConfirmation* confirmation);
+			Platform::String^ server, uint16 service, WarGrey::SCADA::IMRConfirmation* confirmation);
 
 	public:
 		Platform::String^ device_hostname() override;
@@ -79,16 +78,21 @@ namespace WarGrey::SCADA {
 	private:
 		Windows::Storage::Streams::DataReader^ mrin;
 		Windows::Storage::Streams::DataWriter^ mrout;
+
+	private:
+		uint8* data_pool;
+		size_t pool_size;
+		int delay_balance;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
     public:
-        MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode
-			, Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
+        MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
+			Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
 			: IMRMaster(logger, mode, server, port, confirmation) {}
 
-		MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode
-			, uint16 port, IMRConfirmation* confirmation = nullptr)
+		MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
+			uint16 port, IMRConfirmation* confirmation = nullptr)
 			: MRMaster(logger, mode, nullptr, port, confirmation) {}
 
 	public:

@@ -183,7 +183,7 @@
   <data name="Visor" xml:space="preserve">
     <value>Visor Oil Temperature</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>Pipeline Pressure</value>
+  <data name="BackOil" xml:space="preserve">
+    <value>Back Oil Pressure</value>
   </data>
 </root>

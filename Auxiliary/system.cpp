@@ -113,6 +113,7 @@ char WarGrey::SCADA::system_wifi_signal_strength(char defval_if_no_wifi) {
 
 	for (unsigned int i = 0; i < nics->Size; ++i) {
 		auto nic = nics->GetAt(i);
+		//syslog(Log::Info, nic->ProfileName);
 
 		if (nic->IsWlanConnectionProfile) {
 			signal = nic->GetSignalBars()->Value;
@@ -204,6 +205,18 @@ private:
 		}
 	}
 
+	void report_wifi_changed(WiFiAdapter^ wifi, Platform::Object^ args) {
+		char signal = system_wifi_signal_strength();
+
+		if (signal != this->last_wifi_strength) {
+			for (auto listener : this->listeners) {
+				listener->on_wifi_signal_strength_changed(signal);
+			}
+
+			this->last_wifi_strength = signal;
+		}
+	}
+
 	void report_available_storage_if_changed() {
 		static Vector<Platform::String^>^ properties = ref new Vector<Platform::String^>();
 		StorageFolder^ local = ApplicationData::Current->LocalFolder;
@@ -236,8 +249,9 @@ private:
 private:
 	SystemStatus() {
 		BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
-	
+		
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemStatus::report_powerinfo);
+		//WiFiAdapter::AvailableNetworksChanged += ref new TypedEventHandler<WiFiAdapter^, Platform::Object^>(this, &SystemStatus::wifi_changed);
 		
 		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemStatus::report_brightness);
 
@@ -245,6 +259,10 @@ private:
 		this->clock->Tick += ref new EventHandler<Object^>(this, &SystemStatus::report_timestamp);
 		this->report_timestamp(nullptr, nullptr);
 		this->clock->Start();
+
+		//create_task(WiFiAdapter::FindAllAdaptersAsync()).then([=](IVectorView<WiFiAdapter^>^ wifies) {
+		//	syslog(Log::Info, L"found %d adapters", wifies->Size);
+		//});
 	}
 
 	~SystemStatus() {

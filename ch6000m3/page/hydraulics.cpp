@@ -69,7 +69,7 @@ private enum class HS : unsigned int {
 	SQf, SQc, SQd, SQe,
 	
 	// Key Labels
-	Port, Starboard, Master, Visor, Storage, Pressure,
+	Port, Starboard, Master, Visor, Storage, BackOil,
 	
 	// Filter Indicators
 	F01, F02, F10,
@@ -102,7 +102,7 @@ public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
-		this->station_pressure->set_value(RealData(DB203, master_back_oil_pressure));
+		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));
 
 		{ // pump pressures
 			GraphletAnchor psa = GraphletAnchor::LB;
@@ -268,9 +268,12 @@ public:
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 
-		this->dimension_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->dimension_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
-		this->dimension_style.precision = 0;
+		this->pressure_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->pressure_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->temperature_style = this->pressure_style;
+
+		this->pressure_style.precision = 0;
+		this->temperature_style.precision = 1;
 	}
  
 public:
@@ -341,9 +344,7 @@ public:
 			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00);
 
 			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
-
-			this->station_pressure = new Dimensionlet(this->dimension_style, "bar", _speak(HS::Pressure));
-			this->master->insert(this->station_pressure);
+			this->load_dimension(this->pressures, HS::BackOil, "bar");
 		}
 
 		{ // load valves
@@ -364,7 +365,7 @@ public:
 		this->station->fill_anchor_location(HS::SQ1, nullptr, &sq1_y, true);
 		this->station->map_graphlet_at_anchor(this->master_tank, HS::Master, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->visor_tank, HS::Visor, GraphletAnchor::CC);
-		this->master->move_to(this->station_pressure, this->station, GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 
@@ -517,9 +518,14 @@ private:
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->pressure_style, unit, _speak(id.ToString())), id);
+	}
+
+	template<typename E>
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->pressure_style, unit), id);
 		}
 	}
 
@@ -534,7 +540,7 @@ private:
 	template<class T, typename E>
 	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width, float height) {
 		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, height, 2.5F), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, "celsius", _speak(id)), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->temperature_style, "celsius", _speak(id)), id);
 	}
 
 	template<typename E>
@@ -624,7 +630,6 @@ private:
 	FuelTanklet* storage_tank;
 	Tanklet<HSMTStatus>* master_tank;
 	Tanklet<HSVTStatus>* visor_tank;
-	Dimensionlet* station_pressure;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Labellet, HS>*> captions;
@@ -638,7 +643,8 @@ private:
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
-	DimensionStyle dimension_style;
+	DimensionStyle pressure_style;
+	DimensionStyle temperature_style;
 
 private:
 	HydraulicsPage* master;

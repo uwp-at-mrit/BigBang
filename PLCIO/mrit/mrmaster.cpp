@@ -34,6 +34,9 @@ IMRMaster::IMRMaster(Syslog* sl, PLCMasterMode mode, Platform::String^ h, uint16
 		this->device = ref new HostName(h);
 	}
 
+	this->pool_size = 1;
+	this->data_pool = new uint8[this->pool_size];
+
     this->shake_hands();
 };
 
@@ -45,6 +48,8 @@ IMRMaster::~IMRMaster() {
 	if (this->listener != nullptr) {
 		delete this->listener;
 	}
+
+	delete[] this->data_pool;
 
 	this->logger->destroy();
 }
@@ -120,6 +125,7 @@ void IMRMaster::connect() {
 
             this->mrin  = make_socket_reader(this->socket);
             this->mrout = make_socket_writer(this->socket);
+			this->delay_balance = 0;
 
             this->logger->log_message(Log::Debug, L">> connected to device[%s]", this->device_description()->Data());
 
@@ -157,22 +163,42 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 
 void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t addrn, uint8* data, size_t size) {
 	if (this->mrout != nullptr) {
-		this->preference.write_header(this->mrout, fcode, datablock, addr0, addrn);
-		this->preference.write_aligned_tail(this->mrout, data, size);
+		bool reading = (fcode == this->preference.read_signal_fcode());
+		bool reading_safe = true;
 
-		create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
-			try {
-				unsigned int sent = sending.get();
+		if (reading) {
+			if (this->delay_balance > 0) {
+				reading_safe = false;
 
-				this->logger->log_message(Log::Debug,
-					L"<sent %u-byte-request for command '%c' on data block %u[%u, %u] to device[%s]>",
-					sent, fcode, datablock, addr0, addrn, this->device_description()->Data());
-			} catch (task_canceled&) {
-			} catch (Platform::Exception^ e) {
-				this->logger->log_message(Log::Warning, e->Message);
-				this->shake_hands();
+				syslog(Log::Notice,
+					L"requesting for command '%c' on data block %u[%u, %u] to device[%s] is cancelled because %d previous %s are delayed",
+					fcode, datablock, addr0, addrn, this->device_description()->Data(), this->delay_balance,
+					((this->delay_balance == 1) ? L"requests" : L"request"));
 			}
-		});
+		}
+
+		if (!reading || reading_safe) {
+			this->preference.write_header(this->mrout, fcode, datablock, addr0, addrn);
+			this->preference.write_aligned_tail(this->mrout, data, size);
+
+			create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
+				try {
+					unsigned int sent = sending.get();
+
+					if (reading) {
+						this->delay_balance += 1;
+					}
+
+					this->logger->log_message(Log::Debug,
+						L"<sent %u-byte-request for command '%c' on data block %u[%u, %u] to device[%s]>",
+						sent, fcode, datablock, addr0, addrn, this->device_description()->Data());
+				} catch (task_canceled&) {
+				} catch (Platform::Exception^ e) {
+					this->logger->log_message(Log::Warning, e->Message);
+					this->shake_hands();
+				}
+			});
+		}
 	}
 }
 
@@ -207,16 +233,20 @@ void IMRMaster::wait_process_confirm_loop() {
 
 			if (size < tailsize) {
 				modbus_protocol_fatal(this->logger,
-					L"message comes from server device[%s] has been truncated(%u < %u)",
+					L"message comes from device[%s] has been truncated(%u < %u)",
 					this->device_description()->Data(), size, tailsize);
 			}
 
-			uint8* data_pool = new uint8[datasize];
-			this->preference.read_body_tail(this->mrin, datasize, data_pool, &unused_checksum, &end_of_message);
+			if (this->pool_size < datasize) {
+				delete[] this->data_pool;
+
+				this->pool_size = datasize;
+				this->data_pool = new uint8[this->pool_size];				
+			}
+
+			this->preference.read_body_tail(this->mrin, datasize, this->data_pool, &unused_checksum, &end_of_message);
 
 			if (!this->preference.tail_match(end_of_message, &expected_tail)) {
-				delete[] data_pool;
-
 				modbus_protocol_fatal(this->logger,
 					L"message comes from devce[%s] has an malformed end(expected 0X%04X, received 0X%04X)",
 					this->device_description()->Data(), expected_tail, end_of_message);
@@ -225,11 +255,15 @@ void IMRMaster::wait_process_confirm_loop() {
 					L"<received confirmation(%u, %u, %u) for command '%c' comes from device[%s]>",
 					datablock, addr0, addrn, fcode, this->device_description()->Data());
 
-				if (!this->confirmations.empty()) {
-					this->apply_confirmation(fcode, datablock, addr0, addrn, data_pool, datasize);
-				}
+				this->delay_balance -= 1;
 
-				delete[] data_pool;
+				if (this->delay_balance > 0) {
+					syslog(Log::Notice, L"descard a delayed response from device[%s] for next %d %s",
+						this->device_description()->Data(), this->delay_balance,
+						((this->delay_balance == 1) ? "one" : "ones"));
+				} else if (!this->confirmations.empty()) {
+					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
+				}
 			}
 		});
 	}).then([=](task<void> confirm) {

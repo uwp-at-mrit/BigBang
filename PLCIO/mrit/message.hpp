@@ -76,5 +76,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		unsigned int header_checksum;
+
+	private:
+		uint8* body;
 	};
 }

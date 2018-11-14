@@ -46,7 +46,5 @@ namespace WarGrey::SCADA {
 
 	private:
 		long long last_sending_time;
-		long long send_count;
-		long long recv_count;
 	};
 }

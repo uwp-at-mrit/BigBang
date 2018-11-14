@@ -41,7 +41,7 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	this->uptime += this->interval;
 
 	if (next_interval < 0) {
-		this->target->get_logger()->log_message(Log::Notice,
+		syslog(Log::Notice,
 			L"it took %fms to update planet, but the expected interval is %fms",
 			float(elapsed) / 10000.0F, float(interval) / 10000.0F);
 	} else {

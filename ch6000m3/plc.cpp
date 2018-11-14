@@ -104,8 +104,6 @@ void PLCMaster::send_scheduled_request(long long count, long long interval, long
 	if (this->last_sending_time != uptime) {
 		this->read_all_signal((uint16)98U, (uint16)0U, (uint16)0x1263U);
 		this->last_sending_time = uptime;
-
-		this->send_count += 1;
 	}
 }
 
@@ -129,18 +127,12 @@ void PLCMaster::on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA:
 	float ps_page = DBD(db2, 596U);
 	float sb_page = DBD(db2, 600U);
 
-	this->recv_count += 1;
-
 	if (ps_page != 0.0F) {
 		logger->log_message(Log::Info, L"PS Page: %f", ps_page);
 	}
 
 	if (sb_page != 0.0F) {
 		logger->log_message(Log::Info, L"SB Page: %f", sb_page);
-	}
-
-	if (this->recv_count != this->send_count) {
-		logger->log_message(Log::Warning, L"network delayed. (diff: %d)", this->send_count - this->recv_count);
 	}
 }
 
