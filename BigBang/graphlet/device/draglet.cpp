@@ -311,7 +311,7 @@ void DragXYlet::construct() {
 
 		this->universal_joint = circle(this->joint_radius);
 		
-		this->set_position(0.0F, this->ujoints, this->draghead, true);
+		this->set_position(0.0F, this->ujoints, this->draghead, -90.0, true);
 	}
 }
 
@@ -466,7 +466,7 @@ void DragXZlet::construct() {
 
 		this->universal_joint = circle(this->joint_radius);
 
-		this->set_position(0.0F, this->ujoints, this->draghead, true);
+		this->set_position(0.0F, this->ujoints, this->draghead, -90.0, true);
 	}
 }
 

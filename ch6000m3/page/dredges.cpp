@@ -110,8 +110,8 @@ public:
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->caption_color = Colours::Salmon;
 
-		//this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		//this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 
 		this->drag_configs[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
 		this->drag_configs[0].trunnion_length = ps_drag_trunnion_length;
@@ -174,7 +174,7 @@ protected:
 	template<class C, typename E>
 	void load_cylinders(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double vmin, double vmax, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			auto cylinder = new Credit<C, E>(LiquidSurface::_, vmin, vmax, height * 0.2718F, height);
+			auto cylinder = new Credit<C, E>(LiquidSurface::_, vmin, vmax, height * 0.2718F, height, 3.0F, 8U);
 
 			cs[id] = this->master->insert_one(cylinder, id);
 
@@ -212,8 +212,8 @@ protected:
 		cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
 
 		this->load_label(this->labels, id, this->caption_color);
-		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar"), id);
+		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "meter"), id);
+		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "bar"), id);
 	}
 
 	template<class C, typename E>
@@ -227,9 +227,9 @@ protected:
 	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
 		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
 
-		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>("bar", _speak(dpid)), id);
-		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
-		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>("degrees"), id);
+		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "bar", _speak(dpid)), id);
+		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "meter"), id);
+		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees"), id);
 	}
 
 	template<class C, typename E>
@@ -548,7 +548,7 @@ public:
 		{ // load dimensions
 			float overflow_height = shheight * 0.618F;
 			float dfmeter_height = shhmargin * 0.72F;
-			float cylinder_height = shheight * 0.5F;
+			float cylinder_height = shheight * 0.618F;
 			float winch_radius = shvmargin * 0.12F;
 		
 			this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, overflow_height));
@@ -568,11 +568,11 @@ public:
 		}
 
 		{ // load drags
-			float draghead_radius = shhmargin * 0.32F;
+			float draghead_radius = shhmargin * 0.2718F;
 			float over_drag_height = height * 0.5F - vinset;
 			float over_drag_width = over_drag_height * 0.382F;
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 2.0F;
-			float side_drag_height = height * 0.382F - vinset;
+			float side_drag_height = height * 0.314F - vinset;
 			
 			this->load_draghead(this->dragheads, DS::PS, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_draghead(this->dragheads, DS::SB, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);

@@ -18,6 +18,7 @@
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "schema/ai_doors.hpp"
+#include "schema/ai_water_pumps.hpp"
 #include "schema/di_doors.hpp"
 #include "schema/di_valves.hpp"
 #include "schema/di_water_pumps.hpp"
@@ -41,6 +42,8 @@ private enum FSMode { WindowUI = 0, Dashboard };
 
 private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
+
+static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 // WARNING: order matters
 private enum class FS : unsigned int {
@@ -84,14 +87,12 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		//this->set_cylinder(FS::PSPPower, DBD(DB2, 376U));
-		//this->set_cylinder(FS::PSPRpm, DBD(DB2, 388U));
-		//this->set_cylinder(FS::SBPPower, DBD(DB2, 392U));
-		//this->set_cylinder(FS::SBPRpm, DBD(DB2, 404U));
-	}
-
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->pressures[FS::HBV04]->set_value(RealData(DB203, sb_water_pump_discharge_pressure), GraphletAnchor::CB);
+		this->flows[FS::HBV04]->set_value(RealData(DB203, sb_water_pump_flow), GraphletAnchor::CT);
+		this->pressures[FS::HBV05]->set_value(RealData(DB203, ps_water_pump_discharge_pressure), GraphletAnchor::CB);
+		this->flows[FS::HBV05]->set_value(RealData(DB203, sb_water_pump_flow), GraphletAnchor::CT);
+		
 		this->set_door_progress(FS::PS1, RealData(DB203, upper_door_PS1_progress));
 		this->set_door_progress(FS::PS2, RealData(DB203, upper_door_PS2_progress));
 		this->set_door_progress(FS::PS3, RealData(DB203, upper_door_PS3_progress));
@@ -179,8 +180,8 @@ public:
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
 
-		this->hopper_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->hopper_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -388,8 +389,8 @@ private:
 	
 		gs[id] = this->master->insert_one(new G(rx, degrees), id);
 
-		this->load_dimension(this->powers, id, "kwatt", this->hopper_style);
-		this->load_dimension(this->rpms, id, "rpm", this->hopper_style);
+		this->load_dimension(this->powers, id, "kwatt");
+		this->load_dimension(this->rpms, id, "rpm");
 	}
 
 	template<class G, typename E>
@@ -502,6 +503,21 @@ private:
 		AI_hopper_door(this->uhdoors[id], value, upper_door_open_threshold, upper_door_closed_threshold);
 	}
 
+private:
+	void try_flow_water(FS vid, FS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		switch (this->gvalves[vid]->get_status()) {
+		case GateValveStatus::Open: {
+			this->station->append_subtrack(vid, path[0], water_color);
+			this->station->append_subtrack(path, count, color);
+		}
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_water(FS vid, FS (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, path, N, color);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<FS>* station;
@@ -531,7 +547,6 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
-	DimensionStyle hopper_style;
 
 private:
 	FlushsPage* master;

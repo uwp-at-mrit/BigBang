@@ -63,7 +63,7 @@ protected:
 
 		this->add_planet(new Gallery());
 
-		//this->transfer_to(8);
+		this->transfer_to(5);
 	}
 
 private:

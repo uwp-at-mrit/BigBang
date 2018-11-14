@@ -14,8 +14,7 @@ using namespace Windows::System::Diagnostics;
 
 static Calendar^ calendar = ref new Calendar();
 
-static wchar_t* wtime(time_t utc_s, const wchar_t* tfmt, bool locale = false) {
-	wchar_t timestamp[32];
+static inline void wtime(wchar_t* timestamp, time_t utc_s, const wchar_t* tfmt, bool locale = false) {
 	struct tm now_s;
 
 	if (locale) {
@@ -25,8 +24,6 @@ static wchar_t* wtime(time_t utc_s, const wchar_t* tfmt, bool locale = false) {
 	}
 
 	wcsftime(timestamp, 31, tfmt, &now_s);
-
-	return timestamp;
 }
 
 static ProcessCpuUsageReport^ process_cpu_usage() {
@@ -82,11 +79,19 @@ void WarGrey::SCADA::sleep(unsigned int ms) {
 
 /*************************************************************************************************/
 Platform::String^ WarGrey::SCADA::make_timestamp(long long utc_s, bool locale) {
-	return ref new Platform::String(wtime(utc_s, L"%F %T", locale));
+	wchar_t timestamp[32];
+
+	wtime(timestamp, utc_s, L"%F %T", locale);
+
+	return ref new Platform::String(timestamp);
 }
 
 Platform::String^ WarGrey::SCADA::make_daytimestamp(long long utc_s, bool locale) {
-	return ref new Platform::String(wtime(utc_s, L"%T", locale));
+	wchar_t timestamp[32];
+
+	wtime(timestamp, utc_s, L"%T", locale);
+		
+	return ref new Platform::String(timestamp);
 }
 
 Platform::String^ WarGrey::SCADA::update_nowstamp(bool need_us, int* l00ns) {
