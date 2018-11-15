@@ -253,12 +253,12 @@
     <value>左耙唇对地角度</value>
   </data>
   <data name="PSVisor" xml:space="preserve">
-    <value>左耙唇角度</value>
+    <value>左耙臂对地角度</value>
   </data>
   <data name="SBEarth" xml:space="preserve">
     <value>右耙唇对地角度</value>
   </data>
   <data name="SBVisor" xml:space="preserve">
-    <value>右耙唇角度</value>
+    <value>右耙臂对地角度</value>
   </data>
 </root>

@@ -691,7 +691,7 @@ void DragHeadlet::set_position(float suction_depth, float3& last_ujoint, float3&
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	float visor_length = this->radius - this->translate_x;
 	double visor_pointer_range = drag_visor_end_angle - this->offset;
-	double visor_earth_angle = (arm_angle - visor_angle);
+	double visor_earth_angle = (visor_angle - arm_angle);
 
 	if (force || (this->visor_earth_degrees != visor_earth_angle)) {
 		double visor_degrees = drag_adjusted_angle(visor_earth_angle / this->visor_range * visor_pointer_range + this->offset, this->sign);

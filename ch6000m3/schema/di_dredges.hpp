@@ -99,16 +99,16 @@ namespace WarGrey::SCADA {
 				target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
 			} else if (DBX(db205, status + 1U)) {
 				target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
+			} else if (DBX(db205, sensor + 0U)) {
+				target->set_status(WinchStatus::SensorUpperLimited);
+			} else if (DBX(db205, sensor + 1U)) {
+				target->set_status(WinchStatus::SensorLowerLimited);
 			} else if (can_windout && can_windup) {
 				target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
 			} else if (can_windout) {
 				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
 			} else if (can_windup) {
 				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
-			} else if (DBX(db205, sensor + 0U)) {
-				target->set_status(WinchStatus::SensorUpperLimited);
-			} else if (DBX(db205, sensor + 1U)) {
-				target->set_status(WinchStatus::SensorLowerLimited);
 			}
 			
 			// the rest are unused;

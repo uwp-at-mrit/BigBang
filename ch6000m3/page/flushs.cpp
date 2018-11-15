@@ -68,7 +68,7 @@ private enum class FS : unsigned int {
 	// anchors used for unnamed corners
 	h3ps, h3sb, h4, h5, h10,
 	h11, h12, h13, h14, h15, h16, h17, h18,
-	water, room,
+	water, room, h5ps, h1sb,
 
 	// anchors used for non-interconnected nodes
 	nic
@@ -85,6 +85,8 @@ public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+
+		this->station->clear_subtacks();
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
@@ -151,6 +153,35 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
+		{ // flow water
+			FS h1[] = { FS::h1sb, FS::SBPump };
+			
+			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
+			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
+
+			this->try_flow_water(FS::HBV01, h1, water_color);
+			this->try_flow_water(FS::HBV02, FS::PSPump, water_color);
+
+			if (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running) {
+				FS h35 [] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
+				FS h3 [] = { FS::h3sb, FS::SBPump };
+				FS h78[] = { FS::HBV08, FS::HBV07 };
+				
+				this->station->append_subtrack(h35, water_color);
+				this->try_flow_water(FS::HBV03, h3, water_color);
+				this->try_flow_water(FS::HBV05, h78, water_color);
+				this->try_flow_water(FS::HBV07, FS::Port, water_color);
+			}
+
+			if (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running) {
+				FS h69[] = { FS::HBV09, FS::HBV06 };
+
+				this->station->append_subtrack(FS::SBPump, FS::HBV04, water_color);
+				this->try_flow_water(FS::HBV04, h69, water_color);
+				this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
+			}
+		}
+
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -202,13 +233,13 @@ public:
 		pTurtle->turn_left_down()->move_down(2.5F, FS::SBV3)->move_down(2.5F)->turn_down_left();
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(6.5F)->turn_right_down()->move_down(6);
+		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(6.5F)->turn_right_down(FS::h5ps)->move_down(6);
 		pTurtle->turn_down_left(FS::h3ps)->move_left(6)->turn_left_up(FS::PSPump);
 		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
 		pTurtle->turn_down_left(FS::h3sb)->move_left(6, FS::SBPump)->jump_back();
-		pTurtle->turn_right_down()->move_down(3)->turn_down_left()->move_left(6)->turn_left_down();
+		pTurtle->turn_right_down()->move_down(3, FS::h1sb)->turn_down_left()->move_left(6)->turn_left_down();
 		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
 		pTurtle->move_right(4, FS::HBV04)->move_right(5)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
@@ -289,7 +320,7 @@ public:
 			
 			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
+					new Omegalet(-90.0, nic_radius, default_pipe_thickness, water_color));
 			}
 		}
 
@@ -504,10 +535,18 @@ private:
 	}
 
 private:
+	void try_flow_water(FS vid, FS eid, CanvasSolidColorBrush^ color) {
+		switch (this->gvalves[vid]->get_status()) {
+		case GateValveStatus::Open: {
+			this->station->append_subtrack(vid, eid, color);
+		}
+		}
+	}
+
 	void try_flow_water(FS vid, FS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->gvalves[vid]->get_status()) {
 		case GateValveStatus::Open: {
-			this->station->append_subtrack(vid, path[0], water_color);
+			this->station->append_subtrack(vid, path[0], color);
 			this->station->append_subtrack(path, count, color);
 		}
 		}

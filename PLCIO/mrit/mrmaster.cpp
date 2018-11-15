@@ -34,8 +34,7 @@ IMRMaster::IMRMaster(Syslog* sl, PLCMasterMode mode, Platform::String^ h, uint16
 		this->device = ref new HostName(h);
 	}
 
-	this->pool_size = 1;
-	this->data_pool = new uint8[this->pool_size];
+	this->pool_size = 0;
 
     this->shake_hands();
 };
@@ -48,8 +47,6 @@ IMRMaster::~IMRMaster() {
 	if (this->listener != nullptr) {
 		delete this->listener;
 	}
-
-	delete[] this->data_pool;
 
 	this->logger->destroy();
 }
@@ -237,13 +234,11 @@ void IMRMaster::wait_process_confirm_loop() {
 			}
 
 			if (this->pool_size < datasize) {
-				delete[] this->data_pool;
-
-				this->pool_size = datasize;
-				this->data_pool = new uint8[this->pool_size];				
+				this->pool_size = (unsigned int)datasize;
+				this->data_pool = ref new Platform::Array<uint8>(this->pool_size);				
 			}
 
-			this->preference.read_body_tail(this->mrin, datasize, this->data_pool, &unused_checksum, &end_of_message);
+			this->preference.read_body_tail(this->mrin, this->data_pool, &unused_checksum, &end_of_message);
 
 			if (!this->preference.tail_match(end_of_message, &expected_tail)) {
 				modbus_protocol_fatal(this->logger,
@@ -259,7 +254,7 @@ void IMRMaster::wait_process_confirm_loop() {
 				if (this->delay_balance > 0) {
 					syslog(Log::Notice, L"descard a delayed response from device[%s]", this->device_description()->Data());
 				} else if (!this->confirmations.empty()) {
-					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
+					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool->Data, datasize);
 				}
 			}
 		});

@@ -24,7 +24,7 @@ RacketReceiver* default_racket_receiver() {
 	static RacketReceiver* rsyslog;
 
 	if ((rsyslog == nullptr) && (default_racket_receiver_host != nullptr)) {
-		rsyslog = new RacketReceiver(default_racket_receiver_host, 18030, Log::Debug);
+		rsyslog = new RacketReceiver(default_racket_receiver_host, 1618, Log::Debug);
 		rsyslog->reference();
 	}
 

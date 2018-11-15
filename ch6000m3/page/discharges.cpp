@@ -369,9 +369,10 @@ public:
 			this->load_label(this->captions, RS::Gantry, Colours::Yellow, this->caption_font);
 
 			for (size_t idx = 0; idx < hopper_count; idx++) {
-				this->sequences[idx] = this->master->insert_one(new Labellet((idx + 1).ToString() + "#"));
-				this->sequences[idx]->set_font(this->caption_font);
-				this->sequences[idx]->set_color(Colours::Silver);
+				Platform::String^ id = (idx + 1).ToString();
+
+				this->ps_seqs[idx] = this->master->insert_one(new Labellet(_speak("PS" + id), this->caption_font, Colours::Silver));
+				this->sb_seqs[idx] = this->master->insert_one(new Labellet(_speak("SB" + id), this->caption_font, Colours::Silver));
 			}
 		}
 	}
@@ -461,10 +462,17 @@ public:
 		}
 
 		{ // reflow door sequences
-			this->station->fill_anchor_location(RS::D008, nullptr, &y0);
+			float ps_x, ps_y, sb_x, sb_y;
+
+			this->station->fill_anchor_location(RS::D010, nullptr, &ps_y);
+			this->station->fill_anchor_location(RS::D008, nullptr, &sb_y);
+
 			for (unsigned int idx = 0; idx < hopper_count; idx++) {
-				this->master->fill_graphlet_location(this->uhdoors[_E(RS, idx + _I(RS::PS1))], &x0, nullptr, GraphletAnchor::CC);
-				this->master->move_to(this->sequences[idx], x0, y0, GraphletAnchor::CB);
+				this->master->fill_graphlet_location(this->uhdoors[_E(RS, idx + _I(RS::PS1))], &ps_x, nullptr, GraphletAnchor::CC);
+				this->master->fill_graphlet_location(this->uhdoors[_E(RS, idx + _I(RS::SB1))], &sb_x, nullptr, GraphletAnchor::CC);
+				
+				this->master->move_to(this->ps_seqs[idx], ps_x, ps_y, GraphletAnchor::CT);
+				this->master->move_to(this->sb_seqs[idx], sb_x, sb_y, GraphletAnchor::CB);
 			}
 		}
 
@@ -651,7 +659,8 @@ private:
 	std::map<RS, Credit<Dimensionlet, RS>*> pressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> powers;
 	std::map<RS, Credit<Dimensionlet, RS>*> rpms;
-	Labellet* sequences[hopper_count];
+	Labellet* ps_seqs[hopper_count];
+	Labellet* sb_seqs[hopper_count];
 	std::map<RS, Omegalet*> nintercs;
 	Linelet* manual_pipe;
 	Hatchlet* sea_inlet;

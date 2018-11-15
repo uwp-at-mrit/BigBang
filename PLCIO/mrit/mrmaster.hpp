@@ -80,8 +80,8 @@ namespace WarGrey::SCADA {
 		Windows::Storage::Streams::DataWriter^ mrout;
 
 	private:
-		uint8* data_pool;
-		size_t pool_size;
+		Platform::Array<uint8>^ data_pool;
+		unsigned int pool_size;
 		int delay_balance;
     };
 

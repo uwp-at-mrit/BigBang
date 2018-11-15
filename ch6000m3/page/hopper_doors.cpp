@@ -83,10 +83,11 @@ public:
 			
 			this->seq_color = Colours::Tomato;
 
-			for (size_t idx = 0; idx < hopper_count ; idx++) {
-				size_t ridx = hopper_count - idx;
+			for (unsigned int idx = 0; idx < hopper_count; idx++) {
+				Platform::String^ id = (hopper_count - idx).ToString();
 
-				this->sequences[idx] = make_text_layout(ridx.ToString() + "#", cpt_font);
+				this->ps_seqs[idx] = make_text_layout(_speak("PS" + id), cpt_font);
+				this->sb_seqs[idx] = make_text_layout(_speak("SB" + id), cpt_font);
 			}
 		}
 	}
@@ -99,17 +100,18 @@ public:
 		float sx = this->x * Width;
 		float sy = this->y * Height;
 		float cell_width = this->ship_width * Width / float(hopper_count);
-		float seq_y = sy + (ship_box.Height - this->sequences[0]->LayoutBounds.Height) * 0.5F;
+		float ps_y = sy + (ship_box.Height - this->ps_seqs[0]->LayoutBounds.Height) * 0.4F;
+		float sb_y = sy + (ship_box.Height - this->sb_seqs[0]->LayoutBounds.Height) * 0.6F;
 		
 		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
 		
 		for (size_t idx = 0; idx < hopper_count; idx++) {
 			float cell_x = sx + cell_width * float(idx);
-			float seq_width = this->sequences[idx]->LayoutBounds.Width;
+			float seq_width = this->ps_seqs[idx]->LayoutBounds.Width;
+			float seq_x = cell_x + (cell_width - seq_width) * 0.5F;
 			
-			ds->DrawTextLayout(this->sequences[idx],
-				cell_x + (cell_width - seq_width) * 0.5F, seq_y,
-				this->seq_color);
+			ds->DrawTextLayout(this->ps_seqs[idx], seq_x, ps_y, this->seq_color);
+			ds->DrawTextLayout(this->sb_seqs[idx], seq_x, sb_y, this->seq_color);
 		}
 	}
 
@@ -166,7 +168,8 @@ public:
 
 private:
 	CanvasGeometry^ ship;
-	CanvasTextLayout^ sequences[hopper_count];
+	CanvasTextLayout^ ps_seqs[hopper_count];
+	CanvasTextLayout^ sb_seqs[hopper_count];
 	ICanvasBrush^ seq_color;
 
 private:

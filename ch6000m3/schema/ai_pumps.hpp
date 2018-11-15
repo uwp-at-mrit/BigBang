@@ -12,6 +12,6 @@ namespace WarGrey::SCADA {
 	static unsigned int pump_G_pressure = 14U;
 	static unsigned int pump_H_pressure = 15U;
 
-	static unsigned int pump_I_pressure = 16U;
-	static unsigned int pump_J_pressure = 17U;
+	static unsigned int pump_I_pressure = 17U;
+	static unsigned int pump_J_pressure = 16U;
 }

@@ -334,7 +334,7 @@ protected:
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
 		this->dragheads[vid]->set_position(suction_depth, ujoints[1], draghead, visor_angle);
 		
-		this->degrees[vid]->set_value(visor_angle, GraphletAnchor::CC);
+		this->degrees[vid]->set_value(visor_angle + 90.0F, GraphletAnchor::CC);
 		this->degrees[eid]->set_value(this->dragheads[vid]->get_visor_earth_degrees(), GraphletAnchor::CC);
 	}
 
@@ -477,12 +477,14 @@ public:
 		this->station->append_subtrack(DS::D003, DS::SB, water_color);
 		this->station->append_subtrack(DS::D004, DS::PS, water_color);
 
+		this->try_flow_water(DS::D003, DS::SBHP, water_color);
+		this->try_flow_water(DS::D004, DS::PSHP, water_color);
+
 		if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
 			DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
 			DS d14[] = { DS::d014, DS::d14, DS::PSHP };
 			DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
 
-			this->station->append_subtrack(DS::PSHP, DS::PS, water_color);
 			this->try_flow_water(DS::D012, d12, water_color);
 			this->try_flow_water(DS::D014, d14, water_color);
 			this->try_flow_water(DS::D016, d16, water_color);
@@ -493,7 +495,6 @@ public:
 			DS d13[] = { DS::d013, DS::d13, DS::SBHP };
 			DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
 
-			this->station->append_subtrack(DS::SBHP, DS::SB, water_color);
 			this->try_flow_water(DS::D011, d11, water_color);
 			this->try_flow_water(DS::D013, d13, water_color);
 			this->try_flow_water(DS::D015, d15, water_color);
@@ -802,10 +803,18 @@ private:
 	}
 
 private:
+	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
+		switch (this->valves[vid]->get_status()) {
+		case GateValveStatus::Open: {
+			this->station->append_subtrack(vid, eid, color);
+		}
+		}
+	}
+
 	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
-			this->station->append_subtrack(vid, path[0], water_color);
+			this->station->append_subtrack(vid, path[0], color);
 			this->station->append_subtrack(path, count, color);
 		}
 		}
