@@ -28,7 +28,6 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ motor_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;

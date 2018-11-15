@@ -39,8 +39,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LDMode { WindowUI = 0, Dashboard };
 
-private enum class LDGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
-private enum class LDMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
+private enum class LDGVOperation { Open, Close, VirtualOpen, VirtualClose, MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat, _ };
 
 private enum class LDPSHPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
 private enum class LDSBHPOperation { Prepare, Start, Stop, Reset, SBHopper, BothHopper, HPBarge, _ };
@@ -80,7 +79,6 @@ private enum class LD : unsigned int {
 private class Vessel final
 	: public PLCConfirmation
 	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>
-	, public IMenuCommand<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*>
 	, public IMenuCommand<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
 	, public IMenuCommand<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
 	, public IMenuCommand<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
@@ -167,17 +165,9 @@ public:
 	bool can_execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
 		return gate_valve_command_executable(valve, cmd, true) && plc->connected();
 	}
-	
+
 	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc) override {
 		plc->send_command(DO_gate_valve_command(cmd, valve->id));
-	}
-
-	bool can_execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
-		return motor_valve_command_executable(valve, cmd, true) && plc->connected();
-	}
-
-	void execute(LDMVOperation cmd, Credit<MotorValvelet, LD>* valve, PLCMaster* plc) override {
-		plc->send_command(DO_motor_valve_command(cmd, valve->id));
 	}
 
 public:
@@ -638,7 +628,6 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<LDMVOperation, Credit<MotorValvelet, LD>, PLCMaster*>(dashboard, plc);
 	this->ps_hopper_op = make_menu<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
 	this->sb_hopper_op = make_menu<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
 	this->ps_underwater_op = make_menu<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
@@ -719,19 +708,15 @@ void ChargesPage::reflow(float width, float height) {
 
 bool ChargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
-	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, LD>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
-	} else if (mvalve != nullptr) {
-		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	} else if (hpump != nullptr) {
 		switch (hpump->id) {
 		case LD::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;

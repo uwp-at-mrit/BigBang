@@ -51,8 +51,8 @@ namespace WarGrey::SCADA {
 	static unsigned int pump_M_status = 97U;
 	static unsigned int pump_K_status = 81U;
 
-	static unsigned int pump_I_status = 113U;
-	static unsigned int pump_J_status = 105U;
+	static unsigned int pump_I_status = 105U;
+	static unsigned int pump_J_status = 113U;
 
 	static unsigned int pump_ps_gate_flushing_status = 1673U;
 	static unsigned int pump_sb_gate_flushing_status = 1681U;

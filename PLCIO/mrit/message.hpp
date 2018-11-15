@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 		size_t read_header(Windows::Storage::Streams::IDataReader^ mrin,
 			size_t* head, size_t* fcode, size_t* db_id, size_t* addr0, size_t* addrn, size_t* size);
 		
-		void read_body_tail(Windows::Storage::Streams::IDataReader^ mrin, Platform::WriteOnlyArray<uint8, 1>^ data,
+		void read_body_tail(Windows::Storage::Streams::IDataReader^ mrin, size_t size, uint8* data,
 			size_t* checksum, size_t* eom);
 
 		void write_header(Windows::Storage::Streams::IDataWriter^ mrout, size_t fcode, size_t db_id, size_t addr0, size_t addrn);

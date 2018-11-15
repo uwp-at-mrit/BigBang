@@ -46,8 +46,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum RSMode { WindowUI = 0, Dashboard };
 
-private enum class RSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
-private enum class RSMVOperation { Open, Close, VirtualOpen, VirtualClose, Heat, _ };
+private enum class RSGVOperation { Open, Close, VirtualOpen, VirtualClose, MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat, _ };
 private enum class RSHDOperation { Open, Stop, Close, Disable, _ };
 
 private enum class RSPSHPOperation { Prepare, Start, Stop, Reset, PSDischarge, PSRainbowing, BothDischarge, BothRainbowing, _ };
@@ -92,7 +91,6 @@ private enum class RS : unsigned int {
 private class Rainbows final
 	: public PLCConfirmation
 	, public IMenuCommand<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>
-	, public IMenuCommand<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>
 	, public IMenuCommand<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*>
 	, public IMenuCommand<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>
 	, public IMenuCommand<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*> {
@@ -208,15 +206,6 @@ public:
 
 	void execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc) override {
 		plc->send_command(DO_gate_valve_command(cmd, valve->id));
-	}
-
-public:
-	bool can_execute(RSMVOperation cmd, Credit<MotorValvelet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
-		return motor_valve_command_executable(valve, cmd, true) && plc->connected();
-	}
-
-	void execute(RSMVOperation cmd, Credit<MotorValvelet, RS>* valve, PLCMaster* plc) override {
-		plc->send_command(DO_motor_valve_command(cmd, valve->id));
 	}
 
 public:
@@ -776,7 +765,6 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>(dashboard, plc);
-	this->motor_valve_op = make_menu<RSMVOperation, Credit<MotorValvelet, RS>, PLCMaster*>(dashboard, plc);
 	this->upper_door_op = make_menu<RSHDOperation, Credit<UpperHopperDoorlet, RS>, PLCMaster*>(dashboard, plc);
 	this->ps_hopper_op = make_menu<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
 	this->sb_hopper_op = make_menu<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
@@ -856,7 +844,6 @@ void DischargesPage::reflow(float width, float height) {
 
 bool DischargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
@@ -885,15 +872,12 @@ void DischargesPage::on_focus(IGraphlet* g) {
 
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
-	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto editor = dynamic_cast<IEditorlet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, RS>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
-	} else if (mvalve != nullptr) {
-		menu_popup(this->motor_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
 	} else if (hpump != nullptr) {

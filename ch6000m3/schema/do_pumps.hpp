@@ -24,8 +24,8 @@ namespace WarGrey::SCADA {
 		case E::F: index = 24U; break;
 		case E::G: index = 27U; break;
 		case E::H: index = 30U; break;
-		case E::I: index = 36U; break;
-		case E::J: index = 33U; break;
+		case E::I: index = 33U; break;
+		case E::J: index = 36U; break;
 		case E::K: index = 39U; break;
 		case E::L: index = 42U; break;
 		case E::M: index = 45U; break;

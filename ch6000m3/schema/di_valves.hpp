@@ -240,12 +240,4 @@ namespace WarGrey::SCADA {
 
 		return executable;
 	}
-
-	template<class M, typename Menu>
-	bool motor_valve_command_executable(M* target, Menu cmd, bool otherwise) {
-		TValveStatus status = target->get_status();
-		bool executable = otherwise;
-
-		return executable;
-	}
 }

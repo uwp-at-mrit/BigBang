@@ -264,4 +264,19 @@
   <data name="AutoLock" xml:space="preserve">
     <value>自动锁紧</value>
   </data>
+  <data name="MClose" xml:space="preserve">
+    <value>关闭电动阀</value>
+  </data>
+  <data name="MHeat" xml:space="preserve">
+    <value>加热电动阀</value>
+  </data>
+  <data name="MOpen" xml:space="preserve">
+    <value>打开电动阀</value>
+  </data>
+  <data name="MVirtualClose" xml:space="preserve">
+    <value>假关电动阀</value>
+  </data>
+  <data name="MVirtualOpen" xml:space="preserve">
+    <value>假开电动阀</value>
+  </data>
 </root>

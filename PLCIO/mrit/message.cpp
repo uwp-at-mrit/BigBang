@@ -140,8 +140,8 @@ size_t MrMessageConfiguration::read_header(IDataReader^ mrin, size_t* head, size
 	return (*size) + this->postdata_size();
 }
 
-void MrMessageConfiguration::read_body_tail(IDataReader^ mrin, Platform::WriteOnlyArray<uint8, 1>^ data, size_t* checksum, size_t* eom) {
-	mrin->ReadBytes(data);
+void MrMessageConfiguration::read_body_tail(IDataReader^ mrin, size_t size, uint8* data, size_t* checksum, size_t* eom) {
+	READ_BYTES(mrin, data, size);
 
 	if (!this->is_old_protocol()) {
 		(*checksum) = (size_t)read_integer(mrin, this->checksum_size);

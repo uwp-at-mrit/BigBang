@@ -141,8 +141,8 @@
   <data name="VirtualOpen" xml:space="preserve">
     <value>Virtual Open</value>
   </data>
-  <data name="Heat" xml:space="preserve">
-    <value>Heat</value>
+  <data name="MHeat" xml:space="preserve">
+    <value>Heat Motor Valve</value>
   </data>
   <data name="Auto" xml:space="preserve">
     <value>Auto Control</value>
@@ -263,5 +263,17 @@
   </data>
   <data name="AutoLock" xml:space="preserve">
     <value>Auto Lock</value>
+  </data>
+  <data name="MClose" xml:space="preserve">
+    <value>Close Motor Valve</value>
+  </data>
+  <data name="MOpen" xml:space="preserve">
+    <value>Open Motor Valve</value>
+  </data>
+  <data name="MVirtualClose" xml:space="preserve">
+    <value>Virtual Close Motor Valve</value>
+  </data>
+  <data name="MVirtualOpen" xml:space="preserve">
+    <value>Virtual Open Motor Valve</value>
   </data>
 </root>
