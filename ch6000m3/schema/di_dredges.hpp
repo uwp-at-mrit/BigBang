@@ -73,6 +73,9 @@ namespace WarGrey::SCADA {
 	static unsigned int gantry_sb_draghead_virtual_up_limited = 2053U;
 	static unsigned int gantry_sb_draghead_virtual_out_limited = 2054U;
 
+	static unsigned int suction_ps_buttons = 1913U;
+	static unsigned int suction_sb_buttons = 1921U;
+
 	/************************************************************************************************/
 	template<class W>
 	void DI_winch(W* target
@@ -129,6 +132,29 @@ namespace WarGrey::SCADA {
 			target->set_status(GantryStatus::WindingUp);
 		} else {
 			target->set_status(GantryStatus::Default);
+		}
+	}
+
+	template<class B>
+	void DI_suction_buttons(B* intarget, B* detarget, const uint8* db205, unsigned int idx_p1) {
+		if (DBX(db205, idx_p1 - 1U)) {
+			intarget->set_status(ButtonStatus::Executing);
+		} else if (DBX(db205, idx_p1 + 1U)) {
+			intarget->set_status(ButtonStatus::Failed);
+		} else if (DBX(db205, idx_p1 + 3U)) {
+			intarget->set_status(ButtonStatus::Ready);
+		} else {
+			intarget->set_status(ButtonStatus::Default);
+		}
+
+		if (DBX(db205, idx_p1 + 0U)) {
+			detarget->set_status(ButtonStatus::Executing);
+		} else if (DBX(db205, idx_p1 + 2U)) {
+			detarget->set_status(ButtonStatus::Failed);
+		} else if (DBX(db205, idx_p1 + 4U)) {
+			detarget->set_status(ButtonStatus::Ready);
+		} else {
+			detarget->set_status(ButtonStatus::Default);
 		}
 	}
 

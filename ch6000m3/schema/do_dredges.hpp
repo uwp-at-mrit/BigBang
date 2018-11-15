@@ -126,4 +126,31 @@ namespace WarGrey::SCADA {
 
 		return index + offset;
 	}
+
+	template<typename CMD>
+	uint16 DO_suction_command(CMD cmd, bool ps) {
+		uint16 index = (ps ? 497U : 501U);
+		uint16 offset = 0U;
+
+		switch (cmd) {
+		case CMD::Inflate: offset = 0U; break;
+		case CMD::Deflate: offset = 1U; break;
+		}
+
+		return index + offset;
+	}
+
+	template<typename CMD>
+	uint16 DO_LMOD_command(CMD cmd) {
+		uint16 index = 881U;
+		uint16 offset = 0U;
+
+		switch (cmd) {
+		case CMD::Emit: offset = 0U; break;
+		case CMD::Fill: offset = 1U; break;
+		case CMD::Auto: offset = 2U; break;
+		}
+
+		return index + offset;
+	}
 }

@@ -9,4 +9,13 @@ namespace WarGrey::SCADA {
 	public:
 		IDEnum id;
 	};
+
+	template<class Base, typename GIDEnum, typename IDEnum>
+	private class GroupCredit final : public Base {
+		using Base::Base;
+
+	public:
+		GIDEnum gid;
+		IDEnum id;
+	};
 }

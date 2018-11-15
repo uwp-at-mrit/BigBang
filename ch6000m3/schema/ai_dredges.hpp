@@ -14,6 +14,7 @@ namespace WarGrey::SCADA {
 		unsigned int vacuum_pressure;
 		unsigned int discharge_pressure;
 		unsigned int differential_pressure;
+		unsigned int suction_inflator_pressure;
 		
 		unsigned int winch_length;
 		unsigned int winch_speed;

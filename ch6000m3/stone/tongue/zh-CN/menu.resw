@@ -141,9 +141,6 @@
   <data name="VirtualOpen" xml:space="preserve">
     <value>假开</value>
   </data>
-  <data name="Heat" xml:space="preserve">
-    <value>加热</value>
-  </data>
   <data name="Auto" xml:space="preserve">
     <value>自动</value>
   </data>
@@ -278,5 +275,17 @@
   </data>
   <data name="MVirtualOpen" xml:space="preserve">
     <value>假开电动阀</value>
+  </data>
+  <data name="Deflate" xml:space="preserve">
+    <value>放气</value>
+  </data>
+  <data name="Inflate" xml:space="preserve">
+    <value>充气</value>
+  </data>
+  <data name="Emit" xml:space="preserve">
+    <value>低排</value>
+  </data>
+  <data name="Fill" xml:space="preserve">
+    <value>进舱</value>
   </data>
 </root>

@@ -9,6 +9,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation::Numerics;
 
+using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
@@ -43,7 +44,7 @@ void Togglet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(height, this->label->LayoutBounds.Height);
 }
 
-void Togglet::draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Togglet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	float width, diameter, radius, bradius;
 	
 	this->fill_extent(x, y, &width, &diameter);

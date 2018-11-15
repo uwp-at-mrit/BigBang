@@ -163,23 +163,6 @@ namespace WarGrey::SCADA {
 		void move_to(IGraphlet* g, IGraphlet* tg, float tfx, float tfy, WarGrey::SCADA::GraphletAnchor a, float dx = 0.0F, float dy = 0.0F);
 
 	public:
-		template<class G, size_t N>
-		void insert_all(G* (&gs)[N], bool reversed = false) {
-			if (reversed) {
-				for (size_t idx = N; idx > 0; idx--) {
-					if (gs[idx - 1] != nullptr) {
-						this->insert(gs[idx - 1]);
-					}
-				}
-			} else {
-				for (size_t idx = 0; idx < N; idx++) {
-					if (gs[idx] != nullptr) {
-						this->insert(gs[idx]);
-					}
-				}
-			}
-		}
-
 		template<class G>
 		G* insert_one(G* g, float x = 0.0F, float y = 0.0F, GraphletAnchor a = GraphletAnchor::LT) {
 			this->insert(g, x, y, a);
@@ -189,6 +172,15 @@ namespace WarGrey::SCADA {
 
 		template<class G, typename E>
 		Credit<G, E>* insert_one(Credit<G, E>* g, E id, float x = 0.0F, float y = 0.0F, GraphletAnchor a = GraphletAnchor::LT) {
+			g->id = id;
+
+			return this->insert_one(g, x, y, a);
+		}
+
+		template<class G, typename GID, typename EID>
+		GroupCredit<G, GID, EID>* insert_one(GroupCredit<G, GID, EID>* g, GID gid, EID id
+			, float x = 0.0F, float y = 0.0F, GraphletAnchor a = GraphletAnchor::LT) {
+			g->gid = gid;
 			g->id = id;
 
 			return this->insert_one(g, x, y, a);
