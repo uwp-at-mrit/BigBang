@@ -18,10 +18,13 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 		schema->vacuum_pressure = 164U;
 		schema->discharge_pressure = 165U;
 
-		schema->drag_position = 20U;
-		schema->draghead_angle = 272U;
 		schema->winch_speed = 280U;
 		schema->winch_length = 544U;
+
+		schema->drag_position = 20U;
+		schema->intermediate_angle = 408U;
+		schema->draghead_angle = 412U;
+		schema->visor_angle = 272U;
 
 		ps_schema = schema;
 	}
@@ -41,10 +44,13 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 		schema->vacuum_pressure = 166U;
 		schema->discharge_pressure = 167U;
 
-		schema->drag_position = 96U;
-		schema->draghead_angle = 276U;
 		schema->winch_speed = 292U;
 		schema->winch_length = 556U;
+
+		schema->drag_position = 96U;
+		schema->intermediate_angle = 416U;
+		schema->draghead_angle = 420U;
+		schema->visor_angle = 276U;
 
 		sb_schema = schema;
 	}

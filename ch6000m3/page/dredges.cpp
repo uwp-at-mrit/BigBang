@@ -75,7 +75,11 @@ private enum class DS : unsigned int {
 	Overlook, Sidelook, pump, hopper, underwater,
 
 	// dimensions
-	Overflow, PSWC, SBWC, PSDP, SBDP, PSPF1, PSPF2, SBPF1, SBPF2, TideMark, Speed,
+	Overflow, PSWC, SBWC, PSPF1, PSPF2, SBPF1, SBPF2,
+	TideMark, Speed,
+
+	// draghead metrics
+	PSDP, SBDP, PSVisor, SBVisor, PSEarth, SBEarth,
 
 	// hopper pump metrics
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
@@ -224,12 +228,12 @@ protected:
 	}
 
 	template<class C, typename E>
-	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
+	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, E eid, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
 		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
 
-		this->pressures[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "bar", _speak(dpid)), id);
-		this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "meter"), id);
-		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees"), id);
+		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees", _speak(id)), id);
+		this->degrees[eid] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees", _speak(eid)), id);
+		this->pressures[dpid] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "bar", _speak(dpid)), id);
 	}
 
 	template<class C, typename E>
@@ -257,6 +261,12 @@ protected:
 			this->master->move_to(this->winch_slacks[id], this->winch_soft_uppers[id], GraphletAnchor::CT, GraphletAnchor::CB);
 			this->master->move_to(this->winch_suctions[id], this->winch_slacks[id], GraphletAnchor::CT, GraphletAnchor::CB);
 		}
+	}
+
+	void reflow_draghead_metrics(DS id, DS eid, DS dpid) {
+		this->master->move_to(this->pressures[dpid], this->dragheads[id], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->degrees[id], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->degrees[eid], this->degrees[id], GraphletAnchor::CB, GraphletAnchor::CT);
 	}
 
 protected:
@@ -304,20 +314,14 @@ protected:
 		}
 	}
 
-	void set_draghead_angles(DS id, const uint8* db2, unsigned int idx) {
-		float visor_angle = DBD(db2, idx);
-
-		this->dragheads[id]->set_angles(visor_angle - 90.0, 0.0);
-		this->degrees[id]->set_value(visor_angle, GraphletAnchor::CC);
-	}
-
-	void set_drag_positions(DS id, const uint8* db2, DredgeAddress* address) {
+	void set_drag_metrics(DS id, DS vid, DS eid, const uint8* db2, DredgeAddress* address) {
 		unsigned int pidx = address->drag_position;
-		unsigned int aidx = address->draghead_angle;
 		float3 ujoints[2];
 		float3 draghead = DBD_3(db2, pidx + 36U);
 		float suction_depth = DBD(db2, pidx + 0U);
-		float draghead_angle = DBD(db2, aidx) - 90.0F;
+		float intermediate_angle = DBD(db2, address->intermediate_angle);
+		float draghead_angle = DBD(db2, address->draghead_angle);
+		float visor_angle = DBD(db2, address->visor_angle) - 90.0F;
 
 		ujoints[0] = DBD_3(db2, pidx + 12U);
 		ujoints[1] = DBD_3(db2, pidx + 24U);
@@ -326,11 +330,12 @@ protected:
 		draghead.y = DBD(db2, pidx + 52U);
 		draghead.z = DBD(db2, pidx + 56U);
 
-		this->dragxys[id]->set_position(suction_depth, ujoints, draghead, draghead_angle);
-		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, draghead_angle);
-		this->dragheads[id]->set_depths(suction_depth, draghead.z);
-
-		this->lengths[id]->set_value(draghead.z, GraphletAnchor::CC);
+		this->dragxys[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
+		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
+		this->dragheads[vid]->set_position(suction_depth, ujoints[1], draghead, visor_angle);
+		
+		this->degrees[vid]->set_value(visor_angle, GraphletAnchor::CC);
+		this->degrees[eid]->set_value(this->dragheads[vid]->get_visor_earth_degrees(), GraphletAnchor::CC);
 	}
 
 protected: // never delete these graphlets manually.
@@ -395,8 +400,8 @@ public:
 		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator, GraphletAnchor::LC);
 		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator, GraphletAnchor::RC);
 
-		this->pressures[DS::PS]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
-		this->pressures[DS::SB]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);
+		this->pressures[DS::PSDP]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
+		this->pressures[DS::SBDP]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);
 
 		this->set_density_speed(DS::PS, DB203, this->ps_address->density_speed);
 		this->set_density_speed(DS::SB, DB203, this->sb_address->density_speed);
@@ -413,11 +418,8 @@ public:
 		unsigned int sbws_idx = this->sb_address->winch_speed;
 		unsigned int sbwl_idx = this->sb_address->winch_length;
 
-		this->set_drag_positions(DS::PS, DB2, this->ps_address);
-		this->set_drag_positions(DS::SB, DB2, this->sb_address);
-
-		this->set_draghead_angles(DS::PS, DB2, this->ps_address->draghead_angle);
-		this->set_draghead_angles(DS::SB, DB2, this->sb_address->draghead_angle);
+		this->set_drag_metrics(DS::PS, DS::PSVisor, DS::PSEarth, DB2, this->ps_address);
+		this->set_drag_metrics(DS::SB, DS::SBVisor, DS::SBEarth, DB2, this->sb_address);
 
 		this->set_winch_metrics(DS::psTrunnion,     DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::LC);
 		this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::LC);
@@ -557,6 +559,8 @@ public:
 			this->load_dimension(this->forces, DS::PSPF2, "knewton");
 			this->load_dimension(this->forces, DS::SBPF1, "knewton");
 			this->load_dimension(this->forces, DS::SBPF2, "knewton");
+			this->load_dimension(this->pressures, DS::PSDP, "bar");
+			this->load_dimension(this->pressures, DS::SBDP, "bar");
 
 			this->load_densityflowmeters(this->dfmeters, DS::PS, DS::SB, dfmeter_height);
 			this->load_compensators(this->compensators, DS::PSWC, DS::SBWC, cylinder_height, compensator_range);
@@ -574,8 +578,8 @@ public:
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 2.0F;
 			float side_drag_height = height * 0.314F - vinset;
 			
-			this->load_draghead(this->dragheads, DS::PS, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
-			this->load_draghead(this->dragheads, DS::SB, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
+			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSEarth, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
+			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBEarth, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
 			this->load_drag(this->dragxys, DS::PS, -over_drag_width, over_drag_height, this->drag_configs[0], default_ps_color);
 			this->load_drag(this->dragxys, DS::SB, +over_drag_width, over_drag_height, this->drag_configs[1], default_sb_color);
@@ -648,8 +652,8 @@ public:
 			this->master->move_to(this->dfmeters[DS::SB], this->overflowpipe, GraphletAnchor::RT, GraphletAnchor::LB);
 			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -vinset);
 
-			this->master->move_to(this->dragheads[DS::PS], cx, height * 0.80F, GraphletAnchor::RC, -xstep);
-			this->master->move_to(this->dragheads[DS::SB], cx, height * 0.80F, GraphletAnchor::LC, +xstep);
+			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.80F, GraphletAnchor::RC, -xstep);
+			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.80F, GraphletAnchor::LC, +xstep);
 			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +vinset);
 		}
 
@@ -704,12 +708,6 @@ public:
 				this->master->move_to(this->pressures[id], this->lengths[id], GraphletAnchor::CB, GraphletAnchor::CT);
 			}
 
-			for (DS id = DS::PS; id <= DS::SB; id++) {
-				this->master->move_to(this->pressures[id], this->dragheads[id], GraphletAnchor::CT, GraphletAnchor::CB);
-				this->master->move_to(this->degrees[id], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT);
-				this->master->move_to(this->lengths[id], this->degrees[id], GraphletAnchor::CB, GraphletAnchor::CT);
-			}
-
 			for (DS id = DS::PSHPDP; id <= DS::SBHPVP; id++) {
 				this->master->move_to(this->labels[id], this->cylinders[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -txt_gapsize);
 				this->master->move_to(this->pressures[id], this->cylinders[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, txt_gapsize);
@@ -742,6 +740,9 @@ public:
 
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
 			this->master->move_to(this->hopper_types[DS::SB], this->labels[DS::SBHPDP], GraphletAnchor::RT, GraphletAnchor::CB, +vinset, -txt_gapsize);
+
+			this->reflow_draghead_metrics(DS::PSVisor, DS::PSEarth, DS::PSDP);
+			this->reflow_draghead_metrics(DS::SBVisor, DS::SBEarth, DS::SBDP);
 		}
 	}
 
@@ -888,14 +889,13 @@ public:
 		this->lengths[DS::TideMark]->set_value(DBD(DB2, 0U));
 		this->speeds[DS::Speed]->set_value(DBD(DB2, 584U));
 
-		this->set_drag_positions(this->DS_side, DB2, this->address);
-		this->set_draghead_angles(this->DS_side, DB2, this->address->draghead_angle);
-
 		if (this->DS_side == DS::PS) {
+			this->set_drag_metrics(DS::PS, DS::PSVisor, DS::PSEarth, DB2, this->address);
 			this->set_winch_metrics(DS::psTrunnion, DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::CC);
 			this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::CC);
 			this->set_winch_metrics(DS::psDragHead, DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::CC);
 		} else {
+			this->set_drag_metrics(DS::SB, DS::SBVisor, DS::SBEarth, DB2, this->address);
 			this->set_winch_metrics(DS::sbTrunnion, DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::CC);
 			this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::CC);
 			this->set_winch_metrics(DS::sbDragHead, DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::CC);
@@ -1024,7 +1024,7 @@ public:
 		this->load_gantry_indicators(DS::tVirtualUp, DS::hVirtualOut, large_font_size, this->indicators, this->labels);
 
 		if (this->DS_side == DS::PS) {
-			this->load_draghead(this->dragheads, DS::PS, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
+			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSEarth, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_radius);
 			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
@@ -1034,7 +1034,7 @@ public:
 
 			this->load_label(this->labels, DS::ps_gantry_settings, Colours::Black);
 		} else {
-			this->load_draghead(this->dragheads, DS::SB, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
+			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBEarth, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
 			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
@@ -1057,7 +1057,7 @@ public:
 		if (this->DS_side == DS::PS) {
 			this->master->move_to(this->dragxzes[DS::PS], vinset, cy, GraphletAnchor::LC);
 			this->master->move_to(this->dragxys[DS::PS], this->dragxzes[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
-			this->master->move_to(this->dragheads[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset);
+			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset);
 
 			{ // flow gantries and winches
 				auto gantry = this->gantries[DS::psIntermediate];
@@ -1072,7 +1072,7 @@ public:
 			}
 
 			for (DS id = DS::psTrunnion; id <= DS::psDragHead; id++) {
-				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::RB, GraphletAnchor::CT, 0.0F, txt_gapsize);
+				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::RB, GraphletAnchor::CT, -vinset, txt_gapsize);
 				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB);
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB, txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LT, txt_gapsize);
@@ -1091,7 +1091,7 @@ public:
 		} else {
 			this->master->move_to(this->dragxzes[DS::SB], width - vinset, cy, GraphletAnchor::RC);
 			this->master->move_to(this->dragxys[DS::SB], this->dragxzes[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
-			this->master->move_to(this->dragheads[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset);
+			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset);
 
 			{ // flow gantries and winches
 				auto gantry = this->gantries[DS::sbIntermediate];
@@ -1106,7 +1106,7 @@ public:
 			}
 
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
-				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::LB, GraphletAnchor::CT, 0.0F, txt_gapsize);
+				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::LB, GraphletAnchor::CT, vinset, txt_gapsize);
 				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB);
 				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB, -txt_gapsize);
 				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RT, -txt_gapsize);
@@ -1133,9 +1133,11 @@ public:
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 
 			if (DS_side == DS::PS) {
+				this->reflow_draghead_metrics(DS::PSVisor, DS::PSEarth, DS::PSDP); 
 				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS_side], GraphletAnchor::RT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::PSPF1], this->forces[DS::PSPF2], GraphletAnchor::CT, GraphletAnchor::CB);
 			} else {
+				this->reflow_draghead_metrics(DS::SBVisor, DS::SBEarth, DS::SBDP); 
 				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS_side], GraphletAnchor::LT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::SBPF1], this->forces[DS::SBPF2], GraphletAnchor::CT, GraphletAnchor::CB);
 			}
@@ -1318,6 +1320,7 @@ private:
 		}
 	}
 
+private:
 	template<typename E>
 	void draw_cable(CanvasDrawingSession^ ds, E id, GraphletAnchor ga, GraphletAnchor wa, ICanvasBrush^ color, float thickness) {
 		float gantry_x, gantry_y, winch_x, winch_y;

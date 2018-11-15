@@ -21,11 +21,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_forat_data(const uint8* dqs, size_t dqc, const uint8* db20, size_t count, WarGrey::SCADA::Syslog* logger) {}
 		virtual void on_analog_input(const uint8* db203, size_t count, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_raw_analog_input(const uint8* db3, size_t count, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_analog_output(const uint8* db204, size_t count, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_raw_analog_output(const uint8* db5, size_t count, WarGrey::SCADA::Syslog* logger) {}
 
 	public:
 		virtual void on_digital_input(const uint8* db4, size_t count4, const uint8* db205, size_t count205, WarGrey::SCADA::Syslog* logger) {}

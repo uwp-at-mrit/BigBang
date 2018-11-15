@@ -92,20 +92,21 @@ namespace WarGrey::SCADA {
 		float ws_width;
 		float ws_height;
 
-	protected:
+	protected: // real 3D coordinates
 		WarGrey::SCADA::DragInfo info;
 		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
+		double drag_arm_angle; // against earth
 		float drag_length;
 
-	protected:
+	protected: // graphlets 2D coordinates
 		Windows::Foundation::Numerics::float2 _suction;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
+		double _drag_arm_angle;
 
 	protected:
-		double draghead_angle;
 		double visor_angle;
 		float draghead_length;
 		bool dredging;
@@ -209,8 +210,16 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		double get_arm_earth_degrees();
+		double get_visor_earth_degrees();
+
 		void set_angles(double visor_degrees, double arm_degrees, bool force = false);
 		void set_depths(float suction_depth, float draghead_depth, bool force = false);
+		void set_position(float suction_depth,
+			Windows::Foundation::Numerics::float3& last_ujoint,
+			Windows::Foundation::Numerics::float3& draghead,
+			double visor_angle,
+			bool force = false);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
@@ -257,8 +266,8 @@ namespace WarGrey::SCADA {
 		float depth_height;
 
 	private:
-		double visor_pointer_degrees;
-		double arm_pointer_degrees;
+		double arm_earth_degrees;
+		double visor_earth_degrees;
 		float suction_depth;
 		float draghead_depth;
 	};

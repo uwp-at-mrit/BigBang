@@ -36,7 +36,7 @@ double WarGrey::SCADA::degrees_normalize(double degrees) {
 	return degrees;
 }
 
-double WarGrey::SCADA::points_angle(float2 pt1, float2 pt2) {
+double WarGrey::SCADA::points_angle(float2& pt1, float2& pt2) {
 	return points_angle(pt1.x, pt1.y, pt2.x, pt2.y);
 }
 

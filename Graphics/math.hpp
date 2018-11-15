@@ -8,7 +8,7 @@ namespace WarGrey::SCADA {
 	float degrees_to_radians(double degrees);
 	double degrees_normalize(double degrees);
 
-	double points_angle(Windows::Foundation::Numerics::float2 pt1, Windows::Foundation::Numerics::float2 pt2);
+	double points_angle(Windows::Foundation::Numerics::float2& pt1, Windows::Foundation::Numerics::float2& pt2);
 	double points_angle(float x1, float y1, float x2, float y2);
 
 	double arc_length(float radius, double degrees0, double degreesn);

@@ -139,15 +139,30 @@ void PLCMaster::on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA:
 /*************************************************************************************************/
 void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	size_t count, subaddr0, subaddrn;
-	size_t adbs[] = { MRDB::ANALOG_INPUT_RAW, MRDB::ANALOG_INPUT, MRDB::ANALOG_OUTPUT_RAW, MRDB::ANALOG_OUTPUT, MRDB::FORAT, MRDB::REALTIME };
-	size_t ddbs[] = { MRDB::DIGITAL_INPUT_RAW, MRDB::DIGITAL_OUTPUT_RAW, MRDB::DIGITAL_INPUT };
+	size_t adbs[] = { MRDB::ANALOG_INPUT, MRDB::REALTIME };
+	size_t ddbs[] = { MRDB::DIGITAL_INPUT_RAW, MRDB::DIGITAL_INPUT };
 	size_t dqcount = 2;
 	size_t analog_size = sizeof(float);
 	size_t digital_size = sizeof(uint8);
-	uint8* digital_data[] = { nullptr, nullptr, nullptr };
-	size_t digital_counts[] = { 0, 0, 0 };
+	uint8* digital_data[] = { nullptr, nullptr };
+	size_t digital_counts[] = { 0, 0 };
 
 	this->pre_read_data(logger);
+
+	for (size_t i = 0; i < sizeof(ddbs) / sizeof(size_t); i++) {
+		if (fill_signal_preferences(ddbs[i], &count, &subaddr0, &subaddrn)) {
+			if (valid_address(logger, ddbs[i], subaddr0, subaddrn, count, digital_size, size)) {
+				digital_data[i] = data + subaddr0;
+				digital_counts[i] = count;
+			}
+		} else {
+			logger->log_message(Log::Warning, L"missing configuration for data block %hu", ddbs[i]);
+		}
+	}
+
+	if ((digital_data[0] != nullptr) && (digital_data[1] != nullptr)) {
+		this->on_digital_input(digital_data[0], digital_counts[0], digital_data[1], digital_counts[1], logger);
+	}
 
 	for (size_t i = 0; i < sizeof(adbs) / sizeof(size_t); i++) {
 		if (fill_signal_preferences(adbs[i], &count, &subaddr0, &subaddrn)) {
@@ -163,31 +178,12 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 				
 				switch (adbs[i]) {
 				case MRDB::REALTIME: this->on_realtime_data(raw, real_count, logger); break;
-				case MRDB::FORAT: this->on_forat_data(raw - dqcount, dqcount, raw, real_count, logger); break;
 				case MRDB::ANALOG_INPUT: this->on_analog_input(raw, real_count, logger); break;
-				case MRDB::ANALOG_INPUT_RAW: this->on_raw_analog_input(raw, real_count, logger); break;
-				case MRDB::ANALOG_OUTPUT: this->on_analog_output(raw, real_count, logger); break;
-				case MRDB::ANALOG_OUTPUT_RAW: this->on_raw_analog_output(raw, real_count, logger); break;
 				}
 			}
 		} else {
 			logger->log_message(Log::Warning, L"missing configuration for data block %hu", adbs[i]);
 		}
-	}
-
-	for (size_t i = 0; i < sizeof(ddbs) / sizeof(size_t); i++) {
-		if (fill_signal_preferences(ddbs[i], &count, &subaddr0, &subaddrn)) {
-			if (valid_address(logger, ddbs[i], subaddr0, subaddrn, count, digital_size, size)) {
-				digital_data[i] = data + subaddr0;
-				digital_counts[i] = count;
-			}
-		} else {
-			logger->log_message(Log::Warning, L"missing configuration for data block %hu", ddbs[i]);
-		}
-	}
-
-	if ((digital_data[0] != nullptr) && (digital_data[2] != nullptr)) {
-		this->on_digital_input(digital_data[0], digital_counts[0], digital_data[2], digital_counts[2], logger);
 	}
 
 	this->post_read_data(logger);
