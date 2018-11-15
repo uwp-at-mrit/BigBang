@@ -186,17 +186,17 @@ protected:
 		}
 	}
 
-	template<class C, typename E>
-	void load_densityflowmeters(std::map<E, Credit<C, E>*>& dfs, E id0, E idn, float height) {
+	template<class DF, typename E>
+	void load_densityflowmeters(std::map<E, Credit<DF, E>*>& dfs, E id0, E idn, float height) {
 		for (E id = id0; id <= idn; id++) {
-			dfs[id] = this->master->insert_one(new Credit<C, E>(height), id);
+			dfs[id] = this->master->insert_one(new Credit<DF, E>(height), id);
 		}
 	}
 
-	template<class C, typename E>
-	void load_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
+	template<class W, typename E>
+	void load_winches(std::map<E, Credit<W, E>*>& ws, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
-			ws[id] = this->master->insert_one(new Credit<C, E>(radius), id);
+			ws[id] = this->master->insert_one(new Credit<W, E>(radius), id);
 
 			this->load_label(this->labels, id, this->caption_color);
 			this->lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
@@ -227,18 +227,18 @@ protected:
 		}
 	}
 
-	template<class C, typename E>
-	void load_draghead(std::map<E, Credit<C, E>*>& ds, E id, E eid, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(radius, visor_color, drag_depth(info)), id);
+	template<class D, typename E>
+	void load_draghead(std::map<E, Credit<D, E>*>& ds, E id, E eid, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<D, E>(radius, visor_color, drag_depth(info)), id);
 
 		this->degrees[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees", _speak(id)), id);
 		this->degrees[eid] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "degrees", _speak(eid)), id);
 		this->pressures[dpid] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, "bar", _speak(dpid)), id);
 	}
 
-	template<class C, typename E>
-	void load_drag(std::map<E, Credit<C, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<C, E>(info, width, height, visor_color), id);
+	template<class D, typename E>
+	void load_drag(std::map<E, Credit<D, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
+		ds[id] = this->master->insert_one(new Credit<D, E>(info, width, height, visor_color), id);
 	}
 
 	template<typename E>
@@ -445,6 +445,19 @@ public:
 		DI_gate_valve(this->valves[DS::D015], DB4, gate_valve_D15_feedback, DB205, gate_valve_D15_status);
 		DI_gate_valve(this->valves[DS::D016], DB4, gate_valve_D16_feedback, DB205, gate_valve_D16_status);
 		
+		DI_gantry(this->gantries[DS::psTrunnion], DB4, gantry_ps_trunnion_limited, DB205, gantry_ps_trunnion_details);
+		DI_gantry(this->gantries[DS::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
+		DI_gantry(this->gantries[DS::psDragHead], DB4, gantry_ps_draghead_limited, DB205, gantry_ps_draghead_details);
+
+		DI_gantry(this->gantries[DS::sbTrunnion], DB4, gantry_sb_trunnion_limited, DB205, gantry_sb_trunnion_details);
+		DI_gantry(this->gantries[DS::sbIntermediate], DB4, gantry_sb_intermediate_limited, DB205, gantry_sb_intermediate_details);
+
+		if (DI_long_sb_drag(DB205)) {
+			DI_gantry(this->gantries[DS::sbDragHead], DB4, gantry_sb_long_draghead_limited, DB205, gantry_sb_draghead_details);
+		} else {
+			DI_gantry(this->gantries[DS::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
+		}
+
 		DI_winch(this->winches[DS::psTrunnion], DB4, winch_ps_trunnion_limits, DB205, winch_ps_trunnion_details);
 		DI_winch(this->winches[DS::psIntermediate], DB4, winch_ps_intermediate_limits, DB205, winch_ps_intermediate_details);
 		DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limits, DB205, winch_ps_draghead_details);
@@ -551,7 +564,8 @@ public:
 			float overflow_height = shheight * 0.618F;
 			float dfmeter_height = shhmargin * 0.72F;
 			float cylinder_height = shheight * 0.618F;
-			float winch_radius = shvmargin * 0.12F;
+			float winch_width = shvmargin * 0.12F;
+			float gantry_width = winch_width * 1.4F;
 		
 			this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, overflow_height));
 			this->load_dimension(this->lengths, DS::Overflow, "meter");
@@ -567,14 +581,17 @@ public:
 			this->load_cylinders(this->cylinders, DS::PSHPDP, DS::SBHPDP, cylinder_height, 0.0, 20.0, "bar");
 			this->load_cylinders(this->cylinders, DS::PSHPVP, DS::SBHPVP, cylinder_height, -2.0, 2.0, "bar");
 
-			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
-			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
+			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_width);
+			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_width);
+
+			this->load_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_width);
+			this->load_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_width);
 		}
 
 		{ // load drags
 			float draghead_radius = shhmargin * 0.2718F;
 			float over_drag_height = height * 0.5F - vinset;
-			float over_drag_width = over_drag_height * 0.382F;
+			float over_drag_width = over_drag_height * 0.314F;
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 2.0F;
 			float side_drag_height = height * 0.314F - vinset;
 			
@@ -666,16 +683,16 @@ public:
 			this->master->move_to(this->dragxys[DS::PS], std::fminf(dflx, wclx), cy, GraphletAnchor::RB, -vinset, vinset);
 			this->master->move_to(this->dragxzes[DS::PS], xstep, height - vinset - ystep, GraphletAnchor::LB);
 
-			{ // reflow winches
+			{ // reflow gantries
 				float lx = vinset;
 
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &trunnion_y, GraphletAnchor::CT);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::PS], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winches[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 6.0F);
-				this->master->move_to(this->winches[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winches[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 0.0F);
+				this->master->move_to(this->gantries[DS::psTrunnion], lx, trunnion_y, GraphletAnchor::LT, 0.0F, vinset * 6.0F);
+				this->master->move_to(this->gantries[DS::psIntermediate], lx, intermediate_y, GraphletAnchor::LC, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->gantries[DS::psDragHead], lx, draghead_y, GraphletAnchor::LB, 0.0F, -vinset * 0.0F);
 			}
 		}
 
@@ -695,9 +712,9 @@ public:
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &intermediate_y, GraphletAnchor::CC);
 				this->master->fill_graphlet_location(this->dragxys[DS::SB], nullptr, &draghead_y, GraphletAnchor::CB);
 
-				this->master->move_to(this->winches[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 6.0F);
-				this->master->move_to(this->winches[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC, 0.0F, vinset * 3.0F);
-				this->master->move_to(this->winches[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 0.0F);
+				this->master->move_to(this->gantries[DS::sbTrunnion], rx, trunnion_y, GraphletAnchor::RT, 0.0F, vinset * 6.0F);
+				this->master->move_to(this->gantries[DS::sbIntermediate], rx, intermediate_y, GraphletAnchor::RC, 0.0F, vinset * 3.0F);
+				this->master->move_to(this->gantries[DS::sbDragHead], rx, draghead_y, GraphletAnchor::RB, 0.0F, -vinset * 0.0F);
 			}
 		}
 
@@ -714,7 +731,8 @@ public:
 			}
 
 			for (DS id = DS::psTrunnion; id <= DS::psDragHead; id++) {
-				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LC, txt_gapsize);
+				this->master->move_to(this->winches[id], this->gantries[id], GraphletAnchor::CC, GraphletAnchor::CC);
+				this->master->move_to(this->lengths[id], this->gantries[id], GraphletAnchor::RC, GraphletAnchor::LC, txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::LT, GraphletAnchor::LB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::LB, GraphletAnchor::LT);
 
@@ -722,7 +740,8 @@ public:
 			}
 
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
-				this->master->move_to(this->lengths[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RC, -txt_gapsize);
+				this->master->move_to(this->winches[id], this->gantries[id], GraphletAnchor::CC, GraphletAnchor::CC);
+				this->master->move_to(this->lengths[id], this->gantries[id], GraphletAnchor::LC, GraphletAnchor::RC, -txt_gapsize);
 				this->master->move_to(this->labels[id], this->lengths[id], GraphletAnchor::RT, GraphletAnchor::RB);
 				this->master->move_to(this->speeds[id], this->lengths[id], GraphletAnchor::RB, GraphletAnchor::RT);
 
@@ -752,6 +771,13 @@ private:
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
+		}
+	}
+
+	template<class G, typename E>
+	void load_gantries(std::map<E, Credit<G, E>*>& cs, E id0, E idn, float width) {
+		for (E id = id0; id <= idn; id++) {
+			cs[id] = this->master->insert_one(new Credit<G, E>(width), id);
 		}
 	}
 
@@ -799,6 +825,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<DensitySpeedmeterlet, DS>*> dfmeters;
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	std::map<DS, Credit<Labellet, DS>*> hopper_types;
+	std::map<DS, Credit<GantrySymbollet, DS>*> gantries;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
 
@@ -1005,7 +1032,7 @@ public:
 		float side_drag_width = width * 0.32F;
 		float over_drag_width = drag_height * 0.382F;
 		float draghead_radius = side_drag_width * 0.18F;
-		float winch_radius = over_drag_width * 0.382F;
+		float winch_width = over_drag_width * 0.382F;
 		float gantry_radius = drag_height * 0.20F;
 		float table_header_width = width * 0.14F;
 		DragInfo config = this->drag_configs[this->drag_idx];
@@ -1026,7 +1053,7 @@ public:
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSEarth, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_radius);
-			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_radius);
+			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::psTrunnion, DS::psDragHead, DS::C, "bar");
 			this->load_dimension(this->forces, DS::PSPF1, "knewton");
@@ -1036,7 +1063,7 @@ public:
 		} else {
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBEarth, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
-			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_radius);
+			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pressures, DS::sbTrunnion, DS::sbDragHead, DS::F, "bar");
 			this->load_dimension(this->forces, DS::SBPF1, "knewton");
@@ -1242,15 +1269,15 @@ public:
 	}
 
 private:
-	template<class C, typename E>
-	void load_gantries(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float radius) {
+	template<class G, typename E>
+	void load_gantries(std::map<E, Credit<G, E>*>& cs, E id0, E idn, float radius) {
 		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<C, E>(radius), id);
+			cs[id] = this->master->insert_one(new Credit<G, E>(radius), id);
 		}
 	}
 
-	template<class C, typename E>
-	void load_detailed_winches(std::map<E, Credit<C, E>*>& ws, E id0, E idn, float radius) {
+	template<class W, typename E>
+	void load_detailed_winches(std::map<E, Credit<W, E>*>& ws, E id0, E idn, float radius) {
 		this->load_winches(ws, id0, idn, radius);
 
 		for (E id = id0; id <= idn; id++) {

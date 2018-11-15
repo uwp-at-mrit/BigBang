@@ -127,13 +127,13 @@ void PLCMaster::on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA:
 	float ps_page = DBD(db2, 596U);
 	float sb_page = DBD(db2, 600U);
 
-	if (ps_page != 0.0F) {
-		logger->log_message(Log::Info, L"PS Page: %f", ps_page);
-	}
+	//if (ps_page != 0.0F) {
+		//logger->log_message(Log::Info, L"PS Page: %f", ps_page);
+	//}
 
-	if (sb_page != 0.0F) {
-		logger->log_message(Log::Info, L"SB Page: %f", sb_page);
-	}
+	//if (sb_page != 0.0F) {
+		//logger->log_message(Log::Info, L"SB Page: %f", sb_page);
+	//}
 }
 
 /*************************************************************************************************/

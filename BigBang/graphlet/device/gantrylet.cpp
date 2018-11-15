@@ -2,6 +2,7 @@
 
 #include "math.hpp"
 #include "text.hpp"
+#include "polar.hpp"
 #include "shape.hpp"
 #include "paint.hpp"
 #include "geometry.hpp"
@@ -235,21 +236,26 @@ GantrySymbollet::GantrySymbollet(float width, float height)
 	: GantrySymbollet(GantryStatus::WindedUp, width, height) {}
 
 GantrySymbollet::GantrySymbollet(GantryStatus default_status, float width, float height)
-	: IStatuslet(default_status), thickness(2.0F), width(width), height(height) {
+	: IStatuslet(default_status), width(std::fabsf(width)), height(height), leftward(width < 0.0F), thickness(1.0F) {
 	if (this->height <= 0.0F) {
-		this->height = this->width / 7.0F;
+		this->height = this->width * 0.618F;
 	}
 }
 
 void GantrySymbollet::construct() {
+	float halfwidth = this->width * 0.5F;
+	float arrow_radiusX = halfwidth * 0.1618F;
+	float arrow_radiusY = this->height * 0.5F;
+	float xoff = halfwidth - arrow_radiusX - this->thickness * 0.5F;
+
+	this->leftward_arrow = geometry_translate(polar_arrowhead(arrow_radiusX, arrow_radiusY, 180.0), -xoff, 0.F);
+	this->rightward_arrow = geometry_translate(polar_arrowhead(arrow_radiusX, arrow_radiusY, 0.0), +xoff, 0.F);
 }
 
 void GantrySymbollet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_status()) {
-	case GantryStatus::WindingUp: {
-		this->notify_updated();
-	}; break;
-	case GantryStatus::WindingOut: {
+	case GantryStatus::WindingUp: case GantryStatus::WindingOut: {
+		this->highlighting = !this->highlighting;
 		this->notify_updated();
 	}; break;
 	case GantryStatus::Default: {
@@ -265,25 +271,77 @@ void GantrySymbollet::fill_extent(float x, float y, float* w, float* h) {
 void GantrySymbollet::prepare_style(GantryStatus status, GantrySymbolStyle& style) {
 	CAS_SLOT(style.color, Colours::Gray);
 	CAS_SLOT(style.highlight_color, Colours::Green);
-	CAS_SLOT(style.border_color, Colours::DarkGray);
 }
 
 void GantrySymbollet::on_status_changed(GantryStatus status) {
+	GantrySymbolStyle s = this->get_style();
+
 	switch (status) {
 	case GantryStatus::WindedOut: {
+		this->inside_color = s.color;
+		this->outside_color = s.highlight_color;
+		this->inside_border_color = nullptr;
+		this->outside_border_color = nullptr;
+		this->highlighting = true;
 	}; break;
 	case GantryStatus::WindedUp: {
+		this->inside_color = s.highlight_color;
+		this->outside_color = s.color;
+		this->inside_border_color = nullptr;
+		this->outside_border_color = nullptr;
+		this->highlighting = true;
 	}; break;
 	case GantryStatus::WindingOut: {
+		this->inside_color = s.color;
+		this->outside_color = s.highlight_color;
+		this->inside_border_color = nullptr;
+		this->outside_border_color = s.highlight_color;
+		this->highlighting = true;
 	}; break;
 	case GantryStatus::WindingUp: {
+		this->inside_color = s.highlight_color;
+		this->outside_color = s.color;
+		this->inside_border_color = s.highlight_color;
+		this->outside_border_color = nullptr;
+		this->highlighting = true;
 	}; break;
 	case GantryStatus::Default: {
-		// keep current settings, but animation is paused by `update()`.
+		this->highlighting = false;
 	}; break;
 	}
 }
 
 void GantrySymbollet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	
+	GantrySymbolStyle s = this->get_style();
+	float cx = x + this->width * 0.5F;
+	float cy = y + this->height * 0.5F;
+
+	if (!this->highlighting) {
+		ds->FillGeometry(this->leftward_arrow, cx, cy, s.color);
+		ds->FillGeometry(this->rightward_arrow, cx, cy, s.color);
+	} else if (this->leftward) {
+		ds->FillGeometry(this->leftward_arrow, cx, cy, this->outside_color);
+		ds->FillGeometry(this->rightward_arrow, cx, cy, this->inside_color);
+	} else {
+		ds->FillGeometry(this->leftward_arrow, cx, cy, this->inside_color);
+		ds->FillGeometry(this->rightward_arrow, cx, cy, this->outside_color);
+	}
+
+	if (this->leftward) {
+		if (this->outside_border_color != nullptr) {
+			ds->DrawGeometry(this->leftward_arrow, cx, cy, this->outside_border_color, this->thickness);
+		}
+
+		if (this->inside_border_color != nullptr) {
+			ds->DrawGeometry(this->rightward_arrow, cx, cy, this->inside_border_color, this->thickness);
+		}
+	} else {
+		if (this->inside_border_color != nullptr) {
+			ds->DrawGeometry(this->leftward_arrow, cx, cy, this->inside_border_color, this->thickness);
+		}
+
+		if (this->outside_border_color != nullptr) {
+			ds->DrawGeometry(this->rightward_arrow, cx, cy, this->outside_border_color, this->thickness);
+		}
+	}
 }

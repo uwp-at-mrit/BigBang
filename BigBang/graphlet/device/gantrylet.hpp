@@ -20,7 +20,6 @@ namespace WarGrey::SCADA {
 	private struct GantrySymbolStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ highlight_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 	};
 
 	private class Gantrylet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::GantryStatus, WarGrey::SCADA::GantryStyle> {
@@ -92,6 +91,10 @@ namespace WarGrey::SCADA {
 		void on_status_changed(WarGrey::SCADA::GantryStatus status) override;
 
 	private:
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ inside_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ outside_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ inside_border_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ outside_border_color;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ leftward_arrow;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rightward_arrow;
 
@@ -99,5 +102,9 @@ namespace WarGrey::SCADA {
 		float width;
 		float height;
 		float thickness;
+
+	private:
+		bool leftward;
+		bool highlighting;
 	};
 }

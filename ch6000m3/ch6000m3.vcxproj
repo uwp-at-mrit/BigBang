@@ -260,10 +260,10 @@
   <ItemGroup>
     <PRIResource Include="stone\tongue\en-US\dredges.resw" />
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
-    <PRIResource Include="stone\tongue\en-US\loadings.resw" />
+    <PRIResource Include="stone\tongue\en-US\charges.resw" />
     <PRIResource Include="stone\tongue\en-US\draughts.resw" />
     <PRIResource Include="stone\tongue\en-US\lubricatings.resw" />
-    <PRIResource Include="stone\tongue\en-US\rainbowings.resw" />
+    <PRIResource Include="stone\tongue\en-US\discharges.resw" />
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -283,10 +283,10 @@
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\dredges.resw" />
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\loadings.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\charges.resw" />
     <PRIResource Include="stone\tongue\zh-CN\draughts.resw" />
     <PRIResource Include="stone\tongue\zh-CN\lubricatings.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\discharges.resw" />
     <PRIResource Include="stone\tongue\zh-CN\hopper_doors.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -313,9 +313,9 @@
     <ClCompile Include="schema\ai_dredges.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
-    <ClCompile Include="page\loadings.cpp" />
+    <ClCompile Include="page\charges.cpp" />
     <ClCompile Include="page\draughts.cpp" />
-    <ClCompile Include="page\rainbowings.cpp" />
+    <ClCompile Include="page\discharges.cpp" />
     <ClCompile Include="page\hopper_doors.cpp" />
     <ClCompile Include="gallery.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
@@ -347,9 +347,9 @@
     <ClInclude Include="schema\do_valves.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
-    <ClInclude Include="page\loadings.hpp" />
+    <ClInclude Include="page\charges.hpp" />
     <ClInclude Include="page\draughts.hpp" />
-    <ClInclude Include="page\rainbowings.hpp" />
+    <ClInclude Include="page\discharges.hpp" />
     <ClInclude Include="page\hopper_doors.hpp" />
     <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />

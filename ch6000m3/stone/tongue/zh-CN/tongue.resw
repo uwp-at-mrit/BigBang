@@ -153,10 +153,10 @@
   <data name="draughts" xml:space="preserve">
     <value>吃水装载</value>
   </data>
-  <data name="loadings" xml:space="preserve">
+  <data name="charges" xml:space="preserve">
     <value>装舱丨装驳</value>
   </data>
-  <data name="rainbowings" xml:space="preserve">
+  <data name="discharges" xml:space="preserve">
     <value>艏吹丨艏喷</value>
   </data>
   <data name="flushs" xml:space="preserve">

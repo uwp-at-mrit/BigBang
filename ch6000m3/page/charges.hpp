@@ -9,10 +9,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class RainbowingsPage : public WarGrey::SCADA::Planet {
+	private class ChargesPage : public WarGrey::SCADA::Planet {
 	public:
-		~RainbowingsPage() noexcept;
-		RainbowingsPage(WarGrey::SCADA::PLCMaster* plc);
+		~ChargesPage() noexcept;
+		ChargesPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
@@ -20,8 +20,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool can_select(IGraphlet* g) override;
-		void on_focus(IGraphlet* g) override;
-		bool on_char(Windows::System::VirtualKey vkey, bool wargrey_keyboard) override;
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
 
 	private:
@@ -29,9 +27,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCConfirmation* dashboard;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ motor_valve_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ ps_underwater_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ sb_underwater_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

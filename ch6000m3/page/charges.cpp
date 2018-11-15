@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/loadings.hpp"
+#include "page/charges.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -86,7 +86,7 @@ private class Vessel final
 	, public IMenuCommand<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
 	, public IMenuCommand<LDSBUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*> {
 public:
-	Vessel(LoadingsPage* master) : master(master) {}
+	Vessel(ChargesPage* master) : master(master) {}
 
 public:
 	void pre_read_data(Syslog* logger) override {
@@ -547,7 +547,7 @@ private:
 	DimensionStyle hopper_style;
 
 private:
-	LoadingsPage* master;
+	ChargesPage* master;
 };
 
 private class ShipDecorator : public IPlanetDecorator {
@@ -633,7 +633,7 @@ private:
 	Vessel* master;
 };
 
-LoadingsPage::LoadingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
+ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
@@ -659,7 +659,7 @@ LoadingsPage::LoadingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	}
 }
 
-LoadingsPage::~LoadingsPage() {
+ChargesPage::~ChargesPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
@@ -669,7 +669,7 @@ LoadingsPage::~LoadingsPage() {
 #endif
 }
 
-void LoadingsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void ChargesPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -701,7 +701,7 @@ void LoadingsPage::load(CanvasCreateResourcesReason reason, float width, float h
 	}
 }
 
-void LoadingsPage::reflow(float width, float height) {
+void ChargesPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -717,13 +717,13 @@ void LoadingsPage::reflow(float width, float height) {
 	}
 }
 
-bool LoadingsPage::can_select(IGraphlet* g) {
+bool ChargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
-void LoadingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, LD>*>(g);

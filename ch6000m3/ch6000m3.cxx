@@ -10,8 +10,8 @@
 #include "page/sealed_waters.hpp"
 #include "page/draughts.hpp"
 #include "page/lubricatings.hpp"
-#include "page/loadings.hpp"
-#include "page/rainbowings.hpp"
+#include "page/charges.hpp"
+#include "page/discharges.hpp"
 #include "page/flushs.hpp"
 #include "page/dredges.hpp"
 
@@ -50,9 +50,9 @@ protected:
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
 		
 		this->add_planet(new HydraulicsPage(this->device));
-		this->add_planet(new LoadingsPage(this->device));
+		this->add_planet(new ChargesPage(this->device));
 		this->add_planet(new DredgesPage(this->device));
-		this->add_planet(new RainbowingsPage(this->device));
+		this->add_planet(new DischargesPage(this->device));
 		this->add_planet(new SealedWaterPage(this->device));
 		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new DredgesPage(this->device, DragView::Left));

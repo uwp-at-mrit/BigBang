@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/rainbowings.hpp"
+#include "page/discharges.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -97,7 +97,7 @@ private class Rainbows final
 	, public IMenuCommand<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>
 	, public IMenuCommand<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*> {
 public:
-	Rainbows(RainbowingsPage* master) : master(master) {}
+	Rainbows(DischargesPage* master) : master(master) {}
 
 public:
 	void pre_read_data(Syslog* logger) override {
@@ -670,7 +670,7 @@ private:
 	DimensionStyle hopper_style;
 
 private:
-	RainbowingsPage* master;
+	DischargesPage* master;
 };
 
 private class RainbowsDecorator : public IPlanetDecorator {
@@ -762,7 +762,7 @@ private:
 	Rainbows* master;
 };
 
-RainbowingsPage::RainbowingsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
+DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Rainbows* dashboard = new Rainbows(this);
 
 	this->dashboard = dashboard;
@@ -787,7 +787,7 @@ RainbowingsPage::RainbowingsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	}
 }
 
-RainbowingsPage::~RainbowingsPage() {
+DischargesPage::~DischargesPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
 	}
@@ -797,7 +797,7 @@ RainbowingsPage::~RainbowingsPage() {
 #endif
 }
 
-void RainbowingsPage::load(CanvasCreateResourcesReason reason, float width, float height) {
+void DischargesPage::load(CanvasCreateResourcesReason reason, float width, float height) {
 	auto dashboard = dynamic_cast<Rainbows*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -829,7 +829,7 @@ void RainbowingsPage::load(CanvasCreateResourcesReason reason, float width, floa
 	}
 }
 
-void RainbowingsPage::reflow(float width, float height) {
+void DischargesPage::reflow(float width, float height) {
 	auto dashboard = dynamic_cast<Rainbows*>(this->dashboard);
 	
 	if (dashboard != nullptr) {
@@ -845,14 +845,14 @@ void RainbowingsPage::reflow(float width, float height) {
 	}
 }
 
-bool RainbowingsPage::can_select(IGraphlet* g) {
+bool DischargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<MotorValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
-bool RainbowingsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
+bool DischargesPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_char(key, wargrey_keyboard);
 
 	if (!handled) {
@@ -866,7 +866,7 @@ bool RainbowingsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	return handled;
 }
 
-void RainbowingsPage::on_focus(IGraphlet* g) {
+void DischargesPage::on_focus(IGraphlet* g) {
 	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	if (editor != nullptr) {
@@ -874,7 +874,7 @@ void RainbowingsPage::on_focus(IGraphlet* g) {
 	}
 }
 
-void RainbowingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
+void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto mvalve = dynamic_cast<MotorValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);

@@ -53,16 +53,16 @@
     <ClCompile Include="page\dredges.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="page\rainbowings.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
-    <ClCompile Include="page\loadings.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="schema\ai_dredges.cpp">
       <Filter>schema</Filter>
     </ClCompile>
     <ClCompile Include="page\lubricatings.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\charges.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="page\discharges.cpp">
       <Filter>page</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,12 +102,6 @@
     </ClInclude>
     <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\dredges.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
-    <ClInclude Include="page\rainbowings.hpp">
-      <Filter>page</Filter>
-    </ClInclude>
-    <ClInclude Include="page\loadings.hpp">
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="schema\ai_dredges.hpp">
@@ -154,6 +148,12 @@
     </ClInclude>
     <ClInclude Include="schema\ai_water_pumps.hpp">
       <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\charges.hpp">
+      <Filter>page</Filter>
+    </ClInclude>
+    <ClInclude Include="page\discharges.hpp">
+      <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -356,28 +356,28 @@
     <PRIResource Include="stone\tongue\zh-CN\gallery.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\loadings.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\rainbowings.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\dredges.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\dredges.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\loadings.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\rainbowings.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\lubricatings.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\lubricatings.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\charges.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\charges.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\discharges.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\discharges.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
