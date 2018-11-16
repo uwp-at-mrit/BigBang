@@ -18,6 +18,7 @@
 #include "schema/ai_pumps.hpp"
 #include "schema/ai_valves.hpp"
 #include "schema/ai_hopper_pumps.hpp"
+#include "schema/ai_dredges.hpp"
 
 #include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
@@ -59,7 +60,7 @@ private enum class LD : unsigned int {
 	D013, D015,
 
 	// Pump Dimensions
-	C, F, H,
+	A, C, F, H,
 	
 	// Key Labels
 	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
@@ -94,22 +95,33 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->pressures[LD::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
-		this->pressures[LD::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
-		this->pressures[LD::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
+		this->pump_pressures[LD::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LC);
+		this->pump_pressures[LD::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LC);
+		this->pump_pressures[LD::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LC);
+		this->pump_pressures[LD::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LC);
 
 		this->progresses[LD::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->progresses[LD::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
-		this->powers[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LB);
-		this->rpms[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LB);
-		this->powers[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::LB);
-		this->rpms[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LB);
+		this->powers[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LC);
+		this->rpms[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::RC);
+		this->dpressures[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_discharge_pressure), GraphletAnchor::LB);
+		this->vpressures[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_vacuum_pressure), GraphletAnchor::RB);
 
-		this->powers[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
-		this->rpms[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
-		this->powers[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::LB);
-		this->rpms[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LB);
+		this->powers[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LC);
+		this->rpms[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::RC);
+		this->dpressures[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_discharge_pressure), GraphletAnchor::LT);
+		this->vpressures[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_vacuum_pressure), GraphletAnchor::RT);
+
+		this->powers[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::LC);
+		this->rpms[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::RC);
+		this->dpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_discharge_pressure), GraphletAnchor::LB);
+		this->dfpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_draghead_differential_pressure), GraphletAnchor::RB);
+
+		this->powers[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::LC);
+		this->rpms[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::RC);
+		this->dpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_discharge_pressure), GraphletAnchor::LT);
+		this->dfpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::RT);
 
 	}
 
@@ -117,9 +129,10 @@ public:
 		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_pump_dimension(this->pressures[LD::C], DB4, pump_C_feedback);
-		DI_pump_dimension(this->pressures[LD::F], DB4, pump_F_feedback);
-		DI_pump_dimension(this->pressures[LD::H], DB4, pump_H_feedback);
+		DI_pump_dimension(this->pump_pressures[LD::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->pump_pressures[LD::C], DB4, pump_C_feedback);
+		DI_pump_dimension(this->pump_pressures[LD::F], DB4, pump_F_feedback);
+		DI_pump_dimension(this->pump_pressures[LD::H], DB4, pump_H_feedback);
 
 		this->set_valves_status(LD::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(LD::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
@@ -250,7 +263,7 @@ public:
 		pTurtle->move_left(9)->move_left_up(2, LD::D015)->move_left_up(1.5F);
 
 		pTurtle->jump_back(LD::d0326)->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2, LD::F)->turn_down_left();
-		pTurtle->move_left(10, LD::SBUWPump)->move_left(8, LD::H)->move_left(LD::Starboard);
+		pTurtle->move_left(10, LD::SBUWPump)->move_left(8)->move_left(LD::Starboard);
 
 		pTurtle->jump_back(LD::d1819)->move_right(5, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
@@ -268,10 +281,10 @@ public:
 		{ // load special nodes
 			float nic_radius = gheight * 0.25F;
 
-			this->load_pump(this->hoppers, this->captions, LD::PSUWPump, -radius, -2.0F);
-			this->load_pump(this->hoppers, this->captions, LD::SBUWPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, LD::PSHPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, LD::SBHPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, LD::PSUWPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, LD::SBUWPump, -radius, +2.0F);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, LD::PSHPump, -radius, +2.0F);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, LD::SBHPump, -radius, -2.0F);
 
 			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 1.0F, default_pipe_color));
 
@@ -292,7 +305,7 @@ public:
 		{ // load labels and dimensions
 			this->load_percentage(this->progresses, LD::D003);
 			this->load_percentage(this->progresses, LD::D004);
-			this->load_dimensions(this->pressures, LD::C, LD::H, "bar");
+			this->load_dimensions(this->pump_pressures, LD::A, LD::H, "bar");
 
 			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->special_font);
@@ -328,14 +341,36 @@ public:
 			it->second->fill_pump_origin(&ox);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
 
-			if (it->first == LD::SBUWPump) {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, std::fabsf(ox));
-				this->master->move_to(this->rpms[it->first], this->captions[it->first], GraphletAnchor::LT, GraphletAnchor::LB);
-				this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LT, GraphletAnchor::LB);
-			} else {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, std::fabsf(ox));
-				this->master->move_to(this->powers[it->first], this->captions[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
-				this->master->move_to(this->rpms[it->first], this->powers[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
+			ox = std::fabsf(ox);
+			switch (it->first) {
+			case LD::PSHPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::LB);
+				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
+			}; break;
+			case LD::PSUWPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
+				this->master->move_to(this->dfpressures[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
+			}; break;
+			case LD::SBHPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::LT);
+				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
+			}; break;
+			case LD::SBUWPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
+				this->master->move_to(this->dfpressures[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
+			}; break;
 			}
 		}
 
@@ -409,9 +444,10 @@ public:
 			this->master->move_to(this->progresses[LD::D003], this->gvalves[LD::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
 			this->master->move_to(this->progresses[LD::D004], this->gvalves[LD::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 
-			this->station->map_credit_graphlet(this->pressures[LD::C], GraphletAnchor::LB, gwidth);
-			this->station->map_credit_graphlet(this->pressures[LD::F], GraphletAnchor::LT, gwidth);
-			this->station->map_credit_graphlet(this->pressures[LD::H], GraphletAnchor::LT, 0.0F, +offset);
+			this->station->map_credit_graphlet(this->pump_pressures[LD::C], GraphletAnchor::LB, gwidth * 3.0F);
+			this->station->map_credit_graphlet(this->pump_pressures[LD::F], GraphletAnchor::LT, gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[LD::A], this->pump_pressures[LD::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->master->move_to(this->pump_pressures[LD::H], this->pump_pressures[LD::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
 	}
 
@@ -459,17 +495,26 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
+	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ps
+		, E id, float rx, float fy) {
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
-		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "kwatt"), id);
-		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "rpm"), id);
+		
+		this->load_dimension(this->powers, id, "kwatt");
+		this->load_dimension(this->rpms, id, "rpm");
+		this->load_dimension(this->dpressures, id, "bar");
+		this->load_dimension(ps, id, "bar");
 	}
 
 	template<typename E>
 	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
 		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
+	}
+
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, unit), id);
 	}
 
 	template<typename E>
@@ -513,7 +558,10 @@ private:
 	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
 	std::map<LD, Credit<Labellet, LD>*> vlabels;
 	std::map<LD, Credit<Percentagelet, LD>*> progresses;
-	std::map<LD, Credit<Dimensionlet, LD>*> pressures;
+	std::map<LD, Credit<Dimensionlet, LD>*> pump_pressures;
+	std::map<LD, Credit<Dimensionlet, LD>*> dpressures;
+	std::map<LD, Credit<Dimensionlet, LD>*> vpressures;
+	std::map<LD, Credit<Dimensionlet, LD>*> dfpressures;
 	std::map<LD, Credit<Dimensionlet, LD>*> powers;
 	std::map<LD, Credit<Dimensionlet, LD>*> rpms;
 	std::map<LD, Omegalet*> nintercs;

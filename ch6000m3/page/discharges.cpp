@@ -69,9 +69,6 @@ private enum class RS : unsigned int {
 
 	// Key Labels
 	Port, Starboard, Hatch, PSHPump, SBHPump, Gantry,
-
-	// Settings
-	PSPC, SBPC, PSFC, SBFC,
 	
 	_,
 
@@ -105,20 +102,24 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
-		this->pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
+		this->pump_pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
+		this->pump_pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
 
-		this->pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
-		this->pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
+		this->pump_pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
+		this->pump_pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
 
 		this->progresses[RS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->progresses[RS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
 		this->powers[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LB);
 		this->rpms[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LB);
+		this->dpressures[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_discharge_pressure), GraphletAnchor::LB);
+		this->vpressures[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_vacuum_pressure), GraphletAnchor::RB);
 		
 		this->powers[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
 		this->rpms[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
+		this->dpressures[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_discharge_pressure), GraphletAnchor::LT);
+		this->vpressures[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_vacuum_pressure), GraphletAnchor::RT);
 		
 		{ // door progresses
 			this->set_door_progress(RS::PS1, RealData(DB203, upper_door_PS1_progress));
@@ -143,10 +144,10 @@ public:
 		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details);
 		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details);
 
-		DI_pump_dimension(this->pressures[RS::A], DB4, pump_A_feedback);
-		DI_pump_dimension(this->pressures[RS::C], DB4, pump_C_feedback);
-		DI_pump_dimension(this->pressures[RS::F], DB4, pump_F_feedback);
-		DI_pump_dimension(this->pressures[RS::H], DB4, pump_H_feedback);
+		DI_pump_dimension(this->pump_pressures[RS::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->pump_pressures[RS::C], DB4, pump_C_feedback);
+		DI_pump_dimension(this->pump_pressures[RS::F], DB4, pump_F_feedback);
+		DI_pump_dimension(this->pump_pressures[RS::H], DB4, pump_H_feedback);
 
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
@@ -231,33 +232,11 @@ public:
 	}
 
 public:
-	bool on_char(VirtualKey key, PLCMaster* plc) {
-		bool handled = false;
-
-		if (key == VirtualKey::Enter) {
-			auto editor = dynamic_cast<Credit<Dimensionlet, RS>*>(this->master->get_focus_graphlet());
-
-			if (editor != nullptr) {
-				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
-					editor->id.ToString()->Data(),
-					editor->get_input_number());
-
-				editor->set_value(editor->get_input_number());
-			}
-
-			handled = true;
-		}
-
-		return handled;
-	}
-
-public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
-		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
@@ -339,16 +318,8 @@ public:
 		{ // load labels and dimensions
 			this->load_percentage(this->progresses, RS::D003);
 			this->load_percentage(this->progresses, RS::D004);
-			this->load_dimensions(this->pressures, RS::A, RS::H, "bar");
+			this->load_dimensions(this->pump_pressures, RS::A, RS::H, "bar");
 
-			this->load_setting(this->dsettings, RS::PSPC, "bar");
-			this->load_setting(this->dsettings, RS::SBPC, "bar");
-
-			this->load_setting(this->psettings, RS::PSFC);
-			this->load_setting(this->psettings, RS::SBFC);
-
-			this->load_label(this->captions, RS::Port, Colours::make(default_ps_color), this->caption_font);
-			this->load_label(this->captions, RS::Starboard, Colours::make(default_sb_color), this->caption_font);
 			this->load_label(this->captions, RS::Hatch, Colours::SeaGreen, this->caption_font);
 			this->load_label(this->captions, RS::Gantry, Colours::Yellow, this->caption_font);
 
@@ -392,9 +363,24 @@ public:
 		for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
 			it->second->fill_pump_origin(&ox);
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
-			this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, std::fabsf(ox));
-			this->master->move_to(this->powers[it->first], this->captions[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
-			this->master->move_to(this->rpms[it->first], this->powers[it->first], GraphletAnchor::LB, GraphletAnchor::LT);
+
+			ox = std::fabsf(ox);
+			switch (it->first) {
+			case RS::PSHPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::LB);
+				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
+			}; break;
+			case RS::SBHPump: {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::LT);
+				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
+			}; break;
+			}
 		}
 
 		this->vlabels[RS::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
@@ -461,25 +447,15 @@ public:
 		}
 
 		{ // reflow settings dimensions
-			float soff = gwidth * 24.0F;
-			float doff = gwidth * 18.0F;
-			float gap = default_pipe_thickness * 2.0F;
-
-			this->station->map_graphlet_at_anchor(this->captions[RS::Port], RS::ps, GraphletAnchor::RB, -soff, -gheight);
-			this->master->move_to(this->psettings[RS::PSFC], this->captions[RS::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
-			this->master->move_to(this->dsettings[RS::PSPC], this->psettings[RS::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
+			float offset = default_pipe_thickness * 2.0F;
 			
-			this->station->map_graphlet_at_anchor(this->captions[RS::Starboard], RS::sb, GraphletAnchor::RT, -soff, gheight);
-			this->master->move_to(this->psettings[RS::SBFC], this->captions[RS::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
-			this->master->move_to(this->dsettings[RS::SBPC], this->psettings[RS::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
+			this->master->move_to(this->progresses[RS::D003], this->gvalves[RS::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
+			this->master->move_to(this->progresses[RS::D004], this->gvalves[RS::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 			
-			this->master->move_to(this->progresses[RS::D003], this->gvalves[RS::D003], GraphletAnchor::CB, GraphletAnchor::LT, gap, -gap);
-			this->master->move_to(this->progresses[RS::D004], this->gvalves[RS::D004], GraphletAnchor::CT, GraphletAnchor::LB, gap);
-			
-			this->station->map_graphlet_at_anchor(this->pressures[RS::A], RS::Port, GraphletAnchor::LB, -doff);
-			this->station->map_credit_graphlet(this->pressures[RS::C], GraphletAnchor::LB, gwidth);
-			this->station->map_credit_graphlet(this->pressures[RS::F], GraphletAnchor::LT, gwidth);
-			this->station->map_graphlet_at_anchor(this->pressures[RS::H], RS::Starboard, GraphletAnchor::LT, -doff);
+			this->station->map_credit_graphlet(this->pump_pressures[RS::C], GraphletAnchor::LB, gwidth * 3.0F);
+			this->station->map_credit_graphlet(this->pump_pressures[RS::F], GraphletAnchor::LT, gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[RS::A], this->pump_pressures[RS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->master->move_to(this->pump_pressures[RS::H], this->pump_pressures[RS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
 	}
 
@@ -504,16 +480,6 @@ public:
 	}
 
 private:
-	template<typename E>
-	void load_setting(std::map<E, Credit<Percentagelet, E>*>& ds, E id) {
-		ds[id] = this->master->insert_one(new Credit<Percentagelet, E>(DimensionStatus::Input, this->setting_style, _speak(id)), id);
-	}
-
-	template<typename E>
-	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
-	}
-
 	template<class G, typename E>
 	void load_valve(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
 		, E id, float radius, double degrees) {
@@ -554,13 +520,21 @@ private:
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
-		this->powers[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "kwatt"), id);
-		this->rpms[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, "rpm"), id);
+
+		this->load_dimension(this->powers, id, "kwatt");
+		this->load_dimension(this->rpms, id, "rpm");
+		this->load_dimension(this->dpressures, id, "bar");
+		this->load_dimension(this->vpressures, id, "bar");
 	}
 
 	template<typename E>
 	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
 		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
+	}
+
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, unit), id);
 	}
 
 	template<typename E>
@@ -640,7 +614,9 @@ private:
 	std::map<RS, Credit<Percentagelet, RS>*> progresses;
 	std::map<RS, Credit<Dimensionlet, RS>*> dsettings;
 	std::map<RS, Credit<Percentagelet, RS>*> psettings;
-	std::map<RS, Credit<Dimensionlet, RS>*> pressures;
+	std::map<RS, Credit<Dimensionlet, RS>*> pump_pressures;
+	std::map<RS, Credit<Dimensionlet, RS>*> dpressures;
+	std::map<RS, Credit<Dimensionlet, RS>*> vpressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> powers;
 	std::map<RS, Credit<Dimensionlet, RS>*> rpms;
 	Labellet* ps_seqs[hopper_count];
@@ -658,7 +634,6 @@ private:
 	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
-	DimensionStyle setting_style;
 	DimensionStyle plain_style;
 	DimensionStyle hopper_style;
 
@@ -843,32 +818,9 @@ bool DischargesPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
-bool DischargesPage::on_char(VirtualKey key, bool wargrey_keyboard) {
-	bool handled = Planet::on_char(key, wargrey_keyboard);
-
-	if (!handled) {
-		auto db = dynamic_cast<Rainbows*>(this->dashboard);
-
-		if (db != nullptr) {
-			handled = db->on_char(key, this->device);
-		}
-	}
-
-	return handled;
-}
-
-void DischargesPage::on_focus(IGraphlet* g) {
-	auto editor = dynamic_cast<IEditorlet*>(g);
-
-	if (editor != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-	}
-}
-
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
-	auto editor = dynamic_cast<IEditorlet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, RS>*>(g);
 
 	if (gvalve != nullptr) {

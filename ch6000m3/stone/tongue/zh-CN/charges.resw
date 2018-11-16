@@ -205,13 +205,13 @@
     <value>PS</value>
   </data>
   <data name="PSHPump" xml:space="preserve">
-    <value>左舱内泵</value>
+    <value>2级左舱内泵</value>
   </data>
   <data name="PSUWPump" xml:space="preserve">
     <value>左水下泵</value>
   </data>
   <data name="SBHPump" xml:space="preserve">
-    <value>右舱内泵</value>
+    <value>1级右舱内泵</value>
   </data>
   <data name="SBUWPump" xml:space="preserve">
     <value>右水下泵</value>

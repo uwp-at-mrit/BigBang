@@ -43,4 +43,7 @@ namespace WarGrey::SCADA {
 
 	static unsigned int winch_sb_intermediate_remote_speed = 146U;
 	static unsigned int winch_sb_draghead_remote_speed = 147U;
+
+	static unsigned int ps_draghead_differential_pressure = 109U;
+	static unsigned int sb_draghead_differential_pressure = 125U;
 }

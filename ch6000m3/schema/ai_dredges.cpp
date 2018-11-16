@@ -15,7 +15,7 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 		schema->pulling_force = 110U;
 
 		schema->suction_inflator_pressure = 33U;
-		schema->differential_pressure = 109U;
+		schema->differential_pressure = ps_draghead_differential_pressure;
 		schema->vacuum_pressure = 164U;
 		schema->discharge_pressure = 165U;
 
@@ -42,7 +42,7 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 		schema->pulling_force = 126U;
 
 		schema->suction_inflator_pressure = 37U;
-		schema->differential_pressure = 125U;
+		schema->differential_pressure = sb_draghead_differential_pressure;
 		schema->vacuum_pressure = 166U;
 		schema->discharge_pressure = 167U;
 

@@ -180,29 +180,11 @@
   <data name="Hatch" xml:space="preserve">
     <value>海水口</value>
   </data>
-  <data name="Port" xml:space="preserve">
-    <value>左舷小泥门</value>
-  </data>
-  <data name="PSFC" xml:space="preserve">
-    <value>流量控制</value>
-  </data>
   <data name="PSHPump" xml:space="preserve">
-    <value>左舱内泵</value>
-  </data>
-  <data name="PSPC" xml:space="preserve">
-    <value>压力控制</value>
-  </data>
-  <data name="SBFC" xml:space="preserve">
-    <value>流量控制</value>
+    <value>2级左舱内泵</value>
   </data>
   <data name="SBHPump" xml:space="preserve">
-    <value>右舱内泵</value>
-  </data>
-  <data name="SBPC" xml:space="preserve">
-    <value>压力控制</value>
-  </data>
-  <data name="Starboard" xml:space="preserve">
-    <value>右舷小泥门</value>
+    <value>1级右舱内泵</value>
   </data>
   <data name="PS1" xml:space="preserve">
     <value>#1</value>
