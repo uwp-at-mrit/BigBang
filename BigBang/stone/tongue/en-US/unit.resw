@@ -151,7 +151,7 @@
     <value>m/s</value>
   </data>
   <data name="rpm" xml:space="preserve">
-    <value>r/min</value>
+    <value>rpm</value>
   </data>
   <data name="ton" xml:space="preserve">
     <value>t</value>

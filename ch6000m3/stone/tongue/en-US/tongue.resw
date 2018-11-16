@@ -153,8 +153,8 @@
   <data name="UltraLow" xml:space="preserve">
     <value>UL</value>
   </data>
-  <data name="sealed_waters" xml:space="preserve">
-    <value>Sealed Water Pumps</value>
+  <data name="glands" xml:space="preserve">
+    <value>Gland Pumps</value>
   </data>
   <data name="draughts" xml:space="preserve">
     <value>Draught And Loading</value>

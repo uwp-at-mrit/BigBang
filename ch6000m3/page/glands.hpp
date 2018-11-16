@@ -9,10 +9,10 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class SealedWaterPage : public WarGrey::SCADA::Planet {
+	private class GlandsPage : public WarGrey::SCADA::Planet {
 	public:
-		~SealedWaterPage() noexcept;
-		SealedWaterPage(WarGrey::SCADA::PLCMaster* plc);
+		~GlandsPage() noexcept;
+		GlandsPage(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

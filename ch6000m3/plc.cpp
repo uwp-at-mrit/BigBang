@@ -105,8 +105,10 @@ void PLCMaster::send_scheduled_request(long long count, long long interval, long
 	}
 }
 
-void PLCMaster::send_setting(uint16 db, uint16 address, float datum) {
-	this->write_analog_quantity(db, address, datum);
+void PLCMaster::send_setting(int16 address, float datum) {
+	if (address > 0U) {
+		this->write_analog_quantity((uint16)20U, address, datum);
+	}
 }
 
 void PLCMaster::send_command(uint8 idx, uint8 bidx) {

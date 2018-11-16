@@ -126,7 +126,7 @@
   <data name="temperature" xml:space="preserve">
     <value>温度</value>
   </data>
-  <data name="sealed_waters" xml:space="preserve">
+  <data name="glands" xml:space="preserve">
     <value>泥泵封水管系</value>
   </data>
   <data name="hopper_doors" xml:space="preserve">

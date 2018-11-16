@@ -277,7 +277,7 @@
     <PRIResource Include="stone\tongue\en-US\menu.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\sealed_waters.resw" />
+    <PRIResource Include="stone\tongue\en-US\glands.resw" />
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -300,7 +300,7 @@
     <PRIResource Include="stone\tongue\zh-CN\menu.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\sealed_waters.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\glands.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -319,7 +319,7 @@
     <ClCompile Include="page\hopper_doors.cpp" />
     <ClCompile Include="gallery.cpp" />
     <ClCompile Include="page\hydraulics.cpp" />
-    <ClCompile Include="page\sealed_waters.cpp" />
+    <ClCompile Include="page\glands.cpp" />
     <ClCompile Include="plc.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -355,7 +355,7 @@
     <ClInclude Include="page\hopper_doors.hpp" />
     <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\hydraulics.hpp" />
-    <ClInclude Include="page\sealed_waters.hpp" />
+    <ClInclude Include="page\glands.hpp" />
     <ClInclude Include="plc.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

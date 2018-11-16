@@ -33,7 +33,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);
-		void send_setting(uint16 db, uint16 address, float datum);
+		void send_setting(int16 address, float datum);
 		void send_command(uint8 idx, uint8 bidx);
 		void send_command(uint16 index_p1);
 

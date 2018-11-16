@@ -655,10 +655,7 @@ IGraphlet* Planet::get_focus_graphlet() {
 
 void Planet::set_caret_owner(IGraphlet* g) {
 	if (this->focused_graphlet != g) {
-		if (g == nullptr) {
-			this->focused_graphlet->own_caret(false);
-			this->focused_graphlet = nullptr;
-		} else if (g->handles_events()) {
+		if ((g != nullptr) && (g->handles_events())) {
 			GraphletInfo* info = planet_graphlet_info(this, g);
 
 			if ((info != nullptr) && unsafe_graphlet_unmasked(info, this->mode)) {
@@ -671,6 +668,9 @@ void Planet::set_caret_owner(IGraphlet* g) {
 
 				this->on_focus(g);
 			}
+		} else {
+			this->focused_graphlet->own_caret(false);
+			this->focused_graphlet = nullptr;
 		}
 	} else if (g != nullptr) {
 		this->on_focus(g);

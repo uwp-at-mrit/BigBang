@@ -26,7 +26,7 @@ static const float tiny_font_size = 12.0F;
 /*************************************************************************************************/
 static const size_t hopper_count = 7;
 
-static const unsigned int sealed_water_pump_rpm_range = 1500U;
+static const unsigned int gland_pump_rpm_range = 1500U;
 
 static const double hopper_height_range = 13.85;
 static const double earthwork_range = 10000.0;

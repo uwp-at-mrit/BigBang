@@ -7,7 +7,7 @@
 
 #include "page/hydraulics.hpp"
 #include "page/hopper_doors.hpp"
-#include "page/sealed_waters.hpp"
+#include "page/glands.hpp"
 #include "page/draughts.hpp"
 #include "page/lubricatings.hpp"
 #include "page/charges.hpp"
@@ -42,7 +42,7 @@ internal:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger, PLCMasterMode::Release);
+		this->device = new PLCMaster(logger, PLCMasterMode::Debug);
 	}
 
 protected:
@@ -54,7 +54,7 @@ protected:
 		this->add_planet(new ChargesPage(this->device));
 		this->add_planet(new DredgesPage(this->device));
 		this->add_planet(new DischargesPage(this->device));
-		this->add_planet(new SealedWaterPage(this->device));
+		this->add_planet(new GlandsPage(this->device));
 		this->add_planet(new FlushsPage(this->device));
 		this->add_planet(new DredgesPage(this->device, DragView::Left));
 		this->add_planet(new HopperDoorsPage(this->device));

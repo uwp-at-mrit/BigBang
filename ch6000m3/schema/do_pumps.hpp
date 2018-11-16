@@ -77,7 +77,7 @@ namespace WarGrey::SCADA {
 	}
 
 	template<typename OP, typename E>
-	uint16 DO_sealed_water_pump_command(OP cmd, E id) {
+	uint16 DO_gland_pump_command(OP cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
 

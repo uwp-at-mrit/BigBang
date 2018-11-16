@@ -127,7 +127,7 @@ namespace WarGrey::SCADA {
 
 	/************************************************************************************************/
 	template<class S>
-	void DI_sealed_water_pump(S* target, bool underwater, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
+	void DI_gland_pump(S* target, bool underwater, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
 		bool ready = false;
 		
 		if (underwater) {
@@ -159,7 +159,7 @@ namespace WarGrey::SCADA {
 	}
 
 	template<class S, typename Menu>
-	bool sealed_water_pump_command_executable(S* target, Menu cmd, bool otherwise) {
+	bool gland_pump_command_executable(S* target, Menu cmd, bool otherwise) {
 		return hydraulic_pump_command_executable(target, cmd, otherwise);
 	}
 }

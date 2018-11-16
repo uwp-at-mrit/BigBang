@@ -36,9 +36,6 @@
     <ClCompile Include="decorator\page.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
-    <ClCompile Include="page\sealed_waters.cpp">
-      <Filter>page</Filter>
-    </ClCompile>
     <ClCompile Include="page\hopper_doors.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -65,6 +62,9 @@
     <ClCompile Include="page\discharges.cpp">
       <Filter>page</Filter>
     </ClCompile>
+    <ClCompile Include="page\glands.cpp">
+      <Filter>page</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -74,9 +74,6 @@
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="decorator\page.hpp">
       <Filter>decorator</Filter>
-    </ClInclude>
-    <ClInclude Include="page\sealed_waters.hpp">
-      <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="page\hopper_doors.hpp">
       <Filter>page</Filter>
@@ -160,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="schema\ao_pumps.hpp">
       <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="page\glands.hpp">
+      <Filter>page</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -332,12 +332,6 @@
     <PRIResource Include="stone\tongue\zh-CN\menu.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\sealed_waters.resw">
-      <Filter>stone\tongue\en-US</Filter>
-    </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\sealed_waters.resw">
-      <Filter>stone\tongue\zh-CN</Filter>
-    </PRIResource>
     <PRIResource Include="stone\tongue\en-US\hopper_doors.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
@@ -384,6 +378,12 @@
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\discharges.resw">
+      <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\glands.resw">
+      <Filter>stone\tongue\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\glands.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>
