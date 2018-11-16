@@ -988,8 +988,8 @@ public:
 		unsigned int sbws_idx = this->address->winch_speed;
 		unsigned int sbwl_idx = this->address->winch_length;
 
-		this->lengths[DS::TideMark]->set_value(DBD(DB2, 0U));
-		this->speeds[DS::Speed]->set_value(DBD(DB2, 584U));
+		this->lengths[DS::TideMark]->set_value(DBD(DB2, tide_mark));
+		this->speeds[DS::Speed]->set_value(DBD(DB2, gps_speed));
 
 		if (this->DS_side == DS::PS) {
 			this->set_drag_metrics(DS::PS, DS::PSVisor, DS::PSEarth, DB2, this->address);

@@ -148,6 +148,7 @@ namespace WarGrey::SCADA {
 		void own_caret(bool is_own) override;
 
 	public:
+		void set_maximum(long double max);
 		long double get_input_number();
 
 	protected:
@@ -171,6 +172,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool flashing;
+		long double maximum;
 		int decimal_position;
 	};
 

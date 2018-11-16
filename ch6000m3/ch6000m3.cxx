@@ -63,6 +63,8 @@ protected:
 		this->add_planet(new DredgesPage(this->device, DragView::Right));
 
 		this->add_planet(new Gallery());
+
+		this->transfer_to(4);
 	}
 
 protected private:

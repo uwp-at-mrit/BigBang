@@ -334,6 +334,7 @@
     <ClInclude Include="schema\ai_pumps.hpp" />
     <ClInclude Include="schema\ai_valves.hpp" />
     <ClInclude Include="schema\ai_water_pumps.hpp" />
+    <ClInclude Include="schema\ao_pumps.hpp" />
     <ClInclude Include="schema\di_doors.hpp" />
     <ClInclude Include="schema\di_dredges.hpp" />
     <ClInclude Include="schema\di_hopper_pumps.hpp" />

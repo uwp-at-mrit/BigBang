@@ -41,8 +41,10 @@ static void fill_vmetrics(CanvasTextLayout^ layout, TextExtent& num_box, TextExt
 	}
 }
 
-static Platform::String^ accumulate_number(Platform::String^ src, double acc) {
-	return (std::wcstod(src->Data(), nullptr) + acc).ToString();
+static inline Platform::String^ accumulate_number(Platform::String^ src, double acc_percentage, long double maximum) {
+	long double acc = acc_percentage * (std::isnan(maximum) ? 100.0 : maximum);
+	
+	return (std::wcstold(src->Data(), nullptr) + acc).ToString();
 }
 
 /*************************************************************************************************/
@@ -267,8 +269,7 @@ Labellet::Labellet(Platform::String^ caption, Platform::String^ subscript, unsig
 }
 
 /*************************************************************************************************/
-IEditorlet::IEditorlet(DimensionStatus status, DimensionStyle& style, Platform::String^ unit
-	, Platform::String^ label, Platform::String^ subscript)
+IEditorlet::IEditorlet(DimensionStatus status, DimensionStyle& style, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
 	: IEditorlet(status, unit, label, subscript) {
 	
 	/** TODO: Why does not it work if pass the `style` to IStatuslet */
@@ -276,7 +277,7 @@ IEditorlet::IEditorlet(DimensionStatus status, DimensionStyle& style, Platform::
 }
 
 IEditorlet::IEditorlet(DimensionStatus status, Platform::String^ unit, Platform::String^ label, Platform::String^ subscript)
-	: IStatuslet(status), unit(unit) {
+	: IStatuslet(status), unit(unit), maximum(std::nanl("infinity")) {
 	
 	this->set_text(speak(label), speak(subscript));
 
@@ -379,19 +380,19 @@ bool IEditorlet::on_char(VirtualKey key, bool wargrey_keyboard) {
 		handled = true;
 	}; break;
 	case VirtualKey::PageUp: {
-		this->input_number = accumulate_number(this->input_number, 10.0);
+		this->input_number = accumulate_number(this->input_number, 0.10, this->maximum);
 		handled = true;
 	}; break;
 	case VirtualKey::Up: {
-		this->input_number = accumulate_number(this->input_number, 1.0);
+		this->input_number = accumulate_number(this->input_number, 0.01, this->maximum);
 		handled = true;
 	}; break;
 	case VirtualKey::PageDown: {
-		this->input_number = accumulate_number(this->input_number, -10.0);
+		this->input_number = accumulate_number(this->input_number, -0.10, this->maximum);
 		handled = true;
 	}; break;
 	case VirtualKey::Down: {
-		this->input_number = accumulate_number(this->input_number, -1.0);
+		this->input_number = accumulate_number(this->input_number, -0.01, this->maximum);
 		handled = true;
 	}; break;
 	case VirtualKey::Back: {
@@ -440,11 +441,19 @@ void IEditorlet::own_caret(bool on) {
 	}
 }
 
+void IEditorlet::set_maximum(long double maximum) {
+	this->maximum = maximum;
+}
+
 long double IEditorlet::get_input_number() {
 	long double v = 0.0;
 
 	if (this->input_number != nullptr) {
-		v = std::wcstod(this->input_number->Data(), nullptr);
+		v = std::wcstold(this->input_number->Data(), nullptr);
+	}
+
+	if (!std::isnan(this->maximum)) {
+		v = std::fminl(v, this->maximum);
 	}
 
 	return v;

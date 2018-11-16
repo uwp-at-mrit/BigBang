@@ -672,6 +672,8 @@ void Planet::set_caret_owner(IGraphlet* g) {
 				this->on_focus(g);
 			}
 		}
+	} else if (g != nullptr) {
+		this->on_focus(g);
 	}
 }
 

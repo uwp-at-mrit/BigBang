@@ -77,8 +77,7 @@ public:
 	SealedWaters(SealedWaterPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->dimension_style = make_highlight_dimension_style(large_metrics_font_size, 6U);
-		this->setting_style = make_highlight_dimension_style(large_metrics_font_size, 6U,
-			Colours::GhostWhite, Colours::RoyalBlue);
+		this->setting_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::GhostWhite, Colours::RoyalBlue);
 	}
 
 public:
@@ -201,10 +200,10 @@ public:
 		pTurtle->move_down(1, SW::d12)->move_right(5, SW::DGV12)->move_right(6, SW::PSFP);
 		pTurtle->move_right(10)->move_down(2)->jump_back();
 		pTurtle->move_down(4, SW::d11)->move_right(5, SW::DGV11)->move_right(6, SW::SBFP);
-		pTurtle->move_right(10)->move_up(2)->move_right(3, SW::ToFlushs)->move_right(3, SW::flushs)->jump_back(SW::d11);
+		pTurtle->move_right(10)->move_up(2)->move_right(4, SW::ToFlushs)->move_right(4, SW::flushs)->jump_back(SW::d11);
 
 		pTurtle->move_down(4, SW::d13)->move_right(5, SW::DGV13)->move_right(6, SW::PSHPa)->move_right(6, SW::DGV3);
-		pTurtle->move_right(10)->turn_right_down(SW::pshp)->move_down(3)->turn_down_right()->jump_back(SW::d13);
+		pTurtle->move_right(11)->turn_right_down(SW::pshp)->move_down(3)->turn_down_right()->jump_back(SW::d13);
 		pTurtle->move_down(4, SW::d14)->move_right(5, SW::DGV14)->move_right(6, SW::PSHPb)->move_right(6, SW::DGV4);
 		pTurtle->move_right(14, SW::d44)->move_right(9, SW::DGV44)->move_right(12, SW::PSHP)->jump_back();
 		pTurtle->move_up_right(2.5F, SW::SS1)->move_up_right(2.5F)->move_right(4, SW::DGV8);
@@ -215,19 +214,19 @@ public:
 		pTurtle->move_down_right(2.5F, SW::SS2)->move_down_right(2.5F)->move_right(4, SW::DGV7);
 		pTurtle->move_right(12)->move_up(5)->jump_back(SW::d15);
 		pTurtle->move_down(4, SW::d16)->move_right(5, SW::DGV16)->move_right(6, SW::SBHPb)->move_right(6, SW::DGV6);
-		pTurtle->move_right(10)->turn_right_up(SW::sbhp)->move_up(3)->turn_up_right()->jump_back(SW::d16);
+		pTurtle->move_right(11)->turn_right_up(SW::sbhp)->move_up(3)->turn_up_right()->jump_back(SW::d16);
 
 		pTurtle->jump_down(3)->jump_left(SW::Sea)->move_right();
 
 		pTurtle->move_down(2, SW::d17)->move_right(5, SW::DGV17)->move_right(6, SW::PSUWP1)->move_right(6, SW::DGV1);
-		pTurtle->move_right(10)->turn_right_down(SW::psuwp)->move_down(3)->turn_down_right()->jump_back(SW::d17);
+		pTurtle->move_right(11)->turn_right_down(SW::psuwp)->move_down(3)->turn_down_right()->jump_back(SW::d17);
 		pTurtle->move_down(4, SW::d18)->move_right(5, SW::DGV18)->move_right(6, SW::PSUWP2)->move_right(6, SW::DGV2);
 		pTurtle->move_right(14, SW::d46)->move_right(9)->move_right(12, SW::PSUWP)->jump_back(SW::d18);
 
 		pTurtle->move_down(5, SW::d19)->move_right(5, SW::DGV19)->move_right(6, SW::SBUWP1)->move_right(6, SW::DGV9);
 		pTurtle->move_right(14, SW::d47)->move_right(9)->move_right(12, SW::SBUWP)->jump_back(SW::d19);
 		pTurtle->move_down(4, SW::d20)->move_right(5, SW::DGV20)->move_right(6, SW::SBUWP2)->move_right(6, SW::DGV10);
-		pTurtle->move_right(10)->turn_right_up(SW::sbuwp)->move_up(3)->turn_up_right();
+		pTurtle->move_right(11)->turn_right_up(SW::sbuwp)->move_up(3)->turn_up_right();
 
 		this->station = this->master->insert_one(new Tracklet<SW>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
@@ -241,8 +240,10 @@ public:
 			this->hatch = this->master->insert_one(new Hatchlet(hpradius * 2.5F));
 
 			this->load_devices(this->mvalves, this->labels, Colours::Silver, SW::DGV3, SW::DGV8, radius, 0.0);
-			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSFP, SW::SBUWP2, radius, 0.0);
-
+			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSFP, SW::SBFP, radius, 0.0);
+			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSHPa, SW::SBHPb, radius, 0.0);
+			this->load_devices(this->pumps, this->labels, Colours::Salmon, SW::PSUWP1, SW::SBUWP2, radius, 0.0);
+			
 			this->load_device(this->hoppers, this->captions, SW::PSHP, hpradius, -2.0F, true);
 			this->load_device(this->hoppers, this->captions, SW::SBHP, hpradius, +2.0F, true);
 			this->load_device(this->hoppers, this->captions, SW::PSUWP, hpradius, +2.0F, false);
@@ -257,6 +258,8 @@ public:
 			this->load_dimensions(this->pressures, SW::PSUWP1, SW::SBUWP2, "bar", "P");
 			this->load_dimensions(this->pressures, SW::PSHP, SW::SBHP, "bar", "P");
 			this->load_dimensions(this->flows, SW::PSHP, SW::SBHP, "m3ph", "F");
+
+			this->load_settings(this->settings, SW::PSHPa, SW::SBHPb, "rpm", "S");
 		}
 	}
 
@@ -304,8 +307,7 @@ public:
 
 				if (this->rpms.find(it->first) != this->rpms.end()) {
 					this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -gwidth * 0.5F, -toff);
-					this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LB,
-						GraphletAnchor::LT, 0.0, toff * 2.0F + default_pipe_thickness);
+					this->master->move_to(this->powers[it->first], this->rpms[it->first], GraphletAnchor::LB, GraphletAnchor::LT, 0.0, toff * 2.0F);
 				}
 				
 				switch (it->first) {
@@ -317,6 +319,10 @@ public:
 					this->station->map_graphlet_at_anchor(this->pressures[it->first], tanchor, GraphletAnchor::LB, xoff, -toff);
 					this->station->map_graphlet_at_anchor(this->flows[it->first], tanchor, GraphletAnchor::LT, xoff, toff);
 				}
+			}
+
+			for (auto it = this->settings.begin(); it != this->settings.end(); it++) {
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::LB, xoff * 3.0F, -toff);
 			}
 		}
 	}
@@ -352,6 +358,14 @@ private:
 		if (has_dimensions) {
 			this->load_dimension(this->rpms, id, "rpm", "S");
 			this->load_dimension(this->powers, id, "kwatt", "P");
+		}
+	}
+
+	template<typename E>
+	void load_settings(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label) {
+		for (E id = id0; id <= idn; id++) {
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, label), id);
+			ds[id]->set_maximum(double(sealed_water_pump_rpm_range));
 		}
 	}
 
@@ -428,6 +442,7 @@ private:
 	std::map<SW, Credit<Dimensionlet, SW>*> flows;
 	std::map<SW, Credit<Dimensionlet, SW>*> rpms;
 	std::map<SW, Credit<Dimensionlet, SW>*> powers;
+	std::map<SW, Credit<Dimensionlet, SW>*> settings;
 
 private:
 	CanvasTextFormat^ label_font;
