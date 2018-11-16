@@ -288,4 +288,7 @@
   <data name="Fill" xml:space="preserve">
     <value>进舱</value>
   </data>
+  <data name="Override" xml:space="preserve">
+    <value>编码器越控</value>
+  </data>
 </root>

@@ -42,7 +42,7 @@ internal:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger, PLCMasterMode::Debug);
+		this->device = new PLCMaster(logger, PLCMasterMode::Release);
 	}
 
 protected:
@@ -64,7 +64,7 @@ protected:
 
 		this->add_planet(new Gallery());
 
-		this->transfer_to(4);
+		this->transfer_to(1);
 	}
 
 protected private:

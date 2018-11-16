@@ -4,7 +4,8 @@
 
 namespace WarGrey::SCADA {
 	private enum class WaterPumpStatus {
-		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready, Broken, _
+		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready,
+		Broken, Alert, _
 	};
 
 	private struct WaterPumpStyle {

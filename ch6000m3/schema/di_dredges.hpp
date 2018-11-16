@@ -18,13 +18,13 @@ namespace WarGrey::SCADA {
 
 	private struct WinchDetails {
 	public:
-		WinchDetails(unsigned int status, unsigned int sensor, unsigned int control, bool draghead)
-			: status(status), sensor(sensor), control(control), draghead(draghead) {}
+		WinchDetails(unsigned int status, unsigned int sensor, unsigned int override, bool draghead)
+			: status(status), sensor(sensor), override(override), draghead(draghead) {}
 
 	public:
 		unsigned int status;
 		unsigned int sensor;
-		unsigned int control;
+		unsigned int override;
 		bool draghead;
 	};
 
@@ -82,8 +82,6 @@ namespace WarGrey::SCADA {
 		, const uint8* db4, WarGrey::SCADA::WinchLimits& limits
 		, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
 		bool slack = (limits.slack > 0U) && DBX(db4, limits.slack - 1U);
-		
-		target->set_remote_control(DBX(db205, details.control - 1U));
 
 		if (DBX(db4, limits.upper - 1U)) {
 			target->set_status(WinchStatus::UpperLimited);
@@ -118,6 +116,11 @@ namespace WarGrey::SCADA {
 			//  target->set_status(DBX(db205, status + 2U), WinchStatus::Unlettable);
 			//  target->set_status(DBX(db205, status + 3U), WinchStatus::Unpullable);
 		}
+	}
+
+	template<class B>
+	void DI_winch_override(B* target, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
+		target->set_status(DBX(db205, details.override - 1U), ButtonStatus::Executing);
 	}
 
 	template<class G>

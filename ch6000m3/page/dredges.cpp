@@ -76,7 +76,7 @@ private enum class DS : unsigned int {
 	C, B, A, F, G, H,
 
 	// labels
-	Overlook, Sidelook, pump, hopper, underwater,
+	Overlook, Sidelook, Override, pump, hopper, underwater,
 
 	// dimensions
 	Overflow, PSWC, SBWC, PSPF1, PSPF2, SBPF1, SBPF2, PSSIP, SBSIP,
@@ -248,13 +248,18 @@ protected:
 		ds[id] = this->master->insert_one(new Credit<D, E>(info, width, height, visor_color), id);
 	}
 
+	template<class B, typename E>
+	void load_button(std::map<E, Credit<B, E>*>& bs, E id, Platform::String^ label, float width = 128.0F, float height = 32.0F) {
+		bs[id] = this->master->insert_one(new Credit<B, E>(label, width, height), id);
+	}
+
 	template<class B, typename E, typename CMD>
-	void load_button(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, CMD cmd, float width = 100.0F, float height = 22.0F) {
+	void load_button(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, CMD cmd, float width = 128.0F, float height = 32.0F) {
 		bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(speak(cmd, "menu"), width, height), gid, cmd);
 	}
 
 	template<class B, typename E, typename CMD>
-	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, float width = 100.0F, float height = 22.0F) {
+	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
 			this->load_button(bs, gid, cmd, width, height);
 		}
@@ -565,8 +570,8 @@ public:
 		this->load_valves(this->valves, this->labels, DS::D003, DS::D012, vinset, 0.0);
 		this->load_valves(this->valves, this->labels, DS::D013, DS::D016, vinset, -90.0);
 		this->load_label(this->labels, DS::LMOD.ToString(), DS::LMOD, Colours::Cyan, this->station_font);
-		this->load_label(this->hopper_types, _speak(DS::pump), DS::PS, Colours::Salmon, this->caption_font);
-		this->load_label(this->hopper_types, _speak(DS::pump), DS::SB, Colours::Salmon, this->caption_font);
+		this->load_label(this->hopper_types, _speak(DS::pump), DS::PS, caption_color, this->caption_font);
+		this->load_label(this->hopper_types, _speak(DS::pump), DS::SB, caption_color, this->caption_font);
 
 		this->lmod = this->master->insert_one(new Arclet(0.0, 360.0, rlmod, rlmod, default_pipe_thickness, Colours::Green));
 		this->hpumps[DS::PSHP] = this->master->insert_one(new Credit<HopperPumplet, DS>(+rx, -ry), DS::PSHP);
@@ -1016,6 +1021,10 @@ public:
 			DI_winch(this->winches[DS::psDragHead], DB4, winch_ps_draghead_limits, DB205, winch_ps_draghead_details);
 			this->set_winch_limits(DS::psTrunnion, DS::psDragHead);
 
+			DI_winch_override(this->buttons[DS::psTrunnion], DB205, winch_ps_trunnion_details);
+			DI_winch_override(this->buttons[DS::psIntermediate], DB205, winch_ps_intermediate_details);
+			DI_winch_override(this->buttons[DS::psDragHead], DB205, winch_ps_draghead_details);
+
 			DI_gantry(this->gantries[DS::psTrunnion], DB4, gantry_ps_trunnion_limited, DB205, gantry_ps_trunnion_details);
 			DI_gantry(this->gantries[DS::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
 			DI_gantry(this->gantries[DS::psDragHead], DB4, gantry_ps_draghead_limited, DB205, gantry_ps_draghead_details);
@@ -1035,6 +1044,10 @@ public:
 			DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limits, DB205, winch_sb_intermediate_details);
 			DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limits, DB205, winch_sb_draghead_details);
 			this->set_winch_limits(DS::sbTrunnion, DS::sbDragHead);
+
+			DI_winch_override(this->buttons[DS::sbTrunnion], DB205, winch_sb_trunnion_details);
+			DI_winch_override(this->buttons[DS::sbIntermediate], DB205, winch_sb_intermediate_details);
+			DI_winch_override(this->buttons[DS::sbDragHead], DB205, winch_sb_draghead_details);
 
 			DI_gantry(this->gantries[DS::sbTrunnion], DB4, gantry_sb_trunnion_limited, DB205, gantry_sb_trunnion_details);
 			DI_gantry(this->gantries[DS::sbIntermediate], DB4, gantry_sb_intermediate_limited, DB205, gantry_sb_intermediate_details);
@@ -1177,8 +1190,9 @@ public:
 			for (DS id = DS::psTrunnion; id <= DS::psDragHead; id++) {
 				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::RB, GraphletAnchor::CT, -vinset, txt_gapsize);
 				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB);
-				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB, txt_gapsize);
-				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LT, txt_gapsize);
+				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB, txt_gapsize, -1.0F);
+				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LT, txt_gapsize, 1.0F);
+				this->master->move_to(this->buttons[id], this->Blets[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, 1.0F);
 
 				this->reflow_winch_limits(id);
 
@@ -1211,8 +1225,9 @@ public:
 			for (DS id = DS::sbTrunnion; id <= DS::sbDragHead; id++) {
 				this->master->move_to(this->pressures[id], this->gantries[id], GraphletAnchor::LB, GraphletAnchor::CT, vinset, txt_gapsize);
 				this->master->move_to(this->labels[id], this->winches[id], GraphletAnchor::RC, GraphletAnchor::LB);
-				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB, -txt_gapsize);
-				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RT, -txt_gapsize);
+				this->master->move_to(this->Alets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RB, -txt_gapsize, -1.0F);
+				this->master->move_to(this->Blets[id], this->winches[id], GraphletAnchor::LC, GraphletAnchor::RT, -txt_gapsize, 1.0F);
+				this->master->move_to(this->buttons[id], this->Blets[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, 1.0F);
 
 				this->reflow_winch_limits(id);
 
@@ -1294,18 +1309,17 @@ public:
 
 public:
 	bool can_select(IGraphlet* g) override {
-		bool select_settings = false;
 		auto settings = dynamic_cast<Credit<Rectanglet, DS>*>(g);
+		auto maybe_button = dynamic_cast<Buttonlet*>(g);
 
-		if (settings != nullptr) {
-			select_settings = (this->indicators.find(settings->id) != this->indicators.end());
-		}
-
-		return (select_settings
-			|| (dynamic_cast<Winchlet*>(g) != nullptr) 
+		return ((dynamic_cast<Winchlet*>(g) != nullptr) 
 			|| (dynamic_cast<Gantrylet*>(g) != nullptr)
 			|| (dynamic_cast<Compensatorlet*>(g) != nullptr)
-			|| (dynamic_cast<DragHeadlet*>(g) != nullptr));
+			|| (dynamic_cast<DragHeadlet*>(g) != nullptr)
+			|| ((settings != nullptr)
+				&& (this->indicators.find(settings->id) != this->indicators.end()))
+			|| ((maybe_button != nullptr)
+				&& (maybe_button->get_status() != ButtonStatus::Disabled)));
 	}
 
 	bool can_select_multiple() override {
@@ -1318,6 +1332,7 @@ public:
 		auto compensator = dynamic_cast<Compensatorlet*>(g);
 		auto visor = dynamic_cast<Credit<DragHeadlet, DS>*>(g);
 		auto indicator = dynamic_cast<Credit<Rectanglet, DS>*>(g);
+		auto override_btn = dynamic_cast<Credit<Buttonlet, DS>*>(g);
 
 		if (winch != nullptr) {
 			menu_popup(this->winch_op, g, local_x, local_y);
@@ -1329,6 +1344,8 @@ public:
 			menu_popup(this->visor_op, g, local_x, local_y);
 		} else if (indicator != nullptr) {
 			this->master->get_plc_device()->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
+		} else if (override_btn != nullptr) {
+			this->master->get_plc_device()->send_command(DO_winch_override_command(override_btn->id));
 		}
 	}
 
@@ -1360,6 +1377,8 @@ private:
 			if (id != id0) {
 				this->load_percentage(this->rc_speeds, id);
 			}
+
+			this->load_button(this->buttons, id, speak(E::Override, "menu"));
 		}
 	}
 
@@ -1495,6 +1514,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Rectanglet, DS>*> indicators;
 	std::map<DS, Credit<Rectanglet, DS>*> table_headers;
 	std::map<DS, Credit<Dimensionlet, DS>*> settings;
+	std::map<DS, Credit<Buttonlet, DS>*> buttons;
 
 private:
 	DimensionStyle pump_style;

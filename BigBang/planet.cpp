@@ -668,7 +668,7 @@ void Planet::set_caret_owner(IGraphlet* g) {
 
 				this->on_focus(g);
 			}
-		} else {
+		} else if (this->focused_graphlet != nullptr) {
 			this->focused_graphlet->own_caret(false);
 			this->focused_graphlet = nullptr;
 		}

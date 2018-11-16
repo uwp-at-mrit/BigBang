@@ -288,4 +288,7 @@
   <data name="Fill" xml:space="preserve">
     <value>Fill</value>
   </data>
+  <data name="Override" xml:space="preserve">
+    <value>Encoder Override</value>
+  </data>
 </root>

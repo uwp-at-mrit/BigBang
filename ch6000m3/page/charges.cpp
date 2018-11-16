@@ -59,7 +59,7 @@ private enum class LD : unsigned int {
 	D013, D015,
 
 	// Pump Dimensions
-	A, C, F, H,
+	C, F, H,
 	
 	// Key Labels
 	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
@@ -96,8 +96,6 @@ public:
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->pressures[LD::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
 		this->pressures[LD::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
-
-		this->pressures[LD::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
 		this->pressures[LD::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
 
 		this->progresses[LD::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
@@ -119,7 +117,6 @@ public:
 		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_pump_dimension(this->pressures[LD::A], DB4, pump_A_feedback);
 		DI_pump_dimension(this->pressures[LD::C], DB4, pump_C_feedback);
 		DI_pump_dimension(this->pressures[LD::F], DB4, pump_F_feedback);
 		DI_pump_dimension(this->pressures[LD::H], DB4, pump_H_feedback);
@@ -239,7 +236,7 @@ public:
 		pTurtle->move_down(5)->jump_down()->move_down(2, LD::D023)->jump_back(LD::d0406);
 
 		pTurtle->move_up(1.5F, LD::D004)->move_up(2, LD::ps)->move_up(2, LD::C)->turn_up_left();
-		pTurtle->move_left(10, LD::PSUWPump)->move_left(8, LD::A)->move_left(LD::Port);
+		pTurtle->move_left(10, LD::PSUWPump)->move_left(8)->move_left(LD::Port);
 
 		pTurtle->jump_back(LD::D023)->move_down(2)->jump_down()->move_down(5, LD::D007);
 		pTurtle->move_down(LD::deck_by)->move_down(0.5F)->move_left(4, LD::D026)->move_left(4, LD::d0326);
@@ -276,7 +273,7 @@ public:
 			this->load_pump(this->hoppers, this->captions, LD::PSHPump, -radius, +2.0F);
 			this->load_pump(this->hoppers, this->captions, LD::SBHPump, -radius, -2.0F);
 
-			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 0.5F, default_pipe_color));
+			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 1.0F, default_pipe_color));
 
 			this->ps_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
@@ -295,7 +292,7 @@ public:
 		{ // load labels and dimensions
 			this->load_percentage(this->progresses, LD::D003);
 			this->load_percentage(this->progresses, LD::D004);
-			this->load_dimensions(this->pressures, LD::A, LD::H, "bar");
+			this->load_dimensions(this->pressures, LD::C, LD::H, "bar");
 
 			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->special_font);
@@ -412,7 +409,6 @@ public:
 			this->master->move_to(this->progresses[LD::D003], this->gvalves[LD::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
 			this->master->move_to(this->progresses[LD::D004], this->gvalves[LD::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 
-			this->station->map_credit_graphlet(this->pressures[LD::A], GraphletAnchor::LB, 0.0F, -offset);
 			this->station->map_credit_graphlet(this->pressures[LD::C], GraphletAnchor::LB, gwidth);
 			this->station->map_credit_graphlet(this->pressures[LD::F], GraphletAnchor::LT, gwidth);
 			this->station->map_credit_graphlet(this->pressures[LD::H], GraphletAnchor::LT, 0.0F, +offset);

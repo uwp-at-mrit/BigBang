@@ -27,6 +27,22 @@ namespace WarGrey::SCADA {
 
 		return index + offset;
 	}
+
+	template<typename E>
+	uint16 DO_winch_override_command(E id) {
+		uint16 index = 0U;
+
+		switch (id) {
+		case E::psTrunnion:     index = 617U; break;
+		case E::psIntermediate: index = 618U; break;
+		case E::psDragHead:     index = 619U; break;
+		case E::sbTrunnion:     index = 620U; break;
+		case E::sbIntermediate: index = 621U; break;
+		case E::sbDragHead:     index = 622U; break;
+		}
+
+		return index;
+	}
 	
 	template<typename OP, typename E>
 	uint16 DO_gantry_command(OP cmd, E id) {

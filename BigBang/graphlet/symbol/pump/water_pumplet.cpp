@@ -130,7 +130,7 @@ void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
 	case WaterPumpStatus::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case WaterPumpStatus::Broken: {
+	case WaterPumpStatus::Broken: case WaterPumpStatus::Alert: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	}; break;
 	}

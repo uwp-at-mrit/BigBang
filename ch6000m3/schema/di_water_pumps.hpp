@@ -20,11 +20,11 @@ namespace WarGrey::SCADA {
 			target->set_status(WaterPumpStatus::Running);
 		} else if (DBX(db4, idx4_p1 + 0U)) {
 			target->set_status(WaterPumpStatus::Ready);
-		//} else if (DBX(db4, idx4 + 4U)) {
-		//	target->set_status(WaterPumpStatus::Alert);
-		} else if (DBX(db4, idx4_p1 + 5U)) {
+		} else if (DBX(db4, idx4_p1 + 2U)) {
+			target->set_status(WaterPumpStatus::Alert);
+		} else if (DBX(db4, idx4_p1 + 3U)) {
 			target->set_status(WaterPumpStatus::Broken);
-		//} else if (DBX(db4, idx4 + 7U)) {
+		//} else if (DBX(db4, idx4 + 5U)) {
 		//	target->set_status(WaterPumpStatus::Maintenance);
 		} else if (DBX(db205, idx205_p1 - 1U)) {
 			target->set_status(WaterPumpStatus::Starting);
