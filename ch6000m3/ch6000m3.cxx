@@ -29,15 +29,16 @@ using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 
-private ref class Universe sealed : public UniverseDisplay {
+private ref class SCADAUniverse : public UniverseDisplay {
 public:
-	virtual ~Universe() {
+	virtual ~SCADAUniverse() {
 		if (this->device != nullptr) {
 			delete this->device;
 		}
 	}
 
-	Universe(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+internal:
+	SCADAUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
@@ -62,17 +63,58 @@ protected:
 		this->add_planet(new DredgesPage(this->device, DragView::Right));
 
 		this->add_planet(new Gallery());
-
-		this->transfer_to(2);
 	}
+
+protected private:
+	PLCMaster* device;
 
 private:
 	Timer^ timer;
-
-private:
-	PLCMaster* device;
 };
 
+/*************************************************************************************************/
+private class PageEventListener : public PLCConfirmation {
+public:
+	PageEventListener(unsigned int idx) : dbidx(idx), page(2 /* the dredging page */) {}
+
+public:
+	void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {
+		this->page = int(DBD(db2, this->dbidx));  // Left: 620U, Right: 624U
+	}
+
+public:
+	int get_target_page() {
+		return page;
+	}
+
+private:
+	unsigned int dbidx;
+	int page;
+};
+
+private ref class DashboardUniverse sealed : public SCADAUniverse {
+public:
+	virtual ~DashboardUniverse() {
+		if (this->page_turner != nullptr) {
+			delete this->page_turner;
+		}
+	}
+
+	DashboardUniverse(Platform::String^ name, unsigned int dbidx) : SCADAUniverse(name) {
+		this->page_turner = new PageEventListener(dbidx);
+		this->device->append_confirmation_receiver(this->page_turner);
+	}
+
+public:
+	void update(long long count, long long interval, long long uptime) override {
+		this->transfer_to(this->page_turner->get_target_page());
+	}
+
+private:
+	PageEventListener* page_turner;
+};
+
+/*************************************************************************************************/
 private ref class CH6000m3 sealed : public SplitView {
 public:
 	CH6000m3() : SplitView() {
@@ -90,7 +132,16 @@ public:
 
 public:
 	void construct(Platform::String^ name, Size region) {
-		this->universe = ref new Universe(name);
+		Platform::String^ localhost = system_ipv4_address();
+
+		if (localhost->Equals("192.168.0.11")) {
+			this->universe = ref new DashboardUniverse(name, 620U);
+		} else if (localhost->Equals("192.168.0.12")) {
+			this->universe = ref new DashboardUniverse(name, 624U);
+		} else {
+			this->universe = ref new SCADAUniverse(name);
+		}
+
 		this->Content = this->universe->canvas;
 		this->Pane = this->universe->navigator;
 

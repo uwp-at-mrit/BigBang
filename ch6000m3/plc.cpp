@@ -96,9 +96,7 @@ float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* logger, PLCMasterMode mode) : MRMaster(logger, mode, MRIT_PORT), last_sending_time(-1L) {
-	this->append_confirmation_receiver(this);
-}
+PLCMaster::PLCMaster(Syslog* logger, PLCMasterMode mode) : MRMaster(logger, mode, MRIT_PORT), last_sending_time(-1L) {}
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->last_sending_time != uptime) {
@@ -121,19 +119,6 @@ void PLCMaster::send_command(uint16 index_p1) {
 	if (idx >= 0) {
 		this->send_command((uint8)(idx / 8), (uint8)(idx % 8));
 	}
-}
-
-void PLCMaster::on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {
-	float ps_page = DBD(db2, 596U);
-	float sb_page = DBD(db2, 600U);
-
-	//if (ps_page != 0.0F) {
-		//logger->log_message(Log::Info, L"PS Page: %f", ps_page);
-	//}
-
-	//if (sb_page != 0.0F) {
-		//logger->log_message(Log::Info, L"SB Page: %f", sb_page);
-	//}
 }
 
 /*************************************************************************************************/

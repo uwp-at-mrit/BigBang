@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
 		virtual void on_digital_input(const uint8* db4, size_t count4, const uint8* db205, size_t count205, WarGrey::SCADA::Syslog* logger) {}
 	};
 
-	private class PLCMaster : public WarGrey::SCADA::MRMaster, public WarGrey::SCADA::PLCConfirmation {
+	private class PLCMaster : public WarGrey::SCADA::MRMaster {
 	public:
 		PLCMaster(Syslog* logger, WarGrey::SCADA::PLCMasterMode mode);
 
@@ -36,9 +36,6 @@ namespace WarGrey::SCADA {
 		void send_setting(uint16 db, uint16 address, float datum);
 		void send_command(uint8 idx, uint8 bidx);
 		void send_command(uint16 index_p1);
-
-	public:
-		void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) override;
 
 	private:
 		long long last_sending_time;

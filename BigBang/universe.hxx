@@ -85,7 +85,7 @@ namespace WarGrey::SCADA {
 		float source_height;
     };
 
-	private ref class UniverseDisplay : public IDisplay {
+	private ref class UniverseDisplay : public WarGrey::SCADA::IDisplay {
 	public:
 		virtual ~UniverseDisplay();
 
@@ -135,8 +135,9 @@ namespace WarGrey::SCADA {
 		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
 		
 	protected private:
-		virtual void construct() {};
+		virtual void construct() {}
 		void add_planet(WarGrey::SCADA::IPlanet* planet);
+		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void collapse();
 		
 	private:

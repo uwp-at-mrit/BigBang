@@ -313,6 +313,8 @@ void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long u
 			child = PLANET_INFO(child)->next;
 		}
 	}
+
+	this->update(count, elapsed, uptime);
 }
 
 void UniverseDisplay::add_planet(IPlanet* planet) {
