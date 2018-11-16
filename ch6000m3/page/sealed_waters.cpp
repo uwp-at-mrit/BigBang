@@ -16,9 +16,13 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
-#include "schema/do_pumps.hpp"
+#include "schema/ai_pumps.hpp"
+#include "schema/ai_hopper_pumps.hpp"
+
 #include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
+
+#include "schema/do_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -85,31 +89,24 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->powers[SW::PSHP]->set_value(DBD(DB2, 12U));
-		this->powers[SW::SBHP]->set_value(DBD(DB2, 16U));
-		//this->powers[SW::PSUWP]->set_value(DBD(DB2, 200U));
-		//this->powers[SW::SBUWP]->set_value(DBD(DB2, 204U));
-
-		//this->rpms[SW::PSHP]->set_value(DBD(DB2, 604U));
-		//this->rpms[SW::SBHP]->set_value(DBD(DB2, 608U));
-		//this->rpms[SW::PSUWP]->set_value(DBD(DB2, 200U));
-		//this->rpms[SW::SBUWP]->set_value(DBD(DB2, 204U));
-	}
-
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
-		this->pressures[SW::PSFP]->set_value(RealData(DB203, 34U), GraphletAnchor::LB);
+		this->pressures[SW::PSFP]->set_value(RealData(DB203, ps_flushing_pump_pressure), GraphletAnchor::LB);
 
-		this->pressures[SW::PSHP]->set_value(RealData(DB203, 28U), GraphletAnchor::LB);
-		this->flows[SW::PSHP]->set_value(RealData(DB203, 29U), GraphletAnchor::LT);
+		this->pressures[SW::PSHP]->set_value(RealData(DB203, ps_hopper_pump_sealed_water_pressure), GraphletAnchor::LB);
+		this->flows[SW::PSHP]->set_value(RealData(DB203, ps_hopper_pump_sealed_water_flow), GraphletAnchor::LT);
+		this->powers[SW::PSHP]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[SW::PSHP]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LB);
+
+		this->pressures[SW::SBHP]->set_value(RealData(DB203, sb_hopper_pump_sealed_water_pressure), GraphletAnchor::LB);
+		this->flows[SW::SBHP]->set_value(RealData(DB203, sb_hopper_pump_sealed_water_flow), GraphletAnchor::LB);
+		this->powers[SW::SBHP]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[SW::SBHP]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
+
+		this->pressures[SW::PSUWP1]->set_value(RealData(DB203, ps_underwater_pump1_sealed_water_pressure), GraphletAnchor::LB);
+		this->pressures[SW::PSUWP2]->set_value(RealData(DB203, ps_underwater_pump2_sealed_water_pressure), GraphletAnchor::LB);
 		
-		this->pressures[SW::SBHP]->set_value(RealData(DB203, 44U), GraphletAnchor::LB);
-		this->flows[SW::SBHP]->set_value(RealData(DB203, 45U), GraphletAnchor::LB);
-		
-		this->pressures[SW::PSUWP1]->set_value(RealData(DB203, 112U), GraphletAnchor::LB);
-		this->pressures[SW::PSUWP2]->set_value(RealData(DB203, 113U), GraphletAnchor::LB);
-		this->pressures[SW::SBUWP1]->set_value(RealData(DB203, 118U), GraphletAnchor::LB);
-		this->pressures[SW::SBUWP2]->set_value(RealData(DB203, 119U), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP1]->set_value(RealData(DB203, sb_underwater_pump1_sealed_water_pressure), GraphletAnchor::LB);
+		this->pressures[SW::SBUWP2]->set_value(RealData(DB203, sb_underwater_pump2_sealed_water_pressure), GraphletAnchor::LB);
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count25, WarGrey::SCADA::Syslog* logger) override {

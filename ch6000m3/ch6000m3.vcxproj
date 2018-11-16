@@ -329,6 +329,7 @@
     <ClInclude Include="page\lubricatings.hpp" />
     <ClInclude Include="schema\ai_doors.hpp" />
     <ClInclude Include="schema\ai_dredges.hpp" />
+    <ClInclude Include="schema\ai_hopper_pumps.hpp" />
     <ClInclude Include="schema\ai_metrics.hpp" />
     <ClInclude Include="schema\ai_pumps.hpp" />
     <ClInclude Include="schema\ai_valves.hpp" />

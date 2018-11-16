@@ -17,6 +17,7 @@
 
 #include "schema/ai_pumps.hpp"
 #include "schema/ai_valves.hpp"
+#include "schema/ai_hopper_pumps.hpp"
 
 #include "schema/di_pumps.hpp"
 #include "schema/di_hopper_pumps.hpp"
@@ -92,18 +93,6 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->powers[LD::PSHPump]->set_value(DBD(DB2, 12U));
-		this->powers[LD::SBHPump]->set_value(DBD(DB2, 16U));
-		this->powers[LD::PSUWPump]->set_value(DBD(DB2, 12U));
-		this->powers[LD::SBUWPump]->set_value(DBD(DB2, 16U));
-
-		this->rpms[LD::PSHPump]->set_value(DBD(DB2, 604U));
-		this->rpms[LD::SBHPump]->set_value(DBD(DB2, 608U));
-		this->rpms[LD::PSUWPump]->set_value(DBD(DB2, 604U));
-		this->rpms[LD::SBUWPump]->set_value(DBD(DB2, 608U));
-	}
-
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->pressures[LD::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
 		this->pressures[LD::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
@@ -113,6 +102,17 @@ public:
 
 		this->progresses[LD::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->progresses[LD::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
+
+		this->powers[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LB);
+		this->powers[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::LB);
+		this->rpms[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LB);
+
+		this->powers[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
+		this->powers[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::LB);
+		this->rpms[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LB);
+
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {

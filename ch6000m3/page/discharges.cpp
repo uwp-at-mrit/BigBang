@@ -24,6 +24,7 @@
 
 #include "schema/ai_valves.hpp"
 #include "schema/ai_pumps.hpp"
+#include "schema/ai_hopper_pumps.hpp"
 #include "schema/ai_doors.hpp"
 
 #include "schema/do_doors.hpp"
@@ -103,18 +104,6 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		this->powers[RS::PSHPump]->set_value(DBD(DB2, 12U));
-		this->powers[RS::SBHPump]->set_value(DBD(DB2, 16U));
-		//this->powers[RS::PSUWPump]->set_value(DBD(DB2, 200U));
-		//this->powers[RS::SBUWPump]->set_value(DBD(DB2, 204U));
-
-		//this->rpms[RS::PSHPump]->set_value(DBD(DB2, 604U));
-		//this->rpms[RS::SBHPump]->set_value(DBD(DB2, 608U));
-		//this->rpms[RS::PSUWPump]->set_value(DBD(DB2, 200U));
-		//this->rpms[RS::SBUWPump]->set_value(DBD(DB2, 204U));
-	}
-
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
 		this->pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
 		this->pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
@@ -125,6 +114,12 @@ public:
 		this->progresses[RS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->progresses[RS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
+		this->powers[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[RS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LB);
+		
+		this->powers[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
+		this->rpms[RS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
+		
 		{ // door progresses
 			this->set_door_progress(RS::PS1, RealData(DB203, upper_door_PS1_progress));
 			this->set_door_progress(RS::PS2, RealData(DB203, upper_door_PS2_progress));

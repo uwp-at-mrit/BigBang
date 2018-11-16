@@ -421,8 +421,8 @@ public:
 		this->pressures[DS::PSDP]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
 		this->pressures[DS::SBDP]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);
 
-		this->pressures[DS::PSSIP]->set_value(RealData(DB203, this->ps_address->suction_inflator_pressure), GraphletAnchor::CC);
-		this->pressures[DS::SBSIP]->set_value(RealData(DB203, this->sb_address->suction_inflator_pressure), GraphletAnchor::CC);
+		this->pressures[DS::PSSIP]->set_value(RealData(DB203, this->ps_address->suction_inflator_pressure), GraphletAnchor::LC);
+		this->pressures[DS::SBSIP]->set_value(RealData(DB203, this->sb_address->suction_inflator_pressure), GraphletAnchor::RC);
 
 		this->set_density_speed(DS::PS, DB203, this->ps_address->density_speed);
 		this->set_density_speed(DS::SB, DB203, this->sb_address->density_speed);

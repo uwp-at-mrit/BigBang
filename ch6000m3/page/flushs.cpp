@@ -94,6 +94,11 @@ public:
 		this->flows[FS::HBV04]->set_value(RealData(DB203, sb_water_pump_flow), GraphletAnchor::CT);
 		this->pressures[FS::HBV05]->set_value(RealData(DB203, ps_water_pump_discharge_pressure), GraphletAnchor::CB);
 		this->flows[FS::HBV05]->set_value(RealData(DB203, sb_water_pump_flow), GraphletAnchor::CT);
+
+		this->powers[FS::PSPump]->set_value(RealData(DB203, ps_water_pump_power), GraphletAnchor::CB);
+		this->rpms[FS::PSPump]->set_value(RealData(DB203, ps_water_pump_rpm), GraphletAnchor::CT);
+		this->powers[FS::SBPump]->set_value(RealData(DB203, sb_water_pump_power), GraphletAnchor::CB);
+		this->rpms[FS::SBPump]->set_value(RealData(DB203, sb_water_pump_rpm), GraphletAnchor::CT);
 		
 		this->set_door_progress(FS::PS1, RealData(DB203, upper_door_PS1_progress));
 		this->set_door_progress(FS::PS2, RealData(DB203, upper_door_PS2_progress));

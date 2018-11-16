@@ -41,7 +41,7 @@ public:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger, PLCMasterMode::Debug);
+		this->device = new PLCMaster(logger, PLCMasterMode::Release);
 	}
 
 protected:
