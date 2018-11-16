@@ -57,7 +57,6 @@ private enum class HD : unsigned int {
 
 	// Other Dimensions
 	Heel, Trim, BowDraft, SternDraft,
-	SBOP, SBCP, SBFC, PSOP, PSCP, PSFC,
 
 	// Hopper doors
 	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
@@ -188,7 +187,6 @@ public:
 		this->label_font = make_bold_text_format(large_font_size);
 		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
-		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
 	}
@@ -295,34 +293,6 @@ public:
 	}
 
 public:
-	bool on_char(VirtualKey key, PLCMaster* plc) {
-		bool handled = false;
-
-		if (key == VirtualKey::Enter) {
-			auto peditor = dynamic_cast<Credit<Percentagelet, HD>*>(this->master->get_focus_graphlet());
-			auto deditor = dynamic_cast<Credit<Dimensionlet, HD>*>(this->master->get_focus_graphlet());
-
-			if (peditor != nullptr) {
-				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
-					peditor->id.ToString()->Data(),
-					peditor->get_input_number());
-
-				peditor->set_value(peditor->get_input_number());
-			} else if (deditor != nullptr) {
-				plc->get_logger()->log_message(Log::Info, L"%s: %lf",
-					deditor->id.ToString()->Data(),
-					deditor->get_input_number());
-
-				deditor->set_value(deditor->get_input_number());
-			}
-
-			handled = true;
-		}
-
-		return handled;
-	}
-
-public:
 	void load(float width, float height, float vinset) {
 		float cell_width, cell_height, radius, cylinder_height;
 		
@@ -333,29 +303,21 @@ public:
 		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
 
 		cylinder_height = cell_height * 1.618F;
-		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, 0U, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, 0U, "meter3", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter", LiquidSurface::Convex);
-		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, 0U, "ton", LiquidSurface::_);
-		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, 0U, "ton", LiquidSurface::_);
+		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
+		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, 0U, "ton");
+		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, 0U, "ton");
 
 		this->load_dimensions(this->dimensions, HD::A, HD::H, "bar");
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
 		this->load_dimensions(this->dimensions, HD::BowDraft, HD::SternDraft, "meter", this->plain_style);
 
-		{ // load settings
+		{ // load captions
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 
 			this->load_label(this->labels, HD::Port, Colours::make(default_ps_color), cpt_font);
 			this->load_label(this->labels, HD::Starboard, Colours::make(default_sb_color), cpt_font);
-
-			this->load_setting(this->dsettings, HD::PSOP, "bar");
-			this->load_setting(this->dsettings, HD::PSCP, "bar");
-			this->load_setting(this->dsettings, HD::SBOP, "bar");
-			this->load_setting(this->dsettings, HD::SBCP, "bar");
-
-			this->load_setting(this->psettings, HD::PSFC);
-			this->load_setting(this->psettings, HD::SBFC);
 		}
 	}
 
@@ -365,25 +327,23 @@ public:
 
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, HD::EarthWork, HD::Displacement);
 
-		{ // reflow settings and dimensions
+		{ // reflow dimensions
 			float x, y, off;
 
 			this->labels[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
 			off *= 0.618F;
 
-			this->decorator->fill_ascent_anchor(0.0618F, 1.0F, &x, &y);
-			this->master->move_to(this->labels[HD::Port], x, y, GraphletAnchor::LB, 0.0F, -off);
-			this->master->move_to(this->psettings[HD::PSFC], this->labels[HD::Port], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
-			this->master->move_to(this->dsettings[HD::PSOP], this->psettings[HD::PSFC], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
-			this->master->move_to(this->dsettings[HD::PSCP], this->dsettings[HD::PSOP], GraphletAnchor::RB, GraphletAnchor::LB, vinset);
-			this->master->move_to(this->dimensions[HD::A], this->dsettings[HD::PSCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->decorator->fill_ascent_anchor(0.382F, 1.0F, &x, &y);
+			this->master->move_to(this->labels[HD::Port], x, y, GraphletAnchor::CB, 0.0F, -off);
+			
+			this->decorator->fill_descent_anchor(0.382F, 0.0F, &x, &y);
+			this->master->move_to(this->labels[HD::Starboard], x, y, GraphletAnchor::CT, 0.0F, +off);
 
-			this->decorator->fill_descent_anchor(0.0618F, 0.0F, &x, &y);
-			this->master->move_to(this->labels[HD::Starboard], x, y, GraphletAnchor::LT, 0.0F, off);
-			this->master->move_to(this->psettings[HD::SBFC], this->labels[HD::Starboard], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
-			this->master->move_to(this->dsettings[HD::SBOP], this->psettings[HD::SBFC], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
-			this->master->move_to(this->dsettings[HD::SBCP], this->dsettings[HD::SBOP], GraphletAnchor::RT, GraphletAnchor::LT, vinset);
-			this->master->move_to(this->dimensions[HD::H], this->dsettings[HD::SBCP], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->decorator->fill_ascent_anchor(1.0F, 1.0F, &x, &y);
+			this->master->move_to(this->dimensions[HD::A], x, y, GraphletAnchor::RB, 0.0F, -off);
+
+			this->decorator->fill_descent_anchor(1.0F, 0.0F, &x, &y);
+			this->master->move_to(this->dimensions[HD::H], x, y, GraphletAnchor::RT, 0.0F, +off);
 
 			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, false);
 			this->master->move_to(this->dimensions[HD::Heel], x, y, GraphletAnchor::LB, 0.0F, -off);
@@ -427,16 +387,6 @@ public:
 
 private:
 	template<typename E>
-	void load_setting(std::map<E, Credit<Percentagelet, E>*>& ds, E id) {
-		ds[id] = this->master->insert_one(new Credit<Percentagelet, E>(DimensionStatus::Input, this->setting_style, _speak(id)), id);
-	}
-
-	template<typename E>
-	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
-	}
-
-	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, DimensionStyle& s) {
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(s, unit, _speak(id)), id);
@@ -468,8 +418,8 @@ private:
 
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height
-		, double range, unsigned int precision, Platform::String^ unit, LiquidSurface surface) {
-		auto cylinder = new Credit<Cylinderlet, E>(surface, range, height * 0.2718F, height, 3.0F, 0U, precision);
+		, double range, unsigned int precision, Platform::String^ unit) {
+		auto cylinder = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 0U, precision);
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
@@ -555,8 +505,6 @@ private: // never delete these graphlets manually.
 	std::map<HD, Credit<Doorlet, HD>*> doors;
 	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
 	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
-	std::map<HD, Credit<Dimensionlet, HD>*> dsettings;
-	std::map<HD, Credit<Percentagelet, HD>*> psettings;
 
 private:
 	CanvasTextFormat^ label_font;
@@ -565,7 +513,6 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
-	DimensionStyle setting_style;
 
 private:
 	HopperDoorsPage* master;
@@ -641,28 +588,6 @@ bool HopperDoorsPage::can_select(IGraphlet* g) {
 
 bool HopperDoorsPage::can_select_multiple() {
 	return true;
-}
-
-bool HopperDoorsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
-	bool handled = Planet::on_char(key, wargrey_keyboard);
-
-	if (!handled) {
-		auto db = dynamic_cast<Doors*>(this->dashboard);
-		
-		if (db != nullptr) {
-			handled = db->on_char(key, this->device);
-		}
-	}
-
-	return handled;
-}
-
-void HopperDoorsPage::on_focus(IGraphlet* g) {
-	auto editor = dynamic_cast<IEditorlet*>(g);
-
-	if (editor != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
-	}
 }
 
 void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

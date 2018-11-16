@@ -145,6 +145,7 @@ public:
 public:
 	virtual bool can_select(IGraphlet* g) { return false; }
 	virtual bool can_select_multiple() { return false; }
+	virtual bool on_enter_char(PLCMaster* plc) { return false; }
 	virtual void on_tap_selected(IGraphlet* g, float x, float y) {}
 	virtual void on_gesture(std::list<float2>& anchors, float x, float y) {}
 
@@ -1393,6 +1394,11 @@ private:
 		this->load_label(this->labels, id, Colours::Background);
 	}
 
+	template<typename E>
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
+	}
+
 private:
 	template<typename E>
 	void reflow_winches(E wc, E trunnion, E draghead, GraphletAnchor ga, GraphletAnchor wa, float gapsize) {
@@ -1488,6 +1494,7 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Percentagelet, DS>*> rc_speeds;
 	std::map<DS, Credit<Rectanglet, DS>*> indicators;
 	std::map<DS, Credit<Rectanglet, DS>*> table_headers;
+	std::map<DS, Credit<Dimensionlet, DS>*> settings;
 
 private:
 	DimensionStyle pump_style;
@@ -1596,6 +1603,30 @@ bool DredgesPage::can_select_multiple() {
 	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
 	return ((db != nullptr) && (db->can_select_multiple()));
+}
+
+bool DredgesPage::on_char(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_char(key, wargrey_keyboard);
+
+	if (!handled) {
+		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+		if (db != nullptr) {
+			if (key == VirtualKey::Enter) {
+				handled = db->on_enter_char(this->device);
+			}
+		}
+	}
+
+	return handled;
+}
+
+void DredgesPage::on_focus(IGraphlet* g) {
+	auto editor = dynamic_cast<IEditorlet*>(g);
+
+	if (editor != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+	}
 }
 
 void DredgesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

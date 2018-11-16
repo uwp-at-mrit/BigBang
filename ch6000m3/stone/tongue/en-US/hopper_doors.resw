@@ -145,28 +145,10 @@
     <value>Loading</value>
   </data>
   <data name="Port" xml:space="preserve">
-    <value>Port Hopper Door</value>
+    <value>Port</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>Starboard Hopper Door</value>
-  </data>
-  <data name="SBCP" xml:space="preserve">
-    <value>Closing Pressure</value>
-  </data>
-  <data name="SBOP" xml:space="preserve">
-    <value>Opening Pressure</value>
-  </data>
-  <data name="SBFC" xml:space="preserve">
-    <value>Flow Control</value>
-  </data>
-  <data name="PSCP" xml:space="preserve">
-    <value>Closing Pressure</value>
-  </data>
-  <data name="PSFC" xml:space="preserve">
-    <value>Flow Control</value>
-  </data>
-  <data name="PSOP" xml:space="preserve">
-    <value>Opening Pressure</value>
+    <value>Starboard</value>
   </data>
   <data name="PS1" xml:space="preserve">
     <value>#1</value>
