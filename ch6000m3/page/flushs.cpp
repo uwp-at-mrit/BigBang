@@ -43,7 +43,7 @@ private enum FSMode { WindowUI = 0, Dashboard };
 private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
 
-static CanvasSolidColorBrush^ water_color = Colours::Green;
+static CanvasSolidColorBrush^ slurry = Colours::Green;
 
 // WARNING: order matters
 private enum class FS : unsigned int {
@@ -161,29 +161,29 @@ public:
 		{ // flow water
 			FS h1[] = { FS::h1sb, FS::SBPump };
 			
-			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
-			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
+			this->station->append_subtrack(FS::HBV01, FS::SBSea, slurry);
+			this->station->append_subtrack(FS::HBV02, FS::PSSea, slurry);
 
-			this->try_flow_water(FS::HBV01, h1, water_color);
-			this->try_flow_water(FS::HBV02, FS::PSPump, water_color);
+			this->try_flow_water(FS::HBV01, h1, slurry);
+			this->try_flow_water(FS::HBV02, FS::PSPump, slurry);
 
 			if (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running) {
 				FS h35 [] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
 				FS h3 [] = { FS::h3sb, FS::SBPump };
 				FS h78[] = { FS::HBV08, FS::HBV07 };
 				
-				this->station->append_subtrack(h35, water_color);
-				this->try_flow_water(FS::HBV03, h3, water_color);
-				this->try_flow_water(FS::HBV05, h78, water_color);
-				this->try_flow_water(FS::HBV07, FS::Port, water_color);
+				this->station->append_subtrack(h35, slurry);
+				this->try_flow_water(FS::HBV03, h3, slurry);
+				this->try_flow_water(FS::HBV05, h78, slurry);
+				this->try_flow_water(FS::HBV07, FS::Port, slurry);
 			}
 
 			if (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running) {
 				FS h69[] = { FS::HBV09, FS::HBV06 };
 
-				this->station->append_subtrack(FS::SBPump, FS::HBV04, water_color);
-				this->try_flow_water(FS::HBV04, h69, water_color);
-				this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
+				this->station->append_subtrack(FS::SBPump, FS::HBV04, slurry);
+				this->try_flow_water(FS::HBV04, h69, slurry);
+				this->try_flow_water(FS::HBV06, FS::Starboard, slurry);
 			}
 		}
 
@@ -325,7 +325,7 @@ public:
 			
 			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipe_thickness, water_color));
+					new Omegalet(-90.0, nic_radius, default_pipe_thickness, slurry));
 			}
 		}
 

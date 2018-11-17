@@ -44,7 +44,7 @@ static CanvasSolidColorBrush^ region_background = Colours::make(0x006464);
 // WARNING: order matters
 private enum class LU : unsigned int {
 	// Key Labels
-	PSUnit, SBUnit, PSPump, SBPump, Master, Slave,
+	PSUnit, SBUnit, PSPump, SBPump, Master, Spare,
 	
 	_
 };
@@ -84,6 +84,9 @@ public:
 
 		this->ps_region = this->master->insert_one(new Rectanglet(region_width, region_height, region_background, region_border, 2.0F));
 		this->sb_region = this->master->insert_one(new Rectanglet(region_width, region_height, region_background, region_border, 2.0F));
+
+		//this->load_pump_station(this->stations, LU::PSPump, vinset, vinset);
+		//this->load_pump_station(this->stations, LU::SBPump, vinset, vinset);
 	}
 
 public:
@@ -94,9 +97,23 @@ public:
 
 		this->master->move_to(this->ps_region, ps_cx, cy, GraphletAnchor::CC);
 		this->master->move_to(this->sb_region, sb_cx, cy, GraphletAnchor::CC);
+
+		//this->master->move_to(this->stations[LU::PSPump], this->ps_region, 0.5F, 0.75F, GraphletAnchor::CC);
+		//this->master->move_to(this->stations[LU::SBPump], this->sb_region, 0.5F, 0.75F, GraphletAnchor::CC);
 	}
 
 private:
+	template<class T, typename E>
+	void load_pump_station(std::map<E, T*>& ts, E id, float xstep, float ystep) {
+		Turtle<E>* turtle = new Turtle<E>(xstep, ystep);
+
+		turtle->move_down()->move_left(3);
+		turtle->move_down(3, E::Master)->move_down(3)->move_right(6);
+		turtle->move_up(3, E::Spare)->move_up(3)->move_left(3);
+
+		ts[id] = this->master->insert_one(new T(turtle, default_pipe_thickness, default_pipe_color), id);
+	}
+
 	template<class G, typename E>
 	void load_devices(std::map<E, G*>& gs, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
@@ -125,27 +142,6 @@ private:
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label = nullptr) {
-		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
-		}
-	}
-
-	template<typename E>
-	void load_filter_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, Colours::Silver);
-			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, nonblock_color), id);
-		}
-	}
-
-	template<class T, typename E>
-	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width, float height) {
-		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, height, 2.5F), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, "celsius", _speak(id)), id);
-	}
-
-	template<typename E>
 	void load_label(std::map<E, Credit<Labellet, E>*>& ls, Platform::String^ caption, E id
 		, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(caption, ((font == nullptr) ? this->label_font : font), color), id);
@@ -158,8 +154,7 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<LU>* ps_station;
-	Tracklet<LU>* sb_station;
+	std::map<LU, Credit<Tracklet<LU>, LU>*> stations;
 	std::map<LU, Credit<Labellet, LU>*> ps_labels;
 	std::map<LU, Credit<Labellet, LU>*> sb_labels;
 	std::map<LU, Credit<HydraulicPumplet, LU>*> ps_pumps;

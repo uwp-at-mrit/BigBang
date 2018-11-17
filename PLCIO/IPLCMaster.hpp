@@ -26,5 +26,17 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void send_scheduled_request(long long count, long long interval, long long uptime) = 0;
+
+	public:
+		void set_mode(WarGrey::SCADA::PLCMasterMode mode) {
+			this->mode = mode;
+		}
+
+		WarGrey::SCADA::PLCMasterMode get_mode() {
+			return this->mode;
+		}
+
+	private:
+		WarGrey::SCADA::PLCMasterMode mode = PLCMasterMode::Release;
 	};
 }

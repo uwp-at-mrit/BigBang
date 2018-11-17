@@ -43,7 +43,7 @@ private enum GPMode { WindowUI = 0, Dashboard };
 private enum class SWPOperation { Start, Stop, Reset, Auto, _ };
 private enum class GPVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 
-static CanvasSolidColorBrush^ water_color = Colours::Green;
+static CanvasSolidColorBrush^ slurry = Colours::Green;
 
 // WARNING: order matters
 private enum class GP : unsigned int {
@@ -139,19 +139,19 @@ public:
 		GP ps_underwater_path[] = { GP::DGV17, GP::psuwp, GP::d46, GP::PSUWP };
 		GP sb_underwater_path[] = { GP::DGV20, GP::sbuwp, GP::d47, GP::SBUWP };
 
-		this->station->append_subtrack(GP::Hatch, GP::DGV20, water_color);
+		this->station->append_subtrack(GP::Hatch, GP::DGV20, slurry);
 
-		this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, water_color);
-		this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, water_color);
-		this->try_flow_water(GP::PSHPa, ps_hopper_long_path, water_color);
-		this->try_flow_water(GP::PSHPb, ps_hopper_short_path, water_color);
-		this->try_flow_water(GP::SBHPa, sb_hopper_short_path, water_color);
-		this->try_flow_water(GP::SBHPb, sb_hopper_long_path, water_color);
+		this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, slurry);
+		this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, slurry);
+		this->try_flow_water(GP::PSHPa, ps_hopper_long_path, slurry);
+		this->try_flow_water(GP::PSHPb, ps_hopper_short_path, slurry);
+		this->try_flow_water(GP::SBHPa, sb_hopper_short_path, slurry);
+		this->try_flow_water(GP::SBHPb, sb_hopper_long_path, slurry);
 
-		this->try_flow_water(GP::PSUWP1, ps_underwater_path, water_color);
-		this->try_flow_water(GP::PSUWP2, GP::DGV18, GP::PSUWP, water_color);
-		this->try_flow_water(GP::SBUWP1, GP::DGV19, GP::SBUWP, water_color);
-		this->try_flow_water(GP::SBUWP2, sb_underwater_path, water_color);
+		this->try_flow_water(GP::PSUWP1, ps_underwater_path, slurry);
+		this->try_flow_water(GP::PSUWP2, GP::DGV18, GP::PSUWP, slurry);
+		this->try_flow_water(GP::SBUWP1, GP::DGV19, GP::SBUWP, slurry);
+		this->try_flow_water(GP::SBUWP2, sb_underwater_path, slurry);
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -236,7 +236,7 @@ public:
 		this->station = this->master->insert_one(new Tracklet<GP>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
 		this->sea = this->master->insert_one(new VLinelet(gheight * 2.0F, default_pipe_thickness,
-			water_color, make_dash_stroke(CanvasDashStyle::Dash)));
+			slurry, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		{ // load devices
 			float radius = resolve_gridsize(gwidth, gheight);

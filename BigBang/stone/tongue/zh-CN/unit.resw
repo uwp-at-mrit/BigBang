@@ -123,6 +123,9 @@
   <data name="celsius" xml:space="preserve">
     <value>°C</value>
   </data>
+  <data name="centimeter" xml:space="preserve">
+    <value>cm</value>
+  </data>
   <data name="degrees" xml:space="preserve">
     <value>deg</value>
   </data>

@@ -764,7 +764,7 @@ void HydraulicsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
 	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		if (dashboard->pumps_selected(HS::Y, HS::K, 2)) {
+		if (dashboard->pumps_selected(HS::C, HS::E, 1) && dashboard->pumps_selected(HS::A, HS::H, 1)) {
 			group_menu_popup(this->gmaster_op, this, x, y);
 		} else if (dashboard->pumps_selected(HS::C, HS::E, 2)) {
 			group_menu_popup(this->gps_op, this, x, y);

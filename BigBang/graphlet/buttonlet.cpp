@@ -33,10 +33,11 @@ void Buttonlet::prepare_style(ButtonStatus status, ButtonStyle& s) {
 	}; break;
 	case ButtonStatus::Failed: {
 		CAS_SLOT(s.border_color, Colours::Crimson);
-		CAS_SLOT(s.background_color, Colours::Snow);
+		CAS_SLOT(s.background_color, Colours::LavenderBlush);
 	}; break;
 	case ButtonStatus::Ready: {
-		CAS_SLOT(s.border_color, Colours::GreenYellow);
+		CAS_SLOT(s.border_color, Colours::Green);
+		CAS_SLOT(s.background_color, Colours::Honeydew);
 	}; break;
 	case ButtonStatus::Disabled: {
 		CAS_SLOT(s.border_color, Colours::Gray);
@@ -45,7 +46,7 @@ void Buttonlet::prepare_style(ButtonStatus status, ButtonStyle& s) {
 	}; break;
 	}
 
-	CAS_SLOT(s.border_color, Colours::GhostWhite);
+	CAS_SLOT(s.border_color, Colours::Gainsboro);
 	CAS_SLOT(s.background_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.foreground_color, Colours::Black);
 	CAS_SLOT(s.font, button_default_font);

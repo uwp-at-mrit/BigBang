@@ -148,9 +148,8 @@ float WarGrey::SCADA::statusbar_height() {
 }
 
 /*************************************************************************************************/
-Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCMaster* device) {
+Statusbarlet::Statusbarlet(Platform::String^ caption, IPLCMaster* device) : device(device) {
 	initialize_status_font();
-	this->device = device;
 	this->caption = make_text_layout(speak(caption), status_font);
 }
 
@@ -205,7 +204,8 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Red);
 		} else if (this->device->connected()) {
-			if (this->device_name == nullptr) {
+			if ((this->device_name == nullptr) || (this->plc_mode != this->device->get_mode())) {
+				this->plc_mode = this->device->get_mode();
 				this->device_name = make_text_layout(this->device->device_hostname(), status_font);
 			}
 

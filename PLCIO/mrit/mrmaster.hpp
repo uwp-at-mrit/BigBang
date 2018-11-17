@@ -25,8 +25,7 @@ namespace WarGrey::SCADA {
     public:
         virtual ~IMRMaster() noexcept;
 
-		IMRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
-			Platform::String^ server, uint16 service, WarGrey::SCADA::IMRConfirmation* confirmation);
+		IMRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 service, WarGrey::SCADA::IMRConfirmation* confirmation);
 
 	public:
 		Platform::String^ device_hostname() override;
@@ -66,7 +65,6 @@ namespace WarGrey::SCADA {
 		std::list<WarGrey::SCADA::IPLCStatusListener*> listeners;
 		WarGrey::SCADA::MrMessageConfiguration preference;
 		WarGrey::SCADA::Syslog* logger;
-		WarGrey::SCADA::PLCMasterMode mode;
 
     private:
 		// NOTE: Either `listener` or `socket` will work depends on the `device`.
@@ -87,13 +85,11 @@ namespace WarGrey::SCADA {
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {
     public:
-        MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
-			Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
-			: IMRMaster(logger, mode, server, port, confirmation) {}
+        MRMaster(WarGrey::SCADA::Syslog* logger, Platform::String^ server, uint16 port, IMRConfirmation* confirmation = nullptr)
+			: IMRMaster(logger, server, port, confirmation) {}
 
-		MRMaster(WarGrey::SCADA::Syslog* logger, WarGrey::SCADA::PLCMasterMode mode,
-			uint16 port, IMRConfirmation* confirmation = nullptr)
-			: MRMaster(logger, mode, nullptr, port, confirmation) {}
+		MRMaster(WarGrey::SCADA::Syslog* logger, uint16 port, IMRConfirmation* confirmation = nullptr)
+			: MRMaster(logger, nullptr, port, confirmation) {}
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime) {}

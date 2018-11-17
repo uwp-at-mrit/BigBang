@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 
 	private class PLCMaster : public WarGrey::SCADA::MRMaster {
 	public:
-		PLCMaster(Syslog* logger, WarGrey::SCADA::PLCMasterMode mode);
+		PLCMaster(Syslog* logger);
 
 	public:
 		void send_scheduled_request(long long count, long long interval, long long uptime);

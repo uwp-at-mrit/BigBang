@@ -20,13 +20,12 @@ using namespace Windows::Networking::Sockets;
 using namespace Windows::Storage::Streams;
 
 /*************************************************************************************************/
-IMRMaster::IMRMaster(Syslog* sl, PLCMasterMode mode, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
+IMRMaster::IMRMaster(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation* cf) {
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
 	this->logger->reference();
 
 	this->append_confirmation_receiver(cf);
     this->service = p.ToString();
-	this->mode = mode;
 
 	if (h == nullptr) {
 		this->listener = new StreamListener();
@@ -63,7 +62,7 @@ Platform::String^ IMRMaster::device_hostname() {
 		hostname = this->socket->Information->RemoteAddress->DisplayName;
 	}
 
-	if (this->mode == PLCMasterMode::Debug) {
+	if (this->get_mode() == PLCMasterMode::Debug) {
 		hostname += "[Debug]";
 	}
 
@@ -86,7 +85,7 @@ Syslog* IMRMaster::get_logger() {
 	return this->logger;
 }
 
-void IMRMaster::set_message_preference(WarGrey::SCADA::MrMessageConfiguration& config) {
+void IMRMaster::set_message_preference(MrMessageConfiguration& config) {
 	this->preference = config;
 }
 
@@ -338,7 +337,7 @@ void MRMaster::write_analog_quantity(uint16 data_block, uint16 address, float da
 
 	bigendian_float_set(flbytes, 0U, datum);
 
-	if (this->mode == PLCMasterMode::Release) {
+	if (this->get_mode() == PLCMasterMode::Release) {
 		this->request(this->preference.write_analog_quantity_fcode(), data_block, address, address + 4U, flbytes, data_length);
 	} else {
 		this->logger->log_message(Log::Info, L"SET DB%d.DBD%d = %f", data_block, address, datum);
@@ -353,7 +352,7 @@ void MRMaster::write_digital_quantity(uint16 data_block, uint8 idx, uint8 bidx, 
 	xbytes[2] = bidx;
 	xbytes[3] = (value ? 0x01 : 0x00);
 
-	if (this->mode == PLCMasterMode::Release) {
+	if (this->get_mode() == PLCMasterMode::Release) {
 		this->request(this->preference.write_digital_quantity_fcode(), data_block, 0U, 0U, xbytes, data_length);
 	} else {
 		this->logger->log_message(Log::Info, L"EXE DB%d.DBX%d.%d", data_block, idx, bidx);

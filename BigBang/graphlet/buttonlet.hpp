@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
 
 	private class Buttonlet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::ButtonStatus, WarGrey::SCADA::ButtonStyle> {
 	public:
-		Buttonlet(Platform::String^ caption, float width = 100.0F, float height = 22.0F, float thickness = 2.0F);
+		Buttonlet(Platform::String^ caption, float width = 100.0F, float height = 22.0F, float thickness = 3.0F);
 		Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width = 100.0F, float height = 22.0F, float thickness = 2.0F);
 
 	public:

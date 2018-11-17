@@ -23,6 +23,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caption;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ device_name;
 		WarGrey::SCADA::IPLCMaster* device;
+		WarGrey::SCADA::PLCMasterMode plc_mode;
     };
 
 	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {

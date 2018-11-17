@@ -59,7 +59,7 @@ private enum class DSWCOperation { Charge, Discharge, Stop, _ };
 private enum class DSDVOperation { Up, Down, Stop, _ };
 
 private enum class DSSCmd { Inflate, Deflate, _ };
-private enum class DSLMODCmd { Emit, Fill, Auto, _ };
+private enum class DSLMODCmd { Auto, _ };
 
 // WARNING: order matters
 private enum class DS : unsigned int {
@@ -105,10 +105,10 @@ private enum class DS : unsigned int {
 static ICanvasBrush^ checked_color = Colours::Green;
 static ICanvasBrush^ unchecked_color = Colours::WhiteSmoke;
 
-static ICanvasBrush^ winch_status_color = Colours::DimGray;
+static ICanvasBrush^ winch_status_color = Colours::Background;
 static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
 
-static CanvasSolidColorBrush^ water_color = Colours::Green;
+static CanvasSolidColorBrush^ slurry = Colours::GreenYellow;
 
 private class IDredgingSystem : public PLCConfirmation {
 public:
@@ -223,7 +223,7 @@ protected:
 		cs[id] = this->master->insert_one(new Credit<C, E>(range, height / 2.718F, height), id);
 
 		this->load_label(this->labels, id, this->caption_color);
-		this->load_dimension(this->lengths, id, "meter", false);
+		this->load_dimension(this->lengths, id, "centimeter", false);
 		this->load_dimension(this->pressures, id, "bar", false);
 	}
 
@@ -297,7 +297,7 @@ protected:
 	void set_compensator(DS id, const uint8* db203, unsigned int rd_idx, GraphletAnchor a) {
 		float progress = RealData(db203, rd_idx + 2U);
 
-		this->compensators[id]->set_value(progress);
+		this->compensators[id]->set_value(progress * 0.01F);
 		this->lengths[id]->set_value(progress, a);
 		this->pressures[id]->set_value(RealData(db203, rd_idx + 0U), a);
 	}
@@ -504,30 +504,43 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
-		this->station->append_subtrack(DS::D003, DS::SB, water_color);
-		this->station->append_subtrack(DS::D004, DS::PS, water_color);
+		{ // flow slurry
+			this->station->append_subtrack(DS::D003, DS::SB, slurry);
+			this->station->append_subtrack(DS::D004, DS::PS, slurry);
 
-		this->try_flow_water(DS::D003, DS::SBHP, water_color);
-		this->try_flow_water(DS::D004, DS::PSHP, water_color);
+			this->try_flow_slurry(DS::D003, DS::SBHP, slurry);
+			this->try_flow_slurry(DS::D004, DS::PSHP, slurry);
 
-		if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
-			DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
-			DS d14[] = { DS::d014, DS::d14, DS::PSHP };
-			DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
+			if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
+				DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
+				DS d14[] = { DS::d014, DS::d14, DS::PSHP };
+				DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
 
-			this->try_flow_water(DS::D012, d12, water_color);
-			this->try_flow_water(DS::D014, d14, water_color);
-			this->try_flow_water(DS::D016, d16, water_color);
+				this->try_flow_slurry(DS::D012, d12, slurry);
+				this->try_flow_slurry(DS::D014, d14, slurry);
+				this->try_flow_slurry(DS::D016, d16, slurry);
+			}
+
+			if (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running) {
+				DS d11[] = { DS::LMOD, DS::sb, DS::SBHP };
+				DS d13[] = { DS::d013, DS::d13, DS::SBHP };
+				DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
+
+				this->try_flow_slurry(DS::D011, d11, slurry);
+				this->try_flow_slurry(DS::D013, d13, slurry);
+				this->try_flow_slurry(DS::D015, d15, slurry);
+			}
 		}
 
-		if (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running) {
-			DS d11[] = { DS::LMOD, DS::sb, DS::SBHP };
-			DS d13[] = { DS::d013, DS::d13, DS::SBHP };
-			DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
 
-			this->try_flow_water(DS::D011, d11, water_color);
-			this->try_flow_water(DS::D013, d13, water_color);
-			this->try_flow_water(DS::D015, d15, water_color);
+		{ // animate drags
+			bool ps_running = (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running);
+			bool sb_running = (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running);
+
+			this->dragxys[DS::PS]->set_dredging(ps_running);
+			this->dragxzes[DS::PS]->set_dredging(ps_running);
+			this->dragxys[DS::SB]->set_dredging(sb_running);
+			this->dragxzes[DS::SB]->set_dredging(sb_running);
 		}
 
 		IDredgingSystem::post_read_data(logger);
@@ -699,16 +712,18 @@ public:
 		this->station->fill_stepsize(&xstep, &ystep);
 
 		{ // reflow centeral components
+			float wc_offset = vinset * 1.5F;
+
 			this->master->move_to(this->lengths[DS::Overflow], this->station, GraphletAnchor::CC, GraphletAnchor::CB);
 			this->master->move_to(this->overflowpipe, this->lengths[DS::Overflow], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -txt_gapsize);
 
 			this->master->move_to(this->dfmeters[DS::PS], this->overflowpipe, GraphletAnchor::LT, GraphletAnchor::RB);
 			this->master->move_to(this->dfmeters[DS::SB], this->overflowpipe, GraphletAnchor::RT, GraphletAnchor::LB);
-			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -vinset);
+			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -wc_offset);
 
 			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.80F, GraphletAnchor::RC, -xstep);
 			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.80F, GraphletAnchor::LC, +xstep);
-			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +vinset);
+			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +wc_offset);
 		}
 
 		{ // reflow left dredging system
@@ -803,9 +818,7 @@ public:
 				this->master->move_to(this->sb_buttons[DSSCmd::Inflate], this->sb_buttons[DSSCmd::Deflate], GraphletAnchor::LC, GraphletAnchor::RC);
 				this->master->move_to(this->pressures[DS::SBSIP], this->sb_buttons[DSSCmd::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 
-				this->master->move_to(this->lmod_buttons[DSLMODCmd::Emit], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT);
-				this->master->move_to(this->lmod_buttons[DSLMODCmd::Fill], this->lmod_buttons[DSLMODCmd::Emit], GraphletAnchor::CB, GraphletAnchor::CT);
-				this->master->move_to(this->lmod_buttons[DSLMODCmd::Auto], this->lmod_buttons[DSLMODCmd::Fill], GraphletAnchor::CB, GraphletAnchor::CT);
+				this->master->move_to(this->lmod_buttons[DSLMODCmd::Auto], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 			}
 
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
@@ -872,7 +885,7 @@ private:
 	}
 
 private:
-	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
+	void try_flow_slurry(DS vid, DS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
 			this->station->append_subtrack(vid, eid, color);
@@ -880,7 +893,7 @@ private:
 		}
 	}
 
-	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+	void try_flow_slurry(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
 			this->station->append_subtrack(vid, path[0], color);
@@ -890,8 +903,8 @@ private:
 	}
 
 	template<unsigned int N>
-	void try_flow_water(DS vid, DS (&path)[N], CanvasSolidColorBrush^ color) {
-		this->try_flow_water(vid, path, N, color);
+	void try_flow_slurry(DS vid, DS (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_slurry(vid, path, N, color);
 	}
 
 private: // never delete these graphlets manually.

@@ -120,7 +120,7 @@ namespace WarGrey::SCADA {
 
 	template<class B>
 	void DI_winch_override(B* target, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
-		target->set_status(DBX(db205, details.override - 1U), ButtonStatus::Executing);
+		target->set_status(DBX(db205, details.override - 1U), ButtonStatus::Executing, ButtonStatus::Default);
 	}
 
 	template<class G>

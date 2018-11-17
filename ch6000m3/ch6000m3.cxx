@@ -20,6 +20,7 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Windows::System;
 using namespace Windows::Foundation;
 
 using namespace Windows::UI::Input;
@@ -42,7 +43,17 @@ internal:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger, PLCMasterMode::Release);
+		this->device = new PLCMaster(logger);
+	}
+
+public:
+	void switch_plc_master_mode() {
+		if (this->device != nullptr) {
+			switch (this->device->get_mode()) {
+			case PLCMasterMode::Debug: this->device->set_mode(PLCMasterMode::Release); break;
+			case PLCMasterMode::Release: this->device->set_mode(PLCMasterMode::Debug); break;
+			}
+		}
 	}
 
 protected:
@@ -64,7 +75,7 @@ protected:
 
 		this->add_planet(new Gallery());
 
-		this->transfer_to(1);
+		//this->transfer_to(1);
 	}
 
 protected private:
@@ -81,7 +92,7 @@ public:
 
 public:
 	void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {
-		this->page = int(DBD(db2, this->dbidx));  // Left: 620U, Right: 624U
+		this->page = int(DBD(db2, this->dbidx));
 	}
 
 public:
@@ -130,6 +141,7 @@ public:
 
 		// for TouchScreen pointer, but others can also be satisfied
 		this->AddHandler(UIElement::PointerPressedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed), true);
+		this->AddHandler(UIElement::PointerReleasedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_released), true);
 	}
 
 public:
@@ -182,8 +194,14 @@ private:
 		}
 	}
 
+	void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+		if ((args->KeyModifiers & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
+			this->universe->switch_plc_master_mode();
+		}
+	}
+
 private:
-	UniverseDisplay^ universe;
+	SCADAUniverse^ universe;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

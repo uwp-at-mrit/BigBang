@@ -162,8 +162,8 @@ namespace WarGrey::SCADA {
 		uint16 offset = 0U;
 
 		switch (cmd) {
-		case CMD::Emit: offset = 0U; break;
-		case CMD::Fill: offset = 1U; break;
+		//case CMD::Emit: offset = 0U; break;
+		//case CMD::Fill: offset = 1U; break;
 		case CMD::Auto: offset = 2U; break;
 		}
 
