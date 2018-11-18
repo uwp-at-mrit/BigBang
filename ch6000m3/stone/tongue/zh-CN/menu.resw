@@ -291,4 +291,10 @@
   <data name="Override" xml:space="preserve">
     <value>编码器越控</value>
   </data>
+  <data name="CloseDoorCheck" xml:space="preserve">
+    <value>关泥门校验</value>
+  </data>
+  <data name="OpenDoorCheck" xml:space="preserve">
+    <value>开泥门校验</value>
+  </data>
 </root>

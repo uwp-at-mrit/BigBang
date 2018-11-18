@@ -14,11 +14,13 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ button_default_font = make_bold_text_format("Consolas", 16.0F);
 
-Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, float thickness)
-	: Buttonlet(ButtonStatus::Default, caption, width, height, thickness) {}
+Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, float thickness, float corner_radius)
+	: Buttonlet(ButtonStatus::Default, caption, width, height, thickness, corner_radius) {}
 
-Buttonlet::Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width, float height, float thickness)
-	: IStatuslet(default_status), width(width), height(height), thickness(thickness), caption(caption) {}
+Buttonlet::Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width, float height, float thickness, float corner_radius)
+	: IStatuslet(default_status), caption(caption)
+	, width(width), height(height), thickness(thickness)
+	, corner_radius(corner_radius) {}
 
 void Buttonlet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(width, this->width);
@@ -68,8 +70,13 @@ void Buttonlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float btn_width = this->width - btn_x * 2.0F;
 	float btn_height = this->height - btn_y * 2.0F;
 	
-	ds->FillRectangle(x + btn_x, y + btn_y, btn_width, btn_height, s.background_color);
-	ds->DrawRectangle(x + btn_x, y + btn_y, btn_width, btn_height, s.border_color, this->thickness);
+	ds->FillRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height,
+		this->corner_radius, this->corner_radius,
+		s.background_color);
+	
+	ds->DrawRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height,
+		this->corner_radius, this->corner_radius,
+		s.border_color, this->thickness);
 
 	ds->DrawTextLayout(this->label, cpt_x - box.X, cpt_y - box.Y, s.foreground_color);
 }

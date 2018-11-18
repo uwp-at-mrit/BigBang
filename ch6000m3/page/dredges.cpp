@@ -254,14 +254,9 @@ protected:
 	}
 
 	template<class B, typename E, typename CMD>
-	void load_button(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, CMD cmd, float width = 128.0F, float height = 32.0F) {
-		bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(speak(cmd, "menu"), width, height), gid, cmd);
-	}
-
-	template<class B, typename E, typename CMD>
 	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
-			this->load_button(bs, gid, cmd, width, height);
+			bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(speak(cmd, "menu"), width, height), gid, cmd);
 		}
 	}
 

@@ -2,6 +2,7 @@
 
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
+#include "graphlet/dashboard/batterylet.hpp"
 
 namespace WarGrey::SCADA {
 	// DB4, starts from 1
@@ -84,6 +85,26 @@ namespace WarGrey::SCADA {
 	template<class A>
 	void DI_hopper_doors_locked(A* alarmer, const uint8* db205) {
 		alarmer->set_status(DBX(db205, 1086U - 1U), AlarmStatus::Alert, AlarmStatus::Normal);
+	}
+
+	template<class B, typename CMD>
+	void DI_hopper_doors_checks_button(Credit<B, CMD>* button, const uint8* db205) {
+		unsigned int idx_p1 = 0U;
+
+		switch (button->id) {
+		case CMD::OpenDoorCheck:  idx_p1 = 1897U; break;
+		case CMD::CloseDoorCheck: idx_p1 = 1899U; break;
+		}
+
+		if (idx_p1 > 0) {
+			if (DBX(db205, idx_p1 + 0U)) {
+				button->set_status(ButtonStatus::Executing);
+			} else if (DBX(db205, idx_p1 - 1U)) {
+				button->set_status(ButtonStatus::Disabled);
+			} else {
+				button->set_status(ButtonStatus::Ready);
+			}
+		}
 	}
 
 	template<class D, typename Menu>

@@ -58,20 +58,28 @@ namespace WarGrey::SCADA {
 		return index + offset;
 	}
 
-	template<typename OP, typename E>
-	uint16 DO_all_hopper_door_command(OP cmd, E id) {
-		uint16 offset = 0U;
+	template<typename OP>
+	uint16 DO_hopper_doors_locks_command(OP cmd) {
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case OP::Open:     offset = 0U; break;
-		case OP::Stop:     offset = 1U; break;
-		case OP::Close:    offset = 2U; break;
-		case OP::AutoLock: offset = 3U; break;
-		case OP::Lock:     offset = 5U; break;
+		case OP::Auto:   index = 429U; break;
+		case OP::Locked: index = 431U; break;
 		}
 
-		return 426U + offset;
+		return index;
+	}
+
+	template<typename OP>
+	uint16 DO_hopper_doors_checks_command(OP cmd) {
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OP::OpenDoorCheck:  index = 777U; break;
+		case OP::CloseDoorCheck: index = 778U; break;
+		}
+
+		return index;
 	}
 
 	template<typename OP, typename E>

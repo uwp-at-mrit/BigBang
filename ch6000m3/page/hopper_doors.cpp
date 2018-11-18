@@ -44,7 +44,6 @@ private enum class HDGroup { HDoor12, HDoor35, HDoor67, HDoor17, _};
 
 private enum class HDOperation { Open, Stop, Close, Disable, _ };
 private enum class HDGOperation { Open, Stop, Close, _ };
-private enum class HDGLOperation { Open, Stop, Close, Lock, AutoLock, _ };
 
 // WARNING: order matters
 private enum class HD : unsigned int {
@@ -182,8 +181,7 @@ private:
 private class Doors final
 	: public PLCConfirmation
 	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>
-	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*>
-	, public IGroupMenuCommand<HDGLOperation, HDGroup, PLCMaster*> {
+	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*> {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -286,16 +284,8 @@ public:
 		return plc->connected();
 	}
 
-	bool can_execute(HDGLOperation cmd, HDGroup group, PLCMaster* plc) override {
-		return plc->connected();
-	}
-
 	void execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
 		plc->send_command(DO_hopper_door_group_command(cmd, group));
-	}
-
-	void execute(HDGLOperation cmd, HDGroup group, PLCMaster* plc) override {
-		plc->send_command(DO_all_hopper_door_command(cmd, group));
 	}
 
 public:
@@ -319,7 +309,7 @@ public:
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
 		this->load_dimensions(this->dimensions, HD::BowDraft, HD::SternDraft, "meter", this->plain_style);
 
-		this->load_alarms(this->lockers, HD::Auto, HD::Locked, vinset * 1.618F);
+		this->load_alarms(this->lockers, HD::Auto, HD::Locked, vinset * 2.0F);
 		
 		{ // load captions
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
@@ -341,34 +331,37 @@ public:
 			this->labels[HD::Port]->fill_extent(0.0F, 0.0F, nullptr, &off);
 			off *= 0.618F;
 
-			this->decorator->fill_ascent_anchor(0.382F, 1.0F, &x, &y);
+			this->decorator->fill_ascent_anchor(0.5F, 1.0F, &x, &y);
 			this->master->move_to(this->labels[HD::Port], x, y, GraphletAnchor::CB, 0.0F, -off);
 			
-			this->decorator->fill_descent_anchor(0.382F, 0.0F, &x, &y);
+			this->decorator->fill_descent_anchor(0.5F, 0.0F, &x, &y);
 			this->master->move_to(this->labels[HD::Starboard], x, y, GraphletAnchor::CT, 0.0F, +off);
-
-			this->decorator->fill_ascent_anchor(1.0F, 1.0F, &x, &y);
-			this->master->move_to(this->dimensions[HD::A], x, y, GraphletAnchor::RB, 0.0F, -off);
-
-			this->decorator->fill_descent_anchor(1.0F, 0.0F, &x, &y);
-			this->master->move_to(this->dimensions[HD::H], x, y, GraphletAnchor::RT, 0.0F, +off);
 
 			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, false);
 			this->master->move_to(this->dimensions[HD::Heel], x, y, GraphletAnchor::LB, 0.0F, -off);
 			this->master->move_to(this->dimensions[HD::D], this->dimensions[HD::Heel], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -off);
+			this->master->move_to(this->dimensions[HD::A], this->dimensions[HD::D], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -off);
 			this->master->move_to(this->dimensions[HD::Trim], x, y, GraphletAnchor::LT, 0.0F, +off);
 			this->master->move_to(this->dimensions[HD::E], this->dimensions[HD::Trim], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +off);
-
-			this->master->move_to(this->lockers[HD::Auto], this->dimensions[HD::D], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
-			this->master->move_to(this->labels[HD::Auto], this->lockers[HD::Auto], GraphletAnchor::RC, GraphletAnchor::LC, off);
-			this->master->move_to(this->lockers[HD::Locked], this->dimensions[HD::E], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vinset);
-			this->master->move_to(this->labels[HD::Locked], this->lockers[HD::Locked], GraphletAnchor::RC, GraphletAnchor::LC, off);
+			this->master->move_to(this->dimensions[HD::H], this->dimensions[HD::E], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +off);
 
 			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, true);
 			this->master->move_to(this->dimensions[HD::BowDraft], x, y, GraphletAnchor::RC, -off);
 
 			this->decorator->fill_ship_anchor(0.0F, 0.5F, &x, &y, true);
 			this->master->move_to(this->dimensions[HD::SternDraft], x, y, GraphletAnchor::RC, -off);
+		}
+
+		{ // reflow alarms
+			float alarm_x, alarm_y;
+
+			this->decorator->fill_ascent_anchor(1.0F, 1.0F, &alarm_x, nullptr);
+			this->master->fill_graphlet_location(cylinders[HD::Displacement], nullptr, &alarm_y, GraphletAnchor::CC);
+
+			this->master->move_to(this->lockers[HD::Auto], alarm_x, alarm_y, GraphletAnchor::LB, 0.0F, -vinset);
+			this->master->move_to(this->labels[HD::Auto], this->lockers[HD::Auto], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->master->move_to(this->lockers[HD::Locked], alarm_x, alarm_y, GraphletAnchor::LT, 0.0F, +vinset);
+			this->master->move_to(this->labels[HD::Locked], this->lockers[HD::Locked], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
 		}
 	}
 
@@ -554,7 +547,7 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	this->gdoors12_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor12, plc);
 	this->gdoors35_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor35, plc);
 	this->gdoors67_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor67, plc);
-	this->gdoors17_op = make_group_menu<HDGLOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
+	this->gdoors17_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -608,7 +601,8 @@ void HopperDoorsPage::reflow(float width, float height) {
 }
 
 bool HopperDoorsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<HopperDoorlet*>(g) != nullptr);
+	return ((dynamic_cast<HopperDoorlet*>(g) != nullptr)
+		|| (dynamic_cast<Alarmlet*>(g) != nullptr));
 }
 
 bool HopperDoorsPage::can_select_multiple() {
@@ -617,9 +611,13 @@ bool HopperDoorsPage::can_select_multiple() {
 
 void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
+	auto alarm = dynamic_cast<Credit<Alarmlet, HD>*>(g);
+
 	
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);
+	} else if (alarm != nullptr) {
+		this->device->send_command(DO_hopper_doors_locks_command(alarm->id));
 	}
 }
 

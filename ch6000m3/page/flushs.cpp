@@ -68,6 +68,8 @@ private enum class FS : unsigned int {
 	// anchors used for unnamed corners
 	h3ps, h3sb, h4, h5, h10,
 	h11, h12, h13, h14, h15, h16, h17, h18,
+	lb11, lb12, lb13, lb14, lb15, lb16, lb17, lb18, // left-bottom corner of hopper
+	rb11, rb12, rb13, rb14, rb15, rb16, rb17, rb18, // right-bottom corner of hopper
 	water, room, h5ps, h1sb,
 
 	// anchors used for non-interconnected nodes
@@ -159,6 +161,8 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow water
+			bool ps_okay = (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running);
+			bool sb_okay = (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running);
 			FS h1[] = { FS::h1sb, FS::SBPump };
 			
 			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
@@ -167,23 +171,34 @@ public:
 			this->try_flow_water(FS::HBV01, h1, water_color);
 			this->try_flow_water(FS::HBV02, FS::PSPump, water_color);
 
-			if (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running) {
+			if (ps_okay) {
 				FS h35 [] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
 				FS h3 [] = { FS::h3sb, FS::SBPump };
-				FS h78[] = { FS::HBV08, FS::HBV07 };
 				
 				this->station->append_subtrack(h35, water_color);
 				this->try_flow_water(FS::HBV03, h3, water_color);
-				this->try_flow_water(FS::HBV05, h78, water_color);
+				this->try_flow_water(FS::HBV05, FS::HBV07, FS::HBV08, water_color);
 				this->try_flow_water(FS::HBV07, FS::Port, water_color);
+				this->try_flow_water(FS::HBV08, FS::HBV10, water_color);
 			}
 
-			if (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running) {
-				FS h69[] = { FS::HBV09, FS::HBV06 };
-
+			if (sb_okay) {
 				this->station->append_subtrack(FS::SBPump, FS::HBV04, water_color);
-				this->try_flow_water(FS::HBV04, h69, water_color);
+				this->try_flow_water(FS::HBV04, FS::HBV06, FS::HBV09, water_color);
 				this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
+				this->try_flow_water(FS::HBV09, FS::HBV10, water_color);
+			}
+
+			if (ps_okay || sb_okay) {
+				this->try_flow_water(FS::HBV10, FS::HBV18, water_color);
+
+				for (FS HBV = FS::HBV11; HBV <= FS::HBV18; HBV++) {
+					unsigned int distance = _I(HBV) - _I(FS::HBV11);
+					FS lb = _E(FS, _I(FS::lb11) + distance);
+					FS rb = _E(FS, _I(FS::rb11) + distance);
+
+					this->try_flow_water(HBV, rb, ((HBV == FS::HBV18) ? FS::_ : lb), water_color);
+				}
 			}
 		}
 
@@ -259,14 +274,16 @@ public:
 			float room_height = (6.0F + half_height) * 2.0F;
 			float water_height = room_height - 5.0F;
 			FS hbv = _E(FS, _I(FS::h11) + distance);
+			FS lb = _E(FS, _I(FS::lb11) + distance);
+			FS rb = _E(FS, _I(FS::rb11) + distance);
 
 			pTurtle->move_left(half_width);
 			pTurtle->move_left(gapsize)->move_left(half_width, hbv);
 			pTurtle->move_down(half_height, HBV)->move_down(half_height);
-			pTurtle->jump_right(half_width)->move_left(half_width);
+			pTurtle->jump_right(half_width, rb)->move_left(half_width);
 
 			if (HBV != FS::HBV18) {
-				pTurtle->move_left(half_width)->jump_back(hbv);
+				pTurtle->move_left(half_width, lb)->jump_back(hbv);
 
 				rTurtle->jump_left(gapsize)->move_left()->jump_left(half_width);
 				rTurtle->move_left(hbv)->move_down(room_height);
@@ -285,9 +302,9 @@ public:
 			}
 		}
 		
-		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->hopper_room = this->master->insert_one(new Tracklet<FS>(rTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
 		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
+		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
 
 		{ // load doors
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
@@ -540,10 +557,14 @@ private:
 	}
 
 private:
-	void try_flow_water(FS vid, FS eid, CanvasSolidColorBrush^ color) {
+	void try_flow_water(FS vid, FS eid1, FS eid2, CanvasSolidColorBrush^ color) {
 		switch (this->gvalves[vid]->get_status()) {
 		case GateValveStatus::Open: {
-			this->station->append_subtrack(vid, eid, color);
+			this->station->append_subtrack(vid, eid1, color);
+
+			if (eid2 != FS::_) {
+				this->station->append_subtrack(vid, eid2, color);
+			}
 		}
 		}
 	}
@@ -560,6 +581,10 @@ private:
 	template<unsigned int N>
 	void try_flow_water(FS vid, FS (&path)[N], CanvasSolidColorBrush^ color) {
 		this->try_flow_water(vid, path, N, color);
+	}
+	
+	void try_flow_water(FS vid, FS eid, CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, eid, FS::_, color);
 	}
 
 // never deletes these graphlets mannually

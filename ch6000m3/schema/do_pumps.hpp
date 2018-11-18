@@ -89,8 +89,14 @@ namespace WarGrey::SCADA {
 		}
 
 		switch (id) {
-		case E::PSFP: index = 721U; break;
-		case E::SBFP: index = 725U; break;
+		case E::PSHPa: index = 737U; break;
+		case E::PSHPb: index = 741U; break;
+		case E::SBHPa: index = 745U; break;
+		case E::SBHPb: index = 749U; break;
+		case E::PSUWP1: index = 753U; break;
+		case E::PSUWP2: index = 757U; break;
+		case E::SBUWP1: index = 761U; break;
+		case E::SBUWP2: index = 765U; break;
 		}
 
 		return index + offset;

@@ -7,10 +7,14 @@
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/device/overflowlet.hpp"
+#include "graphlet/buttonlet.hpp"
 
 #include "schema/ai_metrics.hpp"
 
+#include "schema/di_doors.hpp"
+
 #include "schema/do_devices.hpp"
+#include "schema/do_doors.hpp"
 
 #include "decorator/page.hpp"
 
@@ -35,6 +39,7 @@ private enum DLMode { WindowUI = 0, Dashboard };
 private enum class DLTS { EarthWork, Vessel, Loading, Displacement, _ };
 
 private enum class DLOFOperation { Up, Down, Stop, Auto, _ };
+private enum class DLHDCCommand { OpenDoorCheck, CloseDoorCheck, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -148,6 +153,11 @@ public:
 		this->set_cylinder(DL::Vessel, DLTS::Vessel, DBD(DB2, vessel_value));
 	}
 
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		DI_hopper_doors_checks_button(this->hdchecks[DLHDCCommand::OpenDoorCheck], DB205);
+		DI_hopper_doors_checks_button(this->hdchecks[DLHDCCommand::CloseDoorCheck], DB205);
+	}
+
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -183,6 +193,8 @@ public:
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
 		this->load_dimension(this->dimensions, DL::Overflow, "meter");
+
+		this->load_buttons(this->hdchecks);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -223,6 +235,14 @@ public:
 			this->reflow_dimension(this->dimensions, DL::sbSternHeight, 0.0F, 1.0F, GraphletAnchor::LB, yoff, -yoff);
 
 			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, -xoff);
+		}
+
+		{ // reflow buttons
+			IGraphlet* target = this->dimensions[DL::HopperHeight];
+			
+			gapsize = vinset * 1.0F;
+			this->master->move_to(this->hdchecks[DLHDCCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
+			this->master->move_to(this->hdchecks[DLHDCCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
 		}
 	}
 
@@ -268,6 +288,13 @@ private:
 		this->load_dimension(this->dimensions, this->labels, id, unit);
 	}
 
+	template<class B, typename CMD>
+	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
+		}
+	}
+
 private:
 	template<class C, typename E>
 	void reflow_cylinders(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds
@@ -309,6 +336,7 @@ private: // never delete these graphlets manually.
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
 	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
+	std::map<DLHDCCommand, Credit<Buttonlet, DLHDCCommand>*> hdchecks;
 	TimeSerieslet<DLTS>* timeseries;
 	OverflowPipelet* overflowpipe;
 
@@ -382,13 +410,19 @@ void DraughtsPage::reflow(float width, float height) {
 }
 
 bool DraughtsPage::can_select(IGraphlet* g) {
-	return (dynamic_cast<OverflowPipelet*>(g) != nullptr);
+	auto hdchecker = dynamic_cast<Buttonlet*>(g);
+
+	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
+		|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
 }
 
 void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto overflow = dynamic_cast<OverflowPipelet*>(g);
+	auto hdchecker = dynamic_cast<Credit<Buttonlet, DLHDCCommand>*>(g);
 
 	if (overflow != nullptr) {
 		menu_popup(this->overflow_op, g, local_x, local_y);
+	} else if (hdchecker != nullptr) {
+		this->device->send_command(DO_hopper_doors_checks_command(hdchecker->id));
 	}
 }
