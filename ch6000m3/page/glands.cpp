@@ -43,7 +43,7 @@ private enum GPMode { WindowUI = 0, Dashboard };
 private enum class SWPOperation { Start, Stop, Reset, Auto, _ };
 private enum class GPVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 
-static CanvasSolidColorBrush^ slurry = Colours::Green;
+static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 // WARNING: order matters
 private enum class GP : unsigned int {
@@ -52,8 +52,8 @@ private enum class GP : unsigned int {
 	PSHPa, PSHPb, SBHPa, SBHPb, PSUWP1, PSUWP2, SBUWP1, SBUWP2,
 
 	// Manual Valves
-	DGV3, DGV4, DGV5, DGV6, DGV1, DGV2, DGV9, DGV10,
-	DGV12, DGV11, DGV13, DGV14, DGV15, DGV16, DGV17, DGV18, DGV19, DGV20,
+	DGV3, DGV4, DGV5, DGV6,
+	DGV12, DGV11, DGV13, DGV14, DGV15, DGV16,
 	DGV7, DGV44, DGV45, DGV8,
 	
 	// Labels
@@ -136,22 +136,23 @@ public:
 		GP ps_hopper_short_path[] = { GP::DGV14, GP::d44, GP::DGV8, GP::PSHP };
 		GP sb_hopper_short_path[] = { GP::DGV15, GP::d45, GP::DGV7, GP::SBHP };
 		GP sb_hopper_long_path[] = { GP::DGV16, GP::sbhp, GP::d45, GP::DGV7, GP::SBHP };
-		GP ps_underwater_path[] = { GP::DGV17, GP::psuwp, GP::d46, GP::PSUWP };
-		GP sb_underwater_path[] = { GP::DGV20, GP::sbuwp, GP::d47, GP::SBUWP };
+		GP ps_underwater_path[] = { GP::PSUWP1, GP::psuwp, GP::d46, GP::PSUWP };
+		GP sb_underwater_path[] = { GP::SBUWP2, GP::sbuwp, GP::d47, GP::SBUWP };
 
-		this->station->append_subtrack(GP::Hatch, GP::DGV20, slurry);
+		this->station->append_subtrack(GP::Hatch, GP::DGV16, water_color);
+		this->station->append_subtrack(GP::Sea, GP::SBUWP2, water_color);
 
-		this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, slurry);
-		this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, slurry);
-		this->try_flow_water(GP::PSHPa, ps_hopper_long_path, slurry);
-		this->try_flow_water(GP::PSHPb, ps_hopper_short_path, slurry);
-		this->try_flow_water(GP::SBHPa, sb_hopper_short_path, slurry);
-		this->try_flow_water(GP::SBHPb, sb_hopper_long_path, slurry);
+		this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, water_color);
+		this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, water_color);
+		this->try_flow_water(GP::PSHPa, ps_hopper_long_path, water_color);
+		this->try_flow_water(GP::PSHPb, ps_hopper_short_path, water_color);
+		this->try_flow_water(GP::SBHPa, sb_hopper_short_path, water_color);
+		this->try_flow_water(GP::SBHPb, sb_hopper_long_path, water_color);
 
-		this->try_flow_water(GP::PSUWP1, ps_underwater_path, slurry);
-		this->try_flow_water(GP::PSUWP2, GP::DGV18, GP::PSUWP, slurry);
-		this->try_flow_water(GP::SBUWP1, GP::DGV19, GP::SBUWP, slurry);
-		this->try_flow_water(GP::SBUWP2, sb_underwater_path, slurry);
+		this->try_flow_water(GP::PSUWP1, ps_underwater_path, water_color);
+		this->try_flow_water(GP::PSUWP2, GP::PSUWP2, GP::PSUWP, water_color);
+		this->try_flow_water(GP::SBUWP1, GP::PSUWP1, GP::SBUWP, water_color);
+		this->try_flow_water(GP::SBUWP2, sb_underwater_path, water_color);
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -159,14 +160,14 @@ public:
 
 public:
 	bool can_execute(SWPOperation cmd, Credit<HydraulicPumplet, GP>* pump, PLCMaster* plc, bool acc_executable) override {
-		bool executable = plc->connected();
+		//bool executable = plc->connected();
 
-		switch (pump->id) {
-		case GP::PSFP: case GP::SBFP: executable = executable && gate_flushing_pump_command_executable(pump, cmd, true); break;
-		default: executable = executable && gland_pump_command_executable(pump, cmd, true); break;
-		}
+		//switch (pump->id) {
+		//case GP::PSFP: case GP::SBFP: executable = executable && gate_flushing_pump_command_executable(pump, cmd, true); break;
+		//default: executable = executable && gland_pump_command_executable(pump, cmd, true); break;
+		//}
 
-		return executable;
+		return plc->connected();
 	}
 
 	void execute(SWPOperation cmd, Credit<HydraulicPumplet, GP>* pump, PLCMaster* plc) {
@@ -223,20 +224,20 @@ public:
 
 		pTurtle->jump_down(3)->jump_left(GP::Sea)->move_right();
 
-		pTurtle->move_down(2, GP::d17)->move_right(5, GP::DGV17)->move_right(6, GP::PSUWP1)->move_right(6, GP::DGV1);
+		pTurtle->move_down(2, GP::d17)->move_right(5)->move_right(6, GP::PSUWP1)->move_right(6);
 		pTurtle->move_right(10)->turn_right_down(GP::psuwp)->move_down(3)->turn_down_right()->jump_back(GP::d17);
-		pTurtle->move_down(4, GP::d18)->move_right(5, GP::DGV18)->move_right(6, GP::PSUWP2)->move_right(6, GP::DGV2);
+		pTurtle->move_down(4, GP::d18)->move_right(5)->move_right(6, GP::PSUWP2)->move_right(6);
 		pTurtle->move_right(14, GP::d46)->move_right(9)->move_right(12, GP::PSUWP)->jump_back(GP::d18);
 
-		pTurtle->move_down(5, GP::d19)->move_right(5, GP::DGV19)->move_right(6, GP::SBUWP1)->move_right(6, GP::DGV9);
+		pTurtle->move_down(5, GP::d19)->move_right(5)->move_right(6, GP::SBUWP1)->move_right(6);
 		pTurtle->move_right(14, GP::d47)->move_right(9)->move_right(12, GP::SBUWP)->jump_back(GP::d19);
-		pTurtle->move_down(4, GP::d20)->move_right(5, GP::DGV20)->move_right(6, GP::SBUWP2)->move_right(6, GP::DGV10);
+		pTurtle->move_down(4, GP::d20)->move_right(5)->move_right(6, GP::SBUWP2)->move_right(6);
 		pTurtle->move_right(10)->turn_right_up(GP::sbuwp)->move_up(3)->turn_up_right();
 
 		this->station = this->master->insert_one(new Tracklet<GP>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->to_flushs = this->master->insert_one(new ArrowHeadlet(gheight, 0.0, Colours::Silver));
 		this->sea = this->master->insert_one(new VLinelet(gheight * 2.0F, default_pipe_thickness,
-			slurry, make_dash_stroke(CanvasDashStyle::Dash)));
+			water_color, make_dash_stroke(CanvasDashStyle::Dash)));
 		
 		{ // load devices
 			float radius = resolve_gridsize(gwidth, gheight);
@@ -411,7 +412,7 @@ private:
 private:
 	void try_flow_water(GP pid, GP start, GP end, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_status()) {
-		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
+		case HydraulicPumpStatus::Running: {
 			this->station->append_subtrack(start, end, color);
 		}
 		}
@@ -419,7 +420,7 @@ private:
 
 	void try_flow_water(GP pid, GP* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_status()) {
-		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
+		case HydraulicPumpStatus::Running: {
 			this->station->append_subtrack(path, count, color);
 		}
 		}

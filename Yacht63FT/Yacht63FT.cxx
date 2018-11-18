@@ -73,7 +73,7 @@ protected:
 	}
 };
 
-#include "dirotation.hpp"
+//#include "dirotation.hpp"
 
 private ref class Yacht63FT sealed : public StackPanel {
 public:
@@ -83,7 +83,7 @@ public:
 		this->HorizontalAlignment = ::HorizontalAlignment::Center;
 		this->VerticalAlignment = ::VerticalAlignment::Center;
 
-		auto test = new IRotativeDirectory("ams");
+		//auto test = new IRotativeDirectory("ams");
 	}
 
 public:

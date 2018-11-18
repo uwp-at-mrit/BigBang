@@ -30,16 +30,16 @@ using namespace Windows::UI::Xaml::Controls;
 
 using namespace Microsoft::Graphics::Canvas;
 
-private ref class SCADAUniverse : public UniverseDisplay {
+private ref class DredgerUniverse : public UniverseDisplay {
 public:
-	virtual ~SCADAUniverse() {
+	virtual ~DredgerUniverse() {
 		if (this->device != nullptr) {
 			delete this->device;
 		}
 	}
 
 internal:
-	SCADAUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+	DredgerUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 
 		this->timer = ref new Timer(this, frame_per_second);
@@ -105,7 +105,7 @@ private:
 	int page;
 };
 
-private ref class DashboardUniverse sealed : public SCADAUniverse {
+private ref class DashboardUniverse sealed : public DredgerUniverse {
 public:
 	virtual ~DashboardUniverse() {
 		if (this->page_turner != nullptr) {
@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	DashboardUniverse(Platform::String^ name, unsigned int dbidx) : SCADAUniverse(name) {
+	DashboardUniverse(Platform::String^ name, unsigned int dbidx) : DredgerUniverse(name) {
 		this->page_turner = new PageEventListener(dbidx);
 		this->device->append_confirmation_receiver(this->page_turner);
 	}
@@ -153,7 +153,7 @@ public:
 		} else if (localhost->Equals("192.168.0.12")) {
 			this->universe = ref new DashboardUniverse(name, 624U);
 		} else {
-			this->universe = ref new SCADAUniverse(name);
+			this->universe = ref new DredgerUniverse(name);
 		}
 
 		this->Content = this->universe->canvas;
@@ -201,7 +201,7 @@ private:
 	}
 
 private:
-	SCADAUniverse^ universe;
+	DredgerUniverse^ universe;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

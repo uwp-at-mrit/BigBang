@@ -238,7 +238,7 @@ public:
 
 public:
 	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) override {
-		return hydraulic_pump_command_executable(pump, cmd, true) && plc->connected();
+		return plc->connected();
 	}
 
 	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) override {

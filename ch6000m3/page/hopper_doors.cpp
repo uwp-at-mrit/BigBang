@@ -268,7 +268,7 @@ public:
 
 public:
 	bool can_execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc, bool acc_executable) override {
-		return hopper_door_command_executable(door, cmd, true) && plc->connected();
+		return plc->connected();
 	}
 
 	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc) override {

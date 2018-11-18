@@ -39,7 +39,7 @@ private enum class HSPOperation { Start, Stop, Reset, _ };
 private enum class HSHOperation { Start, Stop, Cancel, Auto, _ };
 
 static CanvasSolidColorBrush^ region_border = Colours::Silver;
-static CanvasSolidColorBrush^ region_background = Colours::make(0x006464);
+static CanvasSolidColorBrush^ region_background = Colours::make(0x2E2E2EU);
 
 // WARNING: order matters
 private enum class LU : unsigned int {

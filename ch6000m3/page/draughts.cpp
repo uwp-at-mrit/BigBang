@@ -262,7 +262,7 @@ private:
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height, double range
 		, unsigned int precision, Platform::String^ unit) {
-		cs[id] = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 0U, precision);
+		cs[id] = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 8U, precision);
 		
 		this->master->insert_one(cs[id], id);
 		this->load_dimension(this->dimensions, this->labels, id, unit);

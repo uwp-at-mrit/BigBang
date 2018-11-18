@@ -8,14 +8,19 @@ namespace WarGrey::SCADA {
 	Windows::Foundation::TimeSpan make_timespan_from_ms(unsigned int ms);
 	Windows::Foundation::TimeSpan make_timespan_from_rate(int rate);
 
+	long long current_milliseconds();
+	double current_inexact_milliseconds();
+	double current_inexact_seconds();
+
 	long long current_seconds();
 	long long current_floor_seconds(long long span_s = day_span_s);
 	long long current_ceiling_seconds(long long span_s = day_span_s);
+	long long time_zone_offset_seconds();
 
 	void sleep(unsigned int ms);
 
-	Platform::String^ make_timestamp(long long utc_s, bool locale);
-	Platform::String^ make_daytimestamp(long long utc_s, bool locale);
+	Platform::String^ make_timestamp_utc(long long utc_s, bool locale);
+	Platform::String^ make_daytimestamp_utc(long long utc_s, bool locale);
 
 	Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);
 

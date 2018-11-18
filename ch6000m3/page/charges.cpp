@@ -173,7 +173,7 @@ public:
 
 public:
 	bool can_execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
-		return gate_valve_command_executable(valve, cmd, true) && plc->connected();
+		return plc->connected();
 	}
 
 	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc) override {

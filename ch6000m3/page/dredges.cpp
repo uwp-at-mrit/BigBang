@@ -108,7 +108,7 @@ static ICanvasBrush^ unchecked_color = Colours::WhiteSmoke;
 static ICanvasBrush^ winch_status_color = Colours::Background;
 static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
 
-static CanvasSolidColorBrush^ slurry = Colours::GreenYellow;
+static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 private class IDredgingSystem : public PLCConfirmation {
 public:
@@ -505,20 +505,20 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow slurry
-			this->station->append_subtrack(DS::D003, DS::SB, slurry);
-			this->station->append_subtrack(DS::D004, DS::PS, slurry);
+			this->station->append_subtrack(DS::D003, DS::SB, water_color);
+			this->station->append_subtrack(DS::D004, DS::PS, water_color);
 
-			this->try_flow_slurry(DS::D003, DS::SBHP, slurry);
-			this->try_flow_slurry(DS::D004, DS::PSHP, slurry);
+			this->try_flow_water(DS::D003, DS::SBHP, water_color);
+			this->try_flow_water(DS::D004, DS::PSHP, water_color);
 
 			if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
 				DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
 				DS d14[] = { DS::d014, DS::d14, DS::PSHP };
 				DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
 
-				this->try_flow_slurry(DS::D012, d12, slurry);
-				this->try_flow_slurry(DS::D014, d14, slurry);
-				this->try_flow_slurry(DS::D016, d16, slurry);
+				this->try_flow_water(DS::D012, d12, water_color);
+				this->try_flow_water(DS::D014, d14, water_color);
+				this->try_flow_water(DS::D016, d16, water_color);
 			}
 
 			if (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running) {
@@ -526,9 +526,9 @@ public:
 				DS d13[] = { DS::d013, DS::d13, DS::SBHP };
 				DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
 
-				this->try_flow_slurry(DS::D011, d11, slurry);
-				this->try_flow_slurry(DS::D013, d13, slurry);
-				this->try_flow_slurry(DS::D015, d15, slurry);
+				this->try_flow_water(DS::D011, d11, water_color);
+				this->try_flow_water(DS::D013, d13, water_color);
+				this->try_flow_water(DS::D015, d15, water_color);
 			}
 		}
 
@@ -885,7 +885,7 @@ private:
 	}
 
 private:
-	void try_flow_slurry(DS vid, DS eid, CanvasSolidColorBrush^ color) {
+	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
 			this->station->append_subtrack(vid, eid, color);
@@ -893,7 +893,7 @@ private:
 		}
 	}
 
-	void try_flow_slurry(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
 		case GateValveStatus::Open: {
 			this->station->append_subtrack(vid, path[0], color);
@@ -903,8 +903,8 @@ private:
 	}
 
 	template<unsigned int N>
-	void try_flow_slurry(DS vid, DS (&path)[N], CanvasSolidColorBrush^ color) {
-		this->try_flow_slurry(vid, path, N, color);
+	void try_flow_water(DS vid, DS (&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, path, N, color);
 	}
 
 private: // never delete these graphlets manually.
@@ -1094,7 +1094,7 @@ public:
 
 public:
 	bool can_execute(DSGOperation cmd, Credit<Gantrylet, DS>* gantry, PLCMaster* plc, bool acc_executable) override {
-		return gantry_command_executable(gantry, cmd, true) && plc->connected();
+		return plc->connected();
 	}
 
 	void execute(DSGOperation cmd, Credit<Gantrylet, DS>* gantry, PLCMaster* plc) override {

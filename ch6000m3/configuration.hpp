@@ -31,9 +31,9 @@ static const unsigned int gland_pump_rpm_range = 1500U;
 static const double hopper_height_range = 13.85;
 static const double earthwork_range = 10000.0;
 static const double vessel_range = 10000.0;
-static const double loading_range = 14000.0;
+static const double loading_range = 15000.0;
 static const double displacement_range = 30000.0;
-static const double compensator_range = 4.0;
+static const double compensator_range = 3.0;
 
 static const float ps_drag_trunnion_gapsize = 1.845F;
 static const float ps_drag_trunnion_length = 3.61F;

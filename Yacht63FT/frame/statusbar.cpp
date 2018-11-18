@@ -91,7 +91,7 @@ public:
 			this->alarm = new OptionBitmaplet("Alarm", this->master->sketch_to_application_width(sketch_status_alarm_width));
 			this->alarm->set_value(true);
 
-			this->clock = new Labellet(this->make_timestamp("0000-00-00 00:00:00"), this->fonts[1], screen_status_parameter_color);
+			this->clock = new Labellet(this->make_timestamp_utc("0000-00-00 00:00:00"), this->fonts[1], screen_status_parameter_color);
 			this->ipv4 = new Labellet(this->make_ipv4("0.0.0.0"), this->fonts[1], screen_status_parameter_color);
 
 			this->master->insert(this->alarm, this->master->sketch_to_application_width(sketch_status_alarm_x), py, GraphletAnchor::LC);
@@ -103,7 +103,7 @@ public:
 public:
 	void on_timestamp_changed(Platform::String^ timestamp) override {
 		this->master->enter_critical_section();
-		this->clock->set_text(this->make_timestamp(timestamp));
+		this->clock->set_text(this->make_timestamp_utc(timestamp));
 		this->master->leave_critical_section();
 	}
 
@@ -128,7 +128,7 @@ public:
 	}
 
 private:
-	Platform::String^ make_timestamp(Platform::String^ ts) {
+	Platform::String^ make_timestamp_utc(Platform::String^ ts) {
 		return speak(":clock:") + ": " + ts;
 	}
 
