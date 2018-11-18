@@ -86,7 +86,7 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 }
 
 void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
-	long long now = current_seconds() + time_zone_offset_seconds();
+	long long now = current_seconds() - time_zone_utc_bias_seconds();
 	long long next_start = this->series.start + this->series.span;
 
 	if (now > next_start) {
@@ -182,9 +182,8 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& s) {
 	long long delta = this->series.span / (this->series.step + 1);
 	float x = s.haxes_thickness * 0.5F;
 	float y = this->height - s.border_thickness;
+	long long now = current_seconds() - time_zone_utc_bias_seconds();
 	TextExtent mark_te;
-
-	long long now = current_seconds() + time_zone_offset_seconds();
 
 	for (unsigned int i = 0; i <= this->series.step + 1; i++) {
 		float xthis = x + interval * float(i);
@@ -221,7 +220,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	if (this->get_status() == TimeSeriesStatus::Realtime) {
 		Rect haxes_box = this->haxes->ComputeBounds();
-		long long now = current_seconds() + time_zone_offset_seconds();
+		long long now = current_seconds() - time_zone_utc_bias_seconds();
 		float percentage = std::fminf(float(now - this->series.start) / float(this->series.span), 1.0F);
 		float xmin = this->width - haxes_box.Width;
 		
@@ -269,7 +268,7 @@ void ITimeSerieslet::fill_this_position(long long time, double v, double* x, dou
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	static auto linestyle = make_roundcap_stroke_style();
 	TimeSeriesStyle s = this->get_style();
-	long long now = current_seconds() + time_zone_offset_seconds();
+	long long now = current_seconds() - time_zone_utc_bias_seconds();
 	long long next_start = this->series.start + this->series.span;
 	double px, py;
 

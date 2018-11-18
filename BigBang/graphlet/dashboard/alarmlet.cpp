@@ -59,8 +59,7 @@ void Alarmlet::construct() {
 	float body_y = light_lradius + light_thickness;
 
 	CanvasGeometry^ shadow = short_arc(cx, body_y - shadow_radius,
-		cx + shadow_radius, body_y,
-		shadow_radius, shadow_radius,
+		cx + shadow_radius, body_y, shadow_radius, shadow_radius,
 		light_thickness, light_style);
 
 	CanvasGeometry^ parts[] = {

@@ -192,4 +192,10 @@
   <data name="SB7" xml:space="preserve">
     <value>#14</value>
   </data>
+  <data name="Locked" xml:space="preserve">
+    <value>全部泥门锁紧</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动锁紧激活</value>
+  </data>
 </root>

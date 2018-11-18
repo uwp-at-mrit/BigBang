@@ -19,7 +19,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ compensator_default_color = Colours::Yellow;
 static CanvasSolidColorBrush^ compensator_default_pulley_color = Colours::DarkGray;
-static CanvasSolidColorBrush^ compensator_default_progress_color = Colours::Gray;
+static CanvasSolidColorBrush^ compensator_default_progress_color = Colours::DodgerBlue;
 
 /*************************************************************************************************/
 Compensatorlet::Compensatorlet(double range, float width, float height, unsigned int step
@@ -77,7 +77,7 @@ void Compensatorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	float py = y + this->anchor_py + (this->pulley_size + this->thickness) * 0.5F;
 	
 	ds->FillGeometry(this->base, bx, by, this->color);
-	ds->DrawGeometry(this->base, bx, by, this->progress_color, this->thickness);
+	ds->DrawGeometry(this->base, bx, by, this->pulley_color, this->thickness);
 	ds->DrawGeometry(this->pulley, cx, y + this->anchor_py, this->pulley_color, this->thickness);
 	ds->DrawCachedGeometry(this->progress, cx - this->progress_width * 0.5F, py, this->progress_color);
 

@@ -5,6 +5,8 @@
 #include "menu.hpp"
 
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
+
+#include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
 #include "schema/ai_metrics.hpp"
@@ -47,7 +49,7 @@ private enum class HDGLOperation { Open, Stop, Close, Lock, AutoLock, _ };
 // WARNING: order matters
 private enum class HD : unsigned int {
 	//labels
-	Port, Starboard,
+	Port, Starboard, Auto, Locked,
 	
 	// Cylinders
 	EarthWork, Vessel, HopperHeight, Loading, Displacement,
@@ -189,6 +191,7 @@ public:
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
+		this->locker_style.color = Colours::Green;
 	}
 
 public:
@@ -259,6 +262,9 @@ public:
 		DI_hopper_door(this->hdoors[HD::SB5], DB4, bottom_door_SB5_closed, DB205, bottom_door_SB5_status);
 		DI_hopper_door(this->hdoors[HD::SB6], DB4, bottom_door_SB6_closed, DB205, bottom_door_SB6_status);
 		DI_hopper_door(this->hdoors[HD::SB7], DB4, bottom_door_SB7_closed, DB205, bottom_door_SB7_status);
+
+		DI_hopper_doors_auto_locking(this->lockers[HD::Auto], DB205);
+		DI_hopper_doors_locked(this->lockers[HD::Locked], DB205);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -313,6 +319,8 @@ public:
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
 		this->load_dimensions(this->dimensions, HD::BowDraft, HD::SternDraft, "meter", this->plain_style);
 
+		this->load_alarms(this->lockers, HD::Auto, HD::Locked, vinset * 1.618F);
+		
 		{ // load captions
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 
@@ -351,6 +359,11 @@ public:
 			this->master->move_to(this->dimensions[HD::Trim], x, y, GraphletAnchor::LT, 0.0F, +off);
 			this->master->move_to(this->dimensions[HD::E], this->dimensions[HD::Trim], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +off);
 
+			this->master->move_to(this->lockers[HD::Auto], this->dimensions[HD::D], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
+			this->master->move_to(this->labels[HD::Auto], this->lockers[HD::Auto], GraphletAnchor::RC, GraphletAnchor::LC, off);
+			this->master->move_to(this->lockers[HD::Locked], this->dimensions[HD::E], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vinset);
+			this->master->move_to(this->labels[HD::Locked], this->lockers[HD::Locked], GraphletAnchor::RC, GraphletAnchor::LC, off);
+
 			this->decorator->fill_ship_anchor(1.0F, 0.5F, &x, &y, true);
 			this->master->move_to(this->dimensions[HD::BowDraft], x, y, GraphletAnchor::RC, -off);
 
@@ -358,8 +371,6 @@ public:
 			this->master->move_to(this->dimensions[HD::SternDraft], x, y, GraphletAnchor::RC, -off);
 		}
 	}
-
-	public:
 
 public:
 	bool doors_selected(HD ids[], unsigned int count, int tolerance) {
@@ -425,6 +436,18 @@ private:
 
 		this->load_label(this->labels, id, Colours::Silver, this->label_font);
 		this->dimensions[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
+	}
+
+	template<typename E>
+	void load_alarms(std::map<E, Credit<Alarmlet, E>*>& as, E id0, E idn, float size) {
+		for (E id = id0; id <= idn; id++) {
+			auto alarm = new Credit<Alarmlet, E>(size);
+
+			as[id] = this->master->insert_one(alarm, id);
+			alarm->set_style(AlarmStatus::Alert, this->locker_style);
+
+			this->load_label(this->labels, id, Colours::Silver, this->label_font);
+		}
 	}
 
 	template<typename E>
@@ -505,9 +528,11 @@ private: // never delete these graphlets manually.
 	std::map<HD, Credit<Doorlet, HD>*> doors;
 	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
 	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
+	std::map<HD, Credit<Alarmlet, HD>*> lockers;
 
 private:
 	CanvasTextFormat^ label_font;
+	AlarmStyle locker_style;
 	DimensionStyle percentage_style;
 	DimensionStyle metrics_style;
 	DimensionStyle pump_style;

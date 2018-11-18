@@ -345,7 +345,7 @@ protected:
 		float suction_depth = DBD(db2, pidx + 0U);
 		float intermediate_angle = DBD(db2, address->intermediate_angle);
 		float draghead_angle = DBD(db2, address->draghead_angle);
-		float visor_angle = DBD(db2, address->visor_angle) - 90.0F;
+		float visor_angle = DBD(db2, address->visor_angle);
 
 		ujoints[0] = DBD_3(db2, pidx + 12U);
 		ujoints[1] = DBD_3(db2, pidx + 24U);
@@ -358,7 +358,7 @@ protected:
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
 		this->dragheads[vid]->set_position(suction_depth, ujoints[1], draghead, visor_angle);
 		
-		this->degrees[vid]->set_value(visor_angle + 90.0F, GraphletAnchor::CC);
+		this->degrees[vid]->set_value(visor_angle, GraphletAnchor::CC);
 		this->degrees[eid]->set_value(this->dragheads[vid]->get_visor_earth_degrees(), GraphletAnchor::CC);
 	}
 

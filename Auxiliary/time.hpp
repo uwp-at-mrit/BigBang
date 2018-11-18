@@ -15,7 +15,7 @@ namespace WarGrey::SCADA {
 	long long current_seconds();
 	long long current_floor_seconds(long long span_s = day_span_s);
 	long long current_ceiling_seconds(long long span_s = day_span_s);
-	long long time_zone_offset_seconds();
+	long long time_zone_utc_bias_seconds();
 
 	void sleep(unsigned int ms);
 

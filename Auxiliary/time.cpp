@@ -3,6 +3,7 @@
 #include <ctime>
 #include <thread>
 #include <Windows.h>
+#include <timezoneapi.h>
 
 #include "time.hpp"
 #include "box.hpp"
@@ -10,7 +11,6 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
-using namespace Windows::Globalization;
 using namespace Windows::System::Diagnostics;
 
 static const long long l00ns_ms = 1000LL * 10LL;
@@ -87,8 +87,12 @@ long long WarGrey::SCADA::current_ceiling_seconds(long long span) {
 	return now + (span - remainder);
 }
 
-long long WarGrey::SCADA::time_zone_offset_seconds() {
-	return 8 * hour_span_s;
+long long WarGrey::SCADA::time_zone_utc_bias_seconds() {
+	TIME_ZONE_INFORMATION tz;
+
+	GetTimeZoneInformation(&tz);
+
+	return tz.Bias * minute_span_s;
 }
 
 /**************************************************************************************************/

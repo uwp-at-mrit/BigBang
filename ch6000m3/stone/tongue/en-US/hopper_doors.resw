@@ -192,4 +192,10 @@
   <data name="SB7" xml:space="preserve">
     <value>#14</value>
   </data>
+  <data name="Locked" xml:space="preserve">
+    <value>Doors Locked</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto Looking</value>
+  </data>
 </root>
