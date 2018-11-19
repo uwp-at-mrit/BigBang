@@ -53,6 +53,11 @@ static const float sb_drag_head_width = 4.03F;
 static const float sb_drag_head_length = 2.54F;
 static const float sb_drag_head_compensation = 0.5F;
 
+static const double drag_visor_degrees_min = -10.0;
+static const double drag_visor_degrees_max = 60.0;
+static const double drag_arm_degrees_min = 0.0;
+static const double drag_arm_degrees_max = 60.0;
+
 static const unsigned int default_ps_color = 0xFF0000;
 static const unsigned int default_sb_color = 0x008000;
 static const unsigned int default_pipe_color = 0xC0C0C0;

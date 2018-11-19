@@ -18,6 +18,10 @@ namespace WarGrey::SCADA {
 		float head_length;
 		float head_height;
 		float head_compensation;
+		double visor_degrees_min;
+		double visor_degrees_max;
+		double arm_degrees_min;
+		double arm_degrees_max;
 	};
 
 	float drag_depth(WarGrey::SCADA::DragInfo& info);
@@ -97,7 +101,8 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
-		double drag_arm_angle; // against earth
+		double angle[DRAG_SEGMENT_MAX_COUNT];
+		double drag_arm_angle;
 		float drag_length;
 
 	protected: // graphlets 2D coordinates
@@ -194,9 +199,7 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	private class DragHeadlet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
-		DragHeadlet(float radius, unsigned int color,
-			float depth_range = 60.0F, double visor_range = 60.0, double arm_range = 60.0,
-			float thickness = 2.0F,
+		DragHeadlet(WarGrey::SCADA::DragInfo& info, float radius, unsigned int color, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_pointer_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_depth_color = nullptr,
@@ -244,10 +247,9 @@ namespace WarGrey::SCADA {
 		float depth_x;
 
 	private:
+		WarGrey::SCADA::DragInfo info;
 		float depth_interval;
 		float depth_range;
-		double visor_range;
-		double arm_range;
 		double offset;
 		float radius;
 		float thickness;

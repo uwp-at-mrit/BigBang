@@ -127,29 +127,45 @@ namespace WarGrey::SCADA {
 
 	/************************************************************************************************/
 	template<class S>
-	void DI_gland_pump(S* target, bool underwater, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
-		bool ready = false;
-		
-		if (underwater) {
-			target->set_remote_control(DBX(db4, idx_p1 - 1));
-			ready = DBX(db4, idx_p1 + 0);
-		} else {
-			target->set_remote_control(DBX(db4, idx_p1 + 0));
-			ready = DBX(db4, idx_p1 - 1);
-		}
+	void DI_hopper_gland_pump(S* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
+		target->set_remote_control(DBX(db4, idx_p1 + 0U));
 
-		if (ready) {
-			target->set_status(HydraulicPumpStatus::Ready);
-		} else if (DBX(db4, idx_p1 + 1)) {
+		if (DBX(db4, idx_p1 + 1U)) {
 			target->set_status(HydraulicPumpStatus::Running);
-		} else if (DBX(db4, idx_p1 + 2)) {
+		} else if (DBX(db4, idx_p1 + 2U)) {
 			target->set_status(HydraulicPumpStatus::Broken);
+		} else if (DBX(db4, idx_p1 - 1U)) {
+			target->set_status(HydraulicPumpStatus::Ready);
 		} else {
-			target->set_status(DBX(db205, idx205_p1 - 1), HydraulicPumpStatus::Starting);
-			target->set_status(DBX(db205, idx205_p1 + 0), HydraulicPumpStatus::Stopping);
+			target->set_status(DBX(db205, idx205_p1 - 1U), HydraulicPumpStatus::Starting);
+			target->set_status(DBX(db205, idx205_p1 + 0U), HydraulicPumpStatus::Stopping);
 			//target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Reset);
-			target->set_status(DBX(db205, idx205_p1 + 2), HydraulicPumpStatus::Unstartable);
-			target->set_status(DBX(db205, idx205_p1 + 3), HydraulicPumpStatus::Unstoppable);
+			target->set_status(DBX(db205, idx205_p1 + 2U), HydraulicPumpStatus::Unstartable);
+			target->set_status(DBX(db205, idx205_p1 + 3U), HydraulicPumpStatus::Unstoppable);
+
+			// the rest 3 are implied or not used
+			//target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StartReady);
+			//target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::StopReady);
+			//target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Stopped);
+		}
+	}
+
+	template<class S>
+	void DI_underwater_gland_pump(S* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
+		target->set_remote_control(DBX(db4, idx_p1 - 1U));
+		
+		if (DBX(db4, idx_p1 + 1U)) {
+			target->set_status(HydraulicPumpStatus::Running);
+		} else if (DBX(db4, idx_p1 + 2U)) {
+			target->set_status(HydraulicPumpStatus::Broken);
+		} else if (DBX(db4, idx_p1 + 0U)) {
+			target->set_status(HydraulicPumpStatus::Ready);
+		} else {
+			target->set_status(DBX(db205, idx205_p1 - 1U), HydraulicPumpStatus::Starting);
+			target->set_status(DBX(db205, idx205_p1 + 0U), HydraulicPumpStatus::Stopping);
+			//target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Reset);
+			target->set_status(DBX(db205, idx205_p1 + 2U), HydraulicPumpStatus::Unstartable);
+			target->set_status(DBX(db205, idx205_p1 + 3U), HydraulicPumpStatus::Unstoppable);
 
 			// the rest 3 are implied or not used
 			//target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StartReady);

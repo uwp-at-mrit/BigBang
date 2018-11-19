@@ -5,9 +5,6 @@ namespace WarGrey::SCADA {
 	static unsigned int left_shifting_command  = 559U;
 	static unsigned int right_shifting_command = 560U;
 
-	static unsigned int close_all_butterfly_valves = 303U;
-	static unsigned int stop_all_butterfly_valves = 806U;
-
 	template<typename OP>
 	uint16 DO_water_pump_group_command(OP cmd) {
 		uint16 index = 0U;

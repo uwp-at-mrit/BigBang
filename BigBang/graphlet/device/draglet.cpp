@@ -602,18 +602,17 @@ float2 DragXZlet::space_to_local(float3& position) {
 }
 
 /*************************************************************************************************/
-DragHeadlet::DragHeadlet(float radius, unsigned int color, float depth_range, double visor_range, double arm_range
-	, float thickness, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
-	: radius(std::fabsf(radius)), thickness(thickness), sign((radius < 0.0F) ? 1.0F : -1.0F), precision(2U)
-	, depth_interval(10.0F), visor_range(visor_range), arm_range(arm_range), offset(30.0)
-	, visor_color(Colours::make(color))
+DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, float thickness
+	, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
+	: info(info), radius(std::fabsf(radius)), sign((radius < 0.0F) ? 1.0F : -1.0F), thickness(thickness)
+	, precision(2U), depth_interval(10.0F), offset(30.0), visor_color(Colours::make(color))
 	, body_color(bcolor == nullptr ? drag_default_head_color : bcolor)
 	, angle_pointer_color(acolor == nullptr ? drag_default_angle_pointer_color : acolor)
 	, suction_pointer_color(acolor == nullptr ? drag_default_suction_depth_pointer_color : sdcolor)
 	, draghead_pointer_color(ddcolor == nullptr ? drag_default_draghead_depth_pointer_color : ddcolor)
 	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
 	this->pointer_style = make_dash_stroke(CanvasDashStyle::Dash);
-	this->depth_range = std::ceilf(depth_range / depth_interval) * depth_interval;
+	this->depth_range = std::ceilf(drag_depth(info) / depth_interval) * depth_interval;
 }
 
 void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
@@ -632,11 +631,11 @@ void DragHeadlet::construct() {
 	float vradius = this->radius * 0.618F;
 	unsigned int depth_step = ((unsigned int)std::round(this->depth_range / depth_interval)) + 1;
 	double adeg0 = drag_adjusted_angle(0.0, this->sign);
-	double adegn = drag_adjusted_angle(this->arm_range, this->sign);
-	double vdeg0 = drag_adjusted_angle(this->offset, this->sign);
+	double adegn = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
+	double vdeg0 = drag_adjusted_angle(0.0, this->sign);
 	double vdegn = drag_adjusted_angle(drag_visor_end_angle, this->sign);
-	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, 0.0, this->arm_range, 0U, this->thickness, &ametrics, 0U);
-	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, 0.0, this->visor_range, 0U, this->thickness, &vmetrics, 0U);
+	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, this->info.arm_degrees_min, this->info.arm_degrees_max, 0U, this->thickness, &ametrics);
+	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, this->info.visor_degrees_min, this->info.visor_degrees_max, 0U, this->thickness, &vmetrics);
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
@@ -690,11 +689,12 @@ void DragHeadlet::set_position(float suction_depth, float3& last_ujoint, float3&
 
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	float visor_length = this->radius - this->translate_x;
-	double visor_pointer_range = drag_visor_end_angle - this->offset;
+	double visor_range = this->info.visor_degrees_max - this->info.visor_degrees_min;
+	double visor_pointer_range = drag_visor_end_angle;
 	double visor_earth_angle = (visor_angle - arm_angle);
 
 	if (force || (this->visor_earth_degrees != visor_earth_angle)) {
-		double visor_degrees = drag_adjusted_angle(visor_earth_angle / this->visor_range * visor_pointer_range + this->offset, this->sign);
+		double visor_degrees = drag_adjusted_angle(visor_earth_angle / visor_range * visor_pointer_range + this->offset, this->sign);
 
 		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_angle, 0.0F, this->sign));
 		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_degrees, this->arrow_radius, this->pointer_style));

@@ -2,6 +2,12 @@
 
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
+	static unsigned int close_all_gate_valves = 319U;
+	static unsigned int stop_all_gate_valves = 805U;
+
+	static unsigned int close_all_butterfly_valves = 303U;
+	static unsigned int stop_all_butterfly_valves = 806U;
+
 	template<typename OP, typename E>
 	uint16 DO_gate_valve_command(OP cmd, E id) {
 		int16 offset = -1;

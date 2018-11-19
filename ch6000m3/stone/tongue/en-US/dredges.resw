@@ -249,13 +249,13 @@
   <data name="underwater" xml:space="preserve">
     <value>underwater pump</value>
   </data>
-  <data name="PSEarth" xml:space="preserve">
+  <data name="PSArm" xml:space="preserve">
     <value>PS Drag Arm Angle</value>
   </data>
   <data name="PSVisor" xml:space="preserve">
     <value>PS Visor Angle</value>
   </data>
-  <data name="SBEarth" xml:space="preserve">
+  <data name="SBArm" xml:space="preserve">
     <value>SB Drag Arm Angle</value>
   </data>
   <data name="SBVisor" xml:space="preserve">

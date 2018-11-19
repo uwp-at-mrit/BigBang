@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/buttonlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
@@ -42,6 +43,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 private enum LDMode { WindowUI = 0, Dashboard };
 
 private enum class LDGVOperation { Open, Close, VirtualOpen, VirtualClose, MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat, _ };
+private enum class LDVCommand { CloseGateValves, StopGateValves, _ };
 
 private enum class LDPSHPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
 private enum class LDSBHPOperation { Prepare, Start, Stop, Reset, SBHopper, BothHopper, HPBarge, _ };
@@ -268,6 +270,7 @@ public:
 		pTurtle->jump_back(LD::d1819)->move_right(5, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->load_buttons(this->vbuttons);
 
 		{ // load valves
 			this->load_valve(this->gvalves, this->vlabels, this->captions, LD::D001, radius, 0.0);
@@ -449,6 +452,12 @@ public:
 			this->master->move_to(this->pump_pressures[LD::A], this->pump_pressures[LD::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 			this->master->move_to(this->pump_pressures[LD::H], this->pump_pressures[LD::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
+
+		{ // reflow buttons
+			this->master->move_to(this->vbuttons[LDVCommand::CloseGateValves], width, height - vinset, GraphletAnchor::RB);
+			this->master->move_to(this->vbuttons[LDVCommand::StopGateValves], this->vbuttons[LDVCommand::CloseGateValves],
+				GraphletAnchor::LC, GraphletAnchor::RC);
+		}
 	}
 
 public:
@@ -491,6 +500,13 @@ private:
 			// moter-driven valves' second, catching events first 
 			this->load_valve(gs, ls, cs, id, radius, degrees);
 			ms[id] = this->master->insert_one(new M(mradius, mdegrees, false), id);
+		}
+	}
+
+	template<class B, typename CMD>
+	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
 		}
 	}
 
@@ -553,6 +569,7 @@ private:
 private:
 	Tracklet<LD>* station;
 	std::map<LD, Credit<Labellet, LD>*> captions;
+	std::map<LDVCommand, Credit<Buttonlet, LDVCommand>*> vbuttons;
 	std::map<LD, Credit<HopperPumplet, LD>*> hoppers;
 	std::map<LD, Credit<GateValvelet, LD>*> gvalves;
 	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
@@ -751,16 +768,22 @@ void ChargesPage::reflow(float width, float height) {
 }
 
 bool ChargesPage::can_select(IGraphlet* g) {
+	auto btn = dynamic_cast<Buttonlet*>(g);
+
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
+		|| (dynamic_cast<HopperPumplet*>(g) != nullptr)
+		|| ((btn != nullptr) && (btn->get_status() != ButtonStatus::Disabled)));
 }
 
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, LD>*>(g);
+	auto button = dynamic_cast<Credit<Buttonlet, LDVCommand>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
+	} else if (button != nullptr) {
+		this->device->send_command((button->id == LDVCommand::CloseGateValves) ? close_all_gate_valves : stop_all_gate_valves);
 	} else if (hpump != nullptr) {
 		switch (hpump->id) {
 		case LD::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;

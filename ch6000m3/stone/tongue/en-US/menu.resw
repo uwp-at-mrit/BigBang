@@ -342,16 +342,22 @@
   <data name="I2_2" xml:space="preserve">
     <value>Indenpendent for double</value>
   </data>
-  <data name="CloseAll" xml:space="preserve">
-    <value>Close All Valves</value>
+  <data name="CloseButterFlyValves" xml:space="preserve">
+    <value>Close All ButterFly Valves</value>
   </data>
-  <data name="StopAll" xml:space="preserve">
-    <value>Stop All Valves</value>
+  <data name="StopButterFlyValves" xml:space="preserve">
+    <value>Stop All ButterFly Valves</value>
   </data>
   <data name="LeftShift" xml:space="preserve">
     <value>Left Shift</value>
   </data>
   <data name="RightShift" xml:space="preserve">
     <value>Right Shift</value>
+  </data>
+  <data name="CloseGateValves" xml:space="preserve">
+    <value>Close All Gate Valves</value>
+  </data>
+  <data name="StopGateValves" xml:space="preserve">
+    <value>Stop All Gate Valves</value>
   </data>
 </root>
