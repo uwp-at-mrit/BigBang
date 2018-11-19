@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/buttonlet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/water_pumplet.hpp"
@@ -18,8 +19,11 @@
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
 #include "schema/ai_doors.hpp"
+#include "schema/ai_pumps.hpp"
 #include "schema/ai_water_pumps.hpp"
+
 #include "schema/di_doors.hpp"
+#include "schema/di_pumps.hpp"
 #include "schema/di_valves.hpp"
 #include "schema/di_water_pumps.hpp"
 
@@ -43,6 +47,9 @@ private enum FSMode { WindowUI = 0, Dashboard };
 
 private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
+
+private enum class FSVCommand { CloseAll, StopAll, _ };
+private enum class FSSCommand { LeftShift, RightShift, _ };
 
 private enum class FSPSOperation {
 	Prepare, Start, Stop, Reset,
@@ -69,6 +76,9 @@ private enum class FS : unsigned int {
 	// Pumps
 	PSPump, SBPump,
 
+	// Pump dimensions
+	D, E,
+
 	// Valves
 	HBV01, HBV02, HBV03, HBV08, HBV09, HBV11, HBV12, HBV13, HBV14, HBV15, HBV16, HBV17, HBV18,
 	HBV04, HBV05, HBV06, HBV07, HBV10,
@@ -79,7 +89,7 @@ private enum class FS : unsigned int {
 	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 	
 	// key labels
-	PSSea, SBSea, 
+	PSSea, SBSea,
 
 	_,
 	// anchors used for unnamed corners
@@ -111,6 +121,9 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+		this->pressures[FS::D]->set_value(RealData(DB203, pump_D_pressure), GraphletAnchor::CC);
+		this->pressures[FS::E]->set_value(RealData(DB203, pump_E_pressure), GraphletAnchor::CC);
+
 		this->pressures[FS::HBV04]->set_value(RealData(DB203, sb_water_pump_discharge_pressure), GraphletAnchor::CB);
 		this->flows[FS::HBV04]->set_value(RealData(DB203, sb_water_pump_flow), GraphletAnchor::CT);
 		this->pressures[FS::HBV05]->set_value(RealData(DB203, ps_water_pump_discharge_pressure), GraphletAnchor::CB);
@@ -141,6 +154,9 @@ public:
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
 		DI_water_pump(this->pumps[FS::PSPump], DB4, ps_water_pump_feedback, DB205, ps_water_pump_details);
 		DI_water_pump(this->pumps[FS::SBPump], DB4, sb_water_pump_feedback, DB205, sb_water_pump_details);
+
+		DI_pump_dimension(this->pressures[FS::D], DB4, pump_D_feedback);
+		DI_pump_dimension(this->pressures[FS::E], DB4, pump_E_feedback);
 
 		DI_gate_valve(this->gvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
 		DI_gate_valve(this->gvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);
@@ -176,6 +192,9 @@ public:
 		DI_hopper_door(this->uhdoors[FS::SB5], DB205, upper_door_SB5_status);
 		DI_hopper_door(this->uhdoors[FS::SB6], DB205, upper_door_SB6_status);
 		DI_hopper_door(this->uhdoors[FS::SB7], DB205, upper_door_SB7_status);
+
+		DI_shift_button(this->shifts[FSSCommand::LeftShift], DB205, left_shifting_details);
+		DI_shift_button(this->shifts[FSSCommand::RightShift], DB205, right_shifting_details);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -357,6 +376,11 @@ public:
 			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
 		}
 
+		{ // load buttons
+			this->load_buttons(this->vbuttons);
+			this->load_buttons(this->shifts);
+		}
+
 		{ // load special nodes
 			auto pscolor = Colours::make(default_ps_color);
 			auto sbcolor = Colours::make(default_sb_color);
@@ -379,7 +403,7 @@ public:
 			this->sb_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, dh_radius, gheight,
 					nullptr, sbcolor, default_pipe_thickness));
-			
+
 			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(180.0, nic_radius, default_pipe_thickness, default_pipe_color));
@@ -393,6 +417,8 @@ public:
 			this->load_dimension(this->flows, FS::HBV04, "m3ph");
 			this->load_dimension(this->pressures, FS::HBV05, "bar");
 			this->load_dimension(this->flows, FS::HBV05, "m3ph");
+
+			this->load_dimensions(this->pressures, FS::D, FS::E, "bar");
 		}
 	}
 
@@ -419,6 +445,16 @@ public:
 
 		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, GraphletAnchor::CT);
 		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, GraphletAnchor::CB);
+
+		{ // reflow buttons
+			IGraphlet* shift_target = this->progresses[FS::SB4];
+			
+			this->master->move_to(this->shifts[FSSCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
+			this->master->move_to(this->shifts[FSSCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
+
+			this->master->move_to(this->vbuttons[FSVCommand::CloseAll], this->station, 0.75F, 0.5F, GraphletAnchor::CB);
+			this->master->move_to(this->vbuttons[FSVCommand::StopAll], this->station, 0.75F, 0.5F, GraphletAnchor::CT);
+		}
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 			float ox, oy;
@@ -453,6 +489,9 @@ public:
 			this->station->map_credit_graphlet(this->rpms[FS::PSPump], GraphletAnchor::LT, xoff, ps_oy);
 			this->station->map_credit_graphlet(this->powers[FS::SBPump], GraphletAnchor::LB, xoff);
 			this->station->map_credit_graphlet(this->rpms[FS::SBPump], GraphletAnchor::LT, xoff);
+
+			this->master->move_to(this->pressures[FS::D], this->progresses[FS::PS5], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
+			this->master->move_to(this->pressures[FS::E], this->progresses[FS::PS3], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
 		}
 	}
 
@@ -486,15 +525,16 @@ private:
 		this->load_dimension(this->rpms, id, "rpm");
 	}
 
-	template<class G, typename E>
-	void load_cylinders(std::map<E, G*>& cs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ds
-		, E id0, E idn, float height, double range, Platform::String^ unit) {
-		for (E id = id0; id <= idn; id++) {
-			cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::_, range, height * 0.314F, height), id);
-
-			this->load_label(ls, id, Colours::Silver, this->label_font);
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit), id);
+	template<class B, typename CMD>
+	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
 		}
+	}
+
+	template<class S, typename E>
+	void load_shift(std::map<E, Credit<S, E>*> &ss, E id, float size, double degrees) {
+		ss[id] = this->master->insert_one(new Credit<S, E>(size, degrees, Colours::SpringGreen), id);
 	}
 
 	template<typename E>
@@ -634,6 +674,8 @@ private:
 	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
+	std::map<FSSCommand, Credit<Buttonlet, FSSCommand>*> shifts;
+	std::map<FSVCommand, Credit<Buttonlet, FSVCommand>*> vbuttons;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
@@ -743,20 +785,30 @@ void FlushsPage::reflow(float width, float height) {
 }
 
 bool FlushsPage::can_select(IGraphlet* g) {
+	auto btn = dynamic_cast<Buttonlet*>(g);
+
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<WaterPumplet*>(g) != nullptr));
+		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
+		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
+		|| ((btn != nullptr) && (btn->get_status() != ButtonStatus::Disabled)));
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto wpump = dynamic_cast<Credit<WaterPumplet, FS>*>(g);
+	auto shift = dynamic_cast<Credit<Buttonlet, FSSCommand>*>(g);
+	auto button = dynamic_cast<Credit<Buttonlet, FSVCommand>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
+	} else if (shift != nullptr) {
+		this->device->send_command((shift->id == FSSCommand::LeftShift) ? left_shifting_command : right_shifting_command);
+	} else if (button != nullptr) {
+		this->device->send_command((button->id == FSVCommand::CloseAll) ? close_all_butterfly_valves : stop_all_butterfly_valves);
 	} else if (wpump != nullptr) {
 		switch (wpump->id) {
 		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;

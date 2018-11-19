@@ -342,4 +342,16 @@
   <data name="I2_2" xml:space="preserve">
     <value>左右单冲</value>
   </data>
+  <data name="CloseAll" xml:space="preserve">
+    <value>关闭所有阀</value>
+  </data>
+  <data name="StopAll" xml:space="preserve">
+    <value>停止所有阀</value>
+  </data>
+  <data name="LeftShift" xml:space="preserve">
+    <value>左移</value>
+  </data>
+  <data name="RightShift" xml:space="preserve">
+    <value>右移</value>
+  </data>
 </root>

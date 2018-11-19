@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphlet/symbol/pump/water_pumplet.hpp"
+#include "graphlet/buttonlet.hpp"
 
 namespace WarGrey::SCADA {
 	// DB4, starts from 1
@@ -10,6 +11,9 @@ namespace WarGrey::SCADA {
 	// DB205, starts from 1
 	static unsigned int ps_water_pump_details = 1001U;
 	static unsigned int sb_water_pump_details = 1017U;
+
+	static unsigned int left_shifting_details = 1249U;
+	static unsigned int right_shifting_details = 1250U;
 
 	/************************************************************************************************/
 	template<class H>
@@ -42,5 +46,18 @@ namespace WarGrey::SCADA {
 		//target->set_status(DBX(db205, idx205 + 4U), HopperPumpStatus::StartReady);
 		//target->set_status(DBX(db205, idx205 + 5U), HopperPumpStatus::StopReady);
 		//target->set_status(DBX(db205, idx205 + 6U), HopperPumpStatus::Ready);
+	}
+
+	template<class B>
+	void DI_shift_button(B* target, const uint8* db205, unsigned int idx_p1) {
+		if (DBX(db205, idx_p1 - 1U)) {
+			target->set_status(ButtonStatus::Executing);
+		} else if (DBX(db205, idx_p1 + 1U)) {
+			target->set_status(ButtonStatus::Ready);
+		} else if (DBX(db205, idx_p1 + 3U)) {
+			target->set_status(ButtonStatus::Failed);
+		} else {
+			target->set_status(ButtonStatus::Disabled);
+		}
 	}
 }

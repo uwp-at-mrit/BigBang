@@ -2,8 +2,11 @@
 
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
-	static unsigned int both_shoring  = 315U;
-	static unsigned int both_rainbowing = 318U;
+	static unsigned int left_shifting_command  = 559U;
+	static unsigned int right_shifting_command = 560U;
+
+	static unsigned int close_all_butterfly_valves = 303U;
+	static unsigned int stop_all_butterfly_valves = 806U;
 
 	template<typename OP>
 	uint16 DO_water_pump_group_command(OP cmd) {
@@ -16,7 +19,7 @@ namespace WarGrey::SCADA {
 		case OP::P2_2:  index = 298U; break;
 		case OP::S2_H:  index = 302U; break;
 		case OP::P2_H:  index = 301U; break;
-		case OP::I2_2:  index = 303U; break;
+		case OP::I2_2:  index = 304U; break;
 		}
 
 		return index;

@@ -353,7 +353,7 @@ protected:
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
 		this->dragheads[vid]->set_position(suction_depth, ujoints[1], draghead, visor_angle);
 		
-		this->degrees[vid]->set_value(visor_angle, GraphletAnchor::CC);
+		this->degrees[vid]->set_value(this->dragheads[vid]->get_arm_earth_degrees(), GraphletAnchor::CC);
 		this->degrees[eid]->set_value(this->dragheads[vid]->get_visor_earth_degrees(), GraphletAnchor::CC);
 	}
 
