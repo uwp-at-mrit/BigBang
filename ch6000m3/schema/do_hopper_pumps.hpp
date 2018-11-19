@@ -1,10 +1,8 @@
 #pragma once
 
-#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
-	static unsigned int both_discharge  = 315U;
+	static unsigned int both_shoring  = 315U;
 	static unsigned int both_rainbowing = 318U;
 
 	template<typename OP>
@@ -62,7 +60,7 @@ namespace WarGrey::SCADA {
 		switch (cmd) {
 		case OP::PSDischarge:    index = 313U; break;
 		case OP::PSRainbowing:   index = 316U; break;
-		case OP::BothDischarge:  index = both_discharge; break;
+		case OP::BothDischarge:  index = both_shoring; break;
 		case OP::BothRainbowing: index = both_rainbowing; break;
 		default: index = DO_hopper_pump_common_command(cmd, true, true);
 		}
@@ -77,7 +75,7 @@ namespace WarGrey::SCADA {
 		switch (cmd) {
 		case OP::SBDischarge:    index = 314U; break;
 		case OP::SBRainbowing:   index = 317U; break;
-		case OP::BothDischarge:  index = both_discharge; break;
+		case OP::BothDischarge:  index = both_shoring; break;
 		case OP::BothRainbowing: index = both_rainbowing; break;
 		default: index = DO_hopper_pump_common_command(cmd, false, true);
 		}

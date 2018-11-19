@@ -25,6 +25,7 @@
 
 #include "schema/do_doors.hpp"
 #include "schema/do_valves.hpp"
+#include "schema/do_water_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -42,6 +43,22 @@ private enum FSMode { WindowUI = 0, Dashboard };
 
 private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
+
+private enum class FSPSOperation {
+	Prepare, Start, Stop, Reset,
+	PS_PS, PS_SB, PS_2,
+	S2_PS, S2_SB, S2_2, P2_2, I2_2,
+	PS_H, S2_H, P2_H,
+	_ 
+};
+
+private enum class FSSBOperation {
+	Prepare, Start, Stop, Reset,
+	SB_PS, SB_SB, SB_2,
+	S2_PS, S2_SB, S2_2, P2_2, I2_2,
+	SB_H, S2_H, P2_H,
+	_
+};
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
@@ -79,7 +96,9 @@ private enum class FS : unsigned int {
 private class Flush final
 	: public PLCConfirmation
 	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>
-	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*> {
+	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*>
+	, public IMenuCommand<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>
+	, public IMenuCommand<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*> {
 public:
 	Flush(FlushsPage* master) : master(master) {}
 
@@ -176,10 +195,14 @@ public:
 				FS h3 [] = { FS::h3sb, FS::SBPump };
 				
 				this->station->append_subtrack(h35, water_color);
+				this->nintercs[FS::nic]->set_color(water_color);
+
 				this->try_flow_water(FS::HBV03, h3, water_color);
 				this->try_flow_water(FS::HBV05, FS::HBV07, FS::HBV08, water_color);
 				this->try_flow_water(FS::HBV07, FS::Port, water_color);
 				this->try_flow_water(FS::HBV08, FS::HBV10, water_color);
+			} else {
+				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			}
 
 			if (sb_okay) {
@@ -225,6 +248,23 @@ public:
 	}
 
 public:
+	bool can_execute(FSPSOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(FSPSOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc) override {
+		plc->send_command(DO_ps_water_pump_command(cmd));
+	}
+
+	bool can_execute(FSSBOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(FSSBOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc) override {
+		plc->send_command(DO_sb_water_pump_command(cmd));
+	}
+
+public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
@@ -253,9 +293,9 @@ public:
 		pTurtle->turn_left_down()->move_down(2.5F, FS::SBV3)->move_down(2.5F)->turn_down_left();
 		pTurtle->move_left(10, FS::HBV06)->move_left(10, FS::Starboard)->jump_back(FS::h5);
 
-		pTurtle->move_right(4, FS::HBV05)->move_right(8.5F, FS::nic)->move_right(6.5F)->turn_right_down(FS::h5ps)->move_down(6);
+		pTurtle->move_right(4, FS::HBV05)->move_right(8)->jump_right()->move_right(6)->turn_right_down(FS::h5ps)->move_down(6);
 		pTurtle->turn_down_left(FS::h3ps)->move_left(6)->turn_left_up(FS::PSPump);
-		pTurtle->move_up(4, FS::HBV02)->move_up(2)->jump_up()->move_up(3, FS::SBV2)->move_up(2, FS::PSSea)->jump_back();
+		pTurtle->move_up(4, FS::HBV02)->move_up(2.5F, FS::nic)->move_up(3.5F, FS::SBV2)->move_up(2, FS::PSSea)->jump_back(FS::h3ps);
 
 		pTurtle->turn_right_down()->move_down(2.5F, FS::HBV03)->move_down(2.5F);
 		pTurtle->turn_down_left(FS::h3sb)->move_left(6, FS::SBPump)->jump_back();
@@ -342,7 +382,7 @@ public:
 			
 			for (FS id = FS::nic; id <= FS::nic; id++) {
 				this->nintercs[id] = this->master->insert_one(
-					new Omegalet(-90.0, nic_radius, default_pipe_thickness, water_color));
+					new Omegalet(180.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
 
@@ -374,7 +414,7 @@ public:
 			 * Lines are brush-based shape, they do not have stroke, `Shapelet` does not know how width they are,
 			 * thus, we have to do aligning on our own.
 			 */
-			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
+			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::CB, 0.0F, default_pipe_thickness * 0.5F);
 		}
 
 		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, GraphletAnchor::CT);
@@ -627,6 +667,8 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>(dashboard, plc);
 	this->upper_door_op = make_menu<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*>(dashboard, plc);
+	this->ps_pump_op = make_menu<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
+	this->sb_pump_op = make_menu<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -702,16 +744,23 @@ void FlushsPage::reflow(float width, float height) {
 
 bool FlushsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr));
+		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+		|| (dynamic_cast<WaterPumplet*>(g) != nullptr));
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
+	auto wpump = dynamic_cast<Credit<WaterPumplet, FS>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
+	} else if (wpump != nullptr) {
+		switch (wpump->id) {
+		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;
+		case FS::SBPump: menu_popup(this->sb_pump_op, g, local_x, local_y); break;
+		}
 	}
 }

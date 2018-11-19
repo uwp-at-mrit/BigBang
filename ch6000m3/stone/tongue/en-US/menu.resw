@@ -297,4 +297,49 @@
   <data name="OpenDoorCheck" xml:space="preserve">
     <value>Open Door Checking</value>
   </data>
+  <data name="P2_2" xml:space="preserve">
+    <value>Parallel for double</value>
+  </data>
+  <data name="P2_H" xml:space="preserve">
+    <value>Parallel for Hoppers</value>
+  </data>
+  <data name="PS_2" xml:space="preserve">
+    <value>PS to double</value>
+  </data>
+  <data name="PS_H" xml:space="preserve">
+    <value>PS to Hoppers</value>
+  </data>
+  <data name="PS_PS" xml:space="preserve">
+    <value>PS to PS</value>
+  </data>
+  <data name="PS_SB" xml:space="preserve">
+    <value>PS to SB</value>
+  </data>
+  <data name="S2_2" xml:space="preserve">
+    <value>Sequence for double</value>
+  </data>
+  <data name="S2_H" xml:space="preserve">
+    <value>Sequence for Hoppers</value>
+  </data>
+  <data name="S2_PS" xml:space="preserve">
+    <value>Sequence for PS</value>
+  </data>
+  <data name="S2_SB" xml:space="preserve">
+    <value>Sequence for SB</value>
+  </data>
+  <data name="SB_2" xml:space="preserve">
+    <value>SB to doube</value>
+  </data>
+  <data name="SB_H" xml:space="preserve">
+    <value>SB to Hoppers</value>
+  </data>
+  <data name="SB_PS" xml:space="preserve">
+    <value>SB to PS</value>
+  </data>
+  <data name="SB_SB" xml:space="preserve">
+    <value>SB to SB</value>
+  </data>
+  <data name="I2_2" xml:space="preserve">
+    <value>Indenpendent for double</value>
+  </data>
 </root>

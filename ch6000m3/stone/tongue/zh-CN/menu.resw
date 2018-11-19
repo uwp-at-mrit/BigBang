@@ -297,4 +297,49 @@
   <data name="OpenDoorCheck" xml:space="preserve">
     <value>开泥门校验</value>
   </data>
+  <data name="P2_2" xml:space="preserve">
+    <value>并冲双耙</value>
+  </data>
+  <data name="P2_H" xml:space="preserve">
+    <value>并联冲舱</value>
+  </data>
+  <data name="PS_2" xml:space="preserve">
+    <value>左冲双耙</value>
+  </data>
+  <data name="PS_H" xml:space="preserve">
+    <value>左冲舱</value>
+  </data>
+  <data name="PS_PS" xml:space="preserve">
+    <value>左冲左耙</value>
+  </data>
+  <data name="PS_SB" xml:space="preserve">
+    <value>左冲右耙</value>
+  </data>
+  <data name="S2_2" xml:space="preserve">
+    <value>串冲双耙</value>
+  </data>
+  <data name="S2_H" xml:space="preserve">
+    <value>串联冲舱</value>
+  </data>
+  <data name="S2_PS" xml:space="preserve">
+    <value>串冲左耙</value>
+  </data>
+  <data name="S2_SB" xml:space="preserve">
+    <value>串冲右耙</value>
+  </data>
+  <data name="SB_2" xml:space="preserve">
+    <value>右冲双耙</value>
+  </data>
+  <data name="SB_H" xml:space="preserve">
+    <value>右冲舱</value>
+  </data>
+  <data name="SB_PS" xml:space="preserve">
+    <value>右冲左耙</value>
+  </data>
+  <data name="SB_SB" xml:space="preserve">
+    <value>右冲右耙</value>
+  </data>
+  <data name="I2_2" xml:space="preserve">
+    <value>左右单冲</value>
+  </data>
 </root>

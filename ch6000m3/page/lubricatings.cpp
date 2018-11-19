@@ -64,6 +64,7 @@ private class Lubricatings final
 public:
 	Lubricatings(LubricatingsPage* master, LU gid, unsigned int color) : master(master), gid(gid) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+		this->alarm_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 
 		this->color = Colours::make(color);
@@ -154,7 +155,7 @@ public:
 					alarm_box_width, alarm_box_height, corner_radius, alarm_background), id);
 
 				this->alarms[id] = this->master->insert_one(new Credit<Alarmlet, LU>(alarm_size), id);
-				this->load_label(this->labels, id, Colours::Silver, this->label_font);
+				this->load_label(this->labels, id, Colours::Silver, this->alarm_font);
 			}
 		}
 	}
@@ -240,6 +241,7 @@ private:
 	CanvasSolidColorBrush^ color;
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
+	CanvasTextFormat^ alarm_font;
 
 private:
 	LubricatingsPage* master;
