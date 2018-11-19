@@ -71,6 +71,22 @@ namespace WarGrey::SCADA {
 			float thickness = 1.0F);
 	};
 
+	private class RoundedRectanglet : public WarGrey::SCADA::Shapelet {
+	public:
+		RoundedRectanglet(float edge_size, float corner_radius, unsigned int border_color, float thickness = 1.0F);
+		RoundedRectanglet(float width, float height, float corner_radius, unsigned int border_color, float thickness = 1.0F);
+
+		RoundedRectanglet(float edge_size, float corner_radius,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+
+		RoundedRectanglet(float width, float height, float corner_radius,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
+			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ border_color = WarGrey::SCADA::Colours::Transparent,
+			float thickness = 1.0F);
+	};
+
 	private class Circlelet : public WarGrey::SCADA::Shapelet {
 	public:
 		Circlelet(float radius, unsigned int border_color, float thickness = 1.0F);
@@ -243,7 +259,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		template<class G>
-		void map_credit_graphlet(WarGrey::SCADA::Credit<G, Anchor>* g, GraphletAnchor a = GraphletAnchor::CC, float dx = 0.0F, float dy = 0.0F) {
+		void map_credit_graphlet(G* g, GraphletAnchor a = GraphletAnchor::CC, float dx = 0.0F, float dy = 0.0F) {
 			if (g != nullptr) {
 				this->map_graphlet_at_anchor(g, g->id, a, dx, dy);
 			}

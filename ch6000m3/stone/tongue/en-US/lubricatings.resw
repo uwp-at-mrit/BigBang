@@ -117,73 +117,43 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A" xml:space="preserve">
-    <value>Left Drag Head</value>
+  <data name="Bearing1" xml:space="preserve">
+    <value>Bearing 1# Temperature High</value>
   </data>
-  <data name="B" xml:space="preserve">
-    <value>Left Drag Arm</value>
+  <data name="Bearing2" xml:space="preserve">
+    <value>Bearing 2# Temperature High</value>
   </data>
-  <data name="C" xml:space="preserve">
-    <value>Left Gland</value>
+  <data name="Bearing3" xml:space="preserve">
+    <value>Bearing 3# Temperature High</value>
   </data>
-  <data name="D" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
+  <data name="Gearbox" xml:space="preserve">
+    <value>Hopper Gearbox Lubricating Oil Pump</value>
   </data>
-  <data name="E" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
+  <data name="GearboxOil" xml:space="preserve">
+    <value>Oil Temperature High</value>
   </data>
-  <data name="F" xml:space="preserve">
-    <value>Right Gland</value>
+  <data name="GearboxPressure" xml:space="preserve">
+    <value>Pressure Too Low</value>
   </data>
-  <data name="G" xml:space="preserve">
-    <value>Right Drag Arm</value>
-  </data>
-  <data name="H" xml:space="preserve">
-    <value>Right Drag Head</value>
-  </data>
-  <data name="K" xml:space="preserve">
-    <value>Circulating Cooling</value>
-  </data>
-  <data name="Y" xml:space="preserve">
-    <value>Emergency</value>
-  </data>
-  <data name="Port" xml:space="preserve">
-    <value>Port Hydraulic System</value>
-  </data>
-  <data name="Starboard" xml:space="preserve">
-    <value>Starboard Hydraulic System</value>
-  </data>
-  <data name="I" xml:space="preserve">
-    <value>Right Draghead Visor</value>
-  </data>
-  <data name="J" xml:space="preserve">
-    <value>Left Draghead Visor</value>
-  </data>
-  <data name="M" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="L" xml:space="preserve">
-    <value>Motor Flushing</value>
-  </data>
-  <data name="Storage" xml:space="preserve">
-    <value>Oil Storage Tank</value>
-  </data>
-  <data name="F01" xml:space="preserve">
-    <value>Filter F0.01 Blocked</value>
-  </data>
-  <data name="F02" xml:space="preserve">
-    <value>Filter F0.02 Blocked</value>
-  </data>
-  <data name="F10" xml:space="preserve">
-    <value>Filter Blocked</value>
+  <data name="Level" xml:space="preserve">
+    <value>Level Low</value>
   </data>
   <data name="Master" xml:space="preserve">
-    <value>Master Oil Temperature</value>
+    <value>Master</value>
   </data>
-  <data name="Visor" xml:space="preserve">
-    <value>Visor Oil Temperature</value>
+  <data name="Oil" xml:space="preserve">
+    <value>Oil Temperature High</value>
   </data>
   <data name="Pressure" xml:space="preserve">
-    <value>Pipeline Pressure</value>
+    <value>Pressure Low</value>
+  </data>
+  <data name="Spare" xml:space="preserve">
+    <value>Spare</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Hopper Lubricating Unit</value>
+  </data>
+  <data name="Water" xml:space="preserve">
+    <value>Water Temperature High</value>
   </data>
 </root>

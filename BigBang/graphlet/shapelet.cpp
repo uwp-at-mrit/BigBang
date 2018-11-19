@@ -102,6 +102,21 @@ Rectanglet::Rectanglet(float edge_size, ICanvasBrush^ color, CanvasSolidColorBru
 Rectanglet::Rectanglet(float width, float height, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
 	: Shapelet(rectangle(width, height), color, border_color, thickness) {}
 
+RoundedRectanglet::RoundedRectanglet(float edge_size, float corner_radius, unsigned int border_color, float thickness)
+	: RoundedRectanglet(edge_size, corner_radius, nullptr, Colours::make(border_color), thickness) {}
+
+RoundedRectanglet::RoundedRectanglet(float width, float height, float corner_radius, unsigned int border_color, float thickness)
+	: RoundedRectanglet(width, height, corner_radius, nullptr, Colours::make(border_color), thickness) {}
+
+RoundedRectanglet::RoundedRectanglet(float edge_size, float corner_radius
+	, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: RoundedRectanglet(edge_size, edge_size, corner_radius, color, border_color, thickness) {}
+
+RoundedRectanglet::RoundedRectanglet(float width, float height, float corner_radius
+	, ICanvasBrush^ color, CanvasSolidColorBrush^ border_color, float thickness)
+	: Shapelet(rounded_rectangle(0.0F, 0.0F, width, height, corner_radius, corner_radius)
+		, color, border_color, thickness) {}
+
 /*************************************************************************************************/
 Circlelet::Circlelet(float radius, unsigned int border_color, float thickness)
 	: Circlelet(radius, nullptr, Colours::make(border_color), thickness) {}

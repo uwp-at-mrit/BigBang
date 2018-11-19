@@ -11,7 +11,6 @@ namespace WarGrey::SCADA {
 	uint16 DO_hopper_pump_common_command(OP cmd, bool ps, bool hopper) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
-		uint16 condition = 0U;
 
 		switch (cmd) {
 		case OP::Prepare: offset = 0U; break;
@@ -111,5 +110,38 @@ namespace WarGrey::SCADA {
 		}
 
 		return index;
+	}
+
+	template<typename OP>
+	uint16 DO_hopper_lubricating_unit_command(OP cmd, bool ps) {
+		uint16 offset = 0U;
+		uint16 index = (ps ? 673U : 675U);
+
+		switch (cmd) {
+		case OP::Start: offset = 0U; break;
+		case OP::Stop:  offset = 1U; break;
+		}
+
+		return index + offset;
+	}
+
+	template<typename OP, typename E>
+	uint16 DO_hopper_gearbox_command(OP cmd, E id, bool ps) {
+		uint16 index = (ps ? 505U : 513U);
+		uint16 cmdoff = 0U;
+		uint16 idoff = 0U;
+
+		switch (cmd) {
+		case OP::Start: cmdoff = 0U; break;
+		case OP::Stop:  cmdoff = 1U; break;
+		case OP::Auto:  cmdoff = 3U; break;
+		}
+
+		switch (id) {
+		case E::Master: idoff = 0U; break;
+		case E::Spare:  idoff = 4U; break;
+		}
+
+		return index + cmdoff + idoff;
 	}
 }

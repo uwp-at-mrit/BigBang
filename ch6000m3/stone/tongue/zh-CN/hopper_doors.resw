@@ -145,10 +145,10 @@
     <value>装载量</value>
   </data>
   <data name="Port" xml:space="preserve">
-    <value>左舷泥门</value>
+    <value>左舷</value>
   </data>
   <data name="Starboard" xml:space="preserve">
-    <value>右舷泥门</value>
+    <value>右舷</value>
   </data>
   <data name="PS1" xml:space="preserve">
     <value>#1</value>

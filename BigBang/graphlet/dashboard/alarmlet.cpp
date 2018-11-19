@@ -80,7 +80,7 @@ void Alarmlet::fill_extent(float x, float y, float* w, float* h) {
 
 void Alarmlet::prepare_style(AlarmStatus status, AlarmStyle& style) {
 	switch (status) {
-	case AlarmStatus::Alert: CAS_SLOT(style.color, Colours::Firebrick); break;
+	case AlarmStatus::Alert: CAS_SLOT(style.color, Colours::Red); break;
 	}
 
 	CAS_SLOT(style.color, Colours::GhostWhite);
