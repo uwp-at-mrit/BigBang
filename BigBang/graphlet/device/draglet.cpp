@@ -24,6 +24,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ drag_default_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_meter_color = Colours::GhostWhite;
+static CanvasSolidColorBrush^ drag_default_angle_color = Colours::DarkOrange;
 static CanvasSolidColorBrush^ drag_default_head_color = Colours::DimGray;
 static CanvasSolidColorBrush^ drag_default_body_color = Colours::Yellow;
 static CanvasSolidColorBrush^ drag_default_angle_pointer_color = Colours::GhostWhite;
@@ -36,6 +37,10 @@ static double drag_visor_end_angle = 100.0;
 
 static inline double drag_adjusted_angle(double degrees, float sign) {
 	return ((sign > 0.0F) ? 0.0 - degrees : 180.0 + degrees);
+}
+
+static inline double drag_visor_earth(double visor_angle, double arm_angle) {
+	return (visor_angle - arm_angle);
 }
 
 static inline float drag_arm_atan(float radius, float half_thickness, float* extended_radius = nullptr) {
@@ -150,10 +155,6 @@ static inline CanvasGeometry^ make_pointer(float radius, double degrees, float a
 	return geometry_union(line(x, y, 1.0F, style), arrowhead, x, y);
 }
 
-static inline double points_angle_xz(float3& pt1, float3& pt2) {
-	return points_angle(pt1.x, pt1.z, pt2.x, pt2.z);
-}
-
 /*************************************************************************************************/
 float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info) {
 	float depth = info.trunnion_length + info.pipe_padding + info.head_length;
@@ -167,11 +168,12 @@ float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info) {
 
 /*************************************************************************************************/
 IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
-	, ICanvasBrush^ color, ICanvasBrush^ mcolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor
+	, ICanvasBrush^ color, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor
 	, CanvasTextFormat^ font)
 	: info(info), width(std::fabsf(width)), height(height), thickness(thickness), precision(2U)
 	, leftward(width < 0.0F), mfont(font), color(color == nullptr ? drag_default_color : color)
 	, meter_color(mcolor == nullptr ? drag_default_meter_color : mcolor)
+	, angle_color(acolor == nullptr ? drag_default_angle_color : acolor)
 	, head_color(hcolor == nullptr ? drag_default_head_color : hcolor)
 	, body_color(bcolor == nullptr ? drag_default_body_color : bcolor)
 	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
@@ -232,7 +234,7 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 
 	if (force || schanged || ichanged || dchanged) {
 		CanvasPathBuilder^ arm = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-		unsigned int last_joint_idx = 0;
+		float3 last_joint = this->suction;
 		float3 _trunnion;
 
 		this->_suction = this->space_to_local(this->suction);
@@ -246,13 +248,17 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 		arm->BeginFigure(this->_suction);
 		arm->AddLine(this->space_to_local(_trunnion));
 
+		// TODO:  Why angles are slightly different than those read from PLC?
+
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				this->rubbers[idx] = this->universal_joint;
 				this->_ujoints[idx] = this->space_to_local(ujoints[idx]);
+				this->arm_angles[idx] = this->arctangent(ujoints[idx], last_joint);
 				this->ujoints_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->mfont);
-				
-				last_joint_idx = idx;
+				this->arm_degs[idx] = make_text_layout(flstring(this->arm_angles[idx], this->precision), this->mfont);
+
+				last_joint = ujoints[idx];
 
 				arm->AddLine(this->_ujoints[idx]);
 			}
@@ -262,8 +268,9 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 		arm->EndFigure(CanvasFigureLoop::Open);
 
 		this->dragarm = CanvasGeometry::CreatePath(arm);
-		this->drag_arm_angle = points_angle_xz(this->draghead, this->ujoints[last_joint_idx]);
-		this->_drag_arm_angle = points_angle(this->_draghead, this->_ujoints[last_joint_idx]);
+		this->_forearm_angle = points_angle(this->_draghead, this->space_to_local(last_joint));
+		this->forearm_angle = this->arctangent(this->draghead, last_joint);
+		this->forearm_deg = make_text_layout(flstring(this->forearm_angle, this->precision), this->mfont);
 
 		this->on_position_changed(this->suction.z, this->ujoints, this->draghead);
 		this->update_drag_head();
@@ -272,10 +279,25 @@ void IDraglet::set_position(float suction_depth, float3 ujoints[], float3& dragh
 	}
 }
 
+double IDraglet::get_arm_degrees(unsigned int idx) {
+	double angle = this->forearm_angle;
+
+	if ((idx < DRAG_SEGMENT_MAX_COUNT) && (this->info.pipe_lengths[idx] > 0.0F)) {
+		angle = this->arm_angles[idx];
+	}
+
+	return angle;
+}
+
+double IDraglet::get_visor_earth_degrees() {
+	return drag_visor_earth(this->visor_angle, this->forearm_angle);
+}
+
 /*************************************************************************************************/
 DragXYlet::DragXYlet(DragInfo& info, float width, float height, unsigned int color, float interval, unsigned int ostep, unsigned int istep
-	, float thickness, ICanvasBrush^ mcolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor, CanvasTextFormat^ font)
-	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, hcolor, bcolor, hmcolor, font) {
+	, float thickness, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor
+	, CanvasTextFormat^ font)
+	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, acolor, hcolor, bcolor, hmcolor, font) {
 	this->outside_most = interval * float(ostep);
 	this->inside_most = -interval * float(istep);
 	this->step = ostep + istep;
@@ -324,7 +346,7 @@ void DragXYlet::update_drag_head() {
 	float ubase = this->drag_thickness;
 	float bbase = this->width * this->info.head_width / this->drag_length;
 	float h_height = this->draghead_length * 0.618F;
-	double angle = this->_drag_arm_angle + 90.0;
+	double angle = this->_forearm_angle + 90.0;
 	float sign = (this->leftward ? 1.0F : -1.0F);
 	float shape_x = bbase * -0.5F;
 	auto hshape = trapezoid(shape_x, -h_height, ubase, bbase, h_height);
@@ -366,21 +388,34 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		}
 	}
 
-	{ // draw meters
+	{ // draw metrics
+		float x0 = x + this->_ujoints[0].x;
+		float y0 = y + this->_ujoints[0].y;
+
 		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
+				float ax = x0 + (ix - x0) * 0.5F;
+				float ay = y0 + (iy - y0) * 0.5F;
 
-				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, x, this->drag_thickness);
+				x0 = ix;
+				y0 = iy;
+
+				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, x, this->drag_thickness, this->meter_color);
+				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, x, this->drag_thickness, this->angle_color);
 			}
 		}
 
-		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F, this->meter_color);
+		this->draw_metrics(ds, this->forearm_deg,
+			x0 + (draghead_x - x0) * 0.5F, y0 + (draghead_y - y0) * 0.5F,
+			x, this->drag_thickness, this->angle_color);
 	}
 }
 
-void DragXYlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y, float gx, float hspace) {
+void DragXYlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y
+	, float gx, float hspace, ICanvasBrush^ color) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
 		float x0 = this->_suction.x;
@@ -398,7 +433,7 @@ void DragXYlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, fl
 			x = joint_x - box.Width - hspace;
 		}
 
-		ds->DrawTextLayout(meter, x, y, this->meter_color);
+		ds->DrawTextLayout(meter, x, y, color);
 	}
 }
 
@@ -421,10 +456,18 @@ float2 DragXYlet::space_to_local(float3& position) {
 	return location;
 }
 
+double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
+	double dx = double(this_pt.x) - double(last_pt.x);
+	double dy = double(this_pt.y) - double(last_pt.y);
+	double degrees = radians_to_degrees(std::atan2(dy, dx));
+
+	return degrees;
+}
+
 /*************************************************************************************************/
-DragXZlet::DragXZlet(DragInfo& info, float width, float height, unsigned int color, float interval, float suction_lowest
-	, float thickness, ICanvasBrush^ mcolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor, CanvasTextFormat^ font)
-	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, hcolor, bcolor, hmcolor, font)
+DragXZlet::DragXZlet(DragInfo& info, float width, float height, unsigned int color, float interval, float suction_lowest, float thickness
+	, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor, CanvasTextFormat^ font)
+	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, acolor, hcolor, bcolor, hmcolor, font)
 	, depth_highest(interval), suction_lowest(suction_lowest) {
 	this->depth_lowest = -std::ceilf(this->drag_length / interval) * interval;
 }
@@ -483,16 +526,15 @@ void DragXZlet::update_drag_head() {
 	float visor_radius = head_radius * 0.80F;
 	float visor_length = this->draghead_length * 0.5F;
 	float sign = (this->leftward ? 1.0F : -1.0F);
-	double angle = drag_adjusted_angle(this->_drag_arm_angle, sign);
+	double angle = drag_adjusted_angle(this->_forearm_angle, sign);
 	double head_joint_start = (this->leftward ? -angle + 90.0 : angle - 90.0);
 	double head_joint_end = (this->leftward ? -angle + 270.0 : angle + 90.0);
-	bool horizon = (this->drag_arm_angle == 180.0); // horizon
-	double earth_angle = ((horizon && this->leftward) ? -this->visor_angle : (this->drag_arm_angle + this->visor_angle + 180.0));
+	double earth_angle = drag_visor_earth(this->visor_angle, this->forearm_angle);
 	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, earth_angle, angle, sign);
 	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->thickness * 2.0F);
 	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->thickness);
 
-	circle_point(arm_length, this->_drag_arm_angle, &this->mask_dx, &this->mask_dy);
+	circle_point(arm_length, this->_forearm_angle, &this->mask_dx, &this->mask_dy);
 
 	this->visor_part = geometry_freeze(vshape);
 	this->draghead_part = geometry_freeze(hshape);
@@ -544,26 +586,40 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		}
 	}
 	
-	{ // draw meters
+	{ // draw metrics
 		float lX = x + this->left_margin + this->thickness;
 		float rX = x + this->right_margin - this->thickness;
 		float Y = y + this->height;
+		float x0 = x + this->_ujoints[0].x;
+		float y0 = y + this->_ujoints[0].y;
 	
 		for (unsigned int idx = 1; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				float ix = x + this->_ujoints[idx].x;
 				float iy = y + this->_ujoints[idx].y;
+				float ax = x0 + (ix - x0) * 0.5F;
+				float ay = y0 + (iy - y0) * 0.5F;
 
-				this->draw_meter(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y);
+				x0 = ix;
+				y0 = iy;
+
+				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y, this->meter_color);
+				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, lX, rX, Y, this->angle_color);
 			}
 		}
 
-		//this->draw_meter(ds, this->suction_m, suction_x, suction_y, lX, rX, Y);
-		this->draw_meter(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, Y);
+		this->draw_metrics(ds, this->suction_m, suction_x, suction_y, lX, rX, Y, this->meter_color);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, Y, this->meter_color);
+
+		this->draw_metrics(ds, this->forearm_deg,
+			x0 + (draghead_x - x0) * 0.5F, y0 + (draghead_y - y0) * 0.5F,
+			lX, rX, Y, this->angle_color);
+
 	}
 }
 
-void DragXZlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y, float lX, float rX, float Y) {
+void DragXZlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, float joint_x, float joint_y
+	, float lX, float rX, float Y, ICanvasBrush^ color) {
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
 		float x = std::fmaxf(lX, joint_x - box.Width * 0.5F);
@@ -577,7 +633,7 @@ void DragXZlet::draw_meter(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, fl
 			y = joint_y - box.Height * 1.1618F;
 		}
 
-		ds->DrawTextLayout(meter, x, y, this->meter_color);
+		ds->DrawTextLayout(meter, x, y, color);
 	}
 }
 
@@ -599,6 +655,14 @@ float2 DragXZlet::space_to_local(float3& position) {
 	location.y = this->ws_height * py + this->ws_y;
 
 	return location;
+}
+
+double DragXZlet::arctangent(float3& this_pt, float3& last_pt) {
+	double dx = double(this_pt.x) - double(last_pt.x);
+	double dy = double(this_pt.z) - double(last_pt.z);
+	double degrees = radians_to_degrees(std::atan2(dy, dx));
+
+	return degrees;
 }
 
 /*************************************************************************************************/
@@ -630,12 +694,11 @@ void DragHeadlet::construct() {
 	float aradius = this->radius * 1.000F;
 	float vradius = this->radius * 0.618F;
 	unsigned int depth_step = ((unsigned int)std::round(this->depth_range / depth_interval)) + 1;
-	double adeg0 = drag_adjusted_angle(0.0, this->sign);
-	double adegn = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
-	double vdeg0 = drag_adjusted_angle(0.0, this->sign);
-	double vdegn = drag_adjusted_angle(drag_visor_end_angle, this->sign);
-	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, this->info.arm_degrees_min, this->info.arm_degrees_max, 0U, this->thickness, &ametrics);
-	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, this->info.visor_degrees_min, this->info.visor_degrees_max, 0U, this->thickness, &vmetrics);
+	double deg0 = drag_adjusted_angle(0.0, this->sign);
+	double adeg = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
+	double vdeg = drag_adjusted_angle(drag_visor_end_angle, this->sign);
+	auto ahatchmark = rhatchmark(aradius, deg0, adeg, this->info.arm_degrees_min, this->info.arm_degrees_max, 0U, this->thickness, &ametrics);
+	auto vhatchmark = rhatchmark(vradius, deg0, vdeg, this->info.visor_degrees_min, this->info.visor_degrees_max, 0U, this->thickness, &vmetrics);
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
@@ -682,21 +745,17 @@ void DragHeadlet::construct() {
 	this->set_depths(0.0F, 0.0F, true);
 }
 
-void DragHeadlet::set_position(float suction_depth, float3& last_ujoint, float3& draghead, double visor_angle, bool force) {
-	this->set_depths(suction_depth, draghead.z, force);
-	this->set_angles(visor_angle, points_angle_xz(last_ujoint, draghead));
-}
-
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	float visor_length = this->radius - this->translate_x;
 	double visor_range = this->info.visor_degrees_max - this->info.visor_degrees_min;
 	double visor_pointer_range = drag_visor_end_angle;
-	double visor_earth_angle = (visor_angle - arm_angle);
-
+	double visor_earth_angle = drag_visor_earth(visor_angle, arm_angle);
+	
 	if (force || (this->visor_earth_degrees != visor_earth_angle)) {
-		double visor_degrees = drag_adjusted_angle(visor_earth_angle / visor_range * visor_pointer_range + this->offset, this->sign);
+		double visor_progress = (visor_earth_angle - this->info.visor_degrees_min) / visor_range;
+		double visor_degrees = drag_adjusted_angle(visor_progress * visor_pointer_range, this->sign);
 
-		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_angle, 0.0F, this->sign));
+		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_earth_angle, 0.0F, this->sign));
 		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_degrees, this->arrow_radius, this->pointer_style));
 		this->visor_earth_degrees = visor_earth_angle;
 
@@ -727,14 +786,6 @@ void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool for
 
 		this->notify_updated();
 	}
-}
-
-double DragHeadlet::get_arm_earth_degrees() {
-	return this->arm_earth_degrees;
-}
-
-double DragHeadlet::get_visor_earth_degrees() {
-	return this->visor_earth_degrees;
 }
 
 void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {

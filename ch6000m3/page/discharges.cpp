@@ -47,8 +47,15 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum RSMode { WindowUI = 0, Dashboard };
 
-private enum class RSGVOperation { Open, Close, VirtualOpen, VirtualClose, MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat, _ };
 private enum class RSHDOperation { Open, Stop, Close, Disable, _ };
+
+private enum class RSGVOperation {
+	Open, Close, VirtualOpen, VirtualClose,
+	StopGateValves, CloseGateValves,
+	MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat,
+	_
+};
+
 
 private enum class RSPSHPOperation { Prepare, Start, Stop, Reset, PSDischarge, PSRainbowing, BothDischarge, BothRainbowing, _ };
 private enum class RSSBHPOperation { Prepare, Start, Stop, Reset, SBDischarge, SBRainbowing, BothDischarge, BothRainbowing, _ };
@@ -101,7 +108,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pump_pressures[RS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LB);
 		this->pump_pressures[RS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LT);
 

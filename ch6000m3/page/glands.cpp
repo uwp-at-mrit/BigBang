@@ -88,7 +88,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pressures[GP::PSFP]->set_value(RealData(DB203, ps_flushing_pump_pressure), GraphletAnchor::LB);
 
 		this->pressures[GP::PSHP]->set_value(RealData(DB203, ps_hopper_gland_pump_pressure), GraphletAnchor::LB);
@@ -151,7 +151,7 @@ public:
 
 		this->try_flow_water(GP::PSUWP1, ps_underwater_path, water_color);
 		this->try_flow_water(GP::PSUWP2, GP::PSUWP2, GP::PSUWP, water_color);
-		this->try_flow_water(GP::SBUWP1, GP::PSUWP1, GP::SBUWP, water_color);
+		this->try_flow_water(GP::SBUWP1, GP::SBUWP1, GP::SBUWP, water_color);
 		this->try_flow_water(GP::SBUWP2, sb_underwater_path, water_color);
 
 		this->master->end_update_sequence();

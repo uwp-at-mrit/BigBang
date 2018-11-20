@@ -45,10 +45,9 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum FSMode { WindowUI = 0, Dashboard };
 
-private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
+private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, StopButterflyValves, CloseButterflyValves, _ };
 private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
 
-private enum class FSVCommand { CloseButterFlyValves, StopButterFlyValves, _ };
 private enum class FSSCommand { LeftShift, RightShift, _ };
 
 private enum class FSPSOperation {
@@ -120,7 +119,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->pressures[FS::D]->set_value(RealData(DB203, pump_D_pressure), GraphletAnchor::CC);
 		this->pressures[FS::E]->set_value(RealData(DB203, pump_E_pressure), GraphletAnchor::CC);
 
@@ -365,6 +364,8 @@ public:
 		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
 		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
 
+		this->load_buttons(this->shifts);
+
 		{ // load doors
 			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
 			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
@@ -374,11 +375,6 @@ public:
 			this->load_valves(this->mvalves, this->labels, this->captions, FS::SBV1, FS::SBV4, radius * 0.618F, 90.0);
 			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
 			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
-		}
-
-		{ // load buttons
-			this->load_buttons(this->vbuttons);
-			this->load_buttons(this->shifts);
 		}
 
 		{ // load special nodes
@@ -451,9 +447,6 @@ public:
 			
 			this->master->move_to(this->shifts[FSSCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
 			this->master->move_to(this->shifts[FSSCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
-
-			this->master->move_to(this->vbuttons[FSVCommand::CloseButterFlyValves], this->station, 0.75F, 0.5F, GraphletAnchor::CB);
-			this->master->move_to(this->vbuttons[FSVCommand::StopButterFlyValves], this->station, 0.75F, 0.5F, GraphletAnchor::CT);
 		}
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
@@ -675,7 +668,6 @@ private:
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
 	std::map<FSSCommand, Credit<Buttonlet, FSSCommand>*> shifts;
-	std::map<FSVCommand, Credit<Buttonlet, FSVCommand>*> vbuttons;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
@@ -799,7 +791,6 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto wpump = dynamic_cast<Credit<WaterPumplet, FS>*>(g);
 	auto shift = dynamic_cast<Credit<Buttonlet, FSSCommand>*>(g);
-	auto button = dynamic_cast<Credit<Buttonlet, FSVCommand>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
@@ -807,8 +798,6 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
 	} else if (shift != nullptr) {
 		this->device->send_command((shift->id == FSSCommand::LeftShift) ? left_shifting_command : right_shifting_command);
-	} else if (button != nullptr) {
-		this->device->send_command((button->id == FSVCommand::CloseButterFlyValves) ? close_all_butterfly_valves : stop_all_butterfly_valves);
 	} else if (wpump != nullptr) {
 		switch (wpump->id) {
 		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;

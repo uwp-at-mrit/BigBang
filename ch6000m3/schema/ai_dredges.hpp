@@ -3,8 +3,6 @@
 namespace WarGrey::SCADA {
 	private struct DredgeAddress {
 		unsigned int drag_position;
-		unsigned int intermediate_angle;
-		unsigned int draghead_angle;
 		unsigned int visor_angle;
 
 		unsigned int compensator;
@@ -18,6 +16,11 @@ namespace WarGrey::SCADA {
 		
 		unsigned int winch_length;
 		unsigned int winch_speed;
+
+		unsigned int forearm_vertical_angle;
+		unsigned int forearm_horizontal_angle;
+		unsigned int backarm_vertical_angle;
+		unsigned int backarm_horizontal_angle;
 	};
 
 	WarGrey::SCADA::DredgeAddress* make_ps_dredging_system_schema();

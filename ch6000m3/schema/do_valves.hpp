@@ -14,18 +14,21 @@ namespace WarGrey::SCADA {
 		uint16 gindex = 0U;
 		uint16 mindex = 0U;
 		uint16 heat = 0U;
+		uint16 condition = 0U;
 		bool motor = false;
 
 		switch (cmd) {
-		case OP::Open:          offset = 0U; break;
-		case OP::Close:         offset = 1U; break;
-		case OP::VirtualOpen:   offset = 2U; break;
-		case OP::VirtualClose:  offset = 3U; break;
-		case OP::MOpen:         offset = 0U; motor = true; break;
-		case OP::MClose:        offset = 1U; motor = true; break;
-		case OP::MVirtualOpen:  offset = 2U; motor = true; break;
-		case OP::MVirtualClose: offset = 3U; motor = true; break;
-		case OP::MHeat:         motor = true; break;
+		case OP::Open:            offset = 0U; break;
+		case OP::Close:           offset = 1U; break;
+		case OP::VirtualOpen:     offset = 2U; break;
+		case OP::VirtualClose:    offset = 3U; break;
+		case OP::CloseGateValves: condition = close_all_gate_valves; break;
+		case OP::StopGateValves:  condition = stop_all_gate_valves; break;
+		case OP::MOpen:           offset = 0U; motor = true; break;
+		case OP::MClose:          offset = 1U; motor = true; break;
+		case OP::MVirtualOpen:    offset = 2U; motor = true; break;
+		case OP::MVirtualClose:   offset = 3U; motor = true; break;
+		case OP::MHeat:           motor = true; break;
 		}
 
 		switch (id) {
@@ -59,19 +62,22 @@ namespace WarGrey::SCADA {
 
 		return (motor
 			? ((offset >= 0) ? (mindex + offset) : heat)
-			: (gindex + offset));
+			: ((condition > 0) ? condition : (gindex + offset)));
 	}
 
 	template<typename OP, typename E>
 	uint16 DO_butterfly_valve_command(OP cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
+		uint16 condition = 0U;
 
 		switch (cmd) {
-		case OP::Open:         offset = 0U; break;
-		case OP::Close:        offset = 1U; break;
-		case OP::VirtualOpen:  offset = 2U; break;
-		case OP::VirtualClose: offset = 3U; break;
+		case OP::Open:                 offset = 0U; break;
+		case OP::Close:                offset = 1U; break;
+		case OP::VirtualOpen:          offset = 2U; break;
+		case OP::VirtualClose:         offset = 3U; break;
+		case OP::CloseButterflyValves: condition = close_all_butterfly_valves; break;
+		case OP::StopButterflyValves:  condition = stop_all_butterfly_valves; break;
 		}
 
 		switch (id) {
@@ -95,6 +101,6 @@ namespace WarGrey::SCADA {
 		case E::HBV18: index = 253U; break;
 		}
 
-		return index + offset;
+		return (condition > 0) ? condition : (index + offset);
 	}
 }

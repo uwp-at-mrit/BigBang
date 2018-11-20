@@ -242,11 +242,10 @@ protected:
 	}
 
 	template<class D, typename E>
-	void load_draghead(std::map<E, Credit<D, E>*>& ds, E id, E aid, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
+	void load_draghead(std::map<E, Credit<D, E>*>& ds, E id, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
 		ds[id] = this->master->insert_one(new Credit<D, E>(info, radius, visor_color), id);
 
 		this->load_dimension(this->degrees, id, "degrees");
-		this->load_dimension(this->degrees, aid, "degrees");
 		this->load_dimension(this->pressures, dpid, "bar");
 	}
 
@@ -289,10 +288,9 @@ protected:
 		}
 	}
 
-	void reflow_draghead_metrics(DS id, DS aid, DS dpid) {
+	void reflow_draghead_metrics(DS id, DS dpid) {
 		this->master->move_to(this->pressures[dpid], this->dragheads[id], GraphletAnchor::CT, GraphletAnchor::CB);
-		this->master->move_to(this->degrees[aid], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT);
-		this->master->move_to(this->degrees[id], this->degrees[aid], GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->degrees[id], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT);
 	}
 
 protected:
@@ -340,14 +338,12 @@ protected:
 		}
 	}
 
-	void set_drag_metrics(DS id, DS vid, DS eid, const uint8* db2, DredgeAddress* address) {
+	void set_drag_metrics(DS id, DS vid, const uint8* db2, DredgeAddress* address) {
 		unsigned int pidx = address->drag_position;
 		float3 ujoints[2];
 		float3 draghead = DBD_3(db2, pidx + 36U);
 		float suction_depth = DBD(db2, pidx + 0U);
-		float intermediate_angle = DBD(db2, address->intermediate_angle);
-		float draghead_angle = DBD(db2, address->draghead_angle);
-		float visor_angle = DBD(db2, address->visor_angle) - 90.0F;
+		float visor_angle = DBD(db2, address->visor_angle);
 
 		ujoints[0] = DBD_3(db2, pidx + 12U);
 		ujoints[1] = DBD_3(db2, pidx + 24U);
@@ -358,12 +354,12 @@ protected:
 
 		this->dragxys[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
 		this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
-		this->dragheads[vid]->set_position(suction_depth, ujoints[1], draghead, visor_angle);
 
-		this->master->get_logger()->log_message(Log::Info, L"%f, %f", intermediate_angle, draghead_angle);
-		
-		this->degrees[vid]->set_value(this->dragheads[vid]->get_arm_earth_degrees(), GraphletAnchor::LC);
-		this->degrees[eid]->set_value(visor_angle, GraphletAnchor::LC);
+		//this->master->get_logger()->log_message(Log::Info, L"%f", visor_angle);
+
+		this->dragheads[vid]->set_depths(suction_depth, draghead.z);
+		this->dragheads[vid]->set_angles(visor_angle, this->dragxzes[id]->get_arm_degrees());
+		this->degrees[vid]->set_value(this->dragxzes[id]->get_visor_earth_degrees(), GraphletAnchor::LC);
 	}
 
 protected: // never delete these graphlets manually.
@@ -413,8 +409,9 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
+		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
 
 		this->progresses[DS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
@@ -441,26 +438,24 @@ public:
 		this->forces[DS::PSPF2]->set_value(RealData(DB203, this->ps_address->pulling_force + 1U), GraphletAnchor::LC);
 		this->forces[DS::SBPF1]->set_value(RealData(DB203, this->sb_address->pulling_force + 0U), GraphletAnchor::LC);
 		this->forces[DS::SBPF2]->set_value(RealData(DB203, this->sb_address->pulling_force + 1U), GraphletAnchor::LC);
-	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		unsigned int psws_idx = this->ps_address->winch_speed;
-		unsigned int pswl_idx = this->ps_address->winch_length;
-		unsigned int sbws_idx = this->sb_address->winch_speed;
-		unsigned int sbwl_idx = this->sb_address->winch_length;
+		{ // set winch metrics
+			unsigned int psws_idx = this->ps_address->winch_speed;
+			unsigned int pswl_idx = this->ps_address->winch_length;
+			unsigned int sbws_idx = this->sb_address->winch_speed;
+			unsigned int sbwl_idx = this->sb_address->winch_length;
 
-		this->set_drag_metrics(DS::PS, DS::PSVisor, DS::PSArm, DB2, this->ps_address);
-		this->set_drag_metrics(DS::SB, DS::SBVisor, DS::SBArm, DB2, this->sb_address);
+			this->set_winch_metrics(DS::psTrunnion, DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::LC);
+			this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::LC);
+			this->set_winch_metrics(DS::psDragHead, DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::LC);
 
-		this->set_winch_metrics(DS::psTrunnion,     DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::LC);
-		this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::LC);
-		this->set_winch_metrics(DS::psDragHead,     DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::LC);
+			this->set_winch_metrics(DS::sbTrunnion, DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::RC);
+			this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::RC);
+			this->set_winch_metrics(DS::sbDragHead, DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::RC);
+		}
 
-		this->set_winch_metrics(DS::sbTrunnion,     DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::RC);
-		this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::RC);
-		this->set_winch_metrics(DS::sbDragHead,     DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::RC);
-
-		this->overflowpipe->set_liquid_height(DBD(DB2, 224U));
+		this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, this->ps_address);
+		this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, this->sb_address);
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
@@ -643,8 +638,8 @@ public:
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 2.0F;
 			float side_drag_height = height * 0.314F - vinset;
 			
-			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSArm, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
-			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBArm, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
+			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
+			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
 			this->load_drag(this->dragxys, DS::PS, -over_drag_width, over_drag_height, this->drag_configs[0], default_ps_color);
 			this->load_drag(this->dragxys, DS::SB, +over_drag_width, over_drag_height, this->drag_configs[1], default_sb_color);
@@ -828,8 +823,8 @@ public:
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
 			this->master->move_to(this->hopper_types[DS::SB], this->labels[DS::SBHPDP], GraphletAnchor::RT, GraphletAnchor::CB, +vinset, -txt_gapsize);
 
-			this->reflow_draghead_metrics(DS::PSVisor, DS::PSArm, DS::PSDP);
-			this->reflow_draghead_metrics(DS::SBVisor, DS::SBArm, DS::SBDP);
+			this->reflow_draghead_metrics(DS::PSVisor, DS::PSDP);
+			this->reflow_draghead_metrics(DS::SBVisor, DS::SBDP);
 		}
 	}
 
@@ -963,7 +958,29 @@ public:
 	}
 
 public:
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+		this->lengths[DS::TideMark]->set_value(DBD(DB2, tide_mark));
+		this->speeds[DS::Speed]->set_value(DBD(DB2, gps_speed));
+
+		{ // set winches metrics
+			unsigned int psws_idx = this->address->winch_speed;
+			unsigned int pswl_idx = this->address->winch_length;
+			unsigned int sbws_idx = this->address->winch_speed;
+			unsigned int sbwl_idx = this->address->winch_length;
+
+			if (this->DS_side == DS::PS) {
+				this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, this->address);
+				this->set_winch_metrics(DS::psTrunnion, DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::CC);
+				this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::CC);
+				this->set_winch_metrics(DS::psDragHead, DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::CC);
+			} else {
+				this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, this->address);
+				this->set_winch_metrics(DS::sbTrunnion, DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::CC);
+				this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::CC);
+				this->set_winch_metrics(DS::sbDragHead, DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::CC);
+			}
+		}
+
 		if (DS_side == DS::PS) {
 			this->pressures[DS::psTrunnion]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::CC);
 			this->pressures[DS::psIntermediate]->set_value(RealData(DB203, pump_B_pressure), GraphletAnchor::CC);
@@ -1002,28 +1019,6 @@ public:
 			this->Blets[DS::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_B_pressure), GraphletAnchor::RT);
 			this->Alets[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_A_pressure), GraphletAnchor::RB);
 			this->Blets[DS::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_B_pressure), GraphletAnchor::RT);
-		}
-	}
-
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
-		unsigned int psws_idx = this->address->winch_speed;
-		unsigned int pswl_idx = this->address->winch_length;
-		unsigned int sbws_idx = this->address->winch_speed;
-		unsigned int sbwl_idx = this->address->winch_length;
-
-		this->lengths[DS::TideMark]->set_value(DBD(DB2, tide_mark));
-		this->speeds[DS::Speed]->set_value(DBD(DB2, gps_speed));
-
-		if (this->DS_side == DS::PS) {
-			this->set_drag_metrics(DS::PS, DS::PSVisor, DS::PSArm, DB2, this->address);
-			this->set_winch_metrics(DS::psTrunnion, DB2, psws_idx + 0U, pswl_idx + 0U, GraphletAnchor::CC);
-			this->set_winch_metrics(DS::psIntermediate, DB2, psws_idx + 4U, pswl_idx + 4U, GraphletAnchor::CC);
-			this->set_winch_metrics(DS::psDragHead, DB2, psws_idx + 8U, pswl_idx + 8U, GraphletAnchor::CC);
-		} else {
-			this->set_drag_metrics(DS::SB, DS::SBVisor, DS::SBArm, DB2, this->address);
-			this->set_winch_metrics(DS::sbTrunnion, DB2, sbws_idx + 0U, sbwl_idx + 0U, GraphletAnchor::CC);
-			this->set_winch_metrics(DS::sbIntermediate, DB2, sbws_idx + 4U, sbwl_idx + 4U, GraphletAnchor::CC);
-			this->set_winch_metrics(DS::sbDragHead, DB2, sbws_idx + 8U, sbwl_idx + 8U, GraphletAnchor::CC);
 		}
 	}
 
@@ -1157,7 +1152,7 @@ public:
 		this->load_gantry_indicators(DS::tVirtualUp, DS::hVirtualOut, 24.0F, this->indicators, this->labels);
 
 		if (this->DS_side == DS::PS) {
-			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSArm, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
+			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_gantries(this->gantries, DS::psTrunnion, DS::psDragHead, -gantry_radius);
 			this->load_detailed_winches(this->winches, DS::psTrunnion, DS::psDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
@@ -1167,7 +1162,7 @@ public:
 
 			this->load_label(this->labels, DS::ps_gantry_settings, Colours::Black);
 		} else {
-			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBArm, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
+			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 			this->load_gantries(this->gantries, DS::sbTrunnion, DS::sbDragHead, +gantry_radius);
 			this->load_detailed_winches(this->winches, DS::sbTrunnion, DS::sbDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
@@ -1268,11 +1263,11 @@ public:
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 
 			if (DS_side == DS::PS) {
-				this->reflow_draghead_metrics(DS::PSVisor, DS::PSArm, DS::PSDP); 
+				this->reflow_draghead_metrics(DS::PSVisor, DS::PSDP); 
 				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS_side], GraphletAnchor::RT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::PSPF1], this->forces[DS::PSPF2], GraphletAnchor::CT, GraphletAnchor::CB);
 			} else {
-				this->reflow_draghead_metrics(DS::SBVisor, DS::SBArm, DS::SBDP); 
+				this->reflow_draghead_metrics(DS::SBVisor, DS::SBDP); 
 				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS_side], GraphletAnchor::LT, GraphletAnchor::CB);
 				this->master->move_to(this->forces[DS::SBPF1], this->forces[DS::SBPF2], GraphletAnchor::CT, GraphletAnchor::CB);
 			}

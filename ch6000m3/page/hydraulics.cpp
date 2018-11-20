@@ -99,7 +99,7 @@ public:
 		this->station->clear_subtacks();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
 		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));

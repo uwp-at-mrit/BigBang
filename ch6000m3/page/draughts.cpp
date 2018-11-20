@@ -124,12 +124,11 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_analog_input(const uint8* DB203, size_t count, Syslog* logger) override {
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
+		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value());
-	}
 
-	void on_realtime_data(const uint8* DB2, size_t count, Syslog* logger) override {
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
 		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
 		this->dimensions[DL::psSternDraft]->set_value(DBD(DB2, ps_fixed_stern_draught));
@@ -145,7 +144,6 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->set_cylinder(DL::HopperHeight, DBD(DB2, average_hopper_height));
 		this->set_cylinder(DL::Displacement, DLTS::Displacement, DBD(DB2, displacement_value));
 		this->set_cylinder(DL::Loading, DLTS::Loading, DBD(DB2, loading_value));
@@ -179,7 +177,7 @@ public:
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 		
 		lines_height = ship_y * 0.618F;
-		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, 18000.0, lines_width, lines_height));
+		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, displacement_range, lines_width, lines_height, 7U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 

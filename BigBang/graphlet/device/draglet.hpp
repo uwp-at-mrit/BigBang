@@ -32,6 +32,7 @@ namespace WarGrey::SCADA {
 		IDraglet(WarGrey::SCADA::DragInfo& info, float width, float height, float thickness,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color,
@@ -42,15 +43,20 @@ namespace WarGrey::SCADA {
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 
 	public:
-		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
-
-	public:
 		void set_dredging(bool on) { this->dredging = on; }
 		void set_position(float suction_depth,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead,
 			double visor_angle,
 			bool force = false);
+
+	public:
+		double get_arm_degrees(unsigned int idx = DRAG_SEGMENT_MAX_COUNT);
+		double get_visor_earth_degrees();
+
+	protected:
+		virtual Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& X) = 0;
+		virtual double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) = 0;
 
 	protected:
 		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
@@ -62,16 +68,19 @@ namespace WarGrey::SCADA {
 			Windows::Foundation::Numerics::float3& draghead) {}
 
 	protected:
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
-		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ dragarm_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead_part;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor_part;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ dragarm;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ universal_joint;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rubbers[DRAG_SEGMENT_MAX_COUNT];
+
+	protected:
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ dragarm_style;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
@@ -79,7 +88,9 @@ namespace WarGrey::SCADA {
 	protected:
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ mfont;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ draghead_m;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ forearm_deg;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ ujoints_ms[DRAG_SEGMENT_MAX_COUNT];
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ arm_degs[DRAG_SEGMENT_MAX_COUNT];
 		unsigned int precision;
 		
 	protected:
@@ -101,15 +112,15 @@ namespace WarGrey::SCADA {
 		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
-		double angle[DRAG_SEGMENT_MAX_COUNT];
-		double drag_arm_angle;
+		double arm_angles[DRAG_SEGMENT_MAX_COUNT];
+		double forearm_angle;
 		float drag_length;
 
 	protected: // graphlets 2D coordinates
 		Windows::Foundation::Numerics::float2 _suction;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
-		double _drag_arm_angle;
+		double _forearm_angle;
 
 	protected:
 		double visor_angle;
@@ -122,6 +133,7 @@ namespace WarGrey::SCADA {
 		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 5.0F
 			, unsigned int outside_step = 2U, unsigned int inside_step = 1U, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr,
@@ -133,15 +145,17 @@ namespace WarGrey::SCADA {
 
 	public:
 		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
-
+		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
+		
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 		void update_drag_head() override;
 
 	private:
-		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx, float hspace);
+		void draw_metrics(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float gx, float hspace,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	private:
 		double outside_most;
@@ -154,6 +168,7 @@ namespace WarGrey::SCADA {
 		DragXZlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color,
 			float hatchmark_interval = 5.0F, float suction_lowest = -20.0F, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr,
@@ -165,6 +180,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 
 	protected:
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
@@ -175,8 +191,9 @@ namespace WarGrey::SCADA {
 			Windows::Foundation::Numerics::float3& draghead) override;
 
 	private:	
-		void draw_meter(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float lX, float rX, float Y);
+		void draw_metrics(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float lX, float rX, float Y,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
@@ -213,17 +230,9 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		double get_arm_earth_degrees();
-		double get_visor_earth_degrees();
-
 		void set_angles(double visor_degrees, double arm_degrees, bool force = false);
 		void set_depths(float suction_depth, float draghead_depth, bool force = false);
-		void set_position(float suction_depth,
-			Windows::Foundation::Numerics::float3& last_ujoint,
-			Windows::Foundation::Numerics::float3& draghead,
-			double visor_angle,
-			bool force = false);
-
+		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;

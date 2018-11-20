@@ -20,11 +20,8 @@ namespace WarGrey::SCADA {
 		virtual void post_read_data(WarGrey::SCADA::Syslog* logger) {}
 
 	public:
-		virtual void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {}
-		virtual void on_analog_input(const uint8* db203, size_t count, WarGrey::SCADA::Syslog* logger) {}
-
-	public:
 		virtual void on_digital_input(const uint8* db4, size_t count4, const uint8* db205, size_t count205, WarGrey::SCADA::Syslog* logger) {}
+		virtual void on_analog_input(const uint8* db2, size_t count2, const uint8* db203, size_t count203, WarGrey::SCADA::Syslog* logger) {}
 	};
 
 	private class PLCMaster : public WarGrey::SCADA::MRMaster {

@@ -10,6 +10,9 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 	if (ps_schema == nullptr) {
 		DredgeAddress* schema = new DredgeAddress();
 
+		schema->drag_position = 20U;
+		schema->visor_angle = 272U;
+
 		schema->compensator = 82U;
 		schema->density_speed = 172U;
 		schema->pulling_force = 110U;
@@ -22,11 +25,11 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 		schema->winch_speed = 280U;
 		schema->winch_length = 544U;
 
-		schema->drag_position = 20U;
-		schema->intermediate_angle = 408U;
-		schema->draghead_angle = 412U;
-		schema->visor_angle = 272U;
-
+		schema->backarm_vertical_angle = 104U;
+		schema->backarm_horizontal_angle = 105U;
+		schema->forearm_vertical_angle = 106U;
+		schema->forearm_horizontal_angle = 107U;
+		
 		ps_schema = schema;
 	}
 
@@ -36,6 +39,9 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 	if (sb_schema == nullptr) {
 		DredgeAddress* schema = new DredgeAddress();
+
+		schema->drag_position = 96U;
+		schema->visor_angle = 276U;
 
 		schema->compensator = 98U;
 		schema->density_speed = 174U;
@@ -49,11 +55,11 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 		schema->winch_speed = 292U;
 		schema->winch_length = 556U;
 
-		schema->drag_position = 96U;
-		schema->intermediate_angle = 416U;
-		schema->draghead_angle = 420U;
-		schema->visor_angle = 276U;
-
+		schema->backarm_vertical_angle = 120U;
+		schema->backarm_horizontal_angle = 121U;
+		schema->forearm_vertical_angle = 122U;
+		schema->forearm_horizontal_angle = 123U;
+		
 		sb_schema = schema;
 	}
 

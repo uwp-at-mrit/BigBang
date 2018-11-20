@@ -126,13 +126,15 @@ void PLCMaster::send_command(uint16 index_p1) {
 /*************************************************************************************************/
 void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, size_t size, Syslog* logger) {
 	size_t count, subaddr0, subaddrn;
-	size_t adbs[] = { MRDB::ANALOG_INPUT, MRDB::REALTIME };
+	size_t adbs[] = { MRDB::REALTIME, MRDB::ANALOG_INPUT };
 	size_t ddbs[] = { MRDB::DIGITAL_INPUT_RAW, MRDB::DIGITAL_INPUT };
 	size_t dqcount = 2;
 	size_t analog_size = sizeof(float);
 	size_t digital_size = sizeof(uint8);
 	uint8* digital_data[] = { nullptr, nullptr };
 	size_t digital_counts[] = { 0, 0 };
+	uint8* analog_data[] = { nullptr, nullptr };
+	size_t analog_counts[] = { 0, 0 };
 
 	this->pre_read_data(logger);
 
@@ -160,17 +162,16 @@ void PLCConfirmation::on_all_signals(size_t addr0, size_t addrn, uint8* data, si
 			}
 
 			if (valid_address(logger, adbs[i], subaddr0, subaddrn, count, analog_size, size)) {
-				uint8* raw = data + subaddr0;
-				size_t real_count = count * analog_size;
-				
-				switch (adbs[i]) {
-				case MRDB::REALTIME: this->on_realtime_data(raw, real_count, logger); break;
-				case MRDB::ANALOG_INPUT: this->on_analog_input(raw, real_count, logger); break;
-				}
+				analog_data[i] = data + subaddr0;
+				analog_counts[i] = count * analog_size;
 			}
 		} else {
 			logger->log_message(Log::Warning, L"missing configuration for data block %hu", adbs[i]);
 		}
+	}
+
+	if ((analog_data[0] != nullptr) && (analog_data[1] != nullptr)) {
+		this->on_analog_input(analog_data[0], analog_counts[0], analog_data[1], analog_counts[1], logger);
 	}
 
 	this->post_read_data(logger);
