@@ -75,7 +75,7 @@ DimensionStyle WarGrey::SCADA::make_plain_dimension_style(float nfsize, unsigned
 	return ds;
 }
 
-DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number, ICanvasBrush^ color) {
+DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsigned int min_number, int precision, ICanvasBrush^ color) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
 	DimensionStyle ds;
@@ -87,11 +87,12 @@ DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsign
 	ds.number_color = color;
 	ds.unit_color = color;
 	ds.caret_color = color;
+	ds.precision = precision;
 	
 	return ds;
 }
 
-DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number
+DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number, int precision
 	, ICanvasBrush^ label_color, ICanvasBrush^ label_bgcolor) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
@@ -107,6 +108,7 @@ DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsi
 	ds.number_color = Colours::Background;
 	ds.label_background_color = label_bgcolor;
 	ds.label_color = label_color;
+	ds.precision = precision;
 	
 	return ds;
 }

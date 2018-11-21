@@ -221,10 +221,14 @@ namespace WarGrey::SCADA {
 	public:
 		void set_angles(double visor_degrees, double arm_degrees, bool force = false);
 		void set_depths(float suction_depth, float draghead_depth, bool force = false);
+
+	public:
+		void show_depth_metrics(bool yes_or_no);
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ pointer_style;
-		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ angle_hatchmark;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ depth_hatchmark;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ arm_pointer;
@@ -242,8 +246,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ depth_m;
 		unsigned int precision;
-		float depth_x;
-
+		
 	private:
 		WarGrey::SCADA::DragInfo info;
 		float depth_interval;
@@ -252,7 +255,9 @@ namespace WarGrey::SCADA {
 		float radius;
 		float thickness;
 		float sign;
-		float vspace;
+		float tspace;
+		float arm_bottom;
+		float teeth_y;
 
 	private:
 		float visor_radius;
@@ -268,7 +273,11 @@ namespace WarGrey::SCADA {
 	private:
 		double arm_earth_degrees;
 		double visor_degrees;
+
+	private:
+		bool depth_shown;
 		float suction_depth;
 		float draghead_depth;
+		float depth_x;
 	};
 }

@@ -4,6 +4,9 @@
 
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
+	static unsigned int drag_ps_visor_constant_tension_command = 659U;
+	static unsigned int drag_sb_visor_constant_tension_command = 660U;
+
 	template<typename OP, typename E>
 	uint16 DO_winch_command(OP cmd, E id) {
 		uint16 offset = 0U;
@@ -155,6 +158,10 @@ namespace WarGrey::SCADA {
 
 		return index + offset;
 	}
+
+
+	static unsigned int ctension_ps_buttons = 659U;
+	static unsigned int ctension_sb_buttons = 660U;
 
 	template<typename CMD>
 	uint16 DO_LMOD_command(CMD cmd) {

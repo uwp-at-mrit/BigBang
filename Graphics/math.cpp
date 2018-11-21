@@ -29,11 +29,24 @@ float WarGrey::SCADA::degrees_to_radians(double degrees) {
 	return quick_degrees_to_radians(degrees);
 }
 
-double WarGrey::SCADA::degrees_normalize(double degrees) {
-	while (degrees < 0.000) degrees += 360.0;
-	while (degrees >= 360.0) degrees -= 360.0;
+double WarGrey::SCADA::degrees_normalize(double degrees, double degrees_start) {
+	double degrees_end = degrees_start + 360.0;
+
+	while (degrees < degrees_start) degrees += 360.0;
+	while (degrees >= degrees_end) degrees -= 360.0;
 
 	return degrees;
+}
+
+float WarGrey::SCADA::radians_normalize(float radians, double degrees_start) {
+	float double_pi = float(M_PI * 2.0);
+	float radians_start = quick_degrees_to_radians(degrees_start);
+	float radians_end = radians_start + double_pi;
+
+	while (radians < radians_start) radians += double_pi;
+	while (radians >= radians_end) radians -= double_pi;
+
+	return radians;
 }
 
 double WarGrey::SCADA::points_angle(float2& pt1, float2& pt2) {

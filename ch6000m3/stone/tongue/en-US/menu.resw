@@ -360,4 +360,7 @@
   <data name="StopGateValves" xml:space="preserve">
     <value>Stop All Gate Valves</value>
   </data>
+  <data name="CTension" xml:space="preserve">
+    <value>Constant Tension</value>
+  </data>
 </root>

@@ -193,7 +193,7 @@ public:
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
 		this->load_dimension(this->dimensions, DL::Overflow, "meter", this->plain_style);
-		this->load_dimension(this->dimensions, DL::NetWeight, "kgrams", this->netweight_style);
+		this->load_dimension(this->dimensions, DL::NetWeight, "ton", this->netweight_style);
 
 		this->load_buttons(this->hdchecks);
 	}

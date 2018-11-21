@@ -76,6 +76,9 @@ namespace WarGrey::SCADA {
 	static unsigned int suction_ps_buttons = 1913U;
 	static unsigned int suction_sb_buttons = 1921U;
 
+	static unsigned int ctension_ps_button = 1569U;
+	static unsigned int ctension_sb_button = 1570U;
+
 	/************************************************************************************************/
 	template<class W>
 	void DI_winch(W* target
@@ -159,6 +162,11 @@ namespace WarGrey::SCADA {
 		} else {
 			detarget->set_status(ButtonStatus::Default);
 		}
+	}
+
+	template<class B>
+	void DI_ctension_button(B* target, const uint8* db205, unsigned int idx_p1) {
+		target->set_status(DBX(db205, idx_p1 - 1U), ButtonStatus::Executing, ButtonStatus::Default);
 	}
 
 	bool DI_long_sb_drag(const uint8* db205) {

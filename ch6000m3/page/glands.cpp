@@ -76,8 +76,8 @@ private class GlandPumps final
 public:
 	GlandPumps(GlandsPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->dimension_style = make_highlight_dimension_style(large_metrics_font_size, 6U);
-		this->setting_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::GhostWhite, Colours::RoyalBlue);
+		this->dimension_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0);
+		this->setting_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::GhostWhite, Colours::RoyalBlue);
 	}
 
 public:

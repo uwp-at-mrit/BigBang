@@ -24,7 +24,12 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ device_name;
 		WarGrey::SCADA::IPLCMaster* device;
 		WarGrey::SCADA::PLCMasterMode plc_mode;
-    };
+
+	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ retry_icon;
+		unsigned int retry_step;
+		float retry_icon_size;
+	};
 
 	private class Statuslinelet : public virtual WarGrey::SCADA::IGraphlet, public WarGrey::SCADA::ISyslogReceiver {
 	public:

@@ -360,4 +360,7 @@
   <data name="StopGateValves" xml:space="preserve">
     <value>停止所有闸阀</value>
   </data>
+  <data name="CTension" xml:space="preserve">
+    <value>恒张力</value>
+  </data>
 </root>

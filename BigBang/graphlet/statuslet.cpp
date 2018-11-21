@@ -5,6 +5,7 @@
 #include "graphlet/statuslet.hpp"
 
 #include "text.hpp"
+#include "polar.hpp"
 #include "paint.hpp"
 #include "string.hpp"
 #include "system.hpp"
@@ -13,6 +14,8 @@
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
+
+using namespace Windows::System;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -158,6 +161,9 @@ void Statusbarlet::construct() {
 		statusbar = new SingletonStatus();
 		register_system_status_listener(statusbar);
 	}
+
+	this->retry_icon_size = statusbar_height() * 0.618F;
+	this->retry_icon = geometry_freeze(polar_arrowhead(this->retry_icon_size * 0.5F, 0.0));
 }
 
 void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
@@ -166,8 +172,13 @@ void Statusbarlet::fill_extent(float x, float y, float* width, float* height) {
 }
 
 void Statusbarlet::update(long long count, long long interval, long long uptime) {
-	if ((this->device != nullptr) && (this->device->connected())) {
-		this->device->send_scheduled_request(count, interval, uptime);
+	if (this->device != nullptr) {
+		if (this->device->connected()) {
+			this->device->send_scheduled_request(count, interval, uptime);
+		} else {
+			this->retry_step = count % 9;
+			this->notify_updated();
+		}
 	}
 
 	if (statusbar->needs_update()) {
@@ -186,13 +197,29 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(this->caption, x + width * 0.0F, context_y, Colours::Chocolate);
 	ds->DrawTextLayout(statusbar->clock, x + width * 1.0F, context_y, Colours::Foreground);
 	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
-	ds->DrawTextLayout(statusbar->brightness, x + width * 3.0F, context_y, Colours::GreenYellow);
 	ds->DrawTextLayout(statusbar->wifi, x + width * 4.0F, context_y, Colours::Yellow);
 	ds->DrawTextLayout(statusbar->storage, x + width * 6.0F, context_y, Colours::YellowGreen);
 	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
-	{ // highlight PLC Status
+
+	{ // draw App Memory Usage
+		AppMemoryUsageLevel level;
+		unsigned long long memory = system_memory_usage(&level);
+		CanvasSolidColorBrush^ color = Colours::YellowGreen;
+
+		switch (level) {
+		case AppMemoryUsageLevel::OverLimit: color = Colours::Firebrick; break;
+		case AppMemoryUsageLevel::High: color = Colours::Orange; break;
+		case AppMemoryUsageLevel::Low: color = Colours::RoyalBlue; break;
+		}
+
+		ds->DrawText(speak("memory", tongue_scope) + ": " + sstring(memory, 2),
+			x + width * 3.0F, context_y,
+			color, status_font);
+	}
+
+	{ // draw PLC Status
 		float plc_x = x + width * 5.0F;
 
 		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
@@ -211,15 +238,14 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 
 			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
 		} else {
-			static Platform::String^ dots[] = { "", ".", "..", "..." , "...." , "....." , "......" };
-			static unsigned int retry_count = 0;
-			int idx = (retry_count++) % (sizeof(dots) / sizeof(Platform::String^));
+			float icon_cx = plc_x + status_prefix_width + this->retry_icon_size * 0.5F;
+			float icon_cy = y + status_height * 0.5F;
 
-			ds->DrawText(speak("connecting", tongue_scope) + dots[idx],
-				plc_x + status_prefix_width, context_y,
-				Colours::Red, status_font);
-
-			this->device_name = nullptr;
+			for (unsigned int i = 0; i < this->retry_step; i++) {
+				ds->DrawCachedGeometry(this->retry_icon,
+					icon_cx + this->retry_icon_size * float(i), icon_cy,
+					Colours::Orange);
+			}
 		}
 	}
 }

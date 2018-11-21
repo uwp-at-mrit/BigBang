@@ -1,4 +1,6 @@
-﻿#include "graphlet/device/draglet.hpp"
+﻿#include <cmath>
+
+#include "graphlet/device/draglet.hpp"
 
 #include "math.hpp"
 #include "shape.hpp"
@@ -104,10 +106,12 @@ static CanvasGeometry^ make_draghead(float radius, float bottom_radius, float ar
 	return geometry_union(CanvasGeometry::CreatePath(head), geometry_union(center, geometry_rotate(joint, degrees, 0.0F, 0.0F)));
 }
 
-static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth_length, double degrees0, double arm_degrees0, float sign) {
+static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth_length
+	, double degrees0, double arm_degrees0, float sign, float* teeth_y = nullptr) {
 	auto visor = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double degrees = drag_adjusted_angle(degrees0, sign);
 	double arm_degrees = drag_adjusted_angle(arm_degrees0, sign);
+	double normal_start = ((sign > 0.0F) ? 0.0 : -180.0);
 	float jaw_length = teeth_length * 0.85F;
 	float bottom_base_radians = degrees_to_radians(degrees + 90.0 * sign);
 	float bottom_diffradians = std::acos(bottom_radius / radius);
@@ -115,8 +119,8 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	float bottom_intermediate_radians = degrees_to_radians(degrees + 175.0 * sign);
 	float radians = degrees_to_radians(degrees + 180.0 * sign);
 	float top_intermediate_radians = degrees_to_radians(degrees + 190.0 * sign);
-	float top_start_radians = degrees_to_radians(degrees + 215.0 * sign); // TODO: this angle should based on the range
-	float top_stop_radians = degrees_to_radians(arm_degrees + drag_visor_end_angle + ((sign > 0.0F) ? 180.0 : -360.0));
+	float top_start_radians = degrees_to_radians(degrees_normalize(degrees + 215.0 * sign, normal_start)); // TODO: this angle should based on the range
+	float top_stop_radians = degrees_to_radians(degrees_normalize(arm_degrees - drag_visor_end_angle * sign, normal_start));
 	float jaw_radians = bottom_base_radians + std::acos(bottom_radius / jaw_length) * sign;
 	float teeth_radians = jaw_radians - degrees_to_radians(6.18) * sign;
 	float2 bottom_start, bottom_teeth, teeth, bottom_intermediate, top_teeth, top_intermediate_far, top_intermediate_near, top_start;
@@ -130,6 +134,8 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	circle_point(jaw_length, top_intermediate_radians, &top_intermediate_near.x, &top_intermediate_near.y);
 	circle_point(radius, top_start_radians, &top_start.x, &top_start.y);
 	
+	SET_BOX(teeth_y, teeth.y);
+
 	visor->BeginFigure(0.0F, 0.0F);
 	visor->AddLine(bottom_start);
 	visor->AddLine(bottom_teeth);
@@ -681,7 +687,13 @@ void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {
 
 void DragHeadlet::fill_margin(float x, float y, float* ts, float* rs, float* bs, float* ls) {
 	SET_BOXES(ls, rs, 0.0F);
-	SET_BOXES(ts, bs, this->vspace);
+	SET_BOX(ts, this->tspace);
+
+	if (this->depth_shown) {
+		SET_BOX(bs, 0.0F);
+	} else {
+		SET_BOX(bs, this->radius - std::max(this->arm_bottom, this->teeth_y));
+	}
 }
 
 void DragHeadlet::construct() {
@@ -699,7 +711,7 @@ void DragHeadlet::construct() {
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
-	this->vspace = this->radius + ametrics.label_ty;
+	this->tspace = this->radius + ametrics.label_ty;
 	this->translate_x = this->radius - this->radius * 2.0F * 0.382F;
 	this->translate_y = 0.0F;
 	this->visor_radius = head_radius - (vmetrics.ring_radius - head_radius) * 0.618F;
@@ -709,12 +721,19 @@ void DragHeadlet::construct() {
 	this->arrow_radius = ametrics.ch * 0.5F;
 	this->visor_pointer_radius = vmetrics.ring_radius - this->arrow_radius * 2.0F;
 	this->arm_pointer_radius = ametrics.ring_radius - this->arrow_radius * 2.0F;
-	
-	this->draghead = geometry_freeze(make_draghead(head_radius, this->bottom_radius, arm_thickness, this->radius + this->translate_x,
-		this->offset, 0.0, this->sign, this->thickness * 4.0F));
+	this->angle_hatchmark = geometry_freeze(geometry_union(vhatchmark, ahatchmark));
+
+	{ // make drag head
+		auto draghead = make_draghead(head_radius, this->bottom_radius, arm_thickness, this->radius + this->translate_x,
+			this->offset, 0.0, this->sign, this->thickness * 4.0F);
+		auto box = draghead->ComputeBounds();
+
+		this->draghead = geometry_freeze(draghead);
+		this->arm_bottom = (box.Y + box.Height);
+	}
 
 	if (this->sign > 0.0F) { // leftward
-		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
+		float height = this->radius - this->bottom_radius + this->translate_y;
 		auto dhatchmark = vrhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
 		float arrow_length = dmetrics.width;
 		auto arrow = hline(arrow_length);
@@ -722,23 +741,22 @@ void DragHeadlet::construct() {
 		
 		this->depth_x = dmetrics.width + dmetrics.gap_space;
 		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow, -arrow_length), -this->arrow_radius * 2.0F));
-		this->hatchmarks = geometry_freeze(geometry_union(geometry_union(vhatchmark, ahatchmark), dhatchmark, 0.0F, this->bottom_radius));
+		this->depth_hatchmark = geometry_freeze(geometry_translate(dhatchmark, 0.0F, this->bottom_radius));
 	} else {
-		float height = -ametrics.label_ty - this->bottom_radius + this->translate_y;
+		float height = this->radius - this->bottom_radius + this->translate_y;
 		auto dhatchmark = vlhatchmark(height, -this->depth_range, depth_interval, depth_step, 1.0F, &dmetrics, 0U, true, this->depth_font);
 		auto arrow = hline(dmetrics.width);
 		auto arrowhead = polar_arrowhead(this->arrow_radius, 180.0);
 		
 		this->depth_x = -dmetrics.width - dmetrics.gap_space;
 		this->depth_pointer = geometry_freeze(geometry_translate(geometry_union(arrowhead, arrow), this->arrow_radius * 2.0F));
-		this->hatchmarks = geometry_freeze(geometry_union(geometry_union(vhatchmark, ahatchmark), dhatchmark,
-			-dmetrics.width, this->bottom_radius));
+		this->depth_hatchmark = geometry_freeze(geometry_translate(dhatchmark, -dmetrics.width, this->bottom_radius));
 	}
 
 	this->depth_top = this->bottom_radius + dmetrics.hatch_y;
 	this->depth_height = dmetrics.hatch_height;
 
-	this->set_angles(00.0, 0.0, true);
+	this->set_angles(-90.0, 0.0, true);
 	this->set_depths(0.0F, 0.0F, true);
 }
 
@@ -746,8 +764,9 @@ void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
 	if (force || (this->visor_degrees != visor_angle)) {
 		float visor_length = this->radius - this->translate_x;
 		double visor_pointer = drag_adjusted_angle(visor_angle, -this->sign);
+		auto visor = make_visor(this->visor_radius, this->bottom_radius, visor_length, -visor_angle, 0.0F, this->sign, &this->teeth_y);
 
-		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, -visor_angle, 0.0F, this->sign));
+		this->visor = geometry_freeze(visor);
 		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_pointer, this->arrow_radius, this->pointer_style));
 		this->visor_degrees = visor_angle;
 
@@ -769,14 +788,18 @@ void DragHeadlet::set_depths(float suction_depth, float draghead_depth, bool for
 		this->suction_depth = -suction_depth;
 		this->suction_m = make_text_layout(flstring(suction_depth, this->precision), this->depth_font);
 
-		this->notify_updated();
+		if (this->depth_shown) {
+			this->notify_updated();
+		}
 	}
 
 	if (force || (this->draghead_depth != -draghead_depth)) {
 		this->draghead_depth = -draghead_depth;
 		this->depth_m = make_text_layout(flstring(draghead_depth, this->precision), this->depth_font);
 
-		this->notify_updated();
+		if (this->depth_shown) {
+			this->notify_updated();
+		}
 	}
 }
 
@@ -786,9 +809,12 @@ void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 
 	ds->DrawCachedGeometry(this->visor, cx, cy, this->visor_color);
 	ds->DrawCachedGeometry(this->draghead, cx, cy, this->body_color);
-	ds->DrawCachedGeometry(this->hatchmarks, cx, cy, this->hatchmark_color);
+	
+	ds->DrawCachedGeometry(this->angle_hatchmark, cx, cy, this->hatchmark_color);
+	ds->DrawCachedGeometry(this->visor_pointer, cx, cy, this->angle_pointer_color);
+	ds->DrawCachedGeometry(this->arm_pointer, cx, cy, this->angle_pointer_color);
 
-	{ // draw pointers
+	if (this->depth_shown) {
 		Rect suction_box = this->suction_m->LayoutBounds;
 		Rect depth_box = this->depth_m->LayoutBounds;
 		float depth_range = this->depth_interval + this->depth_range;
@@ -798,9 +824,7 @@ void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 		float depth_meter_y = cy + draghead_dy - depth_box.Height * 0.5F;
 		float suction_meter_y = cy + suction_dy - suction_box.Height * 0.5F;
 
-		ds->DrawCachedGeometry(this->visor_pointer, cx, cy, this->angle_pointer_color);
-		ds->DrawCachedGeometry(this->arm_pointer, cx, cy, this->angle_pointer_color);
-
+		ds->DrawCachedGeometry(this->depth_hatchmark, cx, cy, this->hatchmark_color);
 		ds->DrawCachedGeometry(this->depth_pointer, cx, cy + draghead_dy, this->draghead_pointer_color);
 		ds->DrawCachedGeometry(this->depth_pointer, cx, cy + suction_dy, this->suction_pointer_color);
 
@@ -812,4 +836,9 @@ void DragHeadlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, 
 			ds->DrawTextLayout(this->suction_m, depth_x - suction_box.Width, suction_meter_y, this->suction_pointer_color);
 		}
 	}
+}
+
+void DragHeadlet::show_depth_metrics(bool yes_or_no) {
+	this->depth_shown = yes_or_no;
+	this->notify_updated();
 }

@@ -16,7 +16,7 @@ using namespace Windows::Foundation::Collections;
 using namespace Platform::Collections;
 
 using namespace Windows::Graphics::Display;
-
+using namespace Windows::System;
 using namespace Windows::Storage;
 
 using namespace Windows::Devices::Power;
@@ -92,6 +92,14 @@ void WarGrey::SCADA::system_try_change_screen_brightness(double brightness, Disp
 }
 
 /*************************************************************************************************/
+unsigned long long WarGrey::SCADA::system_memory_usage(AppMemoryUsageLevel* level) {
+	if (level != nullptr) {
+		(*level) = MemoryManager::AppMemoryUsageLevel;
+	}
+
+	return MemoryManager::AppMemoryUsage;
+}
+
 float WarGrey::SCADA::system_battery_capacity(float defval_if_no_battery) {
 	auto info = Battery::AggregateBattery->GetReport();
 	auto maybe_remaining = info->RemainingCapacityInMilliwattHours;

@@ -56,7 +56,7 @@ private enum class DSGOperation { WindOut, WindUp, Stop, _ };
 private enum class DSWCOperation { Charge, Discharge, Stop, _ };
 private enum class DSDVOperation { Up, Down, Stop, _ };
 
-private enum class DSSCmd { Inflate, Deflate, _ };
+private enum class DSGCmd { Inflate, Deflate, CTension, _ };
 private enum class DSLMODCmd { Auto, _ };
 
 // WARNING: order matters
@@ -248,6 +248,8 @@ protected:
 	void load_draghead(std::map<E, Credit<D, E>*>& ds, E id, E eid, E dpid, float radius, DragInfo& info, unsigned int visor_color) {
 		ds[id] = this->master->insert_one(new Credit<D, E>(info, radius, visor_color), id);
 
+		ds[id]->show_depth_metrics(false);
+
 		this->load_dimension(this->degrees, id, "degrees");
 		this->load_dimension(this->degrees, eid, "degrees");
 		this->load_dimension(this->pressures, dpid, "bar");
@@ -293,8 +295,11 @@ protected:
 	}
 
 	void reflow_draghead_metrics(DS id, DS eid, DS dpid) {
+		float bspace;
+		
+		this->dragheads[id]->fill_margin(0.0F, 0.0F, nullptr, nullptr, &bspace);
 		this->master->move_to(this->pressures[dpid], this->dragheads[id], GraphletAnchor::CT, GraphletAnchor::CB);
-		this->master->move_to(this->degrees[id], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT);
+		this->master->move_to(this->degrees[id], this->dragheads[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, -bspace);
 		this->master->move_to(this->degrees[eid], this->degrees[id], GraphletAnchor::CB, GraphletAnchor::CT);
 	}
 
@@ -505,8 +510,11 @@ public:
 		DI_winch(this->winches[DS::sbIntermediate], DB4, winch_sb_intermediate_limits, DB205, winch_sb_intermediate_details);
 		DI_winch(this->winches[DS::sbDragHead], DB4, winch_sb_draghead_limits, DB205, winch_sb_draghead_details);
 
-		DI_suction_buttons(this->ps_buttons[DSSCmd::Inflate], this->ps_buttons[DSSCmd::Deflate], DB205, suction_ps_buttons);
-		DI_suction_buttons(this->sb_buttons[DSSCmd::Inflate], this->sb_buttons[DSSCmd::Deflate], DB205, suction_sb_buttons);
+		DI_suction_buttons(this->ps_buttons[DSGCmd::Inflate], this->ps_buttons[DSGCmd::Deflate], DB205, suction_ps_buttons);
+		DI_suction_buttons(this->sb_buttons[DSGCmd::Inflate], this->sb_buttons[DSGCmd::Deflate], DB205, suction_sb_buttons);
+
+		DI_ctension_button(this->ps_buttons[DSGCmd::CTension], DB205, ctension_ps_button);
+		DI_ctension_button(this->sb_buttons[DSGCmd::CTension], DB205, ctension_sb_button);
 
 		this->set_winch_limits(DS::psTrunnion, DS::psDragHead);
 		this->set_winch_limits(DS::sbTrunnion, DS::sbDragHead);
@@ -682,7 +690,7 @@ public:
 			}
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
-			this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
+			//this->station->map_credit_graphlet(this->labels[it->first], anchor, dx, dy);
 		}
 
 		this->station->map_credit_graphlet(this->progresses[DS::D003], GraphletAnchor::CT, 0.0F, ystep);
@@ -810,23 +818,25 @@ public:
 				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
 			}
 
-			{ // reflow buttons
-				this->master->move_to(this->ps_buttons[DSSCmd::Inflate], vinset, vinset * 1.2F);
-				this->master->move_to(this->ps_buttons[DSSCmd::Deflate], this->ps_buttons[DSSCmd::Inflate], GraphletAnchor::RC, GraphletAnchor::LC);
-				this->master->move_to(this->pressures[DS::PSSIP], this->ps_buttons[DSSCmd::Deflate], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
-
-				this->master->move_to(this->sb_buttons[DSSCmd::Deflate], width - vinset, vinset * 1.2F, GraphletAnchor::RT);
-				this->master->move_to(this->sb_buttons[DSSCmd::Inflate], this->sb_buttons[DSSCmd::Deflate], GraphletAnchor::LC, GraphletAnchor::RC);
-				this->master->move_to(this->pressures[DS::SBSIP], this->sb_buttons[DSSCmd::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
-
-				this->master->move_to(this->lmod_buttons[DSLMODCmd::Auto], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
-			}
-
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
 			this->master->move_to(this->hopper_types[DS::SB], this->labels[DS::SBHPDP], GraphletAnchor::RT, GraphletAnchor::CB, +vinset, -txt_gapsize);
 
 			this->reflow_draghead_metrics(DS::PSVisor, DS::PSEarth, DS::PSDP);
 			this->reflow_draghead_metrics(DS::SBVisor, DS::SBEarth, DS::SBDP);
+		}
+
+		{ // reflow buttons
+			this->master->move_to(this->ps_buttons[DSGCmd::Inflate], vinset, vinset * 1.2F);
+			this->master->move_to(this->ps_buttons[DSGCmd::Deflate], this->ps_buttons[DSGCmd::Inflate], GraphletAnchor::RC, GraphletAnchor::LC);
+			this->master->move_to(this->pressures[DS::PSSIP], this->ps_buttons[DSGCmd::Deflate], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+
+			this->master->move_to(this->sb_buttons[DSGCmd::Deflate], width - vinset, vinset * 1.2F, GraphletAnchor::RT);
+			this->master->move_to(this->sb_buttons[DSGCmd::Inflate], this->sb_buttons[DSGCmd::Deflate], GraphletAnchor::LC, GraphletAnchor::RC);
+			this->master->move_to(this->pressures[DS::SBSIP], this->sb_buttons[DSGCmd::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+
+			this->master->move_to(this->lmod_buttons[DSLMODCmd::Auto], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
+			this->master->move_to(this->ps_buttons[DSGCmd::CTension], this->degrees[DS::PSEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
+			this->master->move_to(this->sb_buttons[DSGCmd::CTension], this->degrees[DS::SBEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 		}
 	}
 
@@ -839,13 +849,20 @@ public:
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) {
-		auto suction_btn = dynamic_cast<GroupCredit<Buttonlet, DS, DSSCmd>*>(g);
+		auto group_btn = dynamic_cast<GroupCredit<Buttonlet, DS, DSGCmd>*>(g);
 		auto lmod_btn = dynamic_cast<GroupCredit<Buttonlet, DS, DSLMODCmd>*>(g);
+		auto plc = this->master->get_plc_device();
 
-		if (suction_btn != nullptr) {
-			this->master->get_plc_device()->send_command(DO_suction_command(suction_btn->id, suction_btn->gid == DS::PS));
+		if (group_btn != nullptr) {
+			if (group_btn->id == DSGCmd::CTension) {
+				plc->send_command((group_btn->gid == DS::PS)
+					? drag_ps_visor_constant_tension_command
+					: drag_sb_visor_constant_tension_command);
+			} else {
+				plc->send_command(DO_suction_command(group_btn->id, group_btn->gid == DS::PS));
+			}
 		} else if (lmod_btn != nullptr) {
-			this->master->get_plc_device()->send_command(DO_LMOD_command(lmod_btn->id));
+			plc->send_command(DO_LMOD_command(lmod_btn->id));
 		}
 	}
 
@@ -853,7 +870,7 @@ private:
 	template<class G, typename E>
 	void load_valves(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float radius, double degrees) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
+			//this->load_label(ls, id.ToString(), id, Colours::Silver, this->station_font);
 			gs[id] = this->master->insert_one(new G(radius, degrees), id);
 		}
 	}
@@ -918,8 +935,8 @@ private: // never delete these graphlets manually.
 	std::map<DS, Credit<Percentagelet, DS>*> progresses;
 	std::map<DS, Credit<Labellet, DS>*> hopper_types;
 	std::map<DS, Credit<GantrySymbollet, DS>*> gantries;
-	std::map<DSSCmd, GroupCredit<Buttonlet, DS, DSSCmd>*> ps_buttons;
-	std::map<DSSCmd, GroupCredit<Buttonlet, DS, DSSCmd>*> sb_buttons;
+	std::map<DSGCmd, GroupCredit<Buttonlet, DS, DSGCmd>*> ps_buttons;
+	std::map<DSGCmd, GroupCredit<Buttonlet, DS, DSGCmd>*> sb_buttons;
 	std::map<DSLMODCmd, GroupCredit<Buttonlet, DS, DSLMODCmd>*> lmod_buttons;
 	OverflowPipelet* overflowpipe;
 	Arclet* lmod;
@@ -939,8 +956,8 @@ private class Drags final
 public:
 	Drags(DredgesPage* master, DS side, unsigned int drag_color, unsigned int config_idx)
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
-		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, Colours::Green);
+		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Green);
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 
 		this->winch_op = make_menu<DSWOperation, Credit<Winchlet, DS>, PLCMaster*>(this, master->get_plc_device());

@@ -187,8 +187,8 @@ public:
 		this->label_font = make_bold_text_format(large_font_size);
 		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
-		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, Colours::Green);
+		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Green);
 	}
 
 public:
