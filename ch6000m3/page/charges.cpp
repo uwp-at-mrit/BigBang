@@ -122,12 +122,12 @@ public:
 		this->powers[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::RC);
 		this->rpms[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LC);
 		this->dpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_discharge_pressure), GraphletAnchor::LB);
-		this->dfpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_draghead_differential_pressure), GraphletAnchor::RB);
+		//this->dfpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_draghead_differential_pressure), GraphletAnchor::RB);
 
 		this->powers[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::RC);
 		this->rpms[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LC);
 		this->dpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_discharge_pressure), GraphletAnchor::LT);
-		this->dfpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::RT);
+		//this->dfpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::RT);
 
 	}
 
@@ -361,7 +361,6 @@ public:
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
-				this->master->move_to(this->dfpressures[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
 			}; break;
 			case LD::SBHPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
@@ -375,7 +374,6 @@ public:
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
-				this->master->move_to(this->dfpressures[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
 			}; break;
 			}
 		}

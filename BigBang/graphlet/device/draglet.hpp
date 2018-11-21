@@ -44,7 +44,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_dredging(bool on) { this->dredging = on; }
-		void set_position(float suction_depth,
+		void set_figure(Windows::Foundation::Numerics::float3& trunnion,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead,
 			double visor_angle,
@@ -63,7 +63,7 @@ namespace WarGrey::SCADA {
 		virtual Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) = 0;
 		virtual void update_drag_head() = 0;
 		
-		virtual void on_position_changed(float suction_depth,
+		virtual void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
 			Windows::Foundation::Numerics::float3 ujoints[],
 			Windows::Foundation::Numerics::float3& draghead) {}
 
@@ -71,7 +71,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hatchmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ draghead_part;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ visor_part;
-		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ dragarm;
+		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ drag_body;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ universal_joint;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ rubbers[DRAG_SEGMENT_MAX_COUNT];
 
@@ -109,7 +109,8 @@ namespace WarGrey::SCADA {
 
 	protected: // real 3D coordinates
 		WarGrey::SCADA::DragInfo info;
-		Windows::Foundation::Numerics::float3 suction;
+		Windows::Foundation::Numerics::float3 pseudo_suction; // real suction does not affects the form of drags.
+		Windows::Foundation::Numerics::float3 trunnion;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
 		double arm_angles[DRAG_SEGMENT_MAX_COUNT];
@@ -117,7 +118,8 @@ namespace WarGrey::SCADA {
 		float drag_length;
 
 	protected: // graphlets 2D coordinates
-		Windows::Foundation::Numerics::float2 _suction;
+		Windows::Foundation::Numerics::float2 _pseudo_suction;
+		Windows::Foundation::Numerics::float2 _trunnion;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
 		double _forearm_angle;
@@ -186,9 +188,6 @@ namespace WarGrey::SCADA {
 		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 		void update_drag_head() override;
-		void on_position_changed(float suction_depth,
-			Windows::Foundation::Numerics::float3 ujoints[],
-			Windows::Foundation::Numerics::float3& draghead) override;
 
 	private:	
 		void draw_metrics(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,

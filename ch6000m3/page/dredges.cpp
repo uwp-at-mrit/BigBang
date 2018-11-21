@@ -344,11 +344,15 @@ protected:
 		unsigned int pidx = address->drag_position;
 		float3 ujoints[2];
 		float3 draghead = DBD_3(db2, pidx + 36U);
-		float suction_depth = DBD(db2, pidx + 0U);
-
+		float3 trunnion = DBD_3(db2, pidx + 0U);
+		float tide = DBD(db2, tide_mark);
+		float suction_draught = trunnion.x;
+		float suction_depth = suction_draught - tide;
+		
 		ujoints[0] = DBD_3(db2, pidx + 12U);
 		ujoints[1] = DBD_3(db2, pidx + 24U);
 
+		trunnion.x = 0.0F;
 		ujoints[1].y = DBD(db2, pidx + 48U);
 		draghead.y = DBD(db2, pidx + 52U);
 		draghead.z = DBD(db2, pidx + 56U);
@@ -357,8 +361,8 @@ protected:
 			double visor_progress = RealData(db203, address->visor_progress) * 0.01F;
 			double visor_angle = (info.visor_degrees_max - info.visor_degrees_min) * (1.0 - visor_progress) + info.visor_degrees_min;
 
-			this->dragxys[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
-			this->dragxzes[id]->set_position(suction_depth, ujoints, draghead, visor_angle);
+			this->dragxys[id]->set_figure(trunnion, ujoints, draghead, visor_angle);
+			this->dragxzes[id]->set_figure(trunnion, ujoints, draghead, visor_angle);
 
 			this->dragheads[vid]->set_depths(suction_depth, draghead.z);
 			this->dragheads[vid]->set_angles(visor_angle, this->dragxzes[id]->get_arm_degrees());
