@@ -36,18 +36,18 @@ static const double displacement_range = 22000.0;
 static const double compensator_range = 3.0;
 
 static const float ps_drag_trunnion_gapsize = 1.845F;
-static const float ps_drag_trunnion_length = 3.61F;
-static const float ps_drag_pipe1_length = 25.34F;
-static const float ps_drag_pipe2_length = 17.55F;
+static const float ps_drag_trunnion_length = 4.135F;
+static const float ps_drag_pipe1_length = 22.978F;
+static const float ps_drag_pipe2_length = 21.78F;
 static const float ps_drag_radius = 0.5F;
 static const float ps_drag_head_width = 4.03F;
 static const float ps_drag_head_length = 2.54F;
 static const float ps_drag_head_compensation = 0.5F;
 
 static const float sb_drag_trunnion_gapsize = 1.845F;
-static const float sb_drag_trunnion_length = 3.61F;
-static const float sb_drag_pipe1_length = 25.34F;
-static const float sb_drag_pipe2_length = 17.45F;  // the long one is 30.55F
+static const float sb_drag_trunnion_length = 4.135F;
+static const float sb_drag_pipe1_length = 22.978F;
+static const float sb_drag_pipe2_length = 22.642F;  // + 12.0F for the long drag
 static const float sb_drag_radius = 0.5F;
 static const float sb_drag_head_width = 4.03F;
 static const float sb_drag_head_length = 2.54F;

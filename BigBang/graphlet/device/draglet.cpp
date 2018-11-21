@@ -756,7 +756,7 @@ void DragHeadlet::construct() {
 	this->depth_top = this->bottom_radius + dmetrics.hatch_y;
 	this->depth_height = dmetrics.hatch_height;
 
-	this->set_angles(-90.0, 0.0, true);
+	this->set_angles(0.0, 0.0, true);
 	this->set_depths(0.0F, 0.0F, true);
 }
 
