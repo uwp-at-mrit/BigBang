@@ -120,6 +120,9 @@ public:
 		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 		this->plain_style.minimize_number_width = 5U;
 
+		this->drag_styles[0] = drag_default_style(default_ps_color);
+		this->drag_styles[1] = drag_default_style(default_sb_color);
+
 		this->drag_configs[0].trunnion_gapsize = ps_drag_trunnion_gapsize;
 		this->drag_configs[0].trunnion_length = ps_drag_trunnion_length;
 		this->drag_configs[0].pipe_lengths[0] = ps_drag_pipe1_length;
@@ -251,8 +254,8 @@ protected:
 	}
 
 	template<class D, typename E>
-	void load_drag(std::map<E, Credit<D, E>*>& ds, E id, float width, float height, DragInfo& info, unsigned int visor_color) {
-		ds[id] = this->master->insert_one(new Credit<D, E>(info, width, height, visor_color), id);
+	void load_drag(std::map<E, Credit<D, E>*>& ds, E id, float width, float height, unsigned int idx) {
+		ds[id] = this->master->insert_one(new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], width, height), id);
 	}
 
 	template<class B, typename E>
@@ -357,7 +360,7 @@ protected:
 		draghead.y = DBD(db2, pidx + 52U);
 		draghead.z = DBD(db2, pidx + 56U);
 
-		{ // WARNING: DB2 gives the wrong visor angle, uses DB203 and manually computing instead
+		{ // WARNING: DB2 gives the wrong visor angle, uses DB203 and manually computing it instead.
 			double visor_progress = RealData(db203, address->visor_progress) * 0.01F;
 			double visor_angle = (info.visor_degrees_max - info.visor_degrees_min) * (1.0 - visor_progress) + info.visor_degrees_min;
 
@@ -399,6 +402,7 @@ protected:
 
 protected:
 	DragInfo drag_configs[2];
+	DragStyle drag_styles[2];
 
 protected:
 	DredgesPage* master;
@@ -421,7 +425,7 @@ public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
-		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value());
+		this->lengths[DS::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
 
 		this->progresses[DS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->progresses[DS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
@@ -540,17 +544,6 @@ public:
 			}
 		}
 
-
-		{ // animate drags
-			bool ps_running = (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running);
-			bool sb_running = (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running);
-
-			this->dragxys[DS::PS]->set_dredging(ps_running);
-			this->dragxzes[DS::PS]->set_dredging(ps_running);
-			this->dragxys[DS::SB]->set_dredging(sb_running);
-			this->dragxzes[DS::SB]->set_dredging(sb_running);
-		}
-
 		IDredgingSystem::post_read_data(logger);
 	}
 
@@ -650,11 +643,11 @@ public:
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSEarth, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBEarth, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
-			this->load_drag(this->dragxys, DS::PS, -over_drag_width, over_drag_height, this->drag_configs[0], default_ps_color);
-			this->load_drag(this->dragxys, DS::SB, +over_drag_width, over_drag_height, this->drag_configs[1], default_sb_color);
+			this->load_drag(this->dragxys, DS::PS, -over_drag_width, over_drag_height, 0);
+			this->load_drag(this->dragxys, DS::SB, +over_drag_width, over_drag_height, 1);
 
-			this->load_drag(this->dragxzes, DS::PS, -side_drag_width, side_drag_height, this->drag_configs[0], default_ps_color);
-			this->load_drag(this->dragxzes, DS::SB, +side_drag_width, side_drag_height, this->drag_configs[1], default_sb_color);
+			this->load_drag(this->dragxzes, DS::PS, -side_drag_width, side_drag_height, 0);
+			this->load_drag(this->dragxzes, DS::SB, +side_drag_width, side_drag_height, 1);
 		}
 
 		{ // load buttons
@@ -1151,8 +1144,8 @@ public:
 		float table_header_width = width * 0.14F;
 		DragInfo config = this->drag_configs[this->drag_idx];
 
-		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_height, config, this->drag_color);
-		this->load_drag(this->dragxys, this->DS_side, over_drag_width * this->sign, drag_height, config, this->drag_color);
+		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_height, this->drag_idx);
+		this->load_drag(this->dragxys, this->DS_side, over_drag_width * this->sign, drag_height, this->drag_idx);
 
 		this->load_label(this->labels, DS_side, this->caption_color, this->caption_font);
 		this->load_label(this->labels, DS::Overlook, this->caption_color, this->label_font);

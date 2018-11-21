@@ -32,7 +32,6 @@ static CanvasSolidColorBrush^ drag_default_draghead_depth_pointer_color = Colour
 static CanvasSolidColorBrush^ drag_default_suction_depth_pointer_color = Colours::Yellow;
 static CanvasSolidColorBrush^ drag_default_hatchmark_color = Colours::Silver;
 
-static float drag_hatchmark_fontsize = 24.0F;
 static double drag_visor_end_angle = 100.0;
 
 static inline double drag_adjusted_angle(double degrees, float sign) {
@@ -156,6 +155,24 @@ static inline CanvasGeometry^ make_pointer(float radius, double degrees, float a
 }
 
 /*************************************************************************************************/
+DragStyle WarGrey::SCADA::drag_default_style(unsigned int color, unsigned int precision, float mark_fontsize, float thickness) {
+	DragStyle style;
+
+	style.color = Colours::make(color);
+	style.meter_color = drag_default_meter_color;
+	style.angle_color = drag_default_angle_color;
+	style.head_color = drag_default_head_color;
+	style.body_color = drag_default_body_color;
+	style.hatchmark_color = drag_default_hatchmark_color;
+
+	style.font = make_text_format(mark_fontsize);
+
+	style.precision = precision;
+	style.thickness = thickness;
+
+	return style;
+}
+
 float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info) {
 	float depth = info.trunnion_length + info.pipe_padding + info.head_length;
 
@@ -167,16 +184,8 @@ float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info) {
 }
 
 /*************************************************************************************************/
-IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
-	, ICanvasBrush^ color, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor
-	, CanvasTextFormat^ font)
-	: info(info), width(std::fabsf(width)), height(height), thickness(thickness), precision(2U)
-	, leftward(width < 0.0F), mfont(font), color(color == nullptr ? drag_default_color : color)
-	, meter_color(mcolor == nullptr ? drag_default_meter_color : mcolor)
-	, angle_color(acolor == nullptr ? drag_default_angle_color : acolor)
-	, head_color(hcolor == nullptr ? drag_default_head_color : hcolor)
-	, body_color(bcolor == nullptr ? drag_default_body_color : bcolor)
-	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
+IDraglet::IDraglet(DragInfo& info, DragStyle& style, float width, float height)
+	: info(info), style(style), width(std::fabsf(width)), height(height), leftward(width < 0.0F) {
 
 	this->drag_length = this->info.trunnion_length;
 	for (unsigned int idx = 0; idx < sizeof(this->info.pipe_lengths) / sizeof(float); idx++) {
@@ -200,10 +209,6 @@ IDraglet::IDraglet(DragInfo& info, float width, float height, float thickness
 
 	this->suction_style = make_dash_stroke(CanvasDashStyle::Dash);
 	this->dragarm_style = make_round_stroke_style();
-
-	if (this->mfont == nullptr) {
-		this->mfont = make_text_format(drag_hatchmark_fontsize);
-	}
 }
 
 void IDraglet::update(long long count, long long interval, long long uptime) {
@@ -244,7 +249,7 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		this->_pseudo_suction = this->space_to_local(this->pseudo_suction);
 		this->_trunnion = this->space_to_local(this->trunnion);
 		this->_draghead = this->space_to_local(draghead);
-		this->draghead_m = make_text_layout(this->position_label(draghead), this->mfont);
+		this->draghead_m = make_text_layout(this->position_label(draghead), this->style.font);
 		
 		arm->BeginFigure(this->_pseudo_suction);
 		arm->AddLine(this->_trunnion);
@@ -256,8 +261,8 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 				this->rubbers[idx] = this->universal_joint;
 				this->_ujoints[idx] = this->space_to_local(ujoints[idx]);
 				this->arm_angles[idx] = this->arctangent(ujoints[idx], last_joint);
-				this->ujoints_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->mfont);
-				this->arm_degs[idx] = make_text_layout(flstring(this->arm_angles[idx], this->precision), this->mfont);
+				this->ujoints_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->style.font);
+				this->arm_degs[idx] = make_text_layout(flstring(this->arm_angles[idx], this->style.precision), this->style.font);
 
 				last_joint = ujoints[idx];
 
@@ -271,7 +276,7 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		this->drag_body = CanvasGeometry::CreatePath(arm);
 		this->_forearm_angle = points_angle(this->_draghead, this->space_to_local(last_joint));
 		this->forearm_angle = this->arctangent(this->draghead, last_joint);
-		this->forearm_deg = make_text_layout(flstring(this->forearm_angle, this->precision), this->mfont);
+		this->forearm_deg = make_text_layout(flstring(this->forearm_angle, this->style.precision), this->style.font);
 
 		this->on_position_changed(this->trunnion, this->ujoints, this->draghead);
 		this->update_drag_head();
@@ -295,10 +300,8 @@ double IDraglet::get_visor_earth_degrees() {
 }
 
 /*************************************************************************************************/
-DragXYlet::DragXYlet(DragInfo& info, float width, float height, unsigned int color, float interval, unsigned int ostep, unsigned int istep
-	, float thickness, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor
-	, CanvasTextFormat^ font)
-	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, acolor, hcolor, bcolor, hmcolor, font) {
+DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float width, float height, float interval, unsigned int ostep, unsigned int istep)
+	: IDraglet(info, style, width, height) {
 	this->outside_most = interval * float(ostep);
 	this->inside_most = -interval * float(istep);
 	this->step = ostep + istep;
@@ -311,12 +314,12 @@ void DragXYlet::construct() {
 	float hm_width = this->width;
 	
 	if (this->leftward) {
-		hm = hbhatchmark(hm_width, this->outside_most, this->inside_most, this->step, this->thickness, &metrics, 0U, true);
+		hm = hbhatchmark(hm_width, this->outside_most, this->inside_most, this->step, this->style.thickness, &metrics, 0U, true);
 
 		this->ws_x = metrics.hatch_x;
 		this->ws_width = metrics.hatch_width;
 	} else {
-		hm = hbhatchmark(hm_width, this->inside_most, this->outside_most, this->step, this->thickness, &metrics, 0U, true);
+		hm = hbhatchmark(hm_width, this->inside_most, this->outside_most, this->step, this->style.thickness, &metrics, 0U, true);
 
 		this->ws_x = this->width - metrics.hatch_right_space;
 		this->ws_width = -metrics.hatch_width;
@@ -324,7 +327,7 @@ void DragXYlet::construct() {
 
 	{ // make axes
 		float axis_by = this->height - metrics.height;
-		auto zero = vline(axis_by, this->thickness);
+		auto zero = vline(axis_by, this->style.thickness);
 		
 		this->_pseudo_suction = this->space_to_local(this->pseudo_suction);
 		this->hatchmarks = geometry_freeze(geometry_union(hm, 0.0F, axis_by, zero, this->_pseudo_suction.x, 0.0));
@@ -361,10 +364,10 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
 	
-	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
+	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->style.hatchmark_color);
 
 	{ // draw drag
-		ds->DrawGeometry(this->drag_body, x, y, this->body_color, this->drag_thickness, this->dragarm_style);
+		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
@@ -372,20 +375,20 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float iy = y + this->_ujoints[idx].y;
 
 				if (this->rubbers[idx] != nullptr) {
-					ds->FillGeometry(this->rubbers[idx], ix, iy, this->color);
-					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->body_color);
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->style.color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->style.body_color);
 				}
 			}
 		}
 
-		ds->DrawGeometry(this->drag_body, x, y, this->color, 1.0F, this->suction_style);
+		ds->DrawGeometry(this->drag_body, x, y, this->style.color, 1.0F, this->suction_style);
 
 		{ // draw draghead
-			ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->color);
-			ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->body_color, this->thickness);
+			ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->style.color);
+			ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->style.body_color, this->style.thickness);
 
-			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->color);
-			ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->head_color);
+			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->style.color);
+			ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->style.head_color);
 		}
 	}
 
@@ -403,15 +406,15 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				x0 = ix;
 				y0 = iy;
 
-				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, x, this->drag_thickness, this->meter_color);
-				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, x, this->drag_thickness, this->angle_color);
+				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, x, this->drag_thickness, this->style.meter_color);
+				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, x, this->drag_thickness, this->style.angle_color);
 			}
 		}
 
-		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F, this->meter_color);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, x, this->drag_thickness * 1.618F, this->style.meter_color);
 		this->draw_metrics(ds, this->forearm_deg,
 			x0 + (draghead_x - x0) * 0.5F, y0 + (draghead_y - y0) * 0.5F,
-			x, this->drag_thickness, this->angle_color);
+			x, this->drag_thickness, this->style.angle_color);
 	}
 }
 
@@ -420,8 +423,8 @@ void DragXYlet::draw_metrics(CanvasDrawingSession^ ds, CanvasTextLayout^ meter, 
 	if (meter != nullptr) {
 		Rect box = meter->LayoutBounds;
 		float x0 = this->_pseudo_suction.x;
-		float lx0 = x0 - this->thickness;
-		float rx0 = x0 + this->thickness;
+		float lx0 = x0 - this->style.thickness;
+		float rx0 = x0 + this->style.thickness;
 		float y = joint_y - box.Height * 0.5F;
 		float x = joint_x + (this->leftward ? (-box.Width - hspace) : hspace);
 		float rx = x + box.Width;
@@ -443,7 +446,7 @@ bool DragXYlet::position_equal(float3& old_pos, float3& new_pos) {
 }
 
 Platform::String^ DragXYlet::position_label(float3& position) {
-	return flstring(position.y, this->precision);
+	return flstring(position.y, this->style.precision);
 }
 
 float2 DragXYlet::space_to_local(float3& position) {
@@ -466,10 +469,8 @@ double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 }
 
 /*************************************************************************************************/
-DragXZlet::DragXZlet(DragInfo& info, float width, float height, unsigned int color, float interval, float suction_lowest, float thickness
-	, ICanvasBrush^ mcolor, ICanvasBrush^ acolor, ICanvasBrush^ hcolor, ICanvasBrush^ bcolor, ICanvasBrush^ hmcolor, CanvasTextFormat^ font)
-	: IDraglet(info, width, height, thickness, Colours::make(color), mcolor, acolor, hcolor, bcolor, hmcolor, font)
-	, depth_highest(interval), suction_lowest(suction_lowest) {
+DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, float width, float height, float interval, float suction_lowest)
+	: IDraglet(info, style, width, height), depth_highest(interval), suction_lowest(suction_lowest) {
 	this->depth_lowest = -std::ceilf(this->drag_length / interval) * interval;
 }
 
@@ -478,7 +479,7 @@ void DragXZlet::construct() {
 	double head_range = this->depth_highest - this->depth_lowest;
 	double tail_range = this->depth_highest - this->suction_lowest;
 	float head_height = this->height;
-	float tail_height = head_height * float(tail_range / head_range) + this->thickness * float(head_range / tail_range);
+	float tail_height = head_height * float(tail_range / head_range) + this->style.thickness * float(head_range / tail_range);
 	unsigned int head_step = ((unsigned int)std::round(head_range / this->depth_highest));
 	unsigned int tail_step = ((unsigned int)std::round(tail_range / this->depth_highest));
 	float drag_thickness_ratio = (this->info.pipe_radius * 2.0F) / this->drag_length;
@@ -486,8 +487,8 @@ void DragXZlet::construct() {
 	this->draghead_length = this->width * drag_thickness_ratio * 3.14F;
 	
 	if (this->leftward) {
-		auto head = vlhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->thickness, &hmetrics, 0U, true);
-		auto tail = vrhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->thickness, &tmetrics, 0U, true);
+		auto head = vlhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->style.thickness, &hmetrics, 0U, true);
+		auto tail = vrhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->style.thickness, &tmetrics, 0U, true);
 
 		this->hatchmarks = geometry_freeze(geometry_union(head, tail, this->width - tmetrics.width, 0.0F));
 		
@@ -496,8 +497,8 @@ void DragXZlet::construct() {
 		this->ws_x = this->right_margin - tmetrics.em * 1.618F;
 		this->ws_width = (this->left_margin + hmetrics.em * 1.618F + this->draghead_length * 0.314F) - this->ws_x;
 	} else {
-		auto head = vrhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->thickness, &hmetrics, 0U, true);
-		auto tail = vlhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->thickness, &tmetrics, 0U, true);
+		auto head = vrhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->style.thickness, &hmetrics, 0U, true);
+		auto tail = vlhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->style.thickness, &tmetrics, 0U, true);
 
 		this->hatchmarks = geometry_freeze(geometry_union(head, this->width - hmetrics.width, 0.0F, tail));
 		
@@ -531,8 +532,8 @@ void DragXZlet::update_drag_head() {
 	double head_joint_start = (this->leftward ? -angle + 90.0 : angle - 90.0);
 	double head_joint_end = (this->leftward ? -angle + 270.0 : angle + 90.0);
 	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, -visor_angle, angle, sign);
-	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->thickness * 2.0F);
-	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->thickness);
+	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->style.thickness * 2.0F);
+	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->style.thickness);
 
 	circle_point(arm_length, this->_forearm_angle, &this->mask_dx, &this->mask_dy);
 
@@ -547,10 +548,10 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float draghead_x = x + this->_draghead.x;
 	float draghead_y = y + this->_draghead.y;
 	
-	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->hatchmark_color);
+	ds->DrawCachedGeometry(this->hatchmarks, x, y, this->style.hatchmark_color);
 
 	{ // draw drag
-		ds->DrawGeometry(this->drag_body, x, y, this->body_color, this->drag_thickness, this->dragarm_style);
+		ds->DrawGeometry(this->drag_body, x, y, this->style.body_color, this->drag_thickness, this->dragarm_style);
 
 		for (int idx = DRAG_SEGMENT_MAX_COUNT - 1; idx >= 0; idx--) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
@@ -558,33 +559,33 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				float iy = y + this->_ujoints[idx].y;
 
 				if (this->rubbers[idx] != nullptr) {
-					ds->FillGeometry(this->rubbers[idx], ix, iy, this->color);
-					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->body_color);
+					ds->FillGeometry(this->rubbers[idx], ix, iy, this->style.color);
+					ds->DrawGeometry(this->rubbers[idx], ix, iy, this->style.body_color);
 				}
 			}
 		}
 
-		ds->FillGeometry(this->universal_joint, trunnion_x, trunnion_y, this->color);
-		ds->DrawGeometry(this->universal_joint, trunnion_x, trunnion_y, this->body_color, this->thickness);
+		ds->FillGeometry(this->universal_joint, trunnion_x, trunnion_y, this->style.color);
+		ds->DrawGeometry(this->universal_joint, trunnion_x, trunnion_y, this->style.body_color, this->style.thickness);
 
-		ds->DrawGeometry(this->drag_body, x, y, this->color, 1.0F, this->suction_style);
+		ds->DrawGeometry(this->drag_body, x, y, this->style.color, 1.0F, this->suction_style);
 
 		{ // draw draghead
 			float draghead_joint_x = draghead_x + this->mask_dx;
 			float draghead_joint_y = draghead_y + this->mask_dy;
 
-			ds->FillGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->color);
-			ds->DrawGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->body_color, this->thickness);
+			ds->FillGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->style.color);
+			ds->DrawGeometry(this->universal_joint, draghead_joint_x, draghead_joint_y, this->style.body_color, this->style.thickness);
 			ds->DrawCachedGeometry(this->joint_mask, draghead_joint_x, draghead_joint_y, Colours::Background);
 
-			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->color);
-			ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->head_color);
+			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->style.color);
+			ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->style.head_color);
 		}
 	}
 	
 	{ // draw metrics
-		float lX = x + this->left_margin + this->thickness;
-		float rX = x + this->right_margin - this->thickness;
+		float lX = x + this->left_margin + this->style.thickness;
+		float rX = x + this->right_margin - this->style.thickness;
 		float Y = y + this->height;
 		float x0 = x + this->_ujoints[0].x;
 		float y0 = y + this->_ujoints[0].y;
@@ -599,16 +600,16 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 				x0 = ix;
 				y0 = iy;
 
-				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y, this->meter_color);
-				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, lX, rX, Y, this->angle_color);
+				this->draw_metrics(ds, this->ujoints_ms[idx], ix, iy, lX, rX, Y, this->style.meter_color);
+				this->draw_metrics(ds, this->arm_degs[idx], ax, ay, lX, rX, Y, this->style.angle_color);
 			}
 		}
 
-		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, Y, this->meter_color);
+		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, Y, this->style.meter_color);
 
 		this->draw_metrics(ds, this->forearm_deg,
 			x0 + (draghead_x - x0) * 0.5F, y0 + (draghead_y - y0) * 0.5F,
-			lX, rX, Y, this->angle_color);
+			lX, rX, Y, this->style.angle_color);
 
 	}
 }
@@ -637,7 +638,7 @@ bool DragXZlet::position_equal(float3& old_pos, float3& new_pos) {
 }
 
 Platform::String^ DragXZlet::position_label(float3& position) {
-	return flstring(position.z, this->precision);
+	return flstring(position.z, this->style.precision);
 }
 
 float2 DragXZlet::space_to_local(float3& position) {

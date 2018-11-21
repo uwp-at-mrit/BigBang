@@ -174,4 +174,7 @@
   <data name="Overflow" xml:space="preserve">
     <value>溢流桶行程</value>
   </data>
+  <data name="NetWeight" xml:space="preserve">
+    <value>空船重量</value>
+  </data>
 </root>

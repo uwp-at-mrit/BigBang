@@ -48,7 +48,7 @@ private enum class DL : unsigned int {
 	SternDraft, psSternDraft, psSuctionDraft, sbSternDraft, psSternHeight, sbSternHeight,
 	BowDraft, psBowDraft, sbSuctionDraft, sbBowDraft, psBowHeight, sbBowHeight,
 
-	Overflow,
+	Overflow, NetWeight,
 
 	_
 };
@@ -116,6 +116,7 @@ public:
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
 		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
+		this->netweight_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 	}
 
 public:
@@ -127,7 +128,8 @@ public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
-		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value());
+		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
+		this->dimensions[DL::NetWeight]->set_value(DBD(DB2, vessal_netweight), GraphletAnchor::CC);
 
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
 		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
@@ -190,7 +192,8 @@ public:
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
-		this->load_dimension(this->dimensions, DL::Overflow, "meter");
+		this->load_dimension(this->dimensions, DL::Overflow, "meter", this->plain_style);
+		this->load_dimension(this->dimensions, DL::NetWeight, "kgrams", this->netweight_style);
 
 		this->load_buttons(this->hdchecks);
 	}
@@ -235,12 +238,13 @@ public:
 			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, -xoff);
 		}
 
-		{ // reflow buttons
+		{ // reflow buttons and relevant dimensions
 			IGraphlet* target = this->dimensions[DL::HopperHeight];
 			
 			gapsize = vinset * 1.0F;
 			this->master->move_to(this->hdchecks[DLHDCCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
 			this->master->move_to(this->hdchecks[DLHDCCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
+			this->master->move_to(this->dimensions[DL::NetWeight], this->labels[DL::HopperHeight], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 		}
 	}
 
@@ -253,8 +257,8 @@ public:
 
 private:
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit, _speak(id)), id);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, DimensionStyle& style) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(style, unit, _speak(id)), id);
 	}
 	
 	template<typename E>
@@ -266,7 +270,7 @@ private:
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, id, unit);
+			this->load_dimension(ds, id, unit, this->plain_style);
 		}
 	}
 
@@ -341,6 +345,7 @@ private: // never delete these graphlets manually.
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle plain_style;
+	DimensionStyle netweight_style;
 	DimensionStyle metrics_style;
 
 private:

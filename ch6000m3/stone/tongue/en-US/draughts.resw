@@ -177,4 +177,7 @@
   <data name="psBowDraft" xml:space="preserve">
     <value>Port Bow Draft</value>
   </data>
+  <data name="NetWeight" xml:space="preserve">
+    <value>Vessel Net Weight</value>
+  </data>
 </root>

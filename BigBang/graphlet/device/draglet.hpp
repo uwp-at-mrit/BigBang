@@ -24,19 +24,28 @@ namespace WarGrey::SCADA {
 		double arm_degrees_max;
 	};
 
+	private struct DragStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
+
+		unsigned int precision;
+		float thickness;
+	};
+
 	float drag_depth(WarGrey::SCADA::DragInfo& info);
+
+	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
+		unsigned int precision = 2U, float fontsize = 24.0F, float thickness = 2.0F);
 
 	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
-		IDraglet(WarGrey::SCADA::DragInfo& info, float width, float height, float thickness,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font);
+		IDraglet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, float width, float height);
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
@@ -78,25 +87,17 @@ namespace WarGrey::SCADA {
 	protected:
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ suction_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ dragarm_style;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
+		WarGrey::SCADA::DragStyle& style;
 
 	protected:
-		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ mfont;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ draghead_m;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ forearm_deg;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ ujoints_ms[DRAG_SEGMENT_MAX_COUNT];
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ arm_degs[DRAG_SEGMENT_MAX_COUNT];
-		unsigned int precision;
 		
 	protected:
 		float width;
 		float height;
-		float thickness;
 		float drag_thickness;
 		float joint_radius;
 		bool leftward;
@@ -132,14 +133,9 @@ namespace WarGrey::SCADA {
 
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXYlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color, float hatchmark_interval = 5.0F
-			, unsigned int outside_step = 2U, unsigned int inside_step = 1U, float thickness = 2.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
+			float width, float height, float hatchmark_interval = 5.0F,
+			unsigned int outside_step = 2U, unsigned int inside_step = 1U);
 
 	public:
 		void construct() override;
@@ -167,14 +163,8 @@ namespace WarGrey::SCADA {
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXZlet(WarGrey::SCADA::DragInfo& info, float width, float height, unsigned int color,
-			float hatchmark_interval = 5.0F, float suction_lowest = -20.0F, float thickness = 2.0F,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
-			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color = nullptr,
-			Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font = nullptr);
+		DragXZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
+			float width, float height, float hatchmark_interval = 5.0F, float suction_lowest = -20.0F);
 
 	public:
 		void construct() override;

@@ -37,6 +37,7 @@ namespace WarGrey::SCADA {
 	static unsigned int loading_value = 232U;
 	static unsigned int earthwork_value = 236U;
 	static unsigned int vessel_value = 320U;
+	static unsigned int vessal_netweight = 324U;
 
 	static unsigned int trim_degrees = 200U;
 	static unsigned int heel_degrees = 204U;

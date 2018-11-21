@@ -22,30 +22,29 @@ namespace WarGrey::SCADA {
 
 		if (DBX(db4, idx4_p1 + 1U)) {
 			target->set_status(WaterPumpStatus::Running);
-		} else if (DBX(db4, idx4_p1 + 0U)) {
-			target->set_status(WaterPumpStatus::Ready);
 		} else if (DBX(db4, idx4_p1 + 2U)) {
 			target->set_status(WaterPumpStatus::Alert);
 		} else if (DBX(db4, idx4_p1 + 3U)) {
 			target->set_status(WaterPumpStatus::Broken);
 		//} else if (DBX(db4, idx4 + 5U)) {
 		//	target->set_status(WaterPumpStatus::Maintenance);
-		} else if (DBX(db205, idx205_p1 - 1U)) {
-			target->set_status(WaterPumpStatus::Starting);
-		} else if (DBX(db205, idx205_p1 + 0U)) {
-			target->set_status(WaterPumpStatus::Stopping);
-		} else if (DBX(db205, idx205_p1 + 1U)) {
-			target->set_status(WaterPumpStatus::Unstartable);
-		} else if (DBX(db205, idx205_p1 + 2U)) {
-			target->set_status(WaterPumpStatus::Unstoppable);
-		} else if (DBX(db205, idx205_p1 + 3U)) {
-			target->set_status(WaterPumpStatus::StartReady);
+		} else {
+			if (DBX(db205, idx205_p1 - 1U)) {
+				target->set_status(WaterPumpStatus::Starting);
+			} else if (DBX(db205, idx205_p1 + 0U)) {
+				target->set_status(WaterPumpStatus::Stopping);
+			} else if (DBX(db205, idx205_p1 + 1U)) {
+				target->set_status(WaterPumpStatus::Unstartable);
+			} else if (DBX(db205, idx205_p1 + 2U)) {
+				target->set_status(WaterPumpStatus::Unstoppable);
+			} else if (DBX(db205, idx205_p1 + 3U)) {
+				target->set_status(WaterPumpStatus::Ready);
+			}
 		}
 
-		// the rest are unused
+		// the rest are unused or implied
 		//target->set_status(DBX(db205, idx205 + 4U), HopperPumpStatus::StartReady);
 		//target->set_status(DBX(db205, idx205 + 5U), HopperPumpStatus::StopReady);
-		//target->set_status(DBX(db205, idx205 + 6U), HopperPumpStatus::Ready);
 	}
 
 	template<class B>

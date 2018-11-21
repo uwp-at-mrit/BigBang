@@ -129,6 +129,9 @@
   <data name="degrees" xml:space="preserve">
     <value>deg</value>
   </data>
+  <data name="kgrams" xml:space="preserve">
+    <value>kg</value>
+  </data>
   <data name="kmeter" xml:space="preserve">
     <value>km</value>
   </data>
