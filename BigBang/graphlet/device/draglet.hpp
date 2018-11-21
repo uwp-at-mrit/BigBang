@@ -278,7 +278,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		double arm_earth_degrees;
-		double visor_earth_degrees;
+		double visor_degrees;
 		float suction_depth;
 		float draghead_depth;
 	};

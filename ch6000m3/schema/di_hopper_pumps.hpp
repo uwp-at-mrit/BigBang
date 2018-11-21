@@ -118,6 +118,6 @@ namespace WarGrey::SCADA {
 
 	template<class A>
 	void DI_hopper_lubricating_unit_alarm(A* target, const uint8* db4, unsigned int idx_p1) {
-		target->set_status(DBX(db4, idx_p1 - 1U), AlarmStatus::Alert, AlarmStatus::Normal);
+		target->set_status(DBX(db4, idx_p1 - 1U), AlarmStatus::Alert, AlarmStatus::None);
 	}
 }

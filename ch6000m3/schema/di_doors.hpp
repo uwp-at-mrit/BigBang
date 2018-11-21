@@ -79,12 +79,12 @@ namespace WarGrey::SCADA {
 
 	template<class A>
 	void DI_hopper_doors_auto_locking(A* alarmer, const uint8* db205) {
-		alarmer->set_status(DBX(db205, 1087U - 1U), AlarmStatus::Alert, AlarmStatus::Normal);
+		alarmer->set_status(DBX(db205, 1087U - 1U), AlarmStatus::Notice, AlarmStatus::None);
 	}
 
 	template<class A>
 	void DI_hopper_doors_locked(A* alarmer, const uint8* db205) {
-		alarmer->set_status(DBX(db205, 1086U - 1U), AlarmStatus::Alert, AlarmStatus::Normal);
+		alarmer->set_status(DBX(db205, 1086U - 1U), AlarmStatus::Notice, AlarmStatus::None);
 	}
 
 	template<class B, typename CMD>
@@ -100,9 +100,9 @@ namespace WarGrey::SCADA {
 			if (DBX(db205, idx_p1 + 0U)) {
 				button->set_status(ButtonStatus::Executing);
 			} else if (DBX(db205, idx_p1 - 1U)) {
-				button->set_status(ButtonStatus::Disabled);
-			} else {
 				button->set_status(ButtonStatus::Ready);
+			} else {
+				button->set_status(ButtonStatus::Disabled);
 			}
 		}
 	}

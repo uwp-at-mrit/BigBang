@@ -29,6 +29,7 @@ DredgeAddress* WarGrey::SCADA::make_ps_dredging_system_schema() {
 		schema->backarm_horizontal_angle = 105U;
 		schema->forearm_vertical_angle = 106U;
 		schema->forearm_horizontal_angle = 107U;
+		schema->visor_progress = 108U;
 		
 		ps_schema = schema;
 	}
@@ -59,6 +60,7 @@ DredgeAddress* WarGrey::SCADA::make_sb_dredging_system_schema() {
 		schema->backarm_horizontal_angle = 121U;
 		schema->forearm_vertical_angle = 122U;
 		schema->forearm_horizontal_angle = 123U;
+		schema->visor_progress = 124U;
 		
 		sb_schema = schema;
 	}

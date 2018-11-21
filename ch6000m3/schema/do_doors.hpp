@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-
 namespace WarGrey::SCADA {
 	// DB300, starts from 1
 	

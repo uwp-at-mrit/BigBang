@@ -91,8 +91,8 @@ public:
 	PageEventListener(unsigned int idx) : dbidx(idx), page(2 /* the dredging page */) {}
 
 public:
-	void on_realtime_data(const uint8* db2, size_t count, WarGrey::SCADA::Syslog* logger) {
-		this->page = int(DBD(db2, this->dbidx));
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, WarGrey::SCADA::Syslog* logger) override {
+		this->page = int(DBD(DB2, this->dbidx));
 	}
 
 public:

@@ -35,7 +35,7 @@ static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius,
 }
 
 /*************************************************************************************************/
-Alarmlet::Alarmlet(float size) : Alarmlet(AlarmStatus::Normal, size) {}
+Alarmlet::Alarmlet(float size) : Alarmlet(AlarmStatus::None, size) {}
 
 Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width(size), height(size) {}
 
@@ -80,6 +80,8 @@ void Alarmlet::fill_extent(float x, float y, float* w, float* h) {
 
 void Alarmlet::prepare_style(AlarmStatus status, AlarmStyle& style) {
 	switch (status) {
+	case AlarmStatus::Notice: CAS_SLOT(style.color, Colours::Green); break;
+	case AlarmStatus::Warning: CAS_SLOT(style.color, Colours::Yellow); break;
 	case AlarmStatus::Alert: CAS_SLOT(style.color, Colours::Red); break;
 	}
 

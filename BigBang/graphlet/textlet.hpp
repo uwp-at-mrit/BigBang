@@ -164,6 +164,7 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::TextExtent caret_box;
 		WarGrey::SCADA::TextExtent number_box;
 		WarGrey::SCADA::TextExtent unit_box;
+		WarGrey::SCADA::TextExtent number09_box; // for fonts that number chars do not have same height
 
 	private:
 		Platform::String^ input_number;

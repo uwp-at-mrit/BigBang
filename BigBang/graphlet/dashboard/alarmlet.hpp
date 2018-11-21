@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class AlarmStatus { Normal, Alert, _ };
+	private enum class AlarmStatus { None, Notice, Warning, Alert, _ };
 
 	private struct AlarmStyle {
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color;

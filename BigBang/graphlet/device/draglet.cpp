@@ -529,8 +529,7 @@ void DragXZlet::update_drag_head() {
 	double angle = drag_adjusted_angle(this->_forearm_angle, sign);
 	double head_joint_start = (this->leftward ? -angle + 90.0 : angle - 90.0);
 	double head_joint_end = (this->leftward ? -angle + 270.0 : angle + 90.0);
-	double earth_angle = drag_visor_earth(this->visor_angle, this->forearm_angle);
-	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, earth_angle, angle, sign);
+	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, -visor_angle, angle, sign);
 	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->thickness * 2.0F);
 	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->thickness);
 
@@ -694,11 +693,12 @@ void DragHeadlet::construct() {
 	float aradius = this->radius * 1.000F;
 	float vradius = this->radius * 0.618F;
 	unsigned int depth_step = ((unsigned int)std::round(this->depth_range / depth_interval)) + 1;
-	double deg0 = drag_adjusted_angle(0.0, this->sign);
-	double adeg = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
-	double vdeg = drag_adjusted_angle(drag_visor_end_angle, this->sign);
-	auto ahatchmark = rhatchmark(aradius, deg0, adeg, this->info.arm_degrees_min, this->info.arm_degrees_max, 0U, this->thickness, &ametrics);
-	auto vhatchmark = rhatchmark(vradius, deg0, vdeg, this->info.visor_degrees_min, this->info.visor_degrees_max, 0U, this->thickness, &vmetrics);
+	double adeg0 = drag_adjusted_angle(0.0, this->sign);
+	double adegn = drag_adjusted_angle(this->info.arm_degrees_max, this->sign);
+	double vdeg0 = drag_adjusted_angle(this->info.visor_degrees_min, -this->sign);
+	double vdegn = drag_adjusted_angle(this->info.visor_degrees_max, -this->sign);
+	auto ahatchmark = rhatchmark(aradius, adeg0, adegn, this->info.arm_degrees_min, this->info.arm_degrees_max, 0U, this->thickness, &ametrics);
+	auto vhatchmark = rhatchmark(vradius, vdeg0, vdegn, this->info.visor_degrees_min, this->info.visor_degrees_max, 0U, this->thickness, &vmetrics);
 	float head_radius = vmetrics.ring_radius - vmetrics.ch * 0.618F;
 	float arm_thickness = head_radius * 0.618F * 2.0F;
 	
@@ -746,18 +746,13 @@ void DragHeadlet::construct() {
 }
 
 void DragHeadlet::set_angles(double visor_angle, double arm_angle, bool force) {
-	float visor_length = this->radius - this->translate_x;
-	double visor_range = this->info.visor_degrees_max - this->info.visor_degrees_min;
-	double visor_pointer_range = drag_visor_end_angle;
-	double visor_earth_angle = drag_visor_earth(visor_angle, arm_angle);
-	
-	if (force || (this->visor_earth_degrees != visor_earth_angle)) {
-		double visor_progress = (visor_earth_angle - this->info.visor_degrees_min) / visor_range;
-		double visor_degrees = drag_adjusted_angle(visor_progress * visor_pointer_range, this->sign);
+	if (force || (this->visor_degrees != visor_angle)) {
+		float visor_length = this->radius - this->translate_x;
+		double visor_pointer = drag_adjusted_angle(visor_angle, -this->sign);
 
-		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, visor_earth_angle, 0.0F, this->sign));
-		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_degrees, this->arrow_radius, this->pointer_style));
-		this->visor_earth_degrees = visor_earth_angle;
+		this->visor = geometry_freeze(make_visor(this->visor_radius, this->bottom_radius, visor_length, -visor_angle, 0.0F, this->sign));
+		this->visor_pointer = geometry_freeze(make_pointer(this->visor_pointer_radius, visor_pointer, this->arrow_radius, this->pointer_style));
+		this->visor_degrees = visor_angle;
 
 		this->notify_updated();
 	}

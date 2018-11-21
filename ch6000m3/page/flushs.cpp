@@ -198,6 +198,7 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow water
+			FS h3[] = { FS::h3sb, FS::SBPump };
 			bool ps_okay = (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running);
 			bool sb_okay = (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running);
 			FS h1[] = { FS::h1sb, FS::SBPump };
@@ -208,38 +209,35 @@ public:
 			this->try_flow_water(FS::HBV01, h1, water_color);
 			this->try_flow_water(FS::HBV02, FS::PSPump, water_color);
 
-			if (ps_okay) {
-				FS h35 [] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
-				FS h3 [] = { FS::h3sb, FS::SBPump };
-				
+			if (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running) {
+				FS h35[] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
+
 				this->station->append_subtrack(h35, water_color);
 				this->nintercs[FS::nic]->set_color(water_color);
-
-				this->try_flow_water(FS::HBV03, h3, water_color);
-				this->try_flow_water(FS::HBV05, FS::HBV07, FS::HBV08, water_color);
-				this->try_flow_water(FS::HBV07, FS::Port, water_color);
-				this->try_flow_water(FS::HBV08, FS::HBV10, water_color);
 			} else {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			}
 
-			if (sb_okay) {
+			this->try_flow_water(FS::HBV03, h3, water_color);
+			this->try_flow_water(FS::HBV05, FS::HBV07, FS::HBV08, water_color);
+			this->try_flow_water(FS::HBV07, FS::Port, water_color);
+			this->try_flow_water(FS::HBV08, FS::HBV10, water_color);
+			
+			if (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running) {
 				this->station->append_subtrack(FS::SBPump, FS::HBV04, water_color);
-				this->try_flow_water(FS::HBV04, FS::HBV06, FS::HBV09, water_color);
-				this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
-				this->try_flow_water(FS::HBV09, FS::HBV10, water_color);
 			}
 
-			if (ps_okay || sb_okay) {
-				this->try_flow_water(FS::HBV10, FS::HBV18, water_color);
+			this->try_flow_water(FS::HBV04, FS::HBV06, FS::HBV09, water_color);
+			this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
+			this->try_flow_water(FS::HBV09, FS::HBV10, water_color);
+			this->try_flow_water(FS::HBV10, FS::HBV18, water_color);
 
-				for (FS HBV = FS::HBV11; HBV <= FS::HBV18; HBV++) {
-					unsigned int distance = _I(HBV) - _I(FS::HBV11);
-					FS lb = _E(FS, _I(FS::lb11) + distance);
-					FS rb = _E(FS, _I(FS::rb11) + distance);
+			for (FS HBV = FS::HBV11; HBV <= FS::HBV18; HBV++) {
+				unsigned int distance = _I(HBV) - _I(FS::HBV11);
+				FS lb = _E(FS, _I(FS::lb11) + distance);
+				FS rb = _E(FS, _I(FS::rb11) + distance);
 
-					this->try_flow_water(HBV, rb, ((HBV == FS::HBV18) ? FS::_ : lb), water_color);
-				}
+				this->try_flow_water(HBV, rb, ((HBV == FS::HBV18) ? FS::_ : lb), water_color);
 			}
 		}
 

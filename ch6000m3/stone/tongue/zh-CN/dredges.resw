@@ -250,9 +250,15 @@
     <value>水下泵</value>
   </data>
   <data name="PSVisor" xml:space="preserve">
-    <value>左耙唇对地角度</value>
+    <value>左耙唇</value>
   </data>
   <data name="SBVisor" xml:space="preserve">
-    <value>右耙唇对地角度</value>
+    <value>右耙唇</value>
+  </data>
+  <data name="PSEarth" xml:space="preserve">
+    <value>左对地</value>
+  </data>
+  <data name="SBEarth" xml:space="preserve">
+    <value>右对地</value>
   </data>
 </root>

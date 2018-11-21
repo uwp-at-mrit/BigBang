@@ -320,7 +320,7 @@ void IEditorlet::fill_extent(float x, float y, float* w, float* h) {
 		TextExtent label_box;
 		float tspace, bspace;
 
-		fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, h);
+		fill_vmetrics(this->text_layout, this->number09_box, this->unit_box, &label_box, &tspace, &bspace, h);
 	}
 }
 
@@ -498,6 +498,7 @@ void IEditorlet::apply_style(DimensionStyle& style) {
 
 	this->number_layout = make_text_layout(this->number, style.number_font);
 	this->number_box = get_text_extent(this->number_layout);
+	this->number09_box = get_text_extent("0123456789", style.number_font);
 
 	if (this->unit != nullptr) {
 		this->unit_layout = make_text_layout(this->unit, style.unit_font);
@@ -510,13 +511,12 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	CanvasTextLayout^ nlayout = this->number_layout;
 	TextExtent nbox = this->number_box;
 	TextExtent label_box;
-	float tspace, bspace, height, base_y, box_height;
+	float tspace, bspace, height, base_y;
 	float number_region_x = 0.0F;
 	float number_x = -nbox.width;
 	
-	fill_vmetrics(this->text_layout, this->number_box, this->unit_box, &label_box, &tspace, &bspace, &height);
+	fill_vmetrics(this->text_layout, this->number09_box, this->unit_box, &label_box, &tspace, &bspace, &height);
 	base_y = y + height;
-	box_height = height - tspace - bspace;
 
 	if (this->text_layout != nullptr) {
 		float region_width = std::fmaxf(label_box.width, style.minimize_label_width);
@@ -551,7 +551,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 
 		if (nlayout != nullptr) {
 			number_x = x + (region_width - nbox.width) * style.number_xfraction + padding_x;
-			ds->DrawTextLayout(nlayout, number_x, base_y - number_box.height, style.number_color);
+			ds->DrawTextLayout(nlayout, number_x, base_y - this->number_box.height, style.number_color);
 		}
 
 		if (style.number_border_color != nullptr) {

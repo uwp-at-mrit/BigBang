@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
 		unsigned int forearm_horizontal_angle;
 		unsigned int backarm_vertical_angle;
 		unsigned int backarm_horizontal_angle;
+		unsigned int visor_progress;
 	};
 
 	WarGrey::SCADA::DredgeAddress* make_ps_dredging_system_schema();

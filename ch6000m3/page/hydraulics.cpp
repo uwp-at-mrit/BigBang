@@ -17,12 +17,14 @@
 #include "graphlet/device/tanklet.hpp"
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
+#include "graphlet/dashboard/alarmlet.hpp"
 
 #include "schema/ai_metrics.hpp"
 #include "schema/ai_pumps.hpp"
 
 #include "schema/di_valves.hpp"
 #include "schema/di_pumps.hpp"
+#include "schema/di_devices.hpp"
 
 #include "schema/do_pumps.hpp"
 #include "schema/do_devices.hpp"
@@ -51,9 +53,6 @@ private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
 
 static CanvasSolidColorBrush^ oil_color = Colours::Yellow;
-
-static ICanvasBrush^ block_color = Colours::Red;
-static ICanvasBrush^ nonblock_color = Colours::WhiteSmoke;
 
 // WARNING: order matters
 private enum class HS : unsigned int {
@@ -189,9 +188,9 @@ public:
 		}
 
 		{ // filter statuses
-			this->set_filter_status(HS::F01, DB4, 121U);
-			this->set_filter_status(HS::F02, DB4, 127U);
-			this->set_filter_status(HS::F10, DB4, 134U);
+			DI_filter_alarm(this->alarms[HS::F01], DB4, filter_01_status);
+			DI_filter_alarm(this->alarms[HS::F02], DB4, filter_02_status);
+			DI_filter_alarm(this->alarms[HS::F10], DB4, filter_10_status);
 		}
 	}
 
@@ -289,8 +288,8 @@ public:
 		pTurtle->move_up(3, HS::a)->move_left(4, HS::A)->move_left(12, HS::SQa)->move_left(4)->jump_back();
 		
 		pTurtle->move_up(3, HS::Starboard)->move_up(21, HS::rt)->turn_up_left(HS::tr)->move_left(35, HS::cr);
-		pTurtle->turn_left_down()->move_down(2, HS::F01)->move_down(2);
-		pTurtle->jump_up(4)->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
+		pTurtle->turn_left_down()->move_down(4)->jump_up(4);
+		pTurtle->turn_up_left(HS::cl)->move_left(35, HS::tl)->turn_left_down(HS::lt)->move_down(21);
 
 		pTurtle->move_down(3, HS::c)->move_right(4, HS::C)->move_right(12, HS::SQc)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HS::f)->move_right(4, HS::F)->move_right(12, HS::SQf)->move_right(4)->jump_back();
@@ -300,8 +299,7 @@ public:
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
 		pTurtle->move_up(HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
 
-		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master);
-		pTurtle->move_up(5.5F, HS::F02)->move_up()->turn_up_right(HS::f02)->move_right(2);
+		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master)->move_up(6.5F)->turn_up_right(HS::f02)->move_right(2);
 		pTurtle->move_right(5, HS::y)->move_down(6, HS::Y)->move_down(4, HS::SQy)->move_down(4)->turn_down_left()->jump_back();
 		pTurtle->move_right(5, HS::l)->move_down(6, HS::L)->move_down(4, HS::SQl)->move_down(4)->turn_down_left()->jump_back();
 		pTurtle->move_right(5, HS::m)->move_down(6, HS::M)->move_down(4, HS::SQm)->move_down(4)->turn_down_left()->jump_back();
@@ -321,6 +319,7 @@ public:
 
 	void load_tanks(float width, float height, float gwidth, float gheight) {
 		float thickness = default_pipe_thickness * 2.0F;
+		float alarm_size = gwidth * 1.2F;
 
 		this->master_tank = this->make_tank(HSMTStatus::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
 		this->visor_tank = this->make_tank(HSVTStatus::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
@@ -330,7 +329,7 @@ public:
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		
-		this->load_filter_indicators(HS::F01, HS::F10, gwidth, this->filters, this->islabels);
+		this->load_filter_alarms(HS::F01, HS::F10, alarm_size, this->alarms, this->islabels);
 	}
 
 	void load_devices(float width, float height, float gwidth, float gheight) {
@@ -445,27 +444,20 @@ public:
 	}
 
 	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
-		this->station->map_credit_graphlet(this->filters[HS::F01], GraphletAnchor::CC);
-		this->station->map_credit_graphlet(this->filters[HS::F02], GraphletAnchor::CC);
+		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], 1.0F, 0.75F, GraphletAnchor::LC, gwidth);
+		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LC, gwidth);
 		
-		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
-		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LT, gwidth);
-		this->master->move_to(this->filters[HS::F10], this->thermometers[HS::Visor], GraphletAnchor::RC, GraphletAnchor::LB, gwidth);
-		
-		{ // reflow state labels
-			float gapsize = vinset * 0.25F;
+		{ // reflow alarms
+			float lblgap = vinset * 0.25F;
+			float vgap = lblgap * 0.5F;
 
-			for (auto lt = this->filters.begin(); lt != this->filters.end(); lt++) {
-				switch (lt->first) {
-				case HS::F01: {
-					this->master->move_to(this->islabels[lt->first], this->filters[lt->first],
-						GraphletAnchor::LC, GraphletAnchor::RC, -gapsize);
-				}; break;
-				default: {
-					this->master->move_to(this->islabels[lt->first], this->filters[lt->first],
-						GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
-				}
-				}
+			this->master->move_to(this->alarms[HS::F01], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LB, gwidth, -vgap);
+			this->master->move_to(this->alarms[HS::F02], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LT, gwidth, +vgap);
+			this->master->move_to(this->alarms[HS::F10], this->thermometers[HS::Visor], 1.0F, 0.25F, GraphletAnchor::LC, gwidth);
+
+			for (auto lt = this->alarms.begin(); lt != this->alarms.end(); lt++) {
+				this->master->move_to(this->islabels[lt->first], this->alarms[lt->first],
+					GraphletAnchor::RC, GraphletAnchor::LC, lblgap);
 			}
 		}
 	}
@@ -529,11 +521,11 @@ private:
 		}
 	}
 
-	template<typename E>
-	void load_filter_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+	template<class A, typename E>
+	void load_filter_alarms(E id0, E idn, float size, std::map<E, Credit<A, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id, Colours::Silver);
-			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, nonblock_color), id);
+			bs[id] = this->master->insert_one(new Credit<A, E>(size), id);
 		}
 	}
 
@@ -576,14 +568,6 @@ private:
 	void set_temperature(HS id, float t) {
 		this->thermometers[id]->set_value(t);
 		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
-	}
-
-	void set_filter_status(HS id, const uint8* db4, size_t idx_p1) {
-		if (DBX(db4, idx_p1 - 1)) {
-			this->filters[id]->set_color(block_color);
-		} else {
-			this->filters[id]->set_color(nonblock_color);
-		}
 	}
 
 private:
@@ -637,7 +621,7 @@ private:
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
 	std::map<HS, Credit<GateValvelet, HS>*> valves;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
-	std::map<HS, Credit<Rectanglet, HS>*> filters;
+	std::map<HS, Credit<Alarmlet, HS>*> alarms;
 	std::map<HS, Credit<Labellet, HS>*> islabels;
 	
 private:

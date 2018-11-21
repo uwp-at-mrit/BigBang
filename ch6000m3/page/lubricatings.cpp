@@ -38,8 +38,8 @@ private enum LUMode { WindowUI = 0, Dashboard };
 private enum class LUOperation { Start, Stop, _ };
 private enum class LUGBOperation { Start, Stop, Auto, _ };
 
-static CanvasSolidColorBrush^ region_background = Colours::make(0x212121U);
-static CanvasSolidColorBrush^ alarm_background = Colours::make(0x181818U);
+static CanvasSolidColorBrush^ region_background = Colours::make(0x414141U);
+static CanvasSolidColorBrush^ alarm_background = Colours::make(0x141414U);
 
 // WARNING: order matters
 private enum class LU : unsigned int {
