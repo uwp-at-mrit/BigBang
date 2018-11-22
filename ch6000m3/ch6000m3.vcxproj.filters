@@ -23,7 +23,7 @@
     <Filter Include="stone\tongue\zh-CN">
       <UniqueIdentifier>{5a760ac3-79f5-49f7-83c1-00944243d4d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="schema">
+    <Filter Include="iotables">
       <UniqueIdentifier>{f56f01fb-ab2b-409e-af09-3b1dfeadb7a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -50,9 +50,6 @@
     <ClCompile Include="page\dredges.cpp">
       <Filter>page</Filter>
     </ClCompile>
-    <ClCompile Include="schema\ai_dredges.cpp">
-      <Filter>schema</Filter>
-    </ClCompile>
     <ClCompile Include="page\lubricatings.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -64,6 +61,45 @@
     </ClCompile>
     <ClCompile Include="page\glands.cpp">
       <Filter>page</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\ai_dredges.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\ai_doors.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_devices.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_doors.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_dredges.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_hopper_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_valves.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\di_water_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\do_hopper_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\do_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\do_devices.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\do_doors.cpp">
+      <Filter>iotables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,66 +121,12 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="splash.hpp" />
-    <ClInclude Include="schema\di_doors.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\di_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\di_valves.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\di_hopper_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
     <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\dredges.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="schema\ai_dredges.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ai_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\di_dredges.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_dredges.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ai_doors.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_doors.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ai_valves.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_valves.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_hopper_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\do_devices.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ai_metrics.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
     <ClInclude Include="page\lubricatings.hpp">
       <Filter>page</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\di_water_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ai_water_pumps.hpp">
-      <Filter>schema</Filter>
     </ClInclude>
     <ClInclude Include="page\charges.hpp">
       <Filter>page</Filter>
@@ -152,20 +134,74 @@
     <ClInclude Include="page\discharges.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="schema\ai_hopper_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\ao_pumps.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
     <ClInclude Include="page\glands.hpp">
       <Filter>page</Filter>
     </ClInclude>
-    <ClInclude Include="schema\do_water_pumps.hpp">
-      <Filter>schema</Filter>
+    <ClInclude Include="iotables\ai_doors.hpp">
+      <Filter>iotables</Filter>
     </ClInclude>
-    <ClInclude Include="schema\di_devices.hpp">
-      <Filter>schema</Filter>
+    <ClInclude Include="iotables\ai_dredges.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ai_hopper_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ai_metrics.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ai_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ai_valves.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ai_water_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_devices.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_doors.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_dredges.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_hopper_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_valves.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_water_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_devices.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_doors.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_dredges.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_hopper_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_valves.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_water_pumps.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\ao_gland_pumps.hpp">
+      <Filter>iotables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

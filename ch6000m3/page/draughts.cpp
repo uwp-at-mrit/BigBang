@@ -9,12 +9,12 @@
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/buttonlet.hpp"
 
-#include "schema/ai_metrics.hpp"
+#include "iotables/ai_metrics.hpp"
 
-#include "schema/di_doors.hpp"
+#include "iotables/di_doors.hpp"
 
-#include "schema/do_devices.hpp"
-#include "schema/do_doors.hpp"
+#include "iotables/do_devices.hpp"
+#include "iotables/do_doors.hpp"
 
 #include "decorator/page.hpp"
 
@@ -37,9 +37,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 private enum DLMode { WindowUI = 0, Dashboard };
 
 private enum class DLTS { EarthWork, Vessel, Loading, Displacement, _ };
-
-private enum class DLOFOperation { Up, Down, Stop, Auto, _ };
-private enum class DLHDCCommand { OpenDoorCheck, CloseDoorCheck, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -108,9 +105,7 @@ private:
 	float ship_width;
 };
 
-private class Draughts final
-	: public PLCConfirmation
-	, public IMenuCommand<DLOFOperation, OverflowPipelet, PLCMaster*> {
+private class Draughts final : public PLCConfirmation {
 public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -154,22 +149,13 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		DI_hopper_doors_checks_button(this->hdchecks[DLHDCCommand::OpenDoorCheck], DB205);
-		DI_hopper_doors_checks_button(this->hdchecks[DLHDCCommand::CloseDoorCheck], DB205);
+		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::OpenDoorCheck], BottomDoorCommand::OpenDoorCheck, DB205);
+		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::CloseDoorCheck], BottomDoorCommand::CloseDoorCheck, DB205);
 	}
 
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(DLOFOperation cmd, OverflowPipelet* ofp, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(DLOFOperation cmd, OverflowPipelet* ofp, PLCMaster* plc) override {
-		plc->send_command(DO_overflow_command(cmd));
 	}
 
 public:
@@ -195,7 +181,7 @@ public:
 		this->load_dimension(this->dimensions, DL::Overflow, "meter", this->plain_style);
 		this->load_dimension(this->dimensions, DL::NetWeight, "ton", this->netweight_style);
 
-		this->load_buttons(this->hdchecks);
+		this->load_buttons(this->hdchecks, BottomDoorCommand::OpenDoorCheck, BottomDoorCommand::CloseDoorCheck);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -242,17 +228,10 @@ public:
 			IGraphlet* target = this->dimensions[DL::HopperHeight];
 			
 			gapsize = vinset * 1.0F;
-			this->master->move_to(this->hdchecks[DLHDCCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
-			this->master->move_to(this->hdchecks[DLHDCCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
+			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
+			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
 			this->master->move_to(this->dimensions[DL::NetWeight], this->labels[DL::HopperHeight], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 		}
-	}
-
-public:
-	bool on_char(VirtualKey key, PLCMaster* plc) {
-		bool handled = false;
-
-		return handled;
 	}
 
 private:
@@ -291,8 +270,8 @@ private:
 	}
 
 	template<class B, typename CMD>
-	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
-		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, CMD cmd0, CMD cmdn, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = cmd0; cmd <= cmdn; cmd++) {
 			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
 		}
 	}
@@ -338,7 +317,7 @@ private: // never delete these graphlets manually.
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
 	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
-	std::map<DLHDCCommand, Credit<Buttonlet, DLHDCCommand>*> hdchecks;
+	std::map<BottomDoorCommand, Credit<Buttonlet, BottomDoorCommand>*> hdchecks;
 	TimeSerieslet<DLTS>* timeseries;
 	OverflowPipelet* overflowpipe;
 
@@ -359,7 +338,7 @@ DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Draughts* dashboard = new Draughts(this, decorator);
 
 	this->dashboard = dashboard;
-	this->overflow_op = make_menu<DLOFOperation, OverflowPipelet, PLCMaster*>(dashboard, plc);
+	this->overflow_op = make_overflow_menu(plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -421,11 +400,11 @@ bool DraughtsPage::can_select(IGraphlet* g) {
 
 void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto overflow = dynamic_cast<OverflowPipelet*>(g);
-	auto hdchecker = dynamic_cast<Credit<Buttonlet, DLHDCCommand>*>(g);
+	auto hdchecker = dynamic_cast<Credit<Buttonlet, BottomDoorCommand>*>(g);
 
 	if (overflow != nullptr) {
 		menu_popup(this->overflow_op, g, local_x, local_y);
 	} else if (hdchecker != nullptr) {
-		this->device->send_command(DO_hopper_doors_checks_command(hdchecker->id));
+		this->device->send_command(DO_bottom_doors_special_command(hdchecker->id));
 	}
 }

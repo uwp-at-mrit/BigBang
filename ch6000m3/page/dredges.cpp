@@ -17,17 +17,17 @@
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/device/draglet.hpp"
 
-#include "schema/ai_metrics.hpp"
-#include "schema/ai_dredges.hpp"
-#include "schema/ai_pumps.hpp"
-#include "schema/ai_valves.hpp"
+#include "iotables/ai_metrics.hpp"
+#include "iotables/ai_dredges.hpp"
+#include "iotables/ai_pumps.hpp"
+#include "iotables/ai_valves.hpp"
 
-#include "schema/di_valves.hpp"
-#include "schema/di_pumps.hpp"
-#include "schema/di_hopper_pumps.hpp"
-#include "schema/di_dredges.hpp"
+#include "iotables/di_valves.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_hopper_pumps.hpp"
+#include "iotables/di_dredges.hpp"
 
-#include "schema/do_dredges.hpp"
+#include "iotables/do_dredges.hpp"
 
 #include "decorator/page.hpp"
 

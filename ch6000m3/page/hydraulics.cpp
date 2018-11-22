@@ -19,15 +19,15 @@
 #include "graphlet/dashboard/thermometerlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 
-#include "schema/ai_metrics.hpp"
-#include "schema/ai_pumps.hpp"
+#include "iotables/ai_metrics.hpp"
+#include "iotables/ai_pumps.hpp"
 
-#include "schema/di_valves.hpp"
-#include "schema/di_pumps.hpp"
-#include "schema/di_devices.hpp"
+#include "iotables/di_valves.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_devices.hpp"
 
-#include "schema/do_pumps.hpp"
-#include "schema/do_devices.hpp"
+#include "iotables/do_pumps.hpp"
+#include "iotables/do_devices.hpp"
 
 #include "decorator/page.hpp"
 
@@ -42,12 +42,6 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
-
-private enum class HSGroup { MasterPumps, PSPumps, SBPumps, VisorPumps, _ };
-private enum class HSGPOperation { Start, Stop, Cancel, _ };
-
-private enum class HSPOperation { Start, Stop, Reset, _ };
-private enum class HSHOperation { Start, Stop, Cancel, Auto, _ };
 
 private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
 private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
@@ -82,11 +76,19 @@ private enum class HS : unsigned int {
 	lt, tl, rt, tr, cl, cr, i, j, f02, master, sb
 };
 
-private class Hydraulics final
-	: public PLCConfirmation
-	, public IMenuCommand<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>
-	, public IMenuCommand<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>
-	, public IGroupMenuCommand<HSGPOperation, HSGroup, PLCMaster*> {
+static uint16 DO_hydraulics_action(HydraulicPumpAction cmd, HydraulicPumplet* pump) {
+	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, HS>*>(pump);
+	uint16 index = 0U;
+
+	if (credit_pump != nullptr) {
+		index = DO_hydraulic_pump_command(cmd, credit_pump->id);
+	}
+
+	return index;
+}
+
+/*************************************************************************************************/
+private class Hydraulics final : public PLCConfirmation {
 public:
 	Hydraulics(HydraulicsPage* master) : master(master) {}
 
@@ -233,33 +235,6 @@ public:
 		
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(HSPOperation cmd, Credit<HydraulicPumplet, HS>* pump, PLCMaster* plc) override {
-		plc->send_command(DO_hydraulic_pump_command(cmd, pump->id));
-	}
-
-public:
-	bool can_execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(HSHOperation cmd, Credit<Thermometerlet, HS>* heater, PLCMaster* plc) override {
-		plc->send_command(DO_tank_heater_command(cmd));
-	}
-
-public:
-	bool can_execute(HSGPOperation cmd, HSGroup group, PLCMaster* plc) override {
-		return plc->connected();
-	}
-
-	void execute(HSGPOperation cmd, HSGroup group, PLCMaster* plc) override {
-		plc->send_command(DO_hydraulic_pump_group_command(cmd, group));
 	}
 
 public:
@@ -640,12 +615,12 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->dashboard = dashboard;
 	this->grid = new GridDecorator();
 	
-	this->gmaster_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::MasterPumps, plc);
-	this->gps_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::PSPumps, plc);
-	this->gsb_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::SBPumps, plc);
-	this->gvisor_op = make_group_menu<HSGPOperation, HSGroup, PLCMaster*>(dashboard, HSGroup::VisorPumps, plc);
-	this->pump_op = make_menu<HSPOperation, Credit<HydraulicPumplet, HS>, PLCMaster*>(dashboard, plc);
-	this->heater_op = make_menu<HSHOperation, Credit<Thermometerlet, HS>, PLCMaster*>(dashboard, plc);
+	this->gbs_op = make_hydraulics_group_menu(HydraulicsGroup::BothPumps, plc);
+	this->gps_op = make_hydraulics_group_menu(HydraulicsGroup::PSPumps, plc);
+	this->gsb_op = make_hydraulics_group_menu(HydraulicsGroup::SBPumps, plc);
+	this->gvisor_op = make_hydraulics_group_menu(HydraulicsGroup::VisorPumps, plc);
+	this->pump_op = make_hydraulic_pump_menu(DO_hydraulics_action, plc);
+	this->heater_op = make_tank_heater_menu(plc);
 	
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -749,7 +724,7 @@ void HydraulicsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
 
 	if (dashboard != nullptr) {
 		if (dashboard->pumps_selected(HS::C, HS::E, 1) && dashboard->pumps_selected(HS::A, HS::H, 1)) {
-			group_menu_popup(this->gmaster_op, this, x, y);
+			group_menu_popup(this->gbs_op, this, x, y);
 		} else if (dashboard->pumps_selected(HS::C, HS::E, 2)) {
 			group_menu_popup(this->gps_op, this, x, y);
 		} else if (dashboard->pumps_selected(HS::A, HS::H, 2)) {

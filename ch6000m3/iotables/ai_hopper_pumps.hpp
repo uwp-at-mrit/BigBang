@@ -2,6 +2,11 @@
 
 namespace WarGrey::SCADA {
 	// DB203, real data
+	static unsigned int ps_hopper_gland_pump_A_rpm = 1U;
+	static unsigned int ps_hopper_gland_pump_B_rpm = 2U;
+	static unsigned int sb_hopper_gland_pump_A_rpm = 5U;
+	static unsigned int sb_hopper_gland_pump_B_rpm = 6U;
+
 	static unsigned int ps_hopper_gland_pump_pressure = 28U;
 	static unsigned int ps_hopper_gland_pump_flow = 29U;
 	static unsigned int ps_hopper_pump_power = 160U;

@@ -47,6 +47,9 @@ namespace WarGrey::SCADA {
 		virtual void begin_batch_sequence(Menu cmd, Attachment pobj) {}
 		virtual void execute(Menu cmd, G* g, Attachment pobj) = 0;
 		virtual void end_batch_sequence(Menu cmd, Attachment pobj) {}
+
+	public:
+		virtual bool delete_me() { return true; }
 	};
 
 	template<typename Menu, class G, class Attachment>
@@ -55,6 +58,13 @@ namespace WarGrey::SCADA {
 		 * Interfaces are not classes linguistically,
 		 * all the required methods therefore should be marked as `virtual` instead of `override`.
 		 */
+	public:
+		virtual ~MenuCommand() {
+			if (this->executor->delete_me()) {
+				delete this->executor;
+			}
+		}
+
 	internal:
 		MenuCommand(WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe, Menu cmd, Attachment pobj)
 			: executor(exe), command(cmd), attachment(pobj) {}
@@ -155,6 +165,9 @@ namespace WarGrey::SCADA {
 		virtual void before_group_executing(Menu cmd, Group group, Attachment pobj) {}
 		virtual void execute(Menu cmd, Group group, Attachment pobj) = 0;
 		virtual void after_group_executing(Menu cmd, Group group, Attachment pobj) {}
+
+	public:
+		virtual bool delete_me() { return true; }
 	};
 
 	template<typename Menu, typename Group, class Attachment>
@@ -163,6 +176,13 @@ namespace WarGrey::SCADA {
 		 * Interfaces are not classes linguistically,
 		 * all the required methods therefore should be marked as `virtual` instead of `override`.
 		 */
+	public:
+		virtual ~GroupMenuCommand() {
+			if (this->executor->delete_me()) {
+				delete this->executor;
+			}
+		}
+
 	internal:
 		GroupMenuCommand(WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe, Menu cmd, Group id, Attachment pobj)
 			: executor(exe), id(id), command(cmd), attachment(pobj) {}

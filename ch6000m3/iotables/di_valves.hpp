@@ -1,8 +1,7 @@
 #pragma once
 
-#include <map>
-
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 namespace WarGrey::SCADA {
 	// DB4, starts from 1
@@ -177,61 +176,9 @@ namespace WarGrey::SCADA {
 	static unsigned int butterfly_valve_HBV18_status = 297U;
 
 	/*********************************************************************************************/
-	template<class G>
-	void DI_gate_valve(G* target, const uint8* db4, size_t idx_p1) {
-		target->set_status(DBX(db4, idx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
-	}
-
-	/*********************************************************************************************/
-	template<class V>
-	void DI_gate_valve(V* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-		if (DBX(db4, idx4_p1 - 1U)) {
-			target->set_status(GateValveStatus::Open);
-		} else if (DBX(db4, idx4_p1 + 0U)) {
-			target->set_status(GateValveStatus::Closed);
-		} else if (DBX(db205, idx205_p1 - 1U)) {
-			target->set_status(GateValveStatus::Opening);
-		} else if (DBX(db205, idx205_p1 + 0U)) {
-			target->set_status(GateValveStatus::Closing);
-		} else if (DBX(db205, idx205_p1 + 1U)) {
-			target->set_status(GateValveStatus::Unopenable);
-		} else if (DBX(db205, idx205_p1 + 2U)) {
-			target->set_status(GateValveStatus::Unclosable);
-		} else if (DBX(db205, idx205_p1 + 3U)) {
-			target->set_status(GateValveStatus::OpenReady);
-		} else if (DBX(db205, idx205_p1 + 4U)) {
-			target->set_status(GateValveStatus::CloseReady);
-		} else if (DBX(db205, idx205_p1 + 5U)) {
-			target->set_status(GateValveStatus::VirtualOpen);
-		} else if (DBX(db205, idx205_p1 + 6U)) {
-			target->set_status(GateValveStatus::VirtualClose);
-		}
-	}
-
-	template<class V>
-	void DI_motor_valve(V* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-		if (DBX(db4, idx4_p1 - 1U)) {
-			target->set_status(TValveStatus::Open);
-		} else if (DBX(db4, idx4_p1 + 0U)) {
-			target->set_status(TValveStatus::Closed);
-		} else if (DBX(db205, idx205_p1 - 1U)) {
-			target->set_status(TValveStatus::Opening);
-		} else if (DBX(db205, idx205_p1 + 0U)) {
-			target->set_status(TValveStatus::Closing);
-		} else if (DBX(db205, idx205_p1 + 1U)) {
-			target->set_status(TValveStatus::Unopenable);
-		} else if (DBX(db205, idx205_p1 + 2U)) {
-			target->set_status(TValveStatus::Unclosable);
-		} else if (DBX(db205, idx205_p1 + 3U)) {
-			target->set_status(TValveStatus::OpenReady);
-		} else if (DBX(db205, idx205_p1 + 4U)) {
-			target->set_status(TValveStatus::CloseReady);
-		} else if (DBX(db205, idx205_p1 + 5U)) {
-			target->set_status(TValveStatus::VirtualOpen);
-		} else if (DBX(db205, idx205_p1 + 6U)) {
-			target->set_status(TValveStatus::VirtualClose);
-		}
-	}
+	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx_p1);
+	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
+	void DI_motor_valve(WarGrey::SCADA::MotorValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 
 	template<class G, typename Menu>
 	bool gate_valve_command_executable(G* target, Menu cmd, bool otherwise) {

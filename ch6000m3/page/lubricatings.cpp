@@ -14,12 +14,12 @@
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 
-#include "schema/ai_pumps.hpp"
+#include "iotables/ai_pumps.hpp"
 
-#include "schema/di_pumps.hpp"
-#include "schema/di_hopper_pumps.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_hopper_pumps.hpp"
 
-#include "schema/do_hopper_pumps.hpp"
+#include "iotables/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 

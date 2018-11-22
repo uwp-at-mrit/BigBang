@@ -16,17 +16,17 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
-#include "schema/ai_pumps.hpp"
-#include "schema/ai_valves.hpp"
-#include "schema/ai_hopper_pumps.hpp"
-#include "schema/ai_dredges.hpp"
+#include "iotables/ai_pumps.hpp"
+#include "iotables/ai_valves.hpp"
+#include "iotables/ai_hopper_pumps.hpp"
+#include "iotables/ai_dredges.hpp"
 
-#include "schema/di_pumps.hpp"
-#include "schema/di_hopper_pumps.hpp"
-#include "schema/di_valves.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_hopper_pumps.hpp"
+#include "iotables/di_valves.hpp"
 
-#include "schema/do_valves.hpp"
-#include "schema/do_hopper_pumps.hpp"
+#include "iotables/do_valves.hpp"
+#include "iotables/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 

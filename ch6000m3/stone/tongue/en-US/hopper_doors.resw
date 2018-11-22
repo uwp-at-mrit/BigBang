@@ -195,7 +195,7 @@
   <data name="Locked" xml:space="preserve">
     <value>Doors Locked</value>
   </data>
-  <data name="Auto" xml:space="preserve">
-    <value>Auto Looking</value>
+  <data name="AutoLock" xml:space="preserve">
+    <value>Auto Lock</value>
   </data>
 </root>

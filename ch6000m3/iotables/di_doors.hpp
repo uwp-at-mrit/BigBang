@@ -1,8 +1,10 @@
 #pragma once
 
-#include "graphlet/symbol/door/hopper_doorlet.hpp"
+#include "graphlet/buttonlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
-#include "graphlet/dashboard/batterylet.hpp"
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
+
+#include "iotables/do_doors.hpp"
 
 namespace WarGrey::SCADA {
 	// DB4, starts from 1
@@ -58,60 +60,10 @@ namespace WarGrey::SCADA {
 	static unsigned int upper_door_SB7_status = 1193U;
 
 	/************************************************************************************************/
-	template<class D>
-	void DI_hopper_door(D* target, const uint8* db205, size_t idx205_p1) {
-		if (DBX(db205, idx205_p1 + 6)) {
-			target->set_status(DoorStatus::Disabled);
-		} else if (DBX(db205, idx205_p1 - 1)) {
-			target->set_status(DoorStatus::Opening);
-		} else if (DBX(db205, idx205_p1 + 0)) {
-			target->set_status(DoorStatus::Closing);
-		} else {
-			target->set_status(DoorStatus::Default);
-		}
-	}
+	void DI_hopper_door(WarGrey::SCADA::IHopperDoorlet* target, const uint8* db205, size_t idx205_p1);
+	void DI_hopper_door(WarGrey::SCADA::IHopperDoorlet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 
-	template<class D>
-	void DI_hopper_door(D* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-		DI_hopper_door(target, db205, idx205_p1);
-		target->set_status(DBX(db4, idx4_p1 - 1), DoorStatus::Closed);
-	}
-
-	template<class A>
-	void DI_hopper_doors_auto_locking(A* alarmer, const uint8* db205) {
-		alarmer->set_status(DBX(db205, 1087U - 1U), AlarmStatus::Notice, AlarmStatus::None);
-	}
-
-	template<class A>
-	void DI_hopper_doors_locked(A* alarmer, const uint8* db205) {
-		alarmer->set_status(DBX(db205, 1086U - 1U), AlarmStatus::Notice, AlarmStatus::None);
-	}
-
-	template<class B, typename CMD>
-	void DI_hopper_doors_checks_button(Credit<B, CMD>* button, const uint8* db205) {
-		unsigned int idx_p1 = 0U;
-
-		switch (button->id) {
-		case CMD::OpenDoorCheck:  idx_p1 = 1897U; break;
-		case CMD::CloseDoorCheck: idx_p1 = 1899U; break;
-		}
-
-		if (idx_p1 > 0) {
-			if (DBX(db205, idx_p1 + 0U)) {
-				button->set_status(ButtonStatus::Executing);
-			} else if (DBX(db205, idx_p1 - 1U)) {
-				button->set_status(ButtonStatus::Ready);
-			} else {
-				button->set_status(ButtonStatus::Disabled);
-			}
-		}
-	}
-
-	template<class D, typename Menu>
-	bool hopper_door_command_executable(D* target, Menu cmd, bool otherwise) {
-		DoorStatus status = target->get_status();
-		bool executable = otherwise;
-
-		return executable;
-	}
+	void DI_hopper_doors_auto_lock(WarGrey::SCADA::Alarmlet* alarmer, const uint8* db205);
+	void DI_hopper_doors_locked(WarGrey::SCADA::Alarmlet* alarmer, const uint8* db205);
+	void DI_hopper_doors_checks_button(WarGrey::SCADA::Buttonlet* button, WarGrey::SCADA::BottomDoorCommand cmd, const uint8* db205);
 }

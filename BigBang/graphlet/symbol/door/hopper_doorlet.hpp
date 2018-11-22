@@ -16,11 +16,16 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ disable_color;
 	};
 
-	private class HopperDoorlet
+	private class IHopperDoorlet
 		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle>
 		, public WarGrey::SCADA::IRangelet<double> {
 	public:
-		HopperDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
+		IHopperDoorlet(WarGrey::SCADA::DoorStatus default_status, float radius, double degrees);
+	};
+
+	private class HopperDoorlet : public WarGrey::SCADA::IHopperDoorlet {
+	public:
+		HopperDoorlet(WarGrey::SCADA::DoorStatus default_status, float radius, double degrees = 0.0);
 		HopperDoorlet(float radius, double degrees = 0.0);
 
 	public:
@@ -42,9 +47,7 @@ namespace WarGrey::SCADA {
 		bool flashing;
 	};
 
-	private class UpperHopperDoorlet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle>
-		, public WarGrey::SCADA::IRangelet<double> {
+	private class UpperHopperDoorlet : public IHopperDoorlet {
 	public:
 		UpperHopperDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
 		UpperHopperDoorlet(float radius, double degrees = 0.0);

@@ -119,8 +119,9 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	float bottom_intermediate_radians = degrees_to_radians(degrees + 175.0 * sign);
 	float radians = degrees_to_radians(degrees + 180.0 * sign);
 	float top_intermediate_radians = degrees_to_radians(degrees + 190.0 * sign);
-	float top_start_radians = degrees_to_radians(degrees_normalize(degrees + 215.0 * sign, normal_start)); // TODO: this angle should based on the range
-	float top_stop_radians = degrees_to_radians(degrees_normalize(arm_degrees - drag_visor_end_angle * sign, normal_start));
+	float top_start_radians = degrees_to_radians(degrees + 215.0 * sign); // TODO: this angle should based on the range
+	float top_stop_radians = degrees_to_radians(arm_degrees - drag_visor_end_angle * sign);
+	float top_sweep_radians = radians_normalize(top_stop_radians - top_start_radians, normal_start);
 	float jaw_radians = bottom_base_radians + std::acos(bottom_radius / jaw_length) * sign;
 	float teeth_radians = jaw_radians - degrees_to_radians(6.18) * sign;
 	float2 bottom_start, bottom_teeth, teeth, bottom_intermediate, top_teeth, top_intermediate_far, top_intermediate_near, top_start;
@@ -145,7 +146,7 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	visor->AddLine(top_intermediate_far);
 	visor->AddLine(top_intermediate_near);
 	visor->AddLine(top_start);
-	visor->AddArc(float2(0.0F, 0.0F), radius, radius, top_start_radians, top_stop_radians - top_start_radians);
+	visor->AddArc(float2(0.0F, 0.0F), radius, radius, top_start_radians, top_sweep_radians);
 	visor->EndFigure(CanvasFigureLoop::Closed);
 
 	return CanvasGeometry::CreatePath(visor);
@@ -756,7 +757,7 @@ void DragHeadlet::construct() {
 	this->depth_top = this->bottom_radius + dmetrics.hatch_y;
 	this->depth_height = dmetrics.hatch_height;
 
-	this->set_angles(0.0, 0.0, true);
+	this->set_angles(this->info.visor_degrees_min, 0.0, true);
 	this->set_depths(0.0F, 0.0F, true);
 }
 

@@ -2,6 +2,7 @@
 
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/device/gantrylet.hpp"
+#include "graphlet/buttonlet.hpp"
 
 namespace WarGrey::SCADA {
 	private struct WinchLimits {
@@ -80,101 +81,22 @@ namespace WarGrey::SCADA {
 	static unsigned int ctension_sb_button = 1570U;
 
 	/************************************************************************************************/
-	template<class W>
-	void DI_winch(W* target
+	void DI_winch(WarGrey::SCADA::Winchlet* target
 		, const uint8* db4, WarGrey::SCADA::WinchLimits& limits
-		, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
-		bool slack = (limits.slack > 0U) && DBX(db4, limits.slack - 1U);
+		, const uint8* db205, WarGrey::SCADA::WinchDetails& details);
 
-		if (DBX(db4, limits.upper - 1U)) {
-			target->set_status(WinchStatus::UpperLimited);
-		} else if (DBX(db4, limits.support - 1U)) {
-			target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
-		} else if ((limits.suction > 0U) && DBX(db4, limits.suction - 1U)) {
-			target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
-		} else {
-			unsigned int status = details.status - 1U;
-			unsigned int sensor = details.sensor - 1U;
-			bool can_windout = (DBX(db205, status + 4U));
-			bool can_windup = (DBX(db205, status + 5U));
-			bool fast = (details.draghead && DBX(db205, status + 7U));
+	void DI_winch_override(WarGrey::SCADA::Buttonlet* target, const uint8* db205, WarGrey::SCADA::WinchDetails& details);
 
-			if (DBX(db205, status + 0U)) {
-				target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
-			} else if (DBX(db205, status + 1U)) {
-				target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
-			} else if (DBX(db205, sensor + 0U)) {
-				target->set_status(WinchStatus::SensorUpperLimited);
-			} else if (DBX(db205, sensor + 1U)) {
-				target->set_status(WinchStatus::SensorLowerLimited);
-			} else if (can_windout && can_windup) {
-				target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
-			} else if (can_windout) {
-				target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
-			} else if (can_windup) {
-				target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
-			}
-			
-			// the rest are unused;
-			//  target->set_status(DBX(db205, status + 2U), WinchStatus::Unlettable);
-			//  target->set_status(DBX(db205, status + 3U), WinchStatus::Unpullable);
-		}
-	}
+	void DI_gantry(WarGrey::SCADA::Gantrylet* target, const uint8* db4, unsigned int idx4_p1, const uint8* db205, unsigned int idx205_p1);
+	void DI_gantry(WarGrey::SCADA::GantrySymbollet* target, const uint8* db4, unsigned int idx4_p1, const uint8* db205, unsigned int idx205_p1);
 
-	template<class B>
-	void DI_winch_override(B* target, const uint8* db205, WarGrey::SCADA::WinchDetails& details) {
-		target->set_status(DBX(db205, details.override - 1U), ButtonStatus::Executing, ButtonStatus::Default);
-	}
+	void DI_suction_buttons(WarGrey::SCADA::Buttonlet* intarget, WarGrey::SCADA::Buttonlet* detarget, const uint8* db205, unsigned int idx_p1);
+	void DI_ctension_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned int idx_p1);
 
-	template<class G>
-	void DI_gantry(G* target, const uint8* db4, unsigned int idx4_p1, const uint8* db205, unsigned int idx205_p1) {
-		if (DBX(db4, idx4_p1 - 1U)) {
-			target->set_status(GantryStatus::WindedOut);
-		} else if (DBX(db4, idx4_p1 + 0U)) {
-			target->set_status(GantryStatus::WindedUp);
-		} else if (DBX(db205, idx205_p1 - 1U)) {
-			target->set_status(GantryStatus::WindingOut);
-		} else if (DBX(db205, idx205_p1 + 0U)) {
-			target->set_status(GantryStatus::WindingUp);
-		} else {
-			target->set_status(GantryStatus::Default);
-		}
-	}
+	bool DI_long_sb_drag(const uint8* db205);
 
-	template<class B>
-	void DI_suction_buttons(B* intarget, B* detarget, const uint8* db205, unsigned int idx_p1) {
-		if (DBX(db205, idx_p1 - 1U)) {
-			intarget->set_status(ButtonStatus::Executing);
-		} else if (DBX(db205, idx_p1 + 1U)) {
-			intarget->set_status(ButtonStatus::Failed);
-		} else if (DBX(db205, idx_p1 + 3U)) {
-			intarget->set_status(ButtonStatus::Ready);
-		} else {
-			intarget->set_status(ButtonStatus::Default);
-		}
-
-		if (DBX(db205, idx_p1 + 0U)) {
-			detarget->set_status(ButtonStatus::Executing);
-		} else if (DBX(db205, idx_p1 + 2U)) {
-			detarget->set_status(ButtonStatus::Failed);
-		} else if (DBX(db205, idx_p1 + 4U)) {
-			detarget->set_status(ButtonStatus::Ready);
-		} else {
-			detarget->set_status(ButtonStatus::Default);
-		}
-	}
-
-	template<class B>
-	void DI_ctension_button(B* target, const uint8* db205, unsigned int idx_p1) {
-		target->set_status(DBX(db205, idx_p1 - 1U), ButtonStatus::Executing, ButtonStatus::Default);
-	}
-
-	bool DI_long_sb_drag(const uint8* db205) {
-		return DBX(db205, 1417U - 1U);
-	}
-
-	template<class G, typename Menu>
-	bool winch_command_executable(G* target, Menu cmd, bool draghead, bool otherwise) {
+	template<typename Menu>
+	bool winch_command_executable(WarGrey::SCADA::Winchlet* target, Menu cmd, bool draghead, bool otherwise) {
 		WinchStatus status = target->get_status();
 		bool executable = otherwise;
 
@@ -187,8 +109,8 @@ namespace WarGrey::SCADA {
 		return executable;
 	}
 
-	template<class G, typename Menu>
-	bool gantry_command_executable(G* target, Menu cmd, bool otherwise) {
+	template<typename Menu>
+	bool gantry_command_executable(WarGrey::SCADA::Gantrylet* target, Menu cmd, bool otherwise) {
 		GantryStatus status = target->get_status();
 		bool executable = otherwise;
 

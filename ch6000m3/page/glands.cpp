@@ -16,14 +16,14 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
-#include "schema/ai_pumps.hpp"
-#include "schema/ai_hopper_pumps.hpp"
+#include "iotables/ai_pumps.hpp"
+#include "iotables/ai_hopper_pumps.hpp"
 
-#include "schema/di_pumps.hpp"
-#include "schema/di_hopper_pumps.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_hopper_pumps.hpp"
 
-#include "schema/ao_pumps.hpp"
-#include "schema/do_pumps.hpp"
+#include "iotables/do_hopper_pumps.hpp"
+#include "iotables/ao_gland_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -40,8 +40,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum GPMode { WindowUI = 0, Dashboard };
 
-private enum class SWPOperation { Start, Stop, Reset, Auto, _ };
-private enum class GPVOperation { Open, Close, VirtualOpen, VirtualClose, _ };
+private enum class GPOperation { Start, Stop, Reset, Auto, _ };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
@@ -70,9 +69,22 @@ private enum class GP : unsigned int {
 	flushs, pshp, sbhp, psuwp, sbuwp
 };
 
-private class GlandPumps final
-	: public PLCConfirmation
-	, public IMenuCommand<SWPOperation, Credit<HydraulicPumplet, GP>, PLCMaster*> {
+static uint16 DO_glands_action(GlandPumpAction cmd, HydraulicPumplet* pump) {
+	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, GP>*>(pump);
+	uint16 index = 0U;
+	
+	if (credit_pump != nullptr) {
+		switch (credit_pump->id) {
+		case GP::PSFP: case GP::SBFP: index = DO_gate_flushing_pump_command(cmd, credit_pump->id); break;
+		default: index = DO_gland_pump_command(cmd, credit_pump->id); break;
+		}
+	}
+
+	return index;
+}
+
+/*************************************************************************************************/
+private class GlandPumps final : public PLCConfirmation {
 public:
 	GlandPumps(GlandsPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
@@ -156,25 +168,6 @@ public:
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(SWPOperation cmd, Credit<HydraulicPumplet, GP>* pump, PLCMaster* plc, bool acc_executable) override {
-		//bool executable = plc->connected();
-
-		//switch (pump->id) {
-		//case GP::PSFP: case GP::SBFP: executable = executable && gate_flushing_pump_command_executable(pump, cmd, true); break;
-		//default: executable = executable && gland_pump_command_executable(pump, cmd, true); break;
-		//}
-
-		return plc->connected();
-	}
-
-	void execute(SWPOperation cmd, Credit<HydraulicPumplet, GP>* pump, PLCMaster* plc) {
-		switch (pump->id) {
-		case GP::PSFP: case GP::SBFP: plc->send_command(DO_gate_flushing_pump_command(cmd, pump->id)); break;
-		default: plc->send_command(DO_gland_pump_command(cmd, pump->id)); break;
-		}
 	}
 
 public:
@@ -461,7 +454,7 @@ GlandsPage::GlandsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	GlandPumps* dashboard = new GlandPumps(this);
 
 	this->dashboard = dashboard;
-	this->pump_op = make_menu<SWPOperation, Credit<HydraulicPumplet, GP>, PLCMaster*>(dashboard, plc);
+	this->pump_op = make_gland_pump_menu(DO_glands_action, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

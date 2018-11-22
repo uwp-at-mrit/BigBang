@@ -1,0 +1,60 @@
+#include "menu.hpp"
+
+#include "iotables/do_devices.hpp"
+
+using namespace WarGrey::SCADA;
+
+using namespace Windows::UI::Xaml::Controls;
+
+private class OverflowExecutor final : public IMenuCommand<OverflowAction, IGraphlet, PLCMaster*> {
+public:
+	bool can_execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc) { // DB300, starts from 1
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case OverflowAction::Up:   index = 857U; break;
+		case OverflowAction::Down: index = 858U; break;
+		case OverflowAction::Stop: index = 859U; break;
+		case OverflowAction::Auto: index = 868U; break;
+		}
+
+		plc->send_command(index);
+	}
+};
+
+private class TankHeaterExecutor final : public IMenuCommand<TankHeaterAction, IGraphlet, PLCMaster*> {
+public:
+	bool can_execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc, bool acc_executable) override {
+		return plc->connected();
+	}
+
+	void execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc) { // DB300, starts from 1
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case TankHeaterAction::Start:  index = 665U; break;
+		case TankHeaterAction::Stop:   index = 666U; break;
+		case TankHeaterAction::Cancel: index = 667U; break;
+		case TankHeaterAction::Auto:   index = 668U; break;
+		}
+
+		plc->send_command(index);
+	}
+};
+
+/*************************************************************************************************/
+MenuFlyout^ WarGrey::SCADA::make_overflow_menu(PLCMaster* plc) {
+	OverflowExecutor* exe = new OverflowExecutor();
+
+	return make_menu<OverflowAction, IGraphlet, PLCMaster*>(exe, plc);
+}
+
+MenuFlyout^ WarGrey::SCADA::make_tank_heater_menu(PLCMaster* plc) {
+	TankHeaterExecutor* exe = new TankHeaterExecutor();
+
+	return make_menu<TankHeaterAction, IGraphlet, PLCMaster*>(exe, plc);
+}

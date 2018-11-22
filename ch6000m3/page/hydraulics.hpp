@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
-		Windows::UI::Xaml::Controls::MenuFlyout^ gmaster_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ gbs_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gps_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gsb_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gvisor_op;

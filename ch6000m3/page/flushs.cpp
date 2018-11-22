@@ -18,18 +18,18 @@
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
-#include "schema/ai_doors.hpp"
-#include "schema/ai_pumps.hpp"
-#include "schema/ai_water_pumps.hpp"
+#include "iotables/ai_doors.hpp"
+#include "iotables/ai_pumps.hpp"
+#include "iotables/ai_water_pumps.hpp"
 
-#include "schema/di_doors.hpp"
-#include "schema/di_pumps.hpp"
-#include "schema/di_valves.hpp"
-#include "schema/di_water_pumps.hpp"
+#include "iotables/di_doors.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_valves.hpp"
+#include "iotables/di_water_pumps.hpp"
 
-#include "schema/do_doors.hpp"
-#include "schema/do_valves.hpp"
-#include "schema/do_water_pumps.hpp"
+#include "iotables/do_doors.hpp"
+#include "iotables/do_valves.hpp"
+#include "iotables/do_water_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -105,7 +105,6 @@ private enum class FS : unsigned int {
 private class Flush final
 	: public PLCConfirmation
 	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>
-	, public IMenuCommand<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*>
 	, public IMenuCommand<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>
 	, public IMenuCommand<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*> {
 public:
@@ -133,21 +132,21 @@ public:
 		this->powers[FS::SBPump]->set_value(RealData(DB203, sb_water_pump_power), GraphletAnchor::CB);
 		this->rpms[FS::SBPump]->set_value(RealData(DB203, sb_water_pump_rpm), GraphletAnchor::CT);
 		
-		this->set_door_progress(FS::PS1, RealData(DB203, upper_door_PS1_progress));
-		this->set_door_progress(FS::PS2, RealData(DB203, upper_door_PS2_progress));
-		this->set_door_progress(FS::PS3, RealData(DB203, upper_door_PS3_progress));
-		this->set_door_progress(FS::PS4, RealData(DB203, upper_door_PS4_progress));
-		this->set_door_progress(FS::PS5, RealData(DB203, upper_door_PS5_progress));
-		this->set_door_progress(FS::PS6, RealData(DB203, upper_door_PS6_progress));
-		this->set_door_progress(FS::PS7, RealData(DB203, upper_door_PS7_progress));
+		this->set_door_progress(Door::PS1, RealData(DB203, upper_door_PS1_progress));
+		this->set_door_progress(Door::PS2, RealData(DB203, upper_door_PS2_progress));
+		this->set_door_progress(Door::PS3, RealData(DB203, upper_door_PS3_progress));
+		this->set_door_progress(Door::PS4, RealData(DB203, upper_door_PS4_progress));
+		this->set_door_progress(Door::PS5, RealData(DB203, upper_door_PS5_progress));
+		this->set_door_progress(Door::PS6, RealData(DB203, upper_door_PS6_progress));
+		this->set_door_progress(Door::PS7, RealData(DB203, upper_door_PS7_progress));
 
-		this->set_door_progress(FS::SB1, RealData(DB203, upper_door_SB1_progress));
-		this->set_door_progress(FS::SB2, RealData(DB203, upper_door_SB2_progress));
-		this->set_door_progress(FS::SB3, RealData(DB203, upper_door_SB3_progress));
-		this->set_door_progress(FS::SB4, RealData(DB203, upper_door_SB4_progress));
-		this->set_door_progress(FS::SB5, RealData(DB203, upper_door_SB5_progress));
-		this->set_door_progress(FS::SB6, RealData(DB203, upper_door_SB6_progress));
-		this->set_door_progress(FS::SB7, RealData(DB203, upper_door_SB7_progress));
+		this->set_door_progress(Door::SB1, RealData(DB203, upper_door_SB1_progress));
+		this->set_door_progress(Door::SB2, RealData(DB203, upper_door_SB2_progress));
+		this->set_door_progress(Door::SB3, RealData(DB203, upper_door_SB3_progress));
+		this->set_door_progress(Door::SB4, RealData(DB203, upper_door_SB4_progress));
+		this->set_door_progress(Door::SB5, RealData(DB203, upper_door_SB5_progress));
+		this->set_door_progress(Door::SB6, RealData(DB203, upper_door_SB6_progress));
+		this->set_door_progress(Door::SB7, RealData(DB203, upper_door_SB7_progress));
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
@@ -176,21 +175,21 @@ public:
 		DI_gate_valve(this->gvalves[FS::HBV17], DB4, butterfly_valve_HBV17_feedback, DB205, butterfly_valve_HBV17_status);
 		DI_gate_valve(this->gvalves[FS::HBV18], DB4, butterfly_valve_HBV18_feedback, DB205, butterfly_valve_HBV18_status);
 
-		DI_hopper_door(this->uhdoors[FS::PS1], DB205, upper_door_PS1_status);
-		DI_hopper_door(this->uhdoors[FS::PS2], DB205, upper_door_PS2_status);
-		DI_hopper_door(this->uhdoors[FS::PS3], DB205, upper_door_PS3_status);
-		DI_hopper_door(this->uhdoors[FS::PS4], DB205, upper_door_PS4_status);
-		DI_hopper_door(this->uhdoors[FS::PS5], DB205, upper_door_PS5_status);
-		DI_hopper_door(this->uhdoors[FS::PS6], DB205, upper_door_PS6_status);
-		DI_hopper_door(this->uhdoors[FS::PS7], DB205, upper_door_PS7_status);
+		DI_hopper_door(this->uhdoors[Door::PS1], DB205, upper_door_PS1_status);
+		DI_hopper_door(this->uhdoors[Door::PS2], DB205, upper_door_PS2_status);
+		DI_hopper_door(this->uhdoors[Door::PS3], DB205, upper_door_PS3_status);
+		DI_hopper_door(this->uhdoors[Door::PS4], DB205, upper_door_PS4_status);
+		DI_hopper_door(this->uhdoors[Door::PS5], DB205, upper_door_PS5_status);
+		DI_hopper_door(this->uhdoors[Door::PS6], DB205, upper_door_PS6_status);
+		DI_hopper_door(this->uhdoors[Door::PS7], DB205, upper_door_PS7_status);
 
-		DI_hopper_door(this->uhdoors[FS::SB1], DB205, upper_door_SB1_status);
-		DI_hopper_door(this->uhdoors[FS::SB2], DB205, upper_door_SB2_status);
-		DI_hopper_door(this->uhdoors[FS::SB3], DB205, upper_door_SB3_status);
-		DI_hopper_door(this->uhdoors[FS::SB4], DB205, upper_door_SB4_status);
-		DI_hopper_door(this->uhdoors[FS::SB5], DB205, upper_door_SB5_status);
-		DI_hopper_door(this->uhdoors[FS::SB6], DB205, upper_door_SB6_status);
-		DI_hopper_door(this->uhdoors[FS::SB7], DB205, upper_door_SB7_status);
+		DI_hopper_door(this->uhdoors[Door::SB1], DB205, upper_door_SB1_status);
+		DI_hopper_door(this->uhdoors[Door::SB2], DB205, upper_door_SB2_status);
+		DI_hopper_door(this->uhdoors[Door::SB3], DB205, upper_door_SB3_status);
+		DI_hopper_door(this->uhdoors[Door::SB4], DB205, upper_door_SB4_status);
+		DI_hopper_door(this->uhdoors[Door::SB5], DB205, upper_door_SB5_status);
+		DI_hopper_door(this->uhdoors[Door::SB6], DB205, upper_door_SB6_status);
+		DI_hopper_door(this->uhdoors[Door::SB7], DB205, upper_door_SB7_status);
 
 		DI_shift_button(this->shifts[FSSCommand::LeftShift], DB205, left_shifting_details);
 		DI_shift_button(this->shifts[FSSCommand::RightShift], DB205, right_shifting_details);
@@ -243,15 +242,6 @@ public:
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(FSHDOperation cmd, Credit<UpperHopperDoorlet, FS>* door, PLCMaster* plc) override {
-		plc->send_command(DO_upper_door_command(cmd, door->id));
 	}
 
 public:
@@ -365,8 +355,8 @@ public:
 		this->load_buttons(this->shifts);
 
 		{ // load doors
-			this->load_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, radius);
-			this->load_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, radius);
+			this->load_doors(this->uhdoors, this->progresses, Door::PS1, Door::PS7, radius);
+			this->load_doors(this->uhdoors, this->progresses, Door::SB1, Door::SB7, radius);
 		}
 
 		{ // load valves
@@ -437,11 +427,11 @@ public:
 			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::CB, 0.0F, default_pipe_thickness * 0.5F);
 		}
 
-		this->reflow_doors(this->uhdoors, this->progresses, FS::PS1, FS::PS7, GraphletAnchor::CT);
-		this->reflow_doors(this->uhdoors, this->progresses, FS::SB1, FS::SB7, GraphletAnchor::CB);
+		this->reflow_doors(this->uhdoors, this->progresses, Door::PS1, Door::PS7, GraphletAnchor::CT);
+		this->reflow_doors(this->uhdoors, this->progresses, Door::SB1, Door::SB7, GraphletAnchor::CB);
 
 		{ // reflow buttons
-			IGraphlet* shift_target = this->progresses[FS::SB4];
+			IGraphlet* shift_target = this->progresses[Door::SB4];
 			
 			this->master->move_to(this->shifts[FSSCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
 			this->master->move_to(this->shifts[FSSCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
@@ -481,8 +471,8 @@ public:
 			this->station->map_credit_graphlet(this->powers[FS::SBPump], GraphletAnchor::LB, xoff);
 			this->station->map_credit_graphlet(this->rpms[FS::SBPump], GraphletAnchor::LT, xoff);
 
-			this->master->move_to(this->pressures[FS::D], this->progresses[FS::PS5], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
-			this->master->move_to(this->pressures[FS::E], this->progresses[FS::PS3], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
+			this->master->move_to(this->pressures[FS::D], this->progresses[Door::PS5], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
+			this->master->move_to(this->pressures[FS::E], this->progresses[Door::PS3], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
 		}
 	}
 
@@ -620,7 +610,7 @@ private:
 	}
 
 private:
-	void set_door_progress(FS id, float value) {
+	void set_door_progress(Door id, float value) {
 		this->uhdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 
@@ -669,8 +659,8 @@ private:
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
-	std::map<FS, Credit<UpperHopperDoorlet, FS>*> uhdoors;
-	std::map<FS, Credit<Percentagelet, FS>*> progresses;
+	std::map<Door, Credit<UpperHopperDoorlet, Door>*> uhdoors;
+	std::map<Door, Credit<Percentagelet, Door>*> progresses;
 	std::map<FS, Credit<Dimensionlet, FS>*> pressures;
 	std::map<FS, Credit<Dimensionlet, FS>*> powers;
 	std::map<FS, Credit<Dimensionlet, FS>*> rpms;
@@ -698,7 +688,7 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->dashboard = dashboard;
 	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>(dashboard, plc);
-	this->upper_door_op = make_menu<FSHDOperation, Credit<UpperHopperDoorlet, FS>, PLCMaster*>(dashboard, plc);
+	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_pump_op = make_menu<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
 	this->sb_pump_op = make_menu<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
 	this->grid = new GridDecorator();

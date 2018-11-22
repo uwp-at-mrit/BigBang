@@ -22,10 +22,14 @@ static CanvasSolidColorBrush^ door_default_bottom_color = Colours::make(0xBB6666
 static CanvasSolidColorBrush^ door_default_progress_color = Colours::Yellow;
 
 /*************************************************************************************************/
+IHopperDoorlet::IHopperDoorlet(DoorStatus default_status, float radius, double degrees)
+	: ISymbollet(default_status, radius, degrees), IRangelet(0.0, 1.0) {}
+
+/*************************************************************************************************/
 HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorStatus::Default, radius, degrees) {}
 
-HopperDoorlet::HopperDoorlet(DoorStatus default_state, float radius, double degrees)
-	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {}
+HopperDoorlet::HopperDoorlet(DoorStatus default_status, float radius, double degrees)
+	: IHopperDoorlet(default_status, radius, degrees) {}
 
 void HopperDoorlet::construct() {
 	float r = this->radiusX - default_thickness * 2.0F;
@@ -138,8 +142,8 @@ void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees)
 	: UpperHopperDoorlet(DoorStatus::Default, radius, degrees) {}
 
-UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_state, float radius, double degrees)
-	: ISymbollet(default_state, radius, degrees), IRangelet(0.0, 1.0) {
+UpperHopperDoorlet::UpperHopperDoorlet(DoorStatus default_status, float radius, double degrees)
+	: IHopperDoorlet(default_status, radius, degrees) {
 	this->radiusY = this->radiusX * 0.618F;
 	this->brdiff = default_thickness * 1.618F;
 }

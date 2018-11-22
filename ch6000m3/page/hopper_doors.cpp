@@ -9,15 +9,15 @@
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/dashboard/cylinderlet.hpp"
 
-#include "schema/ai_metrics.hpp"
+#include "iotables/ai_metrics.hpp"
 
-#include "schema/ai_doors.hpp"
-#include "schema/di_doors.hpp"
+#include "iotables/ai_doors.hpp"
+#include "iotables/di_doors.hpp"
 
-#include "schema/ai_pumps.hpp"
-#include "schema/di_pumps.hpp"
+#include "iotables/ai_pumps.hpp"
+#include "iotables/di_pumps.hpp"
 
-#include "schema/do_doors.hpp"
+#include "iotables/do_doors.hpp"
 
 #include "decorator/page.hpp"
 
@@ -40,15 +40,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum HDMode { WindowUI = 0, Dashboard };
 
-private enum class HDGroup { HDoor12, HDoor35, HDoor67, HDoor17, _};
-
-private enum class HDOperation { Open, Stop, Close, Disable, _ };
-private enum class HDGOperation { Open, Stop, Close, _ };
-
 // WARNING: order matters
 private enum class HD : unsigned int {
 	//labels
-	Port, Starboard, Auto, Locked,
+	Port, Starboard,
 	
 	// Cylinders
 	EarthWork, Vessel, HopperHeight, Loading, Displacement,
@@ -58,10 +53,6 @@ private enum class HD : unsigned int {
 
 	// Other Dimensions
 	Heel, Trim, BowDraft, SternDraft,
-
-	// Hopper doors
-	SB1, SB2, SB3, SB4, SB5, SB6, SB7,
-	PS1, PS2, PS3, PS4, PS5, PS6, PS7,
 
 	_
 };
@@ -178,10 +169,7 @@ private:
 	float ship_width;
 };
 
-private class Doors final
-	: public PLCConfirmation
-	, public IMenuCommand<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>
-	, public IGroupMenuCommand<HDGOperation, HDGroup, PLCMaster*> {
+private class Doors final : public PLCConfirmation {
 public:
 	Doors(HopperDoorsPage* master, DoorDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
@@ -210,21 +198,21 @@ public:
 		this->dimensions[HD::Heel]->set_value(DBD(DB2, heel_degrees));
 
 		{ // door progresses
-			this->set_door_progress(HD::PS1, RealData(DB203, bottom_door_PS1_progress));
-			this->set_door_progress(HD::PS2, RealData(DB203, bottom_door_PS2_progress));
-			this->set_door_progress(HD::PS3, RealData(DB203, bottom_door_PS3_progress));
-			this->set_door_progress(HD::PS4, RealData(DB203, bottom_door_PS4_progress));
-			this->set_door_progress(HD::PS5, RealData(DB203, bottom_door_PS5_progress));
-			this->set_door_progress(HD::PS6, RealData(DB203, bottom_door_PS6_progress));
-			this->set_door_progress(HD::PS7, RealData(DB203, bottom_door_PS7_progress));
+			this->set_door_progress(Door::PS1, RealData(DB203, bottom_door_PS1_progress));
+			this->set_door_progress(Door::PS2, RealData(DB203, bottom_door_PS2_progress));
+			this->set_door_progress(Door::PS3, RealData(DB203, bottom_door_PS3_progress));
+			this->set_door_progress(Door::PS4, RealData(DB203, bottom_door_PS4_progress));
+			this->set_door_progress(Door::PS5, RealData(DB203, bottom_door_PS5_progress));
+			this->set_door_progress(Door::PS6, RealData(DB203, bottom_door_PS6_progress));
+			this->set_door_progress(Door::PS7, RealData(DB203, bottom_door_PS7_progress));
 
-			this->set_door_progress(HD::SB1, RealData(DB203, bottom_door_SB1_progress));
-			this->set_door_progress(HD::SB2, RealData(DB203, bottom_door_SB2_progress));
-			this->set_door_progress(HD::SB3, RealData(DB203, bottom_door_SB3_progress));
-			this->set_door_progress(HD::SB4, RealData(DB203, bottom_door_SB4_progress));
-			this->set_door_progress(HD::SB5, RealData(DB203, bottom_door_SB5_progress));
-			this->set_door_progress(HD::SB6, RealData(DB203, bottom_door_SB6_progress));
-			this->set_door_progress(HD::SB7, RealData(DB203, bottom_door_SB7_progress));
+			this->set_door_progress(Door::SB1, RealData(DB203, bottom_door_SB1_progress));
+			this->set_door_progress(Door::SB2, RealData(DB203, bottom_door_SB2_progress));
+			this->set_door_progress(Door::SB3, RealData(DB203, bottom_door_SB3_progress));
+			this->set_door_progress(Door::SB4, RealData(DB203, bottom_door_SB4_progress));
+			this->set_door_progress(Door::SB5, RealData(DB203, bottom_door_SB5_progress));
+			this->set_door_progress(Door::SB6, RealData(DB203, bottom_door_SB6_progress));
+			this->set_door_progress(Door::SB7, RealData(DB203, bottom_door_SB7_progress));
 		}
 
 		{ // pump pressures
@@ -242,47 +230,29 @@ public:
 		DI_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);
 		DI_pump_dimension(this->dimensions[HD::H], DB4, pump_H_feedback);
 
-		DI_hopper_door(this->hdoors[HD::PS1], DB4, bottom_door_PS1_closed, DB205, bottom_door_PS1_status);
-		DI_hopper_door(this->hdoors[HD::PS2], DB4, bottom_door_PS2_closed, DB205, bottom_door_PS2_status);
-		DI_hopper_door(this->hdoors[HD::PS3], DB4, bottom_door_PS3_closed, DB205, bottom_door_PS3_status);
-		DI_hopper_door(this->hdoors[HD::PS4], DB4, bottom_door_PS4_closed, DB205, bottom_door_PS4_status);
-		DI_hopper_door(this->hdoors[HD::PS5], DB4, bottom_door_PS5_closed, DB205, bottom_door_PS5_status);
-		DI_hopper_door(this->hdoors[HD::PS6], DB4, bottom_door_PS6_closed, DB205, bottom_door_PS6_status);
-		DI_hopper_door(this->hdoors[HD::PS7], DB4, bottom_door_PS7_closed, DB205, bottom_door_PS7_status);
+		DI_hopper_door(this->hdoors[Door::PS1], DB4, bottom_door_PS1_closed, DB205, bottom_door_PS1_status);
+		DI_hopper_door(this->hdoors[Door::PS2], DB4, bottom_door_PS2_closed, DB205, bottom_door_PS2_status);
+		DI_hopper_door(this->hdoors[Door::PS3], DB4, bottom_door_PS3_closed, DB205, bottom_door_PS3_status);
+		DI_hopper_door(this->hdoors[Door::PS4], DB4, bottom_door_PS4_closed, DB205, bottom_door_PS4_status);
+		DI_hopper_door(this->hdoors[Door::PS5], DB4, bottom_door_PS5_closed, DB205, bottom_door_PS5_status);
+		DI_hopper_door(this->hdoors[Door::PS6], DB4, bottom_door_PS6_closed, DB205, bottom_door_PS6_status);
+		DI_hopper_door(this->hdoors[Door::PS7], DB4, bottom_door_PS7_closed, DB205, bottom_door_PS7_status);
 
-		DI_hopper_door(this->hdoors[HD::SB1], DB4, bottom_door_SB1_closed, DB205, bottom_door_SB1_status);
-		DI_hopper_door(this->hdoors[HD::SB2], DB4, bottom_door_SB2_closed, DB205, bottom_door_SB2_status);
-		DI_hopper_door(this->hdoors[HD::SB3], DB4, bottom_door_SB3_closed, DB205, bottom_door_SB3_status);
-		DI_hopper_door(this->hdoors[HD::SB4], DB4, bottom_door_SB4_closed, DB205, bottom_door_SB4_status);
-		DI_hopper_door(this->hdoors[HD::SB5], DB4, bottom_door_SB5_closed, DB205, bottom_door_SB5_status);
-		DI_hopper_door(this->hdoors[HD::SB6], DB4, bottom_door_SB6_closed, DB205, bottom_door_SB6_status);
-		DI_hopper_door(this->hdoors[HD::SB7], DB4, bottom_door_SB7_closed, DB205, bottom_door_SB7_status);
+		DI_hopper_door(this->hdoors[Door::SB1], DB4, bottom_door_SB1_closed, DB205, bottom_door_SB1_status);
+		DI_hopper_door(this->hdoors[Door::SB2], DB4, bottom_door_SB2_closed, DB205, bottom_door_SB2_status);
+		DI_hopper_door(this->hdoors[Door::SB3], DB4, bottom_door_SB3_closed, DB205, bottom_door_SB3_status);
+		DI_hopper_door(this->hdoors[Door::SB4], DB4, bottom_door_SB4_closed, DB205, bottom_door_SB4_status);
+		DI_hopper_door(this->hdoors[Door::SB5], DB4, bottom_door_SB5_closed, DB205, bottom_door_SB5_status);
+		DI_hopper_door(this->hdoors[Door::SB6], DB4, bottom_door_SB6_closed, DB205, bottom_door_SB6_status);
+		DI_hopper_door(this->hdoors[Door::SB7], DB4, bottom_door_SB7_closed, DB205, bottom_door_SB7_status);
 
-		DI_hopper_doors_auto_locking(this->lockers[HD::Auto], DB205);
-		DI_hopper_doors_locked(this->lockers[HD::Locked], DB205);
+		DI_hopper_doors_auto_lock(this->lockers[BottomDoorCommand::AutoLock], DB205);
+		DI_hopper_doors_locked(this->lockers[BottomDoorCommand::Locked], DB205);
 	}
 
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(HDOperation cmd, Credit<HopperDoorlet, HD>* door, PLCMaster* plc) override {
-		plc->send_command(DO_hopper_door_command(cmd, door->id));
-	}
-
-public:
-	bool can_execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
-		return plc->connected();
-	}
-
-	void execute(HDGOperation cmd, HDGroup group, PLCMaster* plc) override {
-		plc->send_command(DO_hopper_door_group_command(cmd, group));
 	}
 
 public:
@@ -292,8 +262,8 @@ public:
 		this->decorator->fill_door_cell_extent(nullptr, nullptr, &cell_width, &cell_height, 1, 0.0F);
 		
 		radius = std::fminf(cell_width, cell_height) * 0.75F * 0.5F;
-		this->load_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, radius);
-		this->load_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, radius);
+		this->load_doors(this->hdoors, this->progresses, this->doors, Door::PS1, Door::PS7, radius);
+		this->load_doors(this->hdoors, this->progresses, this->doors, Door::SB1, Door::SB7, radius);
 
 		cylinder_height = cell_height * 1.618F;
 		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
@@ -306,7 +276,7 @@ public:
 		this->load_dimensions(this->dimensions, HD::Heel, HD::Trim, "degrees", this->plain_style);
 		this->load_dimensions(this->dimensions, HD::BowDraft, HD::SternDraft, "meter", this->plain_style);
 
-		this->load_alarms(this->lockers, HD::Auto, HD::Locked, vinset * 2.0F);
+		this->load_alarms(this->lockers, BottomDoorCommand::AutoLock, BottomDoorCommand::Locked, vinset * 2.0F);
 		
 		{ // load captions
 			CanvasTextFormat^ cpt_font = make_bold_text_format("Microsoft YaHei", large_font_size);
@@ -317,8 +287,8 @@ public:
 	}
 
 	void reflow(float width, float height, float vinset) {
-		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::PS1, HD::PS7, 1.0F, -0.5F);
-		this->reflow_doors(this->hdoors, this->progresses, this->doors, HD::SB1, HD::SB7, 3.0F, 0.5F);
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, Door::PS1, Door::PS7, 1.0F, -0.5F);
+		this->reflow_doors(this->hdoors, this->progresses, this->doors, Door::SB1, Door::SB7, 3.0F, 0.5F);
 
 		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, HD::EarthWork, HD::Displacement);
 
@@ -355,15 +325,18 @@ public:
 			this->decorator->fill_ascent_anchor(1.0F, 1.0F, &alarm_x, nullptr);
 			this->master->fill_graphlet_location(cylinders[HD::Displacement], nullptr, &alarm_y, GraphletAnchor::CC);
 
-			this->master->move_to(this->lockers[HD::Auto], alarm_x, alarm_y, GraphletAnchor::LB, 0.0F, -vinset);
-			this->master->move_to(this->labels[HD::Auto], this->lockers[HD::Auto], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
-			this->master->move_to(this->lockers[HD::Locked], alarm_x, alarm_y, GraphletAnchor::LT, 0.0F, +vinset);
-			this->master->move_to(this->labels[HD::Locked], this->lockers[HD::Locked], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			this->master->move_to(this->lockers[BottomDoorCommand::AutoLock], alarm_x, alarm_y, GraphletAnchor::LB, 0.0F, -vinset);
+			this->master->move_to(this->lockers[BottomDoorCommand::Locked], alarm_x, alarm_y, GraphletAnchor::LT, 0.0F, +vinset);
+			
+			for (BottomDoorCommand cmd = BottomDoorCommand::AutoLock; cmd <= BottomDoorCommand::Locked; cmd++) {
+				this->master->move_to(this->locker_labels[cmd], this->lockers[cmd], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+				this->master->move_to(this->locker_labels[cmd], this->lockers[cmd], GraphletAnchor::RC, GraphletAnchor::LC, vinset);
+			}
 		}
 	}
 
 public:
-	bool doors_selected(HD ids[], unsigned int count, int tolerance) {
+	bool doors_selected(Door ids[], unsigned int count, int tolerance) {
 		bool okay = false;
 		int ok = 0;
 
@@ -382,7 +355,7 @@ public:
 	}
 
 	template<unsigned int N>
-	bool doors_selected(HD (&ids)[N], int tolerance) {
+	bool doors_selected(Door(&ids)[N], int tolerance) {
 		return this->doors_selected(ids, N, tolerance);
 	}
 
@@ -434,7 +407,7 @@ private:
 			auto alarm = new Credit<Alarmlet, E>(size);
 
 			as[id] = this->master->insert_one(alarm, id);
-			this->load_label(this->labels, id, Colours::Silver, this->label_font);
+			this->load_label(this->locker_labels, id, Colours::Silver, this->label_font);
 		}
 	}
 
@@ -501,7 +474,7 @@ private:
 		this->dimensions[id]->set_value(value, GraphletAnchor::CC);
 	}
 
-	void set_door_progress(HD id, float value) {
+	void set_door_progress(Door id, float value) {
 		this->doors[id]->set_value(value / 100.0F);
 		this->hdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
@@ -511,12 +484,13 @@ private:
 
 private: // never delete these graphlets manually.
 	std::map<HD, Credit<Labellet, HD>*> labels;
-	std::map<HD, Credit<HopperDoorlet, HD>*> hdoors;
-	std::map<HD, Credit<Percentagelet, HD>*> progresses;
-	std::map<HD, Credit<Doorlet, HD>*> doors;
+	std::map<Door, Credit<HopperDoorlet, Door>*> hdoors;
+	std::map<Door, Credit<Percentagelet, Door>*> progresses;
+	std::map<Door, Credit<Doorlet, Door>*> doors;
 	std::map<HD, Credit<Dimensionlet, HD>*> dimensions;
 	std::map<HD, Credit<Cylinderlet, HD>*> cylinders;
-	std::map<HD, Credit<Alarmlet, HD>*> lockers;
+	std::map<BottomDoorCommand, Credit<Alarmlet, BottomDoorCommand>*> lockers;
+	std::map<BottomDoorCommand, Credit<Labellet, BottomDoorCommand>*> locker_labels;
 
 private:
 	CanvasTextFormat^ label_font;
@@ -537,11 +511,11 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	Doors* dashboard = new Doors(this, decorator);
 
 	this->dashboard = dashboard;
-	this->door_op = make_menu<HDOperation, Credit<HopperDoorlet, HD>, PLCMaster*>(dashboard, plc);
-	this->gdoors12_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor12, plc);
-	this->gdoors35_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor35, plc);
-	this->gdoors67_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor67, plc);
-	this->gdoors17_op = make_group_menu<HDGOperation, HDGroup, PLCMaster*>(dashboard, HDGroup::HDoor17, plc);
+	this->door_op = make_bottom_door_menu(plc);
+	this->gdoors12_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor12, plc);
+	this->gdoors35_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor35, plc);
+	this->gdoors67_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor67, plc);
+	this->gdoors17_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor17, plc);
 
 	this->device->append_confirmation_receiver(dashboard);
 
@@ -605,13 +579,13 @@ bool HopperDoorsPage::can_select_multiple() {
 
 void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto hdoor = dynamic_cast<HopperDoorlet*>(g);
-	auto alarm = dynamic_cast<Credit<Alarmlet, HD>*>(g);
+	auto alarm = dynamic_cast<Credit<Alarmlet, BottomDoorCommand>*>(g);
 
 	
 	if (hdoor != nullptr) {
 		menu_popup(this->door_op, hdoor, local_x, local_y);
 	} else if (alarm != nullptr) {
-		this->device->send_command(DO_hopper_doors_locks_command(alarm->id));
+		this->device->send_command(DO_bottom_doors_special_command(alarm->id));
 	}
 }
 
@@ -619,9 +593,9 @@ void HopperDoorsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
 	auto dashboard = dynamic_cast<Doors*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		HD hds12[] = { HD::PS1, HD::PS2, HD::SB1, HD::SB2 };
-		HD hds35[] = { HD::PS3, HD::PS4, HD::PS5, HD::SB3, HD::SB4, HD::SB5 };
-		HD hds67[] = { HD::PS6, HD::PS7, HD::SB6, HD::SB7 };
+		Door hds12[] = { Door::PS1, Door::PS2, Door::SB1, Door::SB2 };
+		Door hds35[] = { Door::PS3, Door::PS4, Door::PS5, Door::SB3, Door::SB4, Door::SB5 };
+		Door hds67[] = { Door::PS6, Door::PS7, Door::SB6, Door::SB7 };
 		bool g1_okay = dashboard->doors_selected(hds12, 1);
 		bool g2_okay = dashboard->doors_selected(hds35, 1);
 		bool g3_okay = dashboard->doors_selected(hds67, 1);
