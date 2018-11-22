@@ -45,27 +45,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum FSMode { WindowUI = 0, Dashboard };
 
-private enum class FSGVOperation { Open, Close, VirtualOpen, VirtualClose, StopButterflyValves, CloseButterflyValves, _ };
-private enum class FSHDOperation { Open, Stop, Close, Disable, _ };
-
-private enum class FSSCommand { LeftShift, RightShift, _ };
-
-private enum class FSPSOperation {
-	Prepare, Start, Stop, Reset,
-	PS_PS, PS_SB, PS_2,
-	S2_PS, S2_SB, S2_2, P2_2, I2_2,
-	PS_H, S2_H, P2_H,
-	_ 
-};
-
-private enum class FSSBOperation {
-	Prepare, Start, Stop, Reset,
-	SB_PS, SB_SB, SB_2,
-	S2_PS, S2_SB, S2_2, P2_2, I2_2,
-	SB_H, S2_H, P2_H,
-	_
-};
-
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 // WARNING: order matters
@@ -102,11 +81,19 @@ private enum class FS : unsigned int {
 	nic
 };
 
-private class Flush final
-	: public PLCConfirmation
-	, public IMenuCommand<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>
-	, public IMenuCommand<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>
-	, public IMenuCommand<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*> {
+static uint16 DO_butterfly_valve_action(ButterflyValveAction cmd, GateValvelet* valve) {
+	uint16 index = 0U;
+	auto credit_valve = dynamic_cast<Credit<GateValvelet, FS>*>(valve);
+
+	if (credit_valve != nullptr) {
+		index = DO_butterfly_valve_command(cmd, credit_valve->id);
+	}
+
+	return index;
+}
+
+/*************************************************************************************************/
+private class Flush final : public PLCConfirmation {
 public:
 	Flush(FlushsPage* master) : master(master) {}
 
@@ -191,8 +178,8 @@ public:
 		DI_hopper_door(this->uhdoors[Door::SB6], DB205, upper_door_SB6_status);
 		DI_hopper_door(this->uhdoors[Door::SB7], DB205, upper_door_SB7_status);
 
-		DI_shift_button(this->shifts[FSSCommand::LeftShift], DB205, left_shifting_details);
-		DI_shift_button(this->shifts[FSSCommand::RightShift], DB205, right_shifting_details);
+		DI_shift_button(this->shifts[FlushingCommand::LeftShift], DB205, left_shifting_details);
+		DI_shift_button(this->shifts[FlushingCommand::RightShift], DB205, right_shifting_details);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -242,32 +229,6 @@ public:
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(FSGVOperation cmd, Credit<GateValvelet, FS>* valve, PLCMaster* plc) override {
-		plc->send_command(DO_butterfly_valve_command(cmd, valve->id));
-	}
-
-public:
-	bool can_execute(FSPSOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(FSPSOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc) override {
-		plc->send_command(DO_ps_water_pump_command(cmd));
-	}
-
-	bool can_execute(FSSBOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(FSSBOperation cmd, Credit<WaterPumplet, FS>* pump, PLCMaster* plc) override {
-		plc->send_command(DO_sb_water_pump_command(cmd));
 	}
 
 public:
@@ -433,8 +394,8 @@ public:
 		{ // reflow buttons
 			IGraphlet* shift_target = this->progresses[Door::SB4];
 			
-			this->master->move_to(this->shifts[FSSCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
-			this->master->move_to(this->shifts[FSSCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
+			this->master->move_to(this->shifts[FlushingCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
+			this->master->move_to(this->shifts[FlushingCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
 		}
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
@@ -655,7 +616,7 @@ private:
 	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
-	std::map<FSSCommand, Credit<Buttonlet, FSSCommand>*> shifts;
+	std::map<FlushingCommand, Credit<Buttonlet, FlushingCommand>*> shifts;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
@@ -687,10 +648,10 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<FSGVOperation, Credit<GateValvelet, FS>, PLCMaster*>(dashboard, plc);
+	this->gate_valve_op = make_butterfly_valve_menu(DO_butterfly_valve_action, plc);
 	this->upper_door_op = make_upper_door_menu(plc);
-	this->ps_pump_op = make_menu<FSPSOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
-	this->sb_pump_op = make_menu<FSSBOperation, Credit<WaterPumplet, FS>, PLCMaster*>(dashboard, plc);
+	this->ps_pump_op = make_ps_water_pump_menu(plc);
+	this->sb_pump_op = make_sb_water_pump_menu(plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -778,14 +739,14 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto wpump = dynamic_cast<Credit<WaterPumplet, FS>*>(g);
-	auto shift = dynamic_cast<Credit<Buttonlet, FSSCommand>*>(g);
+	auto shift = dynamic_cast<Credit<Buttonlet, FlushingCommand>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
 	} else if (shift != nullptr) {
-		this->device->send_command((shift->id == FSSCommand::LeftShift) ? left_shifting_command : right_shifting_command);
+		this->device->send_command((shift->id == FlushingCommand::LeftShift) ? left_shifting_command : right_shifting_command);
 	} else if (wpump != nullptr) {
 		switch (wpump->id) {
 		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;

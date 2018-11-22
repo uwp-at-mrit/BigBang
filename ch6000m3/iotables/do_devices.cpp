@@ -12,7 +12,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc) { // DB300, starts from 1
+	void execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 index = 0U;
 
 		switch (cmd) {
@@ -32,7 +32,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc) { // DB300, starts from 1
+	void execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 index = 0U;
 
 		switch (cmd) {
@@ -48,13 +48,9 @@ public:
 
 /*************************************************************************************************/
 MenuFlyout^ WarGrey::SCADA::make_overflow_menu(PLCMaster* plc) {
-	OverflowExecutor* exe = new OverflowExecutor();
-
-	return make_menu<OverflowAction, IGraphlet, PLCMaster*>(exe, plc);
+	return make_menu<OverflowAction, IGraphlet, PLCMaster*>(new OverflowExecutor(), plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_tank_heater_menu(PLCMaster* plc) {
-	TankHeaterExecutor* exe = new TankHeaterExecutor();
-
-	return make_menu<TankHeaterAction, IGraphlet, PLCMaster*>(exe, plc);
+	return make_menu<TankHeaterAction, IGraphlet, PLCMaster*>(new TankHeaterExecutor(), plc);
 }

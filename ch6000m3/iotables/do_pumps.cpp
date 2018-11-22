@@ -15,7 +15,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) {
+	void execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) override {
 		plc->send_command(this->DO_action(cmd, pump));
 	}
 
@@ -29,7 +29,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(HydraulicsGroupAction cmd, HydraulicsGroup group, PLCMaster* plc) { // DB300, starts from 1
+	void execute(HydraulicsGroupAction cmd, HydraulicsGroup group, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 offset = 0U;
 		uint16 index = 0U;
 
@@ -52,13 +52,9 @@ public:
 
 /*************************************************************************************************/
 MenuFlyout^ WarGrey::SCADA::make_hydraulic_pump_menu(hydraulic_pump_action_f gpa, PLCMaster* plc) {
-	HydraulicPumpExecutor* exe = new HydraulicPumpExecutor(gpa);
-
-	return make_menu<HydraulicPumpAction, HydraulicPumplet, PLCMaster*>(exe, plc);
+	return make_menu<HydraulicPumpAction, HydraulicPumplet, PLCMaster*>(new HydraulicPumpExecutor(gpa), plc);
 }
 
-MenuFlyout^ WarGrey::SCADA::make_hydraulics_group_menu(HydraulicsGroup group, WarGrey::SCADA::PLCMaster* plc) {
-	HydraulicPumpGroupExecutor* exe = new HydraulicPumpGroupExecutor();
-
-	return make_group_menu<HydraulicsGroupAction, HydraulicsGroup, PLCMaster*>(exe, group, plc);
+MenuFlyout^ WarGrey::SCADA::make_hydraulics_group_menu(HydraulicsGroup group, PLCMaster* plc) {
+	return make_group_menu<HydraulicsGroupAction, HydraulicsGroup, PLCMaster*>(new HydraulicPumpGroupExecutor(), group, plc);
 }

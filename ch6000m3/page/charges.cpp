@@ -42,20 +42,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LDMode { WindowUI = 0, Dashboard };
 
-private enum class LDGVOperation {
-	Open, Close, VirtualOpen, VirtualClose,
-	StopGateValves, CloseGateValves,
-	MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat,
-	_
-};
-
-private enum class LDPSHPOperation { Prepare, Start, Stop, Reset, PSHopper, BothHopper, _ };
-private enum class LDSBHPOperation { Prepare, Start, Stop, Reset, SBHopper, BothHopper, HPBarge, _ };
-private enum class LDPSUWPOperation { Prepare, Start, Stop, Reset, PSUnderWater, BothUnderWater, _ };
-private enum class LDSBUWPOperation { Prepare, Start, Stop, Reset, SBUnderWater, BothUnderWater, UWPBarge, _ };
-
 // WARNING: order matters
-private enum class LD : unsigned int {
+private enum class CS : unsigned int {
 	Port, Starboard,
 	
 	// Valves
@@ -84,13 +72,19 @@ private enum class LD : unsigned int {
 	n0325, n0405, n0723, n0923
 };
 
-private class Vessel final
-	: public PLCConfirmation
-	, public IMenuCommand<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>
-	, public IMenuCommand<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
-	, public IMenuCommand<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
-	, public IMenuCommand<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>
-	, public IMenuCommand<LDSBUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*> {
+static uint16 DO_gate_valve_action(GateValveAction cmd, GateValvelet* valve) {
+	uint16 index = 0U;
+	auto credit_valve = dynamic_cast<Credit<GateValvelet, CS>*>(valve);
+
+	if (credit_valve != nullptr) {
+		index = DO_gate_valve_command(cmd, credit_valve->id);
+	}
+
+	return index;
+}
+
+/*************************************************************************************************/
+private class Vessel final : public PLCConfirmation {
 public:
 	Vessel(ChargesPage* master) : master(master) {}
 
@@ -101,123 +95,80 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
-		this->pump_pressures[LD::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LC);
-		this->pump_pressures[LD::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LC);
-		this->pump_pressures[LD::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LC);
-		this->pump_pressures[LD::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LC);
+		this->pump_pressures[CS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LC);
+		this->pump_pressures[CS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LC);
+		this->pump_pressures[CS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LC);
+		this->pump_pressures[CS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LC);
 
-		this->progresses[LD::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
-		this->progresses[LD::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
+		this->progresses[CS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
+		this->progresses[CS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
 
-		this->powers[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::RC);
-		this->rpms[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LC);
-		this->dpressures[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_discharge_pressure), GraphletAnchor::LB);
-		this->vpressures[LD::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_vacuum_pressure), GraphletAnchor::RB);
+		this->powers[CS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_power), GraphletAnchor::RC);
+		this->rpms[CS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_rpm), GraphletAnchor::LC);
+		this->dpressures[CS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_discharge_pressure), GraphletAnchor::LB);
+		this->vpressures[CS::PSHPump]->set_value(RealData(DB203, ps_hopper_pump_vacuum_pressure), GraphletAnchor::RB);
 
-		this->powers[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::RC);
-		this->rpms[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LC);
-		this->dpressures[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_discharge_pressure), GraphletAnchor::LT);
-		this->vpressures[LD::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_vacuum_pressure), GraphletAnchor::RT);
+		this->powers[CS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::RC);
+		this->rpms[CS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LC);
+		this->dpressures[CS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_discharge_pressure), GraphletAnchor::LT);
+		this->vpressures[CS::SBHPump]->set_value(RealData(DB203, sb_hopper_pump_vacuum_pressure), GraphletAnchor::RT);
 
-		this->powers[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::RC);
-		this->rpms[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LC);
-		this->dpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_discharge_pressure), GraphletAnchor::LB);
-		this->dfpressures[LD::PSUWPump]->set_value(RealData(DB203, ps_draghead_differential_pressure), GraphletAnchor::LB);
+		this->powers[CS::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::RC);
+		this->rpms[CS::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LC);
+		this->dpressures[CS::PSUWPump]->set_value(RealData(DB203, ps_underwater_pump_discharge_pressure), GraphletAnchor::LB);
+		this->dfpressures[CS::PSUWPump]->set_value(RealData(DB203, ps_draghead_differential_pressure), GraphletAnchor::LB);
 
-		this->powers[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::RC);
-		this->rpms[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LC);
-		this->dpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_discharge_pressure), GraphletAnchor::LT);
-		this->dfpressures[LD::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::LT);
+		this->powers[CS::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::RC);
+		this->rpms[CS::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LC);
+		this->dpressures[CS::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_discharge_pressure), GraphletAnchor::LT);
+		this->dfpressures[CS::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::LT);
 
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_hopper_pumps(this->hoppers[LD::PSHPump], this->hoppers[LD::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
-		DI_hopper_pumps(this->hoppers[LD::SBHPump], this->hoppers[LD::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
+		DI_hopper_pumps(this->hoppers[CS::PSHPump], this->hoppers[CS::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
+		DI_hopper_pumps(this->hoppers[CS::SBHPump], this->hoppers[CS::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_pump_dimension(this->pump_pressures[LD::A], DB4, pump_A_feedback);
-		DI_pump_dimension(this->pump_pressures[LD::C], DB4, pump_C_feedback);
-		DI_pump_dimension(this->pump_pressures[LD::F], DB4, pump_F_feedback);
-		DI_pump_dimension(this->pump_pressures[LD::H], DB4, pump_H_feedback);
+		DI_pump_dimension(this->pump_pressures[CS::A], DB4, pump_A_feedback);
+		DI_pump_dimension(this->pump_pressures[CS::C], DB4, pump_C_feedback);
+		DI_pump_dimension(this->pump_pressures[CS::F], DB4, pump_F_feedback);
+		DI_pump_dimension(this->pump_pressures[CS::H], DB4, pump_H_feedback);
 
-		this->set_valves_status(LD::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
-		this->set_valves_status(LD::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
-		this->set_valves_status(LD::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
-		this->set_valves_status(LD::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status, motor_valve_D06_status);
-		this->set_valves_status(LD::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status, motor_valve_D07_status);
-		this->set_valves_status(LD::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status, motor_valve_D08_status);
-		this->set_valves_status(LD::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status, motor_valve_D09_status);
-		this->set_valves_status(LD::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status, motor_valve_D10_status);
-		this->set_valves_status(LD::D011, DB4, gate_valve_D11_feedback, motor_valve_D11_feedback, DB205, gate_valve_D11_status, motor_valve_D11_status);
-		this->set_valves_status(LD::D012, DB4, gate_valve_D12_feedback, motor_valve_D12_feedback, DB205, gate_valve_D12_status, motor_valve_D12_status);
-		this->set_valves_status(LD::D013, DB4, gate_valve_D13_feedback, motor_valve_D13_feedback, DB205, gate_valve_D13_status, motor_valve_D13_status);
-		this->set_valves_status(LD::D014, DB4, gate_valve_D14_feedback, motor_valve_D14_feedback, DB205, gate_valve_D14_status, motor_valve_D14_status);
-		this->set_valves_status(LD::D015, DB4, gate_valve_D15_feedback, motor_valve_D15_feedback, DB205, gate_valve_D15_status, motor_valve_D15_status);
-		this->set_valves_status(LD::D016, DB4, gate_valve_D16_feedback, motor_valve_D16_feedback, DB205, gate_valve_D16_status, motor_valve_D16_status);
-		this->set_valves_status(LD::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status, motor_valve_D17_status);
-		this->set_valves_status(LD::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status, motor_valve_D18_status);
-		this->set_valves_status(LD::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status, motor_valve_D19_status);
-		this->set_valves_status(LD::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status, motor_valve_D20_status);
-		this->set_valves_status(LD::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status, motor_valve_D21_status);
-		this->set_valves_status(LD::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status, motor_valve_D22_status);
-		this->set_valves_status(LD::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status, motor_valve_D23_status);
-		this->set_valves_status(LD::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status, motor_valve_D24_status);
-		this->set_valves_status(LD::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status, motor_valve_D25_status);
-		this->set_valves_status(LD::D026, DB4, gate_valve_D26_feedback, motor_valve_D26_feedback, DB205, gate_valve_D26_status, motor_valve_D26_status);
+		this->set_valves_status(CS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
+		this->set_valves_status(CS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
+		this->set_valves_status(CS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
+		this->set_valves_status(CS::D006, DB4, gate_valve_D06_feedback, motor_valve_D06_feedback, DB205, gate_valve_D06_status, motor_valve_D06_status);
+		this->set_valves_status(CS::D007, DB4, gate_valve_D07_feedback, motor_valve_D07_feedback, DB205, gate_valve_D07_status, motor_valve_D07_status);
+		this->set_valves_status(CS::D008, DB4, gate_valve_D08_feedback, motor_valve_D08_feedback, DB205, gate_valve_D08_status, motor_valve_D08_status);
+		this->set_valves_status(CS::D009, DB4, gate_valve_D09_feedback, motor_valve_D09_feedback, DB205, gate_valve_D09_status, motor_valve_D09_status);
+		this->set_valves_status(CS::D010, DB4, gate_valve_D10_feedback, motor_valve_D10_feedback, DB205, gate_valve_D10_status, motor_valve_D10_status);
+		this->set_valves_status(CS::D011, DB4, gate_valve_D11_feedback, motor_valve_D11_feedback, DB205, gate_valve_D11_status, motor_valve_D11_status);
+		this->set_valves_status(CS::D012, DB4, gate_valve_D12_feedback, motor_valve_D12_feedback, DB205, gate_valve_D12_status, motor_valve_D12_status);
+		this->set_valves_status(CS::D013, DB4, gate_valve_D13_feedback, motor_valve_D13_feedback, DB205, gate_valve_D13_status, motor_valve_D13_status);
+		this->set_valves_status(CS::D014, DB4, gate_valve_D14_feedback, motor_valve_D14_feedback, DB205, gate_valve_D14_status, motor_valve_D14_status);
+		this->set_valves_status(CS::D015, DB4, gate_valve_D15_feedback, motor_valve_D15_feedback, DB205, gate_valve_D15_status, motor_valve_D15_status);
+		this->set_valves_status(CS::D016, DB4, gate_valve_D16_feedback, motor_valve_D16_feedback, DB205, gate_valve_D16_status, motor_valve_D16_status);
+		this->set_valves_status(CS::D017, DB4, gate_valve_D17_feedback, motor_valve_D17_feedback, DB205, gate_valve_D17_status, motor_valve_D17_status);
+		this->set_valves_status(CS::D018, DB4, gate_valve_D18_feedback, motor_valve_D18_feedback, DB205, gate_valve_D18_status, motor_valve_D18_status);
+		this->set_valves_status(CS::D019, DB4, gate_valve_D19_feedback, motor_valve_D19_feedback, DB205, gate_valve_D19_status, motor_valve_D19_status);
+		this->set_valves_status(CS::D020, DB4, gate_valve_D20_feedback, motor_valve_D20_feedback, DB205, gate_valve_D20_status, motor_valve_D20_status);
+		this->set_valves_status(CS::D021, DB4, gate_valve_D21_feedback, motor_valve_D21_feedback, DB205, gate_valve_D21_status, motor_valve_D21_status);
+		this->set_valves_status(CS::D022, DB4, gate_valve_D22_feedback, motor_valve_D22_feedback, DB205, gate_valve_D22_status, motor_valve_D22_status);
+		this->set_valves_status(CS::D023, DB4, gate_valve_D23_feedback, motor_valve_D23_feedback, DB205, gate_valve_D23_status, motor_valve_D23_status);
+		this->set_valves_status(CS::D024, DB4, gate_valve_D24_feedback, motor_valve_D24_feedback, DB205, gate_valve_D24_status, motor_valve_D24_status);
+		this->set_valves_status(CS::D025, DB4, gate_valve_D25_feedback, motor_valve_D25_feedback, DB205, gate_valve_D25_status, motor_valve_D25_status);
+		this->set_valves_status(CS::D026, DB4, gate_valve_D26_feedback, motor_valve_D26_feedback, DB205, gate_valve_D26_status, motor_valve_D26_status);
 	
-		DI_gate_valve(this->gvalves[LD::D003], DB205, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
-		DI_motor_valve(this->mvalves[LD::D003], DB4, motor_valve_D03_feedback, DB205, motor_valve_D03_status);
+		DI_gate_valve(this->gvalves[CS::D003], DB205, gate_valve_D03_feedback, DB205, gate_valve_D03_status);
+		DI_motor_valve(this->mvalves[CS::D003], DB4, motor_valve_D03_feedback, DB205, motor_valve_D03_status);
 
-		DI_gate_valve(this->gvalves[LD::D004], DB205, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
-		DI_motor_valve(this->mvalves[LD::D004], DB4, motor_valve_D04_feedback, DB205, motor_valve_D04_status);
+		DI_gate_valve(this->gvalves[CS::D004], DB205, gate_valve_D04_feedback, DB205, gate_valve_D04_status);
+		DI_motor_valve(this->mvalves[CS::D004], DB4, motor_valve_D04_feedback, DB205, motor_valve_D04_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(LDGVOperation cmd, Credit<GateValvelet, LD>* valve, PLCMaster* plc) override {
-		plc->send_command(DO_gate_valve_command(cmd, valve->id));
-	}
-
-public:
-	bool can_execute(LDPSHPOperation cmd, Credit<HopperPumplet, LD>* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(LDPSHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_ps_hopper_pump_charge_command(cmd));
-	}
-
-	bool can_execute(LDSBHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(LDSBHPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_sb_hopper_pump_charge_command(cmd));
-	}
-
-public:
-	bool can_execute(LDPSUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(LDPSUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_ps_underwater_pump_command(cmd));
-	}
-
-	bool can_execute(LDSBUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(LDSBUWPOperation cmd, Credit<HopperPumplet, LD>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_sb_underwater_pump_command(cmd));
 	}
 
 public:
@@ -237,60 +188,60 @@ public:
 public:
 	void load(float width, float height, float gwidth, float gheight) {
 		float radius = resolve_gridsize(gwidth, gheight);
-		Turtle<LD>* pTurtle = new Turtle<LD>(gwidth, gheight, false);
+		Turtle<CS>* pTurtle = new Turtle<CS>(gwidth, gheight, false);
 
-		pTurtle->move_left(LD::deck_rx)->move_left(2, LD::D021)->move_left(2, LD::d2122);
-		pTurtle->move_down(5)->move_right(2, LD::D022)->move_right(3)->jump_back();
-		pTurtle->move_left(2, LD::d1920)->move_left(2, LD::D020)->move_left(7, LD::d1720);
+		pTurtle->move_left(CS::deck_rx)->move_left(2, CS::D021)->move_left(2, CS::d2122);
+		pTurtle->move_down(5)->move_right(2, CS::D022)->move_right(3)->jump_back();
+		pTurtle->move_left(2, CS::d1920)->move_left(2, CS::D020)->move_left(7, CS::d1720);
 
-		pTurtle->move_left(3, LD::D017)->move_left(11, LD::n0405)->move_left(4, LD::D010)->move_left(6, LD::d12);
-		pTurtle->move_down(2, LD::D012)->move_down(3)->jump_down(LD::LMOD)->jump_back(LD::d12);
-		pTurtle->move_left(4, LD::d14)->move_left_down(2, LD::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(5, LD::d24)->move_left(4)->move_left_down(2, LD::D016)->move_left_down(1.5F)->jump_back();
-		pTurtle->jump_up(2.5F, LD::gantry)->turn_up_left()->move_left(3, LD::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, LD::Gantry)->move_left()->jump_back(LD::Gantry)->move_right()->jump_back(LD::d1720);
+		pTurtle->move_left(3, CS::D017)->move_left(11, CS::n0405)->move_left(4, CS::D010)->move_left(6, CS::d12);
+		pTurtle->move_down(2, CS::D012)->move_down(3)->jump_down(CS::LMOD)->jump_back(CS::d12);
+		pTurtle->move_left(4, CS::d14)->move_left_down(2, CS::D014)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_left(5, CS::d24)->move_left(4)->move_left_down(2, CS::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->jump_up(2.5F, CS::gantry)->turn_up_left()->move_left(3, CS::D024)->move_left(3)->turn_left_up();
+		pTurtle->move_up(0.5F, CS::Gantry)->move_left()->jump_back(CS::Gantry)->move_right()->jump_back(CS::d1720);
 		
-		pTurtle->move_down(3.5F, LD::PSHPump)->move_left(6, LD::n0923)->move_left(8)->move_up(1.5F, LD::D005)->move_up(1.5F)->jump_up();
-		pTurtle->move_up(3, LD::d0406)->move_right(4, LD::D006)->move_right(4)->move_down(0.5F, LD::deck_ty)->move_down(LD::D009);
-		pTurtle->move_down(5)->jump_down()->move_down(2, LD::D023)->jump_back(LD::d0406);
+		pTurtle->move_down(3.5F, CS::PSHPump)->move_left(6, CS::n0923)->move_left(8)->move_up(1.5F, CS::D005)->move_up(1.5F)->jump_up();
+		pTurtle->move_up(3, CS::d0406)->move_right(4, CS::D006)->move_right(4)->move_down(0.5F, CS::deck_ty)->move_down(CS::D009);
+		pTurtle->move_down(5)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
 
-		pTurtle->move_up(1.5F, LD::D004)->move_up(2, LD::ps)->move_up(2, LD::C)->turn_up_left();
-		pTurtle->move_left(10, LD::PSUWPump)->move_left(8)->move_left(LD::Port);
+		pTurtle->move_up(1.5F, CS::D004)->move_up(2, CS::ps)->move_up(2, CS::C)->turn_up_left();
+		pTurtle->move_left(10, CS::PSUWPump)->move_left(8)->move_left(CS::Port);
 
-		pTurtle->jump_back(LD::D023)->move_down(2)->jump_down()->move_down(5, LD::D007);
-		pTurtle->move_down(LD::deck_by)->move_down(0.5F)->move_left(4, LD::D026)->move_left(4, LD::d0326);
-		pTurtle->move_up(3)->jump_up()->move_up(1.5F, LD::D025)->move_up(1.5F, LD::d0225);
-		pTurtle->move_right(8, LD::n0723)->move_right(6, LD::SBHPump)->move_down(3.5F, LD::d1819)->jump_back(LD::d0225);
-		pTurtle->move_up(2.5F)->move_left(2, LD::D002)->move_left(28, LD::D001)->move_left(2)->jump_back(LD::d1819);
+		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(5, CS::D007);
+		pTurtle->move_down(CS::deck_by)->move_down(0.5F)->move_left(4, CS::D026)->move_left(4, CS::d0326);
+		pTurtle->move_up(3)->jump_up()->move_up(1.5F, CS::D025)->move_up(1.5F, CS::d0225);
+		pTurtle->move_right(8, CS::n0723)->move_right(6, CS::SBHPump)->move_down(3.5F, CS::d1819)->jump_back(CS::d0225);
+		pTurtle->move_up(2.5F)->move_left(2, CS::D002)->move_left(28, CS::D001)->move_left(2)->jump_back(CS::d1819);
 
-		pTurtle->move_left(3, LD::D018)->move_left(11, LD::n0325)->move_left(4, LD::D008);
-		pTurtle->move_left(6, LD::d11)->move_up(2, LD::D011)->move_up(3 /* LD::LMOD */)->jump_back();
-		pTurtle->move_left(4, LD::d13)->move_left_up(2, LD::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(9)->move_left_up(2, LD::D015)->move_left_up(1.5F);
+		pTurtle->move_left(3, CS::D018)->move_left(11, CS::n0325)->move_left(4, CS::D008);
+		pTurtle->move_left(6, CS::d11)->move_up(2, CS::D011)->move_up(3 /* CS::LMOD */)->jump_back();
+		pTurtle->move_left(4, CS::d13)->move_left_up(2, CS::D013)->move_left_up(1.5F)->jump_back();
+		pTurtle->move_left(9)->move_left_up(2, CS::D015)->move_left_up(1.5F);
 
-		pTurtle->jump_back(LD::d0326)->move_down(1.5F, LD::D003)->move_down(2, LD::sb)->move_down(2, LD::F)->turn_down_left();
-		pTurtle->move_left(10, LD::SBUWPump)->move_left(8)->move_left(LD::Starboard);
+		pTurtle->jump_back(CS::d0326)->move_down(1.5F, CS::D003)->move_down(2, CS::sb)->move_down(2, CS::F)->turn_down_left();
+		pTurtle->move_left(10, CS::SBUWPump)->move_left(8)->move_left(CS::Starboard);
 
-		pTurtle->jump_back(LD::d1819)->move_right(5, LD::deck_lx)->move_right(2, LD::D019)->move_right(2)->move_to(LD::d1920);
+		pTurtle->jump_back(CS::d1819)->move_right(5, CS::deck_lx)->move_right(2, CS::D019)->move_right(2)->move_to(CS::d1920);
 		
-		this->station = this->master->insert_one(new Tracklet<LD>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->station = this->master->insert_one(new Tracklet<CS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		
 		{ // load valves
-			this->load_valve(this->gvalves, this->vlabels, this->captions, LD::D001, radius, 0.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D002, LD::D026, radius, 00.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D003, LD::D025, radius, 90.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D004, LD::D012, radius, -90.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D014, LD::D016, radius, -45.0);
-			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, LD::D013, LD::D015, radius, 45.0);
+			this->load_valve(this->gvalves, this->vlabels, this->captions, CS::D001, radius, 0.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, CS::D002, CS::D026, radius, 00.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, CS::D003, CS::D025, radius, 90.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, CS::D004, CS::D012, radius, -90.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, CS::D014, CS::D016, radius, -45.0);
+			this->load_valves(this->gvalves, this->mvalves, this->vlabels, this->captions, CS::D013, CS::D015, radius, 45.0);
 		}
 
 		{ // load special nodes
 			float nic_radius = gheight * 0.25F;
 
-			this->load_pump(this->hoppers, this->captions, this->dfpressures, LD::PSUWPump, -radius, -2.0F);
-			this->load_pump(this->hoppers, this->captions, this->dfpressures, LD::SBUWPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, this->vpressures, LD::PSHPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, this->vpressures, LD::SBHPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::PSUWPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::SBUWPump, -radius, +2.0F);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::PSHPump, -radius, +2.0F);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::SBHPump, -radius, -2.0F);
 
 			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 1.0F, default_pipe_color));
 
@@ -302,19 +253,19 @@ public:
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
 					default_sb_color, default_pipe_thickness));
 
-			for (LD id = LD::n0325; id <= LD::n0923; id++) {
+			for (CS id = CS::n0325; id <= CS::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
 			}
 		}
 
 		{ // load labels and dimensions
-			this->load_percentage(this->progresses, LD::D003);
-			this->load_percentage(this->progresses, LD::D004);
-			this->load_dimensions(this->pump_pressures, LD::A, LD::H, "bar");
+			this->load_percentage(this->progresses, CS::D003);
+			this->load_percentage(this->progresses, CS::D004);
+			this->load_dimensions(this->pump_pressures, CS::A, CS::H, "bar");
 
-			this->load_label(this->captions, LD::Gantry, Colours::Yellow, this->caption_font);
-			this->load_label(this->captions, LD::LMOD, Colours::Yellow, this->special_font);
+			this->load_label(this->captions, CS::Gantry, Colours::Yellow, this->caption_font);
+			this->load_label(this->captions, CS::LMOD, Colours::Yellow, this->special_font);
 		}
 	}
 
@@ -328,12 +279,12 @@ public:
 
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 
-		this->station->map_credit_graphlet(this->captions[LD::Gantry], GraphletAnchor::CB);
-		this->station->map_credit_graphlet(this->captions[LD::LMOD], GraphletAnchor::CB);
+		this->station->map_credit_graphlet(this->captions[CS::Gantry], GraphletAnchor::CB);
+		this->station->map_credit_graphlet(this->captions[CS::LMOD], GraphletAnchor::CB);
 
-		this->station->map_graphlet_at_anchor(this->ps_draghead, LD::Port, GraphletAnchor::RC);
-		this->station->map_graphlet_at_anchor(this->sb_draghead, LD::Starboard, GraphletAnchor::RC);
-		this->station->map_graphlet_at_anchor(this->LMOD, LD::LMOD, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->ps_draghead, CS::Port, GraphletAnchor::RC);
+		this->station->map_graphlet_at_anchor(this->sb_draghead, CS::Starboard, GraphletAnchor::RC);
+		this->station->map_graphlet_at_anchor(this->LMOD, CS::LMOD, GraphletAnchor::CC);
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
 			/** NOTE
@@ -349,28 +300,28 @@ public:
 
 			ox = std::fabsf(ox);
 			switch (it->first) {
-			case LD::PSHPump: {
+			case CS::PSHPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::LB);
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
 			}; break;
-			case LD::PSUWPump: {
+			case CS::PSUWPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
 				this->master->move_to(this->dfpressures[it->first], this->ps_draghead, GraphletAnchor::RC, GraphletAnchor::LB, 0.0F, -ox);
 			}; break;
-			case LD::SBHPump: {
+			case CS::SBHPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::LT);
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
 			}; break;
-			case LD::SBUWPump: {
+			case CS::SBUWPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
 				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
@@ -380,27 +331,27 @@ public:
 			}
 		}
 
-		this->vlabels[LD::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
+		this->vlabels[CS::D001]->fill_extent(0.0F, 0.0F, nullptr, &label_height);
 		
 		for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
 			switch (it->first) {
-			case LD::D014: case LD::D016: {
+			case CS::D014: case CS::D016: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LB;
 			}; break;
-			case LD::D013: case LD::D015: {
+			case CS::D013: case CS::D015: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LB;
 			}; break;
-			case LD::D006: case LD::D010: case LD::D020: case LD::D021: case LD::D022: case LD::D024: {
+			case CS::D006: case CS::D010: case CS::D020: case CS::D021: case CS::D022: case CS::D024: {
 				it->second->fill_margin(x0, y0, nullptr, nullptr, &margin, nullptr);
 				dx = x0; dy = y0 + gridsize - margin; anchor = GraphletAnchor::CT;
 			}; break;
-			case LD::D017: {
+			case CS::D017: {
 				dx = x0 + gwidth; dy = y0 - label_height; anchor = GraphletAnchor::LB;
 			}; break;
-			case LD::D018: {
+			case CS::D018: {
 				dx = x0 + gwidth; dy = y0; anchor = GraphletAnchor::LT;
 			}; break;
-			case LD::D001: case LD::D002: case LD::D008: case LD::D019: case LD::D026: {
+			case CS::D001: case CS::D002: case CS::D008: case CS::D019: case CS::D026: {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
 				dx = x0; dy = y0 - gridsize - label_height + margin; anchor = GraphletAnchor::CB;
 			}; break;
@@ -420,18 +371,18 @@ public:
 
 			for (auto it = this->mvalves.begin(); it != this->mvalves.end(); it++) {
 				switch (it->first) {
-				case LD::D014: case LD::D016: {
+				case CS::D014: case CS::D016: {
 					dx = x0 - polar45; dy = y0 - polar45; anchor = GraphletAnchor::CC;
 				}; break;
-				case LD::D013: case LD::D015: {
+				case CS::D013: case CS::D015: {
 					dx = x0 - polar45; dy = y0 + polar45; anchor = GraphletAnchor::CC;
 				}; break;
-				case LD::D003: case LD::D004: case LD::D005: case LD::D007: case LD::D009:
-				case LD::D011: case LD::D012: case LD::D023: case LD::D025: {
-					this->gvalves[LD::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
+				case CS::D003: case CS::D004: case CS::D005: case CS::D007: case CS::D009:
+				case CS::D011: case CS::D012: case CS::D023: case CS::D025: {
+					this->gvalves[CS::D003]->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					dx = x0 - gridsize + margin; dy = y0; anchor = GraphletAnchor::RC;
 				}; break;
-				case LD::D002: case LD::D008: case LD::D017: case LD::D019: case LD::D026: {
+				case CS::D002: case CS::D008: case CS::D017: case CS::D019: case CS::D026: {
 					dx = x0; dy = y0 + gridsize; anchor = GraphletAnchor::CC;
 				}; break;
 				default: {
@@ -447,13 +398,13 @@ public:
 		{ // reflow dimensions
 			float offset = default_pipe_thickness * 2.0F;
 
-			this->master->move_to(this->progresses[LD::D003], this->gvalves[LD::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
-			this->master->move_to(this->progresses[LD::D004], this->gvalves[LD::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
+			this->master->move_to(this->progresses[CS::D003], this->gvalves[CS::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
+			this->master->move_to(this->progresses[CS::D004], this->gvalves[CS::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 
-			this->station->map_credit_graphlet(this->pump_pressures[LD::C], GraphletAnchor::LB, gwidth * 3.0F);
-			this->station->map_credit_graphlet(this->pump_pressures[LD::F], GraphletAnchor::LT, gwidth * 3.0F);
-			this->master->move_to(this->pump_pressures[LD::A], this->pump_pressures[LD::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
-			this->master->move_to(this->pump_pressures[LD::H], this->pump_pressures[LD::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->station->map_credit_graphlet(this->pump_pressures[CS::C], GraphletAnchor::LB, gwidth * 3.0F);
+			this->station->map_credit_graphlet(this->pump_pressures[CS::F], GraphletAnchor::LT, gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[CS::A], this->pump_pressures[CS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->master->move_to(this->pump_pressures[CS::H], this->pump_pressures[CS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
 	}
 
@@ -489,9 +440,9 @@ private:
 			double mdegrees = 0.0;
 
 			switch (id) {
-			case LD::D014: case LD::D016: mdegrees = 45.0; break;
-			case LD::D013: case LD::D015: mdegrees = -45.0; break;
-			case LD::D002: case LD::D008: case LD::D009: case LD::D017: case LD::D019: case LD::D026: mdegrees = -180.0; break;
+			case CS::D014: case CS::D016: mdegrees = 45.0; break;
+			case CS::D013: case CS::D015: mdegrees = -45.0; break;
+			case CS::D002: case CS::D008: case CS::D009: case CS::D017: case CS::D019: case CS::D026: mdegrees = -180.0; break;
 			}
 
 			// moter-driven valves' second, catching events first 
@@ -552,7 +503,7 @@ private:
 	}
 
 private:
-	void set_valves_status(LD id
+	void set_valves_status(CS id
 		, const uint8* db4, unsigned int gidx4_p1, unsigned int midx4_p1
 		, const uint8* db205, unsigned int gidx205_p1, unsigned int midx205_p1) {
 		DI_gate_valve(this->gvalves[id], db4, gidx4_p1, db205, gidx205_p1);
@@ -564,20 +515,20 @@ private:
 
 // never deletes these graphlets mannually
 private:
-	Tracklet<LD>* station;
-	std::map<LD, Credit<Labellet, LD>*> captions;
-	std::map<LD, Credit<HopperPumplet, LD>*> hoppers;
-	std::map<LD, Credit<GateValvelet, LD>*> gvalves;
-	std::map<LD, Credit<MotorValvelet, LD>*> mvalves;
-	std::map<LD, Credit<Labellet, LD>*> vlabels;
-	std::map<LD, Credit<Percentagelet, LD>*> progresses;
-	std::map<LD, Credit<Dimensionlet, LD>*> pump_pressures;
-	std::map<LD, Credit<Dimensionlet, LD>*> dpressures;
-	std::map<LD, Credit<Dimensionlet, LD>*> vpressures;
-	std::map<LD, Credit<Dimensionlet, LD>*> dfpressures;
-	std::map<LD, Credit<Dimensionlet, LD>*> powers;
-	std::map<LD, Credit<Dimensionlet, LD>*> rpms;
-	std::map<LD, Omegalet*> nintercs;
+	Tracklet<CS>* station;
+	std::map<CS, Credit<Labellet, CS>*> captions;
+	std::map<CS, Credit<HopperPumplet, CS>*> hoppers;
+	std::map<CS, Credit<GateValvelet, CS>*> gvalves;
+	std::map<CS, Credit<MotorValvelet, CS>*> mvalves;
+	std::map<CS, Credit<Labellet, CS>*> vlabels;
+	std::map<CS, Credit<Percentagelet, CS>*> progresses;
+	std::map<CS, Credit<Dimensionlet, CS>*> pump_pressures;
+	std::map<CS, Credit<Dimensionlet, CS>*> dpressures;
+	std::map<CS, Credit<Dimensionlet, CS>*> vpressures;
+	std::map<CS, Credit<Dimensionlet, CS>*> dfpressures;
+	std::map<CS, Credit<Dimensionlet, CS>*> powers;
+	std::map<CS, Credit<Dimensionlet, CS>*> rpms;
+	std::map<CS, Omegalet*> nintercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
 	Arclet* LMOD;
@@ -617,19 +568,19 @@ public:
 	}
 
 	void draw_before_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool is_selected) override {
-		auto station = dynamic_cast<Tracklet<LD>*>(g);
+		auto station = dynamic_cast<Tracklet<CS>*>(g);
 
 		if (station != nullptr) {
 			float ps_y, sb_y;
 			float deck_lx, deck_ty, deck_rx, deck_by;
 			
-			station->fill_anchor_location(LD::ps, nullptr, &ps_y, false);
-			station->fill_anchor_location(LD::sb, nullptr, &sb_y, false);
+			station->fill_anchor_location(CS::ps, nullptr, &ps_y, false);
+			station->fill_anchor_location(CS::sb, nullptr, &sb_y, false);
 
-			station->fill_anchor_location(LD::deck_lx, &deck_lx, nullptr, false);
-			station->fill_anchor_location(LD::deck_rx, &deck_rx, nullptr, false);
-			station->fill_anchor_location(LD::deck_ty, nullptr, &deck_ty, false);
-			station->fill_anchor_location(LD::deck_by, nullptr, &deck_by, false);
+			station->fill_anchor_location(CS::deck_lx, &deck_lx, nullptr, false);
+			station->fill_anchor_location(CS::deck_rx, &deck_rx, nullptr, false);
+			station->fill_anchor_location(CS::deck_ty, nullptr, &deck_ty, false);
+			station->fill_anchor_location(CS::deck_by, nullptr, &deck_by, false);
 
 			{ // draw ship
 				float ship_width = this->actual_width();
@@ -655,10 +606,10 @@ public:
 				float gantry_x, gantry_y, barge_y;
 				float d0525_x, d05_y, d25_y;
 
-				station->fill_anchor_location(LD::gantry, &gantry_x, &gantry_y, false);
-				station->fill_anchor_location(LD::D008, nullptr, &barge_y, false);
-				station->fill_anchor_location(LD::D005, &d0525_x, &d05_y, false);
-				station->fill_anchor_location(LD::D025, nullptr, &d25_y, false);
+				station->fill_anchor_location(CS::gantry, &gantry_x, &gantry_y, false);
+				station->fill_anchor_location(CS::D008, nullptr, &barge_y, false);
+				station->fill_anchor_location(CS::D005, &d0525_x, &d05_y, false);
+				station->fill_anchor_location(CS::D025, nullptr, &d25_y, false);
 
 				ds->DrawLine(x + gantry_x, y + gantry_y, x + gantry_x, y + barge_y,
 					Colours::DimGray, default_pipe_thickness, this->ship_style);
@@ -684,11 +635,11 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<LDGVOperation, Credit<GateValvelet, LD>, PLCMaster*>(dashboard, plc);
-	this->ps_hopper_op = make_menu<LDPSHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
-	this->sb_hopper_op = make_menu<LDSBHPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
-	this->ps_underwater_op = make_menu<LDPSUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
-	this->sb_underwater_op = make_menu<LDSBUWPOperation, Credit<HopperPumplet, LD>, PLCMaster*>(dashboard, plc);
+	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
+	this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
+	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
+	this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);
+	this->sb_underwater_op = make_sb_underwater_pump_charge_menu(plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -770,16 +721,16 @@ bool ChargesPage::can_select(IGraphlet* g) {
 
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
-	auto hpump = dynamic_cast<Credit<HopperPumplet, LD>*>(g);
+	auto hpump = dynamic_cast<Credit<HopperPumplet, CS>*>(g);
 	
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (hpump != nullptr) {
 		switch (hpump->id) {
-		case LD::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;
-		case LD::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
-		case LD::PSUWPump: menu_popup(this->ps_underwater_op, g, local_x, local_y); break;
-		case LD::SBUWPump: menu_popup(this->sb_underwater_op, g, local_x, local_y); break;
+		case CS::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;
+		case CS::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
+		case CS::PSUWPump: menu_popup(this->ps_underwater_op, g, local_x, local_y); break;
+		case CS::SBUWPump: menu_popup(this->sb_underwater_op, g, local_x, local_y); break;
 		}
 	}
 }

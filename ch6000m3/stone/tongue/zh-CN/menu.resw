@@ -189,19 +189,19 @@
   <data name="UWPBarge" xml:space="preserve">
     <value>右水下泵挖泥装驳</value>
   </data>
-  <data name="BothDischarge" xml:space="preserve">
+  <data name="BothShoring" xml:space="preserve">
     <value>双舱内泵艏吹</value>
   </data>
   <data name="BothRainbowing" xml:space="preserve">
     <value>双舱内泵艏喷</value>
   </data>
-  <data name="PSDischarge" xml:space="preserve">
+  <data name="PSShoring" xml:space="preserve">
     <value>左舱内泵艏吹</value>
   </data>
   <data name="PSRainbowing" xml:space="preserve">
     <value>左舱内泵艏喷</value>
   </data>
-  <data name="SBDischarge" xml:space="preserve">
+  <data name="SBShoring" xml:space="preserve">
     <value>右舱内泵艏吹</value>
   </data>
   <data name="SBRainbowing" xml:space="preserve">

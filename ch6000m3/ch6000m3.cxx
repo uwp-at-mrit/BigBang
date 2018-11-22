@@ -61,21 +61,21 @@ protected:
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
 		
-		this->add_planet(new HydraulicsPage(this->device));
-		this->add_planet(new ChargesPage(this->device));
-		this->add_planet(new DredgesPage(this->device));
-		this->add_planet(new DischargesPage(this->device));
-		this->add_planet(new GlandsPage(this->device));
-		this->add_planet(new FlushsPage(this->device));
-		this->add_planet(new DredgesPage(this->device, DragView::Left));
-		this->add_planet(new HopperDoorsPage(this->device));
-		this->add_planet(new LubricatingsPage(this->device));
-		this->add_planet(new DraughtsPage(this->device));
-		this->add_planet(new DredgesPage(this->device, DragView::Right));
+		this->add_planet(new HydraulicsPage(this->device));  // 0
+		this->add_planet(new ChargesPage(this->device)); // 1
+		this->add_planet(new DredgesPage(this->device)); // 2
+		this->add_planet(new DischargesPage(this->device)); // 3
+		this->add_planet(new GlandsPage(this->device)); // 4
+		this->add_planet(new FlushsPage(this->device)); // 5
+		this->add_planet(new DredgesPage(this->device, DragView::Left)); // 6
+		this->add_planet(new HopperDoorsPage(this->device)); // 7
+		this->add_planet(new LubricatingsPage(this->device)); // 8
+		this->add_planet(new DraughtsPage(this->device)); // 9
+		this->add_planet(new DredgesPage(this->device, DragView::Right)); // 10
 
 		this->add_planet(new Gallery());
 
-		this->transfer_to(7);
+		this->transfer_to(8);
 	}
 
 protected private:

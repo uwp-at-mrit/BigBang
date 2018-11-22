@@ -24,10 +24,8 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* ps_dashboard;
 		WarGrey::SCADA::PLCConfirmation* sb_dashboard;
-		Windows::UI::Xaml::Controls::MenuFlyout^ ps_unit_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ sb_unit_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ ps_gearbox_op;
-		Windows::UI::Xaml::Controls::MenuFlyout^ sb_gearbox_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ unit_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ gearbox_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

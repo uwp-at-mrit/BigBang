@@ -1,6 +1,29 @@
 #pragma once
 
+#include "plc.hpp"
+
+#include "graphlet/symbol/valve/gate_valvelet.hpp"
+
 namespace WarGrey::SCADA {
+	private enum class GateValveAction {
+		Open, Close, VirtualOpen, VirtualClose,
+		StopGateValves, CloseGateValves,
+		MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat,
+		_
+	};
+
+	private enum class ButterflyValveAction {
+		Open, Close, VirtualOpen, VirtualClose,
+		StopButterflyValves, CloseButterflyValves,
+		_ 
+	};
+
+	typedef uint16(*gate_valve_action_f)(WarGrey::SCADA::GateValveAction, WarGrey::SCADA::GateValvelet*);
+	typedef uint16(*butterfly_valve_action_f)(WarGrey::SCADA::ButterflyValveAction, WarGrey::SCADA::GateValvelet*);
+
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_gate_valve_menu(WarGrey::SCADA::gate_valve_action_f gva, WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_butterfly_valve_menu(WarGrey::SCADA::butterfly_valve_action_f bfva, WarGrey::SCADA::PLCMaster* plc);
+
 	// DB300, starts from 1
 	static unsigned int close_all_gate_valves = 319U;
 	static unsigned int stop_all_gate_valves = 805U;
@@ -8,8 +31,8 @@ namespace WarGrey::SCADA {
 	static unsigned int close_all_butterfly_valves = 303U;
 	static unsigned int stop_all_butterfly_valves = 806U;
 
-	template<typename OP, typename E>
-	uint16 DO_gate_valve_command(OP cmd, E id) {
+	template<typename E>
+	uint16 DO_gate_valve_command(WarGrey::SCADA::GateValveAction cmd, E id) {
 		int16 offset = -1;
 		uint16 gindex = 0U;
 		uint16 mindex = 0U;
@@ -18,17 +41,17 @@ namespace WarGrey::SCADA {
 		bool motor = false;
 
 		switch (cmd) {
-		case OP::Open:            offset = 0U; break;
-		case OP::Close:           offset = 1U; break;
-		case OP::VirtualOpen:     offset = 2U; break;
-		case OP::VirtualClose:    offset = 3U; break;
-		case OP::CloseGateValves: condition = close_all_gate_valves; break;
-		case OP::StopGateValves:  condition = stop_all_gate_valves; break;
-		case OP::MOpen:           offset = 0U; motor = true; break;
-		case OP::MClose:          offset = 1U; motor = true; break;
-		case OP::MVirtualOpen:    offset = 2U; motor = true; break;
-		case OP::MVirtualClose:   offset = 3U; motor = true; break;
-		case OP::MHeat:           motor = true; break;
+		case GateValveAction::Open:            offset = 0U; break;
+		case GateValveAction::Close:           offset = 1U; break;
+		case GateValveAction::VirtualOpen:     offset = 2U; break;
+		case GateValveAction::VirtualClose:    offset = 3U; break;
+		case GateValveAction::CloseGateValves: condition = close_all_gate_valves; break;
+		case GateValveAction::StopGateValves:  condition = stop_all_gate_valves; break;
+		case GateValveAction::MOpen:           offset = 0U; motor = true; break;
+		case GateValveAction::MClose:          offset = 1U; motor = true; break;
+		case GateValveAction::MVirtualOpen:    offset = 2U; motor = true; break;
+		case GateValveAction::MVirtualClose:   offset = 3U; motor = true; break;
+		case GateValveAction::MHeat:           motor = true; break;
 		}
 
 		switch (id) {
@@ -65,19 +88,19 @@ namespace WarGrey::SCADA {
 			: ((condition > 0) ? condition : (gindex + offset)));
 	}
 
-	template<typename OP, typename E>
-	uint16 DO_butterfly_valve_command(OP cmd, E id) {
+	template<typename E>
+	uint16 DO_butterfly_valve_command(ButterflyValveAction cmd, E id) {
 		uint16 offset = 0U;
 		uint16 index = 0U;
 		uint16 condition = 0U;
 
 		switch (cmd) {
-		case OP::Open:                 offset = 0U; break;
-		case OP::Close:                offset = 1U; break;
-		case OP::VirtualOpen:          offset = 2U; break;
-		case OP::VirtualClose:         offset = 3U; break;
-		case OP::CloseButterflyValves: condition = close_all_butterfly_valves; break;
-		case OP::StopButterflyValves:  condition = stop_all_butterfly_valves; break;
+		case ButterflyValveAction::Open:                 offset = 0U; break;
+		case ButterflyValveAction::Close:                offset = 1U; break;
+		case ButterflyValveAction::VirtualOpen:          offset = 2U; break;
+		case ButterflyValveAction::VirtualClose:         offset = 3U; break;
+		case ButterflyValveAction::CloseButterflyValves: condition = close_all_butterfly_valves; break;
+		case ButterflyValveAction::StopButterflyValves:  condition = stop_all_butterfly_valves; break;
 		}
 
 		switch (id) {

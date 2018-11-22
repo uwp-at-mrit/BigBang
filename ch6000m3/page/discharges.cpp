@@ -47,19 +47,6 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum RSMode { WindowUI = 0, Dashboard };
 
-private enum class RSHDOperation { Open, Stop, Close, Disable, _ };
-
-private enum class RSGVOperation {
-	Open, Close, VirtualOpen, VirtualClose,
-	StopGateValves, CloseGateValves,
-	MOpen, MClose, MVirtualOpen, MVirtualClose, MHeat,
-	_
-};
-
-
-private enum class RSPSHPOperation { Prepare, Start, Stop, Reset, PSDischarge, PSRainbowing, BothDischarge, BothRainbowing, _ };
-private enum class RSSBHPOperation { Prepare, Start, Stop, Reset, SBDischarge, SBRainbowing, BothDischarge, BothRainbowing, _ };
-
 // WARNING: order matters
 private enum class RS : unsigned int {
 	// Valves
@@ -89,11 +76,19 @@ private enum class RS : unsigned int {
 	D011, D012, D013, D014, D015, D016, D026
 };
 
-private class Rainbows final
-	: public PLCConfirmation
-	, public IMenuCommand<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>
-	, public IMenuCommand<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>
-	, public IMenuCommand<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*> {
+static uint16 DO_gate_valve_action(GateValveAction cmd, GateValvelet* valve) {
+	uint16 index = 0U;
+	auto credit_valve = dynamic_cast<Credit<GateValvelet, RS>*>(valve);
+
+	if (credit_valve != nullptr) {
+		index = DO_gate_valve_command(cmd, credit_valve->id);
+	}
+
+	return index;
+}
+
+/*************************************************************************************************/
+private class Rainbows final : public PLCConfirmation {
 public:
 	Rainbows(DischargesPage* master) : master(master) {}
 
@@ -195,32 +190,6 @@ public:
 	void post_read_data(Syslog* logger) override {
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
-	}
-
-public:
-	bool can_execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(RSGVOperation cmd, Credit<GateValvelet, RS>* valve, PLCMaster* plc) override {
-		plc->send_command(DO_gate_valve_command(cmd, valve->id));
-	}
-
-public:
-	bool can_execute(RSPSHPOperation cmd, Credit<HopperPumplet, RS>* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(RSPSHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_ps_hopper_pump_discharge_command(cmd));
-	}
-
-	bool can_execute(RSSBHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
-	}
-
-	void execute(RSSBHPOperation cmd, Credit<HopperPumplet, RS>* hopper, PLCMaster* plc) override {
-		plc->send_command(DO_sb_hopper_pump_discharge_command(cmd));
 	}
 
 public:
@@ -725,10 +694,10 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	Rainbows* dashboard = new Rainbows(this);
 
 	this->dashboard = dashboard;
-	this->gate_valve_op = make_menu<RSGVOperation, Credit<GateValvelet, RS>, PLCMaster*>(dashboard, plc);
+	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
 	this->upper_door_op = make_upper_door_menu(plc);
-	this->ps_hopper_op = make_menu<RSPSHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
-	this->sb_hopper_op = make_menu<RSSBHPOperation, Credit<HopperPumplet, RS>, PLCMaster*>(dashboard, plc);
+	this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
+	this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

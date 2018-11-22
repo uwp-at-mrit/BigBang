@@ -13,7 +13,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(DoorAction cmd, Credit<HopperDoorlet, Door>* door, PLCMaster* plc) { // DB300, starts from 1
+	void execute(DoorAction cmd, Credit<HopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 offset = 0U;
 		uint16 index = 0U;
 
@@ -51,7 +51,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(DoorsGroupAction cmd, BottomDoorsGroup group, PLCMaster* plc) { // DB300, starts from 1
+	void execute(DoorsGroupAction cmd, BottomDoorsGroup group, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 offset = 0U;
 		uint16 index = 0U;
 
@@ -78,7 +78,7 @@ public:
 		return plc->connected();
 	}
 
-	void execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc) { // DB300, starts from 1
+	void execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 offset = 0U;
 		uint16 index = 0U;
 
@@ -112,21 +112,15 @@ public:
 
 /*************************************************************************************************/
 MenuFlyout^ WarGrey::SCADA::make_bottom_door_menu(PLCMaster* plc) {
-	BottomDoorExecutor* exe = new BottomDoorExecutor();
-
-	return make_menu<DoorAction, Credit<HopperDoorlet, Door>, PLCMaster*>(exe, plc);
+	return make_menu<DoorAction, Credit<HopperDoorlet, Door>, PLCMaster*>(new BottomDoorExecutor(), plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_bottom_doors_group_menu(BottomDoorsGroup group, PLCMaster* plc) {
-	BottomDoorGroupExecutor* exe = new BottomDoorGroupExecutor();
-
-	return make_group_menu<DoorsGroupAction, BottomDoorsGroup, PLCMaster*>(exe, group, plc);
+	return make_group_menu<DoorsGroupAction, BottomDoorsGroup, PLCMaster*>(new BottomDoorGroupExecutor(), group, plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_upper_door_menu(PLCMaster* plc) {
-	UpperDoorExecutor* exe = new UpperDoorExecutor();
-
-	return make_menu<DoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*>(exe, plc);
+	return make_menu<DoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*>(new UpperDoorExecutor(), plc);
 }
 
 uint16 WarGrey::SCADA::DO_bottom_doors_special_command(BottomDoorCommand cmd) { // DB300, starts from 1

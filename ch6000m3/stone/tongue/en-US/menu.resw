@@ -192,20 +192,20 @@
   <data name="UWPBarge" xml:space="preserve">
     <value>PS Underwater Pump Dredging and Barging</value>
   </data>
-  <data name="BothDischarge" xml:space="preserve">
-    <value>Both Discharge</value>
+  <data name="BothShoring" xml:space="preserve">
+    <value>Both Shoring</value>
   </data>
   <data name="BothRainbowing" xml:space="preserve">
     <value>Both Rainbowing</value>
   </data>
-  <data name="PSDischarge" xml:space="preserve">
-    <value>PS Discharge</value>
+  <data name="PSShoring" xml:space="preserve">
+    <value>PS Shoring</value>
   </data>
   <data name="PSRainbowing" xml:space="preserve">
     <value>PS Rainbowing</value>
   </data>
-  <data name="SBDischarge" xml:space="preserve">
-    <value>SB Discharge</value>
+  <data name="SBShoring" xml:space="preserve">
+    <value>SB Shoring</value>
   </data>
   <data name="SBRainbowing" xml:space="preserve">
     <value>SB Rainbowing</value>

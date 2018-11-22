@@ -101,6 +101,12 @@
     <ClCompile Include="iotables\do_doors.cpp">
       <Filter>iotables</Filter>
     </ClCompile>
+    <ClCompile Include="iotables\do_valves.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="iotables\do_water_pumps.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
