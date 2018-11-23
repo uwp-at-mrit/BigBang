@@ -1,7 +1,6 @@
 #pragma once
 
 #include "plc.hpp"
-#include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class OverflowAction { Up, Down, Stop, Auto, _ };

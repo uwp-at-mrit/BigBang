@@ -3,7 +3,6 @@
 #include "plc.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class GearboxLubricator { Master, Spare, _ };

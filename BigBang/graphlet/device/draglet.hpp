@@ -37,7 +37,7 @@ namespace WarGrey::SCADA {
 		float thickness;
 	};
 
-	float drag_depth(WarGrey::SCADA::DragInfo& info);
+	float drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
 		unsigned int precision = 2U, float fontsize = 24.0F, float thickness = 2.0F);
@@ -164,7 +164,8 @@ namespace WarGrey::SCADA {
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragXZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float width, float height, float hatchmark_interval = 5.0F, float suction_lowest = -20.0F);
+			float width, float height, double max_depth_degrees = 45.0,
+			float hatchmark_interval = 5.0F, float suction_lowest = -20.0F);
 
 	public:
 		void construct() override;
@@ -205,7 +206,8 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	private class DragHeadlet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
-		DragHeadlet(WarGrey::SCADA::DragInfo& info, float radius, unsigned int color, float thickness = 2.0F,
+		DragHeadlet(WarGrey::SCADA::DragInfo& info, float radius, unsigned int color,
+			double max_depth_degrees = 45.0, float thickness = 2.0F,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_pointer_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_depth_color = nullptr,

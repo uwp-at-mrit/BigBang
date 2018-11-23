@@ -318,6 +318,7 @@
     <ClCompile Include="iotables\di_water_pumps.cpp" />
     <ClCompile Include="iotables\do_devices.cpp" />
     <ClCompile Include="iotables\do_doors.cpp" />
+    <ClCompile Include="iotables\do_dredges.cpp" />
     <ClCompile Include="iotables\do_hopper_pumps.cpp" />
     <ClCompile Include="iotables\do_pumps.cpp" />
     <ClCompile Include="iotables\do_valves.cpp" />

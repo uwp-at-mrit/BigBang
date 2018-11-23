@@ -1,93 +1,36 @@
 #pragma once
 
-#include "graphlet/device/winchlet.hpp"
+#include "plc.hpp"
 
 namespace WarGrey::SCADA {
+	private enum class DredgesGroup { PSGantries, SBGantries, _ };
+	private enum class DredgesPosition { psTrunnion, psIntermediate, psDragHead, sbTrunnion, sbIntermediate, sbDragHead, _};
+
+	private enum class WinchAction { Up, Down, Stop, HighSpeed, _ };
+	private enum class GantryAction { WindOut, WindUp, Stop, _ };
+	private enum class WaveCompensatorAction { Charge, Discharge, Stop, _ };
+	private enum class DragVisorAction { Up, Down, Stop, _ };
+
+	private enum class SuctionCommand { Inflate, Deflate, _ };
+	private enum class DragVisorCommand { CTension, _ };
+	private enum class LMODCommand { Auto, _ };
+
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_wave_compensator_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_drag_visor_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_group_menu(WarGrey::SCADA::DredgesGroup group, WarGrey::SCADA::PLCMaster* plc);
+
 	// DB300, starts from 1
 	static unsigned int drag_ps_visor_constant_tension_command = 659U;
 	static unsigned int drag_sb_visor_constant_tension_command = 660U;
 
-	template<typename OP, typename E>
-	uint16 DO_winch_command(OP cmd, E id) {
-		uint16 offset = 0U;
-		uint16 index = 0U;
+	static unsigned int ctension_ps_buttons = 659U;
+	static unsigned int ctension_sb_buttons = 660U;
 
-		switch (cmd) {
-		case OP::Up:        offset = 0U; break;
-		case OP::Down:      offset = 1U; break;
-		case OP::Stop:      offset = 2U; break;
-		case OP::HighSpeed: offset = 3U; break;
-		}
-
-		switch (id) {
-		case E::psTrunnion:     index = 570U; break;
-		case E::psIntermediate: index = 573U; break;
-		case E::psDragHead:     index = 576U; break;
-		case E::sbTrunnion:     index = 589U; break;
-		case E::sbIntermediate: index = 592U; break;
-		case E::sbDragHead:     index = 595U; break;
-		}
-
-		return index + offset;
-	}
-
-	template<typename E>
-	uint16 DO_winch_override_command(E id) {
-		uint16 index = 0U;
-
-		switch (id) {
-		case E::psTrunnion:     index = 617U; break;
-		case E::psIntermediate: index = 618U; break;
-		case E::psDragHead:     index = 619U; break;
-		case E::sbTrunnion:     index = 620U; break;
-		case E::sbIntermediate: index = 621U; break;
-		case E::sbDragHead:     index = 622U; break;
-		}
-
-		return index;
-	}
-	
-	template<typename OP, typename E>
-	uint16 DO_gantry_command(OP cmd, E id) {
-		uint16 offset = 0U;
-		uint16 index = 0U;
-
-		switch (cmd) {
-		case OP::WindOut: offset = 0U; break;
-		case OP::WindUp:  offset = 1U; break;
-		case OP::Stop:    offset = 2U; break;
-		}
-
-		switch (id) {
-		case E::psTrunnion:     index = 561U; break;
-		case E::psIntermediate: index = 564U; break;
-		case E::psDragHead:     index = 567U; break;
-		case E::sbTrunnion:     index = 580U; break;
-		case E::sbIntermediate: index = 583U; break;
-		case E::sbDragHead:     index = 586U; break;
-		}
-
-		return index + offset;
-	}
-
-	template<typename OP, typename E>
-	uint16 DO_gantry_group_command(OP cmd, E id) {
-		uint16 offset = 0U;
-		uint16 index = 0U;
-
-		switch (cmd) {
-		case OP::WindOut: offset = 0U; break;
-		case OP::WindUp:  offset = 1U; break;
-		case OP::Stop:    offset = 2U; break;
-		}
-
-		switch (id) {
-		case E::PSGantries: index = 601U; break;
-		case E::SBGantries: index = 604U; break;
-		}
-
-		return index + offset;
-	}
+	uint16 DO_winch_override_command(WarGrey::SCADA::DredgesPosition id);
+	uint16 DO_suction_command(WarGrey::SCADA::SuctionCommand cmd, bool ps);
+	uint16 DO_LMOD_command(WarGrey::SCADA::LMODCommand cmd);
 
 	template<typename E>
 	uint16 DO_gantry_virtual_action_command(E id, bool ps) {
@@ -114,66 +57,5 @@ namespace WarGrey::SCADA {
 		}
 
 		return index;
-	}
-
-	template<typename E>
-	uint16 DO_wave_compensator_command(E cmd, bool ps) {
-		uint16 offset = 0U;
-		uint16 index = (ps ? 633U : 641U);
-
-		switch (cmd) {
-		case E::Charge:    offset = 0U; break;
-		case E::Discharge: offset = 1U; break;
-		case E::Stop:      offset = 2U; break;
-		//case E::Lock:      offset = 3U; break;
-		//case E::Unlock:    offset = 4U; break;
-		}
-
-		return index + offset;
-	}
-
-	template<typename E>
-	uint16 DO_visor_command(E cmd, bool ps) {
-		uint16 offset = 0U;
-		uint16 index = (ps ? 649U : 652U);
-
-		switch (cmd) {
-		case E::Up:   offset = 0U; break;
-		case E::Down: offset = 1U; break;
-		case E::Stop: offset = 2U; break;
-		}
-
-		return index + offset;
-	}
-
-	template<typename CMD>
-	uint16 DO_suction_command(CMD cmd, bool ps) {
-		uint16 index = (ps ? 497U : 501U);
-		uint16 offset = 0U;
-
-		switch (cmd) {
-		case CMD::Inflate: offset = 0U; break;
-		case CMD::Deflate: offset = 1U; break;
-		}
-
-		return index + offset;
-	}
-
-
-	static unsigned int ctension_ps_buttons = 659U;
-	static unsigned int ctension_sb_buttons = 660U;
-
-	template<typename CMD>
-	uint16 DO_LMOD_command(CMD cmd) {
-		uint16 index = 881U;
-		uint16 offset = 0U;
-
-		switch (cmd) {
-		//case CMD::Emit: offset = 0U; break;
-		//case CMD::Fill: offset = 1U; break;
-		case CMD::Auto: offset = 2U; break;
-		}
-
-		return index + offset;
 	}
 }

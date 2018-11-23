@@ -3,6 +3,8 @@
 
 #include "iotables/do_hopper_pumps.hpp"
 
+#include "graphlet/symbol/pump/hopper_pumplet.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;

@@ -2,6 +2,8 @@
 
 #include "iotables/do_devices.hpp"
 
+#include "graphlet/primitive.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;

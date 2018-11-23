@@ -3,6 +3,8 @@
 
 #include "iotables/do_doors.hpp"
 
+#include "graphlet/symbol/door/hopper_doorlet.hpp"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;

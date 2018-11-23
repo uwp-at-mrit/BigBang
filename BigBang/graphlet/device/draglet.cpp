@@ -180,14 +180,14 @@ DragStyle WarGrey::SCADA::drag_default_style(unsigned int color, unsigned int pr
 	return style;
 }
 
-float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info) {
+float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees) {
 	float depth = info.trunnion_length + info.pipe_padding + info.head_length;
 
 	for (unsigned int idx = 0; idx < sizeof(info.pipe_lengths) / sizeof(float); idx++) {
 		depth += info.pipe_lengths[idx];
 	}
 
-	return depth;
+	return depth * std::sinf(degrees_to_radians(max_depth_degrees));
 }
 
 /*************************************************************************************************/
@@ -476,9 +476,11 @@ double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 }
 
 /*************************************************************************************************/
-DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, float width, float height, float interval, float suction_lowest)
+DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, float width, float height, double max_depth_degrees, float interval, float suction_lowest)
 	: IDraglet(info, style, width, height), depth_highest(interval), suction_lowest(suction_lowest) {
-	this->depth_lowest = -std::ceilf(this->drag_length / interval) * interval;
+	float radians = degrees_to_radians(max_depth_degrees);
+
+	this->depth_lowest = -std::ceilf(this->drag_length * std::sinf(radians) / interval) * interval;
 }
 
 void DragXZlet::construct() {
@@ -538,7 +540,7 @@ void DragXZlet::update_drag_head() {
 	double angle = drag_adjusted_angle(this->_forearm_angle, sign);
 	double head_joint_start = (this->leftward ? -angle + 90.0 : angle - 90.0);
 	double head_joint_end = (this->leftward ? -angle + 270.0 : angle + 90.0);
-	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, -visor_angle, angle, sign);
+	auto vshape = make_visor(visor_radius, bottom_radius, visor_length, -this->visor_angle, angle, sign);
 	auto hshape = make_draghead(head_radius, bottom_radius, arm_thickness, arm_length, 30.0, angle, sign, this->style.thickness * 2.0F);
 	auto mask = sector(head_joint_start, head_joint_end, this->joint_radius + this->style.thickness);
 
@@ -669,7 +671,7 @@ double DragXZlet::arctangent(float3& this_pt, float3& last_pt) {
 }
 
 /*************************************************************************************************/
-DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, float thickness
+DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, double max_depth_degrees, float thickness
 	, ICanvasBrush^ bcolor, ICanvasBrush^ acolor, ICanvasBrush^ sdcolor, ICanvasBrush^ ddcolor, ICanvasBrush^ hmcolor)
 	: info(info), radius(std::fabsf(radius)), sign((radius < 0.0F) ? 1.0F : -1.0F), thickness(thickness)
 	, precision(2U), depth_interval(10.0F), offset(30.0), visor_color(Colours::make(color))
@@ -679,7 +681,7 @@ DragHeadlet::DragHeadlet(DragInfo& info, float radius, unsigned int color, float
 	, draghead_pointer_color(ddcolor == nullptr ? drag_default_draghead_depth_pointer_color : ddcolor)
 	, hatchmark_color(hmcolor == nullptr ? drag_default_hatchmark_color : hmcolor) {
 	this->pointer_style = make_dash_stroke(CanvasDashStyle::Dash);
-	this->depth_range = std::ceilf(drag_depth(info) / depth_interval) * depth_interval;
+	this->depth_range = std::ceilf(drag_depth(info, max_depth_degrees) / depth_interval) * depth_interval;
 }
 
 void DragHeadlet::fill_extent(float x, float y, float* w, float* h) {

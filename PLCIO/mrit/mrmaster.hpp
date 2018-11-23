@@ -81,6 +81,11 @@ namespace WarGrey::SCADA {
 		uint8* data_pool;
 		unsigned int pool_size;
 		int delay_balance;
+
+	private:
+		bool display_timestamp;
+		double last_recv_timestamp;
+		double current_recv_interval;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {

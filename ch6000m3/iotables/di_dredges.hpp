@@ -94,26 +94,4 @@ namespace WarGrey::SCADA {
 	void DI_ctension_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned int idx_p1);
 
 	bool DI_long_sb_drag(const uint8* db205);
-
-	template<typename Menu>
-	bool winch_command_executable(WarGrey::SCADA::Winchlet* target, Menu cmd, bool draghead, bool otherwise) {
-		WinchStatus status = target->get_status();
-		bool executable = otherwise;
-
-		if (cmd == Menu::HighSpeed) {
-			if (!draghead) {
-				executable = false;
-			}
-		}
-
-		return executable;
-	}
-
-	template<typename Menu>
-	bool gantry_command_executable(WarGrey::SCADA::Gantrylet* target, Menu cmd, bool otherwise) {
-		GantryStatus status = target->get_status();
-		bool executable = otherwise;
-
-		return executable;
-	}
 }

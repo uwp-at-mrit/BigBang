@@ -2,8 +2,6 @@
 
 #include "plc.hpp"
 
-#include "graphlet/symbol/door/hopper_doorlet.hpp"
-
 namespace WarGrey::SCADA {
 	private enum class Door { SB1, SB2, SB3, SB4, SB5, SB6, SB7, PS1, PS2, PS3, PS4, PS5, PS6, PS7 };
 	private enum class BottomDoorsGroup { HDoor12, HDoor35, HDoor67, HDoor17 };
