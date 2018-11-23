@@ -139,11 +139,17 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		this->set_cylinder(DLTS::HopperHeight, DBD(DB2, average_hopper_height));
-		this->set_cylinder(DLTS::Displacement, DBD(DB2, displacement_value));
-		this->set_cylinder(DLTS::Loading, DBD(DB2, loading_value));
-		this->set_cylinder(DLTS::EarthWork, DBD(DB2, earthwork_value));
-		this->set_cylinder(DLTS::Vessel, DBD(DB2, vessel_value));
+		{ // set timeseries in batch
+			double values[_N(DLTS)];
+
+			this->set_cylinder(DLTS::HopperHeight, values, DBD(DB2, average_hopper_height));
+			this->set_cylinder(DLTS::Displacement, values, DBD(DB2, displacement_value));
+			this->set_cylinder(DLTS::Loading, values, DBD(DB2, loading_value));
+			this->set_cylinder(DLTS::EarthWork, values, DBD(DB2, earthwork_value));
+			this->set_cylinder(DLTS::Vessel, values, DBD(DB2, vessel_value));
+
+			this->timeseries->set_values(values);
+		}
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
@@ -164,7 +170,7 @@ public:
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
-			displacement_range, make_hour_series(4U), lines_width, lines_height, 6U));
+			displacement_range, make_hour_series(4U), lines_width, lines_height, 9U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
@@ -300,10 +306,10 @@ private:
 	}
 
 private:
-	void set_cylinder(DLTS id, float value) {
+	void set_cylinder(DLTS id, double* values, float value) {
 		this->cylinders[id]->set_value(value);
-		this->timeseries->set_value(id, value);
 		this->cydimensions[id]->set_value(value, GraphletAnchor::CC);
+		values[_I(id)] = value;
 	}
 
 private: // never delete these graphlets manually.

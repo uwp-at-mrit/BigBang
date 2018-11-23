@@ -117,6 +117,7 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 
 	if (now > next_start) {
 		this->update_time_series(this->series.start + this->series.span / this->series.step);
+		this->notify_updated();
 	}
 }
 
@@ -256,8 +257,8 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				while (t != end) {
 					double fx = double((*t) - this->series.start) / double(this->series.span);
 					double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
-					float this_x = float(fx) * haxes_box.Width;
-					float this_y = float(fy) * haxes_box.Height;
+					float this_x = x + float(fx) * haxes_box.Width;
+					float this_y = y + float(fy) * haxes_box.Height;
 
 					if (std::isnan(last_x) || (this_x < x) || (this_x > rx)) {
 						last_x = this_x;
@@ -265,7 +266,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					} else {
 						if (((this_x - last_x) > 1.0F) || (std::fabsf(this_y - last_y) > 1.0)) {
 							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color, style.lines_thickness);
-						
+
 							last_x = this_x;
 							last_y = this_y;
 						}
@@ -305,4 +306,18 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 
 	this->lines[idx].set_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
+	
+	this->notify_updated();
+}
+
+void ITimeSerieslet::set_values(double* values) {
+	TimeSeriesStyle style = this->get_style();
+	long long now = current_seconds() - time_zone_utc_bias_seconds();
+
+	for (unsigned int idx = 0; idx < this->count; idx++) {
+		this->lines[idx].set_value(now, values[idx]);
+		this->lines[idx].update_legend(this->precision + 1U, style);
+	}
+
+	this->notify_updated();
 }

@@ -61,6 +61,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void set_value(unsigned int idx, double value);
+		void set_values(double* values);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesStatus status, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -124,8 +125,12 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
-		void set_value(Name slot, double v) {
-			ITimeSerieslet::set_value(_I(slot), v);
+		void set_value(Name slot, double value) {
+			ITimeSerieslet::set_value(_I(slot), value);
+		}
+
+		void set_values(double* values) {
+			ITimeSerieslet::set_values(values);
 		}
 
 	private:
