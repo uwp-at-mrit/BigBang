@@ -75,7 +75,7 @@ protected:
 
 		this->add_planet(new Gallery());
 
-		this->transfer_to(2);
+		this->transfer_to(9);
 	}
 
 protected private:

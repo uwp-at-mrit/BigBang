@@ -38,9 +38,6 @@ IMRMaster::IMRMaster(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation*
 
 	this->data_pool = new uint8[1];
 	this->pool_size = 1;
-	this->last_recv_timestamp = current_inexact_milliseconds();
-
-	this->display_timestamp = (system_ipv4_address()->Equals("192.168.0.169"));
 
     this->shake_hands();
 };
@@ -188,6 +185,10 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 
 					if (reading) {
 						this->delay_balance += 1;
+					} else {
+						this->logger->log_message(Log::Info,
+							L"<sent command '%c' on data block %u[%u, %u] to device[%s]>",
+							fcode, datablock, addr0, addrn, this->device_description()->Data());
 					}
 
 					this->logger->log_message(Log::Debug,
@@ -212,8 +213,6 @@ void IMRMaster::wait_process_confirm_loop() {
 		double now = current_inexact_milliseconds();
 
 		this->delay_balance -= 1;
-		this->current_recv_interval = now - this->last_recv_timestamp;
-		this->last_recv_timestamp = now;
 		
 		if (size < predata_size) {
 			if (size == 0) {
@@ -257,26 +256,13 @@ void IMRMaster::wait_process_confirm_loop() {
 					L"message comes from devce[%s] has an malformed end(expected 0X%04X, received 0X%04X)",
 					this->device_description()->Data(), expected_tail, end_of_message);
 			} else {
-				Log notice_level = Log::Info;
-
 				this->logger->log_message(Log::Debug,
 					L"<received confirmation(%u, %u, %u) for command '%c' comes from device[%s]>",
 					datablock, addr0, addrn, fcode, this->device_description()->Data());
 
-				if (this->current_recv_interval > 800.0) {
-					notice_level = Log::Error;
-				} else if (this->current_recv_interval > 400.0) {
-					notice_level = Log::Warning;
-				}
-
-				if (this->display_timestamp) {
-					this->get_logger()->log_message(notice_level, L"[recieving interval: %lfms, loading span: %lfms]",
-						this->current_recv_interval, current_inexact_milliseconds() - this->last_recv_timestamp);
-				}
-
 				if (this->delay_balance > 1) {
 					syslog(Log::Notice, L"descarded a delayed response from device[%s]", this->device_description()->Data());
-				} else if (!this->confirmations.empty()) {
+				} else {
 					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
 				}
 			}
@@ -375,7 +361,7 @@ void MRMaster::write_digital_quantity(uint16 data_block, uint8 idx, uint8 bidx, 
 	xbytes[3] = (value ? 0x01 : 0x00);
 
 	if (this->get_mode() == PLCMasterMode::Release) {
-		this->request(this->preference.write_digital_quantity_fcode(), data_block, 0U, 0U, xbytes, data_length);
+		this->request(this->preference.write_digital_quantity_fcode(), data_block, idx, bidx, xbytes, data_length);
 	} else {
 		this->logger->log_message(Log::Info, L"EXE DB%d.DBX%d.%d", data_block, idx, bidx);
 	}

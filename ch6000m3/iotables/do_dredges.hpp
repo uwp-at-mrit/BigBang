@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 	private enum class DragVisorAction { Up, Down, Stop, _ };
 
 	private enum class SuctionCommand { Inflate, Deflate, _ };
-	private enum class DragVisorCommand { CTension, _ };
+	private enum class DragVisorCommand { CResistance, _ };
 	private enum class LMODCommand { Auto, _ };
 
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::PLCMaster* plc);
@@ -22,8 +22,8 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_group_menu(WarGrey::SCADA::DredgesGroup group, WarGrey::SCADA::PLCMaster* plc);
 
 	// DB300, starts from 1
-	static unsigned int drag_ps_visor_constant_tension_command = 659U;
-	static unsigned int drag_sb_visor_constant_tension_command = 660U;
+	static unsigned int drag_ps_visor_constant_resistance_command = 659U;
+	static unsigned int drag_sb_visor_constant_resistance_command = 660U;
 
 	static unsigned int ctension_ps_buttons = 659U;
 	static unsigned int ctension_sb_buttons = 660U;

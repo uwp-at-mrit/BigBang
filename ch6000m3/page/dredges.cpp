@@ -504,8 +504,8 @@ public:
 		DI_suction_buttons(this->ps_suctions[SuctionCommand::Inflate], this->ps_suctions[SuctionCommand::Deflate], DB205, suction_ps_buttons);
 		DI_suction_buttons(this->sb_suctions[SuctionCommand::Inflate], this->sb_suctions[SuctionCommand::Deflate], DB205, suction_sb_buttons);
 
-		DI_ctension_button(this->ps_visors[DragVisorCommand::CTension], DB205, ctension_ps_button);
-		DI_ctension_button(this->sb_visors[DragVisorCommand::CTension], DB205, ctension_sb_button);
+		DI_ctension_button(this->ps_visors[DragVisorCommand::CResistance], DB205, ctension_ps_button);
+		DI_ctension_button(this->sb_visors[DragVisorCommand::CResistance], DB205, ctension_sb_button);
 
 		this->set_winch_limits(DredgesPosition::psTrunnion, DredgesPosition::psDragHead);
 		this->set_winch_limits(DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead);
@@ -828,8 +828,8 @@ public:
 			this->master->move_to(this->pressures[DS::SBSIP], this->sb_suctions[SuctionCommand::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 
 			this->master->move_to(this->lmod_buttons[LMODCommand::Auto], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
-			this->master->move_to(this->ps_visors[DragVisorCommand::CTension], this->degrees[DS::PSEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
-			this->master->move_to(this->sb_visors[DragVisorCommand::CTension], this->degrees[DS::SBEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
+			this->master->move_to(this->ps_visors[DragVisorCommand::CResistance], this->degrees[DS::PSEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
+			this->master->move_to(this->sb_visors[DragVisorCommand::CResistance], this->degrees[DS::SBEarth], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 		}
 	}
 
@@ -851,8 +851,8 @@ public:
 			plc->send_command(DO_suction_command(suction_btn->id, suction_btn->gid == DS::PS));
 		} else if (visor_btn != nullptr) {
 			plc->send_command((visor_btn->gid == DS::PS)
-				? drag_ps_visor_constant_tension_command
-				: drag_sb_visor_constant_tension_command);
+				? drag_ps_visor_constant_resistance_command
+				: drag_sb_visor_constant_resistance_command);
 		} else if (lmod_btn != nullptr) {
 			plc->send_command(DO_LMOD_command(lmod_btn->id));
 		}

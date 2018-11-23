@@ -36,12 +36,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DLMode { WindowUI = 0, Dashboard };
 
-private enum class DLTS { EarthWork, Vessel, Loading, Displacement, _ };
+private enum class DLTS { EarthWork, Vessel, HopperHeight, Loading, Displacement, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
-	EarthWork, Vessel, HopperHeight, Loading, Displacement,
-	
 	SternDraft, psSternDraft, psSuctionDraft, sbSternDraft, psSternHeight, sbSternHeight,
 	BowDraft, psBowDraft, sbSuctionDraft, sbBowDraft, psBowHeight, sbBowHeight,
 
@@ -141,11 +139,11 @@ public:
 		this->dimensions[DL::psSternHeight]->set_value(DBD(DB2, ps_stern_hopper_height));
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
-		this->set_cylinder(DL::HopperHeight, DBD(DB2, average_hopper_height));
-		this->set_cylinder(DL::Displacement, DLTS::Displacement, DBD(DB2, displacement_value));
-		this->set_cylinder(DL::Loading, DLTS::Loading, DBD(DB2, loading_value));
-		this->set_cylinder(DL::EarthWork, DLTS::EarthWork, DBD(DB2, earthwork_value));
-		this->set_cylinder(DL::Vessel, DLTS::Vessel, DBD(DB2, vessel_value));
+		this->set_cylinder(DLTS::HopperHeight, DBD(DB2, average_hopper_height));
+		this->set_cylinder(DLTS::Displacement, DBD(DB2, displacement_value));
+		this->set_cylinder(DLTS::Loading, DBD(DB2, loading_value));
+		this->set_cylinder(DLTS::EarthWork, DBD(DB2, earthwork_value));
+		this->set_cylinder(DLTS::Vessel, DBD(DB2, vessel_value));
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
@@ -165,16 +163,17 @@ public:
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 		
 		lines_height = ship_y * 0.618F;
-		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__, displacement_range, lines_width, lines_height, 7U));
+		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
+			displacement_range, make_hour_series(4U), lines_width, lines_height, 6U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
 		cylinder_height = ship_height * 0.42F;
-		this->load_cylinder(this->cylinders, DL::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, DL::Vessel, cylinder_height, vessel_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, DL::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
-		this->load_cylinder(this->cylinders, DL::Loading, cylinder_height, loading_range, 0U, "ton");
-		this->load_cylinder(this->cylinders, DL::Displacement, cylinder_height, displacement_range, 0U, "ton");
+		this->load_cylinder(this->cylinders, DLTS::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, DLTS::Vessel, cylinder_height, vessel_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, DLTS::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
+		this->load_cylinder(this->cylinders, DLTS::Loading, cylinder_height, loading_range, 0U, "ton");
+		this->load_cylinder(this->cylinders, DLTS::Displacement, cylinder_height, displacement_range, 0U, "ton");
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
@@ -194,7 +193,7 @@ public:
 		this->decorator->fill_ship_anchor(0.5F, 0.0F, &tsx, &tsy, true);
 		tsy *= 0.5F;
 
-		this->reflow_cylinders(this->cylinders, this->dimensions, this->labels, DL::EarthWork, DL::Displacement, gapsize);
+		this->reflow_cylinders(this->cylinders, DLTS::EarthWork, DLTS::Displacement, gapsize);
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
@@ -225,12 +224,12 @@ public:
 		}
 
 		{ // reflow buttons and relevant dimensions
-			IGraphlet* target = this->dimensions[DL::HopperHeight];
+			IGraphlet* target = this->cydimensions[DLTS::HopperHeight];
 			
 			gapsize = vinset * 1.0F;
 			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
 			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
-			this->master->move_to(this->dimensions[DL::NetWeight], this->labels[DL::HopperHeight], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+			this->master->move_to(this->dimensions[DL::NetWeight], this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
 		}
 	}
 
@@ -266,7 +265,7 @@ private:
 		cs[id] = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 8U, precision);
 		
 		this->master->insert_one(cs[id], id);
-		this->load_dimension(this->dimensions, this->labels, id, unit);
+		this->load_dimension(this->cydimensions, this->cylabels, id, unit);
 	}
 
 	template<class B, typename CMD>
@@ -278,8 +277,7 @@ private:
 
 private:
 	template<class C, typename E>
-	void reflow_cylinders(std::map<E, Credit<C, E>*>& is, std::map<E, Credit<Dimensionlet, E>*>& ds
-		, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float gapsize) {
+	void reflow_cylinders(std::map<E, Credit<C, E>*>& is, E id0, E idn, float gapsize) {
 		float flcount = float(_I(idn) - _I(id0) + 1 + 4);
 		float x, y;
 
@@ -287,8 +285,8 @@ private:
 			this->decorator->fill_ship_anchor(float(_I(id) - _I(id0) + 1) / flcount, 0.5F, &x, &y);
 
 			this->master->move_to(is[id], x, y, GraphletAnchor::LC);
-			this->master->move_to(ls[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
-			this->master->move_to(ds[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize);
+			this->master->move_to(this->cylabels[id], is[id], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+			this->master->move_to(this->cydimensions[id], is[id], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, +gapsize);
 		}
 	}
 
@@ -302,21 +300,19 @@ private:
 	}
 
 private:
-	void set_cylinder(DL id, float value) {
+	void set_cylinder(DLTS id, float value) {
 		this->cylinders[id]->set_value(value);
-		this->dimensions[id]->set_value(value, GraphletAnchor::CC);
-	}
-
-	void set_cylinder(DL id, DLTS ts_id, float value) {
-		this->set_cylinder(id, value);
-		this->timeseries->set_value(ts_id, value);
+		this->timeseries->set_value(id, value);
+		this->cydimensions[id]->set_value(value, GraphletAnchor::CC);
 	}
 
 private: // never delete these graphlets manually.
 	std::map<DL, Credit<Labellet, DL>*> labels;
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
-	std::map<DL, Credit<Cylinderlet, DL>*> cylinders;
+	std::map<DLTS, Credit<Labellet, DLTS>*> cylabels;
+	std::map<DLTS, Credit<Dimensionlet, DLTS>*> cydimensions;
+	std::map<DLTS, Credit<Cylinderlet, DLTS>*> cylinders;
 	std::map<BottomDoorCommand, Credit<Buttonlet, BottomDoorCommand>*> hdchecks;
 	TimeSerieslet<DLTS>* timeseries;
 	OverflowPipelet* overflowpipe;

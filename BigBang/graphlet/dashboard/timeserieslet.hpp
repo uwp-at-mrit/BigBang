@@ -9,6 +9,8 @@
 namespace WarGrey::SCADA {
 	typedef Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ (*lookup_line_color)(unsigned int idx);
 
+	struct TimeSeriesLine;
+
 	private enum class TimeSeriesStatus { Realtime, History, _ };
 
 	private struct TimeSeries {
@@ -17,8 +19,8 @@ namespace WarGrey::SCADA {
 		unsigned int step;
 	};
 
-	WarGrey::SCADA::TimeSeries make_this_minute_series(unsigned int step = 5);
-	WarGrey::SCADA::TimeSeries make_this_hour_series(unsigned int step = 5);
+	WarGrey::SCADA::TimeSeries make_minute_series(unsigned int count = 1U, unsigned int step = 5);
+	WarGrey::SCADA::TimeSeries make_hour_series(unsigned int count = 1U, unsigned int step = 5);
 	WarGrey::SCADA::TimeSeries make_today_series(unsigned int step = 11);
 
 	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lookup_default_light_color(unsigned int idx);
@@ -46,9 +48,9 @@ namespace WarGrey::SCADA {
 		float legend_fx = -1.0F;
 	};
 
-	private class ITimeSerieslet abstract
-		: public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::TimeSeriesStatus, WarGrey::SCADA::TimeSeriesStyle> {
+	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::TimeSeriesStatus, WarGrey::SCADA::TimeSeriesStyle> {
 	public:
+		virtual ~ITimeSerieslet() noexcept;
 		ITimeSerieslet(double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts, unsigned int n,
 			float width, float height, unsigned int step, unsigned int precision);
 
@@ -68,13 +70,9 @@ namespace WarGrey::SCADA {
 		void construct_line(unsigned int idx, Platform::String^ name);
 
 	private:
+		void update_time_series(long long next_start);
 		void update_vertical_axes(WarGrey::SCADA::TimeSeriesStyle& style);
 		void update_horizontal_axes(WarGrey::SCADA::TimeSeriesStyle& style);
-		void update_legend(unsigned int idx, WarGrey::SCADA::TimeSeriesStyle& style);
-
-	private:
-		void update_time_series(long long next_start);
-		void fill_this_position(long long time, double v, double* x, double* y);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vaxes;
@@ -82,13 +80,8 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ haxes;
 
 	private:
-		Platform::Array<Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^>^ colors;
-		Platform::Array<Microsoft::Graphics::Canvas::Text::CanvasTextLayout^>^ legends;
-		Platform::Array<Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^>^ lines;
-		Platform::Array<Platform::String^>^ names;
-		Platform::Array<double>^ values;
-		Platform::Array<double>^ xs;
-		Platform::Array<double>^ ys;
+		WarGrey::SCADA::TimeSeriesLine* lines;
+		unsigned int count;
 
 	private:
 		float width;
