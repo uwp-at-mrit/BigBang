@@ -236,7 +236,11 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 				this->device_name = make_text_layout(this->device->device_hostname(), status_font);
 			}
 
-			ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
+			if (this->plc_mode == PLCMasterMode::User) {
+				ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Cyan);
+			} else {
+				ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
+			}
 		} else {
 			float icon_cx = plc_x + status_prefix_width + this->retry_icon_size * 0.5F;
 			float icon_cy = y + status_height * 0.5F;

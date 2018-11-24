@@ -569,12 +569,18 @@ void HopperDoorsPage::reflow(float width, float height) {
 }
 
 bool HopperDoorsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<Alarmlet*>(g) != nullptr));
+	bool okay = false;
+
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		okay = ((dynamic_cast<HopperDoorlet*>(g) != nullptr)
+			|| (dynamic_cast<Alarmlet*>(g) != nullptr));
+	}
+
+	return okay;
 }
 
 bool HopperDoorsPage::can_select_multiple() {
-	return true;
+	return (this->device->get_mode() != PLCMasterMode::User);
 }
 
 void HopperDoorsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

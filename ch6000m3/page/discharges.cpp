@@ -773,9 +773,15 @@ void DischargesPage::reflow(float width, float height) {
 }
 
 bool DischargesPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
-		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
+	bool okay = false;
+
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		okay = ((dynamic_cast<GateValvelet*>(g) != nullptr)
+			|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+			|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
+	}
+
+	return okay;
 }
 
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

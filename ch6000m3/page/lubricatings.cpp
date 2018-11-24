@@ -300,7 +300,13 @@ void LubricatingsPage::reflow(float width, float height) {
 }
 
 bool LubricatingsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
+	bool okay = false;
+
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		okay = ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
+	}
+
+	return okay;
 }
 
 void LubricatingsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

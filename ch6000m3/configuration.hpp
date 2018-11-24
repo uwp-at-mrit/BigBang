@@ -11,6 +11,17 @@ static WarGrey::SCADA::Log default_logging_level = WarGrey::SCADA::Log::Info;
 //static Platform::String^ remote_test_server = "172.20.10.2";
 static Platform::String^ remote_test_server = "192.168.0.159";
 
+static Platform::String^ root_machines[] = {
+	"192.168.0.6",
+	"192.168.0.9",
+	"192.168.0.7",
+	"192.168.0.11",
+	"192.168.0.12",
+
+	//"192.168.0.10",
+	"192.168.0.159",
+};
+
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 5U;
 
@@ -34,6 +45,7 @@ static const double vessel_range = 10000.0;
 static const double loading_range = 13000.0;
 static const double displacement_range = 22000.0;
 static const double compensator_range = 3.0;
+static const double timeseries_range = displacement_range + 2000.0;
 
 static const float ps_drag_trunnion_gapsize = 1.845F;
 static const float ps_drag_trunnion_length = 4.135F;

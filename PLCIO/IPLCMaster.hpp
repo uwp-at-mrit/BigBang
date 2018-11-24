@@ -7,7 +7,7 @@
 namespace WarGrey::SCADA {
 	class IPLCMaster;
 
-	private enum class PLCMasterMode { Debug, Release };
+	private enum class PLCMasterMode { Debug, Root, User };
 
 	private class IPLCStatusListener {
 	public:
@@ -37,6 +37,6 @@ namespace WarGrey::SCADA {
 		}
 
 	private:
-		WarGrey::SCADA::PLCMasterMode mode = PLCMasterMode::Release;
+		WarGrey::SCADA::PLCMasterMode mode = PLCMasterMode::Root;
 	};
 }

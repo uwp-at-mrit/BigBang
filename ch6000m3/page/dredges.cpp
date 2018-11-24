@@ -1589,15 +1589,27 @@ PLCMaster* DredgesPage::get_plc_device() {
 }
 
 bool DredgesPage::can_select(IGraphlet* g) {
-	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
-	
-	return ((db != nullptr) && (db->can_select(g)));
+	bool okay = false;
+
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+		okay = ((db != nullptr) && (db->can_select(g)));
+	}
+
+	return okay;
 }
 
 bool DredgesPage::can_select_multiple() {
-	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+	bool okay = false;
 
-	return ((db != nullptr) && (db->can_select_multiple()));
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
+
+		okay = ((db != nullptr) && (db->can_select_multiple()));
+	}
+
+	return okay;
 }
 
 bool DredgesPage::on_char(VirtualKey key, bool wargrey_keyboard) {

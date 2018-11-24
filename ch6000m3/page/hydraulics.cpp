@@ -698,14 +698,20 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	auto heater = dynamic_cast<Credit<Thermometerlet, HS>*>(g);
+	bool okay = false;
 
-	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| ((heater != nullptr) && (heater->id == HS::Master)));
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		auto heater = dynamic_cast<Credit<Thermometerlet, HS>*>(g);
+
+		okay = ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
+			|| ((heater != nullptr) && (heater->id == HS::Master)));
+	}
+	
+	return okay;
 }
 
 bool HydraulicsPage::can_select_multiple() {
-	return true;
+	return (this->device->get_mode() != PLCMasterMode::User);
 }
 
 void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

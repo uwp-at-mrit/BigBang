@@ -212,6 +212,9 @@
     <ClInclude Include="iotables\ao_gland_pumps.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
+    <ClInclude Include="iotables\macro_keys.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

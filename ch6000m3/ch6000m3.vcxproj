@@ -340,6 +340,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="iotables\macro_keys.hpp" />
     <ClInclude Include="page\dredges.hpp" />
     <ClInclude Include="page\lubricatings.hpp" />
     <ClInclude Include="iotables\ai_doors.hpp" />

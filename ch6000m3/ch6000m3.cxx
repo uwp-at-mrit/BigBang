@@ -1,5 +1,6 @@
 ﻿#include "application.hxx"
 #include "configuration.hpp"
+#include "iotables/macro_keys.hpp"
 #include "plc.hpp"
 
 #include "planet.hpp"
@@ -40,18 +41,30 @@ public:
 
 internal:
 	DredgerUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+		Platform::String^ localhost = system_ipv4_address();
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
+		PLCMasterMode mode = PLCMasterMode::User;
 
 		this->timer = ref new Timer(this, frame_per_second);
 		this->device = new PLCMaster(logger);
+
+		for (unsigned int idx = 0; idx < sizeof(root_machines) / sizeof(Platform::String^); idx++) {
+			if (localhost->Equals(root_machines[idx])) {
+				mode = PLCMasterMode::Root;
+				break;
+			}
+		}
+
+		this->device->set_mode(mode);
 	}
 
 public:
 	void switch_plc_master_mode() {
 		if (this->device != nullptr) {
 			switch (this->device->get_mode()) {
-			case PLCMasterMode::Debug: this->device->set_mode(PLCMasterMode::Release); break;
-			case PLCMasterMode::Release: this->device->set_mode(PLCMasterMode::Debug); break;
+			case PLCMasterMode::Debug: this->device->set_mode(PLCMasterMode::Root); break;
+			case PLCMasterMode::Root: this->device->set_mode(PLCMasterMode::User); break;
+			case PLCMasterMode::User: this->device->set_mode(PLCMasterMode::Debug); break;
 			}
 		}
 	}
@@ -149,9 +162,9 @@ public:
 		Platform::String^ localhost = system_ipv4_address();
 
 		if (localhost->Equals("192.168.0.11")) {
-			this->universe = ref new DashboardUniverse(name, 620U);
+			this->universe = ref new DashboardUniverse(name, left_paging_key);
 		} else if (localhost->Equals("192.168.0.12")) {
-			this->universe = ref new DashboardUniverse(name, 624U);
+			this->universe = ref new DashboardUniverse(name, right_paging_key);
 		} else {
 			this->universe = ref new DredgerUniverse(name);
 		}

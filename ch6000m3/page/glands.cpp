@@ -534,13 +534,19 @@ void GlandsPage::update(long long count, long long interval, long long uptime) {
 
 
 bool GlandsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
+	bool okay = false;
+
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		okay = ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
+	}
+
+	return okay;
 }
 
 bool GlandsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_char(key, wargrey_keyboard);
 
-	if (!handled) {
+	if ((!handled) && (this->device->get_mode() != PLCMasterMode::User)) {
 		auto db = dynamic_cast<GlandPumps*>(this->dashboard);
 
 		if (db != nullptr) {
@@ -555,7 +561,11 @@ void GlandsPage::on_focus(IGraphlet* g) {
 	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	if (editor != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		if (this->device->get_mode() != PLCMasterMode::User) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		} else {
+			this->set_caret_owner(nullptr);
+		}
 	}
 }
 

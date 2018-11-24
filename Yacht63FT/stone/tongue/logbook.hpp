@@ -27,7 +27,7 @@ namespace WarGrey::SCADA {
         static WarGrey::SCADA::Logbook* ACCoolantFault() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(18U); } // Air Conditioner Cooling Pump Fault
         static WarGrey::SCADA::Logbook* CO2PowerFailure() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(19U); } // CO2 Power Failure
         static WarGrey::SCADA::Logbook* CO2Leak() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(20U); } // CO2 Leak
-        static WarGrey::SCADA::Logbook* CO2Release() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(21U); } // CO2 Release
+        static WarGrey::SCADA::Logbook* CO2Release() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(21U); } // CO2 Root
         static WarGrey::SCADA::Logbook* M1PMFault() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(25U); } // M1 Power Module Fault
         static WarGrey::SCADA::Logbook* PSBusOverVoltage() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(26U); } // Port Station DC Bus Voltage Exceed
         static WarGrey::SCADA::Logbook* PSBusUnderVoltage() { return WarGrey::SCADA::Tongue<WarGrey::SCADA::Logbook>::UnsafeTongue(27U); } // Port Station DC Bus Voltage Beneath

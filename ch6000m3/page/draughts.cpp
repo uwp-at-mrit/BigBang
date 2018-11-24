@@ -170,7 +170,7 @@ public:
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
-			displacement_range, make_hour_series(4U), lines_width, lines_height, 9U));
+			timeseries_range, make_hour_series(4U), lines_width, lines_height, 5U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
@@ -394,10 +394,16 @@ void DraughtsPage::reflow(float width, float height) {
 }
 
 bool DraughtsPage::can_select(IGraphlet* g) {
-	auto hdchecker = dynamic_cast<Buttonlet*>(g);
+	bool okay = false;
 
-	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
-		|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
+	if (this->device->get_mode() != PLCMasterMode::User) {
+		auto hdchecker = dynamic_cast<Buttonlet*>(g);
+
+		okay = ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
+			|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
+	}
+
+	return okay;
 }
 
 void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
