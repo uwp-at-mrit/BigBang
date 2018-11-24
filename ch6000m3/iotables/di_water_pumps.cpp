@@ -19,12 +19,12 @@ void WarGrey::SCADA::DI_water_pump(WaterPumplet* target, const uint8* db4, size_
 			target->set_status(WaterPumpStatus::Starting);
 		} else if (DBX(db205, idx205_p1 + 0U)) {
 			target->set_status(WaterPumpStatus::Stopping);
+		} else if (DBX(db205, idx205_p1 + 3U)) {
+			target->set_status(WaterPumpStatus::Ready);
 		} else if (DBX(db205, idx205_p1 + 1U)) {
 			target->set_status(WaterPumpStatus::Unstartable);
 		} else if (DBX(db205, idx205_p1 + 2U)) {
 			target->set_status(WaterPumpStatus::Unstoppable);
-		} else if (DBX(db205, idx205_p1 + 3U)) {
-			target->set_status(WaterPumpStatus::Ready);
 		}
 	}
 

@@ -74,7 +74,7 @@ protected:
 		//this->add_planet(new SplashScreen(620.0F));
 		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
 		
-		this->add_planet(new HydraulicsPage(this->device));  // 0
+		this->add_planet(new HydraulicsPage(this->device)); // 0
 		this->add_planet(new ChargesPage(this->device)); // 1
 		this->add_planet(new DredgesPage(this->device)); // 2
 		this->add_planet(new DischargesPage(this->device)); // 3
@@ -88,7 +88,7 @@ protected:
 
 		this->add_planet(new Gallery());
 
-		this->transfer_to(9);
+		this->transfer_to(5);
 	}
 
 protected private:

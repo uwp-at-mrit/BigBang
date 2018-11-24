@@ -9,8 +9,6 @@ static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4
 
 		if (DBX(db4, idx4 + 6U)) {
 			target->set_status(HopperPumpStatus::Running);
-		} else if (DBX(db4, idx4 + 0U)) {
-			target->set_status(HopperPumpStatus::Ready);
 		} else if (DBX(db4, idx4 + 4U)) {
 			target->set_status(HopperPumpStatus::Alert);
 		} else if (DBX(db4, idx4 + 5U)) {
@@ -21,6 +19,8 @@ static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4
 			target->set_status(HopperPumpStatus::Starting);
 		} else if (DBX(db205, idx205 + 1U)) {
 			target->set_status(HopperPumpStatus::Stopping);
+		} else if (DBX(db4, idx4 + 0U)) {
+			target->set_status(HopperPumpStatus::Ready);
 		} else if (DBX(db205, idx205 + 2U)) {
 			target->set_status(HopperPumpStatus::Unstartable);
 		} else if (DBX(db205, idx205 + 3U)) {
