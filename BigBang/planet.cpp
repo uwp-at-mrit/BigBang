@@ -217,6 +217,9 @@ static IGraphlet* do_search_selected_graphlet(IGraphlet* start, unsigned int mod
 Planet::Planet(Platform::String^ name, unsigned int initial_mode)
 	: IPlanet(name), mode(initial_mode), needs_update(false), update_sequence_depth(0) {
 	this->numpad = new Numpad(this);
+	this->arrowpad = new Arrowpad(this);
+
+	this->keyboard = this->numpad;
 }
 
 Planet::~Planet() {
@@ -227,12 +230,13 @@ Planet::~Planet() {
 	}
 
 	delete this->numpad;
+	delete this->arrowpad;
 }
 
 void Planet::change_mode(unsigned int mode) {
 	if (mode != this->mode) {
 		this->no_selected();
-		this->numpad->show(false);
+		this->keyboard->show(false);
 		this->mode = mode;
 		this->size_cache_invalid();
 		this->notify_graphlet_updated(nullptr);
@@ -681,8 +685,8 @@ void Planet::set_caret_owner(IGraphlet* g) {
 bool Planet::on_char(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = false;
 
-	if (this->numpad->shown()) {
-		this->numpad->on_char(key, wargrey_keyboard);
+	if (this->keyboard->shown()) {
+		this->keyboard->on_char(key, wargrey_keyboard);
 	}
 	
 	if (this->focused_graphlet != nullptr) {
@@ -724,10 +728,10 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
-	if (!this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+	if (!this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
-		this->numpad->show(false);
+		this->keyboard->show(false);
 		
 		this->set_caret_owner(unmasked_graphlet);
 		this->no_selected();
@@ -807,14 +811,14 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 
 	if (puk != PointerUpdateKind::LeftButtonPressed) {
 		// NOTE non-left clicking always produces PointerUpdateKind::Other
-		if (this->numpad->shown()) {
+		if (this->keyboard->shown()) {
 			float local_x = x - keyboard_x;
 			float local_y = y - keyboard_y;
 
-			if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
-				this->numpad->on_hover(local_x, local_y);
+			if (this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+				this->keyboard->on_hover(local_x, local_y);
 			} else {
-				this->numpad->on_goodbye(local_x, local_y);
+				this->keyboard->on_goodbye(local_x, local_y);
 			}
 		} else {
 			IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
@@ -862,22 +866,22 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 	 *  but our API may not follow the devices.
 	 */
 
-	if (this->numpad->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+	if (this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
 		float local_x = x - keyboard_x;
 		float local_y = y - keyboard_y;
 
 		switch (puk) {
 		case PointerUpdateKind::LeftButtonReleased:
 		case PointerUpdateKind::LeftButtonPressed: {
-			this->numpad->on_tap(local_x, local_y);
+			this->keyboard->on_tap(local_x, local_y);
 
 			if (pdt == PointerDeviceType::Touch) {
-				this->numpad->on_goodbye(local_x, local_y);
+				this->keyboard->on_goodbye(local_x, local_y);
 			}
 		}; break;
 		case PointerUpdateKind::RightButtonReleased:
 		case PointerUpdateKind::RightButtonPressed: {
-			this->numpad->on_right_tap(local_x, local_y);
+			this->keyboard->on_right_tap(local_x, local_y);
 		}; break;
 		}
 	} else {
@@ -975,7 +979,9 @@ bool Planet::say_goodbye_to_the_hovering_graphlet(float x, float y) {
 
 /*************************************************************************************************/
 void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y, float dx, float dy) {
-	this->numpad->show(true);
+	this->switch_virtual_keyboard(type);
+
+	this->keyboard->show(true);
 	this->keyboard_x = x + dx;
 	this->keyboard_y = y + dy;
 }
@@ -983,13 +989,20 @@ void Planet::show_virtual_keyboard(ScreenKeyboard type, float x, float y, float 
 void Planet::show_virtual_keyboard(ScreenKeyboard type, IGraphlet* g, GraphletAnchor a, float dx, float dy) {
 	float auto_x, auto_y;
 
-	this->numpad->fill_auto_position(&auto_x, &auto_y, g, a);
-
+	this->switch_virtual_keyboard(type);
+	this->keyboard->fill_auto_position(&auto_x, &auto_y, g, a);
 	this->show_virtual_keyboard(type, auto_x, auto_y, dx, dy);
 }
 
 void Planet::show_virtual_keyboard(ScreenKeyboard type, GraphletAnchor a, float dx, float dy) {
 	this->show_virtual_keyboard(type, this->get_focus_graphlet(), a, dx, dy);
+}
+
+void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
+	switch (type) {
+	case ScreenKeyboard::Numpad:   this->keyboard = this->numpad; break;
+	case ScreenKeyboard::Arrowpad: this->keyboard = this->arrowpad; break;
+	}
 }
 
 /*************************************************************************************************/
@@ -1004,11 +1017,15 @@ void Planet::construct(CanvasCreateResourcesReason reason, float Width, float He
 	this->numpad->sprite();
 	this->numpad->construct();
 	this->numpad->sprite_construct();
+
+	this->arrowpad->sprite();
+	this->arrowpad->construct();
+	this->arrowpad->sprite_construct();
 }
 
 void Planet::on_elapse(long long count, long long interval, long long uptime) {
-	if (this->numpad->shown()) {
-		this->numpad->update(count, interval, uptime);
+	if (this->keyboard->shown()) {
+		this->keyboard->update(count, interval, uptime);
 	}
 
 	if (this->head_graphlet != nullptr) {
@@ -1150,11 +1167,11 @@ void Planet::draw(CanvasDrawingSession^ ds, float Width, float Height) {
 #endif
 	}
 
-	if (this->numpad->shown()) {
+	if (this->keyboard->shown()) {
 		float width, height;
 
-		this->numpad->fill_extent(0.0F, 0.0F, &width, &height);
-		this->numpad->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
+		this->keyboard->fill_extent(0.0F, 0.0F, &width, &height);
+		this->keyboard->draw(ds, this->keyboard_x, this->keyboard_y, width, height);
 	}
 }
 

@@ -107,7 +107,7 @@ private class Draughts final : public PLCConfirmation {
 public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
-		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2);
+		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2U);
 		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
 		this->netweight_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 	}
@@ -170,7 +170,7 @@ public:
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
-			timeseries_range, make_hour_series(4U), lines_width, lines_height, 5U));
+			timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 0U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
@@ -244,18 +244,21 @@ private:
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, DimensionStyle& style) {
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(style, unit, _speak(id)), id);
 	}
-	
-	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), this->label_font, Colours::Silver), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
-	}
 
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_dimension(ds, id, unit, this->plain_style);
 		}
+	}
+
+	template<typename E>
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id
+		, Platform::String^ unit, unsigned int precision = 2U) {
+		this->metrics_style.precision = precision;
+
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), this->label_font, Colours::Silver), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}
 
 	template<typename E>
@@ -271,7 +274,7 @@ private:
 		cs[id] = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 8U, precision);
 		
 		this->master->insert_one(cs[id], id);
-		this->load_dimension(this->cydimensions, this->cylabels, id, unit);
+		this->load_dimension(this->cydimensions, this->cylabels, id, unit, precision);
 	}
 
 	template<class B, typename CMD>
@@ -403,13 +406,23 @@ bool DraughtsPage::can_select(IGraphlet* g) {
 			|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
 	}
 
+	okay = okay || (dynamic_cast<ITimeSerieslet*>(g) != nullptr);
+
 	return okay;
+}
+
+void DraughtsPage::on_focus(IGraphlet* g) {
+	auto timeseries = dynamic_cast<ITimeSerieslet*>(g);
+
+	if (timeseries != nullptr) {
+		this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, timeseries, GraphletAnchor::CB, 0.0F, 4.0F);
+	}
 }
 
 void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto overflow = dynamic_cast<OverflowPipelet*>(g);
 	auto hdchecker = dynamic_cast<Credit<Buttonlet, BottomDoorCommand>*>(g);
-
+	
 	if (overflow != nullptr) {
 		menu_popup(this->overflow_op, g, local_x, local_y);
 	} else if (hdchecker != nullptr) {

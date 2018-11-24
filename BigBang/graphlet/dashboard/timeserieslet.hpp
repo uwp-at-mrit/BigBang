@@ -2,7 +2,9 @@
 
 #include "graphlet/primitive.hpp"
 
+#include "time.hpp"
 #include "tongue.hpp"
+
 #include "paint.hpp"
 #include "brushes.hxx"
 
@@ -51,14 +53,19 @@ namespace WarGrey::SCADA {
 	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::TimeSeriesStatus, WarGrey::SCADA::TimeSeriesStyle> {
 	public:
 		virtual ~ITimeSerieslet() noexcept;
+
 		ITimeSerieslet(double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts, unsigned int n,
-			float width, float height, unsigned int step, unsigned int precision);
+			float width, float height, unsigned int step, unsigned int precision, long long history_s);
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
 		void fill_extent(float x, float y, float* w = nullptr, float* h = nullptr) override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
+	public:
+		bool on_char(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		void own_caret(bool yes) override;
+		
 	protected:
 		void set_value(unsigned int idx, double value);
 		void set_values(double* values);
@@ -89,9 +96,11 @@ namespace WarGrey::SCADA {
 		float height;
 
 	private:
-		WarGrey::SCADA::TimeSeries series;
-		unsigned int step;
+		WarGrey::SCADA::TimeSeries realtime;
+		WarGrey::SCADA::TimeSeries history;
+		unsigned int vertical_step;
 		unsigned int precision;
+		long long history_max;
 
 	private:
 		double vmin;
@@ -102,20 +111,20 @@ namespace WarGrey::SCADA {
 	private class TimeSerieslet : public WarGrey::SCADA::ITimeSerieslet {
 	public:
 		TimeSerieslet(Platform::String^ tongue, double range, float width, float height = 0.0F
-			, unsigned int step = 0U, unsigned int precision = 2U)
-			: TimeSerieslet(tongue, 0.0, range, width, height, step, precision) {}
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, 0.0, range, width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double range, WarGrey::SCADA::TimeSeries& ts
-			, float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U)
-			: TimeSerieslet(tongue, 0.0, range, ts, width, height, step, precision) {}
+			, float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, 0.0, range, ts, width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double vmin, double vmax, float width, float height = 0.0F
-			, unsigned int step = 0U, unsigned int precision = 2U)
-			: TimeSerieslet(tongue, vmin, vmax, WarGrey::SCADA::make_today_series(), width, height, step, precision) {}
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, vmin, vmax, WarGrey::SCADA::make_today_series(), width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts,
-			float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U)
-			: ITimeSerieslet(vmin, vmax, ts, _N(Name), width, height, step, precision), tongue(tongue) {}
+			float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: ITimeSerieslet(vmin, vmax, ts, _N(Name), width, height, step, precision, history_s), tongue(tongue) {}
 
 	public:
 		void construct() override {

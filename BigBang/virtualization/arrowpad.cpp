@@ -1,9 +1,9 @@
 ﻿#include <map>
 
-#include "virtualization/numpad.hpp"
+#include "virtualization/arrowpad.hpp"
 
-#include "forward.hpp"
 #include "text.hpp"
+#include "planet.hpp"
 
 #include "paint.hpp"
 #include "colorspace.hpp"
@@ -23,24 +23,16 @@ using namespace Microsoft::Graphics::Canvas::Text;
 private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
 const static KeyboardCell keys[] = {
-	{ VirtualKey::NumberPad9, 2, 0, 1, 1 }, { VirtualKey::NumberPad8, 1, 0, 1, 1 }, { VirtualKey::NumberPad7, 0, 0, 1, 1 },
-    { VirtualKey::NumberPad6, 2, 1, 1, 1 }, { VirtualKey::NumberPad5, 1, 1, 1, 1 }, { VirtualKey::NumberPad4, 0, 1, 1, 1 },
-    { VirtualKey::NumberPad3, 2, 2, 1, 1 }, { VirtualKey::NumberPad2, 1, 2, 1, 1 }, { VirtualKey::NumberPad1, 0, 2, 1, 1 },
-    { VirtualKey::Subtract,   2, 3, 1, 1 }, { VirtualKey::Decimal,    1, 3, 1, 1 }, { VirtualKey::NumberPad0, 0, 3, 1, 1 },
-
-	{ VirtualKey::PageUp,     3, 0, 1, 1 }, { VirtualKey::Up,         3, 1, 1, 1 },
-	{ VirtualKey::Down,       3, 2, 1, 1 }, { VirtualKey::PageDown,   3, 3, 1, 1 },
-
-    { VirtualKey::Back, 4, 0, 1, 1 }, { VirtualKey::Enter, 4, 1, 1, 3 }
+	{ VirtualKey::PageUp,   0, 0, 1, 1 },
+    { VirtualKey::Left,     1, 0, 1, 1 },
+	{ VirtualKey::Right,    2, 0, 1, 1 },
+    { VirtualKey::PageDown, 3, 0, 1, 1 },
 };
 
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
 
-static unsigned int num0 = static_cast<unsigned int>(VirtualKey::Number0);
-static unsigned int pad0 = static_cast<unsigned int>(VirtualKey::NumberPad0);
-
 /*************************************************************************************************/
-Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
+Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	CanvasTextFormat^ label_font = make_text_format("Consolas", fontsize);
 	
 	this->current_key = VirtualKey::None;
@@ -61,15 +53,10 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			VirtualKey key = keys[i].key;
 
 			switch (key) {
-			case VirtualKey::Subtract: label = "-"; break;
-			case VirtualKey::Decimal: label = "."; break;
-			case VirtualKey::Back: label = L"←"; break;
-			case VirtualKey::Enter: label = L"↵"; break;
-			case VirtualKey::PageUp: label = L"↟"; break;
-			case VirtualKey::Up: label = L"↑"; break;
-			case VirtualKey::PageDown: label = L"↡"; break;
-			case VirtualKey::Down: label = L"↓"; break;
-			default: label = (static_cast<unsigned int>(key) - pad0).ToString();
+			case VirtualKey::PageUp: label = L"⇤"; break;
+			case VirtualKey::Left: label = L"←"; break;
+			case VirtualKey::Right: label = L"→"; break;
+			case VirtualKey::PageDown: label = L"⇥"; break;
 			}
 
 			key_labels.insert(std::pair<VirtualKey, CanvasTextLayout^>(key, make_text_layout(label, label_font)));
@@ -77,7 +64,7 @@ Numpad::Numpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 	}
 }
 
-void Numpad::construct() {
+void Arrowpad::construct() {
 	Color fg = Colours::Background->Color;
 	Color bg = Colours::Foreground->Color;
 	
@@ -88,11 +75,11 @@ void Numpad::construct() {
 	this->taplight = make_solid_brush(rgba(bg, 0.618));
 }
 
-void Numpad::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
+void Arrowpad::draw_before(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
 	ds->FillRoundedRectangle(x, y, this->width, this->height, this->radius, this->radius, this->background);
 }
 
-void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
+void Arrowpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, bool tapped, float x, float y, float width, float height) {
 	auto maybe_label = key_labels.find(key);
 
 	if (focused) {
@@ -113,10 +100,21 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 	}
 }
 
-bool Numpad::on_char(VirtualKey key, bool wargrey_keyboard) {
-	if ((VirtualKey::Number0 <= key) && (key <= VirtualKey::Number9)) {
-		key = static_cast<VirtualKey>(static_cast<unsigned int>(key) - num0 + pad0);
-	}
+void Arrowpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnchor a) {
+	float Width = this->master->actual_width();
+	float Height = this->master->actual_height();
+	float width, height;
 
-	return Keyboard::on_char(key, wargrey_keyboard);
+	this->fill_extent(0.0F, 0.0F, &width, &height);
+
+	if (g == nullptr) {
+		SET_BOX(x, Width - width);
+		SET_BOX(y, Height - height);
+	} else {
+		float x0, y0;
+
+		this->master->fill_graphlet_location(g, &x0, &y0, a);
+
+		SET_VALUES(x, x0 - width * 0.5F, y, y0);
+	}
 }

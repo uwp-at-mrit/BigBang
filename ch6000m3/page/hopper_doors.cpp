@@ -397,6 +397,7 @@ private:
 
 		cs[id] = this->master->insert_one(cylinder, id);
 
+		this->metrics_style.precision = precision;
 		this->load_label(this->labels, id, Colours::Silver, this->label_font);
 		this->dimensions[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}

@@ -7,7 +7,9 @@
 
 #include "universe.hxx"
 #include "decorator/decorator.hpp"
+
 #include "virtualization/numpad.hpp"
+#include "virtualization/arrowpad.hpp"
 
 namespace WarGrey::SCADA {
 	private class IPlanetInfo abstract {
@@ -278,6 +280,7 @@ namespace WarGrey::SCADA {
 			override;
 
     private:
+		void switch_virtual_keyboard(WarGrey::SCADA::ScreenKeyboard type);
         void recalculate_graphlets_extent_when_invalid();
 		bool say_goodbye_to_the_hovering_graphlet(float x, float y);
 
@@ -304,7 +307,9 @@ namespace WarGrey::SCADA {
 		unsigned int mode;
 
 	private:
+		WarGrey::SCADA::Keyboard* keyboard;
 		WarGrey::SCADA::Numpad* numpad;
+		WarGrey::SCADA::Arrowpad* arrowpad;
 		float keyboard_x;
 		float keyboard_y;
 

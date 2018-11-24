@@ -4,7 +4,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ScreenKeyboard { Numpad };
+	private enum class ScreenKeyboard { Numpad, Arrowpad };
 
 	private struct KeyboardCell {
 		Windows::System::VirtualKey key;
