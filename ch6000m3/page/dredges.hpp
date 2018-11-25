@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		bool can_select(IGraphlet* g) override;
 		bool can_select_multiple() override;
 		void on_focus(IGraphlet* g) override;
-		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
 		void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float x, float y);
 

@@ -19,6 +19,9 @@ namespace WarGrey::SCADA {
 			Windows::System::VirtualKey key, bool focused, bool tapped,
 			float x, float y, float width, float height) override;
 
+	protected:
+		Windows::System::VirtualKey find_received_key(unsigned int keycode) override;
+
     private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ foreground;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background;

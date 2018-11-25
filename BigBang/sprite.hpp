@@ -21,7 +21,8 @@ namespace WarGrey::SCADA {
 		virtual bool ready() { return true; }
 
 	public:
-		virtual bool on_char(Windows::System::VirtualKey key, bool screen_keyboard) { return false; }
+		virtual bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) { return false; }
+		virtual void on_character(unsigned int keycode) {}
 		virtual void on_hover(float local_x, float local_y) {}
 		virtual void on_tap(float local_x, float local_y) {}
 		virtual void on_right_tap(float local_x, float local_y) {}

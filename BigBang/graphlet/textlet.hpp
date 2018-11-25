@@ -144,7 +144,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 		void own_caret(bool is_own) override;
 
 	public:

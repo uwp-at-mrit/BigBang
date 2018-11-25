@@ -171,7 +171,7 @@ public:
 	}
 
 public:
-	bool on_char(VirtualKey key, PLCMaster* plc) {
+	bool on_key(VirtualKey key, PLCMaster* plc) {
 		bool handled = false;
 
 		if (key == VirtualKey::Enter) {
@@ -543,14 +543,14 @@ bool GlandsPage::can_select(IGraphlet* g) {
 	return okay;
 }
 
-bool GlandsPage::on_char(VirtualKey key, bool wargrey_keyboard) {
-	bool handled = Planet::on_char(key, wargrey_keyboard);
+bool GlandsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_key(key, wargrey_keyboard);
 
 	if ((!handled) && (this->device->get_mode() != PLCMasterMode::User)) {
 		auto db = dynamic_cast<GlandPumps*>(this->dashboard);
 
 		if (db != nullptr) {
-			handled = db->on_char(key, this->device);
+			handled = db->on_key(key, this->device);
 		}
 	}
 

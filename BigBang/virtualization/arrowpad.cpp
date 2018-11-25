@@ -23,10 +23,13 @@ using namespace Microsoft::Graphics::Canvas::Text;
 private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
 const static KeyboardCell keys[] = {
-	{ VirtualKey::PageUp,   0, 0, 1, 1 },
-    { VirtualKey::Left,     1, 0, 1, 1 },
-	{ VirtualKey::Right,    2, 0, 1, 1 },
-    { VirtualKey::PageDown, 3, 0, 1, 1 },
+	{ VirtualKey::PageUp,   0, 0, 1, 2 },
+    { VirtualKey::Left,     1, 0, 1, 2 },
+	{ VirtualKey::Right,    3, 0, 1, 2 },
+    { VirtualKey::PageDown, 4, 0, 1, 2 },
+
+	{ VirtualKey::Add,      2, 0, 1, 1 },
+	{ VirtualKey::Subtract, 2, 1, 1, 1 },
 };
 
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
@@ -41,8 +44,8 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 		TextExtent te = get_text_extent("0", label_font);
 		float em = te.height;
 		
-		this->gapsize = em * 0.382F;
-		this->cellsize = em * 1.618F;
+		this->gapsize = em * 0.271F;
+		this->cellsize = em * 1.00F;
 		this->radius = this->gapsize * 0.5F;
 	}
 
@@ -57,6 +60,9 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			case VirtualKey::Left: label = L"←"; break;
 			case VirtualKey::Right: label = L"→"; break;
 			case VirtualKey::PageDown: label = L"⇥"; break;
+
+			case VirtualKey::Add: label = L"+"; break;
+			case VirtualKey::Subtract: label = L"-"; break;
 			}
 
 			key_labels.insert(std::pair<VirtualKey, CanvasTextLayout^>(key, make_text_layout(label, label_font)));
@@ -117,4 +123,15 @@ void Arrowpad::fill_auto_position(float* x, float* y, IGraphlet* g, GraphletAnch
 
 		SET_VALUES(x, x0 - width * 0.5F, y, y0);
 	}
+}
+
+VirtualKey Arrowpad::find_received_key(unsigned int keycode) {
+	VirtualKey key = VirtualKey::None;
+
+	switch (keycode) {
+	case 43: key = VirtualKey::Add; break;
+	case 45: key = VirtualKey::Subtract; break;
+	}
+
+	return key;
 }

@@ -61,7 +61,8 @@ namespace WarGrey::SCADA {
 	public:
 		void on_hover(float local_x, float local_y) override;
 		void on_tap(float local_x, float local_y) override;
-		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		void on_character(unsigned int keycode) override;
 		void on_goodbye(float local_x, float local_y) override;
 
 	protected:
@@ -71,6 +72,9 @@ namespace WarGrey::SCADA {
 		virtual void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			Windows::System::VirtualKey key, bool focused, bool tapped,
 			float x, float y, float width, float height) = 0;
+
+	protected:
+		virtual Windows::System::VirtualKey find_received_key(unsigned int keycode);
 
 	protected:
 		Windows::System::VirtualKey find_tapped_key(float mouse_x, float mouse_y);

@@ -101,11 +101,19 @@ void Keyboard::on_tap(float local_x, float local_y) {
 	VirtualKey found = this->find_tapped_key(local_x, local_y);
 
 	if (found != VirtualKey::None) {
-		this->master->on_char(found, true);
+		this->master->on_key(found, true);
 	}
 }
 
-bool Keyboard::on_char(VirtualKey key, bool wargrey_keyboard) {
+void Keyboard::on_character(unsigned int key) {
+	VirtualKey received = this->find_received_key(key);
+
+	if (received != VirtualKey::None) {
+		this->master->on_key(received, true);
+	}
+}
+
+bool Keyboard::on_key(VirtualKey key, bool wargrey_keyboard) {
 	this->current_key = key;
 	this->taptime = this->uptime;
 	this->tapped = true;
@@ -134,6 +142,10 @@ VirtualKey Keyboard::find_tapped_key(float mouse_x, float mouse_y) {
 	}
 
 	return found;
+}
+
+VirtualKey Keyboard::find_received_key(unsigned int keycode) {
+	return VirtualKey::None;
 }
 
 /*************************************************************************************************/

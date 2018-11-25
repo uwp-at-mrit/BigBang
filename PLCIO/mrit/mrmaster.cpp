@@ -187,9 +187,9 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 						this->delay_balance += 1;
 					} else {
 						this->logger->log_message(Log::Info,
-							L"<sent command '%c' on data block %u[%u, %u] to device[%s]@%d>",
+							L"<sent command '%c' on data block %u[%u, %u] to device[%s]@%s>",
 							fcode, datablock, addr0, addrn, this->device_description()->Data(),
-							current_milliseconds());
+							update_nowstamp()->Data());
 					}
 
 					this->logger->log_message(Log::Debug,

@@ -113,10 +113,21 @@ void Numpad::draw_cell(CanvasDrawingSession^ ds, VirtualKey key, bool focused, b
 	}
 }
 
-bool Numpad::on_char(VirtualKey key, bool wargrey_keyboard) {
+bool Numpad::on_key(VirtualKey key, bool wargrey_keyboard) {
 	if ((VirtualKey::Number0 <= key) && (key <= VirtualKey::Number9)) {
 		key = static_cast<VirtualKey>(static_cast<unsigned int>(key) - num0 + pad0);
 	}
 
-	return Keyboard::on_char(key, wargrey_keyboard);
+	return Keyboard::on_key(key, wargrey_keyboard);
+}
+
+
+VirtualKey Numpad::find_received_key(unsigned int keycode) {
+	VirtualKey key = VirtualKey::None;
+
+	switch (keycode) {
+	case 45: key = VirtualKey::Subtract; break;
+	}
+
+	return key;
 }

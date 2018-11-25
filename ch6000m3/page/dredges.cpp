@@ -1612,8 +1612,8 @@ bool DredgesPage::can_select_multiple() {
 	return okay;
 }
 
-bool DredgesPage::on_char(VirtualKey key, bool wargrey_keyboard) {
-	bool handled = Planet::on_char(key, wargrey_keyboard);
+bool DredgesPage::on_key(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_key(key, wargrey_keyboard);
 
 	if (!handled) {
 		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);

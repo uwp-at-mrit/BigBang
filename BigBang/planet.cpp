@@ -682,18 +682,28 @@ void Planet::set_caret_owner(IGraphlet* g) {
 }
 
 /************************************************************************************************/
-bool Planet::on_char(VirtualKey key, bool wargrey_keyboard) {
+bool Planet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = false;
 
 	if (this->keyboard->shown()) {
-		this->keyboard->on_char(key, wargrey_keyboard);
+		this->keyboard->on_key(key, wargrey_keyboard);
 	}
 	
 	if (this->focused_graphlet != nullptr) {
-		handled = this->focused_graphlet->on_char(key, wargrey_keyboard);
+		handled = this->focused_graphlet->on_key(key, wargrey_keyboard);
 	}
 
 	return handled;
+}
+
+void Planet::on_character(unsigned int keycode) {
+	if (this->keyboard->shown()) {
+		this->keyboard->on_character(keycode);
+	}
+
+	if (this->focused_graphlet != nullptr) {
+		this->focused_graphlet->on_character(keycode);
+	}
 }
 
 void Planet::on_swipe(IGraphlet* g, float local_x, float local_y) {

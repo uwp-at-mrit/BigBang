@@ -338,7 +338,7 @@ void ITimeSerieslet::own_caret(bool yes) {
 	this->update_horizontal_axes(this->get_style());
 }
 
-bool ITimeSerieslet::on_char(VirtualKey key, bool screen_keyboard) {
+bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 	bool handled = false;
 
 	switch (key) {

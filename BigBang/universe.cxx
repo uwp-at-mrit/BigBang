@@ -228,6 +228,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 
 	this->display = ref new CanvasControl();
 	this->display->Name = this->get_logger()->get_name();
+	this->shortcuts_enabled = true;
 	
 	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
 	// this->display->UseSharedDevice = true;
@@ -250,7 +251,14 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 		this->display->PointerMoved += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moved);
 		this->display->PointerReleased += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_released);
 		this->display->PointerExited += ref new PointerEventHandler(this, &UniverseDisplay::on_pointer_moveout);
+
+		CoreWindow::GetForCurrentThread()->CharacterReceived +=
+			ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_character);
 	}
+}
+
+void UniverseDisplay::register_virtual_keydown_event_handler(UIElement^ target) {
+	target->KeyDown += ref new KeyEventHandler(this, &UniverseDisplay::on_key);
 }
 
 UniverseDisplay::~UniverseDisplay() {
@@ -659,36 +667,46 @@ void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRouted
 	this->leave_critical_section();
 }
 
-void UniverseDisplay::on_char(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
+void UniverseDisplay::on_key(Platform::Object^ sender, KeyRoutedEventArgs^ args) {
 	this->enter_critical_section();
 
 	if (this->recent_planet != nullptr) {
-		VirtualKey vkey = args->Key;
-
-		args->Handled = this->recent_planet->on_char(args->Key, false);
-
-		if (!args->Handled) { // save temporary snapshot
-			if (this->controlling) {
-				switch (vkey) {
-				case VirtualKey::S: {
-					this->recent_planet->save(
-						ms_apptemp_file(this->recent_planet->name(), ".png"),
-						this->actual_width, this->actual_height);
-				}; break;
-				case VirtualKey::L: {
-					this->recent_planet->save_logo();
-				}; break;
-				case VirtualKey::D: {
-					this->recent_planet->save_logo(-2.0F, -2.0F);
-				}; break;
-				}
-			}
-		}
-
-		this->controlling = (vkey == VirtualKey::Control);
+		args->Handled = this->recent_planet->on_key(args->Key, false);
 	}
 
 	this->leave_critical_section();
+}
+
+void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArgs^ args) {
+	this->enter_critical_section();
+
+	if (this->recent_planet != nullptr) {
+		unsigned int keycode = args->KeyCode;
+
+		this->recent_planet->on_character(keycode);
+
+		if (this->shortcuts_enabled) { // save temporary snapshot
+			switch (keycode) {
+			case 19: { // CTRL+S
+				this->recent_planet->save(
+					ms_apptemp_file(this->recent_planet->name(), ".png"),
+					this->actual_width, this->actual_height);
+			}; break;
+			case 4: { // CTRL+D
+				this->recent_planet->save_logo();
+			}; break;
+			case 12: { // CTRL+L
+				this->recent_planet->save_logo(-2.0F, -2.0F);
+			}; break;
+			}
+		}
+	}
+
+	this->leave_critical_section();
+}
+
+void UniverseDisplay::disable_predefined_shortcuts(bool yes) {
+	this->shortcuts_enabled = !yes;
 }
 
 void UniverseDisplay::on_translating_x() {

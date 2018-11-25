@@ -238,12 +238,12 @@ public:
 		{ // load special nodes
 			float nic_radius = gheight * 0.25F;
 
-			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::PSUWPump, -radius, -2.0F);
-			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::SBUWPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::PSHPump, -radius, +2.0F);
-			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::SBHPump, -radius, -2.0F);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::PSHPump, -radius, +2.0F, 0.0);
+			this->load_pump(this->hoppers, this->captions, this->vpressures, CS::SBHPump, -radius, -2.0F, 0.0);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::PSUWPump, -radius, -2.0F, -90.0);
+			this->load_pump(this->hoppers, this->captions, this->dfpressures, CS::SBUWPump, -radius, +2.0F, +90.0);
 
-			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 1.0F, default_pipe_color));
+			this->LMOD = this->master->insert_one(new Arclet(0.0, 360.0, gheight, gheight, 1.0F, Colours::Green));
 
 			this->ps_draghead = this->master->insert_one(
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
@@ -265,7 +265,7 @@ public:
 			this->load_dimensions(this->pump_pressures, CS::A, CS::H, "bar");
 
 			this->load_label(this->captions, CS::Gantry, Colours::Yellow, this->caption_font);
-			this->load_label(this->captions, CS::LMOD, Colours::Yellow, this->special_font);
+			this->load_label(this->captions, CS::LMOD, Colours::Cyan, this->special_font);
 		}
 	}
 
@@ -295,10 +295,15 @@ public:
 		}
 
 		for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
-			it->second->fill_pump_origin(&ox);
-			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox);
+			it->second->fill_pump_origin(&ox, &oy);
 
-			ox = std::fabsf(ox);
+			if (ox == 0.0F) {
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, 0.0F, -oy);
+			} else {
+				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, -ox, 0.0F);
+			}
+
+			ox = std::max(std::fabsf(ox), std::fabsf(oy));
 			switch (it->first) {
 			case CS::PSHPump: {
 				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LC, ox);
@@ -308,10 +313,10 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
 			}; break;
 			case CS::PSUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LB, GraphletAnchor::RB, -ox);
-				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
-				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox, ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox, ox);
 				this->master->move_to(this->dfpressures[it->first], this->ps_draghead, GraphletAnchor::RC, GraphletAnchor::LB, 0.0F, -ox);
 			}; break;
 			case CS::SBHPump: {
@@ -322,10 +327,10 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
 			}; break;
 			case CS::SBUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LT, GraphletAnchor::RT, -ox);
-				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RT, GraphletAnchor::LT, ox);
-				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RB, GraphletAnchor::LB, ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox, -ox);
 				this->master->move_to(this->dfpressures[it->first], this->sb_draghead, GraphletAnchor::RC, GraphletAnchor::LT, 0.0F, ox);
 			}; break;
 			}
@@ -460,10 +465,10 @@ private:
 
 	template<class G, typename E>
 	void load_pump(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Dimensionlet, E>*>& ps
-		, E id, float rx, float fy) {
+		, E id, float rx, float fy, double degrees) {
 		this->load_label(ls, id, Colours::Salmon, this->caption_font);
 
-		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
+		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy, degrees), id);
 		
 		this->load_dimension(this->powers, id, "kwatt");
 		this->load_dimension(this->rpms, id, "rpm");

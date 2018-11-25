@@ -76,7 +76,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void on_focus(WarGrey::SCADA::IGraphlet* g) {}
-		virtual bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
+		virtual bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
+		virtual void on_character(unsigned int keycode) {}
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
@@ -237,7 +238,8 @@ namespace WarGrey::SCADA {
 		void end_update_sequence() override;
 
 	public:
-		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		void on_character(unsigned int keycode) override;
 		void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) override;
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 		void on_elapse(long long count, long long interval, long long uptime) override;

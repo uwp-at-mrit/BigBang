@@ -102,7 +102,7 @@ public:
 		this->load_display(this->statusbar, screen_width, sketch_statusbar_height);
 		this->timer = ref new Timer(this->timeline, frame_per_second);
 
-		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_char);
+		this->KeyDown += ref new KeyEventHandler(this->workspace, &UniverseDisplay::on_key);
 		this->workspace->navigator->SelectionChanged += ref new SelectionChangedEventHandler(this, &Yacht63FT::do_notify);
 	}
 

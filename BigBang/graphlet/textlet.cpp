@@ -361,7 +361,7 @@ void IEditorlet::on_status_changed(DimensionStatus status) {
 	this->enable_events(status == DimensionStatus::Input);
 }
 
-bool IEditorlet::on_char(VirtualKey key, bool wargrey_keyboard) {
+bool IEditorlet::on_key(VirtualKey key, bool wargrey_keyboard) {
 	static unsigned int num0 = static_cast<unsigned int>(VirtualKey::Number0);
 	static unsigned int pad0 = static_cast<unsigned int>(VirtualKey::NumberPad0);
 	unsigned int keycode = static_cast<unsigned int>(key);

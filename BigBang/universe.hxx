@@ -123,6 +123,10 @@ namespace WarGrey::SCADA {
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
 
+	public: // weird, `UniverseDisplay` cannot do it own its own
+		void register_virtual_keydown_event_handler(Windows::UI::Xaml::UIElement^ target);
+		void disable_predefined_shortcuts(bool yes);
+
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
@@ -132,8 +136,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
-		virtual void on_char(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
-		
+
 	protected private:
 		virtual void construct() {}
 		void add_planet(WarGrey::SCADA::IPlanet* planet);
@@ -161,6 +164,10 @@ namespace WarGrey::SCADA {
 		void on_translating_x();
 		
 	private:
+		void on_key(Platform::Object^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs^ args);
+		void on_character(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::CharacterReceivedEventArgs^ args);
+
+	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
 		Windows::UI::Xaml::Controls::ListView^ navigator_view;
 		WarGrey::SCADA::IPlanet* head_planet;
@@ -178,6 +185,6 @@ namespace WarGrey::SCADA {
 		float transferX;
 
 	private:
-		bool controlling;
+		bool shortcuts_enabled;
 	};
 }

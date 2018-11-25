@@ -24,6 +24,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::System;
 using namespace Windows::Foundation;
 
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
@@ -173,7 +174,7 @@ public:
 		this->Pane = this->universe->navigator;
 
 		// TODO: Why SplitView::Content cannot do it on its own?
-		this->KeyDown += ref new KeyEventHandler(this->universe, &UniverseDisplay::on_char);
+		this->universe->register_virtual_keydown_event_handler(this);
 	}
 
 private:

@@ -11,13 +11,16 @@ namespace WarGrey::SCADA {
 		void construct() override;
 		
 	public:
-		bool on_char(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
+		bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) override;
 
 	protected:
 		void draw_before(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 		void draw_cell(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
 			Windows::System::VirtualKey key, bool focused, bool tapped,
 			float x, float y, float width, float height) override;
+
+	protected:
+		Windows::System::VirtualKey find_received_key(unsigned int keycode) override;
 
     private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ foreground;
