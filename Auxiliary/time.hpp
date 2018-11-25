@@ -20,6 +20,7 @@ namespace WarGrey::SCADA {
 	void sleep(unsigned int ms);
 
 	Platform::String^ make_timestamp_utc(long long utc_s, bool locale);
+	Platform::String^ make_datestamp_utc(long long utc_s, bool locale);
 	Platform::String^ make_daytimestamp_utc(long long utc_s, bool locale);
 
 	Platform::String^ update_nowstamp(bool need_us = true, int* l00ns = nullptr);

@@ -126,6 +126,14 @@ Platform::String^ WarGrey::SCADA::make_timestamp_utc(long long utc_s, bool local
 	return ref new Platform::String(timestamp);
 }
 
+Platform::String^ WarGrey::SCADA::make_datestamp_utc(long long utc_s, bool locale) {
+	wchar_t timestamp[32];
+
+	wtime(timestamp, utc_s, L"%F", locale);
+
+	return ref new Platform::String(timestamp);
+}
+
 Platform::String^ WarGrey::SCADA::make_daytimestamp_utc(long long utc_s, bool locale) {
 	wchar_t timestamp[32];
 

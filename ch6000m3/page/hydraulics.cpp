@@ -5,8 +5,6 @@
 #include "menu.hpp"
 
 #include "module.hpp"
-#include "text.hpp"
-#include "paint.hpp"
 #include "brushes.hxx"
 #include "turtle.hpp"
 

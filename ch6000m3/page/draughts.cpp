@@ -411,6 +411,10 @@ bool DraughtsPage::can_select(IGraphlet* g) {
 	return okay;
 }
 
+bool DraughtsPage::can_select_multiple() {
+	return true;
+}
+
 void DraughtsPage::on_focus(IGraphlet* g) {
 	auto timeseries = dynamic_cast<ITimeSerieslet*>(g);
 
@@ -428,4 +432,8 @@ void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	} else if (hdchecker != nullptr) {
 		this->device->send_command(DO_bottom_doors_special_command(hdchecker->id));
 	}
+}
+
+void DraughtsPage::on_gesture(std::list<Windows::Foundation::Numerics::float2>& points, float x, float y) {
+	this->get_logger()->log_message(Log::Info, L"(%f, %f)", x, y);
 }

@@ -5,10 +5,7 @@
 #include "menu.hpp"
 
 #include "module.hpp"
-#include "text.hpp"
-#include "paint.hpp"
 #include "brushes.hxx"
-#include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"

@@ -220,18 +220,22 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 	float x = style.haxes_thickness * 0.5F;
 	float y = this->height - style.border_thickness;
 	long long now = now_seconds();
-	TextExtent mark_te;
+	TextExtent date_mark_te, time_mark_te;
 
 	for (unsigned int i = 0; i <= ts->step + 1; i++) {
 		float xthis = x + interval * float(i);
-		Platform::String^ mark = make_daytimestamp_utc(ts->start + delta * i, false);
-		CanvasGeometry^ gmark = paragraph(mark, style.font, &mark_te);
+		long long locale_s = ts->start + delta * i;
+		Platform::String^ date_mark = make_datestamp_utc(locale_s, false);
+		Platform::String^ time_mark = make_daytimestamp_utc(locale_s, false);
+		CanvasGeometry^ gdatemark = paragraph(date_mark, style.font, &date_mark_te);
+		CanvasGeometry^ gtimemark = paragraph(time_mark, style.font, &time_mark_te);
 
 		axes->BeginFigure(xthis, 0.0F);
 		axes->AddLine(xthis, this->height);
 		axes->EndFigure(CanvasFigureLoop::Open);
 
-		hmarks = geometry_union(hmarks, gmark, xthis - mark_te.width * 0.5F, y - mark_te.height);
+		hmarks = geometry_union(hmarks, gtimemark, xthis - time_mark_te.width * 0.5F, y - time_mark_te.height);
+		hmarks = geometry_union(hmarks, gdatemark, xthis - date_mark_te.width * 0.5F, y - date_mark_te.height - time_mark_te.height);
 	}
 
 	this->hmarks = geometry_freeze(hmarks);
@@ -347,17 +351,27 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 		handled = true;
 	}; break;
 	case VirtualKey::Left: {
-		this->history.start -= (this->realtime.span / 10);
+		this->history.start -= (this->history.span >> 3);
 		this->history.start = std::max(this->history.start, now_seconds() - this->history_max);
 		handled = true;
 	}; break;
 	case VirtualKey::Right: {
-		this->history.start += (this->realtime.span / 10);
+		this->history.start += (this->history.span >> 3);
 		this->history.start = std::min(this->history.start, now_seconds());
 		handled = true;
 	}; break;
 	case VirtualKey::PageDown: {
 		this->history.start = now_seconds();
+		handled = true;
+	}; break;
+	case VirtualKey::Add: {
+		this->history.span = this->history.span >> 1;
+		this->history.span = std::max(this->history.span, minute_span_s);
+		handled = true;
+	}; break;
+	case VirtualKey::Subtract: {
+		this->history.span = this->history.span << 1;
+		this->history.span = std::min(this->history.span, day_span_s);
 		handled = true;
 	}; break;
 	}
