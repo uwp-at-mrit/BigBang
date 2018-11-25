@@ -1,6 +1,8 @@
 #include "graphlet/buttonlet.hpp"
 
 #include "text.hpp"
+#include "tongue.hpp"
+
 #include "brushes.hxx"
 
 using namespace WarGrey::SCADA;
@@ -14,11 +16,12 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ button_default_font = make_bold_text_format("Consolas", 16.0F);
 
-Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, float thickness, float corner_radius)
-	: Buttonlet(ButtonStatus::Default, caption, width, height, thickness, corner_radius) {}
+Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, float thickness, float corner_radius, Platform::String^ tongue)
+	: Buttonlet(ButtonStatus::Default, caption, width, height, thickness, corner_radius, tongue) {}
 
-Buttonlet::Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width, float height, float thickness, float corner_radius)
-	: IStatuslet(default_status), caption(caption)
+Buttonlet::Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width, float height
+	, float thickness, float corner_radius, Platform::String^ tongue)
+	: IStatuslet(default_status), caption(speak(caption, tongue))
 	, width(width), height(height), thickness(thickness)
 	, corner_radius(corner_radius) {}
 

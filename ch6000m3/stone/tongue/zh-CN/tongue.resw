@@ -180,4 +180,7 @@
   <data name="lubricatings" xml:space="preserve">
     <value>轴承润滑单元 &amp;&amp; 齿轮箱滑油泵</value>
   </data>
+  <data name="waterpumpdx" xml:space="preserve">
+    <value>高压冲水泵诊断</value>
+  </data>
 </root>

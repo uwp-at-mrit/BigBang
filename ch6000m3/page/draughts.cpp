@@ -280,7 +280,7 @@ private:
 	template<class B, typename CMD>
 	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, CMD cmd0, CMD cmdn, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = cmd0; cmd <= cmdn; cmd++) {
-			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(cmd.ToString(), width, height), cmd);
 		}
 	}
 

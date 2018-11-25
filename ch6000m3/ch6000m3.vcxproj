@@ -258,6 +258,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\waterpumpdx.resw" />
     <PRIResource Include="stone\tongue\en-US\dredges.resw" />
     <PRIResource Include="stone\tongue\en-US\flushs.resw" />
     <PRIResource Include="stone\tongue\en-US\charges.resw" />
@@ -281,6 +282,7 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\waterpumpdx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\dredges.resw" />
     <PRIResource Include="stone\tongue\zh-CN\flushs.resw" />
     <PRIResource Include="stone\tongue\zh-CN\charges.resw" />
@@ -323,6 +325,7 @@
     <ClCompile Include="iotables\do_pumps.cpp" />
     <ClCompile Include="iotables\do_valves.cpp" />
     <ClCompile Include="iotables\do_water_pumps.cpp" />
+    <ClCompile Include="page\diagnostics\waterpumpdx.cpp" />
     <ClCompile Include="page\dredges.cpp" />
     <ClCompile Include="page\lubricatings.cpp" />
     <ClCompile Include="iotables\ai_dredges.cpp" />
@@ -341,6 +344,7 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />
+    <ClInclude Include="page\diagnostics\waterpumpdx.hpp" />
     <ClInclude Include="page\dredges.hpp" />
     <ClInclude Include="page\lubricatings.hpp" />
     <ClInclude Include="iotables\ai_doors.hpp" />

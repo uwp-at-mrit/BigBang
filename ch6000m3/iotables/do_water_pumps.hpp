@@ -24,6 +24,8 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_water_pump_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_water_pump_menu(WarGrey::SCADA::PLCMaster* plc);
 
+	unsigned int DO_water_pump_reset_command(bool ps);
+
 	// DB300, starts from 1
 	static unsigned int left_shifting_command  = 559U;
 	static unsigned int right_shifting_command = 560U;

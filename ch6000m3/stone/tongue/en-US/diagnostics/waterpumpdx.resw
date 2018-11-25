@@ -117,49 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Bearing1" xml:space="preserve">
-    <value>轴承1#温度高</value>
+  <data name="PSRunningCondition" xml:space="preserve">
+    <value>PS Water Pump Running Condition</value>
   </data>
-  <data name="Bearing2" xml:space="preserve">
-    <value>轴承2#温度高</value>
+  <data name="PSStartCondition" xml:space="preserve">
+    <value>PS Water Pump Start Condition</value>
   </data>
-  <data name="Bearing3" xml:space="preserve">
-    <value>轴承3#温度高</value>
+  <data name="SBRunningCondition" xml:space="preserve">
+    <value>SB Water Pump Running Condition</value>
   </data>
-  <data name="GearboxOil" xml:space="preserve">
-    <value>油温低</value>
+  <data name="SBStartCondition" xml:space="preserve">
+    <value>SB Water Pump Start Condition</value>
   </data>
-  <data name="GearboxPressure" xml:space="preserve">
-    <value>压力低低</value>
+  <data name="SpeedKnobMoved" xml:space="preserve">
+    <value>Water Pump Speed Knob is Moved</value>
   </data>
-  <data name="Level" xml:space="preserve">
-    <value>液位低</value>
+  <data name="NoAlert" xml:space="preserve">
+    <value>Water Pump No Alert Feedback</value>
   </data>
-  <data name="Master" xml:space="preserve">
-    <value>主</value>
+  <data name="NoBroken" xml:space="preserve">
+    <value>Water Pump No Broken Feedback</value>
   </data>
-  <data name="Oil" xml:space="preserve">
-    <value>油温高</value>
+  <data name="NoEmergence" xml:space="preserve">
+    <value>Water Pump No Emergence Stopping Feedback</value>
   </data>
-  <data name="Pressure" xml:space="preserve">
-    <value>压力低</value>
+  <data name="NoRepair" xml:space="preserve">
+    <value>Water Pump No Repair Feedback</value>
   </data>
-  <data name="PSGearbox" xml:space="preserve">
-    <value>左舷泥泵齿轮箱滑油泵</value>
+  <data name="NotRunning" xml:space="preserve">
+    <value>Water Pump Not Running Feedback</value>
   </data>
-  <data name="PSUnit" xml:space="preserve">
-    <value>左舷泥泵轴承润滑单元</value>
+  <data name="PipelineReady" xml:space="preserve">
+    <value>Water Pipeline is Ready</value>
   </data>
-  <data name="SBGearbox" xml:space="preserve">
-    <value>右舷泥泵齿轮箱滑油泵</value>
+  <data name="RemoteControl" xml:space="preserve">
+    <value>Water Pump Remote Control Feedback</value>
   </data>
-  <data name="SBUnit" xml:space="preserve">
-    <value>右舷泥泵轴承润滑单元</value>
+  <data name="StartReady" xml:space="preserve">
+    <value>Water Pump is Ready</value>
   </data>
-  <data name="Spare" xml:space="preserve">
-    <value>备</value>
-  </data>
-  <data name="Water" xml:space="preserve">
-    <value>水温高</value>
+  <data name="SpeedKnobMoved0" xml:space="preserve">
+    <value>Water Pump Speed Knob is Moved</value>
   </data>
 </root>

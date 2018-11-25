@@ -38,8 +38,8 @@ private enum LUMode { WindowUI = 0, Dashboard };
 private enum class LUOperation { Start, Stop, _ };
 private enum class LUGBOperation { Start, Stop, Auto, _ };
 
-static CanvasSolidColorBrush^ region_background = Colours::make(0x414141U);
-static CanvasSolidColorBrush^ alarm_background = Colours::make(0x141414U);
+static CanvasSolidColorBrush^ region_background = Colours::make(diagnostics_region_background);
+static CanvasSolidColorBrush^ alarm_background = Colours::make(diagnostics_alarm_background);
 
 // WARNING: order matters
 private enum class LU : unsigned int {
@@ -117,8 +117,8 @@ public:
 		this->gearbox = this->master->insert_one(new RoundedRectanglet(region_width, region_height, corner_radius, region_background));
 		this->station = this->master->insert_one(new Tracklet<GearboxLubricator>(turtle, default_pipe_thickness, default_pipe_color));
 
-		this->load_label(this->captions, LU::Unit, this->color, this->caption_font);
-		this->load_label(this->captions, LU::Gearbox, this->color, this->caption_font);
+		this->load_label(this->captions, LU::Unit, this->color, this->caption_font, true);
+		this->load_label(this->captions, LU::Gearbox, this->color, this->caption_font, true);
 		this->load_device(this->units, this->ps, pump_radius);
 		this->load_devices(this->pumps, this->labels, GearboxLubricator::Master, GearboxLubricator::Spare, pump_radius);
 
@@ -205,8 +205,10 @@ private:
 	}
 
 	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr) {
-		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), font, color), id);
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr, bool prefix = false) {
+		Platform::String^ label = (prefix ? _speak((this->ps ? "PS" : "SB") + id.ToString()) : _speak(id));
+
+		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
 	}
 
 // never deletes these graphlets mannually

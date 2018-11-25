@@ -1,6 +1,8 @@
 ﻿#include <map>
 
 #include "page/flushs.hpp"
+#include "page/diagnostics/waterpumpdx.hpp"
+
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -47,6 +49,8 @@ private enum FSMode { WindowUI = 0, Dashboard };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
 
+private enum class FSFunction { Diagnostics, _ };
+
 // WARNING: order matters
 private enum class FS : unsigned int {
 	Port, Starboard,
@@ -71,7 +75,7 @@ private enum class FS : unsigned int {
 
 	_,
 	// anchors used for unnamed corners
-	h3ps, h3sb, h4, h5, h10,
+	h3ps, h3sb, h4sb, h4, h5, h10,
 	h11, h12, h13, h14, h15, h16, h17, h18,
 	lb11, lb12, lb13, lb14, lb15, lb16, lb17, lb18, // left-bottom corner of hopper
 	rb11, rb12, rb13, rb14, rb15, rb16, rb17, rb18, // right-bottom corner of hopper
@@ -184,34 +188,31 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow water
-			FS h3[] = { FS::h3sb, FS::SBPump };
-			bool ps_okay = (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running);
-			bool sb_okay = (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running);
-			FS h1[] = { FS::h1sb, FS::SBPump };
-			
+			FS h14[] = { FS::HBV01, FS::h1sb, FS::SBPump, FS::h4sb, FS::HBV04 };
+			FS h24[] = { FS::h3ps, FS::HBV03, FS::h3sb, FS::SBPump, FS::h4sb, FS::HBV04 };
+			FS h25[] = { FS::HBV02, FS::h3ps, FS::h5ps, FS::HBV05 };
+
 			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
 			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
 
-			this->try_flow_water(FS::HBV01, h1, water_color);
-			this->try_flow_water(FS::HBV02, FS::PSPump, water_color);
-
-			if (this->pumps[FS::PSPump]->get_status() == WaterPumpStatus::Running) {
-				FS h35[] = { FS::PSPump, FS::HBV03, FS::h5ps, FS::HBV05 };
-
-				this->station->append_subtrack(h35, water_color);
-				this->nintercs[FS::nic]->set_color(water_color);
-			} else {
+			if (this->gvalves[FS::HBV01]->get_status() == GateValveStatus::Open) {
+				this->station->append_subtrack(h14, water_color);
+			}
+			
+			if (this->gvalves[FS::HBV02]->get_status() == GateValveStatus::Closed) {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
+			} else {
+				this->nintercs[FS::nic]->set_color(water_color);
+				this->station->append_subtrack(h25, water_color);
+
+				if (this->gvalves[FS::HBV03]->get_status() == GateValveStatus::Open) {
+					this->station->append_subtrack(h24, water_color);
+				}
 			}
 
-			this->try_flow_water(FS::HBV03, h3, water_color);
 			this->try_flow_water(FS::HBV05, FS::HBV07, FS::HBV08, water_color);
 			this->try_flow_water(FS::HBV07, FS::Port, water_color);
 			this->try_flow_water(FS::HBV08, FS::HBV10, water_color);
-			
-			if (this->pumps[FS::SBPump]->get_status() == WaterPumpStatus::Running) {
-				this->station->append_subtrack(FS::SBPump, FS::HBV04, water_color);
-			}
 
 			this->try_flow_water(FS::HBV04, FS::HBV06, FS::HBV09, water_color);
 			this->try_flow_water(FS::HBV06, FS::Starboard, water_color);
@@ -269,7 +270,7 @@ public:
 		pTurtle->turn_right_down()->move_down(3, FS::h1sb)->turn_down_left()->move_left(6)->turn_left_down();
 		pTurtle->move_down(FS::HBV01)->move_down(2, FS::SBV1)->move_down(2, FS::SBSea)->jump_back(FS::h4);
 
-		pTurtle->move_right(4, FS::HBV04)->move_right(5)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
+		pTurtle->move_right(4, FS::HBV04)->move_right(5, FS::h4sb)->turn_right_up()->move_up(2.5F)->turn_up_right()->move_right(2);
 		
 		pTurtle->jump_back(FS::HBV10);
 
@@ -313,6 +314,7 @@ public:
 		this->hopper_water = this->master->insert_one(new Tracklet<FS>(wTurtle, default_pipe_thickness, Colours::DimGray, hstyle));
 		this->station = this->master->insert_one(new Tracklet<FS>(pTurtle, default_pipe_thickness, default_pipe_color));
 
+		this->load_buttons(this->functions);
 		this->load_buttons(this->shifts);
 
 		{ // load doors
@@ -396,6 +398,8 @@ public:
 			
 			this->master->move_to(this->shifts[FlushingCommand::LeftShift], shift_target, GraphletAnchor::LB, GraphletAnchor::RT, 0.0F, gheight);
 			this->master->move_to(this->shifts[FlushingCommand::RightShift], shift_target, GraphletAnchor::RB, GraphletAnchor::LT, 0.0F, gheight);
+
+			this->master->move_to(this->functions[FSFunction::Diagnostics], this->station, 0.75F, 0.5F, GraphletAnchor::CC);
 		}
 
 		for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
@@ -470,7 +474,7 @@ private:
 	template<class B, typename CMD>
 	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
-			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(cmd.ToString(), width, height), cmd);
 		}
 	}
 
@@ -591,20 +595,6 @@ private:
 		}
 	}
 
-	void try_flow_water(FS vid, FS* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		switch (this->gvalves[vid]->get_status()) {
-		case GateValveStatus::Open: {
-			this->station->append_subtrack(vid, path[0], color);
-			this->station->append_subtrack(path, count, color);
-		}
-		}
-	}
-
-	template<unsigned int N>
-	void try_flow_water(FS vid, FS (&path)[N], CanvasSolidColorBrush^ color) {
-		this->try_flow_water(vid, path, N, color);
-	}
-	
 	void try_flow_water(FS vid, FS eid, CanvasSolidColorBrush^ color) {
 		this->try_flow_water(vid, eid, FS::_, color);
 	}
@@ -616,6 +606,7 @@ private:
 	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
+	std::map<FSFunction, Credit<Buttonlet, FSFunction>*> functions;
 	std::map<FlushingCommand, Credit<Buttonlet, FlushingCommand>*> shifts;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
@@ -627,6 +618,7 @@ private:
 	std::map<FS, Credit<Dimensionlet, FS>*> rpms;
 	std::map<FS, Credit<Dimensionlet, FS>*> flows;
 	std::map<FS, Omegalet*> nintercs;
+	Buttonlet* diagnostics;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
 	Hatchlet* ps_sea;
@@ -648,6 +640,7 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
+	
 	this->gate_valve_op = make_butterfly_valve_menu(DO_butterfly_valve_action, plc);
 	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_pump_op = make_ps_water_pump_menu(plc);
@@ -670,6 +663,10 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 FlushsPage::~FlushsPage() {
 	if (this->dashboard != nullptr) {
 		delete this->dashboard;
+	}
+
+	if (this->diagnostics != nullptr) {
+		delete this->diagnostics;
 	}
 
 #ifndef _DEBUG
@@ -726,16 +723,18 @@ void FlushsPage::reflow(float width, float height) {
 }
 
 bool FlushsPage::can_select(IGraphlet* g) {
-	bool okay = false;
+	auto fun_btn = dynamic_cast<Credit<Buttonlet, FSFunction>*>(g);
+	bool okay = (fun_btn != nullptr);
 
 	if (this->device->get_mode() != PLCMasterMode::User) {
-		auto btn = dynamic_cast<Buttonlet*>(g);
+		auto plc_btn = dynamic_cast<Buttonlet*>(g);
 
-		okay = ((dynamic_cast<GateValvelet*>(g) != nullptr)
+		okay = (okay
+			|| (dynamic_cast<GateValvelet*>(g) != nullptr)
 			|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 			|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
 			|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-			|| ((btn != nullptr) && (btn->get_status() != ButtonStatus::Disabled)));
+			|| ((plc_btn != nullptr) && (plc_btn->get_status() != ButtonStatus::Disabled)));
 	}
 
 	return okay;
@@ -746,6 +745,7 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto wpump = dynamic_cast<Credit<WaterPumplet, FS>*>(g);
 	auto shift = dynamic_cast<Credit<Buttonlet, FlushingCommand>*>(g);
+	auto diagnose = dynamic_cast<Credit<Buttonlet, FSFunction>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
@@ -753,6 +753,12 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
 	} else if (shift != nullptr) {
 		this->device->send_command((shift->id == FlushingCommand::LeftShift) ? left_shifting_command : right_shifting_command);
+	} else if (diagnose != nullptr) {
+		if (this->diagnostics == nullptr) {
+			this->diagnostics = new WaterPumpDiagnostics(this->device);
+		}
+
+		this->diagnostics->show();
 	} else if (wpump != nullptr) {
 		switch (wpump->id) {
 		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;

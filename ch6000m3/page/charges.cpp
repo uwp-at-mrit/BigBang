@@ -72,6 +72,8 @@ private enum class CS : unsigned int {
 	n0325, n0405, n0723, n0923
 };
 
+static CanvasSolidColorBrush^ water_color = Colours::Green;
+
 static uint16 DO_gate_valve_action(GateValveAction cmd, GateValvelet* valve) {
 	uint16 index = 0U;
 	auto credit_valve = dynamic_cast<Credit<GateValvelet, CS>*>(valve);
@@ -167,6 +169,26 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
+		/*
+		{ // flow water
+			this->try_flow_water(CS::D004, CS::Port, water_color);
+			this->try_flow_water(CS::D006, CS::D004, CS::D009, water_color);
+
+			if (this->gvalves[CS::D005]->get_status() == GateValveStatus::Closed) {
+				CS c5[] = { CS::D004, CS::D005 };
+
+				this->station->append_subtrack(c5, water_color);
+			}
+
+			this->try_flow_water(CS::D003, CS::Starboard, water_color);
+			this->try_flow_water(CS::D026, CS::D003, CS::D007, water_color);
+
+			if (this->gvalves[CS::D025]->get_status() == GateValveStatus::Closed) {
+				this->station->append_subtrack(CS::D003, CS::D025, water_color);
+			}
+		}
+		*/
+
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -313,8 +335,8 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
 			}; break;
 			case CS::PSUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox, ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox, ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox, ox);
 				this->master->move_to(this->dfpressures[it->first], this->ps_draghead, GraphletAnchor::RC, GraphletAnchor::LB, 0.0F, -ox);
@@ -327,8 +349,8 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
 			}; break;
 			case CS::SBUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox, -ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox, -ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
 				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
 				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox, -ox);
 				this->master->move_to(this->dfpressures[it->first], this->sb_draghead, GraphletAnchor::RC, GraphletAnchor::LT, 0.0F, ox);
@@ -459,7 +481,7 @@ private:
 	template<class B, typename CMD>
 	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
-			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(speak(cmd, "menu"), width, height), cmd);
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(cmd.ToString(), width, height), cmd);
 		}
 	}
 
@@ -516,6 +538,37 @@ private:
 		if (this->mvalves.find(id) != this->mvalves.end()) {
 			DI_motor_valve(this->mvalves[id], db4, midx4_p1, db205, midx205_p1);
 		}
+	}
+
+private:
+	void try_flow_water(CS vid, CS eid1, CS eid2, CanvasSolidColorBrush^ color) {
+		switch (this->gvalves[vid]->get_status()) {
+		case GateValveStatus::Closed: {
+			this->station->append_subtrack(vid, eid1, color);
+
+			if (eid2 != CS::_) {
+				this->station->append_subtrack(vid, eid2, color);
+			}
+		}
+		}
+	}
+
+	void try_flow_water(CS vid, CS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		switch (this->gvalves[vid]->get_status()) {
+		case GateValveStatus::Closed: {
+			this->station->append_subtrack(vid, path[0], color);
+			this->station->append_subtrack(path, count, color);
+		}
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_water(CS vid, CS(&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, path, N, color);
+	}
+
+	void try_flow_water(CS vid, CS eid, CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, eid, CS::_, color);
 	}
 
 // never deletes these graphlets mannually

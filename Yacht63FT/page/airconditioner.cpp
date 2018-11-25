@@ -252,7 +252,7 @@ public:
 	}
 
 public:
-	void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override {
+	void load(CanvasCreateResourcesReason reason, float width, float height) override {
 		ACInfo infos[] = { ACInfo::t_setting, ACInfo::t_room, ACInfo::t_pipe, ACInfo::t_sea };
 		ICanvasBrush^ style_color = make_solid_brush(0xB3ED00);
 		DimensionStyle satellite_style, setting_style;

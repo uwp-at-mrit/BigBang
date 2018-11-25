@@ -1,6 +1,7 @@
 #pragma once
 
 #include "planet.hpp"
+#include "satellite.hpp"
 #include "plc.hpp"
 
 #include "decorator/grid.hpp"
@@ -25,6 +26,7 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::PLCMaster* device;
 		WarGrey::SCADA::PLCConfirmation* dashboard;
+		WarGrey::SCADA::ISatellite* diagnostics;
 		Windows::UI::Xaml::Controls::MenuFlyout^ gate_valve_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_pump_op;

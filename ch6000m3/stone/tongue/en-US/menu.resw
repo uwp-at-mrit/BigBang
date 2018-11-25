@@ -363,4 +363,7 @@
   <data name="CResistance" xml:space="preserve">
     <value>Constant Resistance</value>
   </data>
+  <data name="Diagnostics" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
 </root>

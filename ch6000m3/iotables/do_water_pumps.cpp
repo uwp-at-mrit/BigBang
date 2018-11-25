@@ -38,7 +38,7 @@ public:
 		case PSWaterPumpAction::Prepare: index = 281U; break;
 		case PSWaterPumpAction::Start:   index = 282U; break;
 		case PSWaterPumpAction::Stop:    index = 283U; break;
-		case PSWaterPumpAction::Reset:   index = 284U; break;
+		case PSWaterPumpAction::Reset:   index = DO_water_pump_reset_command(true); break;
 		case PSWaterPumpAction::PS_PS:   index = 289U; break;
 		case PSWaterPumpAction::PS_SB:   index = 290U; break;
 		case PSWaterPumpAction::PS_2:    index = 293U; break;
@@ -63,7 +63,7 @@ public:
 		case SBWaterPumpAction::Prepare: index = 285U; break;
 		case SBWaterPumpAction::Start:   index = 286U; break;
 		case SBWaterPumpAction::Stop:    index = 287U; break;
-		case SBWaterPumpAction::Reset:   index = 288U; break;
+		case SBWaterPumpAction::Reset:   index = DO_water_pump_reset_command(false); break;
 		case SBWaterPumpAction::SB_PS:   index = 291U; break;
 		case SBWaterPumpAction::SB_SB:   index = 292U; break;
 		case SBWaterPumpAction::SB_2:    index = 294U; break;
@@ -82,4 +82,8 @@ MenuFlyout^ WarGrey::SCADA::make_ps_water_pump_menu(PLCMaster* plc) {
 
 MenuFlyout^ WarGrey::SCADA::make_sb_water_pump_menu(PLCMaster* plc) {
 	return make_menu<SBWaterPumpAction, WaterPumplet, PLCMaster*>(new SBWaterPumpExecutor(), plc);
+}
+
+unsigned int WarGrey::SCADA::DO_water_pump_reset_command(bool ps) {
+	return (ps ? 284U : 288U);
 }

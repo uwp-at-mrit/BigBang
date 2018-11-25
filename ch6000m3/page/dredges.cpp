@@ -246,15 +246,15 @@ protected:
 		ds[id] = this->master->insert_one(new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], width, height), id);
 	}
 
-	template<class B, typename E>
-	void load_button(std::map<E, Credit<B, E>*>& bs, E id, Platform::String^ label, float width = 128.0F, float height = 32.0F) {
-		bs[id] = this->master->insert_one(new Credit<B, E>(label, width, height), id);
+	template<class B, typename E, typename L>
+	void load_button(std::map<E, Credit<B, E>*>& bs, E id, L label, float width = 128.0F, float height = 32.0F) {
+		bs[id] = this->master->insert_one(new Credit<B, E>(label.ToString(), width, height), id);
 	}
 
 	template<class B, typename E, typename CMD>
 	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
-			bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(speak(cmd, "menu"), width, height), gid, cmd);
+			bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(cmd.ToString(), width, height), gid, cmd);
 		}
 	}
 
@@ -1353,7 +1353,7 @@ private:
 				this->load_percentage(this->rc_speeds, id);
 			}
 
-			this->load_button(this->buttons, id, speak(DS::Override, "menu"));
+			this->load_button(this->buttons, id, DS::Override);
 		}
 	}
 

@@ -17,13 +17,18 @@ static Platform::String^ root_machines[] = {
 	"192.168.0.7",
 	"192.168.0.11",
 	"192.168.0.12",
-
-	//"192.168.0.10",
-	"192.168.0.159",
 };
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 5U;
+
+static const float diagnostics_width = 800.0F;
+static const float diagnostics_height = 600.0F;
+
+static const unsigned int diagnostics_caption_background = 0x8FBC8F;
+static const unsigned int diagnostics_caption_foreground = 0xF8F8FF;
+static const unsigned int diagnostics_region_background = 0x414141U;
+static const unsigned int diagnostics_alarm_background = 0x141414U;
 
 static const float large_metrics_font_size = 24.0F;
 static const float normal_metrics_font_size = 22.0F;

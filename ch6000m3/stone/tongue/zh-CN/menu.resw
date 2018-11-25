@@ -363,4 +363,7 @@
   <data name="CResistance" xml:space="preserve">
     <value>恒阻力</value>
   </data>
+  <data name="Diagnostics" xml:space="preserve">
+    <value>诊断</value>
+  </data>
 </root>

@@ -26,6 +26,15 @@
     <Filter Include="iotables">
       <UniqueIdentifier>{f56f01fb-ab2b-409e-af09-3b1dfeadb7a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="page\diagnostics">
+      <UniqueIdentifier>{290031ef-0552-44f5-bb38-b73c1c1a2607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stone\tongue\en-US\diagnostics">
+      <UniqueIdentifier>{fc0fc9fe-6673-4536-96fb-acb326f8c8fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stone\tongue\zh-CN\diagnostics">
+      <UniqueIdentifier>{dc0a360c-2424-4fac-bce6-7874a096dc7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
@@ -109,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="iotables\do_dredges.cpp">
       <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="page\diagnostics\waterpumpdx.cpp">
+      <Filter>page\diagnostics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -214,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="iotables\macro_keys.hpp">
       <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="page\diagnostics\waterpumpdx.hpp">
+      <Filter>page\diagnostics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -439,6 +454,12 @@
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\glands.resw">
       <Filter>stone\tongue\zh-CN</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\waterpumpdx.resw">
+      <Filter>stone\tongue\zh-CN\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\waterpumpdx.resw">
+      <Filter>stone\tongue\en-US\diagnostics</Filter>
     </PRIResource>
   </ItemGroup>
 </Project>
