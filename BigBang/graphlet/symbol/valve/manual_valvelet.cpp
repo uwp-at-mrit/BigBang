@@ -21,7 +21,7 @@ static float default_thickness = 1.5F;
 
 /*************************************************************************************************/
 ManualValvelet::ManualValvelet(float radius, double degrees)
-	: ManualValvelet(ManualValveStatus::Disabled, radius, degrees) {}
+	: ManualValvelet(ManualValveStatus::OpenReady, radius, degrees) {}
 
 ManualValvelet::ManualValvelet(ManualValveStatus default_status, float radius, double degrees)
 	: ISymbollet(default_status, radius, degrees) {}

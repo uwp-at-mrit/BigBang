@@ -3,8 +3,9 @@
 
 using namespace WarGrey::SCADA;
 
-void WarGrey::SCADA::DI_gate_valve(GateValvelet* target, const uint8* db4, size_t idx_p1) {
-	target->set_status(DBX(db4, idx_p1 - 1), GateValveStatus::Open, GateValveStatus::Closed);
+void WarGrey::SCADA::DI_manual_valve(ManualValvelet* target, const uint8* db4, size_t idx_p1) {
+	// OpenReady or StopReady
+	target->set_status(DBX(db4, idx_p1 - 1), ManualValveStatus::Open, ManualValveStatus::OpenReady);
 }
 
 void WarGrey::SCADA::DI_gate_valve(GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {

@@ -25,6 +25,8 @@ static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4
 			target->set_status(HopperPumpStatus::Unstartable);
 		} else if (DBX(db205, idx205 + 3U)) {
 			target->set_status(HopperPumpStatus::Unstoppable);
+		} else {
+			target->set_status(HopperPumpStatus::Stopped);
 		}
 
 		// the rest are unused

@@ -22,9 +22,6 @@ static Platform::String^ root_machines[] = {
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 5U;
 
-static const float diagnostics_width = 800.0F;
-static const float diagnostics_height = 600.0F;
-
 static const unsigned int diagnostics_caption_background = 0x8FBC8F;
 static const unsigned int diagnostics_caption_foreground = 0xF8F8FF;
 static const unsigned int diagnostics_region_background = 0x414141U;

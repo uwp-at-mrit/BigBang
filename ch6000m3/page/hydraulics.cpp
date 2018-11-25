@@ -11,7 +11,7 @@
 #include "graphlet/shapelet.hpp"
 
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
-#include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/device/tanklet.hpp"
 #include "graphlet/dashboard/fueltanklet.hpp"
 #include "graphlet/dashboard/thermometerlet.hpp"
@@ -57,7 +57,7 @@ private enum class HS : unsigned int {
 	// Valves
 	SQ1, SQ2, SQy, SQl, SQm, SQi, SQj,
 	SQa, SQb, SQg, SQh, SQk2, SQk1,
-	SQf, SQc, SQd, SQe,
+	SQc, SQf, SQd, SQe,
 	
 	// Key Labels
 	Port, Starboard, Master, Visor, Storage, BackOil,
@@ -164,27 +164,27 @@ public:
 		}
 
 		{ // valve statuses
-			DI_gate_valve(this->valves[HS::SQ1], DB4, gate_valve_SQ1_status);
-			DI_gate_valve(this->valves[HS::SQ2], DB4, gate_valve_SQ2_status);
+			DI_manual_valve(this->valves[HS::SQ1], DB4, gate_valve_SQ1_status);
+			DI_manual_valve(this->valves[HS::SQ2], DB4, gate_valve_SQ2_status);
 
-			DI_gate_valve(this->valves[HS::SQk1], DB4, gate_valve_SQk1_status);
-			DI_gate_valve(this->valves[HS::SQk2], DB4, gate_valve_SQk2_status);
-			DI_gate_valve(this->valves[HS::SQl], DB4, gate_valve_SQl_status);
-			DI_gate_valve(this->valves[HS::SQm], DB4, gate_valve_SQm_status);
-			DI_gate_valve(this->valves[HS::SQy], DB4, gate_valve_SQy_status);
+			DI_manual_valve(this->valves[HS::SQk1], DB4, gate_valve_SQk1_status);
+			DI_manual_valve(this->valves[HS::SQk2], DB4, gate_valve_SQk2_status);
+			DI_manual_valve(this->valves[HS::SQl], DB4, gate_valve_SQl_status);
+			DI_manual_valve(this->valves[HS::SQm], DB4, gate_valve_SQm_status);
+			DI_manual_valve(this->valves[HS::SQy], DB4, gate_valve_SQy_status);
 
-			DI_gate_valve(this->valves[HS::SQi], DB4, gate_valve_SQi_status);
-			DI_gate_valve(this->valves[HS::SQj], DB4, gate_valve_SQj_status);
+			DI_manual_valve(this->valves[HS::SQi], DB4, gate_valve_SQi_status);
+			DI_manual_valve(this->valves[HS::SQj], DB4, gate_valve_SQj_status);
 
-			DI_gate_valve(this->valves[HS::SQc], DB4, gate_valve_SQc_status);
-			DI_gate_valve(this->valves[HS::SQd], DB4, gate_valve_SQd_status);
-			DI_gate_valve(this->valves[HS::SQe], DB4, gate_valve_SQe_status);
-			DI_gate_valve(this->valves[HS::SQf], DB4, gate_valve_SQf_status);
+			DI_manual_valve(this->valves[HS::SQc], DB4, gate_valve_SQc_status);
+			DI_manual_valve(this->valves[HS::SQd], DB4, gate_valve_SQd_status);
+			DI_manual_valve(this->valves[HS::SQe], DB4, gate_valve_SQe_status);
+			DI_manual_valve(this->valves[HS::SQf], DB4, gate_valve_SQf_status);
 
-			DI_gate_valve(this->valves[HS::SQa], DB4, gate_valve_SQa_status);
-			DI_gate_valve(this->valves[HS::SQb], DB4, gate_valve_SQb_status);
-			DI_gate_valve(this->valves[HS::SQg], DB4, gate_valve_SQc_status);
-			DI_gate_valve(this->valves[HS::SQh], DB4, gate_valve_SQd_status);
+			DI_manual_valve(this->valves[HS::SQa], DB4, gate_valve_SQa_status);
+			DI_manual_valve(this->valves[HS::SQb], DB4, gate_valve_SQb_status);
+			DI_manual_valve(this->valves[HS::SQg], DB4, gate_valve_SQc_status);
+			DI_manual_valve(this->valves[HS::SQh], DB4, gate_valve_SQd_status);
 		}
 
 		{ // filter statuses
@@ -321,8 +321,8 @@ public:
 
 		{ // load valves
 			this->load_devices(this->valves, this->labels, HS::SQ1, HS::SQj, radius, 90.000);
-			this->load_devices(this->valves, this->labels, HS::SQa, HS::SQk1, radius, 0.0);
-			this->load_devices(this->valves, this->labels, HS::SQf, HS::SQe, radius, 180.00);
+			this->load_devices(this->valves, this->labels, HS::SQa, HS::SQk1, radius, 0.000);
+			this->load_devices(this->valves, this->labels, HS::SQc, HS::SQe, radius,  0.000);
 		}
 	}
 
@@ -397,13 +397,12 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
-				case HS::SQ1: case HS::SQj: case HS::SQy: {
+				case HS::SQ1: case HS::SQj: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					lbl_dx = x0 - vradius + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				}; break;
 				default: {
-					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
-					lbl_dx = x0 + vradius - margin; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
+					lbl_dx = x0 + vradius; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
 				}
 				}
 			} else {
@@ -546,7 +545,7 @@ private:
 private:
 	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case GateValveStatus::Open: case GateValveStatus::CloseReady: {
+		case ManualValveStatus::Open: {
 			this->station->append_subtrack(vid, pid, color);
 		}
 		}
@@ -554,7 +553,7 @@ private:
 
 	void try_flow_oil(HS vid, HS mid, HS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case GateValveStatus::Open: case GateValveStatus::CloseReady: {
+		case ManualValveStatus::Open: {
 			this->station->append_subtrack(vid, mid, color);
 			this->station->append_subtrack(mid, eid, color);
 		}
@@ -592,7 +591,7 @@ private:
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Labellet, HS>*> labels;
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
-	std::map<HS, Credit<GateValvelet, HS>*> valves;
+	std::map<HS, Credit<ManualValvelet, HS>*> valves;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Alarmlet, HS>*> alarms;
 	std::map<HS, Credit<Labellet, HS>*> islabels;

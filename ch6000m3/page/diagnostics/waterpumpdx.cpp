@@ -27,7 +27,7 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasSolidColorBrush^ region_background = Colours::make(diagnostics_region_background);
-static CanvasSolidColorBrush^ alarm_background = Colours::make(diagnostics_alarm_background);
+static CanvasSolidColorBrush^ diagnosis_background = Colours::make(diagnostics_alarm_background);
 
 // WARNING: order matters
 private enum class WP : unsigned int {
@@ -49,8 +49,8 @@ private enum class WP : unsigned int {
 private class WaterPumpDx final : public PLCConfirmation {
 public:
 	WaterPumpDx(WaterPumpDiagnostics* master, bool ps, unsigned int color) : master(master), ps(ps) {
-		this->group_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
-		this->alarm_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->group_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+		this->diagnosis_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 
 		this->color = Colours::make(color);
 
@@ -72,17 +72,17 @@ public:
 		unsigned int knob = (this->ps ? ps_water_pump_speed_knob_moved : sb_water_pump_speed_knob_moved);
 		unsigned int knob0 = (this->ps ? ps_water_pump_speed_knob_moved0 : sb_water_pump_speed_knob_moved0);
 
-		this->alarms[WP::RemoteControl]->set_status(DI_water_pump_remote_control(DB4, feedback), AlarmStatus::Notice, AlarmStatus::None);
-		this->alarms[WP::NoAlert]->set_status(DI_water_pump_alert(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->alarms[WP::NoBroken]->set_status(DI_water_pump_broken(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->alarms[WP::NotRunning]->set_status(DI_water_pump_running(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->alarms[WP::NoEmergence]->set_status(DI_water_pump_emergence(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->alarms[WP::NoRepair]->set_status(DI_water_pump_repair(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->alarms[WP::PipelineReady]->set_status(DBX(DB205, plready), AlarmStatus::Notice, AlarmStatus::None);
-		this->alarms[WP::SpeedKnobMoved]->set_status(DBX(DB4, knob), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[WP::RemoteControl]->set_status(DI_water_pump_remote_control(DB4, feedback), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[WP::NoAlert]->set_status(DI_water_pump_alert(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::NoBroken]->set_status(DI_water_pump_broken(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::NotRunning]->set_status(DI_water_pump_running(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::NoEmergence]->set_status(DI_water_pump_emergence(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::NoRepair]->set_status(DI_water_pump_repair(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::PipelineReady]->set_status(DBX(DB205, plready), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[WP::SpeedKnobMoved]->set_status(DBX(DB4, knob), AlarmStatus::Notice, AlarmStatus::None);
 
-		this->alarms[WP::StartReady]->set_status(DI_water_pump_ready(DB4, feedback), AlarmStatus::Notice, AlarmStatus::None);
-		this->alarms[WP::SpeedKnobMoved0]->set_status(DBX(DB4, knob0), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[WP::StartReady]->set_status(DI_water_pump_ready(DB4, feedback), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[WP::SpeedKnobMoved0]->set_status(DBX(DB4, knob0), AlarmStatus::Notice, AlarmStatus::None);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -91,69 +91,72 @@ public:
 	}
 
 public:
-	void load(float x, float width, float height, float vinset) {
+	void fill_extent(float title_height, float vgapsize, float* width, float* height) {
 		unsigned int sc_count = _I(this->sc_end) - _I(this->sc_start) + 1U;
 		unsigned int rc_count = _I(this->rc_end) - _I(this->rc_start) + 1U;
-		float gapsize = vinset * 0.25F;
-		float region_width = width * 0.85F;
-		float region_reserved_height = gapsize * 4.0F + this->group_font->FontSize;
-		float alarm_box_width = (region_width - vinset * 1.5F);
-		float alarm_box_height = this->alarm_font->FontSize * 2.0F;
-		float corner_radius = 8.0F;
-		float sc_height = (alarm_box_height + gapsize) * float(sc_count) + region_reserved_height;
-		float rc_height = (alarm_box_height + gapsize) * float(rc_count) + region_reserved_height;
+		float region_reserved_height = vgapsize * 4.0F + this->group_font->FontSize;
 		
-		this->start_condition_bg = this->master->insert_one(new RoundedRectanglet(region_width, sc_height, corner_radius, region_background));
-		this->running_condition_bg = this->master->insert_one(new RoundedRectanglet(region_width, rc_height, corner_radius, region_background));
+		this->diagnosis_height = this->diagnosis_font->FontSize * 2.0F;
+		this->sc_region_height = (this->diagnosis_height + vgapsize) * float(sc_count) + region_reserved_height;
+		this->rc_region_height = (this->diagnosis_height + vgapsize) * float(rc_count) + region_reserved_height;
+
+		SET_BOX(width, 400.0F);
+		SET_BOX(height, this->sc_region_height + this->rc_region_height + title_height * 4.0F);
+	}
+
+	void load(float x, float width, float height, float title_height, float vgapsize) {
+		float region_width = width * 0.90F;
+		float diagnosis_width = (region_width - title_height * 1.5F);
+		float corner_radius = 8.0F;
+		
+		this->sc_region = this->master->insert_one(
+			new RoundedRectanglet(region_width, this->sc_region_height, corner_radius, region_background));
+
+		this->rc_region = this->master->insert_one(
+			new RoundedRectanglet(region_width, this->rc_region_height, corner_radius, region_background));
 
 		this->load_label(this->labels, WP::StartCondition, this->color, this->group_font, true);
 		this->load_label(this->labels, WP::RunningCondition, this->color, this->group_font, true);
 
 		this->reset = this->master->insert_one(new Credit<Buttonlet, bool>(PSWaterPumpAction::Reset.ToString()), this->ps);
 
-		{ // load alarms
-			float alarm_size = alarm_box_height * 0.618F;
+		{ // load diagnoses
+			float icon_size = this->diagnosis_height * 0.618F;
 		
 			for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved0; id++) {
-				this->boxes[id] = this->master->insert_one(new Credit<RoundedRectanglet, WP>(
-					alarm_box_width, alarm_box_height, corner_radius, alarm_background), id);
+				this->slots[id] = this->master->insert_one(new Credit<RoundedRectanglet, WP>(
+					diagnosis_width, this->diagnosis_height, corner_radius, diagnosis_background), id);
 
-				this->alarms[id] = this->master->insert_one(new Credit<Alarmlet, WP>(alarm_size), id);
-				this->load_label(this->labels, id, Colours::Silver, this->alarm_font);
+				this->diagnoses[id] = this->master->insert_one(new Credit<Alarmlet, WP>(icon_size), id);
+				this->load_label(this->labels, id, Colours::Silver, this->diagnosis_font);
 			}
 		}
 	}
 
-	void reflow(float x, float width, float height, float vinset) {
+	void reflow(float x, float width, float height, float title_height, float vgapsize) {
 		unsigned int sc_count = _I(this->sc_end) - _I(this->sc_start) + 1U;
-		float region_width, sc_height, rc_height, btn_height, alarm_height;
 		float cx = x + width * 0.5F;
-		float txtgap = 0.0F;
-		
-		this->start_condition_bg->fill_extent(0.0F, 0.0F, &region_width, &sc_height);
-		this->running_condition_bg->fill_extent(0.0F, 0.0F, nullptr, &rc_height);
-		this->reset->fill_extent(0.0F, 0.0F, nullptr, &btn_height);
-		this->boxes[this->sc_start]->fill_extent(0.0F, 0.0F, nullptr, &alarm_height);
+		float btn_height;
 
-		txtgap = (sc_height - alarm_height * float(sc_count) - this->group_font->FontSize) / float(sc_count + 4);
+		this->reset->fill_extent(0.0F, 0.0F, nullptr, &btn_height);
 
 		{ // reflow layout
-			float gapsize = (height - vinset - sc_height - rc_height - btn_height) * 0.25F;
+			float gapsize = (height - title_height - this->sc_region_height - this->rc_region_height - btn_height) * 0.25F;
 
-			this->master->move_to(this->start_condition_bg, cx, vinset + gapsize, GraphletAnchor::CT);
-			this->master->move_to(this->running_condition_bg, this->start_condition_bg, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+			this->master->move_to(this->sc_region, cx, title_height + gapsize, GraphletAnchor::CT);
+			this->master->move_to(this->rc_region, this->sc_region, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 
-			this->master->move_to(this->labels[WP::StartCondition], this->start_condition_bg, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, txtgap);
-			this->master->move_to(this->labels[WP::RunningCondition], this->running_condition_bg, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, txtgap);
-			this->master->move_to(this->reset, this->running_condition_bg, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+			this->master->move_to(this->labels[WP::StartCondition], this->sc_region, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, vgapsize);
+			this->master->move_to(this->labels[WP::RunningCondition], this->rc_region, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, vgapsize);
+			this->master->move_to(this->reset, this->rc_region, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 		}
 
 		{ // reflow start condition boxes
 			IGraphlet* target = this->labels[WP::StartCondition];
 
 			for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved; id++) {
-				this->master->move_to(this->boxes[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, txtgap);
-				target = this->boxes[id];
+				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
+				target = this->slots[id];
 			}
 		}
 
@@ -161,14 +164,14 @@ public:
 			IGraphlet* target = this->labels[WP::RunningCondition];
 
 			for (WP id = WP::StartReady; id <= WP::SpeedKnobMoved0; id++) {
-				this->master->move_to(this->boxes[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, txtgap);
-				target = this->boxes[id];
+				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
+				target = this->slots[id];
 			}
 		}
 
 		for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved0; id++) {
-			this->master->move_to(this->alarms[id], this->boxes[id], GraphletAnchor::LC, GraphletAnchor::LC, txtgap);
-			this->master->move_to(this->labels[id], this->alarms[id], GraphletAnchor::RC, GraphletAnchor::LC, (width - region_width) * 0.5F);
+			this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, vgapsize);
+			this->master->move_to(this->labels[id], this->diagnoses[id], GraphletAnchor::RC, GraphletAnchor::LC, vgapsize);
 		}
 	}
 
@@ -179,7 +182,8 @@ public:
 
 private:
 	template<typename E>
-	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color, CanvasTextFormat^ font = nullptr, bool prefix = false) {
+	void load_label(std::map<E, Credit<Labellet, E>*>& ls, E id, CanvasSolidColorBrush^ color
+		, CanvasTextFormat^ font = nullptr, bool prefix = false) {
 		Platform::String^ label = (prefix ? _speak((this->ps ? "PS" : "SB") + id.ToString()) : _speak(id));
 
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
@@ -188,16 +192,21 @@ private:
 // never deletes these graphlets mannually
 private:
 	std::map<WP, Credit<Labellet, WP>*> labels;
-	std::map<WP, Credit<Alarmlet, WP>*> alarms;
-	std::map<WP, Credit<RoundedRectanglet, WP>*> boxes;
+	std::map<WP, Credit<Alarmlet, WP>*> diagnoses;
+	std::map<WP, Credit<RoundedRectanglet, WP>*> slots;
 	Credit<Buttonlet, bool>* reset;
-	RoundedRectanglet* start_condition_bg;
-	RoundedRectanglet* running_condition_bg;
+	RoundedRectanglet* sc_region;
+	RoundedRectanglet* rc_region;
 	
 private:
 	CanvasSolidColorBrush^ color;
 	CanvasTextFormat^ group_font;
-	CanvasTextFormat^ alarm_font;
+	CanvasTextFormat^ diagnosis_font;
+
+private:
+	float diagnosis_height;
+	float sc_region_height;
+	float rc_region_height;
 
 private:
 	WP sc_start;
@@ -229,8 +238,26 @@ WaterPumpDiagnostics::~WaterPumpDiagnostics() {
 }
 
 void WaterPumpDiagnostics::fill_satellite_extent(float* width, float* height) {
-	SET_BOX(width, diagnostics_width);
-	SET_BOX(height, diagnostics_height);
+	auto ps_dashboard = dynamic_cast<WaterPumpDx*>(this->ps_dashboard);
+	auto sb_dashboard = dynamic_cast<WaterPumpDx*>(this->sb_dashboard);
+	float ps_width = 400.0F;
+	float ps_height = 600.0F;
+	float sb_width = 400.0F;
+	float sb_height = 600.0F;
+
+	this->title_height = large_font_size * 2.0F;
+	this->vgapsize = this->title_height * 0.25F;
+
+	if (ps_dashboard != nullptr) {
+		ps_dashboard->fill_extent(this->title_height, this->vgapsize, &ps_width, &ps_height);
+	}
+
+	if (sb_dashboard != nullptr) {
+		sb_dashboard->fill_extent(this->title_height, this->vgapsize, &sb_width, &sb_height);
+	}
+
+	SET_BOX(width, ps_width + sb_width);
+	SET_BOX(height, std::fmaxf(ps_height, sb_height));
 }
 
 void WaterPumpDiagnostics::load(CanvasCreateResourcesReason reason, float width, float height) {
@@ -239,14 +266,13 @@ void WaterPumpDiagnostics::load(CanvasCreateResourcesReason reason, float width,
 	
 	if ((ps_dashboard != nullptr) && (sb_dashboard)) {
 		auto caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
-		float vinset = large_font_size * 2.0F;
 		float half_width = width * 0.5F;
 
-		ps_dashboard->load(0.0F, half_width, height, vinset);
-		sb_dashboard->load(half_width, half_width, height, vinset);
+		ps_dashboard->load(0.0F, half_width, height, this->title_height, this->vgapsize);
+		sb_dashboard->load(half_width, half_width, height, this->title_height, this->vgapsize);
 
-		this->caption_background = this->insert_one(new Rectanglet(width, vinset, Colours::make(diagnostics_caption_background)));
-		this->caption = this->insert_one(new Labellet(this->display_name(), caption_font, diagnostics_caption_foreground));
+		this->titlebar = this->insert_one(new Rectanglet(width, this->title_height, Colours::make(diagnostics_caption_background)));
+		this->title = this->insert_one(new Labellet(this->display_name(), caption_font, diagnostics_caption_foreground));
 	}
 }
 
@@ -256,14 +282,11 @@ void WaterPumpDiagnostics::reflow(float width, float height) {
 
 	if ((ps_dashboard != nullptr) && (sb_dashboard != nullptr)) {
 		float half_width = width * 0.5F;
-		float vinset = 0.0F;
+		
+		ps_dashboard->reflow(0.0F,       half_width, height, this->title_height, this->vgapsize);
+		sb_dashboard->reflow(half_width, half_width, height, this->title_height, this->vgapsize);
 
-		this->caption_background->fill_extent(0.0F, 0.0F, nullptr, &vinset);
-
-		ps_dashboard->reflow(0.0F,       half_width, height, vinset);
-		sb_dashboard->reflow(half_width, half_width, height, vinset);
-
-		this->move_to(this->caption, this->caption_background, GraphletAnchor::CC, GraphletAnchor::CC);
+		this->move_to(this->title, this->titlebar, GraphletAnchor::CC, GraphletAnchor::CC);
 	}
 }
 

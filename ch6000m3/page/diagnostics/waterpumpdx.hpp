@@ -28,8 +28,12 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::PLCConfirmation* ps_dashboard;
 		WarGrey::SCADA::PLCConfirmation* sb_dashboard;
 
+	private:
+		float title_height;
+		float vgapsize;
+
 	private: // never delete these graphlets manually
-		WarGrey::SCADA::Rectanglet* caption_background;
-		WarGrey::SCADA::Labellet* caption;
+		WarGrey::SCADA::Rectanglet* titlebar;
+		WarGrey::SCADA::Labellet* title;
 	};
 }

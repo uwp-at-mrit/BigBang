@@ -28,10 +28,11 @@ void WarGrey::SCADA::DI_hydraulic_pump(HydraulicPumplet* target, const uint8* db
 			target->set_status(HydraulicPumpStatus::Unstartable);
 		} else if (DBX(db205, idx205_p1 + 2U)) {
 			target->set_status(HydraulicPumpStatus::Unstoppable);
+		} else {
+			target->set_status(HydraulicPumpStatus::Stopped);
 		}
 		
 		// the rest two are not used
-		// target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::Stopped);
 		// target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Ready);
 	}
 }

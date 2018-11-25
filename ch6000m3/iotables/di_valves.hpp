@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
+#include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
 namespace WarGrey::SCADA {
@@ -176,7 +177,7 @@ namespace WarGrey::SCADA {
 	static unsigned int butterfly_valve_HBV18_status = 297U;
 
 	/*********************************************************************************************/
-	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx_p1);
+	void DI_manual_valve(WarGrey::SCADA::ManualValvelet* target, const uint8* db4, size_t idx_p1);
 	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 	void DI_motor_valve(WarGrey::SCADA::MotorValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 

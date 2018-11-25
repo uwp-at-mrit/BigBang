@@ -435,5 +435,5 @@ void DraughtsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 }
 
 void DraughtsPage::on_gesture(std::list<Windows::Foundation::Numerics::float2>& points, float x, float y) {
-	this->get_logger()->log_message(Log::Info, L"(%f, %f)", x, y);
+	//this->get_logger()->log_message(Log::Info, L"(%f, %f)", x, y);
 }

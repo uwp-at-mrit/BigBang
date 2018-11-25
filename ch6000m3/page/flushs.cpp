@@ -640,6 +640,7 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Flush* dashboard = new Flush(this);
 
 	this->dashboard = dashboard;
+	this->diagnostics = new WaterPumpDiagnostics(plc);
 	
 	this->gate_valve_op = make_butterfly_valve_menu(DO_butterfly_valve_action, plc);
 	this->upper_door_op = make_upper_door_menu(plc);
@@ -665,9 +666,7 @@ FlushsPage::~FlushsPage() {
 		delete this->dashboard;
 	}
 
-	if (this->diagnostics != nullptr) {
-		delete this->diagnostics;
-	}
+	delete this->diagnostics;
 
 #ifndef _DEBUG
 	delete this->grid;
@@ -754,10 +753,6 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	} else if (shift != nullptr) {
 		this->device->send_command((shift->id == FlushingCommand::LeftShift) ? left_shifting_command : right_shifting_command);
 	} else if (diagnose != nullptr) {
-		if (this->diagnostics == nullptr) {
-			this->diagnostics = new WaterPumpDiagnostics(this->device);
-		}
-
 		this->diagnostics->show();
 	} else if (wpump != nullptr) {
 		switch (wpump->id) {
