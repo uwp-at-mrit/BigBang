@@ -23,7 +23,7 @@ public:
 			okay = false;
 		}
 
-		return okay && plc->connected();
+		return okay && plc->connected() && plc->authorized();
 	}
 
 	void execute(WinchAction cmd, Credit<Winchlet, DredgesPosition>* winch, PLCMaster* plc) override { // DB300, starts from 1
@@ -53,7 +53,7 @@ public:
 private class GantryExecutor final : public IMenuCommand<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*> {
 public:
 	bool can_execute(GantryAction cmd, Credit<Gantrylet, DredgesPosition>* gantry, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(GantryAction cmd, Credit<Gantrylet, DredgesPosition>* gantry, PLCMaster* plc) override { // DB300, starts from 1
@@ -82,7 +82,7 @@ public:
 private class CompensatorExecutor final : public IMenuCommand<WaveCompensatorAction, Credit<Compensatorlet, bool>, PLCMaster*> {
 public:
 	bool can_execute(WaveCompensatorAction cmd, Credit<Compensatorlet, bool>* wc, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(WaveCompensatorAction cmd, Credit<Compensatorlet, bool>* wc, PLCMaster* plc) override { // DB300, starts from 1
@@ -104,7 +104,7 @@ public:
 private class DragVisorExecutor final : public IMenuCommand<DragVisorAction, Credit<DragHeadlet, bool>, PLCMaster*> {
 public:
 	bool can_execute(DragVisorAction cmd, Credit<DragHeadlet, bool>* wc, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(DragVisorAction cmd, Credit<DragHeadlet, bool>* wc, PLCMaster* plc) override { // DB300, starts from 1
@@ -124,7 +124,7 @@ public:
 private class GantryGroupExecutor final : public IGroupMenuCommand<GantryAction, DredgesGroup, PLCMaster*> {
 public:
 	bool can_execute(GantryAction cmd, DredgesGroup group, PLCMaster* plc) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(GantryAction cmd, DredgesGroup group, PLCMaster* plc) override { // DB300, starts from 1

@@ -141,7 +141,7 @@
   <data name="NoEmergence" xml:space="preserve">
     <value>高压冲水泵变频器无紧激停止反馈</value>
   </data>
-  <data name="NoRepair" xml:space="preserve">
+  <data name="NoMaintenance" xml:space="preserve">
     <value>高压冲水泵变频器无维修反馈</value>
   </data>
   <data name="NotRunning" xml:space="preserve">

@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PSUnderWaterCondition" xml:space="preserve">
-    <value>PS UnderWater Pump Start Condition</value>
+    <value>PS UnderWater Pump Control Condition</value>
   </data>
   <data name="PSHopperCondition" xml:space="preserve">
-    <value>PS Hopper Pump Start Condition</value>
+    <value>PS Hopper Pump Control Condition</value>
   </data>
   <data name="SBUnderWaterCondition" xml:space="preserve">
-    <value>SB UnderWater Pump Start Condition</value>
+    <value>SB UnderWater Pump Control Condition</value>
   </data>
   <data name="SBHopperCondition" xml:space="preserve">
-    <value>SB Hopper Pump Start Condition</value>
+    <value>SB Hopper Pump Control Condition</value>
   </data>
   <data name="HPSpeedKnobMoved" xml:space="preserve">
     <value>Hopper Pump Speed Knob is Moved</value>
@@ -135,8 +135,8 @@
   <data name="HPNoEmergence" xml:space="preserve">
     <value>Hopper Pump No Emergence Stopping Feedback</value>
   </data>
-  <data name="HPNoRepair" xml:space="preserve">
-    <value>Hopper Pump No Repair Feedback</value>
+  <data name="HPNoMaintenance" xml:space="preserve">
+    <value>Hopper Pump No Maintenance Feedback</value>
   </data>
   <data name="HPNotRunning" xml:space="preserve">
     <value>Hopper Pump Not Running Feedback</value>
@@ -165,8 +165,8 @@
   <data name="UWPNoEmergence" xml:space="preserve">
     <value>Underwater Pump No Emergence Stopping Feedback</value>
   </data>
-  <data name="UWPNoRepair" xml:space="preserve">
-    <value>Underwater Pump No Repair Feedback</value>
+  <data name="UWPNoMaintenance" xml:space="preserve">
+    <value>Underwater Pump No Maintenance Feedback</value>
   </data>
   <data name="UWPNotRunning" xml:space="preserve">
     <value>Underwater Pump Not Running Feedback</value>

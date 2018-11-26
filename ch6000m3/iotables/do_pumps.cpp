@@ -12,7 +12,7 @@ public:
 
 public:
 	bool can_execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) override {
@@ -26,7 +26,7 @@ private:
 private class HydraulicPumpGroupExecutor final : public IGroupMenuCommand<HydraulicsGroupAction, HydraulicsGroup, PLCMaster*> {
 public:
 	bool can_execute(HydraulicsGroupAction cmd, HydraulicsGroup group, PLCMaster* plc) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(HydraulicsGroupAction cmd, HydraulicsGroup group, PLCMaster* plc) override { // DB300, starts from 1

@@ -141,8 +141,8 @@
   <data name="NoEmergence" xml:space="preserve">
     <value>Water Pump No Emergence Stopping Feedback</value>
   </data>
-  <data name="NoRepair" xml:space="preserve">
-    <value>Water Pump No Repair Feedback</value>
+  <data name="NoMaintenance" xml:space="preserve">
+    <value>Water Pump No Maintenance Feedback</value>
   </data>
   <data name="NotRunning" xml:space="preserve">
     <value>Water Pump Not Running Feedback</value>

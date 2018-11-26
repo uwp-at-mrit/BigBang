@@ -837,8 +837,7 @@ public:
 	bool can_select(IGraphlet* g) override {
 		auto maybe_button = dynamic_cast<Buttonlet*>(g);
 
-		return ((maybe_button != nullptr)
-			&& (maybe_button->get_status() != ButtonStatus::Disabled));
+		return ((maybe_button != nullptr) && (maybe_button->get_status() != ButtonStatus::Disabled));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) {
@@ -1589,27 +1588,15 @@ PLCMaster* DredgesPage::get_plc_device() {
 }
 
 bool DredgesPage::can_select(IGraphlet* g) {
-	bool okay = false;
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
-
-		okay = ((db != nullptr) && (db->can_select(g)));
-	}
-
-	return okay;
+	return ((db != nullptr) && (db->can_select(g)));
 }
 
 bool DredgesPage::can_select_multiple() {
-	bool okay = false;
+	auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
 
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		auto db = dynamic_cast<IDredgingSystem*>(this->dashboard);
-
-		okay = ((db != nullptr) && (db->can_select_multiple()));
-	}
-
-	return okay;
+	return ((db != nullptr) && (db->can_select_multiple()));
 }
 
 bool DredgesPage::on_key(VirtualKey key, bool wargrey_keyboard) {

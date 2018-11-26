@@ -20,7 +20,7 @@ static Platform::String^ root_machines[] = {
 };
 
 /*************************************************************************************************/
-static const unsigned int frame_per_second = 5U;
+static const unsigned int frame_per_second = 4U;
 
 static const unsigned int diagnostics_caption_background = 0x8FBC8F;
 static const unsigned int diagnostics_caption_foreground = 0xF8F8FF;

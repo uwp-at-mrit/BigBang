@@ -12,7 +12,7 @@ using namespace Windows::UI::Xaml::Controls;
 private class BottomDoorExecutor final : public IMenuCommand<DoorAction, Credit<HopperDoorlet, Door>, PLCMaster*> {
 public:
 	bool can_execute(DoorAction cmd, Credit<HopperDoorlet, Door>* door, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(DoorAction cmd, Credit<HopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1
@@ -50,7 +50,7 @@ public:
 private class BottomDoorGroupExecutor final : public IGroupMenuCommand<DoorsGroupAction, BottomDoorsGroup, PLCMaster*> {
 public:
 	bool can_execute(DoorsGroupAction cmd, BottomDoorsGroup group, PLCMaster* plc) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(DoorsGroupAction cmd, BottomDoorsGroup group, PLCMaster* plc) override { // DB300, starts from 1
@@ -77,7 +77,7 @@ public:
 private class UpperDoorExecutor final : public IMenuCommand<DoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*> {
 public:
 	bool can_execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1

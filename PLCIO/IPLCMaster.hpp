@@ -26,6 +26,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void send_scheduled_request(long long count, long long interval, long long uptime) = 0;
+		virtual bool authorized() { return (this->mode != PLCMasterMode::User); }
 
 	public:
 		void set_mode(WarGrey::SCADA::PLCMasterMode mode) {

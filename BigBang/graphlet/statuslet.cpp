@@ -187,7 +187,7 @@ void Statusbarlet::update(long long count, long long interval, long long uptime)
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float width = Width / 8.0F;
+    float width = Width / 7.0F;
 	float context_y = y + (status_height - this->caption->LayoutBounds.Height) * 0.5F;
 	
 	ds->FillRectangle(x, y, Width, Height, Colours::Background);
@@ -197,12 +197,13 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(this->caption, x + width * 0.0F, context_y, Colours::Chocolate);
 	ds->DrawTextLayout(statusbar->clock, x + width * 1.0F, context_y, Colours::Foreground);
 	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
-	ds->DrawTextLayout(statusbar->wifi, x + width * 4.0F, context_y, Colours::Yellow);
-	ds->DrawTextLayout(statusbar->storage, x + width * 6.0F, context_y, Colours::YellowGreen);
+	ds->DrawTextLayout(statusbar->wifi, x + width * 3.0F, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->storage, x + width * 5.0F, context_y, Colours::YellowGreen);
 	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
 
+	/*
 	{ // draw App Memory Usage
 		AppMemoryUsageLevel level;
 		unsigned long long memory = system_memory_usage(&level);
@@ -218,9 +219,10 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 			x + width * 3.0F, context_y,
 			color, status_font);
 	}
+	*/
 
 	{ // draw PLC Status
-		float plc_x = x + width * 5.0F;
+		float plc_x = x + width * 4.0F;
 
 		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
 
@@ -236,10 +238,10 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 				this->device_name = make_text_layout(this->device->device_hostname(), status_font);
 			}
 
-			if (this->plc_mode == PLCMasterMode::User) {
-				ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Cyan);
-			} else {
+			if (this->device->authorized()) {
 				ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Green);
+			} else {
+				ds->DrawTextLayout(this->device_name, plc_x + status_prefix_width, context_y, Colours::Cyan);
 			}
 		} else {
 			float icon_cx = plc_x + status_prefix_width + this->retry_icon_size * 0.5F;

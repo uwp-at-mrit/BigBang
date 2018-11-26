@@ -724,21 +724,13 @@ void FlushsPage::reflow(float width, float height) {
 }
 
 bool FlushsPage::can_select(IGraphlet* g) {
-	auto fun_btn = dynamic_cast<Credit<Buttonlet, FSFunction>*>(g);
-	bool okay = (fun_btn != nullptr);
+	auto btn = dynamic_cast<Buttonlet*>(g);
 
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		auto plc_btn = dynamic_cast<Buttonlet*>(g);
-
-		okay = (okay
-			|| (dynamic_cast<GateValvelet*>(g) != nullptr)
-			|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-			|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
-			|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-			|| ((plc_btn != nullptr) && (plc_btn->get_status() != ButtonStatus::Disabled)));
-	}
-
-	return okay;
+	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
+		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
+		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
+		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
+		|| ((btn != nullptr) && (btn->get_status() != ButtonStatus::Disabled)));
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

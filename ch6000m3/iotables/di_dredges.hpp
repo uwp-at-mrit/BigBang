@@ -7,12 +7,12 @@
 namespace WarGrey::SCADA {
 	private struct WinchLimits {
 	public:
-		WinchLimits(unsigned int upper, unsigned int support, unsigned int slack = 0U, unsigned int suction = 0U)
-			: upper(upper), support(support), suction(suction), slack(slack) {}
+		WinchLimits(unsigned int upper, unsigned int saddle, unsigned int slack = 0U, unsigned int suction = 0U)
+			: upper(upper), saddle(saddle), suction(suction), slack(slack) {}
 
 	public:
 		unsigned int upper;
-		unsigned int support;
+		unsigned int saddle;
 		unsigned int suction;
 		unsigned int slack;
 	};

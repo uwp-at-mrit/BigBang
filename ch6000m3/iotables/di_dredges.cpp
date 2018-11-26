@@ -24,7 +24,7 @@ void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& l
 
 	if (DBX(db4, limits.upper - 1U)) {
 		target->set_status(WinchStatus::UpperLimited);
-	} else if (DBX(db4, limits.support - 1U)) {
+	} else if (DBX(db4, limits.saddle - 1U)) {
 		target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
 	} else if ((limits.suction > 0U) && DBX(db4, limits.suction - 1U)) {
 		target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);

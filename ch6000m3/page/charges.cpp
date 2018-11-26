@@ -338,10 +338,10 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
 			}; break;
 			case CS::PSUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox, ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
-				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
-				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox, ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox, ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox, ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox);
 				this->master->move_to(this->dfpressures[it->first], this->ps_draghead, GraphletAnchor::RC, GraphletAnchor::LB, 0.0F, -ox);
 			}; break;
 			case CS::SBHPump: {
@@ -352,10 +352,10 @@ public:
 				this->master->move_to(this->vpressures[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
 			}; break;
 			case CS::SBUWPump: {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox, -ox);
-				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
-				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
-				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox, -ox);
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RT, -ox);
+				this->master->move_to(this->powers[it->first], it->second, GraphletAnchor::LC, GraphletAnchor::RB, -ox, -ox);
+				this->master->move_to(this->rpms[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LB, ox, -ox);
+				this->master->move_to(this->dpressures[it->first], it->second, GraphletAnchor::RC, GraphletAnchor::LT, ox);
 				this->master->move_to(this->dfpressures[it->first], this->sb_draghead, GraphletAnchor::RC, GraphletAnchor::LT, 0.0F, ox);
 			}; break;
 			}
@@ -707,6 +707,7 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
 	this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);
 	this->sb_underwater_op = make_sb_underwater_pump_charge_menu(plc);
+
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -782,16 +783,9 @@ void ChargesPage::reflow(float width, float height) {
 }
 
 bool ChargesPage::can_select(IGraphlet* g) {
-	auto fun_btn = dynamic_cast<Credit<Buttonlet, CSFunction>*>(g);
-	bool okay = (fun_btn != nullptr);
-
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = (okay
-			|| (dynamic_cast<GateValvelet*>(g) != nullptr)
-			|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
-	}
-
-	return okay;
+	return (dynamic_cast<Credit<Buttonlet, CSFunction>*>(g)
+		|| (dynamic_cast<GateValvelet*>(g) != nullptr)
+		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

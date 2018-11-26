@@ -152,27 +152,29 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
-		GP ps_hopper_long_path[] = { GP::DGV13, GP::pshp, GP::d44, GP::DGV8, GP::PSHP };
-		GP ps_hopper_short_path[] = { GP::DGV14, GP::d44, GP::DGV8, GP::PSHP };
-		GP sb_hopper_short_path[] = { GP::DGV15, GP::d45, GP::DGV7, GP::SBHP };
-		GP sb_hopper_long_path[] = { GP::DGV16, GP::sbhp, GP::d45, GP::DGV7, GP::SBHP };
-		GP ps_underwater_path[] = { GP::PSUWP1, GP::psuwp, GP::d46, GP::PSUWP };
-		GP sb_underwater_path[] = { GP::SBUWP2, GP::sbuwp, GP::d47, GP::SBUWP };
+		{ // flow water
+			GP ps_hopper_long_path[] = { GP::DGV13, GP::pshp, GP::d44, GP::DGV8, GP::PSHP };
+			GP ps_hopper_short_path[] = { GP::DGV14, GP::d44, GP::DGV8, GP::PSHP };
+			GP sb_hopper_short_path[] = { GP::DGV15, GP::d45, GP::DGV7, GP::SBHP };
+			GP sb_hopper_long_path[] = { GP::DGV16, GP::sbhp, GP::d45, GP::DGV7, GP::SBHP };
+			GP ps_underwater_path[] = { GP::PSUWP1, GP::psuwp, GP::d46, GP::PSUWP };
+			GP sb_underwater_path[] = { GP::SBUWP2, GP::sbuwp, GP::d47, GP::SBUWP };
 
-		this->station->append_subtrack(GP::Hatch, GP::DGV16, water_color);
-		this->station->append_subtrack(GP::Sea, GP::SBUWP2, water_color);
+			this->station->append_subtrack(GP::Hatch, GP::DGV16, water_color);
+			this->station->append_subtrack(GP::Sea, GP::SBUWP2, water_color);
 
-		this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, water_color);
-		this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, water_color);
-		this->try_flow_water(GP::PSHPa, ps_hopper_long_path, water_color);
-		this->try_flow_water(GP::PSHPb, ps_hopper_short_path, water_color);
-		this->try_flow_water(GP::SBHPa, sb_hopper_short_path, water_color);
-		this->try_flow_water(GP::SBHPb, sb_hopper_long_path, water_color);
+			this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, water_color);
+			this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, water_color);
+			this->try_flow_water(GP::PSHPa, ps_hopper_long_path, water_color);
+			this->try_flow_water(GP::PSHPb, ps_hopper_short_path, water_color);
+			this->try_flow_water(GP::SBHPa, sb_hopper_short_path, water_color);
+			this->try_flow_water(GP::SBHPb, sb_hopper_long_path, water_color);
 
-		this->try_flow_water(GP::PSUWP1, ps_underwater_path, water_color);
-		this->try_flow_water(GP::PSUWP2, GP::PSUWP2, GP::PSUWP, water_color);
-		this->try_flow_water(GP::SBUWP1, GP::SBUWP1, GP::SBUWP, water_color);
-		this->try_flow_water(GP::SBUWP2, sb_underwater_path, water_color);
+			this->try_flow_water(GP::PSUWP1, ps_underwater_path, water_color);
+			this->try_flow_water(GP::PSUWP2, GP::PSUWP2, GP::PSUWP, water_color);
+			this->try_flow_water(GP::SBUWP1, GP::SBUWP1, GP::SBUWP, water_color);
+			this->try_flow_water(GP::SBUWP2, sb_underwater_path, water_color);
+		}
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -288,9 +290,12 @@ public:
 
 		{ // reflow devices and metrics
 			float gridsize = resolve_gridsize(gwidth, gheight);
+			float uwp_master_cy, uwp_spare_cy;
 			
 			this->reflow_valves(this->mvalves, this->labels, gridsize);
-			
+			this->station->fill_anchor_location(GP::PSUWP1, nullptr, &uwp_master_cy);
+			this->station->fill_anchor_location(GP::PSUWP2, nullptr, &uwp_spare_cy);
+
 			for (auto it = this->pumps.begin(); it != this->pumps.end(); it++) {
 				this->station->map_credit_graphlet(it->second, GraphletAnchor::CC);
 				this->master->move_to(this->labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
@@ -302,8 +307,13 @@ public:
 				case GP::PSHPa: case GP::PSHPb: case GP::SBHPa: case GP::SBHPb: {
 					this->station->map_credit_graphlet(this->rpms[it->first], GraphletAnchor::LB, gwidth * 9.0F, -toff);
 				}; break;
-				case GP::PSUWP1: case GP::PSUWP2: case GP::SBUWP1: case GP::SBUWP2: {
-					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LB, gwidth * 9.0F, -toff);
+				case GP::PSUWP1: case GP::SBUWP1: { // the pressure is shared by the two gland pumps
+					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::RC,
+						gwidth * -3.0F, (uwp_spare_cy - uwp_master_cy) * 0.5F);
+				}; break;
+				case GP::PSUWP2: case GP::SBUWP2: { // the pressure is shared by the two gland pumps
+					this->station->map_credit_graphlet(this->pressures[it->first], GraphletAnchor::LC,
+						gwidth * 6.0F, (uwp_master_cy - uwp_spare_cy) * 0.5F);
 				}; break;
 				}
 			}
@@ -542,13 +552,7 @@ void GlandsPage::update(long long count, long long interval, long long uptime) {
 
 
 bool GlandsPage::can_select(IGraphlet* g) {
-	bool okay = false;
-
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = ((dynamic_cast<HydraulicPumplet*>(g) != nullptr));
-	}
-
-	return okay;
+	return (dynamic_cast<HydraulicPumplet*>(g) != nullptr);
 }
 
 bool GlandsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
@@ -569,7 +573,7 @@ void GlandsPage::on_focus(IGraphlet* g) {
 	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	if (editor != nullptr) {
-		if (this->device->get_mode() != PLCMasterMode::User) {
+		if (this->device->authorized()) {
 			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
 		} else {
 			this->set_caret_owner(nullptr);

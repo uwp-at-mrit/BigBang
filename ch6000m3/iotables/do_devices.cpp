@@ -11,7 +11,7 @@ using namespace Windows::UI::Xaml::Controls;
 private class OverflowExecutor final : public IMenuCommand<OverflowAction, IGraphlet, PLCMaster*> {
 public:
 	bool can_execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(OverflowAction cmd, IGraphlet* overflow, PLCMaster* plc) override { // DB300, starts from 1
@@ -31,7 +31,7 @@ public:
 private class TankHeaterExecutor final : public IMenuCommand<TankHeaterAction, IGraphlet, PLCMaster*> {
 public:
 	bool can_execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(TankHeaterAction cmd, IGraphlet* heater, PLCMaster* plc) override { // DB300, starts from 1

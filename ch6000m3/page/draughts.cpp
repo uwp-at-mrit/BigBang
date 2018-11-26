@@ -40,8 +40,8 @@ private enum class DLTS { EarthWork, Vessel, HopperHeight, Loading, Displacement
 
 // WARNING: order matters
 private enum class DL : unsigned int {
-	SternDraft, psSternDraft, psSuctionDraft, sbSternDraft, psSternHeight, sbSternHeight,
-	BowDraft, psBowDraft, sbSuctionDraft, sbBowDraft, psBowHeight, sbBowHeight,
+	SternDraft, psSternDraft, psSuctionDraft, psAmidshipDraft, sbSternDraft, psSternHeight, sbSternHeight,
+	BowDraft, psBowDraft, sbSuctionDraft, sbAmidshipDraft, sbBowDraft, psBowHeight, sbBowHeight,
 
 	Overflow, NetWeight,
 
@@ -126,10 +126,12 @@ public:
 
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
 		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
+		this->dimensions[DL::psAmidshipDraft]->set_value(DBD(DB2, ps_fixed_center_draught));
 		this->dimensions[DL::psSternDraft]->set_value(DBD(DB2, ps_fixed_stern_draught));
 
 		this->dimensions[DL::sbBowDraft]->set_value(DBD(DB2, sb_fixed_bow_draught));
 		this->dimensions[DL::sbSuctionDraft]->set_value(DBD(DB2, sb_suction_draught));
+		this->dimensions[DL::sbAmidshipDraft]->set_value(DBD(DB2, sb_fixed_center_draught));
 		this->dimensions[DL::sbSternDraft]->set_value(DBD(DB2, sb_fixed_stern_draught));
 
 		this->dimensions[DL::BowDraft]->set_value(DBD(DB2, fixed_bow_draught));
@@ -218,8 +220,10 @@ public:
 			this->reflow_dimension(this->dimensions, DL::sbBowDraft, 1.0F, 1.0F, GraphletAnchor::RT, -yoff, yoff);
 			this->reflow_dimension(this->dimensions, DL::sbBowHeight, 1.0F, 1.0F, GraphletAnchor::RB, -yoff, -yoff);
 			
-			this->reflow_dimension(this->dimensions, DL::psSuctionDraft, 0.618F, 0.0F, GraphletAnchor::CB, 0.0F, -yoff);
-			this->reflow_dimension(this->dimensions, DL::sbSuctionDraft, 0.618F, 1.0F, GraphletAnchor::CT, 0.0F, yoff);
+			this->reflow_dimension(this->dimensions, DL::psAmidshipDraft, 0.5F, 0.0F, GraphletAnchor::CB, 0.0F, -yoff);
+			this->reflow_dimension(this->dimensions, DL::sbAmidshipDraft, 0.5F, 1.0F, GraphletAnchor::CT, 0.0F, yoff);
+			this->reflow_dimension(this->dimensions, DL::psSuctionDraft, 0.7F, 0.0F, GraphletAnchor::CB, 0.0F, -yoff);
+			this->reflow_dimension(this->dimensions, DL::sbSuctionDraft, 0.7F, 1.0F, GraphletAnchor::CT, 0.0F, yoff);
 
 			this->reflow_dimension(this->dimensions, DL::psSternDraft, 0.0F, 0.0F, GraphletAnchor::LB, yoff, -yoff);
 			this->reflow_dimension(this->dimensions, DL::psSternHeight, 0.0F, 0.0F, GraphletAnchor::LT, yoff, yoff);
@@ -397,18 +401,10 @@ void DraughtsPage::reflow(float width, float height) {
 }
 
 bool DraughtsPage::can_select(IGraphlet* g) {
-	bool okay = false;
+	auto hdchecker = dynamic_cast<Buttonlet*>(g);
 
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		auto hdchecker = dynamic_cast<Buttonlet*>(g);
-
-		okay = ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
-			|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
-	}
-
-	okay = okay || (dynamic_cast<ITimeSerieslet*>(g) != nullptr);
-
-	return okay;
+	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
+		|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
 }
 
 bool DraughtsPage::can_select_multiple() {

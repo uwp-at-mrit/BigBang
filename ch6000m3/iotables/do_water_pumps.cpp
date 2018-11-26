@@ -28,7 +28,7 @@ static uint16 DO_water_pump_group_command(OP cmd) {
 private class PSWaterPumpExecutor final : public IMenuCommand<PSWaterPumpAction, WaterPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSWaterPumpAction cmd, WaterPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(PSWaterPumpAction cmd, WaterPumplet* pump, PLCMaster* plc) override {
@@ -53,7 +53,7 @@ public:
 private class SBWaterPumpExecutor final : public IMenuCommand<SBWaterPumpAction, WaterPumplet, PLCMaster*> {
 public:
 	bool can_execute(SBWaterPumpAction cmd, WaterPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(SBWaterPumpAction cmd, WaterPumplet* pump, PLCMaster* plc) override {

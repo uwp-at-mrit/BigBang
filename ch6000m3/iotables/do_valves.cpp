@@ -13,7 +13,7 @@ public:
 
 public:
 	bool can_execute(Action cmd, GateValvelet* valve, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(Action cmd, GateValvelet* valve, PLCMaster* plc) override {

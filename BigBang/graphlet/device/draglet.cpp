@@ -111,7 +111,7 @@ static CanvasGeometry^ make_visor(float radius, float bottom_radius, float teeth
 	auto visor = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	double degrees = drag_adjusted_angle(degrees0, sign);
 	double arm_degrees = drag_adjusted_angle(arm_degrees0, sign);
-	double normal_start = ((sign > 0.0F) ? 0.0 : -180.0);
+	double normal_start = ((sign > 0.0F) ? 0.0 : -180.0) - arm_degrees0;
 	float jaw_length = teeth_length * 0.85F;
 	float bottom_base_radians = degrees_to_radians(degrees + 90.0 * sign);
 	float bottom_diffradians = std::acos(bottom_radius / radius);

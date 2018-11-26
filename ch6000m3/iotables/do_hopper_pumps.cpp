@@ -49,7 +49,7 @@ public:
 
 public:
 	bool can_execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) {
@@ -63,7 +63,7 @@ private:
 private class LubricationUnitExecutor final : public IMenuCommand<LubricationUnitAction, Credit<HydraulicPumplet, bool>, PLCMaster*> {
 public:
 	bool can_execute(LubricationUnitAction cmd, Credit<HydraulicPumplet, bool>* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(LubricationUnitAction cmd, Credit<HydraulicPumplet, bool>* pump, PLCMaster* plc) override {
@@ -83,7 +83,7 @@ private class GearboxExecutor final
 	: public IMenuCommand<GearboxLubricatorAction, GroupCredit<HydraulicPumplet, bool, GearboxLubricator>, PLCMaster*> {
 public:
 	bool can_execute(GearboxLubricatorAction cmd, GroupCredit<HydraulicPumplet, bool, GearboxLubricator>* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(GearboxLubricatorAction cmd, GroupCredit<HydraulicPumplet, bool, GearboxLubricator>* pump, PLCMaster* plc) override {
@@ -110,7 +110,7 @@ public:
 private class PSHopperPumpChargeExecutor final : public IMenuCommand<PSHopperPumpChargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSHopperPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(PSHopperPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {
@@ -129,7 +129,7 @@ public:
 private class SBHopperPumpChargeExecutor final : public IMenuCommand<SBHopperPumpChargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(SBHopperPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(SBHopperPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {
@@ -149,7 +149,7 @@ public:
 private class PSUnderWaterPumpChargeExecutor final : public IMenuCommand<PSUnderWaterPumpChargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSUnderWaterPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(PSUnderWaterPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {
@@ -168,7 +168,7 @@ public:
 private class SBUnderWaterPumpChargeExecutor final : public IMenuCommand<SBUnderWaterPumpChargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(SBUnderWaterPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(SBUnderWaterPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {
@@ -188,7 +188,7 @@ public:
 private class PSHopperPumpDischargeExecutor final : public IMenuCommand<PSHopperPumpDischargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSHopperPumpDischargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(PSHopperPumpDischargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {
@@ -209,7 +209,7 @@ public:
 private class SBHopperPumpDischargeExecutor final : public IMenuCommand<SBHopperPumpDischargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(SBHopperPumpDischargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected();
+		return plc->connected() && plc->authorized();
 	}
 
 	void execute(SBHopperPumpDischargeAction cmd, HopperPumplet* pump, PLCMaster* plc) override {

@@ -37,7 +37,7 @@ private enum class WP : unsigned int {
 	// Start Conditions
 	RemoteControl,
 	NoAlert, NoBroken,
-	NotRunning, NoEmergence, NoRepair,
+	NotRunning, NoEmergence, NoMaintenance,
 	PipelineReady, SpeedKnobMoved,
 
 	// Running Conditions
@@ -77,7 +77,7 @@ public:
 		this->diagnoses[WP::NoBroken]->set_status(DI_water_pump_broken(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
 		this->diagnoses[WP::NotRunning]->set_status(DI_water_pump_running(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
 		this->diagnoses[WP::NoEmergence]->set_status(DI_water_pump_emergence(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
-		this->diagnoses[WP::NoRepair]->set_status(DI_water_pump_repair(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
+		this->diagnoses[WP::NoMaintenance]->set_status(DI_water_pump_repair(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
 		this->diagnoses[WP::PipelineReady]->set_status(DBX(DB205, plready), AlarmStatus::Notice, AlarmStatus::None);
 		this->diagnoses[WP::SpeedKnobMoved]->set_status(DBX(DB4, knob), AlarmStatus::Notice, AlarmStatus::None);
 

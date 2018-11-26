@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PSUnderWaterCondition" xml:space="preserve">
-    <value>左舷水下泵变频器启动条件</value>
+    <value>左舷水下泵变频器控制条件</value>
   </data>
   <data name="PSHopperCondition" xml:space="preserve">
-    <value>左舷舱内泵变频器启动条件</value>
+    <value>左舷舱内泵变频器控制条件</value>
   </data>
   <data name="SBUnderWaterCondition" xml:space="preserve">
-    <value>右舷水下泵变频器启动条件</value>
+    <value>右舷水下泵变频器控制条件</value>
   </data>
   <data name="SBHopperCondition" xml:space="preserve">
-    <value>右舷舱内泵变频器启动条件</value>
+    <value>右舷舱内泵变频器控制条件</value>
   </data>
   <data name="HPGearboxPumpsRunning" xml:space="preserve">
     <value>舱内泵齿轮箱滑油泵运行</value>
@@ -141,7 +141,7 @@
   <data name="HPNoEmergence" xml:space="preserve">
     <value>舱内泵变频器无紧急停止反馈</value>
   </data>
-  <data name="HPNoRepair" xml:space="preserve">
+  <data name="HPNoMaintenance" xml:space="preserve">
     <value>舱内泵变频器无维修反馈</value>
   </data>
   <data name="HPNotRunning" xml:space="preserve">
@@ -165,7 +165,7 @@
   <data name="UWPNoEmergence" xml:space="preserve">
     <value>水下泵变频器无紧急停止反馈</value>
   </data>
-  <data name="UWPNoRepair" xml:space="preserve">
+  <data name="UWPNoMaintenance" xml:space="preserve">
     <value>水下泵变频器无维修反馈</value>
   </data>
   <data name="UWPNotRunning" xml:space="preserve">

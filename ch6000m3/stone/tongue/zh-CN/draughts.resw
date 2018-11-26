@@ -177,4 +177,10 @@
   <data name="NetWeight" xml:space="preserve">
     <value>空船重量</value>
   </data>
+  <data name="psAmidshipDraft" xml:space="preserve">
+    <value>舯左吃水</value>
+  </data>
+  <data name="sbAmidshipDraft" xml:space="preserve">
+    <value>舯右吃水</value>
+  </data>
 </root>
