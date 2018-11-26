@@ -117,73 +117,70 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="hydraulics" xml:space="preserve">
-    <value>液压系统</value>
+  <data name="PSUnderWaterCondition" xml:space="preserve">
+    <value>左舷水下泵变频器启动条件</value>
   </data>
-  <data name="gallery" xml:space="preserve">
-    <value>图元状态示例</value>
+  <data name="PSHopperCondition" xml:space="preserve">
+    <value>左舷舱内泵变频器启动条件</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>温度</value>
+  <data name="SBUnderWaterCondition" xml:space="preserve">
+    <value>右舷水下泵变频器启动条件</value>
   </data>
-  <data name="glands" xml:space="preserve">
-    <value>泥泵封水管系</value>
+  <data name="SBHopperCondition" xml:space="preserve">
+    <value>右舷舱内泵变频器启动条件</value>
   </data>
-  <data name="hopper_doors" xml:space="preserve">
-    <value>泥门控制</value>
+  <data name="HPGearboxPumpsRunning" xml:space="preserve">
+    <value>舱内泵齿轮箱滑油泵运行</value>
   </data>
-  <data name="Empty" xml:space="preserve">
-    <value>空</value>
+  <data name="HPGlandPumpsRunning" xml:space="preserve">
+    <value>舱内泵封水泵运行</value>
   </data>
-  <data name="Full" xml:space="preserve">
-    <value>满</value>
+  <data name="HPLubricatingUnitRunning" xml:space="preserve">
+    <value>舱内泵轴承润滑单元运行</value>
   </data>
-  <data name="High" xml:space="preserve">
-    <value>高</value>
+  <data name="HPNoEmergence" xml:space="preserve">
+    <value>舱内泵变频器无紧急停止反馈</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>低</value>
+  <data name="HPNoRepair" xml:space="preserve">
+    <value>舱内泵变频器无维修反馈</value>
   </data>
-  <data name="Normal" xml:space="preserve">
-    <value>正常</value>
+  <data name="HPNotRunning" xml:space="preserve">
+    <value>舱内泵变频器无运行反馈</value>
   </data>
-  <data name="UltraLow" xml:space="preserve">
-    <value>过低</value>
+  <data name="HPPipelineReady" xml:space="preserve">
+    <value>舱内泵管系备妥</value>
   </data>
-  <data name="draughts" xml:space="preserve">
-    <value>吃水装载</value>
+  <data name="HPRemoteControl" xml:space="preserve">
+    <value>舱内泵变频器遥控模式</value>
   </data>
-  <data name="charges" xml:space="preserve">
-    <value>装舱丨装驳</value>
+  <data name="HPSpeedKnobMoved" xml:space="preserve">
+    <value>舱内泵调速旋钮离开%零位</value>
   </data>
-  <data name="discharges" xml:space="preserve">
-    <value>艏吹丨艏喷</value>
+  <data name="HPStartReady" xml:space="preserve">
+    <value>舱内泵变频器备妥反馈</value>
   </data>
-  <data name="flushs" xml:space="preserve">
-    <value>高压冲水</value>
+  <data name="UWPGlandPumpsRunning" xml:space="preserve">
+    <value>水下泵封水泵运行</value>
   </data>
-  <data name="dredges" xml:space="preserve">
-    <value>耙臂指示</value>
+  <data name="UWPNoEmergence" xml:space="preserve">
+    <value>水下泵变频器无紧急停止反馈</value>
   </data>
-  <data name="density" xml:space="preserve">
-    <value>密度</value>
+  <data name="UWPNoRepair" xml:space="preserve">
+    <value>水下泵变频器无维修反馈</value>
   </data>
-  <data name="flspeed" xml:space="preserve">
-    <value>流速</value>
+  <data name="UWPNotRunning" xml:space="preserve">
+    <value>水下泵变频器无运行反馈</value>
   </data>
-  <data name="dredges_Left" xml:space="preserve">
-    <value>左绞车 &amp;&amp; 吊架</value>
+  <data name="UWPPipelineReady" xml:space="preserve">
+    <value>水下泵管系备妥</value>
   </data>
-  <data name="dredges_Right" xml:space="preserve">
-    <value>右绞车 &amp;&amp; 吊架</value>
+  <data name="UWPRemoteControl" xml:space="preserve">
+    <value>水下泵变频器遥控模式</value>
   </data>
-  <data name="lubricatings" xml:space="preserve">
-    <value>轴承润滑单元 &amp;&amp; 齿轮箱滑油泵</value>
+  <data name="UWPSpeedKnobMoved" xml:space="preserve">
+    <value>水下泵调速旋钮离开%零位</value>
   </data>
-  <data name="water_pump_dx" xml:space="preserve">
-    <value>高压冲水泵诊断</value>
-  </data>
-  <data name="hopper_pump_dx" xml:space="preserve">
-    <value>泥泵诊断</value>
+  <data name="UWPStartReady" xml:space="preserve">
+    <value>水下泵变频器备妥反馈</value>
   </data>
 </root>

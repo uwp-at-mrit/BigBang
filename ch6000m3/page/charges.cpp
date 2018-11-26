@@ -1,6 +1,8 @@
 ﻿#include <map>
 
 #include "page/charges.hpp"
+#include "page/diagnostics/hopper_pump_dx.hpp"
+
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -42,6 +44,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum LDMode { WindowUI = 0, Dashboard };
 
+private enum class CSFunction { Diagnostics, _ };
+
 // WARNING: order matters
 private enum class CS : unsigned int {
 	Port, Starboard,
@@ -54,7 +58,7 @@ private enum class CS : unsigned int {
 	D013, D015,
 
 	// Pump Dimensions
-	A, C, F, H,
+	C, F, H,
 	
 	// Key Labels
 	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
@@ -66,7 +70,7 @@ private enum class CS : unsigned int {
 	d1720, d1819, d1920, d2122,
 
 	// anchors used for unnamed nodes
-	ps, sb, gantry, deck_lx, deck_rx, deck_ty, deck_by,
+	ps, sb, gantry, deck_lx, deck_rx, deck_ty, deck_by, diagnostics,
 
 	// anchors used for non-interconnected nodes
 	n0325, n0405, n0723, n0923
@@ -97,7 +101,6 @@ public:
 	}
 
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
-		this->pump_pressures[CS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LC);
 		this->pump_pressures[CS::C]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::LC);
 		this->pump_pressures[CS::F]->set_value(RealData(DB203, pump_F_pressure), GraphletAnchor::LC);
 		this->pump_pressures[CS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LC);
@@ -131,7 +134,6 @@ public:
 		DI_hopper_pumps(this->hoppers[CS::PSHPump], this->hoppers[CS::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[CS::SBHPump], this->hoppers[CS::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_pump_dimension(this->pump_pressures[CS::A], DB4, pump_A_feedback);
 		DI_pump_dimension(this->pump_pressures[CS::C], DB4, pump_C_feedback);
 		DI_pump_dimension(this->pump_pressures[CS::F], DB4, pump_F_feedback);
 		DI_pump_dimension(this->pump_pressures[CS::H], DB4, pump_H_feedback);
@@ -227,8 +229,8 @@ public:
 		pTurtle->move_up(3, CS::d0406)->move_right(4, CS::D006)->move_right(4)->move_down(0.5F, CS::deck_ty)->move_down(CS::D009);
 		pTurtle->move_down(5)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
 
-		pTurtle->move_up(1.5F, CS::D004)->move_up(2, CS::ps)->move_up(2, CS::C)->turn_up_left();
-		pTurtle->move_left(10, CS::PSUWPump)->move_left(8)->move_left(CS::Port);
+		pTurtle->move_up(1.5F, CS::D004)->move_up(2, CS::ps)->move_up(2, CS::diagnostics)->turn_up_left();
+		pTurtle->move_left(8, CS::PSUWPump)->move_left(10)->move_left(CS::Port);
 
 		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(5, CS::D007);
 		pTurtle->move_down(CS::deck_by)->move_down(0.5F)->move_left(4, CS::D026)->move_left(4, CS::d0326);
@@ -241,12 +243,13 @@ public:
 		pTurtle->move_left(4, CS::d13)->move_left_up(2, CS::D013)->move_left_up(1.5F)->jump_back();
 		pTurtle->move_left(9)->move_left_up(2, CS::D015)->move_left_up(1.5F);
 
-		pTurtle->jump_back(CS::d0326)->move_down(1.5F, CS::D003)->move_down(2, CS::sb)->move_down(2, CS::F)->turn_down_left();
-		pTurtle->move_left(10, CS::SBUWPump)->move_left(8)->move_left(CS::Starboard);
+		pTurtle->jump_back(CS::d0326)->move_down(1.5F, CS::D003)->move_down(2, CS::sb)->move_down(2, CS::C)->turn_down_left();
+		pTurtle->move_left(8, CS::SBUWPump)->move_left(10)->move_left(CS::Starboard);
 
 		pTurtle->jump_back(CS::d1819)->move_right(5, CS::deck_lx)->move_right(2, CS::D019)->move_right(2)->move_to(CS::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<CS>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->load_buttons(this->functions);
 		
 		{ // load valves
 			this->load_valve(this->gvalves, this->vlabels, this->captions, CS::D001, radius, 0.0);
@@ -284,7 +287,7 @@ public:
 		{ // load labels and dimensions
 			this->load_percentage(this->progresses, CS::D003);
 			this->load_percentage(this->progresses, CS::D004);
-			this->load_dimensions(this->pump_pressures, CS::A, CS::H, "bar");
+			this->load_dimensions(this->pump_pressures, CS::C, CS::H, "bar");
 
 			this->load_label(this->captions, CS::Gantry, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, CS::LMOD, Colours::Cyan, this->special_font);
@@ -428,11 +431,12 @@ public:
 			this->master->move_to(this->progresses[CS::D003], this->gvalves[CS::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
 			this->master->move_to(this->progresses[CS::D004], this->gvalves[CS::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 
-			this->station->map_credit_graphlet(this->pump_pressures[CS::C], GraphletAnchor::LB, gwidth * 3.0F);
-			this->station->map_credit_graphlet(this->pump_pressures[CS::F], GraphletAnchor::LT, gwidth * 3.0F);
-			this->master->move_to(this->pump_pressures[CS::A], this->pump_pressures[CS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->station->map_credit_graphlet(this->pump_pressures[CS::C], GraphletAnchor::LT, gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[CS::F], this->pump_pressures[CS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 			this->master->move_to(this->pump_pressures[CS::H], this->pump_pressures[CS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
+
+		this->station->map_graphlet_at_anchor(this->functions[CSFunction::Diagnostics], CS::diagnostics, GraphletAnchor::LB, gwidth * 3.0F);
 	}
 
 public:
@@ -590,6 +594,9 @@ private:
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
 	Arclet* LMOD;
+
+private:
+	std::map<CSFunction, Credit<Buttonlet, CSFunction>*> functions;
 	
 private:
 	CanvasTextFormat^ caption_font;
@@ -693,6 +700,8 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	Vessel* dashboard = new Vessel(this);
 
 	this->dashboard = dashboard;
+	this->diagnostics = new HopperPumpDiagnostics(plc);
+
 	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
 	this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
@@ -773,10 +782,12 @@ void ChargesPage::reflow(float width, float height) {
 }
 
 bool ChargesPage::can_select(IGraphlet* g) {
-	bool okay = false;
+	auto fun_btn = dynamic_cast<Credit<Buttonlet, CSFunction>*>(g);
+	bool okay = (fun_btn != nullptr);
 
 	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = ((dynamic_cast<GateValvelet*>(g) != nullptr)
+		okay = (okay
+			|| (dynamic_cast<GateValvelet*>(g) != nullptr)
 			|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 	}
 
@@ -786,9 +797,12 @@ bool ChargesPage::can_select(IGraphlet* g) {
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, CS>*>(g);
+	auto diagnose = dynamic_cast<Credit<Buttonlet, CSFunction>*>(g);
 	
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
+	} else if (diagnose != nullptr) {
+		this->diagnostics->show();
 	} else if (hpump != nullptr) {
 		switch (hpump->id) {
 		case CS::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;

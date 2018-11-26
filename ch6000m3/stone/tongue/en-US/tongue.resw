@@ -186,7 +186,10 @@
   <data name="lubricatings" xml:space="preserve">
     <value>Lubricating Unit</value>
   </data>
-  <data name="waterpumpdx" xml:space="preserve">
+  <data name="water_pump_dx" xml:space="preserve">
     <value>Water Pump Diagnostics</value>
+  </data>
+  <data name="hopper_pump_dx" xml:space="preserve">
+    <value>Hopper Pump Diagnostics</value>
   </data>
 </root>

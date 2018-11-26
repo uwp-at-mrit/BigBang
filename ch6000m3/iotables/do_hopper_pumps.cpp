@@ -9,27 +9,35 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;
 
+static unsigned int hopper_pump_reset_offset = 3U;
+
 static unsigned int both_hopper_dredging = 310U;
 static unsigned int both_underwater_dredging = 307U;
 static unsigned int both_shoring = 315U;
 static unsigned int both_rainbowing = 318U;
 
-template<typename OP>
-static uint16 DO_hopper_pump_common_command(OP cmd, bool ps, bool hopper) {
-	uint16 offset = 0U;
-	uint16 index = 0U;
-
-	switch (cmd) {
-	case OP::Prepare: offset = 0U; break;
-	case OP::Start:   offset = 1U; break;
-	case OP::Stop:    offset = 2U; break;
-	case OP::Reset:   offset = 3U; break;
-	}
-
+inline static uint16 DO_hopper_pump_common_command_index(bool ps, bool hopper) {
+	unsigned int index = 0U;
+	
 	if (ps) {
 		index = (hopper ? 325U : 321U);
 	} else {
 		index = (hopper ? 333U : 329U);
+	}
+
+	return index;
+}
+
+template<typename OP>
+static uint16 DO_hopper_pump_common_command(OP cmd, bool ps, bool hopper) {
+	uint16 index = DO_hopper_pump_common_command_index(ps, hopper);
+	uint16 offset = 0U;
+	
+	switch (cmd) {
+	case OP::Prepare: offset = 0U; break;
+	case OP::Start:   offset = 1U; break;
+	case OP::Stop:    offset = 2U; break;
+	case OP::Reset:   offset = hopper_pump_reset_offset; break;
 	}
 
 	return index + offset;
@@ -256,4 +264,53 @@ MenuFlyout^ WarGrey::SCADA::make_ps_hopper_pump_discharge_menu(PLCMaster* plc) {
 
 MenuFlyout^ WarGrey::SCADA::make_sb_hopper_pump_discharge_menu(PLCMaster* plc) {
 	return make_menu<SBHopperPumpDischargeAction, HopperPumplet, PLCMaster*>(new SBHopperPumpDischargeExecutor(), plc);
+}
+
+/*************************************************************************************************/
+uint16 WarGrey::SCADA::DO_gate_flushing_pump_command(GlandPumpAction cmd, bool ps) { // DB300, starts from 1
+	uint16 offset = 0U;
+	uint16 index = (ps ? 721U : 725U);
+
+	switch (cmd) {
+	case GlandPumpAction::Start: offset = 0U; break;
+	case GlandPumpAction::Stop:  offset = 1U; break;
+	case GlandPumpAction::Reset: offset = 2U; break;
+	case GlandPumpAction::Auto:  offset = 3U; break;
+	}
+
+	return index + offset;
+}
+
+uint16 WarGrey::SCADA::DO_gland_pump_command(GlandPumpAction cmd, bool ps, bool hopper, bool master) { // DB300, starts from 1
+	uint16 offset = 0U;
+	uint16 index = 0U;
+
+	switch (cmd) {
+	case GlandPumpAction::Reset: offset = 0U; break;
+	case GlandPumpAction::Start: offset = 1U; break;
+	case GlandPumpAction::Stop:  offset = 2U; break;
+	case GlandPumpAction::Auto:  offset = 3U; break;
+	}
+
+	if (hopper) {
+		if (ps) {
+			index = (master ? 737U : 741U);
+		} else {
+			index = (master ? 745U : 749U);
+		}
+	} else {
+		if (ps) {
+			index = (master ? 753U : 757U);
+		} else {
+			index = (master ? 761U : 765U);
+		}
+	}
+
+	return index + offset;
+}
+
+
+/*************************************************************************************************/
+unsigned int WarGrey::SCADA::DO_hopper_pump_reset_command(bool ps, bool hopper) {
+	return DO_hopper_pump_common_command_index(ps, hopper) + hopper_pump_reset_offset;
 }

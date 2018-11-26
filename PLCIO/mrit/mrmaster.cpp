@@ -127,8 +127,7 @@ void IMRMaster::connect() {
 
             this->mrin  = make_socket_reader(this->socket);
             this->mrout = make_socket_writer(this->socket);
-			this->delay_balance = 0;
-
+			
             this->logger->log_message(Log::Debug, L">> connected to device[%s]", this->device_description()->Data());
 
 			this->notify_connectivity_changed();
@@ -166,42 +165,30 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t addrn, uint8* data, size_t size) {
 	if (this->mrout != nullptr) {
 		bool reading = (fcode == this->preference.read_signal_fcode());
-		bool reading_safe = true;
 
-		if (reading) {
-			if (this->delay_balance > 0) {
-				reading_safe = false;
-				syslog(Log::Notice, L"cancelled a request to device[%s] because of network delay", this->device_description()->Data());
-			}
-		}
+		this->preference.write_header(this->mrout, fcode, datablock, addr0, addrn);
+		this->preference.write_aligned_tail(this->mrout, data, size);
 
-		if (!reading || reading_safe) {
-			this->preference.write_header(this->mrout, fcode, datablock, addr0, addrn);
-			this->preference.write_aligned_tail(this->mrout, data, size);
+		create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
+			try {
+				unsigned int sent = sending.get();
 
-			create_task(this->mrout->StoreAsync()).then([=](task<unsigned int> sending) {
-				try {
-					unsigned int sent = sending.get();
-
-					if (reading) {
-						this->delay_balance += 1;
-					} else {
-						this->logger->log_message(Log::Info,
-							L"<sent command '%c' on data block %u[%u, %u] to device[%s]@%s>",
-							fcode, datablock, addr0, addrn, this->device_description()->Data(),
-							update_nowstamp()->Data());
-					}
-
-					this->logger->log_message(Log::Debug,
-						L"<sent %u-byte-request for command '%c' on data block %u[%u, %u] to device[%s]>",
-						sent, fcode, datablock, addr0, addrn, this->device_description()->Data());
-				} catch (task_canceled&) {
-				} catch (Platform::Exception^ e) {
-					this->logger->log_message(Log::Warning, e->Message);
-					this->shake_hands();
+				if (!reading) {
+					this->logger->log_message(Log::Info,
+						L"<sent command '%c' on data block %u[%u, %u] to device[%s]@%s>",
+						fcode, datablock, addr0, addrn, this->device_description()->Data(),
+						update_nowstamp()->Data());
 				}
-			});
-		}
+
+				this->logger->log_message(Log::Debug,
+					L"<sent %u-byte-request for command '%c' on data block %u[%u, %u] to device[%s]>",
+					sent, fcode, datablock, addr0, addrn, this->device_description()->Data());
+			} catch (task_canceled&) {
+			} catch (Platform::Exception^ e) {
+				this->logger->log_message(Log::Warning, e->Message);
+				this->shake_hands();
+			}
+		});
 	}
 }
 
@@ -213,8 +200,6 @@ void IMRMaster::wait_process_confirm_loop() {
 		size_t leader, fcode, datablock, addr0, addrn, datasize, tailsize;
 		double now = current_inexact_milliseconds();
 
-		this->delay_balance -= 1;
-		
 		if (size < predata_size) {
 			if (size == 0) {
 				modbus_protocol_fatal(this->logger, L"device[%s] has lost", this->device_description()->Data());
@@ -261,11 +246,7 @@ void IMRMaster::wait_process_confirm_loop() {
 					L"<received confirmation(%u, %u, %u) for command '%c' comes from device[%s]>",
 					datablock, addr0, addrn, fcode, this->device_description()->Data());
 
-				if (this->delay_balance > 1) {
-					syslog(Log::Notice, L"descarded a delayed response from device[%s]", this->device_description()->Data());
-				} else {
-					this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
-				}
+				this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
 			}
 		});
 	}).then([=](task<void> confirm) {

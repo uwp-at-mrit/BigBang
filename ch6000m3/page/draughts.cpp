@@ -170,7 +170,7 @@ public:
 		
 		lines_height = ship_y * 0.618F;
 		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
-			timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 0U));
+			timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 

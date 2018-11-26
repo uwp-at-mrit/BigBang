@@ -3,27 +3,27 @@
 
 using namespace WarGrey::SCADA;
 
-static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4, const uint8* db205, size_t idx205, bool on) {
-	if (on) {
-		target->set_remote_control(DBX(db4, idx4 + 3U));
+static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1, bool on) {
+	target->set_remote_control(DI_hopper_pump_remote_control(db4, idx4_p1, on));
 
-		if (DBX(db4, idx4 + 6U)) {
+	if (on) {
+		if (DI_hopper_pump_running(db4, idx4_p1, true)) {
 			target->set_status(HopperPumpStatus::Running);
-		} else if (DBX(db4, idx4 + 4U)) {
+		} else if (DI_hopper_pump_alert(db4, idx4_p1, true)) {
 			target->set_status(HopperPumpStatus::Alert);
-		} else if (DBX(db4, idx4 + 5U)) {
+		} else if (DI_hopper_pump_broken(db4, idx4_p1, true)) {
 			target->set_status(HopperPumpStatus::Broken);
-		} else if (DBX(db4, idx4 + 7U)) {
+		} else if (DI_hopper_pump_repair(db4, idx4_p1, true)) {
 			target->set_status(HopperPumpStatus::Maintenance);
-		} else if (DBX(db205, idx205 + 0U)) {
+		} else if (DBX(db205, idx205_p1 - 1U)) {
 			target->set_status(HopperPumpStatus::Starting);
-		} else if (DBX(db205, idx205 + 1U)) {
+		} else if (DBX(db205, idx205_p1 + 0U)) {
 			target->set_status(HopperPumpStatus::Stopping);
-		} else if (DBX(db4, idx4 + 0U)) {
+		} else if (DI_hopper_pump_ready(db4, idx4_p1, true)) {
 			target->set_status(HopperPumpStatus::Ready);
-		} else if (DBX(db205, idx205 + 2U)) {
+		} else if (DBX(db205, idx205_p1 + 1U)) {
 			target->set_status(HopperPumpStatus::Unstartable);
-		} else if (DBX(db205, idx205 + 3U)) {
+		} else if (DBX(db205, idx205_p1 + 2U)) {
 			target->set_status(HopperPumpStatus::Unstoppable);
 		} else {
 			target->set_status(HopperPumpStatus::Stopped);
@@ -33,25 +33,51 @@ static void _DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx4
 		//target->set_status(DBX(db205, idx205 + 4U), HopperPumpStatus::StartReady);
 		//target->set_status(DBX(db205, idx205 + 5U), HopperPumpStatus::StopReady);
 		//target->set_status(DBX(db205, idx205 + 6U), HopperPumpStatus::Ready);
+	} else {
+		target->set_status(HopperPumpStatus::Stopped);
 	}
 }
 
 /*************************************************************************************************/
 void WarGrey::SCADA::DI_hopper_pumps(HopperPumplet* t1, HopperPumplet* t2
 	, const uint8* db4, size_t idx4_p1 , const uint8* db205, size_t idx205_1_p1, size_t idx205_2_p1) {
-	_DI_hopper_pump(t1, db4, idx4_p1 - 1U, db205, idx205_1_p1 - 1U, DI_hopper_type(db4, idx4_p1));
-	_DI_hopper_pump(t2, db4, idx4_p1 - 1U, db205, idx205_2_p1 - 1U, DI_underwater_type(db4, idx4_p1));
+	_DI_hopper_pump(t1, db4, idx4_p1, db205, idx205_1_p1, DI_hopper_type(db4, idx4_p1));
+	_DI_hopper_pump(t2, db4, idx4_p1, db205, idx205_2_p1, DI_underwater_type(db4, idx4_p1));
 }
 
 void WarGrey::SCADA::DI_hopper_pump(HopperPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
-	_DI_hopper_pump(target, db4, idx_p1 - 1U, db205, idx205_p1 - 1U, DI_hopper_type(db4, idx_p1));
+	_DI_hopper_pump(target, db4, idx_p1, db205, idx205_p1, DI_hopper_type(db4, idx_p1));
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_remote_control(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 + 2U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_ready(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 - 1U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_running(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 + 5U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_alert(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 + 3U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_broken(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 + 4U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_repair(const uint8* db4, size_t idx4_p1, bool on) {
+	return on && DBX(db4, idx4_p1 + 6U);
 }
 
 /************************************************************************************************/
 void WarGrey::SCADA::DI_hopper_gland_pump(HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
 	target->set_remote_control(DBX(db4, idx_p1 + 0U));
 
-	if (DBX(db4, idx_p1 + 1U)) {
+	if (DI_hopper_gland_pump_running(db4, idx_p1)) {
 		target->set_status(HydraulicPumpStatus::Running);
 	} else if (DBX(db4, idx_p1 + 2U)) {
 		target->set_status(HydraulicPumpStatus::Broken);
@@ -74,7 +100,7 @@ void WarGrey::SCADA::DI_hopper_gland_pump(HydraulicPumplet* target, const uint8*
 void WarGrey::SCADA::DI_underwater_gland_pump(HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
 	target->set_remote_control(DBX(db4, idx_p1 - 1U));
 
-	if (DBX(db4, idx_p1 + 1U)) {
+	if (DI_underwater_gland_pump_running(db4, idx_p1)) {
 		target->set_status(HydraulicPumpStatus::Running);
 	} else if (DBX(db4, idx_p1 + 2U)) {
 		target->set_status(HydraulicPumpStatus::Broken);
@@ -94,20 +120,32 @@ void WarGrey::SCADA::DI_underwater_gland_pump(HydraulicPumplet* target, const ui
 	}
 }
 
+bool WarGrey::SCADA::DI_hopper_gland_pump_running(const uint8* db4, size_t idx4_p1) {
+	return DBX(db4, idx4_p1 + 1U);
+}
+
+bool WarGrey::SCADA::DI_underwater_gland_pump_running(const uint8* db4, size_t idx4_p1) {
+	return DBX(db4, idx4_p1 + 1U);
+}
+
 /************************************************************************************************/
 void WarGrey::SCADA::DI_hopper_pump_lubricating_unit(HydraulicPumplet* target
 	, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
 	target->set_remote_control(DBX(db4, idx4_p1 - 1U));
 
-	// the rest are unused
-	//target->set_status(DBX(db205, idx205 + 4U), HopperPumpStatus::StartReady);
-	//target->set_status(DBX(db205, idx205 + 5U), HopperPumpStatus::StopReady);
+	if (DI_hopper_pump_lubricating_unit_running(db4, idx4_p1)) {
+		target->set_status(HydraulicPumpStatus::Running);
+	} else if (DBX(db4, idx4_p1 + 1U)) {
+		target->set_status(HydraulicPumpStatus::Broken);
+	} else {
+		target->set_status(HydraulicPumpStatus::Stopped);
+	}
 }
 
 void WarGrey::SCADA::DI_hopper_pump_gearbox(HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
 	target->set_remote_control(DBX(db4, idx4_p1 - 1U));
 
-	if (DBX(db4, idx4_p1 + 0U)) {
+	if (DI_hopper_pump_gearbox_running(db4, idx4_p1)) {
 		target->set_status(HydraulicPumpStatus::Running);
 	} else if (DBX(db4, idx4_p1 + 1U)) {
 		target->set_status(HydraulicPumpStatus::Broken);
@@ -126,6 +164,14 @@ void WarGrey::SCADA::DI_hopper_pump_gearbox(HydraulicPumplet* target, const uint
 	// the rest are unused
 	//target->set_status(DBX(db205, idx205 + 4U), HopperPumpStatus::StartReady);
 	//target->set_status(DBX(db205, idx205 + 5U), HopperPumpStatus::StopReady);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_lubricating_unit_running(const uint8* db4, size_t idx4_p1) {
+	return DBX(db4, idx4_p1 + 0U);
+}
+
+bool WarGrey::SCADA::DI_hopper_pump_gearbox_running(const uint8* db4, size_t idx4_p1) {
+	return DBX(db4, idx4_p1 + 0U);
 }
 
 void WarGrey::SCADA::DI_hopper_lubricating_unit_alarm(Alarmlet* target, const uint8* db4, unsigned int idx_p1) {

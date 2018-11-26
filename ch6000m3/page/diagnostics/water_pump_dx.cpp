@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "page/diagnostics/waterpumpdx.hpp"
+#include "page/diagnostics/water_pump_dx.hpp"
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -68,9 +68,9 @@ public:
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
 		unsigned int feedback = (this->ps ? ps_water_pump_feedback : sb_water_pump_feedback);
-		unsigned int plready = (this->ps ? ps_water_pump_pipeline_ready : sb_water_pump_pipeline_ready);
-		unsigned int knob = (this->ps ? ps_water_pump_speed_knob_moved : sb_water_pump_speed_knob_moved);
-		unsigned int knob0 = (this->ps ? ps_water_pump_speed_knob_moved0 : sb_water_pump_speed_knob_moved0);
+		unsigned int plready = (this->ps ? ps_water_pump_pipeline_ready : sb_water_pump_pipeline_ready) - 1U;
+		unsigned int knob = (this->ps ? ps_water_pump_speed_knob_moved : sb_water_pump_speed_knob_moved) - 1U;
+		unsigned int knob0 = (this->ps ? ps_water_pump_speed_knob_moved0 : sb_water_pump_speed_knob_moved0) - 1U;
 
 		this->diagnoses[WP::RemoteControl]->set_status(DI_water_pump_remote_control(DB4, feedback), AlarmStatus::Notice, AlarmStatus::None);
 		this->diagnoses[WP::NoAlert]->set_status(DI_water_pump_alert(DB4, feedback), AlarmStatus::None, AlarmStatus::Notice);
@@ -123,7 +123,7 @@ public:
 		{ // load diagnoses
 			float icon_size = this->diagnosis_height * 0.618F;
 		
-			for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved0; id++) {
+			for (WP id = this->sc_start; id <= this->rc_end; id++) {
 				this->slots[id] = this->master->insert_one(new Credit<RoundedRectanglet, WP>(
 					diagnosis_width, this->diagnosis_height, corner_radius, diagnosis_background), id);
 
@@ -154,7 +154,7 @@ public:
 		{ // reflow start condition boxes
 			IGraphlet* target = this->labels[WP::StartCondition];
 
-			for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved; id++) {
+			for (WP id = this->sc_start; id <= this->sc_end; id++) {
 				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
 				target = this->slots[id];
 			}
@@ -163,13 +163,13 @@ public:
 		{ // reflow running condition boxes
 			IGraphlet* target = this->labels[WP::RunningCondition];
 
-			for (WP id = WP::StartReady; id <= WP::SpeedKnobMoved0; id++) {
+			for (WP id = this->rc_start; id <= this->rc_end; id++) {
 				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
 				target = this->slots[id];
 			}
 		}
 
-		for (WP id = WP::RemoteControl; id <= WP::SpeedKnobMoved0; id++) {
+		for (WP id = this->sc_start; id <= this->rc_end; id++) {
 			this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, vgapsize);
 			this->master->move_to(this->labels[id], this->diagnoses[id], GraphletAnchor::RC, GraphletAnchor::LC, vgapsize);
 		}

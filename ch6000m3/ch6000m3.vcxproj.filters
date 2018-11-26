@@ -119,7 +119,10 @@
     <ClCompile Include="iotables\do_dredges.cpp">
       <Filter>iotables</Filter>
     </ClCompile>
-    <ClCompile Include="page\diagnostics\waterpumpdx.cpp">
+    <ClCompile Include="page\diagnostics\water_pump_dx.cpp">
+      <Filter>page\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="page\diagnostics\hopper_pump_dx.cpp">
       <Filter>page\diagnostics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -227,7 +230,10 @@
     <ClInclude Include="iotables\macro_keys.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
-    <ClInclude Include="page\diagnostics\waterpumpdx.hpp">
+    <ClInclude Include="page\diagnostics\water_pump_dx.hpp">
+      <Filter>page\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="page\diagnostics\hopper_pump_dx.hpp">
       <Filter>page\diagnostics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -455,10 +461,16 @@
     <PRIResource Include="stone\tongue\zh-CN\glands.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\diagnostics\waterpumpdx.resw">
+    <PRIResource Include="stone\tongue\en-US\diagnostics\water_pump_dx.resw">
+      <Filter>stone\tongue\en-US\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\water_pump_dx.resw">
       <Filter>stone\tongue\zh-CN\diagnostics</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\diagnostics\waterpumpdx.resw">
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\hopper_pump_dx.resw">
+      <Filter>stone\tongue\zh-CN\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\hopper_pump_dx.resw">
       <Filter>stone\tongue\en-US\diagnostics</Filter>
     </PRIResource>
   </ItemGroup>

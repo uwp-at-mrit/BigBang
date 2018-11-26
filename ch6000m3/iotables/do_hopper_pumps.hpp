@@ -30,50 +30,8 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 
-	// DB300, starts from 1
-	template<typename E>
-	uint16 DO_gland_pump_command(GlandPumpAction cmd, E id) {
-		uint16 offset = 0U;
-		uint16 index = 0U;
+	uint16 DO_gate_flushing_pump_command(WarGrey::SCADA::GlandPumpAction cmd, bool ps);
+	uint16 DO_gland_pump_command(WarGrey::SCADA::GlandPumpAction cmd, bool ps, bool hopper, bool master);
 
-		switch (cmd) {
-		case GlandPumpAction::Reset: offset = 0U; break;
-		case GlandPumpAction::Start: offset = 1U; break;
-		case GlandPumpAction::Stop:  offset = 2U; break;
-		case GlandPumpAction::Auto:  offset = 3U; break;
-		}
-
-		switch (id) {
-		case E::PSHPa: index = 737U; break;
-		case E::PSHPb: index = 741U; break;
-		case E::SBHPa: index = 745U; break;
-		case E::SBHPb: index = 749U; break;
-		case E::PSUWP1: index = 753U; break;
-		case E::PSUWP2: index = 757U; break;
-		case E::SBUWP1: index = 761U; break;
-		case E::SBUWP2: index = 765U; break;
-		}
-
-		return index + offset;
-	}
-
-	template<typename E>
-	uint16 DO_gate_flushing_pump_command(GlandPumpAction cmd, E id) {
-		uint16 offset = 0U;
-		uint16 index = 0U;
-
-		switch (cmd) {
-		case GlandPumpAction::Start: offset = 0U; break;
-		case GlandPumpAction::Stop:  offset = 1U; break;
-		case GlandPumpAction::Reset: offset = 2U; break;
-		case GlandPumpAction::Auto:  offset = 3U; break;
-		}
-
-		switch (id) {
-		case E::PSFP: index = 721U; break;
-		case E::SBFP: index = 725U; break;
-		}
-
-		return index + offset;
-	}
+	unsigned int DO_hopper_pump_reset_command(bool ps, bool hopper);
 }

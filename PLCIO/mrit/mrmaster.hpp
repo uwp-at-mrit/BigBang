@@ -80,7 +80,6 @@ namespace WarGrey::SCADA {
 	private:
 		uint8* data_pool;
 		unsigned int pool_size;
-		int delay_balance;
     };
 
     private class MRMaster : public WarGrey::SCADA::IMRMaster {

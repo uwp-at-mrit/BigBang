@@ -75,8 +75,16 @@ static uint16 DO_glands_action(GlandPumpAction cmd, HydraulicPumplet* pump) {
 	
 	if (credit_pump != nullptr) {
 		switch (credit_pump->id) {
-		case GP::PSFP: case GP::SBFP: index = DO_gate_flushing_pump_command(cmd, credit_pump->id); break;
-		default: index = DO_gland_pump_command(cmd, credit_pump->id); break;
+		case GP::PSFP: index = DO_gate_flushing_pump_command(cmd, true); break;
+		case GP::SBFP: index = DO_gate_flushing_pump_command(cmd, false); break;
+		case GP::PSHPa: index = DO_gland_pump_command(cmd, true, true, true); break;
+		case GP::PSHPb: index = DO_gland_pump_command(cmd, true, true, false); break;
+		case GP::SBHPa: index = DO_gland_pump_command(cmd, false, true, true); break;
+		case GP::SBHPb: index = DO_gland_pump_command(cmd, false, true, false); break;
+		case GP::PSUWP1: index = DO_gland_pump_command(cmd, true, false, true); break;
+		case GP::PSUWP2: index = DO_gland_pump_command(cmd, true, false, false); break;
+		case GP::SBUWP1: index = DO_gland_pump_command(cmd, false, false, true); break;
+		case GP::SBUWP2: index = DO_gland_pump_command(cmd, false, false, false); break;
 		}
 	}
 
@@ -132,15 +140,15 @@ public:
 		DI_gate_flushing_pump(this->pumps[GP::PSFP], DB4, pump_ps_gate_flushing_feedback, DB205, pump_ps_gate_flushing_status);
 		DI_gate_flushing_pump(this->pumps[GP::SBFP], DB4, pump_sb_gate_flushing_feedback, DB205, pump_sb_gate_flushing_status);
 
-		DI_hopper_gland_pump(this->pumps[GP::PSHPa], DB4, pump_ps_hopper_A_feedback, DB205, pump_ps_hopper_A_status);
-		DI_hopper_gland_pump(this->pumps[GP::PSHPb], DB4, pump_ps_hopper_B_feedback, DB205, pump_ps_hopper_B_status);
-		DI_hopper_gland_pump(this->pumps[GP::SBHPa], DB4, pump_sb_hopper_A_feedback, DB205, pump_sb_hopper_A_status);
-		DI_hopper_gland_pump(this->pumps[GP::SBHPb], DB4, pump_sb_hopper_B_feedback, DB205, pump_sb_hopper_B_status);
+		DI_hopper_gland_pump(this->pumps[GP::PSHPa], DB4, ps_hopper_master_gland_pump_feedback, DB205, ps_hopper_master_gland_pump_status);
+		DI_hopper_gland_pump(this->pumps[GP::PSHPb], DB4, ps_hopper_spare_gland_pump_feedback, DB205, ps_hopper_spare_gland_pump_status);
+		DI_hopper_gland_pump(this->pumps[GP::SBHPa], DB4, sb_hopper_master_gland_pump_feedback, DB205, sb_hopper_master_gland_pump_status);
+		DI_hopper_gland_pump(this->pumps[GP::SBHPb], DB4, sb_hopper_spare_gland_pump_feedback, DB205, sb_hopper_spare_gland_pump_status);
 
-		DI_underwater_gland_pump(this->pumps[GP::PSUWP1], DB4, pump_ps_underwater_1_feedback, DB205, pump_ps_underwater_1_status);
-		DI_underwater_gland_pump(this->pumps[GP::PSUWP2], DB4, pump_ps_underwater_2_feedback, DB205, pump_ps_underwater_2_status);
-		DI_underwater_gland_pump(this->pumps[GP::SBUWP1], DB4, pump_sb_underwater_1_feedback, DB205, pump_sb_underwater_1_status);
-		DI_underwater_gland_pump(this->pumps[GP::SBUWP2], DB4, pump_sb_underwater_2_feedback, DB205, pump_sb_underwater_2_status);
+		DI_underwater_gland_pump(this->pumps[GP::PSUWP1], DB4, ps_underwater_master_gland_pump_feedback, DB205, ps_underwater_master_gland_pump_status);
+		DI_underwater_gland_pump(this->pumps[GP::PSUWP2], DB4, ps_underwater_spare_gland_pump_feedback, DB205, ps_underwater_spare_gland_pump_status);
+		DI_underwater_gland_pump(this->pumps[GP::SBUWP1], DB4, sb_underwater_master_gland_pump_feedback, DB205, sb_underwater_master_gland_pump_status);
+		DI_underwater_gland_pump(this->pumps[GP::SBUWP2], DB4, sb_underwater_spare_gland_pump_feedback, DB205, sb_underwater_spare_gland_pump_status);
 	}
 
 	void post_read_data(Syslog* logger) override {

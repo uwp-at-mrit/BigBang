@@ -1,7 +1,7 @@
 ﻿#include <map>
 
 #include "page/flushs.hpp"
-#include "page/diagnostics/waterpumpdx.hpp"
+#include "page/diagnostics/water_pump_dx.hpp"
 
 #include "configuration.hpp"
 #include "menu.hpp"
@@ -606,8 +606,6 @@ private:
 	Tracklet<FS>* hopper_water;
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
-	std::map<FSFunction, Credit<Buttonlet, FSFunction>*> functions;
-	std::map<FlushingCommand, Credit<Buttonlet, FlushingCommand>*> shifts;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
 	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
@@ -623,6 +621,10 @@ private:
 	Segmentlet* sb_draghead;
 	Hatchlet* ps_sea;
 	Hatchlet* sb_sea;
+
+private:
+	std::map<FSFunction, Credit<Buttonlet, FSFunction>*> functions;
+	std::map<FlushingCommand, Credit<Buttonlet, FlushingCommand>*> shifts;
 	
 private:
 	CanvasTextFormat^ caption_font;

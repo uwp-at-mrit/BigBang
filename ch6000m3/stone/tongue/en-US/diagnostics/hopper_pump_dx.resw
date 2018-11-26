@@ -117,46 +117,70 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PSRunningCondition" xml:space="preserve">
-    <value>左舷高压水泵启动条件</value>
+  <data name="PSUnderWaterCondition" xml:space="preserve">
+    <value>PS UnderWater Pump Start Condition</value>
   </data>
-  <data name="PSStartCondition" xml:space="preserve">
-    <value>左舷高压水泵运行条件</value>
+  <data name="PSHopperCondition" xml:space="preserve">
+    <value>PS Hopper Pump Start Condition</value>
   </data>
-  <data name="SBRunningCondition" xml:space="preserve">
-    <value>右舷高压水泵运行条件</value>
+  <data name="SBUnderWaterCondition" xml:space="preserve">
+    <value>SB UnderWater Pump Start Condition</value>
   </data>
-  <data name="SBStartCondition" xml:space="preserve">
-    <value>右舷高压水泵启动条件</value>
+  <data name="SBHopperCondition" xml:space="preserve">
+    <value>SB Hopper Pump Start Condition</value>
   </data>
-  <data name="SpeedKnobMoved" xml:space="preserve">
-    <value>高压冲水泵调速旋钮离开零位</value>
+  <data name="HPSpeedKnobMoved" xml:space="preserve">
+    <value>Hopper Pump Speed Knob is Moved</value>
   </data>
-  <data name="NoAlert" xml:space="preserve">
-    <value>高压冲水泵变频器无报警反馈</value>
+  <data name="HPNoEmergence" xml:space="preserve">
+    <value>Hopper Pump No Emergence Stopping Feedback</value>
   </data>
-  <data name="NoBroken" xml:space="preserve">
-    <value>高压冲水泵变频器无故障反馈</value>
+  <data name="HPNoRepair" xml:space="preserve">
+    <value>Hopper Pump No Repair Feedback</value>
   </data>
-  <data name="NoEmergence" xml:space="preserve">
-    <value>高压冲水泵变频器无紧激停止反馈</value>
+  <data name="HPNotRunning" xml:space="preserve">
+    <value>Hopper Pump Not Running Feedback</value>
   </data>
-  <data name="NoRepair" xml:space="preserve">
-    <value>高压冲水泵变频器无维修反馈</value>
+  <data name="HPPipelineReady" xml:space="preserve">
+    <value>Hopper Pipeline is Ready</value>
   </data>
-  <data name="NotRunning" xml:space="preserve">
-    <value>高压冲水泵变频器无运行反馈</value>
+  <data name="HPRemoteControl" xml:space="preserve">
+    <value>Hopper Pump Remote Control Feedback</value>
   </data>
-  <data name="PipelineReady" xml:space="preserve">
-    <value>高压冲水管系备妥</value>
+  <data name="HPStartReady" xml:space="preserve">
+    <value>Hopper Pump is Ready</value>
   </data>
-  <data name="RemoteControl" xml:space="preserve">
-    <value>高压冲水泵变频器遥控模式</value>
+  <data name="HPGearboxPumpsRunning" xml:space="preserve">
+    <value>Hopper Gearbox Pumps Running</value>
   </data>
-  <data name="StartReady" xml:space="preserve">
-    <value>高压冲水泵变频器备妥反馈</value>
+  <data name="HPGlandPumpsRunning" xml:space="preserve">
+    <value>Hopper Gland Pumps Running</value>
   </data>
-  <data name="SpeedKnobMoved0" xml:space="preserve">
-    <value>高压冲水泵调速旋钮离开0%零位</value>
+  <data name="HPLubricatingUnitRunning" xml:space="preserve">
+    <value>Hopper Lubricating Unit Running</value>
+  </data>
+  <data name="UWPGlandPumpsRunning" xml:space="preserve">
+    <value>Underwater Gland Pumps Running</value>
+  </data>
+  <data name="UWPNoEmergence" xml:space="preserve">
+    <value>Underwater Pump No Emergence Stopping Feedback</value>
+  </data>
+  <data name="UWPNoRepair" xml:space="preserve">
+    <value>Underwater Pump No Repair Feedback</value>
+  </data>
+  <data name="UWPNotRunning" xml:space="preserve">
+    <value>Underwater Pump Not Running Feedback</value>
+  </data>
+  <data name="UWPPipelineReady" xml:space="preserve">
+    <value>Underwater Pipeline is Ready</value>
+  </data>
+  <data name="UWPRemoteControl" xml:space="preserve">
+    <value>Underwater Pump Remote Control Feedback</value>
+  </data>
+  <data name="UWPSpeedKnobMoved" xml:space="preserve">
+    <value>Underwater Pump Speed Knob is Moved</value>
+  </data>
+  <data name="UWPStartReady" xml:space="preserve">
+    <value>Underwater Pump is Ready</value>
   </data>
 </root>
