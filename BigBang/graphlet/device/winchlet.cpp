@@ -97,8 +97,7 @@ void Winchlet::construct() {
 
 		this->icon_cx = this->base_thickness + (this->cable->ComputeBounds().X - this->base_thickness) * 0.5F;
 		this->icon_cy = this->height * 0.5F;
-		this->slack_icon = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
-
+		
 		this->icons[WinchStatus::WindingUp] = up_icon;
 		this->icons[WinchStatus::WindingOut] = out_icon;
 		this->icons[WinchStatus::WindUpReady] = up_icon;
@@ -117,6 +116,7 @@ void Winchlet::construct() {
 		this->icons[WinchStatus::SensorLowerLimited] = geometry_stroke(out_icon, 1.0F, this->cable_style);
 		this->icons[WinchStatus::SuctionLimited] = geometry_stroke(circle(radius), 2.0F);
 		this->icons[WinchStatus::SaddleLimited] = saddle_icon;
+		this->icons[WinchStatus::Slack] = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
 		this->icons[WinchStatus::SuctionSlack] = this->icons[WinchStatus::SuctionLimited];
 		this->icons[WinchStatus::SaddleSlack] = this->icons[WinchStatus::SaddleLimited];
 	}
@@ -177,6 +177,9 @@ void Winchlet::prepare_style(WinchStatus status, WinchStyle& s) {
 		CAS_SLOT(s.cable_color, Colours::Yellow);
 		CAS_SLOT(s.cable_bottom_color, Colours::Yellow);
 	}; break;
+	case WinchStatus::Slack: {
+		CAS_SLOT(s.status_color, Colours::Green);
+	}; break;
 	case WinchStatus::SuctionLimited: case WinchStatus::SuctionSlack: {
 		CAS_SLOT(s.status_color, Colours::SeaGreen);
 	}; break;
@@ -234,7 +237,7 @@ void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 		ds->FillGeometry(this->icons[status], x + this->icon_cx, y + this->icon_cy, s.status_color);
 
 		if (s.slack_color != nullptr) {
-			ds->FillGeometry(this->slack_icon, x + this->width - this->icon_cx, y + this->icon_cy, s.slack_color);
+			ds->FillGeometry(this->icons[WinchStatus::Slack], x + this->width - this->icon_cx, y + this->icon_cy, s.slack_color);
 		}
 	}
 	

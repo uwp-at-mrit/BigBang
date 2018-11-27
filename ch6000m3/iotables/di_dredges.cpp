@@ -21,13 +21,19 @@ static void _DI_gantry(G* target, const uint8* db4, unsigned int idx4, const uin
 /*************************************************************************************************/
 void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& limits, const uint8* db205, WinchDetails& details) {
 	bool slack = (limits.slack > 0U) && DBX(db4, limits.slack - 1U);
+	bool suction = (limits.suction > 0U) && DBX(db4, limits.suction - 1U);
+	bool saddle = DBX(db4, limits.saddle - 1U);
 
 	if (DBX(db4, limits.upper - 1U)) {
 		target->set_status(WinchStatus::UpperLimited);
-	} else if (DBX(db4, limits.saddle - 1U)) {
-		target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
-	} else if ((limits.suction > 0U) && DBX(db4, limits.suction - 1U)) {
-		target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
+	} else if (slack || suction || saddle) {
+		if (suction) {
+			target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
+		} else if (saddle) {
+			target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
+		} else {
+			target->set_status(WinchStatus::Slack);
+		}
 	} else {
 		unsigned int status = details.status - 1U;
 		unsigned int sensor = details.sensor - 1U;

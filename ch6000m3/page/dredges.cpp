@@ -322,6 +322,7 @@ protected:
 			case WinchStatus::SensorUpperLimited: soft_upper = true; break;
 			case WinchStatus::SaddleSlack: saddle = true; slack = true; break;
 			case WinchStatus::SuctionSlack: suction = true; slack = true; break;
+			case WinchStatus::Slack: slack = true; break;
 			}
 
 			this->winch_saddles[id]->set_color(saddle ? winch_status_highlight_color : winch_status_color);
@@ -435,8 +436,8 @@ public:
 		this->set_cylinder(DS::SBHPDP, RealData(DB203, this->sb_address->discharge_pressure));
 		this->set_cylinder(DS::SBHPVP, RealData(DB203, this->sb_address->vacuum_pressure));
 
-		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator, GraphletAnchor::LC);
-		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator, GraphletAnchor::RC);
+		this->set_compensator(DS::PSWC, DB203, this->ps_address->compensator, GraphletAnchor::CC);
+		this->set_compensator(DS::SBWC, DB203, this->sb_address->compensator, GraphletAnchor::CC);
 
 		this->pressures[DS::PSDP]->set_value(RealData(DB203, this->ps_address->differential_pressure), GraphletAnchor::CC);
 		this->pressures[DS::SBDP]->set_value(RealData(DB203, this->sb_address->differential_pressure), GraphletAnchor::CC);

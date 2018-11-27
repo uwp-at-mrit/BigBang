@@ -214,7 +214,7 @@
     <value>右舷吊架限位假到位</value>
   </data>
   <data name="SaddleLimited" xml:space="preserve">
-    <value>搁墩限位</value>
+    <value>搁墩到位</value>
   </data>
   <data name="Slack" xml:space="preserve">
     <value>钢丝绳松弛</value>
