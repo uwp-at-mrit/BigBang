@@ -136,6 +136,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
+		void on_elapsed(long long count, long long interval, long long uptime, long long elapsed) override;
 
 	protected private:
 		virtual void construct() {}

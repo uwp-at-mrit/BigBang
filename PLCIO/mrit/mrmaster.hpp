@@ -38,7 +38,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		void append_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);
-		void append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
 
     public:
 		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark = 0.0F) = 0;
@@ -56,13 +55,11 @@ namespace WarGrey::SCADA {
 		void connect();
 		void listen();
 		void clear();
-		void notify_connectivity_changed();
 		void wait_process_confirm_loop();
 		void apply_confirmation(size_t code, size_t db, size_t addr0, size_t addrn, uint8* data, size_t size);
 
 	protected:
 		std::list<WarGrey::SCADA::IMRConfirmation*> confirmations;
-		std::list<WarGrey::SCADA::IPLCStatusListener*> listeners;
 		WarGrey::SCADA::MrMessageConfiguration preference;
 		WarGrey::SCADA::Syslog* logger;
 

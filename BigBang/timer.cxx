@@ -36,23 +36,20 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	this->calendar->SetToNow();
 	elapsed = this->calendar->GetDateTime().UniversalTime - elapsed0;
 	next_interval = this->interval - elapsed;
+
+	this->target->on_elapsed(this->count, this->interval, this->uptime, elapsed);
 	
 	this->count += 1;
 	this->uptime += this->interval;
 
-	if (next_interval < 0) {
-		syslog(Log::Notice,
-			L"it took %fms to update planet, but the expected interval is %fms",
-			float(elapsed) / 10000.0F, float(interval) / 10000.0F);
-	} else {
-		this->timer->Interval = TimeSpan{ next_interval };
-		
-		/* 
-		this->target->get_logger()->log_message(Log::Debug,
-			L"it took %fms to update planets",
-			float(elapsed) / 10000.0F);
-		*/
+	while (next_interval < 0) {
+		next_interval += this->interval;
+
+		this->count += 1;
+		this->uptime += this->interval;
 	}
+
+	this->timer->Interval = TimeSpan{ next_interval };
 }
 
 void Timer::start() {
@@ -70,6 +67,12 @@ void Timer::stop() {
 void CompositeTimerAction::on_elapsed(long long count, long long interval, long long uptime) {
 	for (auto action : this->actions) {
 		action->on_elapsed(count, interval, uptime);
+	}
+}
+
+void CompositeTimerAction::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
+	for (auto action : this->actions) {
+		action->on_elapsed(count, interval, uptime, elapsed);
 	}
 }
 

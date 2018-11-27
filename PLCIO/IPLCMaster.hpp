@@ -12,6 +12,11 @@ namespace WarGrey::SCADA {
 	private class IPLCStatusListener {
 	public:
 		virtual void on_plc_connectivity_changed(WarGrey::SCADA::IPLCMaster* master, bool connected) {}
+
+	public:
+		virtual void on_send_data(WarGrey::SCADA::IPLCMaster* master, long long bytes, double span_ms, double timestamp_ms) {}
+		virtual void on_receive_data(WarGrey::SCADA::IPLCMaster* master, long long bytes, double span_ms, double timestamp_ms) {}
+		virtual void on_confirm_data(WarGrey::SCADA::IPLCMaster* master, long long bytes, double span_ms, double timestamp_ms) {}
 	};
 
 	private class IPLCMaster abstract {
@@ -26,18 +31,21 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void send_scheduled_request(long long count, long long interval, long long uptime) = 0;
-		virtual bool authorized() { return (this->mode != PLCMasterMode::User); }
+		virtual bool authorized();
 
 	public:
-		void set_mode(WarGrey::SCADA::PLCMasterMode mode) {
-			this->mode = mode;
-		}
+		void append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
+		void notify_connectivity_changed();
+		void notify_data_sent(long long bytes, double span_ms);
+		void notify_data_received(long long bytes, double span_ms);
+		void notify_data_confirmed(long long bytes, double span_ms);
 
-		WarGrey::SCADA::PLCMasterMode get_mode() {
-			return this->mode;
-		}
+	public:
+		void set_mode(WarGrey::SCADA::PLCMasterMode mode);
+		WarGrey::SCADA::PLCMasterMode get_mode();
 
 	private:
+		std::list<WarGrey::SCADA::IPLCStatusListener*> listeners;
 		WarGrey::SCADA::PLCMasterMode mode = PLCMasterMode::Root;
 	};
 }

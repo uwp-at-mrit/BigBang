@@ -79,6 +79,7 @@ namespace WarGrey::SCADA {
 		virtual bool on_key(Windows::System::VirtualKey key, bool wargrey_keyboard) { return false; }
 		virtual void on_character(unsigned int keycode) {}
 		virtual void on_elapse(long long count, long long interval, long long uptime) {}
+		virtual void on_elapse(long long count, long long interval, long long uptime, long long elapsed) {}
 		virtual void on_hover(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_goodbye(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}

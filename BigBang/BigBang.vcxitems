@@ -51,6 +51,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
     </ClInclude>
@@ -129,12 +131,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)virtualization\numpad.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\performance.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\en-US\unit.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\performance.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)stone\tongue\zh-CN\status.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>

@@ -34,6 +34,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)shared\stream.cpp">
       <Filter>shared</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IPLCMaster.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus.hpp" />

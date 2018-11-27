@@ -18,6 +18,7 @@
 
 #include "splash.hpp"
 #include "gallery.hpp"
+#include "test/performance.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -87,9 +88,10 @@ protected:
 		this->add_planet(new DraughtsPage(this->device)); // 9
 		this->add_planet(new DredgesPage(this->device, DragView::Right)); // 10
 
-		this->add_planet(new Gallery());
+		//this->add_planet(new Gallery());
+		this->add_planet(new PerformancePage(this->device));
 
-		this->transfer_to(1);
+		this->transfer_to(9);
 	}
 
 protected private:

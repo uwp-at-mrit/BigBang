@@ -8,6 +8,7 @@ namespace WarGrey::SCADA {
 	private ref class ITimerAction abstract {
 	public:
 		virtual void on_elapsed(long long count, long long interval, long long uptime) = 0;
+		virtual void on_elapsed(long long count, long long interval, long long uptime, long long span) {}
 
 	internal:
 		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
@@ -39,6 +40,7 @@ namespace WarGrey::SCADA {
 	private ref class CompositeTimerAction : public WarGrey::SCADA::ITimerAction {
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
+		void on_elapsed(long long count, long long interval, long long uptime, long long span) override;
 
 	public:
 		void append_timer_action(WarGrey::SCADA::ITimerAction^ receiver);

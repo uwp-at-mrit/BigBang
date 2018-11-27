@@ -308,21 +308,36 @@ void UniverseDisplay::refresh(IPlanet* which) {
 	}
 }
 
-void UniverseDisplay::on_elapsed(long long count, long long elapsed, long long uptime) {
+void UniverseDisplay::on_elapsed(long long count, long long interval, long long uptime) {
 	if (this->head_planet != nullptr) {
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 		
 		this->recent_planet->begin_update_sequence();
-		this->recent_planet->on_elapse(count, elapsed, uptime);
+		this->recent_planet->on_elapse(count, interval, uptime);
 		this->recent_planet->end_update_sequence();
 
 		while (child != this->recent_planet) {
-			child->on_elapse(count, elapsed, uptime);
+			child->on_elapse(count, interval, uptime);
 			child = PLANET_INFO(child)->next;
 		}
 	}
 
-	this->update(count, elapsed, uptime);
+	this->update(count, interval, uptime);
+}
+
+void UniverseDisplay::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
+	if (this->head_planet != nullptr) {
+		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
+
+		this->recent_planet->begin_update_sequence();
+		this->recent_planet->on_elapse(count, interval, uptime, elapsed);
+		this->recent_planet->end_update_sequence();
+
+		while (child != this->recent_planet) {
+			child->on_elapse(count, interval, uptime, elapsed);
+			child = PLANET_INFO(child)->next;
+		}
+	}
 }
 
 void UniverseDisplay::add_planet(IPlanet* planet) {

@@ -98,13 +98,6 @@ void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
 	}
 }
 
-void IMRMaster::append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener) {
-	if (listener != nullptr) {
-		this->listeners.push_back(listener);
-		listener->on_plc_connectivity_changed(this, this->connected());
-	}
-}
-
 void IMRMaster::shake_hands() {
 	if (this->listener != nullptr) {
 		this->listen();
@@ -165,6 +158,7 @@ void IMRMaster::on_socket(StreamSocket^ plc) {
 void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t addrn, uint8* data, size_t size) {
 	if (this->mrout != nullptr) {
 		bool reading = (fcode == this->preference.read_signal_fcode());
+		double sending_ts = current_inexact_milliseconds();
 
 		this->preference.write_header(this->mrout, fcode, datablock, addr0, addrn);
 		this->preference.write_aligned_tail(this->mrout, data, size);
@@ -175,10 +169,11 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 
 				if (!reading) {
 					this->logger->log_message(Log::Info,
-						L"<sent command '%c' on data block %u[%u, %u] to device[%s]@%s>",
-						fcode, datablock, addr0, addrn, this->device_description()->Data(),
-						update_nowstamp()->Data());
+						L"<[%s]ÃüÁî%u[%u, %u]ÒÑ·¢³ö>",
+						update_nowstamp()->Data(), datablock, addr0, addrn);
 				}
+
+				this->notify_data_sent(sent, current_inexact_milliseconds() - sending_ts);
 
 				this->logger->log_message(Log::Debug,
 					L"<sent %u-byte-request for command '%c' on data block %u[%u, %u] to device[%s]>",
@@ -194,12 +189,11 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 
 void IMRMaster::wait_process_confirm_loop() {
 	unsigned int predata_size = (unsigned int)this->preference.predata_size();
-	unsigned int postdata_size = (unsigned int)this->preference.postdata_size();
+	double receiving_ts = current_inexact_milliseconds();
 
 	create_task(this->mrin->LoadAsync(predata_size)).then([=](unsigned int size) {
 		size_t leader, fcode, datablock, addr0, addrn, datasize, tailsize;
-		double now = current_inexact_milliseconds();
-
+		
 		if (size < predata_size) {
 			if (size == 0) {
 				modbus_protocol_fatal(this->logger, L"device[%s] has lost", this->device_description()->Data());
@@ -242,11 +236,15 @@ void IMRMaster::wait_process_confirm_loop() {
 					L"message comes from devce[%s] has an malformed end(expected 0X%04X, received 0X%04X)",
 					this->device_description()->Data(), expected_tail, end_of_message);
 			} else {
+				double confirming_ms = current_inexact_milliseconds();
+
 				this->logger->log_message(Log::Debug,
 					L"<received confirmation(%u, %u, %u) for command '%c' comes from device[%s]>",
 					datablock, addr0, addrn, fcode, this->device_description()->Data());
 
+				this->notify_data_received(predata_size + tailsize, confirming_ms - receiving_ts);
 				this->apply_confirmation(fcode, datablock, addr0, addrn, this->data_pool, datasize);
+				this->notify_data_confirmed(datasize, current_inexact_milliseconds() - confirming_ms);
 			}
 		});
 	}).then([=](task<void> confirm) {
@@ -300,14 +298,6 @@ void IMRMaster::clear() {
 
 		this->mrout = nullptr;
 		this->notify_connectivity_changed();
-	}
-}
-
-void IMRMaster::notify_connectivity_changed() {
-	bool connected = this->connected();
-
-	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
-		(*lt)->on_plc_connectivity_changed(this, connected);
 	}
 }
 

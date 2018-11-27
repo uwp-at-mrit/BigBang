@@ -161,16 +161,19 @@ public:
 
 protected:
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, bool label = true) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit
+		, bool label = true, unsigned int precision = 1U) {
 		Platform::String^ caption = (label ? _speak(id) : nullptr);
 
+		this->plain_style.precision = precision;
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->plain_style, unit, caption), id);
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id, Platform::String^ unit) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls
+		, E id, Platform::String^ unit, unsigned int precision) {
 		this->load_label(ls, id, Colours::Silver);
-		this->load_dimension(ds, id, unit, false);
+		this->load_dimension(ds, id, unit, false, precision);
 	}
 
 	template<typename E>
@@ -182,10 +185,11 @@ protected:
 	void load_cylinders(std::map<E, Credit<C, E>*>& cs, E id0, E idn, float height, double vmin, double vmax, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
 			auto cylinder = new Credit<C, E>(LiquidSurface::_, vmin, vmax, height * 0.2718F, height, 3.0F, 8U);
+			unsigned int precision = (vmax < 10.0) ? 2U : 1U;
 
 			cs[id] = this->master->insert_one(cylinder, id);
 
-			this->load_dimension(this->pressures, this->labels, id, unit);
+			this->load_dimension(this->pressures, this->labels, id, unit, precision);
 		}
 	}
 

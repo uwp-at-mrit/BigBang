@@ -33,6 +33,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)modbus\mbtest.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IPLCMaster.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mrit\mrmaster.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)mrit\message.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)shared\databytes.cpp" />

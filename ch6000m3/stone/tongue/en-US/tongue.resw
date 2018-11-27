@@ -192,4 +192,7 @@
   <data name="hopper_pump_dx" xml:space="preserve">
     <value>Hopper Pump Diagnostics</value>
   </data>
+  <data name="performance" xml:space="preserve">
+    <value>Performance Visualization</value>
+  </data>
 </root>
