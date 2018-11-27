@@ -117,46 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PSRunningCondition" xml:space="preserve">
-    <value>左舷高压水泵启动条件</value>
-  </data>
-  <data name="PSStartCondition" xml:space="preserve">
-    <value>左舷高压水泵运行条件</value>
-  </data>
-  <data name="SBRunningCondition" xml:space="preserve">
-    <value>右舷高压水泵运行条件</value>
-  </data>
-  <data name="SBStartCondition" xml:space="preserve">
-    <value>右舷高压水泵启动条件</value>
-  </data>
-  <data name="SpeedKnobMoved" xml:space="preserve">
-    <value>高压冲水泵调速旋钮离开零位</value>
-  </data>
-  <data name="NoAlert" xml:space="preserve">
-    <value>高压冲水泵变频器无报警反馈</value>
-  </data>
   <data name="NoBroken" xml:space="preserve">
-    <value>高压冲水泵变频器无故障反馈</value>
-  </data>
-  <data name="NoEmergence" xml:space="preserve">
-    <value>高压冲水泵变频器无紧激停止反馈</value>
-  </data>
-  <data name="NoMaintenance" xml:space="preserve">
-    <value>高压冲水泵变频器无维修反馈</value>
+    <value>无故障反馈</value>
   </data>
   <data name="NotRunning" xml:space="preserve">
-    <value>高压冲水泵变频器无运行反馈</value>
-  </data>
-  <data name="PipelineReady" xml:space="preserve">
-    <value>高压冲水管系备妥</value>
+    <value>无运行反馈</value>
   </data>
   <data name="RemoteControl" xml:space="preserve">
-    <value>高压冲水泵变频器遥控模式</value>
+    <value>遥控反馈</value>
   </data>
   <data name="StartReady" xml:space="preserve">
-    <value>高压冲水泵变频器备妥反馈</value>
+    <value>备妥反馈</value>
   </data>
-  <data name="SpeedKnobMoved0" xml:space="preserve">
-    <value>高压冲水泵调速旋钮离开%零位</value>
+  <data name="PSFP" xml:space="preserve">
+    <value>1# 闸阀冲洗泵</value>
+  </data>
+  <data name="PSHPa" xml:space="preserve">
+    <value>左舷舱内泵封水泵A变频器</value>
+  </data>
+  <data name="PSHPb" xml:space="preserve">
+    <value>左舷舱内泵封水泵B变频器</value>
+  </data>
+  <data name="PSUWP1" xml:space="preserve">
+    <value>左舷水下泵封水泵A变频器</value>
+  </data>
+  <data name="PSUWP2" xml:space="preserve">
+    <value>左舷水下泵封水泵B变频器</value>
+  </data>
+  <data name="SBFP" xml:space="preserve">
+    <value>2# 闸阀冲洗泵</value>
+  </data>
+  <data name="SBHPa" xml:space="preserve">
+    <value>右舷舱内泵封水泵A变频器</value>
+  </data>
+  <data name="SBHPb" xml:space="preserve">
+    <value>右舷舱内泵封水泵B变频器</value>
+  </data>
+  <data name="SBUWP1" xml:space="preserve">
+    <value>右舷水下泵封水泵A变频器</value>
+  </data>
+  <data name="SBUWP2" xml:space="preserve">
+    <value>右舷水下泵封水泵B变频器</value>
   </data>
 </root>

@@ -71,6 +71,7 @@ private enum class CS : unsigned int {
 
 	// anchors used for unnamed nodes
 	ps, sb, gantry, deck_lx, deck_rx, deck_ty, deck_by, diagnostics,
+	d0910, d0708, d0205, e11, e12, e13, e14, e15, e16, egantry,
 
 	// anchors used for non-interconnected nodes
 	n0325, n0405, n0723, n0923
@@ -171,25 +172,67 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
-		/*
-		{ // flow water
+		{ // flow PS water
+			CS c0910[] = { CS::d0910, CS::D010 };
+
 			this->try_flow_water(CS::D004, CS::Port, water_color);
 			this->try_flow_water(CS::D006, CS::D004, CS::D009, water_color);
+			this->try_flow_water(CS::D009, c0910, water_color);
+			this->try_flow_water(CS::D017, CS::D010, water_color);
 
-			if (this->gvalves[CS::D005]->get_status() == GateValveStatus::Closed) {
-				CS c5[] = { CS::D004, CS::D005 };
+			if (this->valve_open(CS::D005)) {
+				CS c0517[] = { CS::D004, CS::D005, CS::d0205, CS::PSHPump, CS::D017 };
 
-				this->station->append_subtrack(c5, water_color);
+				this->station->append_subtrack(c0517, water_color);
+				this->nintercs[CS::n0405]->set_color(water_color);
+			} else {
+				this->nintercs[CS::n0405]->set_color(default_pipe_color);
 			}
 
+			this->try_flow_water(CS::D010, CS::D016, water_color);
+			this->try_flow_water(CS::D012, CS::e12, water_color);
+			this->try_flow_water(CS::D014, CS::e14, water_color);
+			this->try_flow_water(CS::D016, CS::e16, water_color);
+		}
+
+		{ // flow SB water
+			CS c0708[] = { CS::d0708, CS::D008 };
+			
 			this->try_flow_water(CS::D003, CS::Starboard, water_color);
 			this->try_flow_water(CS::D026, CS::D003, CS::D007, water_color);
+			this->try_flow_water(CS::D007, c0708, water_color);
+			this->try_flow_water(CS::D018, CS::D008, water_color);
 
-			if (this->gvalves[CS::D025]->get_status() == GateValveStatus::Closed) {
-				this->station->append_subtrack(CS::D003, CS::D025, water_color);
+			if (this->valve_open(CS::D025)) {
+				CS c0318[] = { CS::D003, CS::D025, CS::d0225, CS::SBHPump, CS::D018 };
+
+				this->station->append_subtrack(c0318, water_color);
+				this->nintercs[CS::n0325]->set_color(water_color);
+			} else {
+				this->nintercs[CS::n0325]->set_color(default_pipe_color);
 			}
+
+			this->try_flow_water(CS::D008, CS::D015, water_color);
+			this->try_flow_water(CS::D011, CS::e11, water_color);
+			this->try_flow_water(CS::D013, CS::e13, water_color);
+			this->try_flow_water(CS::D015, CS::e15, water_color);
 		}
-		*/
+
+		if (this->valve_open(CS::D023)) {
+			this->station->append_subtrack(CS::d0910, CS::d0708, water_color);
+			this->nintercs[CS::n0723]->set_color(water_color);
+			this->nintercs[CS::n0923]->set_color(water_color);
+		} else {
+			this->nintercs[CS::n0723]->set_color(default_pipe_color);
+			this->nintercs[CS::n0923]->set_color(default_pipe_color);
+		}
+
+		if (this->valve_open(CS::D024)) {
+			this->station->append_subtrack(CS::d24, CS::egantry, water_color);
+			this->gantry_pipe->set_color(water_color);
+		} else {
+			this->gantry_pipe->set_color(default_pipe_color);
+		}
 
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
@@ -219,29 +262,30 @@ public:
 		pTurtle->move_left(2, CS::d1920)->move_left(2, CS::D020)->move_left(7, CS::d1720);
 
 		pTurtle->move_left(3, CS::D017)->move_left(11, CS::n0405)->move_left(4, CS::D010)->move_left(6, CS::d12);
-		pTurtle->move_down(2, CS::D012)->move_down(3)->jump_down(CS::LMOD)->jump_back(CS::d12);
-		pTurtle->move_left(4, CS::d14)->move_left_down(2, CS::D014)->move_left_down(1.5F)->jump_back();
-		pTurtle->move_left(5, CS::d24)->move_left(4)->move_left_down(2, CS::D016)->move_left_down(1.5F)->jump_back();
+		pTurtle->move_down(2, CS::D012)->move_down(3, CS::e12)->jump_down(CS::LMOD)->jump_back(CS::d12);
+		pTurtle->move_left(4, CS::d14)->move_left_down(2, CS::D014)->move_left_down(1.5F, CS::e14)->jump_back(CS::d14);
+		pTurtle->move_left(5, CS::d24)->move_left(4)->move_left_down(2, CS::D016)->move_left_down(1.5F, CS::e16)->jump_back(CS::d24);
 		pTurtle->jump_up(2.5F, CS::gantry)->turn_up_left()->move_left(3, CS::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, CS::Gantry)->move_left()->jump_back(CS::Gantry)->move_right()->jump_back(CS::d1720);
+		pTurtle->move_up(0.5F, CS::Gantry)->move_left(CS::egantry)->jump_back(CS::Gantry)->move_right()->jump_back(CS::d1720);
 		
-		pTurtle->move_down(3.5F, CS::PSHPump)->move_left(6, CS::n0923)->move_left(8)->move_up(1.5F, CS::D005)->move_up(1.5F)->jump_up();
+		pTurtle->move_down(3.5F, CS::PSHPump)->move_left(6, CS::n0923);
+		pTurtle->move_left(8, CS::d0205)->move_up(1.5F, CS::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, CS::d0406)->move_right(4, CS::D006)->move_right(4)->move_down(0.5F, CS::deck_ty)->move_down(CS::D009);
-		pTurtle->move_down(5)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
+		pTurtle->move_down(1.5F, CS::d0910)->move_down(3.5F)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
 
 		pTurtle->move_up(1.5F, CS::D004)->move_up(2, CS::ps)->move_up(2, CS::diagnostics)->turn_up_left();
 		pTurtle->move_left(8, CS::PSUWPump)->move_left(10)->move_left(CS::Port);
 
-		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(5, CS::D007);
+		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(3.5F, CS::d0708)->move_down(1.5F, CS::D007);
 		pTurtle->move_down(CS::deck_by)->move_down(0.5F)->move_left(4, CS::D026)->move_left(4, CS::d0326);
 		pTurtle->move_up(3)->jump_up()->move_up(1.5F, CS::D025)->move_up(1.5F, CS::d0225);
 		pTurtle->move_right(8, CS::n0723)->move_right(6, CS::SBHPump)->move_down(3.5F, CS::d1819)->jump_back(CS::d0225);
 		pTurtle->move_up(2.5F)->move_left(2, CS::D002)->move_left(28, CS::D001)->move_left(2)->jump_back(CS::d1819);
 
 		pTurtle->move_left(3, CS::D018)->move_left(11, CS::n0325)->move_left(4, CS::D008);
-		pTurtle->move_left(6, CS::d11)->move_up(2, CS::D011)->move_up(3 /* CS::LMOD */)->jump_back();
-		pTurtle->move_left(4, CS::d13)->move_left_up(2, CS::D013)->move_left_up(1.5F)->jump_back();
-		pTurtle->move_left(9)->move_left_up(2, CS::D015)->move_left_up(1.5F);
+		pTurtle->move_left(6, CS::d11)->move_up(2, CS::D011)->move_up(3, CS::e11)->jump_back(CS::d11);
+		pTurtle->move_left(4, CS::d13)->move_left_up(2, CS::D013)->move_left_up(1.5F, CS::e13)->jump_back(CS::d13);
+		pTurtle->move_left(9)->move_left_up(2, CS::D015)->move_left_up(1.5F, CS::e15);
 
 		pTurtle->jump_back(CS::d0326)->move_down(1.5F, CS::D003)->move_down(2, CS::sb)->move_down(2, CS::C)->turn_down_left();
 		pTurtle->move_left(8, CS::SBUWPump)->move_left(10)->move_left(CS::Starboard);
@@ -250,6 +294,18 @@ public:
 		
 		this->station = this->master->insert_one(new Tracklet<CS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		this->load_buttons(this->functions);
+
+		{ // load gantry pipe segement
+			CanvasStrokeStyle^ gantry_style = make_dash_stroke(CanvasDashStyle::Dash);
+			float gantry_y, vessel_y;
+
+			this->station->fill_anchor_location(CS::gantry, nullptr, &gantry_y);
+			this->station->fill_anchor_location(CS::D008, nullptr, &vessel_y);
+
+			this->gantry_pipe = this->master->insert_one(
+				new Linelet(0.0F, 0.0F, 0.0F, vessel_y - gantry_y,
+					default_pipe_thickness, default_pipe_color, gantry_style));
+		}
 		
 		{ // load valves
 			this->load_valve(this->gvalves, this->vlabels, this->captions, CS::D001, radius, 0.0);
@@ -303,6 +359,7 @@ public:
 		float y0 = 0.0F;
 
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
+		this->station->map_graphlet_at_anchor(this->gantry_pipe, CS::gantry, GraphletAnchor::CT);
 
 		this->station->map_credit_graphlet(this->captions[CS::Gantry], GraphletAnchor::CB);
 		this->station->map_credit_graphlet(this->captions[CS::LMOD], GraphletAnchor::CB);
@@ -545,24 +602,24 @@ private:
 	}
 
 private:
+	bool valve_open(CS vid) {
+		return (this->gvalves[vid]->get_status() == GateValveStatus::Open);
+	}
+
 	void try_flow_water(CS vid, CS eid1, CS eid2, CanvasSolidColorBrush^ color) {
-		switch (this->gvalves[vid]->get_status()) {
-		case GateValveStatus::Closed: {
+		if (this->valve_open(vid)) {
 			this->station->append_subtrack(vid, eid1, color);
 
 			if (eid2 != CS::_) {
 				this->station->append_subtrack(vid, eid2, color);
 			}
 		}
-		}
 	}
 
 	void try_flow_water(CS vid, CS* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		switch (this->gvalves[vid]->get_status()) {
-		case GateValveStatus::Closed: {
+		if (this->valve_open(vid)) {
 			this->station->append_subtrack(vid, path[0], color);
 			this->station->append_subtrack(path, count, color);
-		}
 		}
 	}
 
@@ -578,6 +635,7 @@ private:
 // never deletes these graphlets mannually
 private:
 	Tracklet<CS>* station;
+	Linelet* gantry_pipe;
 	std::map<CS, Credit<Labellet, CS>*> captions;
 	std::map<CS, Credit<HopperPumplet, CS>*> hoppers;
 	std::map<CS, Credit<GateValvelet, CS>*> gvalves;
@@ -668,16 +726,10 @@ public:
 			}
 
 			{ // draw non-important lines
-				float gantry_x, gantry_y, barge_y;
 				float d0525_x, d05_y, d25_y;
 
-				station->fill_anchor_location(CS::gantry, &gantry_x, &gantry_y, false);
-				station->fill_anchor_location(CS::D008, nullptr, &barge_y, false);
 				station->fill_anchor_location(CS::D005, &d0525_x, &d05_y, false);
 				station->fill_anchor_location(CS::D025, nullptr, &d25_y, false);
-
-				ds->DrawLine(x + gantry_x, y + gantry_y, x + gantry_x, y + barge_y,
-					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
 					Colours::DimGray, default_pipe_thickness, this->ship_style);

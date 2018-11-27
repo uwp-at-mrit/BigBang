@@ -231,10 +231,10 @@ private:
 };
 
 /*************************************************************************************************/
-private class ACSatellite final : public ICreditSatellite<ACBoard, AC>, public PLCConfirmation {
+private class ACSatellite final : public ICreditSatellite<AC>, public PLCConfirmation {
 public:
 	ACSatellite(ACBoard* board, Platform::String^ caption, float bar_height = 64.0F)
-		: ICreditSatellite(default_logging_level, board, caption) {
+		: ICreditSatellite(default_logging_level, caption), master(board) {
 		float width = bar_height * _F(ACOP::_);
 		float height = width * 0.618F;
 		Rect bg[] = { Rect(0.0F, bar_height, width, height) };
@@ -361,7 +361,7 @@ public:
 	}
 
 protected:
-	void on_channel_changed(AC room) override {
+	void on_id_changed(AC room) override {
 		this->caption->set_text(speak(room), GraphletAnchor::CC);
 		this->pull_metrics();
 	}
@@ -393,6 +393,7 @@ private:
 
 private:
 	CellDecorator* decorator;
+	ACBoard* master;
 };
 
 /*************************************************************************************************/
@@ -447,7 +448,7 @@ void ACPage::on_tap(IGraphlet* g, float local_x, float local_y) {
 		if (cell_idx >= 0) {
 			ACSatellite* satellite = static_cast<ACSatellite*>(this->satellite);
 
-			satellite->switch_channel(_E(AC, cell_idx));
+			satellite->switch_id(_E(AC, cell_idx));
 			satellite->show();
 		}
 	}

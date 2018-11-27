@@ -52,23 +52,6 @@ namespace WarGrey::SCADA {
 	void DI_pump_dimension(WarGrey::SCADA::Dimensionlet* target, const uint8* db4, size_t idx_p1);
 	void DI_hydraulic_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 
-	template<class H, typename Menu>
-	bool hydraulic_pump_command_executable(H* target, Menu cmd, bool otherwise) {
-		HydraulicPumpStatus status = target->get_status();
-		bool executable = otherwise;
-
-		switch (cmd) {
-		case Menu::Start: executable = ((status == HydraulicPumpStatus::Ready) || (status == HydraulicPumpStatus::Unstartable)); break;
-		}
-
-		return executable;
-	}
-
 	/************************************************************************************************/
 	void DI_gate_flushing_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
-
-	template<class H, typename Menu>
-	bool gate_flushing_pump_command_executable(H* target, Menu cmd, bool otherwise) {
-		return hydraulic_pump_command_executable(target, cmd, otherwise);
-	}
 }

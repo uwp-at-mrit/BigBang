@@ -14,12 +14,16 @@ namespace WarGrey::SCADA {
 	private enum class PSHopperPumpDischargeAction { Prepare, Start, Stop, Reset, PSShoring, PSRainbowing, BothShoring, BothRainbowing, _ };
 	private enum class SBHopperPumpDischargeAction { Prepare, Start, Stop, Reset, SBShoring, SBRainbowing, BothShoring, BothRainbowing, _ };
 
-	private enum class GlandPumpAction { Start, Stop, Reset, Auto, _ };
+	private enum class GlandPumpAction { Start, Stop, Reset, Auto, Diagnostics, _ };
 	private enum class LubricationUnitAction { Start, Stop, _ };
 	private enum class GearboxLubricatorAction { Start, Stop, Cancel, Auto, _ };
 
 	typedef uint16(*gland_pump_action_f)(WarGrey::SCADA::GlandPumpAction, WarGrey::SCADA::HydraulicPumplet*);
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_gland_pump_menu(WarGrey::SCADA::gland_pump_action_f gpc, WarGrey::SCADA::PLCMaster* plc);
+	typedef void(*gland_pump_diagnostics_f)(WarGrey::SCADA::HydraulicPumplet*, WarGrey::SCADA::PLCMaster*);
+
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_gland_pump_menu(WarGrey::SCADA::gland_pump_action_f gpc,
+		WarGrey::SCADA::gland_pump_diagnostics_f gpd, WarGrey::SCADA::PLCMaster* plc);
+
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_lubrication_unit_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gearbox_lubricator_menu(WarGrey::SCADA::PLCMaster* plc);
 

@@ -189,8 +189,7 @@ private:
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
 	}
 
-// never deletes these graphlets mannually
-private:
+private: // never delete these graphlets mannually
 	std::map<WP, Credit<Labellet, WP>*> labels;
 	std::map<WP, Credit<Alarmlet, WP>*> diagnoses;
 	std::map<WP, Credit<RoundedRectanglet, WP>*> slots;
@@ -291,13 +290,7 @@ void WaterPumpDiagnostics::reflow(float width, float height) {
 }
 
 bool WaterPumpDiagnostics::can_select(IGraphlet* g) {
-	bool okay = false;
-
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = ((dynamic_cast<Buttonlet*>(g) != nullptr));
-	}
-
-	return okay;
+	return (dynamic_cast<Buttonlet*>(g) != nullptr);
 }
 
 void WaterPumpDiagnostics::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

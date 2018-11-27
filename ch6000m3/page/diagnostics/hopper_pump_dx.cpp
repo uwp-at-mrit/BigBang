@@ -242,8 +242,7 @@ private:
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(label, font, color), id);
 	}
 
-// never deletes these graphlets mannually
-private:
+private: // never delete these graphlets mannually
 	std::map<HP, Credit<Labellet, HP>*> labels;
 	std::map<HP, Credit<Alarmlet, HP>*> diagnoses;
 	std::map<HP, Credit<Alarmlet, HP>*> spare_diagnoses;
@@ -345,13 +344,7 @@ void HopperPumpDiagnostics::reflow(float width, float height) {
 }
 
 bool HopperPumpDiagnostics::can_select(IGraphlet* g) {
-	bool okay = false;
-
-	if (this->device->get_mode() != PLCMasterMode::User) {
-		okay = ((dynamic_cast<Buttonlet*>(g) != nullptr));
-	}
-
-	return okay;
+	return (dynamic_cast<Buttonlet*>(g) != nullptr);
 }
 
 void HopperPumpDiagnostics::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

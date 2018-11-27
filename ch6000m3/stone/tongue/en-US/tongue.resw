@@ -195,4 +195,7 @@
   <data name="performance" xml:space="preserve">
     <value>Performance Visualization</value>
   </data>
+  <data name="gland_pump_dx" xml:space="preserve">
+    <value>Gland Pump Diagnostics</value>
+  </data>
 </root>

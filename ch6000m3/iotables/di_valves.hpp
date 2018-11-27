@@ -180,12 +180,4 @@ namespace WarGrey::SCADA {
 	void DI_manual_valve(WarGrey::SCADA::ManualValvelet* target, const uint8* db4, size_t idx_p1);
 	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 	void DI_motor_valve(WarGrey::SCADA::MotorValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
-
-	template<class G, typename Menu>
-	bool gate_valve_command_executable(G* target, Menu cmd, bool otherwise) {
-		GateValveStatus status = target->get_status();
-		bool executable = otherwise;
-
-		return executable;
-	}
 }

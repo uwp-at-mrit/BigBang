@@ -167,12 +167,6 @@ void IMRMaster::request(size_t fcode, size_t datablock, size_t addr0, size_t add
 			try {
 				unsigned int sent = sending.get();
 
-				if (!reading) {
-					this->logger->log_message(Log::Info,
-						L"<[%s]ÃüÁî%u[%u, %u]ÒÑ·¢³ö>",
-						update_nowstamp()->Data(), datablock, addr0, addrn);
-				}
-
 				this->notify_data_sent(sent, current_inexact_milliseconds() - sending_ts);
 
 				this->logger->log_message(Log::Debug,

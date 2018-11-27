@@ -117,46 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PSRunningCondition" xml:space="preserve">
-    <value>PS Water Pump Running Condition</value>
-  </data>
-  <data name="PSStartCondition" xml:space="preserve">
-    <value>PS Water Pump Start Condition</value>
-  </data>
-  <data name="SBRunningCondition" xml:space="preserve">
-    <value>SB Water Pump Running Condition</value>
-  </data>
-  <data name="SBStartCondition" xml:space="preserve">
-    <value>SB Water Pump Start Condition</value>
-  </data>
-  <data name="SpeedKnobMoved" xml:space="preserve">
-    <value>Water Pump Speed Knob is Moved</value>
-  </data>
-  <data name="NoAlert" xml:space="preserve">
-    <value>Water Pump No Alert Feedback</value>
+  <data name="PSFP" xml:space="preserve">
+    <value>1# Flushing Pump</value>
   </data>
   <data name="NoBroken" xml:space="preserve">
-    <value>Water Pump No Broken Feedback</value>
-  </data>
-  <data name="NoEmergence" xml:space="preserve">
-    <value>Water Pump No Emergence Stopping Feedback</value>
-  </data>
-  <data name="NoMaintenance" xml:space="preserve">
-    <value>Water Pump No Maintenance Feedback</value>
+    <value>No Broken Feedback</value>
   </data>
   <data name="NotRunning" xml:space="preserve">
-    <value>Water Pump Not Running Feedback</value>
-  </data>
-  <data name="PipelineReady" xml:space="preserve">
-    <value>Water Pipeline is Ready</value>
+    <value>Not Running Feedback</value>
   </data>
   <data name="RemoteControl" xml:space="preserve">
-    <value>Water Pump Remote Control Feedback</value>
+    <value>Remote Control Feedback</value>
   </data>
   <data name="StartReady" xml:space="preserve">
-    <value>Water Pump is Ready</value>
+    <value>Start Ready</value>
   </data>
-  <data name="SpeedKnobMoved0" xml:space="preserve">
-    <value>Water Pump Speed Knob is Moved</value>
+  <data name="PSHPa" xml:space="preserve">
+    <value>PS Hopper Master Gland Pump</value>
+  </data>
+  <data name="PSHPb" xml:space="preserve">
+    <value>PS Hopper Spare Gland Pump</value>
+  </data>
+  <data name="PSUWP1" xml:space="preserve">
+    <value>PS Underwater Pump Master Gland Pump</value>
+  </data>
+  <data name="PSUWP2" xml:space="preserve">
+    <value>PS Underwater Spare Gland Pump</value>
+  </data>
+  <data name="SBFP" xml:space="preserve">
+    <value>2# Flushing Pump</value>
+  </data>
+  <data name="SBHPa" xml:space="preserve">
+    <value>SB Hopper Master Gland Pump</value>
+  </data>
+  <data name="SBHPb" xml:space="preserve">
+    <value>SB Hopper Spare Gland Pump</value>
+  </data>
+  <data name="SBUWP1" xml:space="preserve">
+    <value>SB Underwater Master Gland Pump</value>
+  </data>
+  <data name="SBUWP2" xml:space="preserve">
+    <value>SB Underwater Spare Gland Pump</value>
   </data>
 </root>

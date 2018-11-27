@@ -45,19 +45,27 @@ static uint16 DO_hopper_pump_common_command(OP cmd, bool ps, bool hopper) {
 
 private class GlandPumpExecutor final : public IMenuCommand<GlandPumpAction, HydraulicPumplet, PLCMaster*> {
 public:
-	GlandPumpExecutor(gland_pump_action_f gpc) : DO_action(gpc) {}
+	GlandPumpExecutor(gland_pump_action_f gpc, gland_pump_diagnostics_f gpd)
+		: DO_action(gpc), show_diagnostics(gpd) {}
 
 public:
 	bool can_execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected() && plc->authorized();
+		bool diagnostics = (GlandPumpAction::Diagnostics == cmd);
+
+		return plc->connected() && (plc->authorized() || diagnostics);
 	}
 
 	void execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) {
-		plc->send_command(this->DO_action(cmd, pump));
+		if (cmd == GlandPumpAction::Diagnostics) {
+			show_diagnostics(pump, plc);
+		} else {
+			plc->send_command(this->DO_action(cmd, pump));
+		}
 	}
 
 private:
 	gland_pump_action_f DO_action;
+	gland_pump_diagnostics_f show_diagnostics;
 };
 
 private class LubricationUnitExecutor final : public IMenuCommand<LubricationUnitAction, Credit<HydraulicPumplet, bool>, PLCMaster*> {
@@ -67,7 +75,7 @@ public:
 	}
 
 	void execute(LubricationUnitAction cmd, Credit<HydraulicPumplet, bool>* pump, PLCMaster* plc) override {
-		uint16 index = (pump->id ? 673U : 675U); // `pump->id` indicates PS or SB
+		uint16 index = (pump->id ? 673U : 677U); // `pump->id` indicates PS or SB
 		uint16 offset = 0U;
 
 		switch (cmd) {
@@ -228,8 +236,8 @@ public:
 };
 
 /*************************************************************************************************/
-MenuFlyout^ WarGrey::SCADA::make_gland_pump_menu(gland_pump_action_f gpc, PLCMaster* plc) {
-	return make_menu<GlandPumpAction, HydraulicPumplet, PLCMaster*>(new GlandPumpExecutor(gpc), plc);
+MenuFlyout^ WarGrey::SCADA::make_gland_pump_menu(gland_pump_action_f gpc, gland_pump_diagnostics_f gpd, PLCMaster* plc) {
+	return make_menu<GlandPumpAction, HydraulicPumplet, PLCMaster*>(new GlandPumpExecutor(gpc, gpd), plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_lubrication_unit_menu(PLCMaster* plc) {

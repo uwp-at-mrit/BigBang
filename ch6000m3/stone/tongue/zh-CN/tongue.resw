@@ -189,4 +189,7 @@
   <data name="performance" xml:space="preserve">
     <value>性能可视化</value>
   </data>
+  <data name="gland_pump_dx" xml:space="preserve">
+    <value>封水泵/冲水泵诊断</value>
+  </data>
 </root>

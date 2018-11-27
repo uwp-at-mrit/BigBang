@@ -45,6 +45,7 @@ private enum GPMode { WindowUI = 0, Dashboard };
 private enum class GPOperation { Start, Stop, Reset, Auto, _ };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
+static GlandPumpDiagnostics* satellite = nullptr;
 
 // WARNING: order matters
 private enum class GP : unsigned int {
@@ -91,6 +92,32 @@ static uint16 DO_glands_action(GlandPumpAction cmd, HydraulicPumplet* pump) {
 	}
 
 	return index;
+}
+
+static void gland_pump_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
+	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, GP>*>(pump);
+
+	if (credit_pump != nullptr) {
+		if (satellite == nullptr) {
+			satellite = new GlandPumpDiagnostics(plc);
+		}
+
+		switch (credit_pump->id) {
+		case GP::PSFP: satellite->switch_id(pump_ps_gate_flushing_feedback); break;
+		case GP::SBFP: satellite->switch_id(pump_sb_gate_flushing_feedback); break;
+		case GP::PSHPa: satellite->switch_id(ps_hopper_master_gland_pump_feedback); break;
+		case GP::PSHPb: satellite->switch_id(ps_hopper_spare_gland_pump_feedback); break;
+		case GP::SBHPa: satellite->switch_id(sb_hopper_master_gland_pump_feedback); break;
+		case GP::SBHPb: satellite->switch_id(sb_hopper_spare_gland_pump_feedback); break;
+		case GP::PSUWP1: satellite->switch_id(ps_underwater_master_gland_pump_feedback); break;
+		case GP::PSUWP2: satellite->switch_id(ps_underwater_spare_gland_pump_feedback); break;
+		case GP::SBUWP1: satellite->switch_id(sb_underwater_master_gland_pump_feedback); break;
+		case GP::SBUWP2: satellite->switch_id(sb_underwater_spare_gland_pump_feedback); break;
+		}
+
+		satellite->set_pump(credit_pump->id.ToString());
+		satellite->show();
+	}
 }
 
 /*************************************************************************************************/
@@ -474,7 +501,7 @@ GlandsPage::GlandsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	GlandPumps* dashboard = new GlandPumps(this);
 
 	this->dashboard = dashboard;
-	this->pump_op = make_gland_pump_menu(DO_glands_action, plc);
+	this->pump_op = make_gland_pump_menu(DO_glands_action, gland_pump_diagnostics, plc);
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);

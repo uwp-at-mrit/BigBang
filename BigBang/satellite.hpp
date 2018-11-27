@@ -36,26 +36,26 @@ namespace WarGrey::SCADA {
 		bool ready;
 	};
 
-	template<class Master, typename ID>
+	template<typename ID>
 	private class ICreditSatellite abstract : public WarGrey::SCADA::ISatellite {
 	public:
-		ICreditSatellite(WarGrey::SCADA::Syslog* logger, Master* master, Platform::String^ caption, unsigned int initial_mode = 0U)
-			: ISatellite(logger, caption, initial_mode), pending(true), master(master) {}
+		ICreditSatellite(WarGrey::SCADA::Syslog* logger, Platform::String^ caption, unsigned int initial_mode = 0U)
+			: ISatellite(logger, caption, initial_mode), pending(true) {}
 
-		ICreditSatellite(WarGrey::SCADA::Log level, Master* master, Platform::String^ caption, unsigned int initial_mode = 0U)
-			: ISatellite(level, caption, initial_mode), pending(true), master(master) {}
+		ICreditSatellite(WarGrey::SCADA::Log level, Platform::String^ caption, unsigned int initial_mode = 0U)
+			: ISatellite(level, caption, initial_mode), pending(true) {}
 
 	public:
-		ID get_channel() {
+		ID get_id() {
 			return this->channel;
 		}
 
-		void switch_channel(ID id) {
+		void switch_id(ID id) {
 			if (id != this->channel) {
 				this->channel = id;
 
 				if (this->surface_ready()) {
-					this->on_channel_changed(this->channel);
+					this->on_id_changed(this->channel);
 				} else {
 					this->pending = true;
 				}
@@ -66,15 +66,14 @@ namespace WarGrey::SCADA {
 		void on_surface_ready() override {
 			if (this->pending) {
 				this->pending = false;
-				this->on_channel_changed(this->channel);
+				this->on_id_changed(this->channel);
 			}
 		}
 
 	protected:
-		virtual void on_channel_changed(ID channel) = 0;
+		virtual void on_id_changed(ID channel) = 0;
 
 	protected:
-		Master* master;
 		ID channel;
 
 	private:
