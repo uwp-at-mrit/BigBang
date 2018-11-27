@@ -75,8 +75,8 @@ namespace WarGrey::SCADA {
 		case E::D018: gindex = 141U; mindex = 1085U; heat = 1138U; break;
 		case E::D019: gindex = 145U; mindex = 1089U; heat = 1139U; break;
 		case E::D020: gindex = 149U; mindex = 1093U; heat = 1140U; break;
-		case E::D021: gindex = 157U; mindex = 1097U; heat = 1142U; break;
-		case E::D022: gindex = 153U; mindex = 1101U; heat = 1141U; break;
+		case E::D021: gindex = 153U; mindex = 1097U; heat = 1141U; break;
+		case E::D022: gindex = 157U; mindex = 1101U; heat = 1142U; break;
 		case E::D023: gindex = 161U; mindex = 1105U; heat = 1143U; break;
 		case E::D024: gindex = 165U; mindex = 1109U; heat = 1144U; break;
 		case E::D025: gindex = 169U; mindex = 1113U; heat = 1145U; break;

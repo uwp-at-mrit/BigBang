@@ -1,6 +1,8 @@
 ﻿#include <map>
 
 #include "page/glands.hpp"
+#include "page/diagnostics/gland_pump_dx.hpp"
+
 #include "configuration.hpp"
 #include "menu.hpp"
 

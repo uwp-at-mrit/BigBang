@@ -89,7 +89,7 @@ protected:
 		this->add_planet(new DredgesPage(this->device, DragView::Right)); // 10
 
 		this->add_planet(new Gallery());
-		this->add_planet(new PerformancePage(this->device));
+		//this->add_planet(new PerformancePage(this->device));
 
 		this->transfer_to(9);
 	}

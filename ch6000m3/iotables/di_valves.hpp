@@ -73,8 +73,8 @@ namespace WarGrey::SCADA {
 	static unsigned int motor_valve_D18_feedback = 463U;
 	static unsigned int motor_valve_D19_feedback = 453U;
 	static unsigned int motor_valve_D20_feedback = 451U;
-	static unsigned int motor_valve_D21_feedback = 459U;
-	static unsigned int motor_valve_D22_feedback = 421U;
+	static unsigned int motor_valve_D21_feedback = 421U;
+	static unsigned int motor_valve_D22_feedback = 459U;
 	static unsigned int motor_valve_D23_feedback = 425U;
 	static unsigned int motor_valve_D24_feedback = 429U;
 	static unsigned int motor_valve_D25_feedback = 455U;
@@ -123,8 +123,8 @@ namespace WarGrey::SCADA {
 	static unsigned int gate_valve_D18_status = 505U;
 	static unsigned int gate_valve_D19_status = 513U;
 	static unsigned int gate_valve_D20_status = 521U;
-	static unsigned int gate_valve_D21_status = 529U;
-	static unsigned int gate_valve_D22_status = 537U;
+	static unsigned int gate_valve_D21_status = 537U;
+	static unsigned int gate_valve_D22_status = 529U;
 	static unsigned int gate_valve_D23_status = 545U;
 	static unsigned int gate_valve_D24_status = 553U;
 	static unsigned int gate_valve_D25_status = 561U;
@@ -150,8 +150,8 @@ namespace WarGrey::SCADA {
 	static unsigned int motor_valve_D18_status = 2953U;
 	static unsigned int motor_valve_D19_status = 2961U;
 	static unsigned int motor_valve_D20_status = 2969U;
-	static unsigned int motor_valve_D21_status = 2977U;
-	static unsigned int motor_valve_D22_status = 2985U;
+	static unsigned int motor_valve_D21_status = 2985U;
+	static unsigned int motor_valve_D22_status = 2977U;
 	static unsigned int motor_valve_D23_status = 2993U;
 	static unsigned int motor_valve_D24_status = 3001U;
 	static unsigned int motor_valve_D25_status = 3009U;
