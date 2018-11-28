@@ -6,15 +6,15 @@ using namespace WarGrey::SCADA;
 template<class G>
 static void _DI_gantry(G* target, const uint8* db4, unsigned int idx4, const uint8* db205, unsigned int idx205) {
 	if (DBX(db4, idx4 + 0U)) {
-		target->set_status(GantryStatus::WindedOut);
+		target->set_status(GantryState::WindedOut);
 	} else if (DBX(db4, idx4 + 1U)) {
-		target->set_status(GantryStatus::WindedUp);
+		target->set_status(GantryState::WindedUp);
 	} else if (DBX(db205, idx205 + 0U)) {
-		target->set_status(GantryStatus::WindingOut);
+		target->set_status(GantryState::WindingOut);
 	} else if (DBX(db205, idx205 + 1U)) {
-		target->set_status(GantryStatus::WindingUp);
+		target->set_status(GantryState::WindingUp);
 	} else {
-		target->set_status(GantryStatus::Default);
+		target->set_status(GantryState::Default);
 	}
 }
 
@@ -25,14 +25,14 @@ void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& l
 	bool saddle = DBX(db4, limits.saddle - 1U);
 
 	if (DBX(db4, limits.upper - 1U)) {
-		target->set_status(WinchStatus::UpperLimited);
+		target->set_status(WinchState::UpperLimited);
 	} else if (slack || suction || saddle) {
 		if (suction) {
-			target->set_status(slack, WinchStatus::SuctionSlack, WinchStatus::SuctionLimited);
+			target->set_status(slack, WinchState::SuctionSlack, WinchState::SuctionLimited);
 		} else if (saddle) {
-			target->set_status(slack, WinchStatus::SaddleSlack, WinchStatus::SaddleLimited);
+			target->set_status(slack, WinchState::SaddleSlack, WinchState::SaddleLimited);
 		} else {
-			target->set_status(WinchStatus::Slack);
+			target->set_status(WinchState::Slack);
 		}
 	} else {
 		unsigned int status = details.status - 1U;
@@ -42,29 +42,29 @@ void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& l
 		bool fast = (details.draghead && DBX(db205, status + 7U));
 
 		if (DBX(db205, status + 0U)) {
-			target->set_status(fast, WinchStatus::FastWindingOut, WinchStatus::WindingOut);
+			target->set_status(fast, WinchState::FastWindingOut, WinchState::WindingOut);
 		} else if (DBX(db205, status + 1U)) {
-			target->set_status(fast, WinchStatus::FastWindingUp, WinchStatus::WindingUp);
+			target->set_status(fast, WinchState::FastWindingUp, WinchState::WindingUp);
 		} else if (DBX(db205, sensor + 0U)) {
-			target->set_status(WinchStatus::SensorUpperLimited);
+			target->set_status(WinchState::SensorUpperLimited);
 		} else if (DBX(db205, sensor + 1U)) {
-			target->set_status(WinchStatus::SensorLowerLimited);
+			target->set_status(WinchState::SensorLowerLimited);
 		} else if (can_windout && can_windup) {
-			target->set_status(fast, WinchStatus::FastWindReady, WinchStatus::WindReady);
+			target->set_status(fast, WinchState::FastWindReady, WinchState::WindReady);
 		} else if (can_windout) {
-			target->set_status(fast, WinchStatus::FastWindOutReady, WinchStatus::WindOutReady);
+			target->set_status(fast, WinchState::FastWindOutReady, WinchState::WindOutReady);
 		} else if (can_windup) {
-			target->set_status(fast, WinchStatus::FastWindUpReady, WinchStatus::WindUpReady);
+			target->set_status(fast, WinchState::FastWindUpReady, WinchState::WindUpReady);
 		}
 
 		// the rest are unused;
-		//  target->set_status(DBX(db205, status + 2U), WinchStatus::Unlettable);
-		//  target->set_status(DBX(db205, status + 3U), WinchStatus::Unpullable);
+		//  target->set_status(DBX(db205, status + 2U), WinchState::Unlettable);
+		//  target->set_status(DBX(db205, status + 3U), WinchState::Unpullable);
 	}
 }
 
 void WarGrey::SCADA::DI_winch_override(Buttonlet* target, const uint8* db205, WinchDetails& details) {
-	target->set_status(DBX(db205, details.override - 1U), ButtonStatus::Executing, ButtonStatus::Default);
+	target->set_status(DBX(db205, details.override - 1U), ButtonState::Executing, ButtonState::Default);
 }
 
 void WarGrey::SCADA::DI_gantry(Gantrylet* target, const uint8* db4, unsigned int idx4_p1, const uint8* db205, unsigned int idx205_p1) {
@@ -77,28 +77,28 @@ void WarGrey::SCADA::DI_gantry(GantrySymbollet* target, const uint8* db4, unsign
 
 void WarGrey::SCADA::DI_suction_buttons(Buttonlet* intarget, Buttonlet* detarget, const uint8* db205, unsigned int idx_p1) {
 	if (DBX(db205, idx_p1 - 1U)) {
-		intarget->set_status(ButtonStatus::Executing);
+		intarget->set_status(ButtonState::Executing);
 	} else if (DBX(db205, idx_p1 + 1U)) {
-		intarget->set_status(ButtonStatus::Failed);
+		intarget->set_status(ButtonState::Failed);
 	} else if (DBX(db205, idx_p1 + 3U)) {
-		intarget->set_status(ButtonStatus::Ready);
+		intarget->set_status(ButtonState::Ready);
 	} else {
-		intarget->set_status(ButtonStatus::Default);
+		intarget->set_status(ButtonState::Default);
 	}
 
 	if (DBX(db205, idx_p1 + 0U)) {
-		detarget->set_status(ButtonStatus::Executing);
+		detarget->set_status(ButtonState::Executing);
 	} else if (DBX(db205, idx_p1 + 2U)) {
-		detarget->set_status(ButtonStatus::Failed);
+		detarget->set_status(ButtonState::Failed);
 	} else if (DBX(db205, idx_p1 + 4U)) {
-		detarget->set_status(ButtonStatus::Ready);
+		detarget->set_status(ButtonState::Ready);
 	} else {
-		detarget->set_status(ButtonStatus::Default);
+		detarget->set_status(ButtonState::Default);
 	}
 }
 
 void WarGrey::SCADA::DI_ctension_button(Buttonlet* target, const uint8* db205, unsigned int idx_p1) {
-	target->set_status(DBX(db205, idx_p1 - 1U), ButtonStatus::Executing, ButtonStatus::Default);
+	target->set_status(DBX(db205, idx_p1 - 1U), ButtonState::Executing, ButtonState::Default);
 }
 
 bool WarGrey::SCADA::DI_long_sb_drag(const uint8* db205) {

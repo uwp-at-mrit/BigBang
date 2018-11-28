@@ -15,10 +15,10 @@ static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 HydraulicPumplet::HydraulicPumplet(float radius, double degrees)
-	: HydraulicPumplet(HydraulicPumpStatus::Stopped, radius, degrees) {}
+	: HydraulicPumplet(HydraulicPumpState::Stopped, radius, degrees) {}
 
-HydraulicPumplet::HydraulicPumplet(HydraulicPumpStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, radius, degrees) {
+HydraulicPumplet::HydraulicPumplet(HydraulicPumpState default_state, float radius, double degrees)
+	: ISymbollet(default_state, radius, degrees) {
 	this->tradius = radius - default_thickness * 2.0F;
 }
 
@@ -31,26 +31,26 @@ void HydraulicPumplet::update(long long count, long long interval, long long upt
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
 	switch (this->get_status()) {
-	case HydraulicPumpStatus::Starting: {
+	case HydraulicPumpState::Starting: {
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, pmask);
 		this->notify_updated();
 	} break;
-	case HydraulicPumpStatus::Stopping: {
+	case HydraulicPumpState::Stopping: {
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
 	}
 }
 
-void HydraulicPumplet::on_status_changed(HydraulicPumpStatus status) {
+void HydraulicPumplet::on_status_changed(HydraulicPumpState status) {
 	switch (status) {
-	case HydraulicPumpStatus::StartReady: case HydraulicPumpStatus::Unstartable: {
+	case HydraulicPumpState::StartReady: case HydraulicPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {
 			this->start_mask = polar_masked_triangle(this->tradius, this->degrees, 0.382);
 		}
 		this->mask = this->start_mask;
 	} break;
-	case HydraulicPumpStatus::StopReady: case HydraulicPumpStatus::Unstoppable: {
+	case HydraulicPumpState::StopReady: case HydraulicPumpState::Unstoppable: {
 		if (this->stop_mask == nullptr) {
 			this->stop_mask = polar_masked_triangle(this->tradius, this->degrees, 0.618);
 		}
@@ -62,37 +62,37 @@ void HydraulicPumplet::on_status_changed(HydraulicPumpStatus status) {
 	}
 }
 
-void HydraulicPumplet::prepare_style(HydraulicPumpStatus status, HydraulicPumpStyle& s) {
+void HydraulicPumplet::prepare_style(HydraulicPumpState status, HydraulicPumpStyle& s) {
 	switch (status) {
-	case HydraulicPumpStatus::Running: {
+	case HydraulicPumpState::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case HydraulicPumpStatus::StartReady: {
+	case HydraulicPumpState::StartReady: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HydraulicPumpStatus::Starting: {
+	case HydraulicPumpState::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
-	case HydraulicPumpStatus::Unstartable: {
+	case HydraulicPumpState::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case HydraulicPumpStatus::StopReady: {
+	case HydraulicPumpState::StopReady: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HydraulicPumpStatus::Stopping: {
+	case HydraulicPumpState::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
-	case HydraulicPumpStatus::Unstoppable: {
+	case HydraulicPumpState::Unstoppable: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case HydraulicPumpStatus::Ready: {
+	case HydraulicPumpState::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HydraulicPumpStatus::Broken: {
+	case HydraulicPumpState::Broken: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	}; break;
 	}

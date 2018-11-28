@@ -40,7 +40,7 @@ public:
 		switch (cmd) {
 		case TankHeaterAction::Start:  index = 665U; break;
 		case TankHeaterAction::Stop:   index = 666U; break;
-		case TankHeaterAction::Cancel: index = 667U; break;
+		case TankHeaterAction::Reset:  index = 667U; break;
 		case TankHeaterAction::Auto:   index = 668U; break;
 		}
 

@@ -5,7 +5,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class WinchStatus {
+	private enum class WinchState {
 		WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady, WindReady, FastWindReady,
 		UpperLimited, SensorUpperLimited, LowerLimited, SensorLowerLimited,
@@ -25,9 +25,9 @@ namespace WarGrey::SCADA {
 	};
 
 	private class Winchlet
-		: public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::WinchStatus, WarGrey::SCADA::WinchStyle> {
+		: public WarGrey::SCADA::IStatelet<WarGrey::SCADA::WinchState, WarGrey::SCADA::WinchStyle> {
 	public:
-		Winchlet(WarGrey::SCADA::WinchStatus default_status, float width, float height = 0.0F,
+		Winchlet(WarGrey::SCADA::WinchState default_state, float width, float height = 0.0F,
 			float thickness = 2.0F, unsigned int strand = 8);
 
 		Winchlet(float width, float height = 0.0F, float thickness = 2.0F, unsigned int strand = 8);
@@ -42,11 +42,11 @@ namespace WarGrey::SCADA {
 		void set_remote_control(bool on);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::WinchStatus status, WarGrey::SCADA::WinchStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::WinchStatus status) override;
+		void prepare_style(WarGrey::SCADA::WinchState status, WarGrey::SCADA::WinchStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::WinchState status) override;
 		
 	private:
-		std::map<WarGrey::SCADA::WinchStatus, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> icons;
+		std::map<WarGrey::SCADA::WinchState, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> icons;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ base;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ cable_upper;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ cable_bottom;

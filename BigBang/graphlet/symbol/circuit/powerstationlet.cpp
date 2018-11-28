@@ -12,11 +12,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 PowerStationlet::PowerStationlet(float radius, float thickness, double degrees)
-	: PowerStationlet(PowerStationStatus::Normal, radius, thickness, degrees) {
+	: PowerStationlet(PowerStationState::Normal, radius, thickness, degrees) {
 }
 
-PowerStationlet::PowerStationlet(PowerStationStatus default_status, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
+PowerStationlet::PowerStationlet(PowerStationState default_state, float radius, float thickness, double degrees)
+	: ISymbollet(default_state, radius, degrees), thickness(thickness) {
 	this->ring_radius = radius * 0.618F;
 	float r = (this->width - ring_radius - ring_radius - this->thickness) * 0.5F;
 
@@ -24,9 +24,9 @@ PowerStationlet::PowerStationlet(PowerStationStatus default_status, float radius
 	circle_point(r, this->degrees - 270.0, &this->cx2, &this->cy2);
 }
 
-void PowerStationlet::prepare_style(PowerStationStatus status, PowerStationStyle& s) {
+void PowerStationlet::prepare_style(PowerStationState status, PowerStationStyle& s) {
 	switch (status) {
-	case PowerStationStatus::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
+	case PowerStationState::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
 	}
 
 	CAS_SLOT(s.color, Colours::GhostWhite);

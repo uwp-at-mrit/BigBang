@@ -183,9 +183,11 @@
   </data>
   <data name="Visor" xml:space="preserve">
     <value>油温</value>
-    <comment>“耙唇液压油箱”标签不显示</comment>
   </data>
   <data name="BackOil" xml:space="preserve">
     <value>回油压力</value>
+  </data>
+  <data name="VisorOil" xml:space="preserve">
+    <value>油位</value>
   </data>
 </root>

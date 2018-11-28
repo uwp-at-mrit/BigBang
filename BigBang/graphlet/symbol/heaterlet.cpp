@@ -15,15 +15,15 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static float default_thickness = 2.0F;
-static double default_alpha_degrees = 36.0;
-static unsigned int dynamic_gradient_step = 8U;
+static double default_alpha_degrees = 42.0;
+static unsigned int dynamic_gradient_step = 10U;
 
 /*************************************************************************************************/
 Heaterlet::Heaterlet(float radius, double degrees)
-	: Heaterlet(HeaterStatus::Default, radius, degrees) {}
+	: Heaterlet(HeaterState::Default, radius, degrees) {}
 
-Heaterlet::Heaterlet(HeaterStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, radius, degrees) {
+Heaterlet::Heaterlet(HeaterState default_state, float radius, double degrees)
+	: ISymbollet(default_state, radius, degrees) {
 	this->radiusY = this->radiusX * 0.618F;
 	this->brdiff = default_thickness * 2.5F;
 }
@@ -73,61 +73,59 @@ void Heaterlet::fill_margin(float x, float y, float* top, float* right, float* b
 }
 
 void Heaterlet::update(long long count, long long interval, long long uptime) {
-	double alpha_raw = double(count % dynamic_gradient_step) / double(dynamic_gradient_step - 1);
+	double alpha_raw = double(count % (dynamic_gradient_step - 2) + 2) / double(dynamic_gradient_step - 1);
 	
 	switch (this->get_status()) {
-	case HeaterStatus::Starting: {
+	case HeaterState::Starting: {
 		this->thread_color = Colours::make(this->get_style().thread_color, alpha_raw);
 		this->notify_updated();
 	} break;
-	case HeaterStatus::Stopping: {
+	case HeaterState::Stopping: {
 		this->thread_color = Colours::make(this->get_style().thread_color, 1.0 - alpha_raw);
 		this->notify_updated();
 	} break;
 	}
 }
 
-void Heaterlet::prepare_style(HeaterStatus state, HeaterStyle& s) {
+void Heaterlet::prepare_style(HeaterState state, HeaterStyle& s) {
 	switch (state) {
-	case HeaterStatus::Broken: {
+	case HeaterState::Broken: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	} break;
-	case HeaterStatus::Starting: case HeaterStatus::Stopping: {
+	case HeaterState::Starting: case HeaterState::Stopping: {
 		CAS_SLOT(s.thread_color, Colours::DarkOrange);
 	}; break;
-	case HeaterStatus::Running: {
+	case HeaterState::Running: {
 		CAS_SLOT(s.thread_color, Colours::DarkOrange);
 		CAS_SLOT(s.body_color, Colours::MistyRose);
 	}; break;
-	case HeaterStatus::Stopped: {
+	case HeaterState::Stopped: {
 		CAS_SLOT(s.body_color, Colours::DimGray);
 	} break;
-	case HeaterStatus::Ready: {
+	case HeaterState::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HeaterStatus::Unstartable: {
+	case HeaterState::Unstartable: {
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case HeaterStatus::Unstoppable: {
+	case HeaterState::Unstoppable: {
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 		CAS_SLOT(s.thread_color, Colours::Orange);
-	}; break;
-	case HeaterStatus::Auto: {
-		CAS_SLOT(s.thread_color, Colours::AliceBlue);
-		CAS_SLOT(s.body_color, Colours::SkyBlue);
 	}; break;
 	}
 
 	CAS_SLOT(s.body_color, Colours::DarkGray);
 	CAS_SLOT(s.border_color, Colours::Silver);
 	CAS_SLOT(s.thread_color, Colours::Gray);
-	CAS_SLOT(s.remote_color, Colours::Cyan);
 	CAS_SLOT(s.skeleton_color, s.body_color);
+
+	CAS_SLOT(s.remote_color, Colours::Cyan);
+	CAS_SLOT(s.auto_color, Colours::LightSkyBlue);
 
 	// NOTE: The others can be nullptr;
 }
 
-void Heaterlet::on_status_changed(HeaterStatus state) {
+void Heaterlet::on_status_changed(HeaterState state) {
 	this->thread_color = nullptr;
 }
 
@@ -137,7 +135,7 @@ void Heaterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	float cy = y + this->height * 0.5F;
 
 	ds->FillGeometry(this->border, cx, cy, Colours::Background);
-	ds->FillGeometry(this->body, cx, cy, style.body_color);
+	ds->FillGeometry(this->body, cx, cy, (this->auto_mode ? style.auto_color : style.body_color));
 	ds->DrawGeometry(this->body, cx, cy, style.skeleton_color, default_thickness);
 	
 	ds->DrawCachedGeometry(this->thread, cx, cy,
@@ -150,4 +148,8 @@ void Heaterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 
 void Heaterlet::set_remote_control(bool on) {
 	this->remote_control = on;
+}
+
+void Heaterlet::set_auto_mode(bool yes) {
+	this->auto_mode = yes;
 }

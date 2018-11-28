@@ -4,17 +4,17 @@
 using namespace WarGrey::SCADA;
 
 void WarGrey::SCADA::AI_hopper_door(IHopperDoorlet* target, float progress, float open_threshold, float closed_threshold) {
-	DoorStatus s = target->get_status();
+	DoorState s = target->get_status();
 
-	if (s == DoorStatus::Opening) {
+	if (s == DoorState::Opening) {
 		if (progress >= open_threshold) {
-			target->set_status(DoorStatus::Open);
+			target->set_status(DoorState::Open);
 		}
 	}
 
-	if (s == DoorStatus::Closing) {
+	if (s == DoorState::Closing) {
 		if (progress <= closed_threshold) {
-			target->set_status(DoorStatus::Closed);
+			target->set_status(DoorState::Closed);
 		}
 	}
 }

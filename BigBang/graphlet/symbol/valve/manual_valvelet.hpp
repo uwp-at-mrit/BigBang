@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ManualValveStatus {
+	private enum class ManualValveState {
 		Default,
 		Open, Unopenable, OpenReady,
 		Closed, Unclosable, CloseReady,
@@ -17,9 +17,9 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ stem_color;
 	};
 
-	private class ManualValvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ManualValveStatus, WarGrey::SCADA::ManualValveStyle> {
+	private class ManualValvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::ManualValveState, WarGrey::SCADA::ManualValveStyle> {
 	public:
-		ManualValvelet(WarGrey::SCADA::ManualValveStatus default_status, float radius, double degrees = 0.0);
+		ManualValvelet(WarGrey::SCADA::ManualValveState default_state, float radius, double degrees = 0.0);
 		ManualValvelet(float radius, double degrees = 0.0);
 
 	public:
@@ -28,8 +28,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::ManualValveStatus status, WarGrey::SCADA::ManualValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::ManualValveStatus status) override;
+		void prepare_style(WarGrey::SCADA::ManualValveState status, WarGrey::SCADA::ManualValveStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::ManualValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

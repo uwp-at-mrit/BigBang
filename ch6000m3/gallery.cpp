@@ -58,10 +58,10 @@ public:
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
 		this->load_primitives(this->heaters, this->hlabels, unitsize);
 
-		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpStatus::Stopped, unitsize);
-		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpStatus::Stopped,    unitsize * 0.5F);
-		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpStatus::Stopped,     unitsize);
-		this->load_remote_primitive(&this->remote_heater,      HeaterStatus::Stopped,        unitsize);
+		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpState::Stopped, unitsize);
+		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpState::Stopped,    unitsize * 0.5F);
+		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpState::Stopped,     unitsize);
+		this->load_remote_primitive(&this->remote_heater,      HeaterState::Stopped,        unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -77,7 +77,7 @@ public:
 			}
 		}
 
-		this->pumps[_E0(HydraulicPumpStatus)]->fill_extent(0.0F, 0.0F, &unitsize);
+		this->pumps[_E0(HydraulicPumpState)]->fill_extent(0.0F, 0.0F, &unitsize);
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 		y = (height - cellsize * float(_N(GS))) * 0.5F;
@@ -93,10 +93,10 @@ public:
 		x += (label_max_width + x + x + halfunit);
 
 		{ // split winch statuses
-			WinchStatus at = _E(WinchStatus, _N(WinchStatus) / 2);
+			WinchState at = _E(WinchState, _N(WinchState) / 2);
 
-			this->reflow_primitives(this->ps_winches, this->wlabels, _E0(WinchStatus), at, x, &y, halfunit, cellsize);
-			this->reflow_primitives(this->ps_winches, this->wlabels, at, WinchStatus::_,   x, &y, halfunit, cellsize);
+			this->reflow_primitives(this->ps_winches, this->wlabels, _E0(WinchState), at, x, &y, halfunit, cellsize);
+			this->reflow_primitives(this->ps_winches, this->wlabels, at, WinchState::_,   x, &y, halfunit, cellsize);
 		}
 
 		this->reflow_primitives(this->pumps,  this->plabels,   x, &y, halfunit, cellsize);
@@ -128,10 +128,10 @@ public:
 			this->progress = 0.0;
 		}
 
-		hdoors[DoorStatus::Opening]->set_value(this->progress);
-		udoors[DoorStatus::Opening]->set_value(this->progress);
-		hdoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
-		udoors[DoorStatus::Closing]->set_value(1.0 - this->progress);
+		hdoors[DoorState::Opening]->set_value(this->progress);
+		udoors[DoorState::Opening]->set_value(this->progress);
+		hdoors[DoorState::Closing]->set_value(1.0 - this->progress);
+		udoors[DoorState::Closing]->set_value(1.0 - this->progress);
 	}
 
 private:
@@ -176,24 +176,24 @@ private:
 
 private: // never delete these graphlets manually.
 	Labellet* captions[_N(GS)];
-	std::unordered_map<WinchStatus, Winchlet*> ps_winches;
-	std::unordered_map<WinchStatus, Labellet*> wlabels;
-	std::unordered_map<HydraulicPumpStatus, HydraulicPumplet*> pumps;
-	std::unordered_map<HydraulicPumpStatus, Labellet*> plabels;
-	std::unordered_map<HopperPumpStatus, HopperPumplet*> hpumps;
-	std::unordered_map<HopperPumpStatus, Labellet*> hplabels;
-	std::unordered_map<WaterPumpStatus, WaterPumplet*> wpumps;
-	std::unordered_map<WaterPumpStatus, Labellet*> wplabels;
-	std::unordered_map<GateValveStatus, GateValvelet*> gvalves;
-	std::unordered_map<GateValveStatus, Labellet*> gvlabels;
-	std::unordered_map<TValveStatus, MotorValvelet*> evalves;
-	std::unordered_map<TValveStatus, Labellet*> evlabels;
-	std::unordered_map<DoorStatus, HopperDoorlet*> hdoors;
-	std::unordered_map<DoorStatus, Labellet*> hdlabels;
-	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;
-	std::unordered_map<DoorStatus, Labellet*> udlabels;
-	std::unordered_map<HeaterStatus, Heaterlet*> heaters;
-	std::unordered_map<HeaterStatus, Labellet*> hlabels;
+	std::unordered_map<WinchState, Winchlet*> ps_winches;
+	std::unordered_map<WinchState, Labellet*> wlabels;
+	std::unordered_map<HydraulicPumpState, HydraulicPumplet*> pumps;
+	std::unordered_map<HydraulicPumpState, Labellet*> plabels;
+	std::unordered_map<HopperPumpState, HopperPumplet*> hpumps;
+	std::unordered_map<HopperPumpState, Labellet*> hplabels;
+	std::unordered_map<WaterPumpState, WaterPumplet*> wpumps;
+	std::unordered_map<WaterPumpState, Labellet*> wplabels;
+	std::unordered_map<GateValveState, GateValvelet*> gvalves;
+	std::unordered_map<GateValveState, Labellet*> gvlabels;
+	std::unordered_map<TValveState, MotorValvelet*> evalves;
+	std::unordered_map<TValveState, Labellet*> evlabels;
+	std::unordered_map<DoorState, HopperDoorlet*> hdoors;
+	std::unordered_map<DoorState, Labellet*> hdlabels;
+	std::unordered_map<DoorState, UpperHopperDoorlet*> udoors;
+	std::unordered_map<DoorState, Labellet*> udlabels;
+	std::unordered_map<HeaterState, Heaterlet*> heaters;
+	std::unordered_map<HeaterState, Labellet*> hlabels;
 
 	Labellet* remote_label;
 	HydraulicPumplet* remote_pump;

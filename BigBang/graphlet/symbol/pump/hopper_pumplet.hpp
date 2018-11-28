@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class HopperPumpStatus {
+	private enum class HopperPumpState {
 		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready,
 		Broken, Alert, Maintenance, _
 	};
@@ -18,9 +18,9 @@ namespace WarGrey::SCADA {
 	};
 
 	private class HopperPumplet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HopperPumpStatus, WarGrey::SCADA::HopperPumpStyle> {
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HopperPumpState, WarGrey::SCADA::HopperPumpStyle> {
 	public:
-		HopperPumplet(WarGrey::SCADA::HopperPumpStatus default_status, float radiusX, float radiusY = 0.0F, double degrees = 0.0);
+		HopperPumplet(WarGrey::SCADA::HopperPumpState default_state, float radiusX, float radiusY = 0.0F, double degrees = 0.0);
 		HopperPumplet(float radiusX, float radiusY = 0.0F, double degrees = 0.0);
 
 	public:
@@ -34,8 +34,8 @@ namespace WarGrey::SCADA {
 		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::HopperPumpStatus status, WarGrey::SCADA::HopperPumpStyle& style) override;
-		void on_status_changed(HopperPumpStatus status) override;
+		void prepare_style(WarGrey::SCADA::HopperPumpState status, WarGrey::SCADA::HopperPumpStyle& style) override;
+		void on_status_changed(HopperPumpState status) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ wrench;

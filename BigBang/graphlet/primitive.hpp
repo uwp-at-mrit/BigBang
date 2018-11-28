@@ -128,14 +128,14 @@ namespace WarGrey::SCADA {
 		T vmax;
 	};
 
-	template<typename Status, typename Style>
-	private class IStatuslet abstract : public virtual WarGrey::SCADA::IGraphlet {
+	template<typename State, typename Style>
+	private class IStatelet abstract : public virtual WarGrey::SCADA::IGraphlet {
 	public:
-		IStatuslet() : IStatuslet(Status::_) {}
+		IStatelet() : IStatelet(State::_) {}
 
-		IStatuslet(Status status0) {
-			this->default_status = ((status0 == Status::_) ? 0 : _I(status0));
-			this->current_status = this->default_status;
+		IStatelet(State state0) {
+			this->default_state = ((state0 == State::_) ? 0 : _I(state0));
+			this->current_state = this->default_state;
 		}
 
 	public:
@@ -144,23 +144,23 @@ namespace WarGrey::SCADA {
 		}
 
 	public:		
-		void set_status(Status status) {
-			unsigned int new_status = ((status == Status::_) ? this->default_status : _I(status));
+		void set_status(State state) {
+			unsigned int new_state = ((state == State::_) ? this->default_state : _I(state));
 
-			if (this->current_status != new_status) {
-				this->current_status = new_status;
+			if (this->current_state != new_state) {
+				this->current_state = new_state;
 				this->update_status();
 				this->notify_updated();
 			}
 		}
 
-		void set_status(bool condition, Status status) {
+		void set_status(bool condition, State state) {
 			if (condition) {
-				this->set_status(status);
+				this->set_status(state);
 			}
 		}
 
-		void set_status(bool condition, Status status_yes, Status status_no) {
+		void set_status(bool condition, State status_yes, State status_no) {
 			if (condition) {
 				this->set_status(status_yes);
 			} else {
@@ -168,33 +168,33 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		Status get_status() {
-			return _E(Status, this->current_status);
+		State get_status() {
+			return _E(State, this->current_state);
 		}
 
-		void set_style(Status status, Style& style) {
-			unsigned int idx = (status == Status::_) ? this->current_status : _I(status);
+		void set_style(State status, Style& style) {
+			unsigned int idx = (status == State::_) ? this->current_state : _I(status);
 
 			this->styles[idx] = style;
 			this->style_ready[idx] = false;
 
-			if (idx == this->current_status) {
+			if (idx == this->current_state) {
 				this->update_status();
 				this->notify_updated();
 			}
 		}
 
 		void set_style(Style& style) {
-			for (Status s = _E(Status, 0); s < Status::_; s++) {
+			for (State s = _E(State, 0); s < State::_; s++) {
 				this->set_style(s, style);
 			}
 		}
 
-		Style& get_style(Status status = Status::_) {
-			unsigned int idx = (status == Status::_) ? this->current_status : _I(status);
+		Style& get_style(State status = State::_) {
+			unsigned int idx = (status == State::_) ? this->current_state : _I(status);
 
 			if (!this->style_ready[idx]) {
-				this->prepare_style(_E(Status, idx), this->styles[idx]);
+				this->prepare_style(_E(State, idx), this->styles[idx]);
 				this->style_ready[idx] = true;
 			}
 
@@ -204,37 +204,37 @@ namespace WarGrey::SCADA {
 	protected:
 		void update_status() {
 			this->apply_style(this->get_style());
-			this->on_status_changed(_E(Status, this->current_status));
+			this->on_status_changed(_E(State, this->current_state));
 		}
 
 	protected:
-		virtual void prepare_style(Status status, Style& style) = 0;
-		virtual void on_status_changed(Status status) {}
+		virtual void prepare_style(State status, Style& style) = 0;
+		virtual void on_status_changed(State status) {}
 		virtual void apply_style(Style& style) {}
 
 	private:
-		unsigned int default_status;
-		unsigned int current_status;
-		Style styles[_N(Status)];
-		bool style_ready[_N(Status)];
+		unsigned int default_state;
+		unsigned int current_state;
+		Style styles[_N(State)];
+		bool style_ready[_N(State)];
 	};
 
-	template<typename Status, typename Style>
-	private class ISymbollet abstract : public WarGrey::SCADA::IStatuslet<Status, Style> {
+	template<typename State, typename Style>
+	private class ISymbollet abstract : public WarGrey::SCADA::IStatelet<State, Style> {
 	public:
 		ISymbollet(float radius, double degrees)
-			: ISymbollet<Status, Style>(Status::_, radius, degrees) {}
+			: ISymbollet<State, Style>(State::_, radius, degrees) {}
 
-		ISymbollet(Status default_status, float radius, double degrees)
-			: IStatuslet<Status, Style>(default_status)
+		ISymbollet(State default_state, float radius, double degrees)
+			: IStatelet<State, Style>(default_state)
 			, radiusX(radius), radiusY(radius)
 			, width(radius * 2.0F), height(radius * 2.0F), degrees(degrees) {}
 
 		ISymbollet(float radiusX, float radiusY, double degrees, float proportion = 2.0F)
-			: ISymbollet<Status, Style>(Status::_, radiusX, radiusY, degrees, proportion) {}
+			: ISymbollet<State, Style>(State::_, radiusX, radiusY, degrees, proportion) {}
 
-		ISymbollet(Status default_status, float radiusX, float radiusY, double degrees, float proportion = 2.0F)
-			: IStatuslet<Status, Style>(default_status)
+		ISymbollet(State default_state, float radiusX, float radiusY, double degrees, float proportion = 2.0F)
+			: IStatelet<State, Style>(default_state)
 			, radiusX(radiusX), radiusY(radiusY), degrees(degrees) {
 			if (this->radiusY == 0.0F) {
 				this->radiusY = this->radiusX * proportion;

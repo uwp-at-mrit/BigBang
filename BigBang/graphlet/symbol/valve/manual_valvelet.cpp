@@ -21,10 +21,10 @@ static float default_thickness = 1.5F;
 
 /*************************************************************************************************/
 ManualValvelet::ManualValvelet(float radius, double degrees)
-	: ManualValvelet(ManualValveStatus::OpenReady, radius, degrees) {}
+	: ManualValvelet(ManualValveState::OpenReady, radius, degrees) {}
 
-ManualValvelet::ManualValvelet(ManualValveStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, radius, degrees) {}
+ManualValvelet::ManualValvelet(ManualValveState default_state, float radius, double degrees)
+	: ISymbollet(default_state, radius, degrees) {}
 
 void ManualValvelet::construct() {
 	double adjust_degrees = this->degrees + 90.0;
@@ -50,27 +50,27 @@ void ManualValvelet::fill_margin(float x, float y, float* top, float* right, flo
 	SET_BOX(bottom, std::fminf(vs, this->radiusY - (stem_box.Y + stem_box.Height)));
 }
 
-void ManualValvelet::prepare_style(ManualValveStatus status, ManualValveStyle& s) {
+void ManualValvelet::prepare_style(ManualValveState status, ManualValveStyle& s) {
 	switch (status) {
-	case ManualValveStatus::Default: {
+	case ManualValveState::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
-	case ManualValveStatus::Open: {
+	case ManualValveState::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case ManualValveStatus::OpenReady: {
+	case ManualValveState::OpenReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
 	}; break;
-	case ManualValveStatus::Unopenable: {
+	case ManualValveState::Unopenable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
-	case ManualValveStatus::Closed: {
+	case ManualValveState::Closed: {
 		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
-	case ManualValveStatus::CloseReady: {
+	case ManualValveState::CloseReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
 	}; break;
-	case ManualValveStatus::Unclosable: {
+	case ManualValveState::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
 	}
@@ -82,30 +82,30 @@ void ManualValvelet::prepare_style(ManualValveStatus status, ManualValveStyle& s
 	// NOTE: The others can be nullptr;
 }
 
-void ManualValvelet::on_status_changed(ManualValveStatus status) {
+void ManualValvelet::on_status_changed(ManualValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX;
 
 	switch (status) {
-	case ManualValveStatus::Unopenable: {
+	case ManualValveState::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case ManualValveStatus::Unclosable: case ManualValveStatus::Default: {
+	case ManualValveState::Unclosable: case ManualValveState::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case ManualValveStatus::OpenReady: {
+	case ManualValveState::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case ManualValveStatus::CloseReady: {
+	case ManualValveState::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.70);
 		}

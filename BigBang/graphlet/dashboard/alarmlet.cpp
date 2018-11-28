@@ -35,9 +35,9 @@ static CanvasGeometry^ make_alert_lights(float cx, float cy, float start_radius,
 }
 
 /*************************************************************************************************/
-Alarmlet::Alarmlet(float size) : Alarmlet(AlarmStatus::None, size) {}
+Alarmlet::Alarmlet(float size) : Alarmlet(AlarmState::None, size) {}
 
-Alarmlet::Alarmlet(AlarmStatus dstatus, float size) : IStatuslet(dstatus), width(size), height(size) {}
+Alarmlet::Alarmlet(AlarmState dstatus, float size) : IStatelet(dstatus), width(size), height(size) {}
 
 void Alarmlet::construct() {
 	CanvasStrokeStyle^ light_style = make_roundcap_stroke_style(true);
@@ -78,11 +78,11 @@ void Alarmlet::fill_extent(float x, float y, float* w, float* h) {
 	SET_BOX(h, this->height);
 };
 
-void Alarmlet::prepare_style(AlarmStatus status, AlarmStyle& style) {
+void Alarmlet::prepare_style(AlarmState status, AlarmStyle& style) {
 	switch (status) {
-	case AlarmStatus::Notice: CAS_SLOT(style.color, Colours::Green); break;
-	case AlarmStatus::Warning: CAS_SLOT(style.color, Colours::Yellow); break;
-	case AlarmStatus::Alert: CAS_SLOT(style.color, Colours::Red); break;
+	case AlarmState::Notice: CAS_SLOT(style.color, Colours::Green); break;
+	case AlarmState::Warning: CAS_SLOT(style.color, Colours::Yellow); break;
+	case AlarmState::Alert: CAS_SLOT(style.color, Colours::Red); break;
 	}
 
 	CAS_SLOT(style.color, Colours::GhostWhite);

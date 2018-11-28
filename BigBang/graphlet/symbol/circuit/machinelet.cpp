@@ -17,10 +17,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 Machinelet::Machinelet(char sign, float radius, float thickness, double degrees)
-	: Machinelet(MachineStatus::Normal, sign, radius, thickness, degrees) {}
+	: Machinelet(MachineState::Normal, sign, radius, thickness, degrees) {}
 
-Machinelet::Machinelet(MachineStatus default_status, char sign, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
+Machinelet::Machinelet(MachineState default_state, char sign, float radius, float thickness, double degrees)
+	: ISymbollet(default_state, radius, degrees), thickness(thickness) {
 	auto l_sign = make_text_layout(make_wstring(sign), make_bold_text_format("Monospace", radius));
 	auto l_pair = make_text_layout(L"~", make_bold_text_format("Cambria Math", radius * 2.0F));
 	Rect s_box = l_sign->DrawBounds;
@@ -38,9 +38,9 @@ Machinelet::Machinelet(MachineStatus default_status, char sign, float radius, fl
 	this->sign = geometry_freeze(geometry_rotate(geometry_union(g_sign, g_pair), degrees, radius, radius));
 }
 
-void Machinelet::prepare_style(MachineStatus status, MachineStyle& s) {
+void Machinelet::prepare_style(MachineState status, MachineStyle& s) {
 	switch (status) {
-	case MachineStatus::Breakdown: CAS_VALUES(s.border_color, Colours::Firebrick, s.sign_color, s.border_color); break;
+	case MachineState::Breakdown: CAS_VALUES(s.border_color, Colours::Firebrick, s.sign_color, s.border_color); break;
 	}
 
 	CAS_SLOT(s.border_color, Colours::GhostWhite);

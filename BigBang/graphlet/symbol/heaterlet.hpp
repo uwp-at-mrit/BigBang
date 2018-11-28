@@ -4,11 +4,11 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class HeaterStatus {
+	private enum class HeaterState {
 		Default,
 		Running, Starting, Unstartable,
 		Stopped, Stopping, Unstoppable,
-		Ready, Broken, Auto,
+		Ready, Broken,
 		_
 	};
 
@@ -16,13 +16,15 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ thread_color;
+
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ auto_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ remote_color;
 	};
 
-	private class Heaterlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HeaterStatus, WarGrey::SCADA::HeaterStyle> {
+	private class Heaterlet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HeaterState, WarGrey::SCADA::HeaterStyle> {
 	public:
-		Heaterlet(WarGrey::SCADA::HeaterStatus default_state, float radius, double degrees = 0.0);
+		Heaterlet(WarGrey::SCADA::HeaterState default_state, float radius, double degrees = 0.0);
 		Heaterlet(float radius, double degrees = 0.0);
 
 	public:
@@ -33,10 +35,11 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_remote_control(bool on);
+		void set_auto_mode(bool yes);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::HeaterStatus status, WarGrey::SCADA::HeaterStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::HeaterStatus state) override;
+		void prepare_style(WarGrey::SCADA::HeaterState status, WarGrey::SCADA::HeaterStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::HeaterState state) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ thread;
@@ -48,6 +51,9 @@ namespace WarGrey::SCADA {
 
 	private:
 		bool remote_control;
+		bool auto_mode;
+
+	private:
 		float brdiff;
 	};
 }

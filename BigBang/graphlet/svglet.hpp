@@ -83,12 +83,12 @@ namespace WarGrey::SCADA {
 		Platform::String^ stone_subdir;
 	};
 
-	template<typename Status, typename Style>
-	private class Svglet abstract : public WarGrey::SCADA::ISvglet, public WarGrey::SCADA::IStatuslet<Status, Style> {
+	template<typename State, typename Style>
+	private class Svglet abstract : public WarGrey::SCADA::ISvglet, public WarGrey::SCADA::IStatelet<State, Style> {
 	public:
-		Svglet(Status status0, float width, float height)
+		Svglet(State status0, float width, float height)
 			: WarGrey::SCADA::ISvglet(width, height)
-			, WarGrey::SCADA::IStatuslet<Status, Style>(status0) {}
+			, WarGrey::SCADA::IStatelet<State, Style>(status0) {}
 
 	public:
 		void sprite_construct() override { /* at this point, status maybe not ready for updating */ }

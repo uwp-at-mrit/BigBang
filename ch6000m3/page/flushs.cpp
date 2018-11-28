@@ -195,17 +195,17 @@ public:
 			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
 			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
 
-			if (this->gvalves[FS::HBV01]->get_status() == GateValveStatus::Open) {
+			if (this->gvalves[FS::HBV01]->get_status() == GateValveState::Open) {
 				this->station->append_subtrack(h14, water_color);
 			}
 			
-			if (this->gvalves[FS::HBV02]->get_status() == GateValveStatus::Closed) {
+			if (this->gvalves[FS::HBV02]->get_status() == GateValveState::Closed) {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			} else {
 				this->nintercs[FS::nic]->set_color(water_color);
 				this->station->append_subtrack(h25, water_color);
 
-				if (this->gvalves[FS::HBV03]->get_status() == GateValveStatus::Open) {
+				if (this->gvalves[FS::HBV03]->get_status() == GateValveState::Open) {
 					this->station->append_subtrack(h24, water_color);
 				}
 			}
@@ -498,8 +498,8 @@ private:
 		for (E id = id0; id <= idn; id++) {
 			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, id.ToString()), id);
 
-			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
-			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
+			ds[id]->set_style(DimensionState::Normal, this->pump_style);
+			ds[id]->set_style(DimensionState::Highlight, this->highlight_style);
 		}
 	}
 
@@ -585,7 +585,7 @@ private:
 private:
 	void try_flow_water(FS vid, FS eid1, FS eid2, CanvasSolidColorBrush^ color) {
 		switch (this->gvalves[vid]->get_status()) {
-		case GateValveStatus::Open: {
+		case GateValveState::Open: {
 			this->station->append_subtrack(vid, eid1, color);
 
 			if (eid2 != FS::_) {
@@ -730,7 +730,7 @@ bool FlushsPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
 		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-		|| ((btn != nullptr) && (btn->get_status() != ButtonStatus::Disabled)));
+		|| ((btn != nullptr) && (btn->get_status() != ButtonState::Disabled)));
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

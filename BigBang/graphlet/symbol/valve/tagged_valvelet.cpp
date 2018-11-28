@@ -22,10 +22,10 @@ static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 TValvelet::TValvelet(char tag, float radius, double degrees, bool rotate_tag)
-	: TValvelet(TValveStatus::Default, tag, radius, degrees, rotate_tag) {}
+	: TValvelet(TValveState::Default, tag, radius, degrees, rotate_tag) {}
 
-TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double degrees, bool rotate_tag)
-	: ISymbollet(default_status, radius, degrees), rotate_tag(rotate_tag) {
+TValvelet::TValvelet(TValveState default_state, char tag, float radius, double degrees, bool rotate_tag)
+	: ISymbollet(default_state, radius, degrees), rotate_tag(rotate_tag) {
 	this->tag = make_wstring(tag);
 	this->sradius = radius * 0.5F;
 	this->sgradius = radius * 0.618F;
@@ -73,12 +73,12 @@ void TValvelet::update(long long count, long long interval, long long uptime) {
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (this->get_status()) {
-	case TValveStatus::Opening: {
+	case TValveState::Opening: {
 
 		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -pmask);
 		this->notify_updated();
 	} break;
-	case TValveStatus::Closing: {
+	case TValveState::Closing: {
 		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
@@ -90,39 +90,39 @@ void TValvelet::fill_valve_origin(float* x, float* y) {
 	SET_BOX(y, this->body_cy);
 }
 
-void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
+void TValvelet::prepare_style(TValveState status, TValveStyle& s) {
 	switch (status) {
-	case TValveStatus::Default: {
+	case TValveState::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
-	case TValveStatus::Open: {
+	case TValveState::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case TValveStatus::Opening: {
+	case TValveState::Opening: {
 		CAS_SLOT(s.mask_color, Colours::Green);
 	}; break;
-	case TValveStatus::OpenReady: {
+	case TValveState::OpenReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
 	}; break;
-	case TValveStatus::Unopenable: {
+	case TValveState::Unopenable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
-	case TValveStatus::Closed: {
+	case TValveState::Closed: {
 		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
-	case TValveStatus::Closing: {
+	case TValveState::Closing: {
 		CAS_SLOT(s.mask_color, Colours::DarkGray);
 	}; break;
-	case TValveStatus::CloseReady: {
+	case TValveState::CloseReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
 	}; break;
-	case TValveStatus::Unclosable: {
+	case TValveState::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
-	case TValveStatus::VirtualOpen: {
+	case TValveState::VirtualOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
-	case TValveStatus::VirtualClose: {
+	case TValveState::VirtualClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
 	}; break;
 	}
@@ -134,29 +134,29 @@ void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void TValvelet::on_status_changed(TValveStatus status) {
+void TValvelet::on_status_changed(TValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (status) {
-	case TValveStatus::Unopenable: {
+	case TValveState::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case TValveStatus::Unclosable: case TValveStatus::Default: {
+	case TValveState::Unclosable: case TValveState::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case TValveStatus::OpenReady: {
+	case TValveState::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case TValveStatus::CloseReady: {
+	case TValveState::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.70);
 		}
@@ -204,5 +204,5 @@ void TValvelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 MotorValvelet::MotorValvelet(float radius, double degrees, bool rotate_tag)
 	: TValvelet('M', radius, degrees, rotate_tag) {}
 
-MotorValvelet::MotorValvelet(TValveStatus default_status, float radius, double degrees, bool rotate_tag)
-	: TValvelet(default_status, 'M', radius, degrees, rotate_tag) {}
+MotorValvelet::MotorValvelet(TValveState default_state, float radius, double degrees, bool rotate_tag)
+	: TValvelet(default_state, 'M', radius, degrees, rotate_tag) {}

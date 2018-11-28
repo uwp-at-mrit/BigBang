@@ -23,7 +23,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class YachtStatus { Stopped, Running, Alerting, _ };
+private enum class YachtState { Stopped, Running, Alerting, _ };
 
 private class Backgroundlet : public OptionBitmaplet {
 public:
@@ -35,9 +35,9 @@ public:
 	}
 };
 
-private class CreditItemlet : public virtual UnionBitmaplet<YachtStatus> {
+private class CreditItemlet : public virtual UnionBitmaplet<YachtState> {
 public:
-	CreditItemlet(Yacht id, float width, float height, CanvasTextFormat^ font) : UnionBitmaplet<YachtStatus>(id.ToString(), width, height), id(id) {
+	CreditItemlet(Yacht id, float width, float height, CanvasTextFormat^ font) : UnionBitmaplet<YachtState>(id.ToString(), width, height), id(id) {
 		this->caption = make_text_layout(speak(id), font);
 		this->cpt_xoff = (this->window.Width - this->caption->LayoutBounds.Width) * 0.5F;
 		this->cpt_yoff = (this->window.Height - this->caption->LayoutBounds.Height) * 0.5F;
@@ -57,16 +57,16 @@ public:
 		ICanvasBrush^ caption_color = Colours::GhostWhite;
 
 		switch (this->get_value()) {
-		case YachtStatus::Stopped:  caption_color = Colours::LightGray; break;
-		case YachtStatus::Alerting: caption_color = Colours::Firebrick; break;
+		case YachtState::Stopped:  caption_color = Colours::LightGray; break;
+		case YachtState::Alerting: caption_color = Colours::Firebrick; break;
 		}
 
 		ds->DrawTextLayout(this->caption, x + this->cpt_xoff, y + this->cpt_yoff, caption_color);
 	}
 
 protected:
-	void on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, YachtStatus hint) override {
-		UnionBitmaplet<YachtStatus>::on_appx(ms_appx, doc_bmp, hint);
+	void on_appx(Uri^ ms_appx, CanvasBitmap^ doc_bmp, YachtState hint) override {
+		UnionBitmaplet<YachtState>::on_appx(ms_appx, doc_bmp, hint);
 
 		if (this->icon_window.Width == 0.0F) {
 			float icon_width = this->sketch_to_application_width(doc_bmp->Size.Width);
@@ -132,7 +132,7 @@ public:
 
 public:
 	void on_plc_connectivity_changed(IPLCMaster* device, bool connected) override {
-		YachtStatus s = (connected ? YachtStatus::Running : YachtStatus::Stopped);
+		YachtState s = (connected ? YachtState::Running : YachtState::Stopped);
 		
 		this->master->begin_update_sequence();
 

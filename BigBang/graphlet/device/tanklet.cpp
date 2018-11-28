@@ -65,7 +65,7 @@ void ITanklet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 
 	ds->DrawGeometry(this->tube, x, y, this->style->border_color, this->thickness);
 	ds->FillGeometry(this->tube, x, y, Colours::Background);
-	ds->FillGeometry(this->ruler, x, y, this->style->border_color);
+	ds->FillGeometry(this->ruler, x, y, this->style->ruler_color);
 
 	ds->DrawCachedGeometry(this->floating, x, y + this->float_y, this->style->indicator_color);
 	ds->DrawCachedGeometry(this->liquid, x, y, this->style->liquid_color);
@@ -89,6 +89,7 @@ void ITanklet::apply_style(TankStyle* style) {
 void ITanklet::prepare_style(TankStyle& style, unsigned int idx, unsigned int count) {
 	CAS_SLOT(style.border_color, Colours::make(0xBBBBBB));
 	CAS_SLOT(style.body_color, Colours::make(0x333333));
+	CAS_SLOT(style.ruler_color, Colours::make(0x666666));
 	CAS_SLOT(style.liquid_color, Colours::make(Colours::DarkOrange, 0.618));
 
 	if ((style.mark_weight < 0.0) || (style.mark_weight > 1.0)) {

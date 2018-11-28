@@ -22,10 +22,10 @@ static unsigned int dynamic_mask_step = 8;
 
 /*************************************************************************************************/
 GateValvelet::GateValvelet(float radius, double degrees)
-	: GateValvelet(GateValveStatus::Default, radius, degrees) {}
+	: GateValvelet(GateValveState::Default, radius, degrees) {}
 
-GateValvelet::GateValvelet(GateValveStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, radius, degrees), sgrdiff(default_thickness * 2.0F) {}
+GateValvelet::GateValvelet(GateValveState default_state, float radius, double degrees)
+	: ISymbollet(default_state, radius, degrees), sgrdiff(default_thickness * 2.0F) {}
 
 void GateValvelet::construct() {
 	double adjust_degrees = this->degrees + 90.0;
@@ -49,50 +49,50 @@ void GateValvelet::update(long long count, long long interval, long long uptime)
 	float sandglass_r = this->radiusX - this->sgrdiff;
 
 	switch (this->get_status()) {
-	case GateValveStatus::Opening: {
+	case GateValveState::Opening: {
 		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -pmask);
 		this->notify_updated();
 	} break;
-	case GateValveStatus::Closing: {
+	case GateValveState::Closing: {
 		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 1.0 - pmask);
 		this->notify_updated();
 	} break;
 	}
 }
 
-void GateValvelet::prepare_style(GateValveStatus status, GateValveStyle& s) {
+void GateValvelet::prepare_style(GateValveState status, GateValveStyle& s) {
 	switch (status) {
-	case GateValveStatus::Default: {
+	case GateValveState::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
-	case GateValveStatus::Open: {
+	case GateValveState::Open: {
 		CAS_SLOT(s.body_color, Colours::Green);
 	}; break;
-	case GateValveStatus::Opening: {
+	case GateValveState::Opening: {
 		CAS_SLOT(s.mask_color, Colours::Green);
 	}; break;
-	case GateValveStatus::OpenReady: {
+	case GateValveState::OpenReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::ForestGreen);
 	}; break;
-	case GateValveStatus::Unopenable: {
+	case GateValveState::Unopenable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::Green);
 	}; break;
-	case GateValveStatus::Closed: {
+	case GateValveState::Closed: {
 		CAS_SLOT(s.body_color, Colours::Gray);
 	}; break;
-	case GateValveStatus::Closing: {
+	case GateValveState::Closing: {
 		CAS_SLOT(s.mask_color, Colours::DarkGray);
 	}; break;
-	case GateValveStatus::CloseReady: {
+	case GateValveState::CloseReady: {
 		CAS_VALUES(s.skeleton_color, Colours::Cyan, s.mask_color, Colours::DimGray);
 	}; break;
-	case GateValveStatus::Unclosable: {
+	case GateValveState::Unclosable: {
 		CAS_VALUES(s.skeleton_color, Colours::Red, s.mask_color, Colours::DarkGray);
 	}; break;
-	case GateValveStatus::VirtualOpen: {
+	case GateValveState::VirtualOpen: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::ForestGreen);
 	}; break;
-	case GateValveStatus::VirtualClose: {
+	case GateValveState::VirtualClose: {
 		CAS_VALUES(s.frame_color, Colours::Red, s.body_color, Colours::DimGray);
 	}; break;
 	}
@@ -104,30 +104,30 @@ void GateValvelet::prepare_style(GateValveStatus status, GateValveStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void GateValvelet::on_status_changed(GateValveStatus status) {
+void GateValvelet::on_status_changed(GateValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX - this->sgrdiff;
 
 	switch (status) {
-	case GateValveStatus::Unopenable: {
+	case GateValveState::Unopenable: {
 		if (this->bottom_up_mask == nullptr) {
 			this->bottom_up_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -0.80);
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case GateValveStatus::Unclosable: case GateValveStatus::Default: {
+	case GateValveState::Unclosable: case GateValveState::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.80);
 		}
 		this->mask = this->top_down_mask;
 	} break;
-	case GateValveStatus::OpenReady: {
+	case GateValveState::OpenReady: {
 		if (this->bottom_up_ready_mask == nullptr) {
 			this->bottom_up_ready_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -0.70);
 		}
 		this->mask = this->bottom_up_ready_mask;
 	} break;
-	case GateValveStatus::CloseReady: {
+	case GateValveState::CloseReady: {
 		if (this->top_down_ready_mask == nullptr) {
 			this->top_down_ready_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.70);
 		}

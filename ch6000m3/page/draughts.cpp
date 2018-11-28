@@ -404,7 +404,7 @@ bool DraughtsPage::can_select(IGraphlet* g) {
 	auto hdchecker = dynamic_cast<Buttonlet*>(g);
 
 	return ((dynamic_cast<OverflowPipelet*>(g) != nullptr)
-		|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonStatus::Disabled)));
+		|| ((hdchecker != nullptr) && (hdchecker->get_status() != ButtonState::Disabled)));
 }
 
 bool DraughtsPage::can_select_multiple() {

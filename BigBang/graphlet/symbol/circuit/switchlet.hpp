@@ -4,17 +4,17 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class SwitchStatus { Normal, Breakdown, _ };
+	private enum class SwitchState { Normal, Breakdown, _ };
 
 	private struct SwitchStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	};
 
 	private class Switchlet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::SwitchStatus, WarGrey::SCADA::SwitchStyle>
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::SwitchState, WarGrey::SCADA::SwitchStyle>
 		, public WarGrey::SCADA::IValuelet<bool> {
 	public:
-		Switchlet(WarGrey::SCADA::SwitchStatus default_status, float radius, float thickness = 1.5F, double degrees = 0.0);
+		Switchlet(WarGrey::SCADA::SwitchState default_state, float radius, float thickness = 1.5F, double degrees = 0.0);
 		Switchlet(float radius, float thickness = 1.5F, double degrees = 0.0);
 
 	public:
@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::SwitchStatus status, WarGrey::SCADA::SwitchStyle& style) override;
+		void prepare_style(WarGrey::SCADA::SwitchState status, WarGrey::SCADA::SwitchStyle& style) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ endpoints;

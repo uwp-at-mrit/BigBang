@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 
 	struct TimeSeriesLine;
 
-	private enum class TimeSeriesStatus { Realtime, History, _ };
+	private enum class TimeSeriesState { Realtime, History, _ };
 
 	private struct TimeSeries {
 		long long start;
@@ -50,7 +50,7 @@ namespace WarGrey::SCADA {
 		float legend_fx = -1.0F;
 	};
 
-	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::TimeSeriesStatus, WarGrey::SCADA::TimeSeriesStyle> {
+	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle> {
 	public:
 		virtual ~ITimeSerieslet() noexcept;
 
@@ -71,8 +71,8 @@ namespace WarGrey::SCADA {
 		void set_values(double* values);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::TimeSeriesStatus status, WarGrey::SCADA::TimeSeriesStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::TimeSeriesStatus status) override;
+		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::TimeSeriesState state) override;
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);

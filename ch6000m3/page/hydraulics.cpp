@@ -42,8 +42,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
 
-private enum class HSMTStatus { Empty, UltraLow, Low, Normal, High, Full, _ };
-private enum class HSVTStatus { Empty, UltraLow, Low, Normal, Full, _ };
+private enum class HSMTState { Empty, UltraLow, Low, Normal, High, Full, _ };
+private enum class HSVTState { Empty, UltraLow, Low, Normal, Full, _ };
 
 static CanvasSolidColorBrush^ oil_color = Colours::Yellow;
 
@@ -61,7 +61,7 @@ private enum class HS : unsigned int {
 	SQc, SQf, SQd, SQe,
 	
 	// Key Labels
-	Port, Starboard, Master, Visor, Storage, BackOil,
+	Port, Starboard, Master, Visor, Storage, BackOil, VisorOil,
 	
 	// Filter Indicators
 	F01, F02, F10,
@@ -102,6 +102,7 @@ public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
+		this->levels[HS::VisorOil]->set_value(RealData(DB203, visor_tank_level));
 		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));
 
 		{ // pump pressures
@@ -126,21 +127,21 @@ public:
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
 		{ // tank status
 			if (DBX(DB4, 118U - 1)) {
-				this->master_tank->set_status(HSMTStatus::Low);
+				this->master_tank->set_status(HSMTState::Low);
 			} else if (DBX(DB4, 119U - 1)) {
-				this->master_tank->set_status(HSMTStatus::UltraLow);
+				this->master_tank->set_status(HSMTState::UltraLow);
 			} else if (DBX(DB4, 120U - 1)) {
-				this->master_tank->set_status(HSMTStatus::High);
+				this->master_tank->set_status(HSMTState::High);
 			} else {
-				this->master_tank->set_status(HSMTStatus::Normal);
+				this->master_tank->set_status(HSMTState::Normal);
 			}
 
 			if (DBX(DB4, 132U - 1)) {
-				this->visor_tank->set_status(HSVTStatus::Low);
+				this->visor_tank->set_status(HSVTState::Low);
 			} else if (DBX(DB4, 133U - 1)) {
-				this->visor_tank->set_status(HSVTStatus::UltraLow);
+				this->visor_tank->set_status(HSVTState::UltraLow);
 			} else {
-				this->visor_tank->set_status(HSVTStatus::Normal);
+				this->visor_tank->set_status(HSVTState::Normal);
 			}
 		} 
 		
@@ -193,6 +194,8 @@ public:
 			DI_filter_alarm(this->alarms[HS::F02], DB4, filter_02_status);
 			DI_filter_alarm(this->alarms[HS::F10], DB4, filter_10_status);
 		}
+
+		DI_tank_heater(this->heater, DB4, tank_heater_feedback, DB205, tank_heater_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -241,12 +244,12 @@ public:
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 
-		this->pressure_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->pressure_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
-		this->temperature_style = this->pressure_style;
+		this->fixnum_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->fixnum_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->flonum_style = this->fixnum_style;
 
-		this->pressure_style.precision = 0;
-		this->temperature_style.precision = 1;
+		this->fixnum_style.precision = 0;
+		this->flonum_style.precision = 1;
 	}
  
 public:
@@ -295,12 +298,13 @@ public:
 		float thickness = default_pipe_thickness * 2.0F;
 		float alarm_size = gwidth * 1.2F;
 
-		this->master_tank = this->make_tank(HSMTStatus::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
-		this->visor_tank = this->make_tank(HSVTStatus::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
+		this->master_tank = this->make_tank(HSMTState::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
+		this->visor_tank = this->make_tank(HSVTState::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
 		this->heater = this->master->insert_one(new Heaterlet(gwidth * 1.618F));
 
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
+		this->load_dimension(this->levels, HS::VisorOil, "centimeter");
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		
@@ -427,7 +431,8 @@ public:
 
 	void reflow_metrics(float width, float height, float gwidth, float gheight, float vinset) {
 		this->master->move_to(this->temperatures[HS::Master], this->thermometers[HS::Master], 1.0F, 0.75F, GraphletAnchor::LC, gwidth);
-		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LC, gwidth);
+		this->master->move_to(this->temperatures[HS::Visor], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LB, gwidth);
+		this->master->move_to(this->levels[HS::VisorOil], this->thermometers[HS::Visor], 1.0F, 0.75F, GraphletAnchor::LT, gwidth);
 		
 		{ // reflow alarms
 			float lblgap = vinset * 0.25F;
@@ -493,13 +498,13 @@ private:
 
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->pressure_style, unit, _speak(id.ToString())), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->flonum_style, unit, _speak(id)), id);
 	}
 
 	template<typename E>
 	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->pressure_style, unit), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->fixnum_style, unit), id);
 		}
 	}
 
@@ -514,7 +519,7 @@ private:
 	template<class T, typename E>
 	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width, float height) {
 		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, height, 2.5F), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->temperature_style, "celsius", _speak(id)), id);
+		this->load_dimension(ds, id, "celsius");
 	}
 
 	template<typename E>
@@ -555,7 +560,7 @@ private:
 private:
 	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case ManualValveStatus::Open: {
+		case ManualValveState::Open: {
 			this->station->append_subtrack(vid, pid, color);
 		}
 		}
@@ -563,7 +568,7 @@ private:
 
 	void try_flow_oil(HS vid, HS mid, HS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case ManualValveStatus::Open: {
+		case ManualValveState::Open: {
 			this->station->append_subtrack(vid, mid, color);
 			this->station->append_subtrack(mid, eid, color);
 		}
@@ -574,7 +579,7 @@ private:
 		this->try_flow_oil(vid, pid, color);
 
 		switch (this->pumps[pid]->get_status()) {
-		case HydraulicPumpStatus::Running: case HydraulicPumpStatus::StopReady: {
+		case HydraulicPumpState::Running: case HydraulicPumpState::StopReady: {
 			this->station->append_subtrack(pid, _id, oil_color);
 
 			if (path != nullptr) {
@@ -595,10 +600,11 @@ private:
 	Tracklet<HS>* station;
 	FuelTanklet* storage_tank;
 	Heaterlet* heater;
-	Tanklet<HSMTStatus>* master_tank;
-	Tanklet<HSVTStatus>* visor_tank;
+	Tanklet<HSMTState>* master_tank;
+	Tanklet<HSVTState>* visor_tank;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
+	std::map<HS, Credit<Dimensionlet, HS>*> levels;
 	std::map<HS, Credit<Labellet, HS>*> captions;
 	std::map<HS, Credit<Labellet, HS>*> labels;
 	std::map<HS, Credit<HydraulicPumplet, HS>*> pumps;
@@ -610,8 +616,8 @@ private:
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
-	DimensionStyle pressure_style;
-	DimensionStyle temperature_style;
+	DimensionStyle fixnum_style;
+	DimensionStyle flonum_style;
 
 private:
 	HydraulicsPage* master;

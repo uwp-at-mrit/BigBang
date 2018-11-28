@@ -17,10 +17,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 Converterlet::Converterlet(char sign, float radius, float thickness, double degrees)
-	: Converterlet(ConverterStatus::Normal, sign, radius, thickness, degrees) {}
+	: Converterlet(ConverterState::Normal, sign, radius, thickness, degrees) {}
 
-Converterlet::Converterlet(ConverterStatus default_status, char sign, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, radius, degrees), thickness(thickness) {
+Converterlet::Converterlet(ConverterState default_state, char sign, float radius, float thickness, double degrees)
+	: ISymbollet(default_state, radius, degrees), thickness(thickness) {
 	auto l_sign = make_text_layout(make_wstring(sign), make_bold_text_format("Cambria Math", radius * 1.2F));
 	auto l_pair = make_text_layout(L"=", make_bold_text_format("Cambria Math", radius * 1.2F));
 	Rect s_box = l_sign->DrawBounds;
@@ -42,9 +42,9 @@ Converterlet::Converterlet(ConverterStatus default_status, char sign, float radi
 	this->sign = geometry_freeze(geometry_rotate(geometry_union(g_sign, g_pair), degrees, radius, radius));
 }
 
-void Converterlet::prepare_style(ConverterStatus status, ConverterStyle& s) {
+void Converterlet::prepare_style(ConverterState status, ConverterStyle& s) {
 	switch (status) {
-	case ConverterStatus::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
+	case ConverterState::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
 	}
 
 	CAS_SLOT(s.color, Colours::GhostWhite);

@@ -6,7 +6,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private enum class GantryStatus { Default, WindedUp, WindedOut, WindingUp, WindingOut, _ };
+	private enum class GantryState { Default, WindedUp, WindedOut, WindingUp, WindingOut, _ };
 
 	private struct GantryStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
@@ -22,10 +22,10 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ highlight_color;
 	};
 
-	private class Gantrylet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::GantryStatus, WarGrey::SCADA::GantryStyle> {
+	private class Gantrylet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::GantryState, WarGrey::SCADA::GantryStyle> {
 	public:
 		Gantrylet(float radius, float base_extent_ratio = 3.0F, double degrees = 42.0);
-		Gantrylet(WarGrey::SCADA::GantryStatus default_status, float radius, float base_extent_ratio = 3.0F, double degrees = 42.0);
+		Gantrylet(WarGrey::SCADA::GantryState default_state, float radius, float base_extent_ratio = 3.0F, double degrees = 42.0);
 
 	public:
 		void construct() override;
@@ -38,8 +38,8 @@ namespace WarGrey::SCADA {
 		float get_winch_joint_y();
 
 	protected:
-		void prepare_style(WarGrey::SCADA::GantryStatus status, WarGrey::SCADA::GantryStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GantryStatus status) override;
+		void prepare_style(WarGrey::SCADA::GantryState status, WarGrey::SCADA::GantryStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::GantryState status) override;
 
 	private:
 		void make_hat(double degress_ratio);
@@ -75,10 +75,10 @@ namespace WarGrey::SCADA {
 		bool leftward;
 	};
 
-	private class GantrySymbollet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::GantryStatus, WarGrey::SCADA::GantrySymbolStyle> {
+	private class GantrySymbollet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::GantryState, WarGrey::SCADA::GantrySymbolStyle> {
 	public:
 		GantrySymbollet(float width, float height = 0.0F);
-		GantrySymbollet(WarGrey::SCADA::GantryStatus default_status, float width, float height = 0.0F);
+		GantrySymbollet(WarGrey::SCADA::GantryState default_state, float width, float height = 0.0F);
 
 	public:
 		void construct() override;
@@ -87,8 +87,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::GantryStatus status, WarGrey::SCADA::GantrySymbolStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GantryStatus status) override;
+		void prepare_style(WarGrey::SCADA::GantryState status, WarGrey::SCADA::GantrySymbolStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::GantryState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ inside_color;

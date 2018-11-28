@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class TValveStatus {
+	private enum class TValveState {
 		Default,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
@@ -20,9 +20,9 @@ namespace WarGrey::SCADA {
 	};
 
 	private class TValvelet abstract
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::TValveStatus, WarGrey::SCADA::TValveStyle> {
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::TValveState, WarGrey::SCADA::TValveStyle> {
 	public:
-		TValvelet(WarGrey::SCADA::TValveStatus default_status, char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
+		TValvelet(WarGrey::SCADA::TValveState default_state, char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
 		TValvelet(char tag, float radius, double degrees = 0.0, bool rotate_tag = true);
 
 	public:
@@ -35,8 +35,8 @@ namespace WarGrey::SCADA {
 		void fill_valve_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::TValveStatus status, WarGrey::SCADA::TValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::TValveStatus status) override;
+		void prepare_style(WarGrey::SCADA::TValveState status, WarGrey::SCADA::TValveStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::TValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;
@@ -69,7 +69,7 @@ namespace WarGrey::SCADA {
 
 	private class MotorValvelet : public WarGrey::SCADA::TValvelet {
 	public:
-		MotorValvelet(WarGrey::SCADA::TValveStatus default_status, float radius, double degrees = 0.0, bool rotate_tag = true);
+		MotorValvelet(WarGrey::SCADA::TValveState default_state, float radius, double degrees = 0.0, bool rotate_tag = true);
 		MotorValvelet(float radius, double degrees = 0.0, bool rotate_tag = true);
 	};
 }

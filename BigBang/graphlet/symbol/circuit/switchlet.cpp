@@ -11,10 +11,10 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 Switchlet::Switchlet(float radius, float thickness, double degrees)
-	: Switchlet(SwitchStatus::Normal, radius, thickness, degrees) {}
+	: Switchlet(SwitchState::Normal, radius, thickness, degrees) {}
 
-Switchlet::Switchlet(SwitchStatus default_status, float radius, float thickness, double degrees)
-	: ISymbollet(default_status, radius, degrees), thickness(thickness) {}
+Switchlet::Switchlet(SwitchState default_state, float radius, float thickness, double degrees)
+	: ISymbollet(default_state, radius, degrees), thickness(thickness) {}
 
 void Switchlet::construct() {
 	float epradius = this->thickness * 1.618F;
@@ -29,9 +29,9 @@ void Switchlet::construct() {
 		circle(this->right_x, this->right_y, epradius)));
 }
 
-void Switchlet::prepare_style(SwitchStatus status, SwitchStyle& s) {
+void Switchlet::prepare_style(SwitchState status, SwitchStyle& s) {
 	switch (status) {
-	case SwitchStatus::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
+	case SwitchState::Breakdown: CAS_SLOT(s.color, Colours::Firebrick); break;
 	}
 
 	CAS_SLOT(s.color, Colours::GhostWhite);

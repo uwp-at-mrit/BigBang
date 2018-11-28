@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class WaterPumpStatus {
+	private enum class WaterPumpState {
 		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready,
 		Broken, Alert, _
 	};
@@ -17,10 +17,10 @@ namespace WarGrey::SCADA {
 	};
 
 	private class WaterPumplet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::WaterPumpStatus, WarGrey::SCADA::WaterPumpStyle> {
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::WaterPumpState, WarGrey::SCADA::WaterPumpStyle> {
 
 	public:
-		WaterPumplet(WarGrey::SCADA::WaterPumpStatus default_status, float radius, double degrees = 0.0);
+		WaterPumplet(WarGrey::SCADA::WaterPumpState default_state, float radius, double degrees = 0.0);
 		WaterPumplet(float radius, double degrees = 0.0);
 
 	public:
@@ -34,8 +34,8 @@ namespace WarGrey::SCADA {
 		void fill_pump_origin(float* x = nullptr, float* y = nullptr);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::WaterPumpStatus status, WarGrey::SCADA::WaterPumpStyle& style) override;
-		void on_status_changed(WaterPumpStatus status) override;
+		void prepare_style(WarGrey::SCADA::WaterPumpState status, WarGrey::SCADA::WaterPumpStyle& style) override;
+		void on_status_changed(WaterPumpState status) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

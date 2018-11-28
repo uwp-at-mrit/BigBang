@@ -16,10 +16,10 @@ static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 WaterPumplet::WaterPumplet(float radius, double degrees)
-	: WaterPumplet(WaterPumpStatus::Stopped, radius, degrees) {}
+	: WaterPumplet(WaterPumpState::Stopped, radius, degrees) {}
 
-WaterPumplet::WaterPumplet(WaterPumpStatus default_status, float radius, double degrees)
-	: ISymbollet(default_status, std::fabsf(radius), 0.0F, degrees, 1.0F), leftward(radius > 0.0F) {}
+WaterPumplet::WaterPumplet(WaterPumpState default_state, float radius, double degrees)
+	: ISymbollet(default_state, std::fabsf(radius), 0.0F, degrees, 1.0F), leftward(radius > 0.0F) {}
 
 void WaterPumplet::construct() {
 	float thickoff = default_thickness * 0.5F;
@@ -54,11 +54,11 @@ void WaterPumplet::update(long long count, long long interval, long long uptime)
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
 	switch (this->get_status()) {
-	case WaterPumpStatus::Starting: {
+	case WaterPumpState::Starting: {
 		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(pmask));
 		this->notify_updated();
 	} break;
-	case WaterPumpStatus::Stopping: {
+	case WaterPumpState::Stopping: {
 		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(1.0 - pmask));
 		this->notify_updated();
 	} break;
@@ -79,15 +79,15 @@ void WaterPumplet::fill_pump_origin(float* x, float *y) {
 	SET_VALUES(x, this->pump_cx, y, this->pump_cy);
 }
 
-void WaterPumplet::on_status_changed(WaterPumpStatus status) {
+void WaterPumplet::on_status_changed(WaterPumpState status) {
 	switch (status) {
-	case WaterPumpStatus::StartReady: case WaterPumpStatus::Unstartable: {
+	case WaterPumpState::StartReady: case WaterPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {
 			this->start_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.382F);
 		}
 		this->mask = this->start_mask;
 	} break;
-	case WaterPumpStatus::StopReady: case WaterPumpStatus::Unstoppable: {
+	case WaterPumpState::StopReady: case WaterPumpState::Unstoppable: {
 		if (this->stop_mask == nullptr) {
 			this->stop_mask = circle(this->pump_cx, this->pump_cy, this->iradius * 0.618F);
 		}
@@ -99,38 +99,38 @@ void WaterPumplet::on_status_changed(WaterPumpStatus status) {
 	}
 }
 
-void WaterPumplet::prepare_style(WaterPumpStatus status, WaterPumpStyle& s) {
+void WaterPumplet::prepare_style(WaterPumpState status, WaterPumpStyle& s) {
 	switch (status) {
-	case WaterPumpStatus::Running: {
+	case WaterPumpState::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
-	case WaterPumpStatus::StartReady: {
+	case WaterPumpState::StartReady: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case WaterPumpStatus::Starting: {
+	case WaterPumpState::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
-	case WaterPumpStatus::StopReady: {
+	case WaterPumpState::StopReady: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case WaterPumpStatus::Unstartable: {
+	case WaterPumpState::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case WaterPumpStatus::Stopping: {
+	case WaterPumpState::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
-	case WaterPumpStatus::Unstoppable: {
+	case WaterPumpState::Unstoppable: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case WaterPumpStatus::Ready: {
+	case WaterPumpState::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case WaterPumpStatus::Broken: case WaterPumpStatus::Alert: {
+	case WaterPumpState::Broken: case WaterPumpState::Alert: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	}; break;
 	}

@@ -148,10 +148,10 @@ Platform::String^ WarGrey::SCADA::system_ipv4_address(Platform::String^ defval_i
 }
 
 /*************************************************************************************************/
-private ref class SystemStatus sealed {
+private ref class SystemState sealed {
 public:
-	static SystemStatus^ get_status_info_provider() {
-		static SystemStatus^ singleton = ref new SystemStatus();
+	static SystemState^ get_status_info_provider() {
+		static SystemState^ singleton = ref new SystemState();
 
 		return singleton;
 	}
@@ -255,16 +255,16 @@ private:
 	}
 
 private:
-	SystemStatus() {
+	SystemState() {
 		BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
 		
-		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemStatus::report_powerinfo);
-		//WiFiAdapter::AvailableNetworksChanged += ref new TypedEventHandler<WiFiAdapter^, Platform::Object^>(this, &SystemStatus::wifi_changed);
+		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemState::report_powerinfo);
+		//WiFiAdapter::AvailableNetworksChanged += ref new TypedEventHandler<WiFiAdapter^, Platform::Object^>(this, &SystemState::wifi_changed);
 		
-		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemStatus::report_brightness);
+		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemState::report_brightness);
 
 		this->clock = ref new DispatcherTimer();
-		this->clock->Tick += ref new EventHandler<Object^>(this, &SystemStatus::report_timestamp);
+		this->clock->Tick += ref new EventHandler<Object^>(this, &SystemState::report_timestamp);
 		this->report_timestamp(nullptr, nullptr);
 		this->clock->Start();
 
@@ -273,7 +273,7 @@ private:
 		//});
 	}
 
-	~SystemStatus() {
+	~SystemState() {
 		this->clock->Stop();
 	}
 
@@ -288,5 +288,5 @@ private:
 };
 
 void WarGrey::SCADA::register_system_status_listener(ISystemStatusListener* listener) {
-	SystemStatus::get_status_info_provider()->add_status_listener(listener);
+	SystemState::get_status_info_provider()->add_status_listener(listener);
 }

@@ -13,10 +13,10 @@ static CanvasSolidColorBrush^ default_sign_color = nullptr;
 
 /*************************************************************************************************/
 StorageCelletv::StorageCelletv(float width, float height)
-	: StorageCelletv(StorageCellVStatus::Normal, width, height) {}
+	: StorageCelletv(StorageCellVState::Normal, width, height) {}
 
-StorageCelletv::StorageCelletv(StorageCellVStatus default_status, float width, float height)
-	: Svglet(default_status, width, height) {}
+StorageCelletv::StorageCelletv(StorageCellVState default_state, float width, float height)
+	: Svglet(default_state, width, height) {}
 
 Platform::String^ StorageCelletv::name() {
 	return "StorageCell";
@@ -25,7 +25,7 @@ Platform::String^ StorageCelletv::name() {
 void StorageCelletv::update(long long count, long long interval, long long uptime) {
 	if (this->ready()) {
 		switch (this->get_status()) {
-		case StorageCellVStatus::Charge: {
+		case StorageCellVState::Charge: {
 			StorageCellVStyle style = this->get_style();
 			
 			if (count % 2 == 0) {	
@@ -38,7 +38,7 @@ void StorageCelletv::update(long long count, long long interval, long long uptim
 
 			this->notify_updated();
 		}; break;
-		case StorageCellVStatus::Discharge: {
+		case StorageCellVState::Discharge: {
 			StorageCellVStyle style = this->get_style();
 
 			if (count % 2 != 0) {
@@ -61,12 +61,12 @@ void StorageCelletv::on_ready() {
 	}
 }
 
-void StorageCelletv::prepare_style(StorageCellVStatus status, StorageCellVStyle& style) {
+void StorageCelletv::prepare_style(StorageCellVState status, StorageCellVStyle& style) {
 	switch (status) {
-	case StorageCellVStatus::Normal: CAS_SLOT(style.sign_color, Colours::WhiteSmoke); break;
-	case StorageCellVStatus::Breakdown: CAS_SLOT(style.body_color, Colours::Firebrick); break;
-	case StorageCellVStatus::Charge: CAS_SLOT(style.sign_color, Colours::Orange); break;
-	case StorageCellVStatus::Discharge: CAS_SLOT(style.sign_color, Colours::Green); break;
+	case StorageCellVState::Normal: CAS_SLOT(style.sign_color, Colours::WhiteSmoke); break;
+	case StorageCellVState::Breakdown: CAS_SLOT(style.body_color, Colours::Firebrick); break;
+	case StorageCellVState::Charge: CAS_SLOT(style.sign_color, Colours::Orange); break;
+	case StorageCellVState::Discharge: CAS_SLOT(style.sign_color, Colours::Green); break;
 	}
 
 	CAS_SLOT(style.body_color, Colours::SlateGray);

@@ -414,7 +414,7 @@ private:
 	template<typename E>
 	void load_settings(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^ label) {
 		for (E id = id0; id <= idn; id++) {
-			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, label), id);
+			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, label), id);
 			ds[id]->set_maximum(double(gland_pump_rpm_range));
 		}
 	}
@@ -458,7 +458,7 @@ private:
 private:
 	void try_flow_water(GP pid, GP start, GP end, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_status()) {
-		case HydraulicPumpStatus::Running: {
+		case HydraulicPumpState::Running: {
 			this->station->append_subtrack(start, end, color);
 		}
 		}
@@ -466,7 +466,7 @@ private:
 
 	void try_flow_water(GP pid, GP* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_status()) {
-		case HydraulicPumpStatus::Running: {
+		case HydraulicPumpState::Running: {
 			this->station->append_subtrack(path, count, color);
 		}
 		}

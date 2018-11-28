@@ -25,7 +25,7 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum class AC { Bridge, VIP, Salon, Host, Guest, _ };
 private enum class ACInfo { mode, t_sea, t_pipe, aux, _, t_room, t_setting };
 private enum class ACMode { Breakdown, Heating, Cooling, _ };
-private enum class ACStatus { Normal };
+private enum class ACState { Normal };
 
 private enum class ACOP { Power, Heater, Cooler, Cool, Heat, PlaceHolder, Refresh, _ };
 
@@ -117,7 +117,7 @@ public:
 			this->modes[room] = this->master->insert_one(new UnionBitmaplet<ACMode>("AirConditioner/mode", mode_width));
 			this->Tseas[room] = this->master->insert_one(new Dimensionlet(board_style, "<temperature>"));
 			this->Tpipes[room] = this->master->insert_one(new Dimensionlet(board_style, "<temperature>"));
-			this->auxes[room] = this->master->insert_one(new Labellet(speak(ACStatus::Normal), fore_font, Colours::GhostWhite));
+			this->auxes[room] = this->master->insert_one(new Labellet(speak(ACState::Normal), fore_font, Colours::GhostWhite));
 		}
 	}
 

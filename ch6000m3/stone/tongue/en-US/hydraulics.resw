@@ -186,4 +186,10 @@
   <data name="BackOil" xml:space="preserve">
     <value>Back Oil Pressure</value>
   </data>
+  <data name="Level" xml:space="preserve">
+    <value>Visor Oil Level</value>
+  </data>
+  <data name="VisorOil" xml:space="preserve">
+    <value>Oil Level</value>
+  </data>
 </root>

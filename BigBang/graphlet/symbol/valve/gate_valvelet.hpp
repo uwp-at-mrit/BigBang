@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class GateValveStatus {
+	private enum class GateValveState {
 		Default,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
@@ -18,9 +18,9 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
 	};
 
-	private class GateValvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::GateValveStatus, WarGrey::SCADA::GateValveStyle> {
+	private class GateValvelet : public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::GateValveState, WarGrey::SCADA::GateValveStyle> {
 	public:
-		GateValvelet(WarGrey::SCADA::GateValveStatus default_status, float radius, double degrees = 0.0);
+		GateValvelet(WarGrey::SCADA::GateValveState default_state, float radius, double degrees = 0.0);
 		GateValvelet(float radius, double degrees = 0.0);
 
 	public:
@@ -30,8 +30,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::GateValveStatus status, WarGrey::SCADA::GateValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GateValveStatus status) override;
+		void prepare_style(WarGrey::SCADA::GateValveState status, WarGrey::SCADA::GateValveStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::GateValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

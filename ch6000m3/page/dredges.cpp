@@ -316,13 +316,13 @@ protected:
 			bool soft_upper = false;
 
 			switch (this->winches[id]->get_status()) {
-			case WinchStatus::SaddleLimited: saddle = true; break;
-			case WinchStatus::SuctionLimited: suction = true; break;
-			case WinchStatus::UpperLimited: upper = true; break;
-			case WinchStatus::SensorUpperLimited: soft_upper = true; break;
-			case WinchStatus::SaddleSlack: saddle = true; slack = true; break;
-			case WinchStatus::SuctionSlack: suction = true; slack = true; break;
-			case WinchStatus::Slack: slack = true; break;
+			case WinchState::SaddleLimited: saddle = true; break;
+			case WinchState::SuctionLimited: suction = true; break;
+			case WinchState::UpperLimited: upper = true; break;
+			case WinchState::SensorUpperLimited: soft_upper = true; break;
+			case WinchState::SaddleSlack: saddle = true; slack = true; break;
+			case WinchState::SuctionSlack: suction = true; slack = true; break;
+			case WinchState::Slack: slack = true; break;
 			}
 
 			this->winch_saddles[id]->set_color(saddle ? winch_status_highlight_color : winch_status_color);
@@ -527,7 +527,7 @@ public:
 			this->try_flow_water(DS::D003, DS::SBHP, water_color);
 			this->try_flow_water(DS::D004, DS::PSHP, water_color);
 
-			if (this->hpumps[DS::PSHP]->get_status() == HopperPumpStatus::Running) {
+			if (this->hpumps[DS::PSHP]->get_status() == HopperPumpState::Running) {
 				DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
 				DS d14[] = { DS::d014, DS::d14, DS::PSHP };
 				DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
@@ -537,7 +537,7 @@ public:
 				this->try_flow_water(DS::D016, d16, water_color);
 			}
 
-			if (this->hpumps[DS::SBHP]->get_status() == HopperPumpStatus::Running) {
+			if (this->hpumps[DS::SBHP]->get_status() == HopperPumpState::Running) {
 				DS d11[] = { DS::LMOD, DS::sb, DS::SBHP };
 				DS d13[] = { DS::d013, DS::d13, DS::SBHP };
 				DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
@@ -842,7 +842,7 @@ public:
 	bool can_select(IGraphlet* g) override {
 		auto maybe_button = dynamic_cast<Buttonlet*>(g);
 
-		return ((maybe_button != nullptr) && (maybe_button->get_status() != ButtonStatus::Disabled));
+		return ((maybe_button != nullptr) && (maybe_button->get_status() != ButtonState::Disabled));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) {
@@ -901,7 +901,7 @@ private:
 private:
 	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case GateValveStatus::Open: {
+		case GateValveState::Open: {
 			this->station->append_subtrack(vid, eid, color);
 		}
 		}
@@ -909,7 +909,7 @@ private:
 
 	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_status()) {
-		case GateValveStatus::Open: {
+		case GateValveState::Open: {
 			this->station->append_subtrack(vid, path[0], color);
 			this->station->append_subtrack(path, count, color);
 		}
@@ -1298,7 +1298,7 @@ public:
 			|| ((settings != nullptr)
 				&& (this->indicators.find(settings->id) != this->indicators.end()))
 			|| ((maybe_button != nullptr)
-				&& (maybe_button->get_status() != ButtonStatus::Disabled)));
+				&& (maybe_button->get_status() != ButtonState::Disabled)));
 	}
 
 	bool can_select_multiple() override {
@@ -1373,8 +1373,8 @@ private:
 
 			ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(unit, label.ToString()), id);
 
-			ds[id]->set_style(DimensionStatus::Normal, this->pump_style);
-			ds[id]->set_style(DimensionStatus::Highlight, this->highlight_style);
+			ds[id]->set_style(DimensionState::Normal, this->pump_style);
+			ds[id]->set_style(DimensionState::Highlight, this->highlight_style);
 		}
 	}
 
@@ -1394,7 +1394,7 @@ private:
 
 	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionStatus::Input, this->setting_style, unit, _speak(id)), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, _speak(id)), id);
 	}
 
 private:

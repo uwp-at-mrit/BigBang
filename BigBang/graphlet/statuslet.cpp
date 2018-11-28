@@ -218,7 +218,7 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 			color, status_font);
 	}
 
-	{ // draw PLC Status
+	{ // draw PLC State
 		float plc_x = x + width * 5.0F;
 
 		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);

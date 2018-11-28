@@ -7,18 +7,18 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
 SolarInverterletv::SolarInverterletv(float width, float height)
-	: SolarInverterletv(SolarInverterVStatus::Normal, width, height) {}
+	: SolarInverterletv(SolarInverterVState::Normal, width, height) {}
 
-SolarInverterletv::SolarInverterletv(SolarInverterVStatus default_status, float width, float height)
-	: Svglet(default_status, width, height) {}
+SolarInverterletv::SolarInverterletv(SolarInverterVState default_state, float width, float height)
+	: Svglet(default_state, width, height) {}
 
 Platform::String^ SolarInverterletv::name() {
 	return "SolarPowerPanel";
 }
 
-void SolarInverterletv::prepare_style(SolarInverterVStatus status, SolarInverterVStyle& s) {
+void SolarInverterletv::prepare_style(SolarInverterVState status, SolarInverterVStyle& s) {
 	switch (status) {
-	case SolarInverterVStatus::Breakdown: CAS_SLOT(s.border_color, Colours::Firebrick); break;
+	case SolarInverterVState::Breakdown: CAS_SLOT(s.border_color, Colours::Firebrick); break;
 	}
 
 	CAS_SLOT(s.border_color, Colours::WhiteSmoke);

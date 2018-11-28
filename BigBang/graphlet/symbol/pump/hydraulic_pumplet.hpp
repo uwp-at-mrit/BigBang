@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class HydraulicPumpStatus {
+	private enum class HydraulicPumpState {
 		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready, Broken, _
 	};
 
@@ -16,9 +16,9 @@ namespace WarGrey::SCADA {
 	};
 
 	private class HydraulicPumplet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HydraulicPumpStatus, WarGrey::SCADA::HydraulicPumpStyle> {
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::HydraulicPumpState, WarGrey::SCADA::HydraulicPumpStyle> {
 	public:
-		HydraulicPumplet(WarGrey::SCADA::HydraulicPumpStatus default_status, float radius, double degrees = 0.0);
+		HydraulicPumplet(WarGrey::SCADA::HydraulicPumpState default_state, float radius, double degrees = 0.0);
 		HydraulicPumplet(float radius, double degrees = 0.0);
 
 	public:
@@ -30,8 +30,8 @@ namespace WarGrey::SCADA {
 		void set_remote_control(bool on);
 
 	protected:
-		void prepare_style(WarGrey::SCADA::HydraulicPumpStatus status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
-		void on_status_changed(HydraulicPumpStatus status) override;
+		void prepare_style(WarGrey::SCADA::HydraulicPumpState status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
+		void on_status_changed(HydraulicPumpState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

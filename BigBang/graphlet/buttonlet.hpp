@@ -3,7 +3,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class ButtonStatus { Default, Executing, Failed, Ready, Disabled, _ };
+	private enum class ButtonState { Default, Executing, Failed, Ready, Disabled, _ };
 
 	private struct ButtonStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
@@ -12,13 +12,13 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 	};
 
-	private class Buttonlet : public WarGrey::SCADA::IStatuslet<WarGrey::SCADA::ButtonStatus, WarGrey::SCADA::ButtonStyle> {
+	private class Buttonlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::ButtonState, WarGrey::SCADA::ButtonStyle> {
 	public:
 		Buttonlet(Platform::String^ caption, float width = 128.0F, float height = 32.0F,
 			float thickness = 3.0F, float corner_radius = 4.0F,
 			Platform::String^ tongue = "menu");
 
-		Buttonlet(ButtonStatus default_status, Platform::String^ caption, float width = 128.0F, float height = 32.0F,
+		Buttonlet(ButtonState default_state, Platform::String^ caption, float width = 128.0F, float height = 32.0F,
 			float thickness = 2.0F, float corner_radius = 4.0F,
 			Platform::String^ tongue = "menu");
 
@@ -27,8 +27,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void prepare_style(WarGrey::SCADA::ButtonStatus status, WarGrey::SCADA::ButtonStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::ButtonStatus status) override;
+		void prepare_style(WarGrey::SCADA::ButtonState status, WarGrey::SCADA::ButtonStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::ButtonState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ label;

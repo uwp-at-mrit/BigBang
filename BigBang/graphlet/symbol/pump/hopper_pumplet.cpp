@@ -16,10 +16,10 @@ static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 HopperPumplet::HopperPumplet(float radiusX, float radiusY, double degrees)
-	: HopperPumplet(HopperPumpStatus::Stopped, radiusX, radiusY, degrees) {}
+	: HopperPumplet(HopperPumpState::Stopped, radiusX, radiusY, degrees) {}
 
-HopperPumplet::HopperPumplet(HopperPumpStatus default_status, float radiusX, float radiusY, double degrees)
-	: ISymbollet(default_status, std::fabsf(radiusX), std::fabsf(radiusY), degrees, 2.0F)
+HopperPumplet::HopperPumplet(HopperPumpState default_state, float radiusX, float radiusY, double degrees)
+	: ISymbollet(default_state, std::fabsf(radiusX), std::fabsf(radiusY), degrees, 2.0F)
 	, leftward(radiusX > 0.0F), upward(radiusY >= 0.0F) {}
 
 void HopperPumplet::construct() {
@@ -88,52 +88,52 @@ void HopperPumplet::update(long long count, long long interval, long long uptime
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
 	switch (this->get_status()) {
-	case HopperPumpStatus::Starting: {
+	case HopperPumpState::Starting: {
 		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(pmask));
 		this->notify_updated();
 	} break;
-	case HopperPumpStatus::Stopping: {
+	case HopperPumpState::Stopping: {
 		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(1.0 - pmask));
 		this->notify_updated();
 	} break;
 	}
 }
 
-void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
+void HopperPumplet::prepare_style(HopperPumpState status, HopperPumpStyle& s) {
 	switch (status) {
-	case HopperPumpStatus::Running: {
+	case HopperPumpState::Running: {
 		CAS_SLOT(s.body_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Green);
 	}; break;
-	case HopperPumpStatus::StartReady: {
+	case HopperPumpState::StartReady: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HopperPumpStatus::Starting: {
+	case HopperPumpState::Starting: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 	}; break;
-	case HopperPumpStatus::Unstartable: {
+	case HopperPumpState::Unstartable: {
 		CAS_VALUES(s.body_color, Colours::DimGray, s.mask_color, Colours::Green);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case HopperPumpStatus::StopReady: {
+	case HopperPumpState::StopReady: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HopperPumpStatus::Stopping: {
+	case HopperPumpState::Stopping: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 	}; break;
-	case HopperPumpStatus::Unstoppable: {
+	case HopperPumpState::Unstoppable: {
 		CAS_SLOT(s.mask_color, Colours::ForestGreen);
 		CAS_SLOT(s.skeleton_color, Colours::Red);
 	}; break;
-	case HopperPumpStatus::Ready: {
+	case HopperPumpState::Ready: {
 		CAS_SLOT(s.skeleton_color, Colours::Cyan);
 	}; break;
-	case HopperPumpStatus::Broken: case HopperPumpStatus::Alert: {
+	case HopperPumpState::Broken: case HopperPumpState::Alert: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	}; break;
-	case HopperPumpStatus::Maintenance: {
+	case HopperPumpState::Maintenance: {
 		CAS_SLOT(s.wrench_color, Colours::Red);
 	}; break;
 	}
@@ -146,15 +146,15 @@ void HopperPumplet::prepare_style(HopperPumpStatus status, HopperPumpStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void HopperPumplet::on_status_changed(HopperPumpStatus status) {
+void HopperPumplet::on_status_changed(HopperPumpState status) {
 	switch (status) {
-	case HopperPumpStatus::StartReady: case HopperPumpStatus::Unstartable: {
+	case HopperPumpState::StartReady: case HopperPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {
 			this->start_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.382F);
 		}
 		this->mask = this->start_mask;
 	} break;
-	case HopperPumpStatus::StopReady: case HopperPumpStatus::Unstoppable: {
+	case HopperPumpState::StopReady: case HopperPumpState::Unstoppable: {
 		if (this->stop_mask == nullptr) {
 			this->stop_mask = circle(this->mask_cx, this->mask_cy, this->iradius * 0.618F);
 		}

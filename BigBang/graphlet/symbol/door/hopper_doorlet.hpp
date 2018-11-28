@@ -4,7 +4,7 @@
 #include "graphlet/primitive.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class DoorStatus { Default, Open, Opening, Closed, Closing, Disabled, _ };
+	private enum class DoorState { Default, Open, Opening, Closed, Closing, Disabled, _ };
 
 	private struct DoorStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
@@ -17,15 +17,15 @@ namespace WarGrey::SCADA {
 	};
 
 	private class IHopperDoorlet
-		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorStatus, WarGrey::SCADA::DoorStyle>
+		: public WarGrey::SCADA::ISymbollet<WarGrey::SCADA::DoorState, WarGrey::SCADA::DoorStyle>
 		, public WarGrey::SCADA::IRangelet<double> {
 	public:
-		IHopperDoorlet(WarGrey::SCADA::DoorStatus default_status, float radius, double degrees);
+		IHopperDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees);
 	};
 
 	private class HopperDoorlet : public WarGrey::SCADA::IHopperDoorlet {
 	public:
-		HopperDoorlet(WarGrey::SCADA::DoorStatus default_status, float radius, double degrees = 0.0);
+		HopperDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = 0.0);
 		HopperDoorlet(float radius, double degrees = 0.0);
 
 	public:
@@ -34,8 +34,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
+		void prepare_style(WarGrey::SCADA::DoorState status, WarGrey::SCADA::DoorStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::DoorState state) override;
 		void on_value_changed(double t) override;
 
 	private:
@@ -49,7 +49,7 @@ namespace WarGrey::SCADA {
 
 	private class UpperHopperDoorlet : public IHopperDoorlet {
 	public:
-		UpperHopperDoorlet(WarGrey::SCADA::DoorStatus default_state, float radius, double degrees = 0.0);
+		UpperHopperDoorlet(WarGrey::SCADA::DoorState default_state, float radius, double degrees = 0.0);
 		UpperHopperDoorlet(float radius, double degrees = 0.0);
 
 	public:
@@ -59,8 +59,8 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	protected:
-		void prepare_style(WarGrey::SCADA::DoorStatus status, WarGrey::SCADA::DoorStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::DoorStatus state) override;
+		void prepare_style(WarGrey::SCADA::DoorState status, WarGrey::SCADA::DoorStyle& style) override;
+		void on_status_changed(WarGrey::SCADA::DoorState state) override;
 		void on_value_changed(double t) override;
 
 	private:
