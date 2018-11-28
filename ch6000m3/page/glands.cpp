@@ -128,7 +128,7 @@ private class GlandPumps final : public PLCConfirmation {
 public:
 	GlandPumps(GlandsPage* master) : master(master), sea_oscillation(1.0F) {
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->dimension_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0);
+		this->dimension_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 1U);
 		this->setting_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::GhostWhite, Colours::RoyalBlue);
 	}
 
@@ -152,6 +152,11 @@ public:
 		this->flows[GP::SBHP]->set_value(RealData(DB203, sb_hopper_gland_pump_flow), GraphletAnchor::LB);
 		this->powers[GP::SBHP]->set_value(RealData(DB203, sb_hopper_pump_power), GraphletAnchor::LB);
 		this->rpms[GP::SBHP]->set_value(RealData(DB203, sb_hopper_pump_rpm), GraphletAnchor::LB);
+
+		this->powers[GP::PSUWP]->set_value(RealData(DB203, ps_underwater_pump_power), GraphletAnchor::LB);
+		this->rpms[GP::PSUWP]->set_value(RealData(DB203, ps_underwater_pump_rpm), GraphletAnchor::LB);
+		this->powers[GP::SBUWP]->set_value(RealData(DB203, sb_underwater_pump_power), GraphletAnchor::LB);
+		this->rpms[GP::SBUWP]->set_value(RealData(DB203, sb_underwater_pump_rpm), GraphletAnchor::LB);
 
 		this->rpms[GP::PSHPa]->set_value(RealData(DB203, ps_hopper_gland_pump_A_rpm), GraphletAnchor::LB);
 		this->rpms[GP::PSHPb]->set_value(RealData(DB203, ps_hopper_gland_pump_B_rpm), GraphletAnchor::LB);
@@ -285,10 +290,10 @@ public:
 			this->load_devices(this->pumps, this->labels, Colours::Salmon, GP::PSHPa, GP::SBHPb, radius, 0.0);
 			this->load_devices(this->pumps, this->labels, Colours::Salmon, GP::PSUWP1, GP::SBUWP2, radius, 0.0);
 			
-			this->load_device(this->hoppers, this->captions, GP::PSHP, hpradius, -2.0F, true);
-			this->load_device(this->hoppers, this->captions, GP::SBHP, hpradius, +2.0F, true);
-			this->load_device(this->hoppers, this->captions, GP::PSUWP, hpradius, +2.0F, false);
-			this->load_device(this->hoppers, this->captions, GP::SBUWP, hpradius, -2.0F, false);
+			this->load_device(this->hoppers, this->captions, GP::PSHP, hpradius, -2.0F);
+			this->load_device(this->hoppers, this->captions, GP::SBHP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, GP::PSUWP, hpradius, +2.0F);
+			this->load_device(this->hoppers, this->captions, GP::SBUWP, hpradius, -2.0F);
 		}
 
 		{ // load labels and dimensions
@@ -397,15 +402,13 @@ private:
 	}
 
 	template<class G, typename E>
-	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy, bool has_dimensions) {
+	void load_device(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, E id, float rx, float fy) {
 		this->load_label(ls, id, Colours::Salmon);
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 
-		if (has_dimensions) {
-			this->load_dimension(this->rpms, id, "rpm", "S");
-			this->load_dimension(this->powers, id, "kwatt", "P");
-		}
+		this->load_dimension(this->rpms, id, "rpm", "S");
+		this->load_dimension(this->powers, id, "kwatt", "P");
 	}
 
 	template<typename E>

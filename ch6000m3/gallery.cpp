@@ -4,6 +4,7 @@
 #include "configuration.hpp"
 
 #include "graphlet/device/winchlet.hpp"
+#include "graphlet/symbol/heaterlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/pump/water_pumplet.hpp"
@@ -27,6 +28,7 @@ private enum class GS {
 	hydraulic_pump, hopper_pump, water_pump,
 	gate_valve, motor_valve,
 	hopperdoor, upperdoor,
+	heater,
 	_
 };
 
@@ -54,11 +56,12 @@ public:
 		this->load_primitives(this->evalves, this->evlabels, unitsize);
 		this->load_primitives(this->hdoors, this->hdlabels, unitsize);
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
+		this->load_primitives(this->heaters, this->hlabels, unitsize);
 
-		this->load_remote_primitive(&this->remote_winch,       WinchStatus::Default,         unitsize * 2.0F);
 		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpStatus::Stopped, unitsize);
 		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpStatus::Stopped,    unitsize * 0.5F);
 		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpStatus::Stopped,     unitsize);
+		this->load_remote_primitive(&this->remote_heater,      HeaterStatus::Stopped,        unitsize);
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -103,16 +106,17 @@ public:
 		this->reflow_primitives(this->evalves, this->evlabels, x, &y, halfunit, cellsize);
 		this->reflow_primitives(this->hdoors, this->hdlabels,  x, &y, halfunit, cellsize);
 		this->reflow_primitives(this->udoors, this->udlabels,  x, &y, halfunit, cellsize);
+		this->reflow_primitives(this->heaters, this->hlabels,  x, &y, halfunit, cellsize);
 
 		{ // reflow remote controlled graphlets
 			x = width - x + label_max_width;
 			y = vinset + cellsize * 0.5F;
 
 			this->master->move_to(this->remote_label,       x, y + cellsize * 0.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_winch,       x, y + cellsize * 1.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_pump,        x, y + cellsize * 2.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_hopper_pump, x, y + cellsize * 3.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_water_pump,  x, y + cellsize * 4.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_pump,        x, y + cellsize * 1.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_hopper_pump, x, y + cellsize * 2.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_water_pump,  x, y + cellsize * 3.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_heater,      x, y + cellsize * 4.0F, GraphletAnchor::CC);
 		}
 	}
 
@@ -188,12 +192,14 @@ private: // never delete these graphlets manually.
 	std::unordered_map<DoorStatus, Labellet*> hdlabels;
 	std::unordered_map<DoorStatus, UpperHopperDoorlet*> udoors;
 	std::unordered_map<DoorStatus, Labellet*> udlabels;
+	std::unordered_map<HeaterStatus, Heaterlet*> heaters;
+	std::unordered_map<HeaterStatus, Labellet*> hlabels;
 
 	Labellet* remote_label;
-	Winchlet* remote_winch;
 	HydraulicPumplet* remote_pump;
 	HopperPumplet* remote_hopper_pump;
 	WaterPumplet* remote_water_pump;
+	Heaterlet* remote_heater;
 
 private:
 	Gallery* master;

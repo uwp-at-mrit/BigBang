@@ -10,6 +10,7 @@
 
 #include "graphlet/shapelet.hpp"
 
+#include "graphlet/symbol/heaterlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 #include "graphlet/device/tanklet.hpp"
@@ -296,6 +297,7 @@ public:
 
 		this->master_tank = this->make_tank(HSMTStatus::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
 		this->visor_tank = this->make_tank(HSVTStatus::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
+		this->heater = this->master->insert_one(new Heaterlet(gwidth * 1.618F));
 
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
@@ -340,10 +342,18 @@ public:
 		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
-
+		
 		this->station->map_credit_graphlet(this->captions[HS::Port], GraphletAnchor::CB, -gwidth * 10.0F);
 		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gwidth * 10.0F);
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
+
+		{ // reflow heater
+			float hspace, vspace;
+
+			this->heater->fill_margin(0.0F, 0.0F, &vspace, &hspace);
+			this->master->move_to(this->heater, this->master_tank, GraphletAnchor::CB,
+				GraphletAnchor::CB, 0.0F, vspace - hspace);
+		}
 	}
 	
 	void reflow_devices(float width, float height, float gwidth, float gheight, float vinset) {
@@ -584,6 +594,7 @@ private:
 private:
 	Tracklet<HS>* station;
 	FuelTanklet* storage_tank;
+	Heaterlet* heater;
 	Tanklet<HSMTStatus>* master_tank;
 	Tanklet<HSVTStatus>* visor_tank;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
@@ -695,10 +706,8 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	auto heater = dynamic_cast<Credit<Thermometerlet, HS>*>(g);
-
 	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| ((heater != nullptr) && (heater->id == HS::Master)));
+		|| (dynamic_cast<Heaterlet*>(g) != nullptr));
 }
 
 bool HydraulicsPage::can_select_multiple() {
@@ -707,7 +716,7 @@ bool HydraulicsPage::can_select_multiple() {
 
 void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
-	auto heater = dynamic_cast<Thermometerlet*>(g);
+	auto heater = dynamic_cast<Heaterlet*>(g);
 
 	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);

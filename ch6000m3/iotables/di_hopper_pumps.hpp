@@ -63,10 +63,10 @@ namespace WarGrey::SCADA {
 	static unsigned int sb_underwater_master_gland_pump_status = 1745U;
 	static unsigned int sb_underwater_spare_gland_pump_status = 1753U;
 
-	static unsigned int ps_hopper_pipeline_ready = 817U;
-	static unsigned int sb_hopper_pipeline_ready = 818U;
-	static unsigned int ps_underwater_pipeline_ready = 819U;
-	static unsigned int sb_underwater_pipeline_ready = 820U;
+	static unsigned int ps_hopper_pipeline_ready = 819U;
+	static unsigned int sb_hopper_pipeline_ready = 820U;
+	static unsigned int ps_underwater_pipeline_ready = 817U;
+	static unsigned int sb_underwater_pipeline_ready = 818U;
 
 	/************************************************************************************************/
 	void DI_hopper_pumps(WarGrey::SCADA::HopperPumplet* t1, WarGrey::SCADA::HopperPumplet* t2, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_1_p1, size_t idx205_2_p1);

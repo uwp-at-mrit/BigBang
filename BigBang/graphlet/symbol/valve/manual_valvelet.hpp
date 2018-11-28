@@ -4,7 +4,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class ManualValveStatus {
-		Disabled,
+		Default,
 		Open, Unopenable, OpenReady,
 		Closed, Unclosable, CloseReady,
 		_

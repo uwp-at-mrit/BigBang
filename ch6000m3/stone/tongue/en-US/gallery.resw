@@ -282,4 +282,10 @@
   <data name="WindReady" xml:space="preserve">
     <value>Ready to Wind Up or Out</value>
   </data>
+  <data name="heater" xml:space="preserve">
+    <value>Heater</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
 </root>

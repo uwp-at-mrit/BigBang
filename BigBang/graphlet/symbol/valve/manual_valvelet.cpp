@@ -52,7 +52,7 @@ void ManualValvelet::fill_margin(float x, float y, float* top, float* right, flo
 
 void ManualValvelet::prepare_style(ManualValveStatus status, ManualValveStyle& s) {
 	switch (status) {
-	case ManualValveStatus::Disabled: {
+	case ManualValveStatus::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
 	case ManualValveStatus::Open: {
@@ -93,7 +93,7 @@ void ManualValvelet::on_status_changed(ManualValveStatus status) {
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case ManualValveStatus::Unclosable: case ManualValveStatus::Disabled: {
+	case ManualValveStatus::Unclosable: case ManualValveStatus::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.80);
 		}

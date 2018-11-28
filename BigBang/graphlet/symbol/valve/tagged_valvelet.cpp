@@ -22,7 +22,7 @@ static unsigned int dynamic_mask_step = 8U;
 
 /*************************************************************************************************/
 TValvelet::TValvelet(char tag, float radius, double degrees, bool rotate_tag)
-	: TValvelet(TValveStatus::Disabled, tag, radius, degrees, rotate_tag) {}
+	: TValvelet(TValveStatus::Default, tag, radius, degrees, rotate_tag) {}
 
 TValvelet::TValvelet(TValveStatus default_status, char tag, float radius, double degrees, bool rotate_tag)
 	: ISymbollet(default_status, radius, degrees), rotate_tag(rotate_tag) {
@@ -92,7 +92,7 @@ void TValvelet::fill_valve_origin(float* x, float* y) {
 
 void TValvelet::prepare_style(TValveStatus status, TValveStyle& s) {
 	switch (status) {
-	case TValveStatus::Disabled: {
+	case TValveStatus::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
 	case TValveStatus::Open: {
@@ -144,7 +144,7 @@ void TValvelet::on_status_changed(TValveStatus status) {
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case TValveStatus::Unclosable: case TValveStatus::Disabled: {
+	case TValveStatus::Unclosable: case TValveStatus::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(this->sgradius, adjust_degrees, 0.80);
 		}

@@ -22,7 +22,7 @@ static unsigned int dynamic_mask_step = 8;
 
 /*************************************************************************************************/
 GateValvelet::GateValvelet(float radius, double degrees)
-	: GateValvelet(GateValveStatus::Disabled, radius, degrees) {}
+	: GateValvelet(GateValveStatus::Default, radius, degrees) {}
 
 GateValvelet::GateValvelet(GateValveStatus default_status, float radius, double degrees)
 	: ISymbollet(default_status, radius, degrees), sgrdiff(default_thickness * 2.0F) {}
@@ -62,7 +62,7 @@ void GateValvelet::update(long long count, long long interval, long long uptime)
 
 void GateValvelet::prepare_style(GateValveStatus status, GateValveStyle& s) {
 	switch (status) {
-	case GateValveStatus::Disabled: {
+	case GateValveStatus::Default: {
 		CAS_SLOT(s.mask_color, Colours::Teal);
 	}; break;
 	case GateValveStatus::Open: {
@@ -115,7 +115,7 @@ void GateValvelet::on_status_changed(GateValveStatus status) {
 		}
 		this->mask = this->bottom_up_mask;
 	} break;
-	case GateValveStatus::Unclosable: case GateValveStatus::Disabled: {
+	case GateValveStatus::Unclosable: case GateValveStatus::Default: {
 		if (this->top_down_mask == nullptr) {
 			this->top_down_mask = polar_masked_sandglass(sandglass_r, adjust_degrees, 0.80);
 		}

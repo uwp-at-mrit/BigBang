@@ -4,7 +4,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class GateValveStatus {
-		Disabled,
+		Default,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
 		VirtualOpen, VirtualClose,

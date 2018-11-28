@@ -259,7 +259,7 @@
     <value>可以启动</value>
   </data>
   <data name="StopReady" xml:space="preserve">
-    <value>可以停止条件</value>
+    <value>可以停止</value>
   </data>
   <data name="Alert" xml:space="preserve">
     <value>报警</value>
@@ -281,5 +281,11 @@
   </data>
   <data name="WindReady" xml:space="preserve">
     <value>可以放/收缆</value>
+  </data>
+  <data name="Heater" xml:space="preserve">
+    <value>加热器</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动</value>
   </data>
 </root>

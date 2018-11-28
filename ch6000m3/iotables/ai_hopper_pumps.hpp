@@ -27,8 +27,8 @@ namespace WarGrey::SCADA {
 	static unsigned int sb_hopper_pump_vacuum_pressure = 40U;
 	static unsigned int sb_hopper_pump_discharge_pressure = 41U;
 	
-	static unsigned int sb_underwater_gland_pump1_pressure = 114U;
-	static unsigned int sb_underwater_gland_pump2_pressure = 117U;
+	static unsigned int sb_underwater_gland_pump1_pressure = 117U;
+	static unsigned int sb_underwater_gland_pump2_pressure = 114U;
 	static unsigned int sb_underwater_pump_power = 163U;
 	static unsigned int sb_underwater_pump_rpm = 171U;
 	static unsigned int sb_underwater_pump_discharge_pressure = 36U;

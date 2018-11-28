@@ -4,7 +4,7 @@
 
 namespace WarGrey::SCADA {
 	private enum class TValveStatus {
-		Disabled,
+		Default,
 		Open, Opening, Unopenable, OpenReady,
 		Closed, Closing, Unclosable, CloseReady,
 		VirtualOpen, VirtualClose,
