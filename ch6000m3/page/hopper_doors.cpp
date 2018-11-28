@@ -225,10 +225,10 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
-		DI_pump_dimension(this->dimensions[HD::A], DB4, pump_A_feedback);
-		DI_pump_dimension(this->dimensions[HD::D], DB4, pump_D_feedback);
-		DI_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);
-		DI_pump_dimension(this->dimensions[HD::H], DB4, pump_H_feedback);
+		DI_hydraulic_pump_dimension(this->dimensions[HD::A], DB4, pump_A_feedback);
+		DI_hydraulic_pump_dimension(this->dimensions[HD::D], DB4, pump_D_feedback);
+		DI_hydraulic_pump_dimension(this->dimensions[HD::E], DB4, pump_E_feedback);
+		DI_hydraulic_pump_dimension(this->dimensions[HD::H], DB4, pump_H_feedback);
 
 		DI_hopper_door(this->hdoors[Door::PS1], DB4, bottom_door_PS1_closed, DB205, bottom_door_PS1_status);
 		DI_hopper_door(this->hdoors[Door::PS2], DB4, bottom_door_PS2_closed, DB205, bottom_door_PS2_status);

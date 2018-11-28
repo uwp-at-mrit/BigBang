@@ -9,6 +9,8 @@
 #include "graphlet/textlet.hpp"
 
 namespace WarGrey::SCADA {
+	private enum class PumpType { Hopper, Underwater, _ }; // `_` for gate flushing pump 
+
 	private class GlandPumpDiagnostics : public WarGrey::SCADA::ICreditSatellite<unsigned int> {
 	public:
 		~GlandPumpDiagnostics() noexcept;
@@ -25,7 +27,7 @@ namespace WarGrey::SCADA {
 		bool can_select(IGraphlet* g) override;
 
 	public:
-		void set_pump(Platform::String^ name);
+		void set_pump(Platform::String^ name, WarGrey::SCADA::PumpType type, unsigned int detail_index);
 
 	protected:
 		void on_id_changed(unsigned int id);
@@ -37,7 +39,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		float title_height;
-		float vgapsize;
 
 	private: // never delete these graphlets manually
 		WarGrey::SCADA::Rectanglet* titlebar;

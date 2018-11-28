@@ -133,30 +133,30 @@
     <value>1# 闸阀冲洗泵</value>
   </data>
   <data name="PSHPa" xml:space="preserve">
-    <value>左舷舱内泵封水泵A变频器</value>
+    <value>左舱内泵封水泵A变频器</value>
   </data>
   <data name="PSHPb" xml:space="preserve">
-    <value>左舷舱内泵封水泵B变频器</value>
+    <value>左舱内泵封水泵B变频器</value>
   </data>
   <data name="PSUWP1" xml:space="preserve">
-    <value>左舷水下泵封水泵A变频器</value>
+    <value>左水下泵封水泵A变频器</value>
   </data>
   <data name="PSUWP2" xml:space="preserve">
-    <value>左舷水下泵封水泵B变频器</value>
+    <value>左水下泵封水泵B变频器</value>
   </data>
   <data name="SBFP" xml:space="preserve">
     <value>2# 闸阀冲洗泵</value>
   </data>
   <data name="SBHPa" xml:space="preserve">
-    <value>右舷舱内泵封水泵A变频器</value>
+    <value>右舱内泵封水泵A变频器</value>
   </data>
   <data name="SBHPb" xml:space="preserve">
-    <value>右舷舱内泵封水泵B变频器</value>
+    <value>右舱内泵封水泵B变频器</value>
   </data>
   <data name="SBUWP1" xml:space="preserve">
-    <value>右舷水下泵封水泵A变频器</value>
+    <value>右水下泵封水泵A变频器</value>
   </data>
   <data name="SBUWP2" xml:space="preserve">
-    <value>右舷水下泵封水泵B变频器</value>
+    <value>右水下泵封水泵B变频器</value>
   </data>
 </root>

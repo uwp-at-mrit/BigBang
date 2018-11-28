@@ -91,8 +91,8 @@ public:
 		this->diagnoses[HP::HPNoMaintenance]->set_status(DI_hopper_pump_repair(DB4, feedback, hp), AlarmStatus::None, AlarmStatus::Notice);
 		this->diagnoses[HP::HPPipelineReady]->set_status(DBX(DB205, hplready), AlarmStatus::Notice, AlarmStatus::None);
 		this->diagnoses[HP::HPSpeedKnobMoved]->set_status(hp && DBX(DB4, knob), AlarmStatus::Notice, AlarmStatus::None);
-		this->diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_hopper_gland_pump_running(DB4, hpgmaster), AlarmStatus::Notice, AlarmStatus::None);
-		this->spare_diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_hopper_gland_pump_running(DB4, hpgspare), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, hpgmaster, true), AlarmStatus::Notice, AlarmStatus::None);
+		this->spare_diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, hpgspare, true), AlarmStatus::Notice, AlarmStatus::None);
 
 		this->diagnoses[HP::HPLubricatingUnitRunning]->set_status(DI_hopper_pump_lubricating_unit_running(DB4, lunit), AlarmStatus::Notice, AlarmStatus::None);
 		this->diagnoses[HP::HPGearboxPumpsRunning]->set_status(DI_hopper_pump_gearbox_running(DB4, gbmaster), AlarmStatus::Notice, AlarmStatus::None);
@@ -105,8 +105,8 @@ public:
 		this->diagnoses[HP::UWPNoMaintenance]->set_status(DI_hopper_pump_repair(DB4, feedback, uwp), AlarmStatus::None, AlarmStatus::Notice);
 		this->diagnoses[HP::UWPPipelineReady]->set_status(DBX(DB205, uwplready), AlarmStatus::Notice, AlarmStatus::None);
 		this->diagnoses[HP::UWPSpeedKnobMoved]->set_status(uwp && DBX(DB4, knob), AlarmStatus::Notice, AlarmStatus::None);
-		this->diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_underwater_gland_pump_running(DB4, uwpgmaster), AlarmStatus::Notice, AlarmStatus::None);
-		this->spare_diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_underwater_gland_pump_running(DB4, uwpgspare), AlarmStatus::Notice, AlarmStatus::None);
+		this->diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, uwpgmaster, false), AlarmStatus::Notice, AlarmStatus::None);
+		this->spare_diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, uwpgspare, false), AlarmStatus::Notice, AlarmStatus::None);
 	}
 
 	void post_read_data(Syslog* logger) override {

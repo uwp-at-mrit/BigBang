@@ -144,8 +144,8 @@ public:
 		DI_water_pump(this->pumps[FS::PSPump], DB4, ps_water_pump_feedback, DB205, ps_water_pump_details);
 		DI_water_pump(this->pumps[FS::SBPump], DB4, sb_water_pump_feedback, DB205, sb_water_pump_details);
 
-		DI_pump_dimension(this->pressures[FS::D], DB4, pump_D_feedback);
-		DI_pump_dimension(this->pressures[FS::E], DB4, pump_E_feedback);
+		DI_hydraulic_pump_dimension(this->pressures[FS::D], DB4, pump_D_feedback);
+		DI_hydraulic_pump_dimension(this->pressures[FS::E], DB4, pump_E_feedback);
 
 		DI_gate_valve(this->gvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
 		DI_gate_valve(this->gvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);

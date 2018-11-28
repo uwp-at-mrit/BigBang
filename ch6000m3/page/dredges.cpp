@@ -1039,9 +1039,9 @@ public:
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		if (DS_side == DS::PS) {
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::psTrunnion], DB4, pump_C_feedback);
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::psIntermediate], DB4, pump_B_feedback);
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::psDragHead], DB4, pump_A_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psTrunnion], DB4, pump_C_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psIntermediate], DB4, pump_B_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psDragHead], DB4, pump_A_feedback);
 
 			DI_winch(this->winches[DredgesPosition::psTrunnion], DB4, winch_ps_trunnion_limits, DB205, winch_ps_trunnion_details);
 			DI_winch(this->winches[DredgesPosition::psIntermediate], DB4, winch_ps_intermediate_limits, DB205, winch_ps_intermediate_details);
@@ -1063,9 +1063,9 @@ public:
 			this->set_gantry_virtual_action_status(DS::hVirtualUp, DB205, gantry_ps_draghead_virtual_up_limited);
 			this->set_gantry_virtual_action_status(DS::hVirtualOut, DB205, gantry_ps_draghead_virtual_out_limited);
 		} else {
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::sbTrunnion], DB4, pump_F_feedback);
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::sbIntermediate], DB4, pump_G_feedback);
-			DI_pump_dimension(this->pump_pressures[DredgesPosition::sbDragHead], DB4, pump_H_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbTrunnion], DB4, pump_F_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbIntermediate], DB4, pump_G_feedback);
+			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbDragHead], DB4, pump_H_feedback);
 
 			DI_winch(this->winches[DredgesPosition::sbTrunnion], DB4, winch_sb_trunnion_limits, DB205, winch_sb_trunnion_details);
 			DI_winch(this->winches[DredgesPosition::sbIntermediate], DB4, winch_sb_intermediate_limits, DB205, winch_sb_intermediate_details);

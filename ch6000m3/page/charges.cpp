@@ -99,6 +99,8 @@ public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+
+		this->station->clear_subtacks();
 	}
 
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
@@ -135,9 +137,9 @@ public:
 		DI_hopper_pumps(this->hoppers[CS::PSHPump], this->hoppers[CS::PSUWPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[CS::SBHPump], this->hoppers[CS::SBUWPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_pump_dimension(this->pump_pressures[CS::C], DB4, pump_C_feedback);
-		DI_pump_dimension(this->pump_pressures[CS::F], DB4, pump_F_feedback);
-		DI_pump_dimension(this->pump_pressures[CS::H], DB4, pump_H_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[CS::C], DB4, pump_C_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[CS::F], DB4, pump_F_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[CS::H], DB4, pump_H_feedback);
 
 		this->set_valves_status(CS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(CS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);

@@ -74,14 +74,15 @@ bool WarGrey::SCADA::DI_hopper_pump_repair(const uint8* db4, size_t idx4_p1, boo
 }
 
 /************************************************************************************************/
-void WarGrey::SCADA::DI_hopper_gland_pump(HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
-	target->set_remote_control(DBX(db4, idx_p1 + 0U));
+void WarGrey::SCADA::DI_gland_pump(HydraulicPumplet* target, bool hopper
+	, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
+	target->set_remote_control(DI_gland_pump_remote_control(db4, idx_p1, hopper));
 
-	if (DI_hopper_gland_pump_running(db4, idx_p1)) {
+	if (DI_gland_pump_running(db4, idx_p1, hopper)) {
 		target->set_status(HydraulicPumpStatus::Running);
-	} else if (DBX(db4, idx_p1 + 2U)) {
+	} else if (DI_gland_pump_broken(db4, idx_p1, hopper)) {
 		target->set_status(HydraulicPumpStatus::Broken);
-	} else if (DBX(db4, idx_p1 - 1U)) {
+	} else if (DI_gland_pump_ready(db4, idx_p1, hopper)) {
 		target->set_status(HydraulicPumpStatus::Ready);
 	} else {
 		target->set_status(DBX(db205, idx205_p1 - 1U), HydraulicPumpStatus::Starting);
@@ -97,34 +98,23 @@ void WarGrey::SCADA::DI_hopper_gland_pump(HydraulicPumplet* target, const uint8*
 	}
 }
 
-void WarGrey::SCADA::DI_underwater_gland_pump(HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1) {
-	target->set_remote_control(DBX(db4, idx_p1 - 1U));
+bool WarGrey::SCADA::DI_gland_pump_remote_control(const uint8* db4, size_t idx4_p1, bool hopper) {
+	size_t idx = (hopper ? idx4_p1 : (idx4_p1 - 1U));
 
-	if (DI_underwater_gland_pump_running(db4, idx_p1)) {
-		target->set_status(HydraulicPumpStatus::Running);
-	} else if (DBX(db4, idx_p1 + 2U)) {
-		target->set_status(HydraulicPumpStatus::Broken);
-	} else if (DBX(db4, idx_p1 + 0U)) {
-		target->set_status(HydraulicPumpStatus::Ready);
-	} else {
-		target->set_status(DBX(db205, idx205_p1 - 1U), HydraulicPumpStatus::Starting);
-		target->set_status(DBX(db205, idx205_p1 + 0U), HydraulicPumpStatus::Stopping);
-		//target->set_status(DBX(db205, idx205_p1 + 1), HydraulicPumpStatus::Reset);
-		target->set_status(DBX(db205, idx205_p1 + 2U), HydraulicPumpStatus::Unstartable);
-		target->set_status(DBX(db205, idx205_p1 + 3U), HydraulicPumpStatus::Unstoppable);
-
-		// the rest 3 are implied or not used
-		//target->set_status(DBX(db205, idx205_p1 + 4), HydraulicPumpStatus::StartReady);
-		//target->set_status(DBX(db205, idx205_p1 + 5), HydraulicPumpStatus::StopReady);
-		//target->set_status(DBX(db205, idx205_p1 + 6), HydraulicPumpStatus::Stopped);
-	}
+	return DBX(db4, idx);
 }
 
-bool WarGrey::SCADA::DI_hopper_gland_pump_running(const uint8* db4, size_t idx4_p1) {
-	return DBX(db4, idx4_p1 + 1U);
+bool WarGrey::SCADA::DI_gland_pump_ready(const uint8* db4, size_t idx4_p1, bool hopper) {
+	size_t idx = (hopper ? (idx4_p1 - 1U) : idx4_p1);
+	
+	return DBX(db4, idx);
 }
 
-bool WarGrey::SCADA::DI_underwater_gland_pump_running(const uint8* db4, size_t idx4_p1) {
+bool WarGrey::SCADA::DI_gland_pump_broken(const uint8* db4, size_t idx4_p1, bool hopper) {
+	return DBX(db4, idx4_p1 + 2U);
+}
+
+bool WarGrey::SCADA::DI_gland_pump_running(const uint8* db4, size_t idx4_p1, bool hopper) {
 	return DBX(db4, idx4_p1 + 1U);
 }
 

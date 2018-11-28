@@ -13,8 +13,8 @@
 #include "graphlet/buttonlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 
-#include "iotables/di_water_pumps.hpp"
-#include "iotables/do_water_pumps.hpp"
+#include "iotables/di_pumps.hpp"
+#include "iotables/di_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -46,7 +46,7 @@ private enum class FP : unsigned int {
 private class GlandPumpDecorator : public IPlanetDecorator {
 public:
 	void draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
-		if (dynamic_cast<RoundedRectanglet*>(g) != nullptr) {
+		if (dynamic_cast<Credit<RoundedRectanglet, FP>*>(g) != nullptr) {
 			float name_height = this->name->LayoutBounds.Height;
 		
 			ds->DrawTextLayout(this->name, x + height, y + (height - name_height) * 0.5F, diagnosis_foreground);
@@ -54,21 +54,35 @@ public:
 	}
 
 public:
-	void set_pump(Platform::String^ name) {
+	void set_pump(Platform::String^ name, PumpType type, unsigned int detail_index) {
 		this->name = make_text_layout(_speak(name), diagnosis_font);
+		this->detail_index = detail_index;
 	}
 
 	float get_pump_name_width() {
 		return this->name->LayoutBounds.Width;
 	}
 
+	PumpType get_pump_type() {
+		return this->type;
+	}
+
+	unsigned int get_pump_detail_index() {
+		return this->detail_index;
+	}
+
 private:
 	CanvasTextLayout^ name;
+	PumpType type;
+	unsigned int detail_index;
 };
 
 private class GlandPumpDx final : public PLCConfirmation {
 public:
-	GlandPumpDx(GlandPumpDiagnostics* master, GlandPumpDecorator* decorator) : master(master), decorator(decorator) {}
+	GlandPumpDx(GlandPumpDiagnostics* master, GlandPumpDecorator* decorator) : master(master), decorator(decorator) {
+		this->diagnosis_height = diagnosis_font->FontSize * 2.0F;
+		this->icon_size = this->diagnosis_height * 0.618F;
+	}
 
 public:
 	void pre_read_data(Syslog* logger) override {
@@ -77,10 +91,35 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
-		this->diagnoses[FP::RemoteControl]->set_status(DI_water_pump_remote_control(DB4, this->index), AlarmStatus::Notice, AlarmStatus::None);
-		this->diagnoses[FP::NoBroken]->set_status(DI_water_pump_broken(DB4, this->index), AlarmStatus::None, AlarmStatus::Notice);
-		this->diagnoses[FP::NotRunning]->set_status(DI_water_pump_running(DB4, this->index), AlarmStatus::None, AlarmStatus::Notice);
-		this->diagnoses[FP::StartReady]->set_status(DI_water_pump_ready(DB4, this->index), AlarmStatus::Notice, AlarmStatus::None);
+		unsigned int details = this->decorator->get_pump_detail_index();
+
+		if (details == 0U) {
+			bool hopper = (this->decorator->get_pump_type() == PumpType::Hopper);
+
+			this->diagnoses[FP::RemoteControl]->set_status(DI_gland_pump_remote_control(DB4, this->index, hopper),
+				AlarmStatus::Notice, AlarmStatus::None);
+
+			this->diagnoses[FP::NoBroken]->set_status(DI_gland_pump_broken(DB4, this->index, hopper),
+				AlarmStatus::None, AlarmStatus::Notice);
+
+			this->diagnoses[FP::NotRunning]->set_status(DI_gland_pump_running(DB4, this->index, hopper),
+				AlarmStatus::None, AlarmStatus::Notice);
+
+			this->diagnoses[FP::StartReady]->set_status(DI_gland_pump_ready(DB4, this->index, hopper),
+				AlarmStatus::Notice, AlarmStatus::None);
+		} else {
+			this->diagnoses[FP::RemoteControl]->set_status(DI_gate_flushing_pump_remote_control(DB4, this->index),
+				AlarmStatus::Notice, AlarmStatus::None);
+			
+			this->diagnoses[FP::NoBroken]->set_status(DI_gate_flushing_pump_broken(DB4, this->index),
+				AlarmStatus::None, AlarmStatus::Notice);
+			
+			this->diagnoses[FP::NotRunning]->set_status(DI_gate_flushing_pump_running(DB4, this->index),
+				AlarmStatus::None, AlarmStatus::Notice);
+
+			this->diagnoses[FP::StartReady]->set_status(DI_gate_flushing_pump_ready(DB205, details),
+				AlarmStatus::Notice, AlarmStatus::None);
+		}
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -89,17 +128,17 @@ public:
 	}
 
 public:
-	void fill_extent(float title_height, float vgapsize, float* width, float* height) {
+	void fill_extent(float title_height, float* width, float* height) {
 		unsigned int count = _N(FP);
 		
-		this->diagnosis_height = diagnosis_font->FontSize * 2.0F;
-		this->region_height = (this->diagnosis_height + vgapsize) * float(count) + vgapsize;
+		this->region_height = this->diagnosis_height * float(count)
+			+ (this->diagnosis_height - this->icon_size) * float(count + 1);
 
 		SET_BOX(width, 400.0F);
-		SET_BOX(height, this->region_height + title_height * 2.0F);
+		SET_BOX(height, this->region_height + title_height + title_height * 0.618F * 2.0F);
 	}
 
-	void load(float width, float height, float title_height, float vgapsize) {
+	void load(float width, float height, float title_height) {
 		float region_width = width * 0.90F;
 		float diagnosis_width = (region_width - title_height * 1.5F);
 		float corner_radius = 8.0F;
@@ -108,19 +147,20 @@ public:
 			new RoundedRectanglet(region_width, this->region_height, corner_radius, region_background));
 
 		{ // load diagnoses
-			float icon_size = this->diagnosis_height * 0.618F;
-		
 			for (FP id = _E0(FP); id < FP::_; id++) {
 				this->slots[id] = this->master->insert_one(new Credit<RoundedRectanglet, FP>(
 					diagnosis_width, this->diagnosis_height, corner_radius, diagnosis_background), id);
 
-				this->diagnoses[id] = this->master->insert_one(new Credit<Alarmlet, FP>(icon_size), id);
+				this->diagnoses[id] = this->master->insert_one(new Credit<Alarmlet, FP>(this->icon_size), id);
 				this->load_label(this->labels, id, diagnosis_foreground, diagnosis_font);
 			}
 		}
 	}
 
-	void reflow(float width, float height, float title_height, float vgapsize) {
+	void reflow(float width, float height, float title_height) {
+		unsigned int count = _N(FP);
+		float vgapsize = (this->region_height - this->diagnosis_height * float(count)) / float(count + 1);
+		float hgapsize = vgapsize * 0.5F;
 		float cx = width * 0.5F;
 		float cy = (height + title_height) * 0.5F;
 
@@ -132,9 +172,9 @@ public:
 		}
 
 		for (FP id = _E0(FP); id < FP::_; id++) {
-			this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, vgapsize);
+			this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, hgapsize);
 			this->master->move_to(this->labels[id], this->diagnoses[id], GraphletAnchor::RC, GraphletAnchor::LC,
-				vgapsize + this->decorator->get_pump_name_width());
+				this->decorator->get_pump_name_width() + hgapsize * 2.0F);
 		}
 	}
 
@@ -160,8 +200,9 @@ private: // never delete these graphlets mannually
 	RoundedRectanglet* region;
 
 private:
-	float diagnosis_height;
 	float region_height;
+	float diagnosis_height;
+	float icon_size;
 
 private:
 	GlandPumpDiagnostics* master;
@@ -192,10 +233,9 @@ void GlandPumpDiagnostics::fill_satellite_extent(float* width, float* height) {
 	float db_height = 600.0F;
 
 	this->title_height = large_font_size * 2.0F;
-	this->vgapsize = this->title_height * 0.25F;
 
 	if (db != nullptr) {
-		db->fill_extent(this->title_height, this->vgapsize, &db_width, &db_height);
+		db->fill_extent(this->title_height, &db_width, &db_height);
 	}
 
 	SET_BOX(width, db_width);
@@ -208,7 +248,7 @@ void GlandPumpDiagnostics::load(CanvasCreateResourcesReason reason, float width,
 	if (db != nullptr) {
 		auto caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		
-		db->load(width, height, this->title_height, this->vgapsize);
+		db->load(width, height, this->title_height);
 		
 		this->titlebar = this->insert_one(new Rectanglet(width, this->title_height, Colours::make(diagnostics_caption_background)));
 		this->title = this->insert_one(new Labellet(this->display_name(), caption_font, diagnostics_caption_foreground));
@@ -219,7 +259,7 @@ void GlandPumpDiagnostics::reflow(float width, float height) {
 	auto db = dynamic_cast<GlandPumpDx*>(this->dashboard);
 
 	if (db != nullptr) {
-		db->reflow(width, height, this->title_height, this->vgapsize);
+		db->reflow(width, height, this->title_height);
 		
 		this->move_to(this->title, this->titlebar, GraphletAnchor::CC, GraphletAnchor::CC);
 	}
@@ -237,10 +277,10 @@ void GlandPumpDiagnostics::on_id_changed(unsigned int id) {
 	}
 }
 
-void GlandPumpDiagnostics::set_pump(Platform::String^ name) {
+void GlandPumpDiagnostics::set_pump(Platform::String^ name, PumpType type, unsigned int detail_index) {
 	auto decorator = dynamic_cast<GlandPumpDecorator*>(this->decorator);
 
 	if (decorator != nullptr) {
-		decorator->set_pump(name);
+		decorator->set_pump(name, type, detail_index);
 	}
 }

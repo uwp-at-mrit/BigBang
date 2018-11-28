@@ -141,10 +141,10 @@ public:
 		DI_hopper_pump(this->hoppers[RS::PSHPump], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details);
 		DI_hopper_pump(this->hoppers[RS::SBHPump], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details);
 
-		DI_pump_dimension(this->pump_pressures[RS::A], DB4, pump_A_feedback);
-		DI_pump_dimension(this->pump_pressures[RS::C], DB4, pump_C_feedback);
-		DI_pump_dimension(this->pump_pressures[RS::F], DB4, pump_F_feedback);
-		DI_pump_dimension(this->pump_pressures[RS::H], DB4, pump_H_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[RS::A], DB4, pump_A_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[RS::C], DB4, pump_C_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[RS::F], DB4, pump_F_feedback);
+		DI_hydraulic_pump_dimension(this->pump_pressures[RS::H], DB4, pump_H_feedback);
 
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);

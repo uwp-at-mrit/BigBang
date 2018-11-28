@@ -80,11 +80,13 @@ namespace WarGrey::SCADA {
 	bool DI_hopper_pump_repair(const uint8* db4, size_t idx4_p1, bool on);
 
 	/************************************************************************************************/
-	void DI_hopper_gland_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1);
-	void DI_underwater_gland_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1);
-
-	bool DI_hopper_gland_pump_running(const uint8* db4, size_t idx4_p1);
-	bool DI_underwater_gland_pump_running(const uint8* db4, size_t idx4_p1);
+	void DI_gland_pump(WarGrey::SCADA::HydraulicPumplet* target, bool hopper,
+		const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1);
+	
+	bool DI_gland_pump_remote_control(const uint8* db4, size_t idx4_p1, bool hopper);
+	bool DI_gland_pump_ready(const uint8* db4, size_t idx4_p1, bool hopper);
+	bool DI_gland_pump_running(const uint8* db4, size_t idx4_p1, bool hopper);
+	bool DI_gland_pump_broken(const uint8* db4, size_t idx4_p1, bool hopper);
 
 	/************************************************************************************************/
 	void DI_hopper_pump_lubricating_unit(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);

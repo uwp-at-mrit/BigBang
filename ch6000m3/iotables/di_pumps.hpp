@@ -49,9 +49,19 @@ namespace WarGrey::SCADA {
 	static unsigned int pump_sb_gate_flushing_status = 1681U;
 
 	/************************************************************************************************/
-	void DI_pump_dimension(WarGrey::SCADA::Dimensionlet* target, const uint8* db4, size_t idx_p1);
+	void DI_hydraulic_pump_dimension(WarGrey::SCADA::Dimensionlet* target, const uint8* db4, size_t idx_p1);
 	void DI_hydraulic_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
+
+	bool DI_hydraulic_pump_remote_control(const uint8* db4, size_t idx4_p1);
+	bool DI_hydraulic_pump_running(const uint8* db4, size_t idx4_p1);
+	bool DI_hydraulic_pump_broken(const uint8* db4, size_t idx4_p1);
+	bool DI_hydraulic_pump_ready(const uint8* db205, size_t idx205_p1);
 
 	/************************************************************************************************/
 	void DI_gate_flushing_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
+
+	bool DI_gate_flushing_pump_remote_control(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_running(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_broken(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_ready(const uint8* db205, size_t idx205_p1);
 }
