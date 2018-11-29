@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::ManualValveState status, WarGrey::SCADA::ManualValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::ManualValveState status) override;
+		void on_state_changed(WarGrey::SCADA::ManualValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

@@ -72,17 +72,17 @@ public:
 		unsigned int knob = (this->ps ? ps_water_pump_speed_knob_moved : sb_water_pump_speed_knob_moved) - 1U;
 		unsigned int knob0 = (this->ps ? ps_water_pump_speed_knob_moved0 : sb_water_pump_speed_knob_moved0) - 1U;
 
-		this->diagnoses[WP::RemoteControl]->set_status(DI_water_pump_remote_control(DB4, feedback), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[WP::NoAlert]->set_status(DI_water_pump_alert(DB4, feedback), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[WP::NoBroken]->set_status(DI_water_pump_broken(DB4, feedback), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[WP::NotRunning]->set_status(DI_water_pump_running(DB4, feedback), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[WP::NoEmergence]->set_status(DI_water_pump_emergence(DB4, feedback), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[WP::NoMaintenance]->set_status(DI_water_pump_repair(DB4, feedback), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[WP::PipelineReady]->set_status(DBX(DB205, plready), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[WP::SpeedKnobMoved]->set_status(DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WP::RemoteControl]->set_state(DI_water_pump_remote_control(DB4, feedback), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WP::NoAlert]->set_state(DI_water_pump_alert(DB4, feedback), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WP::NoBroken]->set_state(DI_water_pump_broken(DB4, feedback), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WP::NotRunning]->set_state(DI_water_pump_running(DB4, feedback), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WP::NoEmergence]->set_state(DI_water_pump_emergence(DB4, feedback), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WP::NoMaintenance]->set_state(DI_water_pump_repair(DB4, feedback), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WP::PipelineReady]->set_state(DBX(DB205, plready), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WP::SpeedKnobMoved]->set_state(DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
 
-		this->diagnoses[WP::StartReady]->set_status(DI_water_pump_ready(DB4, feedback), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[WP::SpeedKnobMoved0]->set_status(DBX(DB4, knob0), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WP::StartReady]->set_state(DI_water_pump_ready(DB4, feedback), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WP::SpeedKnobMoved0]->set_state(DBX(DB4, knob0), AlarmState::Notice, AlarmState::None);
 	}
 
 	void post_read_data(Syslog* logger) override {

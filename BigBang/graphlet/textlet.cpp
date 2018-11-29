@@ -284,7 +284,7 @@ IEditorlet::IEditorlet(DimensionState status, Platform::String^ unit, Platform::
 	this->set_text(speak(label), speak(subscript));
 
 	/** TODO: Why does not it work if pass the `status` to IStatelet */
-	this->set_status(status);
+	this->set_state(status);
 }
 
 void IEditorlet::construct() {
@@ -357,7 +357,7 @@ void IEditorlet::on_value_changed(double value) {
 	this->number_box = get_text_extent(this->number_layout);
 }
 
-void IEditorlet::on_status_changed(DimensionState status) {
+void IEditorlet::on_state_changed(DimensionState status) {
 	this->enable_events(status == DimensionState::Input);
 }
 

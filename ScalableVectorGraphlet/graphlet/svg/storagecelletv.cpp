@@ -24,7 +24,7 @@ Platform::String^ StorageCelletv::name() {
 
 void StorageCelletv::update(long long count, long long interval, long long uptime) {
 	if (this->ready()) {
-		switch (this->get_status()) {
+		switch (this->get_state()) {
 		case StorageCellVState::Charge: {
 			StorageCellVStyle style = this->get_style();
 			

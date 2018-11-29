@@ -457,7 +457,7 @@ private:
 
 private:
 	void try_flow_water(GP pid, GP start, GP end, CanvasSolidColorBrush^ color) {
-		switch (this->pumps[pid]->get_status()) {
+		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: {
 			this->station->append_subtrack(start, end, color);
 		}
@@ -465,7 +465,7 @@ private:
 	}
 
 	void try_flow_water(GP pid, GP* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		switch (this->pumps[pid]->get_status()) {
+		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: {
 			this->station->append_subtrack(path, count, color);
 		}

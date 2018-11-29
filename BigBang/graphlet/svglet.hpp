@@ -100,7 +100,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void post_ready() override {
-			this->update_status();
+			this->update_state();
 		}
 	};
 }

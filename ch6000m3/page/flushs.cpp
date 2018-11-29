@@ -195,17 +195,17 @@ public:
 			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
 			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
 
-			if (this->gvalves[FS::HBV01]->get_status() == GateValveState::Open) {
+			if (this->gvalves[FS::HBV01]->get_state() == GateValveState::Open) {
 				this->station->append_subtrack(h14, water_color);
 			}
 			
-			if (this->gvalves[FS::HBV02]->get_status() == GateValveState::Closed) {
+			if (this->gvalves[FS::HBV02]->get_state() == GateValveState::Closed) {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			} else {
 				this->nintercs[FS::nic]->set_color(water_color);
 				this->station->append_subtrack(h25, water_color);
 
-				if (this->gvalves[FS::HBV03]->get_status() == GateValveState::Open) {
+				if (this->gvalves[FS::HBV03]->get_state() == GateValveState::Open) {
 					this->station->append_subtrack(h24, water_color);
 				}
 			}
@@ -584,7 +584,7 @@ private:
 
 private:
 	void try_flow_water(FS vid, FS eid1, FS eid2, CanvasSolidColorBrush^ color) {
-		switch (this->gvalves[vid]->get_status()) {
+		switch (this->gvalves[vid]->get_state()) {
 		case GateValveState::Open: {
 			this->station->append_subtrack(vid, eid1, color);
 
@@ -730,7 +730,7 @@ bool FlushsPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<WaterPumplet*>(g) != nullptr)
 		|| (dynamic_cast<ArrowHeadlet*>(g) != nullptr)
-		|| ((btn != nullptr) && (btn->get_status() != ButtonState::Disabled)));
+		|| ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled)));
 }
 
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

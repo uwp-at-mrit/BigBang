@@ -165,7 +165,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	}
 }
 
-void ITimeSerieslet::on_status_changed(TimeSeriesState status) {
+void ITimeSerieslet::on_state_changed(TimeSeriesState status) {
 	TimeSeriesStyle style = this->get_style();
 
 	this->update_vertical_axes(style);
@@ -212,7 +212,7 @@ void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
 }
 
 void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
-	TimeSeries* ts = ((this->get_status() == TimeSeriesState::History) ? &this->history : &this->realtime);
+	TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	CanvasGeometry^ hmarks = blank();
 	float interval = this->width / float(ts->step + 1);
@@ -243,7 +243,7 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 }
 
 void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	TimeSeries* ts = ((this->get_status() == TimeSeriesState::History) ? &this->history : &this->realtime);
+	TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 	TimeSeriesStyle style = this->get_style();
 	float border_off = style.border_thickness * 0.5F;
 	
@@ -338,7 +338,7 @@ void ITimeSerieslet::set_values(double* values) {
 }
 
 void ITimeSerieslet::own_caret(bool yes) {
-	this->set_status(yes ? TimeSeriesState::History : TimeSeriesState::Realtime);
+	this->set_state(yes ? TimeSeriesState::History : TimeSeriesState::Realtime);
 	this->update_horizontal_axes(this->get_style());
 }
 

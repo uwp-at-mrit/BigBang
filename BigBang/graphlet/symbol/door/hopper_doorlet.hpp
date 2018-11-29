@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorState status, WarGrey::SCADA::DoorStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::DoorState state) override;
+		void on_state_changed(WarGrey::SCADA::DoorState state) override;
 		void on_value_changed(double t) override;
 
 	private:
@@ -60,7 +60,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::DoorState status, WarGrey::SCADA::DoorStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::DoorState state) override;
+		void on_state_changed(WarGrey::SCADA::DoorState state) override;
 		void on_value_changed(double t) override;
 
 	private:

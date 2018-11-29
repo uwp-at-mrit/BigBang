@@ -75,7 +75,7 @@ void Heaterlet::fill_margin(float x, float y, float* top, float* right, float* b
 void Heaterlet::update(long long count, long long interval, long long uptime) {
 	double alpha_raw = double(count % (dynamic_gradient_step - 2) + 2) / double(dynamic_gradient_step - 1);
 	
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case HeaterState::Starting: {
 		this->thread_color = Colours::make(this->get_style().thread_color, alpha_raw);
 		this->notify_updated();
@@ -125,7 +125,7 @@ void Heaterlet::prepare_style(HeaterState state, HeaterStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void Heaterlet::on_status_changed(HeaterState state) {
+void Heaterlet::on_state_changed(HeaterState state) {
 	this->thread_color = nullptr;
 }
 

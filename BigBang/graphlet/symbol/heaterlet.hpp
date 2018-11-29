@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HeaterState status, WarGrey::SCADA::HeaterStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::HeaterState state) override;
+		void on_state_changed(WarGrey::SCADA::HeaterState state) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ thread;

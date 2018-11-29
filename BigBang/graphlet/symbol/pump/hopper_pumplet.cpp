@@ -87,7 +87,7 @@ void HopperPumplet::fill_pump_origin(float* x, float *y) {
 void HopperPumplet::update(long long count, long long interval, long long uptime) {
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case HopperPumpState::Starting: {
 		this->mask = circle(this->mask_cx, this->mask_cy, this->iradius * float(pmask));
 		this->notify_updated();
@@ -146,7 +146,7 @@ void HopperPumplet::prepare_style(HopperPumpState status, HopperPumpStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void HopperPumplet::on_status_changed(HopperPumpState status) {
+void HopperPumplet::on_state_changed(HopperPumpState status) {
 	switch (status) {
 	case HopperPumpState::StartReady: case HopperPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {

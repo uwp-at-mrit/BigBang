@@ -72,7 +72,7 @@ void TValvelet::update(long long count, long long interval, long long uptime) {
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	double adjust_degrees = this->degrees + 90.0;
 
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case TValveState::Opening: {
 
 		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -pmask);
@@ -134,7 +134,7 @@ void TValvelet::prepare_style(TValveState status, TValveStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void TValvelet::on_status_changed(TValveState status) {
+void TValvelet::on_state_changed(TValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 
 	switch (status) {

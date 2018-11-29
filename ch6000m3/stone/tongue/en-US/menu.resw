@@ -366,4 +366,7 @@
   <data name="Diagnostics" xml:space="preserve">
     <value>Diagnostics</value>
   </data>
+  <data name="BOPOverride" xml:space="preserve">
+    <value>Back Oil Pressure Override</value>
+  </data>
 </root>

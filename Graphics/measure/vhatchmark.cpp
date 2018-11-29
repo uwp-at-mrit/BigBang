@@ -76,7 +76,7 @@ static void fill_consistent_vhatch_metrics(CanvasTextFormat^ maybe_font, float t
 	float chwidth = css_metrics.width;
 
 	SET_BOX(hatch_width, chwidth * hatch_long_ratio + thickness);
-	SET_BOX(gapsize, chwidth * mark_space_ratio);
+	SET_BOX(gapsize, chwidth * mark_space_ratio + thickness);
 }
 
 static CanvasGeometry^ make_vlhatch(VHatchMarkMetrics* metrics, float interval, unsigned int step, float thickness, bool no_short) {

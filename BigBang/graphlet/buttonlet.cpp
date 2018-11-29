@@ -57,7 +57,7 @@ void Buttonlet::prepare_style(ButtonState status, ButtonStyle& s) {
 	CAS_SLOT(s.font, button_default_font);
 }
 
-void Buttonlet::on_status_changed(ButtonState status) {
+void Buttonlet::on_state_changed(ButtonState status) {
 	ButtonStyle s = this->get_style();
 
 	this->label = make_text_layout(this->caption, s.font);

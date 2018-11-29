@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HydraulicPumpState status, WarGrey::SCADA::HydraulicPumpStyle& style) override;
-		void on_status_changed(HydraulicPumpState status) override;
+		void on_state_changed(HydraulicPumpState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

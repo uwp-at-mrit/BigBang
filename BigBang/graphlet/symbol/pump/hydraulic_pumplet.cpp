@@ -30,7 +30,7 @@ void HydraulicPumplet::construct() {
 void HydraulicPumplet::update(long long count, long long interval, long long uptime) {
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case HydraulicPumpState::Starting: {
 		this->mask = polar_masked_triangle(this->tradius, this->degrees, pmask);
 		this->notify_updated();
@@ -42,7 +42,7 @@ void HydraulicPumplet::update(long long count, long long interval, long long upt
 	}
 }
 
-void HydraulicPumplet::on_status_changed(HydraulicPumpState status) {
+void HydraulicPumplet::on_state_changed(HydraulicPumpState status) {
 	switch (status) {
 	case HydraulicPumpState::StartReady: case HydraulicPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {

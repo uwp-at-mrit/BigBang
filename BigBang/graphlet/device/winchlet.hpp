@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::WinchState status, WarGrey::SCADA::WinchStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::WinchState status) override;
+		void on_state_changed(WarGrey::SCADA::WinchState status) override;
 		
 	private:
 		std::map<WarGrey::SCADA::WinchState, Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^> icons;

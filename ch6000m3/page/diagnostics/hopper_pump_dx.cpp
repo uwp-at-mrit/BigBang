@@ -84,29 +84,29 @@ public:
 		bool hp = DI_hopper_type(DB4, feedback);
 		bool uwp = DI_underwater_type(DB4, feedback);
 
-		this->diagnoses[HP::HPStartReady]->set_status(DI_hopper_pump_ready(DB4, feedback, hp), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::HPRemoteControl]->set_status(DI_hopper_pump_remote_control(DB4, feedback, hp), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::HPNotRunning]->set_status(DI_hopper_pump_running(DB4, feedback, hp), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::HPNoEmergence]->set_status(hp && emergence, AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::HPNoMaintenance]->set_status(DI_hopper_pump_repair(DB4, feedback, hp), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::HPPipelineReady]->set_status(DBX(DB205, hplready), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::HPSpeedKnobMoved]->set_status(hp && DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, hpgmaster, true), AlarmState::Notice, AlarmState::None);
-		this->spare_diagnoses[HP::HPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, hpgspare, true), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPStartReady]->set_state(DI_hopper_pump_ready(DB4, feedback, hp), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPRemoteControl]->set_state(DI_hopper_pump_remote_control(DB4, feedback, hp), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPNotRunning]->set_state(DI_hopper_pump_running(DB4, feedback, hp), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::HPNoEmergence]->set_state(hp && emergence, AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::HPNoMaintenance]->set_state(DI_hopper_pump_repair(DB4, feedback, hp), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::HPPipelineReady]->set_state(DBX(DB205, hplready), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPSpeedKnobMoved]->set_state(hp && DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPGlandPumpsRunning]->set_state(DI_gland_pump_running(DB4, hpgmaster, true), AlarmState::Notice, AlarmState::None);
+		this->spare_diagnoses[HP::HPGlandPumpsRunning]->set_state(DI_gland_pump_running(DB4, hpgspare, true), AlarmState::Notice, AlarmState::None);
 
-		this->diagnoses[HP::HPLubricatingUnitRunning]->set_status(DI_hopper_pump_lubricating_unit_running(DB4, lunit), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::HPGearboxPumpsRunning]->set_status(DI_hopper_pump_gearbox_running(DB4, gbmaster), AlarmState::Notice, AlarmState::None);
-		this->spare_diagnoses[HP::HPGearboxPumpsRunning]->set_status(DI_hopper_pump_gearbox_running(DB4, gbspare), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPLubricatingUnitRunning]->set_state(DI_hopper_pump_lubricating_unit_running(DB4, lunit), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::HPGearboxPumpsRunning]->set_state(DI_hopper_pump_gearbox_running(DB4, gbmaster), AlarmState::Notice, AlarmState::None);
+		this->spare_diagnoses[HP::HPGearboxPumpsRunning]->set_state(DI_hopper_pump_gearbox_running(DB4, gbspare), AlarmState::Notice, AlarmState::None);
 
-		this->diagnoses[HP::UWPStartReady]->set_status(DI_hopper_pump_ready(DB4, feedback, uwp), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::UWPRemoteControl]->set_status(DI_hopper_pump_remote_control(DB4, feedback, uwp), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::UWPNotRunning]->set_status(DI_hopper_pump_running(DB4, feedback, uwp), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::UWPNoEmergence]->set_status(uwp && emergence, AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::UWPNoMaintenance]->set_status(DI_hopper_pump_repair(DB4, feedback, uwp), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[HP::UWPPipelineReady]->set_status(DBX(DB205, uwplready), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::UWPSpeedKnobMoved]->set_status(uwp && DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
-		this->diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, uwpgmaster, false), AlarmState::Notice, AlarmState::None);
-		this->spare_diagnoses[HP::UWPGlandPumpsRunning]->set_status(DI_gland_pump_running(DB4, uwpgspare, false), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::UWPStartReady]->set_state(DI_hopper_pump_ready(DB4, feedback, uwp), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::UWPRemoteControl]->set_state(DI_hopper_pump_remote_control(DB4, feedback, uwp), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::UWPNotRunning]->set_state(DI_hopper_pump_running(DB4, feedback, uwp), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::UWPNoEmergence]->set_state(uwp && emergence, AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::UWPNoMaintenance]->set_state(DI_hopper_pump_repair(DB4, feedback, uwp), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[HP::UWPPipelineReady]->set_state(DBX(DB205, uwplready), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::UWPSpeedKnobMoved]->set_state(uwp && DBX(DB4, knob), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[HP::UWPGlandPumpsRunning]->set_state(DI_gland_pump_running(DB4, uwpgmaster, false), AlarmState::Notice, AlarmState::None);
+		this->spare_diagnoses[HP::UWPGlandPumpsRunning]->set_state(DI_gland_pump_running(DB4, uwpgspare, false), AlarmState::Notice, AlarmState::None);
 	}
 
 	void post_read_data(Syslog* logger) override {

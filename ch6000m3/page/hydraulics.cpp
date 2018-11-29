@@ -9,6 +9,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/buttonlet.hpp"
 
 #include "graphlet/symbol/heaterlet.hpp"
 #include "graphlet/symbol/pump/hydraulic_pumplet.hpp"
@@ -42,8 +43,9 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 private enum HSMode { WindowUI = 0, Dashboard };
 
+private enum class HSFunction { BOPOverride, _ };
+
 private enum class HSMTState { Empty, UltraLow, Low, Normal, High, Full, _ };
-private enum class HSVTState { Empty, UltraLow, Low, Normal, Full, _ };
 
 static CanvasSolidColorBrush^ oil_color = Colours::Yellow;
 
@@ -61,7 +63,10 @@ private enum class HS : unsigned int {
 	SQc, SQf, SQd, SQe,
 	
 	// Key Labels
-	Port, Starboard, Master, Visor, Storage, BackOil, VisorOil,
+	Port, Starboard, Master, Visor, Heater, Storage, VisorOil,
+
+	// Dimensions
+	BackOil, BowWinch, SternWinch,
 	
 	// Filter Indicators
 	F01, F02, F10,
@@ -102,8 +107,11 @@ public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
-		this->levels[HS::VisorOil]->set_value(RealData(DB203, visor_tank_level));
+		this->set_liquid_level(RealData(DB203, visor_tank_level));
+
 		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));
+		this->pressures[HS::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure));
+		this->pressures[HS::SternWinch]->set_value(RealData(DB203, stern_anchor_winch_pressure));
 
 		{ // pump pressures
 			GraphletAnchor psa = GraphletAnchor::LB;
@@ -125,25 +133,14 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
-		{ // tank status
-			if (DBX(DB4, 118U - 1)) {
-				this->master_tank->set_status(HSMTState::Low);
-			} else if (DBX(DB4, 119U - 1)) {
-				this->master_tank->set_status(HSMTState::UltraLow);
-			} else if (DBX(DB4, 120U - 1)) {
-				this->master_tank->set_status(HSMTState::High);
-			} else {
-				this->master_tank->set_status(HSMTState::Normal);
-			}
+		DI_backoil_pressure_override(this->functions[HSFunction::BOPOverride], DB205, backoil_pressure_override_status);
 
-			if (DBX(DB4, 132U - 1)) {
-				this->visor_tank->set_status(HSVTState::Low);
-			} else if (DBX(DB4, 133U - 1)) {
-				this->visor_tank->set_status(HSVTState::UltraLow);
-			} else {
-				this->visor_tank->set_status(HSVTState::Normal);
-			}
-		} 
+		{ // tank status
+			DI_master_tank(this->master_tank, DB4, master_tank_status);
+			DI_visor_tank(this->visor_tank, DB4, visor_tank_status);
+
+			DI_tank_heater(this->heater, DB4, master_tank_heater_feedback, DB205, tank_heater_status);
+		}
 		
 		{ // pump states
 			DI_hydraulic_pump(this->pumps[HS::A], DB4, pump_A_feedback, DB205, pump_A_status);
@@ -194,8 +191,6 @@ public:
 			DI_filter_alarm(this->alarms[HS::F02], DB4, filter_02_status);
 			DI_filter_alarm(this->alarms[HS::F10], DB4, filter_10_status);
 		}
-
-		DI_tank_heater(this->heater, DB4, tank_heater_feedback, DB205, tank_heater_status);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -256,8 +251,8 @@ public:
 	void load_pump_station(float width, float height, float gwidth, float gheight) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
-		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2);
-		pTurtle->move_down()->turn_down_right()->move_right(13, HS::sb)->turn_right_down()->move_down(17);
+		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2)->move_down()->turn_down_right();
+		pTurtle->move_right(6.5F, HS::SternWinch)->move_right(6.5F, HS::sb)->turn_right_down()->move_down(17);
 		
 		pTurtle->jump_right(20, HS::h)->move_left(4, HS::H)->move_left(12, HS::SQh)->move_left(4)->jump_back();
 		pTurtle->move_up(3, HS::g)->move_left(4, HS::G)->move_left(12, HS::SQg)->move_left(4)->jump_back();
@@ -273,7 +268,8 @@ public:
 		pTurtle->move_down(3, HS::d)->move_right(4, HS::D)->move_right(12, HS::SQd)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HS::e)->move_right(4, HS::E)->move_right(12, HS::SQe)->move_right(4);
 
-		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
+		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right();
+		pTurtle->move_right(6.5F, HS::BowWinch)->move_right(6.5F)->turn_right_up();
 		pTurtle->move_up(HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master)->move_up(6.5F)->turn_up_right(HS::f02)->move_right(2);
@@ -292,6 +288,12 @@ public:
 		this->load_label(this->captions, HS::Port, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Starboard, Colours::DarkKhaki, this->caption_font);
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
+
+		this->load_dimension(this->pressures, HS::BackOil, "bar");
+		this->load_dimension(this->pressures, HS::BowWinch, "bar");
+		this->load_dimension(this->pressures, HS::SternWinch, "bar");
+
+		this->load_buttons(this->functions);
 	}
 
 	void load_tanks(float width, float height, float gwidth, float gheight) {
@@ -299,8 +301,10 @@ public:
 		float alarm_size = gwidth * 1.2F;
 
 		this->master_tank = this->make_tank(HSMTState::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
-		this->visor_tank = this->make_tank(HSVTState::Empty, gwidth * 16.0F, gheight * 7.0F, thickness);
+		this->visor_tank = this->master->insert_one(new Tanklet(drag_visor_tank_range, gwidth * 16.0F, gheight * 7.0F, 8U, thickness));
+		
 		this->heater = this->master->insert_one(new Heaterlet(gwidth * 1.618F));
+		this->load_label(this->labels, HS::Heater, Colours::Salmon);
 
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
@@ -322,7 +326,6 @@ public:
 			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00);
 
 			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
-			this->load_dimension(this->pressures, HS::BackOil, "bar");
 		}
 
 		{ // load valves
@@ -343,7 +346,6 @@ public:
 		this->station->fill_anchor_location(HS::SQ1, nullptr, &sq1_y, true);
 		this->station->map_graphlet_at_anchor(this->master_tank, HS::Master, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->visor_tank, HS::Visor, GraphletAnchor::CC);
-		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->thermometers[HS::Master], this->master_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		this->master->move_to(this->thermometers[HS::Visor], this->visor_tank, 0.25F, 0.5F, GraphletAnchor::CC);
 		
@@ -351,12 +353,28 @@ public:
 		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gwidth * 10.0F);
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
 
+		this->station->map_credit_graphlet(this->pressures[HS::BowWinch], GraphletAnchor::CT);
+		this->station->map_credit_graphlet(this->pressures[HS::SternWinch], GraphletAnchor::CT);
+
+		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
+		
 		{ // reflow heater
 			float hspace, vspace;
 
 			this->heater->fill_margin(0.0F, 0.0F, &vspace, &hspace);
 			this->master->move_to(this->heater, this->master_tank, GraphletAnchor::CB,
 				GraphletAnchor::CB, 0.0F, vspace - hspace);
+
+			this->master->move_to(this->labels[HS::Heater], this->master_tank, GraphletAnchor::CB, GraphletAnchor::CT);
+		}
+
+		{ // reflow button
+			float bcx, bcy;
+
+			this->master->fill_graphlet_location(this->captions[HS::Port], &bcx, nullptr, GraphletAnchor::CC);
+			this->master->fill_graphlet_location(this->master_tank, nullptr, &bcy, GraphletAnchor::CC);
+
+			this->master->move_to(this->functions[HSFunction::BOPOverride], bcx, bcy, GraphletAnchor::CC);
 		}
 	}
 	
@@ -516,6 +534,13 @@ private:
 		}
 	}
 
+	template<class B, typename CMD>
+	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(cmd.ToString(), width, height), cmd);
+		}
+	}
+
 	template<class T, typename E>
 	void load_thermometer(std::map<E, Credit<T, E>*>& ts, std::map<E, Credit<Dimensionlet, E>*>& ds, E id, float width, float height) {
 		ts[id] = this->master->insert_one(new Credit<T, E>(100.0, width, height, 2.5F), id);
@@ -534,9 +559,9 @@ private:
 	}
 
 	template<typename E>
-	Tanklet<E>* make_tank(E id, float width, float height, float thickness) {
-		Tanklet<E>* tank = new Tanklet<E>(id, width, height, thickness);
-		TankStyle ulow, low, normal;
+	StateTanklet<E>* make_tank(E id, float width, float height, float thickness) {
+		StateTanklet<E>* tank = new StateTanklet<E>(id, width, height, thickness);
+		StateTankStyle ulow, low, normal;
 
 		normal.mark_weight = 0.50F;
 		low.mark_weight    = 0.20F;
@@ -557,9 +582,14 @@ private:
 		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
 	}
 
+	void set_liquid_level(float t) {
+		this->visor_tank->set_value(t);
+		this->levels[HS::VisorOil]->set_value(t, GraphletAnchor::LB);
+	}
+
 private:
 	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
-		switch (this->valves[vid]->get_status()) {
+		switch (this->valves[vid]->get_state()) {
 		case ManualValveState::Open: {
 			this->station->append_subtrack(vid, pid, color);
 		}
@@ -567,7 +597,7 @@ private:
 	}
 
 	void try_flow_oil(HS vid, HS mid, HS eid, CanvasSolidColorBrush^ color) {
-		switch (this->valves[vid]->get_status()) {
+		switch (this->valves[vid]->get_state()) {
 		case ManualValveState::Open: {
 			this->station->append_subtrack(vid, mid, color);
 			this->station->append_subtrack(mid, eid, color);
@@ -578,7 +608,7 @@ private:
 	void try_flow_oil(HS vid, HS pid, HS _id, HS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		this->try_flow_oil(vid, pid, color);
 
-		switch (this->pumps[pid]->get_status()) {
+		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: case HydraulicPumpState::StopReady: {
 			this->station->append_subtrack(pid, _id, oil_color);
 
@@ -595,13 +625,13 @@ private:
 		this->try_flow_oil(vid, pid, _id, path, N, color);
 	}
 
-// never deletes these graphlets mannually
-private:
+private: // never deletes these graphlets mannually
 	Tracklet<HS>* station;
-	FuelTanklet* storage_tank;
 	Heaterlet* heater;
-	Tanklet<HSMTState>* master_tank;
-	Tanklet<HSVTState>* visor_tank;
+	Tanklet* visor_tank;
+	FuelTanklet* storage_tank;
+	StateTanklet<HSMTState>* master_tank;
+	std::map<HSFunction, Credit<Buttonlet, HSFunction>*> functions;
 	std::map<HS, Credit<Thermometerlet, HS>*> thermometers;
 	std::map<HS, Credit<Dimensionlet, HS>*> temperatures;
 	std::map<HS, Credit<Dimensionlet, HS>*> levels;
@@ -713,7 +743,8 @@ void HydraulicsPage::reflow(float width, float height) {
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| (dynamic_cast<Heaterlet*>(g) != nullptr));
+		|| (dynamic_cast<Heaterlet*>(g) != nullptr)
+		|| (dynamic_cast<Buttonlet*>(g) != nullptr));
 }
 
 bool HydraulicsPage::can_select_multiple() {
@@ -723,11 +754,14 @@ bool HydraulicsPage::can_select_multiple() {
 void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto pump = dynamic_cast<HydraulicPumplet*>(g);
 	auto heater = dynamic_cast<Heaterlet*>(g);
+	auto override = dynamic_cast<Buttonlet*>(g);
 
 	if (pump != nullptr) {
 		menu_popup(this->pump_op, g, local_x, local_y);
 	} else if (heater != nullptr) {
 		menu_popup(this->heater_op, g, local_x, local_y);
+	} else if (override != nullptr) {
+		this->device->send_command(backoil_pressure_override_command);
 	}
 }
 

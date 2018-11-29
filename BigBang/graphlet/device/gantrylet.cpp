@@ -81,7 +81,7 @@ void Gantrylet::construct() {
 
 void Gantrylet::update(long long count, long long interval, long long uptime) {
 	if (this->winding) {
-		switch (this->get_status()) {
+		switch (this->get_state()) {
 		case GantryState::WindingUp: {
 			this->winding_style->DashOffset = +float(count);
 			this->notify_updated();
@@ -102,7 +102,7 @@ void Gantrylet::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Gantrylet::fill_margin(float x, float y, float* t, float* r, float* b, float* l) {
-	GantryState s = this->get_status();
+	GantryState s = this->get_state();
 	
 	SET_BOX(t, this->hat_y);
 	SET_BOX(b, 0.0F);
@@ -149,7 +149,7 @@ void Gantrylet::prepare_style(GantryState status, GantryStyle& style) {
 	CAS_SLOT(style.base_color, style.color);
 }
 
-void Gantrylet::on_status_changed(GantryState status) {
+void Gantrylet::on_state_changed(GantryState status) {
 	switch (status) {
 	case GantryState::WindedOut: {
 		this->make_hat(1.0);
@@ -253,7 +253,7 @@ void GantrySymbollet::construct() {
 }
 
 void GantrySymbollet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case GantryState::WindingUp: case GantryState::WindingOut: {
 		this->highlighting = !this->highlighting;
 		this->notify_updated();
@@ -273,7 +273,7 @@ void GantrySymbollet::prepare_style(GantryState status, GantrySymbolStyle& style
 	CAS_SLOT(style.highlight_color, Colours::Green);
 }
 
-void GantrySymbollet::on_status_changed(GantryState status) {
+void GantrySymbollet::on_state_changed(GantryState status) {
 	GantrySymbolStyle s = this->get_style();
 
 	switch (status) {

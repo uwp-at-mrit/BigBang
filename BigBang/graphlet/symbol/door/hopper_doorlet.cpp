@@ -38,7 +38,7 @@ void HopperDoorlet::construct() {
 }
 
 void HopperDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case DoorState::Opening: case DoorState::Closing: {
 		this->flashing = !this->flashing;
 		this->notify_updated();
@@ -74,7 +74,7 @@ void HopperDoorlet::prepare_style(DoorState state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void HopperDoorlet::on_status_changed(DoorState state) {
+void HopperDoorlet::on_state_changed(DoorState state) {
 	this->flashing = false;
 	
 	switch (state) {
@@ -169,7 +169,7 @@ void UpperHopperDoorlet::fill_margin(float x, float y, float* top, float* right,
 }
 
 void UpperHopperDoorlet::update(long long count, long long interval, long long uptime) {
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case DoorState::Opening: case DoorState::Closing: {
 		this->flashing = !this->flashing;
 		this->notify_updated();
@@ -202,7 +202,7 @@ void UpperHopperDoorlet::prepare_style(DoorState state, DoorStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void UpperHopperDoorlet::on_status_changed(DoorState state) {
+void UpperHopperDoorlet::on_state_changed(DoorState state) {
 	this->flashing = false;
 
 	switch (state) {

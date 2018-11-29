@@ -96,28 +96,28 @@ public:
 		if (details == 0U) {
 			bool hopper = (this->decorator->get_pump_type() == PumpType::Hopper);
 
-			this->diagnoses[FP::RemoteControl]->set_status(DI_gland_pump_remote_control(DB4, this->index, hopper),
+			this->diagnoses[FP::RemoteControl]->set_state(DI_gland_pump_remote_control(DB4, this->index, hopper),
 				AlarmState::Notice, AlarmState::None);
 
-			this->diagnoses[FP::NoBroken]->set_status(DI_gland_pump_broken(DB4, this->index, hopper),
+			this->diagnoses[FP::NoBroken]->set_state(DI_gland_pump_broken(DB4, this->index, hopper),
 				AlarmState::None, AlarmState::Notice);
 
-			this->diagnoses[FP::NotRunning]->set_status(DI_gland_pump_running(DB4, this->index, hopper),
+			this->diagnoses[FP::NotRunning]->set_state(DI_gland_pump_running(DB4, this->index, hopper),
 				AlarmState::None, AlarmState::Notice);
 
-			this->diagnoses[FP::StartReady]->set_status(DI_gland_pump_ready(DB4, this->index, hopper),
+			this->diagnoses[FP::StartReady]->set_state(DI_gland_pump_ready(DB4, this->index, hopper),
 				AlarmState::Notice, AlarmState::None);
 		} else {
-			this->diagnoses[FP::RemoteControl]->set_status(DI_gate_flushing_pump_remote_control(DB4, this->index),
+			this->diagnoses[FP::RemoteControl]->set_state(DI_gate_flushing_pump_remote_control(DB4, this->index),
 				AlarmState::Notice, AlarmState::None);
 			
-			this->diagnoses[FP::NoBroken]->set_status(DI_gate_flushing_pump_broken(DB4, this->index),
+			this->diagnoses[FP::NoBroken]->set_state(DI_gate_flushing_pump_broken(DB4, this->index),
 				AlarmState::None, AlarmState::Notice);
 			
-			this->diagnoses[FP::NotRunning]->set_status(DI_gate_flushing_pump_running(DB4, this->index),
+			this->diagnoses[FP::NotRunning]->set_state(DI_gate_flushing_pump_running(DB4, this->index),
 				AlarmState::None, AlarmState::Notice);
 
-			this->diagnoses[FP::StartReady]->set_status(DI_gate_flushing_pump_ready(DB205, details),
+			this->diagnoses[FP::StartReady]->set_state(DI_gate_flushing_pump_ready(DB205, details),
 				AlarmState::Notice, AlarmState::None);
 		}
 	}

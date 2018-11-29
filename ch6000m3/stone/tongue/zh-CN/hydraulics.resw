@@ -190,4 +190,13 @@
   <data name="VisorOil" xml:space="preserve">
     <value>油位</value>
   </data>
+  <data name="Heater" xml:space="preserve">
+    <value>加热器</value>
+  </data>
+  <data name="BowWinch" xml:space="preserve">
+    <value>艏靠泊绞车压力</value>
+  </data>
+  <data name="SternWinch" xml:space="preserve">
+    <value>艉靠泊绞车压力</value>
+  </data>
 </root>

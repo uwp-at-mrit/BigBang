@@ -140,46 +140,46 @@ namespace WarGrey::SCADA {
 
 	public:
 		void sprite_construct() override {
-			this->update_status();
+			this->update_state();
 		}
 
 	public:		
-		void set_status(State state) {
+		void set_state(State state) {
 			unsigned int new_state = ((state == State::_) ? this->default_state : _I(state));
 
 			if (this->current_state != new_state) {
 				this->current_state = new_state;
-				this->update_status();
+				this->update_state();
 				this->notify_updated();
 			}
 		}
 
-		void set_status(bool condition, State state) {
+		void set_state(bool condition, State state) {
 			if (condition) {
-				this->set_status(state);
+				this->set_state(state);
 			}
 		}
 
-		void set_status(bool condition, State status_yes, State status_no) {
+		void set_state(bool condition, State state_yes, State state_no) {
 			if (condition) {
-				this->set_status(status_yes);
+				this->set_state(state_yes);
 			} else {
-				this->set_status(status_no);
+				this->set_state(state_no);
 			}
 		}
 
-		State get_status() {
+		State get_state() {
 			return _E(State, this->current_state);
 		}
 
-		void set_style(State status, Style& style) {
-			unsigned int idx = (status == State::_) ? this->current_state : _I(status);
+		void set_style(State state, Style& style) {
+			unsigned int idx = (state == State::_) ? this->current_state : _I(state);
 
 			this->styles[idx] = style;
 			this->style_ready[idx] = false;
 
 			if (idx == this->current_state) {
-				this->update_status();
+				this->update_state();
 				this->notify_updated();
 			}
 		}
@@ -190,8 +190,8 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		Style& get_style(State status = State::_) {
-			unsigned int idx = (status == State::_) ? this->current_state : _I(status);
+		Style& get_style(State state = State::_) {
+			unsigned int idx = (state == State::_) ? this->current_state : _I(state);
 
 			if (!this->style_ready[idx]) {
 				this->prepare_style(_E(State, idx), this->styles[idx]);
@@ -202,14 +202,14 @@ namespace WarGrey::SCADA {
 		}
 
 	protected:
-		void update_status() {
+		void update_state() {
 			this->apply_style(this->get_style());
-			this->on_status_changed(_E(State, this->current_state));
+			this->on_state_changed(_E(State, this->current_state));
 		}
 
 	protected:
 		virtual void prepare_style(State status, Style& style) = 0;
-		virtual void on_status_changed(State status) {}
+		virtual void on_state_changed(State status) {}
 		virtual void apply_style(Style& style) {}
 
 	private:

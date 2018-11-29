@@ -35,7 +35,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::HopperPumpState status, WarGrey::SCADA::HopperPumpStyle& style) override;
-		void on_status_changed(HopperPumpState status) override;
+		void on_state_changed(HopperPumpState status) override;
 		
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ wrench;

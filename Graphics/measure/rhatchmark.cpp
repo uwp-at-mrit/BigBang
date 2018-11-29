@@ -106,7 +106,7 @@ RHatchMarkMetrics WarGrey::SCADA::rhatchmark_metrics(float radius, double vmin, 
 	metrics.ch = (te.width - te.lspace - te.rspace) / float(metrics.span);
 	metrics.em = te.height - te.tspace - te.bspace;
 	metrics.hatch_width = metrics.em * hatch_long_ratio;
-	metrics.gap_space = metrics.em * mark_space_ratio;
+	metrics.gap_space = metrics.em * mark_space_ratio + thickness;
 	metrics.ring_radius = radius - metrics.hatch_width - metrics.gap_space - metrics.ch;
 
 	return metrics;

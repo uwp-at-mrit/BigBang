@@ -155,7 +155,7 @@ namespace WarGrey::SCADA {
 		void prepare_style(WarGrey::SCADA::DimensionState status, WarGrey::SCADA::DimensionStyle& style) override;
 		void apply_style(WarGrey::SCADA::DimensionStyle& style) override;
 		void on_value_changed(double value) override;
-		void on_status_changed(WarGrey::SCADA::DimensionState status) override;
+		void on_state_changed(WarGrey::SCADA::DimensionState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ caret_layout;

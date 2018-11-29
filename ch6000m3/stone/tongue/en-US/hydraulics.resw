@@ -192,4 +192,13 @@
   <data name="VisorOil" xml:space="preserve">
     <value>Oil Level</value>
   </data>
+  <data name="Heater" xml:space="preserve">
+    <value>Heater</value>
+  </data>
+  <data name="BowWinch" xml:space="preserve">
+    <value>Bow Anchor Winch Pressure</value>
+  </data>
+  <data name="SternWinch" xml:space="preserve">
+    <value>Stern Anchor Winch Pressure</value>
+  </data>
 </root>

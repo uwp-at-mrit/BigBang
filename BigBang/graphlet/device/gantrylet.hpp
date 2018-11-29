@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::GantryState status, WarGrey::SCADA::GantryStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GantryState status) override;
+		void on_state_changed(WarGrey::SCADA::GantryState status) override;
 
 	private:
 		void make_hat(double degress_ratio);
@@ -88,7 +88,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::GantryState status, WarGrey::SCADA::GantrySymbolStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GantryState status) override;
+		void on_state_changed(WarGrey::SCADA::GantryState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ inside_color;

@@ -315,7 +315,7 @@ protected:
 			bool suction = false;
 			bool soft_upper = false;
 
-			switch (this->winches[id]->get_status()) {
+			switch (this->winches[id]->get_state()) {
 			case WinchState::SaddleLimited: saddle = true; break;
 			case WinchState::SuctionLimited: suction = true; break;
 			case WinchState::UpperLimited: upper = true; break;
@@ -527,7 +527,7 @@ public:
 			this->try_flow_water(DS::D003, DS::SBHP, water_color);
 			this->try_flow_water(DS::D004, DS::PSHP, water_color);
 
-			if (this->hpumps[DS::PSHP]->get_status() == HopperPumpState::Running) {
+			if (this->hpumps[DS::PSHP]->get_state() == HopperPumpState::Running) {
 				DS d12[] = { DS::LMOD, DS::ps, DS::PSHP };
 				DS d14[] = { DS::d014, DS::d14, DS::PSHP };
 				DS d16[] = { DS::d16, DS::d1416, DS::PSHP };
@@ -537,7 +537,7 @@ public:
 				this->try_flow_water(DS::D016, d16, water_color);
 			}
 
-			if (this->hpumps[DS::SBHP]->get_status() == HopperPumpState::Running) {
+			if (this->hpumps[DS::SBHP]->get_state() == HopperPumpState::Running) {
 				DS d11[] = { DS::LMOD, DS::sb, DS::SBHP };
 				DS d13[] = { DS::d013, DS::d13, DS::SBHP };
 				DS d15[] = { DS::d15, DS::d1315, DS::SBHP };
@@ -842,7 +842,7 @@ public:
 	bool can_select(IGraphlet* g) override {
 		auto maybe_button = dynamic_cast<Buttonlet*>(g);
 
-		return ((maybe_button != nullptr) && (maybe_button->get_status() != ButtonState::Disabled));
+		return ((maybe_button != nullptr) && (maybe_button->get_state() != ButtonState::Disabled));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) {
@@ -900,7 +900,7 @@ private:
 
 private:
 	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
-		switch (this->valves[vid]->get_status()) {
+		switch (this->valves[vid]->get_state()) {
 		case GateValveState::Open: {
 			this->station->append_subtrack(vid, eid, color);
 		}
@@ -908,7 +908,7 @@ private:
 	}
 
 	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
-		switch (this->valves[vid]->get_status()) {
+		switch (this->valves[vid]->get_state()) {
 		case GateValveState::Open: {
 			this->station->append_subtrack(vid, path[0], color);
 			this->station->append_subtrack(path, count, color);
@@ -1298,7 +1298,7 @@ public:
 			|| ((settings != nullptr)
 				&& (this->indicators.find(settings->id) != this->indicators.end()))
 			|| ((maybe_button != nullptr)
-				&& (maybe_button->get_status() != ButtonState::Disabled)));
+				&& (maybe_button->get_state() != ButtonState::Disabled)));
 	}
 
 	bool can_select_multiple() override {

@@ -605,7 +605,7 @@ private:
 
 private:
 	bool valve_open(CS vid) {
-		return (this->gvalves[vid]->get_status() == GateValveState::Open);
+		return (this->gvalves[vid]->get_state() == GateValveState::Open);
 	}
 
 	void try_flow_water(CS vid, CS eid1, CS eid2, CanvasSolidColorBrush^ color) {

@@ -3,6 +3,10 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
+	// DB300, starts from 1
+	static unsigned int backoil_pressure_override_command = 816U;
+
+	/************************************************************************************************/
 	private enum class OverflowAction { Up, Down, Stop, Auto, _ };
 	private enum class TankHeaterAction { Start, Stop, Reset, Auto, _ };
 

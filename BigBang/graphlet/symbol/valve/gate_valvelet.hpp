@@ -31,7 +31,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::GateValveState status, WarGrey::SCADA::GateValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::GateValveState status) override;
+		void on_state_changed(WarGrey::SCADA::GateValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

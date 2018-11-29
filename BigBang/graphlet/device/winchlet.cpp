@@ -124,7 +124,7 @@ void Winchlet::construct() {
 
 void Winchlet::update(long long count, long long interval, long long uptime) {
 	if (this->motion_step != 0.0F) {
-		switch (this->get_status()) {
+		switch (this->get_state()) {
 		case WinchState::WindingUp: case WinchState::WindingOut: {
 			if (count % 2 == 0) {
 				this->cable_style->DashOffset += this->motion_step;
@@ -204,7 +204,7 @@ void Winchlet::prepare_style(WinchState status, WinchStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void Winchlet::on_status_changed(WinchState status) {
+void Winchlet::on_state_changed(WinchState status) {
 	switch (status) {
 	case WinchState::WindingUp: case WinchState::WindUpReady:
 	case WinchState::FastWindingUp: case WinchState::FastWindUpReady: {
@@ -227,7 +227,7 @@ void Winchlet::on_status_changed(WinchState status) {
 }
 
 void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	WinchState status = this->get_status();
+	WinchState status = this->get_state();
 	WinchStyle s = this->get_style();
 	
 	ds->FillGeometry(this->cable_base, x, y, Colours::Background);

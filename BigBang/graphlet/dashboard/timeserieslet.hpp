@@ -72,7 +72,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::TimeSeriesState state) override;
+		void on_state_changed(WarGrey::SCADA::TimeSeriesState state) override;
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);

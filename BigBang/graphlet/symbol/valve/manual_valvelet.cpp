@@ -82,7 +82,7 @@ void ManualValvelet::prepare_style(ManualValveState status, ManualValveStyle& s)
 	// NOTE: The others can be nullptr;
 }
 
-void ManualValvelet::on_status_changed(ManualValveState status) {
+void ManualValvelet::on_state_changed(ManualValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX;
 

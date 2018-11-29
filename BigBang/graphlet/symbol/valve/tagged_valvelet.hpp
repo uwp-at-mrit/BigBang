@@ -36,7 +36,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TValveState status, WarGrey::SCADA::TValveStyle& style) override;
-		void on_status_changed(WarGrey::SCADA::TValveState status) override;
+		void on_state_changed(WarGrey::SCADA::TValveState status) override;
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ mask;

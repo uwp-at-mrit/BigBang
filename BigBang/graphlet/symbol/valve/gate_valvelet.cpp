@@ -48,7 +48,7 @@ void GateValvelet::update(long long count, long long interval, long long uptime)
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX - this->sgrdiff;
 
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case GateValveState::Opening: {
 		this->mask = polar_masked_sandglass(sandglass_r, adjust_degrees, -pmask);
 		this->notify_updated();
@@ -104,7 +104,7 @@ void GateValvelet::prepare_style(GateValveState status, GateValveStyle& s) {
 	// NOTE: The others can be nullptr;
 }
 
-void GateValvelet::on_status_changed(GateValveState status) {
+void GateValvelet::on_state_changed(GateValveState status) {
 	double adjust_degrees = this->degrees + 90.0;
 	float sandglass_r = this->radiusX - this->sgrdiff;
 

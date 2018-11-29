@@ -53,7 +53,7 @@ void WaterPumplet::construct() {
 void WaterPumplet::update(long long count, long long interval, long long uptime) {
 	double pmask = double(count % dynamic_mask_step) / double(dynamic_mask_step - 1);
 	
-	switch (this->get_status()) {
+	switch (this->get_state()) {
 	case WaterPumpState::Starting: {
 		this->mask = circle(this->pump_cx, this->pump_cy, this->iradius * float(pmask));
 		this->notify_updated();
@@ -79,7 +79,7 @@ void WaterPumplet::fill_pump_origin(float* x, float *y) {
 	SET_VALUES(x, this->pump_cx, y, this->pump_cy);
 }
 
-void WaterPumplet::on_status_changed(WaterPumpState status) {
+void WaterPumplet::on_state_changed(WaterPumpState status) {
 	switch (status) {
 	case WaterPumpState::StartReady: case WaterPumpState::Unstartable: {
 		if (this->start_mask == nullptr) {

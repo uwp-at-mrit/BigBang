@@ -126,7 +126,7 @@ HHatchMarkMetrics WarGrey::SCADA::hhatchmark_metrics(double vmin, double vmax, f
 
 	metrics.ch = te.width / float(longer_span);
 	metrics.em = te.height - te.tspace - te.bspace;
-	metrics.gap_space = metrics.ch * mark_space_ratio;
+	metrics.gap_space = metrics.ch * mark_space_ratio + thickness;
 	metrics.top_space = te.tspace;
 
 	metrics.hatch_x = metrics.ch * min_span * 0.5F;

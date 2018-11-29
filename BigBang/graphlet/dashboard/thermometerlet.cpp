@@ -116,8 +116,8 @@ void Thermometerlet::fill_mercury_extent(double percentage, float* x, float* y, 
 	float bulb_cy = this->height - mercury_width;
 	float mercury_radius = mercury_width * 0.5F;
 	float mercury_bulb_bottom = bulb_cy + mercury_radius;
-	float mercury_highest = mercury_radius;
-	float mercury_lowest = this->height - this->bulb_size;
+	float mercury_highest = mercury_radius + this->thickness * 0.5F;
+	float mercury_lowest = this->height - this->bulb_size - this->thickness * 0.5F;
 	float mercury_tube_height = mercury_lowest - mercury_highest;
 	float mercury_height = (mercury_bulb_bottom - mercury_lowest) + mercury_tube_height * float(percentage);
 	float mercury_x = bulb_cx - mercury_radius;
