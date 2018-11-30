@@ -23,7 +23,7 @@
 
 (define (server)
   (define listener (udp-open-socket))
-  (udp-bind! listener #false 18030 #true)
+  (udp-bind! listener #false 1618 #true)
   (define-values (lhost lport _r _p) (udp-addresses listener #true))
   (printf "> ~a:~a~n" lhost lport)
   (let wait-recv-print-loop ()
