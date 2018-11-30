@@ -183,4 +183,7 @@
   <data name="sbAmidshipDraft" xml:space="preserve">
     <value>舯右吃水</value>
   </data>
+  <data name="AverageDraft" xml:space="preserve">
+    <value>平均吃水</value>
+  </data>
 </root>

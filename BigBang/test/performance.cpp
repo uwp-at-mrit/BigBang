@@ -18,7 +18,7 @@ void PerformancePage::load(CanvasCreateResourcesReason reason, float width, floa
 		float lines_height = height * 0.8F;
 
 		this->timeseries = this->insert_one(new TimeSerieslet<PerformanceItem>(__MODULE__,
-			this->timeout, make_minute_series(2U), lines_width, lines_height, this->step, this->precision));
+			this->timeout, make_minute_series(4U), lines_width, lines_height, this->step, this->precision));
 	}
 }
 

@@ -6,11 +6,11 @@
 #include "graphlet/dashboard/timeserieslet.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class PerformanceItem { Send, Receive, Confirm, Render, _ };
+	private enum class PerformanceItem { Receive, Confirm, Render, Send, _ };
 
 	private class PerformancePage : public WarGrey::SCADA::Planet, public WarGrey::SCADA::IPLCStatusListener {
 	public:
-		PerformancePage(WarGrey::SCADA::IPLCMaster* plc, double timeout_ms = 800.0,
+		PerformancePage(WarGrey::SCADA::IPLCMaster* plc, double timeout_ms = 1000.0,
 			unsigned int step = 4U, unsigned int precision = 1U);
 
 	public:

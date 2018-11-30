@@ -275,6 +275,18 @@ namespace WarGrey::SCADA {
 			}
 		}
 
+		template<class G>
+		void map_graphlet_base_on_anchors(G* g, Anchor a, Anchor b, GraphletAnchor ga = GraphletAnchor::CC
+			, float dx = 0.0F, float dy = 0.0F) {
+			if (this->info != nullptr) {
+				float anchor_x, anchor_y;
+
+				this->fill_anchor_location(a, &anchor_x, nullptr, true);
+				this->fill_anchor_location(b, nullptr, &anchor_y, true);
+				this->info->master->move_to(g, anchor_x + dx, anchor_y + dy, ga);
+			}
+		}
+
 	private:
 		void append_subtrack(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track
 			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color) {

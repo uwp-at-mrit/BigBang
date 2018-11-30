@@ -62,7 +62,10 @@ private enum class CS : unsigned int {
 	
 	// Key Labels
 	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
-	
+
+	// Interconnected Nodes
+	I0723, I0923,
+
 	_,
 	// anchors used as last jumping points
 	d11, d12, d13, d14, d24,
@@ -71,7 +74,7 @@ private enum class CS : unsigned int {
 
 	// anchors used for unnamed nodes
 	ps, sb, gantry, deck_lx, deck_rx, deck_ty, deck_by, diagnostics,
-	d0910, d0708, d0205, e11, e12, e13, e14, e15, e16, egantry,
+	d0205, e11, e12, e13, e14, e15, e16, egantry,
 
 	// anchors used for non-interconnected nodes
 	n0325, n0405, n0723, n0923
@@ -175,7 +178,7 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow PS water
-			CS c0910[] = { CS::d0910, CS::D010 };
+			CS c0910[] = { CS::I0923, CS::D010 };
 
 			this->try_flow_water(CS::D004, CS::Port, water_color);
 			this->try_flow_water(CS::D006, CS::D004, CS::D009, water_color);
@@ -198,7 +201,7 @@ public:
 		}
 
 		{ // flow SB water
-			CS c0708[] = { CS::d0708, CS::D008 };
+			CS c0708[] = { CS::I0723, CS::D008 };
 			
 			this->try_flow_water(CS::D003, CS::Starboard, water_color);
 			this->try_flow_water(CS::D026, CS::D003, CS::D007, water_color);
@@ -221,7 +224,7 @@ public:
 		}
 
 		if (this->valve_open(CS::D023)) {
-			this->station->append_subtrack(CS::d0910, CS::d0708, water_color);
+			this->station->append_subtrack(CS::I0923, CS::I0723, water_color);
 			this->nintercs[CS::n0723]->set_color(water_color);
 			this->nintercs[CS::n0923]->set_color(water_color);
 		} else {
@@ -273,12 +276,12 @@ public:
 		pTurtle->move_down(3.5F, CS::PSHPump)->move_left(6, CS::n0923);
 		pTurtle->move_left(8, CS::d0205)->move_up(1.5F, CS::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, CS::d0406)->move_right(4, CS::D006)->move_right(4)->move_down(0.5F, CS::deck_ty)->move_down(CS::D009);
-		pTurtle->move_down(1.5F, CS::d0910)->move_down(3.5F)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
+		pTurtle->move_down(2, CS::I0923)->move_down(3)->jump_down()->move_down(2, CS::D023)->jump_back(CS::d0406);
 
 		pTurtle->move_up(1.5F, CS::D004)->move_up(2, CS::ps)->move_up(2, CS::diagnostics)->turn_up_left();
 		pTurtle->move_left(8, CS::PSUWPump)->move_left(10)->move_left(CS::Port);
 
-		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(3.5F, CS::d0708)->move_down(1.5F, CS::D007);
+		pTurtle->jump_back(CS::D023)->move_down(2)->jump_down()->move_down(3, CS::I0723)->move_down(2, CS::D007);
 		pTurtle->move_down(CS::deck_by)->move_down(0.5F)->move_left(4, CS::D026)->move_left(4, CS::d0326);
 		pTurtle->move_up(3)->jump_up()->move_up(1.5F, CS::D025)->move_up(1.5F, CS::d0225);
 		pTurtle->move_right(8, CS::n0723)->move_right(6, CS::SBHPump)->move_down(3.5F, CS::d1819)->jump_back(CS::d0225);
@@ -336,6 +339,11 @@ public:
 				new Segmentlet(-90.0, 90.0, gwidth * 2.0F, gheight,
 					default_sb_color, default_pipe_thickness));
 
+			for (CS id = CS::I0723; id <= CS::I0923; id++) {
+				this->intercs[id] = this->master->insert_one(
+					new Circlelet(default_pipe_thickness * 2.0F, Colours::Green));
+			}
+
 			for (CS id = CS::n0325; id <= CS::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
@@ -369,6 +377,10 @@ public:
 		this->station->map_graphlet_at_anchor(this->ps_draghead, CS::Port, GraphletAnchor::RC);
 		this->station->map_graphlet_at_anchor(this->sb_draghead, CS::Starboard, GraphletAnchor::RC);
 		this->station->map_graphlet_at_anchor(this->LMOD, CS::LMOD, GraphletAnchor::CC);
+
+		for (auto it = this->intercs.begin(); it != this->intercs.end(); it++) {
+			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::CC);
+		}
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
 			/** NOTE
@@ -651,6 +663,7 @@ private:
 	std::map<CS, Credit<Dimensionlet, CS>*> powers;
 	std::map<CS, Credit<Dimensionlet, CS>*> rpms;
 	std::map<CS, Omegalet*> nintercs;
+	std::map<CS, Circlelet*> intercs;
 	Segmentlet* ps_draghead;
 	Segmentlet* sb_draghead;
 	Arclet* LMOD;

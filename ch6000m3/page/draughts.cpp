@@ -43,11 +43,26 @@ private enum class DL : unsigned int {
 	SternDraft, psSternDraft, psSuctionDraft, psAmidshipDraft, sbSternDraft, psSternHeight, sbSternHeight,
 	BowDraft, psBowDraft, sbSuctionDraft, sbAmidshipDraft, sbBowDraft, psBowHeight, sbBowHeight,
 
-	Overflow, NetWeight,
+	Overflow, NetWeight, AverageDraft,
 
 	_
 };
 
+static ICanvasBrush^ time_series_color_dictionary(unsigned int index) {
+	ICanvasBrush^ color = nullptr;
+	
+	switch (_E(DLTS, index % _N(DLTS))) {
+	case DLTS::EarthWork: color = Colours::Khaki; break;
+	case DLTS::Vessel: color = Colours::Cyan; break;
+	case DLTS::HopperHeight: color = Colours::Crimson; break;
+	case DLTS::Loading: color = Colours::Orange; break;
+	case DLTS::Displacement: color = Colours::MediumSeaGreen; break;
+	}
+
+	return color;
+}
+
+/*************************************************************************************************/
 private class DraughtDecorator : public IPlanetDecorator {
 public:
 	DraughtDecorator() {
@@ -108,8 +123,8 @@ public:
 	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2U);
-		this->metrics_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size);
-		this->netweight_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
+		this->flonum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 2U);
+		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 	}
 
 public:
@@ -122,7 +137,8 @@ public:
 		this->overflowpipe->set_value(RealData(DB203, overflow_pipe_progress));
 		this->overflowpipe->set_liquid_height(DBD(DB2, average_hopper_height));
 		this->dimensions[DL::Overflow]->set_value(this->overflowpipe->get_value(), GraphletAnchor::CC);
-		this->dimensions[DL::NetWeight]->set_value(DBD(DB2, vessal_netweight), GraphletAnchor::CC);
+		this->dimensions[DL::NetWeight]->set_value(DBD(DB2, vessal_netweight), GraphletAnchor::RC);
+		this->dimensions[DL::AverageDraft]->set_value(DBD(DB2, average_draught), GraphletAnchor::LC);
 
 		this->dimensions[DL::psBowDraft]->set_value(DBD(DB2, ps_fixed_bow_draught));
 		this->dimensions[DL::psSuctionDraft]->set_value(DBD(DB2, ps_suction_draught));
@@ -166,13 +182,9 @@ public:
 
 public:
 	void load(float width, float height, float vinset) {
-		float ship_y, ship_height, cylinder_height, lines_width, lines_height;
+		float ship_y, ship_height, cylinder_height, lines_width;
 		
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
-		
-		lines_height = ship_y * 0.618F;
-		this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
-			timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
 
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
@@ -186,9 +198,23 @@ public:
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
 		this->load_dimension(this->dimensions, DL::Overflow, "meter", this->plain_style);
-		this->load_dimension(this->dimensions, DL::NetWeight, "ton", this->netweight_style);
+		this->load_dimension(this->dimensions, DL::AverageDraft, "meter", this->flonum_style);
+		this->load_dimension(this->dimensions, DL::NetWeight, "ton", this->fixnum_style);
 
 		this->load_buttons(this->hdchecks, BottomDoorCommand::OpenDoorCheck, BottomDoorCommand::CloseDoorCheck);
+
+		{ // load timeseries
+			float lines_height = ship_y * 0.618F;
+			TimeSeriesStyle style;
+
+			style.lookup_color = time_series_color_dictionary;
+
+			this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
+				timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
+
+			this->timeseries->set_style(style);
+			this->timeseries->enable_closed_line(DLTS::EarthWork, true);
+		}
 	}
 
 	void reflow(float width, float height, float vinset) {
@@ -231,15 +257,24 @@ public:
 			this->reflow_dimension(this->dimensions, DL::sbSternHeight, 0.0F, 1.0F, GraphletAnchor::LB, yoff, -yoff);
 
 			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, -xoff);
+
+			this->master->move_to(this->dimensions[DL::AverageDraft],
+				this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT,
+				GraphletAnchor::LB, vinset, -vinset);
 		}
 
 		{ // reflow buttons and relevant dimensions
-			IGraphlet* target = this->cydimensions[DLTS::HopperHeight];
+			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck],
+				this->cydimensions[DLTS::HopperHeight], GraphletAnchor::CB,
+				GraphletAnchor::RT, -vinset, vinset);
+
+			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck],
+				this->cydimensions[DLTS::HopperHeight], GraphletAnchor::CB,
+				GraphletAnchor::LT, +vinset, vinset);
 			
-			gapsize = vinset * 1.0F;
-			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::RT, -gapsize, gapsize);
-			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck], target, GraphletAnchor::CB, GraphletAnchor::LT, +gapsize, gapsize);
-			this->master->move_to(this->dimensions[DL::NetWeight], this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gapsize);
+			this->master->move_to(this->dimensions[DL::NetWeight],
+				this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT,
+				GraphletAnchor::RB, -vinset, -vinset);
 		}
 	}
 
@@ -258,11 +293,13 @@ private:
 
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls, E id
-		, Platform::String^ unit, unsigned int precision = 2U) {
-		this->metrics_style.precision = precision;
+		, Platform::String^ unit, unsigned int precision) {
+		unsigned int saved_precision = this->flonum_style.precision;
 
+		this->flonum_style.precision = precision;
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(id), this->label_font, Colours::Silver), id);
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->flonum_style, unit), id);
+		this->flonum_style.precision = saved_precision;
 	}
 
 	template<typename E>
@@ -275,9 +312,9 @@ private:
 	template<typename E>
 	void load_cylinder(std::map<E, Credit<Cylinderlet, E>*>& cs, E id, float height, double range
 		, unsigned int precision, Platform::String^ unit) {
-		cs[id] = new Credit<Cylinderlet, E>(LiquidSurface::Convex, range, height * 0.2718F, height, 3.0F, 8U, precision);
-		
-		this->master->insert_one(cs[id], id);
+		cs[id] = this->master->insert_one(new Credit<Cylinderlet, E>(LiquidSurface::Convex,
+			range, height * 0.2718F, height, 3.0F, 8U, precision));
+
 		this->load_dimension(this->cydimensions, this->cylabels, id, unit, precision);
 	}
 
@@ -333,8 +370,8 @@ private: // never delete these graphlets manually.
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle plain_style;
-	DimensionStyle netweight_style;
-	DimensionStyle metrics_style;
+	DimensionStyle fixnum_style;
+	DimensionStyle flonum_style;
 
 private:
 	DraughtsPage* master;

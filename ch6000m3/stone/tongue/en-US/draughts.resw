@@ -186,4 +186,7 @@
   <data name="sbAmidshipDraft" xml:space="preserve">
     <value>Starboard Amidship Draught</value>
   </data>
+  <data name="AverageDraft" xml:space="preserve">
+    <value>Average Draught</value>
+  </data>
 </root>

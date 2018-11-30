@@ -148,9 +148,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\symbol\heaterlet.cpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -304,9 +302,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\symbol\heaterlet.hpp">
-      <Filter>graphlet\symbol</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

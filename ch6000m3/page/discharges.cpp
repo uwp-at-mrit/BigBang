@@ -59,7 +59,10 @@ private enum class RS : unsigned int {
 
 	// Key Labels
 	Port, Starboard, Hatch, PSHPump, SBHPump, Gantry,
-	
+
+	// Interconnected nodes
+	I0723, I0923,
+
 	_,
 
 	// anchors used as last jumping points
@@ -218,11 +221,11 @@ public:
 		
 		pTurtle->move_down(3.5F, RS::PSHPump)->move_left(6, RS::n0923)->move_left(8)->move_up(1.5F, RS::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, RS::d0406)->move_right(4, RS::D006)->move_right(4)->move_down(0.5F, RS::deck_ty)->move_down(RS::D009);
-		pTurtle->move_down(5)->jump_down()->move_down(2, RS::D023)->jump_back(RS::d0406);
+		pTurtle->move_down(2, RS::I0923)->move_down(3)->jump_down()->move_down(2, RS::D023)->jump_back(RS::d0406);
 
 		pTurtle->move_up(1.5F, RS::D004)->move_up(2, RS::ps)->move_up(2, RS::C)->move_up(RS::Port);
 
-		pTurtle->jump_back(RS::D023)->move_down(2)->jump_down()->move_down(5, RS::D007);
+		pTurtle->jump_back(RS::D023)->move_down(2)->jump_down()->move_down(3, RS::I0723)->move_down(2, RS::D007);
 		pTurtle->move_down(RS::deck_by)->move_down(0.5F, RS::d007)->jump_left(8, RS::d0325);
 		pTurtle->move_up(3)->jump_up()->move_up(1.5F, RS::D025)->move_up(1.5F, RS::d0225);
 		pTurtle->move_right(8, RS::n0723)->move_right(6, RS::SBHPump)->move_down(3.5F, RS::d1819)->jump_back(RS::d0225);
@@ -270,6 +273,11 @@ public:
 			this->sb_suction = this->master->insert_one(new Circlelet(sct_radius, default_sb_color, default_pipe_thickness));
 			this->sea_inlet = this->master->insert_one(new Hatchlet(radius * 2.0F));
 
+			for (RS id = RS::I0723; id <= RS::I0923; id++) {
+				this->intercs[id] = this->master->insert_one(
+					new Circlelet(default_pipe_thickness * 2.0F, Colours::Green));
+			}
+
 			for (RS id = RS::n24; id <= RS::n0923; id++) {
 				this->nintercs[id] = this->master->insert_one(
 					new Omegalet(-90.0, nic_radius, default_pipe_thickness, default_pipe_color));
@@ -309,6 +317,10 @@ public:
 		this->station->map_graphlet_at_anchor(this->sb_suction, RS::Starboard, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->sea_inlet, RS::Hatch, GraphletAnchor::CC);
 		this->master->move_to(this->captions[RS::Hatch], this->sea_inlet, GraphletAnchor::CB, GraphletAnchor::CT);
+
+		for (auto it = this->intercs.begin(); it != this->intercs.end(); it++) {
+			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::CC);
+		}
 
 		for (auto it = this->nintercs.begin(); it != this->nintercs.end(); it++) {
 			/** NOTE
@@ -579,9 +591,10 @@ private:
 	std::map<RS, Credit<Dimensionlet, RS>*> vpressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> powers;
 	std::map<RS, Credit<Dimensionlet, RS>*> rpms;
+	std::map<RS, Omegalet*> nintercs;
+	std::map<RS, Circlelet*> intercs;
 	Labellet* ps_seqs[hopper_count];
 	Labellet* sb_seqs[hopper_count];
-	std::map<RS, Omegalet*> nintercs;
 	Linelet* manual_pipe;
 	Hatchlet* sea_inlet;
 	Circlelet* ps_suction;

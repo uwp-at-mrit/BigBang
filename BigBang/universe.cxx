@@ -397,7 +397,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 		this->navigator_view->SelectedValue = this->recent_planet->navigation_label();
 
 		if (is_animated) {
-			TimeSpan ts = make_timespan_from_ms(ms);
+			TimeSpan ts = make_timespan_from_milliseconds(ms);
 			float width = this->display->Size.Width;
 
 			ts.Duration = ms / count;

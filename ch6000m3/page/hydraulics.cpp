@@ -63,7 +63,7 @@ private enum class HS : unsigned int {
 	SQc, SQf, SQd, SQe,
 	
 	// Key Labels
-	Port, Starboard, Master, Visor, Heater, Storage, VisorOil,
+	Port, Starboard, Master, Visor, VisorState, Heater, Storage, VisorOil,
 
 	// Dimensions
 	BackOil, BowWinch, SternWinch,
@@ -107,7 +107,7 @@ public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
 		this->set_temperature(HS::Visor, RealData(DB203, visor_tank_temperature));
 		this->set_temperature(HS::Master, RealData(DB203, master_tank_temperature));
-		this->set_liquid_level(RealData(DB203, visor_tank_level));
+		this->set_visor_tank_level(RealData(DB203, visor_tank_level));
 
 		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));
 		this->pressures[HS::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure));
@@ -135,11 +135,25 @@ public:
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
 		DI_backoil_pressure_override(this->functions[HSFunction::BOPOverride], DB205, backoil_pressure_override_status);
 
-		{ // tank status
+		{ // tank states
+			DI_tank_heater(this->heater, DB4, master_tank_heater_feedback, DB205, tank_heater_status);
+
 			DI_master_tank(this->master_tank, DB4, master_tank_status);
 			DI_visor_tank(this->visor_tank, DB4, visor_tank_status);
 
-			DI_tank_heater(this->heater, DB4, master_tank_heater_feedback, DB205, tank_heater_status);
+			switch (this->visor_tank->get_state()) {
+			case TankState::Low: {
+				this->labels[HS::VisorState]->set_color(Colours::Yellow);
+				this->labels[HS::VisorState]->set_text("[" + speak(TankState::Low) + "]");
+			}; break;
+			case TankState::UltraLow: {
+				this->labels[HS::VisorState]->set_color(Colours::Red);
+				this->labels[HS::VisorState]->set_text("[" + speak(TankState::UltraLow) + "]");
+			}; break;
+			default: {
+				this->labels[HS::VisorState]->set_text("");
+			}
+			}
 		}
 		
 		{ // pump states
@@ -224,10 +238,10 @@ public:
 			this->try_flow_oil(HS::SQk1, HS::K, HS::k, mt_path, oil_color);
 			this->try_flow_oil(HS::SQk2, HS::K /* , HS::k, mt_path */, oil_color);
 
-			this->try_flow_oil(HS::SQ1, HS::Port, HS::SQe, oil_color);
-			this->try_flow_oil(HS::SQ2, HS::sb, HS::SQh, oil_color);
-			this->try_flow_oil(HS::SQ2, HS::SQk2, oil_color);
-			this->try_flow_oil(HS::SQ2, HS::SQm, oil_color);
+			this->try_flow_oil(HS::SQ2, HS::Port, HS::SQe, oil_color);
+			this->try_flow_oil(HS::SQ1, HS::sb, HS::SQh, oil_color);
+			this->try_flow_oil(HS::SQ1, HS::SQk2, oil_color);
+			this->try_flow_oil(HS::SQ1, HS::SQm, oil_color);
 		}
 		
 		this->master->end_update_sequence();
@@ -251,8 +265,8 @@ public:
 	void load_pump_station(float width, float height, float gwidth, float gheight) {
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
-		pTurtle->move_right(2)->move_down(5.5F, HS::SQ2)->move_down()->turn_down_right();
-		pTurtle->move_right(6.5F, HS::SternWinch)->move_right(6.5F, HS::sb)->turn_right_down()->move_down(17);
+		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1)->move_down()->turn_down_right();
+		pTurtle->move_right(6.5F, HS::BowWinch)->move_right(6.5F, HS::sb)->turn_right_down()->move_down(17);
 		
 		pTurtle->jump_right(20, HS::h)->move_left(4, HS::H)->move_left(12, HS::SQh)->move_left(4)->jump_back();
 		pTurtle->move_up(3, HS::g)->move_left(4, HS::G)->move_left(12, HS::SQg)->move_left(4)->jump_back();
@@ -269,8 +283,8 @@ public:
 		pTurtle->move_down(3, HS::e)->move_right(4, HS::E)->move_right(12, HS::SQe)->move_right(4);
 
 		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right();
-		pTurtle->move_right(6.5F, HS::BowWinch)->move_right(6.5F)->turn_right_up();
-		pTurtle->move_up(HS::SQ1)->move_up(5.5F)->move_to(HS::Master);
+		pTurtle->move_right(6.5F, HS::SternWinch)->move_right(6.5F)->turn_right_up();
+		pTurtle->move_up(HS::SQ2)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master)->move_up(6.5F)->turn_up_right(HS::f02)->move_right(2);
 		pTurtle->move_right(5, HS::y)->move_down(6, HS::Y)->move_down(4, HS::SQy)->move_down(4)->turn_down_left()->jump_back();
@@ -300,8 +314,8 @@ public:
 		float thickness = default_pipe_thickness * 2.0F;
 		float alarm_size = gwidth * 1.2F;
 
-		this->master_tank = this->make_tank(HSMTState::Empty, gwidth * 18.0F, gheight * 8.0F, thickness);
-		this->visor_tank = this->master->insert_one(new Tanklet(drag_visor_tank_range, gwidth * 16.0F, gheight * 7.0F, 8U, thickness));
+		this->master_tank = this->make_tank(HSMTState::Empty, gwidth * 20.0F, gheight * 8.0F, thickness);
+		this->visor_tank = this->master->insert_one(new Tanklet(drag_visor_tank_range, gwidth * 18.0F, gheight * 7.0F, 8U, thickness));
 		
 		this->heater = this->master->insert_one(new Heaterlet(gwidth * 1.618F));
 		this->load_label(this->labels, HS::Heater, Colours::Salmon);
@@ -309,6 +323,7 @@ public:
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Master, gwidth * 2.5F, gheight * 4.5F);
 		this->load_thermometer(this->thermometers, this->temperatures, HS::Visor, gwidth * 2.5F, gheight * 4.5F);
 		this->load_dimension(this->levels, HS::VisorOil, "centimeter");
+		this->load_label(this->labels, speak(HSMTState::Normal), HS::VisorState, Colours::Silver, this->label_font);
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
 		
@@ -322,8 +337,8 @@ public:
 		{ // load pumps
 			this->load_devices(this->pumps, this->labels, this->captions, HS::A, HS::H, pradius, 0.000, Colours::Salmon);
 			this->load_devices(this->pumps, this->labels, this->captions, HS::C, HS::E, pradius, 180.0, Colours::Salmon);
-			this->load_devices(this->pumps, this->labels, this->captions, HS::Y, HS::K, pradius, -90.0);
-			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::Y, HS::K, pradius, -90.0, Colours::Salmon);
+			this->load_devices(this->pumps, this->labels, this->captions, HS::J, HS::I, pradius, 90.00, Colours::Salmon);
 
 			this->load_dimensions(this->pressures, HS::A, HS::I, "bar");
 		}
@@ -357,6 +372,10 @@ public:
 		this->station->map_credit_graphlet(this->pressures[HS::SternWinch], GraphletAnchor::CT);
 
 		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
+
+		this->master->move_to(this->functions[HSFunction::BOPOverride],
+			this->captions[HS::Port], 0.5F, this->master_tank, 0.5F,
+			GraphletAnchor::CC);
 		
 		{ // reflow heater
 			float hspace, vspace;
@@ -366,15 +385,6 @@ public:
 				GraphletAnchor::CB, 0.0F, vspace - hspace);
 
 			this->master->move_to(this->labels[HS::Heater], this->master_tank, GraphletAnchor::CB, GraphletAnchor::CT);
-		}
-
-		{ // reflow button
-			float bcx, bcy;
-
-			this->master->fill_graphlet_location(this->captions[HS::Port], &bcx, nullptr, GraphletAnchor::CC);
-			this->master->fill_graphlet_location(this->master_tank, nullptr, &bcy, GraphletAnchor::CC);
-
-			this->master->move_to(this->functions[HSFunction::BOPOverride], bcx, bcy, GraphletAnchor::CC);
 		}
 	}
 	
@@ -429,13 +439,13 @@ public:
 		for (auto it = this->valves.begin(); it != this->valves.end(); it++) {
 			if (it->second->get_direction_degrees() == 90.0) {
 				switch (it->first) {
-				case HS::SQ1: case HS::SQj: {
+				case HS::SQ2: case HS::SQj: {
 					it->second->fill_margin(x0, y0, nullptr, nullptr, nullptr, &margin);
 					lbl_dx = x0 - vradius + margin; lbl_dy = y0; lbl_a = GraphletAnchor::RC;
 				}; break;
-				default: {
+				case HS::SQ1: case HS::SQi: default: {
 					lbl_dx = x0 + vradius; lbl_dy = y0; lbl_a = GraphletAnchor::LC;
-				}
+				}; break;
 				}
 			} else {
 				it->second->fill_margin(x0, y0, &margin, nullptr, nullptr, nullptr);
@@ -582,9 +592,10 @@ private:
 		this->temperatures[id]->set_value(t, GraphletAnchor::LB);
 	}
 
-	void set_liquid_level(float t) {
+	void set_visor_tank_level(float t) {
 		this->visor_tank->set_value(t);
 		this->levels[HS::VisorOil]->set_value(t, GraphletAnchor::LB);
+		this->master->move_to(this->labels[HS::VisorState], this->levels[HS::VisorOil], GraphletAnchor::RC, GraphletAnchor::LC);
 	}
 
 private:

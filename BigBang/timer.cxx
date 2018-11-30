@@ -4,12 +4,10 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
-using namespace Windows::Globalization;
 
 using namespace Windows::UI::Xaml;
 
 Timer::Timer(ITimerAction^ callback, int rate) : target(callback) {
-	this->calendar = ref new Calendar();
 	this->timer = ref new DispatcherTimer();
 
 	this->timer->Interval = make_timespan_from_rate(rate);
@@ -26,30 +24,25 @@ Timer::~Timer() {
 
 void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	// TODO: meanwhile the next round will elapse after this one finished. 
-	long long elapsed0, elapsed, next_interval;
-
-	this->calendar->SetToNow();
-	elapsed0 = this->calendar->GetDateTime().UniversalTime;
+	long long elapsed0 = current_100nanoseconds();
+	long long elapsed, next_tick;
 
 	this->target->on_elapsed(this->count, this->interval, this->uptime);
-	
-	this->calendar->SetToNow();
-	elapsed = this->calendar->GetDateTime().UniversalTime - elapsed0;
-	next_interval = this->interval - elapsed;
-
+	elapsed = current_100nanoseconds() - elapsed0;
+	next_tick = this->interval - elapsed;
 	this->target->on_elapsed(this->count, this->interval, this->uptime, elapsed);
 	
 	this->count += 1;
 	this->uptime += this->interval;
 
-	while (next_interval < 0) {
-		next_interval += this->interval;
+	while (next_tick < 0) {
+		next_tick += this->interval;
 
 		this->count += 1;
 		this->uptime += this->interval;
 	}
 
-	this->timer->Interval = TimeSpan{ next_interval };
+	this->timer->Interval = TimeSpan{ next_tick }; // don't worry, it's Visual Studio's fault
 }
 
 void Timer::start() {

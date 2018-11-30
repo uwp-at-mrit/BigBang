@@ -28,7 +28,6 @@ namespace WarGrey::SCADA {
 
 	private:
 		Windows::UI::Xaml::DispatcherTimer^ timer;
-		Windows::Globalization::Calendar^ calendar;
 		WarGrey::SCADA::ITimerAction^ target;
 
 	private:

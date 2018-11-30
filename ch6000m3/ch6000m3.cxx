@@ -5,6 +5,7 @@
 
 #include "planet.hpp"
 #include "timer.hxx"
+#include "dirotation.hpp"
 
 #include "page/hydraulics.hpp"
 #include "page/hopper_doors.hpp"
@@ -89,9 +90,12 @@ protected:
 		this->add_planet(new DredgesPage(this->device, DragView::Right)); // 10
 
 		this->add_planet(new Gallery());
-		//this->add_planet(new PerformancePage(this->device));
 
-		//this->transfer_to(4);
+		if (system_ipv4_address()->Equals("192.168.0.10")) {
+			this->add_planet(new PerformancePage(this->device));
+		}
+
+		this->transfer_to(9);
 	}
 
 protected private:

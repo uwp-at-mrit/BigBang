@@ -48,6 +48,7 @@ namespace WarGrey::SCADA {
 		float vaxes_thickness = -1.0F;
 
 		float legend_fx = -1.0F;
+		float maximum_fx = -1.0F;
 	};
 
 	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle> {
@@ -76,6 +77,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);
+		void enable_closed_line(unsigned int idx, bool on_off);
 
 	private:
 		void update_time_series(long long next_start);
@@ -83,6 +85,7 @@ namespace WarGrey::SCADA {
 		void update_horizontal_axes(WarGrey::SCADA::TimeSeriesStyle& style);
 
 	private:
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ vaxes;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ hmarks;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ haxes;
@@ -140,6 +143,10 @@ namespace WarGrey::SCADA {
 
 		void set_values(double* values) {
 			ITimeSerieslet::set_values(values);
+		}
+
+		void enable_closed_line(Name slot, bool on_off) {
+			ITimeSerieslet::enable_closed_line(_I(slot), on_off);
 		}
 
 	private:

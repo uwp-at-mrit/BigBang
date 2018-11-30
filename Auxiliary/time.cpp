@@ -52,6 +52,33 @@ static ProcessCpuUsageReport^ process_cpu_usage() {
 }
 
 /**************************************************************************************************/
+long long WarGrey::SCADA::floor_seconds(long long the_100ns, long long span) {
+	long long the_second = the_100ns / l00ns_s;
+	long long remainder = the_second % span;
+
+	return the_second - remainder;
+}
+
+long long WarGrey::SCADA::ceiling_seconds(long long the_100ns, long long span) {
+	long long the_second = the_100ns / l00ns_s;
+	long long remainder = the_second % span;
+
+	return the_second + (span - remainder);
+}
+
+long long WarGrey::SCADA::time_zone_utc_bias_seconds() {
+	TIME_ZONE_INFORMATION tz;
+
+	GetTimeZoneInformation(&tz);
+
+	return tz.Bias * minute_span_s;
+}
+
+/**************************************************************************************************/
+long long WarGrey::SCADA::current_100nanoseconds() {
+	return current_hectonanoseconds();
+}
+
 long long WarGrey::SCADA::current_milliseconds() {
 	return current_hectonanoseconds() / l00ns_ms;
 }
@@ -74,47 +101,44 @@ long long WarGrey::SCADA::current_seconds() {
 }
 
 long long WarGrey::SCADA::current_floor_seconds(long long span) {
-	long long now = current_hectonanoseconds() / l00ns_s;
-	long long remainder = now % span;
-
-	return now - remainder;
+	return floor_seconds(current_hectonanoseconds(), span);
 }
 
 long long WarGrey::SCADA::current_ceiling_seconds(long long span) {
-	long long now = current_hectonanoseconds() / l00ns_s;
-	long long remainder = now % span;
-
-	return now + (span - remainder);
-}
-
-long long WarGrey::SCADA::time_zone_utc_bias_seconds() {
-	TIME_ZONE_INFORMATION tz;
-
-	GetTimeZoneInformation(&tz);
-
-	return tz.Bias * minute_span_s;
+	return ceiling_seconds(current_hectonanoseconds(), span);
 }
 
 /**************************************************************************************************/
-TimeSpan WarGrey::SCADA::make_timespan_from_ms(unsigned int ms) {
+TimeSpan WarGrey::SCADA::make_timespan_from_milliseconds(long long ms) {
 	TimeSpan ts;
 	
-	ts.Duration = ms * 10000LL;
+	ts.Duration = ms * l00ns_ms;
+
+	return ts;
+}
+
+TimeSpan WarGrey::SCADA::make_timespan_from_seconds(long long s) {
+	TimeSpan ts;
+
+	ts.Duration = s * l00ns_s;
 
 	return ts;
 }
 
 TimeSpan WarGrey::SCADA::make_timespan_from_rate(int rate) {
 	TimeSpan ts;
-	long long l00ns = 10000000LL;
 	
-	ts.Duration = ((rate > 0) ? (l00ns / rate) : (-l00ns * rate));
+	ts.Duration = ((rate > 0) ? (l00ns_s / rate) : (-l00ns_s * rate));
 	
 	return ts;
 }
 
-void WarGrey::SCADA::sleep(unsigned int ms) {
+void WarGrey::SCADA::sleep(long long ms) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+void WarGrey::SCADA::sleep_us(long long us) {
+	std::this_thread::sleep_for(std::chrono::microseconds(us));
 }
 
 /*************************************************************************************************/

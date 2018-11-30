@@ -48,18 +48,14 @@ public:
 	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ legend;
 	Platform::String^ name;
+	bool closed;
 };
-
-/*************************************************************************************************/
-inline static long long now_seconds() {
-	return current_seconds() - time_zone_utc_bias_seconds();
-}
 
 /*************************************************************************************************/
 TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(minute_span_s) - time_zone_utc_bias_seconds();
+	ts.start = current_floor_seconds(minute_span_s);
 	ts.span = minute_span_s * std::max(count, 1U);
 	ts.step = step;
 
@@ -69,7 +65,7 @@ TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int s
 TimeSeries WarGrey::SCADA::make_hour_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(hour_span_s) - time_zone_utc_bias_seconds();
+	ts.start = current_floor_seconds(hour_span_s);
 	ts.span = hour_span_s * std::max(count, 1U);
 	ts.step = step;
 
@@ -79,7 +75,7 @@ TimeSeries WarGrey::SCADA::make_hour_series(unsigned int count, unsigned int ste
 TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(day_span_s) - time_zone_utc_bias_seconds();
+	ts.start = current_floor_seconds(day_span_s);
 	ts.span = day_span_s;
 	ts.step = step;
 
@@ -120,11 +116,12 @@ ITimeSerieslet::~ITimeSerieslet() {
 }
 
 void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
-	long long next_start = this->realtime.start + this->realtime.span;
-	long long now = now_seconds();
+	long long axes_interval = this->realtime.span / this->realtime.step;
+	long long boundary = this->realtime.start + this->realtime.span - (3 * axes_interval / 2);
+	long long now = current_seconds();
 
-	if (now > next_start) {
-		this->update_time_series(this->realtime.start + this->realtime.span / this->realtime.step);
+	if (now > boundary) {
+		this->update_time_series(this->realtime.start + axes_interval);
 		this->notify_updated();
 	}
 }
@@ -137,6 +134,7 @@ void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 	}
 
 	this->lines[idx].name = name;
+	this->lines[idx].closed = false;
 }
 
 void ITimeSerieslet::fill_extent(float x, float y, float* w, float* h) {
@@ -161,7 +159,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	FLCAS_SLOT(style.vaxes_thickness, 0.5F);
 
 	if ((style.legend_fx < 0.0F) || (style.legend_fx > 1.0F)) {
-		style.legend_fx = 0.75F;
+		style.legend_fx = 0.81F;
 	}
 }
 
@@ -189,6 +187,7 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 
 void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
 	CanvasGeometry^ vaxes = blank();
+	CanvasGeometry^ marks = blank();
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float interval = this->height / float(this->vertical_step + 1);
 	double delta = (this->vmax - this->vmin) / double(this->vertical_step + 1);
@@ -200,15 +199,15 @@ void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
 		Platform::String^ mark = flstring(this->vmin + delta * double(i), this->precision);
 		CanvasGeometry^ gmark = paragraph(mark, style.font, &mark_te);
 
+		marks = geometry_union(marks, gmark, style.border_thickness + mark_te.height * 0.618F, ythis - mark_te.height);
+
 		axes->BeginFigure(0.0F, ythis);
 		axes->AddLine(this->width, ythis);
 		axes->EndFigure(CanvasFigureLoop::Open);
-
-		vaxes = geometry_union(vaxes, gmark, style.border_thickness + mark_te.height * 0.618F, ythis - mark_te.height);
 	}
 
-	vaxes = geometry_union(vaxes, geometry_stroke(CanvasGeometry::CreatePath(axes), style.vaxes_thickness, style.vaxes_style));
-	this->vaxes = geometry_freeze(vaxes);
+	this->vmarks = geometry_freeze(marks);
+	this->vaxes = geometry_freeze(geometry_stroke(CanvasGeometry::CreatePath(axes), style.vaxes_thickness, style.vaxes_style));
 }
 
 void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
@@ -219,14 +218,13 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 	long long delta = ts->span / (ts->step + 1);
 	float x = style.haxes_thickness * 0.5F;
 	float y = this->height - style.border_thickness;
-	long long now = now_seconds();
 	TextExtent date_mark_te, time_mark_te;
 
 	for (unsigned int i = 0; i <= ts->step + 1; i++) {
 		float xthis = x + interval * float(i);
-		long long locale_s = ts->start + delta * i;
-		Platform::String^ date_mark = make_datestamp_utc(locale_s, false);
-		Platform::String^ time_mark = make_daytimestamp_utc(locale_s, false);
+		long long utc_s = ts->start + delta * i;
+		Platform::String^ date_mark = make_datestamp_utc(utc_s, true);
+		Platform::String^ time_mark = make_daytimestamp_utc(utc_s, true);
 		CanvasGeometry^ gdatemark = paragraph(date_mark, style.font, &date_mark_te);
 		CanvasGeometry^ gtimemark = paragraph(time_mark, style.font, &time_mark_te);
 
@@ -250,49 +248,6 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
 	ds->FillGeometry(this->haxes, x, y, style.haxes_color);
-	ds->DrawCachedGeometry(this->hmarks, x, y, style.haxes_color);
-
-	{ // draw lines in an efficient way
-		Rect haxes_box = this->haxes->ComputeBounds();
-		long long now = now_seconds();
-		
-		for (unsigned idx = 0; idx < this->count; idx++) {
-			float last_x = std::nanf("no datum");
-			float last_y = std::nanf("no datum");
-			float tolerance = style.lines_thickness;
-			float rx = x + haxes_box.Width;
-			auto t = this->lines[idx].timestamps._Get_container().begin();
-			auto v = this->lines[idx].values._Get_container().begin();
-			auto end = this->lines[idx].timestamps._Get_container().end();
-
-			while (t != end) {
-				double fx = double((*t) - ts->start) / double(ts->span);
-				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
-				float this_x = x + float(fx) * haxes_box.Width;
-				float this_y = y + float(fy) * haxes_box.Height;
-
-				if (std::isnan(last_x) || (this_x < x)) {
-					last_x = this_x;
-					last_y = this_y;
-				} else {
-					if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance)) {
-						ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
-							style.lines_thickness, style.lines_style);
-
-						last_x = this_x;
-						last_y = this_y;
-					}
-
-					if (this_x > rx) {
-						break;
-					}
-				}
-
-				t++;
-				v++;
-			}
-		}
-	}
 
 	{ // draw legends
 		float legend_x = x + this->width * style.legend_fx;
@@ -309,15 +264,99 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			ds->DrawTextLayout(this->lines[idx].legend, legend_label_x, y + yoff, this->lines[idx].color);
 		}
 	}
+
+	{ // draw lines in an efficient way
+		Rect haxes_box = this->haxes->ComputeBounds();
+		long long tzoff = time_zone_utc_bias_seconds();
+		float x0 = 0.0F;
+		float y0 = y + haxes_box.Y + haxes_box.Height;
+
+		for (unsigned idx = 0; idx < this->count; idx++) {
+			TimeSeriesLine* line = &this->lines[idx];
+			float last_x = std::nanf("no datum");
+			float last_y = std::nanf("no datum");
+			float tolerance = style.lines_thickness;
+			float rx = x + haxes_box.Width;
+			auto t = line->timestamps._Get_container().begin();
+			auto v = line->values._Get_container().begin();
+			auto end = line->timestamps._Get_container().end();
+			CanvasPathBuilder^ area = nullptr;
+
+			while (t != end) {
+				double fx = double((*t) - ts->start) / double(ts->span);
+				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
+				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
+				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
+
+				if (std::isnan(last_x) || (this_x < x)) {
+					last_x = this_x;
+					last_y = this_y;
+					x0 = last_x;
+				} else {	
+					if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x0 == last_x)) {
+						if (!line->closed) {
+							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
+								style.lines_thickness, style.lines_style);
+						} else {
+							if (area == nullptr) {
+								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+								area->BeginFigure(last_x, y0);
+								area->AddLine(last_x, last_y);
+								x0 = last_x;
+							} else {
+								area->AddLine(this_x, this_y);
+							}
+						}
+
+						last_x = this_x;
+						last_y = this_y;
+					}
+
+					if (this_x > rx) {
+						break;
+					}
+				}
+
+				t++;
+				v++;
+			}
+
+			if (area != nullptr) {
+				if (last_x == x0) {
+					area->EndFigure(CanvasFigureLoop::Open);
+					ds->DrawLine(last_x, last_y, last_x, y0, line->color, style.lines_thickness);
+				} else {
+					area->AddLine(last_x, y0);
+					area->EndFigure(CanvasFigureLoop::Closed);
+
+					{ // draw closed line area
+						CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
+
+						ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
+						ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
+
+					}
+				}
+			}
+		}
+	}
+
+	ds->DrawCachedGeometry(this->vmarks, x, y, style.vaxes_color);
+	ds->DrawCachedGeometry(this->hmarks, x, y, style.haxes_color);
 	
 	ds->DrawRectangle(x + border_off, y + border_off,
 		this->width - style.border_thickness, this->height - style.border_thickness,
 		style.border_color, style.border_thickness);
 }
 
+
+void ITimeSerieslet::enable_closed_line(unsigned idx, bool on_off) {
+	this->lines[idx].closed = on_off;
+}
+
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	TimeSeriesStyle style = this->get_style();
-	long long now = now_seconds();
+	long long now = current_seconds();
 
 	this->lines[idx].set_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
@@ -327,7 +366,7 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 
 void ITimeSerieslet::set_values(double* values) {
 	TimeSeriesStyle style = this->get_style();
-	long long now = now_seconds();
+	long long now = current_seconds();
 
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].set_value(now, values[idx]);
@@ -347,21 +386,21 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 
 	switch (key) {
 	case VirtualKey::PageUp: {
-		this->history.start = now_seconds() - this->history_max;
+		this->history.start = current_seconds() - this->history_max;
 		handled = true;
 	}; break;
 	case VirtualKey::Left: {
 		this->history.start -= (this->history.span >> 3);
-		this->history.start = std::max(this->history.start, now_seconds() - this->history_max);
+		this->history.start = std::max(this->history.start, current_seconds() - this->history_max);
 		handled = true;
 	}; break;
 	case VirtualKey::Right: {
 		this->history.start += (this->history.span >> 3);
-		this->history.start = std::min(this->history.start, now_seconds());
+		this->history.start = std::min(this->history.start, current_seconds());
 		handled = true;
 	}; break;
 	case VirtualKey::PageDown: {
-		this->history.start = now_seconds();
+		this->history.start = current_seconds();
 		handled = true;
 	}; break;
 	case VirtualKey::Add: {
