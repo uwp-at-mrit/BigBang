@@ -37,15 +37,18 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ haxes_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ vaxes_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ selected_color;
 
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ haxes_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ vaxes_style;
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ lines_style;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ selected_style;
 
 		float lines_thickness = -1.0F;
 		float border_thickness = -1.0F;
 		float haxes_thickness = -1.0F;
 		float vaxes_thickness = -1.0F;
+		float selected_thickness = -1.0F;
 
 		float legend_fx = -1.0F;
 		float maximum_fx = -1.0F;
@@ -65,6 +68,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
+		void on_tap(float local_x, float local_y) override;
 		void own_caret(bool yes) override;
 		
 	protected:
@@ -104,6 +108,7 @@ namespace WarGrey::SCADA {
 		unsigned int vertical_step;
 		unsigned int precision;
 		long long history_max;
+		float selected_x;
 
 	private:
 		double vmin;

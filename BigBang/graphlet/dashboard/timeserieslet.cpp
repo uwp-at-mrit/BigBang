@@ -43,6 +43,8 @@ public:
 public:
 	std::queue<long long> timestamps;
 	std::queue<double> values;
+	double selected_value;
+	float y_axis_selected;
 
 public:
 	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
@@ -95,7 +97,7 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 	, float width, float height, unsigned int step, unsigned int precision, long long history_max)
 	: IStatelet(TimeSeriesState::Realtime), width(std::fabsf(width)), height(height), precision(precision)
 	, vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
-	, realtime(ts), history(ts), history_max(history_max) {
+	, realtime(ts), history(ts), history_max(history_max), selected_x(std::nanf("not exists")) {
 
 	if (this->height == 0.0F) {
 		this->height = this->width * 0.2718F;
@@ -151,12 +153,15 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	CAS_SLOT(style.haxes_style, make_dash_stroke(CanvasDashStyle::DashDot));
 	CAS_SLOT(style.vaxes_color, Colours::Tomato);
 	CAS_SLOT(style.vaxes_style, make_dash_stroke(CanvasDashStyle::DashDot));
+	CAS_SLOT(style.selected_color, Colours::GhostWhite);
+	CAS_SLOT(style.selected_style, make_dash_stroke(CanvasDashStyle::DashDotDot));
 	CAS_SLOT(style.lines_style, make_roundcap_stroke_style());
 
 	FLCAS_SLOT(style.border_thickness, 2.0F);
 	FLCAS_SLOT(style.lines_thickness, 1.0F);
 	FLCAS_SLOT(style.haxes_thickness, 0.5F);
 	FLCAS_SLOT(style.vaxes_thickness, 0.5F);
+	FLCAS_SLOT(style.selected_thickness, 1.0F);
 
 	if ((style.legend_fx < 0.0F) || (style.legend_fx > 1.0F)) {
 		style.legend_fx = 0.81F;
@@ -241,9 +246,15 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 }
 
 void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-	TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
+	bool history = (this->get_state() == TimeSeriesState::History);
+	TimeSeries* ts = (history ? &this->history : &this->realtime);
 	TimeSeriesStyle style = this->get_style();
+	Rect haxes_box = this->haxes->ComputeBounds();
 	float border_off = style.border_thickness * 0.5F;
+	float x_axis_min = std::nanf("unknown");
+	float y_axis_max = y + haxes_box.Y;
+	float y_axis_0 = y_axis_max + haxes_box.Height;
+	float x_axis_selected = x + this->selected_x;
 	
 	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
@@ -265,77 +276,80 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		}
 	}
 
-	{ // draw lines in an efficient way
-		Rect haxes_box = this->haxes->ComputeBounds();
-		long long tzoff = time_zone_utc_bias_seconds();
-		float x0 = 0.0F;
-		float y0 = y + haxes_box.Y + haxes_box.Height;
+	for (unsigned idx = 0; idx < this->count; idx++) {
+		TimeSeriesLine* line = &this->lines[idx];
+		float last_x = std::nanf("no datum");
+		float last_y = std::nanf("no datum");
+		float tolerance = style.lines_thickness;
+		float rx = x + haxes_box.Width;
+		auto t = line->timestamps._Get_container().begin();
+		auto v = line->values._Get_container().begin();
+		auto end = line->timestamps._Get_container().end();
+		CanvasPathBuilder^ area = nullptr;
+		float minimum_diff = style.selected_thickness * 0.5F;
+		
+		line->selected_value = std::nanf("not resolved");
 
-		for (unsigned idx = 0; idx < this->count; idx++) {
-			TimeSeriesLine* line = &this->lines[idx];
-			float last_x = std::nanf("no datum");
-			float last_y = std::nanf("no datum");
-			float tolerance = style.lines_thickness;
-			float rx = x + haxes_box.Width;
-			auto t = line->timestamps._Get_container().begin();
-			auto v = line->values._Get_container().begin();
-			auto end = line->timestamps._Get_container().end();
-			CanvasPathBuilder^ area = nullptr;
+		while (t != end) {
+			double fx = double((*t) - ts->start) / double(ts->span);
+			double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
+			float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
+			float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
+			float this_diff = std::fabsf(this_x - x_axis_selected);
 
-			while (t != end) {
-				double fx = double((*t) - ts->start) / double(ts->span);
-				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
-				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
-				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
-
-				if (std::isnan(last_x) || (this_x < x)) {
-					last_x = this_x;
-					last_y = this_y;
-					x0 = last_x;
-				} else {	
-					if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x0 == last_x)) {
-						if (!line->closed) {
-							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
-								style.lines_thickness, style.lines_style);
-						} else {
-							if (area == nullptr) {
-								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-								area->BeginFigure(last_x, y0);
-								area->AddLine(last_x, last_y);
-								x0 = last_x;
-							} else {
-								area->AddLine(this_x, this_y);
-							}
-						}
-
-						last_x = this_x;
-						last_y = this_y;
-					}
-
-					if (this_x > rx) {
-						break;
-					}
-				}
-
-				t++;
-				v++;
+			if (this_diff < minimum_diff) {
+				minimum_diff = this_diff;
+				line->y_axis_selected = this_y;
+				line->selected_value = (*v);
 			}
 
-			if (area != nullptr) {
-				if (last_x == x0) {
-					area->EndFigure(CanvasFigureLoop::Open);
-					ds->DrawLine(last_x, last_y, last_x, y0, line->color, style.lines_thickness);
-				} else {
-					area->AddLine(last_x, y0);
-					area->EndFigure(CanvasFigureLoop::Closed);
-
-					{ // draw closed line area
-						CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
-
-						ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
-						ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
-
+			if (std::isnan(last_x) || (this_x < x)) {
+				last_x = this_x;
+				last_y = this_y;
+				x_axis_min = last_x;
+			} else {
+				if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_min == last_x)) {
+					if (!line->closed) {
+						ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
+							style.lines_thickness, style.lines_style);
+					} else {
+						if (area == nullptr) {
+							area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+							area->BeginFigure(last_x, y_axis_0);
+							area->AddLine(last_x, last_y);
+							x_axis_min = last_x;
+						} else {
+							area->AddLine(this_x, this_y);
+						}
 					}
+
+					last_x = this_x;
+					last_y = this_y;
+				}
+
+				if (this_x > rx) {
+					break;
+				}
+			}
+
+			t++;
+			v++;
+		}
+
+		if (area != nullptr) {
+			if (last_x == x_axis_min) {
+				area->EndFigure(CanvasFigureLoop::Open);
+				ds->DrawLine(last_x, last_y, last_x, y_axis_0, line->color, style.lines_thickness);
+			} else {
+				area->AddLine(last_x, y_axis_0);
+				area->EndFigure(CanvasFigureLoop::Closed);
+
+				{ // draw closed line area
+					CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
+
+					ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
+					ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
+
 				}
 			}
 		}
@@ -343,6 +357,46 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	ds->DrawCachedGeometry(this->vmarks, x, y, style.vaxes_color);
 	ds->DrawCachedGeometry(this->hmarks, x, y, style.haxes_color);
+
+	if ((history) && (x_axis_selected > x)) {
+		float last_xoff = 0.0F;
+		float last_y = y + this->height;
+		
+		ds->DrawLine(x_axis_selected, y_axis_0, x_axis_selected, y_axis_max,
+			style.selected_color, style.selected_thickness, style.selected_style);
+
+		for (unsigned idx = 0; idx < this->count; idx++) {
+			TimeSeriesLine* line = &this->lines[idx];
+
+			if (!std::isnan(line->selected_value)) {
+				Platform::String^ metric = line->name + ": " + flstring(line->selected_value, this->precision);
+				CanvasTextLayout^ desc = make_text_layout(metric, style.legend_font);
+				Rect this_box = desc->LayoutBounds;
+				float yoff = desc->LayoutBounds.Height;
+				float this_y = line->y_axis_selected - yoff;
+				float this_xoff = yoff * 0.25F;
+
+				if ((this_y + this_box.Height > last_y) && (last_xoff >= 0.0F)) {
+					this_xoff = -this_box.Width - this_xoff;
+				}
+
+				ds->DrawTextLayout(desc, x_axis_selected + this_xoff, this_y,
+					(line->closed ? style.selected_color : line->color));
+
+				last_xoff = this_xoff;
+				last_y = this_box.Y + this_y;
+			}
+		}
+
+		{ // draw selected time
+			double selected_s = double(this->selected_x) / double(this->width) * double(ts->span) + double(ts->start);
+			long long utc_s = (long long)std::round(selected_s);
+			CanvasTextLayout^ timestamp = make_text_layout(make_daytimestamp_utc(utc_s, true), style.font);
+			float xoff = timestamp->LayoutBounds.Width * 0.5F;
+
+			ds->DrawTextLayout(timestamp, x_axis_selected - xoff, y + border_off, style.selected_color);
+		}
+	}
 	
 	ds->DrawRectangle(x + border_off, y + border_off,
 		this->width - style.border_thickness, this->height - style.border_thickness,
@@ -350,7 +404,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 }
 
 
-void ITimeSerieslet::enable_closed_line(unsigned idx, bool on_off) {
+void ITimeSerieslet::enable_closed_line(unsigned int idx, bool on_off) {
 	this->lines[idx].closed = on_off;
 }
 
@@ -379,6 +433,10 @@ void ITimeSerieslet::set_values(double* values) {
 void ITimeSerieslet::own_caret(bool yes) {
 	this->set_state(yes ? TimeSeriesState::History : TimeSeriesState::Realtime);
 	this->update_horizontal_axes(this->get_style());
+}
+
+void ITimeSerieslet::on_tap(float x, float y) {
+	this->selected_x = x;
 }
 
 bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
@@ -416,6 +474,7 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 	}
 
 	if (handled) {
+		this->selected_x = std::nanf("reset");
 		this->update_horizontal_axes(this->get_style());
 	}
 
