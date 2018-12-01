@@ -1,13 +1,13 @@
 ﻿#include "schema/earthwork_dbtest.hpp"
 #include "schema/earthwork.hpp"
 
-#include "dirotation.hpp"
+#include "sqlite3/rotation.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Storage;
 
-static void dbtest(SQLite3* target) {
+static void dbtest(ISQLite3* target) {
 	auto sqlite3 = ((target == nullptr) ? new SQLite3() : target);
 	EarthWork ew = make_earthwork();
 	EarthWork eworks[2];
@@ -27,7 +27,7 @@ static void dbtest(SQLite3* target) {
 	update_earthwork(sqlite3, eworks[0]); // not such record in database
 
 	insert_earthwork(sqlite3, eworks[0]);
-	insert_earthwork(sqlite3, eworks[1]);
+	insert_earthwork(sqlite3, eworks[1]); // TODO: maybe earthwork.vessel NOT NULL constraint failed, why
 
 	sqlite3->get_logger()->log_message(Log::Notice,
 		L"datum count: %lld, average: %lf, earliest: %X, lastest: %X",
@@ -62,34 +62,16 @@ static void dbtest(SQLite3* target) {
 }
 
 /*************************************************************************************************/
-private class RotativeEarthWork : public IRotativeDirectory {
+private class RotativeEarthWork : public RotativeSQLite3 {
 public:
-	virtual ~RotativeEarthWork() {
-		if (this->dbc != nullptr) {
-			delete dbc;
-		}
-
-		this->logger->destroy();
-	}
-
-	RotativeEarthWork() : IRotativeDirectory("earthwork", RotationPeriod::Minutely) {
-		this->logger = make_system_logger(Log::Debug, "RotativeEarthWork");
-		this->logger->reference();
-	}
+	RotativeEarthWork() : RotativeSQLite3("earthwork"
+		, make_system_logger(Log::Debug, "RotativeEarthWork")
+		, RotationPeriod::Minutely) {}
 
 protected:
-	void on_file_rotated(StorageFile^ prev, StorageFile^ current) override {
-		if (this->dbc != nullptr) {
-			delete this->dbc;
-		}
-
-		this->dbc = new SQLite3(current->Path->Data(), this->logger);
-		dbtest(this->dbc);
+	void on_database_rotated(SQLite3* prev, SQLite3* current) override {
+		dbtest(current);
 	}
-
-private:
-	Syslog* logger;
-	SQLite3* dbc;
 };
 
 void WarGrey::SCADA::earthwork_dbtest() {

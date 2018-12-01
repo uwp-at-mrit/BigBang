@@ -26,8 +26,8 @@ private:
 };
 
 /*************************************************************************************************/
-IRotativeDirectory::IRotativeDirectory(Platform::String^ dirname, RotationPeriod period, unsigned int count
-	, Platform::String^ prefix, Platform::String^ suffix)
+IRotativeDirectory::IRotativeDirectory(Platform::String^ dirname
+	, Platform::String^ prefix, Platform::String^ suffix, RotationPeriod period, unsigned int count)
 	: period(period), period_count(max(count, 1)), file_prefix(prefix), file_suffix(suffix) {
 	StorageFolder^ appdata = ApplicationData::Current->LocalFolder;
 	Platform::String^ folder = ((dirname == nullptr) ? appdata->Path : appdata->Path + "\\" + dirname);
@@ -67,6 +67,47 @@ IRotativeDirectory::IRotativeDirectory(Platform::String^ dirname, RotationPeriod
 IRotativeDirectory::~IRotativeDirectory() {
 	this->timer->Stop();
 	this->destructing_watcher.cancel();
+}
+
+void IRotativeDirectory::mission_start() {
+	switch (this->period) {
+	case RotationPeriod::Daily: {
+		this->span = day_span_s;
+	} break;
+	case RotationPeriod::Hourly: {
+		this->span = hour_span_s;
+	} break;
+	case RotationPeriod::Minutely: {
+		this->span = minute_span_s;
+	} break;
+	default: {
+		this->span = 1LL;
+	}
+	}
+
+	this->span *= this->period_count;
+
+	if (this->file_prefix == nullptr) {
+		this->file_prefix = this->root->Name;
+	}
+
+	{ // create or reuse the current file
+		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
+		cancellation_token watcher = this->destructing_watcher.get_token();
+		Platform::String^ current_file = this->resolve_filename();
+
+		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
+			try {
+				this->current_file = creating.get();
+				this->on_file_reused(this->current_file);
+
+				this->timer->Interval = this->resolve_interval();
+				this->timer->Start();
+			} catch (Platform::Exception^ e) {
+				this->on_exception(e);
+			} catch (task_canceled&) {}
+		});
+	}
 }
 
 void IRotativeDirectory::do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications() {
@@ -122,47 +163,6 @@ TimeSpan IRotativeDirectory::resolve_interval() {
 	timepoint.Duration -= current_100nanoseconds();
 
 	return timepoint;
-}
-
-void IRotativeDirectory::mission_start() {
-	switch (this->period) {
-	case RotationPeriod::Daily: {
-		this->span = day_span_s;
-	} break;
-	case RotationPeriod::Hourly: {
-		this->span = hour_span_s;
-	} break;
-	case RotationPeriod::Minutely: {
-		this->span = minute_span_s;
-	} break;
-	default: {
-		this->span = 1LL;
-	}
-	}
-
-	this->span *= this->period_count;
-
-	if (this->file_prefix == nullptr) {
-		this->file_prefix = this->root->Name;
-	}
-
-	{ // create or reuse the current file
-		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
-		cancellation_token watcher = this->destructing_watcher.get_token();
-		Platform::String^ current_file = this->resolve_filename();
-
-		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
-			try {
-				this->current_file = creating.get();
-				this->on_file_reused(this->current_file);
-
-				this->timer->Interval = this->resolve_interval();
-				this->timer->Start();
-			} catch (Platform::Exception^ e) {
-				this->on_exception(e);
-			} catch (task_canceled&) {}
-		});
-	}
 }
 
 void IRotativeDirectory::on_file_reused(StorageFile^ file) {

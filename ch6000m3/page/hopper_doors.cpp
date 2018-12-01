@@ -480,7 +480,7 @@ private:
 		this->hdoors[id]->set_value(value / 100.0F);
 		this->progresses[id]->set_value(value, GraphletAnchor::CC);
 
-		AI_hopper_door(this->hdoors[id], value, bottom_door_open_threshold, 0.0F);
+		//AI_hopper_door(this->hdoors[id], value, bottom_door_open_threshold, std::nanf("follow signal rather than progress"));
 	}
 
 private: // never delete these graphlets manually.

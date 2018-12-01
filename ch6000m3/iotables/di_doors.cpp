@@ -5,11 +5,11 @@ using namespace WarGrey::SCADA;
 
 /************************************************************************************************/
 void WarGrey::SCADA::DI_hopper_door(IHopperDoorlet* target, const uint8* db205, size_t idx205_p1) {
-	if (DBX(db205, idx205_p1 + 6)) {
+	if (DBX(db205, idx205_p1 + 6U)) {
 		target->set_state(DoorState::Disabled);
-	} else if (DBX(db205, idx205_p1 - 1)) {
+	} else if (DBX(db205, idx205_p1 - 1U)) {
 		target->set_state(DoorState::Opening);
-	} else if (DBX(db205, idx205_p1 + 0)) {
+	} else if (DBX(db205, idx205_p1 + 0U)) {
 		target->set_state(DoorState::Closing);
 	} else {
 		target->set_state(DoorState::Default);
@@ -17,8 +17,11 @@ void WarGrey::SCADA::DI_hopper_door(IHopperDoorlet* target, const uint8* db205, 
 }
 
 void WarGrey::SCADA::DI_hopper_door(IHopperDoorlet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-	DI_hopper_door(target, db205, idx205_p1);
-	target->set_state(DBX(db4, idx4_p1 - 1), DoorState::Closed);
+	if (DBX(db4, idx4_p1 - 1U)) {
+		target->set_state(DoorState::Closed);
+	} else {
+		DI_hopper_door(target, db205, idx205_p1);
+	}
 }
 
 void WarGrey::SCADA::DI_hopper_doors_auto_lock(Alarmlet* alarmer, const uint8* db205) {

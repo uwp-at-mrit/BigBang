@@ -12,8 +12,8 @@ namespace WarGrey::SCADA {
 		virtual ~IRotativeDirectory() noexcept;
 
 		IRotativeDirectory(Platform::String^ dirname,
-			WarGrey::SCADA::RotationPeriod period = RotationPeriod::Daily, unsigned int period_count = 1,
-			Platform::String^ file_prefix = nullptr, Platform::String^ file_suffix = ".db");
+			Platform::String^ file_prefix, Platform::String^ file_suffix,
+			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
 	public:
 		virtual Platform::String^ resolve_filename(long long time_100ns = current_100nanoseconds());
