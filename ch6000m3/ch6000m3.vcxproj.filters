@@ -35,6 +35,9 @@
     <Filter Include="stone\tongue\zh-CN\diagnostics">
       <UniqueIdentifier>{dc0a360c-2424-4fac-bce6-7874a096dc7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="schema">
+      <UniqueIdentifier>{2825713d-aae4-492e-b943-113d12c31da5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
@@ -127,6 +130,12 @@
     </ClCompile>
     <ClCompile Include="page\diagnostics\gland_pump_dx.cpp">
       <Filter>page\diagnostics</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\earthwork.cpp">
+      <Filter>schema</Filter>
+    </ClCompile>
+    <ClCompile Include="schema\earthwork_dbtest.cpp">
+      <Filter>schema</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +250,12 @@
     </ClInclude>
     <ClInclude Include="page\diagnostics\gland_pump_dx.hpp">
       <Filter>page\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\earthwork.hpp">
+      <Filter>schema</Filter>
+    </ClInclude>
+    <ClInclude Include="schema\earthwork_dbtest.hpp">
+      <Filter>schema</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -392,6 +407,9 @@
     <None Include="ch6000m3.scrbl" />
     <None Include="Assets\ch6000m3.rkt">
       <Filter>Assets</Filter>
+    </None>
+    <None Include="schema\earthwork.dao.rkt">
+      <Filter>schema</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

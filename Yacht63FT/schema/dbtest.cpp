@@ -7,7 +7,7 @@ using namespace WarGrey::SCADA;
 
 private enum class dbevent { Yacht, Propulsion, Propeller };
 
-void WarGrey::SCADA::dbtest(SQLite3* target) {
+void WarGrey::SCADA::earthwork_dbtest(SQLite3* target) {
 	auto sqlite3 = ((target == nullptr) ? new SQLite3() : target);
 	AlarmEvent fevent = make_event(_I(dbevent::Yacht), 1);
 	AlarmEvent events[2];

@@ -3,7 +3,6 @@
 #include "dirotation.hpp"
 #include "syslog.hpp"
 #include "string.hpp"
-#include "time.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -19,7 +18,7 @@ internal:
 
 public:
 	void on_rotation(Platform::Object^ whocares, Platform::Object^ useless) {
-		master->rotate_now();
+		master->do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications();
 	}
 
 private:
@@ -27,9 +26,9 @@ private:
 };
 
 /*************************************************************************************************/
-IRotativeDirectory::IRotativeDirectory(Syslog* logger, Platform::String^ dirname
-	, Platform::String^ prefix, Platform::String^ suffix, RotationPeriod period, unsigned int count)
-	: logger(logger), period(period), period_count(max(count, 1)), file_prefix(prefix), file_suffix(suffix) {
+IRotativeDirectory::IRotativeDirectory(Platform::String^ dirname, RotationPeriod period, unsigned int count
+	, Platform::String^ prefix, Platform::String^ suffix)
+	: period(period), period_count(max(count, 1)), file_prefix(prefix), file_suffix(suffix) {
 	StorageFolder^ appdata = ApplicationData::Current->LocalFolder;
 	Platform::String^ folder = ((dirname == nullptr) ? appdata->Path : appdata->Path + "\\" + dirname);
 	RotationListener^ listener = ref new RotationListener(this);
@@ -39,19 +38,18 @@ IRotativeDirectory::IRotativeDirectory(Syslog* logger, Platform::String^ dirname
 	this->timer->Tick += ref new EventHandler<Platform::Object^>(listener, &RotationListener::on_rotation);
 	this->listener = listener;
 
-	create_task(StorageFolder::GetFolderFromPathAsync(folder), watcher).then([=](task<StorageFolder^> building) {
+	create_task(StorageFolder::GetFolderFromPathAsync(folder), watcher).then([=](task<StorageFolder^> getting) {
 		try {
-			this->root = building.get();
-			this->on_folder_ready(this->root->Path, false);
+			this->root = getting.get();
+			this->on_folder_ready(this->root, false);
 			this->mission_start();
 		} catch (Platform::Exception^ e) {
 			switch (e->HResult) {
 			case HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND): {
-				this->log_message(Log::Debug, make_wstring(L"Folder %s is not found, make it.", folder->Data()));
 				create_task(appdata->CreateFolderAsync(dirname), watcher).then([=](task<StorageFolder^> creating) {
 					try {
 						this->root = creating.get();
-						this->on_folder_ready(this->root->Path, true);
+						this->on_folder_ready(this->root, true);
 						this->mission_start();
 					} catch (Platform::Exception^ e) {
 						this->on_exception(e);
@@ -71,43 +69,51 @@ IRotativeDirectory::~IRotativeDirectory() {
 	this->destructing_watcher.cancel();
 }
 
-void IRotativeDirectory::rotate_now() {
+void IRotativeDirectory::do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications() {
 	// NOTE: The timer is not precise in nature, sometimes it may be triggered early.
 	long long next_timepoint = current_ceiling_seconds(this->span);
-	Platform::String^ old_file = this->current_file;
+	Platform::String^ current_file = this->resolve_filename();
 
-	this->current_file = this->resolve_current_file();
-
-	if (this->current_file->Equals(old_file)) {
+	if (this->current_file->Name->Equals(current_file)) {
 		long long ms = next_timepoint * 1000LL - current_milliseconds();
 		
 		sleep(ms);
-		this->logger->log_message(Log::Notice, L"Sleepped %lldms since the file rotation event is triggered early", ms);
-
-		this->rotate_now();
+		this->do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications();
 	} else {
-		this->timer->Interval = this->resolve_interval();
-		this->on_file_rotated(old_file, this->current_file);
+		CreationCollisionOption cco = CreationCollisionOption::ReplaceExisting;
+		cancellation_token watcher = this->destructing_watcher.get_token();
+
+		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
+			try {
+				StorageFile^ prev_file = this->current_file;
+
+				this->current_file = creating.get();
+				this->on_file_rotated(prev_file, this->current_file);
+
+				this->timer->Interval = this->resolve_interval();
+			} catch (Platform::Exception^ e) {
+				this->on_exception(e);
+			} catch (task_canceled&) {}
+		});
 	}
 }
 
-void IRotativeDirectory::on_exception(Platform::Exception^ e) {
-	this->log_message(Log::Critical, e->Message);
-	throw e;
+void IRotativeDirectory::on_exception(Platform::Exception^ exn) {
+	throw exn;
 }
 
-void IRotativeDirectory::log_message(Log level, Platform::String^ message) {
-	this->logger->log_message(level, message);
-}
+Platform::String^ IRotativeDirectory::resolve_filename(long long time_100ns) {
+	long long timepoint = floor_seconds(time_100ns, this->span);
+	long long daytime = timepoint % day_span_s - time_zone_utc_bias_seconds();
+	long long hour = daytime / hour_span_s;
+	long long minute = daytime % hour_span_s / minute_span_s;
+	long long seconds = daytime % minute_span_s;
 
-Platform::String^ IRotativeDirectory::resolve_current_file() {
-	long long timepoint = current_floor_seconds(this->span);
-	Platform::String^ file_name = this->file_prefix
+	// Stupid Windows Machine, ":" cannot be included in filename
+	return this->file_prefix
 		+ "-" + make_datestamp_utc(timepoint, true)
-		+ "T" + make_daytimestamp_utc(timepoint, true)
+		+ "T" + make_wstring(L"%02d_%02d_%02d", hour, minute, seconds)
 		+ this->file_suffix;
-
-	return file_name;
 }
 
 TimeSpan IRotativeDirectory::resolve_interval() {
@@ -135,10 +141,30 @@ void IRotativeDirectory::mission_start() {
 	}
 
 	this->span *= this->period_count;
-	this->current_file = this->resolve_current_file();
-	
-	{ // resolve the next timepoint
-		this->timer->Interval = this->resolve_interval();
-		this->timer->Start();
+
+	if (this->file_prefix == nullptr) {
+		this->file_prefix = this->root->Name;
 	}
+
+	{ // create or reuse the current file
+		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
+		cancellation_token watcher = this->destructing_watcher.get_token();
+		Platform::String^ current_file = this->resolve_filename();
+
+		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
+			try {
+				this->current_file = creating.get();
+				this->on_file_reused(this->current_file);
+
+				this->timer->Interval = this->resolve_interval();
+				this->timer->Start();
+			} catch (Platform::Exception^ e) {
+				this->on_exception(e);
+			} catch (task_canceled&) {}
+		});
+	}
+}
+
+void IRotativeDirectory::on_file_reused(StorageFile^ file) {
+	this->on_file_rotated(nullptr, file);
 }

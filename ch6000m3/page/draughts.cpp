@@ -9,10 +9,10 @@
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/buttonlet.hpp"
 
+#include "schema/earthwork_dbtest.hpp"
+
 #include "iotables/ai_metrics.hpp"
-
 #include "iotables/di_doors.hpp"
-
 #include "iotables/do_devices.hpp"
 #include "iotables/do_doors.hpp"
 
@@ -420,6 +420,8 @@ void DraughtsPage::load(CanvasCreateResourcesReason reason, float width, float h
 				this->device->get_logger()->append_log_receiver(this->statusline);
 			}
 		}
+
+		earthwork_dbtest();
 	}
 }
 

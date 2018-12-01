@@ -13,7 +13,8 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::System::Diagnostics;
 
-static const long long l00ns_ms = 1000LL * 10LL;
+static const long long l00ns_us = 10LL;
+static const long long l00ns_ms = l00ns_us * 1000LL;
 static const long long l00ns_s = l00ns_ms * 1000LL;
 static const long long ms_1601_1970 = 11644473600000LL;
 static const long long l00ns_1601_1970 = ms_1601_1970 * l00ns_ms;
@@ -77,6 +78,10 @@ long long WarGrey::SCADA::time_zone_utc_bias_seconds() {
 /**************************************************************************************************/
 long long WarGrey::SCADA::current_100nanoseconds() {
 	return current_hectonanoseconds();
+}
+
+long long WarGrey::SCADA::current_microseconds() {
+	return current_hectonanoseconds() / l00ns_us;
 }
 
 long long WarGrey::SCADA::current_milliseconds() {

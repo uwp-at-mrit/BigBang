@@ -1,6 +1,6 @@
 #include "dbmisc.hpp"
+#include "time.hpp"
 
-#include <chrono>
 #include <cstdlib>
 #include <mutex>
 
@@ -19,18 +19,7 @@ static inline uint32 urnd32() {
 	return (uint32)((urnd16() << 16U) | urnd16());
 }
 
-int64 WarGrey::SCADA::current_milliseconds() {
-	auto duration = std::chrono::system_clock::now().time_since_epoch();
-
-	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-}
-
-int64 WarGrey::SCADA::current_microseconds() {
-	auto duration = std::chrono::system_clock::now().time_since_epoch();
-
-	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-}
-
+/*************************************************************************************************/
 /** WARNING
  * The actual generated 64bit primary keys only have 63 significant bits(3bits therefore are used to represent `version`),
  *  since integers in SQLite3 are signed and the overflowed ones will be converted to `real`s unexpectedly.

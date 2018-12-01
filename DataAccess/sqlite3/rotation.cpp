@@ -7,6 +7,8 @@ RotativeSQLite3::RotativeSQLite3(const wchar_t* dbdir, WarGrey::SCADA::Syslog* l
 	: ISQLite3(logger), xCallback(xCallback) {
 
 	this->logger = this->get_logger();
+	this->logger->reference();
+
 	this->employee = new SQLite3(nullptr, this->logger, this->xCallback);
 }
 
@@ -17,7 +19,6 @@ RotativeSQLite3::~RotativeSQLite3() {
 
 	this->logger->destroy();
 }
-
 
 std::list<std::string> RotativeSQLite3::list_tables() {
 	return this->employee->list_tables();

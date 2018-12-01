@@ -13,6 +13,7 @@ namespace WarGrey::SCADA {
 	long long ceiling_seconds(long long the_100ns, long long span_s = day_span_s);
 	long long time_zone_utc_bias_seconds();
 
+	long long current_microseconds();
 	long long current_milliseconds();
 	double current_inexact_milliseconds();
 	double current_inexact_seconds();

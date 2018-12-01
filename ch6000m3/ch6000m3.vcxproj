@@ -84,6 +84,7 @@
     <Import Project="..\PLCIO\PLCIO.vcxitems" Label="Shared" />
     <Import Project="..\Syslog\Syslog.vcxitems" Label="Shared" />
     <Import Project="..\ScalableVectorGraphlet\ScalableVectorGraphlet.vcxitems" Label="Shared" />
+    <Import Project="..\DataAccess\DataAccess.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -208,6 +209,7 @@
     <None Include="ch6000m3_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="ch6000m3.scrbl" />
+    <None Include="schema\earthwork.dao.rkt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LargeTile.scale-100.png" />
@@ -335,6 +337,8 @@
     <ClCompile Include="page\dredges.cpp" />
     <ClCompile Include="page\lubricatings.cpp" />
     <ClCompile Include="iotables\ai_dredges.cpp" />
+    <ClCompile Include="schema\earthwork_dbtest.cpp" />
+    <ClCompile Include="schema\earthwork.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\charges.cpp" />
@@ -377,6 +381,8 @@
     <ClInclude Include="iotables\do_pumps.hpp" />
     <ClInclude Include="iotables\do_valves.hpp" />
     <ClInclude Include="iotables\do_water_pumps.hpp" />
+    <ClInclude Include="schema\earthwork_dbtest.hpp" />
+    <ClInclude Include="schema\earthwork.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\charges.hpp" />
