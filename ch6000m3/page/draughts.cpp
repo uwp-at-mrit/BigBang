@@ -4,8 +4,10 @@
 #include "configuration.hpp"
 #include "menu.hpp"
 
+#include "schema/timeseries/earthwork_ds.hpp"
+#include "schema/earthwork_dbtest.hpp"
+
 #include "graphlet/dashboard/cylinderlet.hpp"
-#include "graphlet/dashboard/timeserieslet.hpp"
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/buttonlet.hpp"
 
@@ -15,11 +17,10 @@
 #include "iotables/do_doors.hpp"
 
 #include "decorator/page.hpp"
+#include "decorator/ship.hpp"
 
 #include "module.hpp"
 #include "shape.hpp"
-#include "geometry.hpp"
-#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -30,11 +31,8 @@ using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
-using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum DLMode { WindowUI = 0, Dashboard };
-
-private enum class DLTS { EarthWork, Vessel, HopperHeight, Loading, Displacement, _ };
 
 // WARNING: order matters
 private enum class DL : unsigned int {
@@ -49,80 +47,31 @@ private enum class DL : unsigned int {
 static ICanvasBrush^ time_series_color_dictionary(unsigned int index) {
 	ICanvasBrush^ color = nullptr;
 	
-	switch (_E(DLTS, index % _N(DLTS))) {
-	case DLTS::EarthWork: color = Colours::Khaki; break;
-	case DLTS::Vessel: color = Colours::Cyan; break;
-	case DLTS::HopperHeight: color = Colours::Crimson; break;
-	case DLTS::Loading: color = Colours::Orange; break;
-	case DLTS::Displacement: color = Colours::MediumSeaGreen; break;
+	switch (_E(EWTS, index % _N(EWTS))) {
+	case EWTS::EarthWork: color = Colours::Khaki; break;
+	case EWTS::Vessel: color = Colours::Cyan; break;
+	case EWTS::HopperHeight: color = Colours::Crimson; break;
+	case EWTS::Loading: color = Colours::Orange; break;
+	case EWTS::Displacement: color = Colours::MediumSeaGreen; break;
 	}
 
 	return color;
 }
 
 /*************************************************************************************************/
-private class DraughtDecorator : public IPlanetDecorator {
-public:
-	DraughtDecorator() {
-		float height = 0.618F * 0.618F;
-		float radius = height * 0.5F;
-		
-		this->ship_width = 0.618F;
-		this->x = (1.0F - this->ship_width - radius) * 0.5F;
-		this->y = 0.5F;
-		this->ship = geometry_union(rectangle(this->ship_width, height),
-			segment(this->ship_width, radius, -90.0, 90.0, radius, radius));
-	}
-
-public:
-	void draw_before(CanvasDrawingSession^ ds, float Width, float Height) override {
-		auto real_ship = geometry_scale(this->ship, Width, Height);
-		Rect ship_box = real_ship->ComputeBounds();
-		float thickness = 2.0F;
-		float sx = this->x * Width;
-		float sy = this->y * Height;
-		
-		ds->DrawGeometry(real_ship, sx, sy, Colours::Silver, thickness);
-	}
-
-public:
-	void fill_ship_extent(float* x, float* y, float* width, float* height, bool full = false) {
-		float awidth = this->actual_width();
-		float aheight = this->actual_height();
-		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
-
-		SET_VALUES(x, this->x * awidth, y, this->y * aheight);
-		SET_BOX(width, (full ? abox.Width : this->ship_width * awidth));
-		SET_BOX(height, abox.Height);
-	}
-
-	void fill_ship_anchor(float fx, float fy, float* x, float *y, bool full = false) {
-		float awidth = this->actual_width();
-		float aheight = this->actual_height();
-		auto abox = this->ship->ComputeBounds(make_scale_matrix(awidth, aheight));
-		float width = (full ? abox.Width : this->ship_width * awidth);
-
-		SET_BOX(x, this->x * awidth + width * fx);
-		SET_BOX(y, this->y * aheight + abox.Height * fy);
-	}
-
-private:
-	CanvasGeometry^ ship;
-	ICanvasBrush^ seq_color;
-
-private:
-	float x;
-	float y;
-	float ship_width;
-};
-
 private class Draughts final : public PLCConfirmation {
 public:
-	Draughts(DraughtsPage* master, DraughtDecorator* ship) : master(master), decorator(ship) {
+	Draughts(DraughtsPage* master, ShipDecorator* ship) : master(master), decorator(ship) {
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2U);
 		this->flonum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 2U);
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
+
+		{ // load earthwork datasource
+			Syslog* logger = make_system_logger(Log::Debug, "RotativeEarthWork");
+
+			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Minutely);
+		}
 	}
 
 public:
@@ -156,15 +105,17 @@ public:
 		this->dimensions[DL::sbSternHeight]->set_value(DBD(DB2, sb_stern_hopper_height));
 
 		{ // set timeseries in batch
-			double values[_N(DLTS)];
+			double values[_N(EWTS)];
 
-			this->set_cylinder(DLTS::HopperHeight, values, DBD(DB2, average_hopper_height));
-			this->set_cylinder(DLTS::Displacement, values, DBD(DB2, displacement_value));
-			this->set_cylinder(DLTS::Loading, values, DBD(DB2, loading_value));
-			this->set_cylinder(DLTS::EarthWork, values, DBD(DB2, earthwork_value));
-			this->set_cylinder(DLTS::Vessel, values, DBD(DB2, vessel_value));
+			this->set_cylinder(EWTS::HopperHeight, values, DBD(DB2, average_hopper_height));
+			this->set_cylinder(EWTS::Displacement, values, DBD(DB2, displacement_value));
+			this->set_cylinder(EWTS::Loading, values, DBD(DB2, loading_value));
+			this->set_cylinder(EWTS::EarthWork, values, DBD(DB2, earthwork_value));
+			this->set_cylinder(EWTS::Vessel, values, DBD(DB2, vessel_value));
 
 			this->timeseries->set_values(values);
+
+			earthwork_dbtest();
 		}
 	}
 
@@ -187,11 +138,11 @@ public:
 		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
 
 		cylinder_height = ship_height * 0.42F;
-		this->load_cylinder(this->cylinders, DLTS::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, DLTS::Vessel, cylinder_height, vessel_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, DLTS::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
-		this->load_cylinder(this->cylinders, DLTS::Loading, cylinder_height, loading_range, 0U, "ton");
-		this->load_cylinder(this->cylinders, DLTS::Displacement, cylinder_height, displacement_range, 0U, "ton");
+		this->load_cylinder(this->cylinders, EWTS::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, EWTS::Vessel, cylinder_height, vessel_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, EWTS::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
+		this->load_cylinder(this->cylinders, EWTS::Loading, cylinder_height, loading_range, 0U, "ton");
+		this->load_cylinder(this->cylinders, EWTS::Displacement, cylinder_height, displacement_range, 0U, "ton");
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
@@ -207,13 +158,13 @@ public:
 
 			style.lookup_color = time_series_color_dictionary;
 
-			this->timeseries = this->master->insert_one(new TimeSerieslet<DLTS>(__MODULE__,
+			this->timeseries = this->master->insert_one(new TimeSerieslet<EWTS>(__MODULE__, this->datasource,
 				timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
 
 			this->timeseries->set_style(style);
-			this->timeseries->close_line(DLTS::EarthWork, true);
-			this->timeseries->hide_line(DLTS::Vessel, true);
-			this->timeseries->hide_line(DLTS::HopperHeight, true);
+			this->timeseries->close_line(EWTS::EarthWork, true);
+			this->timeseries->hide_line(EWTS::Vessel, true);
+			this->timeseries->hide_line(EWTS::HopperHeight, true);
 		}
 	}
 
@@ -227,7 +178,7 @@ public:
 		this->decorator->fill_ship_anchor(0.5F, 0.0F, &tsx, &tsy, true);
 		tsy *= 0.5F;
 
-		this->reflow_cylinders(this->cylinders, DLTS::EarthWork, DLTS::Displacement, gapsize);
+		this->reflow_cylinders(this->cylinders, EWTS::EarthWork, EWTS::Displacement, gapsize);
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
@@ -259,21 +210,21 @@ public:
 			this->reflow_dimension(this->dimensions, DL::SternDraft, 0.0F, 0.5F, GraphletAnchor::RC, -xoff);
 
 			this->master->move_to(this->dimensions[DL::AverageDraft],
-				this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT,
+				this->cylabels[EWTS::HopperHeight], GraphletAnchor::CT,
 				GraphletAnchor::LB, vinset, -vinset);
 		}
 
 		{ // reflow buttons and relevant dimensions
 			this->master->move_to(this->hdchecks[BottomDoorCommand::OpenDoorCheck],
-				this->cydimensions[DLTS::HopperHeight], GraphletAnchor::CB,
+				this->cydimensions[EWTS::HopperHeight], GraphletAnchor::CB,
 				GraphletAnchor::RT, -vinset, vinset);
 
 			this->master->move_to(this->hdchecks[BottomDoorCommand::CloseDoorCheck],
-				this->cydimensions[DLTS::HopperHeight], GraphletAnchor::CB,
+				this->cydimensions[EWTS::HopperHeight], GraphletAnchor::CB,
 				GraphletAnchor::LT, +vinset, vinset);
 			
 			this->master->move_to(this->dimensions[DL::NetWeight],
-				this->cylabels[DLTS::HopperHeight], GraphletAnchor::CT,
+				this->cylabels[EWTS::HopperHeight], GraphletAnchor::CT,
 				GraphletAnchor::RB, -vinset, -vinset);
 		}
 	}
@@ -350,7 +301,7 @@ private:
 	}
 
 private:
-	void set_cylinder(DLTS id, double* values, float value) {
+	void set_cylinder(EWTS id, double* values, float value) {
 		this->cylinders[id]->set_value(value);
 		this->cydimensions[id]->set_value(value, GraphletAnchor::CC);
 		values[_I(id)] = value;
@@ -360,11 +311,11 @@ private: // never delete these graphlets manually.
 	std::map<DL, Credit<Labellet, DL>*> labels;
 	std::map<DL, Credit<Percentagelet, DL>*> progresses;
 	std::map<DL, Credit<Dimensionlet, DL>*> dimensions;
-	std::map<DLTS, Credit<Labellet, DLTS>*> cylabels;
-	std::map<DLTS, Credit<Dimensionlet, DLTS>*> cydimensions;
-	std::map<DLTS, Credit<Cylinderlet, DLTS>*> cylinders;
+	std::map<EWTS, Credit<Labellet, EWTS>*> cylabels;
+	std::map<EWTS, Credit<Dimensionlet, EWTS>*> cydimensions;
+	std::map<EWTS, Credit<Cylinderlet, EWTS>*> cylinders;
 	std::map<BottomDoorCommand, Credit<Buttonlet, BottomDoorCommand>*> hdchecks;
-	TimeSerieslet<DLTS>* timeseries;
+	TimeSerieslet<EWTS>* timeseries;
 	OverflowPipelet* overflowpipe;
 
 private:
@@ -375,12 +326,13 @@ private:
 
 private:
 	DraughtsPage* master;
-	DraughtDecorator* decorator;
+	ShipDecorator* decorator;
+	EarthWorkDataSource* datasource;
 };
 
 /*************************************************************************************************/
 DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
-	DraughtDecorator* decorator = new DraughtDecorator();
+	ShipDecorator* decorator = new ShipDecorator();
 	Draughts* dashboard = new Draughts(this, decorator);
 
 	this->dashboard = dashboard;

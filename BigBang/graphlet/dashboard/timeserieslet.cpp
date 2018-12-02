@@ -94,8 +94,9 @@ ICanvasBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int idx) {
 }
 
 /*************************************************************************************************/
-ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigned int n
-	, float width, float height, unsigned int step, unsigned int precision, long long history_max)
+ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
+	, double vmin, double vmax, TimeSeries& ts, unsigned int n, float width, float height
+	, unsigned int step, unsigned int precision, long long history_max)
 	: IStatelet(TimeSeriesState::Realtime), width(std::fabsf(width)), height(height), precision(precision)
 	, vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
 	, realtime(ts), history(ts), history_max(history_max), selected_x(std::nanf("not exists")) {
@@ -105,7 +106,7 @@ ITimeSerieslet::ITimeSerieslet(double vmin, double vmax, TimeSeries& ts, unsigne
 	}
 
 	if (this->vmin > this->vmax) {
-		this->vmin = vmax; 
+		this->vmin = vmax;
 		this->vmax = vmin;
 	}
 
@@ -433,7 +434,7 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	this->notify_updated();
 }
 
-void ITimeSerieslet::set_values(double* values) {
+void ITimeSerieslet::set_values(double* values, bool persistent) {
 	TimeSeriesStyle style = this->get_style();
 	long long now = current_seconds();
 

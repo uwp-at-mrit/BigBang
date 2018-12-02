@@ -21,13 +21,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vsql.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\dll.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\ffi.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbmisc.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\dll.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\ffi.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\rotation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\sqlite_master.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\vsqlite3.cpp" />

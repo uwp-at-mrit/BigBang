@@ -295,8 +295,8 @@ public:
 			for (size_t idx = 0; idx < hopper_count; idx++) {
 				Platform::String^ id = (idx + 1).ToString();
 
-				this->ps_seqs[idx] = this->master->insert_one(new Labellet(_speak("PS" + id), this->caption_font, Colours::Silver));
-				this->sb_seqs[idx] = this->master->insert_one(new Labellet(_speak("SB" + id), this->caption_font, Colours::Silver));
+				this->ps_seqs[idx] = this->master->insert_one(new Labellet(speak("PS" + id), this->caption_font, Colours::Silver));
+				this->sb_seqs[idx] = this->master->insert_one(new Labellet(speak("SB" + id), this->caption_font, Colours::Silver));
 			}
 		}
 	}

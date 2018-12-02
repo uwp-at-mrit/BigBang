@@ -1,6 +1,6 @@
 #include <map>
 
-#include "sqlite3/dll.hpp"
+#include "sqlite3/ffi.hpp"
 #include "sqlite3/vsqlite3.hpp"
 #include "sqlite3/sqlite_master.hpp"
 
@@ -15,6 +15,7 @@ typedef const char* (*_fun__sqlite3__char)(sqlite3_t*);
 typedef int (*_fun__sqlite3__int)(sqlite3_t*);
 typedef int64 (*_fun__sqlite3__int64)(sqlite3_t*);
 typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_f, void*);
+typedef const char* (*_fun__sqlite3__char__char)(sqlite3_t*, const char*);
 
 typedef int (*_fun__sqlite3__char__stmt__void__int)(sqlite3_t*, const char*, size_t, sqlite3_stmt_t**, const void**);
 typedef int (*_fun__stmt__int)(sqlite3_stmt_t*);
@@ -43,6 +44,7 @@ static _fun__sqlite3__int sqlite3_close;
 static _fun_destructor sqlite3_free;
 static _fun__sqlite3__char sqlite3_errmsg;
 static _fun__sqlite3__uint__trace__void__int sqlite3_trace_v2;
+static _fun__sqlite3__char__char sqlite3_db_filename;
 
 static _fun__sqlite3__char__stmt__void__int sqlite3_prepare_v2;
 static _fun__stmt__int sqlite3_reset;
@@ -97,6 +99,7 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_free, _fun_destructor, logger);
 			win32_fetch(sqlite3, sqlite3_errmsg, _fun__sqlite3__char, logger);
 			win32_fetch(sqlite3, sqlite3_trace_v2, _fun__sqlite3__uint__trace__void__int, logger);
+			win32_fetch(sqlite3, sqlite3_db_filename, _fun__sqlite3__char__char, logger);
 
 			win32_fetch(sqlite3, sqlite3_prepare_v2, _fun__sqlite3__char__stmt__void__int, logger);
 			win32_fetch(sqlite3, sqlite3_reset, _fun__stmt__int, logger);
@@ -208,8 +211,13 @@ SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallbac
 }
 
 SQLite3::~SQLite3() {
+	const char* filename = sqlite3_db_filename(this->db, "main");
+	const char* database = (((filename == nullptr) || (strlen(filename) == 0)) ? ":memory:" : filename);
+
 	if (sqlite3_close(this->db) != SQLITE_OK) {
-		this->report_warning("");
+		this->report_warning("failed to disconnect [%S]", database);
+	} else {
+		this->get_logger()->log_message(Log::Debug, L"disconnected [%S]", database);
 	}
 
 	unload_sqlite3(this->get_logger());
@@ -217,6 +225,10 @@ SQLite3::~SQLite3() {
 
 IVirtualSQL* SQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {
 	return new VirtualSQLite3(columns, count, this->libversion());
+}
+
+std::string SQLite3::filename(const char* dbname) {
+	return make_safe_bytes(sqlite3_db_filename(this->db, dbname));
 }
 
 int SQLite3::libversion() {

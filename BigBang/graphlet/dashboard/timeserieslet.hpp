@@ -54,7 +54,10 @@ namespace WarGrey::SCADA {
 		float maximum_fx = -1.0F;
 	};
 
-	private class ITimeSeriesPersistence abstract {
+	private class ITimeSeriesDataSource abstract {
+	public:
+		virtual bool ready() = 0;
+
 	public:
 		virtual void save(long long timepoint, double* values, unsigned int n) = 0;
 	};
@@ -63,7 +66,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~ITimeSerieslet() noexcept;
 
-		ITimeSerieslet(double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts, unsigned int n,
+		ITimeSerieslet(WarGrey::SCADA::ITimeSeriesDataSource* src,
+			double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts, unsigned int n,
 			float width, float height, unsigned int step, unsigned int precision, long long history_s);
 
 	public:
@@ -78,7 +82,7 @@ namespace WarGrey::SCADA {
 		
 	protected:
 		void set_value(unsigned int idx, double value);
-		void set_values(double* values);
+		void set_values(double* values, bool persistent = true);
 
 	protected:
 		void prepare_style(WarGrey::SCADA::TimeSeriesState state, WarGrey::SCADA::TimeSeriesStyle& style) override;
@@ -107,6 +111,8 @@ namespace WarGrey::SCADA {
 	private:
 		float width;
 		float height;
+		double vmin;
+		double vmax;
 
 	private:
 		WarGrey::SCADA::TimeSeries realtime;
@@ -117,8 +123,7 @@ namespace WarGrey::SCADA {
 		float selected_x;
 
 	private:
-		double vmin;
-		double vmax;
+		WarGrey::SCADA::ITimeSeriesDataSource* datasrc;
 	};
 
 	template<typename Name>
@@ -126,19 +131,41 @@ namespace WarGrey::SCADA {
 	public:
 		TimeSerieslet(Platform::String^ tongue, double range, float width, float height = 0.0F
 			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
-			: TimeSerieslet(tongue, 0.0, range, width, height, step, precision, history_s) {}
+			: TimeSerieslet(tongue, nullptr, range, width, height, step, precision, history_s) {}
+
+		TimeSerieslet(Platform::String^ tongue, WarGrey::SCADA::ITimeSeriesDataSource* src
+			, double range, float width, float height = 0.0F
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, src, 0.0, range, width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double range, WarGrey::SCADA::TimeSeries& ts
 			, float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
-			: TimeSerieslet(tongue, 0.0, range, ts, width, height, step, precision, history_s) {}
+			: TimeSerieslet(tongue, nullptr, range, ts, width, height, step, precision, history_s) {}
+
+		TimeSerieslet(Platform::String^ tongue, WarGrey::SCADA::ITimeSeriesDataSource* src
+			, double range, WarGrey::SCADA::TimeSeries& ts, float width, float height = 0.0F
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, src, 0.0, range, ts, width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double vmin, double vmax, float width, float height = 0.0F
 			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
-			: TimeSerieslet(tongue, vmin, vmax, WarGrey::SCADA::make_today_series(), width, height, step, precision, history_s) {}
+			: TimeSerieslet(tongue, nullptr, vmin, vmax, WarGrey::SCADA::make_today_series(),
+				width, height, step, precision, history_s) {}
+
+		TimeSerieslet(Platform::String^ tongue, WarGrey::SCADA::ITimeSeriesDataSource* src
+			, double vmin, double vmax, float width, float height = 0.0F
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: TimeSerieslet(tongue, src, vmin, vmax, WarGrey::SCADA::make_today_series(),
+				width, height, step, precision, history_s) {}
 
 		TimeSerieslet(Platform::String^ tongue, double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts,
 			float width, float height = 0.0F, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
-			: ITimeSerieslet(vmin, vmax, ts, _N(Name), width, height, step, precision, history_s), tongue(tongue) {}
+			: TimeSerieslet(tongue, nullptr, vmin, vmax, ts, width, height, step, precision, history_s) {}
+
+		TimeSerieslet(Platform::String^ tongue, WarGrey::SCADA::ITimeSeriesDataSource* src
+			, double vmin, double vmax, WarGrey::SCADA::TimeSeries& ts, float width, float height = 0.0F
+			, unsigned int step = 0U, unsigned int precision = 2U, long long history_s = day_span_s)
+			: ITimeSerieslet(src, vmin, vmax, ts, _N(Name), width, height, step, precision, history_s), tongue(tongue) {}
 
 	public:
 		void construct() override {
@@ -152,8 +179,8 @@ namespace WarGrey::SCADA {
 			ITimeSerieslet::set_value(_I(slot), value);
 		}
 
-		void set_values(double* values) {
-			ITimeSerieslet::set_values(values);
+		void set_values(double* values, bool persistent = true) {
+			ITimeSerieslet::set_values(values, persistent);
 		}
 
 		void close_line(Name slot, bool yes_no) {

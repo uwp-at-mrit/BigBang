@@ -40,6 +40,7 @@ namespace WarGrey::SCADA {
 		virtual std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) = 0;
 
 	public:
+		virtual std::string filename(const char* dbname = "main") = 0;
 		virtual int libversion() = 0;
 		virtual int changes(bool total = false) = 0;
 		virtual int64 last_insert_rowid() = 0;
@@ -102,6 +103,7 @@ namespace WarGrey::SCADA {
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) override;
 
 	public:
+		std::string filename(const char* dbname = "main") override;
 		int libversion() override;
 		int changes(bool total = false) override;
 		int64 last_insert_rowid() override;

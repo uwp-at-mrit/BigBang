@@ -1,7 +1,7 @@
 #pragma once
 
 #include "dbsystem.hpp"
-#include "sqlite3/dll.hpp"
+#include "sqlite3/ffi.hpp"
 
 #include "dirotation.hpp"
 
@@ -16,6 +16,7 @@ namespace WarGrey::SCADA {
 			sqlite3_trace_f xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
 
 	public:
+		std::string filename(const char* dbname = "main") override;
 		std::list<std::string> list_tables() override;
 		bool table_exists(const std::string& tablename) override;
 		std::string get_last_error_message() override;
@@ -29,6 +30,9 @@ namespace WarGrey::SCADA {
 		int changes(bool total = false) override;
 		int64 last_insert_rowid() override;
 
+	public:
+		bool ready();
+
 	protected:
 		virtual void on_database_rotated(WarGrey::SCADA::SQLite3* prev_sqlite3, WarGrey::SCADA::SQLite3* current_sqlite3) = 0;
 
@@ -39,10 +43,6 @@ namespace WarGrey::SCADA {
 		void on_file_rotated(Windows::Storage::StorageFile^ prev, Windows::Storage::StorageFile^ current) override;
 
 	private:
-		void lockfree_prev_employee();
-
-	private:
-		WarGrey::SCADA::SQLite3* prev_employee;
 		WarGrey::SCADA::SQLite3* employee;
 		WarGrey::SCADA::Syslog* logger;
 		sqlite3_trace_f xCallback;

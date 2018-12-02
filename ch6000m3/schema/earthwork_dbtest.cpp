@@ -8,7 +8,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Storage;
 
 static void dbtest(ISQLite3* target) {
-	auto sqlite3 = ((target == nullptr) ? new SQLite3() : target);
+	auto sqlite3 = ((target == nullptr) ? new SQLite3(nullptr, make_system_logger(Log::Debug, "SQLite3")) : target);
 	EarthWork ew = make_earthwork();
 	EarthWork eworks[2];
 	EarthWork_pk id = earthwork_identity(ew);
@@ -59,6 +59,10 @@ static void dbtest(ISQLite3* target) {
 	drop_earthwork(sqlite3);
 	sqlite3->table_info("earthwork");
 	create_earthwork(sqlite3, true);
+
+	if (sqlite3 != target) {
+		delete sqlite3;
+	}
 }
 
 /*************************************************************************************************/
@@ -76,5 +80,7 @@ protected:
 
 void WarGrey::SCADA::earthwork_dbtest() {
 	// TODO: find out a solution to destruct the instance.
-	new RotativeEarthWork();
+	// new RotativeEarthWork();
+
+	dbtest(nullptr);
 }

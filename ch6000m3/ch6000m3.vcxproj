@@ -316,6 +316,7 @@
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
     <ClCompile Include="decorator\page.cpp" />
+    <ClCompile Include="decorator\ship.cpp" />
     <ClCompile Include="iotables\ai_doors.cpp" />
     <ClCompile Include="iotables\di_devices.cpp" />
     <ClCompile Include="iotables\di_doors.cpp" />
@@ -339,6 +340,7 @@
     <ClCompile Include="iotables\ai_dredges.cpp" />
     <ClCompile Include="schema\earthwork_dbtest.cpp" />
     <ClCompile Include="schema\earthwork.cpp" />
+    <ClCompile Include="schema\timeseries\earthwork_ds.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\charges.cpp" />
@@ -353,6 +355,7 @@
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
+    <ClInclude Include="decorator\ship.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />
     <ClInclude Include="page\diagnostics\gland_pump_dx.hpp" />
     <ClInclude Include="page\diagnostics\hopper_pump_dx.hpp" />
@@ -383,6 +386,7 @@
     <ClInclude Include="iotables\do_water_pumps.hpp" />
     <ClInclude Include="schema\earthwork_dbtest.hpp" />
     <ClInclude Include="schema\earthwork.hpp" />
+    <ClInclude Include="schema\timeseries\earthwork_ds.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\charges.hpp" />
