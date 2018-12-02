@@ -105,6 +105,20 @@ ImplementQueryValue(int32, int32, 0)
 ImplementQueryValue(int64, int64, 0)
 ImplementQueryValue(double, double, 0.0)
 
+bool IDBSystem::table_exists(const std::string& tablename) {
+	std::list<std::string> all = this->list_tables();
+	bool found = false;
+
+	for (auto lt = all.begin(); lt != all.end(); lt++) {
+		if ((*lt).compare(tablename) == 0) {
+			found = true;
+			break;
+		}
+	}
+
+	return found;
+}
+
 void IDBSystem::report_error() {
 	this->log(Log::Error);
 }

@@ -11,19 +11,19 @@ namespace WarGrey::SCADA {
     private struct EarthWork {
         Integer uuid;
         Float product;
-        Float replacement;
         Float vessel;
-        Float loading;
         Float hopper_height;
+        Float loading;
+        Float displacement;
         Integer timestamp;
     };
 
-    private enum class earthwork { uuid, product, replacement, vessel, loading, hopper_height, timestamp, _ };
+    private enum class earthwork { uuid, product, vessel, hopper_height, loading, displacement, timestamp, _ };
 
     WarGrey::SCADA::EarthWork_pk earthwork_identity(WarGrey::SCADA::EarthWork& self);
 
-    WarGrey::SCADA::EarthWork make_earthwork(std::optional<Float> product = std::nullopt, std::optional<Float> replacement = std::nullopt, std::optional<Float> vessel = std::nullopt, std::optional<Float> loading = std::nullopt, std::optional<Float> hopper_height = std::nullopt, std::optional<Integer> timestamp = std::nullopt);
-    void default_earthwork(WarGrey::SCADA::EarthWork& self, std::optional<Float> product = std::nullopt, std::optional<Float> replacement = std::nullopt, std::optional<Float> vessel = std::nullopt, std::optional<Float> loading = std::nullopt, std::optional<Float> hopper_height = std::nullopt, std::optional<Integer> timestamp = std::nullopt);
+    WarGrey::SCADA::EarthWork make_earthwork(std::optional<Float> product = std::nullopt, std::optional<Float> vessel = std::nullopt, std::optional<Float> hopper_height = std::nullopt, std::optional<Float> loading = std::nullopt, std::optional<Float> displacement = std::nullopt, std::optional<Integer> timestamp = std::nullopt);
+    void default_earthwork(WarGrey::SCADA::EarthWork& self, std::optional<Float> product = std::nullopt, std::optional<Float> vessel = std::nullopt, std::optional<Float> hopper_height = std::nullopt, std::optional<Float> loading = std::nullopt, std::optional<Float> displacement = std::nullopt, std::optional<Integer> timestamp = std::nullopt);
     void refresh_earthwork(WarGrey::SCADA::EarthWork& self);
     void store_earthwork(WarGrey::SCADA::EarthWork& self, WarGrey::SCADA::IPreparedStatement* stmt);
     void restore_earthwork(WarGrey::SCADA::EarthWork& self, WarGrey::SCADA::IPreparedStatement* stmt);

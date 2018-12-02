@@ -338,7 +338,6 @@
     <ClCompile Include="page\dredges.cpp" />
     <ClCompile Include="page\lubricatings.cpp" />
     <ClCompile Include="iotables\ai_dredges.cpp" />
-    <ClCompile Include="schema\earthwork_dbtest.cpp" />
     <ClCompile Include="schema\earthwork.cpp" />
     <ClCompile Include="schema\timeseries\earthwork_ds.cpp" />
     <ClCompile Include="splash.cpp" />
@@ -384,7 +383,6 @@
     <ClInclude Include="iotables\do_pumps.hpp" />
     <ClInclude Include="iotables\do_valves.hpp" />
     <ClInclude Include="iotables\do_water_pumps.hpp" />
-    <ClInclude Include="schema\earthwork_dbtest.hpp" />
     <ClInclude Include="schema\earthwork.hpp" />
     <ClInclude Include="schema\timeseries\earthwork_ds.hpp" />
     <ClInclude Include="splash.hpp" />

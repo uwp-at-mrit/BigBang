@@ -26,7 +26,6 @@ namespace WarGrey::SCADA {
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) override;
 
 	public:
-		int libversion() override;
 		int changes(bool total = false) override;
 		int64 last_insert_rowid() override;
 
@@ -37,12 +36,13 @@ namespace WarGrey::SCADA {
 		virtual void on_database_rotated(WarGrey::SCADA::SQLite3* prev_sqlite3, WarGrey::SCADA::SQLite3* current_sqlite3) = 0;
 
 	protected:
-		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
-
-	protected:
 		void on_file_rotated(Windows::Storage::StorageFile^ prev, Windows::Storage::StorageFile^ current) override;
 
 	private:
+		void lockfree_previous_connection();
+
+	private:
+		WarGrey::SCADA::SQLite3* prev_employee;
 		WarGrey::SCADA::SQLite3* employee;
 		WarGrey::SCADA::Syslog* logger;
 		sqlite3_trace_f xCallback;

@@ -135,10 +135,10 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_changes, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_total_changes, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_last_insert_rowid, _fun__sqlite3__int64, logger);
-
-			references += 1;
 		}
 	}
+
+	references += 1;
 }
 
 static void unload_sqlite3(Syslog* logger) {
@@ -192,6 +192,14 @@ ISQLite3::ISQLite3(Syslog* logger)
 
 ISQLite3::~ISQLite3() {}
 
+int ISQLite3::libversion() {
+	return sqlite3_libversion_number();
+}
+
+IVirtualSQL* ISQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {
+	return new VirtualSQLite3(columns, count, this->libversion());
+}
+
 /*************************************************************************************************/
 SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallback) : ISQLite3(logger) {
 	const wchar_t* database = ((dbfile == nullptr) ? L":memory:" : dbfile);
@@ -211,28 +219,20 @@ SQLite3::SQLite3(const wchar_t* dbfile, Syslog* logger, sqlite3_trace_f xCallbac
 }
 
 SQLite3::~SQLite3() {
-	const char* filename = sqlite3_db_filename(this->db, "main");
-	const char* database = (((filename == nullptr) || (strlen(filename) == 0)) ? ":memory:" : filename);
+	std::string filename = this->filename();
+	std::string database = ((filename.length() == 0) ? ":memory:" : filename);
 
 	if (sqlite3_close(this->db) != SQLITE_OK) {
-		this->report_warning("failed to disconnect [%S]", database);
+		this->report_warning("failed to disconnect [%s]", database.c_str());
 	} else {
-		this->get_logger()->log_message(Log::Debug, L"disconnected [%S]", database);
+		this->get_logger()->log_message(Log::Debug, L"disconnected [%S]", database.c_str());
 	}
 
 	unload_sqlite3(this->get_logger());
 }
 
-IVirtualSQL* SQLite3::new_sql_factory(TableColumnInfo* columns, size_t count) {
-	return new VirtualSQLite3(columns, count, this->libversion());
-}
-
 std::string SQLite3::filename(const char* dbname) {
 	return make_safe_bytes(sqlite3_db_filename(this->db, dbname));
-}
-
-int SQLite3::libversion() {
-	return sqlite3_libversion_number();
 }
 
 IPreparedStatement* SQLite3::prepare(const std::string& raw) {
@@ -264,20 +264,6 @@ std::list<std::string> SQLite3::list_tables() {
 	}
 
 	return tables;
-}
-
-bool SQLite3::table_exists(const std::string& tablename) {
-	std::list<std::string> all = this->list_tables();
-	bool found = false;
-
-	for (auto lt = all.begin(); lt != all.end(); lt++) {
-		if ((*lt).compare(tablename) == 0) {
-			found = true;
-			break;
-		}
-	}
-
-	return found;
 }
 
 std::list<SQliteTableInfo> SQLite3::table_info(const char* name) {

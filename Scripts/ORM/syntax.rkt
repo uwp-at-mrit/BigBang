@@ -16,9 +16,9 @@
                         (~optional (~seq (~and #:not-null not-null)) #:name "#:not-null")
                         (~optional (~seq (~and #:unique unique)) #:name "#:unique")
                         (~optional (~seq #:% comments) #:name "#:%")) ...)
-       (define-values (primary? not-null?) (values (and (member (syntax-e #'field) rowids) #true) (attribute not-null)))
-       (values (and primary? #'Type)
-               (list (if (or primary? (attribute not-null)) #'Type (format-id #'Type "std::optional<~a>" (syntax-e #'Type)))
+       (define-values (primary? not-null?) (values (and (member (syntax-e #'field) rowids) #true) (and (attribute not-null) #true)))
+	   (values (and primary? #'Type)
+               (list (if (or primary? not-null?) #'Type (format-id #'Type "std::optional<~a>" (syntax-e #'Type)))
                      (cond [(attribute defval) #'defval]
                            [(attribute generate) #'generate]
                            [else #'#false])

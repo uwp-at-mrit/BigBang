@@ -16,8 +16,8 @@ namespace WarGrey::SCADA {
 
 #define VSWPRINT(retval, fmt) \
 Platform::String^ retval; { \
-    static const int DEFAULT_POOL_SIZE = 1024; \
-    static wchar_t wpool[DEFAULT_POOL_SIZE]; \
+    const int DEFAULT_POOL_SIZE = 1024; \
+    wchar_t wpool[DEFAULT_POOL_SIZE]; \
     int bigSize = DEFAULT_POOL_SIZE - 1; \
     wchar_t* pool; \
     va_list argl; \
@@ -38,8 +38,8 @@ Platform::String^ retval; { \
 
 #define VSNPRINT(retval, fmt) \
 std::string retval; { \
-    static const int DEFAULT_POOL_SIZE = 1024; \
-    static char chpool[DEFAULT_POOL_SIZE]; \
+    const int DEFAULT_POOL_SIZE = 1024; \
+    char chpool[DEFAULT_POOL_SIZE]; \
     int bigSize = DEFAULT_POOL_SIZE - 1; \
     char* pool; \
     va_list argl; \

@@ -37,13 +37,18 @@ namespace WarGrey::SCADA {
 		ISQLite3(WarGrey::SCADA::Syslog* logger);
 
 	public:
+		int libversion();
+
+	public:
 		virtual std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) = 0;
 
 	public:
 		virtual std::string filename(const char* dbname = "main") = 0;
-		virtual int libversion() = 0;
 		virtual int changes(bool total = false) = 0;
 		virtual int64 last_insert_rowid() = 0;
+
+	protected:
+		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 	};
 
 	private class SQLiteStatement : public WarGrey::SCADA::IPreparedStatement {
@@ -95,7 +100,6 @@ namespace WarGrey::SCADA {
 
 	public:
 		std::list<std::string> list_tables() override;
-		bool table_exists(const std::string& tablename) override;
 		std::string get_last_error_message() override;
 		WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) override;
 
@@ -104,12 +108,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		std::string filename(const char* dbname = "main") override;
-		int libversion() override;
 		int changes(bool total = false) override;
 		int64 last_insert_rowid() override;
-		
-	protected:
-		WarGrey::SCADA::IVirtualSQL* new_sql_factory(WarGrey::SCADA::TableColumnInfo* columns, size_t count) override;
 
 	private:
 		WarGrey::SCADA::sqlite3_t* db;

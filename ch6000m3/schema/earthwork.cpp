@@ -12,11 +12,11 @@ static const char* earthwork_rowids[] = { "uuid" };
 static TableColumnInfo earthwork_columns[] = {
     { "uuid", SDT::Integer, nullptr, DB_PRIMARY_KEY | 0 | 0 },
     { "product", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "replacement", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
     { "vessel", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "loading", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
     { "hopper_height", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
-    { "timestamp", SDT::Integer, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "loading", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "displacement", SDT::Float, nullptr, 0 | DB_NOT_NULL | 0 },
+    { "timestamp", SDT::Integer, nullptr, 0 | DB_NOT_NULL | DB_UNIQUE },
 };
 
 /**************************************************************************************************/
@@ -24,21 +24,21 @@ EarthWork_pk WarGrey::SCADA::earthwork_identity(EarthWork& self) {
     return self.uuid;
 }
 
-EarthWork WarGrey::SCADA::make_earthwork(std::optional<Float> product, std::optional<Float> replacement, std::optional<Float> vessel, std::optional<Float> loading, std::optional<Float> hopper_height, std::optional<Integer> timestamp) {
+EarthWork WarGrey::SCADA::make_earthwork(std::optional<Float> product, std::optional<Float> vessel, std::optional<Float> hopper_height, std::optional<Float> loading, std::optional<Float> displacement, std::optional<Integer> timestamp) {
     EarthWork self;
 
-    default_earthwork(self, product, replacement, vessel, loading, hopper_height, timestamp);
+    default_earthwork(self, product, vessel, hopper_height, loading, displacement, timestamp);
 
     return self;
 }
 
-void WarGrey::SCADA::default_earthwork(EarthWork& self, std::optional<Float> product, std::optional<Float> replacement, std::optional<Float> vessel, std::optional<Float> loading, std::optional<Float> hopper_height, std::optional<Integer> timestamp) {
+void WarGrey::SCADA::default_earthwork(EarthWork& self, std::optional<Float> product, std::optional<Float> vessel, std::optional<Float> hopper_height, std::optional<Float> loading, std::optional<Float> displacement, std::optional<Integer> timestamp) {
     self.uuid = pk64_timestamp();
     if (product.has_value()) { self.product = product.value(); }
-    if (replacement.has_value()) { self.replacement = replacement.value(); }
     if (vessel.has_value()) { self.vessel = vessel.value(); }
-    if (loading.has_value()) { self.loading = loading.value(); }
     if (hopper_height.has_value()) { self.hopper_height = hopper_height.value(); }
+    if (loading.has_value()) { self.loading = loading.value(); }
+    if (displacement.has_value()) { self.displacement = displacement.value(); }
     if (timestamp.has_value()) { self.timestamp = timestamp.value(); }
 }
 
@@ -48,20 +48,20 @@ void WarGrey::SCADA::refresh_earthwork(EarthWork& self) {
 void WarGrey::SCADA::store_earthwork(EarthWork& self, IPreparedStatement* stmt) {
     stmt->bind_parameter(0U, self.uuid);
     stmt->bind_parameter(1U, self.product);
-    stmt->bind_parameter(2U, self.replacement);
-    stmt->bind_parameter(3U, self.vessel);
+    stmt->bind_parameter(2U, self.vessel);
+    stmt->bind_parameter(3U, self.hopper_height);
     stmt->bind_parameter(4U, self.loading);
-    stmt->bind_parameter(5U, self.hopper_height);
+    stmt->bind_parameter(5U, self.displacement);
     stmt->bind_parameter(6U, self.timestamp);
 }
 
 void WarGrey::SCADA::restore_earthwork(EarthWork& self, IPreparedStatement* stmt) {
     self.uuid = stmt->column_int64(0U);
     self.product = stmt->column_double(1U);
-    self.replacement = stmt->column_double(2U);
-    self.vessel = stmt->column_double(3U);
+    self.vessel = stmt->column_double(2U);
+    self.hopper_height = stmt->column_double(3U);
     self.loading = stmt->column_double(4U);
-    self.hopper_height = stmt->column_double(5U);
+    self.displacement = stmt->column_double(5U);
     self.timestamp = stmt->column_int64(6U);
 }
 
@@ -173,10 +173,10 @@ void WarGrey::SCADA::update_earthwork(IDBSystem* dbc, EarthWork* selves, size_t 
             stmt->bind_parameter(6U, selves[i].uuid);
 
             stmt->bind_parameter(0U, selves[i].product);
-            stmt->bind_parameter(1U, selves[i].replacement);
-            stmt->bind_parameter(2U, selves[i].vessel);
+            stmt->bind_parameter(1U, selves[i].vessel);
+            stmt->bind_parameter(2U, selves[i].hopper_height);
             stmt->bind_parameter(3U, selves[i].loading);
-            stmt->bind_parameter(4U, selves[i].hopper_height);
+            stmt->bind_parameter(4U, selves[i].displacement);
             stmt->bind_parameter(5U, selves[i].timestamp);
 
             dbc->exec(stmt);

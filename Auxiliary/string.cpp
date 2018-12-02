@@ -37,6 +37,9 @@ static unsigned int newline_position(const wchar_t* src, unsigned int idx0, unsi
  * https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
  *
  * The behavior of the `c`, `C`, `s`, and `S` type characters are Microsoft extensions.
+ *   `c` and `s` standard for the comfortable characters and strings, while
+ *   `C` and `S` standard for their counterparts. 
+ *
  * The ISO C standard uses `c` and `s` consistently for narrow characters and strings,
  *   and `C` and `S` for wide characters and strings, in all formatting functions.
  */

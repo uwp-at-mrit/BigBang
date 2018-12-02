@@ -5,7 +5,6 @@
 #include "menu.hpp"
 
 #include "schema/timeseries/earthwork_ds.hpp"
-#include "schema/earthwork_dbtest.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/device/overflowlet.hpp"
@@ -68,7 +67,7 @@ public:
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 
 		{ // load earthwork datasource
-			Syslog* logger = make_system_logger(Log::Debug, "RotativeEarthWork");
+			Syslog* logger = make_system_logger(Log::Info , "RotativeEarthWork");
 
 			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Minutely);
 		}
@@ -114,8 +113,6 @@ public:
 			this->set_cylinder(EWTS::Vessel, values, DBD(DB2, vessel_value));
 
 			this->timeseries->set_values(values);
-
-			earthwork_dbtest();
 		}
 	}
 

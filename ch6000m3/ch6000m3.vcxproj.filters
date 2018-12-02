@@ -137,9 +137,6 @@
     <ClCompile Include="schema\earthwork.cpp">
       <Filter>schema</Filter>
     </ClCompile>
-    <ClCompile Include="schema\earthwork_dbtest.cpp">
-      <Filter>schema</Filter>
-    </ClCompile>
     <ClCompile Include="decorator\ship.cpp">
       <Filter>decorator</Filter>
     </ClCompile>
@@ -261,9 +258,6 @@
       <Filter>page\diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="schema\earthwork.hpp">
-      <Filter>schema</Filter>
-    </ClInclude>
-    <ClInclude Include="schema\earthwork_dbtest.hpp">
       <Filter>schema</Filter>
     </ClInclude>
     <ClInclude Include="decorator\ship.hpp">

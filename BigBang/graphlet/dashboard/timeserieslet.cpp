@@ -98,7 +98,7 @@ ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 	, double vmin, double vmax, TimeSeries& ts, unsigned int n, float width, float height
 	, unsigned int step, unsigned int precision, long long history_max)
 	: IStatelet(TimeSeriesState::Realtime), width(std::fabsf(width)), height(height), precision(precision)
-	, vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
+	, data_source(datasrc), vmin(vmin), vmax(vmax), count(n), vertical_step((step == 0) ? 5U : step)
 	, realtime(ts), history(ts), history_max(history_max), selected_x(std::nanf("not exists")) {
 
 	if (this->height == 0.0F) {
@@ -303,7 +303,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			float minimum_diff = style.selected_thickness * 0.5F;
 
 			while (t != end) {
-				double fx = double((*t) - ts->start) / double(ts->span);
+				double fx = (double(*t) - double(ts->start * 1000)) / double(ts->span * 1000);
 				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
 				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
 				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
@@ -426,7 +426,7 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	TimeSeriesStyle style = this->get_style();
-	long long now = current_seconds();
+	long long now = current_milliseconds();
 
 	this->lines[idx].set_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
@@ -436,11 +436,17 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 
 void ITimeSerieslet::set_values(double* values, bool persistent) {
 	TimeSeriesStyle style = this->get_style();
-	long long now = current_seconds();
+	long long now = current_milliseconds();
 
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].set_value(now, values[idx]);
 		this->lines[idx].update_legend(this->precision + 1U, style);
+	}
+
+	if (persistent) {
+		if ((this->data_source != nullptr) && this->data_source->ready()) {
+			this->data_source->save(now, values, this->count);
+		}
 	}
 
 	this->notify_updated();

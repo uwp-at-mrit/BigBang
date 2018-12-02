@@ -123,7 +123,7 @@ namespace WarGrey::SCADA {
 		float selected_x;
 
 	private:
-		WarGrey::SCADA::ITimeSeriesDataSource* datasrc;
+		WarGrey::SCADA::ITimeSeriesDataSource* data_source;
 	};
 
 	template<typename Name>
