@@ -9,8 +9,6 @@
 #include "graphlet/device/overflowlet.hpp"
 #include "graphlet/buttonlet.hpp"
 
-#include "schema/earthwork_dbtest.hpp"
-
 #include "iotables/ai_metrics.hpp"
 #include "iotables/di_doors.hpp"
 #include "iotables/do_devices.hpp"
@@ -213,7 +211,9 @@ public:
 				timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
 
 			this->timeseries->set_style(style);
-			this->timeseries->enable_closed_line(DLTS::EarthWork, true);
+			this->timeseries->close_line(DLTS::EarthWork, true);
+			this->timeseries->hide_line(DLTS::Vessel, true);
+			this->timeseries->hide_line(DLTS::HopperHeight, true);
 		}
 	}
 
@@ -420,8 +420,6 @@ void DraughtsPage::load(CanvasCreateResourcesReason reason, float width, float h
 				this->device->get_logger()->append_log_receiver(this->statusline);
 			}
 		}
-
-		earthwork_dbtest();
 	}
 }
 

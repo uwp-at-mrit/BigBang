@@ -51,6 +51,7 @@ public:
 	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ legend;
 	Platform::String^ name;
 	bool closed;
+	bool hiden;
 };
 
 /*************************************************************************************************/
@@ -137,6 +138,7 @@ void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 
 	this->lines[idx].name = name;
 	this->lines[idx].closed = false;
+	this->lines[idx].hiden = false;
 }
 
 void ITimeSerieslet::fill_extent(float x, float y, float* w, float* h) {
@@ -267,89 +269,99 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		float legend_width = legend_label_height;
 		float legend_height = legend_label_height * 0.618F;
 		float legend_yoff = (legend_label_height - legend_height) * 0.5F;
+		float flcount = 0.0F;
 
 		for (unsigned int idx = 0; idx < this->count; idx++) {
-			float yoff = legend_label_height * (float(idx) + 0.618F);
+			TimeSeriesLine* line = &this->lines[idx];
 
-			ds->FillRectangle(legend_x, y + legend_yoff + yoff, legend_width, legend_height, this->lines[idx].color);
-			ds->DrawTextLayout(this->lines[idx].legend, legend_label_x, y + yoff, this->lines[idx].color);
+			if (!line->hiden) {
+				float yoff = legend_label_height * (flcount + 0.618F);
+
+				ds->FillRectangle(legend_x, y + legend_yoff + yoff, legend_width, legend_height, line->color);
+				ds->DrawTextLayout(line->legend, legend_label_x, y + yoff, line->color);
+
+				flcount += 1.0F;
+			}
 		}
 	}
 
 	for (unsigned idx = 0; idx < this->count; idx++) {
 		TimeSeriesLine* line = &this->lines[idx];
-		float last_x = std::nanf("no datum");
-		float last_y = std::nanf("no datum");
-		float tolerance = style.lines_thickness;
-		float rx = x + haxes_box.Width;
-		auto t = line->timestamps._Get_container().begin();
-		auto v = line->values._Get_container().begin();
-		auto end = line->timestamps._Get_container().end();
-		CanvasPathBuilder^ area = nullptr;
-		float minimum_diff = style.selected_thickness * 0.5F;
-		
+
 		line->selected_value = std::nanf("not resolved");
 
-		while (t != end) {
-			double fx = double((*t) - ts->start) / double(ts->span);
-			double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
-			float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
-			float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
-			float this_diff = std::fabsf(this_x - x_axis_selected);
+		if (!line->hiden) {
+			float last_x = std::nanf("no datum");
+			float last_y = std::nanf("no datum");
+			float tolerance = style.lines_thickness;
+			float rx = x + haxes_box.Width;
+			auto t = line->timestamps._Get_container().begin();
+			auto v = line->values._Get_container().begin();
+			auto end = line->timestamps._Get_container().end();
+			CanvasPathBuilder^ area = nullptr;
+			float minimum_diff = style.selected_thickness * 0.5F;
 
-			if (this_diff < minimum_diff) {
-				minimum_diff = this_diff;
-				line->y_axis_selected = this_y;
-				line->selected_value = (*v);
-			}
+			while (t != end) {
+				double fx = double((*t) - ts->start) / double(ts->span);
+				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
+				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
+				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
+				float this_diff = std::fabsf(this_x - x_axis_selected);
 
-			if (std::isnan(last_x) || (this_x < x)) {
-				last_x = this_x;
-				last_y = this_y;
-				x_axis_min = last_x;
-			} else {
-				if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_min == last_x)) {
-					if (!line->closed) {
-						ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
-							style.lines_thickness, style.lines_style);
-					} else {
-						if (area == nullptr) {
-							area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
-							area->BeginFigure(last_x, y_axis_0);
-							area->AddLine(last_x, last_y);
-							x_axis_min = last_x;
-						} else {
-							area->AddLine(this_x, this_y);
-						}
-					}
+				if (this_diff < minimum_diff) {
+					minimum_diff = this_diff;
+					line->y_axis_selected = this_y;
+					line->selected_value = (*v);
+				}
 
+				if (std::isnan(last_x) || (this_x < x)) {
 					last_x = this_x;
 					last_y = this_y;
+					x_axis_min = last_x;
+				} else {
+					if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_min == last_x)) {
+						if (!line->closed) {
+							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
+								style.lines_thickness, style.lines_style);
+						} else {
+							if (area == nullptr) {
+								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
+								area->BeginFigure(last_x, y_axis_0);
+								area->AddLine(last_x, last_y);
+								x_axis_min = last_x;
+							} else {
+								area->AddLine(this_x, this_y);
+							}
+						}
+
+						last_x = this_x;
+						last_y = this_y;
+					}
+
+					if (this_x > rx) {
+						break;
+					}
 				}
 
-				if (this_x > rx) {
-					break;
-				}
+				t++;
+				v++;
 			}
 
-			t++;
-			v++;
-		}
+			if (area != nullptr) {
+				if (last_x == x_axis_min) {
+					area->EndFigure(CanvasFigureLoop::Open);
+					ds->DrawLine(last_x, last_y, last_x, y_axis_0, line->color, style.lines_thickness);
+				} else {
+					area->AddLine(last_x, y_axis_0);
+					area->EndFigure(CanvasFigureLoop::Closed);
 
-		if (area != nullptr) {
-			if (last_x == x_axis_min) {
-				area->EndFigure(CanvasFigureLoop::Open);
-				ds->DrawLine(last_x, last_y, last_x, y_axis_0, line->color, style.lines_thickness);
-			} else {
-				area->AddLine(last_x, y_axis_0);
-				area->EndFigure(CanvasFigureLoop::Closed);
+					{ // draw closed line area
+						CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
 
-				{ // draw closed line area
-					CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
+						ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
+						ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
 
-					ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
-					ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
-
+					}
 				}
 			}
 		}
@@ -403,9 +415,12 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		style.border_color, style.border_thickness);
 }
 
-
-void ITimeSerieslet::enable_closed_line(unsigned int idx, bool on_off) {
+void ITimeSerieslet::close_line(unsigned int idx, bool on_off) {
 	this->lines[idx].closed = on_off;
+}
+
+void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
+	this->lines[idx].hiden = yes_no;
 }
 
 void ITimeSerieslet::set_value(unsigned int idx, double v) {

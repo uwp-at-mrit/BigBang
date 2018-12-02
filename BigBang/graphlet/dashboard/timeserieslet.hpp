@@ -54,6 +54,11 @@ namespace WarGrey::SCADA {
 		float maximum_fx = -1.0F;
 	};
 
+	private class ITimeSeriesPersistence abstract {
+	public:
+		virtual void save(long long timepoint, double* values, unsigned int n) = 0;
+	};
+
 	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle> {
 	public:
 		virtual ~ITimeSerieslet() noexcept;
@@ -81,7 +86,8 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);
-		void enable_closed_line(unsigned int idx, bool on_off);
+		void close_line(unsigned int idx, bool yes_no);
+		void hide_line(unsigned int idx, bool yes_no);
 
 	private:
 		void update_time_series(long long next_start);
@@ -150,8 +156,12 @@ namespace WarGrey::SCADA {
 			ITimeSerieslet::set_values(values);
 		}
 
-		void enable_closed_line(Name slot, bool on_off) {
-			ITimeSerieslet::enable_closed_line(_I(slot), on_off);
+		void close_line(Name slot, bool yes_no) {
+			ITimeSerieslet::close_line(_I(slot), yes_no);
+		}
+
+		void hide_line(Name slot, bool yes_no) {
+			ITimeSerieslet::hide_line(_I(slot), yes_no);
 		}
 
 	private:
