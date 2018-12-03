@@ -18,6 +18,11 @@ namespace WarGrey::SCADA {
         Integer timestamp;
     };
 
+private class IEarthWorkCursor abstract {
+    public:
+        virtual bool step(WarGrey::SCADA::EarthWork& occurrence) = 0;
+    };
+
     private enum class earthwork { uuid, product, vessel, hopper_height, loading, displacement, timestamp, _ };
 
     WarGrey::SCADA::EarthWork_pk earthwork_identity(WarGrey::SCADA::EarthWork& self);
@@ -31,7 +36,7 @@ namespace WarGrey::SCADA {
     void create_earthwork(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_earthwork(WarGrey::SCADA::IDBSystem* dbc, EarthWork& self, bool replace = false);
     void insert_earthwork(WarGrey::SCADA::IDBSystem* dbc, EarthWork* selves, size_t count, bool replace = false);
-    std::list<WarGrey::SCADA::EarthWork_pk> list_earthwork(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::earthwork order_by = earthwork::timestamp, bool asc = true);
+    void foreach_earthwork(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::IEarthWorkCursor* cursor, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::earthwork order_by = earthwork::timestamp, bool asc = true);
     std::list<WarGrey::SCADA::EarthWork> select_earthwork(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::earthwork order_by = earthwork::timestamp, bool asc = true);
     std::optional<WarGrey::SCADA::EarthWork> seek_earthwork(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::EarthWork_pk where);
     void update_earthwork(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::EarthWork& self, bool refresh = true);

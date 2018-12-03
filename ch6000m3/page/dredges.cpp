@@ -349,7 +349,7 @@ protected:
 		float3 trunnion = DBD_3(db2, pidx + 0U);
 		float tide = DBD(db2, tide_mark);
 		float suction_draught = trunnion.x;
-		float suction_depth = suction_draught - tide;
+		float suction_depth = suction_draught;
 		
 		ujoints[0] = DBD_3(db2, pidx + 12U);
 		ujoints[1] = DBD_3(db2, pidx + 24U);

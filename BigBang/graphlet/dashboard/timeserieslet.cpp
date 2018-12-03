@@ -143,10 +143,10 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->notify_updated();
 	}
 
-	//if ((this->data_source != nullptr) && (this->data_source->ready()) && (!this->data_source_loaded)) {
-	//	this->data_source->load(this, now, (now - this->history_max));
-	//	this->data_source_loaded = true;
-	//}
+	if ((this->data_source != nullptr) && (this->data_source->ready()) && (!this->data_source_loaded)) {
+		this->data_source->load(this, now, (now - this->history_max));
+		this->data_source_loaded = true;
+	}
 }
 
 void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {

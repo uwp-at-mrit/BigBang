@@ -94,22 +94,23 @@ void WarGrey::SCADA::insert_earthwork(IDBSystem* dbc, EarthWork* selves, size_t 
     }
 }
 
-std::list<EarthWork_pk> WarGrey::SCADA::list_earthwork(IDBSystem* dbc, uint64 limit, uint64 offset, earthwork order_by, bool asc) {
+void WarGrey::SCADA::foreach_earthwork(IDBSystem* dbc, IEarthWorkCursor* cursor, uint64 limit, uint64 offset, earthwork order_by, bool asc) {
     IVirtualSQL* vsql = dbc->make_sql_factory(earthwork_columns);
     const char* colname = ((order_by == earthwork::_) ? nullptr : earthwork_columns[static_cast<unsigned int>(order_by)].name);
-    std::string sql = vsql->select_from("earthwork", colname, asc, earthwork_rowids, sizeof(earthwork_rowids)/sizeof(char*), limit, offset);
+    std::string sql = vsql->select_from("earthwork", colname, asc, limit, offset);
     IPreparedStatement* stmt = dbc->prepare(sql);
-    std::list<EarthWork_pk> queries;
 
     if (stmt != nullptr) {
+        EarthWork self;
+
         while(stmt->step()) {
-            queries.push_back(stmt->column_int64(0U));
+            restore_earthwork(self, stmt);
+            cursor->step(self);
         }
 
         delete stmt;
     }
 
-    return queries;
 }
 
 std::list<EarthWork> WarGrey::SCADA::select_earthwork(IDBSystem* dbc, uint64 limit, uint64 offset, earthwork order_by, bool asc) {

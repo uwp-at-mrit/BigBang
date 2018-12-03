@@ -21,11 +21,12 @@
      (with-syntax* ([(rowid ...) (parse-primary-key #'primary-key)]
                     [order_by (parse-order-by #'order-by (map syntax-e (syntax->list #'(field ...))))]
                     [Table-pk (format-id #'Table "~a_pk" (syntax-e #'Table))]
+                    [ITableCursor (format-id #'Table "I~aCursor" (syntax-e #'Table))]
                     [([RowidType ...]
                       [(MaybeType defval autoval not-null unique) ...]
                       [cat-table.hpp cat-table.cpp table.hpp table.cpp table-rowids table-columns table-id]
                       [create-table insert-table delete-table update-table select-table seek-table drop-table
-                                    make-table default-table refresh-table store-table restore-table list-table])
+                                    make-table default-table refresh-table store-table restore-table foreach-table])
                      (let ([pkids (let ([pk (syntax->datum #'primary-key)]) (if (list? pk) pk (list pk)))]
                            [tablename (syntax-e #'table)])
                        (define-values (sdleif sdiwor)
@@ -41,7 +42,7 @@
                                                             "~a_rowids" "~a_columns" "~a_identity"))])
                                (format-id #'table fmt tablename))
                              (for/list ([prefix (in-list (list 'create 'insert 'delete 'update 'select 'seek 'drop
-                                                               'make 'default 'refresh 'store 'restore 'list))])
+                                                               'make 'default 'refresh 'store 'restore 'foreach))])
                                (format-id #'table "~a_~a" prefix tablename))))]
                     [([header ...] ...) #'addition-hpps]
                     [([ns ...] ...) #'addition-nses])
@@ -56,6 +57,7 @@
                                   (λ [indent]
                                     (&primary-key 'Table-pk '(rowid ...) '(RowidType ...) indent)
                                     (&struct 'Table '(field ...) '(MaybeType ...) indent)
+                                    (&interface 'ITableCursor 'Table indent)
 
                                     (&enum 'table '(field ...) indent)
                                     (&#%table 'table-id 'Table 'Table-pk indent)
@@ -70,7 +72,7 @@
                                     (&linebreak 1)
                                     (&create-table 'create-table indent)
                                     (&insert-table 'insert-table 'Table indent)
-                                    (&list-table 'list-table 'Table-pk 'table 'order_by indent)
+                                    (&foreach-table 'foreach-table 'ITableCursor 'Table 'table 'order_by indent)
                                     (&select-table 'select-table 'Table 'table 'order_by indent)
                                     (&seek-table 'seek-table 'Table 'Table-pk indent)
                                     (&update-table 'update-table 'Table indent)
@@ -110,7 +112,7 @@
                       (&separator)
                       (&create-table 'create-table 'table 'table-columns 'table-rowids)
                       (&insert-table 'insert-table 'Table 'table 'store-table 'table-columns)
-                      (&list-table 'list-table 'Table-pk 'table '(rowid ...) '(RowidType ...) 'table-rowids 'table-columns)
+                      (&foreach-table 'foreach-table 'ITableCursor 'Table 'table 'restore-table 'table-columns '_)
                       (&select-table 'select-table 'Table 'table 'restore-table 'table-columns '_)
                       (&seek-table 'seek-table 'Table 'table 'restore-table 'table-columns 'Table-pk '(rowid ...) 'table-rowids)
                       (&update-table 'update-table 'Table 'table '(rowid ...) '(field ...) 'table-rowids 'table-columns 'refresh-table)

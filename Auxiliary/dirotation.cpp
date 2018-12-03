@@ -176,3 +176,7 @@ TimeSpan IRotativeDirectory::resolve_interval() {
 void IRotativeDirectory::on_file_reused(StorageFile^ file) {
 	this->on_file_rotated(nullptr, file);
 }
+
+long long IRotativeDirectory::span_seconds() {
+	return this->span;
+}

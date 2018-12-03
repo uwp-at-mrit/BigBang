@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
 	public:
 		bool root_ready();
 		Platform::String^ resolve_pathname(long long time_s = current_seconds());
+		long long span_seconds();
 
 	public:
 		void do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications();

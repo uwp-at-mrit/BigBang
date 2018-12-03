@@ -24,6 +24,33 @@ ICanvasBrush^ WarGrey::SCADA::earthwork_line_color_dictionary(unsigned int index
 	return color;
 }
 
+private class EarthWorkCursor : public IEarthWorkCursor {
+public:
+	EarthWorkCursor(ITimeSeriesDataReceiver* receiver) : receiver(receiver) {}
+
+public:
+	bool step(EarthWork& ew) override {
+		this->values[_I(EWTS::EarthWork)] = ew.product;
+		this->values[_I(EWTS::Vessel)] = ew.vessel;
+		this->values[_I(EWTS::HopperHeight)] = ew.hopper_height;
+		this->values[_I(EWTS::Loading)] = ew.loading;
+		this->values[_I(EWTS::Displacement)] = ew.displacement;
+
+		this->receiver->on_datum_values(ew.timestamp, values, _N(EWTS));
+		
+		this->rcount++;
+
+		return true;
+	}
+
+public:
+	int rcount;
+
+private:
+	ITimeSeriesDataReceiver* receiver;
+	double values[_N(EWTS)];
+};
+
 /*************************************************************************************************/
 EarthWorkDataSource::EarthWorkDataSource(Syslog* logger, RotationPeriod period, unsigned int period_count)
 	: RotativeSQLite3("earthwork", logger, period, period_count) {}
@@ -39,26 +66,27 @@ void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc,
 	this->get_logger()->log_message(Log::Warning, L"current file: %S", dbc->filename().c_str());
 }
 
-void EarthWorkDataSource::load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) {
+void EarthWorkDataSource::load(ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) {
 	bool asc = (open_s < closed_s);
 	long long timepoint = open_s;
-
+	long long step = this->span_seconds() * (asc ? 1LL : -1LL);
+	EarthWorkCursor ewr(receiver);
+	double now0 = current_inexact_milliseconds();
+	int fcount = 1;
+	
 	do {
 		Platform::String^ dbsource = this->resolve_pathname(timepoint);
 		SQLite3* dbc = new SQLite3(dbsource->Data(), this->get_logger());
-		std::list<EarthWork> ews = select_earthwork(dbc, 0, 0, earthwork::timestamp, asc);
-		double now = current_inexact_milliseconds();
 		
-		for (auto it = ews.begin(); it != ews.end(); it++) {
-			long long ms = (*it).timestamp;
+		foreach_earthwork(dbc, &ewr, 0, 0, earthwork::timestamp, asc);
+		timepoint += step;
+		fcount++;
 
-			this->get_logger()->log_message(Log::Info, L"%s.%03d",
-				make_daytimestamp_utc(ms / 1000, true)->Data(), ms % 1000);
-		}
+		delete dbc;
+	} while ((asc ? (timepoint < closed_s) : (timepoint > closed_s)));
 
-		this->get_logger()->log_message(Log::Notice, L"loaded %d records from %s within %dms",
-			ews.size(), dbsource->Data(), current_inexact_milliseconds() - now);
-	} while (0);
+	this->get_logger()->log_message(Log::Notice, L"loaded %d records from %d files within %fms",
+		ewr.rcount, fcount, current_inexact_milliseconds() - now0);
 }
 
 void EarthWorkDataSource::save(long long timepoint, double* values, unsigned int n) {

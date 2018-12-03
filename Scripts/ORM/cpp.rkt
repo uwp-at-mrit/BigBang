@@ -89,6 +89,16 @@
     (&brace indent #:semicolon? #true)
     (&linebreak 1)))
 
+(define &interface
+  (lambda [IName Table indent]
+    (printf "private class ~a abstract {~n" IName)
+    (&htab indent)
+    (printf "public:~n")
+    (&htab (add1 indent))
+    (printf "virtual bool step(~a::~a& occurrence) = 0;~n" ns:: Table)
+    (&brace indent #:semicolon? #true)
+    (&linebreak 1)))
+
 (define &table-column-info
   (lambda [var_columns var_rowids rowids cols dbtypes not-nulls uniques]
     (printf "static const char* ~a[] = { ~a };~n" var_rowids
@@ -251,39 +261,30 @@
      (&brace 0)
      (&linebreak 1)]))
 
-(define &list-table
+(define &foreach-table
   (case-lambda
-    [(λname Table_pk tablename order_by indent)
+    [(λname ITableCursor Table tablename order_by indent)
      (&htab indent)
-     (printf "std::list<~a::~a> ~a(~a::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, ~a::~a order_by = ~a::~a, bool asc = true);~n"
-             ns:: Table_pk λname ns:: ns:: tablename tablename (or order_by '_))]
-    [(λname Table_pk tablename rowids rowidtypes table-rowids column_infos)
-     (define rowcount (length rowids))
-     (printf "std::list<~a> ~a::~a(IDBSystem* dbc, uint64 limit, uint64 offset, ~a order_by, bool asc) {~n" Table_pk ns:: λname tablename)
+     (printf "void ~a(~a::IDBSystem* dbc, ~a::~a* cursor, uint64 limit = 0U, uint64 offset = 0U, ~a::~a order_by = ~a::~a, bool asc = true);~n"
+             λname ns:: ns:: ITableCursor ns:: tablename tablename (or order_by '_))]
+    [(λname ITableCursor Table tablename restore column_infos _)
+     (printf "void ~a::~a(IDBSystem* dbc, ~a* cursor, uint64 limit, uint64 offset, ~a order_by, bool asc) {~n" ns:: λname ITableCursor tablename)
      (&htab 1) (printf "IVirtualSQL* vsql = dbc->make_sql_factory(~a);~n" column_infos)
      (&htab 1) (printf "const char* colname = ((order_by == ~a::_) ? nullptr : ~a[static_cast<unsigned int>(order_by)].name);~n" tablename column_infos)
-     (&htab 1) (printf "~a sql = vsql->select_from(~s, colname, asc, ~a, sizeof(~a)/sizeof(char*), limit, offset);~n" cstring (symbol->string tablename) table-rowids table-rowids)
+     (&htab 1) (printf "~a sql = vsql->select_from(~s, colname, asc, limit, offset);~n" cstring (symbol->string tablename))
      (&htab 1) (printf "IPreparedStatement* stmt = dbc->prepare(sql);~n")
-     (&htab 1) (printf "std::list<~a> queries;~n" Table_pk)
      (&linebreak 1)
      (&htab 1) (printf "if (stmt != nullptr) {~n")
-     (when (> rowcount 1)
-       (&htab 2) (printf "~a self;~n" Table_pk)
-       (&linebreak 1))
+     (&htab 2) (printf "~a self;~n" Table)
+     (&linebreak 1)
      (&htab 2) (printf "while(stmt->step()) {~n")
-     (cond [(= rowcount 1) (&htab 3) (printf "queries.push_back(stmt->column_~a(0U));~n" (sql-type (car rowidtypes)))]
-           [else (for ([id (in-list rowids)]
-                       [type (in-list rowidtypes)]
-                       [idx (in-naturals)])
-                   (&htab 3) (printf "self.~a = stmt->column_~a(~aU);~n" id (sql-type type) idx))
-                 (&linebreak 1)
-                 (&htab 3) (printf "queries.push_back(self);~n")])
+     (&htab 3) (printf "~a(self, stmt);~n" restore)
+     (&htab 3) (printf "cursor->step(self);~n")
      (&brace 2)
      (&linebreak 1)
      (&htab 2) (printf "delete stmt;~n")
      (&brace 1)
      (&linebreak 1)
-     (&htab 1) (printf "return queries;~n")
      (&brace 0)
      (&linebreak 1)]))
 
