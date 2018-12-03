@@ -22,7 +22,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool ready() override;
-		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_timepoint, long long closed_timepoint) override;
+		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) override;
 		void save(long long timepoint, double* values, unsigned int n) override;
 
 	protected:

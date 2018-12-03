@@ -261,4 +261,7 @@
   <data name="SBVisor" xml:space="preserve">
     <value>SB Visor Angle</value>
   </data>
+  <data name="SoftLower" xml:space="preserve">
+    <value>Soft Lower</value>
+  </data>
 </root>

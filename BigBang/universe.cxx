@@ -660,12 +660,12 @@ void UniverseDisplay::on_pointer_released(Platform::Object^ sender, PointerRoute
 
 void UniverseDisplay::on_pointer_moveout(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 	unsigned int id = args->Pointer->PointerId;
-	auto lt = this->figures.find(id);
+	auto it = this->figures.find(id);
 
 	this->enter_critical_section();
 
-	if (lt != this->figures.end()) {
-		this->figures.erase(lt);
+	if (it != this->figures.end()) {
+		this->figures.erase(it);
 	}
 
 	if (this->recent_planet != nullptr) {

@@ -292,8 +292,8 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	if (total > 0) {	
 		this->section.lock_shared();
 		
-		auto mlt = this->messages.begin();
-		auto clt = this->colors.begin();
+		auto mit = this->messages.begin();
+		auto cit = this->colors.begin();
 
 		if (this->lines == 0) {
 			float flcount = Height / status_height;
@@ -301,8 +301,8 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 
 			if (total > alines) {
 				for (size_t i = alines; i < total; i++) {
-					mlt++;
-					clt++;
+					mit++;
+					cit++;
 				}
 
 				total = alines;
@@ -310,11 +310,11 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 			}
 		}
 
-		for (size_t idx = 0; idx < total; idx++, mlt++, clt++) {
+		for (size_t idx = 0; idx < total; idx++, mit++, cit++) {
 			float content_y = y + status_height * float(idx);
 			
-			content_y += std::fmaxf((status_height - (*mlt)->LayoutBounds.Height) * 0.5F, 0.0F);
-			ds->DrawTextLayout((*mlt), x, content_y, (*clt));
+			content_y += std::fmaxf((status_height - (*mit)->LayoutBounds.Height) * 0.5F, 0.0F);
+			ds->DrawTextLayout((*mit), x, content_y, (*cit));
 		}
 
 		this->section.unlock_shared();

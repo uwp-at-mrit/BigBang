@@ -36,12 +36,29 @@ void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc,
 	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3
 
 	create_earthwork(dbc, true);
+	this->get_logger()->log_message(Log::Warning, L"current file: %S", dbc->filename().c_str());
 }
 
-void EarthWorkDataSource::load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open, long long closed) {
-	//this->get_logger()->log_message(Log::Info, L"loading from %s to %s",
-		//this->resolve_pathname(open)->Data(),
-		//this->resolve_pathname(closed)->Data());
+void EarthWorkDataSource::load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) {
+	bool asc = (open_s < closed_s);
+	long long timepoint = open_s;
+
+	do {
+		Platform::String^ dbsource = this->resolve_pathname(timepoint);
+		SQLite3* dbc = new SQLite3(dbsource->Data(), this->get_logger());
+		std::list<EarthWork> ews = select_earthwork(dbc, 0, 0, earthwork::timestamp, asc);
+		double now = current_inexact_milliseconds();
+		
+		for (auto it = ews.begin(); it != ews.end(); it++) {
+			long long ms = (*it).timestamp;
+
+			this->get_logger()->log_message(Log::Info, L"%s.%03d",
+				make_daytimestamp_utc(ms / 1000, true)->Data(), ms % 1000);
+		}
+
+		this->get_logger()->log_message(Log::Notice, L"loaded %d records from %s within %dms",
+			ews.size(), dbsource->Data(), current_inexact_milliseconds() - now);
+	} while (0);
 }
 
 void EarthWorkDataSource::save(long long timepoint, double* values, unsigned int n) {

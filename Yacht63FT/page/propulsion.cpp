@@ -135,13 +135,13 @@ public:
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::SolarInverter], PD::SolarInverter, GraphletAnchor::CB, 0.0F, -scap_yoff);
 		this->diagram->map_graphlet_at_anchor(this->captions[PD::StorageCell], PD::StorageCell, GraphletAnchor::CT, 0.0F, scap_yoff);
 		
-		for (auto lt = this->labels.begin(); lt != this->labels.end(); lt++) {
-			switch (lt->first) {
+		for (auto it = this->labels.begin(); it != this->labels.end(); it++) {
+			switch (it->first) {
 			case PD::G1: {
-				this->master->move_to(lt->second, this->vfds[lt->first], GraphletAnchor::RC, GraphletAnchor::LC, vfds_xoff);
+				this->master->move_to(it->second, this->vfds[it->first], GraphletAnchor::RC, GraphletAnchor::LC, vfds_xoff);
 			}; break;
 			default: {
-				this->master->move_to(lt->second, this->vfds[lt->first], GraphletAnchor::LC, GraphletAnchor::RC, -vfds_xoff);
+				this->master->move_to(it->second, this->vfds[it->first], GraphletAnchor::LC, GraphletAnchor::RC, -vfds_xoff);
 			}
 			}
 		}
@@ -237,8 +237,8 @@ private:
 private:
 	template<class G>
 	void map_graphlets(std::map<PD, G*>& gs, GraphletAnchor a) {
-		for (auto lt = gs.begin(); lt != gs.end(); lt++) {
-			this->diagram->map_graphlet_at_anchor(lt->second, lt->first, a);
+		for (auto it = gs.begin(); it != gs.end(); it++) {
+			this->diagram->map_graphlet_at_anchor(it->second, it->first, a);
 		}
 	}
 

@@ -23,8 +23,8 @@ void WarGrey::SCADA::earthwork_dbtest(SQLite3* target) {
 	insert_event(sqlite3, events);
 
 	auto aes = list_event(sqlite3);
-	for (auto lt = aes.begin(); lt != aes.end(); lt++) {
-		AlarmEvent_pk pk = (*lt);
+	for (auto it = aes.begin(); it != aes.end(); it++) {
+		AlarmEvent_pk pk = (*it);
 		std::optional<AlarmEvent> maybe_e = seek_event(sqlite3, pk);
 
 		if (maybe_e.has_value()) {

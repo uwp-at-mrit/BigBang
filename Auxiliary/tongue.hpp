@@ -67,11 +67,11 @@ namespace WarGrey::SCADA {
 	protected:
 		static E* UnsafeTongue(unsigned int idx) {
 			static std::map<int, E*> selves;
-			auto lt = selves.find(idx);
+			auto it = selves.find(idx);
 			E* self = nullptr;
 
-			if (lt != selves.end()) {
-				self = lt->second;
+			if (it != selves.end()) {
+				self = it->second;
 			} else {
 				self = new E(idx);
 				selves.insert(std::pair<int, E*>(idx, self));

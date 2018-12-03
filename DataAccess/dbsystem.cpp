@@ -52,20 +52,20 @@ IDBSystem::IDBSystem(DBMS dbms, Syslog* logger) : IDBObject(dbms), logger(logger
 IDBSystem::~IDBSystem() {
 	this->logger->destroy();
 
-	for (auto lt = this->factories.begin(); lt != this->factories.end(); lt++) {
-		delete lt->second;
+	for (auto it = this->factories.begin(); it != this->factories.end(); it++) {
+		delete it->second;
 	}
 }
 
 IVirtualSQL* IDBSystem::make_sql_factory(TableColumnInfo* columns, size_t count) {
 	IVirtualSQL* vsql = nullptr;
-	auto lt = factories.find(columns);
+	auto it = factories.find(columns);
 
-	if (lt == factories.end()) {
+	if (it == factories.end()) {
 		vsql = this->new_sql_factory(columns, count);
 		factories.insert(std::pair<TableColumnInfo*, IVirtualSQL*>(columns, vsql));
 	} else {
-		vsql = lt->second;
+		vsql = it->second;
 	}
 
 	return vsql;
@@ -109,8 +109,8 @@ bool IDBSystem::table_exists(const std::string& tablename) {
 	std::list<std::string> all = this->list_tables();
 	bool found = false;
 
-	for (auto lt = all.begin(); lt != all.end(); lt++) {
-		if ((*lt).compare(tablename) == 0) {
+	for (auto it = all.begin(); it != all.end(); it++) {
+		if ((*it).compare(tablename) == 0) {
 			found = true;
 			break;
 		}

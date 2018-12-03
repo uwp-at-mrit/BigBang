@@ -139,6 +139,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::ITimeSeriesDataSource* data_source;
+		bool data_source_loaded;
 	};
 
 	template<typename Name>

@@ -253,8 +253,8 @@ std::list<std::string> SQLite3::list_tables() {
 	std::list<std::string> tables;
 	std::list<SQLiteMaster> all = select_sqlite_master(this);
 
-	for (auto lt = all.begin(); lt != all.end(); lt++) {
-		SQLiteMaster m = (*lt);
+	for (auto it = all.begin(); it != all.end(); it++) {
+		SQLiteMaster m = (*it);
 
 		if (m.type.compare("table") == 0) {
 			tables.push_back(m.name);

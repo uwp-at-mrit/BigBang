@@ -24,9 +24,14 @@ static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(14.0F
 
 private struct WarGrey::SCADA::TimeSeriesLine {
 public:
-	void set_value(long long timestamp, double value) {
-		this->timestamps.push(timestamp);
-		this->values.push(value);
+	void push_front_value(long long timestamp, double value) {
+		this->timestamps.push_front(timestamp);
+		this->values.push_front(value);
+	}
+
+	void push_back_value(long long timestamp, double value) {
+		this->timestamps.push_back(timestamp);
+		this->values.push_back(value);
 	}
 
 	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style, ICanvasBrush^ color = nullptr) {
@@ -41,8 +46,8 @@ public:
 	}
 
 public:
-	std::queue<long long> timestamps;
-	std::queue<double> values;
+	std::deque<long long> timestamps;
+	std::deque<double> values;
 	double selected_value;
 	float y_axis_selected;
 
@@ -112,6 +117,7 @@ ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 
 	if (this->data_source != nullptr) {
 		this->data_source->reference();
+		this->data_source_loaded = false;
 	}
 
 	this->enable_events(true);
@@ -137,9 +143,10 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->notify_updated();
 	}
 
-	if ((this->data_source != nullptr) && (this->data_source->ready())) {
-		this->data_source->load(this, (now - this->history_max), now);
-	}
+	//if ((this->data_source != nullptr) && (this->data_source->ready()) && (!this->data_source_loaded)) {
+	//	this->data_source->load(this, now, (now - this->history_max));
+	//	this->data_source_loaded = true;
+	//}
 }
 
 void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
@@ -172,7 +179,7 @@ void ITimeSerieslet::prepare_style(TimeSeriesState status, TimeSeriesStyle& styl
 	CAS_SLOT(style.selected_style, make_dash_stroke(CanvasDashStyle::DashDotDot));
 	CAS_SLOT(style.lines_style, make_roundcap_stroke_style());
 
-	FLCAS_SLOT(style.border_thickness, 2.0F);
+	FLCAS_SLOT(style.border_thickness, 1.5F);
 	FLCAS_SLOT(style.lines_thickness, 1.0F);
 	FLCAS_SLOT(style.haxes_thickness, 0.5F);
 	FLCAS_SLOT(style.vaxes_thickness, 0.5F);
@@ -266,7 +273,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	TimeSeriesStyle style = this->get_style();
 	Rect haxes_box = this->haxes->ComputeBounds();
 	float border_off = style.border_thickness * 0.5F;
-	float x_axis_min = std::nanf("unknown");
+	float x_axis_max = std::nanf("unknown");
 	float y_axis_max = y + haxes_box.Y;
 	float y_axis_0 = y_axis_max + haxes_box.Height;
 	float x_axis_selected = x + this->selected_x;
@@ -308,9 +315,9 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			float last_y = std::nanf("no datum");
 			float tolerance = style.lines_thickness;
 			float rx = x + haxes_box.Width;
-			auto t = line->timestamps._Get_container().begin();
-			auto v = line->values._Get_container().begin();
-			auto end = line->timestamps._Get_container().end();
+			auto t = line->timestamps.rbegin();
+			auto v = line->values.rbegin();
+			auto end = line->timestamps.rend();
 			CanvasPathBuilder^ area = nullptr;
 			float minimum_diff = style.selected_thickness * 0.5F;
 
@@ -327,12 +334,12 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					line->selected_value = (*v);
 				}
 
-				if (std::isnan(last_x) || (this_x < x)) {
+				if (std::isnan(last_x) || (this_x > rx)) {
 					last_x = this_x;
 					last_y = this_y;
-					x_axis_min = last_x;
+					x_axis_max = last_x;
 				} else {
-					if (((this_x - last_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_min == last_x)) {
+					if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
 						if (!line->closed) {
 							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
 								style.lines_thickness, style.lines_style);
@@ -341,7 +348,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 								area->BeginFigure(last_x, y_axis_0);
 								area->AddLine(last_x, last_y);
-								x_axis_min = last_x;
+								x_axis_max = last_x;
 							} else {
 								area->AddLine(this_x, this_y);
 							}
@@ -351,7 +358,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 						last_y = this_y;
 					}
 
-					if (this_x > rx) {
+					if (this_x < x) {
 						break;
 					}
 				}
@@ -361,7 +368,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 			}
 
 			if (area != nullptr) {
-				if (last_x == x_axis_min) {
+				if (last_x == x_axis_max) {
 					area->EndFigure(CanvasFigureLoop::Open);
 					ds->DrawLine(last_x, last_y, last_x, y_axis_0, line->color, style.lines_thickness);
 				} else {
@@ -440,7 +447,7 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	TimeSeriesStyle style = this->get_style();
 	long long now = current_milliseconds();
 
-	this->lines[idx].set_value(now, v);
+	this->lines[idx].push_back_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
 	
 	this->notify_updated();
@@ -451,7 +458,7 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	long long now = current_milliseconds();
 
 	for (unsigned int idx = 0; idx < this->count; idx++) {
-		this->lines[idx].set_value(now, values[idx]);
+		this->lines[idx].push_back_value(now, values[idx]);
 		this->lines[idx].update_legend(this->precision + 1U, style);
 	}
 
@@ -465,7 +472,9 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 }
 
 void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
-
+	for (unsigned int idx = 0; idx < this->count; idx++) {
+		this->lines[idx].push_front_value(timepoint, values[idx]);
+	}
 }
 
 void ITimeSerieslet::own_caret(bool yes) {

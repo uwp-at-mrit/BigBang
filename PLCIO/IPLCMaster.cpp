@@ -39,31 +39,31 @@ void IPLCMaster::append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* 
 void IPLCMaster::notify_connectivity_changed() {
 	bool connected = this->connected();
 
-	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
-		(*lt)->on_plc_connectivity_changed(this, connected);
+	for (auto it = this->listeners.begin(); it != this->listeners.end(); it++) {
+		(*it)->on_plc_connectivity_changed(this, connected);
 	}
 }
 
 void IPLCMaster::notify_data_sent(long long bytes, double span_ms) {
 	double timestamp = current_inexact_milliseconds();
 
-	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
-		(*lt)->on_send_data(this, bytes, span_ms, timestamp);
+	for (auto it = this->listeners.begin(); it != this->listeners.end(); it++) {
+		(*it)->on_send_data(this, bytes, span_ms, timestamp);
 	}
 }
 
 void IPLCMaster::notify_data_received(long long bytes, double span_ms) {
 	double timestamp = current_inexact_milliseconds();
 
-	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
-		(*lt)->on_receive_data(this, bytes, span_ms, timestamp);
+	for (auto it = this->listeners.begin(); it != this->listeners.end(); it++) {
+		(*it)->on_receive_data(this, bytes, span_ms, timestamp);
 	}
 }
 
 void IPLCMaster::notify_data_confirmed(long long bytes, double span_ms) {
 	double timestamp = current_inexact_milliseconds();
 
-	for (auto lt = this->listeners.begin(); lt != this->listeners.end(); lt++) {
-		(*lt)->on_confirm_data(this, bytes, span_ms, timestamp);
+	for (auto it = this->listeners.begin(); it != this->listeners.end(); it++) {
+		(*it)->on_confirm_data(this, bytes, span_ms, timestamp);
 	}
 }

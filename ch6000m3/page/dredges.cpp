@@ -77,7 +77,7 @@ private enum class DS : unsigned int {
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
 	// winch statuses
-	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper,
+	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower,
 
 	// instructions
 	ps_gantry_settings, sb_gantry_settings, on,
@@ -212,6 +212,7 @@ protected:
 			this->load_label(this->winch_saddles, _speak(DS::SaddleLimited.ToString()), id, winch_status_color);
 			this->load_label(this->winch_uppers, _speak(DS::Upper.ToString()), id, winch_status_color);
 			this->load_label(this->winch_soft_uppers, _speak(DS::SoftUpper.ToString()), id, winch_status_color);
+			this->load_label(this->winch_soft_lowers, _speak(DS::SoftLower.ToString()), id, winch_status_color);
 		}
 
 		this->load_label(this->winch_suctions, _speak(DS::SuctionLimited.ToString()), id0, winch_status_color);
@@ -273,7 +274,8 @@ protected:
 
 protected:
 	void reflow_winch_limits(DredgesPosition id) {
-		this->master->move_to(this->winch_saddles[id], this->winches[id], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->winch_soft_lowers[id], this->winches[id], GraphletAnchor::CT, GraphletAnchor::CB);
+		this->master->move_to(this->winch_saddles[id], this->winch_soft_lowers[id], GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->winch_uppers[id], this->winch_saddles[id], GraphletAnchor::CT, GraphletAnchor::CB);
 		this->master->move_to(this->winch_soft_uppers[id], this->winch_uppers[id], GraphletAnchor::CT, GraphletAnchor::CB);
 
@@ -312,12 +314,14 @@ protected:
 			bool saddle = false;
 			bool suction = false;
 			bool soft_upper = false;
+			bool soft_lower = false;
 
 			switch (this->winches[id]->get_state()) {
 			case WinchState::SaddleLimited: saddle = true; break;
 			case WinchState::SuctionLimited: suction = true; break;
 			case WinchState::UpperLimited: upper = true; break;
 			case WinchState::SensorUpperLimited: soft_upper = true; break;
+			case WinchState::SensorLowerLimited: soft_lower = true; break;
 			case WinchState::SaddleSlack: saddle = true; slack = true; break;
 			case WinchState::SuctionSlack: suction = true; slack = true; break;
 			case WinchState::Slack: slack = true; break;
@@ -326,6 +330,7 @@ protected:
 			this->winch_saddles[id]->set_color(saddle ? winch_status_highlight_color : winch_status_color);
 			this->winch_uppers[id]->set_color(upper ? winch_status_highlight_color : winch_status_color);
 			this->winch_soft_uppers[id]->set_color(soft_upper ? winch_status_highlight_color : winch_status_color);
+			this->winch_soft_lowers[id]->set_color(soft_lower ? winch_status_highlight_color : winch_status_color);
 
 			if (this->winch_slacks.find(id) != this->winch_slacks.end()) {
 				this->winch_slacks[id]->set_color(slack ? winch_status_highlight_color : winch_status_color);
@@ -389,6 +394,7 @@ protected: // never delete these graphlets manually.
 	std::map<DredgesPosition, Credit<Labellet, DredgesPosition>*> winch_slacks;
 	std::map<DredgesPosition, Credit<Labellet, DredgesPosition>*> winch_uppers;
 	std::map<DredgesPosition, Credit<Labellet, DredgesPosition>*> winch_soft_uppers;
+	std::map<DredgesPosition, Credit<Labellet, DredgesPosition>*> winch_soft_lowers;
 	
 protected:
 	CanvasTextFormat^ caption_font;

@@ -470,8 +470,8 @@ public:
 			this->master->move_to(this->alarms[HS::F02], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LT, gwidth, +vgap);
 			this->master->move_to(this->alarms[HS::F10], this->thermometers[HS::Visor], 1.0F, 0.25F, GraphletAnchor::LC, gwidth);
 
-			for (auto lt = this->alarms.begin(); lt != this->alarms.end(); lt++) {
-				this->master->move_to(this->islabels[lt->first], this->alarms[lt->first],
+			for (auto it = this->alarms.begin(); it != this->alarms.end(); it++) {
+				this->master->move_to(this->islabels[it->first], this->alarms[it->first],
 					GraphletAnchor::RC, GraphletAnchor::LC, lblgap);
 			}
 		}

@@ -261,4 +261,7 @@
   <data name="SBEarth" xml:space="preserve">
     <value>右对地</value>
   </data>
+  <data name="SoftLower" xml:space="preserve">
+    <value>编码器下限</value>
+  </data>
 </root>
