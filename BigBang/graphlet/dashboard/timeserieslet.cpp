@@ -110,12 +110,20 @@ ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 		this->vmax = vmin;
 	}
 
+	if (this->data_source != nullptr) {
+		this->data_source->reference();
+	}
+
 	this->enable_events(true);
 }
 
 ITimeSerieslet::~ITimeSerieslet() {
 	if (this->lines != nullptr) {
 		delete[] this->lines;
+	}
+
+	if (this->data_source != nullptr) {
+		this->data_source->destroy();
 	}
 }
 
@@ -127,6 +135,10 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 	if (now > boundary) {
 		this->update_time_series(this->realtime.start + axes_interval);
 		this->notify_updated();
+	}
+
+	if ((this->data_source != nullptr) && (this->data_source->ready())) {
+		this->data_source->load(this, (now - this->history_max), now);
 	}
 }
 
@@ -452,6 +464,10 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	this->notify_updated();
 }
 
+void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
+
+}
+
 void ITimeSerieslet::own_caret(bool yes) {
 	this->set_state(yes ? TimeSeriesState::History : TimeSeriesState::Realtime);
 	this->update_horizontal_axes(this->get_style());
@@ -491,6 +507,10 @@ bool ITimeSerieslet::on_key(VirtualKey key, bool screen_keyboard) {
 	case VirtualKey::Subtract: {
 		this->history.span = this->history.span << 1;
 		this->history.span = std::min(this->history.span, day_span_s);
+		handled = true;
+	}; break;
+	case VirtualKey::Escape: {
+		this->history = this->realtime;
 		handled = true;
 	}; break;
 	}

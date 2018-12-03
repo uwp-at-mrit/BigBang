@@ -1,8 +1,10 @@
 #include <map>
 
 #include "dirotation.hpp"
+
 #include "syslog.hpp"
 #include "string.hpp"
+#include "path.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -67,6 +69,10 @@ IRotativeDirectory::IRotativeDirectory(Platform::String^ dirname
 IRotativeDirectory::~IRotativeDirectory() {
 	this->timer->Stop();
 	this->destructing_watcher.cancel();
+}
+
+bool IRotativeDirectory::root_ready() {
+	return (this->root != nullptr);
 }
 
 void IRotativeDirectory::mission_start() {
@@ -143,18 +149,20 @@ void IRotativeDirectory::on_exception(Platform::Exception^ exn) {
 	throw exn;
 }
 
-Platform::String^ IRotativeDirectory::resolve_filename(long long time_100ns) {
-	long long timepoint = floor_seconds(time_100ns, this->span);
-	long long daytime = timepoint % day_span_s - time_zone_utc_bias_seconds();
-	long long hour = daytime / hour_span_s;
-	long long minute = daytime % hour_span_s / minute_span_s;
-	long long seconds = daytime % minute_span_s;
+Platform::String^ IRotativeDirectory::resolve_filename(long long time_s) {
+	long long timepoint = floor_seconds(time_s * 1000LL * 1000LL * 10LL, this->span);
 
 	// Stupid Windows Machine, ":" cannot be included in filename
 	return this->file_prefix
-		+ "-" + make_datestamp_utc(timepoint, true)
-		+ "T" + make_wstring(L"%02d_%02d_%02d", hour, minute, seconds)
+		+ "_" + this->period_count.ToString() + this->period.ToString()
+		+ "-" + file_basename_from_second(timepoint, true)
 		+ this->file_suffix;
+}
+
+Platform::String^ IRotativeDirectory::resolve_pathname(long long time_s) {
+	Platform::String^ filename = this->resolve_filename(time_s);
+
+	return ((this->root_ready()) ? (this->root->Path + "\\" + filename) : filename);
 }
 
 TimeSpan IRotativeDirectory::resolve_interval() {

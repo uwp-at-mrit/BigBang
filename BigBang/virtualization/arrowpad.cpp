@@ -23,13 +23,16 @@ using namespace Microsoft::Graphics::Canvas::Text;
 private enum NumpadCell { Col = 0, Row, NCol, NRow };
 
 const static KeyboardCell keys[] = {
-	{ VirtualKey::PageUp,   0, 0, 1, 2 },
-    { VirtualKey::Left,     1, 0, 1, 2 },
-	{ VirtualKey::Right,    3, 0, 1, 2 },
-    { VirtualKey::PageDown, 4, 0, 1, 2 },
+	{ VirtualKey::Escape,   0, 0, 2, 2 },
 
-	{ VirtualKey::Add,      2, 0, 1, 1 },
-	{ VirtualKey::Subtract, 2, 1, 1, 1 },
+	{ VirtualKey::PageUp,   2, 0, 1, 2 },
+    { VirtualKey::Left,     3, 0, 1, 2 },
+	{ VirtualKey::Right,    5, 0, 1, 2 },
+    { VirtualKey::PageDown, 6, 0, 1, 2 },
+	{ VirtualKey::Print,    7, 0, 2, 2 },
+
+	{ VirtualKey::Add,      4, 0, 1, 1 },
+	{ VirtualKey::Subtract, 4, 1, 1, 1 },
 };
 
 static std::map<VirtualKey, CanvasTextLayout^> key_labels;
@@ -63,6 +66,9 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 
 			case VirtualKey::Add: label = L"+"; break;
 			case VirtualKey::Subtract: label = L"-"; break;
+
+			case VirtualKey::Escape: label = L"↺"; break;
+			case VirtualKey::Print: label = L"⎙"; break;
 			}
 
 			key_labels.insert(std::pair<VirtualKey, CanvasTextLayout^>(key, make_text_layout(label, label_font)));

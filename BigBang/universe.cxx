@@ -374,10 +374,10 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 }
 
 void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int count) {
-	if ((this->recent_planet != nullptr) && (delta_idx != 0)) {
-		bool is_animated = ((!this->transfer_clock->IsEnabled) && ((ms * count) > 0));
+	if ((this->recent_planet != nullptr) && (delta_idx != 0) && (!this->transfer_clock->IsEnabled)) {
+		bool animating = ((ms * count) > 0);
 
-		if (is_animated && (this->from_planet == nullptr)) {
+		if (animating && (this->from_planet == nullptr)) {
 			// thread-safe is granteed for `from_planet`
 			this->from_planet = this->recent_planet;
 		}
@@ -396,7 +396,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 
 		this->navigator_view->SelectedValue = this->recent_planet->navigation_label();
 
-		if (is_animated) {
+		if (animating) {
 			TimeSpan ts = make_timespan_from_milliseconds(ms);
 			float width = this->display->Size.Width;
 
@@ -727,7 +727,7 @@ void UniverseDisplay::disable_predefined_shortcuts(bool yes) {
 void UniverseDisplay::on_translating_x() {
 	float width = this->actual_width;
 	float delta = this->figure_x - this->figure_x0;
-	float distance = width * 0.0618F;
+	float distance = width * 0.0382F;
 
 	if (delta < -distance) {
 		this->transfer_next(256);

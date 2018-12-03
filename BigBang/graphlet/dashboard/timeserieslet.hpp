@@ -4,6 +4,7 @@
 
 #include "time.hpp"
 #include "tongue.hpp"
+#include "object.hpp"
 
 #include "paint.hpp"
 #include "brushes.hxx"
@@ -54,15 +55,26 @@ namespace WarGrey::SCADA {
 		float maximum_fx = -1.0F;
 	};
 
-	private class ITimeSeriesDataSource abstract {
+	private class ITimeSeriesDataReceiver abstract {
+	public:
+		virtual void on_datum_values(long long timepoint, double* values, unsigned int n) = 0;
+	};
+
+	private class ITimeSeriesDataSource abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		virtual bool ready() = 0;
 
 	public:
+		virtual void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) = 0;
 		virtual void save(long long timepoint, double* values, unsigned int n) = 0;
+
+	protected:
+		~ITimeSeriesDataSource() noexcept {}
 	};
 
-	private class ITimeSerieslet abstract : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle> {
+	private class ITimeSerieslet abstract
+		: public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle>
+		, public WarGrey::SCADA::ITimeSeriesDataReceiver {
 	public:
 		virtual ~ITimeSerieslet() noexcept;
 
@@ -79,7 +91,10 @@ namespace WarGrey::SCADA {
 		bool on_key(Windows::System::VirtualKey key, bool screen_keyboard) override;
 		void on_tap(float local_x, float local_y) override;
 		void own_caret(bool yes) override;
-		
+
+	public:
+		void on_datum_values(long long timepoint, double* values, unsigned int n) override;
+
 	protected:
 		void set_value(unsigned int idx, double value);
 		void set_values(double* values, bool persistent = true);
@@ -175,6 +190,9 @@ namespace WarGrey::SCADA {
 		}
 
 	public:
+		using ITimeSerieslet::set_value;
+		using ITimeSerieslet::set_values;
+
 		void set_value(Name slot, double value) {
 			ITimeSerieslet::set_value(_I(slot), value);
 		}

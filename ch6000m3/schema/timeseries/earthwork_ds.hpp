@@ -10,6 +10,8 @@ namespace WarGrey::SCADA {
 		_ 
 	};
 
+	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ earthwork_line_color_dictionary(unsigned int index);
+
 	private class EarthWorkDataSource
 		: public WarGrey::SCADA::ITimeSeriesDataSource
 		, public WarGrey::SCADA::RotativeSQLite3 {
@@ -20,9 +22,13 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool ready() override;
+		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_timepoint, long long closed_timepoint) override;
 		void save(long long timepoint, double* values, unsigned int n) override;
 
 	protected:
 		void on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* current_dbc) override;
+
+	protected:
+		~EarthWorkDataSource() noexcept {}
 	};
 }

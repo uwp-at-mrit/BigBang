@@ -16,7 +16,11 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::RotationPeriod period, unsigned int period_count);
 
 	public:
-		virtual Platform::String^ resolve_filename(long long time_100ns = current_100nanoseconds());
+		virtual Platform::String^ resolve_filename(long long time_s = current_seconds());
+
+	public:
+		bool root_ready();
+		Platform::String^ resolve_pathname(long long time_s = current_seconds());
 
 	public:
 		void do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications();

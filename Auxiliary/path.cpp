@@ -1,4 +1,5 @@
 #include "string.hpp"
+#include "time.hpp"
 #include "path.hpp"
 
 using namespace WarGrey::SCADA;
@@ -96,6 +97,18 @@ Platform::String^ WarGrey::SCADA::file_extension_from_path(Platform::String^ pat
 	}
 
 	return ext;
+}
+
+Platform::String^ WarGrey::SCADA::file_basename_from_second(long long timepoint, bool locale) {
+	long long tz_bias = (locale ? time_zone_utc_bias_seconds() : 0LL);
+	long long daytime = timepoint % day_span_s - tz_bias;
+	long long hour = daytime / hour_span_s;
+	long long minute = daytime % hour_span_s / minute_span_s;
+	long long seconds = daytime % minute_span_s;
+
+	// Stupid Windows Machine
+	// ":" cannot be included in filename
+	return make_datestamp_utc(timepoint, true) + "T" + make_wstring(L"%02d_%02d_%02d", hour, minute, seconds);
 }
 
 Uri^ WarGrey::SCADA::ms_appx_file(Platform::String^ file, Platform::String^ ext, Platform::String^ rootdir) {

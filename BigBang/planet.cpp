@@ -17,10 +17,16 @@
 
 using namespace WarGrey::SCADA;
 
+using namespace Concurrency;
+
 using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
+using namespace Windows::ApplicationModel;
 using namespace Windows::Devices::Input;
+
+using namespace Windows::Storage;
+using namespace Windows::Storage::Streams;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Input;
@@ -1050,6 +1056,12 @@ void Planet::show_virtual_keyboard(ScreenKeyboard type, GraphletAnchor a, float 
 	this->show_virtual_keyboard(type, this->get_focus_graphlet(), a, dx, dy);
 }
 
+void Planet::hide_virtual_keyboard() {
+	if (this->keyboard != nullptr) {
+		this->keyboard->show(false);
+	}
+}
+
 void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
 	switch (type) {
 	case ScreenKeyboard::Numpad:   this->keyboard = this->numpad; break;
@@ -1395,20 +1407,53 @@ void IPlanet::save(Platform::String^ path, float width, float height, CanvasSoli
 void IPlanet::save(Platform::String^ path, float x, float y, float width, float height, CanvasSolidColorBrush^ bgcolor, float dpi) {
 	CanvasRenderTarget^ snapshot = this->take_snapshot(x, y, width, height, bgcolor, dpi);
 
-	Concurrency::create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F))
-		.then([=](Concurrency::task<void> saving) {
-		try {
-			saving.get();
+	if (path_only(path) == nullptr) {
+		CreationCollisionOption oie = CreationCollisionOption::OpenIfExists;
+		CreationCollisionOption re = CreationCollisionOption::ReplaceExisting;
+		Platform::String^ root = Package::Current->DisplayName;
+		Platform::String^ subroot = this->name();
 
-			this->get_logger()->log_message(Log::Notice,
-				L"planet[%s] has been saved to %s",
-				this->name()->Data(), path->Data());
-		} catch (Platform::Exception^ e) {
-			this->get_logger()->log_message(Log::Panic,
-				L"failed to save planet[%s] to %s: %s",
-				this->name()->Data(), path->Data(), e->Message->Data());
-		}
-	});
+		/** WARNING: Stupid Windows 10
+		 * saving through IRandomAccessStream is the only working way,
+		 * and the CanvasBitmapFileFormat::Auto option is lost.
+		 */
+
+		create_task(KnownFolders::PicturesLibrary->CreateFolderAsync(root, oie)).then([=](task<StorageFolder^> getting) {
+			return create_task(getting.get()->CreateFolderAsync(subroot, oie)).then([=](task<StorageFolder^> subgetting) {
+				return create_task(subgetting.get()->CreateFileAsync(path, re)).then([=](task<StorageFile^> creating) {
+					return create_task(creating.get()->OpenAsync(FileAccessMode::ReadWrite)).then([=](task<IRandomAccessStream^> opening) {
+						return create_task(snapshot->SaveAsync(opening.get(), CanvasBitmapFileFormat::Png, 1.0F));
+					});
+				});
+			});
+		}).then([=](task<void> saving) {
+			try {
+				saving.get();
+
+				this->get_logger()->log_message(Log::Notice,
+					L"planet[%s] has been saved to [My Picture]\\%s\\%s\\%s",
+					this->name()->Data(), root->Data(), subroot->Data(), path->Data());
+			} catch (Platform::Exception^ e) {
+				this->get_logger()->log_message(Log::Panic,
+					L"failed to save planet[%s] to [My Pictures]\\%s\\%s\\%s: %s",
+					this->name()->Data(), root->Data(), subroot->Data(), path->Data(), e->Message->Data());
+			}
+		});
+	} else {
+		create_task(snapshot->SaveAsync(path, CanvasBitmapFileFormat::Auto, 1.0F)).then([=](task<void> saving) {
+			try {
+				saving.get();
+
+				this->get_logger()->log_message(Log::Notice,
+					L"planet[%s] has been saved to %s",
+					this->name()->Data(), path->Data());
+			} catch (Platform::Exception^ e) {
+				this->get_logger()->log_message(Log::Panic,
+					L"failed to save planet[%s] to %s: %s",
+					this->name()->Data(), path->Data(), e->Message->Data());
+			}
+		});
+	}
 }
 
 void IPlanet::save_logo(float logo_width, float logo_height, Platform::String^ path, float dpi) {

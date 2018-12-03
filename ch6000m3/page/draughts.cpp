@@ -19,6 +19,7 @@
 #include "decorator/ship.hpp"
 
 #include "module.hpp"
+#include "path.hpp"
 #include "shape.hpp"
 
 using namespace WarGrey::SCADA;
@@ -43,20 +44,6 @@ private enum class DL : unsigned int {
 	_
 };
 
-static ICanvasBrush^ time_series_color_dictionary(unsigned int index) {
-	ICanvasBrush^ color = nullptr;
-	
-	switch (_E(EWTS, index % _N(EWTS))) {
-	case EWTS::EarthWork: color = Colours::Khaki; break;
-	case EWTS::Vessel: color = Colours::Cyan; break;
-	case EWTS::HopperHeight: color = Colours::Crimson; break;
-	case EWTS::Loading: color = Colours::Orange; break;
-	case EWTS::Displacement: color = Colours::MediumSeaGreen; break;
-	}
-
-	return color;
-}
-
 /*************************************************************************************************/
 private class Draughts final : public PLCConfirmation {
 public:
@@ -67,7 +54,7 @@ public:
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 
 		{ // load earthwork datasource
-			Syslog* logger = make_system_logger(Log::Info , "RotativeEarthWork");
+			Syslog* logger = make_system_logger(Log::Info, "RotativeEarthWork");
 
 			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Minutely);
 		}
@@ -153,7 +140,7 @@ public:
 			float lines_height = ship_y * 0.618F;
 			TimeSeriesStyle style;
 
-			style.lookup_color = time_series_color_dictionary;
+			style.lookup_color = earthwork_line_color_dictionary;
 
 			this->timeseries = this->master->insert_one(new TimeSerieslet<EWTS>(__MODULE__, this->datasource,
 				timeseries_range, make_hour_series(6U, 5U), lines_width, lines_height, 5U, 1U));
@@ -395,6 +382,29 @@ bool DraughtsPage::can_select(IGraphlet* g) {
 
 bool DraughtsPage::can_select_multiple() {
 	return true;
+}
+
+bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
+	bool handled = Planet::on_key(key, wargrey_keyboard);
+
+	if (!handled) {
+		if (key == VirtualKey::Print) {
+			if (wargrey_keyboard) {
+				this->hide_virtual_keyboard();
+			}
+
+			this->save(this->name() + "-" + file_basename_from_second(current_seconds()) + ".png",
+				this->actual_width(), this->actual_height(), Colours::Background);
+
+			if (wargrey_keyboard) {
+				this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, this->get_focus_graphlet(), GraphletAnchor::CB, 0.0F, 4.0F);
+			}
+
+			handled = true;
+		}
+	}
+
+	return handled;
 }
 
 void DraughtsPage::on_focus(IGraphlet* g) {
