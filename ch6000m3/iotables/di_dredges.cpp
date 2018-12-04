@@ -36,7 +36,8 @@ void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& l
 		}
 	} else {
 		unsigned int status = details.status - 1U;
-		unsigned int sensor = details.sensor - 1U;
+		unsigned int soft_upper = details.soft_upper - 1U;
+		unsigned int soft_lower = details.soft_lower - 1U;
 		bool can_windout = (DBX(db205, status + 4U));
 		bool can_windup = (DBX(db205, status + 5U));
 		bool fast = (details.draghead && DBX(db205, status + 7U));
@@ -45,10 +46,10 @@ void WarGrey::SCADA::DI_winch(Winchlet* target, const uint8* db4, WinchLimits& l
 			target->set_state(fast, WinchState::FastWindingOut, WinchState::WindingOut);
 		} else if (DBX(db205, status + 1U)) {
 			target->set_state(fast, WinchState::FastWindingUp, WinchState::WindingUp);
-		} else if (DBX(db205, sensor + 0U)) {
-			target->set_state(WinchState::SensorUpperLimited);
-		} else if (DBX(db205, sensor + 1U)) {
-			target->set_state(WinchState::SensorLowerLimited);
+		} else if (DBX(db205, soft_upper + 0U)) {
+			target->set_state(WinchState::SoftUpperLimited);
+		} else if (DBX(db205, soft_lower + 0U)) {
+			target->set_state(WinchState::SoftLowerLimited);
 		} else if (can_windout && can_windup) {
 			target->set_state(fast, WinchState::FastWindReady, WinchState::WindReady);
 		} else if (can_windout) {

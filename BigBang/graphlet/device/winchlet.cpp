@@ -112,8 +112,8 @@ void Winchlet::construct() {
 		this->icons[WinchState::FastWindReady] = fuo_icon;
 		this->icons[WinchState::UpperLimited] = up_icon;
 		this->icons[WinchState::LowerLimited] = out_icon;
-		this->icons[WinchState::SensorUpperLimited] = geometry_stroke(up_icon, 1.0F, this->cable_style);
-		this->icons[WinchState::SensorLowerLimited] = geometry_stroke(out_icon, 1.0F, this->cable_style);
+		this->icons[WinchState::SoftUpperLimited] = geometry_stroke(up_icon, 1.0F, this->cable_style);
+		this->icons[WinchState::SoftLowerLimited] = geometry_stroke(out_icon, 1.0F, this->cable_style);
 		this->icons[WinchState::SuctionLimited] = geometry_stroke(circle(radius), 2.0F);
 		this->icons[WinchState::SaddleLimited] = saddle_icon;
 		this->icons[WinchState::Slack] = geometry_translate(tilde, -(te.width + te.lspace) * 0.5F, -te.tspace);
@@ -137,7 +137,7 @@ void Winchlet::update(long long count, long long interval, long long uptime) {
 		}; break;
 		case WinchState::Unpullable: case WinchState::Unlettable:
 		case WinchState::UpperLimited: case WinchState::LowerLimited:
-		case WinchState::SensorUpperLimited: case WinchState::SensorLowerLimited: {
+		case WinchState::SoftUpperLimited: case WinchState::SoftLowerLimited: {
 			if (count % 2 == 1) {
 				this->cable_style->DashOffset += this->motion_step;
 				this->motion_step = -this->motion_step;
@@ -169,11 +169,11 @@ void Winchlet::prepare_style(WinchState status, WinchStyle& s) {
 	case WinchState::Unpullable: case WinchState::Unlettable: {
 		CAS_SLOT(s.cable_color, Colours::Red);
 	}; break;
-	case WinchState::UpperLimited: case WinchState::SensorUpperLimited: {
+	case WinchState::UpperLimited: case WinchState::SoftUpperLimited: {
 		CAS_SLOT(s.cable_color, Colours::Yellow);
 		CAS_SLOT(s.cable_top_color, Colours::Yellow);
 	}; break;
-	case WinchState::LowerLimited: case WinchState::SensorLowerLimited: {
+	case WinchState::LowerLimited: case WinchState::SoftLowerLimited: {
 		CAS_SLOT(s.cable_color, Colours::Yellow);
 		CAS_SLOT(s.cable_bottom_color, Colours::Yellow);
 	}; break;
@@ -214,10 +214,10 @@ void Winchlet::on_state_changed(WinchState status) {
 	case WinchState::FastWindingOut: case WinchState::FastWindOutReady: {
 		this->motion_step = -1.5F;
 	}; break;
-	case WinchState::Unpullable: case WinchState::UpperLimited: case WinchState::SensorUpperLimited: {
+	case WinchState::Unpullable: case WinchState::UpperLimited: case WinchState::SoftUpperLimited: {
 		this->motion_step = 1.0F;
 	}; break;
-	case WinchState::Unlettable: case WinchState::LowerLimited: case WinchState::SensorLowerLimited: {
+	case WinchState::Unlettable: case WinchState::LowerLimited: case WinchState::SoftLowerLimited: {
 		this->motion_step = -1.0F;
 	}; break;
 	default: {

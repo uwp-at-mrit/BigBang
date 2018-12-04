@@ -21,6 +21,7 @@ namespace WarGrey::SCADA {
 	public:
 		bool root_ready();
 		Platform::String^ resolve_pathname(long long time_s = current_seconds());
+		Windows::Storage::StorageFolder^ rootdir();
 		long long span_seconds();
 
 	public:

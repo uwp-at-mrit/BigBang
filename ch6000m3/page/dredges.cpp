@@ -320,8 +320,8 @@ protected:
 			case WinchState::SaddleLimited: saddle = true; break;
 			case WinchState::SuctionLimited: suction = true; break;
 			case WinchState::UpperLimited: upper = true; break;
-			case WinchState::SensorUpperLimited: soft_upper = true; break;
-			case WinchState::SensorLowerLimited: soft_lower = true; break;
+			case WinchState::SoftUpperLimited: soft_upper = true; break;
+			case WinchState::SoftLowerLimited: soft_lower = true; break;
 			case WinchState::SaddleSlack: saddle = true; slack = true; break;
 			case WinchState::SuctionSlack: suction = true; slack = true; break;
 			case WinchState::Slack: slack = true; break;
@@ -1116,7 +1116,7 @@ public:
 		this->load_label(this->labels, DS::Sidelook, this->caption_color, this->label_font);
 
 		this->load_dimension(this->lengths, DS::TideMark, "meter");
-		this->load_dimension(this->speeds, DS::Speed, "kmeter");
+		this->load_dimension(this->speeds, DS::Speed, "knot");
 		
 		this->load_table_header(this->table_headers, DS::ps_gantry_settings, table_header_width, normal_font_size, Colours::SeaGreen);
 		this->load_gantry_indicators(DS::tVirtualUp, DS::hVirtualOut, 24.0F, this->indicators, this->labels);

@@ -225,11 +225,11 @@
   <data name="LowerLimited" xml:space="preserve">
     <value>Cable Lower Limited</value>
   </data>
-  <data name="SensorLowerLimited" xml:space="preserve">
-    <value>Sensor Lower Limited</value>
+  <data name="SoftLowerLimited" xml:space="preserve">
+    <value>Soft Lower Limited</value>
   </data>
-  <data name="SensorUpperLimited" xml:space="preserve">
-    <value>Sensor Upper Limited</value>
+  <data name="SoftUpperLimited" xml:space="preserve">
+    <value>Soft Upper Limited</value>
   </data>
   <data name="UpperLimited" xml:space="preserve">
     <value>Cable Upper Limited</value>

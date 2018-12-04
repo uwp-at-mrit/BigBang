@@ -101,7 +101,7 @@ Platform::String^ WarGrey::SCADA::file_extension_from_path(Platform::String^ pat
 
 Platform::String^ WarGrey::SCADA::file_basename_from_second(long long timepoint, bool locale) {
 	long long tz_bias = (locale ? time_zone_utc_bias_seconds() : 0LL);
-	long long daytime = timepoint % day_span_s - tz_bias;
+	long long daytime = (timepoint - tz_bias) % day_span_s;
 	long long hour = daytime / hour_span_s;
 	long long minute = daytime % hour_span_s / minute_span_s;
 	long long seconds = daytime % minute_span_s;

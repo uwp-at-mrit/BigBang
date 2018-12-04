@@ -117,10 +117,10 @@ ITimeSerieslet::ITimeSerieslet(ITimeSeriesDataSource* datasrc
 
 	if (this->data_source != nullptr) {
 		this->data_source->reference();
-		this->data_source_loaded = false;
 	}
 
 	this->enable_events(true);
+	this->next_loading_timepoint = current_seconds();
 }
 
 ITimeSerieslet::~ITimeSerieslet() {
@@ -143,9 +143,17 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->notify_updated();
 	}
 
-	if ((this->data_source != nullptr) && (this->data_source->ready()) && (!this->data_source_loaded)) {
-		this->data_source->load(this, now, (now - this->history_max));
-		this->data_source_loaded = true;
+	{ // load or remove data
+		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
+		long long existed_earliest_s = this->next_loading_timepoint;
+		long long request_earliest_s = std::min(ts->start, now - this->history_max);
+		long long request_interval = axes_interval;
+		
+		if (existed_earliest_s > request_earliest_s) {
+			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {
+				this->data_source->load(this, existed_earliest_s, (existed_earliest_s - request_interval));
+			}
+		}
 	}
 }
 
@@ -209,7 +217,33 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 	this->realtime.start = next_start;
 	this->update_horizontal_axes(this->get_style());
 
-	// TODO: pop old values;
+	// TODO: remove old data
+	/*
+	{
+			this->begin_maniplation_sequence();
+
+			for (unsigned int idx = 0; idx < this->count; idx++) {
+				TimeSeriesLine* line = &this->lines[idx];
+				bool done = true;
+
+				do {
+					done = true;
+
+					if (!line->timestamps.empty()) {
+						long long front_s = line->timestamps.front() / 1000L;
+
+						if (front_s < request_earliest_s) {
+							line->timestamps.pop_front();
+							line->values.pop_front();
+							done = false;
+						}
+					}
+				} while (!done);
+			}
+
+			this->end_maniplation_sequence();
+	}
+	*/
 }
 
 void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
@@ -272,11 +306,17 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 	TimeSeries* ts = (history ? &this->history : &this->realtime);
 	TimeSeriesStyle style = this->get_style();
 	Rect haxes_box = this->haxes->ComputeBounds();
+	float x_axis_selected = x + this->selected_x;
 	float border_off = style.border_thickness * 0.5F;
 	float x_axis_max = std::nanf("unknown");
 	float y_axis_max = y + haxes_box.Y;
-	float y_axis_0 = y_axis_max + haxes_box.Height;
-	float x_axis_selected = x + this->selected_x;
+	
+	/** WARNING
+	 * It seems that Win2D/Direct2D Path object does not like overlaid lines,
+	 * thus, it is error-prone to close the line with x-axis.
+	 * just in case, `style.lines_thickness * 2.0F` is the adjustment.
+	 */
+	float y_axis_0 = y_axis_max + haxes_box.Height + style.lines_thickness * 2.0F;
 	
 	ds->FillRectangle(x, y, this->width, this->height, Colours::Background);
 	ds->DrawCachedGeometry(this->vaxes, x, y, style.vaxes_color);
@@ -356,10 +396,12 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 						last_x = this_x;
 						last_y = this_y;
-					}
 
-					if (this_x < x) {
-						break;
+						if (this_x < x) {
+							// move the `break` inside the block
+							// to ensure that the end point is a valid point
+							break;
+						}
 					}
 				}
 
@@ -471,10 +513,22 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	this->notify_updated();
 }
 
+void ITimeSerieslet::begin_maniplation_sequence() {
+	this->section.lock();
+}
+
 void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].push_front_value(timepoint, values[idx]);
 	}
+}
+
+void ITimeSerieslet::end_maniplation_sequence() {
+	this->section.unlock();
+}
+
+void ITimeSerieslet::on_maniplation_complete(long long open_s, long long close_s) {
+	this->next_loading_timepoint = close_s;
 }
 
 void ITimeSerieslet::own_caret(bool yes) {

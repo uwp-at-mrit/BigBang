@@ -155,7 +155,7 @@ Platform::String^ IRotativeDirectory::resolve_filename(long long time_s) {
 	// Stupid Windows Machine, ":" cannot be included in filename
 	return this->file_prefix
 		+ "_" + this->period_count.ToString() + this->period.ToString()
-		+ "-" + file_basename_from_second(timepoint, true)
+		+ "-" + file_basename_from_second(timepoint)
 		+ this->file_suffix;
 }
 
@@ -175,6 +175,10 @@ TimeSpan IRotativeDirectory::resolve_interval() {
 
 void IRotativeDirectory::on_file_reused(StorageFile^ file) {
 	this->on_file_rotated(nullptr, file);
+}
+
+StorageFolder^ IRotativeDirectory::rootdir() {
+	return this->root;
 }
 
 long long IRotativeDirectory::span_seconds() {

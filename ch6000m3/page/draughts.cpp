@@ -54,9 +54,9 @@ public:
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 
 		{ // load earthwork datasource
-			Syslog* logger = make_system_logger(Log::Info, "RotativeEarthWork");
+			Syslog* logger = make_system_logger(default_logging_level, "RotativeEarthWork");
 
-			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Minutely);
+			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Hourly);
 		}
 	}
 
@@ -311,7 +311,7 @@ private:
 private:
 	DraughtsPage* master;
 	ShipDecorator* decorator;
-	EarthWorkDataSource* datasource;
+	EarthWorkDataSource* datasource; // managed by the ITimeSerieslet
 };
 
 /*************************************************************************************************/

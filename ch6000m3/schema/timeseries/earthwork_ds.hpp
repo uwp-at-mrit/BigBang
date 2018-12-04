@@ -22,7 +22,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool ready() override;
-		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) override;
+		bool loading() override;
+		void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) override;
 		void save(long long timepoint, double* values, unsigned int n) override;
 
 	protected:
@@ -30,5 +31,14 @@ namespace WarGrey::SCADA {
 
 	protected:
 		~EarthWorkDataSource() noexcept {}
+
+	private:
+		void do_loading_async(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver,
+			long long open_s, long long close_s, long long interval,
+			unsigned int file_count, unsigned int total, double span_ms);
+
+	private:
+		long long open_timepoint;
+		double time0;
 	};
 }

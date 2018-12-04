@@ -57,15 +57,21 @@ namespace WarGrey::SCADA {
 
 	private class ITimeSeriesDataReceiver abstract {
 	public:
+		virtual void begin_maniplation_sequence() {}
 		virtual void on_datum_values(long long timepoint, double* values, unsigned int n) = 0;
+		virtual void end_maniplation_sequence() {}
+
+	public:
+		virtual void on_maniplation_complete(long long open_s, long long close_s) {}
 	};
 
 	private class ITimeSeriesDataSource abstract : public WarGrey::SCADA::SharedObject {
 	public:
 		virtual bool ready() = 0;
+		virtual bool loading() = 0;
 
 	public:
-		virtual void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long closed_s) = 0;
+		virtual void load(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) = 0;
 		virtual void save(long long timepoint, double* values, unsigned int n) = 0;
 
 	protected:
@@ -93,7 +99,10 @@ namespace WarGrey::SCADA {
 		void own_caret(bool yes) override;
 
 	public:
+		void begin_maniplation_sequence() override;
 		void on_datum_values(long long timepoint, double* values, unsigned int n) override;
+		void end_maniplation_sequence() override;
+		void on_maniplation_complete(long long open_s, long long close_s) override;
 
 	protected:
 		void set_value(unsigned int idx, double value);
@@ -139,7 +148,8 @@ namespace WarGrey::SCADA {
 
 	private:
 		WarGrey::SCADA::ITimeSeriesDataSource* data_source;
-		bool data_source_loaded;
+		long long next_loading_timepoint;
+		std::mutex section;
 	};
 
 	template<typename Name>

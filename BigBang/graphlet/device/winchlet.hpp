@@ -8,7 +8,7 @@ namespace WarGrey::SCADA {
 	private enum class WinchState {
 		WindingUp, FastWindingUp, WindingOut, FastWindingOut,
 		WindUpReady, FastWindUpReady, WindOutReady, FastWindOutReady, WindReady, FastWindReady,
-		UpperLimited, SensorUpperLimited, LowerLimited, SensorLowerLimited,
+		UpperLimited, SoftUpperLimited, LowerLimited, SoftLowerLimited,
 		SaddleLimited, SuctionLimited, Slack, SaddleSlack, SuctionSlack, Unpullable, Unlettable,
 		Default,
 		_,

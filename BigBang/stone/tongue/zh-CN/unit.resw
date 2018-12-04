@@ -138,6 +138,9 @@
   <data name="knewton" xml:space="preserve">
     <value>kN</value>
   </data>
+  <data name="knot" xml:space="preserve">
+    <value>Kn</value>
+  </data>
   <data name="kwatt" xml:space="preserve">
     <value>kW</value>
   </data>

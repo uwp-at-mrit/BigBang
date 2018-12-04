@@ -19,12 +19,13 @@ namespace WarGrey::SCADA {
 
 	private struct WinchDetails {
 	public:
-		WinchDetails(unsigned int status, unsigned int sensor, unsigned int override, bool draghead)
-			: status(status), sensor(sensor), override(override), draghead(draghead) {}
+		WinchDetails(unsigned int status, unsigned int soft_upper, unsigned int soft_lower, unsigned int override, bool draghead)
+			: status(status), soft_upper(soft_upper), soft_lower(soft_lower), override(override), draghead(draghead) {}
 
 	public:
 		unsigned int status;
-		unsigned int sensor;
+		unsigned int soft_upper;
+		unsigned int soft_lower;
 		unsigned int override;
 		bool draghead;
 	};
@@ -46,9 +47,9 @@ namespace WarGrey::SCADA {
 	static unsigned int gantry_sb_short_draghead_limited = 397U;
 
 	// DB205, starts from 1
-	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(1353U, 1793U, 2033U, false);
-	static WarGrey::SCADA::WinchDetails winch_ps_intermediate_details = WarGrey::SCADA::WinchDetails(1361U, 1795U, 2034U, false);
-	static WarGrey::SCADA::WinchDetails winch_ps_draghead_details = WarGrey::SCADA::WinchDetails(1369U, 1797U, 2035U, true);
+	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(1353U, 1793U, 1817U, 2033U, false);
+	static WarGrey::SCADA::WinchDetails winch_ps_intermediate_details = WarGrey::SCADA::WinchDetails(1361U, 1795U, 1818U, 2034U, false);
+	static WarGrey::SCADA::WinchDetails winch_ps_draghead_details = WarGrey::SCADA::WinchDetails(1369U, 1797U, 1819U, 2035U, true);
 	static unsigned int gantry_ps_trunnion_details = 1305U;
 	static unsigned int gantry_ps_intermediate_details = 1313U;
 	static unsigned int gantry_ps_draghead_details = 1321U;
@@ -60,9 +61,9 @@ namespace WarGrey::SCADA {
 	static unsigned int gantry_ps_draghead_virtual_up_limited = 2045U;
 	static unsigned int gantry_ps_draghead_virtual_out_limited = 2046U;
 
-	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(1377U, 1799U, 2036U, false);
-	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(1385U, 1801U, 2037U, false);
-	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(1393U, 1803U, 2038U, true);
+	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(1377U, 1799U, 1820U, 2036U, false);
+	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(1385U, 1801U, 1821U, 2037U, false);
+	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(1393U, 1803U, 1822U, 2038U, true);
 	static unsigned int gantry_sb_trunnion_details = 1329U;
 	static unsigned int gantry_sb_intermediate_details = 1337U;
 	static unsigned int gantry_sb_draghead_details = 1345U;
