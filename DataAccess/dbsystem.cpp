@@ -79,7 +79,7 @@ IPreparedStatement* IDBSystem::prepare(const char* sql, ...) {
 
 void IDBSystem::exec(IPreparedStatement* stmt) {
 	if (this->dbsystem() == stmt->dbsystem()) {
-		stmt->step(nullptr, "exec");
+		stmt->step(nullptr, "exec::step");
 	} else {
 		this->get_logger()->log_message(Log::Warning, "incompatible dbsystem and statement");
 	}
@@ -146,13 +146,13 @@ void IDBSystem::report_warning(const char* format, ...) {
 }
 
 void IDBSystem::log(Log level) {
-	this->get_logger()->log_message(level, L"%S", this->get_last_error_message().c_str());
+	this->get_logger()->log_message(level, L"%S", this->last_error_message().c_str());
 }
 
 void IDBSystem::log(const std::string& message_prefix, Log level) {
 	this->get_logger()->log_message(level, L"%S: %S",
 		message_prefix.c_str(),
-		this->get_last_error_message().c_str());
+		this->last_error_message().c_str());
 }
 
 Syslog* IDBSystem::get_logger() {

@@ -10,12 +10,18 @@ namespace WarGrey::SCADA {
 	typedef void sqlite3_t;
 	typedef void sqlite3_stmt_t;
 
+#define SQLITE_OK   0
+#define SQLITE_BUSY 5
+#define SQLITE_ROW  100
+#define SQLITE_DONE 101
+
 #define SQLITE_TRACE_STMT    0x01
 #define SQLITE_TRACE_PROFILE 0x02
 #define SQLITE_TRACE_ROW     0x04
 #define SQLITE_TRACE_CLOSE   0x08
 
 	typedef int (*sqlite3_trace_f)(unsigned int, void*, void*, void*);
+	typedef int (*sqlite3_busy_handler_f)(void*, int);
 
 	private enum class SQLiteDataType { Integer = 1, Float = 2, Text = 3, Bytes = 4, Null = 5 };
 
@@ -41,6 +47,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) = 0;
+		virtual void set_busy_handler(sqlite3_busy_handler_f handler = nullptr, void* args = nullptr) = 0;
+		virtual void set_busy_handler(int timeout_ms) = 0;
 
 	public:
 		virtual std::string filename(const char* dbname = "main") = 0;
@@ -95,16 +103,18 @@ namespace WarGrey::SCADA {
 	public:
 		virtual ~SQLite3() noexcept;
 
-		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr,
-			sqlite3_trace_f xCallback = WarGrey::SCADA::sqlite3_default_trace_callback);
+		SQLite3(const wchar_t* dbfile = nullptr, WarGrey::SCADA::Syslog* logger = nullptr, sqlite3_trace_f xCallback = nullptr);
 
 	public:
 		std::list<std::string> list_tables() override;
-		std::string get_last_error_message() override;
+		std::string last_error_message() override;
+		int last_errno(int* extended_errno) override;
 		WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) override;
 
 	public:
 		std::list<WarGrey::SCADA::SQliteTableInfo> table_info(const char* name) override;
+		void set_busy_handler(sqlite3_busy_handler_f handler = nullptr, void* args = nullptr) override;
+		void set_busy_handler(int timeout_ms) override;
 
 	public:
 		std::string filename(const char* dbname = "main") override;

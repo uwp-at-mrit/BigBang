@@ -103,7 +103,8 @@ namespace WarGrey::SCADA {
 	public:
 		virtual std::list<std::string> list_tables() = 0;
 		virtual bool table_exists(const std::string& tablename);
-		virtual std::string get_last_error_message() = 0;
+		virtual std::string last_error_message() = 0;
+		virtual int last_errno(int* extended_errno = nullptr) = 0;
 		virtual WarGrey::SCADA::IPreparedStatement* prepare(const std::string& sql) = 0;
 		
 	public:

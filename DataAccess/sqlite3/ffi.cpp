@@ -15,6 +15,7 @@ typedef const char* (*_fun__sqlite3__char)(sqlite3_t*);
 typedef int (*_fun__sqlite3__int)(sqlite3_t*);
 typedef int64 (*_fun__sqlite3__int64)(sqlite3_t*);
 typedef int(*_fun__sqlite3__uint__trace__void__int)(sqlite3_t*, unsigned int, sqlite3_trace_f, void*);
+typedef int(*_fun__sqlite3__uint__busy_handler__void__int)(sqlite3_t*, sqlite3_busy_handler_f, void*);
 typedef const char* (*_fun__sqlite3__char__char)(sqlite3_t*, const char*);
 
 typedef int (*_fun__sqlite3__char__stmt__void__int)(sqlite3_t*, const char*, size_t, sqlite3_stmt_t**, const void**);
@@ -44,6 +45,8 @@ static _fun__sqlite3__int sqlite3_close;
 static _fun_destructor sqlite3_free;
 static _fun__sqlite3__char sqlite3_errmsg;
 static _fun__sqlite3__uint__trace__void__int sqlite3_trace_v2;
+static _fun__sqlite3__uint__busy_handler__void__int sqlite3_busy_handler;
+static _fun__stmt__int__int sqlite3_busy_timeout;
 static _fun__sqlite3__char__char sqlite3_db_filename;
 
 static _fun__sqlite3__char__stmt__void__int sqlite3_prepare_v2;
@@ -79,11 +82,9 @@ static _fun__stmt__malloc sqlite3_expanded_sql;
 
 static _fun__sqlite3__int sqlite3_changes;
 static _fun__sqlite3__int sqlite3_total_changes;
+static _fun__sqlite3__int sqlite3_errcode;
+static _fun__sqlite3__int sqlite3_extended_errcode;
 static _fun__sqlite3__int64 sqlite3_last_insert_rowid;
-
-static const int SQLITE_OK   = 0;
-static const int SQLITE_ROW  = 100;
-static const int SQLITE_DONE = 101;
 
 static const _fun_destructor SQLITE_STATIC    = ((_fun_destructor)0);
 static const _fun_destructor SQLITE_TRANSIENT = ((_fun_destructor)-1);
@@ -98,7 +99,11 @@ static void load_sqlite3(Syslog* logger) {
 			win32_fetch(sqlite3, sqlite3_close, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_free, _fun_destructor, logger);
 			win32_fetch(sqlite3, sqlite3_errmsg, _fun__sqlite3__char, logger);
+			win32_fetch(sqlite3, sqlite3_errcode, _fun__sqlite3__int, logger);
+			win32_fetch(sqlite3, sqlite3_extended_errcode, _fun__sqlite3__int, logger);
 			win32_fetch(sqlite3, sqlite3_trace_v2, _fun__sqlite3__uint__trace__void__int, logger);
+			win32_fetch(sqlite3, sqlite3_busy_handler, _fun__sqlite3__uint__busy_handler__void__int, logger);
+			win32_fetch(sqlite3, sqlite3_busy_timeout, _fun__stmt__int__int, logger);
 			win32_fetch(sqlite3, sqlite3_db_filename, _fun__sqlite3__char__char, logger);
 
 			win32_fetch(sqlite3, sqlite3_prepare_v2, _fun__sqlite3__char__stmt__void__int, logger);
@@ -311,8 +316,22 @@ int64 SQLite3::last_insert_rowid() {
 	return sqlite3_last_insert_rowid(this->db);
 }
 
-std::string SQLite3::get_last_error_message() {
+int SQLite3::last_errno(int* extended_errno) {
+	SET_BOX(extended_errno, sqlite3_extended_errcode(this->db));
+
+	return sqlite3_errcode(this->db);
+}
+
+std::string SQLite3::last_error_message() {
 	return make_safe_bytes(sqlite3_errmsg(this->db));
+}
+
+void SQLite3::set_busy_handler(sqlite3_busy_handler_f handler, void* args) {
+	sqlite3_busy_handler(this->db, handler, args);
+}
+
+void SQLite3::set_busy_handler(int timeout_ms) {
+	sqlite3_busy_timeout(this->db, timeout_ms);
 }
 
 /*************************************************************************************************/

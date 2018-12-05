@@ -17,6 +17,11 @@ namespace WarGrey::SCADA {
         std::optional<Text> sql;
     };
 
+private class ISQLiteMasterCursor abstract {
+    public:
+        virtual bool step(WarGrey::SCADA::SQLiteMaster& occurrence, bool asc, int code) = 0;
+    };
+
     private enum class sqlite_master { rowid, type, name, tbl_name, rootpage, sql, _ };
 
     WarGrey::SCADA::SQLiteMaster_pk sqlite_master_identity(WarGrey::SCADA::SQLiteMaster& self);
@@ -30,7 +35,7 @@ namespace WarGrey::SCADA {
     void create_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, bool if_not_exists = true);
     void insert_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, SQLiteMaster& self, bool replace = false);
     void insert_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, SQLiteMaster* selves, size_t count, bool replace = false);
-    std::list<WarGrey::SCADA::SQLiteMaster_pk> list_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::sqlite_master order_by = sqlite_master::rowid, bool asc = true);
+    void foreach_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::ISQLiteMasterCursor* cursor, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::sqlite_master order_by = sqlite_master::rowid, bool asc = true);
     std::list<WarGrey::SCADA::SQLiteMaster> select_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, uint64 limit = 0U, uint64 offset = 0U, WarGrey::SCADA::sqlite_master order_by = sqlite_master::rowid, bool asc = true);
     std::optional<WarGrey::SCADA::SQLiteMaster> seek_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster_pk where);
     void update_sqlite_master(WarGrey::SCADA::IDBSystem* dbc, WarGrey::SCADA::SQLiteMaster& self, bool refresh = true);

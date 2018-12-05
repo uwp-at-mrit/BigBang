@@ -15,7 +15,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\rotation.hpp">
       <Filter>sqlite3</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\ffi.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\ffi.hpp">
+      <Filter>sqlite3</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)dbsystem.cpp" />
@@ -30,7 +32,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\rotation.cpp">
       <Filter>sqlite3</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\ffi.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sqlite3\ffi.cpp">
+      <Filter>sqlite3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sqlite3">

@@ -42,7 +42,7 @@ public:
 	}
 
 public:
-	bool step(EarthWork& ework) {
+	bool step(EarthWork& ework, bool asc, int code) override {
 		bool okay = ((ework.timestamp >= this->open_timepoint) && (ework.timestamp <= this->close_timepoint));
 
 		if (okay) {
@@ -57,14 +57,11 @@ public:
 			this->count++;
 		}
 
-		this->total++;
-
 		return true;
 	}
 
 public:
 	unsigned int count;
-	unsigned int total;
 
 private:
 	double tempdata[_N(EWTS)];
@@ -73,9 +70,23 @@ private:
 	long long close_timepoint;
 };
 
+static int earthwork_busy_handler(void* args, int count) {
+	syslog(Log::Info, L"retried times: %d", count);
+
+	return 1;
+}
+
 /*************************************************************************************************/
 EarthWorkDataSource::EarthWorkDataSource(Syslog* logger, RotationPeriod period, unsigned int period_count)
 	: RotativeSQLite3("earthwork", logger, period, period_count), open_timepoint(0LL) {}
+
+EarthWorkDataSource::~EarthWorkDataSource() {
+	this->watcher.cancel();
+
+	if (this->dbc != nullptr) {
+		delete this->dbc;
+	}
+}
 
 bool EarthWorkDataSource::ready() {
 	return IRotativeDirectory::root_ready() && RotativeSQLite3::ready();
@@ -89,16 +100,22 @@ void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc,
 	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3
 
 	create_earthwork(dbc, true);
-	this->get_logger()->log_message(Log::Notice, L"current file: %S", dbc->filename().c_str());
+	this->get_logger()->log_message(Log::Debug, L"current file: %S", dbc->filename().c_str());
 }
 
 void EarthWorkDataSource::load(ITimeSeriesDataReceiver* receiver, long long open_s, long long close_s) {
 	if (!this->loading()) {
+		long long start = this->timepoint(open_s);
+		long long end = this->timepoint(close_s);
 		long long interval = this->span_seconds() * ((open_s < close_s) ? 1LL : -1LL);
 		
+		this->get_logger()->log_message(Log::Debug, L"start loading from %s to %s",
+			make_timestamp_utc(open_s, true)->Data(), make_timestamp_utc(close_s, true)->Data());
+
 		this->open_timepoint = open_s;
+		this->close_timepoint = close_s;
 		this->time0 = current_inexact_milliseconds();
-		this->do_loading_async(receiver, open_s, close_s, interval, 0LL, 0LL, 0.0);
+		this->do_loading_async(receiver, start, end, interval, 0LL, 0LL, 0.0);
 	}
 }
 
@@ -122,51 +139,56 @@ void EarthWorkDataSource::save(long long timepoint, double* values, unsigned int
 }
 
 void EarthWorkDataSource::do_loading_async(ITimeSeriesDataReceiver* receiver
-	, long long open_s, long long close_s, long long interval
+	, long long start, long long end, long long interval
 	, unsigned int file_count, unsigned int total, double span_ms) {
 	bool asc = (interval > 0);
-	
-	if ((asc ? (open_s > close_s) : (open_s < close_s))) {
+
+	if ((asc ? (start > end) : (start < end))) {
 		double span_total = current_inexact_milliseconds() - this->time0;
 
-		this->get_logger()->log_message(Log::Info, L"loaded %d records from %d file(s) within %lfms(delta: %lfms)",
+		this->get_logger()->log_message(Log::Debug, L"loaded %d records from %d file(s) within %lfms(wasted: %lfms)",
 			total, file_count, span_total, span_total - span_ms);
 
-		receiver->on_maniplation_complete(this->open_timepoint, close_s);
+		receiver->on_maniplation_complete(this->open_timepoint, this->close_timepoint);
 		this->open_timepoint = 0LL;
 	} else {
-		Platform::String^ dbsource = this->resolve_filename(open_s);
+		Platform::String^ dbsource = this->resolve_filename(start);
+		cancellation_token token = this->watcher.get_token();
 
-		create_task(this->rootdir()->TryGetItemAsync(dbsource)).then([=](task<IStorageItem^> getting) {
+		create_task(this->rootdir()->TryGetItemAsync(dbsource), token).then([=](task<IStorageItem^> getting) {
 			IStorageItem^ db = getting.get();
+			long long next_timepoint = start + interval;
 
 			if ((db != nullptr) && (db->IsOfType(StorageItemTypes::File))) {
-				EarthWorkCursor ecursor(receiver, open_s, close_s);
+				EarthWorkCursor ecursor(receiver, this->open_timepoint, this->close_timepoint);
 				double ms = current_inexact_milliseconds();
-				SQLite3* dbc = new SQLite3(db->Path->Data(), this->get_logger());
+				
+				this->dbc = new SQLite3(db->Path->Data(), this->get_logger());
+				this->dbc->set_busy_handler(earthwork_busy_handler);
 
 				receiver->begin_maniplation_sequence();
 				foreach_earthwork(dbc, &ecursor, 0, 0, earthwork::timestamp, asc);
 				receiver->end_maniplation_sequence();
 
-				delete dbc;
+				delete this->dbc;
+				this->dbc = nullptr;
 
 				ms = current_inexact_milliseconds() - ms;
-				this->get_logger()->log_message(Log::Info, L"loaded %d[%d] record(s) from[%s] within %lfms",
-					ecursor.count, ecursor.total, dbsource->Data(), ms);
+				this->get_logger()->log_message(Log::Debug, L"loaded %d record(s) from[%s] within %lfms",
+					ecursor.count, dbsource->Data(), ms);
 
-				this->do_loading_async(receiver, open_s + interval, close_s, interval,
+				this->do_loading_async(receiver, next_timepoint, end, interval,
 					file_count + 1LL, total + ecursor.count, span_ms + ms);
 			} else {
-				this->get_logger()->log_message(Log::Info, L"skip non-existent source[%s]", dbsource->Data());
-				this->do_loading_async(receiver, open_s + interval, close_s, interval, file_count, total, span_ms);
+				this->get_logger()->log_message(Log::Debug, L"skip non-existent source[%s]", dbsource->Data());
+				this->do_loading_async(receiver, next_timepoint, end, interval, file_count, total, span_ms);
 			}
 		}).then([=](task<void> check_exn) {
 			try {
 				check_exn.get();
 			} catch (Platform::Exception^ e) {
 				this->on_exception(e);
-			}
+			} catch (task_canceled&) {}
 		});
 	}
 }

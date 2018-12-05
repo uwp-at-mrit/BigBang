@@ -135,7 +135,7 @@ ITimeSerieslet::~ITimeSerieslet() {
 
 void ITimeSerieslet::update(long long count, long long interval, long long uptime) {
 	long long axes_interval = this->realtime.span / this->realtime.step;
-	long long boundary = this->realtime.start + this->realtime.span - (3 * axes_interval / 2);
+	long long boundary = this->realtime.start + this->realtime.span - (axes_interval * 3 / 2);
 	long long now = current_seconds();
 
 	if (now > boundary) {
@@ -143,7 +143,7 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->notify_updated();
 	}
 
-	{ // load or remove data
+	{ // load existed data
 		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 		long long existed_earliest_s = this->next_loading_timepoint;
 		long long request_earliest_s = std::min(ts->start, now - this->history_max);
@@ -210,6 +210,8 @@ void ITimeSerieslet::on_state_changed(TimeSeriesState status) {
 }
 
 void ITimeSerieslet::update_time_series(long long next_start) {
+	long long earliest_s = this->realtime.start - this->history_max;
+
 	if (this->history.start >= this->realtime.start) {
 		this->history.start = next_start;
 	}
@@ -217,33 +219,30 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 	this->realtime.start = next_start;
 	this->update_horizontal_axes(this->get_style());
 
-	// TODO: remove old data
-	/*
-	{
-			this->begin_maniplation_sequence();
+	{ // TODO: remove old data
+		this->begin_maniplation_sequence();
 
-			for (unsigned int idx = 0; idx < this->count; idx++) {
-				TimeSeriesLine* line = &this->lines[idx];
-				bool done = true;
+		for (unsigned int idx = 0; idx < this->count; idx++) {
+			TimeSeriesLine* line = &this->lines[idx];
+			bool done = true;
 
-				do {
-					done = true;
+			do {
+				done = true;
 
-					if (!line->timestamps.empty()) {
-						long long front_s = line->timestamps.front() / 1000L;
+				if (!line->timestamps.empty()) {
+					long long front_s = line->timestamps.front() / 1000L;
 
-						if (front_s < request_earliest_s) {
-							line->timestamps.pop_front();
-							line->values.pop_front();
-							done = false;
-						}
+					if (front_s < earliest_s) {
+						line->timestamps.pop_front();
+						line->values.pop_front();
+						done = false;
 					}
-				} while (!done);
-			}
+				}
+			} while (!done);
+		}
 
-			this->end_maniplation_sequence();
+		this->end_maniplation_sequence();
 	}
-	*/
 }
 
 void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
@@ -396,12 +395,10 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 						last_x = this_x;
 						last_y = this_y;
+					}
 
-						if (this_x < x) {
-							// move the `break` inside the block
-							// to ensure that the end point is a valid point
-							break;
-						}
+					if (this_x < x) {
+						break;
 					}
 				}
 

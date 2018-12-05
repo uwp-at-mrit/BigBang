@@ -105,7 +105,7 @@ void WarGrey::SCADA::foreach_earthwork(IDBSystem* dbc, IEarthWorkCursor* cursor,
 
         while(stmt->step()) {
             restore_earthwork(self, stmt);
-            cursor->step(self);
+            if (!cursor->step(self, asc, dbc->last_errno())) break;
         }
 
         delete stmt;

@@ -55,6 +55,7 @@ namespace WarGrey::SCADA {
 		float maximum_fx = -1.0F;
 	};
 
+	/************************************************************************************************/
 	private class ITimeSeriesDataReceiver abstract {
 	public:
 		virtual void begin_maniplation_sequence() {}
@@ -78,6 +79,7 @@ namespace WarGrey::SCADA {
 		~ITimeSeriesDataSource() noexcept {}
 	};
 
+	/************************************************************************************************/
 	private class ITimeSerieslet abstract
 		: public WarGrey::SCADA::IStatelet<WarGrey::SCADA::TimeSeriesState, WarGrey::SCADA::TimeSeriesStyle>
 		, public WarGrey::SCADA::ITimeSeriesDataReceiver {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ppltasks.h>
+
 #include "graphlet/dashboard/timeserieslet.hpp"
 
 #include "sqlite3/rotation.hpp"
@@ -30,15 +32,18 @@ namespace WarGrey::SCADA {
 		void on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* current_dbc) override;
 
 	protected:
-		~EarthWorkDataSource() noexcept {}
+		~EarthWorkDataSource() noexcept;
 
 	private:
 		void do_loading_async(WarGrey::SCADA::ITimeSeriesDataReceiver* receiver,
-			long long open_s, long long close_s, long long interval,
+			long long start, long long end, long long interval,
 			unsigned int file_count, unsigned int total, double span_ms);
 
 	private:
+		Concurrency::cancellation_token_source watcher;
+		WarGrey::SCADA::ISQLite3* dbc;
 		long long open_timepoint;
+		long long close_timepoint;
 		double time0;
 	};
 }

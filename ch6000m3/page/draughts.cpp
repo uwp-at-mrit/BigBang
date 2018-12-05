@@ -54,9 +54,9 @@ public:
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
 
 		{ // load earthwork datasource
-			Syslog* logger = make_system_logger(default_logging_level, "RotativeEarthWork");
+			Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
 
-			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Hourly);
+			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
 		}
 	}
 
@@ -143,7 +143,7 @@ public:
 			style.lookup_color = earthwork_line_color_dictionary;
 
 			this->timeseries = this->master->insert_one(new TimeSerieslet<EWTS>(__MODULE__, this->datasource,
-				timeseries_range, make_hour_series(12U, 5U), lines_width, lines_height, 5U, 1U));
+				timeseries_range, make_hour_series(8U, 7U), lines_width, lines_height, 5U, 1U));
 
 			this->timeseries->set_style(style);
 			this->timeseries->close_line(EWTS::EarthWork, true);

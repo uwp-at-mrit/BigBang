@@ -150,12 +150,12 @@ void IRotativeDirectory::on_exception(Platform::Exception^ exn) {
 }
 
 Platform::String^ IRotativeDirectory::resolve_filename(long long time_s) {
-	long long timepoint = floor_seconds(time_s * 1000LL * 1000LL * 10LL, this->span);
+	long long ts = this->timepoint(time_s);
 
 	// Stupid Windows Machine, ":" cannot be included in filename
 	return this->file_prefix
 		+ "_" + this->period_count.ToString() + this->period.ToString()
-		+ "-" + file_basename_from_second(timepoint)
+		+ "-" + file_basename_from_second(ts)
 		+ this->file_suffix;
 }
 
@@ -179,6 +179,10 @@ void IRotativeDirectory::on_file_reused(StorageFile^ file) {
 
 StorageFolder^ IRotativeDirectory::rootdir() {
 	return this->root;
+}
+
+long long IRotativeDirectory::timepoint(long long time_s) {
+	return floor_seconds(time_s * 1000LL * 1000LL * 10LL, this->span);
 }
 
 long long IRotativeDirectory::span_seconds() {

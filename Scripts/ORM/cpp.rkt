@@ -95,7 +95,7 @@
     (&htab indent)
     (printf "public:~n")
     (&htab (add1 indent))
-    (printf "virtual bool step(~a::~a& occurrence) = 0;~n" ns:: Table)
+    (printf "virtual bool step(~a::~a& occurrence, bool asc, int code) = 0;~n" ns:: Table)
     (&brace indent #:semicolon? #true)
     (&linebreak 1)))
 
@@ -279,7 +279,7 @@
      (&linebreak 1)
      (&htab 2) (printf "while(stmt->step()) {~n")
      (&htab 3) (printf "~a(self, stmt);~n" restore)
-     (&htab 3) (printf "cursor->step(self);~n")
+     (&htab 3) (printf "if (!cursor->step(self, asc, dbc->last_errno())) break;~n")
      (&brace 2)
      (&linebreak 1)
      (&htab 2) (printf "delete stmt;~n")

@@ -30,6 +30,12 @@ bool RotativeSQLite3::ready() {
 void RotativeSQLite3::on_file_rotated(StorageFile^ prev_db, StorageFile^ current_db) {
 	SQLite3* new_employee = new SQLite3(current_db->Path->Data(), this->logger, this->xCallback);
 
+	if (this->busy_timeout > 0) {
+		new_employee->set_busy_handler(this->busy_timeout);
+	} else {
+		new_employee->set_busy_handler(this->busy_handler, this->busy_args);
+	}
+
 	this->lockfree_previous_connection();
 
 	this->prev_employee = this->employee;
@@ -47,8 +53,8 @@ bool RotativeSQLite3::table_exists(const std::string& tablename) {
 	return this->employee->table_exists(tablename);
 }
 
-std::string RotativeSQLite3::get_last_error_message() {
-	return this->employee->get_last_error_message();
+std::string RotativeSQLite3::last_error_message() {
+	return this->employee->last_error_message();
 }
 
 IPreparedStatement* RotativeSQLite3::prepare(const std::string& sql) {
@@ -57,6 +63,19 @@ IPreparedStatement* RotativeSQLite3::prepare(const std::string& sql) {
 
 std::list<WarGrey::SCADA::SQliteTableInfo> RotativeSQLite3::table_info(const char* name) {
 	return this->employee->table_info(name);
+}
+
+void RotativeSQLite3::set_busy_handler(sqlite3_busy_handler_f handler, void* args) {
+	this->busy_timeout = 0;
+	this->busy_handler = handler;
+	this->busy_args = args;
+	this->employee->set_busy_handler(this->busy_handler, this->busy_args);
+}
+
+void RotativeSQLite3::set_busy_handler(int timeout_ms) {
+	this->busy_handler = nullptr;
+	this->busy_timeout = timeout_ms;
+	this->employee->set_busy_handler(this->busy_timeout);
 }
 
 std::string RotativeSQLite3::filename(const char* dbname) {
@@ -69,6 +88,10 @@ int RotativeSQLite3::changes(bool total) {
 
 int64 RotativeSQLite3::last_insert_rowid() {
 	return this->employee->last_insert_rowid();
+}
+
+int RotativeSQLite3::last_errno(int* extended_errno) {
+	return this->employee->last_errno(extended_errno);
 }
 
 void RotativeSQLite3::lockfree_previous_connection() {

@@ -20,7 +20,7 @@ namespace WarGrey::SCADA {
 
 private class IEarthWorkCursor abstract {
     public:
-        virtual bool step(WarGrey::SCADA::EarthWork& occurrence) = 0;
+        virtual bool step(WarGrey::SCADA::EarthWork& occurrence, bool asc, int code) = 0;
     };
 
     private enum class earthwork { uuid, product, vessel, hopper_height, loading, displacement, timestamp, _ };
