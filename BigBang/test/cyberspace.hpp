@@ -10,6 +10,5 @@ namespace WarGrey::SCADA {
 
 	public:
 		void on_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
-		void on_right_tap(WarGrey::SCADA::IGraphlet* g, float x, float y) override;
 	};
 }

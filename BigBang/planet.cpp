@@ -786,17 +786,21 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
+	bool pressed_on_keyboard = this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y);
+	bool handled = false;
+
 	if (this->keyboard->shown() && (pdt == PointerDeviceType::Touch)) {
 		float local_x = x - this->keyboard_x;
 		float local_y = y - this->keyboard_y;
 
-		if (this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y)) {
+		if (pressed_on_keyboard) {
 			this->keyboard->on_hover(local_x, local_y);
+			handled = true;
 		} else {
 			this->keyboard->on_goodbye(local_x, local_y);
 			this->keyboard->show(false);
 		}
-	} else {
+	} else if (!pressed_on_keyboard) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 		this->keyboard->show(false);
@@ -834,6 +838,8 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 					}
 
 					this->on_hover(this->hovering_graphlet, local_x, local_y);
+
+					handled = true;
 				}
 			}
 
@@ -846,7 +852,7 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 		}
 	}
 
-	return true;
+	return handled;
 }
 
 bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
@@ -933,6 +939,8 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 }
 
 bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
+	bool handled = false;
+
 	/** NOTE
 	 * The `*Pressed` kinds of updating are used for tolerating, they are more intuitive.
 	 *
@@ -952,10 +960,8 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 			if (pdt == PointerDeviceType::Touch) {
 				this->keyboard->on_goodbye(local_x, local_y);
 			}
-		}; break;
-		case PointerUpdateKind::RightButtonReleased:
-		case PointerUpdateKind::RightButtonPressed: {
-			this->keyboard->on_right_tap(local_x, local_y);
+
+			handled = true;
 		}; break;
 		}
 	} else {
@@ -988,16 +994,9 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 					if (pdt == PointerDeviceType::Touch) {
 						this->on_goodbye(unmasked_graphlet, local_x, local_y);
 					}
-				}; break;
-				case PointerUpdateKind::RightButtonReleased:
-				case PointerUpdateKind::RightButtonPressed: {
-					if (unmasked_graphlet->handles_events()) {
-						unmasked_graphlet->on_right_tap(local_x, local_y);
-					}
 
-					// NOTE: In macOS, Control + clicking produces a right clicking
-					this->on_right_tap(unmasked_graphlet, local_x, local_y);
-				} break;
+					handled = info->selected;
+				}; break;
 				}
 			}
 
@@ -1007,15 +1006,12 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 				case PointerUpdateKind::LeftButtonPressed: {
 					this->on_tap(nullptr, x, y);
 				} break;
-				case PointerUpdateKind::RightButtonReleased:
-				case PointerUpdateKind::RightButtonPressed: {
-					// NOTE: In macOS, Control + clicking produces a right clicking
-					this->on_right_tap(nullptr, x, y);
-				} break;
 				}
 			}
 		} else {
 			this->on_gesture(this->figure_anchors, x, y);
+
+			handled = true;
 		}
 
 #ifdef _DEBUG
@@ -1024,7 +1020,7 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 		this->figure_anchors.clear();
 	}
 
-	return true;
+	return handled;
 }
 
 bool Planet::on_pointer_moveout(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {

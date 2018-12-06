@@ -156,12 +156,11 @@ public:
 		this->DisplayMode = SplitViewDisplayMode::Overlay;
 		this->IsPaneOpen = false;
 
-		// for Mouse pointer
 		this->PointerMoved += ref new PointerEventHandler(this, &CH6000m3::on_pointer_moved);
+		this->PointerReleased += ref new PointerEventHandler(this, &CH6000m3::on_pointer_released);
 
-		// for TouchScreen pointer, but others can also be satisfied
-		this->AddHandler(UIElement::PointerPressedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed), true);
-		this->AddHandler(UIElement::PointerReleasedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_released), true);
+		//this->AddHandler(UIElement::PointerPressedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_pressed), true);
+		//this->AddHandler(UIElement::PointerReleasedEvent, ref new PointerEventHandler(this, &CH6000m3::on_pointer_released), true);
 	}
 
 public:
@@ -184,21 +183,6 @@ public:
 	}
 
 private:
-	void on_pointer_pressed(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-		auto pt = args->GetCurrentPoint(this);
-		float x = pt->Position.X;
-
-		if (pt->Properties->IsLeftButtonPressed) {
-			if (x <= tiny_font_size) {
-				this->IsPaneOpen = true;
-				args->Handled = true;
-			} else if (x > this->OpenPaneLength) {
-				this->IsPaneOpen = false;
-				args->Handled = true;
-			}
-		}
-	}
-	
 	void on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 		auto pt = args->GetCurrentPoint(this);
 		float x = pt->Position.X;
@@ -217,6 +201,19 @@ private:
 	void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 		if ((args->KeyModifiers & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
 			this->universe->switch_plc_master_mode();
+		} else {
+			auto pt = args->GetCurrentPoint(this);
+			float x = pt->Position.X;
+
+			if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
+				if (x <= tiny_font_size) {
+					this->IsPaneOpen = true;
+					args->Handled = true;
+				} else if (x > this->OpenPaneLength) {
+					this->IsPaneOpen = false;
+					args->Handled = true;
+				}
+			}
 		}
 	}
 

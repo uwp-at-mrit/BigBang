@@ -25,7 +25,6 @@ namespace WarGrey::SCADA {
 		virtual void on_character(unsigned int keycode) {}
 		virtual void on_hover(float local_x, float local_y) {}
 		virtual void on_tap(float local_x, float local_y) {}
-		virtual void on_right_tap(float local_x, float local_y) {}
 		virtual void on_goodbye(float local_x, float local_y) {}
 
 	public:

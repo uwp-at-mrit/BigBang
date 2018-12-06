@@ -21,11 +21,7 @@ CyberSpace::~CyberSpace() {}
 void CyberSpace::on_tap(IGraphlet* g, float x, float y) {
 	if (g == nullptr) {
 		this->insert(new Labellet(make_wstring(L"(%f, %f)", x, y)), x, y);
-	}
-}
-
-void CyberSpace::on_right_tap(IGraphlet* g, float x, float y) {
-	if (g != nullptr) {
+	} else {
 		this->remove(g);
 	}
 }

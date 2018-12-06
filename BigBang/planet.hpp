@@ -87,7 +87,6 @@ namespace WarGrey::SCADA {
 		virtual void on_swipe(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_tap_selected(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
-		virtual void on_right_tap(WarGrey::SCADA::IGraphlet* g, float local_x, float local_y) {}
 		virtual void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float planet_x, float planet_y) {}
 
 	public:
