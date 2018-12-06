@@ -786,7 +786,17 @@ void Planet::on_tap(IGraphlet* g, float local_x, float local_y) {
 
 /************************************************************************************************/
 bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) {
-	if (!this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+	if (this->keyboard->shown() && (pdt == PointerDeviceType::Touch)) {
+		float local_x = x - this->keyboard_x;
+		float local_y = y - this->keyboard_y;
+
+		if (this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y)) {
+			this->keyboard->on_hover(local_x, local_y);
+		} else {
+			this->keyboard->on_goodbye(local_x, local_y);
+			this->keyboard->show(false);
+		}
+	} else {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 
 		this->keyboard->show(false);
@@ -808,16 +818,22 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 			if (pdt == PointerDeviceType::Touch) {
 				this->track_thickness = 8.0F;
 
-				if (this->hovering_graphlet != nullptr) {
-					GraphletInfo* info = GRAPHLET_INFO(this->hovering_graphlet);
+				if (unmasked_graphlet != this->hovering_graphlet) {
+					this->say_goodbye_to_the_hovering_graphlet(x, y);
+				}
+
+				if (unmasked_graphlet != nullptr) {
+					GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 					float local_x = x - info->x;
 					float local_y = y - info->y;
 
-					if (unmasked_graphlet->handles_events()) {
-						unmasked_graphlet->on_hover(local_x, local_y);
+					this->hovering_graphlet = unmasked_graphlet;
+
+					if (this->hovering_graphlet->handles_events()) {
+						this->hovering_graphlet->on_hover(local_x, local_y);
 					}
 
-					this->on_hover(unmasked_graphlet, local_x, local_y);
+					this->on_hover(this->hovering_graphlet, local_x, local_y);
 				}
 			}
 
@@ -870,10 +886,10 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 	if (puk != PointerUpdateKind::LeftButtonPressed) {
 		// NOTE non-left clicking always produces PointerUpdateKind::Other
 		if (this->keyboard->shown()) {
-			float local_x = x - keyboard_x;
-			float local_y = y - keyboard_y;
+			float local_x = x - this->keyboard_x;
+			float local_y = y - this->keyboard_y;
 
-			if (this->keyboard->is_colliding_with_mouse(x, y, keyboard_x, keyboard_y)) {
+			if (this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y)) {
 				this->keyboard->on_hover(local_x, local_y);
 			} else {
 				this->keyboard->on_goodbye(local_x, local_y);
@@ -896,7 +912,7 @@ bool Planet::on_pointer_moved(float x, float y, PointerDeviceType pdt, PointerUp
 					this->hovering_graphlet->on_hover(local_x, local_y);
 				}
 
-				this->on_hover(unmasked_graphlet, local_x, local_y);
+				this->on_hover(this->hovering_graphlet, local_x, local_y);
 
 				handled = true;
 			}
