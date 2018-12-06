@@ -29,7 +29,7 @@ namespace WarGrey::SCADA {
 		void save(long long timepoint, double* values, unsigned int n) override;
 
 	protected:
-		void on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* current_dbc) override;
+		void on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* current_dbc, long long timepoint) override;
 
 	protected:
 		~EarthWorkDataSource() noexcept;

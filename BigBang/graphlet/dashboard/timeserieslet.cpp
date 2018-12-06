@@ -63,8 +63,8 @@ public:
 TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(minute_span_s);
 	ts.span = minute_span_s * std::max(count, 1U);
+	ts.start = current_floor_seconds(minute_span_s) - ts.span / 2;
 	ts.step = step;
 
 	return ts;
@@ -73,8 +73,8 @@ TimeSeries WarGrey::SCADA::make_minute_series(unsigned int count, unsigned int s
 TimeSeries WarGrey::SCADA::make_hour_series(unsigned int count, unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(hour_span_s);
 	ts.span = hour_span_s * std::max(count, 1U);
+	ts.start = current_floor_seconds(hour_span_s) - ts.span / 2;
 	ts.step = step;
 
 	return ts;
@@ -83,8 +83,8 @@ TimeSeries WarGrey::SCADA::make_hour_series(unsigned int count, unsigned int ste
 TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	TimeSeries ts;
 
-	ts.start = current_floor_seconds(day_span_s);
 	ts.span = day_span_s;
+	ts.start = current_floor_seconds(ts.span);
 	ts.step = step;
 
 	return ts;
@@ -147,7 +147,7 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 		long long existed_earliest_s = this->next_loading_timepoint;
 		long long request_earliest_s = std::min(ts->start, now - this->history_max);
-		long long request_interval = axes_interval;
+		long long request_interval = this->history_max / this->realtime.step;
 		
 		if (existed_earliest_s > request_earliest_s) {
 			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {

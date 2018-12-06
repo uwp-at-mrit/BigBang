@@ -27,7 +27,7 @@ bool RotativeSQLite3::ready() {
 	return (this->employee != nullptr);
 }
 
-void RotativeSQLite3::on_file_rotated(StorageFile^ prev_db, StorageFile^ current_db) {
+void RotativeSQLite3::on_file_rotated(StorageFile^ prev_db, StorageFile^ current_db, long long timepoint) {
 	SQLite3* new_employee = new SQLite3(current_db->Path->Data(), this->logger, this->xCallback);
 
 	if (this->busy_timeout > 0) {
@@ -39,7 +39,7 @@ void RotativeSQLite3::on_file_rotated(StorageFile^ prev_db, StorageFile^ current
 	this->lockfree_previous_connection();
 
 	this->prev_employee = this->employee;
-	this->on_database_rotated(this->prev_employee, new_employee);
+	this->on_database_rotated(this->prev_employee, new_employee, timepoint);
 	this->employee = new_employee;
 
 	// destruct last connection until next rotation for lockfree purpose

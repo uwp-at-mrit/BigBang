@@ -36,10 +36,10 @@ namespace WarGrey::SCADA {
 		bool ready();
 
 	protected:
-		virtual void on_database_rotated(WarGrey::SCADA::SQLite3* prev_sqlite3, WarGrey::SCADA::SQLite3* current_sqlite3) = 0;
+		virtual void on_database_rotated(WarGrey::SCADA::SQLite3* prev_sqlite3, WarGrey::SCADA::SQLite3* current_sqlite3, long long timepoint) = 0;
 
 	protected:
-		void on_file_rotated(Windows::Storage::StorageFile^ prev, Windows::Storage::StorageFile^ current) override;
+		void on_file_rotated(Windows::Storage::StorageFile^ prev, Windows::Storage::StorageFile^ current, long long timepoint) override;
 
 	private:
 		void lockfree_previous_connection();

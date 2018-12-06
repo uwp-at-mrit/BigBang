@@ -30,8 +30,8 @@ namespace WarGrey::SCADA {
 
 	protected:
 		virtual void on_folder_ready(Windows::Storage::StorageFolder^ path, bool newly_folder) {}
-		virtual void on_file_reused(Windows::Storage::StorageFile^ current_file);
-		virtual void on_file_rotated(Windows::Storage::StorageFile^ prev_file, Windows::Storage::StorageFile^ current_file) = 0;
+		virtual void on_file_reused(Windows::Storage::StorageFile^ current_file, long long timepoint);
+		virtual void on_file_rotated(Windows::Storage::StorageFile^ prev_file, Windows::Storage::StorageFile^ current_file, long long timepoint) = 0;
 
 	protected:
 		virtual void on_exception(Platform::Exception^ e);

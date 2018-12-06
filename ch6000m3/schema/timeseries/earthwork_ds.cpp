@@ -43,7 +43,8 @@ public:
 
 public:
 	bool step(EarthWork& ework, bool asc, int code) override {
-		bool okay = ((ework.timestamp >= this->open_timepoint) && (ework.timestamp <= this->close_timepoint));
+		long long ts = ework.timestamp;
+		bool okay = ((ts >= this->open_timepoint) && (ts <= this->close_timepoint));
 
 		if (okay) {
 			this->tempdata[_I(EWTS::EarthWork)] = ework.product;
@@ -52,12 +53,12 @@ public:
 			this->tempdata[_I(EWTS::Loading)] = ework.loading;
 			this->tempdata[_I(EWTS::Displacement)] = ework.displacement;
 
-			this->receiver->on_datum_values(ework.timestamp, tempdata, _N(EWTS));
+			this->receiver->on_datum_values(ts, tempdata, _N(EWTS));
 
 			this->count++;
 		}
 
-		return true;
+		return (asc ? (ts <= close_timepoint) : (ts >= open_timepoint));
 	}
 
 public:
@@ -96,7 +97,7 @@ bool EarthWorkDataSource::loading() {
 	return (this->open_timepoint > 0LL);
 }
 
-void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* dbc) {
+void EarthWorkDataSource::on_database_rotated(WarGrey::SCADA::SQLite3* prev_dbc, WarGrey::SCADA::SQLite3* dbc, long long timepoint) {
 	// TODO: move the temporary data from in-memory SQLite3 into the current SQLite3
 
 	create_earthwork(dbc, true);
@@ -167,14 +168,14 @@ void EarthWorkDataSource::do_loading_async(ITimeSeriesDataReceiver* receiver
 				this->dbc->set_busy_handler(earthwork_busy_handler);
 
 				receiver->begin_maniplation_sequence();
-				foreach_earthwork(dbc, &ecursor, 0, 0, earthwork::timestamp, asc);
+				foreach_earthwork(this->dbc, &ecursor, 0, 0, earthwork::timestamp, asc);
 				receiver->end_maniplation_sequence();
 
 				delete this->dbc;
 				this->dbc = nullptr;
 
 				ms = current_inexact_milliseconds() - ms;
-				this->get_logger()->log_message(Log::Debug, L"loaded %d record(s) from[%s] within %lfms",
+				this->get_logger()->log_message(Log::Info, L"loaded %d record(s) from[%s] within %lfms",
 					ecursor.count, dbsource->Data(), ms);
 
 				this->do_loading_async(receiver, next_timepoint, end, interval,

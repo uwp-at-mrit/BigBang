@@ -100,12 +100,13 @@ void IRotativeDirectory::mission_start() {
 	{ // create or reuse the current file
 		CreationCollisionOption cco = CreationCollisionOption::OpenIfExists;
 		cancellation_token watcher = this->destructing_watcher.get_token();
-		Platform::String^ current_file = this->resolve_filename();
+		long long now = current_seconds();
+		Platform::String^ current_file = this->resolve_filename(now);
 
 		create_task(this->root->CreateFileAsync(current_file, cco), watcher).then([=](task<StorageFile^> creating) {
 			try {
 				this->current_file = creating.get();
-				this->on_file_reused(this->current_file);
+				this->on_file_reused(this->current_file, this->timepoint(now));
 
 				this->timer->Interval = this->resolve_interval();
 				this->timer->Start();
@@ -119,7 +120,8 @@ void IRotativeDirectory::mission_start() {
 void IRotativeDirectory::do_rotating_with_this_bad_named_function_which_not_designed_for_client_applications() {
 	// NOTE: The timer is not precise in nature, sometimes it may be triggered early.
 	long long next_timepoint = current_ceiling_seconds(this->span);
-	Platform::String^ current_file = this->resolve_filename();
+	long long now = current_seconds();
+	Platform::String^ current_file = this->resolve_filename(now);
 
 	if (this->current_file->Name->Equals(current_file)) {
 		long long ms = next_timepoint * 1000LL - current_milliseconds();
@@ -135,7 +137,7 @@ void IRotativeDirectory::do_rotating_with_this_bad_named_function_which_not_desi
 				StorageFile^ prev_file = this->current_file;
 
 				this->current_file = creating.get();
-				this->on_file_rotated(prev_file, this->current_file);
+				this->on_file_rotated(prev_file, this->current_file, this->timepoint(now));
 
 				this->timer->Interval = this->resolve_interval();
 			} catch (Platform::Exception^ e) {
@@ -173,8 +175,8 @@ TimeSpan IRotativeDirectory::resolve_interval() {
 	return timepoint;
 }
 
-void IRotativeDirectory::on_file_reused(StorageFile^ file) {
-	this->on_file_rotated(nullptr, file);
+void IRotativeDirectory::on_file_reused(StorageFile^ file, long long timepoint) {
+	this->on_file_rotated(nullptr, file, timepoint);
 }
 
 StorageFolder^ IRotativeDirectory::rootdir() {
