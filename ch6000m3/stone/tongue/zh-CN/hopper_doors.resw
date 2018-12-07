@@ -132,7 +132,7 @@
   <data name="Trim" xml:space="preserve">
     <value>纵倾角度</value>
   </data>
-  <data name="Vessel" xml:space="preserve">
+  <data name="Capacity" xml:space="preserve">
     <value>舱容</value>
   </data>
   <data name="Displacement" xml:space="preserve">

@@ -97,7 +97,7 @@ public:
 			this->set_cylinder(EWTS::Displacement, values, DBD(DB2, displacement_value));
 			this->set_cylinder(EWTS::Loading, values, DBD(DB2, loading_value));
 			this->set_cylinder(EWTS::EarthWork, values, DBD(DB2, earthwork_value));
-			this->set_cylinder(EWTS::Vessel, values, DBD(DB2, vessel_value));
+			this->set_cylinder(EWTS::Capacity, values, DBD(DB2, vessel_value));
 
 			this->timeseries->set_values(values);
 		}
@@ -123,7 +123,7 @@ public:
 
 		cylinder_height = ship_height * 0.42F;
 		this->load_cylinder(this->cylinders, EWTS::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, EWTS::Vessel, cylinder_height, vessel_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, EWTS::Capacity, cylinder_height, vessel_range, 0U, "meter3");
 		this->load_cylinder(this->cylinders, EWTS::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
 		this->load_cylinder(this->cylinders, EWTS::Loading, cylinder_height, loading_range, 0U, "ton");
 		this->load_cylinder(this->cylinders, EWTS::Displacement, cylinder_height, displacement_range, 0U, "ton");
@@ -146,8 +146,8 @@ public:
 				timeseries_range, make_hour_series(8U, 7U), lines_width, lines_height, 5U, 1U));
 
 			this->timeseries->set_style(style);
-			this->timeseries->close_line(EWTS::EarthWork, true);
-			this->timeseries->hide_line(EWTS::Vessel, true);
+			this->timeseries->close_line(EWTS::EarthWork, 0.75);
+			this->timeseries->hide_line(EWTS::Capacity, false);
 			this->timeseries->hide_line(EWTS::HopperHeight, true);
 		}
 	}

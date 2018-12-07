@@ -95,7 +95,7 @@ protected:
 			this->add_planet(new PerformancePage(this->device));
 		}
 
-		this->transfer_to(9);
+		this->transfer_to(6);
 	}
 
 protected private:
@@ -206,7 +206,7 @@ private:
 			float x = pt->Position.X;
 
 			if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
-				if (x <= tiny_font_size) {
+				if (x <= normal_font_size) {
 					this->IsPaneOpen = true;
 					args->Handled = true;
 				} else if (x > this->OpenPaneLength) {

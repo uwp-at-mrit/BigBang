@@ -8,11 +8,11 @@
 
 namespace WarGrey::SCADA {
 	private enum class EWTS {
-		EarthWork, Vessel, HopperHeight, Loading, Displacement,
+		EarthWork, Capacity, HopperHeight, Loading, Displacement,
 		_ 
 	};
 
-	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ earthwork_line_color_dictionary(unsigned int index);
+	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ earthwork_line_color_dictionary(unsigned int index);
 
 	private class EarthWorkDataSource
 		: public WarGrey::SCADA::ITimeSeriesDataSource

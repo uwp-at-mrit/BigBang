@@ -113,8 +113,7 @@ static float resolve_interval(unsigned int* step, double vmin, double vmax, floa
 }
 
 /*************************************************************************************************/
-HHatchMarkMetrics WarGrey::SCADA::hhatchmark_metrics(double vmin, double vmax, float thickness
-	, unsigned int precision, CanvasTextFormat^ font) {
+HHatchMarkMetrics WarGrey::SCADA::hhatchmark_metrics(double vmin, double vmax, float thickness, unsigned int precision, CanvasTextFormat^ font) {
 	HHatchMarkMetrics metrics;
 	Platform::String^ min_mark = make_mark_string(vmin, precision);
 	Platform::String^ max_mark = make_mark_string(vmax, precision);
@@ -130,7 +129,7 @@ HHatchMarkMetrics WarGrey::SCADA::hhatchmark_metrics(double vmin, double vmax, f
 	metrics.top_space = te.tspace;
 
 	metrics.hatch_x = metrics.ch * min_span * 0.5F;
-	metrics.hatch_right_space = metrics.ch * max_span * 0.5F;
+	metrics.hatch_rx = metrics.ch * max_span * 0.5F;
 	metrics.hatch_height = metrics.ch * hatch_long_ratio + thickness;
 	
 	metrics.height = metrics.em + metrics.gap_space + metrics.hatch_height;
@@ -145,7 +144,7 @@ CanvasGeometry^ WarGrey::SCADA::hthatchmark(float width, double vmin, double vma
 	TextExtent te;
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	HHatchMarkMetrics metrics = hhatchmark_metrics(vmin, vmax, thickness, precision, font);
-	float interval = resolve_interval(&step, vmin, vmax, width, metrics.hatch_x, metrics.hatch_right_space, precision, &skip, &diff);
+	float interval = resolve_interval(&step, vmin, vmax, width, metrics.hatch_x, metrics.hatch_rx, precision, &skip, &diff);
 	float mark_ty = -metrics.top_space;
 	
 	metrics.hatch_y = metrics.height - metrics.hatch_height;
@@ -172,7 +171,7 @@ CanvasGeometry^ WarGrey::SCADA::hbhatchmark(float width, double vmin, double vma
 	CanvasTextFormat^ font = ((ft == nullptr) ? default_mark_font : ft);
 	HHatchMarkMetrics metrics = hhatchmark_metrics(vmin, vmax, thickness, precision, font);
 	float mark_ty = metrics.hatch_height + metrics.gap_space - metrics.top_space;
-	float interval = resolve_interval(&step, vmin, vmax, width, metrics.hatch_x, metrics.hatch_right_space, precision, &skip, &diff);
+	float interval = resolve_interval(&step, vmin, vmax, width, metrics.hatch_x, metrics.hatch_rx, precision, &skip, &diff);
 	
 	metrics.hatch_y = thickness * 0.5F;
 

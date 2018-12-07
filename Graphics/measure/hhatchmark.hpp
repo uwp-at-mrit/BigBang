@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 		float hatch_y;
 		float hatch_width;
 		float hatch_height;
-		float hatch_right_space;
+		float hatch_rx;
 	};
 
 	WarGrey::SCADA::HHatchMarkMetrics hhatchmark_metrics(double vmin, double vmax, float thickness,

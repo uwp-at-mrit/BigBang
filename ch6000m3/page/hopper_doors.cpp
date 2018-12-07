@@ -44,7 +44,7 @@ private enum class HD : unsigned int {
 	Port, Starboard,
 	
 	// Cylinders
-	EarthWork, Vessel, HopperHeight, Loading, Displacement,
+	EarthWork, Capacity, HopperHeight, Loading, Displacement,
 	
 	// Hydraulic pump dimensions, see hydraulics.cpp
 	A, D, E, H,
@@ -76,7 +76,7 @@ public:
 		this->set_cylinder(HD::Displacement, DBD(DB2, displacement_value));
 		this->set_cylinder(HD::Loading, DBD(DB2, loading_value));
 		this->set_cylinder(HD::EarthWork, DBD(DB2, earthwork_value));
-		this->set_cylinder(HD::Vessel, DBD(DB2, vessel_value));
+		this->set_cylinder(HD::Capacity, DBD(DB2, vessel_value));
 
 		this->dimensions[HD::BowDraft]->set_value(DBD(DB2, fixed_bow_draught));
 		this->dimensions[HD::SternDraft]->set_value(DBD(DB2, fixed_stern_draught));
@@ -153,7 +153,7 @@ public:
 
 		cylinder_height = cell_height * 1.618F;
 		this->load_cylinder(this->cylinders, HD::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
-		this->load_cylinder(this->cylinders, HD::Vessel, cylinder_height, vessel_range, 0U, "meter3");
+		this->load_cylinder(this->cylinders, HD::Capacity, cylinder_height, vessel_range, 0U, "meter3");
 		this->load_cylinder(this->cylinders, HD::HopperHeight, cylinder_height, hopper_height_range, 2U, "meter");
 		this->load_cylinder(this->cylinders, HD::Loading, cylinder_height, loading_range, 0U, "ton");
 		this->load_cylinder(this->cylinders, HD::Displacement, cylinder_height, displacement_range, 0U, "ton");

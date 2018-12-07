@@ -15,12 +15,12 @@ using namespace Windows::Storage;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
 /*************************************************************************************************/
-ICanvasBrush^ WarGrey::SCADA::earthwork_line_color_dictionary(unsigned int index) {
-	ICanvasBrush^ color = nullptr;
+CanvasSolidColorBrush^ WarGrey::SCADA::earthwork_line_color_dictionary(unsigned int index) {
+	CanvasSolidColorBrush^ color = nullptr;
 
 	switch (_E(EWTS, index % _N(EWTS))) {
 	case EWTS::EarthWork: color = Colours::Khaki; break;
-	case EWTS::Vessel: color = Colours::Cyan; break;
+	case EWTS::Capacity: color = Colours::Cyan; break;
 	case EWTS::HopperHeight: color = Colours::Crimson; break;
 	case EWTS::Loading: color = Colours::Orange; break;
 	case EWTS::Displacement: color = Colours::MediumSeaGreen; break;
@@ -48,7 +48,7 @@ public:
 
 		if (okay) {
 			this->tempdata[_I(EWTS::EarthWork)] = ework.product;
-			this->tempdata[_I(EWTS::Vessel)] = ework.vessel;
+			this->tempdata[_I(EWTS::Capacity)] = ework.vessel;
 			this->tempdata[_I(EWTS::HopperHeight)] = ework.hopper_height;
 			this->tempdata[_I(EWTS::Loading)] = ework.loading;
 			this->tempdata[_I(EWTS::Displacement)] = ework.displacement;
@@ -129,7 +129,7 @@ void EarthWorkDataSource::save(long long timepoint, double* values, unsigned int
 	for (unsigned int i = 0; i < n; i++) {
 		switch (_E(EWTS, i)) {
 		case EWTS::EarthWork: ework.product = values[i]; break;
-		case EWTS::Vessel : ework.vessel = values[i]; break;
+		case EWTS::Capacity : ework.vessel = values[i]; break;
 		case EWTS::HopperHeight: ework.hopper_height = values[i]; break;
 		case EWTS::Loading: ework.loading = values[i]; break;
 		case EWTS::Displacement: ework.displacement = values[i]; break;

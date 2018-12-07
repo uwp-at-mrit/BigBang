@@ -10,7 +10,7 @@ using namespace Windows::UI;
 using namespace Windows::System;
 using namespace Microsoft::Graphics::Canvas;
 
-static const long long numpad_tap_duration = 3000000LL;
+static const long long keyboard_tap_duration = 2000000LL;
 
 static void fill_cellbox(Rect& box, const KeyboardCell cell, float cellsize, float gapsize, float* width, float* height) {
 	float flcol = float(cell.col);
@@ -56,14 +56,14 @@ void Keyboard::fill_extent(float x, float y, float* w, float* h) {
 }
 
 void Keyboard::update(long long count, long long interval, long long uptime) {
-	if (interval > numpad_tap_duration) {
+	if (interval > keyboard_tap_duration) {
 		this->uptime = uptime + interval;
 	} else {
 		this->uptime = uptime;
 	}
 
 	if (this->tapped) {
-		if (uptime - this->taptime > numpad_tap_duration) {
+		if (uptime - this->taptime > keyboard_tap_duration) {
 			this->master->notify_graphlet_updated(this);
 			this->tapped = false;
 		}
@@ -124,6 +124,7 @@ bool Keyboard::on_key(VirtualKey key, bool wargrey_keyboard) {
 
 void Keyboard::on_goodbye(float local_x, float local_y) {
 	this->current_key = VirtualKey::None;
+	this->master->notify_graphlet_updated(this);
 }
 
 VirtualKey Keyboard::find_tapped_key(float mouse_x, float mouse_y) {

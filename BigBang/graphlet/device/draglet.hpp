@@ -37,6 +37,11 @@ namespace WarGrey::SCADA {
 		float thickness;
 	};
 
+	private struct DragLinesStyle {
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tild_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_color;
+	};
+
 	float drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
@@ -45,7 +50,7 @@ namespace WarGrey::SCADA {
 	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
 	public:
-		IDraglet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, float width, float height);
+		IDraglet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, bool leftward);
 
 	public:
 		void update(long long count, long long interval, long long uptime) override;
@@ -134,8 +139,7 @@ namespace WarGrey::SCADA {
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float width, float height, float hatchmark_interval = 5.0F,
-			unsigned int outside_step = 2U, unsigned int inside_step = 1U);
+			float ws_height, float hatchmark_interval = 5.0F, unsigned int outboard_step = 2U, unsigned int inboard_step = 1U);
 
 	public:
 		void construct() override;
@@ -156,16 +160,16 @@ namespace WarGrey::SCADA {
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
 
 	private:
-		double outside_most;
-		double inside_most;
+		double outboard_most;
+		double inboard_most;
 		unsigned int step;
 	};
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragXZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float width, float height, double max_depth_degrees = 45.0,
-			float hatchmark_interval = 5.0F, float suction_lowest = -20.0F);
+			float ws_width, double max_depth_degrees = 45.0,
+			float hatchmark_interval = 5.0F, float suction_lowest = -15.0F);
 
 	public:
 		void construct() override;

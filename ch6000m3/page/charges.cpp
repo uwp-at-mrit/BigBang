@@ -224,7 +224,9 @@ public:
 		}
 
 		if (this->valve_open(CS::D023)) {
-			this->station->append_subtrack(CS::I0923, CS::I0723, water_color);
+			CS d0810[] = { CS::D008, CS::I0723, CS::I0923, CS::D010 };
+
+			this->station->append_subtrack(d0810, water_color);
 			this->nintercs[CS::n0723]->set_color(water_color);
 			this->nintercs[CS::n0923]->set_color(water_color);
 		} else {

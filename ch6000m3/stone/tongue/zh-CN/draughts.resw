@@ -126,7 +126,7 @@
   <data name="SternDraft" xml:space="preserve">
     <value>艉吃水</value>
   </data>
-  <data name="Vessel" xml:space="preserve">
+  <data name="Capacity" xml:space="preserve">
     <value>舱容</value>
   </data>
   <data name="Displacement" xml:space="preserve">

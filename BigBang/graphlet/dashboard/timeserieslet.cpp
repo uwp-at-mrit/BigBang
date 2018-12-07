@@ -34,7 +34,7 @@ public:
 		this->values.push_back(value);
 	}
 
-	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style, ICanvasBrush^ color = nullptr) {
+	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style, CanvasSolidColorBrush^ color = nullptr) {
 		Platform::String^ legend = this->name + ": ";
 
 		legend += (this->values.empty() ? speak("nodatum", "status") : flstring(this->values.back(), precision));
@@ -52,10 +52,10 @@ public:
 	float y_axis_selected;
 
 public:
-	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
+	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color;
+	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ close_color;
 	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ legend;
 	Platform::String^ name;
-	bool closed;
 	bool hiden;
 };
 
@@ -90,11 +90,11 @@ TimeSeries WarGrey::SCADA::make_today_series(unsigned int step) {
 	return ts;
 }
 
-ICanvasBrush^ WarGrey::SCADA::lookup_default_light_color(unsigned int idx) {
+CanvasSolidColorBrush^ WarGrey::SCADA::lookup_default_light_color(unsigned int idx) {
 	return make_solid_brush(lookup_light_color(idx + 1));
 }
 
-ICanvasBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int idx) {
+CanvasSolidColorBrush^ WarGrey::SCADA::lookup_default_dark_color(unsigned int idx) {
 	return make_solid_brush(lookup_dark_color(idx + 1));
 }
 
@@ -165,7 +165,7 @@ void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 	}
 
 	this->lines[idx].name = name;
-	this->lines[idx].closed = false;
+	this->lines[idx].close_color = nullptr;
 	this->lines[idx].hiden = false;
 }
 
@@ -379,7 +379,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					x_axis_max = last_x;
 				} else {
 					if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
-						if (!line->closed) {
+						if (line->close_color == nullptr) {
 							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
 								style.lines_thickness, style.lines_style);
 						} else {
@@ -417,7 +417,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 					{ // draw closed line area
 						CanvasGeometry^ garea = CanvasGeometry::CreatePath(area);
 
-						ds->FillGeometry(garea, 0.0F, 0.0F, line->color);
+						ds->FillGeometry(garea, 0.0F, 0.0F, line->close_color);
 						ds->DrawGeometry(garea, 0.0F, 0.0F, line->color, style.lines_thickness);
 
 					}
@@ -452,7 +452,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				}
 
 				ds->DrawTextLayout(desc, x_axis_selected + this_xoff, this_y,
-					(line->closed ? style.selected_color : line->color));
+					((line->close_color != nullptr) ? style.selected_color : line->color));
 
 				last_xoff = this_xoff;
 				last_y = this_box.Y + this_y;
@@ -474,8 +474,12 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 		style.border_color, style.border_thickness);
 }
 
-void ITimeSerieslet::close_line(unsigned int idx, bool on_off) {
-	this->lines[idx].closed = on_off;
+void ITimeSerieslet::close_line(unsigned int idx, double alpha) {
+	if (alpha == 0.0) {
+		this->lines[idx].close_color = nullptr;
+	} else {
+		this->lines[idx].close_color = Colours::make(this->lines[idx].color, alpha);
+	}
 }
 
 void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {

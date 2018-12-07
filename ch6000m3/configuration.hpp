@@ -72,6 +72,7 @@ static const double drag_visor_degrees_min = 0.0;
 static const double drag_visor_degrees_max = 50.0;
 static const double drag_arm_degrees_min = 0.0;
 static const double drag_arm_degrees_max = 60.0;
+static const double drag_depth_degrees_max = 36.0;
 
 static const unsigned int default_ps_color = 0xFF0000;
 static const unsigned int default_sb_color = 0x008000;

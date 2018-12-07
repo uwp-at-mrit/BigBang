@@ -191,9 +191,7 @@ float WarGrey::SCADA::drag_depth(WarGrey::SCADA::DragInfo& info, double max_dept
 }
 
 /*************************************************************************************************/
-IDraglet::IDraglet(DragInfo& info, DragStyle& style, float width, float height)
-	: info(info), style(style), width(std::fabsf(width)), height(height), leftward(width < 0.0F) {
-
+IDraglet::IDraglet(DragInfo& info, DragStyle& style, bool leftward) : info(info), style(style), leftward(leftward) {
 	this->drag_length = this->info.trunnion_length;
 	for (unsigned int idx = 0; idx < sizeof(this->info.pipe_lengths) / sizeof(float); idx++) {
 		this->ujoints[idx].x = this->drag_length;
@@ -261,8 +259,7 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		arm->BeginFigure(this->_pseudo_suction);
 		arm->AddLine(this->_trunnion);
 
-		// TODO:  Why angles are slightly different than those read from PLC? (within 2.0deg)
-
+		// NOTE: If the angles are not the same as those received from PLC, They should check the drags
 		for (unsigned int idx = 0; idx < DRAG_SEGMENT_MAX_COUNT; idx++) {
 			if (this->info.pipe_lengths[idx] > 0.0F) {
 				this->rubbers[idx] = this->universal_joint;
@@ -307,31 +304,31 @@ double IDraglet::get_visor_earth_degrees() {
 }
 
 /*************************************************************************************************/
-DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float width, float height, float interval, unsigned int ostep, unsigned int istep)
-	: IDraglet(info, style, width, height) {
-	this->outside_most = interval * float(ostep);
-	this->inside_most = -interval * float(istep);
+DragXYlet::DragXYlet(DragInfo& info, DragStyle& style, float ws_height, float interval, unsigned int ostep, unsigned int istep)
+	: IDraglet(info, style, (ws_height < 0.0F)) {
+	float scale = ws_height / this->drag_length;
+
+	this->outboard_most = interval * float(ostep);
+	this->inboard_most = -interval * float(istep);
 	this->step = ostep + istep;
+
+	this->ws_width = -float(this->outboard_most - this->inboard_most) * scale;
+	this->ws_height = std::fabsf(ws_height);
 }
 
 void DragXYlet::construct() {
-	HHatchMarkMetrics metrics;
-	CanvasGeometry^ hm;
-	float drag_thickness_ratio = (this->info.pipe_radius * 2.0F) / this->drag_length;
-	float hm_width = this->width;
+	double vmin = (this->leftward ? this->outboard_most : this->inboard_most);
+	double vmax = (this->leftward ? this->inboard_most : this->outboard_most);
+	HHatchMarkMetrics metrics = hhatchmark_metrics(vmin, vmax, this->style.thickness, 0U);
+	float hm_width = std::fabsf(this->ws_width) + metrics.hatch_x + metrics.hatch_rx;
+	CanvasGeometry^ hm = hbhatchmark(hm_width, vmin, vmax, this->step, this->style.thickness, &metrics, 0U, true);
+	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
 	
-	if (this->leftward) {
-		hm = hbhatchmark(hm_width, this->outside_most, this->inside_most, this->step, this->style.thickness, &metrics, 0U, true);
-
-		this->ws_x = metrics.hatch_x;
-		this->ws_width = metrics.hatch_width;
-	} else {
-		hm = hbhatchmark(hm_width, this->inside_most, this->outside_most, this->step, this->style.thickness, &metrics, 0U, true);
-
-		this->ws_x = this->width - metrics.hatch_right_space;
-		this->ws_width = -metrics.hatch_width;
-	}
-
+	this->width = hm_width;
+	this->ws_x = (this->leftward ? metrics.hatch_x : (this->width - metrics.hatch_rx));
+	this->ws_y = metrics.height * 1.618F;
+	this->height = this->ws_height + this->ws_y + metrics.height * 2.0F + this->draghead_length * 0.382F;
+	
 	{ // make axes
 		float axis_by = this->height - metrics.height;
 		auto zero = vline(axis_by, this->style.thickness);
@@ -341,10 +338,8 @@ void DragXYlet::construct() {
 	}
 	
 	{ // make drag
-		this->draghead_length = this->height * drag_thickness_ratio * 3.14F;
-		this->ws_y = metrics.height * 1.618F;
-		this->ws_height = this->height - this->ws_y - metrics.height * 2.0F - this->draghead_length * 0.382F;
-		this->drag_thickness = this->ws_height * drag_thickness_ratio;
+		this->draghead_length = this->height * drag_thickness_scale * 3.14F;
+		this->drag_thickness = this->ws_height * drag_thickness_scale;
 		this->joint_radius = this->drag_thickness * 0.618F;
 
 		this->universal_joint = circle(this->joint_radius);
@@ -391,8 +386,8 @@ void DragXYlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 		ds->DrawGeometry(this->drag_body, x, y, this->style.color, 1.0F, this->suction_style);
 
 		{ // draw draghead
-			ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->style.color);
-			ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->style.body_color, this->style.thickness);
+			//ds->FillGeometry(this->universal_joint, draghead_x, draghead_y, this->style.color);
+			//ds->DrawGeometry(this->universal_joint, draghead_x, draghead_y, this->style.body_color, this->style.thickness);
 
 			ds->DrawCachedGeometry(this->visor_part, draghead_x, draghead_y, this->style.color);
 			ds->DrawCachedGeometry(this->draghead_part, draghead_x, draghead_y, this->style.head_color);
@@ -458,7 +453,7 @@ Platform::String^ DragXYlet::position_label(float3& position) {
 
 float2 DragXYlet::space_to_local(float3& position) {
 	float px = position.x / this->drag_length;
-	float py = float(this->outside_most - position.y) / float(this->outside_most - this->inside_most);
+	float py = float(this->outboard_most - position.y) / float(this->outboard_most - this->inboard_most);
 	float2 location;
 
 	location.x = this->ws_width * py + this->ws_x;
@@ -476,55 +471,58 @@ double DragXYlet::arctangent(float3& this_pt, float3& last_pt) {
 }
 
 /*************************************************************************************************/
-DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, float width, float height, double max_depth_degrees, float interval, float suction_lowest)
-	: IDraglet(info, style, width, height), depth_highest(interval), suction_lowest(suction_lowest) {
-	float radians = degrees_to_radians(max_depth_degrees);
+DragXZlet::DragXZlet(DragInfo& info, DragStyle& style, float ws_width, double max_depth_degrees, float interval, float suction_lowest)
+	: IDraglet(info, style, (ws_width < 0.0F)), depth_highest(interval), suction_lowest(suction_lowest) {
+	float scale = std::fabsf(ws_width) / this->drag_length;
+	float depth_max = std::ceilf(this->drag_length * std::sinf(degrees_to_radians(max_depth_degrees)) / interval) * interval;
 
-	this->depth_lowest = -std::ceilf(this->drag_length * std::sinf(radians) / interval) * interval;
+	this->ws_width = ws_width;
+	this->ws_height = float(this->depth_highest + depth_max) * scale;
+	this->depth_lowest = -depth_max;
 }
 
 void DragXZlet::construct() {
-	VHatchMarkMetrics hmetrics, tmetrics;
+	VHatchMarkMetrics tmetrics;
+	VHatchMarkMetrics hmetrics = vhatchmark_metrics(this->depth_lowest, this->depth_highest, this->style.thickness, 0U);
 	double head_range = this->depth_highest - this->depth_lowest;
 	double tail_range = this->depth_highest - this->suction_lowest;
-	float head_height = this->height;
-	float tail_height = head_height * float(tail_range / head_range) + this->style.thickness * float(head_range / tail_range);
+	float head_height = this->ws_height + hmetrics.em;
+	float tail_height = this->ws_height * float(tail_range / head_range) + this->style.thickness * float(head_range / tail_range) + hmetrics.em;
 	unsigned int head_step = ((unsigned int)std::round(head_range / this->depth_highest));
 	unsigned int tail_step = ((unsigned int)std::round(tail_range / this->depth_highest));
-	float drag_thickness_ratio = (this->info.pipe_radius * 2.0F) / this->drag_length;
+	float drag_thickness_scale = (this->info.pipe_radius * 2.0F) / this->drag_length;
+	float gapsize = hmetrics.em * 1.618F;
 
-	this->draghead_length = this->width * drag_thickness_ratio * 3.14F;
-	
-	if (this->leftward) {
+	this->height = head_height;
+	this->drag_thickness = std::fabsf(this->ws_width) * drag_thickness_scale;
+	this->draghead_length = this->drag_thickness * 3.14F;
+	this->joint_radius = this->drag_thickness * 0.618F;
+
+	if (this->leftward) { // ws_width < 0.0F
 		auto head = vlhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->style.thickness, &hmetrics, 0U, true);
 		auto tail = vrhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->style.thickness, &tmetrics, 0U, true);
 
+		this->width = hmetrics.width + tmetrics.width + gapsize * 2.0F - this->ws_width + this->draghead_length * 0.382F;
 		this->hatchmarks = geometry_freeze(geometry_union(head, tail, this->width - tmetrics.width, 0.0F));
 		
 		this->left_margin = hmetrics.width;
 		this->right_margin = this->width - tmetrics.width;
-		this->ws_x = this->right_margin - tmetrics.em * 1.618F;
-		this->ws_width = (this->left_margin + hmetrics.em * 1.618F + this->draghead_length * 0.314F) - this->ws_x;
+		this->ws_x = this->right_margin - gapsize;
 	} else {
 		auto head = vrhatchmark(head_height, this->depth_lowest, this->depth_highest, head_step, this->style.thickness, &hmetrics, 0U, true);
 		auto tail = vlhatchmark(tail_height, this->suction_lowest, this->depth_highest, tail_step, this->style.thickness, &tmetrics, 0U, true);
 
+		this->width = hmetrics.width + tmetrics.width + gapsize * 2.0F + this->ws_width + this->draghead_length * 0.5F;
 		this->hatchmarks = geometry_freeze(geometry_union(head, this->width - hmetrics.width, 0.0F, tail));
 		
 		this->left_margin = tmetrics.width;
 		this->right_margin = this->width - hmetrics.width;
-		this->ws_x = this->left_margin + tmetrics.em * 1.618F;
-		this->ws_width = (this->right_margin - hmetrics.em * 1.618F - this->draghead_length * 0.314F) - this->ws_x;
+		this->ws_x = this->left_margin + gapsize;
 	}
 
 	{ // make drag
 		this->ws_y = hmetrics.hatch_y;
-		this->ws_height = hmetrics.hatch_height;
-		this->drag_thickness = std::fabsf(this->ws_width) * drag_thickness_ratio;
-		this->joint_radius = this->drag_thickness * 0.618F;
-
 		this->universal_joint = circle(this->joint_radius);
-
 		this->set_figure(this->trunnion, this->ujoints, this->draghead, 0.0, true);
 	}
 }

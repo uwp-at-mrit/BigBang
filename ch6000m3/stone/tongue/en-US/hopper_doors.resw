@@ -132,8 +132,8 @@
   <data name="Trim" xml:space="preserve">
     <value>Trimming Angle</value>
   </data>
-  <data name="Vessel" xml:space="preserve">
-    <value>Cabin Vessel</value>
+  <data name="Capacity" xml:space="preserve">
+    <value>Cabin Capacity</value>
   </data>
   <data name="Displacement" xml:space="preserve">
     <value>Displacement</value>

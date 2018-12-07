@@ -126,8 +126,8 @@
   <data name="SternDraft" xml:space="preserve">
     <value>Stern Draught</value>
   </data>
-  <data name="Vessel" xml:space="preserve">
-    <value>Cabin Vessel</value>
+  <data name="Capacity" xml:space="preserve">
+    <value>Cabin Capacity</value>
   </data>
   <data name="Displacement" xml:space="preserve">
     <value>Displacement</value>

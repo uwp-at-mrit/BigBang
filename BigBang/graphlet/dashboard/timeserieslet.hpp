@@ -10,7 +10,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	typedef Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ (*lookup_line_color)(unsigned int idx);
+	typedef Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush ^ (*lookup_line_color)(unsigned int idx);
 
 	struct TimeSeriesLine;
 
@@ -26,8 +26,8 @@ namespace WarGrey::SCADA {
 	WarGrey::SCADA::TimeSeries make_hour_series(unsigned int count = 1U, unsigned int step = 5);
 	WarGrey::SCADA::TimeSeries make_today_series(unsigned int step = 11);
 
-	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lookup_default_light_color(unsigned int idx);
-	Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ lookup_default_dark_color(unsigned int idx);
+	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lookup_default_light_color(unsigned int idx);
+	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lookup_default_dark_color(unsigned int idx);
 
 	private struct TimeSeriesStyle {
 		WarGrey::SCADA::lookup_line_color lookup_color;
@@ -116,7 +116,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void construct_line(unsigned int idx, Platform::String^ name);
-		void close_line(unsigned int idx, bool yes_no);
+		void close_line(unsigned int idx, double alpha);
 		void hide_line(unsigned int idx, bool yes_no);
 
 	private:
@@ -214,8 +214,8 @@ namespace WarGrey::SCADA {
 			ITimeSerieslet::set_values(values, persistent);
 		}
 
-		void close_line(Name slot, bool yes_no) {
-			ITimeSerieslet::close_line(_I(slot), yes_no);
+		void close_line(Name slot, double alpha) {
+			ITimeSerieslet::close_line(_I(slot), alpha);
 		}
 
 		void hide_line(Name slot, bool yes_no) {

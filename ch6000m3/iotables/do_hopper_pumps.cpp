@@ -50,9 +50,8 @@ public:
 
 public:
 	bool can_execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		bool diagnostics = (GlandPumpAction::Diagnostics == cmd);
-
-		return plc->connected() && (plc->authorized() || diagnostics);
+		return (GlandPumpAction::Diagnostics == cmd)
+			|| (plc->connected() && plc->authorized());
 	}
 
 	void execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) {
