@@ -186,12 +186,6 @@
   <data name="Blet" xml:space="preserve">
     <value>B口</value>
   </data>
-  <data name="ps_gantry_settings" xml:space="preserve">
-    <value>左舷吊架限位假到位</value>
-  </data>
-  <data name="sb_gantry_settings" xml:space="preserve">
-    <value>右舷吊架限位假到位</value>
-  </data>
   <data name="SaddleLimited" xml:space="preserve">
     <value>搁墩到位</value>
   </data>
