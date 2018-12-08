@@ -208,3 +208,19 @@ uint16 WarGrey::SCADA::DO_LMOD_command(LMODCommand cmd) {
 
 	return index + offset;
 }
+
+uint16 WarGrey::SCADA::DO_gantry_virtual_action_command(DredgesPosition gid, GantryCommand cmd) {
+	uint16 index = 0U;
+
+	switch(gid) {
+	case DredgesPosition::psTrunnion: index = (cmd == GantryCommand::VirtualUp ? 793U : 794U); break;
+	case DredgesPosition::psIntermediate: index = (cmd == GantryCommand::VirtualUp ? 795U : 796U); break;
+	case DredgesPosition::psDragHead: index = (cmd == GantryCommand::VirtualUp ? 797U : 798U); break;
+
+	case DredgesPosition::sbTrunnion: index = (cmd == GantryCommand::VirtualUp ? 799U : 800U); break;
+	case DredgesPosition::sbIntermediate: index = (cmd == GantryCommand::VirtualUp ? 801U : 802U); break;
+	case DredgesPosition::sbDragHead: index = (cmd == GantryCommand::VirtualUp ? 803U : 804U); break;
+	}
+
+	return index;
+}

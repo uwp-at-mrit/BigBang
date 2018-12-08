@@ -665,6 +665,8 @@ void DragXZlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 			}
 		}
 
+		this->draw_metrics(ds, this->suction_m, x + this->_suction.x, y + this->_suction.y, lX, rX, y, Y, this->style.meter_color, true);
+
 		this->draw_metrics(ds, this->draghead_m, draghead_x, draghead_y, lX, rX, y, Y, this->style.meter_color, true);
 		this->draw_metrics(ds, this->forejoint_deg, last_x, last_y, lX, rX, y, Y, this->style.joint_angle_color, false);
 		this->draw_metrics(ds, this->forearm_deg,
@@ -727,6 +729,10 @@ double DragXZlet::arctangent(float3& this_pt, float3& last_pt) {
 	double degrees = radians_to_degrees(std::atan2(dy, dx));
 
 	return degrees;
+}
+
+void DragXZlet::on_position_changed(float3& trunnion, float3 ujoints[], float3& draghead) {
+	this->suction_m = make_text_layout(flstring(trunnion.z, this->style.precision), this->style.font);
 }
 
 float DragXZlet::x_to_x(double x) {

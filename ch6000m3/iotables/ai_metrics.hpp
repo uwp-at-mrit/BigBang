@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 	static unsigned int gps_speed = 584U;
 
 	static unsigned int ps_suction_draught = 20U; // same as the ps suction depth 
-	static unsigned int sb_suction_draught = 96U; // same as the sb suction draught
+	static unsigned int sb_suction_draught = 96U; // same as the sb suction depth
 
 	static unsigned int ps_fixed_bow_draught = 156U;
 	static unsigned int sb_fixed_bow_draught = 160U;

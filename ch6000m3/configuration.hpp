@@ -74,7 +74,7 @@ static const double drag_arm_degrees_min = 0.0;
 static const double drag_arm_degrees_max = 60.0;
 static const double drag_depth_degrees_max = 42.0;
 
-static const double dredging_target_depth = 15.0;
+static const double dredging_target_depth = 14.5;
 static const double dredging_tolerance_depth = 15.5;
 
 static const unsigned int default_ps_color = 0xFF0000;

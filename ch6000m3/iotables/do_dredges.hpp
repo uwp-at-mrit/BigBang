@@ -13,6 +13,7 @@ namespace WarGrey::SCADA {
 
 	private enum class SuctionCommand { Inflate, Deflate, _ };
 	private enum class DragVisorCommand { CResistance, _ };
+	private enum class GantryCommand { VirtualUp, VirtualOut, _ };
 	private enum class LMODCommand { Auto, _ };
 
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::PLCMaster* plc);
@@ -31,31 +32,5 @@ namespace WarGrey::SCADA {
 	uint16 DO_winch_override_command(WarGrey::SCADA::DredgesPosition id);
 	uint16 DO_suction_command(WarGrey::SCADA::SuctionCommand cmd, bool ps);
 	uint16 DO_LMOD_command(WarGrey::SCADA::LMODCommand cmd);
-
-	template<typename E>
-	uint16 DO_gantry_virtual_action_command(E id, bool ps) {
-		uint16 index = 0U;
-
-		if (ps) {
-			switch (id) {
-			case E::tVirtualUp:  index = 793U; break;
-			case E::tVirtualOut: index = 794U; break;
-			case E::iVirtualUp:  index = 795U; break;
-			case E::iVirtualOut: index = 796U; break;
-			case E::hVirtualUp:  index = 797U; break;
-			case E::hVirtualOut: index = 798U; break;
-			}
-		} else {
-			switch (id) {
-			case E::tVirtualUp:  index = 799U; break;
-			case E::tVirtualOut: index = 800U; break;
-			case E::iVirtualUp:  index = 801U; break;
-			case E::iVirtualOut: index = 802U; break;
-			case E::hVirtualUp:  index = 803U; break;
-			case E::hVirtualOut: index = 804U; break;
-			}
-		}
-
-		return index;
-	}
+	uint16 DO_gantry_virtual_action_command(WarGrey::SCADA::DredgesPosition gid, WarGrey::SCADA::GantryCommand cmd);
 }

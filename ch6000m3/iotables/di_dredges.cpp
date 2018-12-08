@@ -102,6 +102,14 @@ void WarGrey::SCADA::DI_ctension_button(Buttonlet* target, const uint8* db205, u
 	target->set_state(DBX(db205, idx_p1 - 1U), ButtonState::Executing, ButtonState::Default);
 }
 
+void WarGrey::SCADA::DI_gantry_button(Buttonlet* target, const uint8* db205, unsigned idx_p1) {
+	if (DBX(db205, idx_p1 - 1U)) {
+		target->set_state(ButtonState::Executing);
+	} else {
+		target->set_state(ButtonState::Default);
+	}
+}
+
 bool WarGrey::SCADA::DI_long_sb_drag(const uint8* db205) {
 	return DBX(db205, 1417U - 1U);
 }

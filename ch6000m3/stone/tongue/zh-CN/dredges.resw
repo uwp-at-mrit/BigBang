@@ -186,27 +186,6 @@
   <data name="Blet" xml:space="preserve">
     <value>B口</value>
   </data>
-  <data name="hVirtualOut" xml:space="preserve">
-    <value>耙头吊架假推出限位</value>
-  </data>
-  <data name="hVirtualUp" xml:space="preserve">
-    <value>耙头吊架假收进限位</value>
-  </data>
-  <data name="iVirtualOut" xml:space="preserve">
-    <value>耙中吊架假推出限位</value>
-  </data>
-  <data name="iVirtualUp" xml:space="preserve">
-    <value>耙中吊架假收进限位</value>
-  </data>
-  <data name="tVirtualOut" xml:space="preserve">
-    <value>弯管吊架假推出限位</value>
-  </data>
-  <data name="tVirtualUp" xml:space="preserve">
-    <value>弯管吊架假收进限位</value>
-  </data>
-  <data name="on" xml:space="preserve">
-    <value>有效</value>
-  </data>
   <data name="ps_gantry_settings" xml:space="preserve">
     <value>左舷吊架限位假到位</value>
   </data>

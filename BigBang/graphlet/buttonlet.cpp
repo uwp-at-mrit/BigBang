@@ -16,14 +16,11 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 
 static CanvasTextFormat^ button_default_font = make_bold_text_format("Consolas", 16.0F);
 
-Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, float thickness, float corner_radius, Platform::String^ tongue)
-	: Buttonlet(ButtonState::Default, caption, width, height, thickness, corner_radius, tongue) {}
+Buttonlet::Buttonlet(Platform::String^ caption, float width, float height, Platform::String^ tongue)
+	: Buttonlet(ButtonState::Default, caption, width, height, tongue) {}
 
-Buttonlet::Buttonlet(ButtonState default_state, Platform::String^ caption, float width, float height
-	, float thickness, float corner_radius, Platform::String^ tongue)
-	: IStatelet(default_state), caption(speak(caption, tongue))
-	, width(width), height(height), thickness(thickness)
-	, corner_radius(corner_radius) {}
+Buttonlet::Buttonlet(ButtonState default_state, Platform::String^ caption, float width, float height, Platform::String^ tongue)
+	: IStatelet(default_state), caption(speak(caption, tongue)), width(width), height(height) {}
 
 void Buttonlet::fill_extent(float x, float y, float* width, float* height) {
 	SET_BOX(width, this->width);
@@ -55,6 +52,14 @@ void Buttonlet::prepare_style(ButtonState status, ButtonStyle& s) {
 	CAS_SLOT(s.background_color, Colours::WhiteSmoke);
 	CAS_SLOT(s.foreground_color, Colours::Black);
 	CAS_SLOT(s.font, button_default_font);
+
+	if (s.thickness < 0.0F) {
+		s.thickness = 3.0F;
+	}
+
+	if (s.corner_radius < 0.0F) {
+		s.corner_radius = 4.0F;
+	}
 }
 
 void Buttonlet::on_state_changed(ButtonState status) {
@@ -68,18 +73,12 @@ void Buttonlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 	Rect box = this->label->DrawBounds;
 	float cpt_x = x + (this->width - box.Width) * 0.5F;
 	float cpt_y = y + (this->height - box.Height) * 0.5F;
-	float btn_x = this->thickness;
-	float btn_y = this->thickness;
+	float btn_x = s.thickness;
+	float btn_y = s.thickness;
 	float btn_width = this->width - btn_x * 2.0F;
 	float btn_height = this->height - btn_y * 2.0F;
 	
-	ds->FillRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height,
-		this->corner_radius, this->corner_radius,
-		s.background_color);
-	
-	ds->DrawRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height,
-		this->corner_radius, this->corner_radius,
-		s.border_color, this->thickness);
-
+	ds->FillRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height, s.corner_radius, s.corner_radius, s.background_color);
+	ds->DrawRoundedRectangle(x + btn_x, y + btn_y, btn_width, btn_height, s.corner_radius, s.corner_radius, s.border_color, s.thickness);
 	ds->DrawTextLayout(this->label, cpt_x - box.X, cpt_y - box.Y, s.foreground_color);
 }

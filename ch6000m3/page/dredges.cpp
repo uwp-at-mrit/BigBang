@@ -77,17 +77,8 @@ private enum class DS : unsigned int {
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
 	// winch statuses
-	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower,
-
-	// instructions
-	ps_gantry_settings, sb_gantry_settings, on,
-	tVirtualUp, tVirtualOut,
-	iVirtualUp, iVirtualOut,
-	hVirtualUp, hVirtualOut
+	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower
 };
-
-static ICanvasBrush^ checked_color = Colours::Green;
-static ICanvasBrush^ unchecked_color = Colours::WhiteSmoke;
 
 static ICanvasBrush^ winch_status_color = Colours::Background;
 static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
@@ -268,6 +259,14 @@ protected:
 	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
 			bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(cmd.ToString(), width, height), gid, cmd);
+		}
+	}
+
+	template<class B, typename E, typename CMD>
+	void load_buttons(std::map<CMD, GroupCredit<B, E, CMD>*>& bs, E gid, ButtonStyle& style, float width = 128.0F, float height = 32.0F) {
+		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
+			bs[cmd] = this->master->insert_one(new GroupCredit<B, E, CMD>(cmd.ToString(), width, height), gid, cmd);
+			bs[cmd]->set_style(style);
 		}
 	}
 
@@ -652,15 +651,15 @@ public:
 		}
 
 		{ // load drags
-			float draghead_radius = shhmargin * 0.314F;
-			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 3.0F;
+			float draghead_radius = shhmargin * 0.2718F;
+			float side_drag_width = width * 0.25F - vinset;
 			float over_drag_height = height * 0.42F - vinset;
 			
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
-			this->load_overview_drag(this->dragxys, DS::PS, -over_drag_height, 5.0F, 0);
-			this->load_overview_drag(this->dragxys, DS::SB, +over_drag_height, 5.0F, 1);
+			this->load_overview_drag(this->dragxys, DS::PS, -over_drag_height, 6.0F, 0);
+			this->load_overview_drag(this->dragxys, DS::SB, +over_drag_height, 6.0F, 1);
 
 			this->load_sideview_drag(this->dragxzes, DS::PS, -side_drag_width, drag_depth_degrees_max, 0);
 			this->load_sideview_drag(this->dragxzes, DS::SB, +side_drag_width, drag_depth_degrees_max, 1);
@@ -740,8 +739,8 @@ public:
 			this->master->move_to(this->dfmeters[DS::SB], this->overflowpipe, GraphletAnchor::RT, GraphletAnchor::LB);
 			this->master->move_to(this->compensators[DS::PSWC], this->cylinders[DS::PSHPVP], GraphletAnchor::LB, GraphletAnchor::RB, -wc_offset);
 
-			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.80F, GraphletAnchor::RC, -xstep);
-			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.80F, GraphletAnchor::LC, +xstep);
+			this->master->move_to(this->dragheads[DS::PSVisor], cx, height * 0.80F, GraphletAnchor::RC, -xstep * 2.0F);
+			this->master->move_to(this->dragheads[DS::SBVisor], cx, height * 0.80F, GraphletAnchor::LC, +xstep * 2.0F);
 			this->master->move_to(this->compensators[DS::SBWC], this->cylinders[DS::SBHPVP], GraphletAnchor::RB, GraphletAnchor::LB, +wc_offset);
 		}
 
@@ -964,6 +963,11 @@ public:
 		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Green);
 		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
 
+		this->button_style.thickness = 2.0F;
+		this->button_style.corner_radius = 1.0F;
+		this->button_style.foreground_color = Colours::CornflowerBlue;
+		this->button_style.font = make_bold_text_format(tiny_font_size);
+
 		this->winch_op = make_winch_menu(master->get_plc_device());
 		this->gantry_op = make_gantry_menu(master->get_plc_device());
 		this->compensator_op = make_wave_compensator_menu(master->get_plc_device());
@@ -1002,7 +1006,7 @@ public:
 			}
 		}
 
-		if (DS_side == DS::PS) {
+		if (this->DS_side == DS::PS) {
 			this->pump_pressures[DredgesPosition::psTrunnion]->set_value(RealData(DB203, pump_C_pressure), GraphletAnchor::CC);
 			this->pump_pressures[DredgesPosition::psIntermediate]->set_value(RealData(DB203, pump_B_pressure), GraphletAnchor::CC);
 			this->pump_pressures[DredgesPosition::psDragHead]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::CC);
@@ -1042,7 +1046,7 @@ public:
 			this->Blets[DredgesPosition::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_B_pressure), GraphletAnchor::RT);
 		}
 
-		if (DS_side == DS::PS) {
+		if (this->DS_side == DS::PS) {
 			this->set_drag_metrics(DS::PS, DS::PSVisor, DB2, DB203, this->drag_configs[0], this->address);
 		} else {
 			this->set_drag_metrics(DS::SB, DS::SBVisor, DB2, DB203, this->drag_configs[1], this->address);
@@ -1050,7 +1054,7 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		if (DS_side == DS::PS) {
+		if (this->DS_side == DS::PS) {
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psTrunnion], DB4, pump_C_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psIntermediate], DB4, pump_B_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::psDragHead], DB4, pump_A_feedback);
@@ -1068,12 +1072,12 @@ public:
 			DI_gantry(this->gantries[DredgesPosition::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
 			DI_gantry(this->gantries[DredgesPosition::psDragHead], DB4, gantry_ps_draghead_limited, DB205, gantry_ps_draghead_details);
 
-			this->set_gantry_virtual_action_status(DS::tVirtualUp, DB205, gantry_ps_trunnion_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::tVirtualOut, DB205, gantry_ps_trunnion_virtual_out_limited);
-			this->set_gantry_virtual_action_status(DS::iVirtualUp, DB205, gantry_ps_intermediate_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::iVirtualOut, DB205, gantry_ps_intermediate_virtual_out_limited);
-			this->set_gantry_virtual_action_status(DS::hVirtualUp, DB205, gantry_ps_draghead_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::hVirtualOut, DB205, gantry_ps_draghead_virtual_out_limited);
+			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_trunnion_virtual_up_limited);
+			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_trunnion_virtual_out_limited);
+			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_intermediate_virtual_up_limited);
+			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_intermediate_virtual_out_limited);
+			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_draghead_virtual_up_limited);
+			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_draghead_virtual_out_limited);
 		} else {
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbTrunnion], DB4, pump_F_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbIntermediate], DB4, pump_G_feedback);
@@ -1096,13 +1100,13 @@ public:
 			} else {
 				DI_gantry(this->gantries[DredgesPosition::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
 			}
-			
-			this->set_gantry_virtual_action_status(DS::tVirtualUp, DB205, gantry_sb_trunnion_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::tVirtualOut, DB205, gantry_sb_trunnion_virtual_out_limited);
-			this->set_gantry_virtual_action_status(DS::iVirtualUp, DB205, gantry_sb_intermediate_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::iVirtualOut, DB205, gantry_sb_intermediate_virtual_out_limited);
-			this->set_gantry_virtual_action_status(DS::hVirtualUp, DB205, gantry_sb_draghead_virtual_up_limited);
-			this->set_gantry_virtual_action_status(DS::hVirtualOut, DB205, gantry_sb_draghead_virtual_out_limited);
+
+			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_trunnion_virtual_up_limited);
+			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_trunnion_virtual_out_limited);
+			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_intermediate_virtual_up_limited);
+			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_intermediate_virtual_out_limited);
+			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_draghead_virtual_up_limited);
+			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_draghead_virtual_out_limited);
 		}
 	}
 
@@ -1111,24 +1115,21 @@ public:
 		DragInfo config = this->drag_configs[this->drag_idx];
 		float over_drag_height = height * 0.56F;
 		float side_drag_width = width * 0.32F;
-		float draghead_radius = side_drag_width * 0.24F;
+		float draghead_radius = side_drag_width * 0.18F;
 		float gantry_radius = over_drag_height * 0.24F;
 		float winch_width = gantry_radius * 0.618F;
-		float table_header_width = width * 0.14F;
+		float gvbutton_size = 32.0F;
 		
 		this->load_sideview_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_depth_degrees_max, this->drag_idx);
-		this->load_overview_drag(this->dragxys, this->DS_side, over_drag_height * this->sign, 5.0F, this->drag_idx);
+		this->load_overview_drag(this->dragxys, this->DS_side, over_drag_height * this->sign, 6.0F, this->drag_idx);
 
-		this->load_label(this->labels, DS_side, this->caption_color, this->caption_font);
+		this->load_label(this->labels, this->DS_side, this->caption_color, this->caption_font);
 		this->load_label(this->labels, DS::Overlook, this->caption_color, this->label_font);
 		this->load_label(this->labels, DS::Sidelook, this->caption_color, this->label_font);
 
 		this->load_dimension(this->lengths, DS::TildeMark, "meter");
 		this->load_dimension(this->speeds, DS::Speed, "knot");
 		
-		this->load_table_header(this->table_headers, DS::ps_gantry_settings, table_header_width, normal_font_size, Colours::SeaGreen);
-		this->load_gantry_indicators(DS::tVirtualUp, DS::hVirtualOut, 24.0F, this->indicators, this->labels);
-
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, config, default_ps_color);
 			this->load_gantries(this->gantries, DredgesPosition::psTrunnion, DredgesPosition::psDragHead, -gantry_radius);
@@ -1138,7 +1139,9 @@ public:
 			this->load_dimension(this->forces, DS::PSPF1, "knewton");
 			this->load_dimension(this->forces, DS::PSPF2, "knewton");
 
-			this->load_label(this->labels, DS::ps_gantry_settings, Colours::Black);
+			this->load_buttons(this->t_gantry_buttons, DredgesPosition::psTrunnion, this->button_style, gvbutton_size, gvbutton_size);
+			this->load_buttons(this->i_gantry_buttons, DredgesPosition::psIntermediate, this->button_style, gvbutton_size, gvbutton_size);
+			this->load_buttons(this->h_gantry_buttons, DredgesPosition::psDragHead, this->button_style, gvbutton_size, gvbutton_size);
 		} else {
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, config, default_sb_color);
 			this->load_gantries(this->gantries, DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead, +gantry_radius);
@@ -1148,10 +1151,10 @@ public:
 			this->load_dimension(this->forces, DS::SBPF1, "knewton");
 			this->load_dimension(this->forces, DS::SBPF2, "knewton");
 
-			this->load_label(this->labels, DS::sb_gantry_settings, Colours::Black);
+			this->load_buttons(this->t_gantry_buttons, DredgesPosition::sbTrunnion, this->button_style, gvbutton_size, gvbutton_size);
+			this->load_buttons(this->i_gantry_buttons, DredgesPosition::sbIntermediate, this->button_style, gvbutton_size, gvbutton_size);
+			this->load_buttons(this->h_gantry_buttons, DredgesPosition::sbDragHead, this->button_style, gvbutton_size, gvbutton_size);
 		}
-
-		this->load_label(this->labels, DS::on, checked_color);
 	}
 
 	void reflow(float width, float height, float vinset) override {
@@ -1233,14 +1236,14 @@ public:
 		}
 
 		{ // reflow labels and dimensions
-			this->master->move_to(this->labels[DS_side], cx, vinset * 2.0F, GraphletAnchor::CC);
-			this->master->move_to(this->labels[DS::Overlook], this->dragxys[DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
-			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
+			this->master->move_to(this->labels[this->DS_side], cx, vinset * 2.0F, GraphletAnchor::CC);
+			this->master->move_to(this->labels[DS::Overlook], this->dragxys[this->DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
+			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[this->DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
 
 			this->master->move_to(this->lengths[DS::TildeMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 
-			if (DS_side == DS::PS) {
+			if (this->DS_side == DS::PS) {
 				this->reflow_draghead_metrics(DS::PSVisor, DS::PSDP);
 				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, vinset * 2.0F);
 				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
@@ -1251,32 +1254,10 @@ public:
 			}
 		}
 
-		{ // reflow gantry indicators
-			GraphletAnchor table_anchor = GraphletAnchor::LC;
-			Credit<Rectanglet, DS>* table_header = this->table_headers[DS::ps_gantry_settings];
-			float xoff = vinset * 0.5F;
-			float ygapsize = vinset * 0.25F;
-			float yoff = ygapsize;
-			
-			if (DS_side == DS::PS) {
-				this->master->move_to(table_header, this->dragxzes[DS_side], GraphletAnchor::LB, GraphletAnchor::LC, 0.0F, vinset * 3.0F);
-			} else {
-				this->master->move_to(table_header, this->dragxzes[DS_side], GraphletAnchor::RB, GraphletAnchor::RC, 0.0F, vinset * 3.0F);
-			}
-
-			this->master->move_to(this->labels[table_header->id], table_header, GraphletAnchor::LC, GraphletAnchor::LC, xoff);
-			this->master->move_to(this->labels[DS::on], table_header, GraphletAnchor::RC, GraphletAnchor::RC, -xoff);
-
-			for (DS id = DS::tVirtualUp; id <= DS::hVirtualOut; id++) {
-				float iheight;
-
-				this->indicators[id]->fill_extent(0.0F, 0.0F, nullptr, &iheight);
-
-				this->master->move_to(this->labels[id], table_header, GraphletAnchor::LB, GraphletAnchor::LT, xoff, yoff);
-				this->master->move_to(this->indicators[id], table_header, GraphletAnchor::RB, GraphletAnchor::RT, -xoff, yoff);
-
-				yoff += (iheight + ygapsize);
-			}
+		{ // reflow gantry virtual action buttons
+			this->reflow_gantry_button(this->t_gantry_buttons);
+			this->reflow_gantry_button(this->i_gantry_buttons);
+			this->reflow_gantry_button(this->h_gantry_buttons);
 		}
 	}
 
@@ -1305,8 +1286,6 @@ public:
 			|| (dynamic_cast<Gantrylet*>(g) != nullptr)
 			|| (dynamic_cast<Compensatorlet*>(g) != nullptr)
 			|| (dynamic_cast<DragHeadlet*>(g) != nullptr)
-			|| ((settings != nullptr)
-				&& (this->indicators.find(settings->id) != this->indicators.end()))
 			|| ((maybe_button != nullptr)
 				&& (maybe_button->get_state() != ButtonState::Disabled)));
 	}
@@ -1320,8 +1299,8 @@ public:
 		auto gantry = dynamic_cast<Gantrylet*>(g);
 		auto compensator = dynamic_cast<Compensatorlet*>(g);
 		auto visor = dynamic_cast<DragHeadlet*>(g);
-		auto indicator = dynamic_cast<Credit<Rectanglet, DS>*>(g);
 		auto override_btn = dynamic_cast<Credit<Buttonlet, DredgesPosition>*>(g);
+		auto virtual_btn = dynamic_cast<GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*>(g);
 
 		if (winch != nullptr) {
 			menu_popup(this->winch_op, g, local_x, local_y);
@@ -1331,10 +1310,10 @@ public:
 			menu_popup(this->compensator_op, g, local_x, local_y);
 		} else if (visor != nullptr) {
 			menu_popup(this->visor_op, g, local_x, local_y);
-		} else if (indicator != nullptr) {
-			this->master->get_plc_device()->send_command(DO_gantry_virtual_action_command(indicator->id, (DS_side == DS::PS)));
 		} else if (override_btn != nullptr) {
 			this->master->get_plc_device()->send_command(DO_winch_override_command(override_btn->id));
+		} else if (virtual_btn != nullptr) {
+			this->master->get_plc_device()->send_command(DO_gantry_virtual_action_command(virtual_btn->gid, virtual_btn->id));
 		}
 	}
 
@@ -1392,20 +1371,6 @@ private:
 	}
 
 	template<typename E>
-	void load_gantry_indicators(E id0, E idn, float size, std::map<E, Credit<Rectanglet, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
-		for (E id = id0; id <= idn; id++) {
-			this->load_label(ls, id, Colours::Silver);
-			bs[id] = this->master->insert_one(new Credit<Rectanglet, E>(size, unchecked_color), id);
-		}
-	}
-	
-	template<class S, typename E>
-	void load_table_header(std::map<E, Credit<S, E>*>& ths, E id, float width, float height, ICanvasBrush^ color) {
-		ths[id] = this->master->insert_one(new Credit<S, E>(width, height, color), id);
-		this->load_label(this->labels, id, Colours::Background);
-	}
-
-	template<typename E>
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, _speak(id)), id);
 	}
@@ -1440,6 +1405,26 @@ private:
 		}
 	}
 
+	template<class B, typename E, typename CMD>
+	void reflow_gantry_button(std::map<CMD, GroupCredit<B, E, CMD>*>& btns) {
+		auto up_btn = btns[GantryCommand::VirtualUp];
+		auto out_btn = btns[GantryCommand::VirtualOut];
+		auto gantry = this->gantries[up_btn->gid];
+		float offset = 3.0F;
+		float fy = 0.0F;
+
+		gantry->fill_extent(0.0F, 0.0F, nullptr, &fy);
+		fy = gantry->get_winch_joint_y() / fy;
+		
+		if (this->DS_side == DS::PS) {
+			this->master->move_to(up_btn, gantry, 1.0F, fy, GraphletAnchor::LB, offset, -offset);
+			this->master->move_to(out_btn, gantry, 1.0F, fy, GraphletAnchor::LT, offset, offset);
+		} else {
+			this->master->move_to(up_btn, gantry, 0.0F, fy, GraphletAnchor::RB, -offset, -offset);
+			this->master->move_to(out_btn, gantry, 0.0F, fy, GraphletAnchor::RT, -offset, offset);
+		}
+	}
+
 private:
 	template<typename E>
 	void draw_cable(CanvasDrawingSession^ ds, E id, GraphletAnchor ga, GraphletAnchor wa, ICanvasBrush^ color, float thickness) {
@@ -1470,16 +1455,6 @@ private:
 	}
 
 private:
-	template<typename E>
-	void set_gantry_virtual_action_status(E id, const uint8* db205, unsigned int idx_p1) {
-		if (DBX(db205, idx_p1 - 1U)) {
-			this->indicators[id]->set_color(checked_color);
-		} else {
-			this->indicators[id]->set_color(unchecked_color);
-		}
-	}
-
-private:
 	bool gantries_selected(DredgesPosition id0, DredgesPosition idn, int tolerance) {
 		bool okay = false;
 		int ok = 0;
@@ -1505,14 +1480,16 @@ private: // never delete these graphlets manually.
 	std::map<DredgesPosition, Credit<Dimensionlet, DredgesPosition>*> Blets;
 	std::map<DredgesPosition, Credit<Percentagelet, DredgesPosition>*> rc_speeds;
 	std::map<DredgesPosition, Credit<Buttonlet, DredgesPosition>*> buttons;
-	std::map<DS, Credit<Rectanglet, DS>*> indicators;
-	std::map<DS, Credit<Rectanglet, DS>*> table_headers;
+	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> t_gantry_buttons;
+	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> i_gantry_buttons;
+	std::map<GantryCommand, GroupCredit<Buttonlet, DredgesPosition, GantryCommand>*> h_gantry_buttons;
 	std::map<DS, Credit<Dimensionlet, DS>*> settings;
 
 private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle setting_style;
+	ButtonStyle button_style;
 
 private:
 	MenuFlyout^ ggantries_op;

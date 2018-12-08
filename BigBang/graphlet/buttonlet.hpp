@@ -10,16 +10,16 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ background_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ foreground_color;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
+
+		// negative value means "use default"
+		float thickness = -1.0F;
+		float corner_radius = -1.0F;
 	};
 
 	private class Buttonlet : public WarGrey::SCADA::IStatelet<WarGrey::SCADA::ButtonState, WarGrey::SCADA::ButtonStyle> {
 	public:
-		Buttonlet(Platform::String^ caption, float width = 128.0F, float height = 32.0F,
-			float thickness = 3.0F, float corner_radius = 4.0F,
-			Platform::String^ tongue = "menu");
-
+		Buttonlet(Platform::String^ caption, float width = 128.0F, float height = 32.0F, Platform::String^ tongue = "menu");
 		Buttonlet(ButtonState default_state, Platform::String^ caption, float width = 128.0F, float height = 32.0F,
-			float thickness = 2.0F, float corner_radius = 4.0F,
 			Platform::String^ tongue = "menu");
 
 	public:
@@ -37,10 +37,5 @@ namespace WarGrey::SCADA {
 		Platform::String^ caption;
 		float width;
 		float height;
-		float corner_radius;
-		float thickness;
-
-	private:
-		bool flashing;
 	};
 }

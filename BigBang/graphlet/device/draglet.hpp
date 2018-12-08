@@ -156,7 +156,7 @@ namespace WarGrey::SCADA {
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float ws_height, float hatchmark_interval = 5.0F, unsigned int outboard_step = 2U, unsigned int inboard_step = 1U);
+			float ws_height, float hatchmark_interval = 6.0F, unsigned int outboard_step = 2U, unsigned int inboard_step = 1U);
 
 	public:
 		void construct() override;
@@ -205,6 +205,10 @@ namespace WarGrey::SCADA {
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 		void update_drag_head() override;
 
+		void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
+			Windows::Foundation::Numerics::float3 ujoints[],
+			Windows::Foundation::Numerics::float3& draghead) override;
+
 	private:
 		float x_to_x(double x);
 		float z_to_y(double z);
@@ -216,7 +220,6 @@ namespace WarGrey::SCADA {
 
 		void draw_line(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x0, float xn, float y,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
-
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;

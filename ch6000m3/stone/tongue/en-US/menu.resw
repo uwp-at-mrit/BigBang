@@ -369,4 +369,10 @@
   <data name="BOPOverride" xml:space="preserve">
     <value>Back Oil Pressure Override</value>
   </data>
+  <data name="VirtualOut" xml:space="preserve">
+    <value>Virtual Wind Out</value>
+  </data>
+  <data name="VirtualUp" xml:space="preserve">
+    <value>Virtual Wind Up</value>
+  </data>
 </root>

@@ -93,6 +93,7 @@ namespace WarGrey::SCADA {
 
 	void DI_suction_buttons(WarGrey::SCADA::Buttonlet* intarget, WarGrey::SCADA::Buttonlet* detarget, const uint8* db205, unsigned int idx_p1);
 	void DI_ctension_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned int idx_p1);
+	void DI_gantry_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned idx_p1);
 
 	bool DI_long_sb_drag(const uint8* db205);
 }
