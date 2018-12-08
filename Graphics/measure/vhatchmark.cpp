@@ -71,7 +71,7 @@ static VHatchMarkMetrics make_input_vmetrics(float width, float height, float th
 	return metrics;
 }
 
-static void fill_consistent_vhatch_metrics(CanvasTextFormat^ maybe_font, float thickness, float* hatch_width, float* gapsize) {
+static inline void fill_consistent_vhatch_metrics(CanvasTextFormat^ maybe_font, float thickness, float* hatch_width, float* gapsize) {
 	TextExtent css_metrics = get_text_extent("0", ((maybe_font == nullptr) ? default_mark_font : maybe_font));
 	float chwidth = css_metrics.width;
 

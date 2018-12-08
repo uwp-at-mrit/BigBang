@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 	static unsigned int overflow_pipe_progress = 55U;
 
 	// DB2, DBD
-	static unsigned int tide_mark = 0U;
+	static unsigned int tilde_mark = 0U;
 	static unsigned int gps_speed = 584U;
 
 	static unsigned int ps_suction_draught = 20U; // same as the ps suction depth 

@@ -487,28 +487,50 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 }
 
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
-	TimeSeriesStyle style = this->get_style();
 	long long now = current_milliseconds();
+	TimeSeriesStyle style = this->get_style();
+	bool datasource_ready = ((this->data_source != nullptr) && this->data_source->ready());
+	bool locked = false;
 
+	if (datasource_ready && (this->data_source->loading())) {
+		this->begin_maniplation_sequence();
+		locked = true;
+	}
+	
 	this->lines[idx].push_back_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
 	
+	if (locked) {
+		this->end_maniplation_sequence();
+	}
+
 	this->notify_updated();
 }
 
 void ITimeSerieslet::set_values(double* values, bool persistent) {
-	TimeSeriesStyle style = this->get_style();
 	long long now = current_milliseconds();
+	TimeSeriesStyle style = this->get_style();
+	bool datasource_ready = ((this->data_source != nullptr) && this->data_source->ready());
+	bool locked = false;
 
+	if (datasource_ready && (this->data_source->loading())) {
+		this->begin_maniplation_sequence();
+		locked = true;
+	}
+	
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].push_back_value(now, values[idx]);
 		this->lines[idx].update_legend(this->precision + 1U, style);
 	}
 
 	if (persistent) {
-		if ((this->data_source != nullptr) && this->data_source->ready()) {
+		if (datasource_ready) {
 			this->data_source->save(now, values, this->count);
 		}
+	}
+
+	if (locked) {
+		this->end_maniplation_sequence();
 	}
 
 	this->notify_updated();

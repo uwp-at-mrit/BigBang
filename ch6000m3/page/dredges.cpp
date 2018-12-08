@@ -68,7 +68,7 @@ private enum class DS : unsigned int {
 
 	// dimensions
 	Overflow, PSWC, SBWC, PSPF1, PSPF2, SBPF1, SBPF2, PSSIP, SBSIP,
-	TideMark, Speed,
+	TildeMark, Speed,
 
 	// draghead metrics
 	PSDP, SBDP, PSVisor, SBVisor,
@@ -106,6 +106,7 @@ public:
 		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 		this->plain_style.minimize_number_width = 5U;
 
+		this->drag_lines_style = drag_default_lines_style();
 		this->drag_styles[0] = drag_default_style(default_ps_color);
 		this->drag_styles[1] = drag_default_style(default_sb_color);
 
@@ -245,9 +246,17 @@ protected:
 		this->load_dimension(this->pressures, dpid, "bar");
 	}
 
-	template<class D, typename E, typename F>
-	void load_drag(std::map<E, Credit<D, E>*>& ds, E id, float length, F hint, unsigned int idx) {
-		ds[id] = this->master->insert_one(new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], length, hint), id);
+	template<class D, typename E>
+	void load_overview_drag(std::map<E, Credit<D, E>*>& ds, E id, float length, float interval, unsigned int idx) {
+		ds[id] = this->master->insert_one(new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], length, interval), id);
+	}
+
+	template<class D, typename E>
+	void load_sideview_drag(std::map<E, Credit<D, E>*>& ds, E id, float ws_width, double max_depth_degrees, unsigned int idx) {
+		auto drag = new Credit<D, E>(this->drag_configs[idx], this->drag_styles[idx], this->drag_lines_style, ws_width, max_depth_degrees);
+		
+		ds[id] = this->master->insert_one(drag, id);
+		drag->set_design_depth(dredging_target_depth, dredging_tolerance_depth);
 	}
 
 	template<class B, typename E, typename L>
@@ -347,7 +356,7 @@ protected:
 		float3 ujoints[2];
 		float3 draghead = DBD_3(db2, pidx + 36U);
 		float3 trunnion = DBD_3(db2, pidx + 0U);
-		float tide = DBD(db2, tide_mark);
+		float tilde = DBD(db2, tilde_mark);
 		float suction_draught = trunnion.x;
 		float suction_depth = suction_draught;
 		
@@ -365,6 +374,7 @@ protected:
 
 			this->dragxys[id]->set_figure(trunnion, ujoints, draghead, visor_angle);
 			this->dragxzes[id]->set_figure(trunnion, ujoints, draghead, visor_angle);
+			this->dragxzes[id]->set_tilde_mark(tilde);
 
 			this->dragheads[vid]->set_depths(suction_depth, draghead.z);
 			this->dragheads[vid]->set_angles(visor_angle, this->dragxzes[id]->get_arm_degrees());
@@ -405,6 +415,7 @@ protected:
 	DimensionStyle plain_style;
 
 protected:
+	DragLinesStyle drag_lines_style;
 	DragInfo drag_configs[2];
 	DragStyle drag_styles[2];
 
@@ -641,18 +652,18 @@ public:
 		}
 
 		{ // load drags
-			float draghead_radius = shhmargin * 0.2718F;
+			float draghead_radius = shhmargin * 0.314F;
 			float side_drag_width = width * 0.5F - (draghead_radius + vinset) * 3.0F;
 			float over_drag_height = height * 0.42F - vinset;
 			
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, this->drag_configs[0], default_ps_color);
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, this->drag_configs[1], default_sb_color);
 		
-			this->load_drag(this->dragxys, DS::PS, -over_drag_height, 5.0F, 0);
-			this->load_drag(this->dragxys, DS::SB, +over_drag_height, 5.0F, 1);
+			this->load_overview_drag(this->dragxys, DS::PS, -over_drag_height, 5.0F, 0);
+			this->load_overview_drag(this->dragxys, DS::SB, +over_drag_height, 5.0F, 1);
 
-			this->load_drag(this->dragxzes, DS::PS, -side_drag_width, drag_depth_degrees_max, 0);
-			this->load_drag(this->dragxzes, DS::SB, +side_drag_width, drag_depth_degrees_max, 1);
+			this->load_sideview_drag(this->dragxzes, DS::PS, -side_drag_width, drag_depth_degrees_max, 0);
+			this->load_sideview_drag(this->dragxzes, DS::SB, +side_drag_width, drag_depth_degrees_max, 1);
 		}
 
 		{ // load buttons
@@ -971,7 +982,7 @@ public:
 
 public:
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
-		this->lengths[DS::TideMark]->set_value(DBD(DB2, tide_mark));
+		this->lengths[DS::TildeMark]->set_value(DBD(DB2, tilde_mark));
 		this->speeds[DS::Speed]->set_value(DBD(DB2, gps_speed));
 
 		{ // set winches metrics
@@ -1104,15 +1115,15 @@ public:
 		float gantry_radius = over_drag_height * 0.24F;
 		float winch_width = gantry_radius * 0.618F;
 		float table_header_width = width * 0.14F;
-
-		this->load_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_depth_degrees_max, this->drag_idx);
-		this->load_drag(this->dragxys, this->DS_side, over_drag_height * this->sign, 5.0F, this->drag_idx);
+		
+		this->load_sideview_drag(this->dragxzes, this->DS_side, side_drag_width * this->sign, drag_depth_degrees_max, this->drag_idx);
+		this->load_overview_drag(this->dragxys, this->DS_side, over_drag_height * this->sign, 5.0F, this->drag_idx);
 
 		this->load_label(this->labels, DS_side, this->caption_color, this->caption_font);
 		this->load_label(this->labels, DS::Overlook, this->caption_color, this->label_font);
 		this->load_label(this->labels, DS::Sidelook, this->caption_color, this->label_font);
 
-		this->load_dimension(this->lengths, DS::TideMark, "meter");
+		this->load_dimension(this->lengths, DS::TildeMark, "meter");
 		this->load_dimension(this->speeds, DS::Speed, "knot");
 		
 		this->load_table_header(this->table_headers, DS::ps_gantry_settings, table_header_width, normal_font_size, Colours::SeaGreen);
@@ -1121,9 +1132,9 @@ public:
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, config, default_ps_color);
 			this->load_gantries(this->gantries, DredgesPosition::psTrunnion, DredgesPosition::psDragHead, -gantry_radius);
-			this->load_detailed_winches(this->winches, DredgesPosition::psTrunnion, DredgesPosition::psDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::PSWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pump_pressures, DredgesPosition::psTrunnion, DredgesPosition::psDragHead, DS::C, "bar");
+			this->load_detailed_winches(this->winches, DredgesPosition::psTrunnion, DredgesPosition::psDragHead, winch_width);
 			this->load_dimension(this->forces, DS::PSPF1, "knewton");
 			this->load_dimension(this->forces, DS::PSPF2, "knewton");
 
@@ -1131,9 +1142,9 @@ public:
 		} else {
 			this->load_draghead(this->dragheads, DS::SBVisor, DS::SBDP, +draghead_radius, config, default_sb_color);
 			this->load_gantries(this->gantries, DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead, +gantry_radius);
-			this->load_detailed_winches(this->winches, DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead, winch_width);
 			this->load_compensator(this->compensators, DS::SBWC, gantry_radius, compensator_range);
 			this->load_dimensions(this->pump_pressures, DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead, DS::F, "bar");
+			this->load_detailed_winches(this->winches, DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead, winch_width);
 			this->load_dimension(this->forces, DS::SBPF1, "knewton");
 			this->load_dimension(this->forces, DS::SBPF2, "knewton");
 
@@ -1151,15 +1162,15 @@ public:
 
 		if (this->DS_side == DS::PS) {
 			this->master->move_to(this->dragxys[DS::PS], cx, cy, GraphletAnchor::CC, vinset);
-			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset, vinset * 2.0F);
+			this->master->move_to(this->dragxzes[DS::PS], this->dragxys[DS::PS], GraphletAnchor::LT, GraphletAnchor::RT, -vinset, vinset);
 			this->master->move_to(this->dragheads[DS::PSVisor], this->dragxys[DS::PS], GraphletAnchor::LB, GraphletAnchor::RC, -vinset);
 
-			{ // flow gantries and winches
+			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::psIntermediate];
 				
 				this->pump_pressures[DredgesPosition::psTrunnion]->fill_extent(0.0F, 0.0F, nullptr, &vgapsize);
 
-				vgapsize = vgapsize * 2.0F + vinset;
+				vgapsize = (vgapsize + vinset) * 2.0F;
 				this->master->move_to(gantry, this->dragxys[DS::PS], GraphletAnchor::RC, GraphletAnchor::LC, 0.0F, -vinset);
 				this->master->move_to(this->gantries[DredgesPosition::psTrunnion], gantry, GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vgapsize);
 				this->master->move_to(this->gantries[DredgesPosition::psDragHead], gantry, GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, +vgapsize);
@@ -1186,15 +1197,15 @@ public:
 			}
 		} else {
 			this->master->move_to(this->dragxys[DS::SB], cx, cy, GraphletAnchor::CC, -vinset);
-			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset * 2.0F);
+			this->master->move_to(this->dragxzes[DS::SB], this->dragxys[DS::SB], GraphletAnchor::RT, GraphletAnchor::LT, vinset, vinset);
 			this->master->move_to(this->dragheads[DS::SBVisor], this->dragxys[DS::SB], GraphletAnchor::RB, GraphletAnchor::LC, vinset);
 
-			{ // flow gantries and winches
+			{ // reflow gantries and winches
 				auto gantry = this->gantries[DredgesPosition::sbIntermediate];
 				
 				this->pump_pressures[DredgesPosition::sbTrunnion]->fill_extent(0.0F, 0.0F, nullptr, &vgapsize);
 
-				vgapsize = vgapsize * 2.0F + vinset;
+				vgapsize = (vgapsize + vinset) * 2.0F;
 				this->master->move_to(gantry, this->dragxys[DS::SB], GraphletAnchor::LC, GraphletAnchor::RC, 0.0F, -vinset);
 				this->master->move_to(this->gantries[DredgesPosition::sbTrunnion], gantry, GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -vgapsize);
 				this->master->move_to(this->gantries[DredgesPosition::sbDragHead], gantry, GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, +vgapsize);
@@ -1226,7 +1237,7 @@ public:
 			this->master->move_to(this->labels[DS::Overlook], this->dragxys[DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
 			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
 
-			this->master->move_to(this->lengths[DS::TideMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
+			this->master->move_to(this->lengths[DS::TildeMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 
 			if (DS_side == DS::PS) {
@@ -1349,6 +1360,8 @@ private:
 
 	template<class W, typename E>
 	void load_detailed_winches(std::map<E, Credit<W, E>*>& ws, E id0, E idn, float radius) {
+		float button_width;
+
 		this->load_winches(ws, id0, idn, radius);
 
 		for (E id = id0; id <= idn; id++) {
@@ -1356,7 +1369,8 @@ private:
 				this->load_percentage(this->rc_speeds, id);
 			}
 
-			this->load_button(this->buttons, id, DS::Override);
+			this->Alets[id]->fill_extent(0.0F, 0.0F, &button_width, nullptr);
+			this->load_button(this->buttons, id, DS::Override, button_width);
 		}
 	}
 
@@ -1404,7 +1418,8 @@ private:
 		this->compensators[wc]->fill_extent(0.0F, 0.0F, &compensator_width, &compensator_height);
 		
 		{ // align gantries and winches
-			float gw_gap = gapsize * 2.0F + compensator_width * ((gapsize > 0.0F) ? 1.0F : -1.0F);
+			float gc_gap = gapsize * 1.5F;
+			float gw_gap = gc_gap * 2.0F + compensator_width * ((gapsize > 0.0F) ? 1.0F : -1.0F);
 			float gantry_joint_dy = 0.0F;
 
 			for (E id = trunnion; id <= draghead; id++) {
@@ -1418,7 +1433,7 @@ private:
 			{ // align the draghead gantry and the wave compensator
 				float wc_joint_dy = this->compensators[wc]->get_cable_joint_y() - compensator_height * 0.5F;
 				
-				this->master->move_to(this->compensators[wc], this->gantries[draghead], ga, wa,gapsize, gantry_joint_dy - wc_joint_dy);
+				this->master->move_to(this->compensators[wc], this->gantries[draghead], ga, wa, gc_gap, gantry_joint_dy - wc_joint_dy);
 				this->master->move_to(this->lengths[wc], this->compensators[wc], GraphletAnchor::CB, GraphletAnchor::CT);
 				this->master->move_to(this->pressures[wc], this->lengths[wc], GraphletAnchor::CB, GraphletAnchor::CT);
 			}

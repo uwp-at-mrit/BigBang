@@ -27,7 +27,8 @@ namespace WarGrey::SCADA {
 	private struct DragStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ meter_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ angle_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ arm_angle_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ joint_angle_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ head_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatchmark_color;
@@ -38,14 +39,24 @@ namespace WarGrey::SCADA {
 	};
 
 	private struct DragLinesStyle {
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tild_color;
-		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ suction_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tilde_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_depth_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ tolerance_depth_color;
+
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ stroke;
+
+		float thickness;
 	};
 
 	float drag_depth(WarGrey::SCADA::DragInfo& info, double max_depth_degrees = 60.0);
 
 	WarGrey::SCADA::DragStyle drag_default_style(unsigned int color,
 		unsigned int precision = 2U, float fontsize = 24.0F, float thickness = 2.0F);
+
+	WarGrey::SCADA::DragLinesStyle drag_default_lines_style(
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ stroke
+		= WarGrey::SCADA::make_dash_stroke(Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle::Dash),
+		float thickness = 1.0F);
 
 	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
@@ -66,6 +77,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		double get_arm_degrees(unsigned int idx = DRAG_SEGMENT_MAX_COUNT);
+		double get_ujoint_degrees(unsigned int idx = DRAG_SEGMENT_MAX_COUNT);
 		double get_visor_earth_degrees();
 
 	protected:
@@ -97,8 +109,10 @@ namespace WarGrey::SCADA {
 	protected:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ draghead_m;
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ forearm_deg;
-		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ ujoints_ms[DRAG_SEGMENT_MAX_COUNT];
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ forejoint_deg;
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ ujoint_ms[DRAG_SEGMENT_MAX_COUNT];
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ arm_degs[DRAG_SEGMENT_MAX_COUNT];
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ joint_degs[DRAG_SEGMENT_MAX_COUNT];
 		
 	protected:
 		float width;
@@ -115,16 +129,18 @@ namespace WarGrey::SCADA {
 
 	protected: // real 3D coordinates
 		WarGrey::SCADA::DragInfo info;
-		Windows::Foundation::Numerics::float3 pseudo_suction; // real suction does not affects the form of drags.
+		Windows::Foundation::Numerics::float3 suction;
 		Windows::Foundation::Numerics::float3 trunnion;
 		Windows::Foundation::Numerics::float3 ujoints[DRAG_SEGMENT_MAX_COUNT];
 		Windows::Foundation::Numerics::float3 draghead;
 		double arm_angles[DRAG_SEGMENT_MAX_COUNT];
+		double joint_angles[DRAG_SEGMENT_MAX_COUNT];
 		double forearm_angle;
+		double forejoint_angle;
 		float drag_length;
 
 	protected: // graphlets 2D coordinates
-		Windows::Foundation::Numerics::float2 _pseudo_suction;
+		Windows::Foundation::Numerics::float2 _suction;
 		Windows::Foundation::Numerics::float2 _trunnion;
 		Windows::Foundation::Numerics::float2 _draghead;
 		Windows::Foundation::Numerics::float2 _ujoints[DRAG_SEGMENT_MAX_COUNT];
@@ -133,6 +149,7 @@ namespace WarGrey::SCADA {
 	protected:
 		double visor_angle;
 		float draghead_length;
+		float visor_length;
 		bool dredging;
 	};
 
@@ -145,7 +162,7 @@ namespace WarGrey::SCADA {
 		void construct() override;
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
-	public:
+	protected:
 		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 		
@@ -167,7 +184,7 @@ namespace WarGrey::SCADA {
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {
 	public:
-		DragXZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
+		DragXZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, WarGrey::SCADA::DragLinesStyle& line_style,
 			float ws_width, double max_depth_degrees = 45.0,
 			float hatchmark_interval = 5.0F, float suction_lowest = -15.0F);
 
@@ -176,6 +193,10 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
+		void set_tilde_mark(double tildemark);
+		void set_design_depth(double target, double tolerance);
+
+	protected:
 		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
 		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
 
@@ -184,14 +205,24 @@ namespace WarGrey::SCADA {
 		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
 		void update_drag_head() override;
 
-	private:	
+	private:
+		float x_to_x(double x);
+		float z_to_y(double z);
+
+	private:
 		void draw_metrics(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
-			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y, float lX, float rX, float Y,
+			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y,
+			float lX, float rX, float tY, float bY, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, bool below);
+
+		void draw_line(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x0, float xn, float y,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
 
 	private:
 		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ joint_mask;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ x_axis;
+		WarGrey::SCADA::DragLinesStyle lines_style;
 
 	private:
 		float left_margin;
@@ -201,6 +232,12 @@ namespace WarGrey::SCADA {
 		double depth_highest;
 		double depth_lowest;
 		double suction_lowest;
+
+	private:
+		float tildemark;
+		float silt_depth;
+		float target_depth;
+		float tolerance_depth;
 
 	private:
 		float mask_dx;

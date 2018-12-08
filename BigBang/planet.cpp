@@ -323,10 +323,12 @@ void Planet::insert(IGraphlet* g, float x, float y, float fx, float fy, float dx
         }
         info->next = this->head_graphlet;
 
+		this->begin_update_sequence();
 		g->sprite();
 		g->construct();
 		g->sprite_construct();
 		unsafe_move_graphlet_via_info(this, g, info, x, y, fx, fy, dx, dy, true);
+		this->end_update_sequence();
 
 		this->notify_graphlet_updated(g);
 	}

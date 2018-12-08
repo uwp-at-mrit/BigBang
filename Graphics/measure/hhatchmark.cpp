@@ -31,6 +31,30 @@ inline unsigned int mark_span(Platform::String^ mark) {
 	return mark->Length();
 }
 
+static Platform::String^ resolve_longest_mark(Platform::String^ marks[], size_t count) {
+	Platform::String^ longest_mark = marks[0];
+	unsigned int longest_span = mark_span(marks[0]);
+
+	for (size_t idx = 1; idx < count; idx++) {
+		unsigned int this_span = mark_span(marks[idx]);
+
+		if (this_span > longest_span) {
+			longest_span = this_span;
+			longest_mark = marks[idx];
+		}
+	}
+
+	return longest_mark;
+}
+
+static inline void fill_consistent_hhatch_metrics(CanvasTextFormat^ maybe_font, float thickness, float* hatch_height, float* gapsize) {
+	TextExtent css_metrics = get_text_extent("0", ((maybe_font == nullptr) ? default_mark_font : maybe_font));
+	float chwidth = css_metrics.width;
+
+	SET_BOX(hatch_height, chwidth * hatch_long_ratio + thickness);
+	SET_BOX(gapsize, chwidth * mark_space_ratio + thickness);
+}
+
 static CanvasGeometry^ make_hthatch(HHatchMarkMetrics* metrics, float interval, unsigned int step, float thickness, bool no_short) {
 	CanvasPathBuilder^ hatch = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	float x = metrics->hatch_x;
@@ -123,14 +147,14 @@ HHatchMarkMetrics WarGrey::SCADA::hhatchmark_metrics(double vmin, double vmax, f
 	TextExtent te = get_text_extent(longer_mark, ((font == nullptr) ? default_mark_font : font));
 	unsigned int longer_span = longer_mark->Length();
 
+	fill_consistent_hhatch_metrics(font, thickness, &metrics.hatch_height, &metrics.gap_space);
+
 	metrics.ch = te.width / float(longer_span);
 	metrics.em = te.height - te.tspace - te.bspace;
-	metrics.gap_space = metrics.ch * mark_space_ratio + thickness;
 	metrics.top_space = te.tspace;
 
 	metrics.hatch_x = metrics.ch * min_span * 0.5F;
 	metrics.hatch_rx = metrics.ch * max_span * 0.5F;
-	metrics.hatch_height = metrics.ch * hatch_long_ratio + thickness;
 	
 	metrics.height = metrics.em + metrics.gap_space + metrics.hatch_height;
 
