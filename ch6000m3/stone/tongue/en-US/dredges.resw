@@ -237,4 +237,13 @@
   <data name="SoftLower" xml:space="preserve">
     <value>Soft Lower</value>
   </data>
+  <data name="DivingCompensation" xml:space="preserve">
+    <value>Compensator Progress When Diving</value>
+  </data>
+  <data name="DivingDepth" xml:space="preserve">
+    <value>Draghead Depth When Diving</value>
+  </data>
+  <data name="LandingDepth" xml:space="preserve">
+    <value>Draghead Depth When Landing</value>
+  </data>
 </root>

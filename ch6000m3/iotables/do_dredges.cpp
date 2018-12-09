@@ -197,16 +197,14 @@ uint16 WarGrey::SCADA::DO_suction_command(SuctionCommand cmd, bool ps) {
 }
 
 uint16 WarGrey::SCADA::DO_LMOD_command(LMODCommand cmd) {
-	uint16 index = 881U;
-	uint16 offset = 0U;
+	uint16 index = 0U;
 
 	switch (cmd) {
-	//case LMODCommand::Emit: offset = 0U; break;
-	//case LMODCommand::Fill: offset = 1U; break;
-	case LMODCommand::Auto: offset = 2U; break;
+	case LMODCommand::PSALMO: index = 883U; break;
+	case LMODCommand::SBALMO: index = 887U; break;
 	}
 
-	return index + offset;
+	return index;
 }
 
 uint16 WarGrey::SCADA::DO_gantry_virtual_action_command(DredgesPosition gid, GantryCommand cmd) {

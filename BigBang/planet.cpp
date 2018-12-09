@@ -791,17 +791,12 @@ bool Planet::on_pointer_pressed(float x, float y, PointerDeviceType pdt, Pointer
 	bool pressed_on_keyboard = this->keyboard->is_colliding_with_mouse(x, y, this->keyboard_x, this->keyboard_y);
 	bool handled = false;
 
-	if (this->keyboard->shown() && (pdt == PointerDeviceType::Touch)) {
+	if (pressed_on_keyboard && (pdt == PointerDeviceType::Touch)) {
 		float local_x = x - this->keyboard_x;
 		float local_y = y - this->keyboard_y;
 
-		if (pressed_on_keyboard) {
-			this->keyboard->on_hover(local_x, local_y);
-			handled = true;
-		} else {
-			this->keyboard->on_goodbye(local_x, local_y);
-			this->keyboard->show(false);
-		}
+		this->keyboard->on_hover(local_x, local_y);
+		handled = true;
 	} else if (!pressed_on_keyboard) {
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 

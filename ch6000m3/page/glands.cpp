@@ -230,9 +230,9 @@ public:
 				if (rpm > 0.0F) {
 					plc->send_setting(AO_gland_pump_setting(editor->id), rpm);
 				}
-			}
 
-			handled = true;
+				handled = true;
+			}
 		}
 
 		return handled;

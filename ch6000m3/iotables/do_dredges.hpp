@@ -14,7 +14,7 @@ namespace WarGrey::SCADA {
 	private enum class SuctionCommand { Inflate, Deflate, _ };
 	private enum class DragVisorCommand { CResistance, _ };
 	private enum class GantryCommand { VirtualUp, VirtualOut, _ };
-	private enum class LMODCommand { Auto, _ };
+	private enum class LMODCommand { PSALMO, SBALMO, _ };
 
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_menu(WarGrey::SCADA::PLCMaster* plc);

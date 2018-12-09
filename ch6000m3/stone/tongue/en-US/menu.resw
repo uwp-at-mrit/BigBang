@@ -144,8 +144,8 @@
   <data name="MHeat" xml:space="preserve">
     <value>Heat Motor Valve</value>
   </data>
-  <data name="Auto" xml:space="preserve">
-    <value>Auto Control</value>
+  <data name="PSALMO" xml:space="preserve">
+    <value>PS ALMO Auto</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -374,5 +374,8 @@
   </data>
   <data name="VirtualUp" xml:space="preserve">
     <value>Virtual Wind Up</value>
+  </data>
+  <data name="SBALMO" xml:space="preserve">
+    <value>SB ALMO Auto</value>
   </data>
 </root>

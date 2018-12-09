@@ -237,4 +237,13 @@
   <data name="SoftLower" xml:space="preserve">
     <value>编码器下限</value>
   </data>
+  <data name="DivingCompensation" xml:space="preserve">
+    <value>一键着地补偿器行程设置</value>
+  </data>
+  <data name="DivingDepth" xml:space="preserve">
+    <value>一键着地耙头深度设置</value>
+  </data>
+  <data name="LandingDepth" xml:space="preserve">
+    <value>一键离地耙头深度设置</value>
+  </data>
 </root>

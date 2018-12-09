@@ -22,6 +22,7 @@ namespace WarGrey::SCADA {
 
 	protected:
 		void fill_anchor_location(unsigned int anchor, float* x, float* y);
+		void fill_anchors_distance(unsigned int anchor1, unsigned int anchor2, float* xdistance, float* ydistance);
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(unsigned int a1, unsigned int a2,
 			float thickness, Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ style);
 
@@ -107,6 +108,10 @@ namespace WarGrey::SCADA {
 	public:
 		void fill_anchor_location(Anchor a, float* x, float* y) {
 			WarGrey::SCADA::ITurtle::fill_anchor_location(_I(a), x, y);
+		}
+
+		void fill_anchors_distance(Anchor a1, Anchor a2, float* xdistance, float* ydistance) {
+			WarGrey::SCADA::ITurtle::fill_anchors_distance(_I(a1), _I(a2), xdistance, ydistance);
 		}
 
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ subtrack(Anchor a1, Anchor a2

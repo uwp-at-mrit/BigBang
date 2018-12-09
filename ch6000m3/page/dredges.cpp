@@ -6,6 +6,7 @@
 
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"
+#include "graphlet/togglet.hpp"
 
 #include "graphlet/dashboard/cylinderlet.hpp"
 #include "graphlet/dashboard/densityflowmeterlet.hpp"
@@ -77,7 +78,10 @@ private enum class DS : unsigned int {
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
 	// winch statuses
-	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower
+	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower,
+
+	// settings
+	DivingDepth, DivingCompensation, LandingDepth
 };
 
 static ICanvasBrush^ winch_status_color = Colours::Background;
@@ -463,8 +467,8 @@ public:
 
 		this->forces[DS::PSPF1]->set_value(RealData(DB203, this->ps_address->pulling_force + 0U), GraphletAnchor::LC);
 		this->forces[DS::PSPF2]->set_value(RealData(DB203, this->ps_address->pulling_force + 1U), GraphletAnchor::LC);
-		this->forces[DS::SBPF1]->set_value(RealData(DB203, this->sb_address->pulling_force + 0U), GraphletAnchor::RC);
-		this->forces[DS::SBPF2]->set_value(RealData(DB203, this->sb_address->pulling_force + 1U), GraphletAnchor::RC);
+		this->forces[DS::SBPF1]->set_value(RealData(DB203, this->sb_address->pulling_force + 0U), GraphletAnchor::LC);
+		this->forces[DS::SBPF2]->set_value(RealData(DB203, this->sb_address->pulling_force + 1U), GraphletAnchor::LC);
 
 		{ // set winches metrics
 			unsigned int psws_idx = this->ps_address->winch_speed;
@@ -522,8 +526,11 @@ public:
 		DI_suction_buttons(this->ps_suctions[SuctionCommand::Inflate], this->ps_suctions[SuctionCommand::Deflate], DB205, suction_ps_buttons);
 		DI_suction_buttons(this->sb_suctions[SuctionCommand::Inflate], this->sb_suctions[SuctionCommand::Deflate], DB205, suction_sb_buttons);
 
-		DI_ctension_button(this->ps_visors[DragVisorCommand::CResistance], DB205, ctension_ps_button);
-		DI_ctension_button(this->sb_visors[DragVisorCommand::CResistance], DB205, ctension_sb_button);
+		DI_boolean_button(this->lmod_buttons[LMODCommand::PSALMO], DB205, ps_almo_auto);
+		DI_boolean_button(this->lmod_buttons[LMODCommand::SBALMO], DB205, sb_almo_auto);
+
+		DI_boolean_button(this->ps_visors[DragVisorCommand::CResistance], DB205, ctension_ps_button);
+		DI_boolean_button(this->sb_visors[DragVisorCommand::CResistance], DB205, ctension_sb_button);
 
 		this->set_winch_limits(DredgesPosition::psTrunnion, DredgesPosition::psDragHead);
 		this->set_winch_limits(DredgesPosition::sbTrunnion, DredgesPosition::sbDragHead);
@@ -667,7 +674,7 @@ public:
 			this->load_buttons(this->sb_suctions, DS::SB);
 			this->load_buttons(this->ps_visors, DS::PS);
 			this->load_buttons(this->sb_visors, DS::SB);
-			this->load_buttons(this->lmod_buttons, DS::LMOD);
+			this->load_buttons(this->lmod_buttons, DS::LMOD, xstep * 6.0F);
 		}
 	}
 
@@ -816,9 +823,9 @@ public:
 				float pf_xoff = vinset * 2.0F;
 
 				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
-				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
+				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
 				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
-				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
+				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
 			}
 
 			this->master->move_to(this->hopper_types[DS::PS], this->labels[DS::PSHPDP], GraphletAnchor::LT, GraphletAnchor::CB, -vinset, -txt_gapsize);
@@ -837,7 +844,8 @@ public:
 			this->master->move_to(this->sb_suctions[SuctionCommand::Inflate], this->sb_suctions[SuctionCommand::Deflate], GraphletAnchor::LC, GraphletAnchor::RC);
 			this->master->move_to(this->pressures[DS::SBSIP], this->sb_suctions[SuctionCommand::Inflate], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
 
-			this->master->move_to(this->lmod_buttons[LMODCommand::Auto], this->lmod, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
+			this->station->map_graphlet_base_on_anchors(this->lmod_buttons[LMODCommand::PSALMO], DS::LMOD, DS::PSHP, GraphletAnchor::RC);
+			this->station->map_graphlet_base_on_anchors(this->lmod_buttons[LMODCommand::SBALMO], DS::LMOD, DS::SBHP, GraphletAnchor::LC);
 			this->master->move_to(this->ps_visors[DragVisorCommand::CResistance], this->degrees[DS::PSVisor], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 			this->master->move_to(this->sb_visors[DragVisorCommand::CResistance], this->degrees[DS::SBVisor], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vinset);
 		}
@@ -955,7 +963,7 @@ public:
 		: IDredgingSystem(master), DS_side(side), drag_color(drag_color), drag_idx(config_idx) {
 		this->pump_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(small_metrics_font_size, 6U, 0, Colours::Green);
-		this->setting_style = make_setting_dimension_style(normal_metrics_font_size, 6U);
+		this->setting_style = make_highlight_dimension_style(normal_metrics_font_size, 6U, 1);
 
 		this->button_style.thickness = 2.0F;
 		this->button_style.corner_radius = 1.0F;
@@ -1027,8 +1035,8 @@ public:
 			this->rc_speeds[DredgesPosition::sbIntermediate]->set_value(RealData(DB203, winch_sb_intermediate_remote_speed), GraphletAnchor::CC);
 			this->rc_speeds[DredgesPosition::sbDragHead]->set_value(RealData(DB203, winch_sb_draghead_remote_speed), GraphletAnchor::CC);
 
-			this->forces[DS::SBPF1]->set_value(RealData(DB203, this->address->pulling_force + 0U), GraphletAnchor::RC);
-			this->forces[DS::SBPF2]->set_value(RealData(DB203, this->address->pulling_force + 1U), GraphletAnchor::RC);
+			this->forces[DS::SBPF1]->set_value(RealData(DB203, this->address->pulling_force + 0U), GraphletAnchor::LC);
+			this->forces[DS::SBPF2]->set_value(RealData(DB203, this->address->pulling_force + 1U), GraphletAnchor::LC);
 
 			this->set_compensator(DS::SBWC, DB203, this->address->compensator, GraphletAnchor::RC);
 
@@ -1066,12 +1074,12 @@ public:
 			DI_gantry(this->gantries[DredgesPosition::psIntermediate], DB4, gantry_ps_intermediate_limited, DB205, gantry_ps_intermediate_details);
 			DI_gantry(this->gantries[DredgesPosition::psDragHead], DB4, gantry_ps_draghead_limited, DB205, gantry_ps_draghead_details);
 
-			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_trunnion_virtual_up_limited);
-			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_trunnion_virtual_out_limited);
-			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_intermediate_virtual_up_limited);
-			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_intermediate_virtual_out_limited);
-			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_draghead_virtual_up_limited);
-			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_draghead_virtual_out_limited);
+			DI_boolean_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_trunnion_virtual_up_limited);
+			DI_boolean_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_trunnion_virtual_out_limited);
+			DI_boolean_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_intermediate_virtual_up_limited);
+			DI_boolean_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_intermediate_virtual_out_limited);
+			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_ps_draghead_virtual_up_limited);
+			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_ps_draghead_virtual_out_limited);
 		} else {
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbTrunnion], DB4, pump_F_feedback);
 			DI_hydraulic_pump_dimension(this->pump_pressures[DredgesPosition::sbIntermediate], DB4, pump_G_feedback);
@@ -1095,13 +1103,19 @@ public:
 				DI_gantry(this->gantries[DredgesPosition::sbDragHead], DB4, gantry_sb_short_draghead_limited, DB205, gantry_sb_draghead_details);
 			}
 
-			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_trunnion_virtual_up_limited);
-			DI_gantry_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_trunnion_virtual_out_limited);
-			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_intermediate_virtual_up_limited);
-			DI_gantry_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_intermediate_virtual_out_limited);
-			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_draghead_virtual_up_limited);
-			DI_gantry_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_draghead_virtual_out_limited);
+			DI_boolean_button(this->t_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_trunnion_virtual_up_limited);
+			DI_boolean_button(this->t_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_trunnion_virtual_out_limited);
+			DI_boolean_button(this->i_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_intermediate_virtual_up_limited);
+			DI_boolean_button(this->i_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_intermediate_virtual_out_limited);
+			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualUp], DB205, gantry_sb_draghead_virtual_up_limited);
+			DI_boolean_button(this->h_gantry_buttons[GantryCommand::VirtualOut], DB205, gantry_sb_draghead_virtual_out_limited);
 		}
+	}
+
+	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+		this->settings[DS::DivingDepth]->set_value(DBD(DB20, draghead_diving_depth));
+		this->settings[DS::DivingCompensation]->set_value(DBD(DB20, compensator_diving_progress));
+		this->settings[DS::LandingDepth]->set_value(DBD(DB20, draghead_landing_depth));
 	}
 
 public:
@@ -1123,6 +1137,10 @@ public:
 
 		this->load_dimension(this->lengths, DS::TildeMark, "meter");
 		this->load_dimension(this->speeds, DS::Speed, "knot");
+
+		this->load_setting(this->settings, this->labels, DS::DivingDepth, "meter", 50.0);
+		this->load_setting(this->settings, this->labels, DS::DivingCompensation, "centimeter", compensator_range * 100.0);
+		this->load_setting(this->settings, this->labels, DS::LandingDepth, "meter", 50.0);
 		
 		if (this->DS_side == DS::PS) {
 			this->load_draghead(this->dragheads, DS::PSVisor, DS::PSDP, -draghead_radius, config, default_ps_color);
@@ -1229,7 +1247,16 @@ public:
 			}
 		}
 
-		{ // reflow labels and dimensions
+		{ // reflow gantry virtual action buttons
+			this->reflow_gantry_button(this->t_gantry_buttons);
+			this->reflow_gantry_button(this->i_gantry_buttons);
+			this->reflow_gantry_button(this->h_gantry_buttons);
+		}
+
+		{ // reflow labels, dimensions and settings
+			DS asetting = DS::DivingCompensation;
+			float pf_xoff = vinset * 2.0F;
+
 			this->master->move_to(this->labels[this->DS_side], cx, vinset * 2.0F, GraphletAnchor::CC);
 			this->master->move_to(this->labels[DS::Overlook], this->dragxys[this->DS_side], GraphletAnchor::CT, GraphletAnchor::CB, 0.0, -vinset);
 			this->master->move_to(this->labels[DS::Sidelook], this->dragxzes[this->DS_side], 0.5F, this->labels[DS::Overlook], 0.5F, GraphletAnchor::CC);
@@ -1237,21 +1264,26 @@ public:
 			this->master->move_to(this->lengths[DS::TildeMark], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::RB, -vinset, -vinset);
 			this->master->move_to(this->speeds[DS::Speed], this->labels[DS::Sidelook], GraphletAnchor::CT, GraphletAnchor::LB, +vinset, -vinset);
 
-			if (this->DS_side == DS::PS) {
+			if (this->DS_side == DS::PS) {	
 				this->reflow_draghead_metrics(DS::PSVisor, DS::PSDP);
-				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, vinset * 2.0F);
-				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::CT, GraphletAnchor::LB);
+				this->master->move_to(this->forces[DS::PSPF1], this->dragxzes[DS::PS], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
+				this->master->move_to(this->forces[DS::PSPF2], this->dragxzes[DS::PS], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
+
+				this->master->move_to(this->labels[asetting], this->dragxzes[DS::PS], 0.0F, this->dragheads[DS::PSVisor], 0.25F, GraphletAnchor::LC);
+				this->master->move_to(this->settings[asetting], this->labels[asetting], GraphletAnchor::RC, GraphletAnchor::LC, +vinset);
 			} else {
 				this->reflow_draghead_metrics(DS::SBVisor, DS::SBDP); 
-				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -vinset * 2.0F);
-				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::CT, GraphletAnchor::RB);
-			}
-		}
+				this->master->move_to(this->forces[DS::SBPF1], this->dragxzes[DS::SB], GraphletAnchor::RT, GraphletAnchor::RB, -pf_xoff);
+				this->master->move_to(this->forces[DS::SBPF2], this->dragxzes[DS::SB], GraphletAnchor::LT, GraphletAnchor::LB, +pf_xoff);
 
-		{ // reflow gantry virtual action buttons
-			this->reflow_gantry_button(this->t_gantry_buttons);
-			this->reflow_gantry_button(this->i_gantry_buttons);
-			this->reflow_gantry_button(this->h_gantry_buttons);
+				this->master->move_to(this->settings[asetting], this->dragxzes[DS::SB], 1.0F, this->dragheads[DS::SBVisor], 0.25F, GraphletAnchor::RC);
+				this->master->move_to(this->labels[asetting], this->settings[asetting], GraphletAnchor::LC, GraphletAnchor::RC, -vinset);
+			}
+
+			this->master->move_to(this->settings[DS::DivingDepth], this->settings[asetting], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -vinset);
+			this->master->move_to(this->settings[DS::LandingDepth], this->settings[asetting], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, vinset);
+			this->master->move_to(this->labels[DS::DivingDepth], this->labels[asetting], 0.0F, this->settings[DS::DivingDepth], 0.5F, GraphletAnchor::LC);
+			this->master->move_to(this->labels[DS::LandingDepth], this->labels[asetting], 0.0F, this->settings[DS::LandingDepth], 0.5F, GraphletAnchor::LC);
 		}
 	}
 
@@ -1323,6 +1355,27 @@ public:
 		}
 	}
 
+	bool on_enter_char(PLCMaster* plc) {
+		auto editor = dynamic_cast<Credit<Dimensionlet, DS>*>(this->master->get_focus_graphlet());
+		bool handled = false;
+
+		if (editor != nullptr) {
+			float length = float(editor->get_input_number());
+
+			if (length > 0.0F) {
+				switch (editor->id) {
+				case DS::DivingDepth: plc->send_setting(draghead_diving_depth, length); break;
+				case DS::DivingCompensation: plc->send_setting(compensator_diving_progress, length); break;
+				case DS::LandingDepth: plc->send_setting(draghead_landing_depth, length); break;
+				}
+			}
+
+			handled = true;
+		}
+
+		return handled;
+	}
+
 private:
 	template<class G, typename E>
 	void load_gantries(std::map<E, Credit<G, E>*>& cs, E id0, E idn, float radius) {
@@ -1365,8 +1418,12 @@ private:
 	}
 
 	template<typename E>
-	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, _speak(id)), id);
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, std::map<E, Credit<Labellet, E>*>& ls
+		, E id, Platform::String^ unit, double maximum) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit), id);
+		ds[id]->set_maximum(maximum);
+
+		this->load_label(ls, id, Colours::Silver, this->label_font);
 	}
 
 private:

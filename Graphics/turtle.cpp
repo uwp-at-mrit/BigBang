@@ -57,6 +57,16 @@ void ITurtle::fill_anchor_location(unsigned int anchor, float* x, float* y) {
 	}
 }
 
+void ITurtle::fill_anchors_distance(unsigned int anchor1, unsigned int anchor2, float* xdistance, float* ydistance) {
+	float x1, y1, x2, y2;
+
+	this->fill_anchor_location(anchor1, &x1, &y1);
+	this->fill_anchor_location(anchor2, &x2, &y2);
+
+	SET_BOX(xdistance, x2 - x1);
+	SET_BOX(ydistance, y2 - y1);
+}
+
 CanvasGeometry^ ITurtle::subtrack(unsigned int a1, unsigned int a2, float thickness, CanvasStrokeStyle^ style) {
 	float poff = thickness * 0.5F;
 	float sext = poff * 2.0F;

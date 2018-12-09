@@ -81,6 +81,9 @@ namespace WarGrey::SCADA {
 	static unsigned int ctension_ps_button = 1569U;
 	static unsigned int ctension_sb_button = 1570U;
 
+	static unsigned int ps_almo_auto = 1872U;
+	static unsigned int sb_almo_auto = 1880U;
+
 	/************************************************************************************************/
 	void DI_winch(WarGrey::SCADA::Winchlet* target
 		, const uint8* db4, WarGrey::SCADA::WinchLimits& limits
@@ -92,8 +95,7 @@ namespace WarGrey::SCADA {
 	void DI_gantry(WarGrey::SCADA::GantrySymbollet* target, const uint8* db4, unsigned int idx4_p1, const uint8* db205, unsigned int idx205_p1);
 
 	void DI_suction_buttons(WarGrey::SCADA::Buttonlet* intarget, WarGrey::SCADA::Buttonlet* detarget, const uint8* db205, unsigned int idx_p1);
-	void DI_ctension_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned int idx_p1);
-	void DI_gantry_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned idx_p1);
+	void DI_boolean_button(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned idx_p1);
 
 	bool DI_long_sb_drag(const uint8* db205);
 }

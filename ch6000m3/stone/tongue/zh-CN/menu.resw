@@ -141,8 +141,8 @@
   <data name="VirtualOpen" xml:space="preserve">
     <value>假开</value>
   </data>
-  <data name="Auto" xml:space="preserve">
-    <value>自动</value>
+  <data name="PSALMO" xml:space="preserve">
+    <value>左ALMO</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
@@ -374,5 +374,8 @@
   </data>
   <data name="VirtualUp" xml:space="preserve">
     <value>假收</value>
+  </data>
+  <data name="SBALMO" xml:space="preserve">
+    <value>右ALMO</value>
   </data>
 </root>

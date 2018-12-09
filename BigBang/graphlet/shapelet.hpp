@@ -223,7 +223,7 @@ namespace WarGrey::SCADA {
 			this->turtle->fill_stepsize(xstep, ystep);
 		}
 
-		void fill_anchor_location(Anchor a, float* x, float* y, bool need_absolute_location = true) {
+		void fill_anchor_location(Anchor a, float* x, float* y = nullptr, bool need_absolute_location = true) {
 			float raw_x, raw_y, shape_x, shape_y;
 			float x0 = 0.0F;
 			float y0 = 0.0F;
@@ -237,6 +237,10 @@ namespace WarGrey::SCADA {
 
 			SET_BOX(x, raw_x + x0 - shape_x);
 			SET_BOX(y, raw_y + y0 - shape_y);
+		}
+
+		void fill_anchors_distance(Anchor a1, Anchor a2, float* xdistance, float* ydistance = nullptr) {
+			this->turtle->fill_anchors_distance(a1, a2, xdistance, ydistance);
 		}
 
 		void append_subtrack(Anchor a1, Anchor a2, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
