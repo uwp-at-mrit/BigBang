@@ -56,7 +56,7 @@ public:
 
 	void execute(GlandPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) {
 		if (cmd == GlandPumpAction::Diagnostics) {
-			show_diagnostics(pump, plc);
+			this->show_diagnostics(pump, plc);
 		} else {
 			plc->send_command(this->DO_action(cmd, pump));
 		}

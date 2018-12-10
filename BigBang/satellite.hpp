@@ -55,7 +55,9 @@ namespace WarGrey::SCADA {
 				this->channel = id;
 
 				if (this->surface_ready()) {
+					this->begin_update_sequence();
 					this->on_id_changed(this->channel);
+					this->end_update_sequence();
 				} else {
 					this->pending = true;
 				}
@@ -66,7 +68,10 @@ namespace WarGrey::SCADA {
 		void on_surface_ready() override {
 			if (this->pending) {
 				this->pending = false;
+
+				this->begin_update_sequence();
 				this->on_id_changed(this->channel);
+				this->end_update_sequence();
 			}
 		}
 

@@ -378,4 +378,7 @@
   <data name="SBALMO" xml:space="preserve">
     <value>右ALMO</value>
   </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
 </root>

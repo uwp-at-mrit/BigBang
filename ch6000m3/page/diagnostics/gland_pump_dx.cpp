@@ -72,9 +72,9 @@ public:
 	}
 
 private:
-	CanvasTextLayout^ name;
 	PumpType type;
 	unsigned int detail_index;
+	CanvasTextLayout^ name;
 };
 
 private class GlandPumpDx final : public PLCConfirmation {

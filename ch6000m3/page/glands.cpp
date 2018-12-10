@@ -42,10 +42,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 private enum GPMode { WindowUI = 0, Dashboard };
 
-private enum class GPOperation { Start, Stop, Reset, Auto, _ };
-
 static CanvasSolidColorBrush^ water_color = Colours::Green;
-static GlandPumpDiagnostics* satellite = nullptr;
+static GlandPumpDiagnostics* satellite = nullptr; // this satellite will be destroyed by `atexit()`;
 
 // WARNING: order matters
 private enum class GP : unsigned int {

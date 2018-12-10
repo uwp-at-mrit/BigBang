@@ -378,4 +378,7 @@
   <data name="SBALMO" xml:space="preserve">
     <value>SB ALMO Auto</value>
   </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
 </root>

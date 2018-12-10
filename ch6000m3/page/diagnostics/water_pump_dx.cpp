@@ -49,7 +49,7 @@ private enum class WP : unsigned int {
 private class WaterPumpDx final : public PLCConfirmation {
 public:
 	WaterPumpDx(WaterPumpDiagnostics* master, bool ps, unsigned int color) : master(master), ps(ps) {
-		this->group_font = make_bold_text_format("Microsoft YaHei", large_font_size);
+		this->region_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->diagnosis_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 
 		this->color = Colours::make(color);
@@ -94,7 +94,7 @@ public:
 	void fill_extent(float title_height, float vgapsize, float* width, float* height) {
 		unsigned int sc_count = _I(this->sc_end) - _I(this->sc_start) + 1U;
 		unsigned int rc_count = _I(this->rc_end) - _I(this->rc_start) + 1U;
-		float region_reserved_height = vgapsize * 4.0F + this->group_font->FontSize;
+		float region_reserved_height = vgapsize * 4.0F + this->region_font->FontSize;
 		
 		this->diagnosis_height = this->diagnosis_font->FontSize * 2.0F;
 		this->sc_region_height = (this->diagnosis_height + vgapsize) * float(sc_count) + region_reserved_height;
@@ -115,8 +115,8 @@ public:
 		this->rc_region = this->master->insert_one(
 			new RoundedRectanglet(region_width, this->rc_region_height, corner_radius, region_background));
 
-		this->load_label(this->labels, WP::StartCondition, this->color, this->group_font, true);
-		this->load_label(this->labels, WP::RunningCondition, this->color, this->group_font, true);
+		this->load_label(this->labels, WP::StartCondition, this->color, this->region_font, true);
+		this->load_label(this->labels, WP::RunningCondition, this->color, this->region_font, true);
 
 		this->reset = this->master->insert_one(new Credit<Buttonlet, bool>(PSWaterPumpAction::Reset.ToString()), this->ps);
 
@@ -134,8 +134,6 @@ public:
 	}
 
 	void reflow(float x, float width, float height, float title_height, float vgapsize) {
-		unsigned int sc_count = _I(this->sc_end) - _I(this->sc_start) + 1U;
-		float cx = x + width * 0.5F;
 		float btn_height;
 
 		this->reset->fill_extent(0.0F, 0.0F, nullptr, &btn_height);
@@ -143,7 +141,7 @@ public:
 		{ // reflow layout
 			float gapsize = (height - title_height - this->sc_region_height - this->rc_region_height - btn_height) * 0.25F;
 
-			this->master->move_to(this->sc_region, cx, title_height + gapsize, GraphletAnchor::CT);
+			this->master->move_to(this->sc_region, x + width * 0.5F, title_height + gapsize, GraphletAnchor::CT);
 			this->master->move_to(this->rc_region, this->sc_region, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 
 			this->master->move_to(this->labels[WP::StartCondition], this->sc_region, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, vgapsize);
@@ -199,7 +197,7 @@ private: // never delete these graphlets mannually
 	
 private:
 	CanvasSolidColorBrush^ color;
-	CanvasTextFormat^ group_font;
+	CanvasTextFormat^ region_font;
 	CanvasTextFormat^ diagnosis_font;
 
 private:

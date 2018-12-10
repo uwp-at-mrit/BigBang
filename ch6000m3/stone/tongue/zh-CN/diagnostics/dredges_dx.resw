@@ -117,133 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
+  <data name="TrunnionGantryCondition" xml:space="preserve">
+    <value>弯管吊架控制条件</value>
   </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
+  <data name="PSMiscCondition" xml:space="preserve">
+    <value>左舷绞车及吊架综合控制条件</value>
   </data>
-  <data name="hydraulics" xml:space="preserve">
-    <value>Hydraulic System</value>
+  <data name="TrunnionWinchCondition" xml:space="preserve">
+    <value>弯管绞车控制条件</value>
   </data>
-  <data name="gallery" xml:space="preserve">
-    <value>Graphlets Gallery</value>
+  <data name="SBMiscCondition" xml:space="preserve">
+    <value>右舷绞车及吊架综合控制条件</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>Temperature</value>
+  <data name="AllGantriesInOrOut" xml:space="preserve">
+    <value>所有吊架在舷内或舷外</value>
   </data>
-  <data name="hopper_doors" xml:space="preserve">
-    <value>Hopper Doors Control</value>
+  <data name="BackOilPressureOkay" xml:space="preserve">
+    <value>回油压力大于 3Bar (可越控)</value>
   </data>
-  <data name="Empty" xml:space="preserve">
-    <value>E</value>
+  <data name="ConsoleAllowed" xml:space="preserve">
+    <value>控制台绞车/吊架工作允许激活</value>
   </data>
-  <data name="Full" xml:space="preserve">
-    <value>F</value>
+  <data name="DragheadGantryCondition" xml:space="preserve">
+    <value>耙头吊架控制条件</value>
   </data>
-  <data name="High" xml:space="preserve">
-    <value>H</value>
+  <data name="DragheadWinchCondition" xml:space="preserve">
+    <value>耙头绞车控制条件</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>L</value>
+  <data name="IntermediateGantryCondition" xml:space="preserve">
+    <value>耙中吊架控制条件</value>
   </data>
-  <data name="Normal" xml:space="preserve">
-    <value>N</value>
+  <data name="IntermediateWinchCondition" xml:space="preserve">
+    <value>耙中绞车控制条件</value>
   </data>
-  <data name="UltraLow" xml:space="preserve">
-    <value>UL</value>
+  <data name="NoConsoleStop" xml:space="preserve">
+    <value>控制台紧急停止未激活</value>
   </data>
-  <data name="glands" xml:space="preserve">
-    <value>Gland Pumps</value>
+  <data name="NoHeadLifting" xml:space="preserve">
+    <value>控制台耙头紧急提升未激活</value>
   </data>
-  <data name="draughts" xml:space="preserve">
-    <value>Draught And Loading</value>
+  <data name="NoIntermediateLifting" xml:space="preserve">
+    <value>控制台耙中紧急提升未激活</value>
   </data>
-  <data name="charges" xml:space="preserve">
-    <value>Loading Cabin</value>
+  <data name="NoSaddle" xml:space="preserve">
+    <value>搁墩限位未激活</value>
   </data>
-  <data name="discharges" xml:space="preserve">
-    <value>Rainbowing</value>
+  <data name="NoSceneStop" xml:space="preserve">
+    <value>现场紧急停止未激活</value>
   </data>
-  <data name="flushs" xml:space="preserve">
-    <value>Flushing System</value>
+  <data name="NoSlack" xml:space="preserve">
+    <value>钢丝绳松弛限位未激活</value>
   </data>
-  <data name="dredges" xml:space="preserve">
-    <value>Dredges</value>
+  <data name="NoSoftUpper" xml:space="preserve">
+    <value>编码器上限位未激活</value>
   </data>
-  <data name="density" xml:space="preserve">
-    <value>Density</value>
+  <data name="NoSuction" xml:space="preserve">
+    <value>吸口到位未激活</value>
   </data>
-  <data name="flspeed" xml:space="preserve">
-    <value>Flow Speed</value>
+  <data name="NoUpper" xml:space="preserve">
+    <value>绞车上限位未激活</value>
   </data>
-  <data name="dredges_PortSide" xml:space="preserve">
-    <value>PS Winches &amp;&amp; Gantries</value>
+  <data name="NoWindedOut" xml:space="preserve">
+    <value>推出限位未激活</value>
   </data>
-  <data name="dredges_Starboard" xml:space="preserve">
-    <value>SB Winches &amp;&amp; Gantries</value>
+  <data name="NoWindedUp" xml:space="preserve">
+    <value>收进限位未激活</value>
   </data>
-  <data name="lubricatings" xml:space="preserve">
-    <value>Lubricating Unit</value>
+  <data name="PSHopperStopped" xml:space="preserve">
+    <value>吸口到位时左泥泵停机</value>
   </data>
-  <data name="water_pump_dx" xml:space="preserve">
-    <value>Water Pump Diagnostics</value>
+  <data name="PSInflatingValveClosed" xml:space="preserve">
+    <value>左吸口充气阀关闭</value>
   </data>
-  <data name="hopper_pump_dx" xml:space="preserve">
-    <value>Hopper Pump Diagnostics</value>
+  <data name="PumpsRunning" xml:space="preserve">
+    <value>液压系统有效</value>
   </data>
-  <data name="performance" xml:space="preserve">
-    <value>Performance Visualization</value>
+  <data name="SBHopperStopped" xml:space="preserve">
+    <value>吸口到位时右泥泵停机</value>
   </data>
-  <data name="gland_pump_dx" xml:space="preserve">
-    <value>Gland Pump Diagnostics</value>
+  <data name="SBInflatingValveClosed" xml:space="preserve">
+    <value>右吸口充气阀关闭</value>
   </data>
-  <data name="PS1" xml:space="preserve">
-    <value>#1</value>
+  <data name="WinchAtTop" xml:space="preserve">
+    <value>耙管绞车在最高位置</value>
   </data>
-  <data name="PS2" xml:space="preserve">
-    <value>#3</value>
+  <data name="BottomPulse" xml:space="preserve">
+    <value>下限脉冲数</value>
   </data>
-  <data name="PS3" xml:space="preserve">
-    <value>#5</value>
+  <data name="CurrentPulse" xml:space="preserve">
+    <value>当前脉冲数</value>
   </data>
-  <data name="PS4" xml:space="preserve">
-    <value>#7</value>
+  <data name="SaddlePulse" xml:space="preserve">
+    <value>搁墩脉冲数</value>
   </data>
-  <data name="PS5" xml:space="preserve">
-    <value>#9</value>
+  <data name="TopPulse" xml:space="preserve">
+    <value>上限脉冲数</value>
   </data>
-  <data name="PS6" xml:space="preserve">
-    <value>#11</value>
+  <data name="DragheadWinchMetrics" xml:space="preserve">
+    <value>耙头绞车编码器</value>
   </data>
-  <data name="PS7" xml:space="preserve">
-    <value>#13</value>
+  <data name="IntermediateWinchMetrics" xml:space="preserve">
+    <value>耙中绞车编码器</value>
   </data>
-  <data name="SB1" xml:space="preserve">
-    <value>#2</value>
-  </data>
-  <data name="SB2" xml:space="preserve">
-    <value>#4</value>
-  </data>
-  <data name="SB3" xml:space="preserve">
-    <value>#6</value>
-  </data>
-  <data name="SB4" xml:space="preserve">
-    <value>#8</value>
-  </data>
-  <data name="SB5" xml:space="preserve">
-    <value>#10</value>
-  </data>
-  <data name="SB6" xml:space="preserve">
-    <value>#12</value>
-  </data>
-  <data name="SB7" xml:space="preserve">
-    <value>#14</value>
-  </data>
-  <data name="PS_dredges_dx" xml:space="preserve">
-    <value>PS Winches and Gantries Diagnostics</value>
-  </data>
-  <data name="SB_dredges_dx" xml:space="preserve">
-    <value>SB Winches and Gantries Diagnostics</value>
+  <data name="TrunnionWinchMetrics" xml:space="preserve">
+    <value>弯管绞车编码器</value>
   </data>
 </root>

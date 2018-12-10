@@ -171,10 +171,10 @@
   <data name="flspeed" xml:space="preserve">
     <value>流速</value>
   </data>
-  <data name="dredges_Left" xml:space="preserve">
+  <data name="dredges_PortSide" xml:space="preserve">
     <value>左绞车 &amp;&amp; 吊架</value>
   </data>
-  <data name="dredges_Right" xml:space="preserve">
+  <data name="dredges_Starboard" xml:space="preserve">
     <value>右绞车 &amp;&amp; 吊架</value>
   </data>
   <data name="lubricatings" xml:space="preserve">
@@ -233,5 +233,11 @@
   </data>
   <data name="SB7" xml:space="preserve">
     <value>#14</value>
+  </data>
+  <data name="PS_dredges_dx" xml:space="preserve">
+    <value>左舷绞车及吊架诊断</value>
+  </data>
+  <data name="SB_dredges_dx" xml:space="preserve">
+    <value>右舷绞车及吊架诊断</value>
   </data>
 </root>

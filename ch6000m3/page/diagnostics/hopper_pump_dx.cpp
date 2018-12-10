@@ -51,7 +51,7 @@ private enum class HP : unsigned int {
 private class HopperPumpDx final : public PLCConfirmation {
 public:
 	HopperPumpDx(HopperPumpDiagnostics* master, bool ps, unsigned int color) : master(master), ps(ps) {
-		this->group_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
+		this->region_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->diagnosis_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 
 		this->color = Colours::make(color);
@@ -118,7 +118,7 @@ public:
 	void fill_extent(float title_height, float vgapsize, float* width, float* height) {
 		unsigned int sc_count = _I(this->hp_end) - _I(this->hp_start) + 1U;
 		unsigned int rc_count = _I(this->uwp_end) - _I(this->uwp_start) + 1U;
-		float region_reserved_height = vgapsize * 4.0F + this->group_font->FontSize;
+		float region_reserved_height = vgapsize * 4.0F + this->region_font->FontSize;
 		
 		this->diagnosis_height = this->diagnosis_font->FontSize * 2.0F;
 		this->hp_region_height = (this->diagnosis_height + vgapsize) * float(sc_count) + region_reserved_height;
@@ -139,8 +139,8 @@ public:
 		this->uwp_region = this->master->insert_one(
 			new RoundedRectanglet(region_width, this->uwp_region_height, corner_radius, region_background));
 
-		this->load_label(this->labels, HP::HopperCondition, this->color, this->group_font, true);
-		this->load_label(this->labels, HP::UnderWaterCondition, this->color, this->group_font, true);
+		this->load_label(this->labels, HP::HopperCondition, this->color, this->region_font, true);
+		this->load_label(this->labels, HP::UnderWaterCondition, this->color, this->region_font, true);
 
 		{ // load buttons
 			Platform::String^ label = PSHopperPumpChargeAction::Reset.ToString();
@@ -170,8 +170,6 @@ public:
 	}
 
 	void reflow(float x, float width, float height, float title_height, float vgapsize) {
-		unsigned int sc_count = _I(this->hp_end) - _I(this->hp_start) + 1U;
-		float cx = x + width * 0.5F;
 		float btn_height;
 
 		this->resets[HP::HopperCondition]->fill_extent(0.0F, 0.0F, nullptr, &btn_height);
@@ -179,7 +177,7 @@ public:
 		{ // reflow layout
 			float gapsize = (height - title_height - this->hp_region_height - this->uwp_region_height - btn_height * 2.0F) / 6.0F;
 
-			this->master->move_to(this->hp_region, cx, title_height + gapsize, GraphletAnchor::CT);
+			this->master->move_to(this->hp_region, x + width * 0.5F, title_height + gapsize, GraphletAnchor::CT);
 			this->master->move_to(this->resets[HP::HopperCondition], this->hp_region, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 			this->master->move_to(this->uwp_region, this->resets[HP::HopperCondition], GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
 			this->master->move_to(this->resets[HP::UnderWaterCondition], this->uwp_region, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
@@ -253,7 +251,7 @@ private: // never delete these graphlets mannually
 	
 private:
 	CanvasSolidColorBrush^ color;
-	CanvasTextFormat^ group_font;
+	CanvasTextFormat^ region_font;
 	CanvasTextFormat^ diagnosis_font;
 
 private:

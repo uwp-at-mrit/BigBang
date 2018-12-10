@@ -260,6 +260,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\dredges_dx.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\gland_pump_dx.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\hopper_pump_dx.resw" />
     <PRIResource Include="stone\tongue\en-US\diagnostics\water_pump_dx.resw" />
@@ -286,6 +287,7 @@
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\dredges_dx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\gland_pump_dx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\hopper_pump_dx.resw" />
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\water_pump_dx.resw" />
@@ -325,6 +327,7 @@
     <ClCompile Include="iotables\di_pumps.cpp" />
     <ClCompile Include="iotables\di_valves.cpp" />
     <ClCompile Include="iotables\di_water_pumps.cpp" />
+    <ClCompile Include="iotables\di_winches.cpp" />
     <ClCompile Include="iotables\do_devices.cpp" />
     <ClCompile Include="iotables\do_doors.cpp" />
     <ClCompile Include="iotables\do_dredges.cpp" />
@@ -332,6 +335,7 @@
     <ClCompile Include="iotables\do_pumps.cpp" />
     <ClCompile Include="iotables\do_valves.cpp" />
     <ClCompile Include="iotables\do_water_pumps.cpp" />
+    <ClCompile Include="page\diagnostics\dredges_dx.cpp" />
     <ClCompile Include="page\diagnostics\gland_pump_dx.cpp" />
     <ClCompile Include="page\diagnostics\hopper_pump_dx.cpp" />
     <ClCompile Include="page\diagnostics\water_pump_dx.cpp" />
@@ -355,7 +359,9 @@
     <ClInclude Include="configuration.hpp" />
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="decorator\ship.hpp" />
+    <ClInclude Include="iotables\di_winches.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />
+    <ClInclude Include="page\diagnostics\dredges_dx.hpp" />
     <ClInclude Include="page\diagnostics\gland_pump_dx.hpp" />
     <ClInclude Include="page\diagnostics\hopper_pump_dx.hpp" />
     <ClInclude Include="page\diagnostics\water_pump_dx.hpp" />

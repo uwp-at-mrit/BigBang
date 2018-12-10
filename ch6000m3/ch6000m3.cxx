@@ -83,11 +83,11 @@ protected:
 		this->add_planet(new DischargesPage(this->device)); // 3
 		this->add_planet(new GlandsPage(this->device)); // 4
 		this->add_planet(new FlushsPage(this->device)); // 5
-		this->add_planet(new DredgesPage(this->device, DragView::Left)); // 6
+		this->add_planet(new DredgesPage(this->device, DragView::PortSide)); // 6
 		this->add_planet(new HopperDoorsPage(this->device)); // 7
 		this->add_planet(new LubricatingsPage(this->device)); // 8
 		this->add_planet(new DraughtsPage(this->device)); // 9
-		this->add_planet(new DredgesPage(this->device, DragView::Right)); // 10
+		this->add_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
 
 		this->add_planet(new Gallery());
 
@@ -95,7 +95,7 @@ protected:
 			this->add_planet(new PerformancePage(this->device));
 		}
 
-		this->transfer_to(2);
+		this->transfer_to(6);
 	}
 
 protected private:

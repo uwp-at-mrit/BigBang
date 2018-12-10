@@ -58,6 +58,7 @@ public:
 		this->load_primitives(this->udoors, this->udlabels, unitsize);
 		this->load_primitives(this->heaters, this->hlabels, unitsize);
 
+		this->load_remote_primitive(&this->remote_winch,       WinchState::Default,         unitsize * 2.0F);
 		this->load_remote_primitive(&this->remote_pump,        HydraulicPumpState::Stopped, unitsize);
 		this->load_remote_primitive(&this->remote_hopper_pump, HopperPumpState::Stopped,    unitsize * 0.5F);
 		this->load_remote_primitive(&this->remote_water_pump,  WaterPumpState::Stopped,     unitsize);
@@ -113,10 +114,11 @@ public:
 			y = vinset + cellsize * 0.5F;
 
 			this->master->move_to(this->remote_label,       x, y + cellsize * 0.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_pump,        x, y + cellsize * 1.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_hopper_pump, x, y + cellsize * 2.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_water_pump,  x, y + cellsize * 3.0F, GraphletAnchor::CC);
-			this->master->move_to(this->remote_heater,      x, y + cellsize * 4.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_winch,       x, y + cellsize * 1.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_pump,        x, y + cellsize * 2.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_hopper_pump, x, y + cellsize * 3.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_water_pump,  x, y + cellsize * 4.0F, GraphletAnchor::CC);
+			this->master->move_to(this->remote_heater,      x, y + cellsize * 5.0F, GraphletAnchor::CC);
 		}
 	}
 
@@ -196,6 +198,7 @@ private: // never delete these graphlets manually.
 	std::unordered_map<HeaterState, Labellet*> hlabels;
 
 	Labellet* remote_label;
+	Winchlet* remote_winch;
 	HydraulicPumplet* remote_pump;
 	HopperPumplet* remote_hopper_pump;
 	WaterPumplet* remote_water_pump;

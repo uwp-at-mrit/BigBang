@@ -1,13 +1,15 @@
 #pragma once
 
 #include "plc.hpp"
+#include "graphlet/device/winchlet.hpp"
+#include "graphlet/device/gantrylet.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class DredgesGroup { PSGantries, SBGantries, _ };
 	private enum class DredgesPosition { psTrunnion, psIntermediate, psDragHead, sbTrunnion, sbIntermediate, sbDragHead, _};
 
-	private enum class WinchAction { Up, Down, Stop, HighSpeed, _ };
-	private enum class GantryAction { WindOut, WindUp, Stop, _ };
+	private enum class WinchAction { Up, Down, Stop, HighSpeed, Diagnostics, _ };
+	private enum class GantryAction { WindOut, WindUp, Stop, Diagnostics, _ };
 	private enum class WaveCompensatorAction { Charge, Discharge, Stop, _ };
 	private enum class DragVisorAction { Up, Down, Stop, _ };
 
@@ -16,8 +18,10 @@ namespace WarGrey::SCADA {
 	private enum class GantryCommand { VirtualUp, VirtualOut, _ };
 	private enum class LMODCommand { PSALMO, SBALMO, _ };
 
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::PLCMaster* plc);
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_menu(WarGrey::SCADA::PLCMaster* plc);
+	typedef void(*dredges_diagnostics_f)(DredgesPosition, WarGrey::SCADA::PLCMaster*);
+
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_winch_menu(WarGrey::SCADA::dredges_diagnostics_f wd, WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_menu(WarGrey::SCADA::dredges_diagnostics_f gd, WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_wave_compensator_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_drag_visor_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gantry_group_menu(WarGrey::SCADA::DredgesGroup group, WarGrey::SCADA::PLCMaster* plc);

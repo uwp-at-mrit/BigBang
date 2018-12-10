@@ -143,6 +143,12 @@
     <ClCompile Include="schema\timeseries\earthwork_ds.cpp">
       <Filter>schema\timeseries</Filter>
     </ClCompile>
+    <ClCompile Include="iotables\di_winches.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
+    <ClCompile Include="page\diagnostics\dredges_dx.cpp">
+      <Filter>page\diagnostics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -265,6 +271,12 @@
     </ClInclude>
     <ClInclude Include="schema\timeseries\earthwork_ds.hpp">
       <Filter>schema\timeseries</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\di_winches.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="page\diagnostics\dredges_dx.hpp">
+      <Filter>page\diagnostics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -510,6 +522,12 @@
       <Filter>stone\tongue\en-US\diagnostics</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\gland_pump_dx.resw">
+      <Filter>stone\tongue\zh-CN\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\dredges_dx.resw">
+      <Filter>stone\tongue\en-US\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\dredges_dx.resw">
       <Filter>stone\tongue\zh-CN\diagnostics</Filter>
     </PRIResource>
   </ItemGroup>

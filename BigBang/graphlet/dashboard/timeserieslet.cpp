@@ -489,18 +489,16 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	long long now = current_milliseconds();
 	TimeSeriesStyle style = this->get_style();
-	bool datasource_ready = ((this->data_source != nullptr) && this->data_source->ready());
-	bool locked = false;
-
-	if (datasource_ready && (this->data_source->loading())) {
+	bool datasource_loading = ((this->data_source != nullptr) && this->data_source->ready() && this->data_source->loading());
+	
+	if (datasource_loading) {
 		this->begin_maniplation_sequence();
-		locked = true;
 	}
 	
 	this->lines[idx].push_back_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
 	
-	if (locked) {
+	if (datasource_loading) {
 		this->end_maniplation_sequence();
 	}
 

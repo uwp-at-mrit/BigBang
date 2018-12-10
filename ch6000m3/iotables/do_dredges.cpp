@@ -14,6 +14,9 @@ using namespace Windows::UI::Xaml::Controls;
 
 private class WinchExecutor final : public IMenuCommand<WinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*> {
 public:
+	WinchExecutor(dredges_diagnostics_f wd) : show_diagnostics(wd) {}
+
+public:
 	bool can_execute(WinchAction cmd, Credit<Winchlet, DredgesPosition>* winch, PLCMaster* plc, bool acc_executable) override {
 		bool okay = true;
 
@@ -23,60 +26,79 @@ public:
 			okay = false;
 		}
 
-		return okay && plc->connected() && plc->authorized();
+		return (WinchAction::Diagnostics == cmd)
+			|| (okay && plc->connected() && plc->authorized());
 	}
 
 	void execute(WinchAction cmd, Credit<Winchlet, DredgesPosition>* winch, PLCMaster* plc) override { // DB300, starts from 1
-		uint16 offset = 0U;
-		uint16 index = 0U;
+		if (cmd == WinchAction::Diagnostics) {
+			this->show_diagnostics(winch->id, plc);
+		} else {
+			uint16 offset = 0U;
+			uint16 index = 0U;
 
-		switch (cmd) {
-		case WinchAction::Up:        offset = 0U; break;
-		case WinchAction::Down:      offset = 1U; break;
-		case WinchAction::Stop:      offset = 2U; break;
-		case WinchAction::HighSpeed: offset = 3U; break;
+			switch (cmd) {
+			case WinchAction::Up:        offset = 0U; break;
+			case WinchAction::Down:      offset = 1U; break;
+			case WinchAction::Stop:      offset = 2U; break;
+			case WinchAction::HighSpeed: offset = 3U; break;
+			}
+
+			switch (winch->id) {
+			case DredgesPosition::psTrunnion:     index = 570U; break;
+			case DredgesPosition::psIntermediate: index = 573U; break;
+			case DredgesPosition::psDragHead:     index = 576U; break;
+			case DredgesPosition::sbTrunnion:     index = 589U; break;
+			case DredgesPosition::sbIntermediate: index = 592U; break;
+			case DredgesPosition::sbDragHead:     index = 595U; break;
+			}
+
+			plc->send_command(index + offset);
 		}
-
-		switch (winch->id) {
-		case DredgesPosition::psTrunnion:     index = 570U; break;
-		case DredgesPosition::psIntermediate: index = 573U; break;
-		case DredgesPosition::psDragHead:     index = 576U; break;
-		case DredgesPosition::sbTrunnion:     index = 589U; break;
-		case DredgesPosition::sbIntermediate: index = 592U; break;
-		case DredgesPosition::sbDragHead:     index = 595U; break;
-		}
-
-		plc->send_command(index + offset);
 	}
+
+private:
+	dredges_diagnostics_f show_diagnostics;
 };
 
 private class GantryExecutor final : public IMenuCommand<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*> {
 public:
+	GantryExecutor(dredges_diagnostics_f gd) : show_diagnostics(gd) {}
+
+public:
 	bool can_execute(GantryAction cmd, Credit<Gantrylet, DredgesPosition>* gantry, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected() && plc->authorized();
+		return (GantryAction::Diagnostics == cmd)
+			|| (plc->connected() && plc->authorized());
 	}
 
 	void execute(GantryAction cmd, Credit<Gantrylet, DredgesPosition>* gantry, PLCMaster* plc) override { // DB300, starts from 1
-		uint16 offset = 0U;
-		uint16 index = 0U;
+		if (cmd == GantryAction::Diagnostics) {
+			this->show_diagnostics(gantry->id, plc);
+		} else {
+			uint16 offset = 0U;
+			uint16 index = 0U;
 
-		switch (cmd) {
-		case GantryAction::WindOut: offset = 0U; break;
-		case GantryAction::WindUp:  offset = 1U; break;
-		case GantryAction::Stop:    offset = 2U; break;
+			switch (cmd) {
+			case GantryAction::WindOut: offset = 0U; break;
+			case GantryAction::WindUp:  offset = 1U; break;
+			case GantryAction::Stop:    offset = 2U; break;
+			}
+
+			switch (gantry->id) {
+			case DredgesPosition::psTrunnion:     index = 561U; break;
+			case DredgesPosition::psIntermediate: index = 564U; break;
+			case DredgesPosition::psDragHead:     index = 567U; break;
+			case DredgesPosition::sbTrunnion:     index = 580U; break;
+			case DredgesPosition::sbIntermediate: index = 583U; break;
+			case DredgesPosition::sbDragHead:     index = 586U; break;
+			}
+
+			plc->send_command(index + offset);
 		}
-
-		switch (gantry->id) {
-		case DredgesPosition::psTrunnion:     index = 561U; break;
-		case DredgesPosition::psIntermediate: index = 564U; break;
-		case DredgesPosition::psDragHead:     index = 567U; break;
-		case DredgesPosition::sbTrunnion:     index = 580U; break;
-		case DredgesPosition::sbIntermediate: index = 583U; break;
-		case DredgesPosition::sbDragHead:     index = 586U; break;
-		}
-
-		plc->send_command(index + offset);
 	}
+
+private:
+	dredges_diagnostics_f show_diagnostics;
 };
 
 private class CompensatorExecutor final : public IMenuCommand<WaveCompensatorAction, Credit<Compensatorlet, bool>, PLCMaster*> {
@@ -147,12 +169,12 @@ public:
 };
 
 /*************************************************************************************************/
-MenuFlyout^ WarGrey::SCADA::make_winch_menu(PLCMaster* plc) {
-	return make_menu<WinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*>(new WinchExecutor(), plc);
+MenuFlyout^ WarGrey::SCADA::make_winch_menu(dredges_diagnostics_f wd, PLCMaster* plc) {
+	return make_menu<WinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*>(new WinchExecutor(wd), plc);
 }
 
-MenuFlyout^ WarGrey::SCADA::make_gantry_menu(PLCMaster* plc) {
-	return make_menu<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*>(new GantryExecutor(), plc);
+MenuFlyout^ WarGrey::SCADA::make_gantry_menu(dredges_diagnostics_f gd, PLCMaster* plc) {
+	return make_menu<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*>(new GantryExecutor(gd), plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_wave_compensator_menu(PLCMaster* plc) {
