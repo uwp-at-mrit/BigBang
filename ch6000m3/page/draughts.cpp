@@ -147,7 +147,7 @@ public:
 
 			this->timeseries->set_style(style);
 			this->timeseries->close_line(EWTS::EarthWork, 0.75);
-			this->timeseries->hide_line(EWTS::Capacity, false);
+			this->timeseries->hide_line(EWTS::Capacity, true);
 			this->timeseries->hide_line(EWTS::HopperHeight, true);
 		}
 	}

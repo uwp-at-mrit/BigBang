@@ -9,7 +9,7 @@ namespace WarGrey::SCADA {
 	private enum class DredgesPosition { psTrunnion, psIntermediate, psDragHead, sbTrunnion, sbIntermediate, sbDragHead, _};
 
 	private enum class WinchAction { Up, Down, Stop, HighSpeed, Diagnostics, _ };
-	private enum class GantryAction { WindOut, WindUp, Stop, Diagnostics, _ };
+	private enum class GantryAction { PushOut, PullIn, Stop, Diagnostics, _ };
 	private enum class WaveCompensatorAction { Charge, Discharge, Stop, _ };
 	private enum class DragVisorAction { Up, Down, Stop, _ };
 

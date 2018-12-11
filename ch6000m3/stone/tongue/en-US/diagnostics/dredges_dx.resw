@@ -180,23 +180,23 @@
   <data name="NoUpper" xml:space="preserve">
     <value>No Upper Limited</value>
   </data>
-  <data name="NoWindedOut" xml:space="preserve">
-    <value>No Winded Out</value>
+  <data name="NoPushedOut" xml:space="preserve">
+    <value>No Pushed Out</value>
   </data>
-  <data name="NoWindedUp" xml:space="preserve">
-    <value>No Winded Up</value>
+  <data name="NoPulledIn" xml:space="preserve">
+    <value>No Pulled In</value>
   </data>
   <data name="PSHopperStopped" xml:space="preserve">
     <value>PS Hopper Stopped</value>
   </data>
-  <data name="PSInflatingValveClosed" xml:space="preserve">
-    <value>PS Inflating Valve Closed</value>
+  <data name="PSNoInflating" xml:space="preserve">
+    <value>PS Suction is Not Inflating</value>
   </data>
   <data name="SBHopperStopped" xml:space="preserve">
     <value>SB Hopper Stopped</value>
   </data>
-  <data name="SBInflatingValveClosed" xml:space="preserve">
-    <value>SB Inflating Valve Closed</value>
+  <data name="SBNoInflating" xml:space="preserve">
+    <value>SB Suction is Not Inflating</value>
   </data>
   <data name="WinchAtTop" xml:space="preserve">
     <value>Winch At Top</value>
@@ -221,5 +221,50 @@
   </data>
   <data name="TrunnionWinchMetrics" xml:space="preserve">
     <value>Trunnion Winch Metrics</value>
+  </data>
+  <data name="A" xml:space="preserve">
+    <value>[A]</value>
+  </data>
+  <data name="B" xml:space="preserve">
+    <value>[B]</value>
+  </data>
+  <data name="C" xml:space="preserve">
+    <value>[C]</value>
+  </data>
+  <data name="Draghead" xml:space="preserve">
+    <value>[Draghead]</value>
+  </data>
+  <data name="F" xml:space="preserve">
+    <value>[F]</value>
+  </data>
+  <data name="G" xml:space="preserve">
+    <value>[G]</value>
+  </data>
+  <data name="H" xml:space="preserve">
+    <value>[H]</value>
+  </data>
+  <data name="Intermediate" xml:space="preserve">
+    <value>[Intermediate]</value>
+  </data>
+  <data name="NoSoftLower" xml:space="preserve">
+    <value>No Soft Lower Limited</value>
+  </data>
+  <data name="Trunnion" xml:space="preserve">
+    <value>[Trunnion]</value>
+  </data>
+  <data name="Pull_Push" xml:space="preserve">
+    <value>Pull &amp; Push</value>
+  </data>
+  <data name="WindUp_Out" xml:space="preserve">
+    <value>WindUp &amp; Out</value>
+  </data>
+  <data name="Allowed" xml:space="preserve">
+    <value>Allowed</value>
+  </data>
+  <data name="Remote" xml:space="preserve">
+    <value>Remote</value>
+  </data>
+  <data name="Scene" xml:space="preserve">
+    <value>Scene</value>
   </data>
 </root>

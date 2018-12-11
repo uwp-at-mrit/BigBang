@@ -10,8 +10,13 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 
+#include "iotables/ai_metrics.hpp"
+
+#include "iotables/di_winches.hpp"
+#include "iotables/di_dredges.hpp"
+#include "iotables/di_devices.hpp"
+#include "iotables/di_pumps.hpp"
 #include "iotables/di_hopper_pumps.hpp"
-#include "iotables/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
 
@@ -28,10 +33,20 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static CanvasSolidColorBrush^ region_background = Colours::make(diagnostics_region_background);
 static CanvasSolidColorBrush^ diagnosis_background = Colours::make(diagnostics_alarm_background);
 
+static CanvasSolidColorBrush^ subcolor_highlight = Colours::RoyalBlue;
+
 // WARNING: order matters
 private enum class WG : unsigned int {
 	// Groups
 	MiscCondition, WinchCondition, GantryCondition, WinchMetrics,
+
+	// Hydraulical Pumps
+	A, B, C, H, F, G,
+
+	// Addition Labels
+	Draghead, Intermediate, Trunnion,
+	Remote, Scene, Allowed,
+	Pull_Push, WindUp_Out,
 
 	// Misc Conditions
 	PumpsRunning,
@@ -40,11 +55,11 @@ private enum class WG : unsigned int {
 	ConsoleAllowed, BackOilPressureOkay,
 
 	// Gantry Conditions
-	WinchAtTop, NoWindedUp, NoWindedOut,
+	WinchAtTop, NoPulledIn, NoPushedOut,
 
 	// Winch Conditions
-	AllGantriesInOrOut, HopperStopped, InflatingValveClosed,
-	NoSoftUpper, NoUpper, NoSuction, NoSlack, NoSaddle,
+	AllGantriesInOrOut, HopperStopped, NoInflating,
+	NoSoftUpper, NoSoftLower, NoUpper, NoSuction, NoSlack, NoSaddle,
 
 	// Metrics
 	CurrentPulse, TopPulse, BottomPulse, SaddlePulse,
@@ -58,18 +73,37 @@ public:
 		this->region_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->diagnosis_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 
+		this->plain_style.number_font = make_bold_text_format("Microsoft YaHei", tiny_font_size);
+		this->plain_style.unit_font = this->plain_style.number_font;
+		this->plain_style.precision = 1U;
+
 		this->color = Colours::make((side == DX::PS) ? default_ps_color : default_sb_color);
 		this->diagnosis_color = Colours::Silver;
+		this->subcolor = Colours::DimGray;
 		this->inset_ratio = 1.618F;
 
 		this->misc_start = WG::PumpsRunning;
 		this->misc_end = WG::BackOilPressureOkay;
 		this->gantry_start = WG::WinchAtTop;
-		this->gantry_end = WG::NoWindedOut;
+		this->gantry_end = WG::NoPushedOut;
 		this->winch_start = WG::AllGantriesInOrOut;
 		this->winch_end = WG::NoSaddle;
 		this->metrics_start = WG::CurrentPulse;
 		this->metrics_end = WG::SaddlePulse;
+
+		if (side == DX::PS) {
+			this->sublabel_start = WG::A;
+			this->sublabel_end = WG::C;
+
+			this->winch_limits = &winch_ps_trunnion_limits;
+			this->winch_details = &winch_ps_trunnion_details;
+		} else {
+			this->sublabel_start = WG::H;
+			this->sublabel_end = WG::G;
+
+			this->winch_limits = &winch_sb_trunnion_limits;
+			this->winch_details = &winch_sb_trunnion_details;
+		}
 	}
 
 public:
@@ -78,7 +112,89 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		bool ps = (this->side == DX::PS);
+		unsigned int draghead_lift = (ps ? console_ps_draghead_winch_lift_button : console_sb_draghead_winch_lift_button) - 1U;
+		unsigned int intermediate_lift = (ps ? console_ps_intermediate_winch_lift_button : console_sb_intermediate_winch_lift_button) - 1U;
+		unsigned int emergence = (ps ? console_ps_winch_gantry_stop_button : console_sb_winch_gantry_stop_button) - 1U;
+		unsigned int console_allowed = (ps ? ps_winch_gantry_allowed : sb_winch_gantry_allowed) - 1U;
+		auto remote_color = (DI_dredges_remote_control(DB4, this->details) ? subcolor_highlight : this->subcolor);
+		auto scene_color = (DI_dredges_scene_control(DB4, this->details) ? subcolor_highlight : this->subcolor);
+		bool pumps_running = true;
+		bool scene_stop = false;
+
+		for (WG id = this->sublabel_start; id <= this->sublabel_end; id++) {
+			switch (id) {
+			case WG::A: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_A_feedback); break;
+			case WG::B: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_B_feedback); break;
+			case WG::C: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_C_feedback); break;
+			case WG::H: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_H_feedback); break;
+			case WG::G: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_G_feedback); break;
+			case WG::F: pumps_running &= this->check_hydraulic_pump(id, DB4, pump_F_feedback); break;
+			}
+		}
+
+		for (WG id = WG::Draghead; id <= WG::Trunnion; id++) {
+			switch (id) {
+			case WG::Draghead: scene_stop |= this->check_scene_stop(id, DB4, (ps ? ps_trunnion_details : sb_trunnion_details)); break;
+			case WG::Intermediate: scene_stop |= this->check_scene_stop(id, DB4, (ps ? ps_trunnion_details : sb_trunnion_details)); break;
+			case WG::Trunnion: scene_stop |= this->check_scene_stop(id, DB4, (ps ? ps_trunnion_details : sb_trunnion_details)); break;
+			}
+		}
+
+		this->diagnoses[WG::PumpsRunning]->set_state(pumps_running, AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WG::NoConsoleStop]->set_state(DBX(DB4, emergence), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WG::NoSceneStop]->set_state(scene_stop, AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WG::NoHeadLifting]->set_state(DBX(DB4, draghead_lift), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WG::NoIntermediateLifting]->set_state(DBX(DB4, intermediate_lift), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[WG::ConsoleAllowed]->set_state(DBX(DB205, console_allowed), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[WG::BackOilPressureOkay]->set_state(DBX(DB205, backoil_pressure_too_low - 1U), AlarmState::None, AlarmState::Notice);
+
+		{ // check gantry conditions
+			unsigned int gantry_limited = this->gantry_limit;
+			bool trunnion_upper = DI_winch_upper_limited(DB4, (ps ? &winch_ps_trunnion_limits : &winch_sb_trunnion_limits));
+			bool trunnion_soft_upper = DI_winch_soft_upper_limited(DB205, (ps ? &winch_ps_trunnion_details : &winch_sb_trunnion_details));
+
+			this->subgantries[WG::Remote]->set_color(remote_color);
+			this->subgantries[WG::Scene]->set_color(scene_color);
+			this->subgantries[WG::Allowed]->set_color(DI_dredges_gantry_allowed(DB4, this->details) ? subcolor_highlight : this->subcolor);
+
+			if (gantry_limited == 0U) {
+				gantry_limited = (DI_long_sb_drag(DB205) ? gantry_sb_long_draghead_limited : gantry_sb_short_draghead_limited);
+			}
+
+			this->diagnoses[WG::WinchAtTop]->set_state(trunnion_upper || trunnion_soft_upper, AlarmState::Notice, AlarmState::None);
+			this->diagnoses[WG::NoPulledIn]->set_state(DI_gantry_pulled_in(DB4, gantry_limited), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoPushedOut]->set_state(DI_gantry_pushed_out(DB4, gantry_limited), AlarmState::None, AlarmState::Notice);
+		}
+
+		{ // check winch conditions
+			unsigned int hopper_feedback = (ps ? ps_hopper_pump_feedback : sb_hopper_pump_feedback);
+			unsigned int suction_btn_p1 = (ps ? suction_ps_buttons : suction_sb_buttons);
+			bool gantries_in = DBX(DB205, (ps ? all_ps_gantries_in : all_sb_gantries_in) - 1U);
+			bool gantries_out = DBX(DB205, (ps ? all_ps_gantries_out : all_sb_gantries_out) - 1U);
+			bool suction_limited = DI_winch_suction_limited(DB4, this->winch_limits);
+			bool stopped = (DI_hopper_type(DB4, hopper_feedback) || DI_underwater_type(DB4, hopper_feedback))
+				&& (!DI_hopper_pump_running(DB4, hopper_feedback, true));
+
+			this->subwinches[WG::Remote]->set_color(remote_color);
+			this->subwinches[WG::Scene]->set_color(scene_color);
+			this->subwinches[WG::Allowed]->set_color(DI_dredges_winch_allowed(DB4, this->details) ? subcolor_highlight : this->subcolor);
+
+			this->diagnoses[WG::AllGantriesInOrOut]->set_state(gantries_in || gantries_out, AlarmState::Notice, AlarmState::None);
+			this->diagnoses[WG::HopperStopped]->set_state(suction_limited && stopped, AlarmState::Notice, AlarmState::None);
+			this->diagnoses[WG::NoInflating]->set_state(DI_suction_inflating(DB205, suction_btn_p1), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoSoftUpper]->set_state(DI_winch_soft_upper_limited(DB205, this->winch_details), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoSoftLower]->set_state(DI_winch_soft_lower_limited(DB205, this->winch_details), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoUpper]->set_state(DI_winch_upper_limited(DB4, this->winch_limits), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoSaddle]->set_state(DI_winch_saddle_limited(DB4, this->winch_limits), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoSuction]->set_state(suction_limited, AlarmState::None, AlarmState::Notice);
+			this->diagnoses[WG::NoSlack]->set_state(DI_winch_slack(DB4, this->winch_limits), AlarmState::None, AlarmState::Notice);
+		}
+	}
+
+	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
+		this->backoil->set_value(RealData(DB203, master_back_oil_pressure));
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -93,19 +209,15 @@ public:
 		unsigned int wc_count = _I(this->winch_end) - _I(this->winch_start) + 1U;
 		unsigned int wmc_count = _I(this->metrics_end) - _I(this->metrics_start) + 1U;
 		float region_reserved_height = vgapsize * 4.0F + this->region_font->FontSize;
-		float left_height, right_height;
 		
 		this->diagnosis_height = this->diagnosis_font->FontSize * 2.0F;
 		this->misc_region_height = (this->diagnosis_height + vgapsize) * float(mc_count) + region_reserved_height;
 		this->gantry_region_height = (this->diagnosis_height + vgapsize) * float(gc_count) + region_reserved_height;
 		this->winch_region_height = (this->diagnosis_height + vgapsize) * float(wc_count) + region_reserved_height;
-		this->metrics_region_height = (this->diagnosis_height + vgapsize) * float(wmc_count) + region_reserved_height;
+		this->metrics_region_height = this->winch_region_height + this->gantry_region_height - this->misc_region_height;
 		
-		left_height = this->misc_region_height + this->metrics_region_height;
-		right_height = this->winch_region_height + this->gantry_region_height;
-
 		SET_BOX(width, 800.0F);
-		SET_BOX(height, std::max(left_height, right_height) + title_height * 3.0F);
+		SET_BOX(height, this->winch_region_height + this->gantry_region_height + title_height * 3.0F);
 	}
 
 	void load(float x, float width, float height, float title_height, float vgapsize) {
@@ -129,6 +241,13 @@ public:
 		this->load_label(this->labels, WG::GantryCondition, DxPosition::Trunnion, this->color, this->region_font);
 		this->load_label(this->labels, WG::WinchCondition, DxPosition::Trunnion, this->color, this->region_font);
 		this->load_label(this->labels, WG::WinchMetrics, DxPosition::Trunnion, this->color, this->region_font);
+		this->load_label(this->labels, WG::Pull_Push, Colours::Teal, this->plain_style.unit_font);
+		this->load_label(this->labels, WG::WindUp_Out, Colours::Teal, this->plain_style.unit_font);
+
+		for (WG id = WG::Remote; id <= WG::Allowed; id++) {
+			this->load_label(this->subwinches, id, this->subcolor, this->plain_style.unit_font);
+			this->load_label(this->subgantries, id, this->subcolor, this->plain_style.unit_font);
+		}
 
 		{ // load diagnoses
 			float icon_size = this->diagnosis_height * 0.618F;
@@ -140,7 +259,7 @@ public:
 				this->diagnoses[id] = this->master->insert_one(new Credit<Alarmlet, WG>(icon_size), id);
 
 				switch (id) {
-				case WG::HopperStopped: case WG::InflatingValveClosed: {
+				case WG::HopperStopped: case WG::NoInflating: {
 					this->load_label(this->labels, id, side, this->diagnosis_color, this->diagnosis_font);
 				}; break;
 				default: {
@@ -148,6 +267,16 @@ public:
 				}
 				}
 			}
+
+			for (WG id = this->sublabel_start; id <= this->sublabel_end; id++) {
+				this->load_label(this->labels, id, this->subcolor, this->plain_style.unit_font);
+			}
+
+			for (WG id = WG::Draghead; id <= WG::Trunnion; id++) {
+				this->load_label(this->labels, id, this->subcolor, this->plain_style.unit_font);
+			}
+
+			this->backoil = this->master->insert_one(new Dimensionlet(this->plain_style, "bar"));
 		}
 	}
 
@@ -166,67 +295,68 @@ public:
 			this->master->move_to(this->labels[WG::WinchMetrics], this->metrics_region, GraphletAnchor::CT, GraphletAnchor::CT, 0.0F, vgapsize);
 		}
 
-		{ // reflow misc condition boxes
-			IGraphlet* target = this->labels[WG::MiscCondition];
-
-			for (WG id = this->misc_start; id <= this->misc_end; id++) {
-				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
-				target = this->slots[id];
-			}
-		}
-
-		{ // reflow gantry condition boxes
-			IGraphlet* target = this->labels[WG::GantryCondition];
-
-			for (WG id = this->gantry_start; id <= this->gantry_end; id++) {
-				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
-				target = this->slots[id];
-			}
-		}
-
-		{ // reflow winch condition boxes
-			IGraphlet* target = this->labels[WG::WinchCondition];
-
-			for (WG id = this->winch_start; id <= this->winch_end; id++) {
-				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
-				target = this->slots[id];
-			}
-		}
-
-		{ // reflow winch metrics
-			IGraphlet* target = this->labels[WG::WinchMetrics];
-
-			for (WG id = this->metrics_start; id <= this->metrics_end; id++) {
-				this->master->move_to(this->slots[id], target, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
-				target = this->slots[id];
-			}
-		}
+		this->reflow(this->slots, WG::MiscCondition, this->misc_start, this->misc_end, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
+		this->reflow(this->slots, WG::GantryCondition, this->gantry_start, this->gantry_end, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
+		this->reflow(this->slots, WG::WinchCondition, this->winch_start, this->winch_end, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
+		this->reflow(this->slots, WG::WinchMetrics, this->metrics_start, this->metrics_end, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, vgapsize);
 
 		{ // reflow diagnostics
 			float inset = vgapsize * this->inset_ratio;
+			float step = vgapsize;
 			float icon_width;
 
 			this->diagnoses[this->misc_start]->fill_extent(0.0F, 0.0F, &icon_width, nullptr);
+			step += icon_width;
 
-			for (WG id = this->misc_start; id <= this->metrics_end; id++) {
-				bool visible = true;
+			this->master->move_to(this->labels[WG::WindUp_Out], this->slots[this->winch_start], 0.0F, this->labels[WG::WinchCondition], 1.0F, GraphletAnchor::LB, inset);
+			this->master->move_to(this->subwinches[WG::Allowed], this->slots[this->winch_start], 1.0F, this->labels[WG::WinchCondition], 1.0F, GraphletAnchor::RB, -inset);
+			this->master->move_to(this->subwinches[WG::Scene], this->subwinches[WG::Allowed], GraphletAnchor::LB, GraphletAnchor::RB);
+			this->master->move_to(this->subwinches[WG::Remote], this->subwinches[WG::Scene], GraphletAnchor::LB, GraphletAnchor::RB, -vgapsize);
+
+			this->master->move_to(this->labels[WG::Pull_Push], this->slots[this->gantry_start], 0.0F, this->labels[WG::GantryCondition], 1.0F, GraphletAnchor::LB, inset);
+			this->master->move_to(this->subgantries[WG::Allowed], this->slots[this->gantry_start], 1.0F, this->labels[WG::GantryCondition], 1.0F, GraphletAnchor::RB, -inset);
+			this->master->move_to(this->subgantries[WG::Scene], this->subgantries[WG::Allowed], GraphletAnchor::LB, GraphletAnchor::RB);
+			this->master->move_to(this->subgantries[WG::Remote], this->subgantries[WG::Scene], GraphletAnchor::LB, GraphletAnchor::RB, -vgapsize);
+
+			for (WG id = this->misc_start; id <= this->misc_end; id++) {				
+				this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, step * 0.0F + inset);
+				this->master->move_to(this->labels[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, step * 1.0F + inset + vgapsize);
+				
+				switch (id) {
+				case WG::PumpsRunning: {
+					this->reflow(this->labels, id, this->sublabel_start, this->sublabel_end, GraphletAnchor::RB, GraphletAnchor::LB, vgapsize, 0.0F);
+				}; break;
+				case WG::NoSceneStop: {
+					this->reflow(this->labels, id, WG::Draghead, WG::Trunnion, GraphletAnchor::RB, GraphletAnchor::LB, vgapsize, 0.0F);
+				}; break;
+				case WG::BackOilPressureOkay: {
+					this->master->move_to(this->backoil, this->labels[WG::BackOilPressureOkay], GraphletAnchor::RB, GraphletAnchor::LB, vgapsize);
+				}; break;
+				}
+			}
+
+			for (WG id = this->gantry_start; id <= this->winch_end; id++) {
+				IGraphlet* target = ((id < this->winch_start) ? this->labels[WG::Pull_Push] : this->labels[WG::WindUp_Out]);
+				float fx = 0.5F;
 
 				switch (id) {
-				case WG::NoSuction: case WG::HopperStopped: case WG::InflatingValveClosed: case WG::NoSlack: {
-					visible = (this->master->get_id() == DxPosition::Trunnion);
+				case WG::NoSuction: case WG::HopperStopped: case WG::NoInflating: case WG::NoSlack: {
+					if (this->master->get_id() != DxPosition::Trunnion) {
+						this->master->move_to(this->diagnoses[id], 0.0F, 0.0F);
+						this->master->move_to(this->labels[id], 0.0F, 0.0F);
+
+						continue;
+					}
 				}; break;
 				}
 
-				if (!visible) {
-					this->master->move_to(this->diagnoses[id], 0.0F, 0.0F);
-					this->master->move_to(this->labels[id], 0.0F, 0.0F);
-				} else {
-					this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC,
-						GraphletAnchor::LC, (icon_width + vgapsize) * 1.0F + inset);
-
-					this->master->move_to(this->labels[id], this->slots[id], GraphletAnchor::LC,
-						GraphletAnchor::LC, (icon_width + vgapsize) * 3.0F + inset + vgapsize);
+				switch (id) {
+				case WG::NoUpper: case WG::NoSoftUpper: case WG::NoPulledIn: fx = 0.25F; break;
+				case WG::NoSuction: case WG::NoSlack: case WG::NoSoftLower: case WG::NoSaddle: case WG::NoPushedOut: fx = 0.75F; break;
 				}
+
+				this->master->move_to(this->diagnoses[id], target, fx, this->slots[id], 0.5F, GraphletAnchor::CC);
+				this->master->move_to(this->labels[id], target, 1.0F, this->slots[id], 0.5F, GraphletAnchor::LC, inset);
 			}
 		}
 	}
@@ -237,8 +367,31 @@ public:
 	}
 
 	void switch_position(DxPosition pos) {
+		bool ps = (this->side == DX::PS);
+
 		for (WG id = WG::GantryCondition; id <= WG::WinchMetrics; id++) {
 			this->labels[id]->set_text(_speak(pos.ToString() + id.ToString()));
+		}
+
+		switch (pos) {
+		case DxPosition::Trunnion: {
+			this->gantry_limit = (ps ? gantry_ps_trunnion_limited : gantry_sb_trunnion_limited);
+			this->winch_limits = (ps ? &winch_ps_trunnion_limits : &winch_sb_trunnion_limits);
+			this->winch_details = (ps ? &winch_ps_trunnion_details : &winch_sb_trunnion_details);
+			this->details = (ps ? ps_draghead_details : sb_draghead_details);
+		}; break;
+		case DxPosition::Intermediate: {
+			this->gantry_limit = (ps ? gantry_ps_intermediate_limited : gantry_sb_intermediate_limited);
+			this->winch_limits = (ps ? &winch_ps_intermediate_limits : &winch_sb_intermediate_limits);
+			this->winch_details = (ps ? &winch_ps_intermediate_details : &winch_sb_intermediate_details);
+			this->details = (ps ? ps_intermediate_details : sb_intermediate_details);
+		}; break;
+		case DxPosition::Draghead: {
+			this->gantry_limit = (ps ? gantry_ps_draghead_limited : 0U);
+			this->winch_limits = (ps ? &winch_ps_draghead_limits : &winch_sb_draghead_limits);
+			this->winch_details = (ps ? &winch_ps_draghead_details : &winch_sb_draghead_details);
+			this->details = (ps ? ps_trunnion_details : sb_trunnion_details);
+		}; break;
 		}
 	}
 
@@ -253,10 +406,43 @@ private:
 		ls[id] = this->master->insert_one(new Credit<Labellet, E>(_speak(prefix.ToString() + id.ToString()), font, color), id);
 	}
 
+private:
+	template<class G, typename E>
+	void reflow(std::map<E, Credit<G, E>*>& gs, E label, E start, E end, GraphletAnchor ta, GraphletAnchor a, float xoff, float yoff) {
+		IGraphlet* target = this->labels[label];
+
+		for (WG id = start; id <= end; id++) {
+			this->master->move_to(gs[id], target, ta, a, xoff, yoff);
+			target = gs[id];
+		}
+	}
+
+private:
+	template<typename E>
+	bool check_hydraulic_pump(E id, const uint8* db4, unsigned int feedback) {
+		bool okay = DI_hydraulic_pump_running(db4, feedback);
+
+		this->labels[id]->set_color(okay ? subcolor_highlight : this->subcolor);
+
+		return okay;
+	}
+
+	template<typename E>
+	bool check_scene_stop(E id, const uint8* db4, unsigned int details) {
+		bool okay = DI_dredges_emergence_stop(db4, details);
+
+		this->labels[id]->set_color(okay ? this->subcolor : subcolor_highlight);
+
+		return okay;
+	}
+
 private: // never delete these graphlets mannually
 	std::map<WG, Credit<Labellet, WG>*> labels;
 	std::map<WG, Credit<Alarmlet, WG>*> diagnoses;
 	std::map<WG, Credit<RoundedRectanglet, WG>*> slots;
+	std::map<WG, Credit<Labellet, WG>*> subwinches;
+	std::map<WG, Credit<Labellet, WG>*> subgantries;
+	Dimensionlet* backoil;
 	RoundedRectanglet* misc_region;
 	RoundedRectanglet* gantry_region;
 	RoundedRectanglet* winch_region;
@@ -265,8 +451,10 @@ private: // never delete these graphlets mannually
 private:
 	CanvasSolidColorBrush^ color;
 	CanvasSolidColorBrush^ diagnosis_color;
+	CanvasSolidColorBrush^ subcolor;
 	CanvasTextFormat^ region_font;
 	CanvasTextFormat^ diagnosis_font;
+	DimensionStyle plain_style;
 
 private:
 	float diagnosis_height;
@@ -285,9 +473,15 @@ private:
 	WG winch_end;
 	WG metrics_start;
 	WG metrics_end;
+	WG sublabel_start;
+	WG sublabel_end;
 
 private:
 	DredgesDiagnostics* master;
+	unsigned int details;
+	unsigned int gantry_limit;
+	WinchLimits* winch_limits;
+	WinchDetails* winch_details;
 	DX side;
 };
 

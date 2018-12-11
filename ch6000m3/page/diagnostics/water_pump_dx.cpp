@@ -66,7 +66,7 @@ public:
 		this->master->begin_update_sequence();
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) {
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		unsigned int feedback = (this->ps ? ps_water_pump_feedback : sb_water_pump_feedback);
 		unsigned int plready = (this->ps ? ps_water_pump_pipeline_ready : sb_water_pump_pipeline_ready) - 1U;
 		unsigned int knob = (this->ps ? ps_water_pump_speed_knob_moved : sb_water_pump_speed_knob_moved) - 1U;

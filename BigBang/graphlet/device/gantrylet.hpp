@@ -6,7 +6,7 @@
 #include "brushes.hxx"
 
 namespace WarGrey::SCADA {
-	private enum class GantryState { Default, WindedUp, WindedOut, WindingUp, WindingOut, _ };
+	private enum class GantryState { Default, PulledIn, PushedOut, PullingIn, PushingOut, _ };
 
 	private struct GantryStyle {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;

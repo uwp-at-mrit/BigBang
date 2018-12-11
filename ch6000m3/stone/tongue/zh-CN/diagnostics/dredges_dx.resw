@@ -133,7 +133,7 @@
     <value>所有吊架在舷内或舷外</value>
   </data>
   <data name="BackOilPressureOkay" xml:space="preserve">
-    <value>回油压力大于 3Bar (可越控)</value>
+    <value>回油压力不少于 3bar (可越控)</value>
   </data>
   <data name="ConsoleAllowed" xml:space="preserve">
     <value>控制台绞车/吊架工作允许激活</value>
@@ -151,7 +151,7 @@
     <value>耙中绞车控制条件</value>
   </data>
   <data name="NoConsoleStop" xml:space="preserve">
-    <value>控制台紧急停止未激活</value>
+    <value>控制台绞车/吊架紧急停止未激活</value>
   </data>
   <data name="NoHeadLifting" xml:space="preserve">
     <value>控制台耙头紧急提升未激活</value>
@@ -160,7 +160,7 @@
     <value>控制台耙中紧急提升未激活</value>
   </data>
   <data name="NoSaddle" xml:space="preserve">
-    <value>搁墩限位未激活</value>
+    <value>搁墩到位未激活</value>
   </data>
   <data name="NoSceneStop" xml:space="preserve">
     <value>现场紧急停止未激活</value>
@@ -177,16 +177,16 @@
   <data name="NoUpper" xml:space="preserve">
     <value>绞车上限位未激活</value>
   </data>
-  <data name="NoWindedOut" xml:space="preserve">
+  <data name="NoPushedOut" xml:space="preserve">
     <value>推出限位未激活</value>
   </data>
-  <data name="NoWindedUp" xml:space="preserve">
+  <data name="NoPulledIn" xml:space="preserve">
     <value>收进限位未激活</value>
   </data>
   <data name="PSHopperStopped" xml:space="preserve">
     <value>吸口到位时左泥泵停机</value>
   </data>
-  <data name="PSInflatingValveClosed" xml:space="preserve">
+  <data name="PSNoInflating" xml:space="preserve">
     <value>左吸口充气阀关闭</value>
   </data>
   <data name="PumpsRunning" xml:space="preserve">
@@ -195,7 +195,7 @@
   <data name="SBHopperStopped" xml:space="preserve">
     <value>吸口到位时右泥泵停机</value>
   </data>
-  <data name="SBInflatingValveClosed" xml:space="preserve">
+  <data name="SBNoInflating" xml:space="preserve">
     <value>右吸口充气阀关闭</value>
   </data>
   <data name="WinchAtTop" xml:space="preserve">
@@ -221,5 +221,50 @@
   </data>
   <data name="TrunnionWinchMetrics" xml:space="preserve">
     <value>弯管绞车编码器</value>
+  </data>
+  <data name="A" xml:space="preserve">
+    <value>[A]</value>
+  </data>
+  <data name="B" xml:space="preserve">
+    <value>[B]</value>
+  </data>
+  <data name="C" xml:space="preserve">
+    <value>[C]</value>
+  </data>
+  <data name="Draghead" xml:space="preserve">
+    <value>[耙头]</value>
+  </data>
+  <data name="F" xml:space="preserve">
+    <value>[F]</value>
+  </data>
+  <data name="G" xml:space="preserve">
+    <value>[G]</value>
+  </data>
+  <data name="H" xml:space="preserve">
+    <value>[H]</value>
+  </data>
+  <data name="Intermediate" xml:space="preserve">
+    <value>[耙中]</value>
+  </data>
+  <data name="NoSoftLower" xml:space="preserve">
+    <value>编码器下限位未激活</value>
+  </data>
+  <data name="Trunnion" xml:space="preserve">
+    <value>[弯管]</value>
+  </data>
+  <data name="Pull_Push" xml:space="preserve">
+    <value>收进&amp;推出</value>
+  </data>
+  <data name="WindUp_Out" xml:space="preserve">
+    <value>收缆&amp;放缆</value>
+  </data>
+  <data name="Allowed" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="Remote" xml:space="preserve">
+    <value>遥控</value>
+  </data>
+  <data name="Scene" xml:space="preserve">
+    <value>现场</value>
   </data>
 </root>

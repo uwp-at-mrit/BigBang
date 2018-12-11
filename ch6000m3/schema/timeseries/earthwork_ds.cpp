@@ -72,8 +72,7 @@ private:
 };
 
 static int earthwork_busy_handler(void* args, int count) {
-	syslog(Log::Info, L"retried times: %d", count);
-
+	// keep trying until it works
 	return 1;
 }
 

@@ -79,8 +79,8 @@ public:
 			uint16 index = 0U;
 
 			switch (cmd) {
-			case GantryAction::WindOut: offset = 0U; break;
-			case GantryAction::WindUp:  offset = 1U; break;
+			case GantryAction::PushOut: offset = 0U; break;
+			case GantryAction::PullIn:  offset = 1U; break;
 			case GantryAction::Stop:    offset = 2U; break;
 			}
 
@@ -154,8 +154,8 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case GantryAction::WindOut: offset = 0U; break;
-		case GantryAction::WindUp:  offset = 1U; break;
+		case GantryAction::PushOut: offset = 0U; break;
+		case GantryAction::PullIn:  offset = 1U; break;
 		case GantryAction::Stop:    offset = 2U; break;
 		}
 

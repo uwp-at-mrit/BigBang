@@ -150,11 +150,11 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="WindOut" xml:space="preserve">
-    <value>Wind Out</value>
+  <data name="PushOut" xml:space="preserve">
+    <value>Push Out</value>
   </data>
-  <data name="WindUp" xml:space="preserve">
-    <value>Wind Up</value>
+  <data name="PullIn" xml:space="preserve">
+    <value>Pull In</value>
   </data>
   <data name="Down" xml:space="preserve">
     <value>Down</value>

@@ -51,7 +51,7 @@ static CanvasGeometry^ make_pivot_base(float radius, float extent_ratio, bool le
 
 /*************************************************************************************************/
 Gantrylet::Gantrylet(float radius, float extent, double degrees)
-	: Gantrylet(GantryState::WindedUp, radius, extent, degrees) {}
+	: Gantrylet(GantryState::Default, radius, extent, degrees) {}
 
 Gantrylet::Gantrylet(GantryState default_state, float radius, float extent, double degrees)
 	: IStatelet(default_state), thickness(2.0F), leftward(radius < 0.0F), base_extent_ratio(extent), degrees(degrees) {
@@ -82,11 +82,11 @@ void Gantrylet::construct() {
 void Gantrylet::update(long long count, long long interval, long long uptime) {
 	if (this->winding) {
 		switch (this->get_state()) {
-		case GantryState::WindingUp: {
+		case GantryState::PullingIn: {
 			this->winding_style->DashOffset = +float(count);
 			this->notify_updated();
 		}; break;
-		case GantryState::WindingOut: {
+		case GantryState::PushingOut: {
 			this->winding_style->DashOffset = -float(count);
 			this->notify_updated();
 		}; break;
@@ -107,7 +107,7 @@ void Gantrylet::fill_margin(float x, float y, float* t, float* r, float* b, floa
 	SET_BOX(t, this->hat_y);
 	SET_BOX(b, 0.0F);
 
-	if (s == GantryState::WindedOut) {
+	if (s == GantryState::PushedOut) {
 		SET_BOXES(l, r, 0.0F);
 	} else {
 		float hspace = this->width
@@ -133,13 +133,13 @@ void Gantrylet::prepare_style(GantryState status, GantryStyle& style) {
 	CAS_SLOT(style.color, Colours::Yellow);
 	
 	switch (status) {
-	case GantryState::WindedOut: {
+	case GantryState::PushedOut: {
 		CAS_SLOT(style.hat_color, Colours::Green);
 	}; break;
-	case GantryState::WindedUp: {
+	case GantryState::PulledIn: {
 		CAS_SLOT(style.base_color, Colours::Green);
 	}; break;
-	case GantryState::WindingOut: case GantryState::WindingUp: {
+	case GantryState::PushingOut: case GantryState::PullingIn: {
 		CAS_SLOT(style.pulley_color, style.winding_color);
 	}; break;
 	}
@@ -151,19 +151,19 @@ void Gantrylet::prepare_style(GantryState status, GantryStyle& style) {
 
 void Gantrylet::on_state_changed(GantryState status) {
 	switch (status) {
-	case GantryState::WindedOut: {
+	case GantryState::PushedOut: {
 		this->make_hat(1.0);
 		this->winding = false;
 	}; break;
-	case GantryState::WindedUp: {
+	case GantryState::PulledIn: {
 		this->make_hat(0.0);
 		this->winding = false;
 	}; break;
-	case GantryState::WindingOut: {
+	case GantryState::PushingOut: {
 		this->make_hat(0.5);
 		this->winding = true;
 	}; break;
-	case GantryState::WindingUp: {
+	case GantryState::PullingIn: {
 		this->make_hat(0.5);
 		this->winding = true;
 	}; break;
@@ -233,7 +233,7 @@ void Gantrylet::make_hat(double ratio) {
 
 /*************************************************************************************************/
 GantrySymbollet::GantrySymbollet(float width, float height)
-	: GantrySymbollet(GantryState::WindedUp, width, height) {}
+	: GantrySymbollet(GantryState::Default, width, height) {}
 
 GantrySymbollet::GantrySymbollet(GantryState default_state, float width, float height)
 	: IStatelet(default_state), width(std::fabsf(width)), height(height), leftward(width < 0.0F), thickness(1.0F) {
@@ -254,7 +254,7 @@ void GantrySymbollet::construct() {
 
 void GantrySymbollet::update(long long count, long long interval, long long uptime) {
 	switch (this->get_state()) {
-	case GantryState::WindingUp: case GantryState::WindingOut: {
+	case GantryState::PullingIn: case GantryState::PushingOut: {
 		this->highlighting = !this->highlighting;
 		this->notify_updated();
 	}; break;
@@ -277,28 +277,28 @@ void GantrySymbollet::on_state_changed(GantryState status) {
 	GantrySymbolStyle s = this->get_style();
 
 	switch (status) {
-	case GantryState::WindedOut: {
+	case GantryState::PushedOut: {
 		this->inside_color = s.color;
 		this->outside_color = s.highlight_color;
 		this->inside_border_color = nullptr;
 		this->outside_border_color = nullptr;
 		this->highlighting = true;
 	}; break;
-	case GantryState::WindedUp: {
+	case GantryState::PulledIn: {
 		this->inside_color = s.highlight_color;
 		this->outside_color = s.color;
 		this->inside_border_color = nullptr;
 		this->outside_border_color = nullptr;
 		this->highlighting = true;
 	}; break;
-	case GantryState::WindingOut: {
+	case GantryState::PushingOut: {
 		this->inside_color = s.color;
 		this->outside_color = s.highlight_color;
 		this->inside_border_color = nullptr;
 		this->outside_border_color = s.highlight_color;
 		this->highlighting = true;
 	}; break;
-	case GantryState::WindingUp: {
+	case GantryState::PullingIn: {
 		this->inside_color = s.highlight_color;
 		this->outside_color = s.color;
 		this->inside_border_color = s.highlight_color;

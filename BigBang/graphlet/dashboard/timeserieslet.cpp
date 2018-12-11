@@ -143,15 +143,15 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 		this->notify_updated();
 	}
 
-	{ // load existed data
+	{ // load exists data
 		TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
-		long long existed_earliest_s = this->next_loading_timepoint;
+		long long exists_earliest_s = this->next_loading_timepoint;
 		long long request_earliest_s = std::min(ts->start, now - this->history_max);
 		long long request_interval = this->history_max / this->realtime.step;
 		
-		if (existed_earliest_s > request_earliest_s) {
+		if (exists_earliest_s > request_earliest_s) {
 			if ((this->data_source != nullptr) && this->data_source->ready() && (!this->data_source->loading())) {
-				this->data_source->load(this, existed_earliest_s, (existed_earliest_s - request_interval));
+				this->data_source->load(this, exists_earliest_s, (exists_earliest_s - request_interval));
 			}
 		}
 	}
@@ -210,8 +210,6 @@ void ITimeSerieslet::on_state_changed(TimeSeriesState status) {
 }
 
 void ITimeSerieslet::update_time_series(long long next_start) {
-	long long earliest_s = this->realtime.start - this->history_max;
-
 	if (this->history.start >= this->realtime.start) {
 		this->history.start = next_start;
 	}
@@ -220,12 +218,15 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 	this->update_horizontal_axes(this->get_style());
 
 	{ // TODO: remove old data
+		long long earliest_s = this->realtime.start - this->history_max;
+
 		this->begin_maniplation_sequence();
 
 		for (unsigned int idx = 0; idx < this->count; idx++) {
 			TimeSeriesLine* line = &this->lines[idx];
+			unsigned int count = 0;
 			bool done = true;
-
+			
 			do {
 				done = true;
 
@@ -236,12 +237,18 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 						line->timestamps.pop_front();
 						line->values.pop_front();
 						done = false;
+
+						count++;
 					}
 				}
 			} while (!done);
 		}
 
 		this->end_maniplation_sequence();
+
+		this->get_logger()->log_message(Log::Info,
+			L"removed %d data@%s",
+			count, update_nowstamp(true)->Data());
 	}
 }
 
@@ -509,12 +516,8 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	long long now = current_milliseconds();
 	TimeSeriesStyle style = this->get_style();
 	bool datasource_ready = ((this->data_source != nullptr) && this->data_source->ready());
-	bool locked = false;
-
-	if (datasource_ready && (this->data_source->loading())) {
-		this->begin_maniplation_sequence();
-		locked = true;
-	}
+	
+	this->begin_maniplation_sequence();
 	
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].push_back_value(now, values[idx]);
@@ -527,10 +530,8 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 		}
 	}
 
-	if (locked) {
-		this->end_maniplation_sequence();
-	}
-
+	this->end_maniplation_sequence();
+	
 	this->notify_updated();
 }
 

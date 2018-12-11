@@ -18,6 +18,7 @@ namespace WarGrey::SCADA {
 	// DB205, starts from 1
 	static unsigned int tank_heater_status = 361U;
 	static unsigned int backoil_pressure_override_status = 1809U;
+	static unsigned int backoil_pressure_too_low = 1810U;
 
 	/************************************************************************************************/
 	void DI_filter_alarm(WarGrey::SCADA::Alarmlet* target, const uint8* db4, unsigned int idx_p1);

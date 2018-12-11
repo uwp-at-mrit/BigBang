@@ -147,10 +147,10 @@
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
-  <data name="WindOut" xml:space="preserve">
+  <data name="PushOut" xml:space="preserve">
     <value>推出</value>
   </data>
-  <data name="WindUp" xml:space="preserve">
+  <data name="PullIn" xml:space="preserve">
     <value>收进</value>
   </data>
   <data name="Down" xml:space="preserve">

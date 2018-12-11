@@ -4,7 +4,7 @@
 using namespace WarGrey::SCADA;
 
 void WarGrey::SCADA::DI_hydraulic_pump_dimension(Dimensionlet* target, const uint8* db4, size_t idx_p1) {
-	target->set_state(DBX(db4, idx_p1) ? DimensionState::Highlight : DimensionState::Normal);
+	target->set_state(DI_hydraulic_pump_running(db4, idx_p1) ? DimensionState::Highlight : DimensionState::Normal);
 }
 
 void WarGrey::SCADA::DI_hydraulic_pump(HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
