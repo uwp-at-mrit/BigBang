@@ -3,14 +3,15 @@
 #include "satellite.hpp"
 #include "plc.hpp"
 
+#include "iotables/do_dredges.hpp"
+
 #include "graphlet/shapelet.hpp"
 #include "graphlet/textlet.hpp"
 
 namespace WarGrey::SCADA {
 	private enum class DX { PS, SB };
-	private enum class DxPosition { Trunnion, Intermediate, Draghead };
 
-	private class DredgesDiagnostics : public WarGrey::SCADA::ICreditSatellite<WarGrey::SCADA::DxPosition> {
+	private class DredgesDiagnostics : public WarGrey::SCADA::ICreditSatellite<WarGrey::SCADA::DredgesPosition> {
 	public:
 		~DredgesDiagnostics() noexcept;
 		DredgesDiagnostics(WarGrey::SCADA::DX side, WarGrey::SCADA::PLCMaster* plc);
@@ -22,8 +23,12 @@ namespace WarGrey::SCADA {
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
 
+	public:
+		bool can_select(IGraphlet* g) override;
+		void on_tap_selected(IGraphlet* g, float local_x, float local_y) override;
+
 	protected:
-		void on_id_changed(DxPosition id) override;
+		void on_id_changed(DredgesPosition id) override;
 
 	private:
 		WarGrey::SCADA::PLCMaster* device;

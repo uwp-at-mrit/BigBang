@@ -34,6 +34,8 @@ namespace WarGrey::SCADA {
 	static unsigned int ctension_sb_buttons = 660U;
 
 	uint16 DO_winch_override_command(WarGrey::SCADA::DredgesPosition id);
+	uint16 DO_winch_upper_check_command(WarGrey::SCADA::DredgesPosition id);
+	uint16 DO_winch_saddle_check_command(WarGrey::SCADA::DredgesPosition id);
 	uint16 DO_suction_command(WarGrey::SCADA::SuctionCommand cmd, bool ps);
 	uint16 DO_LMOD_command(WarGrey::SCADA::LMODCommand cmd);
 	uint16 DO_gantry_virtual_action_command(WarGrey::SCADA::DredgesPosition gid, WarGrey::SCADA::GantryCommand cmd);

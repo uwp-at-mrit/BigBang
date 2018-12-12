@@ -201,8 +201,8 @@
   <data name="WinchAtTop" xml:space="preserve">
     <value>Winch At Top</value>
   </data>
-  <data name="BottomPulse" xml:space="preserve">
-    <value>Bottom Pulse</value>
+  <data name="LowerPulse" xml:space="preserve">
+    <value>Lower Pulse</value>
   </data>
   <data name="CurrentPulse" xml:space="preserve">
     <value>Current Pulse</value>
@@ -210,8 +210,8 @@
   <data name="SaddlePulse" xml:space="preserve">
     <value>Saddle Pulse</value>
   </data>
-  <data name="TopPulse" xml:space="preserve">
-    <value>Top Pulse</value>
+  <data name="UpperPulse" xml:space="preserve">
+    <value>Upper Pulse</value>
   </data>
   <data name="DragheadWinchMetrics" xml:space="preserve">
     <value>Draghead Winch Metrics</value>

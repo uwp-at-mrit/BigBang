@@ -201,7 +201,7 @@
   <data name="WinchAtTop" xml:space="preserve">
     <value>耙管绞车在最高位置</value>
   </data>
-  <data name="BottomPulse" xml:space="preserve">
+  <data name="LowerPulse" xml:space="preserve">
     <value>下限脉冲数</value>
   </data>
   <data name="CurrentPulse" xml:space="preserve">
@@ -210,7 +210,7 @@
   <data name="SaddlePulse" xml:space="preserve">
     <value>搁墩脉冲数</value>
   </data>
-  <data name="TopPulse" xml:space="preserve">
+  <data name="UpperPulse" xml:space="preserve">
     <value>上限脉冲数</value>
   </data>
   <data name="DragheadWinchMetrics" xml:space="preserve">

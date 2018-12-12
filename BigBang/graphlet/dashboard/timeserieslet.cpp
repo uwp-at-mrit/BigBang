@@ -281,13 +281,13 @@ void ITimeSerieslet::update_horizontal_axes(TimeSeriesStyle& style) {
 	TimeSeries* ts = ((this->get_state() == TimeSeriesState::History) ? &this->history : &this->realtime);
 	CanvasPathBuilder^ axes = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
 	CanvasGeometry^ hmarks = blank();
-	float interval = this->width / float(ts->step + 1);
-	long long delta = ts->span / (ts->step + 1);
+	float interval = this->width / float(ts->step);
+	long long delta = ts->span / ts->step;
 	float x = style.haxes_thickness * 0.5F;
 	float y = this->height - style.border_thickness;
 	TextExtent date_mark_te, time_mark_te;
 
-	for (unsigned int i = 0; i <= ts->step + 1; i++) {
+	for (unsigned int i = 0; i <= ts->step; i++) {
 		float xthis = x + interval * float(i);
 		long long utc_s = ts->start + delta * i;
 		Platform::String^ date_mark = make_datestamp_utc(utc_s, true);

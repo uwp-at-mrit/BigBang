@@ -91,27 +91,16 @@ static ICanvasBrush^ winch_status_color = Colours::Background;
 static ICanvasBrush^ winch_status_highlight_color = Colours::Green;
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
-static std::map<DX, DredgesDiagnostics*> satellites; // these satellites will be destroyed by `atexit()`;
+static std::map<DX, DredgesDiagnostics*> satellites; // satellites will be destroyed by `atexit()`;
 
 static void dredges_diagnostics(DredgesPosition position, PLCMaster* plc) {
 	DX side = ((position >= DredgesPosition::sbTrunnion) ? DX::SB : DX::PS);
-	
+
 	if (satellites.find(side) == satellites.end()) {
-		satellites[side] = new DredgesDiagnostics(side, plc);
+		satellites.insert(std::pair<DX, DredgesDiagnostics*>(side, new DredgesDiagnostics(side, plc)));
 	}
 
-	switch (position) {
-	case DredgesPosition::psTrunnion: case DredgesPosition::sbTrunnion: {
-		satellites[side]->switch_id(DxPosition::Trunnion);
-	}; break;
-	case DredgesPosition::psIntermediate: case DredgesPosition::sbIntermediate: {
-		satellites[side]->switch_id(DxPosition::Intermediate);
-	}; break;
-	case DredgesPosition::psDragHead: case DredgesPosition::sbDragHead: {
-		satellites[side]->switch_id(DxPosition::Draghead);
-	}; break;
-	}
-
+	satellites[side]->switch_id(position);
 	satellites[side]->show();
 }
 

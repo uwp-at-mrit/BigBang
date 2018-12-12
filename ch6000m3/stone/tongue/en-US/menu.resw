@@ -381,4 +381,16 @@
   <data name="Auto" xml:space="preserve">
     <value>Auto</value>
   </data>
+  <data name="Block" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="LowerCheck" xml:space="preserve">
+    <value>Lower Check</value>
+  </data>
+  <data name="UpperCheck" xml:space="preserve">
+    <value>Upper Check</value>
+  </data>
+  <data name="SaddleCheck" xml:space="preserve">
+    <value>Saddle Check</value>
+  </data>
 </root>

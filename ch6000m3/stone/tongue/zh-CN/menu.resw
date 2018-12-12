@@ -381,4 +381,16 @@
   <data name="Auto" xml:space="preserve">
     <value>自动</value>
   </data>
+  <data name="Block" xml:space="preserve">
+    <value>屏蔽</value>
+  </data>
+  <data name="LowerCheck" xml:space="preserve">
+    <value>下限校验</value>
+  </data>
+  <data name="UpperCheck" xml:space="preserve">
+    <value>上限校验</value>
+  </data>
+  <data name="SaddleCheck" xml:space="preserve">
+    <value>搁墩校验</value>
+  </data>
 </root>

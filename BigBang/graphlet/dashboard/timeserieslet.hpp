@@ -22,15 +22,15 @@ namespace WarGrey::SCADA {
 		unsigned int step;
 	};
 
-	WarGrey::SCADA::TimeSeries make_minute_series(unsigned int count = 1U, unsigned int step = 5);
-	WarGrey::SCADA::TimeSeries make_hour_series(unsigned int count = 1U, unsigned int step = 5);
-	WarGrey::SCADA::TimeSeries make_today_series(unsigned int step = 11);
+	WarGrey::SCADA::TimeSeries make_minute_series(unsigned int count = 1U, unsigned int step = 6);
+	WarGrey::SCADA::TimeSeries make_hour_series(unsigned int count = 1U, unsigned int step = 6);
+	WarGrey::SCADA::TimeSeries make_today_series(unsigned int step = 12);
 
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lookup_default_light_color(unsigned int idx);
 	Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ lookup_default_dark_color(unsigned int idx);
 
 	private struct TimeSeriesStyle {
-		WarGrey::SCADA::lookup_line_color lookup_color;
+		WarGrey::SCADA::lookup_line_color lookup_color = nullptr;
 
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ font;
 		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ legend_font;

@@ -55,4 +55,12 @@ namespace WarGrey::SCADA {
 	static unsigned int draghead_diving_depth = 190U;
 	static unsigned int draghead_landing_depth = 186U;
 	static unsigned int compensator_diving_progress = 198U;
+
+	static unsigned int winch_ps_trunnion_pulses = 424U;
+	static unsigned int winch_ps_intermediate_pulses = 444U;
+	static unsigned int winch_ps_draghead_pulses = 464U;
+
+	static unsigned int winch_sb_trunnion_pulses = 484U;
+	static unsigned int winch_sb_intermediate_pulses = 504U;
+	static unsigned int winch_sb_draghead_pulses = 524U;
 }
