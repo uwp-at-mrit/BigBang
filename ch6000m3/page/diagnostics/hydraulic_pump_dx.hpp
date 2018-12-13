@@ -24,7 +24,7 @@ namespace WarGrey::SCADA {
 		void reflow(float width, float height) override;
 
 	public:
-		void set_pump(Platform::String^ id, HPDX group);
+		void set_pump(Platform::String^ id, HPDX group, unsigned int details);
 
 	protected:
 		void on_id_changed(unsigned int id) override;

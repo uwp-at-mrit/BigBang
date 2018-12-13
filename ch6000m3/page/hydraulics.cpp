@@ -91,33 +91,34 @@ static void hydraulics_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
 	if (credit_pump != nullptr) {
 		HPDX group = HPDX::Other;
 		unsigned int feedback = 0U;
+		unsigned int details = 0U;
 
 		if (satellite == nullptr) {
 			satellite = new HydraulicPumpDiagnostics(plc);
 		}
 
 		switch (credit_pump->id) {
-		case HS::A: feedback = pump_A_feedback; group = HPDX::SB; break;
-		case HS::B: feedback = pump_B_feedback; group = HPDX::SB; break;
-		case HS::G: feedback = pump_G_feedback; group = HPDX::SB; break;
-		case HS::H: feedback = pump_H_feedback; group = HPDX::SB; break;
+		case HS::A: feedback = pump_A_feedback; group = HPDX::SB; details = pump_A_status; break;
+		case HS::B: feedback = pump_B_feedback; group = HPDX::SB; details = pump_B_status; break;
+		case HS::G: feedback = pump_G_feedback; group = HPDX::SB; details = pump_G_status; break;
+		case HS::H: feedback = pump_H_feedback; group = HPDX::SB; details = pump_H_status; break;
 
-		case HS::C: feedback = pump_C_feedback; group = HPDX::PS; break;
-		case HS::F: feedback = pump_F_feedback; group = HPDX::PS; break;
-		case HS::D: feedback = pump_D_feedback; group = HPDX::PS; break;
-		case HS::E: feedback = pump_E_feedback; group = HPDX::PS; break;
+		case HS::C: feedback = pump_C_feedback; group = HPDX::PS; details = pump_C_status; break;
+		case HS::F: feedback = pump_F_feedback; group = HPDX::PS; details = pump_F_status; break;
+		case HS::D: feedback = pump_D_feedback; group = HPDX::PS; details = pump_D_status; break;
+		case HS::E: feedback = pump_E_feedback; group = HPDX::PS; details = pump_E_status; break;
 
-		case HS::I: feedback = pump_I_feedback; group = HPDX::Visor; break;
-		case HS::J: feedback = pump_J_feedback; group = HPDX::Visor; break;
+		case HS::I: feedback = pump_I_feedback; group = HPDX::Visor; details = pump_I_status; break;
+		case HS::J: feedback = pump_J_feedback; group = HPDX::Visor; details = pump_J_status; break;
 
-		case HS::Y: feedback = pump_Y_feedback; group = HPDX::Other; break;
-		case HS::L: feedback = pump_L_feedback; group = HPDX::Other; break;
-		case HS::M: feedback = pump_M_feedback; group = HPDX::Other; break;
-		case HS::K: feedback = pump_K_feedback; group = HPDX::Other; break;
+		case HS::Y: feedback = pump_Y_feedback; group = HPDX::Other; details = pump_Y_status; break;
+		case HS::L: feedback = pump_L_feedback; group = HPDX::Other; details = pump_L_status; break;
+		case HS::M: feedback = pump_M_feedback; group = HPDX::Other; details = pump_M_status; break;
+		case HS::K: feedback = pump_K_feedback; group = HPDX::Other; details = pump_K_status; break;
 		}
 		
 		// WARNING: `set_pump`ing before `switch_id`ing. 
-		satellite->set_pump(credit_pump->id.ToString(), group);
+		satellite->set_pump(credit_pump->id.ToString(), group, details);
 		satellite->switch_id(feedback);
 		satellite->show();
 	}

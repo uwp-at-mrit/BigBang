@@ -233,7 +233,7 @@ public:
 		SET_BOX(height, this->winch_region_height + this->gantry_region_height + title_height * 3.0F);
 	}
 
-	void load(float x, float width, float height, float title_height, float vgapsize) {
+	void load(float width, float height, float title_height, float vgapsize) {
 		float region_width = width * 0.5F * 0.90F;
 		float diagnosis_width = (region_width - title_height * 1.5F);
 		float corner_radius = 8.0F;
@@ -602,7 +602,7 @@ void DredgesDiagnostics::load(CanvasCreateResourcesReason reason, float width, f
 	if (dashboard != nullptr) {
 		auto caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		
-		dashboard->load(0.0F, width, height, this->title_height, this->vgapsize);
+		dashboard->load(width, height, this->title_height, this->vgapsize);
 		
 		this->titlebar = this->insert_one(new Rectanglet(width, this->title_height, Colours::make(diagnostics_caption_background)));
 		this->title = this->insert_one(new Labellet(this->display_name(), caption_font, diagnostics_caption_foreground));

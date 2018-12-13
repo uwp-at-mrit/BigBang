@@ -216,4 +216,97 @@
   <data name="YPumpCondition" xml:space="preserve">
     <value>应急液压泵Y控制条件</value>
   </data>
+  <data name="SQaOpen" xml:space="preserve">
+    <value>出口阀SQ.A打开</value>
+  </data>
+  <data name="SQbOpen" xml:space="preserve">
+    <value>出口阀SQ.B打开</value>
+  </data>
+  <data name="SQcOpen" xml:space="preserve">
+    <value>出口阀SQ.C打开</value>
+  </data>
+  <data name="SQdOpen" xml:space="preserve">
+    <value>出口阀SQ.D打开</value>
+  </data>
+  <data name="SQeOpen" xml:space="preserve">
+    <value>出口阀SQ.E打开</value>
+  </data>
+  <data name="SQfOpen" xml:space="preserve">
+    <value>出口阀SQ.F打开</value>
+  </data>
+  <data name="SQgOpen" xml:space="preserve">
+    <value>出口阀SQ.G打开</value>
+  </data>
+  <data name="SQhOpen" xml:space="preserve">
+    <value>出口阀SQ.H打开</value>
+  </data>
+  <data name="SQiOpen" xml:space="preserve">
+    <value>出口阀SQ.I打开</value>
+  </data>
+  <data name="SQjOpen" xml:space="preserve">
+    <value>出口阀SQ.J打开</value>
+  </data>
+  <data name="SQkOpen" xml:space="preserve">
+    <value>出口阀SQ.K打开</value>
+  </data>
+  <data name="SQlOpen" xml:space="preserve">
+    <value>出口阀SQ.L打开</value>
+  </data>
+  <data name="SQmOpen" xml:space="preserve">
+    <value>出口阀SQ.M打开</value>
+  </data>
+  <data name="SQyOpen" xml:space="preserve">
+    <value>出口阀SQ.Y打开</value>
+  </data>
+  <data name="NoBroken" xml:space="preserve">
+    <value>无故障反馈</value>
+  </data>
+  <data name="NoRunning" xml:space="preserve">
+    <value>无运行反馈</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>备妥反馈</value>
+  </data>
+  <data name="NoA2C" xml:space="preserve">
+    <value>A泵代替C泵未激活</value>
+  </data>
+  <data name="NoB2C" xml:space="preserve">
+    <value>B泵代替C泵未激活</value>
+  </data>
+  <data name="NoC2A" xml:space="preserve">
+    <value>C泵代替A泵未激活</value>
+  </data>
+  <data name="NoC2B" xml:space="preserve">
+    <value>C泵代替B泵未激活</value>
+  </data>
+  <data name="NoC2F" xml:space="preserve">
+    <value>C泵代替F泵未激活</value>
+  </data>
+  <data name="NoD2E" xml:space="preserve">
+    <value>D泵代替E泵未激活</value>
+  </data>
+  <data name="NoE2D" xml:space="preserve">
+    <value>E泵代替D泵未激活</value>
+  </data>
+  <data name="NoF2H" xml:space="preserve">
+    <value>F泵代替H泵未激活</value>
+  </data>
+  <data name="NoH2F" xml:space="preserve">
+    <value>H泵代替F泵未激活</value>
+  </data>
+  <data name="NoH2G" xml:space="preserve">
+    <value>H泵代替G泵未激活</value>
+  </data>
+  <data name="NoI2J" xml:space="preserve">
+    <value>I泵代替J泵未激活</value>
+  </data>
+  <data name="NoJ2I" xml:space="preserve">
+    <value>J泵代替I泵未激活</value>
+  </data>
+  <data name="SQk1Open" xml:space="preserve">
+    <value>[K1]</value>
+  </data>
+  <data name="SQk2Open" xml:space="preserve">
+    <value>[K2]</value>
+  </data>
 </root>

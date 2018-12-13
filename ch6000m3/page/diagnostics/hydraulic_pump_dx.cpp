@@ -26,6 +26,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 static CanvasSolidColorBrush^ region_background = Colours::make(diagnostics_region_background);
 static CanvasSolidColorBrush^ diagnosis_background = Colours::make(diagnostics_alarm_background);
 
+static CanvasSolidColorBrush^ subcolor = Colours::DimGray;
+static CanvasSolidColorBrush^ subcolor_highlight = Colours::DodgerBlue;
 static CanvasSolidColorBrush^ caption_color = Colours::Salmon;
 static CanvasSolidColorBrush^ diagnosis_color = Colours::Silver;
 
@@ -33,6 +35,9 @@ static CanvasSolidColorBrush^ diagnosis_color = Colours::Silver;
 private enum class P : unsigned int {
 	// Groups
 	MiscCondition, PumpCondition,
+
+	// Addition Labels
+	SQk1Open, SQk2Open,
 
 	// Misc Conditions
 	NoConsolePSStop, NoConsoleSBStop, NoSailingStop, NoPSWinchGantryStop, NoSBWinchGantryStop,
@@ -42,18 +47,43 @@ private enum class P : unsigned int {
 
 	// Pump Conditions
 	Ready, NoRunning, NoBroken,
-	SQAOpen,
-	NoCrA, NoJrA,
+
+	SQaOpen, SQbOpen, SQgOpen, SQhOpen,
+	SQcOpen, SQfOpen, SQdOpen, SQeOpen,
+	SQiOpen, SQjOpen,
+	SQyOpen, SQlOpen, SQmOpen, SQkOpen,
+	
+	NoC2A, NoC2B, NoH2G, NoF2H,
+	NoA2C, NoB2C, NoC2F, NoH2F, NoE2D, NoD2E,
+	NoJ2I, NoI2J,
 
 	_
 };
 
-static P other[] = { P::NoSailingStop, P::NoMasterTankFS02, P::NoMasterTankLS1, P::NoMasterTankLS2 };
-static P visor[] = { P::NoSailingStop, P::NoVisorTankFS, P::NoVisorTankLS1, P::NoVisorTankLS2 };
-static P ps[] = { P::NoConsolePSStop, P::NoSailingStop, P::NoPSWinchGantryStop, P::NoMasterTankFS01,
+static P other[] = { P::NoMasterTankFS02, P::NoMasterTankLS1, P::NoMasterTankLS2 };
+static P visor[] = { P::NoVisorTankFS, P::NoVisorTankLS1, P::NoVisorTankLS2 };
+static P ps[] = { P::NoConsolePSStop, P::NoPSWinchGantryStop, P::NoMasterTankFS01,
 	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ2Open, P::CoolantRunning };
-static P sb[] = { P::NoConsoleSBStop, P::NoSailingStop, P::NoSBWinchGantryStop, P::NoMasterTankFS01,
+static P sb[] = { P::NoConsoleSBStop, P::NoSBWinchGantryStop, P::NoMasterTankFS01,
 	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ1Open, P::CoolantRunning };
+
+static P A[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQaOpen, P::NoC2A };
+static P B[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQbOpen, P::NoC2B };
+static P G[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQgOpen, P::NoH2G };
+static P H[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQhOpen, P::NoF2H };
+
+static P C[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQcOpen, P::NoA2C, P::NoB2C };
+static P F[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQfOpen, P::NoC2F, P::NoH2F };
+static P D[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQdOpen, P::NoE2D };
+static P E[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQeOpen, P::NoD2E };
+
+static P I[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQyOpen, P::NoJ2I };
+static P J[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQjOpen, P::NoI2J };
+
+static P Y[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQyOpen };
+static P L[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQlOpen };
+static P M[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQmOpen };
+static P K[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQkOpen };
 
 static const P* select_group_conditions(HPDX gid, unsigned int* count) {
 	const P* group = nullptr;
@@ -68,12 +98,36 @@ static const P* select_group_conditions(HPDX gid, unsigned int* count) {
 	return group;
 }
 
+static const P* select_pump_conditions(unsigned int id, unsigned int* count) {
+	const P* pump = nullptr;
+
+	switch (id) {
+	case pump_A_feedback: pump = A; SET_BOX(count, sizeof(A) / sizeof(P)); break;
+	case pump_B_feedback: pump = B; SET_BOX(count, sizeof(B) / sizeof(P)); break;
+	case pump_G_feedback: pump = G; SET_BOX(count, sizeof(G) / sizeof(P)); break;
+	case pump_H_feedback: pump = H; SET_BOX(count, sizeof(H) / sizeof(P)); break;
+	case pump_C_feedback: pump = C; SET_BOX(count, sizeof(C) / sizeof(P)); break;
+	case pump_F_feedback: pump = F; SET_BOX(count, sizeof(F) / sizeof(P)); break;
+	case pump_D_feedback: pump = D; SET_BOX(count, sizeof(D) / sizeof(P)); break;
+	case pump_E_feedback: pump = E; SET_BOX(count, sizeof(E) / sizeof(P)); break;
+	case pump_Y_feedback: pump = Y; SET_BOX(count, sizeof(Y) / sizeof(P)); break;
+	case pump_L_feedback: pump = L; SET_BOX(count, sizeof(L) / sizeof(P)); break;
+	case pump_M_feedback: pump = M; SET_BOX(count, sizeof(M) / sizeof(P)); break;
+	case pump_K_feedback: pump = K; SET_BOX(count, sizeof(K) / sizeof(P)); break;
+	case pump_I_feedback: pump = I; SET_BOX(count, sizeof(I) / sizeof(P)); break;
+	case pump_J_feedback: pump = J; SET_BOX(count, sizeof(J) / sizeof(P)); break;
+	}
+
+	return pump;
+}
+
 /*************************************************************************************************/
 private class PumpDx final : public PLCConfirmation {
 public:
 	PumpDx(HydraulicPumpDiagnostics* master) : master(master) {
 		this->region_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->diagnosis_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+		this->subfont = make_bold_text_format("Microsoft YaHei", tiny_font_size);
 	}
 
 public:
@@ -83,9 +137,9 @@ public:
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		this->diagnoses[P::NoConsolePSStop]->set_state(DBX(DB4, console_ps_hydraulic_stop_button - 1U), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[P::NoConsoleSBStop]->set_state(DBX(DB4, console_sb_hydraulic_stop_button - 1U), AlarmState::None, AlarmState::Notice);
-		this->diagnoses[P::NoSailingStop]->set_state(DBX(DB4, sailing_hydraulic_stop_button - 1U), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[P::NoConsolePSStop]->set_state(DBX(DB4, console_ps_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[P::NoConsoleSBStop]->set_state(DBX(DB4, console_sb_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
+		//this->diagnoses[P::NoSailingStop]->set_state(DBX(DB4, sailing_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoPSWinchGantryStop]->set_state(DBX(DB4, console_ps_winch_gantry_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoSBWinchGantryStop]->set_state(DBX(DB4, console_sb_winch_gantry_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoMasterTankFS01]->set_state(DBX(DB4, filter_01_status - 1U), AlarmState::None, AlarmState::Notice);
@@ -98,6 +152,53 @@ public:
 		this->diagnoses[P::SQ1Open]->set_state(DI_manual_valve_open(DB4, manual_valve_SQ1_status), AlarmState::Notice, AlarmState::None);
 		this->diagnoses[P::SQ2Open]->set_state(DI_manual_valve_open(DB4, manual_valve_SQ2_status), AlarmState::Notice, AlarmState::None);
 		this->diagnoses[P::CoolantRunning]->set_state(DI_hydraulic_pump_running(DB4, pump_K_feedback), AlarmState::Notice, AlarmState::None);
+
+		{ // check pumps
+			unsigned int feedback = this->master->get_id();
+
+			this->diagnoses[P::Ready]->set_state(DI_hydraulic_pump_ready(DB205, this->details), AlarmState::Notice, AlarmState::None);
+			this->diagnoses[P::NoRunning]->set_state(DI_hydraulic_pump_running(DB4, feedback), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoBroken]->set_state(DI_hydraulic_pump_broken(DB4, feedback), AlarmState::None, AlarmState::Notice);
+			
+			this->diagnoses[P::NoA2C]->set_state(DBX(DB4, pump_A_replace_C - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoC2A]->set_state(DBX(DB4, pump_C_replace_A - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoB2C]->set_state(DBX(DB4, pump_B_replace_C - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoC2B]->set_state(DBX(DB4, pump_C_replace_B - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoC2F]->set_state(DBX(DB4, pump_C_replace_F - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoH2F]->set_state(DBX(DB4, pump_H_replace_F - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoF2H]->set_state(DBX(DB4, pump_F_replace_H - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoH2G]->set_state(DBX(DB4, pump_H_replace_G - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoD2E]->set_state(DBX(DB4, pump_D_replace_E - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoE2D]->set_state(DBX(DB4, pump_E_replace_D - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoI2J]->set_state(DBX(DB4, pump_I_replace_J - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoJ2I]->set_state(DBX(DB4, pump_J_replace_I - 1U), AlarmState::None, AlarmState::Notice);
+
+			{ // check valves
+				bool k1_open = DI_manual_valve_open(DB4, manual_valve_SQk1_status);
+				bool k2_open = DI_manual_valve_open(DB4, manual_valve_SQk2_status);
+
+				this->diagnoses[P::SQaOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQa_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQbOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQb_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQgOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQg_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQhOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQh_status), AlarmState::Notice, AlarmState::None);
+
+				this->diagnoses[P::SQcOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQc_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQfOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQf_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQdOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQd_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQeOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQe_status), AlarmState::Notice, AlarmState::None);
+
+				this->diagnoses[P::SQiOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQi_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQjOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQj_status), AlarmState::Notice, AlarmState::None);
+
+				this->diagnoses[P::SQyOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQy_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQlOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQl_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQmOpen]->set_state(DI_manual_valve_open(DB4, manual_valve_SQm_status), AlarmState::Notice, AlarmState::None);
+				this->diagnoses[P::SQkOpen]->set_state((k1_open || k2_open), AlarmState::Notice, AlarmState::None);
+
+				this->labels[P::SQk1Open]->set_color(k1_open ? subcolor_highlight : subcolor);
+				this->labels[P::SQk2Open]->set_color(k2_open ? subcolor_highlight : subcolor);
+			}
+		}
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -111,7 +212,7 @@ public:
 		float region_reserved_height = vgapsize * 4.0F + this->region_font->FontSize;
 
 		select_group_conditions(HPDX::PS, &gc_count);
-		pc_count = 0U;
+		select_pump_conditions(pump_C_feedback, &pc_count);
 
 		this->diagnosis_height = this->diagnosis_font->FontSize * 2.0F;
 		this->misc_region_height = (this->diagnosis_height + vgapsize) * float(gc_count) + region_reserved_height;
@@ -121,7 +222,7 @@ public:
 		SET_BOX(height, this->misc_region_height + this->pump_region_height + title_height * 3.0F);
 	}
 
-	void load(float x, float width, float height, float title_height, float vgapsize) {
+	void load(float width, float height, float title_height, float vgapsize) {
 		float region_width = width * 0.90F;
 		float diagnosis_width = (region_width - title_height * 1.5F);
 		float corner_radius = 8.0F;
@@ -145,12 +246,18 @@ public:
 				this->diagnoses[id] = this->master->insert_one(new Credit<Alarmlet, P>(icon_size), id);
 				this->load_label(this->labels, id, diagnosis_color, this->diagnosis_font);
 			}
-		}
+
+			this->load_label(this->labels, P::SQk1Open, subcolor, this->subfont);
+			this->load_label(this->labels, P::SQk2Open, subcolor, this->subfont);
+		}		
 	}
 
 	void reflow(float width, float height, float title_height, float vgapsize) {
 		unsigned int gc_count = 0;
+		unsigned int pc_count = 0;
+		unsigned int feedback = this->master->get_id();
 		const P* group = select_group_conditions(this->group, &gc_count);
+		const P* pump = select_pump_conditions(feedback, &pc_count);
 		
 		{ // reflow layout
 			float gapsize = (height - title_height - this->misc_region_height - this->pump_region_height) / 3.0F;
@@ -169,6 +276,7 @@ public:
 		}
 
 		this->reflow(this->slots, P::MiscCondition, group, gc_count, GraphletAnchor::CB, GraphletAnchor::CT, vgapsize);
+		this->reflow(this->slots, P::PumpCondition, pump, pc_count, GraphletAnchor::CB, GraphletAnchor::CT, vgapsize);
 		
 		{ // reflow diagnostics
 			float inset = vgapsize * 1.618F;
@@ -182,6 +290,14 @@ public:
 				this->master->move_to(this->diagnoses[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, step * 0.0F + inset);
 				this->master->move_to(this->labels[id], this->slots[id], GraphletAnchor::LC, GraphletAnchor::LC, step * 1.0F + inset + vgapsize);
 			}
+
+			if (feedback == pump_K_feedback) {
+				this->master->move_to(this->labels[P::SQk1Open], this->labels[P::SQkOpen], GraphletAnchor::RB, GraphletAnchor::LB, vgapsize);
+				this->master->move_to(this->labels[P::SQk2Open], this->labels[P::SQk1Open], GraphletAnchor::RB, GraphletAnchor::LB, vgapsize);
+			} else {
+				this->master->move_to(this->labels[P::SQk1Open], 0.0F, 0.0F);
+				this->master->move_to(this->labels[P::SQk2Open], 0.0F, 0.0F);
+			}
 		}
 	}
 
@@ -190,7 +306,9 @@ public:
 		return (this->master->surface_ready() && this->master->shown());
 	}
 
-	void set_pump(Platform::String^ name, HPDX gid) {
+	void set_pump(Platform::String^ name, HPDX gid, unsigned int details) {
+		this->details = details;
+
 		// delay the updating when `switch_id`
 		this->pump = name;
 		this->group = gid;
@@ -198,7 +316,7 @@ public:
 
 	void switch_id(unsigned int id) {
 		// `ICreditSatellite` guarantees that the master is loaded and reflowed;
-		// furthermore, the current `id` is available in `load` and `reflow` even through they are invoked earlier.
+		// furthermore, the `this->master->get_id()` works for `load` and `reflow` even when `switch_id` is delayed.
 		this->labels[P::MiscCondition]->set_text(_speak(this->group.ToString() + P::MiscCondition.ToString()), GraphletAnchor::CC);
 		this->labels[P::PumpCondition]->set_text(_speak(this->pump + P::PumpCondition.ToString()), GraphletAnchor::CC);
 	}
@@ -237,6 +355,7 @@ private: // never delete these graphlets mannually
 private:
 	CanvasTextFormat^ region_font;
 	CanvasTextFormat^ diagnosis_font;
+	CanvasTextFormat^ subfont;
 
 private:
 	float diagnosis_height;
@@ -245,8 +364,8 @@ private:
 
 private:
 	HydraulicPumpDiagnostics* master;
-	unsigned int feedback_id;
 	Platform::String^ pump;
+	unsigned int details;
 	HPDX group;
 };
 
@@ -286,7 +405,7 @@ void HydraulicPumpDiagnostics::load(CanvasCreateResourcesReason reason, float wi
 	if (dashboard != nullptr) {
 		auto caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		
-		dashboard->load(0.0F, width, height, this->title_height, this->vgapsize);
+		dashboard->load(width, height, this->title_height, this->vgapsize);
 		
 		this->titlebar = this->insert_one(new Rectanglet(width, this->title_height, Colours::make(diagnostics_caption_background)));
 		this->title = this->insert_one(new Labellet(this->display_name(), caption_font, diagnostics_caption_foreground));
@@ -302,11 +421,11 @@ void HydraulicPumpDiagnostics::reflow(float width, float height) {
 	}
 }
 
-void HydraulicPumpDiagnostics::set_pump(Platform::String^ id, HPDX group) {
+void HydraulicPumpDiagnostics::set_pump(Platform::String^ id, HPDX group, unsigned int details) {
 	auto dashboard = dynamic_cast<PumpDx*>(this->dashboard);
 
 	if (dashboard != nullptr) {
-		dashboard->set_pump(id, group);
+		dashboard->set_pump(id, group, details);
 	}
 }
 
