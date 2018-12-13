@@ -41,6 +41,9 @@ namespace WarGrey::SCADA {
 	static unsigned int sb_hopper_gearbox_master_feedback = 537U;
 	static unsigned int sb_hopper_gearbox_spare_feedback = 540U;
 	static unsigned int sb_hopper_gearbox_alarms = 543U;
+
+	static unsigned int ps_gate_flushing_pump_feedback = 105U;
+	static unsigned int sb_gate_flushing_pump_feedback = 109U;
 	
 	// DB205, starts from 1
 	static unsigned int ps_hopper_pump_details = 857U;
@@ -68,6 +71,9 @@ namespace WarGrey::SCADA {
 	static unsigned int ps_underwater_pipeline_ready = 817U;
 	static unsigned int sb_underwater_pipeline_ready = 818U;
 
+	static unsigned int ps_gate_flushing_pump_status = 1673U;
+	static unsigned int sb_gate_flushing_pump_status = 1681U;
+
 	/************************************************************************************************/
 	void DI_hopper_pumps(WarGrey::SCADA::HopperPumplet* t1, WarGrey::SCADA::HopperPumplet* t2, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_1_p1, size_t idx205_2_p1);
 	void DI_hopper_pump(WarGrey::SCADA::HopperPumplet* target, const uint8* db4, size_t idx_p1, const uint8* db205, size_t idx205_p1);
@@ -78,6 +84,14 @@ namespace WarGrey::SCADA {
 	bool DI_hopper_pump_alert(const uint8* db4, size_t idx4_p1, bool on);
 	bool DI_hopper_pump_broken(const uint8* db4, size_t idx4_p1, bool on);
 	bool DI_hopper_pump_repair(const uint8* db4, size_t idx4_p1, bool on);
+
+	/************************************************************************************************/
+	void DI_gate_flushing_pump(WarGrey::SCADA::HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
+
+	bool DI_gate_flushing_pump_remote_control(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_running(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_broken(const uint8* db4, size_t idx4_p1);
+	bool DI_gate_flushing_pump_ready(const uint8* db205, size_t idx205_p1);
 
 	/************************************************************************************************/
 	void DI_gland_pump(WarGrey::SCADA::HydraulicPumplet* target, bool hopper,

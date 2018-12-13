@@ -136,7 +136,7 @@
     <value>回油压力不少于 3bar (可越控)</value>
   </data>
   <data name="ConsoleAllowed" xml:space="preserve">
-    <value>控制台绞车/吊架工作允许激活</value>
+    <value>疏浚控制台绞车/吊架工作允许激活</value>
   </data>
   <data name="DragheadGantryCondition" xml:space="preserve">
     <value>耙头吊架控制条件</value>
@@ -151,13 +151,13 @@
     <value>耙中绞车控制条件</value>
   </data>
   <data name="NoConsoleStop" xml:space="preserve">
-    <value>控制台绞车/吊架紧急停止未激活</value>
+    <value>疏浚控制台绞车/吊架紧急停止未激活</value>
   </data>
   <data name="NoHeadLifting" xml:space="preserve">
-    <value>控制台耙头紧急提升未激活</value>
+    <value>疏浚控制台耙头紧急提升未激活</value>
   </data>
   <data name="NoIntermediateLifting" xml:space="preserve">
-    <value>控制台耙中紧急提升未激活</value>
+    <value>疏浚控制台耙中紧急提升未激活</value>
   </data>
   <data name="NoSaddle" xml:space="preserve">
     <value>搁墩到位未激活</value>

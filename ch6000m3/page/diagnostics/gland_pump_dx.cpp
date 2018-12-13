@@ -2,9 +2,7 @@
 
 #include "page/diagnostics/gland_pump_dx.hpp"
 #include "decorator/decorator.hpp"
-
 #include "configuration.hpp"
-#include "menu.hpp"
 
 #include "module.hpp"
 #include "brushes.hxx"
@@ -13,15 +11,9 @@
 #include "graphlet/buttonlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 
-#include "iotables/di_pumps.hpp"
 #include "iotables/di_hopper_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
-
-using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;

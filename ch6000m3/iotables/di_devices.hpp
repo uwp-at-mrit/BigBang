@@ -29,11 +29,14 @@ namespace WarGrey::SCADA {
 
 	void DI_visor_tank(WarGrey::SCADA::Tanklet* target, const uint8* db4, unsigned int idx_p1);
 
+	bool DI_tank_level_low(const uint8* db4, unsigned int idx_p1);
+	bool DI_tank_level_too_low(const uint8* db4, unsigned int idx_p1);
+
 	template<typename E>
 	void DI_master_tank(WarGrey::SCADA::StateTanklet<E>* target, const uint8* db4, unsigned int idx_p1) {
-		if (DBX(db4, idx_p1 - 1U)) {
+		if (DI_tank_level_low(db4, idx_p1)) {
 			target->set_state(E::Low);
-		} else if (DBX(db4, idx_p1 + 0U)) {
+		} else if (DI_tank_level_too_low(db4, idx_p1)) {
 			target->set_state(E::UltraLow);
 		} else if (DBX(db4, idx_p1 + 1U)) {
 			target->set_state(E::High);

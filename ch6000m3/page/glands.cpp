@@ -18,12 +18,8 @@
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/manual_valvelet.hpp"
 
-#include "iotables/ai_pumps.hpp"
 #include "iotables/ai_hopper_pumps.hpp"
-
-#include "iotables/di_pumps.hpp"
 #include "iotables/di_hopper_pumps.hpp"
-
 #include "iotables/do_hopper_pumps.hpp"
 #include "iotables/ao_gland_pumps.hpp"
 
@@ -96,7 +92,7 @@ static void gland_pump_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
 	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, GP>*>(pump);
 
 	if (credit_pump != nullptr) {
-		unsigned int detail_index = 0U;
+		unsigned int details_index = 0U;
 		PumpType type = PumpType::_;
 
 		if (satellite == nullptr) {
@@ -104,8 +100,8 @@ static void gland_pump_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
 		}
 
 		switch (credit_pump->id) {
-		case GP::PSFP: satellite->switch_id(pump_ps_gate_flushing_feedback); detail_index = pump_ps_gate_flushing_status; break;
-		case GP::SBFP: satellite->switch_id(pump_sb_gate_flushing_feedback); detail_index = pump_sb_gate_flushing_status; break;
+		case GP::PSFP: satellite->switch_id(ps_gate_flushing_pump_feedback); details_index = ps_gate_flushing_pump_status; break;
+		case GP::SBFP: satellite->switch_id(sb_gate_flushing_pump_feedback); details_index = sb_gate_flushing_pump_status; break;
 		case GP::PSHPa: satellite->switch_id(ps_hopper_master_gland_pump_feedback); type = PumpType::Hopper; break;
 		case GP::PSHPb: satellite->switch_id(ps_hopper_spare_gland_pump_feedback); type = PumpType::Hopper; break;
 		case GP::SBHPa: satellite->switch_id(sb_hopper_master_gland_pump_feedback); type = PumpType::Hopper; break;
@@ -116,7 +112,7 @@ static void gland_pump_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
 		case GP::SBUWP2: satellite->switch_id(sb_underwater_spare_gland_pump_feedback); type = PumpType::Underwater; break;
 		}
 
-		satellite->set_pump(credit_pump->id.ToString(), type, detail_index);
+		satellite->set_pump(credit_pump->id.ToString(), type, details_index);
 		satellite->show();
 	}
 }
@@ -172,8 +168,8 @@ public:
 		DI_hopper_pumps(this->hoppers[GP::PSHP], this->hoppers[GP::PSUWP], DB4, ps_hopper_pump_feedback, DB205, ps_hopper_pump_details, ps_underwater_pump_details);
 		DI_hopper_pumps(this->hoppers[GP::SBHP], this->hoppers[GP::SBUWP], DB4, sb_hopper_pump_feedback, DB205, sb_hopper_pump_details, sb_underwater_pump_details);
 
-		DI_gate_flushing_pump(this->pumps[GP::PSFP], DB4, pump_ps_gate_flushing_feedback, DB205, pump_ps_gate_flushing_status);
-		DI_gate_flushing_pump(this->pumps[GP::SBFP], DB4, pump_sb_gate_flushing_feedback, DB205, pump_sb_gate_flushing_status);
+		DI_gate_flushing_pump(this->pumps[GP::PSFP], DB4, ps_gate_flushing_pump_feedback, DB205, ps_gate_flushing_pump_status);
+		DI_gate_flushing_pump(this->pumps[GP::SBFP], DB4, sb_gate_flushing_pump_feedback, DB205, sb_gate_flushing_pump_status);
 
 		DI_gland_pump(this->pumps[GP::PSHPa], true, DB4, ps_hopper_master_gland_pump_feedback, DB205, ps_hopper_master_gland_pump_status);
 		DI_gland_pump(this->pumps[GP::PSHPb], true, DB4, ps_hopper_spare_gland_pump_feedback, DB205, ps_hopper_spare_gland_pump_status);

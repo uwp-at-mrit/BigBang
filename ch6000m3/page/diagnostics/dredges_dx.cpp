@@ -2,7 +2,6 @@
 
 #include "page/diagnostics/dredges_dx.hpp"
 #include "configuration.hpp"
-#include "menu.hpp"
 
 #include "module.hpp"
 #include "string.hpp"
@@ -11,7 +10,6 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/buttonlet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
-#include "graphlet/dashboard/timeserieslet.hpp"
 
 #include "iotables/ai_metrics.hpp"
 #include "iotables/ai_dredges.hpp"
@@ -22,12 +20,7 @@
 #include "iotables/di_pumps.hpp"
 #include "iotables/di_hopper_pumps.hpp"
 
-#include "decorator/page.hpp"
-
 using namespace WarGrey::SCADA;
-
-using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -41,6 +34,7 @@ static CanvasSolidColorBrush^ subcolor = Colours::DimGray;
 static CanvasSolidColorBrush^ subcolor_highlight = Colours::DodgerBlue;
 static CanvasSolidColorBrush^ diagnosis_color = Colours::Silver;
 static CanvasSolidColorBrush^ metrics_color = Colours::Yellow;
+static CanvasSolidColorBrush^ tips_color = Colours::CadetBlue;
 
 private enum class WGFunction { Block, UpperCheck, LowerCheck, _ }; // NOTE: LowerCheck is actually the Saddle Check
 
@@ -260,8 +254,8 @@ public:
 		this->load_label(this->labels, WG::GantryCondition, WG::Trunnion, this->color, this->region_font);
 		this->load_label(this->labels, WG::WinchCondition, WG::Trunnion, this->color, this->region_font);
 		this->load_label(this->labels, WG::WinchMetrics, WG::Trunnion, this->color, this->region_font);
-		this->load_label(this->labels, WG::Pull_Push, Colours::Teal, this->plain_style.unit_font);
-		this->load_label(this->labels, WG::WindUp_Out, Colours::Teal, this->plain_style.unit_font);
+		this->load_label(this->labels, WG::Pull_Push, tips_color, this->plain_style.unit_font);
+		this->load_label(this->labels, WG::WindUp_Out, tips_color, this->plain_style.unit_font);
 
 		for (WG id = WG::Remote; id <= WG::Allowed; id++) {
 			this->load_label(this->subwinches, id, subcolor, this->plain_style.unit_font);
@@ -514,7 +508,7 @@ private:
 	}
 
 	void reset_captions(WG prefix) {
-		for (WG id = WG::GantryCondition; id <= WG::WinchMetrics; id++) {
+		for (WG id = WG::WinchCondition; id <= WG::WinchMetrics; id++) {
 			this->labels[id]->set_text(_speak(prefix.ToString() + id.ToString()));
 		}
 	}

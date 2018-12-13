@@ -12,9 +12,9 @@ void WarGrey::SCADA::DI_backoil_pressure_override(Buttonlet* target, const uint8
 }
 
 void WarGrey::SCADA::DI_visor_tank(Tanklet* target, const uint8* db4, unsigned int idx_p1) {
-	if (DBX(db4, idx_p1 - 1U)) {
+	if (DI_tank_level_low(db4, idx_p1)) {
 		target->set_state(TankState::Low);
-	} else if (DBX(db4, idx_p1 + 0U)) {
+	} else if (DI_tank_level_too_low(db4, idx_p1)) {
 		target->set_state(TankState::UltraLow);
 	} else {
 		target->set_state(TankState::Normal);
@@ -42,4 +42,13 @@ void WarGrey::SCADA::DI_tank_heater(Heaterlet* target, const uint8* db4, unsigne
 	} else {
 		target->set_state(HeaterState::Stopped);
 	}
+}
+
+/*************************************************************************************************/
+bool WarGrey::SCADA::DI_tank_level_low(const uint8* db4, unsigned int idx_p1) {
+	return DBX(db4, idx_p1 - 1U);
+}
+
+bool WarGrey::SCADA::DI_tank_level_too_low(const uint8* db4, unsigned int idx_p1) {
+	return DBX(db4, idx_p1 + 0U);
 }

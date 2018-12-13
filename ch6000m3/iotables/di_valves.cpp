@@ -4,8 +4,7 @@
 using namespace WarGrey::SCADA;
 
 void WarGrey::SCADA::DI_manual_valve(ManualValvelet* target, const uint8* db4, size_t idx_p1) {
-	// OpenReady or StopReady
-	target->set_state(DBX(db4, idx_p1 - 1), ManualValveState::Open, ManualValveState::OpenReady);
+	target->set_state(DI_manual_valve_open(db4, idx_p1), ManualValveState::Open, ManualValveState::OpenReady); // OpenReady or StopReady
 }
 
 void WarGrey::SCADA::DI_gate_valve(GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
@@ -54,4 +53,9 @@ void WarGrey::SCADA::DI_motor_valve(MotorValvelet* target, const uint8* db4, siz
 	} else if (DBX(db205, idx205_p1 + 2U)) {
 		target->set_state(TValveState::Unclosable);
 	}
+}
+
+/*************************************************************************************************/
+bool WarGrey::SCADA::DI_manual_valve_open(const uint8* db4, size_t idx_p1) {
+	return DBX(db4, idx_p1 - 1U);
 }

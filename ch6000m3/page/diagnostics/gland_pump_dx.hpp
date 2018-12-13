@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 
 	private class GlandPumpDiagnostics : public WarGrey::SCADA::ICreditSatellite<unsigned int> {
 	public:
-		~GlandPumpDiagnostics() noexcept;
+		virtual ~GlandPumpDiagnostics() noexcept;
 		GlandPumpDiagnostics(WarGrey::SCADA::PLCMaster* plc);
 
 	public:

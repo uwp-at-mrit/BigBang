@@ -1,6 +1,8 @@
 ﻿#include <map>
 
 #include "page/hydraulics.hpp"
+#include "page/diagnostics/hydraulic_pump_dx.hpp"
+
 #include "configuration.hpp"
 #include "menu.hpp"
 
@@ -79,6 +81,47 @@ private enum class HS : unsigned int {
 	// anchors used for unnamed corners
 	lt, tl, rt, tr, cl, cr, i, j, f02, master, sb
 };
+
+/*************************************************************************************************/
+static HydraulicPumpDiagnostics* satellite; // it will be destroyed by `atexit()`;
+
+static void hydraulics_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
+	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, HS>*>(pump);
+
+	if (credit_pump != nullptr) {
+		HPDX group = HPDX::Other;
+		unsigned int feedback = 0U;
+
+		if (satellite == nullptr) {
+			satellite = new HydraulicPumpDiagnostics(plc);
+		}
+
+		switch (credit_pump->id) {
+		case HS::A: feedback = pump_A_feedback; group = HPDX::SB; break;
+		case HS::B: feedback = pump_B_feedback; group = HPDX::SB; break;
+		case HS::G: feedback = pump_G_feedback; group = HPDX::SB; break;
+		case HS::H: feedback = pump_H_feedback; group = HPDX::SB; break;
+
+		case HS::C: feedback = pump_C_feedback; group = HPDX::PS; break;
+		case HS::F: feedback = pump_F_feedback; group = HPDX::PS; break;
+		case HS::D: feedback = pump_D_feedback; group = HPDX::PS; break;
+		case HS::E: feedback = pump_E_feedback; group = HPDX::PS; break;
+
+		case HS::I: feedback = pump_I_feedback; group = HPDX::Visor; break;
+		case HS::J: feedback = pump_J_feedback; group = HPDX::Visor; break;
+
+		case HS::Y: feedback = pump_Y_feedback; group = HPDX::Other; break;
+		case HS::L: feedback = pump_L_feedback; group = HPDX::Other; break;
+		case HS::M: feedback = pump_M_feedback; group = HPDX::Other; break;
+		case HS::K: feedback = pump_K_feedback; group = HPDX::Other; break;
+		}
+		
+		// WARNING: `set_pump`ing before `switch_id`ing. 
+		satellite->set_pump(credit_pump->id.ToString(), group);
+		satellite->switch_id(feedback);
+		satellite->show();
+	}
+}
 
 static uint16 DO_hydraulics_action(HydraulicPumpAction cmd, HydraulicPumplet* pump) {
 	auto credit_pump = dynamic_cast<Credit<HydraulicPumplet, HS>*>(pump);
@@ -177,27 +220,27 @@ public:
 		}
 
 		{ // valve statuses
-			DI_manual_valve(this->valves[HS::SQ1], DB4, gate_valve_SQ1_status);
-			DI_manual_valve(this->valves[HS::SQ2], DB4, gate_valve_SQ2_status);
+			DI_manual_valve(this->valves[HS::SQ1], DB4, manual_valve_SQ1_status);
+			DI_manual_valve(this->valves[HS::SQ2], DB4, manual_valve_SQ2_status);
 
-			DI_manual_valve(this->valves[HS::SQk1], DB4, gate_valve_SQk1_status);
-			DI_manual_valve(this->valves[HS::SQk2], DB4, gate_valve_SQk2_status);
-			DI_manual_valve(this->valves[HS::SQl], DB4, gate_valve_SQl_status);
-			DI_manual_valve(this->valves[HS::SQm], DB4, gate_valve_SQm_status);
-			DI_manual_valve(this->valves[HS::SQy], DB4, gate_valve_SQy_status);
+			DI_manual_valve(this->valves[HS::SQk1], DB4, manual_valve_SQk1_status);
+			DI_manual_valve(this->valves[HS::SQk2], DB4, manual_valve_SQk2_status);
+			DI_manual_valve(this->valves[HS::SQl], DB4, manual_valve_SQl_status);
+			DI_manual_valve(this->valves[HS::SQm], DB4, manual_valve_SQm_status);
+			DI_manual_valve(this->valves[HS::SQy], DB4, manual_valve_SQy_status);
 
-			DI_manual_valve(this->valves[HS::SQi], DB4, gate_valve_SQi_status);
-			DI_manual_valve(this->valves[HS::SQj], DB4, gate_valve_SQj_status);
+			DI_manual_valve(this->valves[HS::SQi], DB4, manual_valve_SQi_status);
+			DI_manual_valve(this->valves[HS::SQj], DB4, manual_valve_SQj_status);
 
-			DI_manual_valve(this->valves[HS::SQc], DB4, gate_valve_SQc_status);
-			DI_manual_valve(this->valves[HS::SQd], DB4, gate_valve_SQd_status);
-			DI_manual_valve(this->valves[HS::SQe], DB4, gate_valve_SQe_status);
-			DI_manual_valve(this->valves[HS::SQf], DB4, gate_valve_SQf_status);
+			DI_manual_valve(this->valves[HS::SQc], DB4, manual_valve_SQc_status);
+			DI_manual_valve(this->valves[HS::SQd], DB4, manual_valve_SQd_status);
+			DI_manual_valve(this->valves[HS::SQe], DB4, manual_valve_SQe_status);
+			DI_manual_valve(this->valves[HS::SQf], DB4, manual_valve_SQf_status);
 
-			DI_manual_valve(this->valves[HS::SQa], DB4, gate_valve_SQa_status);
-			DI_manual_valve(this->valves[HS::SQb], DB4, gate_valve_SQb_status);
-			DI_manual_valve(this->valves[HS::SQg], DB4, gate_valve_SQc_status);
-			DI_manual_valve(this->valves[HS::SQh], DB4, gate_valve_SQd_status);
+			DI_manual_valve(this->valves[HS::SQa], DB4, manual_valve_SQa_status);
+			DI_manual_valve(this->valves[HS::SQb], DB4, manual_valve_SQb_status);
+			DI_manual_valve(this->valves[HS::SQg], DB4, manual_valve_SQc_status);
+			DI_manual_valve(this->valves[HS::SQh], DB4, manual_valve_SQd_status);
 		}
 
 		{ // filter statuses
@@ -674,7 +717,7 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->gps_op = make_hydraulics_group_menu(HydraulicsGroup::PSPumps, plc);
 	this->gsb_op = make_hydraulics_group_menu(HydraulicsGroup::SBPumps, plc);
 	this->gvisor_op = make_hydraulics_group_menu(HydraulicsGroup::VisorPumps, plc);
-	this->pump_op = make_hydraulic_pump_menu(DO_hydraulics_action, plc);
+	this->pump_op = make_hydraulic_pump_menu(DO_hydraulics_action, hydraulics_diagnostics, plc);
 	this->heater_op = make_tank_heater_menu(plc);
 	
 	this->device->append_confirmation_receiver(dashboard);

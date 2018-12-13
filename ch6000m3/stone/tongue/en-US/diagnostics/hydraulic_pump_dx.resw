@@ -117,130 +117,103 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="hydraulics" xml:space="preserve">
-    <value>液压系统</value>
+  <data name="PSMiscCondition" xml:space="preserve">
+    <value>PS Hydraulic Pumps Control Condition</value>
   </data>
-  <data name="gallery" xml:space="preserve">
-    <value>图元状态示例</value>
+  <data name="APumpCondition" xml:space="preserve">
+    <value>SB Hydraulic Pump A Control Condition</value>
   </data>
-  <data name="temperature" xml:space="preserve">
-    <value>温度</value>
+  <data name="BPumpCondition" xml:space="preserve">
+    <value>SB Hydraulic Pump B Control Condition</value>
   </data>
-  <data name="glands" xml:space="preserve">
-    <value>泥泵封水管系</value>
+  <data name="CPumpCondition" xml:space="preserve">
+    <value>PS Hydraulic Pump C Control Condition</value>
   </data>
-  <data name="hopper_doors" xml:space="preserve">
-    <value>泥门控制</value>
+  <data name="DPumpCondition" xml:space="preserve">
+    <value>PS Hydraulic Pump D Control Condition</value>
   </data>
-  <data name="Empty" xml:space="preserve">
-    <value>空</value>
+  <data name="EPumpCondition" xml:space="preserve">
+    <value>PS Hydraulic Pump E Control Condition</value>
   </data>
-  <data name="Full" xml:space="preserve">
-    <value>满</value>
+  <data name="FPumpCondition" xml:space="preserve">
+    <value>PS Hydraulic Pump F Control Condition</value>
   </data>
-  <data name="High" xml:space="preserve">
-    <value>高</value>
+  <data name="GPumpCondition" xml:space="preserve">
+    <value>SB Hydraulic Pump G Control Condition</value>
   </data>
-  <data name="Low" xml:space="preserve">
-    <value>低</value>
+  <data name="HPumpCondition" xml:space="preserve">
+    <value>SB Hydraulic Pump H Control Condition</value>
   </data>
-  <data name="Normal" xml:space="preserve">
-    <value>正常</value>
+  <data name="IPumpCondition" xml:space="preserve">
+    <value>SB Visor Hydraulic Pump I Control Condition</value>
   </data>
-  <data name="UltraLow" xml:space="preserve">
-    <value>过低</value>
+  <data name="JPumpCondition" xml:space="preserve">
+    <value>PS Visor Hydraulic Pump J Control Condition</value>
   </data>
-  <data name="draughts" xml:space="preserve">
-    <value>吃水装载</value>
+  <data name="KPumpCondition" xml:space="preserve">
+    <value>Coolant Hydraulic Pump K Control Condition</value>
   </data>
-  <data name="charges" xml:space="preserve">
-    <value>装舱丨装驳</value>
+  <data name="LPumpCondition" xml:space="preserve">
+    <value>Motor Flushing Hydraulic Pump L Control Condition</value>
   </data>
-  <data name="discharges" xml:space="preserve">
-    <value>艏吹丨艏喷</value>
+  <data name="MPumpCondition" xml:space="preserve">
+    <value>Spare Hydraulic Pump M Control Condition</value>
   </data>
-  <data name="flushs" xml:space="preserve">
-    <value>高压冲水</value>
+  <data name="OtherMiscCondition" xml:space="preserve">
+    <value>Other Hydraulic Pumps Control Condition</value>
   </data>
-  <data name="dredges" xml:space="preserve">
-    <value>耙臂指示</value>
+  <data name="SBMiscCondition" xml:space="preserve">
+    <value>SB Hydraulic Pumps Control Condition</value>
   </data>
-  <data name="density" xml:space="preserve">
-    <value>密度</value>
+  <data name="VisorMiscCondition" xml:space="preserve">
+    <value>Visor Hydraulic Pumps Control Condition</value>
   </data>
-  <data name="flspeed" xml:space="preserve">
-    <value>流速</value>
+  <data name="YPumpCondition" xml:space="preserve">
+    <value>Emergence Hydraulic Pump Y Control Condition</value>
   </data>
-  <data name="dredges_PortSide" xml:space="preserve">
-    <value>左绞车 &amp;&amp; 吊架</value>
+  <data name="CoolantRunning" xml:space="preserve">
+    <value>Coolant Pump is Running</value>
   </data>
-  <data name="dredges_Starboard" xml:space="preserve">
-    <value>右绞车 &amp;&amp; 吊架</value>
+  <data name="NoConsolePSStop" xml:space="preserve">
+    <value>Console PS Emergence Stop Button Not Pressed</value>
   </data>
-  <data name="lubricatings" xml:space="preserve">
-    <value>轴承润滑单元 &amp;&amp; 齿轮箱滑油泵</value>
+  <data name="NoConsoleSBStop" xml:space="preserve">
+    <value>Console SB Emergence Stop Button Not Pressed</value>
   </data>
-  <data name="water_pump_dx" xml:space="preserve">
-    <value>高压冲水泵诊断</value>
+  <data name="NoMasterTankFS01" xml:space="preserve">
+    <value>Master Tank FS.01 not Alert</value>
   </data>
-  <data name="hopper_pump_dx" xml:space="preserve">
-    <value>泥泵诊断</value>
+  <data name="NoMasterTankFS02" xml:space="preserve">
+    <value>Master Tank FS.02 not Alert</value>
   </data>
-  <data name="performance" xml:space="preserve">
-    <value>性能可视化</value>
+  <data name="NoMasterTankLS1" xml:space="preserve">
+    <value>Master Tank Level LS.01 not Alert</value>
   </data>
-  <data name="gland_pump_dx" xml:space="preserve">
-    <value>封水泵/冲水泵诊断</value>
+  <data name="NoMasterTankLS2" xml:space="preserve">
+    <value>Master Tank Level LS.02 not Alert</value>
   </data>
-  <data name="PS1" xml:space="preserve">
-    <value>#1</value>
+  <data name="NoPSWinchGantryStop" xml:space="preserve">
+    <value>PS Winch/Gantry Emergence Stop Button Not Pressed</value>
   </data>
-  <data name="PS2" xml:space="preserve">
-    <value>#3</value>
+  <data name="NoSailingStop" xml:space="preserve">
+    <value>Sail Console Emergence Stop Button not Pressed</value>
   </data>
-  <data name="PS3" xml:space="preserve">
-    <value>#5</value>
+  <data name="NoSBWinchGantryStop" xml:space="preserve">
+    <value>SB Winch/Gantry Emergence Stop Button Not Pressed</value>
   </data>
-  <data name="PS4" xml:space="preserve">
-    <value>#7</value>
+  <data name="NoVisorTankFS" xml:space="preserve">
+    <value>Visor Tank FS not Alert</value>
   </data>
-  <data name="PS5" xml:space="preserve">
-    <value>#9</value>
+  <data name="NoVisorTankLS1" xml:space="preserve">
+    <value>Visor Tank Level LS.01 not Alert</value>
   </data>
-  <data name="PS6" xml:space="preserve">
-    <value>#11</value>
+  <data name="NoVisorTankLS2" xml:space="preserve">
+    <value>Visor Tank Level LS.02 not Alert</value>
   </data>
-  <data name="PS7" xml:space="preserve">
-    <value>#13</value>
+  <data name="SQ1Open" xml:space="preserve">
+    <value>Master Tank to SB Group Valve SQ1 Open</value>
   </data>
-  <data name="SB1" xml:space="preserve">
-    <value>#2</value>
-  </data>
-  <data name="SB2" xml:space="preserve">
-    <value>#4</value>
-  </data>
-  <data name="SB3" xml:space="preserve">
-    <value>#6</value>
-  </data>
-  <data name="SB4" xml:space="preserve">
-    <value>#8</value>
-  </data>
-  <data name="SB5" xml:space="preserve">
-    <value>#10</value>
-  </data>
-  <data name="SB6" xml:space="preserve">
-    <value>#12</value>
-  </data>
-  <data name="SB7" xml:space="preserve">
-    <value>#14</value>
-  </data>
-  <data name="PS_dredges_dx" xml:space="preserve">
-    <value>左舷绞车及吊架诊断</value>
-  </data>
-  <data name="SB_dredges_dx" xml:space="preserve">
-    <value>右舷绞车及吊架诊断</value>
-  </data>
-  <data name="hydraulic_pump_dx" xml:space="preserve">
-    <value>液压泵诊断</value>
+  <data name="SQ2Open" xml:space="preserve">
+    <value>Master Tank to PS Group Valve SQ2 Open</value>
   </data>
 </root>

@@ -9,7 +9,7 @@
 namespace WarGrey::SCADA {
 	private class WaterPumpDiagnostics : public WarGrey::SCADA::ISatellite {
 	public:
-		~WaterPumpDiagnostics() noexcept;
+		virtual ~WaterPumpDiagnostics() noexcept;
 		WaterPumpDiagnostics(WarGrey::SCADA::PLCMaster* plc);
 
 	public:

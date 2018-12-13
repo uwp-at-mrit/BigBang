@@ -6,27 +6,27 @@
 
 namespace WarGrey::SCADA {
 	// DB4, starts from 1
-	static unsigned int gate_valve_SQ1_status = 113U;
-	static unsigned int gate_valve_SQ2_status = 114U;
+	static unsigned int manual_valve_SQ1_status = 113U;
+	static unsigned int manual_valve_SQ2_status = 114U;
 
-	static unsigned int gate_valve_SQk1_status = 122U;
-	static unsigned int gate_valve_SQk2_status = 123U;
-	static unsigned int gate_valve_SQl_status = 124U;
-	static unsigned int gate_valve_SQm_status = 125U;
-	static unsigned int gate_valve_SQy_status = 126U;
+	static unsigned int manual_valve_SQk1_status = 122U;
+	static unsigned int manual_valve_SQk2_status = 123U;
+	static unsigned int manual_valve_SQl_status = 124U;
+	static unsigned int manual_valve_SQm_status = 125U;
+	static unsigned int manual_valve_SQy_status = 126U;
 
-	static unsigned int gate_valve_SQi_status = 128U;
-	static unsigned int gate_valve_SQj_status = 129U;
+	static unsigned int manual_valve_SQi_status = 128U;
+	static unsigned int manual_valve_SQj_status = 129U;
 
-	static unsigned int gate_valve_SQc_status = 135U;
-	static unsigned int gate_valve_SQd_status = 136U;
-	static unsigned int gate_valve_SQe_status = 137U;
-	static unsigned int gate_valve_SQf_status = 138U;
+	static unsigned int manual_valve_SQc_status = 135U;
+	static unsigned int manual_valve_SQd_status = 136U;
+	static unsigned int manual_valve_SQe_status = 137U;
+	static unsigned int manual_valve_SQf_status = 138U;
 
-	static unsigned int gate_valve_SQa_status = 141U;
-	static unsigned int gate_valve_SQb_status = 142U;
-	static unsigned int gate_valve_SQg_status = 143U;
-	static unsigned int gate_valve_SQh_status = 144U;
+	static unsigned int manual_valve_SQa_status = 141U;
+	static unsigned int manual_valve_SQb_status = 142U;
+	static unsigned int manual_valve_SQg_status = 143U;
+	static unsigned int manual_valve_SQh_status = 144U;
 
 	static unsigned int gate_valve_D01_feedback = 279U;
 	static unsigned int gate_valve_D02_feedback = 273U;
@@ -180,4 +180,6 @@ namespace WarGrey::SCADA {
 	void DI_manual_valve(WarGrey::SCADA::ManualValvelet* target, const uint8* db4, size_t idx_p1);
 	void DI_gate_valve(WarGrey::SCADA::GateValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
 	void DI_motor_valve(WarGrey::SCADA::MotorValvelet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);
+
+	bool DI_manual_valve_open(const uint8* db4, size_t idx_p1);
 }

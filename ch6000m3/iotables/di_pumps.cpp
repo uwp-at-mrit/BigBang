@@ -52,24 +52,3 @@ bool WarGrey::SCADA::DI_hydraulic_pump_broken(const uint8* db4, size_t idx4_p1) 
 bool WarGrey::SCADA::DI_hydraulic_pump_ready(const uint8* db205, size_t idx205_p1) {
 	return DBX(db205, idx205_p1 + 3U);
 }
-
-/************************************************************************************************/
-void WarGrey::SCADA::DI_gate_flushing_pump(HydraulicPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
-	DI_hydraulic_pump(target, db4, idx4_p1, db205, idx205_p1);
-}
-
-bool WarGrey::SCADA::DI_gate_flushing_pump_remote_control(const uint8* db4, size_t idx4_p1) {
-	return DI_hydraulic_pump_remote_control(db4, idx4_p1);
-}
-
-bool WarGrey::SCADA::DI_gate_flushing_pump_running(const uint8* db4, size_t idx4_p1) {
-	return DI_hydraulic_pump_running(db4, idx4_p1);
-}
-
-bool WarGrey::SCADA::DI_gate_flushing_pump_broken(const uint8* db4, size_t idx4_p1) {
-	return DI_hydraulic_pump_broken(db4, idx4_p1);
-}
-
-bool WarGrey::SCADA::DI_gate_flushing_pump_ready(const uint8* db205, size_t idx205_p1) {
-	return DI_hydraulic_pump_ready(db205, idx205_p1);
-}

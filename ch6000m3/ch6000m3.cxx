@@ -92,10 +92,10 @@ protected:
 		this->add_planet(new Gallery());
 
 		if (system_ipv4_address()->Equals("192.168.0.10")) {
-			this->add_planet(new PerformancePage(this->device));
+			//this->add_planet(new PerformancePage(this->device));
 		}
 
-		this->transfer_to(6);
+		//this->transfer_to(2);
 	}
 
 protected private:

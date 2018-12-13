@@ -8,19 +8,25 @@ using namespace Windows::UI::Xaml::Controls;
 
 private class HydraulicPumpExecutor final : public IMenuCommand<HydraulicPumpAction, HydraulicPumplet, PLCMaster*> {
 public:
-	HydraulicPumpExecutor(hydraulic_pump_action_f hpa) : DO_action(hpa) {}
+	HydraulicPumpExecutor(hydraulic_pump_action_f hpa, hydraulic_pump_diagnostics_f hpd) : DO_action(hpa), show_diagnostics(hpd) {}
 
 public:
 	bool can_execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc, bool acc_executable) override {
-		return plc->connected() && plc->authorized();
+		return (HydraulicPumpAction::Diagnostics == cmd)
+			|| (plc->connected() && plc->authorized());
 	}
 
 	void execute(HydraulicPumpAction cmd, HydraulicPumplet* pump, PLCMaster* plc) override {
-		plc->send_command(this->DO_action(cmd, pump));
+		if (HydraulicPumpAction::Diagnostics == cmd) {
+			show_diagnostics(pump, plc);
+		} else {
+			plc->send_command(this->DO_action(cmd, pump));
+		}
 	}
 
 private:
 	hydraulic_pump_action_f DO_action;
+	hydraulic_pump_diagnostics_f show_diagnostics;
 };
 
 private class HydraulicPumpGroupExecutor final : public IGroupMenuCommand<HydraulicsGroupAction, HydraulicsGroup, PLCMaster*> {
@@ -51,8 +57,8 @@ public:
 };
 
 /*************************************************************************************************/
-MenuFlyout^ WarGrey::SCADA::make_hydraulic_pump_menu(hydraulic_pump_action_f gpa, PLCMaster* plc) {
-	return make_menu<HydraulicPumpAction, HydraulicPumplet, PLCMaster*>(new HydraulicPumpExecutor(gpa), plc);
+MenuFlyout^ WarGrey::SCADA::make_hydraulic_pump_menu(hydraulic_pump_action_f hpa, hydraulic_pump_diagnostics_f hpd, PLCMaster* plc) {
+	return make_menu<HydraulicPumpAction, HydraulicPumplet, PLCMaster*>(new HydraulicPumpExecutor(hpa, hpd), plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_hydraulics_group_menu(HydraulicsGroup group, PLCMaster* plc) {

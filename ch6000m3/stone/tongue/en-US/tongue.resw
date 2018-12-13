@@ -246,4 +246,7 @@
   <data name="SB_dredges_dx" xml:space="preserve">
     <value>SB Winches and Gantries Diagnostics</value>
   </data>
+  <data name="hydraulic_pump_dx" xml:space="preserve">
+    <value>Hydraulic Pump Diagnostics</value>
+  </data>
 </root>

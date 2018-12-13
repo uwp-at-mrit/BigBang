@@ -218,22 +218,21 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 	this->update_horizontal_axes(this->get_style());
 
 	{ // TODO: remove old data
-		long long earliest_s = this->realtime.start - this->history_max;
+		long long earliest_ms = (this->realtime.start - this->history_max) * 1000LL;
 
 		this->begin_maniplation_sequence();
 
 		for (unsigned int idx = 0; idx < this->count; idx++) {
 			TimeSeriesLine* line = &this->lines[idx];
-			unsigned int count = 0;
 			bool done = true;
 			
 			do {
 				done = true;
 
 				if (!line->timestamps.empty()) {
-					long long front_s = line->timestamps.front() / 1000L;
+					long long front_ms = line->timestamps.front();
 
-					if (front_s < earliest_s) {
+					if (front_ms < earliest_ms) {
 						line->timestamps.pop_front();
 						line->values.pop_front();
 						done = false;
@@ -245,10 +244,6 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 		}
 
 		this->end_maniplation_sequence();
-
-		this->get_logger()->log_message(Log::Info,
-			L"removed %d data@%s",
-			count, update_nowstamp(true)->Data());
 	}
 }
 

@@ -32,4 +32,7 @@ namespace WarGrey::SCADA {
 	static unsigned int sb_underwater_pump_power = 163U;
 	static unsigned int sb_underwater_pump_rpm = 171U;
 	static unsigned int sb_underwater_pump_discharge_pressure = 36U;
+
+	static unsigned int ps_flushing_pump_pressure = 34U;
+	static unsigned int sb_flushing_pump_pressure = 38U;
 }

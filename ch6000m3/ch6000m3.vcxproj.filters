@@ -149,6 +149,9 @@
     <ClCompile Include="page\diagnostics\dredges_dx.cpp">
       <Filter>page\diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="page\diagnostics\hydraulic_pump_dx.cpp">
+      <Filter>page\diagnostics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -276,6 +279,9 @@
       <Filter>iotables</Filter>
     </ClInclude>
     <ClInclude Include="page\diagnostics\dredges_dx.hpp">
+      <Filter>page\diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="page\diagnostics\hydraulic_pump_dx.hpp">
       <Filter>page\diagnostics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -528,6 +534,12 @@
       <Filter>stone\tongue\en-US\diagnostics</Filter>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\dredges_dx.resw">
+      <Filter>stone\tongue\zh-CN\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\en-US\diagnostics\hydraulic_pump_dx.resw">
+      <Filter>stone\tongue\en-US\diagnostics</Filter>
+    </PRIResource>
+    <PRIResource Include="stone\tongue\zh-CN\diagnostics\hydraulic_pump_dx.resw">
       <Filter>stone\tongue\zh-CN\diagnostics</Filter>
     </PRIResource>
   </ItemGroup>

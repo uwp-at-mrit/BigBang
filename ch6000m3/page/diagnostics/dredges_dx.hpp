@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 
 	private class DredgesDiagnostics : public WarGrey::SCADA::ICreditSatellite<WarGrey::SCADA::DredgesPosition> {
 	public:
-		~DredgesDiagnostics() noexcept;
+		virtual ~DredgesDiagnostics() noexcept;
 		DredgesDiagnostics(WarGrey::SCADA::DX side, WarGrey::SCADA::PLCMaster* plc);
 
 	public:

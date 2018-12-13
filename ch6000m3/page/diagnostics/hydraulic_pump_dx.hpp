@@ -3,14 +3,18 @@
 #include "satellite.hpp"
 #include "plc.hpp"
 
+#include "iotables/do_dredges.hpp"
+
 #include "graphlet/shapelet.hpp"
 #include "graphlet/textlet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HopperPumpDiagnostics : public WarGrey::SCADA::ISatellite {
+	private enum class HPDX { PS, SB, Visor, Other, _ };
+
+	private class HydraulicPumpDiagnostics : public WarGrey::SCADA::ICreditSatellite<unsigned int> {
 	public:
-		virtual ~HopperPumpDiagnostics() noexcept;
-		HopperPumpDiagnostics(WarGrey::SCADA::PLCMaster* plc);
+		virtual ~HydraulicPumpDiagnostics() noexcept;
+		HydraulicPumpDiagnostics(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
 		void fill_satellite_extent(float* width, float* height) override;
@@ -20,13 +24,14 @@ namespace WarGrey::SCADA {
 		void reflow(float width, float height) override;
 
 	public:
-		bool can_select(IGraphlet* g) override;
-		void on_tap_selected(IGraphlet* g, float local_x, float local_y) override;
+		void set_pump(Platform::String^ id, HPDX group);
+
+	protected:
+		void on_id_changed(unsigned int id) override;
 
 	private:
 		WarGrey::SCADA::PLCMaster* device;
-		WarGrey::SCADA::PLCConfirmation* ps_dashboard;
-		WarGrey::SCADA::PLCConfirmation* sb_dashboard;
+		WarGrey::SCADA::PLCConfirmation* dashboard;
 
 	private:
 		float title_height;

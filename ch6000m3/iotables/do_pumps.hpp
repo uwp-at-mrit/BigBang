@@ -7,12 +7,14 @@
 namespace WarGrey::SCADA {
 	private enum class HydraulicsGroup { BothPumps, PSPumps, SBPumps, VisorPumps };
 	private enum class HydraulicsGroupAction { Start, Stop, Cancel, _ };
-	private enum class HydraulicPumpAction { Start, Stop, Reset, _ };
+	private enum class HydraulicPumpAction { Start, Stop, Reset, Diagnostics, _ };
 
 	typedef uint16(*hydraulic_pump_action_f)(WarGrey::SCADA::HydraulicPumpAction, WarGrey::SCADA::HydraulicPumplet*);
+	typedef void(*hydraulic_pump_diagnostics_f)(WarGrey::SCADA::HydraulicPumplet*, WarGrey::SCADA::PLCMaster*);
 
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_hydraulic_pump_menu(WarGrey::SCADA::hydraulic_pump_action_f hpa, WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_hydraulics_group_menu(WarGrey::SCADA::HydraulicsGroup group, WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_hydraulic_pump_menu(WarGrey::SCADA::hydraulic_pump_action_f hpa,
+		WarGrey::SCADA::hydraulic_pump_diagnostics_f hpd, WarGrey::SCADA::PLCMaster* plc);
 
 	// DB300, starts from 1
 	template<typename E>
