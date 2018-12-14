@@ -117,29 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A" xml:space="preserve">
-    <value>Left Drag Head</value>
+  <data name="PSDraghead" xml:space="preserve">
+    <value>PS Draghead</value>
   </data>
-  <data name="B" xml:space="preserve">
-    <value>Left Drag Arm</value>
+  <data name="PSIntermediate" xml:space="preserve">
+    <value>PS Intermediate</value>
   </data>
-  <data name="C" xml:space="preserve">
-    <value>Left Gland</value>
+  <data name="PSTrunnion" xml:space="preserve">
+    <value>PS Trunnion</value>
   </data>
-  <data name="D" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
+  <data name="ButterflyValves" xml:space="preserve">
+    <value>Butterfly Valve</value>
   </data>
-  <data name="E" xml:space="preserve">
-    <value>BDoor Locking / Butterfly Valve</value>
+  <data name="DoorsLocking" xml:space="preserve">
+    <value>Hopper Doors Locking</value>
   </data>
-  <data name="F" xml:space="preserve">
-    <value>Right Gland</value>
+  <data name="SBTrunnion" xml:space="preserve">
+    <value>SB Trunnion</value>
   </data>
-  <data name="G" xml:space="preserve">
-    <value>Right Drag Arm</value>
+  <data name="SBIntermediate" xml:space="preserve">
+    <value>SB Intermediate</value>
   </data>
-  <data name="H" xml:space="preserve">
-    <value>Right Drag Head</value>
+  <data name="SBDraghead" xml:space="preserve">
+    <value>SB Draghead</value>
   </data>
   <data name="K" xml:space="preserve">
     <value>Circulating Cooling</value>
@@ -200,5 +200,35 @@
   </data>
   <data name="SternWinch" xml:space="preserve">
     <value>Stern Anchor Winch Pressure</value>
+  </data>
+  <data name="BowAnchor" xml:space="preserve">
+    <value>Bow Anchor</value>
+  </data>
+  <data name="Barge" xml:space="preserve">
+    <value>Barge</value>
+  </data>
+  <data name="Overflow" xml:space="preserve">
+    <value>Overflow Pipe</value>
+  </data>
+  <data name="PSDoors" xml:space="preserve">
+    <value>PS Hopper Doors</value>
+  </data>
+  <data name="PSGateValves" xml:space="preserve">
+    <value>PS Gate Valves</value>
+  </data>
+  <data name="SBDoors" xml:space="preserve">
+    <value>SB Hopper Doors</value>
+  </data>
+  <data name="SBGateValves" xml:space="preserve">
+    <value>SB Gate Valves</value>
+  </data>
+  <data name="ShoreDischarge" xml:space="preserve">
+    <value>Shore Discharge</value>
+  </data>
+  <data name="SternAnchor" xml:space="preserve">
+    <value>Stern Anchor</value>
+  </data>
+  <data name="WateringValves" xml:space="preserve">
+    <value>Watering Gate Valves</value>
   </data>
 </root>

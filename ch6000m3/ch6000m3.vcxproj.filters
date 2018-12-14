@@ -284,6 +284,9 @@
     <ClInclude Include="page\diagnostics\hydraulic_pump_dx.hpp">
       <Filter>page\diagnostics</Filter>
     </ClInclude>
+    <ClInclude Include="iotables\ai_winches.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

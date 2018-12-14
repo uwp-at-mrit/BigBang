@@ -195,11 +195,11 @@
   <data name="SuctionLimited" xml:space="preserve">
     <value>Suction Limited</value>
   </data>
-  <data name="Upper" xml:space="preserve">
-    <value>Upper</value>
+  <data name="UpperLimited" xml:space="preserve">
+    <value>Upper Limited</value>
   </data>
-  <data name="SoftUpper" xml:space="preserve">
-    <value>Soft Upper</value>
+  <data name="SoftUpperLimited" xml:space="preserve">
+    <value>Soft Upper Limited</value>
   </data>
   <data name="PSPF1" xml:space="preserve">
     <value>PS Pulling Force 1</value>
@@ -234,8 +234,8 @@
   <data name="SBVisor" xml:space="preserve">
     <value>SB Visor Angle</value>
   </data>
-  <data name="SoftLower" xml:space="preserve">
-    <value>Soft Lower</value>
+  <data name="SoftLowerLimited" xml:space="preserve">
+    <value>Soft Lower Limited</value>
   </data>
   <data name="DivingCompensation" xml:space="preserve">
     <value>Compensator Progress When Diving</value>

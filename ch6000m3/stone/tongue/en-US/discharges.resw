@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Barge" xml:space="preserve">
+    <value>Barge</value>
+  </data>
+  <data name="BargeWinch" xml:space="preserve">
+    <value>Barging Gantry Winch</value>
+  </data>
+  <data name="BowWinch" xml:space="preserve">
+    <value>Bow Anchor Winch</value>
+  </data>
   <data name="D001" xml:space="preserve">
     <value>Empty and Water</value>
   </data>
@@ -174,16 +183,28 @@
   <data name="D025" xml:space="preserve">
     <value>Starboard Isolation</value>
   </data>
-  <data name="Gantry" xml:space="preserve">
-    <value>Gantry</value>
+  <data name="D026" xml:space="preserve">
+    <value>Starboard Underwater Discharge</value>
   </data>
   <data name="Hatch" xml:space="preserve">
     <value>Sea Water Inlet</value>
+  </data>
+  <data name="LowerLimited" xml:space="preserve">
+    <value>Lower Limited</value>
   </data>
   <data name="PSHPump" xml:space="preserve">
     <value>Port Inhatch Pump</value>
   </data>
   <data name="SBHPump" xml:space="preserve">
     <value>Starboard Inhatch Pump</value>
+  </data>
+  <data name="ShoreWinch" xml:space="preserve">
+    <value>Shore Discharge Winch</value>
+  </data>
+  <data name="SternWinch" xml:space="preserve">
+    <value>Stern Anchor Winch</value>
+  </data>
+  <data name="UpperLimited" xml:space="preserve">
+    <value>Upper Limited</value>
   </data>
 </root>

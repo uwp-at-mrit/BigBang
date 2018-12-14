@@ -47,6 +47,12 @@ namespace WarGrey::SCADA {
 	static unsigned int winch_sb_intermediate_feedback = 201U;
 	static unsigned int winch_sb_draghead_feedback = 209U;
 
+	static unsigned int bow_anchor_winch_feedback = 225U;
+	static unsigned int stern_anchor_winch_feedback = 233U;
+
+	static unsigned int barge_winch_feedback = 217U;
+	static unsigned int barge_winch_limits = 377U;
+
 	// DB205, starts from 1
 	static WarGrey::SCADA::WinchDetails winch_ps_trunnion_details = WarGrey::SCADA::WinchDetails(false, 1353U, 1793U, 1817U, 2033U, 2009U, 2025U);
 	static WarGrey::SCADA::WinchDetails winch_ps_intermediate_details = WarGrey::SCADA::WinchDetails(false, 1361U, 1795U, 1818U, 2034U, 2010U, 2026U);
@@ -55,11 +61,25 @@ namespace WarGrey::SCADA {
 	static WarGrey::SCADA::WinchDetails winch_sb_trunnion_details = WarGrey::SCADA::WinchDetails(false, 1377U, 1799U, 1820U, 2036U, 2012U, 2028U);
 	static WarGrey::SCADA::WinchDetails winch_sb_intermediate_details = WarGrey::SCADA::WinchDetails(false, 1385U, 1801U, 1821U, 2037U, 2013U, 2029U);
 	static WarGrey::SCADA::WinchDetails winch_sb_draghead_details = WarGrey::SCADA::WinchDetails(true, 1393U, 1803U, 1822U, 2038U, 2014U, 2030U);
+
+	static unsigned int barge_winch_override = 2039U;
+	static unsigned int barge_winch_details = 2801U;
+
+	static unsigned int shore_discharge_winch_details = 1497U;
+
+	static unsigned int bow_anchor_winch_details = 2785U;
+	static unsigned int stern_anchor_winch_details = 2793U;
 	
 	/************************************************************************************************/
-	void DI_winch(WarGrey::SCADA::Winchlet* target
-		, const uint8* db4, unsigned int feedback_p1, WarGrey::SCADA::WinchLimits& limits
-		, const uint8* db205, WarGrey::SCADA::WinchDetails& details);
+	void DI_winch(WarGrey::SCADA::Winchlet* target,
+		const uint8* db4, unsigned int feedback_p1, WarGrey::SCADA::WinchLimits& limits,
+		const uint8* db205, WarGrey::SCADA::WinchDetails& details);
+
+	void DI_winch(WarGrey::SCADA::Winchlet* shore_discharge_winch, const uint8* db205, unsigned int details_p1);
+	void DI_winch(WarGrey::SCADA::Winchlet* anchor_winch, const uint8* db4, unsigned int feedback_p1, const uint8* db205, unsigned int details_p1);
+	void DI_winch(WarGrey::SCADA::Winchlet* barge_winch,
+		const uint8* db4, unsigned int feedback_p1, unsigned int limits_p1,
+		const uint8* db205, unsigned int details_p1);
 
 	bool DI_winch_remote_control(const uint8* db4, unsigned int feedback_p1);
 	bool DI_winch_slack(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);

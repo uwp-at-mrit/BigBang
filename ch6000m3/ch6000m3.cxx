@@ -95,7 +95,7 @@ protected:
 			//this->add_planet(new PerformancePage(this->device));
 		}
 
-		//this->transfer_to(2);
+		this->transfer_to(3);
 	}
 
 protected private:

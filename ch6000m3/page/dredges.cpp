@@ -80,9 +80,6 @@ private enum class DS : unsigned int {
 	// hopper pump metrics
 	PSHPDP, SBHPDP, PSHPVP, SBHPVP,
 
-	// winch statuses
-	SuctionLimited, SaddleLimited, Slack, Upper, SoftUpper, SoftLower,
-
 	// settings
 	DivingDepth, DivingCompensation, LandingDepth
 };
@@ -221,14 +218,14 @@ protected:
 			this->winch_lengths[id] = this->master->insert_one(new Credit<Dimensionlet, E>("meter"), id);
 			this->winch_speeds[id] = this->master->insert_one(new Credit<Dimensionlet, E>("mpm"), id);
 			
-			this->load_label(this->winch_saddles, _speak(DS::SaddleLimited.ToString()), id, winch_status_color);
-			this->load_label(this->winch_uppers, _speak(DS::Upper.ToString()), id, winch_status_color);
-			this->load_label(this->winch_soft_uppers, _speak(DS::SoftUpper.ToString()), id, winch_status_color);
-			this->load_label(this->winch_soft_lowers, _speak(DS::SoftLower.ToString()), id, winch_status_color);
+			this->load_label(this->winch_saddles, _speak(WinchState::SaddleLimited.ToString()), id, winch_status_color);
+			this->load_label(this->winch_uppers, _speak(WinchState::UpperLimited.ToString()), id, winch_status_color);
+			this->load_label(this->winch_soft_uppers, _speak(WinchState::SoftUpperLimited.ToString()), id, winch_status_color);
+			this->load_label(this->winch_soft_lowers, _speak(WinchState::SoftLowerLimited.ToString()), id, winch_status_color);
 		}
 
-		this->load_label(this->winch_suctions, _speak(DS::SuctionLimited.ToString()), id0, winch_status_color);
-		this->load_label(this->winch_slacks, _speak(DS::Slack.ToString()), id0, winch_status_color);
+		this->load_label(this->winch_suctions, _speak(WinchState::SuctionLimited.ToString()), id0, winch_status_color);
+		this->load_label(this->winch_slacks, _speak(WinchState::Slack.ToString()), id0, winch_status_color);
 	}
 
 	template<class C, typename E>

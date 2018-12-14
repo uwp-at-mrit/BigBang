@@ -61,7 +61,7 @@ private enum class CS : unsigned int {
 	C, F, H,
 	
 	// Key Labels
-	PSUWPump, SBUWPump, PSHPump, SBHPump, Gantry, LMOD,
+	PSUWPump, SBUWPump, PSHPump, SBHPump, Barge, LMOD,
 
 	// Interconnected Nodes
 	I0723, I0923,
@@ -273,7 +273,7 @@ public:
 		pTurtle->move_left(4, CS::d14)->move_left_down(2, CS::D014)->move_left_down(1.5F, CS::e14)->jump_back(CS::d14);
 		pTurtle->move_left(5, CS::d24)->move_left(4)->move_left_down(2, CS::D016)->move_left_down(1.5F, CS::e16)->jump_back(CS::d24);
 		pTurtle->jump_up(2.5F, CS::gantry)->turn_up_left()->move_left(3, CS::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, CS::Gantry)->move_left(CS::egantry)->jump_back(CS::Gantry)->move_right()->jump_back(CS::d1720);
+		pTurtle->move_up(0.5F, CS::Barge)->move_left(CS::egantry)->jump_back(CS::Barge)->move_right()->jump_back(CS::d1720);
 		
 		pTurtle->move_down(3.5F, CS::PSHPump)->move_left(6, CS::n0923);
 		pTurtle->move_left(8, CS::d0205)->move_up(1.5F, CS::D005)->move_up(1.5F)->jump_up();
@@ -357,7 +357,7 @@ public:
 			this->load_percentage(this->progresses, CS::D004);
 			this->load_dimensions(this->pump_pressures, CS::C, CS::H, "bar");
 
-			this->load_label(this->captions, CS::Gantry, Colours::Yellow, this->caption_font);
+			this->load_label(this->captions, CS::Barge, Colours::Yellow, this->caption_font);
 			this->load_label(this->captions, CS::LMOD, Colours::Cyan, this->special_font);
 		}
 	}
@@ -373,7 +373,7 @@ public:
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->gantry_pipe, CS::gantry, GraphletAnchor::CT);
 
-		this->station->map_credit_graphlet(this->captions[CS::Gantry], GraphletAnchor::CB);
+		this->station->map_credit_graphlet(this->captions[CS::Barge], GraphletAnchor::CB);
 		this->station->map_credit_graphlet(this->captions[CS::LMOD], GraphletAnchor::CB);
 
 		this->station->map_graphlet_at_anchor(this->ps_draghead, CS::Port, GraphletAnchor::RC);

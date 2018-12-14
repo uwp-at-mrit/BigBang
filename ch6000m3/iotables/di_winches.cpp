@@ -51,6 +51,73 @@ void WarGrey::SCADA::DI_winch(Winchlet* target
 	}
 }
 
+void WarGrey::SCADA::DI_winch(Winchlet* shore_discharge_winch, const uint8* db205, unsigned int details_p1) {
+	bool fast = DBX(db205, details_p1 + 3U);
+
+	if (DBX(db205, details_p1 - 1U)) {
+		shore_discharge_winch->set_state(fast, WinchState::FastWindingOut, WinchState::WindingOut);
+	} else if (DBX(db205, details_p1 + 0U)) {
+		shore_discharge_winch->set_state(fast, WinchState::FastWindingUp, WinchState::WindingUp);
+	} else if (DBX(db205, details_p1 + 1U)) {
+		shore_discharge_winch->set_state(WinchState::WindReady);
+	} else {
+		shore_discharge_winch->set_state(WinchState::Default);
+	}
+}
+
+void WarGrey::SCADA::DI_winch(Winchlet* anchor_winch, const uint8* db4, unsigned int feedback_p1, const uint8* db205, unsigned int details_p1) {
+	bool can_windout = (DBX(db205, details_p1 + 3U));
+	bool can_windup = (DBX(db205, details_p1 + 4U));
+
+	anchor_winch->set_remote_control(DI_winch_remote_control(db4, feedback_p1));
+
+	if (DBX(db205, details_p1 - 1U)) {
+		anchor_winch->set_state(WinchState::WindingOut);
+	} else if (DBX(db205, details_p1 + 0U)) {
+		anchor_winch->set_state(WinchState::WindingUp);
+	} else if (DBX(db205, details_p1 + 1U)) {
+		anchor_winch->set_state(WinchState::Unlettable);
+	} else if (DBX(db205, details_p1 + 2U)) {
+		anchor_winch->set_state(WinchState::Unpullable);
+	} else if (can_windout && can_windup) {
+		anchor_winch->set_state(WinchState::WindReady);
+	} else if (can_windout) {
+		anchor_winch->set_state(WinchState::WindOutReady);
+	} else if (can_windup) {
+		anchor_winch->set_state(WinchState::WindUpReady);
+	}
+}
+
+void WarGrey::SCADA::DI_winch(Winchlet* barge_winch
+	, const uint8* db4, unsigned int feedback_p1, unsigned int limits_p1
+	, const uint8* db205, unsigned int details_p1) {
+	bool can_windout = (DBX(db205, details_p1 + 3U));
+	bool can_windup = (DBX(db205, details_p1 + 4U));
+	
+	barge_winch->set_remote_control(DI_winch_remote_control(db4, feedback_p1));
+	
+	if (DBX(db4, limits_p1 - 1U)) {
+		barge_winch->set_state(WinchState::UpperLimited);
+	} else if (DBX(db4, limits_p1 + 0U)) {
+		barge_winch->set_state(WinchState::LowerLimited);
+	} else if (DBX(db205, details_p1 - 1U)) {
+		barge_winch->set_state(WinchState::WindingOut);
+	} else if (DBX(db205, details_p1 + 0U)) {
+		barge_winch->set_state(WinchState::WindingUp);
+	} else if (DBX(db205, details_p1 + 1U)) {
+		barge_winch->set_state(WinchState::Unlettable);
+	} else if (DBX(db205, details_p1 + 2U)) {
+		barge_winch->set_state(WinchState::Unpullable);
+	} else if (can_windout && can_windup) {
+		barge_winch->set_state(WinchState::WindReady);
+	} else if (can_windout) {
+		barge_winch->set_state(WinchState::WindOutReady);
+	} else if (can_windup) {
+		barge_winch->set_state(WinchState::WindUpReady);
+	}
+}
+
+/*************************************************************************************************/
 bool WarGrey::SCADA::DI_winch_remote_control(const uint8* db4, unsigned int feedback_p1) {
 	return DBX(db4, feedback_p1 + 0U);
 }

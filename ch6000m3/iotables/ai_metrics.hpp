@@ -7,9 +7,6 @@ namespace WarGrey::SCADA {
 	static unsigned int visor_tank_level = 20U;
 	static unsigned int master_back_oil_pressure = 21U;
 
-	static unsigned int bow_anchor_winch_pressure = 23U;
-	static unsigned int stern_anchor_winch_pressure = 87U;
-
 	static unsigned int overflow_pipe_progress = 55U;
 
 	// DB2, DBD

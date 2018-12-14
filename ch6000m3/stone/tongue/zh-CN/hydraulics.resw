@@ -117,29 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A" xml:space="preserve">
-    <value>左耙头、左泥门、艉靠泊、溢流桶、装驳</value>
+  <data name="PSDraghead" xml:space="preserve">
+    <value>左耙头</value>
   </data>
-  <data name="B" xml:space="preserve">
+  <data name="PSIntermediate" xml:space="preserve">
     <value>左耙中</value>
   </data>
-  <data name="C" xml:space="preserve">
-    <value>左弯管、左闸阀、艏吹、艏靠泊</value>
+  <data name="PSTrunnion" xml:space="preserve">
+    <value>左弯管</value>
   </data>
-  <data name="D" xml:space="preserve">
+  <data name="ButterflyValves" xml:space="preserve">
     <value>蝶阀</value>
   </data>
-  <data name="E" xml:space="preserve">
+  <data name="DoorsLocking" xml:space="preserve">
     <value>泥门紧锁</value>
   </data>
-  <data name="F" xml:space="preserve">
-    <value>右弯管、右闸阀</value>
+  <data name="SBTrunnion" xml:space="preserve">
+    <value>右弯管</value>
   </data>
-  <data name="G" xml:space="preserve">
+  <data name="SBIntermediate" xml:space="preserve">
     <value>右耙中</value>
   </data>
-  <data name="H" xml:space="preserve">
-    <value>右耙头、右泥门、引水闸阀</value>
+  <data name="SBDraghead" xml:space="preserve">
+    <value>右耙头</value>
   </data>
   <data name="K" xml:space="preserve">
     <value>循环冷却</value>
@@ -198,5 +198,35 @@
   </data>
   <data name="SternWinch" xml:space="preserve">
     <value>艉靠泊绞车压力</value>
+  </data>
+  <data name="BowAnchor" xml:space="preserve">
+    <value>艏靠泊</value>
+  </data>
+  <data name="Barge" xml:space="preserve">
+    <value>装驳</value>
+  </data>
+  <data name="Overflow" xml:space="preserve">
+    <value>溢流桶</value>
+  </data>
+  <data name="PSDoors" xml:space="preserve">
+    <value>左泥门</value>
+  </data>
+  <data name="PSGateValves" xml:space="preserve">
+    <value>左闸阀</value>
+  </data>
+  <data name="SBDoors" xml:space="preserve">
+    <value>右泥门</value>
+  </data>
+  <data name="SBGateValves" xml:space="preserve">
+    <value>右闸阀</value>
+  </data>
+  <data name="ShoreDischarge" xml:space="preserve">
+    <value>艏吹</value>
+  </data>
+  <data name="SternAnchor" xml:space="preserve">
+    <value>艉靠泊</value>
+  </data>
+  <data name="WateringValves" xml:space="preserve">
+    <value>引水闸阀</value>
   </data>
 </root>

@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Barge" xml:space="preserve">
+    <value>装驳架</value>
+  </data>
+  <data name="BargeWinch" xml:space="preserve">
+    <value>装驳架绞车</value>
+  </data>
+  <data name="BowWinch" xml:space="preserve">
+    <value>艏靠泊绞车</value>
+  </data>
   <data name="D001" xml:space="preserve">
     <value>抽舱引水</value>
   </data>
@@ -174,16 +183,28 @@
   <data name="D025" xml:space="preserve">
     <value>右隔离</value>
   </data>
-  <data name="Gantry" xml:space="preserve">
-    <value>装驳架</value>
+  <data name="D026" xml:space="preserve">
+    <value>右水下泵排出</value>
   </data>
   <data name="Hatch" xml:space="preserve">
     <value>海水口</value>
+  </data>
+  <data name="LowerLimited" xml:space="preserve">
+    <value>钢丝绳下限</value>
   </data>
   <data name="PSHPump" xml:space="preserve">
     <value>2级左舱内泵</value>
   </data>
   <data name="SBHPump" xml:space="preserve">
     <value>1级右舱内泵</value>
+  </data>
+  <data name="ShoreWinch" xml:space="preserve">
+    <value>艏吹绞车</value>
+  </data>
+  <data name="SternWinch" xml:space="preserve">
+    <value>艉靠泊绞车</value>
+  </data>
+  <data name="UpperLimited" xml:space="preserve">
+    <value>钢丝绳上限</value>
   </data>
 </root>

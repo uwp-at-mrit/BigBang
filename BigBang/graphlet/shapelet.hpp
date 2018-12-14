@@ -280,8 +280,7 @@ namespace WarGrey::SCADA {
 		}
 
 		template<class G>
-		void map_graphlet_base_on_anchors(G* g, Anchor a, Anchor b, GraphletAnchor ga = GraphletAnchor::CC
-			, float dx = 0.0F, float dy = 0.0F) {
+		void map_graphlet_base_on_anchors(G* g, Anchor a, Anchor b, GraphletAnchor ga = GraphletAnchor::CC, float dx = 0.0F, float dy = 0.0F) {
 			if (this->info != nullptr) {
 				float anchor_x, anchor_y;
 

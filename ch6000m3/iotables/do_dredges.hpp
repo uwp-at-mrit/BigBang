@@ -30,9 +30,6 @@ namespace WarGrey::SCADA {
 	static unsigned int drag_ps_visor_constant_resistance_command = 659U;
 	static unsigned int drag_sb_visor_constant_resistance_command = 660U;
 
-	static unsigned int ctension_ps_buttons = 659U;
-	static unsigned int ctension_sb_buttons = 660U;
-
 	uint16 DO_winch_override_command(WarGrey::SCADA::DredgesPosition id);
 	uint16 DO_winch_upper_check_command(WarGrey::SCADA::DredgesPosition id);
 	uint16 DO_winch_saddle_check_command(WarGrey::SCADA::DredgesPosition id);

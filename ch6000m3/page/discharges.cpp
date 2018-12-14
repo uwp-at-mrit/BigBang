@@ -11,17 +11,20 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/device/winchlet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
 
+#include "iotables/di_winches.hpp"
 #include "iotables/di_pumps.hpp"
 #include "iotables/di_hopper_pumps.hpp"
 #include "iotables/di_valves.hpp"
 #include "iotables/di_doors.hpp"
 
+#include "iotables/ai_winches.hpp"
 #include "iotables/ai_valves.hpp"
 #include "iotables/ai_pumps.hpp"
 #include "iotables/ai_hopper_pumps.hpp"
@@ -57,8 +60,11 @@ private enum class RS : unsigned int {
 	// Pump dimensions
 	A, C, F, H,
 
+	// Winches
+	BowWinch, SternWinch, ShoreWinch, BargeWinch,
+
 	// Key Labels
-	Port, Starboard, Hatch, PSHPump, SBHPump, Gantry,
+	Port, Starboard, Hatch, PSHPump, SBHPump, Barge,
 
 	// Interconnected nodes
 	I0723, I0923,
@@ -66,11 +72,12 @@ private enum class RS : unsigned int {
 	_,
 
 	// anchors used as last jumping points
-	d0225, d0325, d0406,
+	d0205, d0225, d0325, d0406,
 	d1720, d1819, d1920, d2122,
 
 	// anchors used for unnamed nodes
-	ps, sb, d007, deck_lx, deck_rx, deck_ty, deck_by,
+	ps, sb, d007, d019, deck_lx, deck_rx, deck_ty, deck_by,
+	manual, shore_pipe, rainbowing, barge, gantry,
 
 	// anchors used for non-interconnected nodes
 	n24, n0325, n0405, n0723, n0923,
@@ -78,6 +85,8 @@ private enum class RS : unsigned int {
 	// unused, but template requires them
 	D011, D012, D013, D014, D015, D016, D026
 };
+
+static CanvasSolidColorBrush^ water_color = Colours::Green;
 
 static uint16 DO_gate_valve_action(GateValveAction cmd, GateValvelet* valve) {
 	uint16 index = 0U;
@@ -99,6 +108,8 @@ public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+
+		this->station->clear_subtacks();
 	}
 
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
@@ -107,6 +118,11 @@ public:
 
 		this->pump_pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
 		this->pump_pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
+
+		this->winch_pressures[RS::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[RS::SternWinch]->set_value(RealData(DB203, stern_anchor_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[RS::ShoreWinch]->set_value(RealData(DB203, shore_discharge_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[RS::BargeWinch]->set_value(RealData(DB203, barge_winch_pressure), GraphletAnchor::CC);
 
 		this->suctions[RS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->suctions[RS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
@@ -149,6 +165,11 @@ public:
 		DI_hydraulic_pump_dimension(this->pump_pressures[RS::F], DB4, pump_F_feedback);
 		DI_hydraulic_pump_dimension(this->pump_pressures[RS::H], DB4, pump_H_feedback);
 
+		DI_winch(this->winches[RS::ShoreWinch], DB205, shore_discharge_winch_details);
+		DI_winch(this->winches[RS::BowWinch], DB4, bow_anchor_winch_feedback, DB205, bow_anchor_winch_details);
+		DI_winch(this->winches[RS::SternWinch], DB4, stern_anchor_winch_feedback, DB205, stern_anchor_winch_details);
+		DI_winch(this->winches[RS::BargeWinch], DB4, barge_winch_feedback, barge_winch_limits, DB205, barge_winch_details);
+		
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
 		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
@@ -191,6 +212,89 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
+		RS rps20[] = { RS::d0205, RS::PSHPump, RS::D020 };
+		RS rsb19[] = { RS::d0225, RS::PSHPump, RS::D018, RS::D019 };
+		RS r19[] = { RS::d019, RS::D021 };
+		RS r20[] = { RS::d2122, RS::D022 };
+
+		this->station->append_subtrack(RS::D001, RS::Hatch, water_color);
+
+		this->try_flow_water(RS::D001, RS::D002, water_color);
+		this->try_flow_water(RS::D019, RS::D021, water_color);
+		this->try_flow_water(RS::D020, r20, water_color);
+		this->try_flow_water(RS::D021, RS::shore_pipe, water_color);
+		this->try_flow_water(RS::D022, RS::rainbowing, water_color);
+
+		if (this->valve_open(RS::D002)) {
+			this->station->append_subtrack(RS::D002, RS::manual, water_color);
+			this->station->append_subtrack(rsb19, water_color);
+			this->manual_pipe->set_color(water_color);
+		} else {
+			this->manual_pipe->set_color(default_pipe_color);
+		}
+		
+		{ // flow PS water
+			bool d004 = this->valve_open(RS::D004);
+			bool d006 = this->valve_open(RS::D006);
+			bool d023 = this->valve_open(RS::D023);
+
+			this->station->append_subtrack(RS::D004, RS::Port, water_color);
+			this->try_flow_water(RS::D004, RS::d0406, water_color);
+			this->try_flow_water(RS::D005, rps20, water_color);
+			this->try_flow_water(RS::D017, RS::I0923, water_color);
+
+			if (d023) {
+				RS d0810[] = { RS::D018, RS::I0723, RS::D009 };
+
+				this->station->append_subtrack(d0810, water_color);
+				this->nintercs[RS::n0723]->set_color(water_color);
+				this->nintercs[RS::n0923]->set_color(water_color);
+
+				this->try_flow_water(RS::D009, RS::D006, water_color);
+			} else {
+				this->nintercs[RS::n0723]->set_color(default_pipe_color);
+				this->nintercs[RS::n0923]->set_color(default_pipe_color);
+			}
+
+			if (d004 || (d006 && d023)) {
+				if (d004) {
+					this->station->append_subtrack(RS::d0406, RS::D004, water_color);
+				}
+
+				if (d006) {
+					this->station->append_subtrack(RS::d0406, RS::D006, water_color);
+				}
+
+				this->station->append_subtrack(RS::d0406, RS::D005, water_color);
+				this->nintercs[RS::n0405]->set_color(water_color);
+			} else {
+				this->nintercs[RS::n0405]->set_color(default_pipe_color);
+			}
+		}
+
+		{ // flow SB water
+			RS r0824[] = { RS::D008, RS::gantry, RS::BargeWinch, RS::D024 };
+
+			this->station->append_subtrack(RS::D003, RS::Starboard, water_color);
+			this->try_flow_water(RS::D025, rsb19, water_color);
+			this->try_flow_water(RS::D018, RS::D008, water_color);
+			this->try_flow_water(RS::D024, RS::barge, water_color);
+
+			if (this->valve_open(RS::D003)) {
+				this->station->append_subtrack(RS::D003, RS::D025, water_color);
+				this->nintercs[RS::n0325]->set_color(water_color);
+			} else {
+				this->nintercs[RS::n0325]->set_color(default_pipe_color);
+			}
+
+			if (this->valve_open(RS::D008)) {
+				this->station->append_subtrack(r0824, water_color);
+				this->nintercs[RS::n24]->set_color(water_color);
+			} else {
+				this->nintercs[RS::n24]->set_color(default_pipe_color);
+			}
+		}
+
 		this->master->end_update_sequence();
 		this->master->leave_critical_section();
 	}
@@ -199,8 +303,8 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", normal_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
-		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Background);
-		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Green);
+		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0U, Colours::Background);
+		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0U, Colours::Green);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
@@ -211,46 +315,48 @@ public:
 public:
 	void load(float width, float height, float gwidth, float gheight) {
 		float radius = resolve_gridsize(gwidth, gheight);
-		Turtle<RS>* pTurtle = new Turtle<RS>(gwidth, gheight, false);
+		Turtle<RS>* pTurtle = new Turtle<RS>(gwidth, gheight, false, RS::shore_pipe);
 
 		pTurtle->move_left(RS::deck_rx)->move_left(2, RS::D021)->move_left(2, RS::d2122);
-		pTurtle->move_down(5)->move_right(2, RS::D022)->move_right(3)->jump_back();
+		pTurtle->move_down(5)->move_right(2, RS::D022)->move_right(3, RS::rainbowing)->jump_back(RS::d2122);
 		pTurtle->move_left(2, RS::d1920)->move_left(2, RS::D020)->move_left(7, RS::d1720);
 
 		pTurtle->move_left(3, RS::D017)->move_left(11, RS::n0405)->move_left(4, RS::D010)->jump_back(RS::d1720);
 		
-		pTurtle->move_down(3.5F, RS::PSHPump)->move_left(6, RS::n0923)->move_left(8)->move_up(1.5F, RS::D005)->move_up(1.5F)->jump_up();
+		pTurtle->move_down(3.5F, RS::PSHPump)->move_left(6, RS::n0923)->move_left(8, RS::d0205);
+		pTurtle->move_up(1.5F, RS::D005)->move_up(1.5F)->jump_up();
 		pTurtle->move_up(3, RS::d0406)->move_right(4, RS::D006)->move_right(4)->move_down(0.5F, RS::deck_ty)->move_down(RS::D009);
 		pTurtle->move_down(2, RS::I0923)->move_down(3)->jump_down()->move_down(2, RS::D023)->jump_back(RS::d0406);
 
-		pTurtle->move_up(1.5F, RS::D004)->move_up(2, RS::ps)->move_up(2, RS::C)->move_up(RS::Port);
+		pTurtle->move_up(1.5F, RS::D004)->move_up(2, RS::ps)->move_up(2)->move_up(RS::Port);
 
 		pTurtle->jump_back(RS::D023)->move_down(2)->jump_down()->move_down(3, RS::I0723)->move_down(2, RS::D007);
 		pTurtle->move_down(RS::deck_by)->move_down(0.5F, RS::d007)->jump_left(8, RS::d0325);
 		pTurtle->move_up(3)->jump_up()->move_up(1.5F, RS::D025)->move_up(1.5F, RS::d0225);
 		pTurtle->move_right(8, RS::n0723)->move_right(6, RS::SBHPump)->move_down(3.5F, RS::d1819)->jump_back(RS::d0225);
-		pTurtle->jump_up(2.5F)->move_left(2, RS::D002)->move_left(15, RS::n24)->move_left(10, RS::D001)->move_left(3, RS::Hatch);
+		pTurtle->jump_up(2.5F, RS::manual)->move_left(2, RS::D002)->move_left(15, RS::n24)->move_left(10, RS::D001)->move_left(3, RS::Hatch);
 
 		pTurtle->jump_back(RS::d1819)->move_left(3, RS::D018)->move_left(11, RS::n0325)->move_left(4, RS::D008);
-		pTurtle->move_left(13)->move_up(5.5F)->jump_up()->move_up(6.5F);
-		pTurtle->move_up(2.5F)->turn_up_left()->move_left(3, RS::D024)->move_left(3)->turn_left_up();
-		pTurtle->move_up(0.5F, RS::Gantry)->move_left()->jump_back(RS::Gantry)->move_right()->jump_back(RS::d0325);
+		pTurtle->move_left(13, RS::gantry)->move_up(5.5F)->jump_up()->move_up(6.5F);
+		pTurtle->move_up(2.5F, RS::BargeWinch)->turn_up_left()->move_left(3, RS::D024)->move_left(3)->turn_left_up();
+		pTurtle->move_up(0.5F, RS::Barge)->move_left(RS::barge)->jump_back(RS::Barge)->move_right()->jump_back(RS::d0325);
 
-		pTurtle->move_down(1.5F, RS::D003)->move_down(2, RS::sb)->move_down(2, RS::F)->move_down(RS::Starboard);
+		pTurtle->move_down(1.5F, RS::D003)->move_down(2, RS::sb)->move_down(2, RS::C)->move_down(RS::Starboard);
 
-		pTurtle->jump_back(RS::d1819)->move_right(5, RS::deck_lx)->move_right(2, RS::D019)->move_right(2)->move_to(RS::d1920);
+		pTurtle->jump_back(RS::d1819)->move_right(5, RS::deck_lx)->move_right(2, RS::D019)->move_right(2, RS::d019)->move_to(RS::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<RS>(pTurtle, default_pipe_thickness, default_pipe_color));
+		this->load_winches(this->winches, RS::BowWinch, RS::BargeWinch, radius * 3.2F);
 
 		{ // load manual pipe segement
-			float d02_y, d05_y;
+			float d02_y, d25_y;
 
 			this->station->fill_anchor_location(RS::D002, nullptr, &d02_y);
-			this->station->fill_anchor_location(RS::D005, nullptr, &d05_y);
+			this->station->fill_anchor_location(RS::d0225, nullptr, &d25_y);
 
 			this->manual_pipe = this->master->insert_one(
-				new Linelet(0.0F, d02_y, 0.0F, d05_y,
-					default_pipe_thickness, default_pipe_color));
+				new Linelet(0.0F, d02_y, 0.0F, d25_y, default_pipe_thickness, default_pipe_color,
+					make_roundcap_stroke_style()));
 		}
 
 		{ // load doors and valves
@@ -290,7 +396,7 @@ public:
 			this->load_dimensions(this->pump_pressures, RS::A, RS::H, "bar");
 
 			this->load_label(this->captions, RS::Hatch, Colours::SeaGreen, this->caption_font);
-			this->load_label(this->captions, RS::Gantry, Colours::Yellow, this->caption_font);
+			this->load_label(this->captions, RS::Barge, Colours::Yellow, this->caption_font);
 
 			for (size_t idx = 0; idx < hopper_count; idx++) {
 				Platform::String^ id = (idx + 1).ToString();
@@ -310,9 +416,9 @@ public:
 		float y0 = 0.0F;
 
 		this->master->move_to(this->station, width * 0.5F, height * 0.5F, GraphletAnchor::CC);
-		this->station->map_graphlet_at_anchor(this->manual_pipe, RS::D025, GraphletAnchor::CB);
+		this->station->map_graphlet_at_anchor(this->manual_pipe, RS::d0225, GraphletAnchor::CB);
 
-		this->station->map_credit_graphlet(this->captions[RS::Gantry], GraphletAnchor::CB);
+		this->station->map_credit_graphlet(this->captions[RS::Barge], GraphletAnchor::CB);
 		this->station->map_graphlet_at_anchor(this->ps_suction, RS::Port, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->sb_suction, RS::Starboard, GraphletAnchor::CC);
 		this->station->map_graphlet_at_anchor(this->sea_inlet, RS::Hatch, GraphletAnchor::CC);
@@ -329,9 +435,6 @@ public:
 			 */
 			this->station->map_graphlet_at_anchor(it->second, it->first, GraphletAnchor::LC, -default_pipe_thickness * 0.5F);
 		}
-
-		this->reflow_doors(this->uhdoors, this->progresses, Door::PS1, Door::PS7, gheight * -2.5F);
-		this->reflow_doors(this->uhdoors, this->progresses, Door::SB1, Door::SB7, gheight * +2.5F);
 
 		for (auto it = this->hoppers.begin(); it != this->hoppers.end(); it++) {
 			it->second->fill_pump_origin(&ox);
@@ -404,8 +507,24 @@ public:
 			this->station->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
 		}
 
-		{ // reflow door sequences
+		{ // reflow winches
+			this->master->move_to(this->winches[RS::ShoreWinch], this->mvalves[RS::D021], GraphletAnchor::LT, GraphletAnchor::RB);
+			this->station->map_graphlet_base_on_anchors(this->winches[RS::BowWinch], RS::PSHPump, RS::ps, GraphletAnchor::CT);
+
+			this->station->map_credit_graphlet(this->winches[RS::BargeWinch], GraphletAnchor::LC, gwidth);
+			this->station->map_graphlet_base_on_anchors(this->winches[RS::SternWinch], RS::Hatch, RS::ps, GraphletAnchor::CT, gwidth);
+
+			for (auto it = this->winches.begin(); it != this->winches.end(); it++) {
+				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
+				this->master->move_to(this->winch_pressures[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::CT);
+			}
+		}
+
+		{ // reflow doors
 			float ps_x, ps_y, sb_x, sb_y;
+
+			this->reflow_doors(this->uhdoors, this->progresses, Door::PS1, Door::PS7, gheight * -2.5F);
+			this->reflow_doors(this->uhdoors, this->progresses, Door::SB1, Door::SB7, gheight * +2.5F);
 
 			this->station->fill_anchor_location(RS::D010, nullptr, &ps_y);
 			this->station->fill_anchor_location(RS::D008, nullptr, &sb_y);
@@ -419,14 +538,14 @@ public:
 			}
 		}
 
-		{ // reflow settings dimensions
+		{ // reflow dimensions
 			float offset = default_pipe_thickness * 2.0F;
 			
 			this->master->move_to(this->suctions[RS::D003], this->gvalves[RS::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
 			this->master->move_to(this->suctions[RS::D004], this->gvalves[RS::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 			
 			this->station->map_credit_graphlet(this->pump_pressures[RS::C], GraphletAnchor::LB, gwidth * 3.0F);
-			this->station->map_credit_graphlet(this->pump_pressures[RS::F], GraphletAnchor::LT, gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[RS::F], this->pump_pressures[RS::C], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, offset);
 			this->master->move_to(this->pump_pressures[RS::A], this->pump_pressures[RS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 			this->master->move_to(this->pump_pressures[RS::H], this->pump_pressures[RS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 		}
@@ -500,6 +619,16 @@ private:
 		this->load_dimension(this->vpressures, id, "bar");
 	}
 
+	template<class W, typename E>
+	void load_winches(std::map<E, Credit<W, E>*>& ws, E id0, E idn, float radius) {
+		for (E id = id0; id <= idn; id++) {
+			ws[id] = this->master->insert_one(new Credit<W, E>(radius), id);
+
+			this->load_label(this->captions, id, Colours::Salmon, this->caption_font);
+			this->load_dimension(this->winch_pressures, id, "bar");
+		}
+	}
+
 	template<typename E>
 	void load_percentage(std::map<E, Credit<Percentagelet, E>*>& ps, E id) {
 		ps[id] = this->master->insert_one(new Credit<Percentagelet, E>(this->plain_style), id);
@@ -536,9 +665,9 @@ private:
 	void reflow_doors(std::map<E, Credit<D, E>*>& ds, std::map<E, Credit<Percentagelet, E>*>& ps, E id0, E idn, float yoff) {
 		GraphletAnchor d_anchor = GraphletAnchor::CT;
 		GraphletAnchor p_anchor = GraphletAnchor::CB;
-		float lx, rx, y, cell_width;
 		float label_yoff = default_pipe_thickness * 2.0F;
-		
+		float lx, rx, y, cell_width;
+
 		if (yoff > 0.0F) { // Starboard
 			d_anchor = GraphletAnchor::CB;
 			p_anchor = GraphletAnchor::CT;
@@ -575,6 +704,37 @@ private:
 		}
 	}
 
+private:
+	bool valve_open(RS vid) {
+		return (this->gvalves[vid]->get_state() == GateValveState::Open);
+	}
+
+	void try_flow_water(RS vid, RS eid1, RS eid2, CanvasSolidColorBrush^ color) {
+		if (this->valve_open(vid)) {
+			this->station->append_subtrack(vid, eid1, color);
+
+			if (eid2 != RS::_) {
+				this->station->append_subtrack(vid, eid2, color);
+			}
+		}
+	}
+
+	void try_flow_water(RS vid, RS* path, unsigned int count, CanvasSolidColorBrush^ color) {
+		if (this->valve_open(vid)) {
+			this->station->append_subtrack(vid, path[0], color);
+			this->station->append_subtrack(path, count, color);
+		}
+	}
+
+	template<unsigned int N>
+	void try_flow_water(RS vid, RS(&path)[N], CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, path, N, color);
+	}
+
+	void try_flow_water(RS vid, RS eid, CanvasSolidColorBrush^ color) {
+		this->try_flow_water(vid, eid, RS::_, color);
+	}
+
 // never deletes these graphlets mannually
 private:
 	Tracklet<RS>* station;
@@ -583,9 +743,11 @@ private:
 	std::map<RS, Credit<GateValvelet, RS>*> gvalves;
 	std::map<RS, Credit<MotorValvelet, RS>*> mvalves;
 	std::map<RS, Credit<Labellet, RS>*> vlabels;
+	std::map<RS, Credit<Winchlet, RS>*> winches;
 	std::map<Door, Credit<UpperHopperDoorlet, Door>*> uhdoors;
 	std::map<Door, Credit<Percentagelet, Door>*> progresses;
 	std::map<RS, Credit<Percentagelet, RS>*> suctions;
+	std::map<RS, Credit<Dimensionlet, RS>*> winch_pressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> pump_pressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> dpressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> vpressures;
@@ -671,19 +833,18 @@ public:
 
 			{ // draw non-important lines
 				float d0525_x, d05_y, d25_y;
-				float d0325_y, d03_x, d07_x;
+				float d07_x, d07_y;
 				float d10_x, d10_y;
 
 				station->fill_anchor_location(RS::D005, &d0525_x, &d05_y, false);
 				station->fill_anchor_location(RS::D025, nullptr, &d25_y, false);
+				station->fill_anchor_location(RS::d007, &d07_x, &d07_y, false);
 				station->fill_anchor_location(RS::D010, &d10_x, &d10_y, false);
-				station->fill_anchor_location(RS::d0325, &d03_x, &d0325_y, false);
-				station->fill_anchor_location(RS::d007, &d07_x, nullptr, false);
-
+				
 				ds->DrawLine(x + d0525_x, y + d05_y, x + d0525_x, y + d25_y,
 					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
-				ds->DrawLine(x + d03_x, y + d0325_y, x + d07_x, y + d0325_y,
+				ds->DrawLine(x + d0525_x, y + d07_y, x + d07_x, y + d07_y,
 					Colours::DimGray, default_pipe_thickness, this->ship_style);
 
 				ds->DrawLine(d10_x, y + d10_y, x + d10_x, y + d10_y,

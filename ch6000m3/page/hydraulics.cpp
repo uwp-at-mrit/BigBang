@@ -67,8 +67,14 @@ private enum class HS : unsigned int {
 	// Key Labels
 	Port, Starboard, Master, Visor, VisorState, Heater, Storage, VisorOil,
 
+	// Pump-driven subsystems
+	PSTrunnion, PSGateValves, ShoreDischarge, BowAnchor,
+	PSDraghead, PSDoors, SternAnchor, Overflow, Barge,
+	SBTrunnion, SBGateValves, PSIntermediate, ButterflyValves, SBIntermediate,
+	DoorsLocking, SBDraghead, SBDoors, WateringValves,
+
 	// Dimensions
-	BackOil, BowWinch, SternWinch,
+	BackOil,
 	
 	// Filter Indicators
 	F01, F02, F10,
@@ -81,6 +87,16 @@ private enum class HS : unsigned int {
 	// anchors used for unnamed corners
 	lt, tl, rt, tr, cl, cr, i, j, f02, master, sb
 };
+
+static HS A[] = { HS::PSDraghead, HS::PSDoors, HS::SternAnchor, HS::Overflow, HS::Barge };
+static HS B[] = { HS::PSIntermediate };
+static HS G[] = { HS::SBIntermediate };
+static HS H[] = { HS::SBDraghead, HS::SBDoors, HS::WateringValves };
+
+static HS C[] = { HS::PSTrunnion, HS::PSGateValves, HS::ShoreDischarge, HS::BowAnchor };
+static HS F[] = { HS::SBTrunnion, HS::SBGateValves };
+static HS D[] = { HS::ButterflyValves };
+static HS E[] = { HS::DoorsLocking };
 
 /*************************************************************************************************/
 static HydraulicPumpDiagnostics* satellite; // it will be destroyed by `atexit()`;
@@ -135,6 +151,26 @@ static uint16 DO_hydraulics_action(HydraulicPumpAction cmd, HydraulicPumplet* pu
 	return index;
 }
 
+static const HS* select_captions(HS pid, unsigned int* count) {
+	HS* captions = nullptr;
+
+	switch (pid) {
+	case HS::A: captions = A; SET_BOX(count, sizeof(A) / sizeof(HS)); break;
+	case HS::B: captions = B; SET_BOX(count, sizeof(B) / sizeof(HS)); break;
+	case HS::G: captions = G; SET_BOX(count, sizeof(G) / sizeof(HS)); break;
+	case HS::H: captions = H; SET_BOX(count, sizeof(H) / sizeof(HS)); break;
+
+	case HS::C: captions = C; SET_BOX(count, sizeof(C) / sizeof(HS)); break;
+	case HS::F: captions = F; SET_BOX(count, sizeof(F) / sizeof(HS)); break;
+	case HS::D: captions = D; SET_BOX(count, sizeof(D) / sizeof(HS)); break;
+	case HS::E: captions = E; SET_BOX(count, sizeof(E) / sizeof(HS)); break;
+
+	default: SET_BOX(count, 0);
+	}
+
+	return captions;
+}
+
 /*************************************************************************************************/
 private class Hydraulics final : public PLCConfirmation {
 public:
@@ -154,9 +190,7 @@ public:
 		this->set_visor_tank_level(RealData(DB203, visor_tank_level));
 
 		this->pressures[HS::BackOil]->set_value(RealData(DB203, master_back_oil_pressure));
-		this->pressures[HS::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure));
-		this->pressures[HS::SternWinch]->set_value(RealData(DB203, stern_anchor_winch_pressure));
-
+		
 		{ // pump pressures
 			GraphletAnchor psa = GraphletAnchor::LB;
 			GraphletAnchor sba = GraphletAnchor::RB;
@@ -310,7 +344,7 @@ public:
 		Turtle<HS>* pTurtle = new Turtle<HS>(gwidth, gheight, true, HS::Master);
 
 		pTurtle->move_right(2)->move_down(5.5F, HS::SQ1)->move_down()->turn_down_right();
-		pTurtle->move_right(6.5F, HS::BowWinch)->move_right(6.5F, HS::sb)->turn_right_down()->move_down(17);
+		pTurtle->move_right(13, HS::sb)->turn_right_down()->move_down(17);
 		
 		pTurtle->jump_right(20, HS::h)->move_left(4, HS::H)->move_left(12, HS::SQh)->move_left(4)->jump_back();
 		pTurtle->move_up(3, HS::g)->move_left(4, HS::G)->move_left(12, HS::SQg)->move_left(4)->jump_back();
@@ -326,8 +360,7 @@ public:
 		pTurtle->move_down(3, HS::d)->move_right(4, HS::D)->move_right(12, HS::SQd)->move_right(4)->jump_back();
 		pTurtle->move_down(3, HS::e)->move_right(4, HS::E)->move_right(12, HS::SQe)->move_right(4);
 
-		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right();
-		pTurtle->move_right(6.5F, HS::SternWinch)->move_right(6.5F)->turn_right_up();
+		pTurtle->move_up(12, HS::Port)->move_up(5)->turn_up_right()->move_right(13)->turn_right_up();
 		pTurtle->move_up(HS::SQ2)->move_up(5.5F)->move_to(HS::Master);
 
 		pTurtle->jump_back(HS::Master)->jump_right(4, HS::master)->move_up(6.5F)->turn_up_right(HS::f02)->move_right(2);
@@ -348,8 +381,6 @@ public:
 		this->load_label(this->captions, HS::Storage, Colours::Silver);
 
 		this->load_dimension(this->pressures, HS::BackOil, "bar");
-		this->load_dimension(this->pressures, HS::BowWinch, "bar");
-		this->load_dimension(this->pressures, HS::SternWinch, "bar");
 
 		this->load_buttons(this->functions);
 	}
@@ -412,9 +443,6 @@ public:
 		this->station->map_credit_graphlet(this->captions[HS::Starboard], GraphletAnchor::CB, -gwidth * 10.0F);
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
 
-		this->station->map_credit_graphlet(this->pressures[HS::BowWinch], GraphletAnchor::CT);
-		this->station->map_credit_graphlet(this->pressures[HS::SternWinch], GraphletAnchor::CT);
-
 		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
 
 		this->master->move_to(this->functions[HSFunction::BOPOverride],
@@ -473,7 +501,22 @@ public:
 
 			this->station->map_credit_graphlet(it->second, GraphletAnchor::CC, x0, y0);
 			this->station->map_credit_graphlet(this->labels[it->first], lbl_a, lbl_dx, lbl_dy);
-			this->station->map_credit_graphlet(this->captions[it->first], cpt_a, cpt_dx, cpt_dy);
+
+			if (this->captions.find(it->first) != this->captions.end()) {
+				this->station->map_credit_graphlet(this->captions[it->first], cpt_a, cpt_dx, cpt_dy);
+			} else {
+				unsigned int count = 0U;
+				const HS* cpts = select_captions(it->first, &count);
+				IGraphlet* target = this->captions[cpts[0]];
+				GraphletAnchor tgt_a = ((cpt_a == GraphletAnchor::LT) ? GraphletAnchor::RT : GraphletAnchor::LT);
+				float hgapsize = ((cpt_dx > 0.0F) ? text_hspace : -text_hspace);
+
+				this->station->map_graphlet_at_anchor(target, it->first, cpt_a, cpt_dx, cpt_dy);
+				for (unsigned int idx = 1; idx < count; idx++) {
+					this->master->move_to(this->captions[cpts[idx]], target, tgt_a, cpt_a, hgapsize);
+					target = this->captions[cpts[idx]];
+				}
+			}
 
 			if (this->pressures.find(it->first) != this->pressures.end()) {
 				this->station->map_credit_graphlet(this->pressures[it->first], bar_a, bar_dx, bar_dy);
@@ -560,11 +603,22 @@ private:
 	template<class G, typename E>
 	void load_devices(std::map<E, G*>& gs, std::map<E, Credit<Labellet, E>*>& ls, std::map<E, Credit<Labellet, E>*>& cs
 		, E id0, E idn, float radius, double degrees, CanvasSolidColorBrush^ color = Colours::Silver) {
+		unsigned int count = 0U;
+
 		this->load_devices(gs, id0, idn, radius, degrees);
 
 		for (E id = id0; id <= idn; id++) {
+			const HS* captions = select_captions(id, &count);
+
 			this->load_label(ls, id.ToString(), id, color);
-			this->load_label(cs, id, color);
+
+			if (count == 0) {
+				this->load_label(cs, id, color);
+			} else {
+				for (unsigned int idx = 0; idx < count; idx++) {
+					this->load_label(cs, captions[idx], color);
+				}
+			}
 		}
 	}
 

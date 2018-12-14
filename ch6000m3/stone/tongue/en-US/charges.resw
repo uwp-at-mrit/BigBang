@@ -195,8 +195,8 @@
   <data name="D026" xml:space="preserve">
     <value>Starboard Underwater Discharge</value>
   </data>
-  <data name="Gantry" xml:space="preserve">
-    <value>Gantry</value>
+  <data name="Barge" xml:space="preserve">
+    <value>Barge</value>
   </data>
   <data name="LMOD" xml:space="preserve">
     <value>LMOD</value>
