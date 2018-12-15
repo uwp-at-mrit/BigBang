@@ -32,6 +32,7 @@
 #include "iotables/di_winches.hpp"
 
 #include "iotables/do_dredges.hpp"
+#include "iotables/do_winches.hpp"
 
 #include "decorator/page.hpp"
 
@@ -986,7 +987,7 @@ public:
 		this->button_style.foreground_color = Colours::CornflowerBlue;
 		this->button_style.font = make_bold_text_format(tiny_font_size);
 
-		this->winch_op = make_winch_menu(dredges_diagnostics, master->get_plc_device());
+		this->winch_op = make_dredging_winch_menu(dredges_diagnostics, master->get_plc_device());
 		this->gantry_op = make_gantry_menu(dredges_diagnostics, master->get_plc_device());
 		this->compensator_op = make_wave_compensator_menu(master->get_plc_device());
 		this->visor_op = make_drag_visor_menu(master->get_plc_device());

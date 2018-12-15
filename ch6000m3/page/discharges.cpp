@@ -11,6 +11,7 @@
 #include "turtle.hpp"
 
 #include "graphlet/shapelet.hpp"
+#include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
@@ -32,6 +33,7 @@
 
 #include "iotables/do_doors.hpp"
 #include "iotables/do_valves.hpp"
+#include "iotables/do_winches.hpp"
 #include "iotables/do_hopper_pumps.hpp"
 
 #include "decorator/page.hpp"
@@ -60,8 +62,8 @@ private enum class RS : unsigned int {
 	// Pump dimensions
 	A, C, F, H,
 
-	// Winches
-	BowWinch, SternWinch, ShoreWinch, BargeWinch,
+	// Winch States
+	BowCTension, SternCTension, BargeLocked,
 
 	// Key Labels
 	Port, Starboard, Hatch, PSHPump, SBHPump, Barge,
@@ -76,7 +78,7 @@ private enum class RS : unsigned int {
 	d1720, d1819, d1920, d2122,
 
 	// anchors used for unnamed nodes
-	ps, sb, d007, d019, deck_lx, deck_rx, deck_ty, deck_by,
+	ps, sb, d007, d019, d024, deck_lx, deck_rx, deck_ty, deck_by,
 	manual, shore_pipe, rainbowing, barge, gantry,
 
 	// anchors used for non-interconnected nodes
@@ -119,10 +121,10 @@ public:
 		this->pump_pressures[RS::A]->set_value(RealData(DB203, pump_A_pressure), GraphletAnchor::LB);
 		this->pump_pressures[RS::H]->set_value(RealData(DB203, pump_H_pressure), GraphletAnchor::LT);
 
-		this->winch_pressures[RS::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure), GraphletAnchor::CC);
-		this->winch_pressures[RS::SternWinch]->set_value(RealData(DB203, stern_anchor_winch_pressure), GraphletAnchor::CC);
-		this->winch_pressures[RS::ShoreWinch]->set_value(RealData(DB203, shore_discharge_winch_pressure), GraphletAnchor::CC);
-		this->winch_pressures[RS::BargeWinch]->set_value(RealData(DB203, barge_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[ShipSlot::BowWinch]->set_value(RealData(DB203, bow_anchor_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[ShipSlot::SternWinch]->set_value(RealData(DB203, stern_anchor_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[ShipSlot::ShoreWinch]->set_value(RealData(DB203, shore_discharge_winch_pressure), GraphletAnchor::CC);
+		this->winch_pressures[ShipSlot::BargeWinch]->set_value(RealData(DB203, barge_winch_pressure), GraphletAnchor::CC);
 
 		this->suctions[RS::D003]->set_value(RealData(DB203, gate_valve_D03_progress), GraphletAnchor::LB);
 		this->suctions[RS::D004]->set_value(RealData(DB203, gate_valve_D04_progress), GraphletAnchor::LT);
@@ -165,10 +167,14 @@ public:
 		DI_hydraulic_pump_dimension(this->pump_pressures[RS::F], DB4, pump_F_feedback);
 		DI_hydraulic_pump_dimension(this->pump_pressures[RS::H], DB4, pump_H_feedback);
 
-		DI_winch(this->winches[RS::ShoreWinch], DB205, shore_discharge_winch_details);
-		DI_winch(this->winches[RS::BowWinch], DB4, bow_anchor_winch_feedback, DB205, bow_anchor_winch_details);
-		DI_winch(this->winches[RS::SternWinch], DB4, stern_anchor_winch_feedback, DB205, stern_anchor_winch_details);
-		DI_winch(this->winches[RS::BargeWinch], DB4, barge_winch_feedback, barge_winch_limits, DB205, barge_winch_details);
+		DI_winch(this->winches[ShipSlot::ShoreWinch], DB205, shore_discharge_winch_details);
+		DI_winch(this->winches[ShipSlot::BowWinch], DB4, bow_anchor_winch_feedback, DB205, bow_anchor_winch_details);
+		DI_winch(this->winches[ShipSlot::SternWinch], DB4, stern_anchor_winch_feedback, DB205, stern_anchor_winch_details);
+		DI_winch(this->winches[ShipSlot::BargeWinch], DB4, barge_winch_feedback, barge_winch_limits, DB205, barge_winch_details);
+
+		this->alarms[RS::BowCTension]->set_state(DI_winch_constant_tension(DB205, bow_anchor_winch_details), AlarmState::Notice, AlarmState::None);
+		this->alarms[RS::SternCTension]->set_state(DI_winch_constant_tension(DB205, stern_anchor_winch_details), AlarmState::Notice, AlarmState::None);
+		this->alarms[RS::BargeLocked]->set_state(DI_winch_locked(DB205, barge_winch_details), AlarmState::Notice, AlarmState::None);
 		
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
@@ -261,7 +267,7 @@ public:
 					this->station->append_subtrack(RS::d0406, RS::D004, water_color);
 				}
 
-				if (d006) {
+				if (d006 && d023) {
 					this->station->append_subtrack(RS::d0406, RS::D006, water_color);
 				}
 
@@ -273,7 +279,7 @@ public:
 		}
 
 		{ // flow SB water
-			RS r0824[] = { RS::D008, RS::gantry, RS::BargeWinch, RS::D024 };
+			RS r0824[] = { RS::D008, RS::gantry, RS::d024, RS::D024 };
 
 			this->station->append_subtrack(RS::D003, RS::Starboard, water_color);
 			this->try_flow_water(RS::D025, rsb19, water_color);
@@ -337,8 +343,8 @@ public:
 		pTurtle->jump_up(2.5F, RS::manual)->move_left(2, RS::D002)->move_left(15, RS::n24)->move_left(10, RS::D001)->move_left(3, RS::Hatch);
 
 		pTurtle->jump_back(RS::d1819)->move_left(3, RS::D018)->move_left(11, RS::n0325)->move_left(4, RS::D008);
-		pTurtle->move_left(13, RS::gantry)->move_up(5.5F)->jump_up()->move_up(6.5F);
-		pTurtle->move_up(2.5F, RS::BargeWinch)->turn_up_left()->move_left(3, RS::D024)->move_left(3)->turn_left_up();
+		pTurtle->move_left(13, RS::gantry)->move_up(5.5F)->jump_up()->move_up(5.5F);
+		pTurtle->move_up(2.5F, RS::d024)->turn_up_left()->move_left(3, RS::D024)->move_left(3)->turn_left_up();
 		pTurtle->move_up(0.5F, RS::Barge)->move_left(RS::barge)->jump_back(RS::Barge)->move_right()->jump_back(RS::d0325);
 
 		pTurtle->move_down(1.5F, RS::D003)->move_down(2, RS::sb)->move_down(2, RS::C)->move_down(RS::Starboard);
@@ -346,7 +352,9 @@ public:
 		pTurtle->jump_back(RS::d1819)->move_right(5, RS::deck_lx)->move_right(2, RS::D019)->move_right(2, RS::d019)->move_to(RS::d1920);
 		
 		this->station = this->master->insert_one(new Tracklet<RS>(pTurtle, default_pipe_thickness, default_pipe_color));
-		this->load_winches(this->winches, RS::BowWinch, RS::BargeWinch, radius * 3.2F);
+		
+		this->load_winches(this->winches, this->winch_labels, radius * 3.2F);
+		this->load_alarms(this->alarms, this->alabels, RS::BowCTension, RS::BargeLocked, radius);
 
 		{ // load manual pipe segement
 			float d02_y, d25_y;
@@ -508,15 +516,25 @@ public:
 		}
 
 		{ // reflow winches
-			this->master->move_to(this->winches[RS::ShoreWinch], this->mvalves[RS::D021], GraphletAnchor::LT, GraphletAnchor::RB);
-			this->station->map_graphlet_base_on_anchors(this->winches[RS::BowWinch], RS::PSHPump, RS::ps, GraphletAnchor::CT);
+			float gapsize = gheight * 0.5F;
 
-			this->station->map_credit_graphlet(this->winches[RS::BargeWinch], GraphletAnchor::LC, gwidth);
-			this->station->map_graphlet_base_on_anchors(this->winches[RS::SternWinch], RS::Hatch, RS::ps, GraphletAnchor::CT, gwidth);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::ShoreWinch], RS::d2122, RS::deck_ty, GraphletAnchor::CB, -gwidth);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BowWinch], RS::PSHPump, RS::ps, GraphletAnchor::CT);
+
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BargeWinch], RS::d024, RS::D006, GraphletAnchor::LC, gwidth, gapsize);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::SternWinch], RS::Hatch, RS::ps, GraphletAnchor::CT, gwidth);
+
+			this->master->move_to(this->alarms[RS::BowCTension], this->winches[ShipSlot::BowWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
+			this->master->move_to(this->alarms[RS::SternCTension], this->winches[ShipSlot::SternWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
+			this->master->move_to(this->alarms[RS::BargeLocked], this->winches[ShipSlot::BargeWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 
 			for (auto it = this->winches.begin(); it != this->winches.end(); it++) {
-				this->master->move_to(this->captions[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
+				this->master->move_to(this->winch_labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
 				this->master->move_to(this->winch_pressures[it->first], it->second, GraphletAnchor::CB, GraphletAnchor::CT);
+			}
+
+			for (auto it = this->alabels.begin(); it != this->alabels.end(); it++) {
+				this->master->move_to(it->second, this->alarms[it->first], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 			}
 		}
 
@@ -619,12 +637,20 @@ private:
 		this->load_dimension(this->vpressures, id, "bar");
 	}
 
-	template<class W, typename E>
-	void load_winches(std::map<E, Credit<W, E>*>& ws, E id0, E idn, float radius) {
+	template<class A, typename E>
+	void load_alarms(std::map<E, Credit<A, E>*>& as, std::map<E, Credit<Labellet, E>*>& ls, E id0, E idn, float size) {
 		for (E id = id0; id <= idn; id++) {
+			this->load_label(ls, id, Colours::Silver, this->label_font);
+			as[id] = this->master->insert_one(new Credit<A, E>(size), id);
+		}
+	}
+
+	template<class W, typename E>
+	void load_winches(std::map<E, Credit<W, E>*>& ws, std::map<E, Credit<Labellet, E>*>& ls, float radius) {
+		for (E id = _E0(E); id < E::_; id++) {
 			ws[id] = this->master->insert_one(new Credit<W, E>(radius), id);
 
-			this->load_label(this->captions, id, Colours::Salmon, this->caption_font);
+			this->load_label(ls, id, Colours::Salmon, this->caption_font);
 			this->load_dimension(this->winch_pressures, id, "bar");
 		}
 	}
@@ -743,11 +769,14 @@ private:
 	std::map<RS, Credit<GateValvelet, RS>*> gvalves;
 	std::map<RS, Credit<MotorValvelet, RS>*> mvalves;
 	std::map<RS, Credit<Labellet, RS>*> vlabels;
-	std::map<RS, Credit<Winchlet, RS>*> winches;
+	std::map<RS, Credit<Alarmlet, RS>*> alarms;
+	std::map<RS, Credit<Labellet, RS>*> alabels;
+	std::map<ShipSlot, Credit<Winchlet, ShipSlot>*> winches;
+	std::map<ShipSlot, Credit<Dimensionlet, ShipSlot>*> winch_pressures;
+	std::map<ShipSlot, Credit<Labellet, ShipSlot>*> winch_labels;
 	std::map<Door, Credit<UpperHopperDoorlet, Door>*> uhdoors;
 	std::map<Door, Credit<Percentagelet, Door>*> progresses;
 	std::map<RS, Credit<Percentagelet, RS>*> suctions;
-	std::map<RS, Credit<Dimensionlet, RS>*> winch_pressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> pump_pressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> dpressures;
 	std::map<RS, Credit<Dimensionlet, RS>*> vpressures;
@@ -868,10 +897,16 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	Rainbows* dashboard = new Rainbows(this);
 
 	this->dashboard = dashboard;
+	
+	this->anchor_winch_op = make_anchor_winch_menu(plc);
+	this->barge_winch_op = make_barge_winch_menu(plc);
+	this->shore_winch_op = make_shore_winch_menu(plc);
+
 	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
 	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
+	
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -949,18 +984,26 @@ void DischargesPage::reflow(float width, float height) {
 bool DischargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
-		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
+		|| (dynamic_cast<HopperPumplet*>(g) != nullptr)
+		|| (dynamic_cast<Winchlet*>(g) != nullptr));
 }
 
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, RS>*>(g);
+	auto winch = dynamic_cast<Credit<Winchlet, ShipSlot>*>(g);
 
 	if (gvalve != nullptr) {
 		menu_popup(this->gate_valve_op, g, local_x, local_y);
 	} else if (uhdoor != nullptr) {
 		menu_popup(this->upper_door_op, g, local_x, local_y);
+	} else if (winch != nullptr) {
+		switch (winch->id) {
+		case ShipSlot::ShoreWinch: menu_popup(this->shore_winch_op, g, local_x, local_y); break;
+		case ShipSlot::BargeWinch: menu_popup(this->barge_winch_op, g, local_x, local_y); break;
+		case ShipSlot::BowWinch: case ShipSlot::SternWinch: menu_popup(this->anchor_winch_op, g, local_x, local_y); break;
+		}
 	} else if (hpump != nullptr) {
 		switch (hpump->id) {
 		case RS::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;

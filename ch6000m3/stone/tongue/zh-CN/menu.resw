@@ -393,4 +393,19 @@
   <data name="SaddleCheck" xml:space="preserve">
     <value>搁墩校验</value>
   </data>
+  <data name="CTension" xml:space="preserve">
+    <value>恒张力</value>
+  </data>
+  <data name="WindOut" xml:space="preserve">
+    <value>放缆</value>
+  </data>
+  <data name="WindUp" xml:space="preserve">
+    <value>收缆</value>
+  </data>
+  <data name="CloseLocker" xml:space="preserve">
+    <value>关闭锁紧油缸</value>
+  </data>
+  <data name="OpenLocker" xml:space="preserve">
+    <value>打开锁紧油缸</value>
+  </data>
 </root>

@@ -145,3 +145,11 @@ bool WarGrey::SCADA::DI_winch_soft_upper_limited(const uint8* db205, WinchDetail
 bool WarGrey::SCADA::DI_winch_soft_lower_limited(const uint8* db205, WinchDetails* details) {
 	return DBX(db205, details->soft_lower - 1U);
 }
+
+bool WarGrey::SCADA::DI_winch_constant_tension(const uint8* db205, unsigned int details_p1) {
+	return DBX(db205, details_p1 + 6U);
+}
+
+bool WarGrey::SCADA::DI_winch_locked(const uint8* db205, unsigned int details_p1) {
+	return DBX(db205, details_p1 + 7U);
+}

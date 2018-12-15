@@ -152,6 +152,9 @@
     <ClCompile Include="page\diagnostics\hydraulic_pump_dx.cpp">
       <Filter>page\diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="iotables\do_winches.cpp">
+      <Filter>iotables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -285,6 +288,9 @@
       <Filter>page\diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="iotables\ai_winches.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
+    <ClInclude Include="iotables\do_winches.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
   </ItemGroup>

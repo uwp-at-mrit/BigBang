@@ -88,4 +88,7 @@ namespace WarGrey::SCADA {
 	bool DI_winch_suction_limited(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);
 	bool DI_winch_soft_upper_limited(const uint8* db205, WarGrey::SCADA::WinchDetails* details);
 	bool DI_winch_soft_lower_limited(const uint8* db205, WarGrey::SCADA::WinchDetails* details);
+
+	bool DI_winch_constant_tension(const uint8* db205, unsigned int details_p1);
+	bool DI_winch_locked(const uint8* db205, unsigned int details_p1);
 }

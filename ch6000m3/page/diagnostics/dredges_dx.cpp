@@ -191,7 +191,7 @@ public:
 			this->subwinches[WG::Allowed]->set_color(DI_dredges_winch_allowed(DB4, this->details) ? subcolor_highlight : subcolor);
 
 			this->diagnoses[WG::AllGantriesInOrOut]->set_state(gantries_in || gantries_out, AlarmState::Notice, AlarmState::None);
-			this->diagnoses[WG::HopperStopped]->set_state(suction_limited && stopped, AlarmState::Notice, AlarmState::None);
+			this->diagnoses[WG::HopperStopped]->set_state((suction_limited && stopped) || (!suction_limited), AlarmState::Notice, AlarmState::None);
 			this->diagnoses[WG::NoInflating]->set_state(DI_suction_inflating(DB205, suction_btn_p1), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[WG::NoSoftUpper]->set_state(DI_winch_soft_upper_limited(DB205, this->winch_details), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[WG::NoSoftLower]->set_state(DI_winch_soft_lower_limited(DB205, this->winch_details), AlarmState::None, AlarmState::Notice);

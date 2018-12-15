@@ -510,8 +510,7 @@ void ITimeSerieslet::set_value(unsigned int idx, double v) {
 void ITimeSerieslet::set_values(double* values, bool persistent) {
 	long long now = current_milliseconds();
 	TimeSeriesStyle style = this->get_style();
-	bool datasource_ready = ((this->data_source != nullptr) && this->data_source->ready());
-	
+
 	this->begin_maniplation_sequence();
 	
 	for (unsigned int idx = 0; idx < this->count; idx++) {
@@ -519,13 +518,13 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 		this->lines[idx].update_legend(this->precision + 1U, style);
 	}
 
+	this->end_maniplation_sequence();
+
 	if (persistent) {
-		if (datasource_ready) {
+		if ((this->data_source != nullptr) && this->data_source->ready()) {
 			this->data_source->save(now, values, this->count);
 		}
 	}
-
-	this->end_maniplation_sequence();
 	
 	this->notify_updated();
 }

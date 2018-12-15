@@ -393,4 +393,19 @@
   <data name="SaddleCheck" xml:space="preserve">
     <value>Saddle Check</value>
   </data>
+  <data name="CTension" xml:space="preserve">
+    <value>Constant Tension</value>
+  </data>
+  <data name="WindOut" xml:space="preserve">
+    <value>Wind Out</value>
+  </data>
+  <data name="WindUp" xml:space="preserve">
+    <value>Wind Up</value>
+  </data>
+  <data name="CloseLocker" xml:space="preserve">
+    <value>Close Locker</value>
+  </data>
+  <data name="OpenLocker" xml:space="preserve">
+    <value>Open Locker</value>
+  </data>
 </root>

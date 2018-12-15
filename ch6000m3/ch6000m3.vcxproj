@@ -337,6 +337,7 @@
     <ClCompile Include="iotables\do_pumps.cpp" />
     <ClCompile Include="iotables\do_valves.cpp" />
     <ClCompile Include="iotables\do_water_pumps.cpp" />
+    <ClCompile Include="iotables\do_winches.cpp" />
     <ClCompile Include="page\diagnostics\dredges_dx.cpp" />
     <ClCompile Include="page\diagnostics\gland_pump_dx.cpp" />
     <ClCompile Include="page\diagnostics\hopper_pump_dx.cpp" />
@@ -364,6 +365,7 @@
     <ClInclude Include="decorator\ship.hpp" />
     <ClInclude Include="iotables\ai_winches.hpp" />
     <ClInclude Include="iotables\di_winches.hpp" />
+    <ClInclude Include="iotables\do_winches.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />
     <ClInclude Include="page\diagnostics\dredges_dx.hpp" />
     <ClInclude Include="page\diagnostics\gland_pump_dx.hpp" />

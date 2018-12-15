@@ -120,8 +120,14 @@
   <data name="Barge" xml:space="preserve">
     <value>Barge</value>
   </data>
+  <data name="BargeLocked" xml:space="preserve">
+    <value>Barge Winch Locked</value>
+  </data>
   <data name="BargeWinch" xml:space="preserve">
     <value>Barging Gantry Winch</value>
+  </data>
+  <data name="BowCTension" xml:space="preserve">
+    <value>Constant Tension</value>
   </data>
   <data name="BowWinch" xml:space="preserve">
     <value>Bow Anchor Winch</value>
@@ -200,6 +206,9 @@
   </data>
   <data name="ShoreWinch" xml:space="preserve">
     <value>Shore Discharge Winch</value>
+  </data>
+  <data name="SternCTension" xml:space="preserve">
+    <value>Constant Tension</value>
   </data>
   <data name="SternWinch" xml:space="preserve">
     <value>Stern Anchor Winch</value>

@@ -12,55 +12,6 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::UI::Xaml::Controls;
 
-private class WinchExecutor final : public IMenuCommand<WinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*> {
-public:
-	WinchExecutor(dredges_diagnostics_f wd) : show_diagnostics(wd) {}
-
-public:
-	bool can_execute(WinchAction cmd, Credit<Winchlet, DredgesPosition>* winch, PLCMaster* plc, bool acc_executable) override {
-		bool okay = true;
-
-		if ((cmd == WinchAction::HighSpeed)
-			&& (!((winch->id == DredgesPosition::psDragHead)
-				|| (winch->id == DredgesPosition::sbDragHead)))) {
-			okay = false;
-		}
-
-		return (WinchAction::Diagnostics == cmd)
-			|| (okay && plc->connected() && plc->authorized());
-	}
-
-	void execute(WinchAction cmd, Credit<Winchlet, DredgesPosition>* winch, PLCMaster* plc) override { // DB300, starts from 1
-		if (cmd == WinchAction::Diagnostics) {
-			this->show_diagnostics(winch->id, plc);
-		} else {
-			uint16 offset = 0U;
-			uint16 index = 0U;
-
-			switch (cmd) {
-			case WinchAction::Up:        offset = 0U; break;
-			case WinchAction::Down:      offset = 1U; break;
-			case WinchAction::Stop:      offset = 2U; break;
-			case WinchAction::HighSpeed: offset = 3U; break;
-			}
-
-			switch (winch->id) {
-			case DredgesPosition::psTrunnion:     index = 570U; break;
-			case DredgesPosition::psIntermediate: index = 573U; break;
-			case DredgesPosition::psDragHead:     index = 576U; break;
-			case DredgesPosition::sbTrunnion:     index = 589U; break;
-			case DredgesPosition::sbIntermediate: index = 592U; break;
-			case DredgesPosition::sbDragHead:     index = 595U; break;
-			}
-
-			plc->send_command(index + offset);
-		}
-	}
-
-private:
-	dredges_diagnostics_f show_diagnostics;
-};
-
 private class GantryExecutor final : public IMenuCommand<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*> {
 public:
 	GantryExecutor(dredges_diagnostics_f gd) : show_diagnostics(gd) {}
@@ -169,10 +120,6 @@ public:
 };
 
 /*************************************************************************************************/
-MenuFlyout^ WarGrey::SCADA::make_winch_menu(dredges_diagnostics_f wd, PLCMaster* plc) {
-	return make_menu<WinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*>(new WinchExecutor(wd), plc);
-}
-
 MenuFlyout^ WarGrey::SCADA::make_gantry_menu(dredges_diagnostics_f gd, PLCMaster* plc) {
 	return make_menu<GantryAction, Credit<Gantrylet, DredgesPosition>, PLCMaster*>(new GantryExecutor(gd), plc);
 }
@@ -190,51 +137,6 @@ MenuFlyout^ WarGrey::SCADA::make_gantry_group_menu(DredgesGroup group, PLCMaster
 }
 
 /*************************************************************************************************/
-uint16 WarGrey::SCADA::DO_winch_override_command(DredgesPosition id) {
-	uint16 index = 0U;
-
-	switch (id) {
-	case DredgesPosition::psTrunnion:     index = 617U; break;
-	case DredgesPosition::psIntermediate: index = 618U; break;
-	case DredgesPosition::psDragHead:     index = 619U; break;
-	case DredgesPosition::sbTrunnion:     index = 620U; break;
-	case DredgesPosition::sbIntermediate: index = 621U; break;
-	case DredgesPosition::sbDragHead:     index = 622U; break;
-	}
-
-	return index;
-}
-
-uint16 WarGrey::SCADA::DO_winch_upper_check_command(DredgesPosition id) {
-	uint16 index = 0U;
-
-	switch (id) {
-	case DredgesPosition::psTrunnion:     index = 823U; break;
-	case DredgesPosition::psIntermediate: index = 824U; break;
-	case DredgesPosition::psDragHead:     index = 825U; break;
-	case DredgesPosition::sbTrunnion:     index = 826U; break;
-	case DredgesPosition::sbIntermediate: index = 827U; break;
-	case DredgesPosition::sbDragHead:     index = 828U; break;
-	}
-
-	return index;
-}
-
-uint16 WarGrey::SCADA::DO_winch_saddle_check_command(DredgesPosition id) {
-	uint16 index = 0U;
-
-	switch (id) {
-	case DredgesPosition::psTrunnion:     index = 809U; break;
-	case DredgesPosition::psIntermediate: index = 810U; break;
-	case DredgesPosition::psDragHead:     index = 811U; break;
-	case DredgesPosition::sbTrunnion:     index = 812U; break;
-	case DredgesPosition::sbIntermediate: index = 813U; break;
-	case DredgesPosition::sbDragHead:     index = 814U; break;
-	}
-
-	return index;
-}
-
 uint16 WarGrey::SCADA::DO_suction_command(SuctionCommand cmd, bool ps) {
 	uint16 index = (ps ? 497U : 501U);
 	uint16 offset = 0U;
