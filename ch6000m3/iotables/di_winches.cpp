@@ -118,6 +118,15 @@ void WarGrey::SCADA::DI_winch(Winchlet* barge_winch
 }
 
 /*************************************************************************************************/
+void WarGrey::SCADA::DI_bolt(Boltlet* target, const uint8* db4, unsigned int feedback_p1) {
+	target->set_state(DBX(db4, feedback_p1 - 1U), BoltState::SlidedIn, BoltState::SlidedOut);
+}
+
+void WarGrey::SCADA::DI_holdhoop(HoldHooplet* target, const uint8* db4, unsigned int feedback_p1) {
+	target->set_state(DBX(db4, feedback_p1 - 1U), HoldHoopState::Held, HoldHoopState::Loose);
+}
+
+/*************************************************************************************************/
 bool WarGrey::SCADA::DI_winch_remote_control(const uint8* db4, unsigned int feedback_p1) {
 	return DBX(db4, feedback_p1 + 0U);
 }

@@ -10,7 +10,10 @@ namespace WarGrey::SCADA {
 	private enum class DredgingWinchAction { WindUp, WindOut, Stop, HighSpeed, Diagnostics, _ };
 	private enum class AnchorWinchAction { WindUp, WindOut, Stop, CTension, _ };
 	private enum class ShoreWinchAction { WindUp, WindOut, HighSpeed, _ };
-	private enum class BargeWinchAction { WindUp, WindOut, Stop, OpenLocker, CloseLocker, _ };
+	private enum class BargeWinchAction { WindUp, WindOut, Stop, _ };
+	
+	private enum class BargeCylinderAction { OpenBolt, CloseBolt, _ };
+	private enum class ShoreCylinderAction { Hold, Loose, Bolt, Unbolt, _ };
 	
 	typedef void(*dredges_diagnostics_f)(DredgesPosition, WarGrey::SCADA::PLCMaster*);
 
@@ -18,6 +21,9 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_anchor_winch_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_shore_winch_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_barge_winch_menu(WarGrey::SCADA::PLCMaster* plc);
+
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_shore_cylinder_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_barge_cylinder_menu(WarGrey::SCADA::PLCMaster* plc);
 
 	uint16 DO_winch_override_command(WarGrey::SCADA::DredgesPosition id);
 	uint16 DO_winch_upper_check_command(WarGrey::SCADA::DredgesPosition id);

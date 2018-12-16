@@ -98,8 +98,6 @@ public:
 		case BargeWinchAction::WindUp:      offset = 0U; break;
 		case BargeWinchAction::WindOut:     offset = 1U; break;
 		case BargeWinchAction::Stop:        offset = 2U; break;
-		case BargeWinchAction::OpenLocker:  offset = 3U; break;
-		case BargeWinchAction::CloseLocker: offset = 4U; break;
 		}
 
 		switch (winch->id) {
@@ -108,6 +106,26 @@ public:
 
 		if (index > 0) {
 			plc->send_command(index + offset);
+		}
+	}
+};
+
+private class BargeCylinderExecutor final : public IMenuCommand<BargeCylinderAction, IGraphlet, PLCMaster*> {
+public:
+	bool can_execute(BargeCylinderAction cmd, IGraphlet* bolt, PLCMaster* plc, bool acc_executable) override {
+		return (plc->connected() && plc->authorized());
+	}
+
+	void execute(BargeCylinderAction cmd, IGraphlet* bolt, PLCMaster* plc) override { // DB300, starts from 1
+		uint16 index = 0U;
+		
+		switch (cmd) {
+		case BargeCylinderAction::OpenBolt:  index = 932U; break;
+		case BargeCylinderAction::CloseBolt: index = 933U; break;
+		}
+
+		if (index > 0) {
+			plc->send_command(index);
 		}
 	}
 };
@@ -138,6 +156,29 @@ public:
 	}
 };
 
+
+private class ShoreCylinderExecutor final : public IMenuCommand<ShoreCylinderAction, IGraphlet, PLCMaster*> {
+public:
+	bool can_execute(ShoreCylinderAction cmd, IGraphlet* bolt, PLCMaster* plc, bool acc_executable) override {
+		return (plc->connected() && plc->authorized());
+	}
+
+	void execute(ShoreCylinderAction cmd, IGraphlet* bolt, PLCMaster* plc) override { // DB300, starts from 1
+		uint16 index = 0U;
+		
+		switch (cmd) {
+		case ShoreCylinderAction::Hold:   index = 627U; break;
+		case ShoreCylinderAction::Loose:  index = 626U; break;
+		case ShoreCylinderAction::Bolt:   index = 629U; break;
+		case ShoreCylinderAction::Unbolt: index = 630U; break;
+		}
+
+		if (index > 0) {
+			plc->send_command(index);
+		}
+	}
+};
+
 /*************************************************************************************************/
 MenuFlyout^ WarGrey::SCADA::make_dredging_winch_menu(dredges_diagnostics_f wd, PLCMaster* plc) {
 	return make_menu<DredgingWinchAction, Credit<Winchlet, DredgesPosition>, PLCMaster*>(new DredgingWinchExecutor(wd), plc);
@@ -151,8 +192,16 @@ MenuFlyout^ WarGrey::SCADA::make_barge_winch_menu(PLCMaster* plc) {
 	return make_menu<BargeWinchAction, Credit<Winchlet, ShipSlot>, PLCMaster*>(new BargeWinchExecutor(), plc);
 }
 
+MenuFlyout^ WarGrey::SCADA::make_barge_cylinder_menu(PLCMaster* plc) {
+	return make_menu<BargeCylinderAction, IGraphlet, PLCMaster*>(new BargeCylinderExecutor(), plc);
+}
+
 MenuFlyout^ WarGrey::SCADA::make_shore_winch_menu(PLCMaster* plc) {
 	return make_menu<ShoreWinchAction, Credit<Winchlet, ShipSlot>, PLCMaster*>(new ShoreWinchExecutor(), plc);
+}
+
+MenuFlyout^ WarGrey::SCADA::make_shore_cylinder_menu(PLCMaster* plc) {
+	return make_menu<ShoreCylinderAction, IGraphlet, PLCMaster*>(new ShoreCylinderExecutor(), plc);
 }
 
 /*************************************************************************************************/

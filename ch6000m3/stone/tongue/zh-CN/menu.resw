@@ -402,10 +402,22 @@
   <data name="WindUp" xml:space="preserve">
     <value>收缆</value>
   </data>
-  <data name="CloseLocker" xml:space="preserve">
+  <data name="CloseBolt" xml:space="preserve">
     <value>关闭锁紧油缸</value>
   </data>
-  <data name="OpenLocker" xml:space="preserve">
+  <data name="OpenBolt" xml:space="preserve">
     <value>打开锁紧油缸</value>
+  </data>
+  <data name="Bolt" xml:space="preserve">
+    <value>插销插入</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>抱箍收紧</value>
+  </data>
+  <data name="Loose" xml:space="preserve">
+    <value>抱箍松开</value>
+  </data>
+  <data name="Unbolt" xml:space="preserve">
+    <value>插销拔出</value>
   </data>
 </root>

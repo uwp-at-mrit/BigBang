@@ -402,10 +402,22 @@
   <data name="WindUp" xml:space="preserve">
     <value>Wind Up</value>
   </data>
-  <data name="CloseLocker" xml:space="preserve">
-    <value>Close Locker</value>
+  <data name="CloseBolt" xml:space="preserve">
+    <value>Close Bolt Cylinder</value>
   </data>
-  <data name="OpenLocker" xml:space="preserve">
-    <value>Open Locker</value>
+  <data name="OpenBolt" xml:space="preserve">
+    <value>Open Bolt Cylinder</value>
+  </data>
+  <data name="Bolt" xml:space="preserve">
+    <value>Bolt</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="Loose" xml:space="preserve">
+    <value>Loose</value>
+  </data>
+  <data name="Unbolt" xml:space="preserve">
+    <value>Unbolt</value>
   </data>
 </root>

@@ -2,6 +2,9 @@
 
 #include "graphlet/device/winchlet.hpp"
 
+#include "graphlet/cylinder/boltlet.hpp"
+#include "graphlet/cylinder/holdhooplet.hpp"
+
 namespace WarGrey::SCADA {
 	private struct WinchLimits {
 	public:
@@ -50,6 +53,9 @@ namespace WarGrey::SCADA {
 	static unsigned int bow_anchor_winch_feedback = 225U;
 	static unsigned int stern_anchor_winch_feedback = 233U;
 
+	static unsigned int shore_discharge_bolt_feedback = 165U;
+	static unsigned int shore_discharge_holdhoop_feedback = 167U;
+
 	static unsigned int barge_winch_feedback = 217U;
 	static unsigned int barge_winch_limits = 377U;
 
@@ -80,6 +86,9 @@ namespace WarGrey::SCADA {
 	void DI_winch(WarGrey::SCADA::Winchlet* barge_winch,
 		const uint8* db4, unsigned int feedback_p1, unsigned int limits_p1,
 		const uint8* db205, unsigned int details_p1);
+
+	void DI_bolt(WarGrey::SCADA::Boltlet* target, const uint8* db4, unsigned int feedback_p1);
+	void DI_holdhoop(WarGrey::SCADA::HoldHooplet* target, const uint8* db4, unsigned int feedback_p1);
 
 	bool DI_winch_remote_control(const uint8* db4, unsigned int feedback_p1);
 	bool DI_winch_locker_open(const uint8* db4, unsigned int feedback_p1);
