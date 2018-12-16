@@ -195,5 +195,8 @@ void HopperPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 }
 
 void HopperPumplet::set_remote_control(bool on) {
-	this->remote_control = on;
+	if (this->remote_control != on) {
+		this->remote_control = on;
+		this->notify_updated();
+	}
 }

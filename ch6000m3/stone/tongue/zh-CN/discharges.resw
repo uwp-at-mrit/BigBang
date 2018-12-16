@@ -123,6 +123,9 @@
   <data name="BargeLocked" xml:space="preserve">
     <value>油缸锁紧</value>
   </data>
+  <data name="BargeLockerOpen" xml:space="preserve">
+    <value>锁紧油缸打开</value>
+  </data>
   <data name="BargeWinch" xml:space="preserve">
     <value>装驳架绞车</value>
   </data>

@@ -252,5 +252,8 @@ void Winchlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, flo
 }
 
 void Winchlet::set_remote_control(bool on) {
-	this->remote_control = on;
+	if (this->remote_control != on) {
+		this->remote_control = on;
+		this->notify_updated();
+	}
 }

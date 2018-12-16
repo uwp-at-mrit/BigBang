@@ -123,8 +123,8 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case ShoreWinchAction::WindUp:    offset = 0U; break;
-		case ShoreWinchAction::WindOut:   offset = 1U; break;
+		case ShoreWinchAction::WindUp:    offset = 1U; break;
+		case ShoreWinchAction::WindOut:   offset = 0U; break;
 		case ShoreWinchAction::HighSpeed: offset = 2U; break;
 		}
 

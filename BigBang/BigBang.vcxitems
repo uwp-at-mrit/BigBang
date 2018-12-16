@@ -31,6 +31,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\compensatorlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\draglet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\gantrylet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\overflowlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\device\tanklet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\door\hatchlet.hpp" />

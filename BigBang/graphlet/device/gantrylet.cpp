@@ -20,9 +20,9 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
-static CanvasSolidColorBrush^ gantry_default_color = Colours::Yellow;
-static CanvasSolidColorBrush^ gantry_default_pulley_color = Colours::DarkGray;
-static CanvasSolidColorBrush^ gantry_default_progress_color = Colours::Gray;
+static CanvasSolidColorBrush^ gantry_default_color = Colours::Gold;
+static CanvasSolidColorBrush^ gantry_default_pulley_color = Colours::DimGray;
+static CanvasSolidColorBrush^ gantry_default_progress_color = Colours::ForestGreen;
 
 static CanvasGeometry^ make_pivot_base(float radius, float extent_ratio, bool leftward) {
 	auto base = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -129,8 +129,8 @@ void Gantrylet::fill_margin(float x, float y, float* t, float* r, float* b, floa
 
 void Gantrylet::prepare_style(GantryState status, GantryStyle& style) {
 	CAS_SLOT(style.border_color, Colours::DarkGray);
-	CAS_SLOT(style.winding_color, Colours::ForestGreen);
-	CAS_SLOT(style.color, Colours::Yellow);
+	CAS_SLOT(style.winding_color, gantry_default_progress_color);
+	CAS_SLOT(style.color, gantry_default_color);
 	
 	switch (status) {
 	case GantryState::PushedOut: {
@@ -144,7 +144,7 @@ void Gantrylet::prepare_style(GantryState status, GantryStyle& style) {
 	}; break;
 	}
 
-	CAS_SLOT(style.pulley_color, Colours::DimGray);
+	CAS_SLOT(style.pulley_color, gantry_default_pulley_color);
 	CAS_SLOT(style.hat_color, style.color);
 	CAS_SLOT(style.base_color, style.color);
 }

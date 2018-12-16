@@ -123,6 +123,9 @@
   <data name="BargeLocked" xml:space="preserve">
     <value>Barge Winch Locked</value>
   </data>
+  <data name="BargeLockerOpen" xml:space="preserve">
+    <value>Barge Locker Open</value>
+  </data>
   <data name="BargeWinch" xml:space="preserve">
     <value>Barging Gantry Winch</value>
   </data>

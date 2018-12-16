@@ -122,6 +122,10 @@ bool WarGrey::SCADA::DI_winch_remote_control(const uint8* db4, unsigned int feed
 	return DBX(db4, feedback_p1 + 0U);
 }
 
+bool WarGrey::SCADA::DI_winch_locker_open(const uint8* db4, unsigned int feedback_p1) {
+	return DBX(db4, feedback_p1 + 1U);
+}
+
 bool WarGrey::SCADA::DI_winch_slack(const uint8* db4, WinchLimits* limits) {
 	return ((limits->slack > 0U) && DBX(db4, limits->slack - 1U));
 }

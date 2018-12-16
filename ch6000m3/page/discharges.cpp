@@ -13,11 +13,14 @@
 #include "graphlet/shapelet.hpp"
 #include "graphlet/dashboard/alarmlet.hpp"
 #include "graphlet/device/winchlet.hpp"
+
 #include "graphlet/symbol/door/hatchlet.hpp"
 #include "graphlet/symbol/door/hopper_doorlet.hpp"
 #include "graphlet/symbol/pump/hopper_pumplet.hpp"
 #include "graphlet/symbol/valve/gate_valvelet.hpp"
 #include "graphlet/symbol/valve/tagged_valvelet.hpp"
+
+#include "graphlet/cylinder/holdhooplet.hpp"
 
 #include "iotables/di_winches.hpp"
 #include "iotables/di_pumps.hpp"
@@ -62,8 +65,8 @@ private enum class RS : unsigned int {
 	// Pump dimensions
 	A, C, F, H,
 
-	// Winch States
-	BowCTension, SternCTension, BargeLocked,
+	// Anchor Winch States
+	BowCTension, SternCTension,
 
 	// Key Labels
 	Port, Starboard, Hatch, PSHPump, SBHPump, Barge,
@@ -79,7 +82,7 @@ private enum class RS : unsigned int {
 
 	// anchors used for unnamed nodes
 	ps, sb, d007, d019, d024, deck_lx, deck_rx, deck_ty, deck_by,
-	manual, shore_pipe, rainbowing, barge, gantry,
+	manual, shore_joint, rainbowing, barge, gantry,
 
 	// anchors used for non-interconnected nodes
 	n24, n0325, n0405, n0723, n0923,
@@ -174,8 +177,10 @@ public:
 
 		this->alarms[RS::BowCTension]->set_state(DI_winch_constant_tension(DB205, bow_anchor_winch_details), AlarmState::Notice, AlarmState::None);
 		this->alarms[RS::SternCTension]->set_state(DI_winch_constant_tension(DB205, stern_anchor_winch_details), AlarmState::Notice, AlarmState::None);
-		this->alarms[RS::BargeLocked]->set_state(DI_winch_locked(DB205, barge_winch_details), AlarmState::Notice, AlarmState::None);
 		
+		this->holdhoops[RS::Barge]->set_running(DI_winch_locker_open(DB205, barge_winch_feedback));
+		this->holdhoops[RS::Barge]->set_state(DI_winch_locked(DB205, barge_winch_details), HoldHoopState::Held, HoldHoopState::Loose);
+
 		this->set_valves_status(RS::D001, DB4, gate_valve_D01_feedback, motor_valve_D01_feedback, DB205, gate_valve_D01_status, motor_valve_D01_status);
 		this->set_valves_status(RS::D002, DB4, gate_valve_D02_feedback, motor_valve_D02_feedback, DB205, gate_valve_D02_status, motor_valve_D02_status);
 		this->set_valves_status(RS::D005, DB4, gate_valve_D05_feedback, motor_valve_D05_feedback, DB205, gate_valve_D05_status, motor_valve_D05_status);
@@ -228,7 +233,7 @@ public:
 		this->try_flow_water(RS::D001, RS::D002, water_color);
 		this->try_flow_water(RS::D019, RS::D021, water_color);
 		this->try_flow_water(RS::D020, r20, water_color);
-		this->try_flow_water(RS::D021, RS::shore_pipe, water_color);
+		this->try_flow_water(RS::D021, RS::shore_joint, water_color);
 		this->try_flow_water(RS::D022, RS::rainbowing, water_color);
 
 		if (this->valve_open(RS::D002)) {
@@ -321,7 +326,7 @@ public:
 public:
 	void load(float width, float height, float gwidth, float gheight) {
 		float radius = resolve_gridsize(gwidth, gheight);
-		Turtle<RS>* pTurtle = new Turtle<RS>(gwidth, gheight, false, RS::shore_pipe);
+		Turtle<RS>* pTurtle = new Turtle<RS>(gwidth, gheight, false, RS::shore_joint);
 
 		pTurtle->move_left(RS::deck_rx)->move_left(2, RS::D021)->move_left(2, RS::d2122);
 		pTurtle->move_down(5)->move_right(2, RS::D022)->move_right(3, RS::rainbowing)->jump_back(RS::d2122);
@@ -353,8 +358,13 @@ public:
 		
 		this->station = this->master->insert_one(new Tracklet<RS>(pTurtle, default_pipe_thickness, default_pipe_color));
 		
-		this->load_winches(this->winches, this->winch_labels, radius * 3.2F);
-		this->load_alarms(this->alarms, this->alabels, RS::BowCTension, RS::BargeLocked, radius);
+		{ // load winches and cylinders
+			this->load_winches(this->winches, this->winch_labels, radius * 3.2F);
+			this->load_alarms(this->alarms, this->alabels, RS::BowCTension, RS::SternCTension, radius);
+
+			this->holdhoops[RS::shore_joint] = this->master->insert_one(new Credit<HoldHooplet, RS>(radius), RS::shore_joint);
+			this->holdhoops[RS::Barge] = this->master->insert_one(new Credit<HoldHooplet, RS>(radius, -45.0), RS::Barge);
+		}
 
 		{ // load manual pipe segement
 			float d02_y, d25_y;
@@ -515,18 +525,27 @@ public:
 			this->station->map_credit_graphlet(it->second, anchor, dx - ox, dy - oy);
 		}
 
-		{ // reflow winches
+		{ // reflow winches and cylinders
 			float gapsize = gheight * 0.5F;
 
-			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::ShoreWinch], RS::d2122, RS::deck_ty, GraphletAnchor::CB, -gwidth);
-			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BowWinch], RS::PSHPump, RS::ps, GraphletAnchor::CT);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::ShoreWinch],
+				RS::deck_lx, RS::deck_by, GraphletAnchor::RT, -gwidth, gapsize);
 
-			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BargeWinch], RS::d024, RS::D006, GraphletAnchor::LC, gwidth, gapsize);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BowWinch], RS::deck_lx, RS::ps, GraphletAnchor::RT, -gwidth);
 			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::SternWinch], RS::Hatch, RS::ps, GraphletAnchor::CT, gwidth);
+			this->station->map_graphlet_base_on_anchors(this->winches[ShipSlot::BargeWinch], RS::d024, RS::D006, GraphletAnchor::LC, gwidth, gapsize);
 
 			this->master->move_to(this->alarms[RS::BowCTension], this->winches[ShipSlot::BowWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
 			this->master->move_to(this->alarms[RS::SternCTension], this->winches[ShipSlot::SternWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
-			this->master->move_to(this->alarms[RS::BargeLocked], this->winches[ShipSlot::BargeWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
+
+			{ // reflow cylinders
+				float cylinder_cx, cylinder_cy;
+
+				this->holdhoops[RS::shore_joint]->fill_cylinder_origin(&cylinder_cx, &cylinder_cy);
+				this->station->map_credit_graphlet(this->holdhoops[RS::shore_joint], GraphletAnchor::CC, -cylinder_cx, -cylinder_cy);
+
+				this->master->move_to(this->holdhoops[RS::Barge], this->winches[ShipSlot::BargeWinch], GraphletAnchor::RC, GraphletAnchor::LC, gapsize);
+			}
 
 			for (auto it = this->winches.begin(); it != this->winches.end(); it++) {
 				this->master->move_to(this->winch_labels[it->first], it->second, GraphletAnchor::CT, GraphletAnchor::CB);
@@ -562,10 +581,10 @@ public:
 			this->master->move_to(this->suctions[RS::D003], this->gvalves[RS::D003], GraphletAnchor::CB, GraphletAnchor::LT, offset, -offset);
 			this->master->move_to(this->suctions[RS::D004], this->gvalves[RS::D004], GraphletAnchor::CT, GraphletAnchor::LB, offset);
 			
-			this->station->map_credit_graphlet(this->pump_pressures[RS::C], GraphletAnchor::LB, gwidth * 3.0F);
-			this->master->move_to(this->pump_pressures[RS::F], this->pump_pressures[RS::C], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, offset);
-			this->master->move_to(this->pump_pressures[RS::A], this->pump_pressures[RS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
-			this->master->move_to(this->pump_pressures[RS::H], this->pump_pressures[RS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
+			this->station->map_credit_graphlet(this->pump_pressures[RS::C], GraphletAnchor::RB, -gwidth * 3.0F);
+			this->master->move_to(this->pump_pressures[RS::F], this->pump_pressures[RS::C], GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, offset);
+			this->master->move_to(this->pump_pressures[RS::A], this->pump_pressures[RS::C], GraphletAnchor::LC, GraphletAnchor::RC, -gwidth);
+			this->master->move_to(this->pump_pressures[RS::H], this->pump_pressures[RS::F], GraphletAnchor::LC, GraphletAnchor::RC, -gwidth);
 		}
 	}
 
@@ -771,6 +790,7 @@ private:
 	std::map<RS, Credit<Labellet, RS>*> vlabels;
 	std::map<RS, Credit<Alarmlet, RS>*> alarms;
 	std::map<RS, Credit<Labellet, RS>*> alabels;
+	std::map<RS, Credit<HoldHooplet, RS>*> holdhoops;
 	std::map<ShipSlot, Credit<Winchlet, ShipSlot>*> winches;
 	std::map<ShipSlot, Credit<Dimensionlet, ShipSlot>*> winch_pressures;
 	std::map<ShipSlot, Credit<Labellet, ShipSlot>*> winch_labels;
@@ -985,7 +1005,8 @@ bool DischargesPage::can_select(IGraphlet* g) {
 	return ((dynamic_cast<GateValvelet*>(g) != nullptr)
 		|| (dynamic_cast<UpperHopperDoorlet*>(g) != nullptr)
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr)
-		|| (dynamic_cast<Winchlet*>(g) != nullptr));
+		|| (dynamic_cast<Winchlet*>(g) != nullptr)
+		|| (dynamic_cast<HoldHooplet*>(g) != nullptr));
 }
 
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

@@ -82,13 +82,14 @@ namespace WarGrey::SCADA {
 		const uint8* db205, unsigned int details_p1);
 
 	bool DI_winch_remote_control(const uint8* db4, unsigned int feedback_p1);
+	bool DI_winch_locker_open(const uint8* db4, unsigned int feedback_p1);
+	bool DI_winch_constant_tension(const uint8* db205, unsigned int details_p1);
+	bool DI_winch_locked(const uint8* db205, unsigned int details_p1);
+
 	bool DI_winch_slack(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);
 	bool DI_winch_upper_limited(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);
 	bool DI_winch_saddle_limited(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);
 	bool DI_winch_suction_limited(const uint8* db4, WarGrey::SCADA::WinchLimits* limits);
 	bool DI_winch_soft_upper_limited(const uint8* db205, WarGrey::SCADA::WinchDetails* details);
 	bool DI_winch_soft_lower_limited(const uint8* db205, WarGrey::SCADA::WinchDetails* details);
-
-	bool DI_winch_constant_tension(const uint8* db205, unsigned int details_p1);
-	bool DI_winch_locked(const uint8* db205, unsigned int details_p1);
 }

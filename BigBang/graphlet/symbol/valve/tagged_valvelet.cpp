@@ -74,7 +74,6 @@ void TValvelet::update(long long count, long long interval, long long uptime) {
 
 	switch (this->get_state()) {
 	case TValveState::Opening: {
-
 		this->mask = polar_masked_sandglass(this->sgradius, adjust_degrees, -pmask);
 		this->notify_updated();
 	} break;

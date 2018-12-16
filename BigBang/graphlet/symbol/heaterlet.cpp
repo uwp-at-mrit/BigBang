@@ -147,9 +147,15 @@ void Heaterlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, fl
 }
 
 void Heaterlet::set_remote_control(bool on) {
-	this->remote_control = on;
+	if (this->remote_control != on) {
+		this->remote_control = on;
+		this->notify_updated();
+	}
 }
 
 void Heaterlet::set_auto_mode(bool yes) {
-	this->auto_mode = yes;
+	if (this->auto_mode != yes) {
+		this->auto_mode = yes;
+		this->notify_updated();
+	}
 }
