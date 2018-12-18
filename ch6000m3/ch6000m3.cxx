@@ -43,7 +43,7 @@ public:
 	}
 
 internal:
-	DredgerUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name)) {
+	DredgerUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name), name) {
 		Platform::String^ localhost = system_ipv4_address();
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 		PLCMasterMode mode = PLCMasterMode::User;
@@ -94,8 +94,6 @@ protected:
 		if (system_ipv4_address()->Equals("192.168.0.10")) {
 			//this->add_planet(new PerformancePage(this->device));
 		}
-
-		this->transfer_to(9);
 	}
 
 protected private:

@@ -91,12 +91,14 @@ namespace WarGrey::SCADA {
 
 	internal:
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
+			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
 			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
+			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
 			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 
@@ -104,6 +106,7 @@ namespace WarGrey::SCADA {
 			float dest_width, float dest_height,
 			float src_width, float src_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
+			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
 			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
 		
@@ -130,6 +133,7 @@ namespace WarGrey::SCADA {
 	public:
 		Microsoft::Graphics::Canvas::CanvasRenderTarget^ take_snapshot(float dpi = 96.0F);
 		void transfer(int delta_idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
+		void transfer_to(Platform::String^ name, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_to(int idx, unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_previous(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
@@ -180,6 +184,7 @@ namespace WarGrey::SCADA {
 		float figure_x;
 
 	private:
+		Windows::Storage::ApplicationDataContainer^ universe_settings;
 		Windows::UI::Xaml::DispatcherTimer^ transfer_clock;
 		WarGrey::SCADA::IPlanet* from_planet;
 		float transfer_delta;

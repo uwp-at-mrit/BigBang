@@ -12,6 +12,7 @@ using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Numerics;
 using namespace Windows::Devices::Input;
+using namespace Windows::Storage;
 
 using namespace Windows::UI;
 using namespace Windows::UI::Core;
@@ -35,6 +36,8 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 #define CONTROLLED(vkms) ((vkms & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control)
 #define WINDOWED(vkms) ((vkms & VirtualKeyModifiers::Windows) == VirtualKeyModifiers::Windows)
 #define MENUED(vkms) ((vkms & VirtualKeyModifiers::Menu) == VirtualKeyModifiers::Menu)
+
+static Platform::String^ page_settings_key = "Page_Name";
 
 class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
 public:
@@ -208,16 +211,17 @@ Syslog* IDisplay::get_logger() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger, IPlanet* first_planet, ListView^ navigator)
-	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, first_planet, navigator) {}
+UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
+	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, first_planet, navigator) {}
 
-UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, Syslog* logger, IPlanet* first_planet, ListView^ navigator)
-	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, first_planet, navigator) {}
+UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
+	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
+	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, first_planet, navigator) {}
 
-UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight, Syslog* logger
-	, IPlanet* first_planet, ListView^ navigator)
+UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
+	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
-	, figure_x0(std::nanf("swipe")) {
+	, figure_x0(std::nanf("swipe")), universe_settings(nullptr) {
 	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
 	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
 	this->navigator_view->IsItemClickEnabled = true;
@@ -225,6 +229,12 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
+
+	if (setting_name != nullptr) {
+		ApplicationDataCreateDisposition adcd = ApplicationDataCreateDisposition::Always;
+
+		this->universe_settings = ApplicationData::Current->LocalSettings->CreateContainer(setting_name, adcd);
+	}
 
 	this->display = ref new CanvasControl();
 	this->display->Name = this->get_logger()->get_name();
@@ -370,6 +380,12 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 		}
 
 		info->next = this->head_planet;
+
+		if (this->universe_settings != nullptr) {
+			if (!this->universe_settings->Values->HasKey(page_settings_key)) {
+				this->universe_settings->Values->Insert(page_settings_key, planet->name());
+			}
+		}
 	}
 }
 
@@ -396,6 +412,10 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 
 		this->navigator_view->SelectedValue = this->recent_planet->navigation_label();
 
+		if (this->universe_settings != nullptr) {
+			this->universe_settings->Values->Insert(page_settings_key, this->recent_planet->name());
+		}
+
 		if (animating) {
 			TimeSpan ts = make_timespan_from_milliseconds(ms);
 			float width = this->display->Size.Width;
@@ -415,13 +435,38 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 	}
 }
 
+void UniverseDisplay::transfer_to(Platform::String^ name, unsigned int ms, unsigned int count) {
+	int index = -1;
+	
+	if ((this->head_planet != nullptr) && (name != nullptr)) {
+		IPlanet* child = this->head_planet;
+		int idx = 0;
+
+		do {
+			PlanetInfo* info = PLANET_INFO(child);
+
+			if (child->name()->Equals(name)) {
+				index = idx;
+				break;
+			}
+
+			idx += 1;
+			child = info->next;
+		} while (child != this->head_planet);
+	}
+
+	if (index >= 0) {
+		this->transfer_to(index, ms, count);
+	}
+}
+
 void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) {
 	int from_idx = this->navigator_view->SelectedIndex;
 	int delta_idx = idx - from_idx;
 
 	if (delta_idx != 0) {
 		this->from_planet = this->recent_planet;
-		this->transfer(delta_idx, 0U);
+		this->transfer(delta_idx, ms, count);
 	}
 }
 
@@ -496,9 +541,11 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 	this->get_logger()->log_message(Log::Debug, L"construct planets because of %s", args->Reason.ToString()->Data());
 	
 	this->construct();
+
 	if (this->head_planet != nullptr) {
 		IPlanet* child = this->head_planet;
 		Size region = this->display->Size;
+		Platform::String^ last_page = nullptr;
 
 		do {
 			PlanetInfo* info = PLANET_INFO(child);
@@ -522,6 +569,10 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 
 			child = info->next;
 		} while (child != this->head_planet);
+	}
+
+	if (this->universe_settings != nullptr) {
+		this->transfer_to(this->universe_settings->Values->Lookup(page_settings_key)->ToString());
 	}
 }
 
