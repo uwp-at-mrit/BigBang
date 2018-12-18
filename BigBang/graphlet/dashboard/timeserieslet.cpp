@@ -18,26 +18,28 @@ using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 using namespace Microsoft::Graphics::Canvas::Geometry;
 
+static const long long DEFAULT_SLOT_SIZE = 4096LL;
+
 static CanvasSolidColorBrush^ lines_default_border_color = Colours::make(0xBBBBBB);
 static CanvasTextFormat^ lines_default_font = make_bold_text_format(12.0F);
 static CanvasTextFormat^ lines_default_legend_font = make_bold_text_format(14.0F);
 
-private struct WarGrey::SCADA::TimeSeriesLine {
+/*************************************************************************************************/
+private class WarGrey::SCADA::TimeSeriesLine {
 public:
-	void push_front_value(long long timestamp, double value) {
-		this->timestamps.push_front(timestamp);
-		this->values.push_front(value);
+	~TimeSeriesLine() noexcept {
+		this->clear_pool();
 	}
 
-	void push_back_value(long long timestamp, double value) {
-		this->timestamps.push_back(timestamp);
-		this->values.push_back(value);
+public:
+	bool empty() {
+		return ((this->legend_value == nullptr) && (this->timestamps[this->slot_count - 1] == nullptr));
 	}
 
 	void update_legend(unsigned int precision, WarGrey::SCADA::TimeSeriesStyle& style, CanvasSolidColorBrush^ color = nullptr) {
 		Platform::String^ legend = this->name + ": ";
-
-		legend += (this->values.empty() ? speak("nodatum", "status") : flstring(this->values.back(), precision));
+		
+		legend += (this->legend_value == nullptr) ? speak("nodatum", "status") : flstring((*this->legend_value), precision);		
 		this->legend = make_text_layout(legend, style.legend_font);
 
 		if (color != nullptr) {
@@ -46,8 +48,149 @@ public:
 	}
 
 public:
-	std::deque<long long> timestamps;
-	std::deque<double> values;
+	/** WARNING:
+	 * Move cursor only when `this->empty()` returns `false`,
+	 * so that there is no need to check the existence of current iterator slot every time.
+	 */
+
+	void cursor_end() {
+		// NOTE: For reverse iteration, the current slot should greater than or equal to the history slot.
+		this->virtual_iterator_slot = this->virtual_current_slot + this->slot_count;
+
+		if (this->current_index > 0) {
+			this->iterator_index = this->current_index - 1;
+		} else { // also works when `this->legend_value == nullptr`
+			this->virtual_iterator_slot -= 1;
+			this->iterator_index = this->slot_size - 1;
+		}
+	}
+
+	bool cursor_step_backward(long long* timestamp, double* value) {
+		bool has_value = false;
+
+		if ((this->virtual_iterator_slot > this->virtual_history_slot)
+			|| ((this->virtual_iterator_slot == this->virtual_history_slot)
+				&& (this->iterator_index >= this->history_last_index))) {
+			long long iterator_slot = this->virtual_iterator_slot % this->slot_count;
+		
+			(*timestamp) = this->timestamps[iterator_slot][this->iterator_index];
+			(*value) = this->values[iterator_slot][this->iterator_index];
+
+			if (this->iterator_index > 0) {
+				this->iterator_index -= 1;
+			} else {
+				this->virtual_iterator_slot -= 1;
+				this->iterator_index = this->slot_size - 1;
+			}
+
+			has_value = true;
+		}
+
+		return has_value;
+	}
+
+	void push_front_value(long long timestamp, double value) {
+		long long current_slot = this->virtual_history_slot % this->slot_count;
+
+		if (this->history_last_index > 0) {
+			if (this->history_last_index == this->slot_size) {
+				if (this->timestamps[current_slot] == nullptr) {
+					this->bzero_slot(current_slot);
+				}
+			}
+
+			this->timestamps[current_slot][this->history_last_index - 1] = timestamp;
+			this->values[current_slot][this->history_last_index - 1] = value;
+
+			this->history_last_index -= 1;
+
+			if ((this->history_last_index == 0) && (this->virtual_history_slot > this->virtual_current_slot + 1U)) {
+				this->history_last_index = this->slot_size;
+				this->virtual_history_slot -= 1;
+			}
+		}
+	}
+
+	void push_back_value(long long timestamp, double value) {
+		long long current_slot = this->virtual_current_slot % this->slot_count;
+
+		if (this->current_index == 0) {
+			if (this->timestamps[current_slot] == nullptr) {
+				this->bzero_slot(current_slot);
+			}
+		}
+
+		this->timestamps[current_slot][this->current_index] = timestamp;
+		this->values[current_slot][this->current_index] = value;
+
+		this->legend_value = &this->values[current_slot][this->current_index];
+
+		if (this->current_index < (this->slot_size - 1)) {
+			this->current_index += 1;
+		} else {
+			if ((this->virtual_history_slot - this->virtual_current_slot) == 1) {
+				this->history_last_index = 0;
+				this->virtual_history_slot += 1;
+			}
+
+			this->current_index = 0;
+			this->virtual_current_slot += 1;
+		}
+	}
+
+public:
+	void reset_pool(long long history_s, long long count_per_second, long long slot_size) {
+		long long total = history_s * count_per_second;
+		long long slot_count = total / slot_size;
+		
+		this->legend_value = nullptr;
+		this->clear_pool();
+
+		/** NOTE
+		 * The history values will not be stored in the current slot,
+		 * thereby always adding an extra slot for the "air" history values.
+		 *
+		 * By the way, the pool is much bigger than desired.
+		 */
+		this->slot_count = slot_count + 1;
+		this->slot_size = slot_size;
+
+		this->timestamps = new long long*[this->slot_count];
+		this->values = new double*[this->slot_count];
+
+		this->virtual_current_slot = 0;
+		this->current_index = 0;
+
+		this->virtual_history_slot = this->slot_count - 1;
+		this->history_last_index = this->slot_size;
+
+		for (unsigned int idx = 0; idx < this->slot_count; idx++) {
+			this->timestamps[idx] = nullptr;
+		}
+	}
+
+	void clear_pool() {
+		if (this->timestamps != nullptr) {
+			for (int idx = 0; idx < this->slot_count; idx++) {
+				delete[] this->timestamps[idx];
+				delete[] this->values[idx];
+			}
+
+			delete[] this->timestamps;
+			delete[] this->values;
+		}
+	}
+
+	void bzero_slot(long long slot) {
+		// `bzero()` is not necessary;
+
+		this->timestamps[slot] = new long long[this->slot_size];
+		this->values[slot] = new double[this->slot_size];
+	}
+
+public:
+	long long virtual_iterator_slot;
+	long long iterator_index;
 	double selected_value;
 	float y_axis_selected;
 
@@ -57,6 +200,17 @@ public:
 	Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ legend;
 	Platform::String^ name;
 	bool hiden;
+
+private:
+	long long** timestamps = nullptr;
+	double** values = nullptr;
+	double* legend_value = nullptr;
+	long long slot_count = 0;
+	long long slot_size = 0;
+	long long virtual_current_slot;
+	long long current_index;
+	long long virtual_history_slot;
+	long long history_last_index;
 };
 
 /*************************************************************************************************/
@@ -159,11 +313,18 @@ void ITimeSerieslet::update(long long count, long long interval, long long uptim
 
 void ITimeSerieslet::construct_line(unsigned int idx, Platform::String^ name) {
 	TimeSeriesStyle style = this->get_style();
+	long long slot_size = DEFAULT_SLOT_SIZE;
+	long long count = 5;
 
 	if (this->lines == nullptr) {
 		this->lines = new TimeSeriesLine[this->count];
 	}
 
+	if (slot_size > this->history_max * count) {
+		slot_size = this->history_max;
+	}
+
+	this->lines[idx].reset_pool(this->history_max, count, DEFAULT_SLOT_SIZE);
 	this->lines[idx].name = name;
 	this->lines[idx].close_color = nullptr;
 	this->lines[idx].hiden = false;
@@ -216,35 +377,6 @@ void ITimeSerieslet::update_time_series(long long next_start) {
 
 	this->realtime.start = next_start;
 	this->update_horizontal_axes(this->get_style());
-
-	{ // TODO: remove old data
-		long long earliest_ms = (this->realtime.start - this->history_max) * 1000LL;
-
-		this->begin_maniplation_sequence();
-
-		for (unsigned int idx = 0; idx < this->count; idx++) {
-			TimeSeriesLine* line = &this->lines[idx];
-			bool done = true;
-			
-			do {
-				done = true;
-
-				if (!line->timestamps.empty()) {
-					long long front_ms = line->timestamps.front();
-
-					if (front_ms < earliest_ms) {
-						line->timestamps.pop_front();
-						line->values.pop_front();
-						done = false;
-
-						count++;
-					}
-				}
-			} while (!done);
-		}
-
-		this->end_maniplation_sequence();
-	}
 }
 
 void ITimeSerieslet::update_vertical_axes(TimeSeriesStyle& style) {
@@ -348,23 +480,24 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 
 	for (unsigned idx = 0; idx < this->count; idx++) {
 		TimeSeriesLine* line = &this->lines[idx];
+		long long cursor_timestamp;
+		double cursor_value;
 
 		line->selected_value = std::nanf("not resolved");
 
 		if (!line->hiden) {
+			float minimum_diff = style.selected_thickness * 0.5F;
+			float tolerance = style.lines_thickness;
 			float last_x = std::nanf("no datum");
 			float last_y = std::nanf("no datum");
-			float tolerance = style.lines_thickness;
 			float rx = x + haxes_box.Width;
-			auto t = line->timestamps.rbegin();
-			auto v = line->values.rbegin();
-			auto end = line->timestamps.rend();
 			CanvasPathBuilder^ area = nullptr;
-			float minimum_diff = style.selected_thickness * 0.5F;
 
-			while (t != end) {
-				double fx = (double(*t) - double(ts->start * 1000)) / double(ts->span * 1000);
-				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - (*v)) / (this->vmax - this->vmin);
+			line->cursor_end();
+
+			while (line->cursor_step_backward(&cursor_timestamp, &cursor_value)) {
+				double fx = (double(cursor_timestamp) - double(ts->start * 1000)) / double(ts->span * 1000);
+				double fy = (this->vmin == this->vmax) ? 1.0 : (this->vmax - cursor_value) / (this->vmax - this->vmin);
 				float this_x = x + haxes_box.X + float(fx) * haxes_box.Width;
 				float this_y = y + haxes_box.Y + float(fy) * haxes_box.Height;
 				float this_diff = std::fabsf(this_x - x_axis_selected);
@@ -372,7 +505,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				if (this_diff < minimum_diff) {
 					minimum_diff = this_diff;
 					line->y_axis_selected = this_y;
-					line->selected_value = (*v);
+					line->selected_value = cursor_value;
 				}
 
 				if (std::isnan(last_x) || (this_x > rx)) {
@@ -382,8 +515,7 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 				} else {
 					if (((last_x - this_x) > tolerance) || (std::fabsf(this_y - last_y) > tolerance) || (x_axis_max == last_x)) {
 						if (line->close_color == nullptr) {
-							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color,
-								style.lines_thickness, style.lines_style);
+							ds->DrawLine(last_x, last_y, this_x, this_y, this->lines[idx].color, style.lines_thickness, style.lines_style);
 						} else {
 							if (area == nullptr) {
 								area = ref new CanvasPathBuilder(CanvasDevice::GetSharedDevice());
@@ -403,9 +535,6 @@ void ITimeSerieslet::draw(CanvasDrawingSession^ ds, float x, float y, float Widt
 						break;
 					}
 				}
-
-				t++;
-				v++;
 			}
 
 			if (area != nullptr) {
@@ -491,19 +620,10 @@ void ITimeSerieslet::hide_line(unsigned int idx, bool yes_no) {
 void ITimeSerieslet::set_value(unsigned int idx, double v) {
 	long long now = current_milliseconds();
 	TimeSeriesStyle style = this->get_style();
-	bool datasource_loading = ((this->data_source != nullptr) && this->data_source->ready() && this->data_source->loading());
-	
-	if (datasource_loading) {
-		this->begin_maniplation_sequence();
-	}
 	
 	this->lines[idx].push_back_value(now, v);
 	this->lines[idx].update_legend(this->precision + 1U, style);
 	
-	if (datasource_loading) {
-		this->end_maniplation_sequence();
-	}
-
 	this->notify_updated();
 }
 
@@ -511,14 +631,10 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	long long now = current_milliseconds();
 	TimeSeriesStyle style = this->get_style();
 
-	this->begin_maniplation_sequence();
-	
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].push_back_value(now, values[idx]);
 		this->lines[idx].update_legend(this->precision + 1U, style);
 	}
-
-	this->end_maniplation_sequence();
 
 	if (persistent) {
 		if ((this->data_source != nullptr) && this->data_source->ready()) {
@@ -529,18 +645,10 @@ void ITimeSerieslet::set_values(double* values, bool persistent) {
 	this->notify_updated();
 }
 
-void ITimeSerieslet::begin_maniplation_sequence() {
-	this->section.lock();
-}
-
 void ITimeSerieslet::on_datum_values(long long timepoint, double* values, unsigned int n) {
 	for (unsigned int idx = 0; idx < this->count; idx++) {
 		this->lines[idx].push_front_value(timepoint, values[idx]);
 	}
-}
-
-void ITimeSerieslet::end_maniplation_sequence() {
-	this->section.unlock();
 }
 
 void ITimeSerieslet::on_maniplation_complete(long long open_s, long long close_s) {

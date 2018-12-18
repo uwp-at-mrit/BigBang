@@ -18,7 +18,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ holdhoop_default_color = Colours::Silver;
 static CanvasSolidColorBrush^ holdhoop_default_border_color = Colours::DarkGray;
-static CanvasSolidColorBrush^ holdhoop_default_hoop_color = Colours::Gray;
+static CanvasSolidColorBrush^ holdhoop_default_hoop_color = Colours::Yellow;
 static CanvasSolidColorBrush^ holdhoop_default_running_color = Colours::ForestGreen;
 
 static float default_thickness = 1.5F;
@@ -56,10 +56,6 @@ void HoldHooplet::fill_margin(float x, float y, float* top, float* right, float*
 }
 
 void HoldHooplet::prepare_style(HoldHoopState status, HoldHoopStyle& style) {
-	switch (status) {
-	case HoldHoopState::Loose: style.hoop_color = Colours::Yellow; break;
-	}
-
 	CAS_SLOT(style.color, holdhoop_default_color);
 	CAS_SLOT(style.border_color, holdhoop_default_border_color);
 	CAS_SLOT(style.hoop_color, holdhoop_default_hoop_color);

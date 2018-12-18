@@ -17,7 +17,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ bolt_default_color = Colours::Silver;
 static CanvasSolidColorBrush^ bolt_default_border_color = Colours::DarkGray;
-static CanvasSolidColorBrush^ bolt_default_slide_color = Colours::Gray;
+static CanvasSolidColorBrush^ bolt_default_slide_color = Colours::Yellow;
 static CanvasSolidColorBrush^ bolt_default_running_color = Colours::ForestGreen;
 
 static float default_thickness = 1.5F;
@@ -56,10 +56,6 @@ void Boltlet::fill_margin(float x, float y, float* top, float* right, float* bot
 }
 
 void Boltlet::prepare_style(BoltState status, BoltStyle& style) {
-	switch (status) {
-	case BoltState::SlidedOut: style.bolt_color = Colours::Yellow; break;
-	}
-
 	CAS_SLOT(style.color, bolt_default_color);
 	CAS_SLOT(style.border_color, bolt_default_border_color);
 	CAS_SLOT(style.bolt_color, bolt_default_slide_color);

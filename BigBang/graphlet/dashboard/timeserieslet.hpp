@@ -12,7 +12,7 @@
 namespace WarGrey::SCADA {
 	typedef Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush ^ (*lookup_line_color)(unsigned int idx);
 
-	struct TimeSeriesLine;
+	class TimeSeriesLine;
 
 	private enum class TimeSeriesState { Realtime, History, _ };
 
@@ -101,9 +101,7 @@ namespace WarGrey::SCADA {
 		void own_caret(bool yes) override;
 
 	public:
-		void begin_maniplation_sequence() override;
 		void on_datum_values(long long timepoint, double* values, unsigned int n) override;
-		void end_maniplation_sequence() override;
 		void on_maniplation_complete(long long open_s, long long close_s) override;
 
 	protected:
@@ -151,7 +149,6 @@ namespace WarGrey::SCADA {
 	private:
 		WarGrey::SCADA::ITimeSeriesDataSource* data_source;
 		long long next_loading_timepoint;
-		std::mutex section;
 	};
 
 	template<typename Name>
