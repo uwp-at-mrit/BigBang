@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Overflow" xml:space="preserve">
-    <value>溢流桶</value>
+    <value>溢流桶行程</value>
   </data>
   <data name="PSHPDP" xml:space="preserve">
     <value>排压</value>

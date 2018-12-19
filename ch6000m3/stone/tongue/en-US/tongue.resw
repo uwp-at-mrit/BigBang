@@ -249,4 +249,7 @@
   <data name="hydraulic_pump_dx" xml:space="preserve">
     <value>Hydraulic Pump Diagnostics</value>
   </data>
+  <data name="dredges_Suctions" xml:space="preserve">
+    <value>Suction Positions</value>
+  </data>
 </root>

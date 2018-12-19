@@ -88,6 +88,7 @@ protected:
 		this->add_planet(new LubricatingsPage(this->device)); // 8
 		this->add_planet(new DraughtsPage(this->device)); // 9
 		this->add_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
+		this->add_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
 
 		this->add_planet(new Gallery());
 

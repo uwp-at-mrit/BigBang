@@ -36,6 +36,6 @@ namespace WarGrey::SCADA {
 		void send_command(uint16 index_p1);
 
 	private:
-		long long last_sending_time;
+		long long last_sent_time;
 	};
 }

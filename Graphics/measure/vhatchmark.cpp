@@ -382,7 +382,7 @@ CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, double vmin, double vm
 	float mark_tx = metrics.hatch_width + metrics.gap_space;
 	float interval = resolve_interval(&step, vmin, vmax, height, metrics.em, precision, &skip, &diff);
 	
-	metrics.hatch_x = thickness * 0.5F;
+	metrics.hatch_x = thickness * 0.0F;
 
 	auto hatchmark = make_vrhatch(&metrics, interval, step, thickness, no_short);
 	for (unsigned int i = 0; i <= step; i += (no_short ? 1 : skip)) {
@@ -403,7 +403,7 @@ CanvasGeometry^ WarGrey::SCADA::vrhatchmark(float height, Platform::String^ mark
 	VHatchMarkMetrics metrics = vhatchmark_metrics(marks, count, thickness, font);
 	float mark_tx = metrics.hatch_width + metrics.gap_space;
 	
-	metrics.hatch_x = thickness * 0.5F;
+	metrics.hatch_x = thickness * 0.0F;
 	metrics.hatch_height = height - metrics.em;
 
 	auto hatchmark = make_vrhatch(metrics, weights, count, thickness);

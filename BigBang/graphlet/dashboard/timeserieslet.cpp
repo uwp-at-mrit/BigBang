@@ -128,7 +128,7 @@ public:
 		if (this->current_index < (this->slot_size - 1)) {
 			this->current_index += 1;
 		} else {
-			if ((this->virtual_history_slot - this->virtual_current_slot) == 1) {
+			if ((this->virtual_history_slot - this->virtual_current_slot) <= 1) {
 				this->history_last_index = 0;
 				this->virtual_history_slot += 1;
 			}

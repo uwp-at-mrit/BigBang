@@ -136,7 +136,7 @@
     <value>Storage:  </value>
   </data>
   <data name="noipv4" xml:space="preserve">
-    <value>0.0.0.0</value>
+    <value>No Ethernet</value>
   </data>
   <data name="wifi" xml:space="preserve">
     <value>WiFi: </value>

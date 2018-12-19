@@ -96,12 +96,12 @@ float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* logger) : MRMaster(logger, MRIT_PORT), last_sending_time(-1L) {}
+PLCMaster::PLCMaster(Syslog* logger) : MRMaster(logger, MRIT_PORT), last_sent_time(-1L) {}
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
-	if (this->last_sending_time != uptime) {
+	if (this->last_sent_time != uptime) {
 		this->read_all_signal((uint16)98U, (uint16)0U, (uint16)0x1263U);
-		this->last_sending_time = uptime;
+		this->last_sent_time = uptime;
 	}
 }
 

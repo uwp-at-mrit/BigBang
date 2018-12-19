@@ -243,4 +243,7 @@
   <data name="hydraulic_pump_dx" xml:space="preserve">
     <value>液压泵诊断</value>
   </data>
+  <data name="dredges_Suctions" xml:space="preserve">
+    <value>水下耙臂</value>
+  </data>
 </root>

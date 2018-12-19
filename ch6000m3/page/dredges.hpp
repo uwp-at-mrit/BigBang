@@ -7,7 +7,7 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private enum class DragView { PortSide, Starboard, _ };
+	private enum class DragView { PortSide, Starboard, Suctions, _ };
 
 	private class DredgesPage : public WarGrey::SCADA::Planet {
 	public:

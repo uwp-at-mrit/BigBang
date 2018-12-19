@@ -56,7 +56,7 @@ namespace WarGrey::SCADA {
 	WarGrey::SCADA::DragLinesStyle drag_default_lines_style(
 		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ stroke
 		= WarGrey::SCADA::make_dash_stroke(Microsoft::Graphics::Canvas::Geometry::CanvasDashStyle::Dash),
-		float thickness = 1.0F);
+		float thickness = 2.0F);
 
 	/************************************************************************************************/
 	private class IDraglet abstract : public WarGrey::SCADA::IGraphlet {
@@ -156,7 +156,7 @@ namespace WarGrey::SCADA {
 	private class DragXYlet : public WarGrey::SCADA::IDraglet {
 	public:
 		DragXYlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style,
-			float ws_height, float hatchmark_interval = 6.0F, unsigned int outboard_step = 2U, unsigned int inboard_step = 1U);
+			float ws_height, float hatchmark_interval = 4.0F, unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
 
 	public:
 		void construct() override;
@@ -180,6 +180,63 @@ namespace WarGrey::SCADA {
 		double outboard_most;
 		double inboard_most;
 		unsigned int step;
+	};
+
+	private class DragYZlet : public WarGrey::SCADA::IDraglet {
+	public:
+		DragYZlet(WarGrey::SCADA::DragInfo& info, WarGrey::SCADA::DragStyle& style, WarGrey::SCADA::DragLinesStyle& line_style,
+			float ws_width, double max_depth_degrees = 45.0, float vhatchmark_interval = 5.0F, float hhatchmark_interval = 4.0F,
+			unsigned int outboard_step = 3U, unsigned int inboard_step = 2U);
+
+	public:
+		void construct() override;
+		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
+
+	public:
+		void set_tilde_mark(double tildemark);
+		void set_design_depth(double target, double tolerance);
+
+	protected:
+		Windows::Foundation::Numerics::float2 space_to_local(Windows::Foundation::Numerics::float3& position) override;
+		double arctangent(Windows::Foundation::Numerics::float3& pt1, Windows::Foundation::Numerics::float3& pt2) override;
+
+	protected:
+		bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) override;
+		Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) override;
+		void update_drag_head() override;
+
+		void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,
+			Windows::Foundation::Numerics::float3 ujoints[],
+			Windows::Foundation::Numerics::float3& draghead) override;
+
+	private:
+		float y_to_x(double y);
+		float z_to_y(double z);
+
+	private:
+		void draw_metrics(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds,
+			Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ meter, float joint_x, float joint_y,
+			float lX, float rX, float tY, float bY, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color, bool below);
+
+		void draw_line(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x0, float xn, float y,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color);
+
+	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextLayout^ suction_m;
+		WarGrey::SCADA::DragLinesStyle lines_style;
+
+	private:
+		double depth_highest;
+		double depth_lowest;
+		double outboard_most;
+		double inboard_most;
+		unsigned int hstep;
+
+	private:
+		float tildemark;
+		float silt_depth;
+		float target_depth;
+		float tolerance_depth;
 	};
 
 	private class DragXZlet : public WarGrey::SCADA::IDraglet {

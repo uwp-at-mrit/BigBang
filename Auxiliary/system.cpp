@@ -138,6 +138,7 @@ Platform::String^ WarGrey::SCADA::system_ipv4_address(Platform::String^ defval_i
 	
 	for (unsigned int i = 0; i < names->Size; ++i) {
 		auto host = names->GetAt(i);
+
 		if (host->Type == HostNameType::Ipv4) {
 			ipv4 = host->RawName;
 			break;
@@ -225,6 +226,14 @@ private:
 		}
 	}
 
+	void report_ipv4_changed(Platform::Object^ whocares) {
+		Platform::String^ ipv4 = system_ipv4_address();
+
+		for (auto listener : this->listeners) {
+			listener->on_ipv4_address_changed(ipv4);
+		}
+	}
+
 	void report_available_storage_if_changed() {
 		static Vector<Platform::String^>^ properties = ref new Vector<Platform::String^>();
 		StorageFolder^ local = ApplicationData::Current->LocalFolder;
@@ -259,6 +268,7 @@ private:
 		BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
 		
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemState::report_powerinfo);
+		NetworkInformation::NetworkStatusChanged += ref new NetworkStatusChangedEventHandler(this, &SystemState::report_ipv4_changed);
 		//WiFiAdapter::AvailableNetworksChanged += ref new TypedEventHandler<WiFiAdapter^, Platform::Object^>(this, &SystemState::wifi_changed);
 		
 		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemState::report_brightness);

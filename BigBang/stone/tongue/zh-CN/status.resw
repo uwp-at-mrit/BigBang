@@ -136,7 +136,7 @@
     <value>可用硬盘空间: </value>
   </data>
   <data name="noipv4" xml:space="preserve">
-    <value>0.0.0.0</value>
+    <value>无网络连接</value>
   </data>
   <data name="wifi" xml:space="preserve">
     <value>WiFi: </value>
