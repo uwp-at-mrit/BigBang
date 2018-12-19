@@ -32,7 +32,7 @@ OverflowPipelet::OverflowPipelet(double range, float width, float height, unsign
 	, hatch_color((hatchmark_color == nullptr) ? overflow_default_hatch_color : hatchmark_color) {
 
 	if (this->height == 0.0F) {
-		this->height = this->width;
+		this->height = this->width * 1.618F;
 	}
 }
 

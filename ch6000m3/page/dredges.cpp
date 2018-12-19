@@ -623,13 +623,13 @@ public:
 
 		pTurtle->jump_right(1.5F)->move_right(2.5F, DS::D011)->move_right(3, DS::sb)->move_up(4, DS::SBHP);
 		pTurtle->move_right(3, DS::D003)->move_right(3, DS::SB)->jump_back();
-		pTurtle->move_right(3, DS::d1315)->move_down(4, DS::d13)->move_left(1.5F, DS::d013)->move_down(2, DS::D013)->jump_back(DS::d13);
-		pTurtle->move_down(4, DS::d15)->move_left(1.5F)->move_down(2, DS::D015)->jump_back(DS::LMOD);
+		pTurtle->move_right(3, DS::d1315)->move_down(4, DS::d13)->move_left(3, DS::d013)->move_down(2, DS::D013)->jump_back(DS::d13);
+		pTurtle->move_down(4, DS::d15)->move_left(3)->move_down(2, DS::D015)->jump_back(DS::LMOD);
 
 		pTurtle->jump_left(1.5F)->move_left(2.5F, DS::D012)->move_left(3, DS::ps)->move_up(4, DS::PSHP);
 		pTurtle->move_left(3, DS::D004)->move_left(3, DS::PS)->jump_back();
-		pTurtle->move_left(3, DS::d1416)->move_down(4, DS::d14)->move_right(1.5F, DS::d014)->move_down(2, DS::D014)->jump_back(DS::d14);
-		pTurtle->move_down(4, DS::d16)->move_right(1.5F)->move_down(2, DS::D016);
+		pTurtle->move_left(3, DS::d1416)->move_down(4, DS::d14)->move_right(3, DS::d014)->move_down(2, DS::D014)->jump_back(DS::d14);
+		pTurtle->move_down(4, DS::d16)->move_right(3)->move_down(2, DS::D016);
 
 		this->station = this->master->insert_one(new Tracklet<DS>(pTurtle, default_pipe_thickness, default_pipe_color));
 
@@ -660,13 +660,12 @@ public:
 		shhmargin = (height - vinset * 2.0F - shheight) * 0.5F;
 
 		{ // load dimensions
-			float overflow_height = shheight * 0.618F;
 			float dfmeter_height = shhmargin * 0.72F;
 			float cylinder_height = shheight * 0.618F;
 			float winch_width = shvmargin * 0.12F;
 			float gantry_width = winch_width * 1.4F;
 		
-			this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, overflow_height));
+			this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, shheight * 0.382F));
 			this->load_dimension(this->lengths, DS::Overflow, "meter");
 			this->load_dimension(this->forces, DS::PSPF1, "knewton");
 			this->load_dimension(this->forces, DS::PSPF2, "knewton");

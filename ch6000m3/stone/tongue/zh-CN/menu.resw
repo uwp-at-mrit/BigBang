@@ -420,4 +420,7 @@
   <data name="Unbolt" xml:space="preserve">
     <value>插销拔出</value>
   </data>
+  <data name="MoveTo" xml:space="preserve">
+    <value>升降到指定高度</value>
+  </data>
 </root>

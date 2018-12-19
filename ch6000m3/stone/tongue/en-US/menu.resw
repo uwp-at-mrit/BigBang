@@ -420,4 +420,7 @@
   <data name="Unbolt" xml:space="preserve">
     <value>Unbolt</value>
   </data>
+  <data name="MoveTo" xml:space="preserve">
+    <value>Move To Target Height</value>
+  </data>
 </root>

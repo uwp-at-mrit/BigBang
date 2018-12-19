@@ -364,6 +364,7 @@
     <ClInclude Include="decorator\page.hpp" />
     <ClInclude Include="decorator\ship.hpp" />
     <ClInclude Include="iotables\ai_winches.hpp" />
+    <ClInclude Include="iotables\ao_devices.hpp" />
     <ClInclude Include="iotables\di_winches.hpp" />
     <ClInclude Include="iotables\do_winches.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />

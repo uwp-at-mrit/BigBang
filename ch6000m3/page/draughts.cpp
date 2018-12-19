@@ -12,6 +12,8 @@
 
 #include "iotables/ai_metrics.hpp"
 #include "iotables/di_doors.hpp"
+
+#include "iotables/ao_devices.hpp"
 #include "iotables/do_devices.hpp"
 #include "iotables/do_doors.hpp"
 
@@ -20,7 +22,7 @@
 
 #include "module.hpp"
 #include "path.hpp"
-#include "shape.hpp"
+#include "string.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -48,22 +50,26 @@ private enum class DL : unsigned int {
 private class Draughts final : public PLCConfirmation {
 public:
 	Draughts(DraughtsPage* master, ShipDecorator* ship) : master(master), decorator(ship) {
+		Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
+
+		this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
+
 		this->label_font = make_bold_text_format(large_font_size);
 		this->plain_style = make_plain_dimension_style(small_metrics_font_size, 5U, 2U);
 		this->flonum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 2U);
 		this->fixnum_style = make_plain_dimension_style(small_metrics_font_size, normal_font_size, 0U);
-
-		{ // load earthwork datasource
-			Syslog* logger = make_system_logger(default_logging_level, "EarthWorkHistory");
-
-			this->datasource = new EarthWorkDataSource(logger, RotationPeriod::Daily);
-		}
+		this->setting_style = make_highlight_dimension_style(small_metrics_font_size, 5U, 2, this->plain_style.label_color, Colours::Background);
 	}
 
 public:
 	void pre_read_data(Syslog* logger) override {
 		this->master->enter_critical_section();
 		this->master->begin_update_sequence();
+	}
+
+	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
+		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::OpenDoorCheck], BottomDoorCommand::OpenDoorCheck, DB205);
+		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::CloseDoorCheck], BottomDoorCommand::CloseDoorCheck, DB205);
 	}
 
 	void on_analog_input(const uint8* DB2, size_t count2, const uint8* DB203, size_t count203, Syslog* logger) override {
@@ -103,9 +109,10 @@ public:
 		}
 	}
 
-	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
-		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::OpenDoorCheck], BottomDoorCommand::OpenDoorCheck, DB205);
-		DI_hopper_doors_checks_button(this->hdchecks[BottomDoorCommand::CloseDoorCheck], BottomDoorCommand::CloseDoorCheck, DB205);
+	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+		float target_height = DBD(DB20, overflow_pipe_target_height);
+
+		this->labels[DL::Overflow]->set_text(flstring(target_height, this->setting_style.precision), GraphletAnchor::LB);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -119,7 +126,7 @@ public:
 		
 		this->decorator->fill_ship_extent(nullptr, &ship_y, &lines_width, &ship_height, true);
 
-		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.618F));
+		this->overflowpipe = this->master->insert_one(new OverflowPipelet(hopper_height_range, ship_height * 0.382F));
 
 		cylinder_height = ship_height * 0.42F;
 		this->load_cylinder(this->cylinders, EWTS::EarthWork, cylinder_height, earthwork_range, 0U, "meter3");
@@ -130,9 +137,9 @@ public:
 
 		this->load_dimensions(this->dimensions, DL::SternDraft, DL::sbSternHeight, "meter");
 		this->load_dimensions(this->dimensions, DL::BowDraft, DL::sbBowHeight, "meter");
-		this->load_dimension(this->dimensions, DL::Overflow, "meter", this->plain_style);
 		this->load_dimension(this->dimensions, DL::AverageDraft, "meter", this->flonum_style);
 		this->load_dimension(this->dimensions, DL::NetWeight, "ton", this->fixnum_style);
+		this->load_setting(this->dimensions, DL::Overflow, "meter");
 
 		this->load_buttons(this->hdchecks, BottomDoorCommand::OpenDoorCheck, BottomDoorCommand::CloseDoorCheck);
 
@@ -166,6 +173,7 @@ public:
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
+		this->master->move_to(this->labels[DL::Overflow], this->overflowpipe, GraphletAnchor::RB, GraphletAnchor::LB);
 
 		{ // reflow dimensions
 			float cpt_height, xoff, yoff;
@@ -214,6 +222,14 @@ public:
 	}
 
 private:
+	template<typename E>
+	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, _speak(id)), id);
+		ds[id]->set_maximum(hopper_height_range);
+
+		this->labels[id] = this->master->insert_one(new Credit<Labellet, E>("", this->setting_style.number_font, Colours::DimGray));
+	}
+
 	template<typename E>
 	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, DimensionStyle& style) {
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(style, unit, _speak(id)), id);
@@ -305,6 +321,7 @@ private: // never delete these graphlets manually.
 private:
 	CanvasTextFormat^ label_font;
 	DimensionStyle plain_style;
+	DimensionStyle setting_style;
 	DimensionStyle fixnum_style;
 	DimensionStyle flonum_style;
 
@@ -388,7 +405,8 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 	bool handled = Planet::on_key(key, wargrey_keyboard);
 
 	if (!handled) {
-		if (key == VirtualKey::Print) {
+		switch (key) {
+		case VirtualKey::Print: {
 			if (wargrey_keyboard) {
 				this->hide_virtual_keyboard();
 			}
@@ -401,6 +419,21 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 			}
 
 			handled = true;
+		}; break;
+		case VirtualKey::Enter: {
+			auto editor = dynamic_cast<Credit<Dimensionlet, DL>*>(this->get_focus_graphlet());
+
+			if (editor != nullptr) {
+				float ofp_height = float(editor->get_input_number());
+
+				if (ofp_height > 0.0F) {
+					this->device->send_setting(overflow_pipe_target_height, ofp_height);
+					this->device->send_command(overflow_pipe_move_to_target_height);
+				}
+
+				handled = true;
+			}
+		}; break;
 		}
 	}
 
@@ -409,9 +442,16 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 
 void DraughtsPage::on_focus(IGraphlet* g) {
 	auto timeseries = dynamic_cast<ITimeSerieslet*>(g);
+	auto editor = dynamic_cast<IEditorlet*>(g);
 
 	if (timeseries != nullptr) {
-		this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, timeseries, GraphletAnchor::CB, 0.0F, 4.0F);
+		this->show_virtual_keyboard(ScreenKeyboard::Arrowpad, g, GraphletAnchor::CB, 0.0F, 4.0F);
+	} else if (editor != nullptr) {
+		if (this->device->authorized()) {
+			this->show_virtual_keyboard(ScreenKeyboard::Numpad);
+		} else {
+			this->set_caret_owner(nullptr);
+		}
 	}
 }
 

@@ -18,10 +18,11 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case OverflowAction::Up:   index = 857U; break;
-		case OverflowAction::Down: index = 858U; break;
-		case OverflowAction::Stop: index = 859U; break;
-		case OverflowAction::Auto: index = 868U; break;
+		case OverflowAction::Up:     index = 857U; break;
+		case OverflowAction::Down:   index = 858U; break;
+		case OverflowAction::Stop:   index = 859U; break;
+		case OverflowAction::MoveTo: index = overflow_pipe_move_to_target_height; break;
+		case OverflowAction::Auto:   index = 868U; break;
 		}
 
 		plc->send_command(index);

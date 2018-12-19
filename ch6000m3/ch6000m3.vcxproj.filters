@@ -293,6 +293,9 @@
     <ClInclude Include="iotables\do_winches.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
+    <ClInclude Include="iotables\ao_devices.hpp">
+      <Filter>iotables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
