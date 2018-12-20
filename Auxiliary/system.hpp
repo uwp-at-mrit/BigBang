@@ -8,7 +8,7 @@ namespace WarGrey::SCADA {
 		virtual void on_brightness_changed(double brightness) {}
 		virtual void on_available_storage_changed(unsigned long long free_bytes, unsigned long long total_bytes) {}
 		virtual void on_ipv4_address_changed(Platform::String^ ipv4) {}
-		virtual void on_wifi_signal_strength_changed(char strength) {}
+		virtual void on_wifi_signal_strength_changed(Platform::String^ ssid, char strength) {}
 	};
 
 	void register_system_status_listener(WarGrey::SCADA::ISystemStatusListener* listener);
@@ -25,6 +25,6 @@ namespace WarGrey::SCADA {
 
 	unsigned long long system_memory_usage(Windows::System::AppMemoryUsageLevel* level = nullptr);
 	float system_battery_capacity(float defval_if_no_battery = 1.0F);
-	char system_wifi_signal_strength(char defval_if_no_wifi = -1);
+	Platform::String^ system_wifi_ssid(char* signal_strength = nullptr);
 	Platform::String^ system_ipv4_address(Platform::String^ defval_if_no_nic = nullptr);
 }

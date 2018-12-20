@@ -57,10 +57,10 @@ public:
 		this->leave_critical_section();
 	}
 
-    void on_wifi_signal_strength_changed(char strength) override {
+    void on_wifi_signal_strength_changed(Platform::String^ ssid, char strength) override {
 		float percentage = std::roundf(float(strength) * 100.0F / 5.0F);
 		Platform::String^ label = speak("wifi", tongue_scope);
-        Platform::String^ signal = ((strength < 0) ? speak("nowifi", tongue_scope) : (percentage.ToString() + "%"));
+        Platform::String^ signal = ((ssid == nullptr) ? speak("nowifi", tongue_scope) : (ssid + " " + percentage.ToString() + "%"));
 
 		this->enter_critical_section();
         this->wifi = make_text_layout(label + signal, status_font);

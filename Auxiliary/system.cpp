@@ -1,10 +1,11 @@
 #include <ppltasks.h>
-#include <collection.h>
 #include <algorithm>
+#include <collection.h>
 #include <list>
 
 #include "system.hpp"
 #include "syslog.hpp"
+#include "box.hpp"
 #include "time.hpp"
 
 using namespace WarGrey::SCADA;
@@ -115,21 +116,24 @@ float WarGrey::SCADA::system_battery_capacity(float defval_if_no_battery) {
 	return capacity;
 }
 
-char WarGrey::SCADA::system_wifi_signal_strength(char defval_if_no_wifi) {
+Platform::String^ WarGrey::SCADA::system_wifi_ssid(char* signal) {
 	auto nics = NetworkInformation::GetConnectionProfiles();
-	char signal = defval_if_no_wifi;
+	Platform::String^ ssid = nullptr;
 
 	for (unsigned int i = 0; i < nics->Size; ++i) {
 		auto nic = nics->GetAt(i);
-		//syslog(Log::Info, nic->ProfileName);
 
 		if (nic->IsWlanConnectionProfile) {
-			signal = nic->GetSignalBars()->Value;
-			break;
+			ssid = nic->WlanConnectionProfileDetails->GetConnectedSsid();
+
+			if (ssid != nullptr) {
+				SET_BOX(signal, nic->GetSignalBars()->Value);
+				break;
+			}
 		}
 	}
 
-	return signal;
+	return ssid;
 }
 
 Platform::String^ WarGrey::SCADA::system_ipv4_address(Platform::String^ defval_if_no_nic) {
@@ -160,12 +164,15 @@ public:
 internal:
 	void add_status_listener(ISystemStatusListener* listener) {
 		if (listener != nullptr) {
+			char wifi_signal_strength;
+			Platform::String^ ssid = system_wifi_ssid(&wifi_signal_strength);
+
 			this->listeners.push_back(listener);
 
 			listener->on_timestamp_changed(update_nowstamp(false));
 			listener->on_battery_capacity_changed(system_battery_capacity());
 			listener->on_brightness_changed(system_screen_brightness());
-			listener->on_wifi_signal_strength_changed(system_wifi_signal_strength());
+			listener->on_wifi_signal_strength_changed(ssid, wifi_signal_strength);
 			listener->on_available_storage_changed(0L, 0L);
 			listener->on_ipv4_address_changed(system_ipv4_address());
 		}
@@ -203,26 +210,18 @@ private:
 	}
 
 	void report_wifiinfo_if_changed() {
-		char signal = system_wifi_signal_strength();
+		char signal;
+		Platform::String^ ssid = system_wifi_ssid(&signal);
 
-		if (signal != this->last_wifi_strength) {
+		if ((signal != this->last_wifi_strength)
+			|| (ssid != this->last_wifi_ssid)
+			|| ((ssid != nullptr) && (!ssid->Equals(this->last_wifi_ssid)))) {
 			for (auto listener : this->listeners) {
-				listener->on_wifi_signal_strength_changed(signal);
+				listener->on_wifi_signal_strength_changed(ssid, signal);
 			}
 
 			this->last_wifi_strength = signal;
-		}
-	}
-
-	void report_wifi_changed(WiFiAdapter^ wifi, Platform::Object^ args) {
-		char signal = system_wifi_signal_strength();
-
-		if (signal != this->last_wifi_strength) {
-			for (auto listener : this->listeners) {
-				listener->on_wifi_signal_strength_changed(signal);
-			}
-
-			this->last_wifi_strength = signal;
+			this->last_wifi_ssid = ssid;
 		}
 	}
 
@@ -269,7 +268,6 @@ private:
 		
 		Battery::AggregateBattery->ReportUpdated += ref new BatteryUpdateHandler(this, &SystemState::report_powerinfo);
 		NetworkInformation::NetworkStatusChanged += ref new NetworkStatusChangedEventHandler(this, &SystemState::report_ipv4_changed);
-		//WiFiAdapter::AvailableNetworksChanged += ref new TypedEventHandler<WiFiAdapter^, Platform::Object^>(this, &SystemState::wifi_changed);
 		
 		bo->BrightnessLevelChanged += ref new TypedEventHandler<BrightnessOverride^, Platform::Object^>(this, &SystemState::report_brightness);
 
@@ -277,10 +275,6 @@ private:
 		this->clock->Tick += ref new EventHandler<Object^>(this, &SystemState::report_timestamp);
 		this->report_timestamp(nullptr, nullptr);
 		this->clock->Start();
-
-		//create_task(WiFiAdapter::FindAllAdaptersAsync()).then([=](IVectorView<WiFiAdapter^>^ wifies) {
-		//	syslog(Log::Info, L"found %d adapters", wifies->Size);
-		//});
 	}
 
 	~SystemState() {
@@ -293,8 +287,9 @@ private:
 	DispatcherTimer^ clock;
 
 private:
-	long long last_freespace = -1L;
+	Platform::String^ last_wifi_ssid = nullptr;
 	char last_wifi_strength = -1;
+	long long last_freespace = -1L;
 };
 
 void WarGrey::SCADA::register_system_status_listener(ISystemStatusListener* listener) {
