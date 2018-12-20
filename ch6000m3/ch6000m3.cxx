@@ -49,7 +49,7 @@ internal:
 		PLCMasterMode mode = PLCMasterMode::User;
 
 		this->timer = ref new Timer(this, frame_per_second);
-		this->device = new PLCMaster(logger);
+		this->device = new PLCMaster(logger, plc_master_suicide_timeout);
 
 		for (unsigned int idx = 0; idx < sizeof(root_machines) / sizeof(Platform::String^); idx++) {
 			if (localhost->Equals(root_machines[idx])) {

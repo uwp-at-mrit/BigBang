@@ -33,6 +33,7 @@
 
 #include "iotables/do_dredges.hpp"
 #include "iotables/do_winches.hpp"
+#include "iotables/ao_devices.hpp"
 
 #include "decorator/page.hpp"
 
@@ -570,6 +571,12 @@ public:
 
 		this->set_hopper_type(DS::PS, DB4, ps_hopper_pump_feedback);
 		this->set_hopper_type(DS::SB, DB4, sb_hopper_pump_feedback);
+	}
+
+	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
+		float overflow_target_height = DBD(DB20, overflow_pipe_target_height);
+
+		this->overflowpipe->set_target_height(overflow_target_height, (overflow_target_height == 0.0F));
 	}
 
 	void post_read_data(Syslog* logger) override {

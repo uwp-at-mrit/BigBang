@@ -378,6 +378,10 @@ bool IModbusClient::connected() {
 	return (this->mbout != nullptr);
 }
 
+void IModbusClient::suicide() {
+
+}
+
 uint16 IModbusClient::do_simple_request(uint8 fcode, uint16 addr, uint16 val) {
 	ModbusTransaction* mt = make_transaction(fcode, addr, 4);
 

@@ -96,7 +96,9 @@ float3 WarGrey::SCADA::DBD_3(const uint8* src, size_t idx) {
 }
 
 /*************************************************************************************************/
-PLCMaster::PLCMaster(Syslog* logger) : MRMaster(logger, MRIT_PORT), last_sent_time(-1L) {}
+PLCMaster::PLCMaster(Syslog* logger, long long ms) : MRMaster(logger, MRIT_PORT), last_sent_time(-1L) {
+	this->set_suicide_timeout(ms);
+}
 
 void PLCMaster::send_scheduled_request(long long count, long long interval, long long uptime) {
 	if (this->last_sent_time != uptime) {

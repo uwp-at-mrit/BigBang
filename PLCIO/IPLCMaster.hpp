@@ -21,6 +21,9 @@ namespace WarGrey::SCADA {
 
 	private class IPLCMaster abstract {
 	public:
+		virtual ~IPLCMaster() noexcept;
+
+	public:
 		virtual Platform::String^ device_hostname() = 0;
 		virtual Platform::String^ device_description() = 0;
 
@@ -28,12 +31,14 @@ namespace WarGrey::SCADA {
 		virtual Syslog* get_logger() = 0;
 		virtual void shake_hands() = 0;
 		virtual bool connected() = 0;
+		virtual void suicide() = 0;
 
 	public:
 		virtual void send_scheduled_request(long long count, long long interval, long long uptime) = 0;
 		virtual bool authorized();
 
 	public:
+		void set_suicide_timeout(long long ms);
 		void append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
 		void notify_connectivity_changed();
 		void notify_data_sent(long long bytes, double span_ms);
@@ -47,5 +52,6 @@ namespace WarGrey::SCADA {
 	private:
 		std::list<WarGrey::SCADA::IPLCStatusListener*> listeners;
 		WarGrey::SCADA::PLCMasterMode mode = PLCMasterMode::Root;
+		Platform::Object^ killer;
 	};
 }

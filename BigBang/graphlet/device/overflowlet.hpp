@@ -12,6 +12,7 @@ namespace WarGrey::SCADA {
 			unsigned int step = 0U, unsigned int precision = 2U,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color = nullptr,
+			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color = nullptr,
 			Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ hatch_color = nullptr);
 
@@ -21,26 +22,35 @@ namespace WarGrey::SCADA {
 		void draw(Microsoft::Graphics::Canvas::CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override;
 
 	public:
-		void set_liquid_height(double h, bool force_upadte = false);
+		void set_liquid_height(double h, bool force_update = false);
+		void set_target_height(double h, bool force_update = false);
 
 	protected:
 		void on_value_changed(double t) override;
 		virtual void on_liquid_height_changed(double h);
+		virtual void on_target_height_changed(double h);
 
 	private:
 		float get_outlet_height(double percentage);
 
 	private:
 		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ liquid;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ target;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ hatchmark;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ body;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ liquid_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ target_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ border_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ hatch_color;
 
 	private:
+		Microsoft::Graphics::Canvas::Text::CanvasTextFormat^ target_font;
+		Microsoft::Graphics::Canvas::Geometry::CanvasStrokeStyle^ target_style;
+
+	private:
 		double liquid_height;
+		double target_height;
 
 	private:
 		float ofbbase;

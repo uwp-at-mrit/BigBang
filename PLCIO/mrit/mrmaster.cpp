@@ -284,14 +284,24 @@ bool IMRMaster::connected() {
 	return (this->mrout != nullptr);
 }
 
+void IMRMaster::suicide() {
+	if (this->socket != nullptr) {
+		delete this->socket;
+
+		if (this->mrout != nullptr) {
+			delete this->mrin;
+			delete this->mrout;
+
+			this->mrout = nullptr;
+		}
+
+		this->notify_connectivity_changed();
+	}
+}
+
 void IMRMaster::clear() {
 	if (this->mrout != nullptr) {
-		delete this->socket;
-		delete this->mrin;
-		delete this->mrout;
-
-		this->mrout = nullptr;
-		this->notify_connectivity_changed();
+		this->suicide();
 	}
 }
 

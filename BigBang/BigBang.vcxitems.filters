@@ -149,12 +149,10 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.cpp" />
-    <ClCompile Include="D:\WinSCADA\BigBang\graphlet\cylinder\holdhooplet.cpp">
-      <Filter>graphlet\cylinder</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp">
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -309,12 +307,10 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.hpp" />
-    <ClInclude Include="D:\WinSCADA\BigBang\graphlet\cylinder\holdhooplet.hpp">
-      <Filter>graphlet\cylinder</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp">
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">

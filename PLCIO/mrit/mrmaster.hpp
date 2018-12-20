@@ -35,6 +35,7 @@ namespace WarGrey::SCADA {
 		Syslog* get_logger() override;
 		void shake_hands() override;
 		bool connected() override;
+		void suicide() override;
 
 	public:
 		void append_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);

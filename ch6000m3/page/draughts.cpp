@@ -22,7 +22,6 @@
 
 #include "module.hpp"
 #include "path.hpp"
-#include "string.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -112,7 +111,7 @@ public:
 	void on_forat(const uint8* DB20, size_t count, Syslog* logger) override {
 		float target_height = DBD(DB20, overflow_pipe_target_height);
 
-		this->labels[DL::Overflow]->set_text(flstring(target_height, this->setting_style.precision), GraphletAnchor::LB);
+		this->overflowpipe->set_target_height(target_height, (target_height == 0.0F));
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -173,8 +172,7 @@ public:
 		this->master->move_to(this->timeseries, tsx, tsy, GraphletAnchor::CC);
 		this->master->move_to(this->overflowpipe, ofpx, ofpy, GraphletAnchor::CC, 0.0F, -gapsize);
 		this->master->move_to(this->dimensions[DL::Overflow], this->overflowpipe, GraphletAnchor::CB, GraphletAnchor::CT, 0.0F, gapsize);
-		this->master->move_to(this->labels[DL::Overflow], this->overflowpipe, GraphletAnchor::RB, GraphletAnchor::LB);
-
+		
 		{ // reflow dimensions
 			float cpt_height, xoff, yoff;
 
@@ -226,8 +224,6 @@ private:
 	void load_setting(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(DimensionState::Input, this->setting_style, unit, _speak(id)), id);
 		ds[id]->set_maximum(hopper_height_range);
-
-		this->labels[id] = this->master->insert_one(new Credit<Labellet, E>("", this->setting_style.number_font, Colours::DimGray));
 	}
 
 	template<typename E>
