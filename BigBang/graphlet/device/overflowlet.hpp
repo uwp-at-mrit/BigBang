@@ -65,5 +65,6 @@ namespace WarGrey::SCADA {
 	private:
 		unsigned int step;
 		unsigned int precision;
+		bool leftward;
 	};
 }

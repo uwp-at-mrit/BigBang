@@ -7,7 +7,7 @@ using namespace Windows::Foundation;
 
 using namespace Windows::UI::Xaml;
 
-Timer::Timer(ITimerAction^ callback, int rate) : target(callback) {
+Timer::Timer(ITimerListener^ callback, int rate) : target(callback) {
 	this->timer = ref new DispatcherTimer();
 
 	this->timer->Interval = make_timespan_from_rate(rate);
@@ -57,27 +57,27 @@ void Timer::stop() {
 }
 
 /*************************************************************************************************/
-void CompositeTimerAction::on_elapsed(long long count, long long interval, long long uptime) {
-	for (auto action : this->actions) {
+void CompositeTimerListener::on_elapsed(long long count, long long interval, long long uptime) {
+	for (auto action : this->listeners) {
 		action->on_elapsed(count, interval, uptime);
 	}
 }
 
-void CompositeTimerAction::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
-	for (auto action : this->actions) {
+void CompositeTimerListener::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
+	for (auto action : this->listeners) {
 		action->on_elapsed(count, interval, uptime, elapsed);
 	}
 }
 
-void CompositeTimerAction::append_timer_action(ITimerAction^ action) {
-	this->actions.push_back(action);
+void CompositeTimerListener::append_timer_action(ITimerListener^ action) {
+	this->listeners.push_back(action);
 }
 
-Syslog* CompositeTimerAction::get_logger() {
+Syslog* CompositeTimerListener::get_logger() {
 	Syslog* logger = default_logger();
-	auto maybe_action = this->actions.begin();
+	auto maybe_action = this->listeners.begin();
 
-	if (maybe_action != this->actions.end()) {
+	if (maybe_action != this->listeners.end()) {
 		logger = (*maybe_action)->get_logger();
 	}
 

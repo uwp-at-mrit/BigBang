@@ -20,14 +20,14 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ overflow_default_color = Colours::DimGray;
 static CanvasSolidColorBrush^ overflow_default_liquid_color = Colours::DarkKhaki;
-static CanvasSolidColorBrush^ overflow_default_target_color = Colours::Chocolate;
+static CanvasSolidColorBrush^ overflow_default_target_color = Colours::Orange;
 static CanvasSolidColorBrush^ overflow_default_border_color = Colours::Aquamarine;
 static CanvasSolidColorBrush^ overflow_default_hatch_color = Colours::GhostWhite;
 
 /*************************************************************************************************/
 OverflowPipelet::OverflowPipelet(double range, float width, float height, unsigned int step, unsigned int precision, ICanvasBrush^ color
 	, ICanvasBrush^ liquid_color, ICanvasBrush^ target_color, ICanvasBrush^ border_color, CanvasSolidColorBrush^ hatchmark_color)
-	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(1.0F), step(step), precision(precision)
+	: IRangelet(0.0, range), width(std::fabsf(width)), height(height), thickness(1.0F), step(step), precision(precision), leftward(width < 0.0F)
 	, color((color == nullptr) ? overflow_default_color : color)
 	, liquid_color((liquid_color == nullptr) ? overflow_default_liquid_color : liquid_color)
 	, target_color((target_color == nullptr) ? overflow_default_target_color : target_color)
@@ -113,8 +113,8 @@ void OverflowPipelet::on_target_height_changed(double h) {
 	float line_y = region.Y + region.Height - this->get_outlet_height(percentage);
 	auto target_line = line(0.0F, line_y, this->width, line_y, 1.0F, this->target_style);
 	auto target_meter = paragraph(flstring(h, this->precision), this->target_font, &te);
-	float meter_x = (this->width - te.width) * 0.5F;
-	float meter_y = line_y - te.height * 0.5F;
+	float meter_x = (this->leftward ? 0.0F : (this->width - te.width) * 1.0F);
+	float meter_y = line_y - (te.height - te.tspace - te.bspace) * 0.5F - te.tspace;
 
 	this->target = geometry_freeze(geometry_union(target_line, target_meter, meter_x, meter_y));
 }

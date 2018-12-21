@@ -5,7 +5,7 @@
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class ITimerAction abstract {
+	private ref class ITimerListener abstract {
 	public:
 		virtual void on_elapsed(long long count, long long interval, long long uptime) = 0;
 		virtual void on_elapsed(long long count, long long interval, long long uptime, long long span) {}
@@ -17,7 +17,7 @@ namespace WarGrey::SCADA {
 	private ref class Timer sealed {
 	public:
 		virtual ~Timer();
-		Timer(WarGrey::SCADA::ITimerAction^ callback_executor, int rate = 60);
+		Timer(WarGrey::SCADA::ITimerListener^ callback_executor, int rate = 60);
 
 	public:
 		void start();
@@ -28,7 +28,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Windows::UI::Xaml::DispatcherTimer^ timer;
-		WarGrey::SCADA::ITimerAction^ target;
+		WarGrey::SCADA::ITimerListener^ target;
 
 	private:
 		long long count;
@@ -36,18 +36,18 @@ namespace WarGrey::SCADA {
 		long long uptime;
 	};
 
-	private ref class CompositeTimerAction : public WarGrey::SCADA::ITimerAction {
+	private ref class CompositeTimerListener : public WarGrey::SCADA::ITimerListener {
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
 		void on_elapsed(long long count, long long interval, long long uptime, long long span) override;
 
 	public:
-		void append_timer_action(WarGrey::SCADA::ITimerAction^ receiver);
+		void append_timer_action(WarGrey::SCADA::ITimerListener^ receiver);
 
 	internal:
 		WarGrey::SCADA::Syslog* get_logger() override;
 
 	private:
-		std::list<ITimerAction^> actions;
+		std::list<ITimerListener^> listeners;
 	};
 }

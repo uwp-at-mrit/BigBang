@@ -153,6 +153,12 @@
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.cpp">
+      <Filter>navigator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.cpp">
+      <Filter>navigator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)forward.hpp" />
@@ -311,6 +317,12 @@
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.hpp">
+      <Filter>navigator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.hpp">
+      <Filter>navigator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="decorator">
@@ -360,6 +372,9 @@
     </Filter>
     <Filter Include="graphlet\cylinder">
       <UniqueIdentifier>{0edb439b-a790-4cd7-adfc-00bbc74d37d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="navigator">
+      <UniqueIdentifier>{459de487-c509-4022-838c-b1ec68d04a2f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

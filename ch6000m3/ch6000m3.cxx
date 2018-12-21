@@ -175,7 +175,7 @@ public:
 		}
 
 		this->Content = this->universe->canvas;
-		this->Pane = this->universe->navigator;
+		this->Pane = this->universe->navigator->display_element();
 
 		// TODO: Why SplitView::Content cannot do it on its own?
 		this->universe->register_virtual_keydown_event_handler(this);

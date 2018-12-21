@@ -3,6 +3,7 @@
 #include <map>
 #include <mutex>
 
+#include "navigator/IUniverseNavigator.hpp"
 #include "timer.hxx"
 
 #include "class.hpp"
@@ -27,7 +28,7 @@ namespace WarGrey::SCADA {
 
 	private enum class DisplayFit { Fill, Contain, None };
 
-	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerAction {
+	private ref class IDisplay abstract : public WarGrey::SCADA::ITimerListener, public WarGrey::SCADA::IUniverseNavigatorListener {
 	public:
 		virtual ~IDisplay();
 
@@ -64,6 +65,9 @@ namespace WarGrey::SCADA {
 		virtual bool shown();
 
 	public:
+		virtual void on_navigate(int from_index, int to_index) = 0;
+
+	public:
 		void enter_critical_section();
 		void leave_critical_section();
 
@@ -93,14 +97,14 @@ namespace WarGrey::SCADA {
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
@@ -108,15 +112,13 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
 			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			Windows::UI::Xaml::Controls::ListView^ navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
 		
 	internal:
 		void refresh(WarGrey::SCADA::IPlanet* target) override;
 		read_only_property(WarGrey::SCADA::IPlanet*, current_planet);
-
-	public:
-		read_only_property(Windows::UI::Xaml::Controls::Primitives::Selector^, navigator);
-		read_only_property(unsigned int, current_planet_index);
+		read_only_property(WarGrey::SCADA::IUniverseNavigator*, navigator);
+		read_only_property(int, current_planet_index);
 
 	public:
 		override_read_only_property(Windows::UI::Xaml::Controls::UserControl^, canvas);
@@ -141,6 +143,7 @@ namespace WarGrey::SCADA {
 	public:
 		void on_elapsed(long long count, long long interval, long long uptime) override;
 		void on_elapsed(long long count, long long interval, long long uptime, long long elapsed) override;
+		void on_navigate(int from_index, int to_index) override;
 
 	protected private:
 		virtual void construct() {}
@@ -150,7 +153,6 @@ namespace WarGrey::SCADA {
 		
 	private:
 		void do_refresh(Platform::Object^ sender, Platform::Object^ args);
-		void do_transfer(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ args);
 		void do_resize(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ args);
 		
 		void do_construct(
@@ -174,7 +176,7 @@ namespace WarGrey::SCADA {
 
 	private:
 		Microsoft::Graphics::Canvas::UI::Xaml::CanvasControl^ display;
-		Windows::UI::Xaml::Controls::ListView^ navigator_view;
+		WarGrey::SCADA::IUniverseNavigator* _navigator;
 		WarGrey::SCADA::IPlanet* head_planet;
 		WarGrey::SCADA::IPlanet* recent_planet;
 

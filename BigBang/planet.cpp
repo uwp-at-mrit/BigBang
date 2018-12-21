@@ -1282,10 +1282,6 @@ IDisplay^ IPlanet::master() {
 	return display;
 }
 
-Platform::Object^ IPlanet::navigation_label() {
-	return this->display_name();
-}
-
 bool IPlanet::shown() {
 	return (this->info != nullptr) && (this->info->master->shown());
 }

@@ -79,9 +79,18 @@ Color WarGrey::SCADA::system_color(UIElementType type) {
 }
 
 /*************************************************************************************************/
+/** CRITICAL WARNING
+ * Don't ask me, Microsoft is an asshole.
+ *
+ * `BrightnessOverride::IsSupported` always returns false,
+ * Even the device is its own Surface Book Pro 2, 2018.
+ * 
+ * `BrightnessOverride::GetDefaultForSystem()` throws "Unspecified Error"
+ */
+
 double WarGrey::SCADA::system_screen_brightness(double defval_if_not_available) {
 	BrightnessOverride^ bo = BrightnessOverride::GetForCurrentView();
-		
+
 	return (bo->IsSupported ? bo->BrightnessLevel : defval_if_not_available);
 }
 
@@ -120,8 +129,8 @@ Platform::String^ WarGrey::SCADA::system_wifi_ssid(char* signal) {
 	auto nics = NetworkInformation::GetConnectionProfiles();
 	Platform::String^ ssid = nullptr;
 
-	for (unsigned int i = 0; i < nics->Size; ++i) {
-		auto nic = nics->GetAt(i);
+	for (unsigned int i = nics->Size; i > 0; --i) {
+		auto nic = nics->GetAt(i - 1U);
 
 		if (nic->IsWlanConnectionProfile) {
 			ssid = nic->WlanConnectionProfileDetails->GetConnectedSsid();

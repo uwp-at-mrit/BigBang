@@ -187,7 +187,7 @@ void Statusbarlet::update(long long count, long long interval, long long uptime)
 }
 
 void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) {
-    float width = Width / 8.0F;
+    float width = Width / 9.0F;
 	float context_y = y + (status_height - this->caption->LayoutBounds.Height) * 0.5F;
 	
 	ds->FillRectangle(x, y, Width, Height, Colours::Background);
@@ -197,8 +197,9 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	ds->DrawTextLayout(this->caption, x + width * 0.0F, context_y, Colours::Chocolate);
 	ds->DrawTextLayout(statusbar->clock, x + width * 1.0F, context_y, Colours::Foreground);
 	ds->DrawTextLayout(statusbar->battery, x + width * 2.0F, context_y, Colours::Green);
-	ds->DrawTextLayout(statusbar->wifi, x + width * 4.0F, context_y, Colours::Yellow);
-	ds->DrawTextLayout(statusbar->storage, x + width * 6.0F, context_y, Colours::YellowGreen);
+	ds->DrawTextLayout(statusbar->brightness, x + width * 3.0F, context_y, Colours::LightBlue);
+	ds->DrawTextLayout(statusbar->wifi, x + width * 5.0F, context_y, Colours::Yellow);
+	ds->DrawTextLayout(statusbar->storage, x + width * 7.0F, context_y, Colours::YellowGreen);
 	ds->DrawTextLayout(statusbar->ipv4, x + lastone_xoff, context_y, Colours::Yellow);
 	statusbar->leave_shared_section();
 
@@ -214,12 +215,12 @@ void Statusbarlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 		}
 
 		ds->DrawText(speak("memory", tongue_scope) + ": " + sstring(memory, 2),
-			x + width * 3.0F, context_y,
+			x + width * 4.0F, context_y,
 			color, status_font);
 	}
 
 	{ // draw PLC State
-		float plc_x = x + width * 5.0F;
+		float plc_x = x + width * 6.0F;
 
 		ds->DrawText(speak("plc", tongue_scope), plc_x, context_y, Colours::Yellow, status_font);
 

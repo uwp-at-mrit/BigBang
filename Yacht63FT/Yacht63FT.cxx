@@ -92,7 +92,7 @@ public:
 
 		plc_master = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"));
 
-		this->timeline = ref new CompositeTimerAction();
+		this->timeline = ref new CompositeTimerListener();
 		this->workspace = ref new PageUniverse(name + "[Workspace]");
 		this->navigatorbar = ref new YachtDisplay(name + "[Navigator]", new Navigatorbar(plc_master, this->workspace));
 		this->statusbar = ref new YachtDisplay(name + "[Statusbar]", new Statusbar(plc_master));
@@ -126,7 +126,7 @@ private:
 
 private:
 	WarGrey::SCADA::Timer^ timer;
-	WarGrey::SCADA::CompositeTimerAction^ timeline;
+	WarGrey::SCADA::CompositeTimerListener^ timeline;
 
 private:
 	UniverseDisplay^ navigatorbar;

@@ -1,10 +1,14 @@
-#include "transformation.hpp"
 #include "universe.hxx"
 #include "planet.hpp"
+#include "navigator/ListViewNavigator.hpp"
+
 #include "system.hpp"
 #include "syslog.hpp"
 #include "time.hpp"
 #include "path.hpp"
+
+#include "colorspace.hpp"
+#include "transformation.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -211,24 +215,22 @@ Syslog* IDisplay::get_logger() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
+UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
 	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, first_planet, navigator) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
-	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
+	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
 	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, first_planet, navigator) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
-	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, ListView^ navigator)
+	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
 	, figure_x0(std::nanf("swipe")), universe_settings(nullptr) {
-	this->navigator_view = ((navigator == nullptr) ? ref new ListView() : navigator);
-	this->navigator_view->SelectionMode = ListViewSelectionMode::Single;
-	this->navigator_view->IsItemClickEnabled = true;
-	this->navigator_view->ItemClick += ref new ItemClickEventHandler(this, &UniverseDisplay::do_transfer);
-
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
+
+	this->_navigator = ((navigator == nullptr) ? new ListViewNavigator() : navigator);
+	this->_navigator->append_navigation_listener(this);
 
 	if (setting_name != nullptr) {
 		ApplicationDataCreateDisposition adcd = ApplicationDataCreateDisposition::Always;
@@ -276,16 +278,16 @@ UniverseDisplay::~UniverseDisplay() {
 	this->transfer_clock->Stop();
 }
 
-Selector^ UniverseDisplay::navigator::get() {
-	return this->navigator_view;
+IUniverseNavigator* UniverseDisplay::navigator::get() {
+	return this->_navigator;
 }
 
 IPlanet* UniverseDisplay::current_planet::get() {
 	return this->recent_planet;
 }
 
-unsigned int UniverseDisplay::current_planet_index::get() {
-	return (unsigned int)this->navigator_view->SelectedIndex;
+int UniverseDisplay::current_planet_index::get() {
+	return this->_navigator->selected_index();
 }
 
 UserControl^ UniverseDisplay::canvas::get() {
@@ -355,15 +357,14 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 
 	if (planet->info == nullptr) {
 		PlanetInfo* info = bind_planet_owership(this, planet);
-		Platform::Object^ label = planet->navigation_label();
-
+		
 		if (this->head_planet == nullptr) {
 			this->head_planet = planet;
 			this->recent_planet = planet;
 			info->prev = this->head_planet;
 			
-			this->navigator_view->Items->Append(label);
-			this->navigator_view->SelectedValue = label;
+			this->_navigator->insert(planet);
+			this->_navigator->select(planet);
 
 			this->get_logger()->log_message(Log::Debug, L"found the first planet[%s]", planet->name()->Data());
 		} else { 
@@ -374,7 +375,7 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 			prev_info->next = planet;
 			head_info->prev = planet;
 
-			this->navigator_view->Items->Append(label);
+			this->_navigator->insert(planet);
 
 			this->get_logger()->log_message(Log::Debug, L"found another planet[%s]", planet->name()->Data());
 		}
@@ -410,7 +411,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 		}
 		this->leave_critical_section();
 
-		this->navigator_view->SelectedValue = this->recent_planet->navigation_label();
+		this->_navigator->select(this->recent_planet);
 
 		if (this->universe_settings != nullptr) {
 			this->universe_settings->Values->Insert(page_settings_key, this->recent_planet->name());
@@ -461,7 +462,7 @@ void UniverseDisplay::transfer_to(Platform::String^ name, unsigned int ms, unsig
 }
 
 void UniverseDisplay::transfer_to(int idx, unsigned int ms, unsigned int count) {
-	int from_idx = this->navigator_view->SelectedIndex;
+	int from_idx = this->_navigator->selected_index();
 	int delta_idx = idx - from_idx;
 
 	if (delta_idx != 0) {
@@ -577,16 +578,16 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 }
 
 void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args) {
+	CanvasDrawingSession^ ds = args->DrawingSession;
+	Size region = this->display->Size;
+	float width = region.Width;
+	float height = region.Height;
+
 	// NOTE: only the current planet and the one transferred from need to be drawn
 
 	this->enter_critical_section();
 
 	if (this->recent_planet != nullptr) {
-		CanvasDrawingSession^ ds = args->DrawingSession;
-		Size region = this->display->Size;
-		float width = region.Width;
-		float height = region.Height;
-
 		if (this->from_planet == nullptr) {
 			draw_planet(ds, this->recent_planet, width, height, this->get_logger());
 		} else {
@@ -601,6 +602,8 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 	}
 
 	this->leave_critical_section();
+
+	//ds->FillRectangle(0.0F, 0.0F, width, height, rgba(0x000000, 0.00));
 }
 
 void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ args) {
@@ -622,13 +625,9 @@ void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ arg
 	}
 }
 
-void UniverseDisplay::do_transfer(Platform::Object^ sender, ItemClickEventArgs^ args) {
-	int from_idx = this->navigator_view->SelectedIndex;
-	int delta_idx = 0;
+void UniverseDisplay::on_navigate(int from_index, int to_index) {
+	int delta_idx = to_index - from_index;
 
-	this->navigator_view->SelectedValue = args->ClickedItem;
-
-	delta_idx = this->navigator_view->SelectedIndex - from_idx;
 	if (delta_idx != 0) {
 		this->from_planet = this->recent_planet;
 		this->transfer(delta_idx, 0U);
