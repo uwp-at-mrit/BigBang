@@ -225,6 +225,9 @@ public:
 					plc->send_setting(AO_gland_pump_setting(editor->id), rpm);
 				}
 
+				this->master->hide_virtual_keyboard();
+				this->master->set_caret_owner(nullptr);
+
 				handled = true;
 			}
 		}

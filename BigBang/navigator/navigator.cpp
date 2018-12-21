@@ -1,4 +1,4 @@
-#include "navigator/IUniverseNavigator.hpp"
+#include "navigator/navigator.hpp"
 
 using namespace WarGrey::SCADA;
 

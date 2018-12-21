@@ -110,7 +110,7 @@ private:
 	void load_display(UniverseDisplay^ display, float width, float height) {
 		display->apply_source_size(width, height);
 
-		this->timeline->append_timer_action(display);
+		this->timeline->append_timer_listener(display);
 		this->Children->Append(display->canvas);
 	}
 

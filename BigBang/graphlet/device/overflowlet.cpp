@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 
 static CanvasSolidColorBrush^ overflow_default_color = Colours::DimGray;
 static CanvasSolidColorBrush^ overflow_default_liquid_color = Colours::DarkKhaki;
-static CanvasSolidColorBrush^ overflow_default_target_color = Colours::Orange;
+static CanvasSolidColorBrush^ overflow_default_target_color = Colours::Chocolate;
 static CanvasSolidColorBrush^ overflow_default_border_color = Colours::Aquamarine;
 static CanvasSolidColorBrush^ overflow_default_hatch_color = Colours::GhostWhite;
 

@@ -1,9 +1,8 @@
-#include "navigator/ListViewNavigator.hpp"
+#include "navigator/listview.hpp"
 #include "planet.hpp"
 
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 
 /*************************************************************************************************/
@@ -46,6 +45,6 @@ int ListViewNavigator::selected_index() {
 	return this->master->SelectedIndex;
 }
 
-UIElement^ ListViewNavigator::display_element() {
+Control^ ListViewNavigator::user_interface() {
 	return this->master;
 }

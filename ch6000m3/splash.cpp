@@ -128,6 +128,10 @@ SplashScreen::~SplashScreen() {
 	}
 }
 
+bool SplashScreen::can_select(IGraphlet* g) {
+	return false;
+}
+
 void SplashScreen::load(CanvasCreateResourcesReason reason, float width, float height) {
 	if (screens.find(this) == screens.end()) {
 		IconCanvas* canvas = new IconCanvas(this);

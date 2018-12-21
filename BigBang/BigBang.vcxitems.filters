@@ -153,10 +153,13 @@
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.cpp">
+    <ClCompile Include="D:\WinSCADA\BigBang\navigator\null.cpp">
       <Filter>navigator</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.cpp">
+    <ClCompile Include="D:\WinSCADA\BigBang\navigator\listview.cpp">
+      <Filter>navigator</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\WinSCADA\BigBang\navigator\navigator.cpp">
       <Filter>navigator</Filter>
     </ClCompile>
   </ItemGroup>
@@ -317,10 +320,13 @@
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.hpp">
+    <ClInclude Include="D:\WinSCADA\BigBang\navigator\null.hpp">
       <Filter>navigator</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.hpp">
+    <ClInclude Include="D:\WinSCADA\BigBang\navigator\listview.hpp">
+      <Filter>navigator</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\WinSCADA\BigBang\navigator\navigator.hpp">
       <Filter>navigator</Filter>
     </ClInclude>
   </ItemGroup>

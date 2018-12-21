@@ -1412,6 +1412,9 @@ public:
 				}
 			}
 
+			this->master->hide_virtual_keyboard();
+			this->master->set_caret_owner(nullptr);
+
 			handled = true;
 		}
 

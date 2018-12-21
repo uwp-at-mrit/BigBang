@@ -149,6 +149,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_maximum(long double max);
+		void set_input_number(long double n, int precision = 2);
 		long double get_input_number();
 
 	protected:

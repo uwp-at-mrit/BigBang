@@ -16,7 +16,7 @@ namespace WarGrey::SCADA {
 		virtual int selected_index() = 0;
 
 	public:
-		virtual Windows::UI::Xaml::UIElement^ display_element() = 0;
+		virtual Windows::UI::Xaml::Controls::Control^ user_interface() = 0;
 
 	public:
 		void append_navigation_listener(IUniverseNavigatorListener^ actor);

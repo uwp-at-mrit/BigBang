@@ -1,6 +1,7 @@
 ﻿#include "application.hxx"
 #include "configuration.hpp"
 #include "iotables/macro_keys.hpp"
+#include "settings.hpp"
 #include "plc.hpp"
 
 #include "planet.hpp"
@@ -48,7 +49,6 @@ internal:
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 		PLCMasterMode mode = PLCMasterMode::User;
 
-		this->timer = ref new Timer(this, frame_per_second);
 		this->device = new PLCMaster(logger, plc_master_suicide_timeout);
 
 		for (unsigned int idx = 0; idx < sizeof(root_machines) / sizeof(Platform::String^); idx++) {
@@ -59,6 +59,11 @@ internal:
 		}
 
 		this->device->set_mode(mode);
+	}
+
+internal:
+	PLCMaster* get_plc_device() {
+		return this->device;
 	}
 
 public:
@@ -74,8 +79,8 @@ public:
 
 protected:
 	void construct() override {
-		//this->add_planet(new SplashScreen(620.0F));
-		//this->add_planet(new SplashScreen(1240.0F, 0.0F));
+		// this->add_planet(new SplashScreen(620.0F));
+		// this->add_planet(new SplashScreen(1240.0F, 0.0F));
 		
 		this->add_planet(new HydraulicsPage(this->device)); // 0
 		this->add_planet(new ChargesPage(this->device)); // 1
@@ -90,18 +95,11 @@ protected:
 		this->add_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
 		this->add_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
 
-		this->add_planet(new Gallery());
-
-		if (system_ipv4_address()->Equals("192.168.0.10")) {
-			//this->add_planet(new PerformancePage(this->device));
-		}
+		//this->add_planet(new Gallery());
 	}
 
 protected private:
 	PLCMaster* device;
-
-private:
-	Timer^ timer;
 };
 
 /*************************************************************************************************/
@@ -174,11 +172,32 @@ public:
 			this->universe = ref new DredgerUniverse(name);
 		}
 
-		this->Content = this->universe->canvas;
-		this->Pane = this->universe->navigator->display_element();
-
 		// TODO: Why SplitView::Content cannot do it on its own?
 		this->universe->register_virtual_keydown_event_handler(this);
+
+		this->Content = this->universe->canvas;
+		
+		this->timeline = ref new CompositeTimerListener();
+		this->timer = ref new Timer(this->timeline, frame_per_second);
+		this->timeline->append_timer_listener(this->universe);
+
+		{ // construct the functional panel
+			StackPanel^ panel = ref new StackPanel();
+			
+			this->settings = ref new SettingsWidget(this->universe->get_logger(), this->universe->get_plc_device());
+			this->settings->min_width = 1.0F;
+			this->settings->min_height = 300.0F;
+
+			panel->Orientation = ::Orientation::Vertical;
+			panel->HorizontalAlignment = ::HorizontalAlignment::Stretch;
+			panel->VerticalAlignment = ::VerticalAlignment::Stretch;
+
+			panel->Children->Append(this->universe->navigator->user_interface());
+			panel->Children->Append(this->settings->canvas);
+
+			this->Pane = panel;
+			this->timeline->append_timer_listener(this->settings);
+		}
 	}
 
 private:
@@ -217,7 +236,12 @@ private:
 	}
 
 private:
+	WarGrey::SCADA::CompositeTimerListener^ timeline;
+	WarGrey::SCADA::Timer^ timer;
+
+private:
 	DredgerUniverse^ universe;
+	SettingsWidget^ settings;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {

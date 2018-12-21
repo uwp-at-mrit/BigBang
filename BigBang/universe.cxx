@@ -1,12 +1,13 @@
 #include "universe.hxx"
 #include "planet.hpp"
-#include "navigator/ListViewNavigator.hpp"
+#include "navigator/listview.hpp"
 
 #include "system.hpp"
 #include "syslog.hpp"
 #include "time.hpp"
 #include "path.hpp"
 
+#include "paint.hpp"
 #include "colorspace.hpp"
 #include "transformation.hpp"
 
@@ -41,7 +42,10 @@ using namespace Microsoft::Graphics::Canvas::Geometry;
 #define WINDOWED(vkms) ((vkms & VirtualKeyModifiers::Windows) == VirtualKeyModifiers::Windows)
 #define MENUED(vkms) ((vkms & VirtualKeyModifiers::Menu) == VirtualKeyModifiers::Menu)
 
-static Platform::String^ page_settings_key = "Page_Name";
+static Platform::String^ page_setting_key = "Page_Name";
+static Platform::String^ mask_setting_key = "Mask_Alpha";
+
+static CanvasSolidColorBrush^ global_mask_color;
 
 class PlanetInfo : public WarGrey::SCADA::IPlanetInfo {
 public:
@@ -74,6 +78,20 @@ static void draw_planet(CanvasDrawingSession^ ds, IPlanet* planet, float width, 
 
 static inline float display_contain_mode_scale(float to_width, float to_height, float from_width, float from_height) {
 	return std::fminf(std::fminf(to_width / from_width, to_height / from_height), 1.0F);
+}
+
+static inline void set_mask_alpha(CanvasSolidColorBrush^ color, double v) {
+	color->Color = rgba(color->Color, v);
+}
+
+static inline double get_mask_alpha(CanvasSolidColorBrush^ color) {
+	return double(color->Color.A) / 255.0;
+}
+
+static inline void load_mask_alpha(ApplicationDataContainer^ container, CanvasSolidColorBrush^ color) {
+	if (container->Values->HasKey(mask_setting_key)) {
+		set_mask_alpha(color, double(container->Values->Lookup(mask_setting_key)));
+	}
 }
 
 /*************************************************************************************************/
@@ -225,7 +243,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
 	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
-	, figure_x0(std::nanf("swipe")), universe_settings(nullptr) {
+	, figure_x0(std::nanf("swipe")), universe_settings(nullptr), shortcuts_enabled(true), follow_global_mask_setting(true) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
 
@@ -240,7 +258,6 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 
 	this->display = ref new CanvasControl();
 	this->display->Name = this->get_logger()->get_name();
-	this->shortcuts_enabled = true;
 	
 	// CanvasControl uses the shared one by default, while CanvasAnimatedControl is not.
 	// this->display->UseSharedDevice = true;
@@ -267,6 +284,20 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 		CoreWindow::GetForCurrentThread()->CharacterReceived +=
 			ref new TypedEventHandler<CoreWindow^, CharacterReceivedEventArgs^>(this, &UniverseDisplay::on_character);
 	}
+
+	{ // initialize masks
+		this->mask_color = make_solid_brush(0x000000, 0.0F);
+
+		if (global_mask_color == nullptr) {
+			global_mask_color = make_solid_brush(0x000000, 0.0F);
+		}
+
+		load_mask_alpha(ApplicationData::Current->LocalSettings, global_mask_color);
+
+		if (this->universe_settings != nullptr) {
+			load_mask_alpha(this->universe_settings, this->mask_color);
+		}
+	}
 }
 
 void UniverseDisplay::register_virtual_keydown_event_handler(UIElement^ target) {
@@ -276,6 +307,10 @@ void UniverseDisplay::register_virtual_keydown_event_handler(UIElement^ target) 
 UniverseDisplay::~UniverseDisplay() {
 	this->collapse();
 	this->transfer_clock->Stop();
+
+	if (this->_navigator != nullptr) {
+		delete this->_navigator;
+	}
 }
 
 IUniverseNavigator* UniverseDisplay::navigator::get() {
@@ -304,6 +339,27 @@ float UniverseDisplay::actual_width::get() {
 
 float UniverseDisplay::actual_height::get() {
 	return float(this->display->Size.Height);
+}
+
+void UniverseDisplay::global_mask_alpha::set(double v) {
+	ApplicationData::Current->LocalSettings->Values->Insert(mask_setting_key, v);
+	set_mask_alpha(global_mask_color, v);
+}
+
+double UniverseDisplay::global_mask_alpha::get() {
+	return get_mask_alpha(global_mask_color);
+}
+
+void UniverseDisplay::mask_alpha::set(double v) {
+	set_mask_alpha(this->mask_color, v);
+
+	if (this->universe_settings != nullptr) {
+		this->universe_settings->Values->Insert(mask_setting_key, v);
+	}
+}
+
+double UniverseDisplay::mask_alpha::get() {
+	return get_mask_alpha(this->mask_color);
 }
 
 bool UniverseDisplay::ui_thread_ready() {
@@ -383,8 +439,8 @@ void UniverseDisplay::add_planet(IPlanet* planet) {
 		info->next = this->head_planet;
 
 		if (this->universe_settings != nullptr) {
-			if (!this->universe_settings->Values->HasKey(page_settings_key)) {
-				this->universe_settings->Values->Insert(page_settings_key, planet->name());
+			if (!this->universe_settings->Values->HasKey(page_setting_key)) {
+				this->universe_settings->Values->Insert(page_setting_key, planet->name());
 			}
 		}
 	}
@@ -414,7 +470,7 @@ void UniverseDisplay::transfer(int delta_idx, unsigned int ms, unsigned int coun
 		this->_navigator->select(this->recent_planet);
 
 		if (this->universe_settings != nullptr) {
-			this->universe_settings->Values->Insert(page_settings_key, this->recent_planet->name());
+			this->universe_settings->Values->Insert(page_setting_key, this->recent_planet->name());
 		}
 
 		if (animating) {
@@ -573,7 +629,7 @@ void UniverseDisplay::do_construct(CanvasControl^ sender, CanvasCreateResourcesE
 	}
 
 	if (this->universe_settings != nullptr) {
-		this->transfer_to(this->universe_settings->Values->Lookup(page_settings_key)->ToString());
+		this->transfer_to(this->universe_settings->Values->Lookup(page_setting_key)->ToString());
 	}
 }
 
@@ -602,8 +658,14 @@ void UniverseDisplay::do_paint(CanvasControl^ sender, CanvasDrawEventArgs^ args)
 	}
 
 	this->leave_critical_section();
+	
+	{ // draw mask to simulate the brightness
+		CanvasSolidColorBrush^ mask_color = (this->follow_global_mask_setting ? global_mask_color : this->mask_color);
 
-	//ds->FillRectangle(0.0F, 0.0F, width, height, rgba(0x000000, 0.00));
+		if (mask_color->Color.A != 0) {
+			ds->FillRectangle(0.0F, 0.0F, width, height, mask_color);
+		}
+	}
 }
 
 void UniverseDisplay::do_refresh(Platform::Object^ sender, Platform::Object^ args) {
@@ -772,6 +834,10 @@ void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArg
 
 void UniverseDisplay::disable_predefined_shortcuts(bool yes) {
 	this->shortcuts_enabled = !yes;
+}
+
+void UniverseDisplay::use_global_mask_setting(bool yes) {
+	this->follow_global_mask_setting = yes;
 }
 
 void UniverseDisplay::on_translating_x() {

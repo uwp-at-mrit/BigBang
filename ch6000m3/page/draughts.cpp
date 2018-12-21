@@ -427,6 +427,9 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 					this->device->send_command(overflow_pipe_move_to_target_height);
 				}
 
+				this->hide_virtual_keyboard();
+				this->set_caret_owner(nullptr);
+
 				handled = true;
 			}
 		}; break;

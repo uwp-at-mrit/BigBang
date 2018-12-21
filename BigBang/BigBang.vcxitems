@@ -52,8 +52,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\device\winchlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)menu.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\shapelet.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\navigator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\listview.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\null.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp" />
@@ -114,8 +115,9 @@
       <FileType>Document</FileType>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\shapelet.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\IUniverseNavigator.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\ListViewNavigator.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\navigator.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\listview.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\null.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp" />

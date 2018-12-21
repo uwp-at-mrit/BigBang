@@ -1,6 +1,6 @@
 #pragma once
 
-#include "navigator/IUniverseNavigator.hpp"
+#include "navigator/navigator.hpp"
 
 namespace WarGrey::SCADA {
 	private class ListViewNavigator : public WarGrey::SCADA::IUniverseNavigator {
@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 		int selected_index() override;
 
 	public:
-		Windows::UI::Xaml::UIElement^ display_element() override;
+		Windows::UI::Xaml::Controls::Control^ user_interface() override;
 
 	private:
 		Windows::UI::Xaml::Controls::ListView^ master;

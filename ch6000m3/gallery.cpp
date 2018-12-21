@@ -79,6 +79,7 @@ public:
 		}
 
 		this->pumps[_E0(HydraulicPumpState)]->fill_extent(0.0F, 0.0F, &unitsize);
+		
 		halfunit = unitsize * 0.5F;
 		cellsize = unitsize * 1.618F;
 		y = (height - cellsize * float(_N(GS))) * 0.5F;

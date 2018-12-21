@@ -3,7 +3,7 @@
 #include <map>
 #include <mutex>
 
-#include "navigator/IUniverseNavigator.hpp"
+#include "navigator/navigator.hpp"
 #include "timer.hxx"
 
 #include "class.hpp"
@@ -125,6 +125,9 @@ namespace WarGrey::SCADA {
 		override_read_only_property(Microsoft::Graphics::Canvas::CanvasDevice^, device);
 		override_read_only_property(float, actual_width);
 		override_read_only_property(float, actual_height);
+		read_write_property(double, global_mask_alpha);
+		read_write_property(double, mask_alpha);
+		void use_global_mask_setting(bool yes);
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
 
@@ -191,6 +194,10 @@ namespace WarGrey::SCADA {
 		WarGrey::SCADA::IPlanet* from_planet;
 		float transfer_delta;
 		float transferX;
+
+	private:
+		Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ mask_color;
+		bool follow_global_mask_setting;
 
 	private:
 		bool shortcuts_enabled;

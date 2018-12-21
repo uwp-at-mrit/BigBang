@@ -447,6 +447,14 @@ void IEditorlet::set_maximum(long double maximum) {
 	this->maximum = maximum;
 }
 
+void IEditorlet::set_input_number(long double n, int precision) {
+	if (!std::isnan(this->maximum)) {
+		n = std::fminl(n, this->maximum);
+	}
+
+	this->input_number = flstring(n, precision);
+}
+
 long double IEditorlet::get_input_number() {
 	long double v = 0.0;
 
