@@ -227,8 +227,7 @@ public:
 	}
 
 	void post_read_data(Syslog* logger) override {
-		RS rps20[] = { RS::d0205, RS::PSHPump, RS::D020 };
-		RS rsb19[] = { RS::d0225, RS::PSHPump, RS::D018, RS::D019 };
+		RS rsb19[] = { RS::d0225, RS::SBHPump, RS::D018, RS::D019 };
 		RS r19[] = { RS::d019, RS::D021 };
 		RS r20[] = { RS::d2122, RS::D022 };
 
@@ -248,43 +247,28 @@ public:
 			this->manual_pipe->set_color(default_pipe_color);
 		}
 		
-		{ // flow PS water
-			bool d004 = this->valve_open(RS::D004);
-			bool d006 = this->valve_open(RS::D006);
-			bool d023 = this->valve_open(RS::D023);
+		if (this->valve_open(RS::D023)) {
+			RS d0810[] = { RS::D018, RS::I0723, RS::D009 };
+			RS rps20[] = { RS::d0205, RS::PSHPump, RS::D020 };
 
-			this->station->append_subtrack(RS::D004, RS::Port, water_color);
-			this->try_flow_water(RS::D004, RS::d0406, water_color);
-			this->try_flow_water(RS::D005, rps20, water_color);
-			this->try_flow_water(RS::D017, RS::I0923, water_color);
+			this->station->append_subtrack(d0810, water_color);
+			this->nintercs[RS::n0723]->set_color(water_color);
+			this->nintercs[RS::n0923]->set_color(water_color);
 
-			if (d023) {
-				RS d0810[] = { RS::D018, RS::I0723, RS::D009 };
+			this->try_flow_water(RS::D009, RS::D006, water_color);
 
-				this->station->append_subtrack(d0810, water_color);
-				this->nintercs[RS::n0723]->set_color(water_color);
-				this->nintercs[RS::n0923]->set_color(water_color);
-
-				this->try_flow_water(RS::D009, RS::D006, water_color);
-			} else {
-				this->nintercs[RS::n0723]->set_color(default_pipe_color);
-				this->nintercs[RS::n0923]->set_color(default_pipe_color);
-			}
-
-			if (d004 || (d006 && d023)) {
-				if (d004) {
-					this->station->append_subtrack(RS::d0406, RS::D004, water_color);
-				}
-
-				if (d006 && d023) {
-					this->station->append_subtrack(RS::d0406, RS::D006, water_color);
-				}
-
+			if (this->valve_open(RS::D006)) {
+				this->station->append_subtrack(RS::d0406, RS::D006, water_color);
 				this->station->append_subtrack(RS::d0406, RS::D005, water_color);
 				this->nintercs[RS::n0405]->set_color(water_color);
 			} else {
 				this->nintercs[RS::n0405]->set_color(default_pipe_color);
 			}
+
+			this->try_flow_water(RS::D005, rps20, water_color);
+		} else {
+			this->nintercs[RS::n0723]->set_color(default_pipe_color);
+			this->nintercs[RS::n0923]->set_color(default_pipe_color);
 		}
 
 		{ // flow SB water
