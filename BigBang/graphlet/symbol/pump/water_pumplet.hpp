@@ -5,7 +5,7 @@
 namespace WarGrey::SCADA {
 	private enum class WaterPumpState {
 		Running, StartReady, Starting, Unstartable, Stopped, StopReady, Stopping, Unstoppable, Ready,
-		Broken, Alert, _
+		Broken, Alert, Maintenance, Limited, _
 	};
 
 	private struct WaterPumpStyle {
@@ -14,6 +14,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ body_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ skeleton_color;
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ mask_color;
+		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ wrench_color;
 	};
 
 	private class WaterPumplet
@@ -43,6 +44,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ stop_mask;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ border;
 		Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ skeleton;
+		Microsoft::Graphics::Canvas::Geometry::CanvasCachedGeometry^ wrench;
 		
 	private:
 		Windows::Foundation::Rect enclosing_box;

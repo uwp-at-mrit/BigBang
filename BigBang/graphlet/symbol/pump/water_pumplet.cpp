@@ -1,4 +1,4 @@
-#include "graphlet/symbol/pump/water_pumplet.hpp"
+﻿#include "graphlet/symbol/pump/water_pumplet.hpp"
 
 #include "polar.hpp"
 #include "paint.hpp"
@@ -40,6 +40,16 @@ void WaterPumplet::construct() {
 	this->iradius = pump_radius * 0.618F;
 	this->border = geometry_rotate(geometry_union(pump, geometry_union(outlet, outlet_line)), this->degrees, 0.0F, 0.0F);
 	this->skeleton = geometry_rotate(circle(pump_cx, pump_cy, this->iradius), this->degrees, 0.0F, 0.0F);
+
+	{ // make wrench
+		TextExtent te;
+		auto font = make_bold_text_format("Monospace", this->radiusX * 0.85F);
+		auto wrshape = paragraph(L"🔧", font, &te);
+		float wrcx = -te.width * 0.5F;
+		float wrcy = -te.height * 0.5F;
+
+		this->wrench = geometry_freeze(geometry_rotate(geometry_translate(wrshape, wrcx, wrcy), this->degrees, 0.0F, 0.0F));
+	}
 	
 	{ // locate
 		auto box = this->skeleton->ComputeBounds();
@@ -133,6 +143,13 @@ void WaterPumplet::prepare_style(WaterPumpState status, WaterPumpStyle& s) {
 	case WaterPumpState::Broken: case WaterPumpState::Alert: {
 		CAS_SLOT(s.body_color, Colours::Red);
 	}; break;
+	case WaterPumpState::Maintenance: {
+		CAS_SLOT(s.wrench_color, Colours::Red);
+	}; break;
+	case WaterPumpState::Limited: {
+		CAS_SLOT(s.body_color, Colours::Green);
+		CAS_SLOT(s.skeleton_color, Colours::DodgerBlue);
+	}; break;
 	}
 
 	CAS_SLOT(s.remote_color, Colours::Cyan);
@@ -161,6 +178,10 @@ void WaterPumplet::draw(CanvasDrawingSession^ ds, float x, float y, float Width,
 	}
 
 	ds->DrawGeometry(this->skeleton, cx, cy, s.skeleton_color, default_thickness);
+
+	if (s.wrench_color != nullptr) {
+		ds->DrawCachedGeometry(this->wrench, cx, cy, s.wrench_color);
+	}
 }
 
 void WaterPumplet::set_remote_control(bool on) {

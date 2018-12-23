@@ -288,4 +288,7 @@
   <data name="Auto" xml:space="preserve">
     <value>自动</value>
   </data>
+  <data name="Limited" xml:space="preserve">
+    <value>功率限制</value>
+  </data>
 </root>

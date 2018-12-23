@@ -2,6 +2,7 @@
 
 #include "settings.hpp"
 #include "planet.hpp"
+#include "gallery.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/textlet.hpp"
@@ -25,11 +26,8 @@ using namespace Microsoft::Graphics::Canvas::Brushes;
 private enum class Brightness { Brightness100, Brightness80, Brightness60, Brightness40, Brightness30, Brightness20, _ };
 
 // WARNING: order matters
-private enum class SS : unsigned int {
-	Brightness, Permission,
-
-	_
-};
+private enum class SS : unsigned int { Brightness, Permission, _ };
+private enum class Icon : unsigned int { Gallery , Settings, _ };
 
 static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 
@@ -55,7 +53,8 @@ public:
 
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
-		auto label_font = make_bold_text_format(large_font_size);
+		auto label_font = make_text_format("Microsoft YaHei", large_font_size);
+		auto icon_font = make_text_format("Consolas", 32.0F);
 		float button_height, label_width;
 		ButtonStyle button_style;
 
@@ -69,18 +68,27 @@ public:
 			this->label_max = std::fmaxf(label_width, this->label_max);
 		}
 
+		for (Icon id = _E0(Icon); id < Icon::_; id++) {
+			this->icons[id] = this->insert_one(new Credit<Labellet, Icon>(_speak(id), icon_font, Colours::GhostWhite), id);
+		}
+
 		this->load_buttons(this->brightnesses, button_style, button_height);
 		this->load_buttons(this->permissions, button_style, button_height);
 	}
 
 	void reflow(float width, float height) override {
-		float label_rx = this->inset + this->label_max;
+		float fx = 0.36F;
+		float button_y;
 
-		this->move_to(this->labels[SS::Brightness], this->inset + this->label_max, height - tiny_font_size, GraphletAnchor::RB);
-		this->move_to(this->labels[SS::Permission], this->labels[SS::Brightness], GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -tiny_font_size);
+		this->move_to(this->labels[SS::Brightness], this->inset, height - tiny_font_size, GraphletAnchor::LB);
+		this->move_to(this->labels[SS::Permission], this->labels[SS::Brightness], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -tiny_font_size);
 
 		this->reflow_buttons(this->brightnesses, this->labels[SS::Brightness]);
 		this->reflow_buttons(this->permissions, this->labels[SS::Permission]);
+
+		this->fill_graphlet_location(this->permissions[PLCMasterMode::Root], nullptr, &button_y);
+		this->move_to(this->icons[Icon::Gallery], width * fx, button_y, GraphletAnchor::RB, 0.0F, -tiny_font_size);
+		this->move_to(this->icons[Icon::Settings], width * (1.0F - fx), button_y, GraphletAnchor::LB, 0.0F, -tiny_font_size);
 	}
 
 public:
@@ -125,12 +133,14 @@ public:
 	bool can_select(IGraphlet* g) override {
 		auto btn = dynamic_cast<Buttonlet*>(g);
 
-		return ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled));
+		return (dynamic_cast<Credit<Labellet, Icon>*>(g) != nullptr)
+			|| ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled));
 	}
 
 	void on_tap_selected(IGraphlet* g, float local_x, float local_y) override {
 		auto b_btn = dynamic_cast<Credit<Buttonlet, Brightness>*>(g);
 		auto p_btn = dynamic_cast<Credit<Buttonlet, PLCMasterMode>*>(g);
+		auto icon = dynamic_cast<Credit<Labellet, Icon>*>(g);
 
 		if (b_btn != nullptr) {
 			double alpha = -1.0;
@@ -149,6 +159,10 @@ public:
 			}
 		} else if (p_btn != nullptr) {
 			this->set_plc_master_mode(p_btn->id);
+		} else if (icon != nullptr) {
+			switch (icon->id) {
+			case Icon::Gallery: popup_the_gallery(); break;
+			}
 		}
 	}
 
@@ -166,7 +180,12 @@ private:
 private:
 	template<typename CMD>
 	void reflow_buttons(std::map<CMD, Credit<Buttonlet, CMD>*>& bs, IGraphlet* target) {
+		float target_width;
 		float xoff = this->inset;
+
+		target->fill_extent(0.0F, 0.0F, &target_width, nullptr);
+
+		xoff += (this->label_max - target_width);
 
 		for (CMD cmd = _E0(CMD); cmd < CMD::_; cmd++) {
 			this->move_to(bs[cmd], target, GraphletAnchor::RC, GraphletAnchor::LC, xoff);
@@ -185,8 +204,6 @@ private:
 			if (settings->Values->HasKey(mode_setting_key)) {
 				Platform::String^ mode_str = settings->Values->Lookup(mode_setting_key)->ToString();
 
-				this->get_logger()->log_message(Log::Info, mode_str);
-				
 				for (PLCMasterMode m = _E0(PLCMasterMode); m < PLCMasterMode::_; m++) {
 					if (m.ToString()->Equals(mode_str)) {
 						if ((m != PLCMasterMode::Root) || this->root) {
@@ -221,6 +238,7 @@ private:
 private: // never delete these graphlets manually.
 	std::map<Brightness, Credit<Buttonlet, Brightness>*> brightnesses;
 	std::map<PLCMasterMode, Credit<Buttonlet, PLCMasterMode>*> permissions;
+	std::map<Icon, Credit<Labellet, Icon>*> icons;
 	std::map<SS, Labellet*> labels;
 };
 

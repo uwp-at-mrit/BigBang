@@ -34,7 +34,7 @@ public:
 public:
 	void construct() override {
 		this->label = make_text_layout(entity->display_name(), label_font);
-		this->mask_color = Colours::make(0x000000, 0.64);
+		this->mask_color = Colours::make(0x000000, 0.72);
 	}
 
 	void fill_extent(float x, float y, float* w, float* h) override {
@@ -44,7 +44,9 @@ public:
 	void draw(CanvasDrawingSession^ ds, float x, float y, float Width, float Height) override {
 		Rect box = this->label->LayoutBounds;
 		float cx = x + this->width * 0.5F;
-		float ly = y + this->height - box.Height;
+		float mask_height = box.Height * 1.618F;
+		float mask_y = y + this->height - mask_height;
+		float label_y = y + this->height - box.Height;
 
 		if (this->thumbnail == nullptr) {
 			this->refresh();
@@ -52,8 +54,8 @@ public:
 
 		ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
 
-		ds->FillRectangle(x, ly, this->width, box.Height, this->mask_color);
-		ds->DrawTextLayout(this->label, cx - box.Width * 0.5F - box.X, ly, Colours::White);
+		ds->FillRectangle(x, mask_y, this->width, mask_height, this->mask_color);
+		ds->DrawTextLayout(this->label, cx - box.Width * 0.5F - box.X, label_y, Colours::White);
 	};
 
 public:

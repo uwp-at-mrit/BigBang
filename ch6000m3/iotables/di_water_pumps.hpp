@@ -31,6 +31,7 @@ namespace WarGrey::SCADA {
 	bool DI_water_pump_running(const uint8* db4, size_t idx4_p1);
 	bool DI_water_pump_alert(const uint8* db4, size_t idx4_p1);
 	bool DI_water_pump_broken(const uint8* db4, size_t idx4_p1);
+	bool DI_water_pump_limited(const uint8* db4, size_t idx4_p1);
 	bool DI_water_pump_repair(const uint8* db4, size_t idx4_p1);
 	bool DI_water_pump_emergence(const uint8* db4, size_t idx4_p1);
 	

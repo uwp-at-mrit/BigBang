@@ -1,4 +1,4 @@
-#include "graphlet/symbol/pump/hopper_pumplet.hpp"
+﻿#include "graphlet/symbol/pump/hopper_pumplet.hpp"
 
 #include "polar.hpp"
 #include "paint.hpp"
@@ -41,20 +41,27 @@ void HopperPumplet::construct() {
 	float icydiff = irdiff + indicator_radius;
 	float indicator_cx = body_x + irdiff + indicator_radius;
 	float indicator_cy = (this->upward ? (body_y + icydiff) : (body_y + body_height - icydiff));
-	float wrench_radius = this->radiusY * 0.618F;
-
+	
 	auto stadium = rounded_rectangle(body_x, body_y, body_width, body_height, body_radius, body_radius);
 	auto inlet = rectangle(inlet_x, inlet_y, inlet_width, inlet_height);
 	auto inlet_line = vline(inlet_ex, inlet_ey, inlet_extend);
 	auto indicator = circle(indicator_cx, indicator_cy, indicator_radius);
 	auto iborder = circle(indicator_cx, indicator_cy, body_radius);
-	auto wrshape = geometry_translate(polar_wrench(wrench_radius, 30.0, -95.0), indicator_cx, indicator_cx);
-	
+
 	this->border = geometry_rotate(stadium, this->degrees, 0.0F, 0.0F);
 	this->inlet = geometry_rotate(geometry_union(inlet, inlet_line), this->degrees, 0.0F, 0.0F);
 	this->skeleton = geometry_rotate(indicator, this->degrees, 0.0F, 0.0F);
 	this->iborder = geometry_rotate(iborder, this->degrees, 0.0F, 0.0F);
-	this->wrench = geometry_freeze(geometry_rotate(wrshape, this->degrees, 0.0F, 0.0F));
+	
+	{ // make wrench
+		TextExtent te;
+		auto font = make_bold_text_format("Monospace", this->radiusX * 1.2F);
+		auto wrshape = paragraph(L"🔧", font, &te);
+		float wrcx = indicator_cx - te.width * 0.5F;
+		float wrcy = -te.height * 0.5F;
+
+		this->wrench = geometry_freeze(geometry_rotate(geometry_translate(wrshape, wrcx, wrcy), this->degrees, 0.0F, 0.0F));
+	}
 
 	{ // locate
 		auto box = this->border->ComputeBounds();

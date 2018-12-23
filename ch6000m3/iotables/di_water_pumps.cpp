@@ -6,14 +6,18 @@ using namespace WarGrey::SCADA;
 void WarGrey::SCADA::DI_water_pump(WaterPumplet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1) {
 	target->set_remote_control(DI_water_pump_remote_control(db4, idx4_p1));
 
+	//if (DI_water_pump_limited(db4, idx4_p1)) {
+	//	target->set_state(WaterPumpState::Limited);
+	//} else
+		
 	if (DI_water_pump_running(db4, idx4_p1)) {
 		target->set_state(WaterPumpState::Running);
 	} else if (DI_water_pump_alert(db4, idx4_p1)) {
 		target->set_state(WaterPumpState::Alert);
 	} else if (DI_water_pump_broken(db4, idx4_p1)) {
 		target->set_state(WaterPumpState::Broken);
-	//} else if (DI_water_pump_repair(db4, idx4_p1)) {
-	//	target->set_state(WaterPumpState::Maintenance);
+	} else if (DI_water_pump_repair(db4, idx4_p1)) {
+		target->set_state(WaterPumpState::Maintenance);
 	} else {
 		if (DBX(db205, idx205_p1 - 1U)) {
 			target->set_state(WaterPumpState::Starting);
@@ -66,6 +70,10 @@ bool WarGrey::SCADA::DI_water_pump_alert(const uint8* db4, size_t idx4_p1) {
 
 bool WarGrey::SCADA::DI_water_pump_broken(const uint8* db4, size_t idx4_p1) {
 	return DBX(db4, idx4_p1 + 3U);
+}
+
+bool WarGrey::SCADA::DI_water_pump_limited(const uint8* db4, size_t idx4_p1) {
+	return DBX(db4, idx4_p1 + 4U);
 }
 
 bool WarGrey::SCADA::DI_water_pump_repair(const uint8* db4, size_t idx4_p1) {

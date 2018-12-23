@@ -312,11 +312,3 @@ CanvasGeometry^ WarGrey::SCADA::polar_trapezoid(float r, float ubase, double rot
 
 	return CanvasGeometry::CreatePath(trapezoid);
 }
-
-CanvasGeometry^ WarGrey::SCADA::polar_wrench(float radius, double alpha_degrees, double rotation_degrees) {
-	return polar_wrench(radius, radius, alpha_degrees, rotation_degrees);
-}
-
-CanvasGeometry^ WarGrey::SCADA::polar_wrench(float radiusX, float radiusY, double alpha_degrees, double rotation_degrees) {
-	return polar_rectangle(radiusX, radiusY, alpha_degrees, rotation_degrees);
-}

@@ -27,14 +27,15 @@ IHopperDoorlet::IHopperDoorlet(DoorState default_state, float radius, double deg
 
 /*************************************************************************************************/
 HopperDoorlet::HopperDoorlet(float radius, double degrees) : HopperDoorlet(DoorState::Default, radius, degrees) {}
-
-HopperDoorlet::HopperDoorlet(DoorState default_state, float radius, double degrees)
-	: IHopperDoorlet(default_state, radius, degrees) {}
+HopperDoorlet::HopperDoorlet(DoorState default_state, float radius, double degrees) : IHopperDoorlet(default_state, radius, degrees) {}
 
 void HopperDoorlet::construct() {
 	float r = this->radiusX - default_thickness * 2.0F;
-	
+	double d0 = this->degrees - 45.0;
+	double dn = this->degrees + 135.0;
+
 	this->depth_line = geometry_draft(polar_triangle(r, this->degrees + 60.00), default_thickness);
+	this->disable_line = geometry_draft(polar_line(this->radiusX - default_thickness, d0, dn), default_thickness);
 }
 
 void HopperDoorlet::update(long long count, long long interval, long long uptime) {
@@ -75,25 +76,20 @@ void HopperDoorlet::prepare_style(DoorState state, DoorStyle& s) {
 }
 
 void HopperDoorlet::on_state_changed(DoorState state) {
+	float progress = 0.0F;
+
 	this->flashing = false;
 	
 	switch (state) {
-	case DoorState::Opening: case DoorState::Closing: this->flashing = true; break;
+	case DoorState::Opening: this->flashing = true; progress = 0.0F; break;
+	case DoorState::Closing: this->flashing = true; progress = 1.0F; break;
 	case DoorState::Open: this->set_value(1.0, true); break;
-	case DoorState::Disabled: {
-		if (this->disable_line == nullptr) {
-			double d0 = this->degrees - 45.0;
-			double dn = this->degrees + 135.0;
+	case DoorState::Closed: case DoorState::Disabled: this->set_value(0.0, true); break;
+	case DoorState::Default: progress = 0.0F; break;
+	}
 
-			this->disable_line = geometry_draft(polar_line(this->radiusX - default_thickness, d0, dn), default_thickness);
-		}
-	} // NOTE: there is no `break` here;
-	case DoorState::Closed: this->set_value(0.0, true); break;
-	case DoorState::Default: {
-		if (this->door_partitions[0] == nullptr) {
-			this->set_value(0.0, true);
-		}
-	}; break;
+	if (this->door_partitions[0] == nullptr) {
+		this->set_value(progress, true);
 	}
 }
 
@@ -139,11 +135,8 @@ void HopperDoorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 }
 
 /*************************************************************************************************/
-UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees)
-	: UpperHopperDoorlet(DoorState::Default, radius, degrees) {}
-
-UpperHopperDoorlet::UpperHopperDoorlet(DoorState default_state, float radius, double degrees)
-	: IHopperDoorlet(default_state, radius, degrees) {
+UpperHopperDoorlet::UpperHopperDoorlet(float radius, double degrees) : UpperHopperDoorlet(DoorState::Default, radius, degrees) {}
+UpperHopperDoorlet::UpperHopperDoorlet(DoorState default_state, float radius, double degrees) : IHopperDoorlet(default_state, radius, degrees) {
 	this->radiusY = this->radiusX * 0.618F;
 	this->brdiff = default_thickness * 1.618F;
 }
@@ -203,17 +196,20 @@ void UpperHopperDoorlet::prepare_style(DoorState state, DoorStyle& s) {
 }
 
 void UpperHopperDoorlet::on_state_changed(DoorState state) {
+	float progress = 0.0F;
+
 	this->flashing = false;
 
 	switch (state) {
-	case DoorState::Opening: case DoorState::Closing: this->flashing = true; break;
-	case DoorState::Open: this->set_value(1.0, true); break;
-	case DoorState::Closed: case DoorState::Disabled: this->set_value(0.0, true); break;
-	case DoorState::Default: {
-		if (this->door == nullptr) {
-			this->set_value(0.0, true);
-		}
-	}; break;
+	case DoorState::Opening: this->flashing = true; progress = 0.0F; break;
+	case DoorState::Closing: this->flashing = true; progress = 1.0F; break;
+	case DoorState::Open: this->set_value(1.0F, true); break;
+	case DoorState::Closed: case DoorState::Disabled: this->set_value(0.0F, true); break;
+	case DoorState::Default: progress = 0.0F; break;
+	}
+
+	if (this->door == nullptr) {
+		this->set_value(progress, true);
 	}
 }
 
@@ -222,7 +218,7 @@ void UpperHopperDoorlet::on_value_changed(double v) {
 	float ry = this->radiusY - this->brdiff;
 	auto partial_door = polar_masked_rectangle(rx, ry, default_alpha_degrees, 0.0F, this->get_percentage() - 1.0);
 
-	/** Note: all masked doors must be rotated with (0.0F, 0.0F) */
+	/* Note: all masked doors must be rotated with (0.0F, 0.0F) */
 	this->door = geometry_rotate(partial_door, this->degrees, 0.0F, 0.0F);
 }
 
