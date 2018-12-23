@@ -148,19 +148,26 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.cpp">
       <Filter>graphlet\cylinder</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp" />
-    <ClCompile Include="D:\WinSCADA\BigBang\navigator\null.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp">
       <Filter>navigator</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\navigator\listview.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\listview.cpp">
       <Filter>navigator</Filter>
     </ClCompile>
-    <ClCompile Include="D:\WinSCADA\BigBang\navigator\navigator.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\navigator.cpp">
       <Filter>navigator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\null.cpp">
+      <Filter>navigator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.cpp">
+      <Filter>graphlet\cylinder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.cpp">
+      <Filter>graphlet\symbol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -315,19 +322,26 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\boltlet.hpp">
       <Filter>graphlet\cylinder</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp" />
-    <ClInclude Include="D:\WinSCADA\BigBang\navigator\null.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp">
       <Filter>navigator</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\navigator\listview.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\listview.hpp">
       <Filter>navigator</Filter>
     </ClInclude>
-    <ClInclude Include="D:\WinSCADA\BigBang\navigator\navigator.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\navigator.hpp">
       <Filter>navigator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\null.hpp">
+      <Filter>navigator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\cylinder\holdhooplet.hpp">
+      <Filter>graphlet\cylinder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)graphlet\symbol\heaterlet.hpp">
+      <Filter>graphlet\symbol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

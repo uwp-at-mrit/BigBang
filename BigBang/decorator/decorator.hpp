@@ -32,10 +32,11 @@ namespace WarGrey::SCADA {
 			float x, float y, float width, float height, bool selected) {}
 
 	public:
-		void set_active_planet(IPlanet* master);
+		virtual void update(long long count, long long interval, long long uptime) {}
+		virtual void on_active_planet_changed(IPlanet* master) {}
 
 	public:
-		virtual void update(long long count, long long interval, long long uptime) {}
+		void set_active_planet(IPlanet* master);
 
 	private:
 		IPlanet* master;

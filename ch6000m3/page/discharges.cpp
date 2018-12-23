@@ -307,8 +307,8 @@ public:
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
 
-		this->hopper_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->hopper_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->metrics_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->metrics_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
 	}
  
 public:
@@ -638,10 +638,10 @@ private:
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 
-		this->load_dimension(this->powers, id, "kwatt");
-		this->load_dimension(this->rpms, id, "rpm");
-		this->load_dimension(this->dpressures, id, "bar");
-		this->load_dimension(this->vpressures, id, "bar");
+		this->load_dimension(this->powers, id, "kwatt", 0);
+		this->load_dimension(this->rpms, id, "rpm", 0);
+		this->load_dimension(this->dpressures, id, "bar", 1);
+		this->load_dimension(this->vpressures, id, "bar", 1);
 	}
 
 	template<class A, typename E>
@@ -658,7 +658,7 @@ private:
 			ws[id] = this->master->insert_one(new Credit<W, E>(radius), id);
 
 			this->load_label(ls, id, Colours::Salmon, this->caption_font);
-			this->load_dimension(this->winch_pressures, id, "bar");
+			this->load_dimension(this->winch_pressures, id, "bar", 1);
 		}
 	}
 
@@ -668,8 +668,9 @@ private:
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, unit), id);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, int precision) {
+		this->metrics_style.precision = precision;
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}
 
 	template<typename E>
@@ -808,7 +809,7 @@ private:
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
 	DimensionStyle plain_style;
-	DimensionStyle hopper_style;
+	DimensionStyle metrics_style;
 
 private:
 	DischargesPage* master;

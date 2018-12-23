@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "plc.hpp"
 
+#include "navigator/thumbnail.hpp"
 #include "planet.hpp"
 #include "timer.hxx"
 #include "dirotation.hpp"
@@ -44,7 +45,8 @@ public:
 	}
 
 internal:
-	DredgerUniverse(Platform::String^ name) : UniverseDisplay(make_system_logger(default_logging_level, name), name) {
+	DredgerUniverse(Platform::String^ name, IUniverseNavigator* navigator)
+		: UniverseDisplay(make_system_logger(default_logging_level, name), name, navigator) {
 		Platform::String^ localhost = system_ipv4_address();
 		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
 		PLCMasterMode mode = PLCMasterMode::User;
@@ -130,7 +132,8 @@ public:
 		}
 	}
 
-	DashboardUniverse(Platform::String^ name, unsigned int dbidx) : DredgerUniverse(name) {
+internal:
+	DashboardUniverse(Platform::String^ name, IUniverseNavigator* navigator, unsigned int dbidx) : DredgerUniverse(name, navigator) {
 		this->page_turner = new PageEventListener(dbidx);
 		this->device->append_confirmation_receiver(this->page_turner);
 	}
@@ -163,13 +166,14 @@ public:
 public:
 	void construct(Platform::String^ name, Size region) {
 		Platform::String^ localhost = system_ipv4_address();
+		IUniverseNavigator* navigator = new ThumbnailNavigator(default_logging_level, name, region.Width / region.Height, 160.0F);
 
 		if (localhost->Equals("192.168.0.11")) {
-			this->universe = ref new DashboardUniverse(name, left_paging_key);
+			this->universe = ref new DashboardUniverse(name, navigator, left_paging_key);
 		} else if (localhost->Equals("192.168.0.12")) {
-			this->universe = ref new DashboardUniverse(name, right_paging_key);
+			this->universe = ref new DashboardUniverse(name, navigator, right_paging_key);
 		} else {
-			this->universe = ref new DredgerUniverse(name);
+			this->universe = ref new DredgerUniverse(name, navigator);
 		}
 
 		// TODO: Why SplitView::Content cannot do it on its own?
@@ -184,9 +188,11 @@ public:
 		{ // construct the functional panel
 			StackPanel^ panel = ref new StackPanel();
 			
+			this->universe->navigator->min_height(region.Height * 0.85F);
+			
 			this->settings = ref new SettingsWidget(this->universe->get_logger(), this->universe->get_plc_device());
-			this->settings->min_width = 1.0F;
-			this->settings->min_height = 300.0F;
+			this->settings->min_width = this->universe->navigator->min_width();
+			this->settings->min_height = region.Height - this->universe->navigator->min_height();
 
 			panel->Orientation = ::Orientation::Vertical;
 			panel->HorizontalAlignment = ::HorizontalAlignment::Stretch;
@@ -196,6 +202,7 @@ public:
 			panel->Children->Append(this->settings->canvas);
 
 			this->Pane = panel;
+			this->OpenPaneLength = this->universe->navigator->min_width();
 			this->timeline->append_timer_listener(this->settings);
 		}
 	}

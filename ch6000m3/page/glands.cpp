@@ -298,10 +298,10 @@ public:
 			this->load_labels(this->captions, GP::ToFlushs, GP::SS2, Colours::Silver);
 			this->load_labels(this->captions, GP::Hatch, GP::Sea, Colours::Salmon);
 
-			this->load_dimension(this->pressures, GP::PSFP, "bar", "P");
-			this->load_dimensions(this->pressures, GP::PSUWP1, GP::SBUWP2, "bar", "P");
-			this->load_dimensions(this->pressures, GP::PSHP, GP::SBHP, "bar", "P");
-			this->load_dimensions(this->flows, GP::PSHP, GP::SBHP, "m3ph", "F");
+			this->load_dimension(this->pressures, GP::PSFP, "bar", "P", 1);
+			this->load_dimensions(this->pressures, GP::PSUWP1, GP::SBUWP2, "bar", "P", 1);
+			this->load_dimensions(this->pressures, GP::PSHP, GP::SBHP, "bar", "P", 1);
+			this->load_dimensions(this->flows, GP::PSHP, GP::SBHP, "m3ph", "F", 1);
 
 			this->load_settings(this->rpms, GP::PSHPa, GP::SBHPb, "rpm", "S");
 		}
@@ -405,8 +405,8 @@ private:
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy), id);
 
-		this->load_dimension(this->rpms, id, "rpm", "S");
-		this->load_dimension(this->powers, id, "kwatt", "P");
+		this->load_dimension(this->rpms, id, "rpm", "S", 0);
+		this->load_dimension(this->powers, id, "kwatt", "P", 0);
 	}
 
 	template<typename E>
@@ -418,14 +418,15 @@ private:
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^label) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, Platform::String^label, int precision) {
+		this->dimension_style.precision = precision;
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->dimension_style, unit, label), id);
 	}
 
 	template<typename E>
-	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^label) {
+	void load_dimensions(std::map<E, Credit<Dimensionlet, E>*>& ds, E id0, E idn, Platform::String^ unit, Platform::String^label, int precision) {
 		for (E id = id0; id <= idn; id++) {
-			this->load_dimension(ds, id, unit, label);
+			this->load_dimension(ds, id, unit, label, precision);
 		}
 	}
 

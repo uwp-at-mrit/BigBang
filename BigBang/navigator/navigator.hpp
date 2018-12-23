@@ -22,6 +22,13 @@ namespace WarGrey::SCADA {
 		void append_navigation_listener(IUniverseNavigatorListener^ actor);
 		void navigate(int from_index, int to_index);
 
+	public:
+		float min_width();
+		void min_width(double v);
+
+		float min_height();
+		void min_height(double v);
+
 	private:
 		std::list<IUniverseNavigatorListener^> listeners;
 	};

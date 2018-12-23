@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name=":connecting:" xml:space="preserve">
-    <value>Listening</value>
-  </data>
-  <data name=":disconnected:" xml:space="preserve">
-    <value>Disconnected</value>
-  </data>
   <data name="hydraulics" xml:space="preserve">
     <value>Hydraulic System</value>
   </data>
@@ -251,5 +245,8 @@
   </data>
   <data name="dredges_Suctions" xml:space="preserve">
     <value>Suction Positions</value>
+  </data>
+  <data name="CH6000m3" xml:space="preserve">
+    <value>changjing7 SCADA</value>
   </data>
 </root>

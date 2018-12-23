@@ -1,6 +1,6 @@
 #include "universe.hxx"
 #include "planet.hpp"
-#include "navigator/listview.hpp"
+#include "navigator/null.hpp"
 
 #include "system.hpp"
 #include "syslog.hpp"
@@ -233,21 +233,21 @@ Syslog* IDisplay::get_logger() {
 }
 
 /*************************************************************************************************/
-UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
-	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, first_planet, navigator) {}
+UniverseDisplay::UniverseDisplay(Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
+	: UniverseDisplay(DisplayFit::None, 0.0F, 0.0F, logger, setting_name, navigator, first_planet) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight
-	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
-	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, first_planet, navigator) {}
+	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
+	: UniverseDisplay(mode, dwidth, dheight, dwidth, dheight, logger, setting_name, navigator, first_planet) {}
 
 UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, float swidth, float sheight
-	, Syslog* logger, Platform::String^ setting_name, IPlanet* first_planet, IUniverseNavigator* navigator)
+	, Syslog* logger, Platform::String^ setting_name, IUniverseNavigator* navigator, IPlanet* first_planet)
 	: IDisplay(((logger == nullptr) ? make_silent_logger("UniverseDisplay") : logger), mode, dwidth, dheight, swidth, sheight)
 	, figure_x0(std::nanf("swipe")), universe_settings(nullptr), shortcuts_enabled(true), follow_global_mask_setting(true) {
 	this->transfer_clock = ref new DispatcherTimer();
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
 
-	this->_navigator = ((navigator == nullptr) ? new ListViewNavigator() : navigator);
+	this->_navigator = ((navigator == nullptr) ? new NullNavigator() : navigator);
 	this->_navigator->append_navigation_listener(this);
 
 	if (setting_name != nullptr) {
@@ -305,9 +305,9 @@ void UniverseDisplay::register_virtual_keydown_event_handler(UIElement^ target) 
 }
 
 UniverseDisplay::~UniverseDisplay() {
-	this->collapse();
 	this->transfer_clock->Stop();
-
+	this->collapse();
+	
 	if (this->_navigator != nullptr) {
 		delete this->_navigator;
 	}

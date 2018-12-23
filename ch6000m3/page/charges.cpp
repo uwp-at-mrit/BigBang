@@ -569,10 +569,10 @@ private:
 
 		gs[id] = this->master->insert_one(new G(rx, std::fabsf(rx) * fy, degrees), id);
 		
-		this->load_dimension(this->powers, id, "kwatt");
-		this->load_dimension(this->rpms, id, "rpm");
-		this->load_dimension(this->dpressures, id, "bar");
-		this->load_dimension(ps, id, "bar");
+		this->load_dimension(this->powers, id, "kwatt", 0);
+		this->load_dimension(this->rpms, id, "rpm", 0);
+		this->load_dimension(this->dpressures, id, "bar", 1);
+		this->load_dimension(ps, id, "bar", 1);
 	}
 
 	template<typename E>
@@ -581,7 +581,8 @@ private:
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, int precision) {
+		this->hopper_style.precision = precision;
 		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->hopper_style, unit), id);
 	}
 

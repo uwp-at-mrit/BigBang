@@ -178,7 +178,7 @@
     <value>右绞车 &amp;&amp; 吊架</value>
   </data>
   <data name="lubricatings" xml:space="preserve">
-    <value>轴承润滑单元 &amp;&amp; 齿轮箱滑油泵</value>
+    <value>泥泵轴承 &amp;&amp; 齿轮箱</value>
   </data>
   <data name="water_pump_dx" xml:space="preserve">
     <value>高压冲水泵诊断</value>
@@ -245,5 +245,8 @@
   </data>
   <data name="dredges_Suctions" xml:space="preserve">
     <value>水下耙臂</value>
+  </data>
+  <data name="CH6000m3" xml:space="preserve">
+    <value>长鲸7 SCADA</value>
   </data>
 </root>

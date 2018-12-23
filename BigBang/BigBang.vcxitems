@@ -55,6 +55,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\navigator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\listview.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)navigator\null.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)navigator\thumbnail.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\navigator.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\listview.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)navigator\null.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)navigator\thumbnail.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp" />

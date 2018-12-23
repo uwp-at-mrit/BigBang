@@ -1,5 +1,4 @@
 ﻿#include "satellite.hpp"
-#include "navigator/null.hpp"
 
 using namespace WarGrey::SCADA;
 
@@ -36,7 +35,7 @@ static void configure_flyout(Flyout^ orbit, ISatellite* self) {
 private ref class SatelliteDisplay sealed : public UniverseDisplay {
 internal:
 	SatelliteDisplay(Syslog* logger, ISatellite* entity)
-		: UniverseDisplay(logger, nullptr, entity, new NullNavigator())
+		: UniverseDisplay(logger, nullptr, nullptr, entity)
 		, satellite(entity), closed(true) {}
 
 public:

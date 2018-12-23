@@ -45,8 +45,6 @@ namespace WarGrey::SCADA {
     public:
 		virtual_read_only_property(float, actual_width);
         virtual_read_only_property(float, actual_height);
-
-	public:
         read_write_property(float, width);
         read_write_property(float, height);
         read_write_property(float, min_width);
@@ -96,23 +94,23 @@ namespace WarGrey::SCADA {
 	internal:
 		UniverseDisplay(WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr);
 
 		UniverseDisplay(WarGrey::SCADA::DisplayFit mode,
 			float dest_width, float dest_height,
 			float src_width, float src_height,
 			WarGrey::SCADA::Syslog* logger = nullptr,
 			Platform::String^ setting_name = nullptr,
-			WarGrey::SCADA::IPlanet* first_planet = nullptr,
-			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr);
+			WarGrey::SCADA::IUniverseNavigator* navigator = nullptr,
+			WarGrey::SCADA::IPlanet* first_planet = nullptr);
 		
 	internal:
 		void refresh(WarGrey::SCADA::IPlanet* target) override;

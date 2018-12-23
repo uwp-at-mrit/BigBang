@@ -20,7 +20,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
 using namespace Microsoft::Graphics::Canvas::Brushes;
 
-private enum class SettingsCommand { Brightness100, Brightness80, Brightness60, Brightness40, Brightness20, _ };
+private enum class SettingsCommand { Brightness100, Brightness80, Brightness60, Brightness40, Brightness30, Brightness20, _ };
 
 // WARNING: order matters
 private enum class SS : unsigned int {
@@ -72,13 +72,15 @@ public:
 		double alpha = this->master->global_mask_alpha;
 		Buttonlet* target = nullptr;
 
-		if (alpha > 0.7) {
+		if (alpha > 0.75) {
 			target = this->settings[SettingsCommand::Brightness20];
-		} else if (alpha > 0.5) {
+		} else if (alpha > 0.65) {
+			target = this->settings[SettingsCommand::Brightness30];
+		} else if (alpha > 0.50) {
 			target = this->settings[SettingsCommand::Brightness40];
-		} else if (alpha > 0.3) {
+		} else if (alpha > 0.30) {
 			target = this->settings[SettingsCommand::Brightness60];
-		} else if (alpha > 0.1) {
+		} else if (alpha > 0.10) {
 			target = this->settings[SettingsCommand::Brightness80];
 		} else {
 			target = this->settings[SettingsCommand::Brightness100];
@@ -107,6 +109,7 @@ public:
 			case SettingsCommand::Brightness80:  alpha = 0.2; break;
 			case SettingsCommand::Brightness60:  alpha = 0.4; break;
 			case SettingsCommand::Brightness40:  alpha = 0.6; break;
+			case SettingsCommand::Brightness30:  alpha = 0.7; break;
 			case SettingsCommand::Brightness20:  alpha = 0.8; break;
 			}
 

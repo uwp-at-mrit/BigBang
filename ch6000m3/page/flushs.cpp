@@ -239,8 +239,9 @@ public:
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Green);
 
-		this->plain_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
-		this->plain_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+		this->metrics_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
+		this->metrics_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
+
 	}
  
 public:
@@ -360,10 +361,10 @@ public:
 		{ // load other dimensions
 			float cylinder_height = gheight * 5.0F;
 
-			this->load_dimension(this->pressures, FS::HBV04, "bar");
-			this->load_dimension(this->flows, FS::HBV04, "m3ph");
-			this->load_dimension(this->pressures, FS::HBV05, "bar");
-			this->load_dimension(this->flows, FS::HBV05, "m3ph");
+			this->load_dimension(this->pressures, FS::HBV04, "bar", 1);
+			this->load_dimension(this->flows, FS::HBV04, "m3ph", 1);
+			this->load_dimension(this->pressures, FS::HBV05, "bar", 1);
+			this->load_dimension(this->flows, FS::HBV05, "m3ph", 1);
 
 			this->load_dimensions(this->pressures, FS::D, FS::E, "bar");
 		}
@@ -467,8 +468,8 @@ private:
 	
 		gs[id] = this->master->insert_one(new G(rx, degrees), id);
 
-		this->load_dimension(this->powers, id, "kwatt");
-		this->load_dimension(this->rpms, id, "rpm");
+		this->load_dimension(this->powers, id, "kwatt", 0);
+		this->load_dimension(this->rpms, id, "rpm", 0);
 	}
 
 	template<class B, typename CMD>
@@ -484,13 +485,9 @@ private:
 	}
 
 	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit) {
-		this->load_dimension(ds, id, unit, this->plain_style);
-	}
-
-	template<typename E>
-	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, DimensionStyle& style) {
-		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(style, unit), id);
+	void load_dimension(std::map<E, Credit<Dimensionlet, E>*>& ds, E id, Platform::String^ unit, int precision) {
+		this->metrics_style.precision = precision;
+		ds[id] = this->master->insert_one(new Credit<Dimensionlet, E>(this->metrics_style, unit), id);
 	}
 
 	template<typename E>
@@ -632,7 +629,7 @@ private:
 	DimensionStyle percentage_style;
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
-	DimensionStyle plain_style;
+	DimensionStyle metrics_style;
 
 private:
 	FlushsPage* master;

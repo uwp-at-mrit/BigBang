@@ -18,7 +18,13 @@ Syslog* IPlanetDecorator::get_logger() {
 }
 
 void IPlanetDecorator::set_active_planet(IPlanet* master) {
+	bool changed = (this->master != master);
+
 	this->master = master;
+
+	if (changed) {
+		this->on_active_planet_changed(this->master);
+	}
 }
 
 void IPlanetDecorator::fill_graphlets_boundary(float* x, float* y, float* width, float* height) {
