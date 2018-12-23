@@ -7,7 +7,6 @@
 #include "navigator/thumbnail.hpp"
 #include "planet.hpp"
 #include "timer.hxx"
-#include "dirotation.hpp"
 
 #include "page/hydraulics.hpp"
 #include "page/hopper_doors.hpp"
@@ -20,15 +19,12 @@
 #include "page/dredges.hpp"
 
 #include "splash.hpp"
-#include "gallery.hpp"
-#include "test/performance.hpp"
 
 using namespace WarGrey::SCADA;
 
 using namespace Windows::System;
 using namespace Windows::Foundation;
 
-using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
@@ -47,36 +43,12 @@ public:
 internal:
 	DredgerUniverse(Platform::String^ name, IUniverseNavigator* navigator)
 		: UniverseDisplay(make_system_logger(default_logging_level, name), name, navigator) {
-		Platform::String^ localhost = system_ipv4_address();
-		Syslog* logger = make_system_logger(default_logging_level, name + ":PLC");
-		PLCMasterMode mode = PLCMasterMode::User;
-
-		this->device = new PLCMaster(logger, plc_master_suicide_timeout);
-
-		for (unsigned int idx = 0; idx < sizeof(root_machines) / sizeof(Platform::String^); idx++) {
-			if (localhost->Equals(root_machines[idx])) {
-				mode = PLCMasterMode::Root;
-				break;
-			}
-		}
-
-		this->device->set_mode(mode);
+		this->device = new PLCMaster(make_system_logger(default_logging_level, name + ":PLC"), plc_master_suicide_timeout);
 	}
 
 internal:
 	PLCMaster* get_plc_device() {
 		return this->device;
-	}
-
-public:
-	void switch_plc_master_mode() {
-		if (this->device != nullptr) {
-			switch (this->device->get_mode()) {
-			case PLCMasterMode::Debug: this->device->set_mode(PLCMasterMode::Root); break;
-			case PLCMasterMode::Root: this->device->set_mode(PLCMasterMode::User); break;
-			case PLCMasterMode::User: this->device->set_mode(PLCMasterMode::Debug); break;
-			}
-		}
 	}
 
 protected:
@@ -96,8 +68,6 @@ protected:
 		this->add_planet(new DraughtsPage(this->device)); // 9
 		this->add_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
 		this->add_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
-
-		//this->add_planet(new Gallery());
 	}
 
 protected private:
@@ -224,20 +194,16 @@ private:
 	}
 
 	void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
-		if ((args->KeyModifiers & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
-			this->universe->switch_plc_master_mode();
-		} else {
-			auto pt = args->GetCurrentPoint(this);
-			float x = pt->Position.X;
+		auto pt = args->GetCurrentPoint(this);
+		float x = pt->Position.X;
 
-			if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
-				if (x <= normal_font_size) {
-					this->IsPaneOpen = true;
-					args->Handled = true;
-				} else if (x > this->OpenPaneLength) {
-					this->IsPaneOpen = false;
-					args->Handled = true;
-				}
+		if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
+			if (x <= normal_font_size) {
+				this->IsPaneOpen = true;
+				args->Handled = true;
+			} else if (x > this->OpenPaneLength) {
+				this->IsPaneOpen = false;
+				args->Handled = true;
 			}
 		}
 	}

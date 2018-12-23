@@ -1326,6 +1326,26 @@ float IPlanet::actual_height() {
 	return height;
 }
 
+float IPlanet::min_width() {
+	float width = 0.0F;
+
+	if (this->info != nullptr) {
+		width = this->info->master->min_width;
+	}
+
+	return width;
+}
+
+float IPlanet::min_height() {
+	float height = 0.0F;
+
+	if (this->info != nullptr) {
+		height = this->info->master->min_height;
+	}
+
+	return height;
+}
+
 float IPlanet::sketch_to_application_width(float sketch_width) {
 	float width = sketch_width;
 
@@ -1419,8 +1439,8 @@ void IPlanet::save(Platform::String^ path, float x, float y, float width, float 
 		Platform::String^ subroot = this->name();
 
 		/** WARNING: Stupid Windows 10
-		 * saving through IRandomAccessStream is the only working way,
-		 * and the CanvasBitmapFileFormat::Auto option is lost.
+		 * Saving through `IRandomAccessStream` is the only working way,
+		 * and the `CanvasBitmapFileFormat::Auto` option is lost.
 		 */
 
 		create_task(KnownFolders::PicturesLibrary->CreateFolderAsync(root, oie)).then([=](task<StorageFolder^> getting) {

@@ -423,22 +423,4 @@
   <data name="MoveTo" xml:space="preserve">
     <value>升降到指定高度</value>
   </data>
-  <data name="Brightness100" xml:space="preserve">
-    <value>100%</value>
-  </data>
-  <data name="Brightness20" xml:space="preserve">
-    <value>20%</value>
-  </data>
-  <data name="Brightness40" xml:space="preserve">
-    <value>40%</value>
-  </data>
-  <data name="Brightness60" xml:space="preserve">
-    <value>60%</value>
-  </data>
-  <data name="Brightness80" xml:space="preserve">
-    <value>80%</value>
-  </data>
-  <data name="Brightness30" xml:space="preserve">
-    <value>30%</value>
-  </data>
 </root>

@@ -120,4 +120,34 @@
   <data name="Brightness" xml:space="preserve">
     <value>Brightness</value>
   </data>
+  <data name="Brightness100" xml:space="preserve">
+    <value>100%</value>
+  </data>
+  <data name="Brightness20" xml:space="preserve">
+    <value>20%</value>
+  </data>
+  <data name="Brightness30" xml:space="preserve">
+    <value>30%</value>
+  </data>
+  <data name="Brightness40" xml:space="preserve">
+    <value>40%</value>
+  </data>
+  <data name="Brightness60" xml:space="preserve">
+    <value>60%</value>
+  </data>
+  <data name="Brightness80" xml:space="preserve">
+    <value>80%</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Permission" xml:space="preserve">
+    <value>Permission</value>
+  </data>
+  <data name="Root" xml:space="preserve">
+    <value>Root</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
 </root>

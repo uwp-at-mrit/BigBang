@@ -47,7 +47,7 @@ public:
 		float ly = y + this->height - box.Height;
 
 		if (this->thumbnail == nullptr) {
-			this->thumbnail = entity->take_snapshot(entity->actual_width(), entity->actual_height(), Colours::Transparent);
+			this->refresh();
 		}
 
 		ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
@@ -59,6 +59,10 @@ public:
 public:
 	int index() {
 		return this->id;
+	}
+
+	void refresh() {
+		this->thumbnail = entity->take_snapshot(entity->actual_width(), entity->actual_height(), Colours::Transparent);
 	}
 
 private:
@@ -84,6 +88,12 @@ public:
 		return true;
 	}
 
+	void draw_visible_selection(CanvasDrawingSession^ ds, float x, float y, float width, float height) override {
+		// do nothing
+		// The decorator does it.
+	}
+
+
 	bool on_pointer_pressed(float x, float y, PointerDeviceType pdt, PointerUpdateKind puk) override {
 		return true;
 	}
@@ -99,9 +109,14 @@ public:
 			auto this_graphlet = dynamic_cast<Navigationlet*>(this->find_graphlet(x, y));
 			auto last_graphlet = dynamic_cast<Navigationlet*>(this->find_next_selected_graphlet());
 
-			if ((this_graphlet != nullptr) && (last_graphlet != nullptr) && (this_graphlet != last_graphlet)) {
-				this->master->navigate(last_graphlet->index(), this_graphlet->index());
-				this->last_thumbnail = this_graphlet;
+			if ((this_graphlet != nullptr) && (last_graphlet != nullptr)) {
+				if (this_graphlet != last_graphlet) {
+					this->master->navigate(last_graphlet->index(), this_graphlet->index());
+					this->last_thumbnail = this_graphlet;
+				}
+
+				this_graphlet->refresh();
+				last_graphlet->refresh();
 			}
 		}; break;
 		}
@@ -127,9 +142,7 @@ public:
 	}
 
 	void draw_after_graphlet(IGraphlet* g, CanvasDrawingSession^ ds, float x, float y, float width, float height, bool selected) override {
-		if (!selected) {
-			ds->DrawRectangle(x, y, width, height, Colours::DimGray, 2.0F);
-		}
+		ds->DrawRectangle(x, y, width, height, (selected ? Colours::RoyalBlue : Colours::DimGray), 2.0F);
 	}
 
 public:

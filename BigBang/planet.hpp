@@ -37,6 +37,8 @@ namespace WarGrey::SCADA {
 		bool ui_thread_ready();
 		float actual_width();
 		float actual_height();
+		float min_width();
+		float min_height();
 
 	public:
 		float sketch_to_application_width(float sketch_width);
