@@ -7,8 +7,8 @@
 namespace WarGrey::SCADA {
 	private ref class ITimerListener abstract {
 	public:
-		virtual void on_elapsed(long long count, long long interval, long long uptime) = 0;
-		virtual void on_elapsed(long long count, long long interval, long long uptime, long long span) {}
+		virtual void on_elapse(long long count, long long interval, long long uptime) = 0;
+		virtual void on_elapse(long long count, long long interval, long long uptime, long long span) {}
 
 	internal:
 		virtual WarGrey::SCADA::Syslog* get_logger() = 0;
@@ -38,8 +38,8 @@ namespace WarGrey::SCADA {
 
 	private ref class CompositeTimerListener : public WarGrey::SCADA::ITimerListener {
 	public:
-		void on_elapsed(long long count, long long interval, long long uptime) override;
-		void on_elapsed(long long count, long long interval, long long uptime, long long span) override;
+		void on_elapse(long long count, long long interval, long long uptime) override;
+		void on_elapse(long long count, long long interval, long long uptime, long long span) override;
 
 	public:
 		void append_timer_listener(WarGrey::SCADA::ITimerListener^ receiver);

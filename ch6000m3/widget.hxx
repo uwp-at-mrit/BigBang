@@ -4,9 +4,9 @@
 #include "plc.hpp"
 
 namespace WarGrey::SCADA {
-	private ref class SettingsWidget : public UniverseDisplay {
+	private ref class UniverseWidget : public UniverseDisplay {
 	internal:
-		SettingsWidget(Syslog* logger, PLCMaster* plc);
+		UniverseWidget(Syslog* logger, PLCMaster* plc);
 
 	protected:
 		void construct() override;

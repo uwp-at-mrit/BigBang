@@ -285,7 +285,7 @@
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="stone\tongue\en-US\glands.resw" />
-    <PRIResource Include="stone\tongue\en-US\settings.resw" />
+    <PRIResource Include="stone\tongue\en-US\widget.resw" />
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -314,7 +314,7 @@
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\glands.resw" />
-    <PRIResource Include="stone\tongue\zh-CN\settings.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\widget.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
@@ -350,7 +350,6 @@
     <ClCompile Include="iotables\ai_dredges.cpp" />
     <ClCompile Include="schema\earthwork.cpp" />
     <ClCompile Include="schema\timeseries\earthwork_ds.cpp" />
-    <ClCompile Include="settings.cpp" />
     <ClCompile Include="splash.cpp" />
     <ClCompile Include="page\flushs.cpp" />
     <ClCompile Include="page\charges.cpp" />
@@ -361,6 +360,7 @@
     <ClCompile Include="page\hydraulics.cpp" />
     <ClCompile Include="page\glands.cpp" />
     <ClCompile Include="plc.cpp" />
+    <ClCompile Include="widget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -402,7 +402,6 @@
     <ClInclude Include="iotables\do_water_pumps.hpp" />
     <ClInclude Include="schema\earthwork.hpp" />
     <ClInclude Include="schema\timeseries\earthwork_ds.hpp" />
-    <ClInclude Include="settings.hpp" />
     <ClInclude Include="splash.hpp" />
     <ClInclude Include="page\flushs.hpp" />
     <ClInclude Include="page\charges.hpp" />
@@ -413,6 +412,7 @@
     <ClInclude Include="page\hydraulics.hpp" />
     <ClInclude Include="page\glands.hpp" />
     <ClInclude Include="plc.hpp" />
+    <ClInclude Include="widget.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

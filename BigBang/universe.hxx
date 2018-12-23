@@ -142,8 +142,8 @@ namespace WarGrey::SCADA {
 		void transfer_next(unsigned int timeline_ms = 0, unsigned int frame_count = 4);
 
 	public:
-		void on_elapsed(long long count, long long interval, long long uptime) override;
-		void on_elapsed(long long count, long long interval, long long uptime, long long elapsed) override;
+		void on_elapse(long long count, long long interval, long long uptime) override;
+		void on_elapse(long long count, long long interval, long long uptime, long long elapsed) override;
 		void on_navigate(int from_index, int to_index) override;
 
 	protected private:

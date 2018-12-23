@@ -1,7 +1,6 @@
 ﻿#include <map>
 
 #include "gallery.hpp"
-#include "satellite.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/textlet.hpp"
@@ -235,12 +234,24 @@ private:
 };
 
 /*************************************************************************************************/
-static Gallery* the_gallery = nullptr;
+static Gallery* the_gallery_instance = nullptr;
 
-void WarGrey::SCADA::popup_the_gallery() {
-	if (the_gallery == nullptr) {
-		the_gallery = new Gallery();
+ISatellite* WarGrey::SCADA::the_gallery() {
+	if (the_gallery_instance == nullptr) {
+		the_gallery_instance = new Gallery();
 	}
 
-	the_gallery->show();
+	return the_gallery_instance;
+}
+
+void WarGrey::SCADA::update_the_shown_gallery(long long count, long long interval, long long uptime, bool create) {
+	if (create && (the_gallery_instance == nullptr)) {
+		the_gallery();
+	}
+
+	if (the_gallery_instance != nullptr) {
+		if (the_gallery_instance->shown()) {
+			the_gallery_instance->on_elapse(count, interval, uptime);
+		}
+	}
 }

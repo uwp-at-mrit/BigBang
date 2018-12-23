@@ -376,7 +376,7 @@ void UniverseDisplay::refresh(IPlanet* which) {
 	}
 }
 
-void UniverseDisplay::on_elapsed(long long count, long long interval, long long uptime) {
+void UniverseDisplay::on_elapse(long long count, long long interval, long long uptime) {
 	if (this->head_planet != nullptr) {
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 		
@@ -393,7 +393,7 @@ void UniverseDisplay::on_elapsed(long long count, long long interval, long long 
 	this->update(count, interval, uptime);
 }
 
-void UniverseDisplay::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
+void UniverseDisplay::on_elapse(long long count, long long interval, long long uptime, long long elapsed) {
 	if (this->head_planet != nullptr) {
 		IPlanet* child = PLANET_INFO(this->recent_planet)->next;
 

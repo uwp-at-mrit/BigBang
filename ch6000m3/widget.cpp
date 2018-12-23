@@ -1,6 +1,6 @@
 ﻿#include <map>
 
-#include "settings.hpp"
+#include "widget.hxx"
 #include "planet.hpp"
 #include "gallery.hpp"
 #include "configuration.hpp"
@@ -27,14 +27,14 @@ private enum class Brightness { Brightness100, Brightness80, Brightness60, Brigh
 
 // WARNING: order matters
 private enum class SS : unsigned int { Brightness, Permission, _ };
-private enum class Icon : unsigned int { Gallery , Settings, _ };
+private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, _ };
 
 static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 
 /*************************************************************************************************/
 private class Widget : public Planet {
 public:
-	Widget(SettingsWidget^ master, PLCMaster* plc) : Planet(__MODULE__), master(master), device(plc) {
+	Widget(UniverseWidget^ master, PLCMaster* plc) : Planet(__MODULE__), master(master), device(plc) {
 		Platform::String^ localhost = system_ipv4_address();
 		
 		this->inset = tiny_font_size * 0.5F;
@@ -77,7 +77,7 @@ public:
 	}
 
 	void reflow(float width, float height) override {
-		float fx = 0.36F;
+		float fx = 0.25F;
 		float button_y;
 
 		this->move_to(this->labels[SS::Brightness], this->inset, height - tiny_font_size, GraphletAnchor::LB);
@@ -87,14 +87,17 @@ public:
 		this->reflow_buttons(this->permissions, this->labels[SS::Permission]);
 
 		this->fill_graphlet_location(this->permissions[PLCMasterMode::Root], nullptr, &button_y);
-		this->move_to(this->icons[Icon::Gallery], width * fx, button_y, GraphletAnchor::RB, 0.0F, -tiny_font_size);
-		this->move_to(this->icons[Icon::Settings], width * (1.0F - fx), button_y, GraphletAnchor::LB, 0.0F, -tiny_font_size);
+		this->move_to(this->icons[Icon::Gallery], width * fx, button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
+		this->move_to(this->icons[Icon::Settings], width * 0.5F, button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
+		this->move_to(this->icons[Icon::TimeMachine], width * (1.0F - fx), button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
 	}
 
 public:
 	void update(long long count, long long interval, long long uptime) override {
 		double alpha = this->master->global_mask_alpha;
 		Buttonlet* target = nullptr;
+
+		update_the_shown_gallery(count, interval, uptime, false);
 
 		if (alpha > 0.75) {
 			target = this->brightnesses[Brightness::Brightness20];
@@ -161,7 +164,7 @@ public:
 			this->set_plc_master_mode(p_btn->id);
 		} else if (icon != nullptr) {
 			switch (icon->id) {
-			case Icon::Gallery: popup_the_gallery(); break;
+			case Icon::Gallery: the_gallery()->show(); break;
 			}
 		}
 	}
@@ -231,7 +234,7 @@ private:
 	float label_max;
 
 private:
-	SettingsWidget^ master;
+	UniverseWidget^ master;
 	PLCMaster* device;
 	bool root;
 
@@ -243,10 +246,10 @@ private: // never delete these graphlets manually.
 };
 
 /*************************************************************************************************/
-SettingsWidget::SettingsWidget(Syslog* logger, PLCMaster* plc) : UniverseDisplay(logger), plc(plc) {
+UniverseWidget::UniverseWidget(Syslog* logger, PLCMaster* plc) : UniverseDisplay(logger), plc(plc) {
 	this->use_global_mask_setting(false);
 }
 
-void SettingsWidget::construct() {
+void UniverseWidget::construct() {
 	this->add_planet(new Widget(this, this->plc));
 }

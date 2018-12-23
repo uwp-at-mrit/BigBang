@@ -155,7 +155,7 @@
     <ClCompile Include="iotables\do_winches.cpp">
       <Filter>iotables</Filter>
     </ClCompile>
-    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="widget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -297,7 +297,7 @@
     <ClInclude Include="iotables\ao_devices.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
-    <ClInclude Include="settings.hpp" />
+    <ClInclude Include="widget.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -556,10 +556,10 @@
     <PRIResource Include="stone\tongue\zh-CN\diagnostics\hydraulic_pump_dx.resw">
       <Filter>stone\tongue\zh-CN\diagnostics</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\en-US\settings.resw">
+    <PRIResource Include="stone\tongue\en-US\widget.resw">
       <Filter>stone\tongue\en-US</Filter>
     </PRIResource>
-    <PRIResource Include="stone\tongue\zh-CN\settings.resw">
+    <PRIResource Include="stone\tongue\zh-CN\widget.resw">
       <Filter>stone\tongue\zh-CN</Filter>
     </PRIResource>
   </ItemGroup>

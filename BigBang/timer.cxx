@@ -27,10 +27,10 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 	long long elapsed0 = current_100nanoseconds();
 	long long elapsed, next_tick;
 
-	this->target->on_elapsed(this->count, this->interval, this->uptime);
+	this->target->on_elapse(this->count, this->interval, this->uptime);
 	elapsed = current_100nanoseconds() - elapsed0;
 	next_tick = this->interval - elapsed;
-	this->target->on_elapsed(this->count, this->interval, this->uptime, elapsed);
+	this->target->on_elapse(this->count, this->interval, this->uptime, elapsed);
 	
 	this->count += 1;
 	this->uptime += this->interval;
@@ -57,15 +57,15 @@ void Timer::stop() {
 }
 
 /*************************************************************************************************/
-void CompositeTimerListener::on_elapsed(long long count, long long interval, long long uptime) {
+void CompositeTimerListener::on_elapse(long long count, long long interval, long long uptime) {
 	for (auto action : this->listeners) {
-		action->on_elapsed(count, interval, uptime);
+		action->on_elapse(count, interval, uptime);
 	}
 }
 
-void CompositeTimerListener::on_elapsed(long long count, long long interval, long long uptime, long long elapsed) {
+void CompositeTimerListener::on_elapse(long long count, long long interval, long long uptime, long long elapsed) {
 	for (auto action : this->listeners) {
-		action->on_elapsed(count, interval, uptime, elapsed);
+		action->on_elapse(count, interval, uptime, elapsed);
 	}
 }
 

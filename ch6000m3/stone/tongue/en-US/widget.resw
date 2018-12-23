@@ -153,6 +153,9 @@
   <data name="Settings" xml:space="preserve">
     <value>⚙️</value>
   </data>
+  <data name="TimeMachine" xml:space="preserve">
+    <value>⏳</value>
+  </data>
   <data name="User" xml:space="preserve">
     <value>User</value>
   </data>

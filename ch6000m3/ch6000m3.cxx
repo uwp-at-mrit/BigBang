@@ -1,7 +1,7 @@
 ﻿#include "application.hxx"
 #include "configuration.hpp"
 #include "iotables/macro_keys.hpp"
-#include "settings.hpp"
+#include "widget.hxx"
 #include "plc.hpp"
 
 #include "navigator/thumbnail.hpp"
@@ -160,20 +160,20 @@ public:
 			
 			this->universe->navigator->min_height(region.Height * 0.85F);
 			
-			this->settings = ref new SettingsWidget(this->universe->get_logger(), this->universe->get_plc_device());
-			this->settings->min_width = this->universe->navigator->min_width();
-			this->settings->min_height = region.Height - this->universe->navigator->min_height();
+			this->widget = ref new UniverseWidget(this->universe->get_logger(), this->universe->get_plc_device());
+			this->widget->min_width = this->universe->navigator->min_width();
+			this->widget->min_height = region.Height - this->universe->navigator->min_height();
 
 			panel->Orientation = ::Orientation::Vertical;
 			panel->HorizontalAlignment = ::HorizontalAlignment::Stretch;
 			panel->VerticalAlignment = ::VerticalAlignment::Stretch;
 
 			panel->Children->Append(this->universe->navigator->user_interface());
-			panel->Children->Append(this->settings->canvas);
+			panel->Children->Append(this->widget->canvas);
 
 			this->Pane = panel;
 			this->OpenPaneLength = this->universe->navigator->min_width();
-			this->timeline->append_timer_listener(this->settings);
+			this->timeline->append_timer_listener(this->widget);
 		}
 	}
 
@@ -214,7 +214,7 @@ private:
 
 private:
 	DredgerUniverse^ universe;
-	SettingsWidget^ settings;
+	UniverseWidget^ widget;
 };
 
 int main(Platform::Array<Platform::String^>^ args) {
