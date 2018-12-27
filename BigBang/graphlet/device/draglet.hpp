@@ -87,6 +87,7 @@ namespace WarGrey::SCADA {
 	protected:
 		virtual bool position_equal(Windows::Foundation::Numerics::float3& old_pos, Windows::Foundation::Numerics::float3& new_pos) = 0;
 		virtual Platform::String^ position_label(Windows::Foundation::Numerics::float3& position) = 0;
+		virtual Platform::String^ angle_label(double degrees);
 		virtual void update_drag_head() = 0;
 		
 		virtual void on_position_changed(Windows::Foundation::Numerics::float3& trunnion,

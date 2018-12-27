@@ -41,6 +41,9 @@
     <Filter Include="schema\timeseries">
       <UniqueIdentifier>{100a3152-8298-496b-adf9-c7fc74c297ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="widget">
+      <UniqueIdentifier>{fca0f529-e967-4022-8c69-02c436a04cbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ch6000m3.cxx" />
@@ -61,7 +64,6 @@
       <Filter>page</Filter>
     </ClCompile>
     <ClCompile Include="splash.cpp" />
-    <ClCompile Include="gallery.cpp" />
     <ClCompile Include="page\dredges.cpp">
       <Filter>page</Filter>
     </ClCompile>
@@ -156,6 +158,12 @@
       <Filter>iotables</Filter>
     </ClCompile>
     <ClCompile Include="widget.cpp" />
+    <ClCompile Include="widget\gallery.cpp">
+      <Filter>widget</Filter>
+    </ClCompile>
+    <ClCompile Include="widget\settings.cpp">
+      <Filter>widget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.hpp" />
@@ -176,7 +184,6 @@
       <Filter>page</Filter>
     </ClInclude>
     <ClInclude Include="splash.hpp" />
-    <ClInclude Include="gallery.hpp" />
     <ClInclude Include="page\dredges.hpp">
       <Filter>page</Filter>
     </ClInclude>
@@ -298,6 +305,12 @@
       <Filter>iotables</Filter>
     </ClInclude>
     <ClInclude Include="widget.hxx" />
+    <ClInclude Include="widget\gallery.hpp">
+      <Filter>widget</Filter>
+    </ClInclude>
+    <ClInclude Include="widget\settings.hpp">
+      <Filter>widget</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

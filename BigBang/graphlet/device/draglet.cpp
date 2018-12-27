@@ -283,8 +283,8 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 				this->arm_angles[idx] = this->arctangent(ujoints[idx], last_joint);
 				this->joint_angles[idx] = this->arm_angles[idx] - last_arm_angle;
 				this->ujoint_ms[idx] = make_text_layout(this->position_label(ujoints[idx]), this->style.font);
-				this->arm_degs[idx] = make_text_layout(flstring(this->arm_angles[idx], this->style.precision), this->style.font);
-				this->joint_degs[idx] = make_text_layout(flstring(this->joint_angles[idx], this->style.precision), this->style.font);
+				this->arm_degs[idx] = make_text_layout(this->angle_label(this->arm_angles[idx]), this->style.font);
+				this->joint_degs[idx] = make_text_layout(this->angle_label(this->joint_angles[idx]), this->style.font);
 
 				last_joint = ujoints[idx];
 				last_arm_angle = this->arm_angles[idx];
@@ -300,8 +300,8 @@ void IDraglet::set_figure(float3& trunnion, float3 ujoints[], float3& draghead, 
 		this->_forearm_angle = points_angle(this->_draghead, this->space_to_local(last_joint));
 		this->forearm_angle = this->arctangent(this->draghead, last_joint);
 		this->forejoint_angle = this->forearm_angle - last_arm_angle;
-		this->forearm_deg = make_text_layout(flstring(this->forearm_angle, this->style.precision), this->style.font);
-		this->forejoint_deg = make_text_layout(flstring(this->forejoint_angle, this->style.precision), this->style.font);
+		this->forearm_deg = make_text_layout(this->angle_label(this->forearm_angle), this->style.font);
+		this->forejoint_deg = make_text_layout(this->angle_label(this->forejoint_angle), this->style.font);
 
 		this->on_position_changed(this->trunnion, this->ujoints, this->draghead);
 		this->update_drag_head();
@@ -332,6 +332,10 @@ double IDraglet::get_ujoint_degrees(unsigned int idx) {
 
 double IDraglet::get_visor_earth_degrees() {
 	return drag_visor_earth(this->visor_angle, this->forearm_angle);
+}
+
+Platform::String^ IDraglet::angle_label(double angle) {
+	return flstring(angle, this->style.precision) + "°";
 }
 
 /*************************************************************************************************/

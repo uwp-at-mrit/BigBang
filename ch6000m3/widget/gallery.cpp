@@ -1,11 +1,10 @@
 ﻿#include <map>
 
-#include "gallery.hpp"
+#include "widget/gallery.hpp"
 #include "configuration.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/shapelet.hpp"
-#include "graphlet/statuslet.hpp"
 
 #include "graphlet/device/winchlet.hpp"
 #include "graphlet/symbol/heaterlet.hpp"
@@ -46,7 +45,7 @@ public:
 	}
 
 	void Gallery::fill_satellite_extent(float* width, float* height) {
-		float margin = statusbar_height() * 4.0F;
+		float margin = normal_font_size * 4.0F;
 		Size size = system_screen_size();
 
 		SET_BOX(width, size.Width - margin);
@@ -55,7 +54,7 @@ public:
 
 public:
 	void load(CanvasCreateResourcesReason reason, float width, float height) override {
-		float vinset = statusbar_height();
+		float vinset = normal_font_size;
 		float unitsize = (height - vinset - vinset) / (float(_N(GS)) * 2.0F * 1.618F);
 
 		this->font = make_bold_text_format(std::fminf(unitsize, 18.0F));
@@ -86,7 +85,7 @@ public:
 	}
 
 	void reflow(float width, float height) override {
-		float vinset = statusbar_height();
+		float vinset = normal_font_size;
 		float unitsize, halfunit, cellsize, label_width;
 		float label_max_width = 0.0F;
 		float x = vinset * 0.5F;

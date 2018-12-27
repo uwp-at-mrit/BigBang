@@ -2,8 +2,10 @@
 
 #include "widget.hxx"
 #include "planet.hpp"
-#include "gallery.hpp"
 #include "configuration.hpp"
+
+#include "widget/gallery.hpp"
+#include "widget/settings.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/buttonlet.hpp"
@@ -77,7 +79,7 @@ public:
 	}
 
 	void reflow(float width, float height) override {
-		float fx = 0.25F;
+		float fx = 1.0F / float(_N(Icon) + 1);
 		float button_y;
 
 		this->move_to(this->labels[SS::Brightness], this->inset, height - tiny_font_size, GraphletAnchor::LB);
@@ -87,9 +89,9 @@ public:
 		this->reflow_buttons(this->permissions, this->labels[SS::Permission]);
 
 		this->fill_graphlet_location(this->permissions[PLCMasterMode::Root], nullptr, &button_y);
-		this->move_to(this->icons[Icon::Gallery], width * fx, button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
-		this->move_to(this->icons[Icon::Settings], width * 0.5F, button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
-		this->move_to(this->icons[Icon::TimeMachine], width * (1.0F - fx), button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
+		for (Icon id = _E0(Icon); id < Icon::_; id++) {
+			this->move_to(this->icons[id], width * fx * float(_I(id) + 1), button_y, GraphletAnchor::CB, 0.0F, -tiny_font_size);
+		}
 	}
 
 public:
@@ -165,6 +167,13 @@ public:
 		} else if (icon != nullptr) {
 			switch (icon->id) {
 			case Icon::Gallery: the_gallery()->show(); break;
+			case Icon::Settings: {
+				if (this->settings == nullptr) {
+					this->settings = make_settings(this->device);
+				}
+
+				this->settings->show();
+			}; break;
 			}
 		}
 	}
@@ -235,6 +244,7 @@ private:
 
 private:
 	UniverseWidget^ master;
+	ISatellite* settings;
 	PLCMaster* device;
 	bool root;
 

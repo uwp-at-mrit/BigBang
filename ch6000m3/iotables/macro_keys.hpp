@@ -2,6 +2,6 @@
 
 namespace WarGrey::SCADA {
 	// DB2, DBD
-	unsigned int left_paging_key = 620U;
-	unsigned int right_paging_key = 624U;
+	unsigned int left_paging_key = 596U;
+	unsigned int right_paging_key = 600U;
 }
