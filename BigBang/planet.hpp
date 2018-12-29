@@ -209,6 +209,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void change_mode(unsigned int mode); // NOTE: mode 0 is designed for UI graphlets which will be unmasked in all modes;
+		unsigned int current_mode();
+
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
 		void append_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 

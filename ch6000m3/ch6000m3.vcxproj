@@ -285,6 +285,7 @@
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="stone\tongue\en-US\glands.resw" />
+    <PRIResource Include="stone\tongue\en-US\settings.resw" />
     <PRIResource Include="stone\tongue\en-US\widget.resw" />
     <PRIResource Include="stone\tongue\en-US\tongue.resw">
       <DeploymentContent>false</DeploymentContent>
@@ -314,6 +315,7 @@
       <DeploymentContent>false</DeploymentContent>
     </PRIResource>
     <PRIResource Include="stone\tongue\zh-CN\glands.resw" />
+    <PRIResource Include="stone\tongue\zh-CN\settings.resw" />
     <PRIResource Include="stone\tongue\zh-CN\widget.resw" />
     <PRIResource Include="stone\tongue\zh-CN\tongue.resw">
       <DeploymentContent>false</DeploymentContent>

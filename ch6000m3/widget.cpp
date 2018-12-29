@@ -101,6 +101,10 @@ public:
 
 		update_the_shown_gallery(count, interval, uptime, false);
 
+		if ((this->settings != nullptr) && (this->settings->shown())) {
+			this->settings->on_elapse(count, interval, uptime);
+		}
+
 		if (alpha > 0.75) {
 			target = this->brightnesses[Brightness::Brightness20];
 		} else if (alpha > 0.65) {

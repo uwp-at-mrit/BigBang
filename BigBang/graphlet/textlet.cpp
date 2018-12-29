@@ -586,7 +586,7 @@ void IEditorlet::draw(CanvasDrawingSession^ ds, float x, float y, float Width, f
 	}
 
 	if (this->flashing) {
-		float padding_x = 2.0F;
+		float padding_x = 3.0F;
 		float caret_x = std::fmaxf(number_region_x + padding_x, number_x + nbox.width);
 
 		ds->DrawLine(caret_x, y + padding_x, caret_x, y + height - padding_x, style.caret_color);

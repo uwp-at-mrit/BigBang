@@ -249,6 +249,10 @@ void Planet::change_mode(unsigned int mode) {
 	}
 }
 
+unsigned int Planet::current_mode() {
+	return this->mode;
+}
+
 bool Planet::graphlet_unmasked(IGraphlet* g) {
 	GraphletInfo* info = planet_graphlet_info(this, g);
 
