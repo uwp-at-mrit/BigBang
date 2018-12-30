@@ -77,7 +77,7 @@ Platform::String^ WarGrey::SCADA::dbspeak(Platform::String^ word) {
 
 Platform::String^ WarGrey::SCADA::unitspeak(Platform::String^ unit) {
 	bool exists;
-	Platform::String^ dialect = speak(unit, "unit", &exists);
+	Platform::String^ dialect = (unit->Equals("%") ? unit : speak(unit, "unit", &exists));
 
 	return (exists ? dialect : speak(unit));
 }

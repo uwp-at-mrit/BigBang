@@ -1404,12 +1404,10 @@ public:
 		if (editor != nullptr) {
 			float length = float(editor->get_input_number());
 
-			if (length > 0.0F) {
-				switch (editor->id) {
-				case DS::DivingDepth: plc->send_setting(draghead_diving_depth, length); break;
-				case DS::DivingCompensation: plc->send_setting(compensator_diving_progress, length); break;
-				case DS::LandingDepth: plc->send_setting(draghead_landing_depth, length); break;
-				}
+			switch (editor->id) {
+			case DS::DivingDepth: plc->send_setting(draghead_diving_depth, length); break;
+			case DS::DivingCompensation: plc->send_setting(compensator_diving_progress, length); break;
+			case DS::LandingDepth: plc->send_setting(draghead_landing_depth, length); break;
 			}
 
 			this->master->hide_virtual_keyboard();

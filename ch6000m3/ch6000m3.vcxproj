@@ -326,6 +326,7 @@
     <ClCompile Include="decorator\page.cpp" />
     <ClCompile Include="decorator\ship.cpp" />
     <ClCompile Include="iotables\ai_doors.cpp" />
+    <ClCompile Include="iotables\ao_settings.cpp" />
     <ClCompile Include="iotables\di_devices.cpp" />
     <ClCompile Include="iotables\di_doors.cpp" />
     <ClCompile Include="iotables\di_dredges.cpp" />
@@ -371,6 +372,7 @@
     <ClInclude Include="decorator\ship.hpp" />
     <ClInclude Include="iotables\ai_winches.hpp" />
     <ClInclude Include="iotables\ao_devices.hpp" />
+    <ClInclude Include="iotables\ao_settings.hpp" />
     <ClInclude Include="iotables\di_winches.hpp" />
     <ClInclude Include="iotables\do_winches.hpp" />
     <ClInclude Include="iotables\macro_keys.hpp" />

@@ -141,11 +141,17 @@
   <data name="_Winch" xml:space="preserve">
     <value>绞车</value>
   </data>
+  <data name="DragOutFlow" xml:space="preserve">
+    <value>一键放耙流量</value>
+  </data>
+  <data name="DragUpFlow" xml:space="preserve">
+    <value>一键起耙流量</value>
+  </data>
   <data name="GantryFlow" xml:space="preserve">
     <value>现场流量</value>
   </data>
   <data name="GantryPressure" xml:space="preserve">
-    <value>压力控制</value>
+    <value>现场压力</value>
   </data>
   <data name="PullFlow" xml:space="preserve">
     <value>遥控收进流量</value>
@@ -165,10 +171,34 @@
   <data name="PushUpFlow" xml:space="preserve">
     <value>一键推出收流量</value>
   </data>
+  <data name="RemoteFlow" xml:space="preserve">
+    <value>遥控流量</value>
+  </data>
+  <data name="RemotePressure" xml:space="preserve">
+    <value>遥控压力</value>
+  </data>
+  <data name="SPWCFastOutFlow" xml:space="preserve">
+    <value>SPWC 高速放流量</value>
+  </data>
+  <data name="SPWCFastUpFlow" xml:space="preserve">
+    <value>SPWC 高速收流量</value>
+  </data>
+  <data name="SPWCOutFlow" xml:space="preserve">
+    <value>SPWC 放流量</value>
+  </data>
+  <data name="SPWCSlowOutFlow" xml:space="preserve">
+    <value>SPWC 低速放流量</value>
+  </data>
+  <data name="SPWCSlowUpFlow" xml:space="preserve">
+    <value>SPWC 低速收流量</value>
+  </data>
+  <data name="SPWCUpFlow" xml:space="preserve">
+    <value>SPWC 收流量</value>
+  </data>
   <data name="WinchFlow" xml:space="preserve">
     <value>现场流量</value>
   </data>
   <data name="WinchPressure" xml:space="preserve">
-    <value>压力控制</value>
+    <value>现场压力</value>
   </data>
 </root>

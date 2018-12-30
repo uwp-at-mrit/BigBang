@@ -141,6 +141,12 @@
   <data name="_Winch" xml:space="preserve">
     <value>Winch</value>
   </data>
+  <data name="DragOutFlow" xml:space="preserve">
+    <value>Macro Drag Out Flow</value>
+  </data>
+  <data name="DragUpFlow" xml:space="preserve">
+    <value>Macro Drag Up Flow</value>
+  </data>
   <data name="GantryFlow" xml:space="preserve">
     <value>Scene Flow</value>
   </data>
@@ -164,6 +170,30 @@
   </data>
   <data name="PushUpFlow" xml:space="preserve">
     <value>Macro Push Out Wind Up Flow</value>
+  </data>
+  <data name="RemoteFlow" xml:space="preserve">
+    <value>Remote Flow</value>
+  </data>
+  <data name="RemotePressure" xml:space="preserve">
+    <value>Remote Pressure</value>
+  </data>
+  <data name="SPWCFastOutFlow" xml:space="preserve">
+    <value>SPWC Fast Out Flow</value>
+  </data>
+  <data name="SPWCFastUpFlow" xml:space="preserve">
+    <value>SPWC Fast Up Flow</value>
+  </data>
+  <data name="SPWCOutFlow" xml:space="preserve">
+    <value>SPWC Out Flow</value>
+  </data>
+  <data name="SPWCSlowOutFlow" xml:space="preserve">
+    <value>SPWC Slow Out Flow</value>
+  </data>
+  <data name="SPWCSlowUpFlow" xml:space="preserve">
+    <value>SPWC Slow Up Flow</value>
+  </data>
+  <data name="SPWCUpFlow" xml:space="preserve">
+    <value>SPWC Up Flow</value>
   </data>
   <data name="WinchFlow" xml:space="preserve">
     <value>Scene Flow</value>

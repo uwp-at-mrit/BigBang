@@ -422,7 +422,7 @@ bool DraughtsPage::on_key(VirtualKey key, bool wargrey_keyboard) {
 			if (editor != nullptr) {
 				float ofp_height = float(editor->get_input_number());
 
-				if (ofp_height > 0.0F) {
+				if (ofp_height >= 0.0F) {
 					this->device->send_setting(overflow_pipe_target_height, ofp_height);
 					this->device->send_command(overflow_pipe_move_to_target_height);
 				}

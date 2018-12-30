@@ -222,7 +222,7 @@ public:
 				float rpm = float(editor->get_input_number());
 				float percentage = rpm / float(gland_pump_rpm_range);
 
-				if (rpm > 0.0F) {
+				if (rpm >= 0.0F) {
 					plc->send_setting(AO_gland_pump_setting(editor->id), percentage * 100.0F);
 				}
 
