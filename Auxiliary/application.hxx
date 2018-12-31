@@ -29,7 +29,10 @@ namespace WarGrey::SCADA {
 				+= ref new Windows::Foundation::EventHandler<Windows::ApplicationModel::Core::UnhandledErrorDetectedEventArgs^>(this,
 					&UniversalWindowsApplication::OnUncaughtException);
 
+			this->EnteredBackground += ref new Windows::UI::Xaml::EnteredBackgroundEventHandler(this, &UniversalWindowsApplication::OnEnteredBackground);
+			this->LeavingBackground += ref new Windows::UI::Xaml::LeavingBackgroundEventHandler(this, &UniversalWindowsApplication::OnLeavingBackground);
 			this->Suspending += ref new Windows::UI::Xaml::SuspendingEventHandler(this, &UniversalWindowsApplication::OnSuspending);
+			this->Resuming += ref new Windows::Foundation::EventHandler<Platform::Object^>(this, &UniversalWindowsApplication::OnResuming);
 			this->RequestedTheme = Windows::UI::Xaml::ApplicationTheme::Dark;
 
 			self->Title = screen->ToString();
@@ -59,10 +62,47 @@ namespace WarGrey::SCADA {
 			}
 		}
 
+		void OnBackgroundActivated(Windows::ApplicationModel::Activation::BackgroundActivatedEventArgs^ args) {
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+
+			if (screen != nullptr) {
+				screen->on_background_activated(args);
+			}
+		}
+
 	private:
 		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args) {
-			// TODO: Save application state and stop any background activity.
 			// Do not assume that the application will be terminated or resumed with the contents of memory still intact.
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+
+			if (screen != nullptr) {
+				screen->on_suspending(args);
+			}
+		}
+
+		void OnResuming(Platform::Object^ sender, Platform::Object^ args) {
+			// Only when any displayed content has changed while the app is suspended.
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+		
+			if (screen != nullptr) {
+				screen->on_resuming();
+			}
+		}
+
+		void OnEnteredBackground(Platform::Object^ sender, Windows::ApplicationModel::EnteredBackgroundEventArgs^ args) {
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+
+			if (screen != nullptr) {
+				screen->on_entered_background(args);
+			}
+		}
+
+		void OnLeavingBackground(Platform::Object^ sender, Windows::ApplicationModel::LeavingBackgroundEventArgs^ args) {
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+
+			if (screen != nullptr) {
+				screen->on_leaving_background(args);
+			}
 		}
 
 		void OnUncaughtException(Platform::Object^ sender, Windows::ApplicationModel::Core::UnhandledErrorDetectedEventArgs^ args) {

@@ -31,14 +31,25 @@ static CanvasSolidColorBrush^ caption_background = Colours::make(diagnostics_cap
 
 static const float settings_corner_radius = 8.0F;
 
+static const wchar_t* hints[] = { L"Pressure", L"Degrees", L"Length", L"Density" };
+static Platform::String^ units[] = { "bar", "degrees", "meter", "tpm3" };
+
 // WARNING: order matters
-private enum class Mode { psTrunnion, psIntermediate, psDragHead, sbTrunnion, sbIntermediate, sbDragHead, _ };
+private enum class Mode {
+	psTrunnion, psIntermediate, psDragHead, sbTrunnion, sbIntermediate, sbDragHead,
+	psDragPipes, sbDragPipes, psDoors, sbDoors, ShoreDischarge,
+	Others,
+	_
+};
 
 static Platform::String^ editor_unit(const wchar_t* metrics) {
 	Platform::String^ unit = "%";
 
-	if (wcsstr(metrics, L"Pressure") != nullptr) {
-		unit = "bar";
+	for (unsigned int idx = 0; idx < sizeof(hints) / sizeof(const wchar_t*); idx++) {
+		if (wcsstr(metrics, hints[idx]) != nullptr) {
+			unit = units[idx];
+			break;
+		}
 	}
 
 	return unit;
@@ -69,7 +80,7 @@ public:
 	}
 
 	void Settings::fill_satellite_extent(float* width, float* height) {
-		SET_VALUES(width, 800.0F, height, 800.0F);
+		SET_VALUES(width, 700.0F, height, 700.0F);
 	}
 
 public:
@@ -86,6 +97,16 @@ public:
 		this->AI_settings(DB20, this->sbt_metrics, AO_gantry_winch_trunnion_settings, false);
 		this->AI_settings(DB20, this->sbi_metrics, AO_gantry_winch_intermediate_settings, false);
 		this->AI_settings(DB20, this->sbh_metrics, AO_gantry_winch_draghead_settings, false);
+
+		this->AI_settings(DB20, this->psdp_metrics, AO_drag_pipes_settings, true);
+		this->AI_settings(DB20, this->sbdp_metrics, AO_drag_pipes_settings, false);
+
+		this->AI_settings(DB20, this->psds_metrics, AO_doors_settings, true);
+		this->AI_settings(DB20, this->sbds_metrics, AO_doors_settings, false);
+
+		this->AI_settings(DB20, this->shore_discharge_metrics, AO_shore_discharge_settings, true);
+
+		this->AI_settings(DB20, this->other_metrics, AO_other_settings, true);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -110,6 +131,12 @@ public:
 		this->load_settings(Mode::sbTrunnion, this->sbt_metrics, caption_width, caption_height, default_sb_color);
 		this->load_settings(Mode::sbIntermediate, this->sbi_metrics, caption_width, caption_height, default_sb_color);
 		this->load_settings(Mode::sbDragHead, this->sbh_metrics, caption_width, caption_height, default_sb_color);
+		this->load_settings(Mode::psDragPipes, this->psdp_metrics, caption_width, caption_height, default_ps_color);
+		this->load_settings(Mode::sbDragPipes, this->sbdp_metrics, caption_width, caption_height, default_sb_color);
+		this->load_settings(Mode::psDoors, this->psds_metrics, caption_width, caption_height, default_ps_color);
+		this->load_settings(Mode::sbDoors, this->sbds_metrics, caption_width, caption_height, default_sb_color);
+		this->load_settings(Mode::ShoreDischarge, this->shore_discharge_metrics, caption_width, caption_height);
+		this->load_settings(Mode::Others, this->other_metrics, caption_width, caption_height);
 	}
 
 	void reflow(float width, float height) override {
@@ -131,6 +158,12 @@ public:
 		this->reflow_settings(Mode::sbTrunnion, this->sbt_metrics, caption_rx, caption_y);
 		this->reflow_settings(Mode::sbIntermediate, this->sbi_metrics, caption_rx, caption_y);
 		this->reflow_settings(Mode::sbDragHead, this->sbh_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::psDragPipes, this->psdp_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::sbDragPipes, this->sbdp_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::psDoors, this->psds_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::sbDoors, this->sbds_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::ShoreDischarge, this->shore_discharge_metrics, caption_rx, caption_y);
+		this->reflow_settings(Mode::Others, this->other_metrics, caption_rx, caption_y);
 
 		this->change_mode(1U);
 	}
@@ -198,6 +231,16 @@ public:
 				case Mode::sbTrunnion: addr = AO_gantry_winch_trunnion_settings(this->id<GantryWinchTrunnionSettings>(editor), false); break;
 				case Mode::sbIntermediate: addr = AO_gantry_winch_intermediate_settings(this->id<GantryWinchIntermediateSettings>(editor), false); break;
 				case Mode::sbDragHead: addr = AO_gantry_winch_draghead_settings(this->id<GantryWinchDragHeadSettings>(editor), false); break;
+
+				case Mode::psDragPipes: addr = AO_drag_pipes_settings(this->id<DragPipesSettings>(editor), true); break;
+				case Mode::sbDragPipes: addr = AO_drag_pipes_settings(this->id<DragPipesSettings>(editor), false); break;
+
+				case Mode::psDoors: addr = AO_doors_settings(this->id<DoorsSettings>(editor), true); break;
+				case Mode::sbDoors: addr = AO_doors_settings(this->id<DoorsSettings>(editor), false); break;
+
+				case Mode::ShoreDischarge: addr = AO_shore_discharge_settings(this->id<ShoreDischargeSettings>(editor), true); break;
+
+				case Mode::Others: addr = AO_other_settings(this->id<OtherSettings>(editor), true); break;
 				}
 
 				this->device->send_setting(addr, v);
@@ -222,7 +265,7 @@ private:
 	}
 
 	template<typename S>
-	void load_settings(Mode m, Metrics<S>& ms, float width, float height, unsigned int subcolor = 0xFFFFFFU) {
+	void load_settings(Mode m, Metrics<S>& ms, float width, float height, unsigned int subcolor = 0xF8F8FFU) {
 		unsigned int idx = (1U << _I(m));
 		float editor_width;
 
@@ -304,6 +347,12 @@ private: // never delete these graphlets manually.
 	Metrics<GantryWinchTrunnionSettings> sbt_metrics;
 	Metrics<GantryWinchIntermediateSettings> sbi_metrics;
 	Metrics<GantryWinchDragHeadSettings> sbh_metrics;
+	Metrics<DragPipesSettings> psdp_metrics;
+	Metrics<DragPipesSettings> sbdp_metrics;
+	Metrics<DoorsSettings> psds_metrics;
+	Metrics<DoorsSettings> sbds_metrics;
+	Metrics<ShoreDischargeSettings> shore_discharge_metrics;
+	Metrics<OtherSettings> other_metrics;
 
 private:
 	std::map<Mode, Credit<Buttonlet, Mode>*> tabs;

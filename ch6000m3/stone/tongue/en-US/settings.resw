@@ -141,17 +141,44 @@
   <data name="_Winch" xml:space="preserve">
     <value>Winch</value>
   </data>
+  <data name="BackarmDegrees" xml:space="preserve">
+    <value>Backarm Degrees</value>
+  </data>
+  <data name="BottomFlow" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
+  <data name="CableLength" xml:space="preserve">
+    <value>Trunnion Cable Length</value>
+  </data>
+  <data name="ClosePressure" xml:space="preserve">
+    <value>Close Pressure</value>
+  </data>
   <data name="DragOutFlow" xml:space="preserve">
     <value>Macro Drag Out Flow</value>
   </data>
   <data name="DragUpFlow" xml:space="preserve">
     <value>Macro Drag Up Flow</value>
   </data>
+  <data name="ForearmDegrees" xml:space="preserve">
+    <value>Forearm Degrees</value>
+  </data>
+  <data name="ForeBackDegrees" xml:space="preserve">
+    <value>Forearm Backarm Degrees</value>
+  </data>
   <data name="GantryFlow" xml:space="preserve">
     <value>Scene Flow</value>
   </data>
   <data name="GantryPressure" xml:space="preserve">
     <value>Scene Pressure</value>
+  </data>
+  <data name="OpenPressure" xml:space="preserve">
+    <value>Open Pressure</value>
+  </data>
+  <data name="psDoors" xml:space="preserve">
+    <value>PS Doors</value>
+  </data>
+  <data name="psDragPipes" xml:space="preserve">
+    <value>PS Drag Pipes</value>
   </data>
   <data name="PullFlow" xml:space="preserve">
     <value>Remote Pulling In Flow</value>
@@ -177,6 +204,12 @@
   <data name="RemotePressure" xml:space="preserve">
     <value>Remote Pressure</value>
   </data>
+  <data name="sbDoors" xml:space="preserve">
+    <value>SB Doors</value>
+  </data>
+  <data name="sbDragPipes" xml:space="preserve">
+    <value>SB Drag Pipes</value>
+  </data>
   <data name="SPWCFastOutFlow" xml:space="preserve">
     <value>SPWC Fast Out Flow</value>
   </data>
@@ -195,10 +228,79 @@
   <data name="SPWCUpFlow" xml:space="preserve">
     <value>SPWC Up Flow</value>
   </data>
+  <data name="UpperFlow" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
+  <data name="UpperPressure" xml:space="preserve">
+    <value>Pressure Control</value>
+  </data>
   <data name="WinchFlow" xml:space="preserve">
     <value>Scene Flow</value>
   </data>
   <data name="WinchPressure" xml:space="preserve">
     <value>Scene Pressure</value>
+  </data>
+  <data name="_BottomDoors" xml:space="preserve">
+    <value>Bottom Doors</value>
+  </data>
+  <data name="_UpperDoors" xml:space="preserve">
+    <value>Upper Doors</value>
+  </data>
+  <data name="BargeFlow" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
+  <data name="BargePressure" xml:space="preserve">
+    <value>Pressure Control</value>
+  </data>
+  <data name="BoltFlow" xml:space="preserve">
+    <value>BoltFlow</value>
+  </data>
+  <data name="BoltPressure" xml:space="preserve">
+    <value>BoltPressure</value>
+  </data>
+  <data name="ChargeDensity" xml:space="preserve">
+    <value>Charge Density</value>
+  </data>
+  <data name="DischargeDensity" xml:space="preserve">
+    <value>Discharge Density</value>
+  </data>
+  <data name="FastFlow" xml:space="preserve">
+    <value>Fast Flow</value>
+  </data>
+  <data name="HoldhoopFlow" xml:space="preserve">
+    <value>Holdhoop Flow</value>
+  </data>
+  <data name="HoldhoopPressure" xml:space="preserve">
+    <value>Holdhoop Pressure</value>
+  </data>
+  <data name="NormalFlow" xml:space="preserve">
+    <value>Normal Flow</value>
+  </data>
+  <data name="OverflowFlow" xml:space="preserve">
+    <value>Flow Control</value>
+  </data>
+  <data name="OverflowPressure" xml:space="preserve">
+    <value>Pressure Control</value>
+  </data>
+  <data name="ShoreDischarge" xml:space="preserve">
+    <value>Shore Discharge</value>
+  </data>
+  <data name="_ALMO" xml:space="preserve">
+    <value>ALMO</value>
+  </data>
+  <data name="_Barge" xml:space="preserve">
+    <value>Barge Winch</value>
+  </data>
+  <data name="_Bolt" xml:space="preserve">
+    <value>Bolt Cylinder</value>
+  </data>
+  <data name="_Holdhoop" xml:space="preserve">
+    <value>Holdhoop Cylinder</value>
+  </data>
+  <data name="_Overflow" xml:space="preserve">
+    <value>Overflow Pipe</value>
+  </data>
+  <data name="Others" xml:space="preserve">
+    <value>Others</value>
   </data>
 </root>

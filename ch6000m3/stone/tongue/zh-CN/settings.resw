@@ -201,4 +201,106 @@
   <data name="WinchPressure" xml:space="preserve">
     <value>现场压力</value>
   </data>
+  <data name="BackarmDegrees" xml:space="preserve">
+    <value>下耙管夹角</value>
+  </data>
+  <data name="BottomFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="CableLength" xml:space="preserve">
+    <value>弯管钢丝绳下放长度</value>
+  </data>
+  <data name="ClosePressure" xml:space="preserve">
+    <value>关闭压力</value>
+  </data>
+  <data name="ForearmDegrees" xml:space="preserve">
+    <value>上耙管夹角</value>
+  </data>
+  <data name="ForeBackDegrees" xml:space="preserve">
+    <value>上下耙管夹角</value>
+  </data>
+  <data name="OpenPressure" xml:space="preserve">
+    <value>打开压力</value>
+  </data>
+  <data name="psDoors" xml:space="preserve">
+    <value>左舷泥门</value>
+  </data>
+  <data name="psDragPipes" xml:space="preserve">
+    <value>左舷耙管</value>
+  </data>
+  <data name="sbDoors" xml:space="preserve">
+    <value>右舷泥门</value>
+  </data>
+  <data name="sbDragPipes" xml:space="preserve">
+    <value>右舷耙管</value>
+  </data>
+  <data name="UpperFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="UpperPressure" xml:space="preserve">
+    <value>压力控制</value>
+  </data>
+  <data name="_BottomDoors" xml:space="preserve">
+    <value>大泥门</value>
+  </data>
+  <data name="_UpperDoors" xml:space="preserve">
+    <value>小泥门</value>
+  </data>
+  <data name="BargeFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="BargePressure" xml:space="preserve">
+    <value>压力控制</value>
+  </data>
+  <data name="BoltFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="BoltPressure" xml:space="preserve">
+    <value>压力控制</value>
+  </data>
+  <data name="ChargeDensity" xml:space="preserve">
+    <value>进舱密度</value>
+  </data>
+  <data name="DischargeDensity" xml:space="preserve">
+    <value>低排密度</value>
+  </data>
+  <data name="FastFlow" xml:space="preserve">
+    <value>高速流量</value>
+  </data>
+  <data name="HoldhoopFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="HoldhoopPressure" xml:space="preserve">
+    <value>压力控制</value>
+  </data>
+  <data name="NormalFlow" xml:space="preserve">
+    <value>常速流量</value>
+  </data>
+  <data name="OverflowFlow" xml:space="preserve">
+    <value>流量控制</value>
+  </data>
+  <data name="OverflowPressure" xml:space="preserve">
+    <value>压力控制</value>
+  </data>
+  <data name="ShoreDischarge" xml:space="preserve">
+    <value>艏吹绞车</value>
+  </data>
+  <data name="_ALMO" xml:space="preserve">
+    <value>ALMO</value>
+  </data>
+  <data name="_Barge" xml:space="preserve">
+    <value>装驳绞车</value>
+  </data>
+  <data name="_Bolt" xml:space="preserve">
+    <value>插销油缸</value>
+  </data>
+  <data name="_Holdhoop" xml:space="preserve">
+    <value>抱箍油缸</value>
+  </data>
+  <data name="_Overflow" xml:space="preserve">
+    <value>溢流桶</value>
+  </data>
+  <data name="Others" xml:space="preserve">
+    <value>其他设备</value>
+  </data>
 </root>

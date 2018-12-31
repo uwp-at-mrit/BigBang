@@ -78,3 +78,61 @@ unsigned int WarGrey::SCADA::AO_gantry_winch_draghead_settings(GantryWinchDragHe
 
 	return idx;
 }
+
+unsigned int WarGrey::SCADA::AO_drag_pipes_settings(DragPipesSettings setting, bool ps) { // DB20, DBD
+	unsigned int idx = 0U;
+
+	switch (setting) {
+	case DragPipesSettings::ForearmDegrees:  idx = (ps ? 610U : 626U); break;
+	case DragPipesSettings::BackarmDegrees:  idx = (ps ? 614U : 630U); break;
+	case DragPipesSettings::ForeBackDegrees: idx = (ps ? 618U : 634U); break;
+	case DragPipesSettings::CableLength:     idx = (ps ? 622U : 638U); break;
+	}
+
+	return idx;
+}
+
+unsigned int WarGrey::SCADA::AO_doors_settings(DoorsSettings setting, bool ps) { // DB20, DBD
+	unsigned int idx = 0U;
+
+	switch (setting) {
+	case DoorsSettings::UpperFlow:     idx = (ps ? 706U : 710U); break;
+	case DoorsSettings::UpperPressure: idx = (ps ? 714U : 718U); break;
+	case DoorsSettings::BottomFlow:    idx = (ps ? 690U : 694U); break;
+	case DoorsSettings::OpenPressure:  idx = (ps ? 674U : 682U); break;
+	case DoorsSettings::ClosePressure: idx = (ps ? 678U : 686U); break;
+	}
+
+	return idx;
+}
+
+unsigned int WarGrey::SCADA::AO_shore_discharge_settings(ShoreDischargeSettings setting, bool placeholder_for_useless_args) { // DB20, DBD
+	unsigned int idx = 0U;
+
+	switch (setting) {
+	case ShoreDischargeSettings::NormalFlow:       idx = 738U; break;
+	case ShoreDischargeSettings::FastFlow:         idx = 742U; break;
+	case ShoreDischargeSettings::WinchPressure:    idx = 746U; break;
+	case ShoreDischargeSettings::HoldhoopFlow:     idx = 754U; break;
+	case ShoreDischargeSettings::HoldhoopPressure: idx = 758U; break;
+	case ShoreDischargeSettings::BoltFlow:         idx = 762U; break;
+	case ShoreDischargeSettings::BoltPressure:     idx = 766U; break;
+	}
+
+	return idx;
+}
+
+unsigned int WarGrey::SCADA::AO_other_settings(OtherSettings setting, bool placeholder_for_useless_args) { // DB20, DBD
+	unsigned int idx = 0U;
+
+	switch (setting) {
+	case OtherSettings::BargeFlow:        idx = 242U; break;
+	case OtherSettings::BargePressure:    idx = 246U; break;
+	case OtherSettings::OverflowFlow:     idx = 722U; break;
+	case OtherSettings::OverflowPressure: idx = 726U; break;
+	case OtherSettings::ChargeDensity:    idx = 150U; break;
+	case OtherSettings::DischargeDensity: idx = 154U; break;
+	}
+
+	return idx;
+}
