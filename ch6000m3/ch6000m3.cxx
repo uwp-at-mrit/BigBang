@@ -163,7 +163,7 @@ public:
 			
 			this->universe->navigator->min_height(region.Height * 0.85F);
 			
-			this->widget = ref new UniverseWidget(this->universe->get_logger(), this->universe->get_plc_device());
+			this->widget = ref new UniverseWidget(this->universe, this->universe->get_plc_device());
 			this->widget->min_width = this->universe->navigator->min_width();
 			this->widget->min_height = region.Height - this->universe->navigator->min_height();
 

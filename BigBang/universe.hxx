@@ -125,7 +125,7 @@ namespace WarGrey::SCADA {
 		override_read_only_property(float, actual_height);
 		read_write_property(double, global_mask_alpha);
 		read_write_property(double, mask_alpha);
-		void use_global_mask_setting(bool yes);
+		void use_global_mask_setting(bool yes, bool* prev_state = nullptr);
 		bool surface_ready() override;
 		bool ui_thread_ready() override;
 

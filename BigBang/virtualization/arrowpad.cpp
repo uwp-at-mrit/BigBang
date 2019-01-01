@@ -68,7 +68,7 @@ Arrowpad::Arrowpad(IPlanet* master, float fontsize) : Keyboard(master, keys) {
 			case VirtualKey::Subtract: label = L"-"; break;
 
 			case VirtualKey::Escape: label = L"↺"; break;
-			case VirtualKey::Print: label = L"⎙"; break;
+			case VirtualKey::Print: label = L"📸"; break;
 			}
 
 			key_labels.insert(std::pair<VirtualKey, CanvasTextLayout^>(key, make_text_layout(label, label_font)));

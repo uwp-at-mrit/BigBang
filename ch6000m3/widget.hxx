@@ -6,12 +6,13 @@
 namespace WarGrey::SCADA {
 	private ref class UniverseWidget : public UniverseDisplay {
 	internal:
-		UniverseWidget(Syslog* logger, PLCMaster* plc);
+		UniverseWidget(UniverseDisplay^ master, PLCMaster* plc);
 
 	protected:
 		void construct() override;
 
 	private:
+		UniverseDisplay^ master;
 		PLCMaster* plc;
 	};
 }

@@ -836,7 +836,9 @@ void UniverseDisplay::disable_predefined_shortcuts(bool yes) {
 	this->shortcuts_enabled = !yes;
 }
 
-void UniverseDisplay::use_global_mask_setting(bool yes) {
+void UniverseDisplay::use_global_mask_setting(bool yes, bool* prev_state) {
+	SET_BOX(prev_state, this->follow_global_mask_setting);
+
 	this->follow_global_mask_setting = yes;
 }
 

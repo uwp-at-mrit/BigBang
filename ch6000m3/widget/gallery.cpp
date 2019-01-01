@@ -48,7 +48,7 @@ public:
 		float margin = normal_font_size * 4.0F;
 		Size size = system_screen_size();
 
-		SET_BOX(width, size.Width - margin);
+		SET_BOX(width, size.Width - margin * 2.0F);
 		SET_BOX(height, size.Height - margin);
 	}
 

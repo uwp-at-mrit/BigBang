@@ -147,6 +147,9 @@
   <data name="Permission" xml:space="preserve">
     <value>🕹 模式切换</value>
   </data>
+  <data name="PrintScreen" xml:space="preserve">
+    <value>📸</value>
+  </data>
   <data name="Root" xml:space="preserve">
     <value>控制</value>
   </data>

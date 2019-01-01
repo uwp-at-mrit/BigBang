@@ -29,7 +29,8 @@ static CanvasTextFormat^ label_font = make_bold_text_format("Consolas", 14.0F);
 /*************************************************************************************************/
 private class Navigationlet : public IGraphlet {
 public:
-	Navigationlet(unsigned int id, IPlanet* entity, float width, float height) : entity(entity), id(id), width(width), height(height) {}
+	Navigationlet(unsigned int id, IPlanet* entity, float width, float height)
+		: entity(entity), master(nullptr), id(id), width(width), height(height) {}
 
 public:
 	void construct() override {
@@ -47,12 +48,14 @@ public:
 		float mask_height = box.Height * 1.618F;
 		float mask_y = y + this->height - mask_height;
 		float label_y = y + this->height - box.Height;
-
+		
 		if (this->thumbnail == nullptr) {
 			this->refresh();
 		}
 
-		ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
+		if (this->thumbnail != nullptr) {
+			ds->DrawImage(this->thumbnail, Rect(x, y, this->width, this->height));
+		}
 
 		ds->FillRectangle(x, mask_y, this->width, mask_height, this->mask_color);
 		ds->DrawTextLayout(this->label, cx - box.Width * 0.5F - box.X, label_y, Colours::White);
@@ -64,7 +67,17 @@ public:
 	}
 
 	void refresh() {
-		this->thumbnail = entity->take_snapshot(entity->actual_width(), entity->actual_height(), Colours::Transparent);
+		if (this->master != this->entity->info->master) {
+			this->master = dynamic_cast<UniverseDisplay^>(this->entity->info->master);
+		}
+
+		if (this->master != nullptr) {
+			bool prev_state;
+
+			this->master->use_global_mask_setting(false, &prev_state);
+			this->thumbnail = this->entity->take_snapshot(entity->actual_width(), entity->actual_height(), Colours::Transparent);
+			this->master->use_global_mask_setting(prev_state);
+		}
 	}
 
 private:
@@ -78,6 +91,7 @@ private:
 
 private:
 	IPlanet* entity; // managed by its original `UniverseDisplay`.
+	UniverseDisplay^ master;
 	unsigned int id;
 };
 
@@ -170,6 +184,7 @@ internal:
 		, column(column), cell_width(cell_width), cell_height(cell_width / ratio), gapsize(gapsize)
 		, decorator(new NavigationDecorator(gapsize)) {
 
+		this->use_global_mask_setting(false);
 		this->min_width = (this->cell_width + this->gapsize) * float(this->column) + this->gapsize;
 		dynamic_cast<Planet*>(this->current_planet)->append_decorator(this->decorator);
 	}

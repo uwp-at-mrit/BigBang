@@ -12,6 +12,7 @@
 
 #include "module.hpp"
 #include "system.hpp"
+#include "time.hpp"
 #include "path.hpp"
 
 using namespace WarGrey::SCADA;
@@ -29,14 +30,14 @@ private enum class Brightness { Brightness100, Brightness80, Brightness60, Brigh
 
 // WARNING: order matters
 private enum class SS : unsigned int { Brightness, Permission, _ };
-private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, _ };
+private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, PrintScreen, _ };
 
 static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 
 /*************************************************************************************************/
 private class Widget : public Planet {
 public:
-	Widget(UniverseWidget^ master, PLCMaster* plc) : Planet(__MODULE__), master(master), device(plc) {
+	Widget(UniverseDisplay^ master, PLCMaster* plc) : Planet(__MODULE__), master(master), device(plc) {
 		Platform::String^ localhost = system_ipv4_address();
 		
 		this->inset = tiny_font_size * 0.5F;
@@ -178,6 +179,17 @@ public:
 
 				this->settings->show();
 			}; break;
+			case Icon::PrintScreen: {
+				IPlanet* target = this->master->current_planet;
+				bool prev_state;
+
+				this->master->use_global_mask_setting(false, &prev_state);
+
+				target->save(target->name() + "-" + file_basename_from_second(current_seconds()) + ".png",
+					target->actual_width(), target->actual_height(), Colours::Background);
+
+				this->master->use_global_mask_setting(prev_state);
+			}; break;
 			}
 		}
 	}
@@ -247,7 +259,7 @@ private:
 	float label_max;
 
 private:
-	UniverseWidget^ master;
+	UniverseDisplay^ master;
 	ISatellite* settings;
 	PLCMaster* device;
 	bool root;
@@ -260,10 +272,10 @@ private: // never delete these graphlets manually.
 };
 
 /*************************************************************************************************/
-UniverseWidget::UniverseWidget(Syslog* logger, PLCMaster* plc) : UniverseDisplay(logger), plc(plc) {
+UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : UniverseDisplay(master->get_logger()), master(master), plc(plc) {
 	this->use_global_mask_setting(false);
 }
 
 void UniverseWidget::construct() {
-	this->add_planet(new Widget(this, this->plc));
+	this->add_planet(new Widget(this->master, this->plc));
 }
