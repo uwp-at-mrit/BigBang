@@ -1,7 +1,10 @@
 ﻿#pragma once
 
+#include <ppltasks.h>
+
 #include "syslog.hpp"
 #include "system.hpp"
+#include "backtask.hxx"
 
 namespace WarGrey::SCADA {
 	template<class UniversalWindowsScreen>
@@ -38,13 +41,17 @@ namespace WarGrey::SCADA {
 			self->Title = screen->ToString();
 		}
 
+	protected:
 		void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e) override {
 			Windows::UI::ViewManagement::ApplicationView^ self = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+			Platform::String^ package_name = Windows::ApplicationModel::Package::Current->DisplayName;
 			
 			if (screen == nullptr) {
 				screen = ref new UniversalWindowsScreen();
+
 				this->AppMain(self, screen);
+				//this->BackgroundMain(package_name);
 
 				if (e->PreviousExecutionState == Windows::ApplicationModel::Activation::ApplicationExecutionState::Terminated) {
 					// TODO: Restore the saved session state only when appropriate, scheduling the
@@ -55,24 +62,34 @@ namespace WarGrey::SCADA {
 			}
 
 			if (e->PrelaunchActivated == false) {
-				Platform::String^ package_name = Windows::ApplicationModel::Package::Current->DisplayName;
-
 				screen->construct(package_name, adjusted_workspace_size(self->VisibleBounds, screen));
 				Windows::UI::Xaml::Window::Current->Activate();
 			}
 		}
 
 		void OnBackgroundActivated(Windows::ApplicationModel::Activation::BackgroundActivatedEventArgs^ args) {
+			// For In-Process background task, this functionality can be treated just like `IBackgroundTask.Run()`
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
 
 			if (screen != nullptr) {
-				screen->on_background_activated(args);
+				Windows::UI::Xaml::Application::OnBackgroundActivated(args);
+
+				screen->on_background_activated(args->TaskInstance);
 			}
 		}
 
 	private:
-		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args) {
+		void OnEnteredBackground(Platform::Object^ sender, Windows::ApplicationModel::EnteredBackgroundEventArgs^ args) {
 			// Do not assume that the application will be terminated or resumed with the contents of memory still intact.
+			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
+
+			if (screen != nullptr) {
+				screen->on_entered_background(args);
+			}
+		}
+
+		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args) {
+			// This functionality should be replaced by EnterBackground;
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
 
 			if (screen != nullptr) {
@@ -81,7 +98,7 @@ namespace WarGrey::SCADA {
 		}
 
 		void OnResuming(Platform::Object^ sender, Platform::Object^ args) {
-			// Only when any displayed content has changed while the app is suspended.
+			// This functionality should be replaced by LeavingBackground;
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
 		
 			if (screen != nullptr) {
@@ -89,15 +106,8 @@ namespace WarGrey::SCADA {
 			}
 		}
 
-		void OnEnteredBackground(Platform::Object^ sender, Windows::ApplicationModel::EnteredBackgroundEventArgs^ args) {
-			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
-
-			if (screen != nullptr) {
-				screen->on_entered_background(args);
-			}
-		}
-
 		void OnLeavingBackground(Platform::Object^ sender, Windows::ApplicationModel::LeavingBackgroundEventArgs^ args) {
+			// Only when any displayed content has changed while the app is suspended.
 			UniversalWindowsScreen^ screen = dynamic_cast<UniversalWindowsScreen^>(Windows::UI::Xaml::Window::Current->Content);
 
 			if (screen != nullptr) {
@@ -136,8 +146,10 @@ namespace WarGrey::SCADA {
 
 		set_default_logging_level(level);
 		set_default_racket_receiver_host(remote_rsyslog_server);
+
+
 		Windows::UI::Xaml::Application::Start(ref new Windows::UI::Xaml::ApplicationInitializationCallback(lazy_main));
-		
+
 		return 0;
 	}
 }

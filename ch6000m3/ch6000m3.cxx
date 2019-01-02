@@ -24,6 +24,7 @@ using namespace WarGrey::SCADA;
 
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::ApplicationModel::Background;
 
 using namespace Windows::System;
 using namespace Windows::Foundation;
@@ -180,18 +181,9 @@ public:
 		}
 	}
 
-	void on_entered_background(EnteredBackgroundEventArgs^ args) {
-		this->universe->get_logger()->log_message(Log::Info, "enter");
-	}
-
-	void on_background_activated(BackgroundActivatedEventArgs^ args) {
-		this->universe->get_logger()->log_message(Log::Info, "active");
-	}
-
-	void on_leaving_background(LeavingBackgroundEventArgs^ args) {
-		this->universe->get_logger()->log_message(Log::Info, "leaving");
-	}
-
+	void on_entered_background(EnteredBackgroundEventArgs^ args) {}
+	void on_background_activated(IBackgroundTaskInstance^ task) {}
+	void on_leaving_background(LeavingBackgroundEventArgs^ args) {}
 	void on_suspending(SuspendingEventArgs^ args) {}
 	void on_resuming() {}
 
