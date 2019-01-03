@@ -21,7 +21,7 @@ namespace WarGrey::SCADA {
 	static unsigned int backoil_pressure_too_low = 1810U;
 
 	/************************************************************************************************/
-	void DI_filter_alarm(WarGrey::SCADA::Alarmlet* target, const uint8* db4, unsigned int idx_p1);
+	void DI_alarm(WarGrey::SCADA::Alarmlet* target, const uint8* db4, unsigned int idx_p1, WarGrey::SCADA::AlarmState hlstate = AlarmState::Alert);
 	void DI_backoil_pressure_override(WarGrey::SCADA::Buttonlet* target, const uint8* db205, unsigned int idx_p1);
 	void DI_tank_heater(WarGrey::SCADA::Heaterlet* target,
 		const uint8* db4, unsigned int idx4_p1,

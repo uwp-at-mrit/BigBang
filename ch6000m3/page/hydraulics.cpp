@@ -69,13 +69,17 @@ private enum class HS : unsigned int {
 
 	// Pump-driven subsystems
 	PSTrunnion, PSGateValves, ShoreDischarge, BowAnchor,
-	PSDraghead, PSDoors, SternAnchor, Overflow, Barge,
+	PSDraghead, PSDoors, SternAnchor, Overflow, Barge, PSCompensator,
 	SBTrunnion, SBGateValves, PSIntermediate, ButterflyValves, SBIntermediate,
-	DoorsLocking, SBDraghead, SBDoors, WateringValves,
+	DoorsLocking, SBDraghead, SBDoors, WateringValves, SBCompensator,
 
 	// Dimensions
 	BackOil,
-	
+
+	// Pump Replacement Indicators
+	A2C, B2C, F2C, H2F, G2F, I2J,
+	C2A, C2B, C2F, F2H, F2G, J2I,
+
 	// Filter Indicators
 	F01, F02, F10,
 	
@@ -88,10 +92,10 @@ private enum class HS : unsigned int {
 	lt, tl, rt, tr, cl, cr, i, j, f02, master, sb
 };
 
-static HS A[] = { HS::PSDraghead, HS::PSDoors, HS::SternAnchor, HS::Overflow, HS::Barge };
+static HS A[] = { HS::PSDraghead, HS::PSDoors, HS::SternAnchor, HS::Overflow, HS::Barge, HS::PSCompensator };
 static HS B[] = { HS::PSIntermediate };
 static HS G[] = { HS::SBIntermediate };
-static HS H[] = { HS::SBDraghead, HS::SBDoors, HS::WateringValves };
+static HS H[] = { HS::SBDraghead, HS::SBDoors, HS::WateringValves, HS::SBCompensator };
 
 static HS C[] = { HS::PSTrunnion, HS::PSGateValves, HS::ShoreDischarge, HS::BowAnchor };
 static HS F[] = { HS::SBTrunnion, HS::SBGateValves };
@@ -133,7 +137,7 @@ static void hydraulics_diagnostics(HydraulicPumplet* pump, PLCMaster* plc) {
 		case HS::K: feedback = pump_K_feedback; group = HPDX::Other; details = pump_K_status; break;
 		}
 		
-		// WARNING: `set_pump`ing before `switch_id`ing. 
+		// WARNING: `set_pump()`ing before `switch_id()`ing. 
 		satellite->set_pump(credit_pump->id.ToString(), group, details);
 		satellite->switch_id(feedback);
 		satellite->show();
@@ -279,9 +283,23 @@ public:
 		}
 
 		{ // filter statuses
-			DI_filter_alarm(this->alarms[HS::F01], DB4, filter_01_status);
-			DI_filter_alarm(this->alarms[HS::F02], DB4, filter_02_status);
-			DI_filter_alarm(this->alarms[HS::F10], DB4, filter_10_status);
+			DI_alarm(this->alarms[HS::F01], DB4, filter_01_status);
+			DI_alarm(this->alarms[HS::F02], DB4, filter_02_status);
+			DI_alarm(this->alarms[HS::F10], DB4, filter_10_status);
+
+			DI_alarm(this->alarms[HS::A2C], DB4, pump_A_replace_C, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::B2C], DB4, pump_B_replace_C, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::F2C], DB4, pump_F_replace_C, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::H2F], DB4, pump_H_replace_F, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::G2F], DB4, pump_G_replace_F, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::I2J], DB4, pump_I_replace_J, AlarmState::Notice);
+
+			DI_alarm(this->alarms[HS::C2A], DB4, pump_C_replace_A, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::C2B], DB4, pump_C_replace_B, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::C2F], DB4, pump_C_replace_F, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::F2H], DB4, pump_F_replace_H, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::F2G], DB4, pump_F_replace_G, AlarmState::Notice);
+			DI_alarm(this->alarms[HS::J2I], DB4, pump_J_replace_I, AlarmState::Notice);
 		}
 	}
 
@@ -330,6 +348,10 @@ public:
 	void construct(float gwidth, float gheight) {
 		this->caption_font = make_bold_text_format("Microsoft YaHei", large_font_size);
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
+
+		this->button_style.font = make_bold_text_format("Consolas", 14.0F);
+		this->button_style.corner_radius = 2.0F;
+		this->button_style.thickness = 2.0F;
 
 		this->fixnum_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
 		this->fixnum_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
@@ -382,7 +404,7 @@ public:
 
 		this->load_dimension(this->pressures, HS::BackOil, "bar");
 
-		this->load_buttons(this->functions);
+		this->load_buttons(this->functions, 48.0F, 24.0F);
 	}
 
 	void load_tanks(float width, float height, float gwidth, float gheight) {
@@ -401,8 +423,10 @@ public:
 		this->load_label(this->labels, speak(HSMTState::Normal), HS::VisorState, Colours::Silver, this->label_font);
 
 		this->storage_tank = this->master->insert_one(new FuelTanklet(gwidth * 2.5F, 0.0F, thickness, Colours::WhiteSmoke));
-		
-		this->load_filter_alarms(HS::F01, HS::F10, alarm_size, this->alarms, this->islabels);
+
+		this->load_alarms(HS::A2C, HS::I2J, alarm_size, this->alarms, this->alabels);
+		this->load_alarms(HS::C2A, HS::J2I, alarm_size, this->alarms, this->alabels);
+		this->load_alarms(HS::F01, HS::F10, alarm_size, this->alarms, this->alabels);
 	}
 
 	void load_devices(float width, float height, float gwidth, float gheight) {
@@ -444,10 +468,8 @@ public:
 		this->master->move_to(this->captions[HS::Storage], this->storage_tank, GraphletAnchor::CB, GraphletAnchor::CT);
 
 		this->master->move_to(this->pressures[HS::BackOil], this->station, GraphletAnchor::CT, GraphletAnchor::CB);
-
 		this->master->move_to(this->functions[HSFunction::BOPOverride],
-			this->captions[HS::Port], 0.5F, this->master_tank, 0.5F,
-			GraphletAnchor::CC);
+			this->pressures[HS::BackOil], GraphletAnchor::RB, GraphletAnchor::LB, gwidth);
 		
 		{ // reflow heater
 			float hspace, vspace;
@@ -552,13 +574,24 @@ public:
 		{ // reflow alarms
 			float lblgap = vinset * 0.25F;
 			float vgap = lblgap * 0.5F;
-
+			
 			this->master->move_to(this->alarms[HS::F01], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LB, gwidth, -vgap);
 			this->master->move_to(this->alarms[HS::F02], this->thermometers[HS::Master], 1.0F, 0.25F, GraphletAnchor::LT, gwidth, +vgap);
 			this->master->move_to(this->alarms[HS::F10], this->thermometers[HS::Visor], 1.0F, 0.25F, GraphletAnchor::LC, gwidth);
 
-			for (auto it = this->alarms.begin(); it != this->alarms.end(); it++) {
-				this->master->move_to(this->islabels[it->first], this->alarms[it->first],
+			this->master->move_to(this->alarms[HS::A2C], this->pumps[HS::C], 0.5F, this->master_tank, 0.0F, GraphletAnchor::LT);
+			this->master->move_to(this->alarms[HS::C2A], this->valves[HS::SQc], 0.0F, this->master_tank, 0.0F, GraphletAnchor::RT, -gwidth * 2.0F);
+
+			for (HS id = HS::A2C; id < HS::J2I; id++) {
+				if (id != HS::I2J) {
+					this->master->move_to(this->alarms[_E(HS, _I(id) + 1U)],
+						this->alarms[id], GraphletAnchor::CB, GraphletAnchor::CT,
+						0.0F, vgap * 3.0F);
+				}
+			}
+
+			for (auto it = this->alabels.begin(); it != this->alabels.end(); it++) {
+				this->master->move_to(it->second, this->alarms[it->first],
 					GraphletAnchor::RC, GraphletAnchor::LC, lblgap);
 			}
 		}
@@ -635,7 +668,7 @@ private:
 	}
 
 	template<class A, typename E>
-	void load_filter_alarms(E id0, E idn, float size, std::map<E, Credit<A, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
+	void load_alarms(E id0, E idn, float size, std::map<E, Credit<A, E>*>& bs, std::map<E, Credit<Labellet, E>*>& ls) {
 		for (E id = id0; id <= idn; id++) {
 			this->load_label(ls, id, Colours::Silver);
 			bs[id] = this->master->insert_one(new Credit<A, E>(size), id);
@@ -646,6 +679,7 @@ private:
 	void load_buttons(std::map<CMD, Credit<B, CMD>*>& bs, float width = 128.0F, float height = 32.0F) {
 		for (CMD cmd = _E(CMD, 0); cmd < CMD::_; cmd++) {
 			bs[cmd] = this->master->insert_one(new Credit<B, CMD>(cmd.ToString(), width, height), cmd);
+			bs[cmd]->set_style(this->button_style);
 		}
 	}
 
@@ -750,13 +784,14 @@ private: // never deletes these graphlets mannually
 	std::map<HS, Credit<ManualValvelet, HS>*> valves;
 	std::map<HS, Credit<Dimensionlet, HS>*> pressures;
 	std::map<HS, Credit<Alarmlet, HS>*> alarms;
-	std::map<HS, Credit<Labellet, HS>*> islabels;
+	std::map<HS, Credit<Labellet, HS>*> alabels;
 	
 private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
 	DimensionStyle fixnum_style;
 	DimensionStyle flonum_style;
+	ButtonStyle button_style;
 
 private:
 	HydraulicsPage* master;

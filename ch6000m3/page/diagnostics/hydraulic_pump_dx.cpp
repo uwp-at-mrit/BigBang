@@ -43,7 +43,7 @@ private enum class P : unsigned int {
 	NoConsolePSStop, NoConsoleSBStop, NoSailingStop, NoPSWinchGantryStop, NoSBWinchGantryStop,
 	NoMasterTankFS01, NoMasterTankFS02, NoMasterTankLS1, NoMasterTankLS2,
 	NoVisorTankFS, NoVisorTankLS1, NoVisorTankLS2,
-	SQ1Open, SQ2Open, CoolantRunning,
+	SQ1Open, SQ2Open, CoolantRunning, Flushing,
 
 	// Pump Conditions
 	Ready, NoRunning, NoBroken,
@@ -53,29 +53,29 @@ private enum class P : unsigned int {
 	SQiOpen, SQjOpen,
 	SQyOpen, SQlOpen, SQmOpen, SQkOpen,
 	
-	NoC2A, NoC2B, NoH2G, NoF2H,
-	NoA2C, NoB2C, NoC2F, NoH2F, NoE2D, NoD2E,
+	NoC2A, NoC2B, NoF2G, NoF2H,
+	NoA2C, NoB2C, NoF2C, NoC2F, NoH2F, NoG2F,
 	NoJ2I, NoI2J,
 
 	_
 };
 
-static P other[] = { P::NoMasterTankFS02, P::NoMasterTankLS1, P::NoMasterTankLS2 };
-static P visor[] = { P::NoVisorTankFS, P::NoVisorTankLS1, P::NoVisorTankLS2 };
-static P ps[] = { P::NoConsolePSStop, P::NoPSWinchGantryStop, P::NoMasterTankFS01,
-	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ2Open, P::CoolantRunning };
-static P sb[] = { P::NoConsoleSBStop, P::NoSBWinchGantryStop, P::NoMasterTankFS01,
-	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ1Open, P::CoolantRunning };
+static P other[] = { P::NoMasterTankFS02, P::NoSailingStop, P::NoMasterTankLS1, P::NoMasterTankLS2 };
+static P visor[] = { P::NoSailingStop, P::NoVisorTankFS, P::NoVisorTankLS1, P::NoVisorTankLS2 };
+static P ps[] = { P::NoConsolePSStop, P::NoSailingStop, P::NoPSWinchGantryStop, P::NoMasterTankFS01,
+	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ2Open, P::CoolantRunning, P::Flushing };
+static P sb[] = { P::NoConsoleSBStop, P::NoSailingStop, P::NoSBWinchGantryStop, P::NoMasterTankFS01,
+	P::NoMasterTankLS1, P::NoMasterTankLS2, P::SQ1Open, P::CoolantRunning, P::Flushing };
 
 static P A[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQaOpen, P::NoC2A };
 static P B[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQbOpen, P::NoC2B };
-static P G[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQgOpen, P::NoH2G };
+static P G[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQgOpen, P::NoF2G };
 static P H[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQhOpen, P::NoF2H };
 
-static P C[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQcOpen, P::NoA2C, P::NoB2C };
-static P F[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQfOpen, P::NoC2F, P::NoH2F };
-static P D[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQdOpen, P::NoE2D };
-static P E[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQeOpen, P::NoD2E };
+static P C[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQcOpen, P::NoA2C, P::NoB2C, P::NoF2C };
+static P F[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQfOpen, P::NoC2F, P::NoH2F, P::NoG2F };
+static P D[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQdOpen };
+static P E[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQeOpen };
 
 static P I[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQyOpen, P::NoJ2I };
 static P J[] = { P::Ready, P::NoRunning, P::NoBroken, P::SQjOpen, P::NoI2J };
@@ -139,7 +139,7 @@ public:
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, Syslog* logger) override {
 		this->diagnoses[P::NoConsolePSStop]->set_state(DBX(DB4, console_ps_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoConsoleSBStop]->set_state(DBX(DB4, console_sb_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
-		//this->diagnoses[P::NoSailingStop]->set_state(DBX(DB4, sailing_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
+		this->diagnoses[P::NoSailingStop]->set_state(DBX(DB4, sailing_hydraulics_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoPSWinchGantryStop]->set_state(DBX(DB4, console_ps_winch_gantry_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoSBWinchGantryStop]->set_state(DBX(DB4, console_sb_winch_gantry_stop_button - 1U), AlarmState::None, AlarmState::Notice);
 		this->diagnoses[P::NoMasterTankFS01]->set_state(DBX(DB4, filter_01_status - 1U), AlarmState::None, AlarmState::Notice);
@@ -152,6 +152,7 @@ public:
 		this->diagnoses[P::SQ1Open]->set_state(DI_manual_valve_open(DB4, manual_valve_SQ1_status), AlarmState::Notice, AlarmState::None);
 		this->diagnoses[P::SQ2Open]->set_state(DI_manual_valve_open(DB4, manual_valve_SQ2_status), AlarmState::Notice, AlarmState::None);
 		this->diagnoses[P::CoolantRunning]->set_state(DI_hydraulic_pump_running(DB4, pump_K_feedback), AlarmState::Notice, AlarmState::None);
+		this->diagnoses[P::Flushing]->set_state(DI_hydraulic_pump_running(DB4, pump_L_feedback), AlarmState::Notice, AlarmState::None);
 
 		{ // check pumps
 			unsigned int feedback = this->master->get_id();
@@ -165,11 +166,11 @@ public:
 			this->diagnoses[P::NoB2C]->set_state(DBX(DB4, pump_B_replace_C - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoC2B]->set_state(DBX(DB4, pump_C_replace_B - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoC2F]->set_state(DBX(DB4, pump_C_replace_F - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoF2C]->set_state(DBX(DB4, pump_F_replace_C - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoH2F]->set_state(DBX(DB4, pump_H_replace_F - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoF2H]->set_state(DBX(DB4, pump_F_replace_H - 1U), AlarmState::None, AlarmState::Notice);
-			this->diagnoses[P::NoH2G]->set_state(DBX(DB4, pump_H_replace_G - 1U), AlarmState::None, AlarmState::Notice);
-			this->diagnoses[P::NoD2E]->set_state(DBX(DB4, pump_D_replace_E - 1U), AlarmState::None, AlarmState::Notice);
-			this->diagnoses[P::NoE2D]->set_state(DBX(DB4, pump_E_replace_D - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoG2F]->set_state(DBX(DB4, pump_G_replace_F - 1U), AlarmState::None, AlarmState::Notice);
+			this->diagnoses[P::NoF2G]->set_state(DBX(DB4, pump_F_replace_G - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoI2J]->set_state(DBX(DB4, pump_I_replace_J - 1U), AlarmState::None, AlarmState::Notice);
 			this->diagnoses[P::NoJ2I]->set_state(DBX(DB4, pump_J_replace_I - 1U), AlarmState::None, AlarmState::Notice);
 

@@ -282,11 +282,11 @@
   <data name="NoC2F" xml:space="preserve">
     <value>No C Replace F</value>
   </data>
-  <data name="NoD2E" xml:space="preserve">
-    <value>No D Replace E</value>
+  <data name="NoF2C" xml:space="preserve">
+    <value>No F Replace C</value>
   </data>
-  <data name="NoE2D" xml:space="preserve">
-    <value>No E Replace D</value>
+  <data name="NoG2F" xml:space="preserve">
+    <value>No G Replace F</value>
   </data>
   <data name="NoF2H" xml:space="preserve">
     <value>No F Replace H</value>
@@ -294,8 +294,8 @@
   <data name="NoH2F" xml:space="preserve">
     <value>No H Replace F</value>
   </data>
-  <data name="NoH2G" xml:space="preserve">
-    <value>No H Replace G</value>
+  <data name="NoF2G" xml:space="preserve">
+    <value>No F Replace G</value>
   </data>
   <data name="NoI2J" xml:space="preserve">
     <value>No I Replace J</value>
@@ -308,5 +308,8 @@
   </data>
   <data name="SQk2Open" xml:space="preserve">
     <value>[K2]</value>
+  </data>
+  <data name="Flushing" xml:space="preserve">
+    <value>Flushing Pump is Running</value>
   </data>
 </root>

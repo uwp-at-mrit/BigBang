@@ -231,4 +231,55 @@
   <data name="WateringValves" xml:space="preserve">
     <value>Watering Gate Valves</value>
   </data>
+  <data name="PSCompensator" xml:space="preserve">
+    <value>PS Compensator</value>
+  </data>
+  <data name="SBCompensator" xml:space="preserve">
+    <value>SB Compensator</value>
+  </data>
+  <data name="A2C" xml:space="preserve">
+    <value>A Replace C</value>
+  </data>
+  <data name="B2C" xml:space="preserve">
+    <value>B Replace C</value>
+  </data>
+  <data name="C2A" xml:space="preserve">
+    <value>C Replace A</value>
+  </data>
+  <data name="C2B" xml:space="preserve">
+    <value>C Replace B</value>
+  </data>
+  <data name="C2F" xml:space="preserve">
+    <value>C Replace F</value>
+  </data>
+  <data name="D2E" xml:space="preserve">
+    <value>D Replace E</value>
+  </data>
+  <data name="E2D" xml:space="preserve">
+    <value>E Replace D</value>
+  </data>
+  <data name="F2H" xml:space="preserve">
+    <value>F Replace H</value>
+  </data>
+  <data name="H2F" xml:space="preserve">
+    <value>H Replace F</value>
+  </data>
+  <data name="H2G" xml:space="preserve">
+    <value>H Replace G</value>
+  </data>
+  <data name="I2J" xml:space="preserve">
+    <value>I Replace J</value>
+  </data>
+  <data name="J2I" xml:space="preserve">
+    <value>J Replace I</value>
+  </data>
+  <data name="F2C" xml:space="preserve">
+    <value>F Replace C</value>
+  </data>
+  <data name="F2G" xml:space="preserve">
+    <value>F Replace G</value>
+  </data>
+  <data name="G2F" xml:space="preserve">
+    <value>G Replace F</value>
+  </data>
 </root>

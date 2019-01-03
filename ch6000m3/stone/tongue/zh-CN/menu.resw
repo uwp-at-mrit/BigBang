@@ -367,7 +367,7 @@
     <value>诊断</value>
   </data>
   <data name="BOPOverride" xml:space="preserve">
-    <value>回油压力越控</value>
+    <value>越控</value>
   </data>
   <data name="VirtualOut" xml:space="preserve">
     <value>假推</value>

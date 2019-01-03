@@ -3,8 +3,8 @@
 
 using namespace WarGrey::SCADA;
 
-void WarGrey::SCADA::DI_filter_alarm(Alarmlet* target, const uint8* db4, unsigned int idx_p1) {
-	target->set_state(DBX(db4, idx_p1 - 1U), AlarmState::Alert, AlarmState::None);
+void WarGrey::SCADA::DI_alarm(Alarmlet* target, const uint8* db4, unsigned int idx_p1, AlarmState hlstate) {
+	target->set_state(DBX(db4, idx_p1 - 1U), hlstate, AlarmState::None);
 }
 
 void WarGrey::SCADA::DI_backoil_pressure_override(Buttonlet* target, const uint8* db205, unsigned int idx_p1) {

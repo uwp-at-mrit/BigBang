@@ -367,7 +367,7 @@
     <value>Diagnostics</value>
   </data>
   <data name="BOPOverride" xml:space="preserve">
-    <value>Back Oil Pressure Override</value>
+    <value>Override</value>
   </data>
   <data name="VirtualOut" xml:space="preserve">
     <value>Virtual Wind Out</value>

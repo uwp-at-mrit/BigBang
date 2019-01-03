@@ -25,7 +25,7 @@ namespace WarGrey::SCADA {
 
 	static const unsigned int console_ps_hydraulics_stop_button = 588U;
 	static const unsigned int console_sb_hydraulics_stop_button = 652U;
-	//static const unsigned int sailing_hydraulics_stop_button = 622U;
+	static const unsigned int sailing_hydraulics_stop_button = 669U;
 
 	static const unsigned int pump_A_replace_C = 145U;
 	static const unsigned int pump_C_replace_A = 146U;
@@ -35,12 +35,10 @@ namespace WarGrey::SCADA {
 	static const unsigned int pump_C_replace_F = 150U;
 	static const unsigned int pump_H_replace_F = 151U;
 	static const unsigned int pump_F_replace_H = 152U;
-	static const unsigned int pump_H_replace_G = 153U;
-	static const unsigned int pump_G_replace_H = 154U;
+	static const unsigned int pump_G_replace_F = 153U;
+	static const unsigned int pump_F_replace_G = 154U;
 	static const unsigned int pump_I_replace_J = 155U;
 	static const unsigned int pump_J_replace_I = 156U;
-	static const unsigned int pump_D_replace_E = 157U;
-	static const unsigned int pump_E_replace_D = 158U;
 
 	// DB205, starts from 1
 	static const unsigned int pump_A_status = 9U;

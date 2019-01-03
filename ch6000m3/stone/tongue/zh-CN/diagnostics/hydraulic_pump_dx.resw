@@ -282,11 +282,11 @@
   <data name="NoC2F" xml:space="preserve">
     <value>C泵代替F泵未激活</value>
   </data>
-  <data name="NoD2E" xml:space="preserve">
-    <value>D泵代替E泵未激活</value>
+  <data name="NoF2C" xml:space="preserve">
+    <value>F泵代替C泵未激活</value>
   </data>
-  <data name="NoE2D" xml:space="preserve">
-    <value>E泵代替D泵未激活</value>
+  <data name="NoG2F" xml:space="preserve">
+    <value>G泵代替F泵未激活</value>
   </data>
   <data name="NoF2H" xml:space="preserve">
     <value>F泵代替H泵未激活</value>
@@ -294,8 +294,8 @@
   <data name="NoH2F" xml:space="preserve">
     <value>H泵代替F泵未激活</value>
   </data>
-  <data name="NoH2G" xml:space="preserve">
-    <value>H泵代替G泵未激活</value>
+  <data name="NoF2G" xml:space="preserve">
+    <value>F泵代替G泵未激活</value>
   </data>
   <data name="NoI2J" xml:space="preserve">
     <value>I泵代替J泵未激活</value>
@@ -308,5 +308,8 @@
   </data>
   <data name="SQk2Open" xml:space="preserve">
     <value>[K2]</value>
+  </data>
+  <data name="Flushing" xml:space="preserve">
+    <value>马达冲洗泵运行</value>
   </data>
 </root>

@@ -179,7 +179,6 @@
   </data>
   <data name="Master" xml:space="preserve">
     <value>主油温</value>
-    <comment>“主油箱”标签不显示</comment>
   </data>
   <data name="Visor" xml:space="preserve">
     <value>油温</value>
@@ -228,5 +227,56 @@
   </data>
   <data name="WateringValves" xml:space="preserve">
     <value>引水闸阀</value>
+  </data>
+  <data name="PSCompensator" xml:space="preserve">
+    <value>左补偿器</value>
+  </data>
+  <data name="SBCompensator" xml:space="preserve">
+    <value>右补偿器</value>
+  </data>
+  <data name="A2C" xml:space="preserve">
+    <value>A泵代替C泵</value>
+  </data>
+  <data name="B2C" xml:space="preserve">
+    <value>B泵代替C泵</value>
+  </data>
+  <data name="C2A" xml:space="preserve">
+    <value>C泵代替A泵</value>
+  </data>
+  <data name="C2B" xml:space="preserve">
+    <value>C泵代替B泵</value>
+  </data>
+  <data name="C2F" xml:space="preserve">
+    <value>C泵代替F泵</value>
+  </data>
+  <data name="D2E" xml:space="preserve">
+    <value>D泵代替E泵</value>
+  </data>
+  <data name="E2D" xml:space="preserve">
+    <value>E泵代替D泵</value>
+  </data>
+  <data name="F2H" xml:space="preserve">
+    <value>F泵代替H泵</value>
+  </data>
+  <data name="H2F" xml:space="preserve">
+    <value>H泵代替F泵</value>
+  </data>
+  <data name="H2G" xml:space="preserve">
+    <value>H泵代替G泵</value>
+  </data>
+  <data name="I2J" xml:space="preserve">
+    <value>I泵代替J泵</value>
+  </data>
+  <data name="J2I" xml:space="preserve">
+    <value>J泵代替I泵</value>
+  </data>
+  <data name="F2C" xml:space="preserve">
+    <value>F泵代替C泵</value>
+  </data>
+  <data name="F2G" xml:space="preserve">
+    <value>F泵代替G泵</value>
+  </data>
+  <data name="G2F" xml:space="preserve">
+    <value>G泵代替F泵</value>
   </data>
 </root>

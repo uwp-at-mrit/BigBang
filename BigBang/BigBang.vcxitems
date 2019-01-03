@@ -59,6 +59,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)satellite.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\cyberspace.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)test\performance.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)timemachine.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timer.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\arrowpad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)virtualization\keyboard.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)satellite.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\cyberspace.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\performance.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)timemachine.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timer.hxx">
       <FileType>Document</FileType>
     </ClInclude>
