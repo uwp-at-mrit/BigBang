@@ -94,13 +94,19 @@ DimensionStyle WarGrey::SCADA::make_setting_dimension_style(float nfsize, unsign
 
 DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_number, int precision
 	, ICanvasBrush^ label_color, ICanvasBrush^ label_bgcolor) {
+	return make_highlight_dimension_style(nfsize, 0U, min_number, precision, label_color, label_bgcolor);
+}
+
+DimensionStyle WarGrey::SCADA::make_highlight_dimension_style(float nfsize, unsigned int min_label, unsigned int min_number, int precision
+	, ICanvasBrush^ label_color, ICanvasBrush^ label_bgcolor) {
 	auto nf = make_bold_text_format("Cambria Math", nfsize);
 	auto uf = make_bold_text_format("Cambria", nfsize);
+	TextExtent label_extent = get_text_extent("O", uf);
 	DimensionStyle ds;
 
 	ds.number_font = nf;
 	ds.unit_font = uf;
-	ds.minimize_label_width = get_text_extent("O", uf).height;
+	ds.minimize_label_width = ((min_label == 0) ? label_extent.height : (label_extent.width * float(min_label)));
 	ds.label_xfraction = 0.5F;
 	ds.minimize_number_width = get_text_extent("0", nf).width * float(min_number);
 	ds.number_leading_space = 2.0F;

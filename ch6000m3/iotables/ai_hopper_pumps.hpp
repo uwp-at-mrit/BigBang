@@ -35,4 +35,26 @@ namespace WarGrey::SCADA {
 
 	static unsigned int ps_flushing_pump_pressure = 34U;
 	static unsigned int sb_flushing_pump_pressure = 38U;
+
+	static unsigned int ps_motor_U = 176U;
+	static unsigned int ps_motor_V = 177U;
+	static unsigned int ps_motor_W = 178U;
+	static unsigned int ps_motor_DE = 179U;
+	static unsigned int ps_motor_NDEa = 180U;
+	static unsigned int ps_motor_NDEr = 181U;
+	static unsigned int ps_motor_DEo = 182U;
+	static unsigned int ps_motor_NDEo = 183U;
+	static unsigned int ps_motor_dp1 = 184U;
+	static unsigned int ps_motor_dp2 = 185U;
+
+	static unsigned int sb_motor_U = 186U;
+	static unsigned int sb_motor_V = 187U;
+	static unsigned int sb_motor_W = 188U;
+	static unsigned int sb_motor_DE = 189U;
+	static unsigned int sb_motor_NDEa = 190U;
+	static unsigned int sb_motor_NDEr = 191U;
+	static unsigned int sb_motor_DEo = 192U;
+	static unsigned int sb_motor_NDEo = 193U;
+	static unsigned int sb_motor_dp1 = 194U;
+	static unsigned int sb_motor_dp2 = 195U;
 }
