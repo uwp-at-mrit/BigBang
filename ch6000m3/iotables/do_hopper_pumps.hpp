@@ -14,6 +14,9 @@ namespace WarGrey::SCADA {
 	private enum class PSHopperPumpDischargeAction { Prepare, Start, Stop, Reset, PSShoring, PSRainbowing, BothShoring, BothRainbowing, _ };
 	private enum class SBHopperPumpDischargeAction { Prepare, Start, Stop, Reset, SBShoring, SBRainbowing, BothShoring, BothRainbowing, _ };
 
+	private enum class HopperGroup { ChargeCondition, _ };
+	private enum class GroupChargeAction { PSHopper, SBHopper, HPBarge, BothHopper, PSUnderWater, SBUnderWater, UWPBarge, BothUnderWater, _ };
+
 	private enum class GlandPumpAction { Start, Stop, Reset, Auto, Diagnostics, _ };
 	private enum class LubricationUnitAction { Start, Stop, _ };
 	private enum class GearboxLubricatorAction { Start, Stop, Cancel, Auto, _ };
@@ -27,10 +30,12 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_lubrication_unit_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gearbox_lubricator_menu(WarGrey::SCADA::PLCMaster* plc);
 
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_group_charge_menu(WarGrey::SCADA::GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_hopper_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_hopper_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_underwater_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_underwater_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
+
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 

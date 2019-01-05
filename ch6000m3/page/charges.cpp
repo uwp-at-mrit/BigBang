@@ -35,6 +35,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -139,6 +140,7 @@ public:
 		this->dpressures[CS::SBUWPump]->set_value(RealData(DB203, sb_underwater_pump_discharge_pressure), GraphletAnchor::LT);
 		this->dfpressures[CS::SBUWPump]->set_value(RealData(DB203, sb_draghead_differential_pressure), GraphletAnchor::LT);
 
+		/*
 		this->motors[CS::PSU]->set_value(RealData(DB203, ps_motor_U), GraphletAnchor::LT);
 		this->motors[CS::PSV]->set_value(RealData(DB203, ps_motor_V), GraphletAnchor::LT);
 		this->motors[CS::PSW]->set_value(RealData(DB203, ps_motor_W), GraphletAnchor::LT);
@@ -160,6 +162,7 @@ public:
 		this->motors[CS::SBNDEoil]->set_value(RealData(DB203, sb_motor_NDEo), GraphletAnchor::LT);
 		this->motors[CS::SBMotorDP1]->set_value(RealData(DB203, sb_motor_dp1), GraphletAnchor::LT);
 		this->motors[CS::SBMotorDP2]->set_value(RealData(DB203, sb_motor_dp2), GraphletAnchor::LT);
+		*/
 	}
 
 	void on_digital_input(const uint8* DB4, size_t count4, const uint8* DB205, size_t count205, WarGrey::SCADA::Syslog* logger) override {
@@ -277,7 +280,7 @@ public:
 		this->label_font = make_bold_text_format("Microsoft YaHei", small_font_size);
 		this->special_font = make_text_format(tiny_font_size);
 
-		this->motor_style = make_highlight_dimension_style(tiny_font_size, 6U, 4U, 0);
+		this->motor_style = make_highlight_dimension_style(small_font_size, 6U, 4U, 0);
 		this->pump_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Background);
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0, Colours::Green);
 
@@ -537,12 +540,12 @@ public:
 			this->master->move_to(this->pump_pressures[CS::F], this->pump_pressures[CS::C], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 			this->master->move_to(this->pump_pressures[CS::H], this->pump_pressures[CS::F], GraphletAnchor::RC, GraphletAnchor::LC, gwidth);
 
-			this->master->move_to(this->tips[CS::PSMotor], vinset, vinset * 2.0F, GraphletAnchor::LT);
+			this->master->move_to(this->tips[CS::PSMotor], vinset * 0.618F, vinset * 1.618F, GraphletAnchor::LT);
 			this->master->move_to(this->captions[CS::PSMotor], this->tips[CS::PSMotor], GraphletAnchor::CC, GraphletAnchor::CC);
 			this->master->move_to(this->motors[CS::PSU], this->tips[CS::PSMotor], GraphletAnchor::LB, GraphletAnchor::LT, 0.0F, 1.0F);
 			this->master->move_to(this->motors[CS::PSDE], this->tips[CS::PSMotor], GraphletAnchor::RB, GraphletAnchor::RT, 0.0F, 1.0F);
 
-			this->master->move_to(this->tips[CS::SBMotor], vinset, height - vinset * 2.0F, GraphletAnchor::LB);
+			this->master->move_to(this->tips[CS::SBMotor], vinset * 0.618F, height - vinset * 1.618F, GraphletAnchor::LB);
 			this->master->move_to(this->captions[CS::SBMotor], this->tips[CS::SBMotor], GraphletAnchor::CC, GraphletAnchor::CC);
 			this->master->move_to(this->motors[CS::SBMotorDP2], this->tips[CS::SBMotor], GraphletAnchor::LT, GraphletAnchor::LB, 0.0F, -1.0F);
 			this->master->move_to(this->motors[CS::SBNDEoil], this->tips[CS::SBMotor], GraphletAnchor::RT, GraphletAnchor::RB, 0.0F, -1.0F);
@@ -565,6 +568,34 @@ public:
 		}
 
 		this->station->map_graphlet_at_anchor(this->functions[CSFunction::Diagnostics], CS::diagnostics, GraphletAnchor::LB, gwidth * 3.0F);
+	}
+
+public:
+	bool hopper_selected(CS pid) {
+		return this->master->is_selected(this->hoppers[pid]);
+	}
+
+	bool valves_selected(CS vids[], unsigned int count, int tolerance) {
+		bool okay = false;
+		int ok = 0;
+
+		for (unsigned int idx = 0; idx < count; idx++) {
+			if (this->master->is_selected(this->gvalves[vids[idx]])) {
+				ok += 1;
+
+				if (ok >= tolerance) {
+					okay = true;
+					break;
+				}
+			}
+		}
+
+		return okay;
+	}
+
+	template<unsigned int N>
+	bool valves_selected(CS(&vids)[N], int tolerance) {
+		return this->valves_selected(vids, N, tolerance);
 	}
 
 public:
@@ -651,6 +682,7 @@ private:
 		}; break;
 		}
 
+		/*
 		if (title != E::_) {
 			Platform::String^ unit = nullptr;
 			float mwidth, mheight;
@@ -675,6 +707,7 @@ private:
 				new Credit<Labellet, E>(_speak(title), this->motor_style.label_font, this->motor_style.label_color),
 				title);
 		}
+		*/
 	}
 
 	template<typename E>
@@ -876,6 +909,14 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->diagnostics = new HopperPumpDiagnostics(plc);
 
 	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
+	this->ghopper_op = make_group_charge_menu(GroupChargeAction::BothHopper, plc);
+	this->gunderwater_op = make_group_charge_menu(GroupChargeAction::BothUnderWater, plc);
+	this->ghbarge_op = make_group_charge_menu(GroupChargeAction::HPBarge, plc);
+	this->guwbarge_op = make_group_charge_menu(GroupChargeAction::UWPBarge, plc);
+	this->ghps_op = make_group_charge_menu(GroupChargeAction::PSHopper, plc);
+	this->guwps_op = make_group_charge_menu(GroupChargeAction::PSUnderWater, plc);
+	this->ghsb_op = make_group_charge_menu(GroupChargeAction::SBHopper, plc);
+	this->guwsb_op = make_group_charge_menu(GroupChargeAction::SBUnderWater, plc);
 	this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
 	this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);
@@ -961,6 +1002,10 @@ bool ChargesPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<HopperPumplet*>(g) != nullptr));
 }
 
+bool ChargesPage::can_select_multiple() {
+	return true;
+}
+
 void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto hpump = dynamic_cast<Credit<HopperPumplet, CS>*>(g);
@@ -976,6 +1021,48 @@ void ChargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 		case CS::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
 		case CS::PSUWPump: menu_popup(this->ps_underwater_op, g, local_x, local_y); break;
 		case CS::SBUWPump: menu_popup(this->sb_underwater_op, g, local_x, local_y); break;
+		}
+	}
+}
+
+void ChargesPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto dashboard = dynamic_cast<Vessel*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		bool ps_underwater = dashboard->hopper_selected(CS::PSUWPump);
+		bool sb_underwater = dashboard->hopper_selected(CS::SBUWPump);
+		bool ps_hopper = dashboard->hopper_selected(CS::PSHPump);
+		bool sb_hopper = dashboard->hopper_selected(CS::SBHPump);
+		CS barges[] = { CS::D024 };
+		CS uwps[] = { CS::D004, CS::D006, CS::D009 };
+		CS hps[] = { CS::D004, CS::D005, CS::D017 };
+		CS uwsb[] = { CS::D003, CS::D026, CS::D007 };
+		CS hsb[] = { CS::D003, CS::D025, CS::D018 };
+
+		if (ps_underwater && sb_underwater) {
+			group_menu_popup(this->gunderwater_op, this, x, y);
+		} else if (ps_hopper && sb_hopper) {
+			group_menu_popup(this->ghopper_op, this, x, y);
+		} else if (sb_underwater) {
+			if (dashboard->valves_selected(barges, 1)) {
+				group_menu_popup(this->guwbarge_op, this, x, y);
+			} else if (dashboard->valves_selected(uwsb, 3)) {
+				group_menu_popup(this->guwsb_op, this, x, y);
+			}
+		} else if (sb_hopper) {
+			if (dashboard->valves_selected(barges, 1)) {
+				group_menu_popup(this->ghbarge_op, this, x, y);
+			} else if (dashboard->valves_selected(uwsb, 1)) {
+				group_menu_popup(this->ghsb_op, this, x, y);
+			}
+		} else if (ps_underwater) {
+			if (dashboard->valves_selected(uwps, 3)) {
+				group_menu_popup(this->guwps_op, this, x, y);
+			}
+		} else if (ps_hopper) {
+			if (dashboard->valves_selected(hps, 3)) {
+				group_menu_popup(this->ghps_op, this, x, y);
+			}
 		}
 	}
 }

@@ -11,8 +11,15 @@ using namespace Windows::UI::Xaml::Controls;
 
 static unsigned int hopper_pump_reset_offset = 3U;
 
-static unsigned int both_hopper_dredging = 310U;
+static unsigned int ps_underwater_dredging = 305U;
+static unsigned int sb_underwater_dredging = 306U;
 static unsigned int both_underwater_dredging = 307U;
+static unsigned int ps_hopper_dredging = 308U;
+static unsigned int sb_hopper_dredging = 309U;
+static unsigned int both_hopper_dredging = 310U;
+static unsigned int underwater_dredging_barging = 311U;
+static unsigned int hopper_dredging_barging = 312U;
+
 static unsigned int both_shoring = 315U;
 static unsigned int both_rainbowing = 318U;
 
@@ -114,6 +121,30 @@ public:
 	}
 };
 
+private class GroupChargeExecutor final : public IGroupMenuCommand<GroupChargeAction, HopperGroup, PLCMaster*> {
+public:
+	bool can_execute(GroupChargeAction cmd, HopperGroup gid, PLCMaster* plc) override {
+		return plc->connected() && plc->authorized();
+	}
+
+	void execute(GroupChargeAction cmd, HopperGroup gid, PLCMaster* plc) override {
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case GroupChargeAction::PSHopper:       index = ps_hopper_dredging; break;
+		case GroupChargeAction::SBHopper:       index = sb_hopper_dredging; break;
+		case GroupChargeAction::PSUnderWater:   index = ps_underwater_dredging; break;
+		case GroupChargeAction::SBUnderWater:   index = sb_underwater_dredging; break;
+		case GroupChargeAction::BothHopper:     index = both_hopper_dredging; break;
+		case GroupChargeAction::BothUnderWater: index = both_underwater_dredging; break;
+		case GroupChargeAction::HPBarge:        index = hopper_dredging_barging; break;
+		case GroupChargeAction::UWPBarge:       index = underwater_dredging_barging; break;
+		}
+
+		plc->send_command(index);
+	}
+};
+
 private class PSHopperPumpChargeExecutor final : public IMenuCommand<PSHopperPumpChargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSHopperPumpChargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
@@ -124,7 +155,7 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case PSHopperPumpChargeAction::PSHopper:   index = 308U; break;
+		case PSHopperPumpChargeAction::PSHopper:   index = ps_hopper_dredging; break;
 		case PSHopperPumpChargeAction::BothHopper: index = both_hopper_dredging; break;
 		default: index = DO_hopper_pump_common_command(cmd, true, true);
 		}
@@ -143,8 +174,8 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case SBHopperPumpChargeAction::SBHopper:   index = 309U; break;
-		case SBHopperPumpChargeAction::HPBarge:    index = 311U; break;
+		case SBHopperPumpChargeAction::SBHopper:   index = sb_hopper_dredging; break;
+		case SBHopperPumpChargeAction::HPBarge:    index = hopper_dredging_barging; break;
 		case SBHopperPumpChargeAction::BothHopper: index = both_hopper_dredging; break;
 		default: index = DO_hopper_pump_common_command(cmd, false, true);
 		}
@@ -163,7 +194,7 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case PSUnderWaterPumpChargeAction::PSUnderWater:   index = 305U; break;
+		case PSUnderWaterPumpChargeAction::PSUnderWater:   index = ps_underwater_dredging; break;
 		case PSUnderWaterPumpChargeAction::BothUnderWater: index = both_underwater_dredging; break;
 		default: index = DO_hopper_pump_common_command(cmd, true, false);
 		}
@@ -182,9 +213,9 @@ public:
 		uint16 index = 0U;
 
 		switch (cmd) {
-		case SBUnderWaterPumpChargeAction::SBUnderWater:   index = 306U; break;
-		case SBUnderWaterPumpChargeAction::UWPBarge:       index = 312U; break;
+		case SBUnderWaterPumpChargeAction::SBUnderWater:   index = sb_underwater_dredging; break;
 		case SBUnderWaterPumpChargeAction::BothUnderWater: index = both_underwater_dredging; break;
+		case SBUnderWaterPumpChargeAction::UWPBarge:       index = underwater_dredging_barging; break;
 		default: index = DO_hopper_pump_common_command(cmd, false, false);
 		}
 
@@ -247,6 +278,12 @@ MenuFlyout^ WarGrey::SCADA::make_gearbox_lubricator_menu(PLCMaster* plc) {
 	auto exe = new GearboxExecutor();
 
 	return make_menu<GearboxLubricatorAction, GroupCredit<HydraulicPumplet, bool, GearboxLubricator>, PLCMaster*>(exe, plc);
+}
+
+MenuFlyout^ WarGrey::SCADA::make_group_charge_menu(GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc) {
+	auto exe = new GroupChargeExecutor();
+
+	return make_group_menu<GroupChargeAction, HopperGroup, PLCMaster*>(exe, HopperGroup::ChargeCondition, action, action, plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_ps_hopper_pump_charge_menu(PLCMaster* plc) {

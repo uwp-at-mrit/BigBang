@@ -55,7 +55,7 @@ namespace WarGrey::SCADA {
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::GhostWhite,
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_bgcolor = WarGrey::SCADA::Colours::ForestGreen);
 
-	WarGrey::SCADA::DimensionStyle make_highlight_dimension_style(float nfontsize, unsigned int min_label, unsigned int min_n, int precision = 0,
+	WarGrey::SCADA::DimensionStyle make_highlight_dimension_style(float nfontsize, unsigned int min_label, unsigned int min_n, int precision,
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_color = WarGrey::SCADA::Colours::GhostWhite,
 		Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ label_bgcolor = WarGrey::SCADA::Colours::ForestGreen);
 

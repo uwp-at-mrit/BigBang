@@ -423,4 +423,10 @@
   <data name="MoveTo" xml:space="preserve">
     <value>Move To Target Height</value>
   </data>
+  <data name="BothPumps" xml:space="preserve">
+    <value>Hydraulics Pump Group</value>
+  </data>
+  <data name="ChargeCondition" xml:space="preserve">
+    <value>Charge Condition</value>
+  </data>
 </root>

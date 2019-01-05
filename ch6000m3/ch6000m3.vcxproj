@@ -113,7 +113,8 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageDir>D:\Packages\</AppxPackageDir>
     <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
-    <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
+    <AppInstallerCheckForUpdateFrequency>Daily</AppInstallerCheckForUpdateFrequency>
+    <AppInstallerUri>\\192.168.0.2\Win10_SCADA</AppInstallerUri>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>

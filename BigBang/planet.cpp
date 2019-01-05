@@ -969,7 +969,7 @@ bool Planet::on_pointer_released(float x, float y, PointerDeviceType pdt, Pointe
 		IGraphlet* unmasked_graphlet = this->find_graphlet(x, y);
 		size_t anchor_count = this->figure_anchors.size();
 		
-		if (anchor_count <= 8) {
+		if ((this->count_selected() == 1) && (anchor_count <= 8)) {
 			if (unmasked_graphlet != nullptr) {
 				GraphletInfo* info = GRAPHLET_INFO(unmasked_graphlet);
 				float local_x = x - info->x;

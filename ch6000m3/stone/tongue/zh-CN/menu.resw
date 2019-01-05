@@ -423,4 +423,10 @@
   <data name="MoveTo" xml:space="preserve">
     <value>升降到指定高度</value>
   </data>
+  <data name="BothPumps" xml:space="preserve">
+    <value>组合液压泵组</value>
+  </data>
+  <data name="ChargeCondition" xml:space="preserve">
+    <value>挖泥工况</value>
+  </data>
 </root>
