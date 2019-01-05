@@ -223,6 +223,24 @@ public:
 	}
 };
 
+private class GroupDischargeExecutor final : public IGroupMenuCommand<GroupDischargeAction, HopperGroup, PLCMaster*> {
+public:
+	bool can_execute(GroupDischargeAction cmd, HopperGroup gid, PLCMaster* plc) override {
+		return plc->connected() && plc->authorized();
+	}
+
+	void execute(GroupDischargeAction cmd, HopperGroup gid, PLCMaster* plc) override {
+		uint16 index = 0U;
+
+		switch (cmd) {
+		case GroupDischargeAction::BothShoring:    index = both_shoring; break;
+		case GroupDischargeAction::BothRainbowing: index = both_rainbowing; break;
+		}
+
+		plc->send_command(index);
+	}
+};
+
 private class PSHopperPumpDischargeExecutor final : public IMenuCommand<PSHopperPumpDischargeAction, HopperPumplet, PLCMaster*> {
 public:
 	bool can_execute(PSHopperPumpDischargeAction cmd, HopperPumplet* pump, PLCMaster* plc, bool acc_executable) override {
@@ -300,6 +318,12 @@ MenuFlyout^ WarGrey::SCADA::make_ps_underwater_pump_charge_menu(PLCMaster* plc) 
 
 MenuFlyout^ WarGrey::SCADA::make_sb_underwater_pump_charge_menu(PLCMaster* plc) {
 	return make_menu<SBUnderWaterPumpChargeAction, HopperPumplet, PLCMaster*>(new SBUnderWaterPumpChargeExecutor(), plc);
+}
+
+MenuFlyout^ WarGrey::SCADA::make_group_discharge_menu(WarGrey::SCADA::PLCMaster* plc) {
+	auto exe = new GroupDischargeExecutor();
+
+	return make_group_menu<GroupDischargeAction, HopperGroup, PLCMaster*>(exe, HopperGroup::DischargeCondition, plc);
 }
 
 MenuFlyout^ WarGrey::SCADA::make_ps_hopper_pump_discharge_menu(PLCMaster* plc) {

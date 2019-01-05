@@ -429,4 +429,10 @@
   <data name="ChargeCondition" xml:space="preserve">
     <value>挖泥工况</value>
   </data>
+  <data name="DischargeCondition" xml:space="preserve">
+    <value>排出工况</value>
+  </data>
+  <data name="Pair" xml:space="preserve">
+    <value>联动</value>
+  </data>
 </root>

@@ -429,4 +429,10 @@
   <data name="ChargeCondition" xml:space="preserve">
     <value>Charge Condition</value>
   </data>
+  <data name="DischargeCondition" xml:space="preserve">
+    <value>Discharge Condition</value>
+  </data>
+  <data name="Pair" xml:space="preserve">
+    <value>Pair</value>
+  </data>
 </root>

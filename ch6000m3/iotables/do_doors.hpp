@@ -8,8 +8,9 @@ namespace WarGrey::SCADA {
 
 	private enum class BottomDoorCommand { AutoLock, Locked, OpenDoorCheck, CloseDoorCheck };
 
-	private enum class DoorAction { Open, Stop, Close, Disable, _ };
 	private enum class DoorsGroupAction { Open, Stop, Close, _ };
+	private enum class DoorAction { Open, Stop, Close, Disable, _ };
+	private enum class UpperDoorAction { Open, Stop, Close, Disable, Pair, _ };
 
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_bottom_door_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_bottom_doors_group_menu(WarGrey::SCADA::BottomDoorsGroup group, WarGrey::SCADA::PLCMaster* plc);

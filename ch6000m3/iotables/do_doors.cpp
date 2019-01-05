@@ -74,21 +74,23 @@ public:
 	}
 };
 
-private class UpperDoorExecutor final : public IMenuCommand<DoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*> {
+private class UpperDoorExecutor final : public IMenuCommand<UpperDoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*> {
 public:
-	bool can_execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc, bool acc_executable) override {
+	bool can_execute(UpperDoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc, bool acc_executable) override {
 		return plc->connected() && plc->authorized();
 	}
 
-	void execute(DoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1
+	void execute(UpperDoorAction cmd, Credit<UpperHopperDoorlet, Door>* door, PLCMaster* plc) override { // DB300, starts from 1
 		uint16 offset = 0U;
 		uint16 index = 0U;
-
+		uint16 pair = 0U;
+		
 		switch (cmd) {
-		case DoorAction::Open:    offset = 0U; break;
-		case DoorAction::Close:   offset = 1U; break;
-		case DoorAction::Stop:    offset = 2U; break;
-		case DoorAction::Disable: offset = 3U; break;
+		case UpperDoorAction::Open:    offset = 0U; break;
+		case UpperDoorAction::Close:   offset = 1U; break;
+		case UpperDoorAction::Stop:    offset = 2U; break;
+		case UpperDoorAction::Disable: offset = 3U; break;
+		case UpperDoorAction::Pair:    pair = 551U; break;
 		}
 
 		switch (door->id) {
@@ -108,7 +110,7 @@ public:
 		case Door::SB7: index = 485U; break;
 		}
 
-		plc->send_command(index + offset);
+		plc->send_command((pair > 0U) ? pair : (index + offset));
 	}
 };
 
@@ -122,7 +124,7 @@ MenuFlyout^ WarGrey::SCADA::make_bottom_doors_group_menu(BottomDoorsGroup group,
 }
 
 MenuFlyout^ WarGrey::SCADA::make_upper_door_menu(PLCMaster* plc) {
-	return make_menu<DoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*>(new UpperDoorExecutor(), plc);
+	return make_menu<UpperDoorAction, Credit<UpperHopperDoorlet, Door>, PLCMaster*>(new UpperDoorExecutor(), plc);
 }
 
 uint16 WarGrey::SCADA::DO_bottom_doors_special_command(BottomDoorCommand cmd) { // DB300, starts from 1

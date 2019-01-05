@@ -59,6 +59,8 @@ namespace WarGrey::SCADA {
 	static unsigned int upper_door_SB6_status = 1177U;
 	static unsigned int upper_door_SB7_status = 1193U;
 
+	static unsigned int upper_door_paired = 1275U;
+
 	/************************************************************************************************/
 	void DI_hopper_door(WarGrey::SCADA::IHopperDoorlet* target, const uint8* db205, size_t idx205_p1);
 	void DI_hopper_door(WarGrey::SCADA::IHopperDoorlet* target, const uint8* db4, size_t idx4_p1, const uint8* db205, size_t idx205_p1);

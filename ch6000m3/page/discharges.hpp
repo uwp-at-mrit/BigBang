@@ -20,7 +20,9 @@ namespace WarGrey::SCADA {
 
 	public:
 		bool can_select(IGraphlet* g) override;
+		bool can_select_multiple() override;
 		void on_tap_selected(IGraphlet* g, float x, float y) override;
+		void on_gesture(std::list<Windows::Foundation::Numerics::float2>& anchors, float x, float y) override;
 
 	private:
 		WarGrey::SCADA::PLCMaster* device;
@@ -34,6 +36,7 @@ namespace WarGrey::SCADA {
 		Windows::UI::Xaml::Controls::MenuFlyout^ upper_door_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ ps_hopper_op;
 		Windows::UI::Xaml::Controls::MenuFlyout^ sb_hopper_op;
+		Windows::UI::Xaml::Controls::MenuFlyout^ gdischarge_op;
 
 	private: // never deletes these graphlets mannually
 		WarGrey::SCADA::Statusbarlet* statusbar;

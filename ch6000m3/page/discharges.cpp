@@ -45,7 +45,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
-
+using namespace Windows::Foundation::Numerics;
 using namespace Windows::System;
 
 using namespace Microsoft::Graphics::Canvas;
@@ -93,6 +93,7 @@ private enum class RS : unsigned int {
 };
 
 static CanvasSolidColorBrush^ water_color = Colours::Green;
+static CanvasSolidColorBrush^ door_pairing_color = Colours::Green;
 
 static uint16 DO_gate_valve_action(GateValveAction cmd, GateValvelet* valve) {
 	uint16 index = 0U;
@@ -224,6 +225,8 @@ public:
 		DI_hopper_door(this->uhdoors[Door::SB5], DB205, upper_door_SB5_status);
 		DI_hopper_door(this->uhdoors[Door::SB6], DB205, upper_door_SB6_status);
 		DI_hopper_door(this->uhdoors[Door::SB7], DB205, upper_door_SB7_status);
+
+		this->door_paired_color = (DBX(DB205, upper_door_paired - 1U) ? door_pairing_color : this->relationship_color);
 	}
 
 	void post_read_data(Syslog* logger) override {
@@ -306,6 +309,7 @@ public:
 		this->highlight_style = make_highlight_dimension_style(large_metrics_font_size, 6U, 0U, Colours::Green);
 		this->relationship_style = make_dash_stroke(CanvasDashStyle::DashDot);
 		this->relationship_color = Colours::DarkGray;
+		this->door_paired_color = this->relationship_color;
 
 		this->metrics_style.number_font = make_bold_text_format("Cambria Math", large_metrics_font_size);
 		this->metrics_style.unit_font = make_bold_text_format("Cambria", normal_font_size);
@@ -577,6 +581,11 @@ public:
 	}
 
 public:
+	bool hopper_selected(RS pid) {
+		return this->master->is_selected(this->hoppers[pid]);
+	}
+
+public:
 	void draw_relationships(CanvasDrawingSession^ ds, float Width, float Height) {
 		float ox, oy, sx, sy, tx, ty;
 
@@ -592,7 +601,7 @@ public:
 			this->master->fill_graphlet_location(this->uhdoors[_E(Door, idx + _I(Door::PS1))], &sx, &sy, GraphletAnchor::CC);
 			this->master->fill_graphlet_location(this->uhdoors[_E(Door, idx + _I(Door::SB1))], &tx, &ty, GraphletAnchor::CC);
 			
-			ds->DrawLine(sx, sy, tx, ty, this->relationship_color, 1.0F, this->relationship_style);
+			ds->DrawLine(sx, sy, tx, ty, this->door_paired_color, 1.0F, this->relationship_style);
 		}
 	}
 
@@ -805,6 +814,7 @@ private:
 	CanvasTextFormat^ caption_font;
 	CanvasTextFormat^ label_font;
 	ICanvasBrush^ relationship_color;
+	ICanvasBrush^ door_paired_color;
 	CanvasStrokeStyle^ relationship_style;
 	DimensionStyle pump_style;
 	DimensionStyle highlight_style;
@@ -918,6 +928,7 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
+	this->gdischarge_op = make_group_discharge_menu(plc);
 	
 	this->grid = new GridDecorator();
 
@@ -1002,6 +1013,10 @@ bool DischargesPage::can_select(IGraphlet* g) {
 		|| (dynamic_cast<HoldHooplet*>(g) != nullptr));
 }
 
+bool DischargesPage::can_select_multiple() {
+	return true;
+}
+
 void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
@@ -1031,6 +1046,16 @@ void DischargesPage::on_tap_selected(IGraphlet* g, float local_x, float local_y)
 		switch (hpump->id) {
 		case RS::PSHPump: menu_popup(this->ps_hopper_op, g, local_x, local_y); break;
 		case RS::SBHPump: menu_popup(this->sb_hopper_op, g, local_x, local_y); break;
+		}
+	}
+}
+
+void DischargesPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto dashboard = dynamic_cast<Rainbows*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		if (dashboard->hopper_selected(RS::PSHPump) && dashboard->hopper_selected(RS::SBHPump)) {
+			menu_popup(this->gdischarge_op, this, x, y);
 		}
 	}
 }
