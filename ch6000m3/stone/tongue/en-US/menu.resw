@@ -435,4 +435,7 @@
   <data name="Pair" xml:space="preserve">
     <value>Pair</value>
   </data>
+  <data name="FlushCondition" xml:space="preserve">
+    <value>Flush Condition</value>
+  </data>
 </root>

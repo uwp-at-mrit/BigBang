@@ -435,4 +435,7 @@
   <data name="Pair" xml:space="preserve">
     <value>联动</value>
   </data>
+  <data name="FlushCondition" xml:space="preserve">
+    <value>冲水工况</value>
+  </data>
 </root>

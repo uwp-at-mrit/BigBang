@@ -38,6 +38,7 @@
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Numerics;
 
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
@@ -147,24 +148,24 @@ public:
 		DI_hydraulic_pump_dimension(this->pressures[FS::D], DB4, pump_D_feedback);
 		DI_hydraulic_pump_dimension(this->pressures[FS::E], DB4, pump_E_feedback);
 
-		DI_gate_valve(this->gvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
-		DI_gate_valve(this->gvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);
-		DI_gate_valve(this->gvalves[FS::HBV03], DB4, butterfly_valve_HBV03_feedback, DB205, butterfly_valve_HBV03_status);
-		DI_gate_valve(this->gvalves[FS::HBV04], DB4, butterfly_valve_HBV04_feedback, DB205, butterfly_valve_HBV04_status);
-		DI_gate_valve(this->gvalves[FS::HBV05], DB4, butterfly_valve_HBV05_feedback, DB205, butterfly_valve_HBV05_status);
-		DI_gate_valve(this->gvalves[FS::HBV06], DB4, butterfly_valve_HBV06_feedback, DB205, butterfly_valve_HBV06_status);
-		DI_gate_valve(this->gvalves[FS::HBV07], DB4, butterfly_valve_HBV07_feedback, DB205, butterfly_valve_HBV07_status);
-		DI_gate_valve(this->gvalves[FS::HBV08], DB4, butterfly_valve_HBV08_feedback, DB205, butterfly_valve_HBV08_status);
-		DI_gate_valve(this->gvalves[FS::HBV09], DB4, butterfly_valve_HBV09_feedback, DB205, butterfly_valve_HBV09_status);
-		DI_gate_valve(this->gvalves[FS::HBV10], DB4, butterfly_valve_HBV10_feedback, DB205, butterfly_valve_HBV10_status);
-		DI_gate_valve(this->gvalves[FS::HBV11], DB4, butterfly_valve_HBV11_feedback, DB205, butterfly_valve_HBV11_status);
-		DI_gate_valve(this->gvalves[FS::HBV12], DB4, butterfly_valve_HBV12_feedback, DB205, butterfly_valve_HBV12_status);
-		DI_gate_valve(this->gvalves[FS::HBV13], DB4, butterfly_valve_HBV13_feedback, DB205, butterfly_valve_HBV13_status);
-		DI_gate_valve(this->gvalves[FS::HBV14], DB4, butterfly_valve_HBV14_feedback, DB205, butterfly_valve_HBV14_status);
-		DI_gate_valve(this->gvalves[FS::HBV15], DB4, butterfly_valve_HBV15_feedback, DB205, butterfly_valve_HBV15_status);
-		DI_gate_valve(this->gvalves[FS::HBV16], DB4, butterfly_valve_HBV16_feedback, DB205, butterfly_valve_HBV16_status);
-		DI_gate_valve(this->gvalves[FS::HBV17], DB4, butterfly_valve_HBV17_feedback, DB205, butterfly_valve_HBV17_status);
-		DI_gate_valve(this->gvalves[FS::HBV18], DB4, butterfly_valve_HBV18_feedback, DB205, butterfly_valve_HBV18_status);
+		DI_gate_valve(this->bfvalves[FS::HBV01], DB4, butterfly_valve_HBV01_feedback, DB205, butterfly_valve_HBV01_status);
+		DI_gate_valve(this->bfvalves[FS::HBV02], DB4, butterfly_valve_HBV02_feedback, DB205, butterfly_valve_HBV02_status);
+		DI_gate_valve(this->bfvalves[FS::HBV03], DB4, butterfly_valve_HBV03_feedback, DB205, butterfly_valve_HBV03_status);
+		DI_gate_valve(this->bfvalves[FS::HBV04], DB4, butterfly_valve_HBV04_feedback, DB205, butterfly_valve_HBV04_status);
+		DI_gate_valve(this->bfvalves[FS::HBV05], DB4, butterfly_valve_HBV05_feedback, DB205, butterfly_valve_HBV05_status);
+		DI_gate_valve(this->bfvalves[FS::HBV06], DB4, butterfly_valve_HBV06_feedback, DB205, butterfly_valve_HBV06_status);
+		DI_gate_valve(this->bfvalves[FS::HBV07], DB4, butterfly_valve_HBV07_feedback, DB205, butterfly_valve_HBV07_status);
+		DI_gate_valve(this->bfvalves[FS::HBV08], DB4, butterfly_valve_HBV08_feedback, DB205, butterfly_valve_HBV08_status);
+		DI_gate_valve(this->bfvalves[FS::HBV09], DB4, butterfly_valve_HBV09_feedback, DB205, butterfly_valve_HBV09_status);
+		DI_gate_valve(this->bfvalves[FS::HBV10], DB4, butterfly_valve_HBV10_feedback, DB205, butterfly_valve_HBV10_status);
+		DI_gate_valve(this->bfvalves[FS::HBV11], DB4, butterfly_valve_HBV11_feedback, DB205, butterfly_valve_HBV11_status);
+		DI_gate_valve(this->bfvalves[FS::HBV12], DB4, butterfly_valve_HBV12_feedback, DB205, butterfly_valve_HBV12_status);
+		DI_gate_valve(this->bfvalves[FS::HBV13], DB4, butterfly_valve_HBV13_feedback, DB205, butterfly_valve_HBV13_status);
+		DI_gate_valve(this->bfvalves[FS::HBV14], DB4, butterfly_valve_HBV14_feedback, DB205, butterfly_valve_HBV14_status);
+		DI_gate_valve(this->bfvalves[FS::HBV15], DB4, butterfly_valve_HBV15_feedback, DB205, butterfly_valve_HBV15_status);
+		DI_gate_valve(this->bfvalves[FS::HBV16], DB4, butterfly_valve_HBV16_feedback, DB205, butterfly_valve_HBV16_status);
+		DI_gate_valve(this->bfvalves[FS::HBV17], DB4, butterfly_valve_HBV17_feedback, DB205, butterfly_valve_HBV17_status);
+		DI_gate_valve(this->bfvalves[FS::HBV18], DB4, butterfly_valve_HBV18_feedback, DB205, butterfly_valve_HBV18_status);
 
 		DI_hopper_door(this->uhdoors[Door::PS1], DB205, upper_door_PS1_status);
 		DI_hopper_door(this->uhdoors[Door::PS2], DB205, upper_door_PS2_status);
@@ -195,17 +196,17 @@ public:
 			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
 			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
 
-			if (this->gvalves[FS::HBV01]->get_state() == GateValveState::Open) {
+			if (this->bfvalves[FS::HBV01]->get_state() == GateValveState::Open) {
 				this->station->append_subtrack(h14, water_color);
 			}
 			
-			if (this->gvalves[FS::HBV02]->get_state() == GateValveState::Closed) {
+			if (this->bfvalves[FS::HBV02]->get_state() == GateValveState::Closed) {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			} else {
 				this->nintercs[FS::nic]->set_color(water_color);
 				this->station->append_subtrack(h25, water_color);
 
-				if (this->gvalves[FS::HBV03]->get_state() == GateValveState::Open) {
+				if (this->bfvalves[FS::HBV03]->get_state() == GateValveState::Open) {
 					this->station->append_subtrack(h24, water_color);
 				}
 			}
@@ -325,8 +326,8 @@ public:
 
 		{ // load valves
 			this->load_valves(this->mvalves, this->labels, this->captions, FS::SBV1, FS::SBV4, radius * 0.618F, 90.0);
-			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
-			this->load_valves(this->gvalves, this->labels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
+			this->load_valves(this->bfvalves, this->labels, this->captions, FS::HBV01, FS::HBV18, radius, 90.0);
+			this->load_valves(this->bfvalves, this->labels, this->captions, FS::HBV04, FS::HBV10, radius, 00.0);
 		}
 
 		{ // load special nodes
@@ -414,7 +415,7 @@ public:
 		{ // reflow valves
 			float gridsize = resolve_gridsize(gwidth, gheight);
 
-			for (auto it = this->gvalves.begin(); it != this->gvalves.end(); it++) {
+			for (auto it = this->bfvalves.begin(); it != this->bfvalves.end(); it++) {
 				this->reflow_valve(0.0F, 0.0F, gridsize, it->first, it->second);
 			}
 
@@ -440,6 +441,42 @@ public:
 			this->master->move_to(this->pressures[FS::D], this->progresses[Door::PS5], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
 			this->master->move_to(this->pressures[FS::E], this->progresses[Door::PS3], GraphletAnchor::CT, GraphletAnchor::CB, 0.0F, -gheight);
 		}
+	}
+
+public:
+	bool pump_selected(FS pid) {
+		return this->master->is_selected(this->pumps[pid]);
+	}
+	
+	bool valve_selected(FS vid) {
+		return this->master->is_selected(this->bfvalves[vid]);
+	}
+
+	bool valves_selected(FS vids[], unsigned int count, int tolerance = 0) {
+		bool okay = false;
+		int ok = 0;
+
+		if (tolerance == 0) {
+			tolerance = count;
+		}
+
+		for (unsigned int idx = 0; idx < count; idx++) {
+			if (this->master->is_selected(this->bfvalves[vids[idx]])) {
+				ok += 1;
+
+				if (ok >= tolerance) {
+					okay = true;
+					break;
+				}
+			}
+		}
+
+		return okay;
+	}
+
+	template<unsigned int N>
+	bool valves_selected(FS(&vids)[N], int tolerance) {
+		return this->valves_selected(vids, N, tolerance);
 	}
 
 private:
@@ -581,7 +618,7 @@ private:
 
 private:
 	void try_flow_water(FS vid, FS eid1, FS eid2, CanvasSolidColorBrush^ color) {
-		switch (this->gvalves[vid]->get_state()) {
+		switch (this->bfvalves[vid]->get_state()) {
 		case GateValveState::Open: {
 			this->station->append_subtrack(vid, eid1, color);
 
@@ -604,7 +641,7 @@ private:
 	std::map<FS, Credit<Labellet, FS>*> captions;
 	std::map<FS, Credit<Labellet, FS>*> labels;
 	std::map<FS, Credit<WaterPumplet, FS>*> pumps;
-	std::map<FS, Credit<GateValvelet, FS>*> gvalves;
+	std::map<FS, Credit<GateValvelet, FS>*> bfvalves;
 	std::map<FS, Credit<ManualValvelet, FS>*> mvalves;
 	std::map<Door, Credit<UpperHopperDoorlet, Door>*> uhdoors;
 	std::map<Door, Credit<Percentagelet, Door>*> progresses;
@@ -645,6 +682,23 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_pump_op = make_ps_water_pump_menu(plc);
 	this->sb_pump_op = make_sb_water_pump_menu(plc);
+
+	this->ps_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_PS, plc);
+	this->ps_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_SB, plc);
+	this->ps_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_2, plc);
+	this->sb_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_PS, plc);
+	this->sb_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_SB, plc);
+	this->sb_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_2, plc);
+	this->s2_ps_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_PS, plc);
+	this->s2_sb_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_SB, plc);
+	this->s2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_2, plc);
+	this->p2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_2, plc);
+	this->i2_2_op = make_water_pump_condition_menu(WaterPumpConditionAction::I2_2, plc);
+	this->ps_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::PS_H, plc);
+	this->sb_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::SB_H, plc);
+	this->s2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::S2_H, plc);
+	this->p2_h_op = make_water_pump_condition_menu(WaterPumpConditionAction::P2_H, plc);
+
 	this->grid = new GridDecorator();
 
 	this->device->append_confirmation_receiver(dashboard);
@@ -730,6 +784,10 @@ bool FlushsPage::can_select(IGraphlet* g) {
 		|| ((btn != nullptr) && (btn->get_state() != ButtonState::Disabled)));
 }
 
+bool FlushsPage::can_select_multiple() {
+	return true;
+}
+
 void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 	auto gvalve = dynamic_cast<GateValvelet*>(g);
 	auto uhdoor = dynamic_cast<UpperHopperDoorlet*>(g);
@@ -749,6 +807,70 @@ void FlushsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {
 		switch (wpump->id) {
 		case FS::PSPump: menu_popup(this->ps_pump_op, g, local_x, local_y); break;
 		case FS::SBPump: menu_popup(this->sb_pump_op, g, local_x, local_y); break;
+		}
+	}
+}
+
+void FlushsPage::on_gesture(std::list<float2>& anchors, float x, float y) {
+	auto dashboard = dynamic_cast<Flush*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		bool ps_pump = dashboard->pump_selected(FS::PSPump);
+		bool sb_pump = dashboard->pump_selected(FS::SBPump);
+		FS sb_sb[] = { FS::HBV04, FS::HBV06 };
+		FS sb_ps[] = { FS::HBV04, FS::HBV07 };
+		FS sb_drags[] = { FS::HBV04, FS::HBV06, FS::HBV07 };
+		FS sb_hopper[] = { FS::HBV04, FS::HBV09, FS::HBV10 };
+
+		if (ps_pump && sb_pump) {
+			if (dashboard->valve_selected(FS::HBV03)) {
+				if (dashboard->valves_selected(sb_drags, 3)) {
+					menu_popup(this->s2_2_op, this, x, y);
+				} else if (dashboard->valves_selected(sb_sb, 2)) {
+					menu_popup(this->s2_sb_op, this, x, y);
+				} else if (dashboard->valves_selected(sb_ps, 2)) {
+					menu_popup(this->s2_ps_op, this, x, y);
+				} else if (dashboard->valves_selected(sb_hopper, 3)) {
+					menu_popup(this->s2_h_op, this, x, y);
+				}
+			} else {
+				FS independent[] = { FS::HBV04, FS::HBV05 };
+				FS parallel_drags[] = { FS::HBV07, FS::HBV06 };
+				FS parallel_hopper[] = { FS::HBV08, FS::HBV09, FS::HBV10 };
+
+				if (dashboard->valves_selected(independent, 2)) {
+					menu_popup(this->i2_2_op, this, x, y);
+				} else if (dashboard->valves_selected(parallel_drags, 2)) {
+					menu_popup(this->p2_2_op, this, x, y);
+				} else if (dashboard->valves_selected(parallel_hopper, 2)) {
+					menu_popup(this->p2_h_op, this, x, y);
+				}
+			}
+		} else if (sb_pump) {
+			if (dashboard->valves_selected(sb_drags, 3)) {
+				menu_popup(this->sb_2_op, this, x, y);
+			} else if (dashboard->valves_selected(sb_sb, 2)) {
+				menu_popup(this->sb_sb_op, this, x, y);
+			} else if (dashboard->valves_selected(sb_ps, 2)) {
+				menu_popup(this->sb_ps_op, this, x, y);
+			} else if (dashboard->valves_selected(sb_hopper, 3)) {
+				menu_popup(this->sb_h_op, this, x, y);
+			}
+		} else if (ps_pump) {
+			FS ps_sb[] = { FS::HBV05, FS::HBV06 };
+			FS ps_ps[] = { FS::HBV05, FS::HBV07 };
+			FS ps_drags[] = { FS::HBV05, FS::HBV06, FS::HBV07 };
+			FS ps_hopper[] = { FS::HBV05, FS::HBV08, FS::HBV10 };
+			
+			if (dashboard->valves_selected(ps_drags, 3)) {
+				menu_popup(this->ps_2_op, this, x, y);
+			} else if (dashboard->valves_selected(ps_sb, 2)) {
+				menu_popup(this->ps_sb_op, this, x, y);
+			} else if (dashboard->valves_selected(ps_ps, 2)) {
+				menu_popup(this->ps_ps_op, this, x, y);
+			} else if (dashboard->valves_selected(ps_hopper, 3)) {
+				menu_popup(this->ps_h_op, this, x, y);
+			}
 		}
 	}
 }

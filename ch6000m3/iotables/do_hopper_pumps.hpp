@@ -31,13 +31,13 @@ namespace WarGrey::SCADA {
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_lubrication_unit_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_gearbox_lubricator_menu(WarGrey::SCADA::PLCMaster* plc);
 
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_group_charge_menu(WarGrey::SCADA::GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_charge_condition_menu(WarGrey::SCADA::GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_hopper_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_hopper_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_underwater_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_underwater_pump_charge_menu(WarGrey::SCADA::PLCMaster* plc);
 
-	Windows::UI::Xaml::Controls::MenuFlyout^ make_group_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
+	Windows::UI::Xaml::Controls::MenuFlyout^ make_discharge_condition_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_ps_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 	Windows::UI::Xaml::Controls::MenuFlyout^ make_sb_hopper_pump_discharge_menu(WarGrey::SCADA::PLCMaster* plc);
 

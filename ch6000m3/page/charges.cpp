@@ -909,14 +909,14 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->diagnostics = new HopperPumpDiagnostics(plc);
 
 	this->gate_valve_op = make_gate_valve_menu(DO_gate_valve_action, plc);
-	this->ghopper_op = make_group_charge_menu(GroupChargeAction::BothHopper, plc);
-	this->gunderwater_op = make_group_charge_menu(GroupChargeAction::BothUnderWater, plc);
-	this->ghbarge_op = make_group_charge_menu(GroupChargeAction::HPBarge, plc);
-	this->guwbarge_op = make_group_charge_menu(GroupChargeAction::UWPBarge, plc);
-	this->ghps_op = make_group_charge_menu(GroupChargeAction::PSHopper, plc);
-	this->guwps_op = make_group_charge_menu(GroupChargeAction::PSUnderWater, plc);
-	this->ghsb_op = make_group_charge_menu(GroupChargeAction::SBHopper, plc);
-	this->guwsb_op = make_group_charge_menu(GroupChargeAction::SBUnderWater, plc);
+	this->ghopper_op = make_charge_condition_menu(GroupChargeAction::BothHopper, plc);
+	this->gunderwater_op = make_charge_condition_menu(GroupChargeAction::BothUnderWater, plc);
+	this->ghbarge_op = make_charge_condition_menu(GroupChargeAction::HPBarge, plc);
+	this->guwbarge_op = make_charge_condition_menu(GroupChargeAction::UWPBarge, plc);
+	this->ghps_op = make_charge_condition_menu(GroupChargeAction::PSHopper, plc);
+	this->guwps_op = make_charge_condition_menu(GroupChargeAction::PSUnderWater, plc);
+	this->ghsb_op = make_charge_condition_menu(GroupChargeAction::SBHopper, plc);
+	this->guwsb_op = make_charge_condition_menu(GroupChargeAction::SBUnderWater, plc);
 	this->ps_hopper_op = make_ps_hopper_pump_charge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_charge_menu(plc);
 	this->ps_underwater_op = make_ps_underwater_pump_charge_menu(plc);

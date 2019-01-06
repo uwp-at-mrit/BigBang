@@ -928,7 +928,7 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->upper_door_op = make_upper_door_menu(plc);
 	this->ps_hopper_op = make_ps_hopper_pump_discharge_menu(plc);
 	this->sb_hopper_op = make_sb_hopper_pump_discharge_menu(plc);
-	this->gdischarge_op = make_group_discharge_menu(plc);
+	this->gdischarge_op = make_discharge_condition_menu(plc);
 	
 	this->grid = new GridDecorator();
 

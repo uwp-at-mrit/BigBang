@@ -298,7 +298,7 @@ MenuFlyout^ WarGrey::SCADA::make_gearbox_lubricator_menu(PLCMaster* plc) {
 	return make_menu<GearboxLubricatorAction, GroupCredit<HydraulicPumplet, bool, GearboxLubricator>, PLCMaster*>(exe, plc);
 }
 
-MenuFlyout^ WarGrey::SCADA::make_group_charge_menu(GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc) {
+MenuFlyout^ WarGrey::SCADA::make_charge_condition_menu(GroupChargeAction action, WarGrey::SCADA::PLCMaster* plc) {
 	auto exe = new GroupChargeExecutor();
 
 	return make_group_menu<GroupChargeAction, HopperGroup, PLCMaster*>(exe, HopperGroup::ChargeCondition, action, action, plc);
@@ -320,7 +320,7 @@ MenuFlyout^ WarGrey::SCADA::make_sb_underwater_pump_charge_menu(PLCMaster* plc) 
 	return make_menu<SBUnderWaterPumpChargeAction, HopperPumplet, PLCMaster*>(new SBUnderWaterPumpChargeExecutor(), plc);
 }
 
-MenuFlyout^ WarGrey::SCADA::make_group_discharge_menu(WarGrey::SCADA::PLCMaster* plc) {
+MenuFlyout^ WarGrey::SCADA::make_discharge_condition_menu(WarGrey::SCADA::PLCMaster* plc) {
 	auto exe = new GroupDischargeExecutor();
 
 	return make_group_menu<GroupDischargeAction, HopperGroup, PLCMaster*>(exe, HopperGroup::DischargeCondition, plc);
