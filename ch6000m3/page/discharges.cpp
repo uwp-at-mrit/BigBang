@@ -234,7 +234,7 @@ public:
 		RS r19[] = { RS::d019, RS::D021 };
 		RS r20[] = { RS::d2122, RS::D022 };
 
-		this->station->append_subtrack(RS::D001, RS::Hatch, water_color);
+		this->station->push_subtrack(RS::D001, RS::Hatch, water_color);
 
 		this->try_flow_water(RS::D001, RS::D002, water_color);
 		this->try_flow_water(RS::D019, RS::D021, water_color);
@@ -243,8 +243,8 @@ public:
 		this->try_flow_water(RS::D022, RS::rainbowing, water_color);
 
 		if (this->valve_open(RS::D002)) {
-			this->station->append_subtrack(RS::D002, RS::manual, water_color);
-			this->station->append_subtrack(rsb19, water_color);
+			this->station->push_subtrack(RS::D002, RS::manual, water_color);
+			this->station->push_subtrack(rsb19, water_color);
 			this->manual_pipe->set_color(water_color);
 		} else {
 			this->manual_pipe->set_color(default_pipe_color);
@@ -254,15 +254,15 @@ public:
 			RS d0810[] = { RS::D018, RS::I0723, RS::D009 };
 			RS rps20[] = { RS::d0205, RS::PSHPump, RS::D020 };
 
-			this->station->append_subtrack(d0810, water_color);
+			this->station->push_subtrack(d0810, water_color);
 			this->nintercs[RS::n0723]->set_color(water_color);
 			this->nintercs[RS::n0923]->set_color(water_color);
 
 			this->try_flow_water(RS::D009, RS::D006, water_color);
 
 			if (this->valve_open(RS::D006)) {
-				this->station->append_subtrack(RS::d0406, RS::D006, water_color);
-				this->station->append_subtrack(RS::d0406, RS::D005, water_color);
+				this->station->push_subtrack(RS::d0406, RS::D006, water_color);
+				this->station->push_subtrack(RS::d0406, RS::D005, water_color);
 				this->nintercs[RS::n0405]->set_color(water_color);
 			} else {
 				this->nintercs[RS::n0405]->set_color(default_pipe_color);
@@ -277,20 +277,20 @@ public:
 		{ // flow SB water
 			RS r0824[] = { RS::D008, RS::gantry, RS::d024, RS::D024 };
 
-			this->station->append_subtrack(RS::D003, RS::Starboard, water_color);
+			this->station->push_subtrack(RS::D003, RS::Starboard, water_color);
 			this->try_flow_water(RS::D025, rsb19, water_color);
 			this->try_flow_water(RS::D018, RS::D008, water_color);
 			this->try_flow_water(RS::D024, RS::barge, water_color);
 
 			if (this->valve_open(RS::D003)) {
-				this->station->append_subtrack(RS::D003, RS::D025, water_color);
+				this->station->push_subtrack(RS::D003, RS::D025, water_color);
 				this->nintercs[RS::n0325]->set_color(water_color);
 			} else {
 				this->nintercs[RS::n0325]->set_color(default_pipe_color);
 			}
 
 			if (this->valve_open(RS::D008)) {
-				this->station->append_subtrack(r0824, water_color);
+				this->station->push_subtrack(r0824, water_color);
 				this->nintercs[RS::n24]->set_color(water_color);
 			} else {
 				this->nintercs[RS::n24]->set_color(default_pipe_color);
@@ -754,18 +754,18 @@ private:
 
 	void try_flow_water(RS vid, RS eid1, RS eid2, CanvasSolidColorBrush^ color) {
 		if (this->valve_open(vid)) {
-			this->station->append_subtrack(vid, eid1, color);
+			this->station->push_subtrack(vid, eid1, color);
 
 			if (eid2 != RS::_) {
-				this->station->append_subtrack(vid, eid2, color);
+				this->station->push_subtrack(vid, eid2, color);
 			}
 		}
 	}
 
 	void try_flow_water(RS vid, RS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		if (this->valve_open(vid)) {
-			this->station->append_subtrack(vid, path[0], color);
-			this->station->append_subtrack(path, count, color);
+			this->station->push_subtrack(vid, path[0], color);
+			this->station->push_subtrack(path, count, color);
 		}
 	}
 
@@ -932,14 +932,14 @@ DischargesPage::DischargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	
 	this->grid = new GridDecorator();
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->append_decorator(new PageDecorator());
-		this->append_decorator(new RainbowsDecorator(dashboard));
+		this->push_decorator(new PageDecorator());
+		this->push_decorator(new RainbowsDecorator(dashboard));
 
 #ifdef _DEBUG
-		this->append_decorator(this->grid);
+		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
@@ -979,10 +979,10 @@ void DischargesPage::load(CanvasCreateResourcesReason reason, float width, float
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 			
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

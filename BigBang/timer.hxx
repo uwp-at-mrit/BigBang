@@ -42,7 +42,7 @@ namespace WarGrey::SCADA {
 		void on_elapse(long long count, long long interval, long long uptime, long long span) override;
 
 	public:
-		void append_timer_listener(WarGrey::SCADA::ITimerListener^ receiver);
+		void push_timer_listener(WarGrey::SCADA::ITimerListener^ receiver);
 
 	internal:
 		WarGrey::SCADA::Syslog* get_logger() override;

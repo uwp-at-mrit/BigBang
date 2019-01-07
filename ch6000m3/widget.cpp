@@ -6,6 +6,7 @@
 
 #include "widget/gallery.hpp"
 #include "widget/settings.hpp"
+#include "widget/history.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/buttonlet.hpp"
@@ -171,7 +172,8 @@ public:
 			this->set_plc_master_mode(p_btn->id);
 		} else if (icon != nullptr) {
 			switch (icon->id) {
-			case Icon::Gallery: the_gallery()->show(); break;
+			case Icon::Gallery: display_the_gallery(); break;
+			case Icon::TimeMachine: launch_the_timemachine(); break;
 			case Icon::Settings: {
 				if (this->settings == nullptr) {
 					this->settings = make_settings(this->device);
@@ -277,5 +279,5 @@ UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : Univer
 }
 
 void UniverseWidget::construct() {
-	this->add_planet(new Widget(this->master, this->plc));
+	this->push_planet(new Widget(this->master, this->plc));
 }

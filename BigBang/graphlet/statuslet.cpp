@@ -310,7 +310,7 @@ void Statuslinelet::draw(CanvasDrawingSession^ ds, float x, float y, float Width
 	}
 }
 
-void Statuslinelet::append_message(Platform::String^ message, Log level) {
+void Statuslinelet::push_message(Platform::String^ message, Log level) {
 	auto lcolor = status_colors[level];
 
 	this->section.lock();
@@ -330,5 +330,5 @@ void Statuslinelet::append_message(Platform::String^ message, Log level) {
 }
 
 void Statuslinelet::on_log_message(Log level, Platform::String^ message, SyslogMetainfo& data, Platform::String^ topic) {
-	this->append_message("[" + level.ToString() + "] " + string_first_line(message), level);
+	this->push_message("[" + level.ToString() + "] " + string_first_line(message), level);
 }

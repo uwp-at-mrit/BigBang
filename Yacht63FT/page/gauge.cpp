@@ -137,11 +137,11 @@ void GaugePage::load(CanvasCreateResourcesReason reason, float width, float heig
 		CellDecorator* regions = new CellDecorator(cell_bgcolor, cells); // don't mind, it's Visual Studio's fault
 		GaugeBoard* lb = new GaugeBoard(this, regions);
 
-		this->append_decorator(regions);
+		this->push_decorator(regions);
 		lb->load_and_flow(width, height);
 
 		this->dashboard = lb;
-		this->device->append_confirmation_receiver(lb);
+		this->device->push_confirmation_receiver(lb);
 	}
 }
 

@@ -404,11 +404,11 @@ void PropellerPage::load(CanvasCreateResourcesReason reason, float width, float 
 		PDecorator* regions = new PDecorator(this, 4.0F / sketch_height);
 		PBoard* pb = new PBoard(this, regions);
 
-		this->append_decorator(regions);
+		this->push_decorator(regions);
 		pb->load();
 
 		this->dashboard = pb;
-		this->device->append_confirmation_receiver(pb);
+		this->device->push_confirmation_receiver(pb);
 	}
 }
 

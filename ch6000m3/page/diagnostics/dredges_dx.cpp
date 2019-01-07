@@ -571,7 +571,7 @@ DredgesDiagnostics::DredgesDiagnostics(DX side, PLCMaster* plc)
 	
 	this->dashboard = dashboard;
 	
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 }
 
 DredgesDiagnostics::~DredgesDiagnostics() {

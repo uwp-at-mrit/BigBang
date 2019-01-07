@@ -148,7 +148,7 @@ namespace WarGrey::SCADA {
 
 	protected private:
 		virtual void construct() {}
-		void add_planet(WarGrey::SCADA::IPlanet* planet);
+		void push_planet(WarGrey::SCADA::IPlanet* planet);
 		virtual void update(long long count, long long interval, long long uptime) {}
 		virtual void collapse();
 		

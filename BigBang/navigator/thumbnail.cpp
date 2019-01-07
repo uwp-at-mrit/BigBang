@@ -186,7 +186,7 @@ internal:
 
 		this->use_global_mask_setting(false);
 		this->min_width = (this->cell_width + this->gapsize) * float(this->column) + this->gapsize;
-		dynamic_cast<Planet*>(this->current_planet)->append_decorator(this->decorator);
+		dynamic_cast<Planet*>(this->current_planet)->push_decorator(this->decorator);
 	}
 
 internal:

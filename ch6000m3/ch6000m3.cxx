@@ -57,21 +57,21 @@ internal:
 
 protected:
 	void construct() override {
-		// this->add_planet(new SplashScreen(620.0F));
-		// this->add_planet(new SplashScreen(1240.0F, 0.0F));
+		// this->push_planet(new SplashScreen(620.0F));
+		// this->push_planet(new SplashScreen(1240.0F, 0.0F));
 		
-		this->add_planet(new HydraulicsPage(this->device)); // 0
-		this->add_planet(new ChargesPage(this->device)); // 1
-		this->add_planet(new DredgesPage(this->device)); // 2
-		this->add_planet(new DischargesPage(this->device)); // 3
-		this->add_planet(new GlandsPage(this->device)); // 4
-		this->add_planet(new FlushsPage(this->device)); // 5
-		this->add_planet(new DredgesPage(this->device, DragView::PortSide)); // 6
-		this->add_planet(new HopperDoorsPage(this->device)); // 7
-		this->add_planet(new LubricatingsPage(this->device)); // 8
-		this->add_planet(new DraughtsPage(this->device)); // 9
-		this->add_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
-		this->add_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
+		this->push_planet(new HydraulicsPage(this->device)); // 0
+		this->push_planet(new ChargesPage(this->device)); // 1
+		this->push_planet(new DredgesPage(this->device)); // 2
+		this->push_planet(new DischargesPage(this->device)); // 3
+		this->push_planet(new GlandsPage(this->device)); // 4
+		this->push_planet(new FlushsPage(this->device)); // 5
+		this->push_planet(new DredgesPage(this->device, DragView::PortSide)); // 6
+		this->push_planet(new HopperDoorsPage(this->device)); // 7
+		this->push_planet(new LubricatingsPage(this->device)); // 8
+		this->push_planet(new DraughtsPage(this->device)); // 9
+		this->push_planet(new DredgesPage(this->device, DragView::Starboard)); // 10
+		this->push_planet(new DredgesPage(this->device, DragView::Suctions)); // 11
 	}
 
 protected private:
@@ -109,7 +109,7 @@ public:
 internal:
 	DashboardUniverse(Platform::String^ name, IUniverseNavigator* navigator, unsigned int dbidx) : DredgerUniverse(name, navigator) {
 		this->page_turner = new PageEventListener(dbidx);
-		this->device->append_confirmation_receiver(this->page_turner);
+		this->device->push_confirmation_receiver(this->page_turner);
 	}
 
 public:
@@ -157,7 +157,7 @@ public:
 		
 		this->timeline = ref new CompositeTimerListener();
 		this->timer = ref new Timer(this->timeline, frame_per_second);
-		this->timeline->append_timer_listener(this->universe);
+		this->timeline->push_timer_listener(this->universe);
 
 		{ // construct the functional panel
 			StackPanel^ panel = ref new StackPanel();
@@ -177,7 +177,7 @@ public:
 
 			this->Pane = panel;
 			this->OpenPaneLength = this->universe->navigator->min_width();
-			this->timeline->append_timer_listener(this->widget);
+			this->timeline->push_timer_listener(this->widget);
 		}
 	}
 

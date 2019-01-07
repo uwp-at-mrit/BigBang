@@ -35,7 +35,7 @@ Platform::String^ Syslog::get_name() {
 	return this->topic;
 }
 
-void Syslog::append_log_receiver(ISyslogReceiver* receiver) {
+void Syslog::push_log_receiver(ISyslogReceiver* receiver) {
 	if (receiver != nullptr) {
 		receiver->reference();
 		this->receivers.push_back(receiver);

@@ -38,7 +38,7 @@ namespace WarGrey::SCADA {
 		void suicide() override;
 
 	public:
-		void append_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);
+		void push_confirmation_receiver(WarGrey::SCADA::IMRConfirmation* confirmation);
 
     public:
 		virtual void read_all_signal(uint16 data_block, uint16 addr0, uint16 addrn, float tidemark = 0.0F) = 0;

@@ -1083,7 +1083,7 @@ void Planet::switch_virtual_keyboard(ScreenKeyboard type) {
 }
 
 /*************************************************************************************************/
-void Planet::append_decorator(IPlanetDecorator* decorator) {
+void Planet::push_decorator(IPlanetDecorator* decorator) {
 	if (decorator != nullptr) {
 		this->decorators.push_back(decorator);
 		decorator->set_active_planet(this);

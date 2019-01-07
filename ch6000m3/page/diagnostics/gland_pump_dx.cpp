@@ -209,8 +209,8 @@ GlandPumpDiagnostics::GlandPumpDiagnostics(PLCMaster* plc) : ICreditSatellite(pl
 	this->dashboard = dashboard;
 	this->decorator = decorator;
 
-	this->append_decorator(decorator);
-	this->device->append_confirmation_receiver(dashboard);
+	this->push_decorator(decorator);
+	this->device->push_confirmation_receiver(dashboard);
 }
 
 GlandPumpDiagnostics::~GlandPumpDiagnostics() {

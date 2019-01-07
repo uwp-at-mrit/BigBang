@@ -375,7 +375,7 @@ HydraulicPumpDiagnostics::HydraulicPumpDiagnostics(PLCMaster* plc) : ICreditSate
 	
 	this->dashboard = dashboard;
 	
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 }
 
 HydraulicPumpDiagnostics::~HydraulicPumpDiagnostics() {

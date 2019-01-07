@@ -581,8 +581,8 @@ public:
 
 	void post_read_data(Syslog* logger) override {
 		{ // flow water
-			this->station->append_subtrack(DS::D003, DS::SB, water_color);
-			this->station->append_subtrack(DS::D004, DS::PS, water_color);
+			this->station->push_subtrack(DS::D003, DS::SB, water_color);
+			this->station->push_subtrack(DS::D004, DS::PS, water_color);
 
 			if (this->valves[DS::D003]->get_state() == GateValveState::Open) {
 				DS d11[] = { DS::LMOD, DS::sb, DS::SBHP, DS::D003 };
@@ -956,7 +956,7 @@ private:
 	void try_flow_water(DS vid, DS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_state()) {
 		case GateValveState::Open: {
-			this->station->append_subtrack(vid, eid, color);
+			this->station->push_subtrack(vid, eid, color);
 		}
 		}
 	}
@@ -964,8 +964,8 @@ private:
 	void try_flow_water(DS vid, DS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_state()) {
 		case GateValveState::Open: {
-			this->station->append_subtrack(vid, path[0], color);
-			this->station->append_subtrack(path, count, color);
+			this->station->push_subtrack(vid, path[0], color);
+			this->station->push_subtrack(path, count, color);
 		}
 		}
 	}
@@ -1725,10 +1725,10 @@ DredgesPage::DredgesPage(PLCMaster* plc, DragView type)
 	}
 
 	this->dashboard = dashboard;
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
-	this->append_decorator(new PageDecorator());
-	this->append_decorator(new DragCableDecorator(dashboard));
+	this->push_decorator(new PageDecorator());
+	this->push_decorator(new DragCableDecorator(dashboard));
 }
 
 DredgesPage::~DredgesPage() {
@@ -1751,10 +1751,10 @@ void DredgesPage::load(CanvasCreateResourcesReason reason, float width, float he
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

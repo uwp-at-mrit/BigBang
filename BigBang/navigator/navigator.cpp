@@ -5,7 +5,7 @@ using namespace WarGrey::SCADA;
 using namespace Windows::UI::Xaml::Controls;
 
 /*************************************************************************************************/
-void IUniverseNavigator::append_navigation_listener(IUniverseNavigatorListener^ listener) {
+void IUniverseNavigator::push_navigation_listener(IUniverseNavigatorListener^ listener) {
 	this->listeners.push_back(listener);
 }
 

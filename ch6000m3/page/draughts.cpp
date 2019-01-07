@@ -335,10 +335,10 @@ DraughtsPage::DraughtsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->dashboard = dashboard;
 	this->overflow_op = make_overflow_menu(plc);
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
-	this->append_decorator(new PageDecorator());
-	this->append_decorator(decorator);
+	this->push_decorator(new PageDecorator());
+	this->push_decorator(decorator);
 }
 
 DraughtsPage::~DraughtsPage() {
@@ -363,10 +363,10 @@ void DraughtsPage::load(CanvasCreateResourcesReason reason, float width, float h
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

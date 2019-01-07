@@ -243,17 +243,17 @@ namespace WarGrey::SCADA {
 			this->turtle->fill_anchors_distance(a1, a2, xdistance, ydistance);
 		}
 
-		void append_subtrack(Anchor a1, Anchor a2, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			this->append_subtrack(this->turtle->subtrack(a1, a2, this->thickness, this->style), color);
+		void push_subtrack(Anchor a1, Anchor a2, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
+			this->push_subtrack(this->turtle->subtrack(a1, a2, this->thickness, this->style), color);
 		}
 
-		void append_subtrack(Anchor as[], unsigned int count, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			this->append_subtrack(this->turtle->subtrack(as, count, this->thickness, this->style), color);
+		void push_subtrack(Anchor as[], unsigned int count, Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
+			this->push_subtrack(this->turtle->subtrack(as, count, this->thickness, this->style), color);
 		}
 
 		template<size_t N>
-		void append_subtrack(Anchor (&as)[N], Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
-			return this->append_subtrack(as, N, color);
+		void push_subtrack(Anchor (&as)[N], Microsoft::Graphics::Canvas::Brushes::CanvasSolidColorBrush^ color) {
+			return this->push_subtrack(as, N, color);
 		}
 
 		void clear_subtacks() {
@@ -291,7 +291,7 @@ namespace WarGrey::SCADA {
 		}
 
 	private:
-		void append_subtrack(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track
+		void push_subtrack(Microsoft::Graphics::Canvas::Geometry::CanvasGeometry^ track
 			, Microsoft::Graphics::Canvas::Brushes::ICanvasBrush^ color) {
 			float shape_x, shape_y;
 

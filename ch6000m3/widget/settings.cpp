@@ -76,7 +76,7 @@ public:
 		this->button_style.corner_radius = 3.0F;
 		this->button_style.thickness = 2.0F;
 
-		this->device->append_confirmation_receiver(this);
+		this->device->push_confirmation_receiver(this);
 	}
 
 	void Settings::fill_satellite_extent(float* width, float* height) {

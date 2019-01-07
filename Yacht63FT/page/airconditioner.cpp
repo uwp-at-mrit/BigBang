@@ -240,7 +240,7 @@ public:
 		Rect bg[] = { Rect(0.0F, bar_height, width, height) };
 
 		this->decorator = new CellDecorator(0x383838, bg, 0.0F);
-		this->append_decorator(this->decorator);
+		this->push_decorator(this->decorator);
 	}
 
 public:
@@ -417,15 +417,15 @@ void ACPage::load(CanvasCreateResourcesReason reason, float width, float height)
 		ACBoard* ac = new ACBoard(this, cells);
 		ACSatellite* acs = new ACSatellite(ac, this->name() + "#Satellite");
 	
-		this->append_decorator(cells);
+		this->push_decorator(cells);
 		ac->load();
 
 		this->dashboard = ac;
 		this->satellite = acs;
 		this->decorator = cells;
 		
-		this->device->append_confirmation_receiver(ac);
-		this->device->append_confirmation_receiver(acs);
+		this->device->push_confirmation_receiver(ac);
+		this->device->push_confirmation_receiver(acs);
 	}
 }
 

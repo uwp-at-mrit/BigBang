@@ -404,10 +404,10 @@ HopperDoorsPage::HopperDoorsPage(PLCMaster* plc) : Planet(__MODULE__), device(pl
 	this->gdoors67_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor67, plc);
 	this->gdoors17_op = make_bottom_doors_group_menu(BottomDoorsGroup::HDoor17, plc);
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
-	this->append_decorator(new PageDecorator());
-	this->append_decorator(decorator);
+	this->push_decorator(new PageDecorator());
+	this->push_decorator(decorator);
 }
 
 HopperDoorsPage::~HopperDoorsPage() {
@@ -432,10 +432,10 @@ void HopperDoorsPage::load(CanvasCreateResourcesReason reason, float width, floa
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

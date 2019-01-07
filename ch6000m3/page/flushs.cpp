@@ -193,21 +193,21 @@ public:
 			FS h24[] = { FS::h3ps, FS::HBV03, FS::h3sb, FS::SBPump, FS::h4sb, FS::HBV04 };
 			FS h25[] = { FS::HBV02, FS::h3ps, FS::h5ps, FS::HBV05 };
 
-			this->station->append_subtrack(FS::HBV01, FS::SBSea, water_color);
-			this->station->append_subtrack(FS::HBV02, FS::PSSea, water_color);
+			this->station->push_subtrack(FS::HBV01, FS::SBSea, water_color);
+			this->station->push_subtrack(FS::HBV02, FS::PSSea, water_color);
 
 			if (this->bfvalves[FS::HBV01]->get_state() == GateValveState::Open) {
-				this->station->append_subtrack(h14, water_color);
+				this->station->push_subtrack(h14, water_color);
 			}
 			
 			if (this->bfvalves[FS::HBV02]->get_state() == GateValveState::Closed) {
 				this->nintercs[FS::nic]->set_color(default_pipe_color);
 			} else {
 				this->nintercs[FS::nic]->set_color(water_color);
-				this->station->append_subtrack(h25, water_color);
+				this->station->push_subtrack(h25, water_color);
 
 				if (this->bfvalves[FS::HBV03]->get_state() == GateValveState::Open) {
-					this->station->append_subtrack(h24, water_color);
+					this->station->push_subtrack(h24, water_color);
 				}
 			}
 
@@ -620,10 +620,10 @@ private:
 	void try_flow_water(FS vid, FS eid1, FS eid2, CanvasSolidColorBrush^ color) {
 		switch (this->bfvalves[vid]->get_state()) {
 		case GateValveState::Open: {
-			this->station->append_subtrack(vid, eid1, color);
+			this->station->push_subtrack(vid, eid1, color);
 
 			if (eid2 != FS::_) {
-				this->station->append_subtrack(vid, eid2, color);
+				this->station->push_subtrack(vid, eid2, color);
 			}
 		}
 		}
@@ -701,13 +701,13 @@ FlushsPage::FlushsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->grid = new GridDecorator();
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->append_decorator(new PageDecorator());
+		this->push_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(this->grid);
+		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
@@ -749,10 +749,10 @@ void FlushsPage::load(CanvasCreateResourcesReason reason, float width, float hei
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

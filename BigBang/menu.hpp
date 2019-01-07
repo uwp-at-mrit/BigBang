@@ -7,13 +7,13 @@
 namespace WarGrey::SCADA {
 	WarGrey::SCADA::IGraphlet* menu_get_next_target_graphlet(WarGrey::SCADA::IGraphlet* start = nullptr);
 
-	void menu_append_command(
+	void menu_push_command(
 		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		Windows::UI::Xaml::Input::ICommand^ cmd,
 		Platform::String^ label,
 		Platform::String^ tongue = nullptr);
 
-	void group_menu_append_command(
+	void group_menu_push_command(
 		Windows::UI::Xaml::Controls::MenuFlyout^ master,
 		Windows::UI::Xaml::Input::ICommand^ cmd,
 		Platform::String^ group, Platform::String^ label,
@@ -119,20 +119,20 @@ namespace WarGrey::SCADA {
 	};
 
 	template<typename Menu, class G, class Attachment>
-	void menu_append_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
+	void menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe
 		, Menu cmd, Attachment pobj, Platform::String^ tongue = nullptr) {
-		WarGrey::SCADA::menu_append_command(m,
+		WarGrey::SCADA::menu_push_command(m,
 			ref new WarGrey::SCADA::MenuCommand<Menu, G, Attachment>(exe, cmd, pobj),
 			cmd.ToString(), tongue);
 	}
 
 	template<typename Menu, class G, class Attachment>
-	void menu_append_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
+	void menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IMenuCommand<Menu, G, Attachment>* exe
 		, Menu start, Menu end, Attachment pobj, Platform::String^ tongue = nullptr) {
 		for (Menu cmd = start; cmd <= end; cmd++) {
-			WarGrey::SCADA::menu_append_command(m, exe, cmd, pobj, tongue);
+			WarGrey::SCADA::menu_push_command(m, exe, cmd, pobj, tongue);
 		}
 	}
 
@@ -141,7 +141,7 @@ namespace WarGrey::SCADA {
 		, Menu first, Menu last, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Windows::UI::Xaml::Controls::MenuFlyout^ m = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
-		WarGrey::SCADA::menu_append_command(m, exe, first, last, pobj, tongue);
+		WarGrey::SCADA::menu_push_command(m, exe, first, last, pobj, tongue);
 
 		return m;
 	}
@@ -213,20 +213,20 @@ namespace WarGrey::SCADA {
 	};
 
 	template<typename Menu, typename Group, class Attachment>
-	void group_menu_append_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
+	void group_menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe
 		, Group id, Menu cmd, Attachment pobj, Platform::String^ tongue = nullptr) {
-		WarGrey::SCADA::group_menu_append_command(m,
+		WarGrey::SCADA::group_menu_push_command(m,
 			ref new WarGrey::SCADA::GroupMenuCommand<Menu, Group, Attachment>(exe, cmd, id, pobj),
 			id.ToString(), cmd.ToString(), tongue);
 	}
 
 	template<typename Menu, typename Group, class Attachment>
-	void group_menu_append_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
+	void group_menu_push_command(Windows::UI::Xaml::Controls::MenuFlyout^ m
 		, WarGrey::SCADA::IGroupMenuCommand<Menu, Group, Attachment>* exe, Group id
 		, Menu start, Menu end, Attachment pobj, Platform::String^ tongue = nullptr) {
 		for (Menu cmd = start; cmd <= end; cmd++) {
-			WarGrey::SCADA::group_menu_append_command(m, exe, id, cmd, pobj, tongue);
+			WarGrey::SCADA::group_menu_push_command(m, exe, id, cmd, pobj, tongue);
 		}
 	}
 
@@ -235,7 +235,7 @@ namespace WarGrey::SCADA {
 		, Group id, Menu first, Menu last, Attachment pobj, Platform::String^ tongue = nullptr) {
 		Windows::UI::Xaml::Controls::MenuFlyout^ gm = ref new Windows::UI::Xaml::Controls::MenuFlyout();
 
-		WarGrey::SCADA::group_menu_append_command(gm, exe, id, first, last, pobj, tongue);
+		WarGrey::SCADA::group_menu_push_command(gm, exe, id, first, last, pobj, tongue);
 
 		return gm;
 	}

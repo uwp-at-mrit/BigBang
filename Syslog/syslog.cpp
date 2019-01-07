@@ -38,10 +38,10 @@ Syslog* default_logger() {
 		RacketReceiver* racket = default_racket_receiver();
 
 		winlog = make_logger(default_logging_level, default_logging_topic, nullptr);
-		winlog->append_log_receiver(new VisualStudioReceiver());
+		winlog->push_log_receiver(new VisualStudioReceiver());
 
 		if (racket != nullptr) {
-			winlog->append_log_receiver(racket);
+			winlog->push_log_receiver(racket);
 		}
 
 		winlog->reference();

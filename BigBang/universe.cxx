@@ -248,7 +248,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	this->transfer_clock->Tick += ref new EventHandler<Platform::Object^>(this, &UniverseDisplay::do_refresh);
 
 	this->_navigator = ((navigator == nullptr) ? new NullNavigator() : navigator);
-	this->_navigator->append_navigation_listener(this);
+	this->_navigator->push_navigation_listener(this);
 
 	if (setting_name != nullptr) {
 		ApplicationDataCreateDisposition adcd = ApplicationDataCreateDisposition::Always;
@@ -263,7 +263,7 @@ UniverseDisplay::UniverseDisplay(DisplayFit mode, float dwidth, float dheight, f
 	// this->display->UseSharedDevice = true;
 
 	if (first_planet != nullptr) {
-		this->add_planet(first_planet);
+		this->push_planet(first_planet);
 	}
 
 	{ // initialize gesture
@@ -408,7 +408,7 @@ void UniverseDisplay::on_elapse(long long count, long long interval, long long u
 	}
 }
 
-void UniverseDisplay::add_planet(IPlanet* planet) {
+void UniverseDisplay::push_planet(IPlanet* planet) {
 	// NOTE: this method is designed to be invoked before CreateResources event
 
 	if (planet->info == nullptr) {

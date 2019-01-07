@@ -135,7 +135,7 @@ IModbusClient::IModbusClient(Syslog* sl, Platform::String^ h, uint16 p, IModbusC
 	this->device = ref new HostName(h);
     this->service = p.ToString();
 
-	this->append_confirmation_receiver(cf);
+	this->push_confirmation_receiver(cf);
 	this->generator = ((g == nullptr) ? new WarGrey::SCADA::ModbusSequenceGenerator() : g);
 	this->generator->reference();
 
@@ -173,7 +173,7 @@ Syslog* IModbusClient::get_logger() {
 	return this->logger;
 }
 
-void IModbusClient::append_confirmation_receiver(IModbusConfirmation* confirmation) {
+void IModbusClient::push_confirmation_receiver(IModbusConfirmation* confirmation) {
 	if (confirmation != nullptr) {
 		this->confirmations.push_back(confirmation);
 	}

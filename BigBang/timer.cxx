@@ -69,7 +69,7 @@ void CompositeTimerListener::on_elapse(long long count, long long interval, long
 	}
 }
 
-void CompositeTimerListener::append_timer_listener(ITimerListener^ action) {
+void CompositeTimerListener::push_timer_listener(ITimerListener^ action) {
 	this->listeners.push_back(action);
 }
 

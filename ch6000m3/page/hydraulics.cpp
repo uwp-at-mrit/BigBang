@@ -309,11 +309,11 @@ public:
 			HS sb_path[] = { HS::rt, HS::tr, HS::cr, HS::Master };
 			HS mt_path[] = { HS::f02, HS::master };
 			
-			this->station->append_subtrack(HS::Master, HS::SQ1, oil_color);
-			this->station->append_subtrack(HS::Master, HS::SQ2, oil_color);
-			this->station->append_subtrack(HS::Visor, HS::SQi, oil_color);
-			this->station->append_subtrack(HS::Visor, HS::SQj, oil_color);
-			this->station->append_subtrack(HS::Storage, HS::SQk1, oil_color);
+			this->station->push_subtrack(HS::Master, HS::SQ1, oil_color);
+			this->station->push_subtrack(HS::Master, HS::SQ2, oil_color);
+			this->station->push_subtrack(HS::Visor, HS::SQi, oil_color);
+			this->station->push_subtrack(HS::Visor, HS::SQj, oil_color);
+			this->station->push_subtrack(HS::Storage, HS::SQk1, oil_color);
 
 			this->try_flow_oil(HS::SQi, HS::I, HS::i, nullptr, 0, oil_color);
 			this->try_flow_oil(HS::SQj, HS::J, HS::j, nullptr, 0, oil_color);
@@ -734,7 +734,7 @@ private:
 	void try_flow_oil(HS vid, HS pid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_state()) {
 		case ManualValveState::Open: {
-			this->station->append_subtrack(vid, pid, color);
+			this->station->push_subtrack(vid, pid, color);
 		}
 		}
 	}
@@ -742,8 +742,8 @@ private:
 	void try_flow_oil(HS vid, HS mid, HS eid, CanvasSolidColorBrush^ color) {
 		switch (this->valves[vid]->get_state()) {
 		case ManualValveState::Open: {
-			this->station->append_subtrack(vid, mid, color);
-			this->station->append_subtrack(mid, eid, color);
+			this->station->push_subtrack(vid, mid, color);
+			this->station->push_subtrack(mid, eid, color);
 		}
 		}
 	}
@@ -753,11 +753,11 @@ private:
 
 		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: case HydraulicPumpState::StopReady: {
-			this->station->append_subtrack(pid, _id, oil_color);
+			this->station->push_subtrack(pid, _id, oil_color);
 
 			if (path != nullptr) {
-				this->station->append_subtrack(_id, path[0], oil_color);
-				this->station->append_subtrack(path, count, color);
+				this->station->push_subtrack(_id, path[0], oil_color);
+				this->station->push_subtrack(path, count, color);
 			}
 		}
 		}
@@ -803,20 +803,22 @@ HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc)
 	this->dashboard = dashboard;
 	this->grid = new GridDecorator();
 	
-	this->gbs_op = make_hydraulics_group_menu(HydraulicsGroup::BothPumps, plc);
-	this->gps_op = make_hydraulics_group_menu(HydraulicsGroup::PSPumps, plc);
-	this->gsb_op = make_hydraulics_group_menu(HydraulicsGroup::SBPumps, plc);
-	this->gvisor_op = make_hydraulics_group_menu(HydraulicsGroup::VisorPumps, plc);
-	this->pump_op = make_hydraulic_pump_menu(DO_hydraulics_action, hydraulics_diagnostics, plc);
-	this->heater_op = make_tank_heater_menu(plc);
-	
-	this->device->append_confirmation_receiver(dashboard);
+	if (this->device != nullptr) {
+		this->gbs_op = make_hydraulics_group_menu(HydraulicsGroup::BothPumps, plc);
+		this->gps_op = make_hydraulics_group_menu(HydraulicsGroup::PSPumps, plc);
+		this->gsb_op = make_hydraulics_group_menu(HydraulicsGroup::SBPumps, plc);
+		this->gvisor_op = make_hydraulics_group_menu(HydraulicsGroup::VisorPumps, plc);
+		this->pump_op = make_hydraulic_pump_menu(DO_hydraulics_action, hydraulics_diagnostics, plc);
+		this->heater_op = make_tank_heater_menu(plc);
+
+		this->device->push_confirmation_receiver(dashboard);
+	}
 
 	{ // load decorators
-		this->append_decorator(new PageDecorator());
+		this->push_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(this->grid);
+		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
@@ -858,10 +860,10 @@ void HydraulicsPage::load(CanvasCreateResourcesReason reason, float width, float
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}
@@ -886,13 +888,14 @@ void HydraulicsPage::reflow(float width, float height) {
 }
 
 bool HydraulicsPage::can_select(IGraphlet* g) {
-	return ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
-		|| (dynamic_cast<Heaterlet*>(g) != nullptr)
-		|| (dynamic_cast<Buttonlet*>(g) != nullptr));
+	return ((this->device != nullptr)
+		&& ((dynamic_cast<HydraulicPumplet*>(g) != nullptr)
+			|| (dynamic_cast<Heaterlet*>(g) != nullptr)
+			|| (dynamic_cast<Buttonlet*>(g) != nullptr)));
 }
 
 bool HydraulicsPage::can_select_multiple() {
-	return true;
+	return (this->device != nullptr);
 }
 
 void HydraulicsPage::on_tap_selected(IGraphlet* g, float local_x, float local_y) {

@@ -217,7 +217,7 @@ public:
 			if (this->valve_open(CS::D005)) {
 				CS c0517[] = { CS::D004, CS::D005, CS::d0205, CS::PSHPump, CS::D017 };
 
-				this->station->append_subtrack(c0517, water_color);
+				this->station->push_subtrack(c0517, water_color);
 				this->nintercs[CS::n0405]->set_color(water_color);
 			} else {
 				this->nintercs[CS::n0405]->set_color(default_pipe_color);
@@ -240,7 +240,7 @@ public:
 			if (this->valve_open(CS::D025)) {
 				CS c0318[] = { CS::D003, CS::D025, CS::d0225, CS::SBHPump, CS::D018 };
 
-				this->station->append_subtrack(c0318, water_color);
+				this->station->push_subtrack(c0318, water_color);
 				this->nintercs[CS::n0325]->set_color(water_color);
 			} else {
 				this->nintercs[CS::n0325]->set_color(default_pipe_color);
@@ -255,7 +255,7 @@ public:
 		if (this->valve_open(CS::D023)) {
 			CS d0810[] = { CS::D008, CS::I0723, CS::I0923, CS::D010 };
 
-			this->station->append_subtrack(d0810, water_color);
+			this->station->push_subtrack(d0810, water_color);
 			this->nintercs[CS::n0723]->set_color(water_color);
 			this->nintercs[CS::n0923]->set_color(water_color);
 		} else {
@@ -264,7 +264,7 @@ public:
 		}
 
 		if (this->valve_open(CS::D024)) {
-			this->station->append_subtrack(CS::d24, CS::egantry, water_color);
+			this->station->push_subtrack(CS::d24, CS::egantry, water_color);
 			this->gantry_pipe->set_color(water_color);
 		} else {
 			this->gantry_pipe->set_color(default_pipe_color);
@@ -760,18 +760,18 @@ private:
 
 	void try_flow_water(CS vid, CS eid1, CS eid2, CanvasSolidColorBrush^ color) {
 		if (this->valve_open(vid)) {
-			this->station->append_subtrack(vid, eid1, color);
+			this->station->push_subtrack(vid, eid1, color);
 
 			if (eid2 != CS::_) {
-				this->station->append_subtrack(vid, eid2, color);
+				this->station->push_subtrack(vid, eid2, color);
 			}
 		}
 	}
 
 	void try_flow_water(CS vid, CS* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		if (this->valve_open(vid)) {
-			this->station->append_subtrack(vid, path[0], color);
-			this->station->append_subtrack(path, count, color);
+			this->station->push_subtrack(vid, path[0], color);
+			this->station->push_subtrack(path, count, color);
 		}
 	}
 
@@ -924,14 +924,14 @@ ChargesPage::ChargesPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 
 	this->grid = new GridDecorator();
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->append_decorator(new PageDecorator());
-		this->append_decorator(new ShipDecorator(dashboard));
+		this->push_decorator(new PageDecorator());
+		this->push_decorator(new ShipDecorator(dashboard));
 
 #ifdef _DEBUG
-		this->append_decorator(this->grid);
+		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
@@ -971,10 +971,10 @@ void ChargesPage::load(CanvasCreateResourcesReason reason, float width, float he
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 			
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

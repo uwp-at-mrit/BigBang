@@ -43,7 +43,7 @@ namespace WarGrey::SCADA {
 		Platform::String^ get_name();
 
 	public:
-		void append_log_receiver(ISyslogReceiver* receiver);
+		void push_log_receiver(ISyslogReceiver* receiver);
 		
 		void log_message(WarGrey::SCADA::Log level, Platform::String^ message);
 		void log_message(WarGrey::SCADA::Log level, const wchar_t* msgfmt, ...);

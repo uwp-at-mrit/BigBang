@@ -191,8 +191,8 @@ public:
 			GP ps_underwater_path[] = { GP::PSUWP1, GP::psuwp, GP::d46, GP::PSUWP };
 			GP sb_underwater_path[] = { GP::SBUWP2, GP::sbuwp, GP::d47, GP::SBUWP };
 
-			this->station->append_subtrack(GP::Hatch, GP::DGV16, water_color);
-			this->station->append_subtrack(GP::Sea, GP::SBUWP2, water_color);
+			this->station->push_subtrack(GP::Hatch, GP::DGV16, water_color);
+			this->station->push_subtrack(GP::Sea, GP::SBUWP2, water_color);
 
 			this->try_flow_water(GP::PSFP, GP::DGV12, GP::flushs, water_color);
 			this->try_flow_water(GP::SBFP, GP::DGV11, GP::flushs, water_color);
@@ -458,7 +458,7 @@ private:
 	void try_flow_water(GP pid, GP start, GP end, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: {
-			this->station->append_subtrack(start, end, color);
+			this->station->push_subtrack(start, end, color);
 		}
 		}
 	}
@@ -466,7 +466,7 @@ private:
 	void try_flow_water(GP pid, GP* path, unsigned int count, CanvasSolidColorBrush^ color) {
 		switch (this->pumps[pid]->get_state()) {
 		case HydraulicPumpState::Running: {
-			this->station->append_subtrack(path, count, color);
+			this->station->push_subtrack(path, count, color);
 		}
 		}
 	}
@@ -509,13 +509,13 @@ GlandsPage::GlandsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
 	this->pump_op = make_gland_pump_menu(DO_glands_action, gland_pump_diagnostics, plc);
 	this->grid = new GridDecorator();
 
-	this->device->append_confirmation_receiver(dashboard);
+	this->device->push_confirmation_receiver(dashboard);
 
 	{ // load decorators
-		this->append_decorator(new PageDecorator());
+		this->push_decorator(new PageDecorator());
 
 #ifdef _DEBUG
-		this->append_decorator(this->grid);
+		this->push_decorator(this->grid);
 #else
 		this->grid->set_active_planet(this);
 #endif
@@ -554,7 +554,7 @@ void GlandsPage::load(CanvasCreateResourcesReason reason, float width, float hei
 
 		{ // delayed initializing
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

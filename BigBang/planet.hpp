@@ -212,7 +212,7 @@ namespace WarGrey::SCADA {
 		unsigned int current_mode();
 
 		bool graphlet_unmasked(WarGrey::SCADA::IGraphlet* g);
-		void append_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
+		void push_decorator(WarGrey::SCADA::IPlanetDecorator* decorator);
 
     public:
         void construct(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float Width, float Height) override;

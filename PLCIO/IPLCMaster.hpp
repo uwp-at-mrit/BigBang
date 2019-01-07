@@ -39,7 +39,7 @@ namespace WarGrey::SCADA {
 
 	public:
 		void set_suicide_timeout(long long ms);
-		void append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
+		void push_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener);
 		void notify_connectivity_changed();
 		void notify_data_sent(long long bytes, double span_ms);
 		void notify_data_received(long long bytes, double span_ms);

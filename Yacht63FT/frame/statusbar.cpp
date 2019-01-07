@@ -184,14 +184,14 @@ void Statusbar::load(CanvasCreateResourcesReason reason, float width, float heig
 		CellDecorator* cells = new CellDecorator(Colours::Background, boxes); // don't mind, it's Visual Studio's fault
 		StatusBoard* status = new StatusBoard(this, cells);
 		
-		this->append_decorator(new BackgroundDecorator(0x1E1E1E));
-		this->append_decorator(cells);
+		this->push_decorator(new BackgroundDecorator(0x1E1E1E));
+		this->push_decorator(cells);
 		
 		status->load_and_flow(width, height);
 		register_system_status_listener(status);
 
 		this->dashboard = status;
-		this->device->append_confirmation_receiver(status);
+		this->device->push_confirmation_receiver(status);
 	}
 }
 

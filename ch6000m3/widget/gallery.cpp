@@ -41,10 +41,10 @@ private enum class GS {
 private class Gallery : public ISatellite {
 public:
 	Gallery() : ISatellite(default_logging_level, __MODULE__) {
-		this->append_decorator(new MarginDecorator(true, true));
+		this->push_decorator(new MarginDecorator(true, true));
 	}
 
-	void Gallery::fill_satellite_extent(float* width, float* height) {
+	void fill_satellite_extent(float* width, float* height) {
 		float margin = normal_font_size * 4.0F;
 		Size size = system_screen_size();
 
@@ -233,24 +233,24 @@ private:
 };
 
 /*************************************************************************************************/
-static Gallery* the_gallery_instance = nullptr;
+static Gallery* the_gallery = nullptr;
 
-ISatellite* WarGrey::SCADA::the_gallery() {
-	if (the_gallery_instance == nullptr) {
-		the_gallery_instance = new Gallery();
+void WarGrey::SCADA::display_the_gallery() {
+	if (the_gallery == nullptr) {
+		the_gallery = new Gallery();
 	}
 
-	return the_gallery_instance;
+	the_gallery->show();
 }
 
 void WarGrey::SCADA::update_the_shown_gallery(long long count, long long interval, long long uptime, bool create) {
-	if (create && (the_gallery_instance == nullptr)) {
-		the_gallery();
+	if (create && (the_gallery == nullptr)) {
+		the_gallery = new Gallery();
 	}
 
-	if (the_gallery_instance != nullptr) {
-		if (the_gallery_instance->shown()) {
-			the_gallery_instance->on_elapse(count, interval, uptime);
+	if (the_gallery != nullptr) {
+		if (the_gallery->shown()) {
+			the_gallery->on_elapse(count, interval, uptime);
 		}
 	}
 }

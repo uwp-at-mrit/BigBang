@@ -56,7 +56,7 @@ internal:
 		this->timer->Tick += ref new EventHandler<Platform::Object^>(this, &PLCMasterKiller::check_timeout);
 
 		this->listener = new TimerListener();
-		this->master->append_plc_status_listener(this->listener);
+		this->master->push_plc_status_listener(this->listener);
 	}
 
 public:
@@ -103,7 +103,7 @@ PLCMasterMode IPLCMaster::get_mode() {
 	return this->mode;
 }
 
-void IPLCMaster::append_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener) {
+void IPLCMaster::push_plc_status_listener(WarGrey::SCADA::IPLCStatusListener* listener) {
 	if (listener != nullptr) {
 		this->listeners.push_back(listener);
 		listener->on_plc_connectivity_changed(this, this->connected());

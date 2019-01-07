@@ -9,7 +9,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 /*************************************************************************************************/
 PerformancePage::PerformancePage(IPLCMaster* plc, double timeout_ms, unsigned int step, unsigned int precision)
 	: Planet(__MODULE__), device(plc), timeout(timeout_ms), step(step), precision(precision) {
-	this->device->append_plc_status_listener(this);
+	this->device->push_plc_status_listener(this);
 }
 
 void PerformancePage::load(CanvasCreateResourcesReason reason, float width, float height) {

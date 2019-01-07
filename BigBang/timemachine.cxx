@@ -1,11 +1,16 @@
 ﻿#include "timemachine.hpp"
 
+#include "navigator/listview.hpp"
+
 using namespace WarGrey::SCADA;
 
-using namespace Windows::UI::Core;
 using namespace Windows::Foundation;
 
+using namespace Windows::UI::Core;
+using namespace Windows::UI::Input;
+
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
@@ -16,9 +21,9 @@ static void configure_flyout(Flyout^ orbit, ITimeMachine* self) {
 	double wspread, hspread;
 	float width, height;
 
-	self->fill_satellite_extent(&width, &height);
-	self->fill_satellite_border(border);
-	self->fill_satellite_padding(padding);
+	self->fill_timemachine_extent(&width, &height);
+	self->fill_timemachine_border(border);
+	self->fill_timemachine_padding(padding);
 
 	wspread = (border.Left + border.Right + padding.Left + padding.Right);
 	hspread = (border.Top + border.Bottom + padding.Top + padding.Bottom);
@@ -32,29 +37,55 @@ static void configure_flyout(Flyout^ orbit, ITimeMachine* self) {
 }
 
 /*************************************************************************************************/
-private ref class SatelliteDisplay sealed : public UniverseDisplay {
+private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
-	SatelliteDisplay(Syslog* logger, ITimeMachine* entity)
-		: UniverseDisplay(logger, nullptr, nullptr, entity)
-		, satellite(entity), closed(true) {}
+	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity)
+		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), nullptr)
+		, machine(entity), closed(true) {
+	
+		this->use_global_mask_setting(false);
+
+		this->_void = ref new SplitView();
+		this->_void->Content = this->canvas;
+		this->_void->Pane = this->navigator->user_interface();
+
+		this->_void->OpenPaneLength = 256.0;
+		this->_void->DisplayMode = SplitViewDisplayMode::Overlay;
+		
+		this->_void->PointerReleased += ref new PointerEventHandler(this, &TimeMachineUniverseDisplay::on_pointer_released);
+	}
+
+internal:
+	void push_planet(IPlanet* planet) {
+		UniverseDisplay::push_planet(planet);
+	}
+
+public:
+	SplitView^ flyout_content() {
+		return this->_void;
+	}
 
 public:
 	void on_opening(Platform::Object^ target, Platform::Object^ args) {
-		this->satellite->on_satellite_showing();
+		this->darkness = this->global_mask_alpha;
+		this->machine->on_timemachine_showing();
 	}
 
 	void on_opened(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = false;
-		this->satellite->on_satellite_shown();
+		this->global_mask_alpha = 0.8;
+		this->_void->IsPaneOpen = false;
+		this->machine->on_timemachine_shown();
 	}
 
 	void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
-		args->Cancel = !(this->satellite->can_satellite_hiding());
+		args->Cancel = !(this->machine->can_timemachine_hiding());
 	}
 
 	void on_closed(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = true;
-		this->satellite->on_satellite_hiden();
+		this->machine->on_timemachine_hiden();
+		this->global_mask_alpha = this->darkness;
 	}
 
 public:
@@ -63,40 +94,53 @@ public:
 	}
 
 protected:
-	void collapse() override {
-		/** NOTE
-		 * By design, `ISatellite` is the only interface that client applications would use,
-		 *  therefore, they should take responsibility to manage the lifecycle of the instance.
-		 *
-		 * Here the method `collapse` is overriden to avoid deleting the instance twice.
-		 */
+	void construct() override {
+		this->machine->construct();
 	}
 
 private:
-	ITimeMachine* satellite; // its lifetime is managed by client applications
+	void on_pointer_released(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
+		auto pt = args->GetCurrentPoint(this->_void);
+		
+		if (pt->Properties->PointerUpdateKind == PointerUpdateKind::LeftButtonReleased) {
+			this->_void->IsPaneOpen = !this->_void->IsPaneOpen;
+			args->Handled = true;
+		}
+	}
+
+private:
+	SplitView^ _void;
+	ITimeMachine* machine; // its lifetime is managed by client applications
+	double darkness;
 	bool closed;
 };
 
 /*************************************************************************************************/
-ITimeMachine::ITimeMachine(Log level, Platform::String^ caption, unsigned int initial_mode)
-	: ITimeMachine(make_system_logger(level, caption), caption, initial_mode) {}
+ITimeMachine::ITimeMachine(Syslog* logger) : ready(false) {
+	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this);
 
-ITimeMachine::ITimeMachine(Syslog* logger, Platform::String^ caption, unsigned int initial_mode) : Planet(caption, initial_mode), ready(false) {
-	SatelliteDisplay^ surface = ref new SatelliteDisplay(logger, this);
-
-	this->orbit = ref new Flyout();
-	this->orbit->Content = surface->canvas;
-	this->orbit->Placement = FlyoutPlacementMode::Full;
+	this->machine = ref new Flyout();
+	this->machine->Content = _universe->flyout_content();
+	this->machine->Placement = FlyoutPlacementMode::Full;
 	
-	this->orbit->Opening += ref new EventHandler<Platform::Object^>(surface, &SatelliteDisplay::on_opening);
-	this->orbit->Opened += ref new EventHandler<Platform::Object^>(surface, &SatelliteDisplay::on_opened);
-	this->orbit->Closing += ref new TypedEventHandler<FlyoutBase^, FlyoutBaseClosingEventArgs^>(surface, &SatelliteDisplay::on_closing);
-	this->orbit->Closed += ref new EventHandler<Platform::Object^>(surface, &SatelliteDisplay::on_closed);
-
-	FlyoutBase::SetAttachedFlyout(surface->canvas, this->orbit);
+	this->machine->Opening += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_opening);
+	this->machine->Opened += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_opened);
+	this->machine->Closing += ref new TypedEventHandler<FlyoutBase^, FlyoutBaseClosingEventArgs^>(_universe, &TimeMachineUniverseDisplay::on_closing);
+	this->machine->Closed += ref new EventHandler<Platform::Object^>(_universe, &TimeMachineUniverseDisplay::on_closed);
+	
+	this->universe = _universe;
+	FlyoutBase::SetAttachedFlyout(this->universe->canvas, this->machine);
 }
 
-void ITimeMachine::fill_satellite_border(Thickness& border) {
+void ITimeMachine::push_planet(IPlanet* planet) {
+	auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->universe);
+
+	if (tmud != nullptr) {
+		tmud->push_planet(planet);
+	}
+}
+
+void ITimeMachine::fill_timemachine_border(Thickness& border) {
 	double thickness = 1.0;
 	
 	border.Top = thickness;
@@ -105,7 +149,7 @@ void ITimeMachine::fill_satellite_border(Thickness& border) {
 	border.Left = thickness;
 }
 
-void ITimeMachine::fill_satellite_padding(Thickness& padding) {
+void ITimeMachine::fill_timemachine_padding(Thickness& padding) {
 	double space = 0.0;
 
 	padding.Top = space;
@@ -114,22 +158,26 @@ void ITimeMachine::fill_satellite_padding(Thickness& padding) {
 	padding.Left = space;
 }
 
+Syslog* ITimeMachine::get_logger() {
+	return this->universe->get_logger();
+}
+
 void ITimeMachine::show() {
 	try {
 		FrameworkElement^ frame = dynamic_cast<FrameworkElement^>(Window::Current->Content);
 		
-		if (this->orbit->FlyoutPresenterStyle == nullptr) {
-			configure_flyout(this->orbit, this);
+		if (this->machine->FlyoutPresenterStyle == nullptr) {
+			configure_flyout(this->machine, this);
 		}
 
-		this->orbit->ShowAt(frame);
+		this->machine->ShowAt(frame);
 	} catch (Platform::Exception^ e) {
-		this->get_logger()->log_message(Log::Critical, e->Message);
+		this->universe->get_logger()->log_message(Log::Critical, e->Message);
 	}
 }
 
 void ITimeMachine::hide() {
-	this->orbit->Hide();
+	this->machine->Hide();
 }
 
 void ITimeMachine::notify_surface_ready() {

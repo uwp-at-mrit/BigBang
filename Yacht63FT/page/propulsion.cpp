@@ -342,11 +342,11 @@ void PropulsionPage::load(CanvasCreateResourcesReason reason, float width, float
 		diagram->load();
 
 #ifdef _DEBUG
-		this->append_decorator(new GridDecorator(gridsize, gridsize));
+		this->push_decorator(new GridDecorator(gridsize, gridsize));
 #endif
 
 		this->dashboard = diagram;
-		this->device->append_confirmation_receiver(diagram);
+		this->device->push_confirmation_receiver(diagram);
 	}
 }
 

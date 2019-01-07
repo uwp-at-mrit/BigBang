@@ -27,7 +27,7 @@ IMRMaster::IMRMaster(Syslog* sl, Platform::String^ h, uint16 p, IMRConfirmation*
 	this->logger = ((sl == nullptr) ? make_silent_logger("Silent MRIT Client") : sl);
 	this->logger->reference();
 
-	this->append_confirmation_receiver(cf);
+	this->push_confirmation_receiver(cf);
     this->service = p.ToString();
 
 	if (h == nullptr) {
@@ -92,7 +92,7 @@ void IMRMaster::set_message_preference(MrMessageConfiguration& config) {
 	this->preference = config;
 }
 
-void IMRMaster::append_confirmation_receiver(IMRConfirmation* confirmation) {
+void IMRMaster::push_confirmation_receiver(IMRConfirmation* confirmation) {
 	if (confirmation != nullptr) {
 		this->confirmations.push_back(confirmation);
 	}

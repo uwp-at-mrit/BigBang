@@ -365,6 +365,7 @@
     <ClCompile Include="page\glands.cpp" />
     <ClCompile Include="plc.cpp" />
     <ClCompile Include="widget.cpp" />
+    <ClCompile Include="widget\history.cpp" />
     <ClCompile Include="widget\settings.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -419,6 +420,7 @@
     <ClInclude Include="page\glands.hpp" />
     <ClInclude Include="plc.hpp" />
     <ClInclude Include="widget.hxx" />
+    <ClInclude Include="widget\history.hpp" />
     <ClInclude Include="widget\settings.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

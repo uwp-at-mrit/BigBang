@@ -244,9 +244,9 @@ LubricatingsPage::LubricatingsPage(PLCMaster* plc) : Planet(__MODULE__), device(
 	this->unit_op = make_lubrication_unit_menu(plc);
 	this->gearbox_op = make_gearbox_lubricator_menu(plc);
 	
-	this->device->append_confirmation_receiver(ps_dashboard);
-	this->device->append_confirmation_receiver(sb_dashboard);
-	this->append_decorator(new PageDecorator());
+	this->device->push_confirmation_receiver(ps_dashboard);
+	this->device->push_confirmation_receiver(sb_dashboard);
+	this->push_decorator(new PageDecorator());
 }
 
 LubricatingsPage::~LubricatingsPage() {
@@ -275,10 +275,10 @@ void LubricatingsPage::load(CanvasCreateResourcesReason reason, float width, flo
 		}
 
 		{ // delayed initializing
-			this->get_logger()->append_log_receiver(this->statusline);
+			this->get_logger()->push_log_receiver(this->statusline);
 
 			if (this->device != nullptr) {
-				this->device->get_logger()->append_log_receiver(this->statusline);
+				this->device->get_logger()->push_log_receiver(this->statusline);
 			}
 		}
 	}

@@ -12,7 +12,7 @@ namespace WarGrey::SCADA {
 	private class HydraulicsPage : public WarGrey::SCADA::Planet {
 	public:
 		~HydraulicsPage() noexcept;
-		HydraulicsPage(WarGrey::SCADA::PLCMaster* plc);
+		HydraulicsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

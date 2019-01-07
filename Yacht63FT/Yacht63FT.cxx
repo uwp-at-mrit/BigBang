@@ -60,14 +60,14 @@ protected:
 			Platform::String^ name = page.ToString();
 
 			switch (page) {
-			case Yacht::Generator: this->add_planet(new GeneratorPage(plc_master, name)); break;
-			case Yacht::Propeller: this->add_planet(new PropellerPage(plc_master, name)); break;
-			case Yacht::Propulsion: this->add_planet(new PropulsionPage(plc_master, name)); break;
-			case Yacht::AirConditioner: this->add_planet(new ACPage(plc_master, name)); break;
-			case Yacht::Operation: this->add_planet(new OperationPage(plc_master, name)); break;
-			case Yacht::Logbook: this->add_planet(new LogbookPage(plc_master, name)); break;
-			case Yacht::Gauge: this->add_planet(new GaugePage(plc_master, name)); break;
-			default: this->add_planet(new Homepage(name)); break;
+			case Yacht::Generator: this->push_planet(new GeneratorPage(plc_master, name)); break;
+			case Yacht::Propeller: this->push_planet(new PropellerPage(plc_master, name)); break;
+			case Yacht::Propulsion: this->push_planet(new PropulsionPage(plc_master, name)); break;
+			case Yacht::AirConditioner: this->push_planet(new ACPage(plc_master, name)); break;
+			case Yacht::Operation: this->push_planet(new OperationPage(plc_master, name)); break;
+			case Yacht::Logbook: this->push_planet(new LogbookPage(plc_master, name)); break;
+			case Yacht::Gauge: this->push_planet(new GaugePage(plc_master, name)); break;
+			default: this->push_planet(new Homepage(name)); break;
 			}
 		}
 	}
@@ -110,7 +110,7 @@ private:
 	void load_display(UniverseDisplay^ display, float width, float height) {
 		display->apply_source_size(width, height);
 
-		this->timeline->append_timer_listener(display);
+		this->timeline->push_timer_listener(display);
 		this->Children->Append(display->canvas);
 	}
 

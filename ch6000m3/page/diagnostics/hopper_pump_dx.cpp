@@ -271,8 +271,8 @@ HopperPumpDiagnostics::HopperPumpDiagnostics(PLCMaster* plc) : ISatellite(plc->g
 	this->ps_dashboard = ps_dashboard;
 	this->sb_dashboard = sb_dashboard;
 	
-	this->device->append_confirmation_receiver(ps_dashboard);
-	this->device->append_confirmation_receiver(sb_dashboard);
+	this->device->push_confirmation_receiver(ps_dashboard);
+	this->device->push_confirmation_receiver(sb_dashboard);
 }
 
 HopperPumpDiagnostics::~HopperPumpDiagnostics() {

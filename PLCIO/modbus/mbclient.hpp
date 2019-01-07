@@ -60,7 +60,7 @@ namespace WarGrey::SCADA {
 		void suicide() override;
 
 	public:
-		void append_confirmation_receiver(WarGrey::SCADA::IModbusConfirmation* confirmation);
+		void push_confirmation_receiver(WarGrey::SCADA::IModbusConfirmation* confirmation);
 
     public: // data access
 		virtual uint16 read_coils(uint16 address, uint16 quantity) = 0;

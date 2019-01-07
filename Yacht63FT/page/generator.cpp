@@ -420,11 +420,11 @@ void GeneratorPage::load(CanvasCreateResourcesReason reason, float width, float 
 		GDecorator* regions = new GDecorator(this, 4.0F / sketch_height);
 		GBoard* gb = new GBoard(this, regions);
 
-		this->append_decorator(regions);
+		this->push_decorator(regions);
 		gb->load();
 
 		this->dashboard = gb;
-		this->device->append_confirmation_receiver(gb);
+		this->device->push_confirmation_receiver(gb);
 	}
 }
 

@@ -13,7 +13,7 @@ using namespace Microsoft::Graphics::Canvas::UI;
 
 /*************************************************************************************************/
 CyberSpace::CyberSpace() : Planet("Cyber Space") {
-	this->append_decorator(new BorderDecorator());
+	this->push_decorator(new BorderDecorator());
 }
 
 CyberSpace::~CyberSpace() {}

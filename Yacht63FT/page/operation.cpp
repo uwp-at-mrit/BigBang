@@ -59,7 +59,7 @@ void OperationPage::load(CanvasCreateResourcesReason reason, float width, float 
 		ob->load_and_flow(width, height);
 
 		this->dashboard = ob;
-		this->device->append_confirmation_receiver(ob);
+		this->device->push_confirmation_receiver(ob);
 	}
 }
 
