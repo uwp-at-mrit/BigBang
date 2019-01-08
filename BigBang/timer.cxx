@@ -46,7 +46,8 @@ void Timer::notify(Platform::Object^ whocares, Platform::Object^ useless) {
 }
 
 void Timer::start() {
-	this->timer->Start();
+	this->timer->Start(); // start or restart
+	this->timer->Start(); // ensure restarting
 
 	this->count = 1;
 	this->uptime = this->interval;

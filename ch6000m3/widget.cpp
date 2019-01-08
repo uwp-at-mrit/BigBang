@@ -6,7 +6,7 @@
 
 #include "widget/gallery.hpp"
 #include "widget/settings.hpp"
-#include "widget/history.hpp"
+#include "widget/timestream.hpp"
 
 #include "graphlet/textlet.hpp"
 #include "graphlet/buttonlet.hpp"
@@ -279,5 +279,6 @@ UniverseWidget::UniverseWidget(UniverseDisplay^ master, PLCMaster* plc) : Univer
 }
 
 void UniverseWidget::construct() {
+	initialize_the_timemachine(this->plc, timemachine_frame_per_second, timemachine_snapshot_interval);
 	this->push_planet(new Widget(this->master, this->plc));
 }

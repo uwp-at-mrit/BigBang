@@ -2,9 +2,13 @@
 
 #include "navigator/listview.hpp"
 
+#include "string.hpp"
+#include "timer.hxx"
+
 using namespace WarGrey::SCADA;
 
 using namespace Windows::Foundation;
+using namespace Windows::Storage;
 
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
@@ -39,11 +43,14 @@ static void configure_flyout(Flyout^ orbit, ITimeMachine* self) {
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
-	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity)
+	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate)
 		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), nullptr)
 		, machine(entity), closed(true) {
 	
 		this->use_global_mask_setting(false);
+
+		this->timer = ref new Timer(this, frame_rate);
+		this->timer->stop();
 
 		this->_void = ref new SplitView();
 		this->_void->Content = this->canvas;
@@ -56,8 +63,8 @@ internal:
 	}
 
 internal:
-	void push_planet(IPlanet* planet) {
-		UniverseDisplay::push_planet(planet);
+	void push_timeline(ITimeline* timeline) {
+		this->push_planet(timeline);
 	}
 
 public:
@@ -76,6 +83,7 @@ public:
 		this->global_mask_alpha = 0.8;
 		this->_void->IsPaneOpen = false;
 		this->machine->on_timemachine_shown();
+		this->timer->start();
 	}
 
 	void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
@@ -84,8 +92,21 @@ public:
 
 	void on_closed(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = true;
+		this->timer->stop();
 		this->machine->on_timemachine_hiden();
 		this->global_mask_alpha = this->darkness;
+	}
+
+public:
+	void travel(long long start_timepoint, long long stop_timepoint) {
+		this->timer->stop();
+		this->start_timepoint = start_timepoint;
+		this->current_timepoint = start_timepoint;
+		this->stop_timepoint = stop_timepoint;
+		this->timer->start();
+	}
+
+	void on_elapse(long long count, long long interval, long long uptime) override {
 	}
 
 public:
@@ -111,13 +132,21 @@ private:
 private:
 	SplitView^ _void;
 	ITimeMachine* machine; // its lifetime is managed by client applications
+	Timer^ timer;
 	double darkness;
 	bool closed;
+
+private:
+	long long start_timepoint;
+	long long current_timepoint;
+	long long stop_timepoint;
 };
 
 /*************************************************************************************************/
-ITimeMachine::ITimeMachine(Syslog* logger) : ready(false) {
-	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this);
+ITimeMachine::ITimeMachine(Platform::String^ dirname, int frame_rate, Syslog* logger
+	, Platform::String^ prefix, Platform::String^ suffix, RotationPeriod period, unsigned int period_count)
+	: IRotativeDirectory(dirname, prefix, suffix, period, period_count), ready(false) {
+	TimeMachineUniverseDisplay^ _universe = ref new TimeMachineUniverseDisplay(logger, this, frame_rate);
 
 	this->machine = ref new Flyout();
 	this->machine->Content = _universe->flyout_content();
@@ -132,11 +161,20 @@ ITimeMachine::ITimeMachine(Syslog* logger) : ready(false) {
 	FlyoutBase::SetAttachedFlyout(this->universe->canvas, this->machine);
 }
 
-void ITimeMachine::push_planet(IPlanet* planet) {
+void ITimeMachine::push_timeline(ITimeline* timeline) {
 	auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->universe);
 
 	if (tmud != nullptr) {
-		tmud->push_planet(planet);
+		tmud->push_timeline(timeline);
+		this->timelines.push_back(timeline);
+	}
+}
+
+void ITimeMachine::travel(long long start_timepoint, long long stop_timepoint) {
+	auto tmud = dynamic_cast<TimeMachineUniverseDisplay^>(this->universe);
+
+	if (tmud != nullptr) {
+		tmud->travel(start_timepoint, stop_timepoint);
 	}
 }
 
@@ -180,12 +218,25 @@ void ITimeMachine::hide() {
 	this->machine->Hide();
 }
 
-void ITimeMachine::notify_surface_ready() {
-	this->ready = true;
-	this->on_surface_ready();
+/*************************************************************************************************/
+TimeMachine::TimeMachine(Platform::String^ dirname, int frame_rate, Syslog* logger
+	, Platform::String^ file_prefix, Platform::String^ file_suffix, RotationPeriod period, unsigned int period_count)
+	: ITimeMachine(dirname, frame_rate, logger, file_prefix, file_suffix, period, period_count) {}
+
+void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_file, long long timepoint) {
+	if (prev_file != nullptr) {
+		this->tmstream.close();
+	}
+	
+	// TODO: find the reason if `open` fails.
+	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app);
 }
 
-bool ITimeMachine::surface_ready() {
-	// Surpass the cross-thread accessing.
-	return this->ready;
+void TimeMachine::snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) {
+	// TODO: find the reason if `write` fails.
+	if (this->tmstream.is_open()) {
+		this->tmstream << timepoint_s << " " << addr0 << " " << addrn << std::endl;
+		this->tmstream.write(data, size) << std::endl;
+		this->tmstream.flush();
+	}
 }

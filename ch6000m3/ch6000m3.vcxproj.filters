@@ -167,7 +167,7 @@
     <ClCompile Include="iotables\ao_settings.cpp">
       <Filter>iotables</Filter>
     </ClCompile>
-    <ClCompile Include="widget\history.cpp">
+    <ClCompile Include="widget\timestream.cpp">
       <Filter>widget</Filter>
     </ClCompile>
   </ItemGroup>
@@ -320,7 +320,7 @@
     <ClInclude Include="iotables\ao_settings.hpp">
       <Filter>iotables</Filter>
     </ClInclude>
-    <ClInclude Include="widget\history.hpp">
+    <ClInclude Include="widget\timestream.hpp">
       <Filter>widget</Filter>
     </ClInclude>
   </ItemGroup>

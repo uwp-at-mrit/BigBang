@@ -23,6 +23,8 @@ static Platform::String^ root_machines[] = {
 
 /*************************************************************************************************/
 static const unsigned int frame_per_second = 5U;
+static const unsigned int timemachine_frame_per_second = 4U;
+static const long long timemachine_snapshot_interval = 2U;
 static const long long plc_master_suicide_timeout = 4000;
 
 static const unsigned int diagnostics_caption_background = 0x8FBC8F;

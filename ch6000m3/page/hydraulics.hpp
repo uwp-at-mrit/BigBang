@@ -1,6 +1,6 @@
 #pragma once
 
-#include "planet.hpp"
+#include "timemachine.hpp"
 #include "plc.hpp"
 
 #include "decorator/grid.hpp"
@@ -9,7 +9,7 @@
 #include "graphlet/statuslet.hpp"
 
 namespace WarGrey::SCADA {
-	private class HydraulicsPage : public WarGrey::SCADA::Planet {
+	private class HydraulicsPage : public WarGrey::SCADA::ITimeline {
 	public:
 		~HydraulicsPage() noexcept;
 		HydraulicsPage(WarGrey::SCADA::PLCMaster* plc = nullptr);
@@ -17,6 +17,11 @@ namespace WarGrey::SCADA {
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;
 		void reflow(float width, float height) override;
+
+	public:
+		void on_snapshot(long long timepoint_s,
+			size_t addr0, size_t addrn, const char* data, size_t size,
+			WarGrey::SCADA::Syslog* logger) override;
 
 	public:
 		bool can_select(IGraphlet* g) override;

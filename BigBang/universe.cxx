@@ -812,7 +812,7 @@ void UniverseDisplay::on_character(CoreWindow^ sender, CharacterReceivedEventArg
 
 		this->recent_planet->on_character(keycode);
 
-		if (this->shortcuts_enabled) { // save temporary snapshot
+		if (this->shortcuts_enabled) { // snapshot temporary snapshot
 			switch (keycode) {
 			case 19: { // CTRL+S
 				this->recent_planet->save(

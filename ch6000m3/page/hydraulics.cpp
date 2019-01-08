@@ -797,7 +797,7 @@ private:
 	HydraulicsPage* master;
 };
 
-HydraulicsPage::HydraulicsPage(PLCMaster* plc) : Planet(__MODULE__), device(plc) {
+HydraulicsPage::HydraulicsPage(PLCMaster* plc) : ITimeline(__MODULE__), device(plc) {
 	Hydraulics* dashboard = new Hydraulics(this);
 
 	this->dashboard = dashboard;
@@ -884,6 +884,14 @@ void HydraulicsPage::reflow(float width, float height) {
 		dashboard->reflow_pump_station(width, height, gwidth, gheight, vinset);
 		dashboard->reflow_devices(width, height, gwidth, gheight, vinset);
 		dashboard->reflow_metrics(width, height, gwidth, gheight, vinset);
+	}
+}
+
+void HydraulicsPage::on_snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size, Syslog* logger) {
+	auto dashboard = dynamic_cast<Hydraulics*>(this->dashboard);
+
+	if (dashboard != nullptr) {
+		dashboard->on_all_signals(addr0, addrn, (uint8*)(data), size, logger);
 	}
 }
 
