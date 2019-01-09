@@ -30,6 +30,7 @@ using namespace Windows::System;
 using namespace Windows::Foundation;
 
 using namespace Windows::UI::Input;
+
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Controls;
@@ -180,13 +181,14 @@ public:
 			this->timeline->push_timer_listener(this->widget);
 		}
 	}
+	
 
 	void on_entered_background(EnteredBackgroundEventArgs^ args) {}
 	void on_background_activated(IBackgroundTaskInstance^ task) {}
 	void on_leaving_background(LeavingBackgroundEventArgs^ args) {}
 	void on_suspending(SuspendingEventArgs^ args) {}
 	void on_resuming() {}
-
+	
 private:
 	void on_pointer_moved(Platform::Object^ sender, PointerRoutedEventArgs^ args) {
 		auto pt = args->GetCurrentPoint(this);

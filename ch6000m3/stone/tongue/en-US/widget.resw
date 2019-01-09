@@ -141,6 +141,9 @@
   <data name="Debug" xml:space="preserve">
     <value>Debug</value>
   </data>
+  <data name="FullScreen" xml:space="preserve">
+    <value>💻</value>
+  </data>
   <data name="Gallery" xml:space="preserve">
     <value>🔮</value>
   </data>

@@ -22,6 +22,8 @@ using namespace Windows::Foundation;
 using namespace Windows::System;
 using namespace Windows::Storage;
 
+using namespace Windows::UI::ViewManagement;
+
 using namespace Microsoft::Graphics::Canvas;
 using namespace Microsoft::Graphics::Canvas::UI;
 using namespace Microsoft::Graphics::Canvas::Text;
@@ -31,7 +33,7 @@ private enum class Brightness { Brightness100, Brightness80, Brightness60, Brigh
 
 // WARNING: order matters
 private enum class SS : unsigned int { Brightness, Permission, _ };
-private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, PrintScreen, _ };
+private enum class Icon : unsigned int { Gallery , Settings, TimeMachine, PrintScreen, FullScreen, _ };
 
 static Platform::String^ mode_setting_key = "PLC_Master_Mode";
 
@@ -191,6 +193,16 @@ public:
 					target->actual_width(), target->actual_height(), Colours::Background);
 
 				this->master->use_global_mask_setting(prev_state);
+			}; break;
+			case Icon::FullScreen: {
+				auto self = ApplicationView::GetForCurrentView();
+
+				if (self->IsFullScreenMode) {
+					self->ExitFullScreenMode();
+				} else {
+					self->TryEnterFullScreenMode();
+				}
+
 			}; break;
 			}
 		}
