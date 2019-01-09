@@ -17,6 +17,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)application.hxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)backtask.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)dirotation.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)hamburger.cxx" />
     <ClCompile Include="$(MSBuildThisFileDirectory)module.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)path.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)string.cpp" />
@@ -31,6 +32,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)credit.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)enum.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dirotation.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)hamburger.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)module.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)msappx.hxx" />
     <ClInclude Include="$(MSBuildThisFileDirectory)object.hpp" />

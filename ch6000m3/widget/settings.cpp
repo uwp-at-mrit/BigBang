@@ -79,7 +79,7 @@ public:
 		this->device->push_confirmation_receiver(this);
 	}
 
-	void Settings::fill_satellite_extent(float* width, float* height) {
+	void Settings::fill_extent(float* width, float* height) {
 		SET_VALUES(width, 700.0F, height, 700.0F);
 	}
 

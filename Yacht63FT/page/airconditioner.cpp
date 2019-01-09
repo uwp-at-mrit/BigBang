@@ -244,7 +244,7 @@ public:
 	}
 
 public:
-	void fill_satellite_extent(float* width, float* height) override {
+	void fill_extent(float* width, float* height) override {
 		float y, cell_height;
 
 		this->decorator->fill_cell_extent(0, nullptr, &y, width, &cell_height);

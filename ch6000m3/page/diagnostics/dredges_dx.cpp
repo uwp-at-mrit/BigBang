@@ -580,7 +580,7 @@ DredgesDiagnostics::~DredgesDiagnostics() {
 	}
 }
 
-void DredgesDiagnostics::fill_satellite_extent(float* width, float* height) {
+void DredgesDiagnostics::fill_extent(float* width, float* height) {
 	auto dashboard = dynamic_cast<DredgesDx*>(this->dashboard);
 	float db_width = 400.0F;
 	float db_height = 600.0F;

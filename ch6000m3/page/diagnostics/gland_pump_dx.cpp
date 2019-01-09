@@ -219,7 +219,7 @@ GlandPumpDiagnostics::~GlandPumpDiagnostics() {
 	}
 }
 
-void GlandPumpDiagnostics::fill_satellite_extent(float* width, float* height) {
+void GlandPumpDiagnostics::fill_extent(float* width, float* height) {
 	auto db = dynamic_cast<GlandPumpDx*>(this->dashboard);
 	float db_width = 400.0F;
 	float db_height = 600.0F;

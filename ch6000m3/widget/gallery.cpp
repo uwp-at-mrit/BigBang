@@ -44,7 +44,7 @@ public:
 		this->push_decorator(new MarginDecorator(true, true));
 	}
 
-	void fill_satellite_extent(float* width, float* height) {
+	void fill_extent(float* width, float* height) {
 		float margin = normal_font_size * 4.0F;
 		Size size = system_screen_size();
 

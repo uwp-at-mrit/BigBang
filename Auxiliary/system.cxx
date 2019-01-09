@@ -103,6 +103,7 @@ void WarGrey::SCADA::system_try_change_screen_brightness(double brightness, Disp
 
 /*************************************************************************************************/
 unsigned long long WarGrey::SCADA::system_memory_usage(AppMemoryUsageLevel* level) {
+	// WARNING: This API does not give the correct usage.
 	if (level != nullptr) {
 		(*level) = MemoryManager::AppMemoryUsageLevel;
 	}

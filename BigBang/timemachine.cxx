@@ -1,4 +1,6 @@
-﻿#include "timemachine.hpp"
+﻿#include <list>
+
+#include "timemachine.hpp"
 
 #include "navigator/listview.hpp"
 
@@ -10,42 +12,19 @@ using namespace WarGrey::SCADA;
 using namespace Windows::Foundation;
 using namespace Windows::Storage;
 
-using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
 
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
-
-static void configure_flyout(Flyout^ orbit, ITimeMachine* self) {
-	Style^ style = ref new Style(FlyoutPresenter::typeid); // WARNING: the style can only be modified before it is applied
-	Thickness border, padding;
-	double wspread, hspread;
-	float width, height;
-
-	self->fill_timemachine_extent(&width, &height);
-	self->fill_timemachine_border(border);
-	self->fill_timemachine_padding(padding);
-
-	wspread = (border.Left + border.Right + padding.Left + padding.Right);
-	hspread = (border.Top + border.Bottom + padding.Top + padding.Bottom);
-
-	style->Setters->Append(ref new Setter(FlyoutPresenter::BorderThicknessProperty, border));
-	style->Setters->Append(ref new Setter(FlyoutPresenter::PaddingProperty, padding));
-	style->Setters->Append(ref new Setter(FlyoutPresenter::MaxWidthProperty, double(width) + wspread));
-	style->Setters->Append(ref new Setter(FlyoutPresenter::MaxHeightProperty, double(height) + hspread));
-
-	orbit->FlyoutPresenterStyle = style; // apply the style
-}
 
 /*************************************************************************************************/
 private ref class TimeMachineUniverseDisplay sealed : public UniverseDisplay {
 internal:
 	TimeMachineUniverseDisplay(Syslog* logger, ITimeMachine* entity, int frame_rate)
 		: UniverseDisplay(logger, nullptr, new ListViewNavigator(), nullptr)
-		, machine(entity), closed(true) {
+		, machine(entity), closed(true), current_timepoint(0LL) {
 	
 		this->use_global_mask_setting(false);
 
@@ -65,6 +44,7 @@ internal:
 internal:
 	void push_timeline(ITimeline* timeline) {
 		this->push_planet(timeline);
+		this->timelines.push_back(timeline);
 	}
 
 public:
@@ -75,38 +55,49 @@ public:
 public:
 	void on_opening(Platform::Object^ target, Platform::Object^ args) {
 		this->darkness = this->global_mask_alpha;
-		this->machine->on_timemachine_showing();
+		this->machine->on_showing();
 	}
 
 	void on_opened(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = false;
 		this->global_mask_alpha = 0.8;
 		this->_void->IsPaneOpen = false;
-		this->machine->on_timemachine_shown();
+		this->machine->on_shown();
 		this->timer->start();
 	}
 
 	void on_closing(FlyoutBase^ target, FlyoutBaseClosingEventArgs^ args) {
-		args->Cancel = !(this->machine->can_timemachine_hiding());
+		args->Cancel = !(this->machine->can_hide());
 	}
 
 	void on_closed(Platform::Object^ target, Platform::Object^ args) {
 		this->closed = true;
 		this->timer->stop();
-		this->machine->on_timemachine_hiden();
+		this->machine->on_hiden();
 		this->global_mask_alpha = this->darkness;
 	}
 
 public:
 	void travel(long long start_timepoint, long long stop_timepoint) {
 		this->timer->stop();
+
 		this->start_timepoint = start_timepoint;
 		this->current_timepoint = start_timepoint;
 		this->stop_timepoint = stop_timepoint;
+		
+		if (this->start_timepoint < this->stop_timepoint) {
+			this->direction = 1LL;
+			this->current_timepoint = this->start_timepoint;
+		} else {
+			this->direction = -1LL;
+			this->current_timepoint = this->stop_timepoint;
+		}
+
 		this->timer->start();
 	}
 
 	void on_elapse(long long count, long long interval, long long uptime) override {
+		
 	}
 
 public:
@@ -130,8 +121,9 @@ private:
 	}
 
 private:
-	SplitView^ _void;
+	std::list<ITimeline*> timelines; // never deletes these timelines manually
 	ITimeMachine* machine; // its lifetime is managed by client applications
+	SplitView^ _void;
 	Timer^ timer;
 	double darkness;
 	bool closed;
@@ -140,6 +132,7 @@ private:
 	long long start_timepoint;
 	long long current_timepoint;
 	long long stop_timepoint;
+	long long direction;
 };
 
 /*************************************************************************************************/
@@ -166,7 +159,6 @@ void ITimeMachine::push_timeline(ITimeline* timeline) {
 
 	if (tmud != nullptr) {
 		tmud->push_timeline(timeline);
-		this->timelines.push_back(timeline);
 	}
 }
 
@@ -178,44 +170,12 @@ void ITimeMachine::travel(long long start_timepoint, long long stop_timepoint) {
 	}
 }
 
-void ITimeMachine::fill_timemachine_border(Thickness& border) {
-	double thickness = 1.0;
-	
-	border.Top = thickness;
-	border.Right = thickness;
-	border.Bottom = thickness;
-	border.Left = thickness;
-}
-
-void ITimeMachine::fill_timemachine_padding(Thickness& padding) {
-	double space = 0.0;
-
-	padding.Top = space;
-	padding.Right = space;
-	padding.Bottom = space;
-	padding.Left = space;
-}
-
 Syslog* ITimeMachine::get_logger() {
 	return this->universe->get_logger();
 }
 
-void ITimeMachine::show() {
-	try {
-		FrameworkElement^ frame = dynamic_cast<FrameworkElement^>(Window::Current->Content);
-		
-		if (this->machine->FlyoutPresenterStyle == nullptr) {
-			configure_flyout(this->machine, this);
-		}
-
-		this->machine->ShowAt(frame);
-	} catch (Platform::Exception^ e) {
-		this->universe->get_logger()->log_message(Log::Critical, e->Message);
-	}
-}
-
-void ITimeMachine::hide() {
-	this->machine->Hide();
+Flyout^ ITimeMachine::user_interface() {
+	return this->machine;
 }
 
 /*************************************************************************************************/
@@ -232,11 +192,15 @@ void TimeMachine::on_file_rotated(StorageFile^ prev_file, StorageFile^ current_f
 	this->tmstream.open(current_file->Path->Data(), std::ios::out | std::ios::app);
 }
 
-void TimeMachine::snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) {
+void TimeMachine::save_snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) {
 	// TODO: find the reason if `write` fails.
 	if (this->tmstream.is_open()) {
 		this->tmstream << timepoint_s << " " << addr0 << " " << addrn << std::endl;
 		this->tmstream.write(data, size) << std::endl;
 		this->tmstream.flush();
 	}
+}
+
+const char* TimeMachine::seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) {
+	return nullptr;
 }

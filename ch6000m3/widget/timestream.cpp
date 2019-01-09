@@ -18,7 +18,7 @@ public:
 		: TimeMachine(L"timemachine", frame_rate, make_system_logger(default_logging_level, __MODULE__))
 		, snapshot_interval(snapshot_interval * 1000LL), last_timepoint(current_seconds()) {}
 
-	void fill_timemachine_extent(float* width, float* height) {
+	void fill_extent(float* width, float* height) {
 		float margin = normal_font_size * 2.0F;
 		Size size = system_screen_size();
 
@@ -31,7 +31,7 @@ public:
 		long long timestamp = current_milliseconds();
 
 		if ((timestamp - last_timepoint) >= this->snapshot_interval) {
-			this->snapshot(timestamp, addr0, addrn, (const char*)(data), size);
+			this->save_snapshot(timestamp, addr0, addrn, (const char*)(data), size);
 			this->last_timepoint = timestamp;
 		}
 	}

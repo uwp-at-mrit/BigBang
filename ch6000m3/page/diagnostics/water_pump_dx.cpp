@@ -228,7 +228,7 @@ WaterPumpDiagnostics::~WaterPumpDiagnostics() {
 	}
 }
 
-void WaterPumpDiagnostics::fill_satellite_extent(float* width, float* height) {
+void WaterPumpDiagnostics::fill_extent(float* width, float* height) {
 	auto ps_dashboard = dynamic_cast<WaterPumpDx*>(this->ps_dashboard);
 	auto sb_dashboard = dynamic_cast<WaterPumpDx*>(this->sb_dashboard);
 	float ps_width = 400.0F;

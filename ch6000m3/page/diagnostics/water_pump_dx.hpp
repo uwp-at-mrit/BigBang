@@ -13,7 +13,7 @@ namespace WarGrey::SCADA {
 		WaterPumpDiagnostics(WarGrey::SCADA::PLCMaster* plc);
 
 	public:
-		void fill_satellite_extent(float* width, float* height) override;
+		void fill_extent(float* width, float* height) override;
 
 	public:
 		void load(Microsoft::Graphics::Canvas::UI::CanvasCreateResourcesReason reason, float width, float height) override;

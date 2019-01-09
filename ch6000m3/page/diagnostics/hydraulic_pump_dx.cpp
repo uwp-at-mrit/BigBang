@@ -384,7 +384,7 @@ HydraulicPumpDiagnostics::~HydraulicPumpDiagnostics() {
 	}
 }
 
-void HydraulicPumpDiagnostics::fill_satellite_extent(float* width, float* height) {
+void HydraulicPumpDiagnostics::fill_extent(float* width, float* height) {
 	auto dashboard = dynamic_cast<PumpDx*>(this->dashboard);
 	float db_width = 400.0F;
 	float db_height = 600.0F;

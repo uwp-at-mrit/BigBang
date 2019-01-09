@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <list>
 
 #include "universe.hxx"
 #include "planet.hpp"
 
 #include "dirotation.hpp"
+#include "hamburger.hpp"
 #include "syslog.hpp"
 
 namespace WarGrey::SCADA {
@@ -21,7 +20,7 @@ namespace WarGrey::SCADA {
 			WarGrey::SCADA::Syslog* logger) = 0;
 	};
 
-	private class ITimeMachine abstract : public WarGrey::SCADA::IRotativeDirectory {
+	private class ITimeMachine abstract : public WarGrey::SCADA::IHamburger, public WarGrey::SCADA::IRotativeDirectory {
 	public:
 		ITimeMachine(Platform::String^ dirname, int frame_rate, WarGrey::SCADA::Syslog* logger,
 			Platform::String^ file_prefix, Platform::String^ file_suffix,
@@ -29,35 +28,21 @@ namespace WarGrey::SCADA {
 
 	public:
 		virtual void construct() = 0;
-		virtual void snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) = 0;
-
-	public:
-		virtual void fill_timemachine_extent(float* width, float* height) = 0;
-		virtual void fill_timemachine_border(Windows::UI::Xaml::Thickness& border);
-		virtual void fill_timemachine_padding(Windows::UI::Xaml::Thickness& padding);
-
-	public:
-		virtual void on_timemachine_showing() {}
-		virtual void on_timemachine_shown() {}
-		virtual bool can_timemachine_hiding() { return true; }
-		virtual void on_timemachine_hiden() {}
+		virtual void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) = 0;
+		virtual const char* seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) = 0;
 
 	public:
 		void push_timeline(WarGrey::SCADA::ITimeline* timeline);
 		void travel(long long start_timepoint, long long stop_timepoint);
 		WarGrey::SCADA::Syslog* get_logger();
 
-	public:
-		void hide();
-		void show();
+	protected:
+		Windows::UI::Xaml::Controls::Flyout^ user_interface() override;
 
 	private:
 		Windows::UI::Xaml::Controls::Flyout^ machine;
 		WarGrey::SCADA::UniverseDisplay^ universe;
 		bool ready;
-
-	private:
-		std::list<ITimeline*> timelines; // never deletes these timelines manually
 	};
 
 	private class TimeMachine : public WarGrey::SCADA::ITimeMachine {
@@ -69,7 +54,8 @@ namespace WarGrey::SCADA {
 
 	public:
 		void construct() override {}
-		void snapshot(long long timepoint_s, size_t addr0, size_t addrn, const char* data, size_t size) override;
+		void save_snapshot(long long timepoint_ms, size_t addr0, size_t addrn, const char* data, size_t size) override;
+		const char* seek_snapshot(long long* timepoint_ms, size_t* addr0, size_t* addrn) override;
 
 	protected:
 		void on_file_rotated(Windows::Storage::StorageFile^ prev_file, Windows::Storage::StorageFile^ current_file, long long timepoint) override;
